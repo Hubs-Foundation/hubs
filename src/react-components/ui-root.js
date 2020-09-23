@@ -1165,8 +1165,6 @@ class UIRoot extends Component {
 
     const isLoading = !preload && !this.state.hideLoader && !this.props.showSafariMicDialog;
 
-    const hasPush = navigator.serviceWorker && "PushManager" in window;
-
     if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
       return (
         <div className={classNames(rootStyles)}>
@@ -1204,17 +1202,11 @@ class UIRoot extends Component {
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
     if (this.props.isBotMode) return this.renderBotMode();
 
-    const embed = this.props.embed;
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
     const enteredOrWatchingOrPreload = entered || watching || preload;
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
-    const inEntryFlow = !!(
-      this.props.history &&
-      this.props.history.location.state &&
-      this.props.history.location.state.entry_step
-    );
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
@@ -1289,7 +1281,6 @@ class UIRoot extends Component {
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser =
       mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
-    const hasTopTip = (this.props.activeTips && this.props.activeTips.top) || this.state.showVideoShareFailed;
 
     const clientInfoClientId = getClientInfoClientId(this.props.history.location);
     const showClientInfo = !!clientInfoClientId;
@@ -1301,32 +1292,6 @@ class UIRoot extends Component {
     const hasDiscordBridges = discordBridges.length > 0;
     const showBroadcastTip =
       (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
-
-    const inviteEntryMode = this.props.hub && this.props.hub.entry_mode === "invite";
-    const showInviteButton = !showObjectInfo && !this.state.frozen && !watching && !preload && !inviteEntryMode;
-
-    const showInviteTip =
-      !showObjectInfo &&
-      !hasTopTip &&
-      !entered &&
-      !embed &&
-      !preload &&
-      !watching &&
-      !hasTopTip &&
-      !inEntryFlow &&
-      !this.props.store.state.activity.hasOpenedShare &&
-      this.occupantCount() <= 1;
-
-    const showChooseSceneButton =
-      !showObjectInfo &&
-      !entered &&
-      !embed &&
-      !preload &&
-      !watching &&
-      !showInviteTip &&
-      !this.state.showShareDialog &&
-      this.props.hubChannel &&
-      this.props.hubChannel.canOrWillIfCreator("update_hub");
 
     const streaming = this.state.isStreaming;
 
@@ -1617,78 +1582,6 @@ class UIRoot extends Component {
             <button className={styles.leaveButton} onClick={() => this.exit("left")}>
               <FormattedMessage id="entry.leave-room" />
             </button>
-          )}
-          {showInviteButton && (
-            <div
-              className={classNames({
-                [inviteStyles.inviteContainer]: true,
-                [inviteStyles.inviteContainerBelowHud]: entered,
-                [inviteStyles.inviteContainerInverted]: this.state.showShareDialog
-              })}
-            >
-              {showChooseSceneButton && (
-                <button
-                  className={classNames([styles.chooseSceneButton])}
-                  onClick={() => {
-                    this.props.performConditionalSignIn(
-                      () => this.props.hubChannel.can("update_hub"),
-                      () => {
-                        showFullScreenIfAvailable();
-                        this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
-                      },
-                      "change-scene"
-                    );
-                  }}
-                >
-                  <FormattedMessage id="entry.change-scene" />
-                </button>
-              )}
-
-              {showInviteTip && (
-                <div className={styles.inviteTip}>
-                  <div className={styles.inviteTipAttachPoint} />
-                  <FormattedMessage id={`entry.${isMobile ? "mobile" : "desktop"}.invite-tip`} />
-                </div>
-              )}
-              {!embed &&
-                this.occupantCount() > 1 &&
-                !hasTopTip &&
-                entered &&
-                !streaming && (
-                  <button onClick={this.onMiniInviteClicked} className={inviteStyles.inviteMiniButton}>
-                    <span>
-                      {this.state.miniInviteActivated
-                        ? navigator.share
-                          ? "sharing..."
-                          : "copied!"
-                        : `${configs.SHORTLINK_DOMAIN}/` + this.props.hub.hub_id}
-                    </span>
-                  </button>
-                )}
-              {embed && (
-                <a href={baseUrl} className={inviteStyles.enterButton} target="_blank" rel="noopener noreferrer">
-                  <FormattedMessage id="entry.open-in-window" />
-                </a>
-              )}
-              {this.state.showShareDialog && (
-                <InviteDialog
-                  allowShare={!isMobileVR}
-                  entryCode={this.props.hub.entry_code}
-                  embedUrl={
-                    this.props.embedToken && !isMobilePhoneOrVR
-                      ? `${baseUrl}?embed_token=${this.props.embedToken}`
-                      : null
-                  }
-                  hasPush={hasPush}
-                  isSubscribed={
-                    this.state.isSubscribed === undefined ? this.props.initialIsSubscribed : this.state.isSubscribed
-                  }
-                  onSubscribeChanged={() => this.onSubscribeChanged()}
-                  hubId={this.props.hub.hub_id}
-                  onClose={() => this.setState({ showShareDialog: false })}
-                />
-              )}
-            </div>
           )}
           <StateRoute
             stateKey="overlay"
