@@ -49,7 +49,7 @@ export function MicSetupModal({
       <div className={styles.audioCheckContainer}>
         <ToolbarButton
           icon={
-            microphoneEnabled ? (
+            microphoneEnabled && !microphoneMuted ? (
               <MicrophoneIcon width={48} height={48} />
             ) : (
               <MicrophoneMutedIcon width={48} height={48} />
@@ -69,7 +69,7 @@ export function MicSetupModal({
                 Math.floor(micLevel * micButtonDiameter)}px, ${micButtonDiameter}px, ${micButtonDiameter}px, 0px)`
             }}
           >
-            {microphoneEnabled ? (
+            {microphoneEnabled && !microphoneMuted ? (
               <MicrophoneIcon className={styles.clippedIcon} width={48} height={48} />
             ) : (
               <MicrophoneMutedIcon className={styles.clippedIcon} width={48} height={48} />
@@ -108,13 +108,12 @@ export function MicSetupModal({
           large
         />
       </div>
-      <SelectInputField
-        disabled={!microphoneEnabled}
-        value={selectedMicrophone}
-        options={microphoneOptions}
-        onChange={onChangeMicrophone}
-      />
-      <ToggleInput label="Mute My Microphone" value={microphoneMuted} onChange={onChangeMicrophoneMuted} />
+      {microphoneEnabled && (
+        <>
+          <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
+          <ToggleInput label="Mute My Microphone" value={microphoneMuted} onChange={onChangeMicrophoneMuted} />
+        </>
+      )}
       <Button preset="green" onClick={onEnterRoom}>
         Enter Room
       </Button>
