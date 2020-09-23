@@ -1239,7 +1239,6 @@ class UIRoot extends Component {
                 containerType="modal"
                 displayNameOverride={displayNameOverride}
                 finished={() => {
-                  console.log("finished");
                   if (this.props.forcedVREntryType) {
                     this.pushHistoryState();
                     this.handleForceEntry();
