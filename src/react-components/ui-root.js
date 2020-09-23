@@ -12,7 +12,6 @@ import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
 import entryStyles from "../assets/stylesheets/entry.scss";
-import inviteStyles from "../assets/stylesheets/invite-dialog.scss";
 import { ReactAudioContext } from "./wrap-with-audio";
 import {
   pushHistoryState,
@@ -109,7 +108,6 @@ async function grantedMicLabels() {
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
-const isMobilePhoneOrVR = isMobile || isMobileVR;
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 const AUTO_EXIT_TIMER_SECONDS = 10;
