@@ -19,6 +19,12 @@ $input-height: 40px;
   max-width: 300px;
   padding: 0 8px;
 
+  span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
   &:hover {
     border-color: theme.$blue-hover;
   }
@@ -45,6 +51,8 @@ $input-height: 40px;
   left: 0;
   right: 0;
   box-shadow: -1px -1px 1px theme.$lightgrey, 3px 3px 6px rgba(0, 0, 0, 0.2);
+  max-height: 320px;
+  overflow-y: auto;
 }
 
 :local(.open) {
