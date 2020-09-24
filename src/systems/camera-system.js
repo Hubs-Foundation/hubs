@@ -76,6 +76,7 @@ const moveRigSoCameraLooksAtObject = (function() {
   const cwp = new THREE.Vector3();
   const oForw = new THREE.Vector3();
   const center = new THREE.Vector3();
+  const boxFix = new THREE.Vector3(0.3, 0.3, 0.3);
   const target = new THREE.Object3D();
   return function moveRigSoCameraLooksAtObject(rig, camera, object, distanceMod) {
     if (!target.parent) {
@@ -90,6 +91,11 @@ const moveRigSoCameraLooksAtObject = (function() {
     rig.getWorldQuaternion(cwq);
 
     const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
+    if (box.min.x === Infinity) {
+      // fix edgecase where inspectable object has no mesh / dimensions
+      box.min.subVectors(owp, boxFix);
+      box.max.addVectors(owp, boxFix);
+    }
     box.getCenter(center);
     const vrMode = object.el.sceneEl.is("vr-mode");
     const dist =
@@ -213,7 +219,7 @@ export class CameraSystem {
     this.mode = NEXT_MODES[this.mode] || 0;
   }
 
-  inspect(o, distanceMod, temporarilyDisableRegularExit) {
+  inspect(o, distanceMod, temporarilyDisableRegularExit, optionalAlternativeToNotHide) {
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -237,7 +243,7 @@ export class CameraSystem {
       this.snapshot.mask1 = camera.cameras[1].layers.mask;
     }
     if (!this.enableLights) {
-      this.hideEverythingButThisObject(o);
+      this.hideEverythingButThisObject(optionalAlternativeToNotHide || o);
     }
 
     this.viewingCamera.object3DMap.camera.updateMatrices();
