@@ -1037,8 +1037,12 @@ class UIRoot extends Component {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
 
-              const stateValue = promptForNameAndAvatarBeforeEntry ? "profile" : "device";
-              this.pushHistoryState("entry_step", stateValue);
+              if (promptForNameAndAvatarBeforeEntry) {
+                this.pushHistoryState("entry_step", "profile");
+              } else {
+                this.onRequestMicPermission();
+                this.pushHistoryState("entry_step", "mic_grant");
+              }
             } else {
               this.handleForceEntry();
             }
