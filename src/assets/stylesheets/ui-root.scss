@@ -277,28 +277,6 @@ body.vr-mode {
   pointer-events: auto;
 }
 
-:local(.invite-tip) {
-  @extend %tip-bubble;
-  width: auto;
-  top: 60px;
-
-  display: none;
-
-  @media (min-height: 450px) {
-    display: flex;
-  }
-
-  :local(.invite-tip-attach-point) {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid $notice-background-color;
-    position: absolute;
-    top: -5px;
-  }
-}
-
 :local(.interstitial) {
   @extend %default-font;
   background-color: var(--vr-interstitial-background-color);
