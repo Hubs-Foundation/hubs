@@ -16,9 +16,13 @@ export function RoomEntryModal({
   logoSrc,
   className,
   roomName,
+  showJoinRoom,
   onJoinRoom,
+  showEnterOndevice,
   onEnterOnDevice,
+  showSpectate,
   onSpectate,
+  showOptions,
   onOptions,
   ...rest
 }) {
@@ -40,23 +44,30 @@ export function RoomEntryModal({
         <p>{roomName}</p>
       </div>
       <div className={styles.buttons}>
-        <Button preset="blue" onClick={onJoinRoom}>
-          <EnterIcon /> Join Room
-        </Button>
-        <Button preset="purple" onClick={onEnterOnDevice}>
-          <VRIcon /> Enter On Device
-        </Button>
-        <Button preset="orange" onClick={onSpectate}>
-          <ShowIcon /> Spectate
-        </Button>
-        {breakpoint !== "sm" && (
-          <>
-            <hr className={styleUtils.showMd} />
-            <Button preset="transparent" className={styleUtils.showMd} onClick={onOptions}>
-              <SettingsIcon /> Options
-            </Button>
-          </>
+        {showJoinRoom && (
+          <Button preset="blue" onClick={onJoinRoom}>
+            <EnterIcon /> Join Room
+          </Button>
         )}
+        {showEnterOndevice && (
+          <Button preset="purple" onClick={onEnterOnDevice}>
+            <VRIcon /> Enter On Device
+          </Button>
+        )}
+        {showSpectate && (
+          <Button preset="orange" onClick={onSpectate}>
+            <ShowIcon /> Spectate
+          </Button>
+        )}
+        {showOptions &&
+          breakpoint !== "sm" && (
+            <>
+              <hr className={styleUtils.showMd} />
+              <Button preset="transparent" className={styleUtils.showMd} onClick={onOptions}>
+                <SettingsIcon /> Options
+              </Button>
+            </>
+          )}
       </div>
     </Modal>
   );
@@ -65,10 +76,14 @@ export function RoomEntryModal({
 RoomEntryModal.propTypes = {
   appName: PropTypes.string,
   logoSrc: PropTypes.string,
-  className: PropTypes.className,
+  className: PropTypes.string,
   roomName: PropTypes.string.isRequired,
+  showJoinRoom: PropTypes.bool,
   onJoinRoom: PropTypes.func,
+  showEnterOnDevice: PropTypes.bool,
   onEnterOnDevice: PropTypes.func,
+  showSpectate: PropTypes.bool,
   onSpectate: PropTypes.func,
+  showOptions: PropTypes.bool,
   onOptions: PropTypes.func
 };

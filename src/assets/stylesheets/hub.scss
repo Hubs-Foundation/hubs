@@ -6,11 +6,27 @@
 @import 'exited';
 @import 'profile';
 @import 'entry';
-@import 'audio';
 @import 'info-dialog';
 
-body {
-  background-color: var(--loading-background-color);
+html, body {
+  height: 100%;
+}
+
+#ui-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+a-scene {
+  position: absolute;
+  top: 0;
+  bottom: 96px;
+  left: 0;
+  right: 0;
 }
 
 body.vr-mode-stretch {

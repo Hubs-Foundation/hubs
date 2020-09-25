@@ -212,6 +212,7 @@ import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
+import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -277,26 +278,28 @@ function mountUI(props = {}) {
   const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
-    <Router history={history}>
-      <Route
-        render={routeProps => (
-          <UIRoot
-            {...{
-              scene,
-              isBotMode,
-              disableAutoExitOnIdle,
-              forcedVREntryType,
-              store,
-              mediaSearchStore,
-              isCursorHoldingPen,
-              hasActiveCamera,
-              ...props,
-              ...routeProps
-            }}
-          />
-        )}
-      />
-    </Router>,
+    <WrappedIntlProvider>
+      <Router history={history}>
+        <Route
+          render={routeProps => (
+            <UIRoot
+              {...{
+                scene,
+                isBotMode,
+                disableAutoExitOnIdle,
+                forcedVREntryType,
+                store,
+                mediaSearchStore,
+                isCursorHoldingPen,
+                hasActiveCamera,
+                ...props,
+                ...routeProps
+              }}
+            />
+          )}
+        />
+      </Router>
+    </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );
 }

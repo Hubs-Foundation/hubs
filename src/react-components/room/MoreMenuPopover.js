@@ -64,14 +64,14 @@ MoreMenuPopoverContent.propTypes = {
   menu: PropTypes.array.isRequired
 };
 
-export function MoreMenuPopoverButton({ menu, onSelect }) {
+export function MoreMenuPopoverButton({ menu, onSelect, initiallyVisible }) {
   return (
     <Popover
       title="More"
       content={() => <MoreMenuPopoverContent menu={menu} onSelect={onSelect} />}
       placement="top"
       offsetDistance={28}
-      initiallyVisible
+      initiallyVisible={initiallyVisible}
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
         <ToolbarButton
@@ -87,6 +87,7 @@ export function MoreMenuPopoverButton({ menu, onSelect }) {
 }
 
 MoreMenuPopoverButton.propTypes = {
+  initiallyVisible: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
   menu: PropTypes.array.isRequired
 };

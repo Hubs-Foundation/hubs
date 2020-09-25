@@ -6,24 +6,22 @@ import styles from "./SelectInputField.scss";
 import { ReactComponent as CaretDownIcon } from "../icons/CaretDown.svg";
 import { useSelect } from "downshift";
 
-function getSelectedItem(value, options) {
-  if (options.length > 0 && typeof options[0] === "object") {
-    return options.find(item => item.value === value);
-  }
-
-  return value;
+function getItemValue(item) {
+  return typeof item === "object" ? item.value : item;
 }
 
-function getItemId(item) {
-  return typeof item === "object" ? item.id : item;
+function getSelectedItem(value, options) {
+  const selectedItemValue = getItemValue(value);
+
+  if (options.length > 0 && typeof options[0] === "object") {
+    return options.find(item => item.value === selectedItemValue);
+  }
+
+  return selectedItemValue;
 }
 
 function getItemLabel(item) {
   return typeof item === "object" ? item.label || item.value : item;
-}
-
-function getItemValue(item) {
-  return typeof item === "object" ? item.value : item;
 }
 
 export function SelectInputField({
@@ -71,7 +69,7 @@ export function SelectInputField({
               options.map((item, index) => (
                 <li
                   className={classNames(styles.dropdownItem, { [styles.highlightedItem]: highlightedIndex === index })}
-                  key={getItemId(item)}
+                  key={getItemValue(item)}
                   {...getItemProps({ item, index })}
                 >
                   {getItemLabel(item)}
@@ -91,7 +89,7 @@ SelectInputField.propTypes = {
   description: PropTypes.node,
   labelClassName: PropTypes.string,
   inputClassName: PropTypes.string,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  value: PropTypes.any,
   options: PropTypes.arrayOf(
     PropTypes.oneOfType([
       PropTypes.string,

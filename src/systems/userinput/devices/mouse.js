@@ -44,8 +44,8 @@ export class MouseDevice {
     document.addEventListener(
       "wheel",
       e => {
-        // Do not capture wheel events if they are being sent to an modal/overlay
-        if (!isInModal()) {
+        // Only capture wheel events when the canvas is focused
+        if (document.activeElement.classList.contains("a-canvas")) {
           e.preventDefault();
         }
       },

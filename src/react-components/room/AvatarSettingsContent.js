@@ -3,36 +3,52 @@ import PropTypes from "prop-types";
 import { Button } from "../input/Button";
 import styles from "./AvatarSettingsContent.scss";
 import { TextInputField } from "../input/TextInputField";
-import { AvatarPreviewCanvas } from "../avatar/AvatarPreviewCanvas";
 
 export function AvatarSettingsContent({
   displayName,
+  displayNameInputRef,
+  disableDisplayNameInput,
   onChangeDisplayName,
-  avatarPreviewCanvasRef,
+  avatarPreview,
+  displayNamePattern,
+  displayNameDescription,
   onChangeAvatar,
-  onAccept,
   ...rest
 }) {
   return (
-    <div className={styles.content} {...rest}>
-      <TextInputField label="Display Name" value={displayName} onChange={onChangeDisplayName} />
+    <form className={styles.content} {...rest}>
+      <TextInputField
+        disabled={disableDisplayNameInput}
+        label="Display Name"
+        value={displayName}
+        pattern={displayNamePattern}
+        spellCheck="false"
+        required
+        onChange={onChangeDisplayName}
+        description={displayNameDescription}
+        ref={displayNameInputRef}
+      />
       <div className={styles.avatarPreviewContainer}>
-        <AvatarPreviewCanvas ref={avatarPreviewCanvasRef} />
-        <Button onClick={onChangeAvatar}>Change Avatar</Button>
+        {avatarPreview}
+        <Button type="button" onClick={onChangeAvatar}>
+          Change Avatar
+        </Button>
       </div>
-      <Button preset="accept" onClick={onAccept}>
+      <Button preset="accept" type="submit">
         Accept
       </Button>
-    </div>
+    </form>
   );
 }
 
 AvatarSettingsContent.propTypes = {
   className: PropTypes.string,
   displayName: PropTypes.string,
+  displayNameInputRef: PropTypes.func,
+  disableDisplayNameInput: PropTypes.bool,
+  displayNamePattern: PropTypes.string,
+  displayNameDescription: PropTypes.string,
   onChangeDisplayName: PropTypes.func,
-  avatarPreviewCanvasRef: PropTypes.object,
-  onChangeAvatar: PropTypes.func,
-  onAccept: PropTypes.func,
-  onBack: PropTypes.func
+  avatarPreview: PropTypes.node,
+  onChangeAvatar: PropTypes.func
 };

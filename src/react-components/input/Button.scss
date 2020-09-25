@@ -16,6 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: theme.$white;
 
   svg {
     flex-shrink: 0;
@@ -28,6 +29,14 @@
     *[fill=\#000] {
       fill: theme.$white;
     }
+  }
+
+  &:hover {
+    color: theme.$white;
+  }
+
+  &:active {
+    color: theme.$white;
   }
 }
 
@@ -47,10 +56,12 @@
   }
 
   &:hover {
+    color: theme.$darkgrey;
     background-color: theme.$white-hover;
   }
 
   &:active {
+    color: theme.$darkgrey;
     background-color: theme.$white-pressed;
   }
 }
@@ -61,7 +72,6 @@
 }
 
 :local(.accept), :local(.green) {
-  color: theme.$white;
   background-color: theme.$green;
 
   &:hover {
@@ -74,7 +84,6 @@
 }
 
 :local(.cancel), :local(.red) {
-  color: theme.$white;
   background-color: theme.$red;
 
   &:hover {
@@ -87,7 +96,6 @@
 }
 
 :local(.blue) {
-  color: theme.$white;
   background-color: theme.$blue;
 
   &:hover {
@@ -100,7 +108,6 @@
 }
 
 :local(.orange) {
-  color: theme.$white;
   background-color: theme.$orange;
 
   &:hover {
@@ -113,7 +120,6 @@
 }
 
 :local(.purple) {
-  color: theme.$white;
   background-color: theme.$purple;
 
   &:hover {

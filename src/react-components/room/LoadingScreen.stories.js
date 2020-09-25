@@ -6,35 +6,25 @@ export default {
   title: "LoadingScreen"
 };
 
-export const Tip = () => (
-  <LoadingScreen
-    logoSrc={logoSrc}
-    message="Loading objects 2/14"
-    bottomHeader="Tip:"
-    bottomMessage="Press the Q & E keys to turn left and right."
-  />
-);
-
-Tip.parameters = {
-  layout: "fullscreen"
-};
-
-export const WhatsNew = () => (
-  <LoadingScreen
-    logoSrc={logoSrc}
-    message="Loading objects 2/14"
-    bottomHeader="What's New?"
-    bottomMessage={
+const infoMessages = [
+  { heading: "Tip:", message: "Press the Q & E keys to turn left and right." },
+  {
+    heading: "What's New?",
+    message: (
       <>
         You can now set the default locale in your preferences.{" "}
         <a href="#" target="_blank">
           Read More
         </a>
       </>
-    }
-  />
+    )
+  }
+];
+
+export const Base = () => (
+  <LoadingScreen logoSrc={logoSrc} message="Loading objects 2/14" infoMessages={infoMessages} />
 );
 
-WhatsNew.parameters = {
+Base.parameters = {
   layout: "fullscreen"
 };

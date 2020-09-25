@@ -275,34 +275,6 @@ body.vr-mode {
 :local(.choose-scene-button) {
   @extend %action-button-secondary;
   pointer-events: auto;
-  @media (max-width: 500px) {
-    margin-top: 8px;
-  }
-  @media (min-width: 501px) {
-    margin-top: 16px;
-  }
-}
-
-:local(.invite-tip) {
-  @extend %tip-bubble;
-  width: auto;
-  top: 60px;
-
-  display: none;
-
-  @media (min-height: 450px) {
-    display: flex;
-  }
-
-  :local(.invite-tip-attach-point) {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid $notice-background-color;
-    position: absolute;
-    top: -5px;
-  }
 }
 
 :local(.interstitial) {

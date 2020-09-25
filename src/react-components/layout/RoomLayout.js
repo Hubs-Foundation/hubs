@@ -6,7 +6,6 @@ import { Toolbar } from "./Toolbar";
 
 export function RoomLayout({
   className,
-  viewportCanvasRef,
   viewportClassName,
   sidebar,
   sidebarClassName,
@@ -15,26 +14,26 @@ export function RoomLayout({
   toolbarRight,
   toolbarClassName,
   modal,
+  viewport,
   ...rest
 }) {
   return (
     <div className={classNames(styles.roomLayout, className)} {...rest}>
-      <canvas className={classNames(styles.main, styles.viewport, viewportClassName)} ref={viewportCanvasRef} />
+      {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
+      <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       <Toolbar
         className={classNames(styles.main, styles.toolbar, toolbarClassName)}
         left={toolbarLeft}
         center={toolbarCenter}
         right={toolbarRight}
       />
-      {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
-      <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
+      <div className={classNames(styles.main, styles.viewport, viewportClassName)}>{viewport}</div>
     </div>
   );
 }
 
 RoomLayout.propTypes = {
   className: PropTypes.string,
-  viewportCanvasRef: PropTypes.object,
   viewportClassName: PropTypes.string,
   sidebar: PropTypes.node,
   sidebarClassName: PropTypes.string,
@@ -42,5 +41,6 @@ RoomLayout.propTypes = {
   toolbarCenter: PropTypes.node,
   toolbarRight: PropTypes.node,
   toolbarClassName: PropTypes.string,
-  modal: PropTypes.node
+  modal: PropTypes.node,
+  viewport: PropTypes.node
 };

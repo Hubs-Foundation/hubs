@@ -14,6 +14,7 @@ $fontSize: 16px;
 :local(.preferences-panel) {
   @extend %full-screen-panel;
   z-index: 2;
+  pointer-events: auto;
   display: flex;
   flex-flow: column;
   align-items: center;

@@ -25,6 +25,7 @@ export function MicSetupModal({
   microphoneEnabled,
   micLevel,
   soundPlaying,
+  onPlaySound,
   microphoneMuted,
   onChangeMicrophoneMuted,
   onEnterRoom,
@@ -48,7 +49,7 @@ export function MicSetupModal({
       <div className={styles.audioCheckContainer}>
         <ToolbarButton
           icon={
-            microphoneEnabled ? (
+            microphoneEnabled && !microphoneMuted ? (
               <MicrophoneIcon width={48} height={48} />
             ) : (
               <MicrophoneMutedIcon width={48} height={48} />
@@ -68,7 +69,7 @@ export function MicSetupModal({
                 Math.floor(micLevel * micButtonDiameter)}px, ${micButtonDiameter}px, ${micButtonDiameter}px, 0px)`
             }}
           >
-            {microphoneEnabled ? (
+            {microphoneEnabled && !microphoneMuted ? (
               <MicrophoneIcon className={styles.clippedIcon} width={48} height={48} />
             ) : (
               <MicrophoneMutedIcon className={styles.clippedIcon} width={48} height={48} />
@@ -101,18 +102,18 @@ export function MicSetupModal({
         <ToolbarButton
           icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
           label="Click to Test Audio"
-          preset={soundPlaying && "blue"}
+          preset={soundPlaying ? "blue" : "basic"}
           className={styles.largeToolbarButton}
+          onClick={onPlaySound}
           large
         />
       </div>
-      <SelectInputField
-        disabled={!microphoneEnabled}
-        value={selectedMicrophone}
-        options={microphoneOptions}
-        onChange={onChangeMicrophone}
-      />
-      <ToggleInput label="Mute My Microphone" value={microphoneMuted} onChange={onChangeMicrophoneMuted} />
+      {microphoneEnabled && (
+        <>
+          <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
+          <ToggleInput label="Mute My Microphone" value={microphoneMuted} onChange={onChangeMicrophoneMuted} />
+        </>
+      )}
       <Button preset="green" onClick={onEnterRoom}>
         Enter Room
       </Button>
@@ -123,6 +124,7 @@ export function MicSetupModal({
 MicSetupModal.propTypes = {
   className: PropTypes.string,
   soundPlaying: PropTypes.bool,
+  onPlaySound: PropTypes.func,
   micLevel: PropTypes.number,
   microphoneEnabled: PropTypes.bool,
   microphoneMuted: PropTypes.bool,
