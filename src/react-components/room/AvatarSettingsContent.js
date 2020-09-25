@@ -29,7 +29,7 @@ export function AvatarSettingsContent({
         ref={displayNameInputRef}
       />
       <div className={styles.avatarPreviewContainer}>
-        {avatarPreview}
+        {avatarPreview || <div />}
         <Button type="button" onClick={onChangeAvatar}>
           Change Avatar
         </Button>

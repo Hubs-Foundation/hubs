@@ -87,3 +87,10 @@ RoomEntryModal.propTypes = {
   showOptions: PropTypes.bool,
   onOptions: PropTypes.func
 };
+
+RoomEntryModal.defaultProps = {
+  showJoinRoom: true,
+  showEnterOnDevice: true,
+  showSpectate: true,
+  showOptions: true
+};

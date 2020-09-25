@@ -6,20 +6,51 @@ export default {
   title: "MicSetupModal"
 };
 
-export const Base = () => <RoomLayout modal={<MicSetupModal />} />;
+const micOptions = ["Microphone 1", "Microphone 2", "Microphone 3"];
+
+export const Base = () => (
+  <RoomLayout
+    modal={<MicSetupModal selectedMicrophone="Microphone 1" microphoneEnabled microphoneOptions={micOptions} />}
+  />
+);
 
 Base.parameters = {
   layout: "fullscreen"
 };
 
-export const TestMicrophone = () => <RoomLayout modal={<MicSetupModal micLevel={0.5} />} />;
+export const TestMicrophone = () => (
+  <RoomLayout
+    modal={
+      <MicSetupModal
+        selectedMicrophone="Microphone 1"
+        microphoneEnabled
+        microphoneOptions={micOptions}
+        micLevel={0.5}
+      />
+    }
+  />
+);
 
 TestMicrophone.parameters = {
   layout: "fullscreen"
 };
 
-export const TestSound = () => <RoomLayout modal={<MicSetupModal soundPlaying />} />;
+export const TestSound = () => (
+  <RoomLayout
+    modal={
+      <MicSetupModal selectedMicrophone="Microphone 1" microphoneEnabled microphoneOptions={micOptions} soundPlaying />
+    }
+  />
+);
 
 TestSound.parameters = {
+  layout: "fullscreen"
+};
+
+export const MicrophoneDisabled = () => (
+  <RoomLayout modal={<MicSetupModal selectedMicrophone="Microphone 1" microphoneOptions={micOptions} />} />
+);
+
+MicrophoneDisabled.parameters = {
   layout: "fullscreen"
 };

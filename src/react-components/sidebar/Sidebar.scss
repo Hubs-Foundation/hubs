@@ -5,6 +5,10 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  @media(min-width: theme.$breakpoint-md) {
+    border-left: 1px solid theme.$lightgrey;
+  }
 }
 
 :local(.header) {
