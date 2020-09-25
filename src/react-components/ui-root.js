@@ -1092,10 +1092,6 @@ class UIRoot extends Component {
     );
   };
 
-  renderMicPanel = () => {
-    return <MicPermissionsModal onBack={() => this.props.history.goBack()} />;
-  };
-
   renderAudioSetupPanel = () => {
     const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
     // TODO: Show HMD mic not chosen warning
@@ -1224,7 +1220,7 @@ class UIRoot extends Component {
             {this.renderDevicePanel()}
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
-            {this.renderMicPanel()}
+            <MicPermissionsModal onBack={() => this.props.history.goBack()} />
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
