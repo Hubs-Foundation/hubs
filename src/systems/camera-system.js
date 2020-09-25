@@ -7,13 +7,36 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 
+function isTaggedInspectable(el) {
+  return el.components && el.components.tags && el.components.tags.data.inspectable;
+}
+
+function selfOrChildOfInspectable(el) {
+  if (el.components["child-to-inspect"]) {
+    const child = el.querySelector(el.components["child-to-inspect"].data.selector);
+    if (!child) {
+      console.error(`Could not find child to inspect: ${el.components["child-to-inspect"].data.selector}`, el);
+      return null;
+    }
+    return child.object3D;
+  } else {
+    return el.object3D;
+  }
+}
+
 export function getInspectable(child) {
   let el = child;
+  const ret = { inspectable: null, doNotHideMe: null };
   while (el) {
-    if (el.components && el.components.tags && el.components.tags.data.inspectable) return el;
+    if (isTaggedInspectable(el)) {
+      ret.inspectable = selfOrChildOfInspectable(el);
+      if (el.components["optional-alternative-to-not-hide"]) {
+        ret.doNotHideMe = el.object3D;
+      }
+    }
     el = el.parentNode;
   }
-  return null;
+  return ret;
 }
 
 const decompose = (function() {
@@ -76,6 +99,7 @@ const moveRigSoCameraLooksAtObject = (function() {
   const cwp = new THREE.Vector3();
   const oForw = new THREE.Vector3();
   const center = new THREE.Vector3();
+  const boxFix = new THREE.Vector3(0.3, 0.3, 0.3);
   const target = new THREE.Object3D();
   return function moveRigSoCameraLooksAtObject(rig, camera, object, distanceMod) {
     if (!target.parent) {
@@ -90,6 +114,11 @@ const moveRigSoCameraLooksAtObject = (function() {
     rig.getWorldQuaternion(cwq);
 
     const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
+    if (box.min.x === Infinity) {
+      // fix edgecase where inspectable object has no mesh / dimensions
+      box.min.subVectors(owp, boxFix);
+      box.max.addVectors(owp, boxFix);
+    }
     box.getCenter(center);
     const vrMode = object.el.sceneEl.is("vr-mode");
     const dist =
@@ -213,7 +242,7 @@ export class CameraSystem {
     this.mode = NEXT_MODES[this.mode] || 0;
   }
 
-  inspect(o, distanceMod, temporarilyDisableRegularExit) {
+  inspect(o, distanceMod, temporarilyDisableRegularExit, optionalAlternativeToNotHide) {
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -237,7 +266,7 @@ export class CameraSystem {
       this.snapshot.mask1 = camera.cameras[1].layers.mask;
     }
     if (!this.enableLights) {
-      this.hideEverythingButThisObject(o);
+      this.hideEverythingButThisObject(optionalAlternativeToNotHide || o);
     }
 
     this.viewingCamera.object3DMap.camera.updateMatrices();
@@ -284,6 +313,7 @@ export class CameraSystem {
   }
 
   hideEverythingButThisObject(o) {
+    this.notHiddenObject = o;
     o.traverse(enableInspectLayer);
 
     const scene = AFRAME.scenes[0];
@@ -297,8 +327,9 @@ export class CameraSystem {
   }
 
   showEverythingAsNormal() {
-    if (this.inspected) {
-      this.inspected.traverse(disableInspectLayer);
+    if (this.notHiddenObject) {
+      this.notHiddenObject.traverse(disableInspectLayer);
+      this.notHiddenObject = null;
     }
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
@@ -358,10 +389,9 @@ export class CameraSystem {
         const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
 
         if (hoverEl) {
-          const inspectable = getInspectable(hoverEl);
-
+          const { inspectable, doNotHideMe } = getInspectable(hoverEl);
           if (inspectable) {
-            this.inspect(inspectable.object3D);
+            this.inspect(inspectable, 1, false, doNotHideMe);
           }
         }
       } else if (
