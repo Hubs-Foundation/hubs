@@ -33,7 +33,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run: npm deploy-storybook -- --ci
+      - run: npm run deploy-storybook -- --ci
 
 workflows:
   version: 2
