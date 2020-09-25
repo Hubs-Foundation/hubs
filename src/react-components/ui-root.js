@@ -1047,7 +1047,7 @@ class UIRoot extends Component {
               this.handleForceEntry();
             }
           }}
-          showEnterOndevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
+          showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
           onEnterOnDevice={() => this.attemptLink()}
           showSpectate={
             !this.state.waitingOnAudio && !this.props.entryDisallowed && configs.feature("enable_lobby_ghosts")

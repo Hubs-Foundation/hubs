@@ -18,7 +18,7 @@ export function RoomEntryModal({
   roomName,
   showJoinRoom,
   onJoinRoom,
-  showEnterOndevice,
+  showEnterOnDevice,
   onEnterOnDevice,
   showSpectate,
   onSpectate,
@@ -49,7 +49,7 @@ export function RoomEntryModal({
             <EnterIcon /> Join Room
           </Button>
         )}
-        {showEnterOndevice && (
+        {showEnterOnDevice && (
           <Button preset="purple" onClick={onEnterOnDevice}>
             <VRIcon /> Enter On Device
           </Button>
