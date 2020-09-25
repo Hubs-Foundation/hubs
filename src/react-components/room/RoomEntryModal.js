@@ -80,7 +80,7 @@ RoomEntryModal.propTypes = {
   roomName: PropTypes.string.isRequired,
   showJoinRoom: PropTypes.bool,
   onJoinRoom: PropTypes.func,
-  showEnterOndevice: PropTypes.bool,
+  showEnterOnDevice: PropTypes.bool,
   onEnterOnDevice: PropTypes.func,
   showSpectate: PropTypes.bool,
   onSpectate: PropTypes.func,
