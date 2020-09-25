@@ -9,7 +9,8 @@ import {
   schemaByCategories,
   schemaCategories,
   getSchemas as getItaSchemas,
-  setAuthToken as setItaAuthToken
+  setAuthToken as setItaAuthToken,
+  getAdminInfo
 } from "./utils/ita";
 import { detectIdle } from "./utils/idle-detector";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
@@ -34,6 +35,7 @@ import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog
 import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
 import { createMuiTheme, withStyles } from "@material-ui/core/styles";
+import { UnauthorizedPage } from "./react-components/unauthorized";
 
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
@@ -74,13 +76,17 @@ class AdminUI extends Component {
   };
 
   state = {
-    showAutoEndSessionDialog: false
+    showAutoEndSessionDialog: false,
+    isAdmin: true
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     if (process.env.NODE_ENV !== "development" || qs.get("idle_timeout")) detectIdle();
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
+    const adminInfo = await getAdminInfo();
+    // Unauthorized account
+    if (adminInfo.error && adminInfo.code === 401) this.setState({ isAdmin: false });
   }
 
   componentWillUnmount() {
@@ -101,60 +107,66 @@ class AdminUI extends Component {
   render() {
     return (
       <>
-        <Admin
-          dashboard={SystemEditor}
-          appLayout={this.props.layout}
-          customRoutes={this.props.customRoutes}
-          dataProvider={this.props.dataProvider}
-          authProvider={this.props.authProvider}
-          loginPage={false}
-          logoutButton={() => <span />}
-          theme={theme}
-        >
-          <Resource name="pending_scenes" list={PendingSceneList} />
-          <Resource
-            name="scene_listings"
-            list={SceneListingList}
-            edit={SceneListingEdit}
-            options={{ label: "Approved scenes" }}
-          />
-          <Resource
-            name="featured_scene_listings"
-            list={FeaturedSceneListingList}
-            edit={FeaturedSceneListingEdit}
-            options={{ label: "Featured scenes" }}
-          />
+        {this.state.isAdmin ? (
+          <>
+            <Admin
+              dashboard={SystemEditor}
+              appLayout={this.props.layout}
+              customRoutes={this.props.customRoutes}
+              dataProvider={this.props.dataProvider}
+              authProvider={this.props.authProvider}
+              loginPage={false}
+              logoutButton={() => <span />}
+              theme={theme}
+            >
+              <Resource name="pending_scenes" list={PendingSceneList} />
+              <Resource
+                name="scene_listings"
+                list={SceneListingList}
+                edit={SceneListingEdit}
+                options={{ label: "Approved scenes" }}
+              />
+              <Resource
+                name="featured_scene_listings"
+                list={FeaturedSceneListingList}
+                edit={FeaturedSceneListingEdit}
+                options={{ label: "Featured scenes" }}
+              />
 
-          <Resource name="pending_avatars" list={AvatarList} />
-          <Resource
-            name="avatar_listings"
-            list={AvatarListingList}
-            edit={AvatarListingEdit}
-            options={{ label: "Approved avatars" }}
-          />
-          <Resource
-            name="featured_avatar_listings"
-            list={AvatarListingList}
-            edit={AvatarListingEdit}
-            options={{ label: "Featured avatars" }}
-          />
+              <Resource name="pending_avatars" list={AvatarList} />
+              <Resource
+                name="avatar_listings"
+                list={AvatarListingList}
+                edit={AvatarListingEdit}
+                options={{ label: "Approved avatars" }}
+              />
+              <Resource
+                name="featured_avatar_listings"
+                list={AvatarListingList}
+                edit={AvatarListingEdit}
+                options={{ label: "Featured avatars" }}
+              />
 
-          <Resource name="accounts" list={AccountList} edit={AccountEdit} />
-          <Resource name="identities" list={IdentityList} create={IdentityCreate} edit={IdentityEdit} />
-          <Resource name="scenes" list={SceneList} edit={SceneEdit} />
-          <Resource name="avatars" list={AvatarList} create={IdentityCreate} edit={AvatarEdit} />
-          <Resource name="owned_files" />
+              <Resource name="accounts" list={AccountList} edit={AccountEdit} />
+              <Resource name="identities" list={IdentityList} create={IdentityCreate} edit={IdentityEdit} />
+              <Resource name="scenes" list={SceneList} edit={SceneEdit} />
+              <Resource name="avatars" list={AvatarList} create={IdentityCreate} edit={AvatarEdit} />
+              <Resource name="owned_files" />
 
-          <Resource name="projects" list={ProjectList} show={ProjectShow} />
-        </Admin>
-        {this.state.showAutoEndSessionDialog && (
-          <AutoEndSessionDialog
-            onCancel={() => this.setState({ showAutoEndSessionDialog: false })}
-            onEndSession={() => {
-              this.props.onEndSession();
-              this.setState({ sessionEnded: true });
-            }}
-          />
+              <Resource name="projects" list={ProjectList} show={ProjectShow} />
+            </Admin>
+            {this.state.showAutoEndSessionDialog && (
+              <AutoEndSessionDialog
+                onCancel={() => this.setState({ showAutoEndSessionDialog: false })}
+                onEndSession={() => {
+                  this.props.onEndSession();
+                  this.setState({ sessionEnded: true });
+                }}
+              />
+            )}
+          </>
+        ) : (
+          <UnauthorizedPage />
         )}
       </>
     );
