@@ -83,3 +83,22 @@ button:local(.more-menu-item-target) {
   background: transparent;
   border: none; 
 }
+
+:local(.compact-button) {
+  pointer-events: auto;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 48px;
+  background-color: theme.$white;
+  border: 1px solid theme.$lightgrey;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media(min-width: theme.$breakpoint-md) {
+    display: none;
+  }
+}

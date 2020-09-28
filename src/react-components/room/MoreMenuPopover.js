@@ -1,5 +1,6 @@
-import React from "react";
+import React, { createContext, useContext, useState } from "react";
 import PropTypes from "prop-types";
+import classNames from "classnames";
 import styles from "./MoreMenuPopover.scss";
 import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
@@ -65,14 +66,31 @@ MoreMenuPopoverContent.propTypes = {
   menu: PropTypes.array.isRequired
 };
 
-export function MoreMenuPopoverButton({ menu, initiallyVisible }) {
+// The MoreMenuContext allows us to control the more menu popover visibility from the MoreMenuPopoverButton
+// and CompactMoreMenuButton.
+const MoreMenuContext = createContext([false, () => {}]);
+
+export function MoreMenuContextProvider({ initiallyVisible, children }) {
+  const context = useState(initiallyVisible || false);
+  return <MoreMenuContext.Provider value={context}>{children}</MoreMenuContext.Provider>;
+}
+
+MoreMenuContextProvider.propTypes = {
+  initiallyVisible: PropTypes.bool,
+  children: PropTypes.node
+};
+
+export function MoreMenuPopoverButton({ menu }) {
+  const [visible, setVisible] = useContext(MoreMenuContext);
+
   return (
     <Popover
       title="More"
       content={() => <MoreMenuPopoverContent menu={menu} />}
       placement="top-end"
       offsetDistance={28}
-      initiallyVisible={initiallyVisible}
+      isVisible={visible}
+      onChangeVisible={setVisible}
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
         <ToolbarButton
@@ -88,6 +106,31 @@ export function MoreMenuPopoverButton({ menu, initiallyVisible }) {
 }
 
 MoreMenuPopoverButton.propTypes = {
-  initiallyVisible: PropTypes.bool,
   menu: PropTypes.array.isRequired
+};
+
+// The CompactMoreMenuButton is only shown in the small breakpoint.
+// We actually render the popover in the MoreMenuPopoverButton so that when resizing the window,
+// the popover positions itself relative to the correct element.
+export function CompactMoreMenuButton({ className, ...rest }) {
+  const [, setVisible] = useContext(MoreMenuContext);
+
+  return (
+    <button
+      className={classNames(styles.compactButton, className)}
+      aria-label="More"
+      onClick={e => {
+        // Stop event bubbling so we don't immediately close the popover by clicking outside it.
+        e.stopPropagation();
+        setVisible(true);
+      }}
+      {...rest}
+    >
+      <MoreIcon />
+    </button>
+  );
+}
+
+CompactMoreMenuButton.propTypes = {
+  className: PropTypes.string
 };

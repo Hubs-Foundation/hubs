@@ -10,7 +10,7 @@ import { ReactComponent as HomeIcon } from "../icons/Home.svg";
 import { ReactComponent as TextDocumentIcon } from "../icons/TextDocument.svg";
 import { ReactComponent as SupportIcon } from "../icons/Support.svg";
 import { ReactComponent as ShieldIcon } from "../icons/Shield.svg";
-import { MoreMenuPopoverButton } from "./MoreMenuPopover";
+import { CompactMoreMenuButton, MoreMenuContextProvider, MoreMenuPopoverButton } from "./MoreMenuPopover";
 
 export default {
   title: "MoreMenuPopover"
@@ -68,7 +68,9 @@ const menu = [
 ];
 
 export const Base = () => (
-  <RoomLayout toolbarCenter={<MoreMenuPopoverButton menu={menu} onSelect={item => console.log(item)} />} />
+  <MoreMenuContextProvider initiallyVisible={true}>
+    <RoomLayout viewport={<CompactMoreMenuButton />} toolbarRight={<MoreMenuPopoverButton menu={menu} />} />
+  </MoreMenuContextProvider>
 );
 
 Base.parameters = {
