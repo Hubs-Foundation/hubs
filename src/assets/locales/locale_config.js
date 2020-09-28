@@ -4,11 +4,13 @@
 
 export const AVAILABLE_LOCALES = {
   en: "English",
-  zh: "简体中文"
+  zh: "简体中文",
+  pt: "Portugês"
 };
 
 export const FALLBACK_LOCALES = {
   "zh-cn": "zh",
   "zh-hans": "zh",
-  "zh-hans-cn": "zh"
+  "zh-hans-cn": "zh",
+  "pt-br": "pt"
 };
