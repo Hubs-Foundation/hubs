@@ -1318,6 +1318,10 @@ class UIRoot extends Component {
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
 
+    const renderEntryFlow =
+      (!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo && this.props.hub) ||
+      this.isWaitingForAutoExit();
+
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
         <div className={classNames(rootStyles)}>
@@ -1393,356 +1397,357 @@ class UIRoot extends Component {
               performConditionalSignIn={this.props.performConditionalSignIn}
             />
           )}
-          <StateRoute
-            stateKey="modal"
-            stateValue="room_settings"
-            history={this.props.history}
-            render={() =>
-              this.renderDialog(RoomSettingsDialog, {
-                showPublicRoomSetting: this.props.hubChannel.can("update_hub_promotion"),
-                initialSettings: {
-                  name: this.props.hub.name,
-                  description: this.props.hub.description,
-                  member_permissions: this.props.hub.member_permissions,
-                  room_size: this.props.hub.room_size,
-                  allow_promotion: this.props.hub.allow_promotion,
-                  entry_mode: this.props.hub.entry_mode
-                },
-                onChange: settings => this.props.hubChannel.updateHub(settings),
-                hubChannel: this.props.hubChannel
-              })
-            }
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="close_room"
-            history={this.props.history}
-            render={() => this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })}
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="support"
-            history={this.props.history}
-            render={() => this.renderDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel })}
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="create"
-            history={this.props.history}
-            render={() => this.renderDialog(CreateObjectDialog, { onCreate: this.createObject })}
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="change_scene"
-            history={this.props.history}
-            render={() => this.renderDialog(ChangeSceneDialog, { onChange: this.changeScene })}
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="avatar_url"
-            history={this.props.history}
-            render={() => this.renderDialog(AvatarUrlDialog, { onChange: this.setAvatarUrl })}
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="webvr"
-            history={this.props.history}
-            render={() => this.renderDialog(WebVRRecommendDialog)}
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="webrtc-screenshare"
-            history={this.props.history}
-            render={() => this.renderDialog(WebRTCScreenshareUnsupportedDialog)}
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="room_info"
-            history={this.props.history}
-            render={() => {
-              return this.renderDialog(RoomInfoDialog, {
-                store: this.props.store,
-                scene: this.props.hub.scene,
-                hubName: this.props.hub.name,
-                hubDescription: this.props.hub.description
-              });
-            }}
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="feedback"
-            history={this.props.history}
-            render={() =>
-              this.renderDialog(FeedbackDialog, {
-                history: this.props.history,
-                onClose: () => this.pushHistoryState("modal", null)
-              })
-            }
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="help"
-            history={this.props.history}
-            render={() =>
-              this.renderDialog(HelpDialog, {
-                history: this.props.history,
-                onClose: () => this.pushHistoryState("modal", null)
-              })
-            }
-          />
-          <StateRoute
-            stateKey="modal"
-            stateValue="tweet"
-            history={this.props.history}
-            render={() => this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })}
-          />
-          {showClientInfo && (
-            <ClientInfoDialog
-              clientId={clientInfoClientId}
-              onClose={this.closeDialog}
-              history={this.props.history}
-              presences={this.props.presences}
-              hubChannel={this.props.hubChannel}
-              showNonHistoriedDialog={this.showNonHistoriedDialog}
-              performConditionalSignIn={this.props.performConditionalSignIn}
-            />
-          )}
-          {showObjectInfo && (
-            <ObjectInfoDialog
-              scene={this.props.scene}
-              el={this.state.objectInfo}
-              src={this.state.objectSrc}
-              pinned={this.state.objectInfo && this.state.objectInfo.components["networked"].data.persistent}
-              hubChannel={this.props.hubChannel}
-              onPinChanged={() => switchToInspectingObject(this.state.objectInfo)}
-              onNavigated={el => switchToInspectingObject(el)}
-              onClose={() => {
-                if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                  this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
-                }
-                this.setState({ isObjectListExpanded: false, objectInfo: null });
-              }}
-            />
-          )}
-          {((!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo && this.props.hub) ||
-            this.isWaitingForAutoExit()) && (
-            <RoomLayout
-              viewport={
-                <PresenceLog
-                  entries={presenceLogEntries}
-                  presences={this.props.presences}
-                  hubId={this.props.hub.hub_id}
+          <RoomLayout
+            viewport={
+              <>
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="room_settings"
                   history={this.props.history}
-                />
-              }
-              modal={entryDialog}
-              toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
-            />
-          )}
-          {enteredOrWatchingOrPreload &&
-            this.props.hub && (
-              <PresenceLog
-                inRoom={true}
-                presences={this.props.presences}
-                entries={presenceLogEntries}
-                hubId={this.props.hub.hub_id}
-                history={this.props.history}
-              />
-            )}
-          {entered &&
-            this.props.activeTips &&
-            this.props.activeTips.bottom &&
-            (!presenceLogEntries || presenceLogEntries.length === 0) &&
-            !showBroadcastTip && (
-              <Tip tip={this.props.activeTips.bottom} tipRegion="bottom" pushHistoryState={this.pushHistoryState} />
-            )}
-          {enteredOrWatchingOrPreload &&
-            showBroadcastTip && (
-              <Tip
-                tip={hasDiscordBridges ? "discord" : "embed"}
-                broadcastTarget={discordSnippet}
-                onClose={() => this.confirmBroadcastedRoom()}
-              />
-            )}
-          {enteredOrWatchingOrPreload &&
-            !this.state.objectInfo &&
-            !this.state.frozen && (
-              <InWorldChatBox
-                discordBridges={discordBridges}
-                onSendMessage={this.sendMessage}
-                onObjectCreated={this.createObject}
-                enableSpawning={entered}
-                history={this.props.history}
-              />
-            )}
-          {this.state.frozen && (
-            <button className={styles.leaveButton} onClick={() => this.exit("left")}>
-              <FormattedMessage id="entry.leave-room" />
-            </button>
-          )}
-          <StateRoute
-            stateKey="overlay"
-            stateValue="invite"
-            history={this.props.history}
-            render={() => (
-              <InviteDialog
-                allowShare={!!navigator.share}
-                entryCode={this.props.hub.entry_code}
-                hubId={this.props.hub.hub_id}
-                isModal={true}
-                onClose={() => {
-                  this.props.history.goBack();
-                  exit2DInterstitialAndEnterVR();
-                }}
-              />
-            )}
-          />
-          {streaming && (
-            <button
-              title="Exit Camera Mode"
-              onClick={() => this.toggleStreamerMode(false)}
-              className={classNames([styles.cornerButton, styles.cameraModeExitButton])}
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          )}
-          {streamingTip}
-
-          {showObjectList && (
-            <ObjectList
-              scene={this.props.scene}
-              onExpand={(expand, uninspect) => {
-                if (expand) {
-                  this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
-                } else {
-                  this.setState({ isObjectListExpanded: expand });
-                }
-
-                if (uninspect) {
-                  this.setState({ objectInfo: null });
-                  if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                    this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                  render={() =>
+                    this.renderDialog(RoomSettingsDialog, {
+                      showPublicRoomSetting: this.props.hubChannel.can("update_hub_promotion"),
+                      initialSettings: {
+                        name: this.props.hub.name,
+                        description: this.props.hub.description,
+                        member_permissions: this.props.hub.member_permissions,
+                        room_size: this.props.hub.room_size,
+                        allow_promotion: this.props.hub.allow_promotion,
+                        entry_mode: this.props.hub.entry_mode
+                      },
+                      onChange: settings => this.props.hubChannel.updateHub(settings),
+                      hubChannel: this.props.hubChannel
+                    })
                   }
-                }
-              }}
-              expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-              onInspectObject={el => switchToInspectingObject(el)}
-            />
-          )}
-
-          {showPresenceList && (
-            <PresenceList
-              hubChannel={this.props.hubChannel}
-              history={this.props.history}
-              presences={this.props.presences}
-              sessionId={this.props.sessionId}
-              signedIn={this.state.signedIn}
-              email={this.props.store.state.credentials.email}
-              onSignIn={this.showSignInDialog}
-              onSignOut={this.signOut}
-              expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
-              onExpand={expand => {
-                if (expand) {
-                  this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
-                } else {
-                  this.setState({ isPresenceListExpanded: expand });
-                }
-              }}
-            />
-          )}
-
-          {showSettingsMenu && (
-            <SettingsMenu
-              history={this.props.history}
-              mediaSearchStore={this.props.mediaSearchStore}
-              isStreaming={streaming}
-              toggleStreamerMode={this.toggleStreamerMode}
-              hubChannel={this.props.hubChannel}
-              hubScene={this.props.hub && this.props.hub.scene}
-              scene={this.props.scene}
-              showAsOverlay={showSettingsAsOverlay}
-              onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}
-              performConditionalSignIn={this.props.performConditionalSignIn}
-              showNonHistoriedDialog={this.showNonHistoriedDialog}
-              showPreferencesScreen={() => {
-                this.setState({ showPrefs: true });
-              }}
-              pushHistoryState={this.pushHistoryState}
-            />
-          )}
-          {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
-          {showTopHud && (
-            <div className={styles.topHud}>
-              <TwoDHUD.TopHUD
-                scene={this.props.scene}
-                history={this.props.history}
-                mediaSearchStore={this.props.mediaSearchStore}
-                muted={this.state.muted}
-                frozen={this.state.frozen}
-                watching={this.state.watching}
-                onWatchEnded={() => this.setState({ watching: false })}
-                videoShareMediaSource={this.state.videoShareMediaSource}
-                showVideoShareFailed={this.state.showVideoShareFailed}
-                hideVideoShareFailedTip={() => this.setState({ showVideoShareFailed: false })}
-                activeTip={this.props.activeTips && this.props.activeTips.top}
-                isCursorHoldingPen={this.props.isCursorHoldingPen}
-                hasActiveCamera={this.props.hasActiveCamera}
-                onToggleMute={this.toggleMute}
-                onSpawnPen={this.spawnPen}
-                onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
-                onShareVideo={this.shareVideo}
-                onEndShareVideo={this.endShareVideo}
-                onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
-                isStreaming={streaming}
-                showStreamingTip={this.state.showStreamingTip}
-                hideStreamingTip={() => {
-                  this.setState({ showStreamingTip: false });
-                }}
-              />
-              {!watching && !streaming ? (
-                <UnlessFeature name="show_feedback_ui">
-                  <div className={styles.nagCornerButton}>
-                    <button onClick={() => this.pushHistoryState("modal", "help")} className={styles.helpButton}>
-                      <i>
-                        <FontAwesomeIcon icon={faQuestion} />
-                      </i>
-                    </button>
-                  </div>
-                </UnlessFeature>
-              ) : (
-                <div className={styles.nagCornerButton}>
-                  <button onClick={() => this.setState({ hide: true })}>
-                    <FormattedMessage id="hide-ui.prompt" />
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="close_room"
+                  history={this.props.history}
+                  render={() =>
+                    this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })
+                  }
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="support"
+                  history={this.props.history}
+                  render={() => this.renderDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel })}
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="create"
+                  history={this.props.history}
+                  render={() => this.renderDialog(CreateObjectDialog, { onCreate: this.createObject })}
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="change_scene"
+                  history={this.props.history}
+                  render={() => this.renderDialog(ChangeSceneDialog, { onChange: this.changeScene })}
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="avatar_url"
+                  history={this.props.history}
+                  render={() => this.renderDialog(AvatarUrlDialog, { onChange: this.setAvatarUrl })}
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="webvr"
+                  history={this.props.history}
+                  render={() => this.renderDialog(WebVRRecommendDialog)}
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="webrtc-screenshare"
+                  history={this.props.history}
+                  render={() => this.renderDialog(WebRTCScreenshareUnsupportedDialog)}
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="room_info"
+                  history={this.props.history}
+                  render={() => {
+                    return this.renderDialog(RoomInfoDialog, {
+                      store: this.props.store,
+                      scene: this.props.hub.scene,
+                      hubName: this.props.hub.name,
+                      hubDescription: this.props.hub.description
+                    });
+                  }}
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="feedback"
+                  history={this.props.history}
+                  render={() =>
+                    this.renderDialog(FeedbackDialog, {
+                      history: this.props.history,
+                      onClose: () => this.pushHistoryState("modal", null)
+                    })
+                  }
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="help"
+                  history={this.props.history}
+                  render={() =>
+                    this.renderDialog(HelpDialog, {
+                      history: this.props.history,
+                      onClose: () => this.pushHistoryState("modal", null)
+                    })
+                  }
+                />
+                <StateRoute
+                  stateKey="modal"
+                  stateValue="tweet"
+                  history={this.props.history}
+                  render={() =>
+                    this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })
+                  }
+                />
+                {showClientInfo && (
+                  <ClientInfoDialog
+                    clientId={clientInfoClientId}
+                    onClose={this.closeDialog}
+                    history={this.props.history}
+                    presences={this.props.presences}
+                    hubChannel={this.props.hubChannel}
+                    showNonHistoriedDialog={this.showNonHistoriedDialog}
+                    performConditionalSignIn={this.props.performConditionalSignIn}
+                  />
+                )}
+                {showObjectInfo && (
+                  <ObjectInfoDialog
+                    scene={this.props.scene}
+                    el={this.state.objectInfo}
+                    src={this.state.objectSrc}
+                    pinned={this.state.objectInfo && this.state.objectInfo.components["networked"].data.persistent}
+                    hubChannel={this.props.hubChannel}
+                    onPinChanged={() => switchToInspectingObject(this.state.objectInfo)}
+                    onNavigated={el => switchToInspectingObject(el)}
+                    onClose={() => {
+                      if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                        this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                      }
+                      this.setState({ isObjectListExpanded: false, objectInfo: null });
+                    }}
+                  />
+                )}
+                {enteredOrWatchingOrPreload &&
+                  this.props.hub && (
+                    <PresenceLog
+                      inRoom={true}
+                      presences={this.props.presences}
+                      entries={presenceLogEntries}
+                      hubId={this.props.hub.hub_id}
+                      history={this.props.history}
+                    />
+                  )}
+                {entered &&
+                  this.props.activeTips &&
+                  this.props.activeTips.bottom &&
+                  (!presenceLogEntries || presenceLogEntries.length === 0) &&
+                  !showBroadcastTip && (
+                    <Tip
+                      tip={this.props.activeTips.bottom}
+                      tipRegion="bottom"
+                      pushHistoryState={this.pushHistoryState}
+                    />
+                  )}
+                {enteredOrWatchingOrPreload &&
+                  showBroadcastTip && (
+                    <Tip
+                      tip={hasDiscordBridges ? "discord" : "embed"}
+                      broadcastTarget={discordSnippet}
+                      onClose={() => this.confirmBroadcastedRoom()}
+                    />
+                  )}
+                {enteredOrWatchingOrPreload &&
+                  !this.state.objectInfo &&
+                  !this.state.frozen && (
+                    <InWorldChatBox
+                      discordBridges={discordBridges}
+                      onSendMessage={this.sendMessage}
+                      onObjectCreated={this.createObject}
+                      enableSpawning={entered}
+                      history={this.props.history}
+                    />
+                  )}
+                {this.state.frozen && (
+                  <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                    <FormattedMessage id="entry.leave-room" />
                   </button>
-                </div>
-              )}
-              {!watching &&
-                !streaming && (
-                  <IfFeature name="show_feedback_ui">
-                    <div className={styles.nagCornerButton}>
-                      <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                        <FormattedMessage id="feedback.prompt" />
-                      </button>
-                    </div>
-                  </IfFeature>
+                )}
+                <StateRoute
+                  stateKey="overlay"
+                  stateValue="invite"
+                  history={this.props.history}
+                  render={() => (
+                    <InviteDialog
+                      allowShare={!!navigator.share}
+                      entryCode={this.props.hub.entry_code}
+                      hubId={this.props.hub.hub_id}
+                      isModal={true}
+                      onClose={() => {
+                        this.props.history.goBack();
+                        exit2DInterstitialAndEnterVR();
+                      }}
+                    />
+                  )}
+                />
+                {streaming && (
+                  <button
+                    title="Exit Camera Mode"
+                    onClick={() => this.toggleStreamerMode(false)}
+                    className={classNames([styles.cornerButton, styles.cameraModeExitButton])}
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                  </button>
+                )}
+                {streamingTip}
+
+                {showObjectList && (
+                  <ObjectList
+                    scene={this.props.scene}
+                    onExpand={(expand, uninspect) => {
+                      if (expand) {
+                        this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
+                      } else {
+                        this.setState({ isObjectListExpanded: expand });
+                      }
+
+                      if (uninspect) {
+                        this.setState({ objectInfo: null });
+                        if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                          this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                        }
+                      }
+                    }}
+                    expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
+                    onInspectObject={el => switchToInspectingObject(el)}
+                  />
                 )}
 
-              {!streaming && (
-                <button
-                  aria-label="Toggle Favorited"
-                  onClick={() => this.toggleFavorited()}
-                  className={classNames({
-                    [entryStyles.favorited]: this.isFavorited(),
-                    [styles.inRoomFavoriteButton]: true
-                  })}
-                >
-                  <i title="Favorite">
-                    <FontAwesomeIcon icon={faStar} />
-                  </i>
-                </button>
-              )}
-            </div>
-          )}
+                {showPresenceList && (
+                  <PresenceList
+                    hubChannel={this.props.hubChannel}
+                    history={this.props.history}
+                    presences={this.props.presences}
+                    sessionId={this.props.sessionId}
+                    signedIn={this.state.signedIn}
+                    email={this.props.store.state.credentials.email}
+                    onSignIn={this.showSignInDialog}
+                    onSignOut={this.signOut}
+                    expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
+                    onExpand={expand => {
+                      if (expand) {
+                        this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
+                      } else {
+                        this.setState({ isPresenceListExpanded: expand });
+                      }
+                    }}
+                  />
+                )}
+
+                {showSettingsMenu && (
+                  <SettingsMenu
+                    history={this.props.history}
+                    mediaSearchStore={this.props.mediaSearchStore}
+                    isStreaming={streaming}
+                    toggleStreamerMode={this.toggleStreamerMode}
+                    hubChannel={this.props.hubChannel}
+                    hubScene={this.props.hub && this.props.hub.scene}
+                    scene={this.props.scene}
+                    showAsOverlay={showSettingsAsOverlay}
+                    onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}
+                    performConditionalSignIn={this.props.performConditionalSignIn}
+                    showNonHistoriedDialog={this.showNonHistoriedDialog}
+                    showPreferencesScreen={() => {
+                      this.setState({ showPrefs: true });
+                    }}
+                    pushHistoryState={this.pushHistoryState}
+                  />
+                )}
+                {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
+                {showTopHud && (
+                  <div className={styles.topHud}>
+                    <TwoDHUD.TopHUD
+                      scene={this.props.scene}
+                      history={this.props.history}
+                      mediaSearchStore={this.props.mediaSearchStore}
+                      muted={this.state.muted}
+                      frozen={this.state.frozen}
+                      watching={this.state.watching}
+                      onWatchEnded={() => this.setState({ watching: false })}
+                      videoShareMediaSource={this.state.videoShareMediaSource}
+                      showVideoShareFailed={this.state.showVideoShareFailed}
+                      hideVideoShareFailedTip={() => this.setState({ showVideoShareFailed: false })}
+                      activeTip={this.props.activeTips && this.props.activeTips.top}
+                      isCursorHoldingPen={this.props.isCursorHoldingPen}
+                      hasActiveCamera={this.props.hasActiveCamera}
+                      onToggleMute={this.toggleMute}
+                      onSpawnPen={this.spawnPen}
+                      onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
+                      onShareVideo={this.shareVideo}
+                      onEndShareVideo={this.endShareVideo}
+                      onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
+                      isStreaming={streaming}
+                      showStreamingTip={this.state.showStreamingTip}
+                      hideStreamingTip={() => {
+                        this.setState({ showStreamingTip: false });
+                      }}
+                    />
+                    {!watching && !streaming ? (
+                      <UnlessFeature name="show_feedback_ui">
+                        <div className={styles.nagCornerButton}>
+                          <button onClick={() => this.pushHistoryState("modal", "help")} className={styles.helpButton}>
+                            <i>
+                              <FontAwesomeIcon icon={faQuestion} />
+                            </i>
+                          </button>
+                        </div>
+                      </UnlessFeature>
+                    ) : (
+                      <div className={styles.nagCornerButton}>
+                        <button onClick={() => this.setState({ hide: true })}>
+                          <FormattedMessage id="hide-ui.prompt" />
+                        </button>
+                      </div>
+                    )}
+                    {!watching &&
+                      !streaming && (
+                        <IfFeature name="show_feedback_ui">
+                          <div className={styles.nagCornerButton}>
+                            <button onClick={() => this.pushHistoryState("modal", "feedback")}>
+                              <FormattedMessage id="feedback.prompt" />
+                            </button>
+                          </div>
+                        </IfFeature>
+                      )}
+
+                    {!streaming && (
+                      <button
+                        aria-label="Toggle Favorited"
+                        onClick={() => this.toggleFavorited()}
+                        className={classNames({
+                          [entryStyles.favorited]: this.isFavorited(),
+                          [styles.inRoomFavoriteButton]: true
+                        })}
+                      >
+                        <i title="Favorite">
+                          <FontAwesomeIcon icon={faStar} />
+                        </i>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            }
+            modal={renderEntryFlow && entryDialog}
+            toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
+          />
         </div>
       </ReactAudioContext.Provider>
     );
