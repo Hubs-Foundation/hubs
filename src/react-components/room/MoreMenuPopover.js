@@ -5,7 +5,7 @@ import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as MoreIcon } from "../icons/More.svg";
 
-function MoreMenuItem({ item, onSelect }) {
+function MoreMenuItem({ item }) {
   const Icon = item.icon;
 
   return (
@@ -21,7 +21,7 @@ function MoreMenuItem({ item, onSelect }) {
           <span>{item.label}</span>
         </a>
       ) : (
-        <button className={styles.moreMenuItemTarget} onClick={() => onSelect(item)}>
+        <button className={styles.moreMenuItemTarget} onClick={event => item.onClick(item, event)}>
           <Icon />
           <span>{item.label}</span>
         </button>
@@ -31,45 +31,46 @@ function MoreMenuItem({ item, onSelect }) {
 }
 
 MoreMenuItem.propTypes = {
-  onSelect: PropTypes.func.isRequired,
-  item: PropTypes.object.isRequired
+  item: PropTypes.shape({
+    href: PropTypes.string,
+    target: PropTypes.string,
+    icon: PropTypes.elementType.isRequired,
+    label: PropTypes.node.isRequired,
+    onClick: PropTypes.func
+  }).isRequired
 };
 
-function MoreMenuGroup({ group, onSelect }) {
+function MoreMenuGroup({ group }) {
   return (
     <li>
       <h1 className={styles.moreMenuGroupLabel}>{group.label}</h1>
-      <ul className={styles.moreMenuItemList}>
-        {group.items.map(item => <MoreMenuItem key={item.id} item={item} onSelect={onSelect} />)}
-      </ul>
+      <ul className={styles.moreMenuItemList}>{group.items.map(item => <MoreMenuItem key={item.id} item={item} />)}</ul>
     </li>
   );
 }
 
 MoreMenuGroup.propTypes = {
-  onSelect: PropTypes.func.isRequired,
   group: PropTypes.object.isRequired
 };
 
-function MoreMenuPopoverContent({ menu, onSelect }) {
+function MoreMenuPopoverContent({ menu }) {
   return (
     <div className={styles.moreMenuPopover}>
-      <ul>{menu.map(group => <MoreMenuGroup key={group.id} group={group} onSelect={onSelect} />)}</ul>
+      <ul>{menu.map(group => <MoreMenuGroup key={group.id} group={group} />)}</ul>
     </div>
   );
 }
 
 MoreMenuPopoverContent.propTypes = {
-  onSelect: PropTypes.func.isRequired,
   menu: PropTypes.array.isRequired
 };
 
-export function MoreMenuPopoverButton({ menu, onSelect, initiallyVisible }) {
+export function MoreMenuPopoverButton({ menu, initiallyVisible }) {
   return (
     <Popover
       title="More"
-      content={() => <MoreMenuPopoverContent menu={menu} onSelect={onSelect} />}
-      placement="top"
+      content={() => <MoreMenuPopoverContent menu={menu} />}
+      placement="top-end"
       offsetDistance={28}
       initiallyVisible={initiallyVisible}
     >
@@ -88,6 +89,5 @@ export function MoreMenuPopoverButton({ menu, onSelect, initiallyVisible }) {
 
 MoreMenuPopoverButton.propTypes = {
   initiallyVisible: PropTypes.bool,
-  onSelect: PropTypes.func.isRequired,
   menu: PropTypes.array.isRequired
 };

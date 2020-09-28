@@ -11,7 +11,6 @@ import UnlessFeature from "./unless-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
-import entryStyles from "../assets/stylesheets/entry.scss";
 import { ReactAudioContext } from "./wrap-with-audio";
 import {
   pushHistoryState,
@@ -57,16 +56,15 @@ import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
 import PresenceList from "./presence-list.js";
 import ObjectList from "./object-list.js";
-import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
+import { resetTips } from "../systems/tips";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
-import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
@@ -76,11 +74,26 @@ import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 import "./styles/global.scss";
 import { RoomLayout } from "./layout/RoomLayout";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
+import { ToolbarButton } from "./input/ToolbarButton";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 import { MicPermissionsModal } from "./room/MicPermissionsModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
+import { MoreMenuPopoverButton } from "./room/MoreMenuPopover";
+import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
+import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
+import { ReactComponent as SceneIcon } from "./icons/Scene.svg";
+import { ReactComponent as StarOutlineIcon } from "./icons/StarOutline.svg";
+import { ReactComponent as StarIcon } from "./icons/Star.svg";
+import { ReactComponent as SettingsIcon } from "./icons/Settings.svg";
+import { ReactComponent as WarningCircleIcon } from "./icons/WarningCircle.svg";
+import { ReactComponent as HomeIcon } from "./icons/Home.svg";
+import { ReactComponent as TextDocumentIcon } from "./icons/TextDocument.svg";
+import { ReactComponent as SupportIcon } from "./icons/Support.svg";
+import { ReactComponent as ShieldIcon } from "./icons/Shield.svg";
+import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
+import { ReactComponent as VRIcon } from "./icons/VR.svg";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1260,9 +1273,6 @@ class UIRoot extends Component {
         </>
       ));
 
-    // MobileVR browsers always show settings panel as an overlay when exiting immersive mode.
-    const showSettingsAsOverlay = entered && isMobileVR;
-
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
     const switchToInspectingObject = el => {
@@ -1293,7 +1303,6 @@ class UIRoot extends Component {
     const streaming = this.state.isStreaming;
 
     const showTopHud = enteredOrWatching && !showObjectInfo;
-    const showSettingsMenu = !streaming && !preload && !showObjectInfo;
     const showObjectList = !showObjectInfo;
     const showPresenceList = !showObjectInfo;
 
@@ -1321,6 +1330,183 @@ class UIRoot extends Component {
     const renderEntryFlow =
       (!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo && this.props.hub) ||
       this.isWaitingForAutoExit();
+
+    const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
+    const canUpdateRoom = this.props.hubChannel.canOrWillIfCreator("update_hub");
+    const canCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
+    const roomHasSceneInfo = !!(this.props.hub && this.props.hub.scene);
+    const isModerator = this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
+
+    const moreMenu = [
+      {
+        id: "user",
+        label: "You",
+        items: [
+          canCreateRoom && {
+            id: "create-room",
+            label: "Create Room",
+            icon: HomeIcon,
+            onClick: () =>
+              this.showNonHistoriedDialog(LeaveRoomDialog, {
+                destinationUrl: "/",
+                messageType: "create-room"
+              })
+          },
+          {
+            id: "user-profile",
+            label: "Change Name & Avatar",
+            icon: AvatarIcon,
+            onClick: () => this.pushHistoryState("overlay", "profile")
+          },
+          {
+            id: "favorite-rooms",
+            label: "Favorite Rooms",
+            icon: HomeIcon, // TODO: Use a unique icon
+            onClick: () =>
+              this.props.performConditionalSignIn(
+                () => this.props.hubChannel.signedIn,
+                () => {
+                  showFullScreenIfAvailable();
+                  this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
+                },
+                "favorite-rooms"
+              )
+          },
+          {
+            id: "preferences",
+            label: "Preferences",
+            icon: SettingsIcon,
+            onClick: () => this.setState({ showPrefs: true })
+          }
+        ].filter(item => item)
+      },
+      {
+        id: "room",
+        label: "Room",
+        items: [
+          roomHasSceneInfo && {
+            id: "room-info",
+            label: "Room Info",
+            icon: HomeIcon,
+            onClick: () => this.pushHistoryState("modal", "room_info")
+          },
+          canUpdateRoom && {
+            id: "room-settings",
+            label: "Room Settings",
+            icon: HomeIcon,
+            onClick: () =>
+              this.props.performConditionalSignIn(
+                () => this.props.hubChannel.can("update_hub"),
+                () => {
+                  this.pushHistoryState("modal", "room_settings");
+                },
+                "room-settings"
+              )
+          },
+          canUpdateRoom && {
+            id: "change-scene",
+            label: "Change Scene",
+            icon: SceneIcon,
+            onClick: () =>
+              this.props.performConditionalSignIn(
+                () => this.props.hubChannel.can("update_hub"),
+                () => {
+                  showFullScreenIfAvailable();
+                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
+                },
+                "change-scene"
+              )
+          },
+          this.isFavorited()
+            ? { id: "unfavorite-room", label: "Unfavorite Room", icon: StarIcon, onClick: () => this.toggleFavorited() }
+            : {
+                id: "favorite-room",
+                label: "Favorite Room",
+                icon: StarOutlineIcon,
+                onClick: () => this.toggleFavorited()
+              },
+          isModerator && {
+            id: "streamer-mode",
+            label: "Enter Streamer Mode",
+            icon: CameraIcon,
+            onClick: () => this.toggleStreamerMode(true)
+          },
+          canCloseRoom && {
+            id: "close-room",
+            label: "Close Room",
+            icon: HomeIcon,
+            onClick: () =>
+              this.props.performConditionalSignIn(
+                () => this.props.hubChannel.can("update_hub"),
+                () => {
+                  this.pushHistoryState("modal", "close_room");
+                },
+                "close-room"
+              )
+          }
+        ].filter(item => item)
+      },
+      {
+        id: "support",
+        label: "Support",
+        items: [
+          configs.feature("show_community_link") && {
+            id: "community",
+            label: "Community",
+            icon: DiscordIcon,
+            href: configs.link("community", "https://discord.gg/wHmY4nd")
+          },
+          configs.feature("show_feedback_ui") && {
+            id: "feedback",
+            label: "Leave Feedback",
+            icon: SupportIcon, // TODO: Use a unique icon
+            onClick: () => this.pushHistoryState("modal", "feedback")
+          },
+          configs.feature("show_issue_report_link") && {
+            id: "report-issue",
+            label: "Report Issue",
+            icon: WarningCircleIcon,
+            href: configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")
+          },
+          entered && {
+            id: "start-tour",
+            label: "Start Tour",
+            icon: SupportIcon,
+            onClick: () => resetTips()
+          },
+          configs.feature("show_docs_link") && {
+            id: "help",
+            label: "Help",
+            icon: SupportIcon,
+            href: configs.link("docs", "https://hubs.mozilla.com/docs")
+          },
+          configs.feature("show_controls_link") && {
+            id: "controls",
+            label: "Controls",
+            icon: SupportIcon,
+            href: configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")
+          },
+          configs.feature("show_whats_new_link") && {
+            id: "whats-new",
+            label: "What's New",
+            icon: SupportIcon,
+            href: "/whats-new"
+          },
+          configs.feature("show_terms") && {
+            id: "tos",
+            label: "Terms of Service",
+            icon: TextDocumentIcon,
+            href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
+          },
+          configs.feature("show_privacy") && {
+            id: "privacy",
+            label: "Privacy Notice",
+            icon: ShieldIcon,
+            href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+          }
+        ].filter(item => item)
+      }
+    ];
 
     return (
       <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1599,7 +1785,7 @@ class UIRoot extends Component {
                 />
                 {streaming && (
                   <button
-                    title="Exit Camera Mode"
+                    title="Exit Streamer Mode"
                     onClick={() => this.toggleStreamerMode(false)}
                     className={classNames([styles.cornerButton, styles.cameraModeExitButton])}
                   >
@@ -1648,26 +1834,6 @@ class UIRoot extends Component {
                         this.setState({ isPresenceListExpanded: expand });
                       }
                     }}
-                  />
-                )}
-
-                {showSettingsMenu && (
-                  <SettingsMenu
-                    history={this.props.history}
-                    mediaSearchStore={this.props.mediaSearchStore}
-                    isStreaming={streaming}
-                    toggleStreamerMode={this.toggleStreamerMode}
-                    hubChannel={this.props.hubChannel}
-                    hubScene={this.props.hub && this.props.hub.scene}
-                    scene={this.props.scene}
-                    showAsOverlay={showSettingsAsOverlay}
-                    onCloseOverlay={() => exit2DInterstitialAndEnterVR(true)}
-                    performConditionalSignIn={this.props.performConditionalSignIn}
-                    showNonHistoriedDialog={this.showNonHistoriedDialog}
-                    showPreferencesScreen={() => {
-                      this.setState({ showPrefs: true });
-                    }}
-                    pushHistoryState={this.pushHistoryState}
                   />
                 )}
                 {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
@@ -1726,27 +1892,26 @@ class UIRoot extends Component {
                           </div>
                         </IfFeature>
                       )}
-
-                    {!streaming && (
-                      <button
-                        aria-label="Toggle Favorited"
-                        onClick={() => this.toggleFavorited()}
-                        className={classNames({
-                          [entryStyles.favorited]: this.isFavorited(),
-                          [styles.inRoomFavoriteButton]: true
-                        })}
-                      >
-                        <i title="Favorite">
-                          <FontAwesomeIcon icon={faStar} />
-                        </i>
-                      </button>
-                    )}
                   </div>
                 )}
               </>
             }
             modal={renderEntryFlow && entryDialog}
             toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
+            toolbarRight={
+              <>
+                {entered &&
+                  isMobileVR && (
+                    <ToolbarButton
+                      icon={<VRIcon />}
+                      preset="accept"
+                      label="Enter VR"
+                      onClick={() => exit2DInterstitialAndEnterVR(true)}
+                    />
+                  )}
+                <MoreMenuPopoverButton menu={moreMenu} />
+              </>
+            }
           />
         </div>
       </ReactAudioContext.Provider>
