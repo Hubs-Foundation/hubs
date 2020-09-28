@@ -7,7 +7,6 @@ import screenfull from "screenfull";
 
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
-import UnlessFeature from "./unless-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
@@ -64,7 +63,6 @@ import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-in
 import { resetTips } from "../systems/tips";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { faQuestion } from "@fortawesome/free-solid-svg-icons/faQuestion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
@@ -1867,36 +1865,6 @@ class UIRoot extends Component {
                           this.setState({ showStreamingTip: false });
                         }}
                       />
-                      {!watching && !streaming ? (
-                        <UnlessFeature name="show_feedback_ui">
-                          <div className={styles.nagCornerButton}>
-                            <button
-                              onClick={() => this.pushHistoryState("modal", "help")}
-                              className={styles.helpButton}
-                            >
-                              <i>
-                                <FontAwesomeIcon icon={faQuestion} />
-                              </i>
-                            </button>
-                          </div>
-                        </UnlessFeature>
-                      ) : (
-                        <div className={styles.nagCornerButton}>
-                          <button onClick={() => this.setState({ hide: true })}>
-                            <FormattedMessage id="hide-ui.prompt" />
-                          </button>
-                        </div>
-                      )}
-                      {!watching &&
-                        !streaming && (
-                          <IfFeature name="show_feedback_ui">
-                            <div className={styles.nagCornerButton}>
-                              <button onClick={() => this.pushHistoryState("modal", "feedback")}>
-                                <FormattedMessage id="feedback.prompt" />
-                              </button>
-                            </div>
-                          </IfFeature>
-                        )}
                     </div>
                   )}
                 </>
