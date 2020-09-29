@@ -3,11 +3,11 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
-import Linkify from "react-linkify";
 import { toArray as toEmojis } from "react-emoji-render";
 import serializeElement from "../utils/serialize-element";
 import { navigateToClientInfo } from "./presence-list";
 import { coerceToUrl } from "../utils/media-utils";
+import { formatMessageBody } from "../utils/chat-message";
 
 const messageCanvas = document.createElement("canvas");
 
@@ -16,52 +16,16 @@ const textureLoader = new THREE.TextureLoader();
 
 const CHAT_MESSAGE_TEXTURE_SIZE = 1024;
 
-// Hacky word wrapping, needed because the SVG conversion doesn't properly deal
-// with wrapping in Firefox for some reason. (The CSS white-space is set to pre)
-const wordWrap = body => {
-  const maxCharsPerLine = 40;
-  const words = body.split(" ");
-  const outWords = [];
-  let c = 0;
-
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i];
-
-    if (word.startsWith(":") && word.endsWith(":")) {
-      c++;
-    } else {
-      c += word.length;
-    }
-
-    outWords.push(word);
-
-    if (c >= maxCharsPerLine) {
-      c = 0;
-      outWords.push("\n");
-    }
-  }
-
-  return outWords.join(" ");
-};
-
 const messageBodyDom = (body, from, fromSessionId, includeFromLink, history) => {
-  // Support wrapping text in ` to get monospace, and multiline.
-  const multiLine = body.split("\n").length > 1;
-  const wrapStyle = multiLine ? styles.messageWrapMulti : styles.messageWrap;
-  const mono = body.startsWith("`") && body.endsWith("`");
+  const { formattedBody, multiline, monospace } = formatMessageBody(body);
+  const wrapStyle = multiline ? styles.messageWrapMulti : styles.messageWrap;
   const messageBodyClasses = {
     [styles.messageBody]: true,
-    [styles.messageBodyMulti]: multiLine,
-    [styles.messageBodyMono]: mono
+    [styles.messageBodyMulti]: multiline,
+    [styles.messageBodyMono]: monospace
   };
   const includeClientLink = includeFromLink && fromSessionId && history && NAF.clientId !== fromSessionId;
   const onFromClick = includeClientLink ? () => navigateToClientInfo(history, fromSessionId) : () => {};
-
-  if (!multiLine) {
-    body = wordWrap(body);
-  }
-
-  const cleanedBody = (mono ? body.substring(1, body.length - 1) : body).trim();
 
   return (
     <div className={wrapStyle}>
@@ -73,9 +37,7 @@ const messageBodyDom = (body, from, fromSessionId, includeFromLink, history) => 
           {from}:
         </div>
       )}
-      <div className={classNames(messageBodyClasses)}>
-        <Linkify properties={{ target: "_blank", rel: "noopener referrer" }}>{toEmojis(cleanedBody)}</Linkify>
-      </div>
+      <div className={classNames(messageBodyClasses)}>{formattedBody}</div>
     </div>
   );
 };

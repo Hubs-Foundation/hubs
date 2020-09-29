@@ -8,52 +8,57 @@ import iconButtonStyles from "./IconButton.scss";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../../utils/focus-utils";
 
 export const TextInput = memo(
-  forwardRef(({ id, disabled, invalid, className, beforeInput, afterInput, onFocus, onBlur, ...rest }, ref) => {
-    // TODO: This is REALLY bad. We're overriding default behavior of text inputs to get a fullscreen behavior to work on Firefox.
-    // It also selects the contents of the text input which is not always something you want to do. If we can remove this, we absolutely should.
-    const handleFocus = e => {
-      handleTextFieldFocus(e.target);
+  forwardRef(
+    (
+      { id, disabled, invalid, className, beforeInput, afterInput, onFocus, onBlur, as: InputElement, ...rest },
+      ref
+    ) => {
+      // TODO: This is REALLY bad. We're overriding default behavior of text inputs to get a fullscreen behavior to work on Firefox.
+      // It also selects the contents of the text input which is not always something you want to do. If we can remove this, we absolutely should.
+      const handleFocus = e => {
+        handleTextFieldFocus(e.target);
 
-      if (onFocus) {
-        onFocus(e);
-      }
-    };
+        if (onFocus) {
+          onFocus(e);
+        }
+      };
 
-    const handleBlur = e => {
-      handleTextFieldBlur();
+      const handleBlur = e => {
+        handleTextFieldBlur();
 
-      if (onBlur) {
-        onBlur(e);
-      }
-    };
+        if (onBlur) {
+          onBlur(e);
+        }
+      };
 
-    return (
-      <div
-        className={classNames(
-          styles.outerWrapper,
-          buttonStyles.inputGroup,
-          iconButtonStyles.inputGroup,
-          { [styles.invalid]: invalid, [styles.disabled]: disabled },
-          className
-        )}
-      >
-        {beforeInput}
-        <div className={styles.inputWrapper}>
-          <input
-            id={id}
-            className={styles.textInput}
-            disabled={disabled}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            {...rest}
-            ref={ref}
-          />
+      return (
+        <div
+          className={classNames(
+            styles.outerWrapper,
+            buttonStyles.inputGroup,
+            iconButtonStyles.inputGroup,
+            { [styles.invalid]: invalid, [styles.disabled]: disabled },
+            className
+          )}
+        >
+          {beforeInput}
+          <div className={styles.inputWrapper}>
+            <InputElement
+              id={id}
+              className={styles.textInput}
+              disabled={disabled}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              {...rest}
+              ref={ref}
+            />
+          </div>
+          {invalid && <WarningIcon className={styles.invalidIcon} />}
+          {afterInput}
         </div>
-        {invalid && <WarningIcon className={styles.invalidIcon} />}
-        {afterInput}
-      </div>
-    );
-  })
+      );
+    }
+  )
 );
 
 TextInput.propTypes = {
@@ -65,9 +70,11 @@ TextInput.propTypes = {
   beforeInput: PropTypes.node,
   afterInput: PropTypes.node,
   onFocus: PropTypes.func,
-  onBlur: PropTypes.func
+  onBlur: PropTypes.func,
+  as: PropTypes.elementType
 };
 
 TextInput.defaultProps = {
-  onChange: () => {}
+  onChange: () => {},
+  as: "input"
 };

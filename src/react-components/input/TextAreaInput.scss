@@ -1,0 +1,9 @@
+:local(.textarea) {
+  height: auto;
+
+  textarea {
+    resize: none;
+    line-height: 1.25;
+    padding: 8px;
+  }
+}
