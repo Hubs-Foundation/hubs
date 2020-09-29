@@ -18,9 +18,13 @@ export function Popover({
   offsetSkidding,
   offsetDistance,
   initiallyVisible,
-  disableFullscreen
+  disableFullscreen,
+  isVisible,
+  onChangeVisible
 }) {
-  const [visible, setVisible] = useState(initiallyVisible);
+  const [_visible, _setVisible] = useState(initiallyVisible);
+  const visible = isVisible === undefined ? _visible : isVisible;
+  const setVisible = onChangeVisible || _setVisible;
   const [referenceElement, setReferenceElement] = useState(null);
   const [popperElement, setPopperElement] = useState(null);
   const [arrowElement, setArrowElement] = useState(null);
@@ -68,7 +72,7 @@ export function Popover({
         window.removeEventListener("keydown", onKeyDown);
       };
     },
-    [visible, popperElement, referenceElement]
+    [visible, popperElement, referenceElement, setVisible]
   );
 
   useEffect(
