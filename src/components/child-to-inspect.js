@@ -3,4 +3,3 @@ AFRAME.registerComponent("child-to-inspect", {
     selector: { type: "string" }
   }
 });
-
