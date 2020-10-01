@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { Sidebar } from "../sidebar/Sidebar";
@@ -11,17 +11,19 @@ import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage } from "react-intl";
 import { useRelativeTime } from "../misc/useRelativeTime";
 
-function ChatInput({ onSpawn, ...rest }) {
+export function SpawnMessageButton(props) {
   return (
-    <TextAreaInput
-      placeholder="Message..."
-      afterInput={
-        <IconButton className={styles.wandIcon} onClick={onSpawn}>
-          <WandIcon />
-        </IconButton>
-      }
-      {...rest}
-    />
+    <IconButton className={styles.wandIcon} {...props}>
+      <WandIcon />
+    </IconButton>
+  );
+}
+
+export function ChatInput(props) {
+  return (
+    <div className={styles.chatInputContainer}>
+      <TextAreaInput placeholder="Message..." {...props} />
+    </div>
   );
 }
 
@@ -153,7 +155,17 @@ ChatMessageGroup.propTypes = {
   messages: PropTypes.array
 };
 
-export function ChatSidebar({ onClose, children, listRef, onScrollList, ...rest }) {
+export const ChatMessageList = forwardRef(({ children, ...rest }, ref) => (
+  <li {...rest} className={styles.messageList} ref={ref}>
+    {children}
+  </li>
+));
+
+ChatMessageList.propTypes = {
+  children: PropTypes.node
+};
+
+export function ChatSidebar({ onClose, children, ...rest }) {
   return (
     <Sidebar
       title="Chat"
@@ -163,13 +175,9 @@ export function ChatSidebar({ onClose, children, listRef, onScrollList, ...rest 
         </IconButton>
       }
       contentClassName={styles.content}
+      {...rest}
     >
-      <li className={styles.messageList} ref={listRef} onScroll={onScrollList}>
-        {children}
-      </li>
-      <div className={styles.chatInputContainer}>
-        <ChatInput {...rest} />
-      </div>
+      {children}
     </Sidebar>
   );
 }

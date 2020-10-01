@@ -1863,7 +1863,10 @@ class UIRoot extends Component {
               }
               sidebar={
                 this.state.sidebarId === "chat" && (
-                  <ChatSidebarContainer onClose={() => this.setState({ sidebarId: null })} />
+                  <ChatSidebarContainer
+                    canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
+                    onClose={() => this.setState({ sidebarId: null })}
+                  />
                 )
               }
               modal={renderEntryFlow && entryDialog}

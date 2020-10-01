@@ -1,7 +1,15 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { ChatSidebar, ChatMessageGroup, SystemMessage } from "./ChatSidebar";
+import {
+  ChatSidebar,
+  ChatMessageGroup,
+  SystemMessage,
+  ChatMessageList,
+  ChatInput,
+  SpawnMessageButton
+} from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
+import { spawnChatMessage } from "../chat-message";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 
@@ -123,8 +131,9 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer(props) {
+export function ChatSidebarContainer({ canSpawnMessages, onClose }) {
   const { messageGroups, sendMessage } = useContext(ChatContext);
+  const [onScrollList, listRef] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
   const onKeyDown = useCallback(
     e => {
@@ -136,25 +145,33 @@ export function ChatSidebarContainer(props) {
     },
     [sendMessage, setMessage]
   );
-
-  const [onScrollList, listRef] = useMaintainScrollPosition(messageGroups);
+  const onSpawnMessage = () => {
+    spawnChatMessage(message);
+    setMessage("");
+  };
 
   return (
-    <ChatSidebar
-      {...props}
-      onScrollList={onScrollList}
-      listRef={listRef}
-      onKeyDown={onKeyDown}
-      onChange={e => setMessage(e.target.value)}
-      value={message}
-    >
-      {messageGroups.map(({ id, systemMessage, ...rest }) => {
-        if (systemMessage) {
-          return <SystemMessage key={id} {...rest} />;
-        } else {
-          return <ChatMessageGroup key={id} {...rest} />;
-        }
-      })}
+    <ChatSidebar onClose={onClose}>
+      <ChatMessageList ref={listRef} onScroll={onScrollList}>
+        {messageGroups.map(({ id, systemMessage, ...rest }) => {
+          if (systemMessage) {
+            return <SystemMessage key={id} {...rest} />;
+          } else {
+            return <ChatMessageGroup key={id} {...rest} />;
+          }
+        })}
+      </ChatMessageList>
+      <ChatInput
+        onKeyDown={onKeyDown}
+        onChange={e => setMessage(e.target.value)}
+        value={message}
+        afterInput={canSpawnMessages && <SpawnMessageButton onClick={onSpawnMessage} />}
+      />
     </ChatSidebar>
   );
 }
+
+ChatSidebarContainer.propTypes = {
+  canSpawnMessages: PropTypes.bool,
+  onClose: PropTypes.func.isRequired
+};
