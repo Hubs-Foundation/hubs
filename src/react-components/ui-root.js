@@ -1861,7 +1861,11 @@ class UIRoot extends Component {
                   )}
                 </>
               }
-              sidebar={this.state.sidebarId === "chat" && <ChatSidebarContainer />}
+              sidebar={
+                this.state.sidebarId === "chat" && (
+                  <ChatSidebarContainer onClose={() => this.setState({ sidebarId: null })} />
+                )
+              }
               modal={renderEntryFlow && entryDialog}
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
               toolbarCenter={

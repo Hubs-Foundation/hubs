@@ -122,12 +122,12 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer() {
+export function ChatSidebarContainer(props) {
   const { messageGroups, sendMessage } = useContext(ChatContext);
   const [message, setMessage] = useState("");
   const onKeyDown = useCallback(
     e => {
-      if (e.key === "Enter" && !e.shift) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         sendMessage(e.target.value);
         setMessage("");
@@ -137,7 +137,7 @@ export function ChatSidebarContainer() {
   );
 
   return (
-    <ChatSidebar onKeyDown={onKeyDown} onChange={e => setMessage(e.target.value)} value={message}>
+    <ChatSidebar {...props} onKeyDown={onKeyDown} onChange={e => setMessage(e.target.value)} value={message}>
       {messageGroups.map(({ id, systemMessage, ...rest }) => {
         if (systemMessage) {
           return <SystemMessage key={id} {...rest} />;
