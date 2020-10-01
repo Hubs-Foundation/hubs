@@ -153,7 +153,7 @@ ChatMessageGroup.propTypes = {
   messages: PropTypes.array
 };
 
-export function ChatSidebar({ onClose, children, ...rest }) {
+export function ChatSidebar({ onClose, children, listRef, onScrollList, ...rest }) {
   return (
     <Sidebar
       title="Chat"
@@ -164,7 +164,9 @@ export function ChatSidebar({ onClose, children, ...rest }) {
       }
       contentClassName={styles.content}
     >
-      <li className={styles.messageList}>{children}</li>
+      <li className={styles.messageList} ref={listRef} onScroll={onScrollList}>
+        {children}
+      </li>
       <div className={styles.chatInputContainer}>
         <ChatInput {...rest} />
       </div>
@@ -174,5 +176,7 @@ export function ChatSidebar({ onClose, children, ...rest }) {
 
 ChatSidebar.propTypes = {
   onClose: PropTypes.func,
-  children: PropTypes.node
+  onScrollList: PropTypes.func,
+  children: PropTypes.node,
+  listRef: PropTypes.func
 };

@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { ChatSidebar, ChatMessageGroup, SystemMessage } from "./ChatSidebar";
+import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 
@@ -136,8 +137,17 @@ export function ChatSidebarContainer(props) {
     [sendMessage, setMessage]
   );
 
+  const [onScrollList, listRef] = useMaintainScrollPosition(messageGroups);
+
   return (
-    <ChatSidebar {...props} onKeyDown={onKeyDown} onChange={e => setMessage(e.target.value)} value={message}>
+    <ChatSidebar
+      {...props}
+      onScrollList={onScrollList}
+      listRef={listRef}
+      onKeyDown={onKeyDown}
+      onChange={e => setMessage(e.target.value)}
+      value={message}
+    >
       {messageGroups.map(({ id, systemMessage, ...rest }) => {
         if (systemMessage) {
           return <SystemMessage key={id} {...rest} />;
