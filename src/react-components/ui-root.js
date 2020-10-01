@@ -49,7 +49,6 @@ import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
-import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
@@ -1917,10 +1916,14 @@ function UIRootHooksWrapper(props) {
   }, []);
 
   return (
-    <ChatContextProvider>
+    <ChatContextProvider messageDispatch={props.messageDispatch}>
       <UIRoot {...props} />
     </ChatContextProvider>
   );
 }
+
+UIRootHooksWrapper.propTypes = {
+  messageDispatch: PropTypes.object
+};
 
 export default UIRootHooksWrapper;

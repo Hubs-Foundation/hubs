@@ -73,7 +73,20 @@
 
 :local(.monospace) {
   font-family: monospace;
-  
+}
+
+:local(.system-message) :local(.message-group-label) {
+  display: inline;
+  vertical-align: bottom;
+
+  i {
+    font-size: theme.$font-size-xs;
+    color: theme.$darkgrey;
+  }
+
+  span {
+    margin-left: 1ch;
+  }
 }
 
 :local(.sent) {

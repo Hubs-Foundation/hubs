@@ -1,9 +1,8 @@
 import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
-import { ChatMessageGroup, ChatSidebar } from "./ChatSidebar";
+import { ChatMessageGroup, ChatSidebar, SystemMessage } from "./ChatSidebar";
 import imgSrc from "../../assets/background.jpg";
-import mp4VideoSrc from "../../assets/video/home.mp4";
-import webmVideoSrc from "../../assets/video/home.webm";
+import videoSrc from "../../assets/video/home.mp4";
 
 export default {
   title: "ChatSidebar"
@@ -13,41 +12,47 @@ export const Base = () => (
   <RoomLayout
     sidebar={
       <ChatSidebar>
+        <SystemMessage type="log" body="Robert joined the room" timestamp={Date.now()} />
+        <SystemMessage type="log" body="Dom joined the room" timestamp={Date.now()} />
         <ChatMessageGroup
           sender="Dom"
-          timestamp="3m ago"
+          timestamp={Date.now()}
           messages={[
-            "Hello!",
-            "This is a really long message that should cause a new line.",
-            <img alt="Test image" src={imgSrc} key="image" />
+            { type: "chat", body: "Hello!" },
+            { type: "chat", body: "This is a really long message that should cause a new line." },
+            { type: "image", body: { src: imgSrc } }
           ]}
         />
         <ChatMessageGroup
           sent
           sender="Robert"
-          timestamp="3m ago"
+          timestamp={Date.now()}
           messages={[
-            "Hello!",
-            "This is a really long message that should cause a new line.",
-            <video controls key="video">
-              <source src={webmVideoSrc} type="video/webm" />
-              <source src={mp4VideoSrc} type="video/mp4" />
-            </video>,
-            "Another message",
-            "One last message"
+            { type: "chat", body: "Hello!" },
+            { type: "chat", body: "This is a really long message that should cause a new line." },
+            { type: "video", body: { src: videoSrc } },
+            { type: "chat", body: "Another message" },
+            { type: "chat", body: "One last message" }
           ]}
         />
+        <SystemMessage type="log" body="John joined the room" timestamp={Date.now()} />
         <ChatMessageGroup
           sender="John"
-          timestamp="1m ago"
+          timestamp={Date.now()}
           messages={[
-            "https://mozilla.org",
-            "Test message with url. https://hubs.mozilla.com Best site :point_up:",
-            ":thumbsup:"
+            { type: "chat", body: "https://mozilla.org" },
+            { type: "chat", body: "Test message with url. https://hubs.mozilla.com Best site :point_up:" },
+            { type: "chat", body: ":thumbsup:" }
           ]}
         />
-        <ChatMessageGroup sender="Liv" timestamp="30s ago" messages={[":clap:"]} />
-        <ChatMessageGroup sender="Robin" timestamp="just now" messages={['`console.log("Hello World")`']} />
+        <SystemMessage type="log" body="Liv joined the room" timestamp={Date.now()} />
+        <SystemMessage type="log" body="Robin joined the room" timestamp={Date.now()} />
+        <ChatMessageGroup sender="Liv" timestamp={Date.now()} messages={[{ type: "chat", body: ":clap:" }]} />
+        <ChatMessageGroup
+          sender="Robin"
+          timestamp={Date.now()}
+          messages={[{ type: "chat", body: '`console.log("Hello World")`' }]}
+        />
       </ChatSidebar>
     }
   />

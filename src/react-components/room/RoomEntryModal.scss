@@ -46,6 +46,7 @@
 
   p {
     font-size: theme.$font-size-sm;
+    text-align: center;
 
     @media(min-width: theme.$breakpoint-md) {
       font-size: 20px;
