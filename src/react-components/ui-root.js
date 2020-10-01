@@ -1862,6 +1862,8 @@ class UIRoot extends Component {
               sidebar={
                 this.state.sidebarId === "chat" && (
                   <ChatSidebarContainer
+                    occupantCount={this.occupantCount()}
+                    discordBridges={discordBridges}
                     canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
                     onUploadFile={this.createObject}
                     onClose={() => this.setState({ sidebarId: null })}

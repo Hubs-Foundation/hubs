@@ -154,7 +154,7 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer({ canSpawnMessages, canUploadFiles, onUploadFile, onClose }) {
+export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, discordBridges, occupantCount, onClose }) {
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
@@ -191,6 +191,16 @@ export function ChatSidebarContainer({ canSpawnMessages, canUploadFiles, onUploa
     [messageGroups, scrolledToBottom, setMessagesRead]
   );
 
+  // TODO: Add i18n for this placeholder
+  const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
+  const occupantSnippet = `${occupantCount - 1} other${occupantCount > 2 ? "s" : ""}`;
+  const placeholder =
+    occupantCount <= 1
+      ? "Nobody is here yet..."
+      : discordBridges.length
+        ? `Send message to ${occupantSnippet} and ${discordSnippet}...`
+        : `Send message to ${occupantSnippet}...`;
+
   return (
     <ChatSidebar onClose={onClose}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
@@ -206,6 +216,7 @@ export function ChatSidebarContainer({ canSpawnMessages, canUploadFiles, onUploa
         id="chat-input"
         onKeyDown={onKeyDown}
         onChange={e => setMessage(e.target.value)}
+        placeholder={placeholder}
         value={message}
         afterInput={
           canSpawnMessages && (
@@ -222,7 +233,8 @@ export function ChatSidebarContainer({ canSpawnMessages, canUploadFiles, onUploa
 
 ChatSidebarContainer.propTypes = {
   canSpawnMessages: PropTypes.bool,
-  canUploadFiles: PropTypes.bool,
+  discordBridges: PropTypes.array.isRequired,
+  occupantCount: PropTypes.number.isRequired,
   onClose: PropTypes.func.isRequired
 };
 
