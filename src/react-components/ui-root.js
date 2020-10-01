@@ -78,7 +78,7 @@ import { MicPermissionsModal } from "./room/MicPermissionsModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
-import { ChatSidebarContainer, ChatContextProvider } from "./room/ChatSidebarContainer";
+import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as SceneIcon } from "./icons/Scene.svg";
@@ -92,7 +92,6 @@ import { ReactComponent as SupportIcon } from "./icons/Support.svg";
 import { ReactComponent as ShieldIcon } from "./icons/Shield.svg";
 import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
-import { ReactComponent as ChatIcon } from "./icons/Chat.svg";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1871,10 +1870,7 @@ class UIRoot extends Component {
               modal={renderEntryFlow && entryDialog}
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
               toolbarCenter={
-                <ToolbarButton
-                  icon={<ChatIcon />}
-                  preset="blue"
-                  label="Chat"
+                <ChatToolbarButtonContainer
                   onClick={() =>
                     this.setState(({ sidebarId }) => ({
                       sidebarId: sidebarId === "chat" ? null : "chat"

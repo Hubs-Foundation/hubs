@@ -6,7 +6,8 @@ import {
   SystemMessage,
   ChatMessageList,
   ChatInput,
-  SpawnMessageButton
+  SpawnMessageButton,
+  ChatToolbarButton
 } from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
@@ -93,12 +94,22 @@ function updateMessageGroups(messageGroups, newMessage) {
 
 export function ChatContextProvider({ messageDispatch, children }) {
   const [messageGroups, setMessageGroups] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState(false);
 
   useEffect(
     () => {
       function onReceiveMessage(event) {
         const newMessage = event.detail;
         setMessageGroups(messages => updateMessageGroups(messages, newMessage));
+
+        if (
+          newMessage.type === "chat" ||
+          newMessage.type === "image" ||
+          newMessage.type === "photo" ||
+          newMessage.type === "video"
+        ) {
+          setUnreadMessages(true);
+        }
       }
 
       if (messageDispatch) {
@@ -111,7 +122,7 @@ export function ChatContextProvider({ messageDispatch, children }) {
         }
       };
     },
-    [messageDispatch, setMessageGroups]
+    [messageDispatch, setMessageGroups, setUnreadMessages]
   );
 
   const sendMessage = useCallback(
@@ -123,7 +134,18 @@ export function ChatContextProvider({ messageDispatch, children }) {
     [messageDispatch]
   );
 
-  return <ChatContext.Provider value={{ messageGroups, sendMessage }}>{children}</ChatContext.Provider>;
+  const setMessagesRead = useCallback(
+    () => {
+      setUnreadMessages(false);
+    },
+    [setUnreadMessages]
+  );
+
+  return (
+    <ChatContext.Provider value={{ messageGroups, unreadMessages, sendMessage, setMessagesRead }}>
+      {children}
+    </ChatContext.Provider>
+  );
 }
 
 ChatContextProvider.propTypes = {
@@ -132,8 +154,8 @@ ChatContextProvider.propTypes = {
 };
 
 export function ChatSidebarContainer({ canSpawnMessages, onClose }) {
-  const { messageGroups, sendMessage } = useContext(ChatContext);
-  const [onScrollList, listRef] = useMaintainScrollPosition(messageGroups);
+  const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
+  const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
   const onKeyDown = useCallback(
     e => {
@@ -149,6 +171,15 @@ export function ChatSidebarContainer({ canSpawnMessages, onClose }) {
     spawnChatMessage(message);
     setMessage("");
   };
+
+  useEffect(
+    () => {
+      if (scrolledToBottom) {
+        setMessagesRead();
+      }
+    },
+    [messageGroups, scrolledToBottom, setMessagesRead]
+  );
 
   return (
     <ChatSidebar onClose={onClose}>
@@ -175,3 +206,8 @@ ChatSidebarContainer.propTypes = {
   canSpawnMessages: PropTypes.bool,
   onClose: PropTypes.func.isRequired
 };
+
+export function ChatToolbarButtonContainer(props) {
+  const { unreadMessages } = useContext(ChatContext);
+  return <ChatToolbarButton {...props} statusColor={unreadMessages && "orange"} />;
+}

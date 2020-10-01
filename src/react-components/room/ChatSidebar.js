@@ -4,8 +4,10 @@ import classNames from "classnames";
 import { Sidebar } from "../sidebar/Sidebar";
 import { ReactComponent as CloseIcon } from "../icons/Close.svg";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
+import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
 import { IconButton } from "../input/IconButton";
 import { TextAreaInput } from "../input/TextAreaInput";
+import { ToolbarButton } from "../input/ToolbarButton";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage } from "react-intl";
@@ -188,3 +190,7 @@ ChatSidebar.propTypes = {
   children: PropTypes.node,
   listRef: PropTypes.func
 };
+
+export function ChatToolbarButton(props) {
+  return <ToolbarButton {...props} icon={<ChatIcon />} preset="blue" label="Chat" />;
+}

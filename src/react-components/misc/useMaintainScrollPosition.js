@@ -1,23 +1,29 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 
 export function useMaintainScrollPosition(items) {
   const listRef = useRef();
-  const scrolledToBottomRef = useRef(true);
+  const [scrolledToBottom, setScrolledToBottom] = useState(true);
 
-  const onScrollList = useCallback(e => {
-    const el = e.target;
-    scrolledToBottomRef.current = el.scrollHeight - el.scrollTop === el.clientHeight;
-  }, []);
+  const onScrollList = useCallback(
+    e => {
+      const el = e.target;
+      setScrolledToBottom(el.scrollHeight - el.scrollTop === el.clientHeight);
+    },
+    [setScrolledToBottom]
+  );
 
   useEffect(
     () => {
-      if (scrolledToBottomRef.current) {
+      if (scrolledToBottom) {
         const el = listRef.current;
-        el.scrollTop = el.scrollHeight;
+
+        if (el.scrollTop !== el.scrollHeight) {
+          el.scrollTop = el.scrollHeight;
+        }
       }
     },
-    [items]
+    [items, scrolledToBottom]
   );
 
-  return [onScrollList, listRef];
+  return [onScrollList, listRef, scrolledToBottom];
 }
