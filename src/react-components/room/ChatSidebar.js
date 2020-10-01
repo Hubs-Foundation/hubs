@@ -158,9 +158,9 @@ ChatMessageGroup.propTypes = {
 };
 
 export const ChatMessageList = forwardRef(({ children, ...rest }, ref) => (
-  <li {...rest} className={styles.messageList} ref={ref}>
+  <ul {...rest} className={styles.messageList} ref={ref}>
     {children}
-  </li>
+  </ul>
 ));
 
 ChatMessageList.propTypes = {

@@ -193,6 +193,7 @@ export function ChatSidebarContainer({ canSpawnMessages, onClose }) {
         })}
       </ChatMessageList>
       <ChatInput
+        id="chat-input"
         onKeyDown={onKeyDown}
         onChange={e => setMessage(e.target.value)}
         value={message}
@@ -209,5 +210,5 @@ ChatSidebarContainer.propTypes = {
 
 export function ChatToolbarButtonContainer(props) {
   const { unreadMessages } = useContext(ChatContext);
-  return <ChatToolbarButton {...props} statusColor={unreadMessages && "orange"} />;
+  return <ChatToolbarButton {...props} statusColor={unreadMessages ? "orange" : undefined} />;
 }
