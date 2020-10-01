@@ -198,7 +198,7 @@ export default function ChatMessage(props) {
           onClick={() => spawnChatMessage(props.body)}
         />
       )}
-      {messageBodyDom(props.body, props.name, props.sessionId, props.includeFromLink, props.history)}
+      <p>{messageBodyDom(props.body, props.name, props.sessionId, props.includeFromLink, props.history)}</p>
     </div>
   );
 }
