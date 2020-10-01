@@ -1724,7 +1724,6 @@ class UIRoot extends Component {
                     />
                   )}
                   {this.state.sidebarId !== "chat" &&
-                    enteredOrWatchingOrPreload &&
                     this.props.hub && (
                       <PresenceLog
                         inRoom={true}
