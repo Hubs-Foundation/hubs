@@ -101,7 +101,7 @@
   }
 }
 
-:local(.wand-icon) {
+:local(.chat-input-icon) {
   svg {
     *[stroke=\#000] {
       stroke: theme.$darkgrey;

@@ -6,7 +6,8 @@ import {
   SystemMessage,
   ChatMessageList,
   ChatInput,
-  SpawnMessageButton
+  SpawnMessageButton,
+  MesssageAttachmentButton
 } from "./ChatSidebar";
 import imgSrc from "../../assets/background.jpg";
 import videoSrc from "../../assets/video/home.mp4";
@@ -62,7 +63,14 @@ export const Base = () => (
             messages={[{ type: "chat", body: '`console.log("Hello World")`' }]}
           />
         </ChatMessageList>
-        <ChatInput afterInput={<SpawnMessageButton />} />
+        <ChatInput
+          afterInput={
+            <>
+              <MesssageAttachmentButton />
+              <SpawnMessageButton />
+            </>
+          }
+        />
       </ChatSidebar>
     }
   />

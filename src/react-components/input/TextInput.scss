@@ -17,7 +17,7 @@ $input-height: 40px;
     box-shadow: 0 0 0 2px theme.$blue;
   }
 
-  button {
+  button:not(:local(.icon-button)) {
     height: 100%;
     border-radius: 0;
     min-width: auto;
@@ -51,6 +51,15 @@ $input-height: 40px;
         border-bottom-right-radius: theme.$border-radius-regular;
       }
     }
+  }
+}
+
+:local(.icon-button) {
+  padding: 0;
+  margin-left: 8px;
+  
+  &:last-child {
+    margin-right: 8px;
   }
 }
 

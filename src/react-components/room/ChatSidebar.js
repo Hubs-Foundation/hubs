@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { Sidebar } from "../sidebar/Sidebar";
 import { ReactComponent as CloseIcon } from "../icons/Close.svg";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
+import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
 import { IconButton } from "../input/IconButton";
 import { TextAreaInput } from "../input/TextAreaInput";
@@ -15,9 +16,20 @@ import { useRelativeTime } from "../misc/useRelativeTime";
 
 export function SpawnMessageButton(props) {
   return (
-    <IconButton className={styles.wandIcon} {...props}>
+    <IconButton className={styles.chatInputIcon} {...props}>
       <WandIcon />
     </IconButton>
+  );
+}
+
+export function MesssageAttachmentButton(props) {
+  return (
+    <>
+      <IconButton as="label" className={styles.chatInputIcon}>
+        <AttachIcon />
+        <input type="file" {...props} />
+      </IconButton>
+    </>
   );
 }
 

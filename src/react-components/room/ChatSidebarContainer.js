@@ -6,6 +6,7 @@ import {
   SystemMessage,
   ChatMessageList,
   ChatInput,
+  MesssageAttachmentButton,
   SpawnMessageButton,
   ChatToolbarButton
 } from "./ChatSidebar";
@@ -153,7 +154,7 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer({ canSpawnMessages, onClose }) {
+export function ChatSidebarContainer({ canSpawnMessages, canUploadFiles, onUploadFile, onClose }) {
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
@@ -170,6 +171,15 @@ export function ChatSidebarContainer({ canSpawnMessages, onClose }) {
   const onSpawnMessage = () => {
     spawnChatMessage(message);
     setMessage("");
+  };
+
+  const onUploadAttachments = e => {
+    // TODO: Right now there's no way to upload files to the chat only.
+    // When we add the place menu whcih will have an explicit button for uploading files,
+    // should we make this attach button only upload to chat?
+    for (const file of e.target.files) {
+      onUploadFile(file);
+    }
   };
 
   useEffect(
@@ -197,7 +207,14 @@ export function ChatSidebarContainer({ canSpawnMessages, onClose }) {
         onKeyDown={onKeyDown}
         onChange={e => setMessage(e.target.value)}
         value={message}
-        afterInput={canSpawnMessages && <SpawnMessageButton onClick={onSpawnMessage} />}
+        afterInput={
+          canSpawnMessages && (
+            <>
+              <MesssageAttachmentButton onChange={onUploadAttachments} />
+              <SpawnMessageButton onClick={onSpawnMessage} />
+            </>
+          )
+        }
       />
     </ChatSidebar>
   );
@@ -205,6 +222,7 @@ export function ChatSidebarContainer({ canSpawnMessages, onClose }) {
 
 ChatSidebarContainer.propTypes = {
   canSpawnMessages: PropTypes.bool,
+  canUploadFiles: PropTypes.bool,
   onClose: PropTypes.func.isRequired
 };
 

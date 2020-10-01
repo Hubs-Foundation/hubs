@@ -1863,6 +1863,7 @@ class UIRoot extends Component {
                 this.state.sidebarId === "chat" && (
                   <ChatSidebarContainer
                     canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
+                    onUploadFile={this.createObject}
                     onClose={() => this.setState({ sidebarId: null })}
                   />
                 )
