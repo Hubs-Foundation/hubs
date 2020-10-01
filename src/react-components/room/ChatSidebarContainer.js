@@ -235,6 +235,7 @@ ChatSidebarContainer.propTypes = {
   canSpawnMessages: PropTypes.bool,
   discordBridges: PropTypes.array.isRequired,
   occupantCount: PropTypes.number.isRequired,
+  onUploadFile: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired
 };
 
