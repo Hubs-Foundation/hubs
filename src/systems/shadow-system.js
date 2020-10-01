@@ -105,7 +105,7 @@ export class ShadowSystem {
   tick() {
     const environmentObject3D = this.environmentObject3D;
 
-    if (!this.needsUpdate || (window.APP && window.APP.quality === "low") || !environmentObject3D) {
+    if (!this.needsUpdate || window.APP.store.materialQualitySetting === "low" || !environmentObject3D) {
       return;
     }
 

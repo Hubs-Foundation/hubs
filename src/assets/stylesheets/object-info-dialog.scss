@@ -1,5 +1,15 @@
 @import 'shared.scss';
 
+:local(.hidden) {
+  .dialog__box__contents {
+    padding: 20px;
+  }
+
+  .dialog__box__contents__body {
+    margin: 0;
+  }
+}
+
 :local(.flex){
   display: flex;
 }

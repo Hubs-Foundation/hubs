@@ -392,7 +392,7 @@
                                 is-remote-hover-target
                                 tags="singleActionButton: true;"
                                 deserialize-drawing-button
-                                position="0.250 -0.625 0.001">
+                                position="-0.3 -0.625 0.001">
                                 <a-entity
                                     sprite
                                     icon-button="image: deserialize-action.png; hoverImage: deserialize-action.png"
@@ -552,6 +552,17 @@
                     </a-entity>
                 </a-entity>
             </template>
+
+            <template id="interactable-media-frame">
+                <!--
+                    note we intentionally don't setup the shape or media-frame here since they both don't support dynamic updates
+                    and so must be configured when creating the entity on each client. Since we only support media frames in scenes
+                    for now, this is acceptable, but TODO this will need to be handled if we want to dynamically spawn them.
+                -->
+                <a-entity body-helper="type: kinematic; collisionFilterGroup: 16; collisionFilterMask: 1; disableCollision: true;" >
+                </a-entity>
+            </template>
+
 
             <template id="linked-media">
                 <a-entity

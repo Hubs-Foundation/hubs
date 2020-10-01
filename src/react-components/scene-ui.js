@@ -1,23 +1,19 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import { IntlProvider, FormattedMessage, addLocaleData } from "react-intl";
-import en from "react-intl/locale-data/en";
-
+import { FormattedMessage } from "react-intl";
+import { WrappedIntlProvider } from "./wrapped-intl-provider";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/scene-ui.scss";
 import { createAndRedirectToNewHub, getReticulumFetchUrl } from "../utils/phoenix-utils";
-import { WithHoverSound } from "./wrap-with-audio";
 import CreateRoomDialog from "./create-room-dialog.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH } from "@fortawesome/free-solid-svg-icons/faEllipsisH";
 import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 
-import { lang, messages } from "../utils/i18n";
-
-addLocaleData([...en]);
+import { getMessages } from "../utils/i18n";
 
 class SceneUI extends Component {
   static propTypes = {
@@ -67,7 +63,7 @@ class SceneUI extends Component {
   render() {
     if (this.props.unavailable) {
       return (
-        <IntlProvider locale={lang} messages={messages}>
+        <WrappedIntlProvider>
           <div className={styles.ui}>
             <div className={styles.unavailable}>
               <div>
@@ -75,14 +71,14 @@ class SceneUI extends Component {
               </div>
             </div>
           </div>
-        </IntlProvider>
+        </WrappedIntlProvider>
       );
     }
 
     const { sceneAllowRemixing, isOwner, sceneProjectId, parentScene, sceneId } = this.props;
 
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
-    const tweetText = `${this.props.sceneName} in ${messages["share-hashtag"]}`;
+    const tweetText = `${this.props.sceneName} in ${getMessages()["share-hashtag"]}`;
     const tweetLink = `https://twitter.com/share?url=${encodeURIComponent(sceneUrl)}&text=${encodeURIComponent(
       tweetText
     )}`;
@@ -144,7 +140,7 @@ class SceneUI extends Component {
     }
 
     return (
-      <IntlProvider locale={lang} messages={messages}>
+      <WrappedIntlProvider>
         <div className={styles.ui}>
           <div
             className={classNames({
@@ -157,29 +153,23 @@ class SceneUI extends Component {
           <div className={styles.whiteOverlay} />
           <div className={styles.grid}>
             <div className={styles.mainPanel}>
-              <WithHoverSound>
-                <a href="/" className={styles.logo}>
-                  <img src={configs.image("logo")} />
-                </a>
-              </WithHoverSound>
+              <a href="/" className={styles.logo}>
+                <img src={configs.image("logo")} />
+              </a>
               <div className={styles.logoTagline}>
                 <FormattedMessage id="app-tagline" />
               </div>
               {this.props.showCreateRoom && (
                 <div className={styles.createButtons}>
-                  <WithHoverSound>
-                    <button className={styles.createButton} onClick={this.createRoom}>
-                      <FormattedMessage id="scene.create_button" />
-                    </button>
-                  </WithHoverSound>
-                  <WithHoverSound>
-                    <button
-                      className={styles.optionsButton}
-                      onClick={() => this.setState({ showCustomRoomDialog: true })}
-                    >
-                      <FontAwesomeIcon icon={faEllipsisH} />
-                    </button>
-                  </WithHoverSound>
+                  <button className={styles.createButton} onClick={this.createRoom}>
+                    <FormattedMessage id="scene.create_button" />
+                  </button>
+                  <button
+                    className={styles.optionsButton}
+                    onClick={() => this.setState({ showCustomRoomDialog: true })}
+                  >
+                    <FontAwesomeIcon icon={faEllipsisH} />
+                  </button>
                 </div>
               )}
               <IfFeature name="enable_spoke">
@@ -207,14 +197,12 @@ class SceneUI extends Component {
                   )
                 )}
               </IfFeature>
-              <WithHoverSound>
-                <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
-                  <img src="../assets/images/twitter.svg" />
-                  <div>
-                    <FormattedMessage id="scene.tweet_button" />
-                  </div>
-                </a>
-              </WithHoverSound>
+              <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
+                <img src="../assets/images/twitter.svg" />
+                <div>
+                  <FormattedMessage id="scene.tweet_button" />
+                </div>
+              </a>
             </div>
           </div>
           <div className={styles.info}>
@@ -239,7 +227,7 @@ class SceneUI extends Component {
             />
           )}
         </div>
-      </IntlProvider>
+      </WrappedIntlProvider>
     );
   }
 }

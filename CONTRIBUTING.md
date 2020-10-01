@@ -57,7 +57,7 @@ If you are a 3D artist and want to support what we're doing with Hubs, consider 
 Our documentation for Hubs is hosted on the [GitHub Hubs Wiki](https://github.com/mozilla/hubs/wiki) section of the project. The documentation for Spoke is hosted on the [GitHub Spoke Wiki](https://github.com/mozilla/spoke/wiki) For contributing corrections or additional pages for the Wiki, please file an issue as a suggestion in the corresponding repository with your proposed content and we will review it and add it to the wiki when all looks good! 
 
 ### 🌐 Localization 
-Hubs is currently en-US only, but if you would like to work with us on localization efforts, submit a suggestion through the GitHub issues and we'll work with you from there. 
+If you would like to add/update a localization translation for Hubs, please see the [Localization README](src/assets/locales/README.md). Then, please submit a pull request with your new/updated localization changes.
 
 ### 🦆 General Help
 We believe in the power of community (that's why we're building this, after all!) and know that not all forms of support will come from something outlined here. Feel free to jump into our public [Discord server](https://discord.gg/wHmY4nd) to chat with us and ask about how you can get involved!

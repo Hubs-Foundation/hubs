@@ -4,36 +4,23 @@ AFRAME.registerComponent("local-refresh-media-button", {
   init() {
     this.onClick = async () => {
       if (this.targetEl) {
-        this.targetEl.components["media-loader"] &&
-          this.targetEl.components["media-loader"].update(this.targetEl.components["media-loader"].data, true);
+        const c = this.targetEl.components;
+        // If an HLS stream is loaded, refresh directly with HLS.js
+        if (c["media-video"] && c["media-video"].videoTexture && c["media-video"].videoTexture.hls) {
+          c["media-video"].videoTexture.hls.recoverMediaError();
+        } else if (c["media-loader"]) {
+          // Otherwise fall back to hard resolve-level refresh which should work for any media
+          c["media-loader"].update(c["media-loader"].data, true);
+        }
       }
     };
 
     NAF.utils
       .getNetworkedEntity(this.el)
-      .then(networkedEl => {
-        this.targetEl = networkedEl;
-        const isNonLiveVideo =
-          this.targetEl.components["media-video"] && this.targetEl.components["media-video"].videoIsLive === false;
-        const src =
-          (this.targetEl.components["media-loader"] && this.targetEl.components["media-loader"].data.src) || "";
-        const shouldHaveLocalRefreshButton = !isNonLiveVideo && src.indexOf("twitch.tv") !== -1;
-        if (!shouldHaveLocalRefreshButton) {
-          this.el.parentNode.removeChild(this.el);
-        } else {
-          const onVideoIsLiveUpdate = e => {
-            if (!e.detail.videoIsLive) {
-              this.targetEl.removeEventListener("video_is_live_update", onVideoIsLiveUpdate);
-              this.el.parentNode.removeChild(this.el);
-            }
-          };
-          this.targetEl.addEventListener("video_is_live_update", onVideoIsLiveUpdate);
-        }
-      })
-      .catch(() => {
-        this.el.parentNode.removeChild(this.el);
-      });
+      .then(networkedEl => (this.targetEl = networkedEl))
+      .catch(() => this.el.parentNode.removeChild(this.el));
   },
+
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
   },

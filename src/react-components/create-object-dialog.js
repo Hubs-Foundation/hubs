@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 
-import { messages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import giphyLogo from "../assets/images/giphy_logo.png";
@@ -23,7 +23,7 @@ const attributionHostnames = {
 
 const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 const instructions = "Paste a URL to an image, video, model, scene, or upload.";
-const desktopTips = `Tip: You can paste URLs directly into ${messages["app-name"]} with Ctrl+V`;
+const desktopTips = `Tip: You can paste URLs directly into ${getMessages()["app-name"]} with Ctrl+V`;
 const references = (
   <span>
     For models, try{" "}
