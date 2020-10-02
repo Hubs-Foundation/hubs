@@ -3,8 +3,14 @@ AFRAME.registerComponent("invisible-player-hover-thing", {
     this.el.setObject3D(
       "invisible-player-hover-thing",
       new THREE.Mesh(
-        new THREE.BoxGeometry(0.4, 1.6, 0.4),
-        new THREE.MeshBasicMaterial({ opacity: 0, transparent: true, color: 0x020202, side: THREE.BackSide })
+        new THREE.BoxGeometry(0.3, 0.8, 0.3),
+        new THREE.MeshBasicMaterial({
+          depthWrite: false,
+          opacity: 0.5,
+          transparent: true,
+          color: 0x020202,
+          side: THREE.BackSide
+        })
       )
     );
   }
