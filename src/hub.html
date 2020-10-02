@@ -91,9 +91,9 @@
                 </a-entity>
             </template>
             <template id="remote-avatar">
-                <a-entity tags="inspectable: true" child-to-inspect="selector:.inspect-me-instead" optional-alternative-to-not-hide networked-avatar ik-root player-info matrix-auto-update visible="false">
+                <a-entity tags="inspectable: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update>
-                        <a-entity class="inspect-me-instead" rotate-180></a-entity>
+                        <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                     </a-entity>
 
                     <a-entity class="left-controller" matrix-auto-update></a-entity>
@@ -1074,6 +1074,8 @@
             set-yxz-order
             periodic-full-syncs
             visible="false"
+            tags="inspectable: true"
+            inspect-pivot-child-selector="selector:.inspect-pivot"
         >
             <a-entity
                 id="player-hud"
@@ -1174,7 +1176,7 @@
                 set-yxz-order
                 position="0 1.6 0"
             >
-                <a-entity id="inspect-yourself"></a-entity>
+                <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"
