@@ -11,5 +11,6 @@ export const AVAILABLE_LOCALES = {
 export const FALLBACK_LOCALES = {
   "zh-cn": "zh",
   "zh-hans": "zh",
-  "zh-hans-cn": "zh"
+  "zh-hans-cn": "zh",
+  ja: "jp"
 };
