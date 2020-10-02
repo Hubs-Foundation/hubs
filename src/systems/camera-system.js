@@ -283,8 +283,6 @@ export class CameraSystem {
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
       scene.audioListener.updateMatrices();
       this.audioSourceTargetTransform.makeTranslation(0, 0, -0.25).premultiply(scene.audioListener.matrixWorld);
-      console.log(this.audioSourceTargetTransform)
-
       setMatrixWorld(this.snapshot.audio, this.audioSourceTargetTransform);
     }
 

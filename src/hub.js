@@ -117,7 +117,7 @@ import "./components/inspect-pivot-offset-from-camera";
 import "./components/optional-alternative-to-not-hide";
 import "./components/set-max-resolution";
 import "./components/avatar-audio-source";
-import "./components/invisible-player-hover-thing";
+import "./components/avatar-inspect-collider";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";

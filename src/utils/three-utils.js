@@ -353,4 +353,3 @@ export function traverseAnimationTargets(rootObject, animations, callback) {
     }
   }
 }
-
