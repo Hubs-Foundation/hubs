@@ -117,8 +117,10 @@
                 </a-entity>
             </template>
             <template id="remote-avatar">
-                <a-entity networked-avatar ik-root player-info matrix-auto-update visible="false">
-                    <a-entity class="camera" matrix-auto-update></a-entity>
+                <a-entity tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info matrix-auto-update visible="false">
+                    <a-entity class="camera" matrix-auto-update>
+                        <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
+                    </a-entity>
 
                     <a-entity class="left-controller" matrix-auto-update></a-entity>
 
@@ -172,6 +174,7 @@
 
                         <template data-name="Spine">
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                                <a-entity class="avatar-inspect-collider" avatar-inspect-collider tags="togglesHoveredActionSet: true;" is-remote-hover-target inspect-button></a-entity>
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
                                 <a-entity class="interactable ui interactable-ui">
                                     <a-entity billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
@@ -1097,6 +1100,8 @@
             set-yxz-order
             periodic-full-syncs
             visible="false"
+            tags="inspectable: true; preventAudioBoost: true"
+            inspect-pivot-child-selector="selector:.inspect-pivot"
         >
             <a-entity
                 id="player-hud"
@@ -1197,6 +1202,7 @@
                 set-yxz-order
                 position="0 1.6 0"
             >
+                <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"
