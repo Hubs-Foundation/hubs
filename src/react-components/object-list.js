@@ -123,7 +123,7 @@ export default class ObjectList extends Component {
         }}
         onMouseOver={() => {
           AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
-          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(el.object3D, 1.5, true);
+          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(el.object3D, el.object3D, 1.5, true);
         }}
       >
         <div title={THUMBNAIL_TITLE.get(mediaSortOrder(el))} className={objectListStyles.icon}>
