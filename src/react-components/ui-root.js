@@ -1279,7 +1279,7 @@ class UIRoot extends Component {
       this.setState({ objectInfo: el, objectSrc: src });
       const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
       cameraSystem.uninspect();
-      cameraSystem.inspect(el.object3D, 1.5, true);
+      cameraSystem.inspect(el.object3D, el.object3D, 1.5, true);
     };
 
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);

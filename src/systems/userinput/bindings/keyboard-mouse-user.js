@@ -18,6 +18,7 @@ const startInspectingViaKeyboard = "/vars/mouse-and-keyboard/startInspectingViaK
 const stopInspectingViaMouse = "/vars/mouse-and-keyboard/stopInspectingViaMouse";
 const stopInspectingViaKeyboardEscape = "/vars/mouse-and-keyboard/stopInspectingViaKeyboardEscape";
 const stopInspectingViaKeyboardFocusRelease = "/vars/mouse-and-keyboard/stopInspectingViaKeyboardFocusRelease";
+const stopInspectingSelf = "/vars/mouse-and-keyboard/stopInspectingSelf";
 
 const qs = new URLSearchParams(location.search);
 const inspectZoomSpeed = parseFloat(qs.get("izs")) || -10.0;
@@ -470,7 +471,13 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: "/var/notcontrol+7" },
       dest: { value: paths.actions.spawnEmoji6 },
       xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.keyboard.key("i") },
+      dest: { value: paths.actions.startInspectingSelf },
+      xform: xforms.rising
     }
+
     // Helpful bindings for debugging hands in 2D
     // {
     //   src: {},
@@ -908,7 +915,17 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 101
     },
     {
-      src: [stopInspectingViaMouse, stopInspectingViaKeyboardEscape, stopInspectingViaKeyboardFocusRelease],
+      src: { value: paths.device.keyboard.key("i") },
+      dest: { value: stopInspectingSelf },
+      xform: xforms.rising
+    },
+    {
+      src: [
+        stopInspectingViaMouse,
+        stopInspectingViaKeyboardEscape,
+        stopInspectingViaKeyboardFocusRelease,
+        stopInspectingSelf
+      ],
       dest: { value: paths.actions.stopInspecting },
       xform: xforms.any
     }
