@@ -3,18 +3,15 @@ import { childMatch, setMatrixWorld, calculateViewingDistance } from "../utils/t
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
+import { isTagged } from "../components/tags";
 import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 
-function isTaggedInspectable(el) {
-  return el.components && el.components.tags && el.components.tags.data.inspectable;
-}
-
 function getInspectableInHierarchy(el) {
   let inspectable = el;
   while (inspectable) {
-    if (isTaggedInspectable(inspectable)) {
+    if (isTagged(inspectable, "inspectable")) {
       return inspectable.object3D;
     }
     inspectable = inspectable.parentNode;
@@ -277,7 +274,7 @@ export class CameraSystem {
     this.viewingCamera.object3DMap.camera.updateMatrices();
     this.snapshot.matrixWorld.copy(this.viewingRig.object3D.matrixWorld);
 
-    this.snapshot.audio = getAudio(inspectable);
+    this.snapshot.audio = !(inspectable.el && isTagged(inspectable.el, "preventAudioBoost")) && getAudio(inspectable);
     if (this.snapshot.audio) {
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
