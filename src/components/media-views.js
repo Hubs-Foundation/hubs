@@ -546,6 +546,11 @@ AFRAME.registerComponent("media-video", {
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
+
+    // Make sure that the audio is initialized to the right place.
+    // Its matrix may not update if this element is not visible.
+    // See https://github.com/mozilla/hubs/issues/2855
+    this.audio.updateMatrixWorld();
   },
 
   setPositionalAudioProperties() {
