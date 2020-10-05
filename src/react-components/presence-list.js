@@ -4,14 +4,11 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
-
-import rootStyles from "../assets/stylesheets/ui-root.scss";
 import styles from "../assets/stylesheets/presence-list.scss";
 import maskEmail from "../utils/mask-email";
 import StateLink from "./state-link.js";
 import { WithHoverSound } from "./wrap-with-audio";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
 import { faDesktop } from "@fortawesome/free-solid-svg-icons/faDesktop";
 import { faVideo } from "@fortawesome/free-solid-svg-icons/faVideo";
@@ -24,6 +21,7 @@ import { InlineSVG } from "./svgi";
 import { faVolumeMute } from "@fortawesome/free-solid-svg-icons/faVolumeMute";
 import { faVolumeOff } from "@fortawesome/free-solid-svg-icons/faVolumeOff";
 import { faVolumeUp } from "@fortawesome/free-solid-svg-icons/faVolumeUp";
+import { Sidebar } from "./sidebar/Sidebar";
 
 const MIC_PRESENCE_UPDATE_FREQUENCY = 500;
 
@@ -69,16 +67,12 @@ export default class PresenceList extends Component {
     signedIn: PropTypes.bool,
     email: PropTypes.string,
     onSignIn: PropTypes.func,
-    onSignOut: PropTypes.func,
-    expanded: PropTypes.bool,
-    onExpand: PropTypes.func
+    onSignOut: PropTypes.func
   };
 
   updateMicrophoneState = () => {
-    if (this.props.expanded) {
-      const microphonePresences = getMicrophonePresences(AFRAME.scenes[0]);
-      this.setState({ microphonePresences });
-    }
+    const microphonePresences = getMicrophonePresences(AFRAME.scenes[0]);
+    this.setState({ microphonePresences });
     this.timeout = setTimeout(this.updateMicrophoneState, MIC_PRESENCE_UPDATE_FREQUENCY);
   };
 
@@ -178,20 +172,14 @@ export default class PresenceList extends Component {
 
   componentDidMount() {
     this.updateMicrophoneState();
-    document.querySelector(".a-canvas").addEventListener(
-      "mouseup",
-      () => {
-        this.props.onExpand(false);
-      },
-      { once: true }
-    );
   }
 
   componentWillUnmount() {
     clearTimeout(this.timeout);
   }
 
-  renderExpandedList() {
+  render() {
+    const occupantCount = this.props.presences ? Object.entries(this.props.presences).length : 0;
     const canMuteUsers = this.props.hubChannel.can("mute_users");
     const muteAll = canMuteUsers && (
       <div className={styles.muteAll}>
@@ -202,59 +190,38 @@ export default class PresenceList extends Component {
     );
 
     return (
-      <div className={styles.presenceList}>
-        <div className={styles.attachPoint} />
-        <div className={styles.contents}>
-          {muteAll}
-          <div className={styles.rows}>
-            {Object.entries(this.props.presences || {})
-              .filter(([k]) => k === this.props.sessionId)
-              .map(this.domForPresence)}
-            {Object.entries(this.props.presences || {})
-              .filter(([k]) => k !== this.props.sessionId)
-              .map(this.domForPresence)}
-          </div>
-          <div className={styles.signIn}>
-            {this.props.signedIn ? (
-              <div>
-                <span>
-                  <FormattedMessage id="sign-in.as" /> {maskEmail(this.props.email)}
-                </span>{" "}
-                <a onClick={this.props.onSignOut}>
-                  <FormattedMessage id="sign-in.out" />
+      <Sidebar title={`People (${occupantCount})`}>
+        <div className={styles.presenceList}>
+          <div className={styles.attachPoint} />
+          <div className={styles.contents}>
+            {muteAll}
+            <div className={styles.rows}>
+              {Object.entries(this.props.presences || {})
+                .filter(([k]) => k === this.props.sessionId)
+                .map(this.domForPresence)}
+              {Object.entries(this.props.presences || {})
+                .filter(([k]) => k !== this.props.sessionId)
+                .map(this.domForPresence)}
+            </div>
+            <div className={styles.signIn}>
+              {this.props.signedIn ? (
+                <div>
+                  <span>
+                    <FormattedMessage id="sign-in.as" /> {maskEmail(this.props.email)}
+                  </span>{" "}
+                  <a onClick={this.props.onSignOut}>
+                    <FormattedMessage id="sign-in.out" />
+                  </a>
+                </div>
+              ) : (
+                <a onClick={this.props.onSignIn}>
+                  <FormattedMessage id="sign-in.in" />
                 </a>
-              </div>
-            ) : (
-              <a onClick={this.props.onSignIn}>
-                <FormattedMessage id="sign-in.in" />
-              </a>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  render() {
-    const occupantCount = this.props.presences ? Object.entries(this.props.presences).length : 0;
-    return (
-      <div>
-        <button
-          title="Members"
-          aria-label={`Toggle list of ${occupantCount} member${occupantCount === 1 ? "" : "s"}`}
-          onClick={() => {
-            this.props.onExpand(!this.props.expanded);
-          }}
-          className={classNames({
-            [rootStyles.presenceListButton]: true,
-            [rootStyles.presenceInfoSelected]: this.props.expanded
-          })}
-        >
-          <FontAwesomeIcon icon={faUsers} />
-          <span className={rootStyles.occupantCount}>{occupantCount}</span>
-        </button>
-        {this.props.expanded && this.renderExpandedList()}
-      </div>
+      </Sidebar>
     );
   }
 }

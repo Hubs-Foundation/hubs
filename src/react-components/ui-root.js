@@ -79,6 +79,7 @@ import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
 import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
+import { ContentMenu, ContentMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as SceneIcon } from "./icons/Scene.svg";
@@ -92,6 +93,8 @@ import { ReactComponent as SupportIcon } from "./icons/Support.svg";
 import { ReactComponent as ShieldIcon } from "./icons/Shield.svg";
 import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
+import { ReactComponent as PeopleIcon } from "./icons/People.svg";
+import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -221,8 +224,6 @@ class UIRoot extends Component {
 
     objectInfo: null,
     objectSrc: "",
-    isObjectListExpanded: false,
-    isPresenceListExpanded: false,
     sidebarId: null
   };
 
@@ -1148,7 +1149,7 @@ class UIRoot extends Component {
     if (this.state.objectInfo && this.state.objectInfo.object3D) {
       return true; // TODO: Get object info dialog to use history
     }
-    if (this.state.isObjectListExpanded) {
+    if (this.state.sidebarId !== null) {
       return true;
     }
 
@@ -1302,7 +1303,7 @@ class UIRoot extends Component {
     const streaming = this.state.isStreaming;
 
     const showTopHud = enteredOrWatching && !showObjectInfo;
-    const showObjectList = !showObjectInfo;
+    const showObjectList = enteredOrWatching && !showObjectInfo;
     const showPresenceList = !showObjectInfo;
 
     const streamingTip = streaming &&
@@ -1326,9 +1327,7 @@ class UIRoot extends Component {
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
 
-    const renderEntryFlow =
-      (!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo && this.props.hub) ||
-      this.isWaitingForAutoExit();
+    const renderEntryFlow = (!enteredOrWatching && !showObjectInfo && this.props.hub) || this.isWaitingForAutoExit();
 
     const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
     const canUpdateRoom = this.props.hubChannel.canOrWillIfCreator("update_hub");
@@ -1587,6 +1586,34 @@ class UIRoot extends Component {
               viewport={
                 <>
                   <CompactMoreMenuButton />
+                  <ContentMenu>
+                    {showObjectList && (
+                      <ContentMenuButton
+                        active={this.state.sidebarId === "objects"}
+                        onClick={() =>
+                          this.setState(({ sidebarId }) => ({
+                            sidebarId: sidebarId === "objects" ? null : "objects"
+                          }))
+                        }
+                      >
+                        <ObjectsIcon />
+                        <span>Objects</span>
+                      </ContentMenuButton>
+                    )}
+                    {showPresenceList && (
+                      <ContentMenuButton
+                        active={this.state.sidebarId === "people"}
+                        onClick={() =>
+                          this.setState(({ sidebarId }) => ({
+                            sidebarId: sidebarId === "people" ? null : "people"
+                          }))
+                        }
+                      >
+                        <PeopleIcon />
+                        <span>People</span>
+                      </ContentMenuButton>
+                    )}
+                  </ContentMenu>
                   <StateRoute
                     stateKey="modal"
                     stateValue="room_settings"
@@ -1705,7 +1732,7 @@ class UIRoot extends Component {
                       performConditionalSignIn={this.props.performConditionalSignIn}
                     />
                   )}
-                  {showObjectInfo && (
+                  {this.state.objectInfo && (
                     <ObjectInfoDialog
                       scene={this.props.scene}
                       el={this.state.objectInfo}
@@ -1718,7 +1745,7 @@ class UIRoot extends Component {
                         if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
                           this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
                         }
-                        this.setState({ isObjectListExpanded: false, objectInfo: null });
+                        this.setState({ objectInfo: null });
                       }}
                     />
                   )}
@@ -1783,49 +1810,6 @@ class UIRoot extends Component {
                     </button>
                   )}
                   {streamingTip}
-
-                  {showObjectList && (
-                    <ObjectList
-                      scene={this.props.scene}
-                      onExpand={(expand, uninspect) => {
-                        if (expand) {
-                          this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
-                        } else {
-                          this.setState({ isObjectListExpanded: expand });
-                        }
-
-                        if (uninspect) {
-                          this.setState({ objectInfo: null });
-                          if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                            this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
-                          }
-                        }
-                      }}
-                      expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-                      onInspectObject={el => switchToInspectingObject(el)}
-                    />
-                  )}
-
-                  {showPresenceList && (
-                    <PresenceList
-                      hubChannel={this.props.hubChannel}
-                      history={this.props.history}
-                      presences={this.props.presences}
-                      sessionId={this.props.sessionId}
-                      signedIn={this.state.signedIn}
-                      email={this.props.store.state.credentials.email}
-                      onSignIn={this.showSignInDialog}
-                      onSignOut={this.signOut}
-                      expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
-                      onExpand={expand => {
-                        if (expand) {
-                          this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
-                        } else {
-                          this.setState({ isPresenceListExpanded: expand });
-                        }
-                      }}
-                    />
-                  )}
                   {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
                   {showTopHud && (
                     <div className={styles.topHud}>
@@ -1860,14 +1844,44 @@ class UIRoot extends Component {
                 </>
               }
               sidebar={
-                this.state.sidebarId === "chat" && (
-                  <ChatSidebarContainer
-                    occupantCount={this.occupantCount()}
-                    discordBridges={discordBridges}
-                    canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
-                    onUploadFile={this.createObject}
-                    onClose={() => this.setState({ sidebarId: null })}
-                  />
+                this.state.sidebarId ? (
+                  <>
+                    {this.state.sidebarId === "chat" && (
+                      <ChatSidebarContainer
+                        occupantCount={this.occupantCount()}
+                        discordBridges={discordBridges}
+                        canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
+                        onUploadFile={this.createObject}
+                        onClose={() => this.setState({ sidebarId: null })}
+                      />
+                    )}
+                    {this.state.sidebarId === "objects" && (
+                      <ObjectList
+                        scene={this.props.scene}
+                        onInspectObject={el => switchToInspectingObject(el)}
+                        onUninspectObject={() => {
+                          this.setState({ objectInfo: null });
+                          if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                            this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                          }
+                        }}
+                      />
+                    )}
+                    {this.state.sidebarId === "people" && (
+                      <PresenceList
+                        hubChannel={this.props.hubChannel}
+                        history={this.props.history}
+                        presences={this.props.presences}
+                        sessionId={this.props.sessionId}
+                        signedIn={this.state.signedIn}
+                        email={this.props.store.state.credentials.email}
+                        onSignIn={this.showSignInDialog}
+                        onSignOut={this.signOut}
+                      />
+                    )}
+                  </>
+                ) : (
+                  undefined
                 )
               }
               modal={renderEntryFlow && entryDialog}
