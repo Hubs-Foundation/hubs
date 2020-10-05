@@ -167,7 +167,7 @@ label {
   font-weight: theme.$font-weight-bold;
 }
 
-body :focus {
+body :focus, [type="button"]:focus {
   outline: none;
 }
 
