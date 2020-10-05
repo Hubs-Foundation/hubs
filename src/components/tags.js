@@ -18,7 +18,8 @@ AFRAME.registerComponent("tags", {
     isPen: { default: false },
     isHoverMenuChild: { default: false },
     isStatic: { default: false },
-    inspectable: { default: false }
+    inspectable: { default: false },
+    preventAudioBoost: { default: false }
   },
   update() {
     if (this.didUpdateOnce) {

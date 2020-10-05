@@ -29,6 +29,7 @@ import { EnterVRButtonSystem } from "./enter-vr-button-system";
 import { AudioSystem } from "./audio-system";
 import { ShadowSystem } from "./shadow-system";
 import { MediaFramesSystem } from "./media-frames";
+import { InspectYourselfSystem } from "./inspect-yourself-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -67,6 +68,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.uvScrollSystem = new UVScrollSystem();
     this.shadowSystem = new ShadowSystem(this.el);
     this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
+    this.inspectYourselfSystem = new InspectYourselfSystem();
   },
 
   tick(t, dt) {
@@ -102,6 +104,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.scenePreviewCameraSystem.tick();
     this.physicsSystem.tick(dt);
     this.batchManagerSystem.tick(t);
+    this.inspectYourselfSystem.tick(this.el, systems.userinput, this.cameraSystem);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
     this.menuAnimationSystem.tick(t);
