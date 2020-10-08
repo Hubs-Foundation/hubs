@@ -14,57 +14,56 @@ import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
 import { List, ButtonListItem } from "../layout/List";
 
-function getDeviceLabel(device) {
-  switch (device) {
-    case "discord-bot":
-      return "Discord Bot";
-    case "phone":
+function getDeviceLabel(ctx) {
+  if (ctx) {
+    if (ctx.mobile) {
       return "On Mobile";
-    case "VR":
+    } else if (ctx.discord) {
+      return "Discord Bot";
+    } else if (ctx.hmd) {
       return "In VR";
-    case "desktop":
-    default:
-      return "On Desktop";
+    }
   }
+
+  return "On Desktop";
 }
 
-function getDeviceIconComponent(device) {
-  switch (device) {
-    case "discord-bot":
-      return DiscordIcon;
-    case "phone":
+function getDeviceIconComponent(ctx) {
+  if (ctx) {
+    if (ctx.mobile) {
       return PhoneIcon;
-    case "VR":
+    } else if (ctx.discord) {
+      return DiscordIcon;
+    } else if (ctx.hmd) {
       return VRIcon;
-    case "desktop":
-    default:
-      return DesktopIcon;
+    }
   }
+
+  return DesktopIcon;
 }
 
-function getVoiceLabel(micStatus) {
-  switch (micStatus) {
-    case "talking":
+function getVoiceLabel(micPresence) {
+  if (micPresence) {
+    if (micPresence.talking) {
       return "Talking";
-    case "muted":
+    } else if (micPresence.muted) {
       return "Muted";
-    case "unmuted":
-    default:
-      return "Not Talking";
+    }
   }
+
+  return "Not Talking";
 }
 
-function getVoiceIconComponent(micStatus) {
-  switch (micStatus) {
-    case "talking":
+function getVoiceIconComponent(micPresence) {
+  if (micPresence) {
+    if (micPresence.talking) {
       return VolumeHighIcon;
-    case "muted":
+    } else if (micPresence.muted) {
       return VolumeMutedIcon;
-    case "unmuted":
-      return VolumeOffIcon;
-    default:
-      return undefined;
+    }
   }
+
+  return VolumeOffIcon;
 }
 
 // TODO: i18n
@@ -82,17 +81,17 @@ function getPresenceMessage(presence) {
 }
 
 function getPersonName(person) {
-  return person.name + (person.isMe ? " (You)" : "");
+  return person.profile.displayName + (person.isMe ? " (You)" : "");
 }
 
 function getLabel(person) {
-  if (person.device === "discord-bot") {
-    return `${getDeviceLabel(person.device)}, ${getPersonName(person)} is ${getPresenceMessage(person.presence)}.`;
+  if (person.context.discord) {
+    return `${getDeviceLabel(person.context)}, ${getPersonName(person)} is ${getPresenceMessage(person.presence)}.`;
   }
 
-  return `${person.isModerator ? "Moderator " : ""}${getPersonName(person)}, is ${getPresenceMessage(
+  return `${person.roles.owner ? "Moderator " : ""}${getPersonName(person)}, is ${getPresenceMessage(
     person.presence
-  )} and ${getVoiceLabel(person.prs)} ${getDeviceLabel(person.device)}.`;
+  )} and ${getVoiceLabel(person.micPresence)} ${getDeviceLabel(person.context)}.`;
 }
 
 export function PeopleSidebar({ people, onSelectPerson, onClose }) {
@@ -112,8 +111,8 @@ export function PeopleSidebar({ people, onSelectPerson, onClose }) {
     >
       <List>
         {people.map(person => {
-          const DeviceIcon = getDeviceIconComponent(person.device);
-          const VoiceIcon = getVoiceIconComponent(person.micStatus);
+          const DeviceIcon = getDeviceIconComponent(person.context);
+          const VoiceIcon = getVoiceIconComponent(person.micPresence);
 
           return (
             <ButtonListItem
@@ -123,10 +122,10 @@ export function PeopleSidebar({ people, onSelectPerson, onClose }) {
               aria-label={getLabel(person)}
               onClick={e => onSelectPerson(person, e)}
             >
-              {<DeviceIcon title={getDeviceLabel(person.device)} />}
-              {VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micStatus)} />}
+              {<DeviceIcon title={getDeviceLabel(person.context)} />}
+              {!person.context.discord && VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micPresence)} />}
               <p>{getPersonName(person)}</p>
-              {person.isModerator && (
+              {person.roles.owner && (
                 <StarIcon title="Moderator" className={styles.moderatorIcon} width={12} height={12} />
               )}
               <p className={styles.presence}>{getPresenceMessage(person.presence)}</p>
@@ -145,5 +144,6 @@ PeopleSidebar.propTypes = {
 };
 
 PeopleSidebar.defaultProps = {
+  people: [],
   onSelectPerson: () => {}
 };

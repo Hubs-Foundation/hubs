@@ -52,7 +52,6 @@ import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
-import PresenceList from "./presence-list.js";
 import ObjectList from "./object-list.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
@@ -95,6 +94,7 @@ import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
+import { PeopleSidebarContainer } from "./room/PeopleSidebarContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1868,15 +1868,13 @@ class UIRoot extends Component {
                       />
                     )}
                     {this.state.sidebarId === "people" && (
-                      <PresenceList
-                        hubChannel={this.props.hubChannel}
-                        history={this.props.history}
+                      <PeopleSidebarContainer
+                        mySessionId={this.props.sessionId}
                         presences={this.props.presences}
-                        sessionId={this.props.sessionId}
-                        signedIn={this.state.signedIn}
-                        email={this.props.store.state.credentials.email}
-                        onSignIn={this.showSignInDialog}
-                        onSignOut={this.signOut}
+                        onClose={() => this.setState({ sidebarId: null })}
+                        onOpenAvatarSettings={() => {
+                          this.pushHistoryState("overlay", "profile");
+                        }}
                       />
                     )}
                   </>

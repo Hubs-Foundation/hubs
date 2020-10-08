@@ -8,30 +8,54 @@ export default {
 
 const people = [
   {
-    id: 1,
+    id: "1",
     isMe: true,
-    name: "Robert",
-    isModerator: true,
-    device: "desktop",
-    micStatus: "unmuted",
+    profile: {
+      displayName: "Robert"
+    },
+    roles: {
+      owner: true
+    },
+    context: {
+      desktop: true
+    },
+    micPresence: {
+      muted: false,
+      talking: false
+    },
     presence: "room"
   },
   {
-    id: 2,
+    id: "2",
     isMe: false,
-    name: "Hubs Bot",
-    isModerator: false,
-    device: "discord-bot",
-    micStatus: undefined,
+    profile: {
+      displayName: "Hubs Bot"
+    },
+    roles: {
+      owner: false
+    },
+    context: {
+      discord: true
+    },
+    micPresence: undefined,
     presence: "lobby"
   },
   {
-    id: 3,
+    id: "3",
     isMe: false,
-    name: "Tyler Travers",
-    isModerator: false,
-    device: "phone",
-    micStatus: "talking",
+    profile: {
+      displayName: "John"
+    },
+    roles: {
+      owner: false
+    },
+    context: {
+      mobile: true
+    },
+    micPresence: {
+      talking: true,
+      muted: false
+    },
     presence: "room"
   }
 ];
