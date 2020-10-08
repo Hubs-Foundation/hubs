@@ -1869,6 +1869,7 @@ class UIRoot extends Component {
                     )}
                     {this.state.sidebarId === "people" && (
                       <PeopleSidebarContainer
+                        history={this.props.history}
                         mySessionId={this.props.sessionId}
                         presences={this.props.presences}
                         onClose={() => this.setState({ sidebarId: null })}

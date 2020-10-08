@@ -37,7 +37,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   return people;
 }
 
-export function PeopleSidebarContainer({ presences, mySessionId, onOpenAvatarSettings, onClose }) {
+export function PeopleSidebarContainer({ history, presences, mySessionId, onOpenAvatarSettings, onClose }) {
   const people = usePeopleList(presences, mySessionId);
 
   // TODO: Dont use state routes for profiles
@@ -49,13 +49,14 @@ export function PeopleSidebarContainer({ presences, mySessionId, onOpenAvatarSet
         navigateToClientInfo(history, person.id);
       }
     },
-    [mySessionId, onOpenAvatarSettings]
+    [history, mySessionId, onOpenAvatarSettings]
   );
 
   return <PeopleSidebar people={people} onSelectPerson={onSelectPerson} onClose={onClose} />;
 }
 
 PeopleSidebarContainer.propTypes = {
+  history: PropTypes.object.isRequired,
   onOpenAvatarSettings: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   mySessionId: PropTypes.string.isRequired,
