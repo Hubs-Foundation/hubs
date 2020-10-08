@@ -54,15 +54,6 @@ $input-height: 40px;
   }
 }
 
-:local(.icon-button) {
-  padding: 0;
-  margin-left: 8px;
-  
-  &:last-child {
-    margin-right: 8px;
-  }
-}
-
 :local(.input-wrapper) {
   flex: 1;
   height: 100%;
@@ -92,6 +83,15 @@ $input-height: 40px;
 
   &:focus {
     box-shadow: none;
+  }
+
+  :local(.icon-button) {
+    padding: 0;
+    margin-left: 8px;
+    
+    &:last-child {
+      margin-right: 8px;
+    }
   }
 }
 
