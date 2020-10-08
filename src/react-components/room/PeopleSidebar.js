@@ -94,7 +94,7 @@ function getLabel(person) {
   )} and ${getVoiceLabel(person.micPresence)} ${getDeviceLabel(person.context)}.`;
 }
 
-export function PeopleSidebar({ people, onSelectPerson, onClose }) {
+export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, onMuteAll }) {
   return (
     <Sidebar
       title={`People (${people.length})`}
@@ -104,9 +104,13 @@ export function PeopleSidebar({ people, onSelectPerson, onClose }) {
         </IconButton>
       }
       afterTitle={
-        <IconButton className={styles.muteAllButton} onClick={onClose}>
-          Mute All
-        </IconButton>
+        showMuteAll ? (
+          <IconButton className={styles.muteAllButton} onClick={onMuteAll}>
+            Mute All
+          </IconButton>
+        ) : (
+          undefined
+        )
       }
     >
       <List>
@@ -140,6 +144,8 @@ export function PeopleSidebar({ people, onSelectPerson, onClose }) {
 PeopleSidebar.propTypes = {
   people: PropTypes.array,
   onSelectPerson: PropTypes.func,
+  showMuteAll: PropTypes.bool,
+  onMuteAll: PropTypes.func,
   onClose: PropTypes.func
 };
 

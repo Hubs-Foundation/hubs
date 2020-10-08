@@ -27,3 +27,11 @@
   flex: 1;
   justify-content: flex-end;
 }
+
+:local(.close-button) {
+  margin-left: 16px;
+}
+
+:local(.mute-all-button) {
+  margin-right: 16px;
+}

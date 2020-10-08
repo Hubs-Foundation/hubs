@@ -37,7 +37,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   return people;
 }
 
-export function PeopleSidebarContainer({ history, presences, mySessionId, onOpenAvatarSettings, onClose }) {
+export function PeopleSidebarContainer({ hubChannel, history, presences, mySessionId, onOpenAvatarSettings, onClose }) {
   const people = usePeopleList(presences, mySessionId);
 
   // TODO: Dont use state routes for profiles
@@ -52,10 +52,30 @@ export function PeopleSidebarContainer({ history, presences, mySessionId, onOpen
     [history, mySessionId, onOpenAvatarSettings]
   );
 
-  return <PeopleSidebar people={people} onSelectPerson={onSelectPerson} onClose={onClose} />;
+  const onMuteAll = useCallback(
+    () => {
+      for (const person of people) {
+        if (person.presence === "room" && person.permissions && !person.permissions.mute_users) {
+          hubChannel.mute(person.id);
+        }
+      }
+    },
+    [people, hubChannel]
+  );
+
+  return (
+    <PeopleSidebar
+      people={people}
+      onSelectPerson={onSelectPerson}
+      onClose={onClose}
+      onMuteAll={onMuteAll}
+      showMuteAll={hubChannel.can("mute_users")}
+    />
+  );
 }
 
 PeopleSidebarContainer.propTypes = {
+  hubChannel: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   onOpenAvatarSettings: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
