@@ -1,20 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Sidebar } from "../sidebar/Sidebar";
-import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
-import { IconButton } from "../input/IconButton";
+import { Sidebar, BackButton, CloseButton } from "../sidebar/Sidebar";
 import { AvatarSettingsContent } from "./AvatarSettingsContent";
 
-export function AvatarSettingsSidebar({ className, onBack, ...rest }) {
+export function AvatarSettingsSidebar({ className, showBackButton, onBack, onClose, ...rest }) {
   return (
     <Sidebar
       title="Avatar Settings"
-      beforeTitle={
-        <IconButton onClick={onBack}>
-          <ChevronBackIcon />
-          <span>Back</span>
-        </IconButton>
-      }
+      beforeTitle={showBackButton ? <BackButton onClick={onBack} /> : <CloseButton onClick={onClose} />}
       className={className}
     >
       <AvatarSettingsContent {...rest} />
@@ -23,6 +16,8 @@ export function AvatarSettingsSidebar({ className, onBack, ...rest }) {
 }
 
 AvatarSettingsSidebar.propTypes = {
+  showBackButton: PropTypes.bool,
   className: PropTypes.string,
-  onBack: PropTypes.func
+  onBack: PropTypes.func,
+  onClose: PropTypes.func
 };

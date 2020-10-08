@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Sidebar } from "../sidebar/Sidebar";
+import { Sidebar, BackButton } from "../sidebar/Sidebar";
 import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
 import { IconButton } from "../input/IconButton";
 import { Button } from "../input/Button";
@@ -25,12 +25,7 @@ export function UserProfileSidebar({
   return (
     <Sidebar
       title={displayName}
-      beforeTitle={
-        <IconButton onClick={onBack}>
-          <ChevronBackIcon />
-          <span>Back</span>
-        </IconButton>
-      }
+      beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       contentClassName={styles.content}
       {...rest}

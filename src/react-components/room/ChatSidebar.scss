@@ -1,9 +1,5 @@
 @use "../styles/theme.scss";
 
-:local(.close-button) {
-  margin-left: 16px;
-}
-
 :local(.chat-input-container) {
   padding: 0 16px 8px 16px;
   background-color: theme.$white;
