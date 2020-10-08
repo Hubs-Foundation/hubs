@@ -10,28 +10,30 @@ class AudioNormalizer {
   constructor(audio) {
     this.audio = audio;
     this.analyser = audio.context.createAnalyser();
+    this.compressor = audio.context.createDynamicsCompressor();
+    this.connected = false;
+
     // To analyse volume, 32 fftsize may be good enough
     this.analyser.fftSize = 32;
     this.gain = audio.context.createGain();
     this.timeData = new Uint8Array(this.analyser.frequencyBinCount);
     this.volumes = [];
     this.volumeSum = 0;
-    // Hacks. THREE.Audio connects audio nodes when source is set.
-    // If audio is not played yet, THREE.Audio.setFilters() doesn't
-    // reset connections. Then manually caling .connect()/disconnect() here.
-    // This might be a bug of Three.js and should be fixed in Three.js side?
-    if (this.audio.source && !this.audio.isPlaying) {
-      this.audio.disconnect();
-    }
-    this.audio.setFilters([this.analyser, this.gain]);
-    if (this.audio.source && !this.audio.isPlaying) {
-      this.audio.connect();
-    }
+
+    // To protect user's ears, we insert compressor in case of misguessing the volume.
+    // Threshold -30 is just an arbitary number so far.
+    this.compressor.threshold.setValueAtTime(-30, audio.context.currentTime);
   }
 
   apply() {
-    if (!window.APP.store.state.preferences.audioNormalization) {
-      this.gain.gain.setTargetAtTime(1, this.audio.context.currentTime, 0.01);
+    if (window.APP.store.state.preferences.audioNormalization) {
+      if (!this.connected) {
+        this.connect();
+      }
+    } else {
+      if (this.connected) {
+        this.disconnect();
+      }
       return;
     }
 
@@ -64,6 +66,34 @@ class AudioNormalizer {
         this.gain.gain.setTargetAtTime(baseVolume / averageVolume, this.audio.context.currentTime, 0.01);
       }
     }
+  }
+
+  connect() {
+    // Hacks. THREE.Audio connects audio nodes when source is set.
+    // If audio is not played yet, THREE.Audio.setFilters() doesn't
+    // reset connections. Then manually caling .connect()/disconnect() here.
+    // This might be a bug of Three.js and should be fixed in Three.js side?
+    if (this.audio.source && !this.audio.isPlaying) {
+      this.audio.disconnect();
+    }
+    // @TODO: Here overrides filters even if filters are already set other places.
+    // Should we check whether filters are already set for robustness?
+    this.audio.setFilters([this.analyser, this.gain, this.compressor]);
+    if (this.audio.source && !this.audio.isPlaying) {
+      this.audio.connect();
+    }
+    this.connected = true;
+  }
+
+  disconnect() {
+    if (this.audio.source && !this.audio.isPlaying) {
+      this.audio.disconnect();
+    }
+    this.audio.setFilters([]);
+    if (this.audio.source && !this.audio.isPlaying) {
+      this.audio.connect();
+    }
+    this.connected = false;
   }
 }
 
