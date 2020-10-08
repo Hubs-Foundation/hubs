@@ -5,7 +5,6 @@ import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
 import { toArray as toEmojis } from "react-emoji-render";
 import serializeElement from "../utils/serialize-element";
-import { navigateToClientInfo } from "./presence-list";
 import { coerceToUrl } from "../utils/media-utils";
 import { formatMessageBody } from "../utils/chat-message";
 
@@ -16,7 +15,7 @@ const textureLoader = new THREE.TextureLoader();
 
 const CHAT_MESSAGE_TEXTURE_SIZE = 1024;
 
-const messageBodyDom = (body, from, fromSessionId, includeFromLink, history) => {
+const messageBodyDom = (body, from, fromSessionId, onViewProfile) => {
   const { formattedBody, multiline, monospace } = formatMessageBody(body);
   const wrapStyle = multiline ? styles.messageWrapMulti : styles.messageWrap;
   const messageBodyClasses = {
@@ -24,8 +23,8 @@ const messageBodyDom = (body, from, fromSessionId, includeFromLink, history) => 
     [styles.messageBodyMulti]: multiline,
     [styles.messageBodyMono]: monospace
   };
-  const includeClientLink = includeFromLink && fromSessionId && history && NAF.clientId !== fromSessionId;
-  const onFromClick = includeClientLink ? () => navigateToClientInfo(history, fromSessionId) : () => {};
+  const includeClientLink = onViewProfile && fromSessionId && history && NAF.clientId !== fromSessionId;
+  const onFromClick = includeClientLink ? () => onViewProfile(fromSessionId) : () => {};
 
   return (
     <div className={wrapStyle}>
@@ -198,7 +197,7 @@ export default function ChatMessage(props) {
           onClick={() => spawnChatMessage(props.body)}
         />
       )}
-      <p>{messageBodyDom(props.body, props.name, props.sessionId, props.includeFromLink, props.history)}</p>
+      <p>{messageBodyDom(props.body, props.name, props.sessionId, props.onViewProfile)}</p>
     </div>
   );
 }
@@ -208,7 +207,6 @@ ChatMessage.propTypes = {
   maySpawn: PropTypes.bool,
   body: PropTypes.string,
   sessionId: PropTypes.string,
-  history: PropTypes.object,
   className: PropTypes.string,
-  includeFromLink: PropTypes.bool
+  onViewProfile: PropTypes.func
 };

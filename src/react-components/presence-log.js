@@ -16,7 +16,8 @@ export default class PresenceLog extends Component {
     inRoom: PropTypes.bool,
     hubId: PropTypes.string,
     history: PropTypes.object,
-    presences: PropTypes.object
+    presences: PropTypes.object,
+    onViewProfile: PropTypes.func
   };
 
   constructor(props) {
@@ -46,6 +47,7 @@ export default class PresenceLog extends Component {
             sessionId={e.sessionId}
             includeFromLink={this.props.inRoom && !isBot}
             history={this.props.history}
+            onViewProfile={this.props.onViewProfile}
           />
         );
       case "image":

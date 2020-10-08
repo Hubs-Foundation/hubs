@@ -20,7 +20,7 @@ import {
 } from "../utils/history";
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
-import { getClientInfoClientId } from "./client-info-dialog";
+import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
 
 import { getMessages } from "../utils/i18n";
@@ -94,7 +94,7 @@ import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
-import { PeopleSidebarContainer } from "./room/PeopleSidebarContainer";
+import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1161,6 +1161,13 @@ class UIRoot extends Component {
     );
   };
 
+  getSelectedUser() {
+    const selectedUserId = this.state.selectedUserId;
+    const presence = this.props.presences[selectedUserId];
+    const micPresences = getMicrophonePresences();
+    return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
+  }
+
   render() {
     const rootStyles = {
       [styles.ui]: true,
@@ -1290,8 +1297,6 @@ class UIRoot extends Component {
     const showMediaBrowser =
       mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
 
-    const clientInfoClientId = getClientInfoClientId(this.props.history.location);
-    const showClientInfo = !!clientInfoClientId;
     const showObjectInfo = !!(this.state.objectInfo && this.state.objectInfo.object3D);
 
     const discordBridges = this.discordBridges();
@@ -1706,17 +1711,6 @@ class UIRoot extends Component {
                       this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })
                     }
                   />
-                  {showClientInfo && (
-                    <ClientInfoDialog
-                      clientId={clientInfoClientId}
-                      onClose={this.closeDialog}
-                      history={this.props.history}
-                      presences={this.props.presences}
-                      hubChannel={this.props.hubChannel}
-                      showNonHistoriedDialog={this.showNonHistoriedDialog}
-                      performConditionalSignIn={this.props.performConditionalSignIn}
-                    />
-                  )}
                   {this.state.objectInfo && (
                     <ObjectInfoDialog
                       scene={this.props.scene}
@@ -1742,6 +1736,7 @@ class UIRoot extends Component {
                         entries={presenceLogEntries}
                         hubId={this.props.hub.hub_id}
                         history={this.props.history}
+                        onViewProfile={sessionId => this.setState({ sidebarId: "user", selectedUserId: sessionId })}
                       />
                     )}
                   {entered &&
@@ -1862,6 +1857,8 @@ class UIRoot extends Component {
                         mySessionId={this.props.sessionId}
                         presences={this.props.presences}
                         onClose={() => this.setState({ sidebarId: null })}
+                        showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        performConditionalSignIn={this.props.performConditionalSignIn}
                       />
                     )}
                     {this.state.sidebarId === "profile" && (
@@ -1873,6 +1870,15 @@ class UIRoot extends Component {
                         onClose={() => this.setState({ sidebarId: null })}
                         store={this.props.store}
                         mediaSearchStore={this.props.mediaSearchStore}
+                      />
+                    )}
+                    {this.state.sidebarId === "user" && (
+                      <ClientInfoDialog
+                        user={this.getSelectedUser()}
+                        hubChannel={this.props.hubChannel}
+                        performConditionalSignIn={this.props.performConditionalSignIn}
+                        onClose={() => this.setState({ sidebarId: null, selectedUserId: null })}
+                        showNonHistoriedDialog={this.showNonHistoriedDialog}
                       />
                     )}
                   </>

@@ -3,7 +3,13 @@ import PropTypes from "prop-types";
 import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
-import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
+import ClientInfoDialog from "../client-info-dialog";
+
+export function userFromPresence(sessionId, presence, micPresences, mySessionId) {
+  const meta = presence.metas[presence.metas.length - 1];
+  const micPresence = micPresences.get(sessionId);
+  return { id: sessionId, isMe: mySessionId === sessionId, micPresence, ...meta };
+}
 
 function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   const [people, setPeople] = useState([]);
@@ -17,9 +23,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
 
         setPeople(
           Object.entries(presences).map(([id, presence]) => {
-            const meta = presence.metas[presence.metas.length - 1];
-            const micPresence = micPresences.get(id);
-            return { id, isMe: mySessionId === id, micPresence, ...meta };
+            return userFromPresence(id, presence, micPresences, mySessionId);
           })
         );
 
@@ -78,6 +82,8 @@ export function PeopleSidebarContainer({
   displayNameOverride,
   store,
   mediaSearchStore,
+  performConditionalSignIn,
+  showNonHistoriedDialog,
   onClose
 }) {
   const [selectedPerson, setSelectedPerson] = useState(null);
@@ -97,7 +103,16 @@ export function PeopleSidebarContainer({
         />
       );
     } else {
-      return <UserProfileSidebarContainer user={selectedPerson} onBack={() => setSelectedPerson(null)} />;
+      return (
+        <ClientInfoDialog
+          user={selectedPerson}
+          hubChannel={hubChannel}
+          performConditionalSignIn={performConditionalSignIn}
+          showBackButton
+          onBack={() => setSelectedPerson(null)}
+          showNonHistoriedDialog={showNonHistoriedDialog}
+        />
+      );
     }
   }
 
@@ -121,5 +136,7 @@ PeopleSidebarContainer.propTypes = {
   onOpenAvatarSettings: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   mySessionId: PropTypes.string.isRequired,
-  presences: PropTypes.object.isRequired
+  presences: PropTypes.object.isRequired,
+  performConditionalSignIn: PropTypes.func.isRequired,
+  showNonHistoriedDialog: PropTypes.func.isRequired
 };
