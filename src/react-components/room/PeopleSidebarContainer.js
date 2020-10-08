@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
-import { navigateToClientInfo } from "../presence-list";
+import ProfileEntryPanel from "../profile-entry-panel";
+import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
 
 function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   const [people, setPeople] = useState([]);
@@ -37,20 +38,8 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   return people;
 }
 
-export function PeopleSidebarContainer({ hubChannel, history, presences, mySessionId, onOpenAvatarSettings, onClose }) {
+function PeopleListContainer({ hubChannel, presences, mySessionId, onSelectPerson, onClose }) {
   const people = usePeopleList(presences, mySessionId);
-
-  // TODO: Dont use state routes for profiles
-  const onSelectPerson = useCallback(
-    person => {
-      if (person.id === mySessionId) {
-        onOpenAvatarSettings();
-      } else if (!person.context.discord) {
-        navigateToClientInfo(history, person.id);
-      }
-    },
-    [history, mySessionId, onOpenAvatarSettings]
-  );
 
   const onMuteAll = useCallback(
     () => {
@@ -74,11 +63,63 @@ export function PeopleSidebarContainer({ hubChannel, history, presences, mySessi
   );
 }
 
+PeopleListContainer.propTypes = {
+  onSelectPerson: PropTypes.func.isRequired,
+  hubChannel: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired,
+  mySessionId: PropTypes.string.isRequired,
+  presences: PropTypes.object.isRequired
+};
+
+export function PeopleSidebarContainer({
+  hubChannel,
+  presences,
+  mySessionId,
+  displayNameOverride,
+  store,
+  mediaSearchStore,
+  onClose
+}) {
+  const [selectedPerson, setSelectedPerson] = useState(null);
+
+  if (selectedPerson) {
+    if (selectedPerson.id === mySessionId) {
+      return (
+        <ProfileEntryPanel
+          containerType="sidebar"
+          displayNameOverride={displayNameOverride}
+          store={store}
+          mediaSearchStore={mediaSearchStore}
+          finished={() => setSelectedPerson(null)}
+          history={history}
+          showBackButton
+          onBack={() => setSelectedPerson(null)}
+        />
+      );
+    } else {
+      return <UserProfileSidebarContainer user={selectedPerson} onBack={() => setSelectedPerson(null)} />;
+    }
+  }
+
+  return (
+    <PeopleListContainer
+      onSelectPerson={setSelectedPerson}
+      onClose={onClose}
+      hubChannel={hubChannel}
+      presences={presences}
+      mySessionId={mySessionId}
+    />
+  );
+}
+
 PeopleSidebarContainer.propTypes = {
+  displayNameOverride: PropTypes.string,
+  store: PropTypes.object.isRequired,
+  mediaSearchStore: PropTypes.object.isRequired,
   hubChannel: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
   onOpenAvatarSettings: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   mySessionId: PropTypes.string.isRequired,
-  presences: PropTypes.array.isRequired
+  presences: PropTypes.object.isRequired
 };

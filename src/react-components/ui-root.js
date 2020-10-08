@@ -1260,7 +1260,8 @@ class UIRoot extends Component {
                     this.pushHistoryState("entry_step", "mic_grant");
                   }
                 }}
-                onClose={() => this.pushHistoryState()}
+                showBackButton
+                onBack={() => this.pushHistoryState()}
                 store={this.props.store}
                 mediaSearchStore={this.props.mediaSearchStore}
                 avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1354,7 +1355,7 @@ class UIRoot extends Component {
             id: "user-profile",
             label: "Change Name & Avatar",
             icon: AvatarIcon,
-            onClick: () => this.pushHistoryState("overlay", "profile")
+            onClick: () => this.setState({ sidebarId: "profile" })
           },
           {
             id: "favorite-rooms",
@@ -1520,22 +1521,6 @@ class UIRoot extends Component {
                   onLoadClicked={this.props.onPreloadLoadClicked}
                 />
               )}
-            <StateRoute
-              stateKey="overlay"
-              stateValue="profile"
-              history={this.props.history}
-              render={props => (
-                <ProfileEntryPanel
-                  {...props}
-                  displayNameOverride={displayNameOverride}
-                  finished={() => this.pushHistoryState()}
-                  onClose={() => this.pushHistoryState()}
-                  store={this.props.store}
-                  mediaSearchStore={this.props.mediaSearchStore}
-                  avatarId={props.location.state.detail && props.location.state.detail.avatarId}
-                />
-              )}
-            />
             <StateRoute
               stateKey="overlay"
               stateValue="avatar-editor"
@@ -1869,14 +1854,25 @@ class UIRoot extends Component {
                     )}
                     {this.state.sidebarId === "people" && (
                       <PeopleSidebarContainer
+                        displayNameOverride={displayNameOverride}
+                        store={this.props.store}
+                        mediaSearchStore={this.props.mediaSearchStore}
                         hubChannel={this.props.hubChannel}
                         history={this.props.history}
                         mySessionId={this.props.sessionId}
                         presences={this.props.presences}
                         onClose={() => this.setState({ sidebarId: null })}
-                        onOpenAvatarSettings={() => {
-                          this.pushHistoryState("overlay", "profile");
-                        }}
+                      />
+                    )}
+                    {this.state.sidebarId === "profile" && (
+                      <ProfileEntryPanel
+                        history={this.props.history}
+                        containerType="sidebar"
+                        displayNameOverride={displayNameOverride}
+                        finished={() => this.setState({ sidebarId: null })}
+                        onClose={() => this.setState({ sidebarId: null })}
+                        store={this.props.store}
+                        mediaSearchStore={this.props.mediaSearchStore}
                       />
                     )}
                   </>

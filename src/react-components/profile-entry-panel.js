@@ -19,7 +19,9 @@ class ProfileEntryPanel extends Component {
     intl: PropTypes.object,
     history: PropTypes.object,
     avatarId: PropTypes.string,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    onBack: PropTypes.func,
+    showBackButton: PropTypes.bool
   };
 
   static defaultProps = {
@@ -137,7 +139,9 @@ class ProfileEntryPanel extends Component {
         this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
       },
       onSubmit: this.saveStateAndFinish,
-      onBack: () => this.props.onClose()
+      showBackButton: this.props.showBackButton,
+      onClose: this.props.onClose,
+      onBack: this.props.onBack
     };
 
     if (this.props.containerType === "sidebar") {

@@ -1,8 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Sidebar, BackButton } from "../sidebar/Sidebar";
-import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
-import { IconButton } from "../input/IconButton";
 import { Button } from "../input/Button";
 import styles from "./UserProfileSidebar.scss";
 import { AvatarPreviewCanvas } from "../avatar/AvatarPreviewCanvas";
