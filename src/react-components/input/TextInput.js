@@ -41,7 +41,7 @@ export const TextInput = memo(
             className
           )}
         >
-          {beforeInput}
+          <div className={styles.beforeInput}>{beforeInput}</div>
           <div className={styles.inputWrapper}>
             <InputElement
               id={id}
@@ -53,8 +53,10 @@ export const TextInput = memo(
               ref={ref}
             />
           </div>
-          {invalid && <WarningIcon className={styles.invalidIcon} />}
-          {afterInput}
+          <div className={styles.afterInput}>
+            {invalid && <WarningIcon className={styles.invalidIcon} />}
+            {afterInput}
+          </div>
         </div>
       );
     }
