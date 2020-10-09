@@ -1,6 +1,5 @@
 import React from "react";
 import { TextAreaInput } from "./TextAreaInput";
-import { Button } from "./Button";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
 import { IconButton } from "./IconButton";
 
