@@ -222,7 +222,7 @@ export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, discordBr
           canSpawnMessages && (
             <>
               <MessageAttachmentButton onChange={onUploadAttachments} />
-              <SpawnMessageButton onClick={onSpawnMessage} />
+              <SpawnMessageButton disabled={message.length === 0} onClick={onSpawnMessage} />
             </>
           )
         }
