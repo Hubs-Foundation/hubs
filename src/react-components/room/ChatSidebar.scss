@@ -102,6 +102,8 @@
 }
 
 :local(.chat-input-icon) {
+  cursor: pointer;
+
   svg {
     *[stroke=\#000] {
       stroke: theme.$darkgrey;
