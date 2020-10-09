@@ -1,0 +1,13 @@
+@use "../styles/theme.scss";
+
+:local(.object) {
+  font-size: theme.$font-size-sm;
+
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
