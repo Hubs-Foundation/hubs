@@ -6,7 +6,7 @@ import {
   SystemMessage,
   ChatMessageList,
   ChatInput,
-  MesssageAttachmentButton,
+  MessageAttachmentButton,
   SpawnMessageButton,
   ChatToolbarButton
 } from "./ChatSidebar";
@@ -17,7 +17,7 @@ const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 
 let uniqueMessageId = 0;
 
-const NEW_MESSSAGE_GROUP_TIMEOUT = 1000 * 60;
+const NEW_MESSAGE_GROUP_TIMEOUT = 1000 * 60;
 
 function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
   if (messageGroups.length === 0) {
@@ -32,7 +32,7 @@ function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
 
   const lastMessage = lastMessageGroup.messages[lastMessageGroup.messages.length - 1];
 
-  return now - lastMessage.timestamp > NEW_MESSSAGE_GROUP_TIMEOUT;
+  return now - lastMessage.timestamp > NEW_MESSAGE_GROUP_TIMEOUT;
 }
 
 function processChatMessage(messageGroups, newMessage) {
@@ -221,7 +221,7 @@ export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, discordBr
         afterInput={
           canSpawnMessages && (
             <>
-              <MesssageAttachmentButton onChange={onUploadAttachments} />
+              <MessageAttachmentButton onChange={onUploadAttachments} />
               <SpawnMessageButton onClick={onSpawnMessage} />
             </>
           )
