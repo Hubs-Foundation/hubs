@@ -1845,6 +1845,7 @@ class UIRoot extends Component {
                             this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
                           }
                         }}
+                        onClose={() => this.setState({ sidebarId: null })}
                       />
                     )}
                     {this.state.sidebarId === "people" && (

@@ -1,6 +1,6 @@
 import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
-import { ObjectsSidebar } from "./ObjectsSidebar";
+import { ObjectsSidebar, ObjectsSidebarItem } from "./ObjectsSidebar";
 
 export default {
   title: "ObjectsSidebar"
@@ -31,10 +31,22 @@ const objects = [
     id: "6",
     name: "VRML 1.0 Specification",
     type: "pdf"
+  },
+  {
+    id: "7",
+    name: "Unknown Object"
   }
 ];
 
-export const Base = () => <RoomLayout sidebar={<ObjectsSidebar objects={objects} />} />;
+export const Base = () => (
+  <RoomLayout
+    sidebar={
+      <ObjectsSidebar objectCount={objects.length}>
+        {objects.map(object => <ObjectsSidebarItem object={object} key={object.id} />)}
+      </ObjectsSidebar>
+    }
+  />
+);
 
 Base.parameters = {
   layout: "fullscreen"

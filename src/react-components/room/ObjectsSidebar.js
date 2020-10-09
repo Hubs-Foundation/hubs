@@ -38,38 +38,39 @@ function getLabel(object) {
   return `${objectTypeNames[object.type] || objectTypeNames.default}: ${object.name}`;
 }
 
-export function ObjectsSidebar({ objects, onSelectObject, onClose }) {
-  return (
-    <Sidebar title={`Objects (${objects.length})`} beforeTitle={<CloseButton onClick={onClose} />}>
-      <List>
-        {objects.map(object => {
-          const ObjectTypeIcon = getObjectIcon(object.type);
+export function ObjectsSidebarItem({ object, ...rest }) {
+  const ObjectTypeIcon = getObjectIcon(object.type);
 
-          return (
-            <ButtonListItem
-              className={styles.object}
-              key={object.id}
-              type="button"
-              aria-label={getLabel(object)}
-              onClick={e => onSelectObject(object, e)}
-            >
-              <ObjectTypeIcon />
-              <p>{object.name}</p>
-            </ButtonListItem>
-          );
-        })}
-      </List>
+  return (
+    <ButtonListItem {...rest} className={styles.object} type="button" aria-label={getLabel(object)}>
+      <ObjectTypeIcon />
+      <p>{object.name}</p>
+    </ButtonListItem>
+  );
+}
+
+ObjectsSidebarItem.propTypes = {
+  object: PropTypes.shape({
+    id: PropTypes.any.isRequired,
+    name: PropTypes.string.isRequired,
+    type: PropTypes.string
+  })
+};
+
+export function ObjectsSidebar({ children, objectCount, onClose }) {
+  return (
+    <Sidebar title={`Objects (${objectCount})`} beforeTitle={<CloseButton onClick={onClose} />}>
+      <List>{children}</List>
     </Sidebar>
   );
 }
 
 ObjectsSidebar.propTypes = {
-  objects: PropTypes.array,
-  onSelectObject: PropTypes.func,
+  objectCount: PropTypes.number.isRequired,
+  children: PropTypes.node,
   onClose: PropTypes.func
 };
 
 ObjectsSidebar.defaultProps = {
-  objects: [],
-  onSelectObject: () => {}
+  objectCount: 0
 };

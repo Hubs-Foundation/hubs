@@ -1,32 +1,7 @@
 import React, { Component } from "react";
-import { FormattedMessage } from "react-intl";
 import PropTypes from "prop-types";
-import classNames from "classnames";
-import rootStyles from "../assets/stylesheets/ui-root.scss";
-import objectListStyles from "../assets/stylesheets/object-list-styles.scss";
-import styles from "../assets/stylesheets/presence-list.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  SORT_ORDER_VIDEO,
-  SORT_ORDER_AUDIO,
-  SORT_ORDER_IMAGE,
-  SORT_ORDER_PDF,
-  SORT_ORDER_MODEL,
-  SORT_ORDER_UNIDENTIFIED,
-  mediaSortOrder,
-  mediaSort,
-  DISPLAY_IMAGE
-} from "../utils/media-sorting.js";
-import { Sidebar } from "./sidebar/Sidebar";
-
-const THUMBNAIL_TITLE = new Map([
-  [SORT_ORDER_VIDEO, "Video"],
-  [SORT_ORDER_AUDIO, "Audio"],
-  [SORT_ORDER_IMAGE, "Image"],
-  [SORT_ORDER_PDF, "PDF"],
-  [SORT_ORDER_UNIDENTIFIED, "Unknown Media Type"],
-  [SORT_ORDER_MODEL, "Model"]
-]);
+import { mediaSort, getMediaType } from "../utils/media-sorting.js";
+import { ObjectsSidebar, ObjectsSidebarItem } from "./room/ObjectsSidebar";
 
 function getDisplayString(el) {
   // Having a listed-media component does not guarantee the existence of a media-loader component,
@@ -67,7 +42,8 @@ export default class ObjectList extends Component {
   static propTypes = {
     onInspectObject: PropTypes.func,
     onUninspectObject: PropTypes.func,
-    scene: PropTypes.object
+    scene: PropTypes.object,
+    onClose: PropTypes.func
   };
 
   state = {
@@ -97,6 +73,11 @@ export default class ObjectList extends Component {
     this.props.onUninspectObject();
   };
 
+  onFocusObject = object => {
+    AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
+    AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(object.el.object3D, object.el.object3D, 1.5, true);
+  };
+
   updateMediaEntities() {
     const mediaEntities = [...this.props.scene.systems["listed-media"].els];
     mediaEntities.sort(mediaSort);
@@ -105,54 +86,33 @@ export default class ObjectList extends Component {
 
   componentDidUpdate() {}
 
-  domForEntity(el, i) {
-    return (
-      <button
-        aria-label="Show Object Info Panel"
-        key={i}
-        className={objectListStyles.rowNoMargin}
-        onMouseDown={() => {
-          this.props.onInspectObject(el);
-        }}
-        onMouseOut={() => {
-          if (!AFRAME.utils.device.isMobileVR()) {
-            AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
-          }
-        }}
-        onMouseOver={() => {
-          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
-          AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.inspect(el.object3D, el.object3D, 1.5, true);
-        }}
-      >
-        <div title={THUMBNAIL_TITLE.get(mediaSortOrder(el))} className={objectListStyles.icon}>
-          <FontAwesomeIcon icon={DISPLAY_IMAGE.get(mediaSortOrder(el))} />
-        </div>
-        <div className={classNames({ [styles.listItem]: true })}>
-          <div className={styles.presence}>
-            <p>{getDisplayString(el)}</p>
-          </div>
-        </div>
-      </button>
-    );
-  }
-
   render() {
-    const numObjects = (this.state.mediaEntities && this.state.mediaEntities.length) || 0;
+    const objects = (this.state.mediaEntities || []).map((el, i) => ({
+      id: i,
+      name: getDisplayString(el),
+      type: getMediaType(el),
+      el
+    }));
 
     return (
-      <Sidebar title={`Objects (${numObjects})`}>
-        <div className={rootStyles.objectList}>
-          <div className={objectListStyles.contents}>
-            <div className={styles.rows}>
-              {this.state.mediaEntities.length ? (
-                this.state.mediaEntities.map(this.domForEntity.bind(this))
-              ) : (
-                <FormattedMessage id="object-info.no-media" className={styles.listItem} />
-              )}
-            </div>
-          </div>
-        </div>
-      </Sidebar>
+      <ObjectsSidebar objectCount={objects.length} onClose={this.props.onClose}>
+        {objects.map(object => (
+          <ObjectsSidebarItem
+            object={object}
+            key={object.id}
+            onMouseDown={() => {
+              this.props.onInspectObject(object.el);
+            }}
+            onMouseOut={() => {
+              if (!AFRAME.utils.device.isMobileVR()) {
+                AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.uninspect();
+              }
+            }}
+            onMouseOver={() => this.onFocusObject(object)}
+            onFocus={() => this.onFocusObject(object)}
+          />
+        ))}
+      </ObjectsSidebar>
     );
   }
 }
