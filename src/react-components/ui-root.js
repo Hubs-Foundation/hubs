@@ -596,8 +596,6 @@ class UIRoot extends Component {
     let hasAudio = false;
     const { lastUsedMicDeviceId } = this.props.store.state.settings;
 
-    console.log(`Last used input device: ${lastUsedMicDeviceId}`);
-
     // Try to fetch last used mic, if there was one.
     if (lastUsedMicDeviceId) {
       hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { ideal: lastUsedMicDeviceId } } });
@@ -723,16 +721,13 @@ class UIRoot extends Component {
   };
 
   fetchMicDevices = () => {
-    console.log("Available input devices: ");
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
-        const inputDevices = mediaDevices
-          .filter(d => d.kind === "audioinput")
-          .map(d => ({ deviceId: d.deviceId, label: d.label }));
-        inputDevices.forEach(d => console.log(`\t${d.label} (${d.deviceId})`));
         this.setState(
           {
-            micDevices: inputDevices
+            micDevices: mediaDevices
+              .filter(d => d.kind === "audioinput")
+              .map(d => ({ deviceId: d.deviceId, label: d.label }))
           },
           resolve
         );
