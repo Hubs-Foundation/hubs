@@ -5,11 +5,13 @@ import { getMessages } from "./utils/i18n";
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
 import ducky from "./assets/models/DuckyMesh.glb";
+import { EventTarget } from "event-target-shim";
 
 let uiRoot;
 // Handles user-entered messages
-export default class MessageDispatch {
+export default class MessageDispatch extends EventTarget {
   constructor(scene, entryManager, hubChannel, addToPresenceLog, remountUI, mediaSearchStore) {
+    super();
     this.scene = scene;
     this.entryManager = entryManager;
     this.hubChannel = hubChannel;
@@ -18,8 +20,13 @@ export default class MessageDispatch {
     this.mediaSearchStore = mediaSearchStore;
   }
 
+  receive(message) {
+    this.addToPresenceLog(message);
+    this.dispatchEvent(new CustomEvent("message", { detail: message }));
+  }
+
   log = body => {
-    this.addToPresenceLog({ type: "log", body });
+    this.receive({ type: "log", body });
   };
 
   dispatch = message => {
@@ -38,7 +45,7 @@ export default class MessageDispatch {
     const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
 
     if (!entered && (!isGhost || command === "duck")) {
-      this.addToPresenceLog({ type: "log", body: "You must enter the room to use this command." });
+      this.receive({ type: "log", body: "You must enter the room to use this command." });
       return;
     }
 
@@ -53,10 +60,10 @@ export default class MessageDispatch {
       case "fly":
         if (this.scene.systems["hubs-systems"].characterController.fly) {
           this.scene.systems["hubs-systems"].characterController.enableFly(false);
-          this.addToPresenceLog({ type: "log", body: "Fly mode disabled." });
+          this.receive({ type: "log", body: "Fly mode disabled." });
         } else {
           if (this.scene.systems["hubs-systems"].characterController.enableFly(true)) {
-            this.addToPresenceLog({ type: "log", body: "Fly mode enabled." });
+            this.receive({ type: "log", body: "Fly mode enabled." });
           }
         }
         break;
@@ -104,10 +111,10 @@ export default class MessageDispatch {
           if (await isValidSceneUrl(args[0])) {
             err = this.hubChannel.updateScene(args[0]);
             if (err === "unauthorized") {
-              this.addToPresenceLog({ type: "log", body: "You do not have permission to change the scene." });
+              this.receive({ type: "log", body: "You do not have permission to change the scene." });
             }
           } else {
-            this.addToPresenceLog({ type: "log", body: getMessages()["invalid-scene-url"] });
+            this.receive({ type: "log", body: getMessages()["invalid-scene-url"] });
           }
         } else if (this.hubChannel.canOrWillIfCreator("update_hub")) {
           this.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
@@ -117,7 +124,7 @@ export default class MessageDispatch {
       case "rename":
         err = this.hubChannel.rename(args.join(" "));
         if (err === "unauthorized") {
-          this.addToPresenceLog({ type: "log", body: "You do not have permission to rename this room." });
+          this.receive({ type: "log", body: "You do not have permission to rename this room." });
         }
         break;
       case "capture":

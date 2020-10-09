@@ -44,4 +44,37 @@
       }
     }
   }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:disabled {
+    color: theme.$grey;
+    cursor: not-allowed;
+
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$grey;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$grey;
+      }
+    }
+  }
+
+  // For file upload buttons
+  input {
+    opacity: 0;
+    width: 0;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  :global(.keyboard-user) &:focus-within {
+    box-shadow: 0 0 0 2px theme.$black;
+  }
 }

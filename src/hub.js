@@ -502,6 +502,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   console.log(`Janus host: ${hub.host}:${hub.port}`);
 
   remountUI({
+    messageDispatch: messageDispatch,
     onSendMessage: messageDispatch.dispatch,
     onLoaded: () => store.executeOnLoadActions(scene),
     onMediaSearchResultEntrySelected: (entry, selectAction) =>
@@ -1355,7 +1356,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   meta.presence === "room" &&
                   meta.profile.displayName
                 ) {
-                  addToPresenceLog({
+                  messageDispatch.receive({
                     type: "entered",
                     presence: meta.presence,
                     name: meta.profile.displayName
@@ -1367,7 +1368,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   meta.profile &&
                   currentMeta.profile.displayName !== meta.profile.displayName
                 ) {
-                  addToPresenceLog({
+                  messageDispatch.receive({
                     type: "display_name_changed",
                     oldName: currentMeta.profile.displayName,
                     newName: meta.profile.displayName
@@ -1378,7 +1379,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const meta = info.metas[0];
 
                 if (meta.presence && meta.profile.displayName) {
-                  addToPresenceLog({
+                  messageDispatch.receive({
                     type: "join",
                     presence: meta.presence,
                     name: meta.profile.displayName
@@ -1408,7 +1409,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const meta = info.metas[0];
 
             if (meta.profile.displayName) {
-              addToPresenceLog({
+              messageDispatch.receive({
                 type: "leave",
                 name: meta.profile.displayName
               });
@@ -1543,13 +1544,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     const name = getAuthor();
     const maySpawn = scene.is("entered");
 
-    const incomingMessage = { name, type, body, maySpawn, sessionId: session_id };
+    const incomingMessage = {
+      name,
+      type,
+      body,
+      maySpawn,
+      sessionId: session_id,
+      sent: session_id === socket.params().session_id
+    };
 
     if (scene.is("vr-mode")) {
       createInWorldLogMessage(incomingMessage);
     }
 
-    addToPresenceLog(incomingMessage);
+    messageDispatch.receive(incomingMessage);
   });
 
   hubPhxChannel.on("hub_refresh", ({ session_id, hubs, stale_fields }) => {
@@ -1568,7 +1576,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateEnvironmentForHub(hub, entryManager);
       });
 
-      addToPresenceLog({
+      messageDispatch.receive({
         type: "scene_changed",
         name: displayName,
         sceneName: hub.scene ? hub.scene.name : "a custom URL"
@@ -1592,7 +1600,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       history.replace({ pathname, search, state });
 
-      addToPresenceLog({
+      messageDispatch.receive({
         type: "hub_name_changed",
         name: displayName,
         hubName: hub.name

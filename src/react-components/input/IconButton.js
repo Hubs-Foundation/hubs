@@ -2,13 +2,18 @@ import React, { forwardRef, memo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./IconButton.scss";
+import textInputStyles from "./TextInput.scss";
 
 export const IconButton = memo(
-  forwardRef(({ className, children, ...rest }, ref) => {
+  forwardRef(({ className, as: ButtonComponent, children, ...rest }, ref) => {
     return (
-      <button className={classNames(styles.iconButton, className)} {...rest} ref={ref}>
+      <ButtonComponent
+        className={classNames(styles.iconButton, textInputStyles.iconButton, className)}
+        {...rest}
+        ref={ref}
+      >
         {children}
-      </button>
+      </ButtonComponent>
     );
   })
 );
@@ -16,4 +21,8 @@ export const IconButton = memo(
 IconButton.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node
+};
+
+IconButton.defaultProps = {
+  as: "button"
 };

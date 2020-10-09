@@ -49,7 +49,6 @@ import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
-import InWorldChatBox from "./in-world-chat-box.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
@@ -79,6 +78,7 @@ import { MicPermissionsModal } from "./room/MicPermissionsModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
+import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as SceneIcon } from "./icons/Scene.svg";
@@ -222,7 +222,8 @@ class UIRoot extends Component {
     objectInfo: null,
     objectSrc: "",
     isObjectListExpanded: false,
-    isPresenceListExpanded: false
+    isPresenceListExpanded: false,
+    sidebarId: null
   };
 
   constructor(props) {
@@ -1721,7 +1722,7 @@ class UIRoot extends Component {
                       }}
                     />
                   )}
-                  {enteredOrWatchingOrPreload &&
+                  {this.state.sidebarId !== "chat" &&
                     this.props.hub && (
                       <PresenceLog
                         inRoom={true}
@@ -1748,17 +1749,6 @@ class UIRoot extends Component {
                         tip={hasDiscordBridges ? "discord" : "embed"}
                         broadcastTarget={discordSnippet}
                         onClose={() => this.confirmBroadcastedRoom()}
-                      />
-                    )}
-                  {enteredOrWatchingOrPreload &&
-                    !this.state.objectInfo &&
-                    !this.state.frozen && (
-                      <InWorldChatBox
-                        discordBridges={discordBridges}
-                        onSendMessage={this.sendMessage}
-                        onObjectCreated={this.createObject}
-                        enableSpawning={entered}
-                        history={this.props.history}
                       />
                     )}
                   {this.state.frozen && (
@@ -1869,8 +1859,28 @@ class UIRoot extends Component {
                   )}
                 </>
               }
+              sidebar={
+                this.state.sidebarId === "chat" && (
+                  <ChatSidebarContainer
+                    occupantCount={this.occupantCount()}
+                    discordBridges={discordBridges}
+                    canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
+                    onUploadFile={this.createObject}
+                    onClose={() => this.setState({ sidebarId: null })}
+                  />
+                )
+              }
               modal={renderEntryFlow && entryDialog}
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
+              toolbarCenter={
+                <ChatToolbarButtonContainer
+                  onClick={() =>
+                    this.setState(({ sidebarId }) => ({
+                      sidebarId: sidebarId === "chat" ? null : "chat"
+                    }))
+                  }
+                />
+              }
               toolbarRight={
                 <>
                   {entered &&
@@ -1910,7 +1920,15 @@ function UIRootHooksWrapper(props) {
     };
   }, []);
 
-  return <UIRoot {...props} />;
+  return (
+    <ChatContextProvider messageDispatch={props.messageDispatch}>
+      <UIRoot {...props} />
+    </ChatContextProvider>
+  );
 }
+
+UIRootHooksWrapper.propTypes = {
+  messageDispatch: PropTypes.object
+};
 
 export default UIRootHooksWrapper;

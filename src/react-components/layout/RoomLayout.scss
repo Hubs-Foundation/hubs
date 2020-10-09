@@ -25,6 +25,7 @@
   grid-column-start: sidebar;
   background-color: theme.$white;
   height: 100%;
+  overflow: hidden;
   width: 450px;
   pointer-events: auto;
 
@@ -41,6 +42,7 @@
 }
 
 :local(.viewport) {
+  position: relative;
   grid-row-start: viewport;
 }
 

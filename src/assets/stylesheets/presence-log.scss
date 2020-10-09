@@ -11,6 +11,7 @@
   margin-top: 90px;
   overflow: hidden;
   width: 100%;
+  box-sizing: content-box;
 
   :local(.presence-log-entry) {
     @extend %default-font;
@@ -144,12 +145,8 @@
 
 :local(.presence-log-in-room) {
   position: absolute;
-  bottom: 64px;
-  z-index: 1;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  width: 95%;
+  left: 20px;
+  bottom: 20px;
   max-width: 700px;
 
   :local(.presence-log-entry) {

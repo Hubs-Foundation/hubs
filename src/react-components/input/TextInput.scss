@@ -4,7 +4,6 @@ $input-height: 40px;
 
 :local(.outer-wrapper) {
   display: flex;
-  align-items: center;
   position: relative;
   height: $input-height;
   border: 1px solid theme.$darkgrey;
@@ -16,23 +15,25 @@ $input-height: 40px;
     border-color: theme.$blue;
     box-shadow: 0 0 0 2px theme.$blue;
   }
+}
 
-  button {
+:local(.input-wrapper) {
+  flex: 1;
+  height: 100%;
+}
+
+:local(.before-input), :local(.after-input) {
+  display: flex;
+  height: $input-height;
+  align-items: center;
+
+  button:not(:local(.icon-button)) {
     height: 100%;
     border-radius: 0;
     min-width: auto;
     padding: 0 16px;
     border-width: 0;
     min-height: auto;
-
-    &:first-child {
-      border-right-width: 1px;
-    }
-
-    &:last-child {
-      border-left-width: 1px;
-    }
-    
 
     :global(.keyboard-user) &:focus {
       border-width: 0;
@@ -52,11 +53,27 @@ $input-height: 40px;
       }
     }
   }
+
+  :local(.icon-button) {
+    padding: 0;
+    margin-left: 8px;
+    
+    &:last-child {
+      margin-right: 8px;
+    }
+  }
 }
 
-:local(.input-wrapper) {
-  flex: 1;
-  height: 100%;
+:local(.before-input) {
+  button:not(:local(.icon-button)) {
+    border-right-width: 1px;
+  }
+}
+
+:local(.after-input) {
+  button:not(:local(.icon-button)) {
+    border-left-width: 1px;
+  }
 }
 
 :local(.disabled) {
