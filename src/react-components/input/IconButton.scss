@@ -49,6 +49,21 @@
     outline: none;
   }
 
+  &:disabled {
+    color: theme.$grey;
+    cursor: not-allowed;
+
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$grey;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$grey;
+      }
+    }
+  }
+
   // For file upload buttons
   input {
     opacity: 0;

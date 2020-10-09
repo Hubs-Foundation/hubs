@@ -88,7 +88,7 @@ export default class PresenceLog extends Component {
         return (
           systemMessage && (
             <div key={e.key} className={classNames(entryClasses)}>
-              <p>{systemMessage}</p>
+              <div>{systemMessage}</div>
             </div>
           )
         );

@@ -21,7 +21,7 @@ export function SpawnMessageButton(props) {
   );
 }
 
-export function MesssageAttachmentButton(props) {
+export function MessageAttachmentButton(props) {
   return (
     <>
       <IconButton as="label" className={styles.chatInputIcon}>

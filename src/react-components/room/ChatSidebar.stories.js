@@ -7,7 +7,7 @@ import {
   ChatMessageList,
   ChatInput,
   SpawnMessageButton,
-  MesssageAttachmentButton
+  MessageAttachmentButton
 } from "./ChatSidebar";
 import imgSrc from "../../assets/background.jpg";
 import videoSrc from "../../assets/video/home.mp4";
@@ -66,7 +66,7 @@ export const Base = () => (
         <ChatInput
           afterInput={
             <>
-              <MesssageAttachmentButton />
+              <MessageAttachmentButton />
               <SpawnMessageButton />
             </>
           }
