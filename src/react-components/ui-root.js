@@ -952,6 +952,8 @@ class UIRoot extends Component {
     }
 
     sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
+    sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
+    sceneEl.camera.updateProjectionMatrix();
 
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
   }
@@ -969,6 +971,8 @@ class UIRoot extends Component {
       }
 
       sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
+      sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
+      sceneEl.camera.updateProjectionMatrix();
 
       return {
         sidebarId: nextSidebarId,
