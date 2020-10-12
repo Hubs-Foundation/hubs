@@ -40,6 +40,7 @@ function getDisplayString(el) {
 
 export default class ObjectList extends Component {
   static propTypes = {
+    selectedObject: PropTypes.object,
     onInspectObject: PropTypes.func,
     onUninspectObject: PropTypes.func,
     scene: PropTypes.object,
@@ -95,7 +96,11 @@ export default class ObjectList extends Component {
     }));
 
     return (
-      <ObjectsSidebar objectCount={objects.length} onClose={this.props.onClose}>
+      <ObjectsSidebar
+        objectCount={objects.length}
+        onClose={this.props.onClose}
+        objectSelected={!!this.props.selectedObject}
+      >
         {objects.map(object => (
           <ObjectsSidebarItem
             object={object}

@@ -23,11 +23,9 @@
 
 :local(.sidebar) {
   grid-column-start: sidebar;
-  background-color: theme.$white;
   height: 100%;
   overflow: hidden;
   width: 450px;
-  pointer-events: auto;
 
   @media(max-width: theme.$breakpoint-md - 1) {
     position: fixed;

@@ -951,7 +951,7 @@ class UIRoot extends Component {
       sceneEl.classList.remove(roomLayoutStyles.sidebarOpen);
     }
 
-    sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight);
+    sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
 
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
   }
@@ -968,7 +968,7 @@ class UIRoot extends Component {
         sceneEl.classList.remove(roomLayoutStyles.sidebarOpen);
       }
 
-      sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight);
+      sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
 
       return {
         sidebarId: nextSidebarId,
@@ -1866,6 +1866,7 @@ class UIRoot extends Component {
                     )}
                     {this.state.sidebarId === "objects" && (
                       <ObjectList
+                        selectedObject={this.state.objectInfo}
                         scene={this.props.scene}
                         onInspectObject={el => switchToInspectingObject(el)}
                         onUninspectObject={() => {
