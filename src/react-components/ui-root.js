@@ -684,12 +684,15 @@ class UIRoot extends Component {
     await this.fetchMicDevices();
 
     // we should definitely have an audioTrack at this point unless they denied mic access
-    if (this.state.mediaStream) {
-      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(this.state.mediaStream));
+    if (this.state.audioTrack) {
+      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForAudioTrack(this.state.audioTrack));
       if (micDeviceId) {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
+        console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
       }
       this.props.scene.emit("local-media-stream-created");
+    } else {
+      console.log("No available audio tracks");
     }
   };
 
@@ -744,16 +747,20 @@ class UIRoot extends Component {
     return !!this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
   };
 
-  micLabelForMediaStream = mediaStream => {
-    return (mediaStream && mediaStream.getAudioTracks().length > 0 && mediaStream.getAudioTracks()[0].label) || "";
+  micLabelForAudioTrack = audioTrack => {
+    return (audioTrack && audioTrack.label) || "";
   };
 
   selectedMicLabel = () => {
-    return this.micLabelForMediaStream(this.state.mediaStream);
+    return this.micLabelForAudioTrack(this.state.audioTrack);
   };
 
   micDeviceIdForMicLabel = label => {
     return this.state.micDevices.filter(d => d.label === label).map(d => d.deviceId)[0];
+  };
+
+  micLabelForDeviceId = deviceId => {
+    return this.state.micDevices.filter(d => d.deviceId === deviceId).map(d => d.label)[0];
   };
 
   selectedMicDeviceId = () => {
@@ -786,8 +793,8 @@ class UIRoot extends Component {
     const mediaStream = this.state.mediaStream;
 
     if (mediaStream) {
-      if (mediaStream.getAudioTracks().length > 0) {
-        console.log(`Using microphone: ${mediaStream.getAudioTracks()[0].label}`);
+      if (this.state.audioTrack) {
+        console.log(`Using microphone: ${this.state.audioTrack.label}`);
       }
 
       if (mediaStream.getVideoTracks().length > 0) {
