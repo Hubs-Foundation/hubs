@@ -38,10 +38,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-
-  @media(max-width: theme.$breakpoint-md - 1) {
-    overflow-y: auto;
-  }
+  overflow-y: auto;
 }
 
 :local(.back-button) {
