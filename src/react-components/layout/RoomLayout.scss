@@ -66,3 +66,14 @@
     pointer-events: auto;
   }
 }
+
+:local(.scene) {
+  width: auto;
+  height: auto;
+}
+
+:local(.sidebar-open) {
+  @media(min-width: theme.$breakpoint-md) {
+    right: 450px;
+  }
+}

@@ -69,6 +69,7 @@ import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
 import "./styles/global.scss";
 import { RoomLayout } from "./layout/RoomLayout";
+import roomLayoutStyles from "./layout/RoomLayout.scss";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { ToolbarButton } from "./input/ToolbarButton";
 import { RoomEntryModal } from "./room/RoomEntryModal";
@@ -941,6 +942,42 @@ class UIRoot extends Component {
 
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
+  setSidebar(sidebarId, otherState) {
+    const sceneEl = this.props.scene;
+
+    if (sidebarId) {
+      sceneEl.classList.add(roomLayoutStyles.sidebarOpen);
+    } else {
+      sceneEl.classList.remove(roomLayoutStyles.sidebarOpen);
+    }
+
+    sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight);
+
+    this.setState({ sidebarId, selectedUserId: null, ...otherState });
+  }
+
+  toggleSidebar(sidebarId, otherState) {
+    const sceneEl = this.props.scene;
+
+    this.setState(({ sidebarId: curSidebarId }) => {
+      const nextSidebarId = curSidebarId === sidebarId ? null : sidebarId;
+
+      if (nextSidebarId) {
+        sceneEl.classList.add(roomLayoutStyles.sidebarOpen);
+      } else {
+        sceneEl.classList.remove(roomLayoutStyles.sidebarOpen);
+      }
+
+      sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight);
+
+      return {
+        sidebarId: nextSidebarId,
+        selectedUserId: null,
+        ...otherState
+      };
+    });
+  }
+
   renderInterstitialPrompt = () => {
     return (
       <div className={styles.interstitial} onClick={() => this.props.onInterstitialPromptClicked()}>
@@ -1360,7 +1397,7 @@ class UIRoot extends Component {
             id: "user-profile",
             label: "Change Name & Avatar",
             icon: AvatarIcon,
-            onClick: () => this.setState({ sidebarId: "profile" })
+            onClick: () => this.setSidebar("profile")
           },
           {
             id: "favorite-rooms",
@@ -1580,11 +1617,7 @@ class UIRoot extends Component {
                     {showObjectList && (
                       <ContentMenuButton
                         active={this.state.sidebarId === "objects"}
-                        onClick={() =>
-                          this.setState(({ sidebarId }) => ({
-                            sidebarId: sidebarId === "objects" ? null : "objects"
-                          }))
-                        }
+                        onClick={() => this.toggleSidebar("objects")}
                       >
                         <ObjectsIcon />
                         <span>Objects</span>
@@ -1593,11 +1626,7 @@ class UIRoot extends Component {
                     {showPresenceList && (
                       <ContentMenuButton
                         active={this.state.sidebarId === "people"}
-                        onClick={() =>
-                          this.setState(({ sidebarId }) => ({
-                            sidebarId: sidebarId === "people" ? null : "people"
-                          }))
-                        }
+                        onClick={() => this.toggleSidebar("people")}
                       >
                         <PeopleIcon />
                         <span>People</span>
@@ -1736,7 +1765,7 @@ class UIRoot extends Component {
                         entries={presenceLogEntries}
                         hubId={this.props.hub.hub_id}
                         history={this.props.history}
-                        onViewProfile={sessionId => this.setState({ sidebarId: "user", selectedUserId: sessionId })}
+                        onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                       />
                     )}
                   {entered &&
@@ -1832,7 +1861,7 @@ class UIRoot extends Component {
                         discordBridges={discordBridges}
                         canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
                         onUploadFile={this.createObject}
-                        onClose={() => this.setState({ sidebarId: null })}
+                        onClose={() => this.setSidebar(null)}
                       />
                     )}
                     {this.state.sidebarId === "objects" && (
@@ -1845,7 +1874,7 @@ class UIRoot extends Component {
                             this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
                           }
                         }}
-                        onClose={() => this.setState({ sidebarId: null })}
+                        onClose={() => this.setSidebar(null)}
                       />
                     )}
                     {this.state.sidebarId === "people" && (
@@ -1857,7 +1886,7 @@ class UIRoot extends Component {
                         history={this.props.history}
                         mySessionId={this.props.sessionId}
                         presences={this.props.presences}
-                        onClose={() => this.setState({ sidebarId: null })}
+                        onClose={() => this.setSidebar(null)}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
                         performConditionalSignIn={this.props.performConditionalSignIn}
                       />
@@ -1867,8 +1896,8 @@ class UIRoot extends Component {
                         history={this.props.history}
                         containerType="sidebar"
                         displayNameOverride={displayNameOverride}
-                        finished={() => this.setState({ sidebarId: null })}
-                        onClose={() => this.setState({ sidebarId: null })}
+                        finished={() => this.setSidebar(null)}
+                        onClose={() => this.setSidebar(null)}
                         store={this.props.store}
                         mediaSearchStore={this.props.mediaSearchStore}
                       />
@@ -1878,7 +1907,7 @@ class UIRoot extends Component {
                         user={this.getSelectedUser()}
                         hubChannel={this.props.hubChannel}
                         performConditionalSignIn={this.props.performConditionalSignIn}
-                        onClose={() => this.setState({ sidebarId: null, selectedUserId: null })}
+                        onClose={() => this.setSidebar(null)}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
                       />
                     )}
@@ -1889,15 +1918,7 @@ class UIRoot extends Component {
               }
               modal={renderEntryFlow && entryDialog}
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
-              toolbarCenter={
-                <ChatToolbarButtonContainer
-                  onClick={() =>
-                    this.setState(({ sidebarId }) => ({
-                      sidebarId: sidebarId === "chat" ? null : "chat"
-                    }))
-                  }
-                />
-              }
+              toolbarCenter={<ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />}
               toolbarRight={
                 <>
                   {entered &&
@@ -1923,19 +1944,27 @@ class UIRoot extends Component {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
 
-  useEffect(() => {
-    const el = document.getElementById("preload-overlay");
-    el.classList.add("loaded");
+  useEffect(
+    () => {
+      const el = document.getElementById("preload-overlay");
+      el.classList.add("loaded");
 
-    // Remove the preload overlay after the animation has finished.
-    const timeout = setTimeout(() => {
-      el.remove();
-    }, 500);
+      const sceneEl = props.scene;
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, []);
+      sceneEl.classList.add(roomLayoutStyles.scene);
+
+      // Remove the preload overlay after the animation has finished.
+      const timeout = setTimeout(() => {
+        el.remove();
+      }, 500);
+
+      return () => {
+        clearTimeout(timeout);
+        sceneEl.classList.remove(roomLayoutStyles.scene);
+      };
+    },
+    [props.scene]
+  );
 
   return (
     <ChatContextProvider messageDispatch={props.messageDispatch}>
@@ -1945,6 +1974,7 @@ function UIRootHooksWrapper(props) {
 }
 
 UIRootHooksWrapper.propTypes = {
+  scene: PropTypes.object.isRequired,
   messageDispatch: PropTypes.object
 };
 
