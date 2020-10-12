@@ -91,8 +91,10 @@
                 </a-entity>
             </template>
             <template id="remote-avatar">
-                <a-entity networked-avatar ik-root player-info matrix-auto-update visible="false">
-                    <a-entity class="camera" matrix-auto-update></a-entity>
+                <a-entity tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info matrix-auto-update visible="false">
+                    <a-entity class="camera" matrix-auto-update>
+                        <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
+                    </a-entity>
 
                     <a-entity class="left-controller" matrix-auto-update></a-entity>
 
@@ -146,6 +148,7 @@
 
                         <template data-name="Spine">
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                                <a-entity class="avatar-inspect-collider" avatar-inspect-collider tags="togglesHoveredActionSet: true;" is-remote-hover-target inspect-button></a-entity>
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
                                 <a-entity class="interactable ui interactable-ui">
                                     <a-entity billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
@@ -392,7 +395,7 @@
                                 is-remote-hover-target
                                 tags="singleActionButton: true;"
                                 deserialize-drawing-button
-                                position="0.250 -0.625 0.001">
+                                position="-0.3 -0.625 0.001">
                                 <a-entity
                                     sprite
                                     icon-button="image: deserialize-action.png; hoverImage: deserialize-action.png"
@@ -552,6 +555,17 @@
                     </a-entity>
                 </a-entity>
             </template>
+
+            <template id="interactable-media-frame">
+                <!--
+                    note we intentionally don't setup the shape or media-frame here since they both don't support dynamic updates
+                    and so must be configured when creating the entity on each client. Since we only support media frames in scenes
+                    for now, this is acceptable, but TODO this will need to be handled if we want to dynamically spawn them.
+                -->
+                <a-entity body-helper="type: kinematic; collisionFilterGroup: 16; collisionFilterMask: 1; disableCollision: true;" >
+                </a-entity>
+            </template>
+
 
             <template id="linked-media">
                 <a-entity
@@ -1060,6 +1074,8 @@
             set-yxz-order
             periodic-full-syncs
             visible="false"
+            tags="inspectable: true; preventAudioBoost: true"
+            inspect-pivot-child-selector="selector:.inspect-pivot"
         >
             <a-entity
                 id="player-hud"
@@ -1160,6 +1176,7 @@
                 set-yxz-order
                 position="0 1.6 0"
             >
+                <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"

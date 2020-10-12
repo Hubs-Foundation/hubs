@@ -3,17 +3,42 @@ import { childMatch, setMatrixWorld, calculateViewingDistance } from "../utils/t
 import { paths } from "./userinput/paths";
 import { getBox } from "../utils/auto-box-collider";
 import qsTruthy from "../utils/qs_truthy";
+import { isTagged } from "../components/tags";
 import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 
-export function getInspectable(child) {
-  let el = child;
-  while (el) {
-    if (el.components && el.components.tags && el.components.tags.data.inspectable) return el;
-    el = el.parentNode;
+function getInspectableInHierarchy(el) {
+  let inspectable = el;
+  while (inspectable) {
+    if (isTagged(inspectable, "inspectable")) {
+      return inspectable.object3D;
+    }
+    inspectable = inspectable.parentNode;
   }
-  return null;
+  console.warn("could not find inspectable in hierarchy");
+  return el.object3D;
+}
+
+function pivotFor(el) {
+  const selector =
+    el.components["inspect-pivot-child-selector"] && el.components["inspect-pivot-child-selector"].data.selector;
+  if (!selector) {
+    return el.object3D;
+  }
+
+  const child = el.querySelector(selector);
+  if (!child) {
+    console.error(`Failed to find pivot for selector: ${selector}`, el);
+    return el.object3D;
+  }
+  return child.object3D;
+}
+
+export function getInspectableAndPivot(el) {
+  const inspectable = getInspectableInHierarchy(el);
+  const pivot = pivotFor(inspectable.el);
+  return { inspectable, pivot };
 }
 
 const decompose = (function() {
@@ -35,14 +60,14 @@ const orbit = (function() {
   const target = new THREE.Object3D();
   const dhQ = new THREE.Quaternion();
   const dvQ = new THREE.Quaternion();
-  return function orbit(object, rig, camera, dh, dv, dz, dt, panY) {
+  return function orbit(pivot, rig, camera, dh, dv, dz, dt, panY) {
     if (!target.parent) {
       // add dummy object to the scene, if this is the first time we call this function
       AFRAME.scenes[0].object3D.add(target);
       target.applyMatrix(IDENTITY); // make sure target gets updated at least once for our matrix optimizations
     }
-    object.updateMatrices();
-    decompose(object.matrixWorld, owp, owq);
+    pivot.updateMatrices();
+    decompose(pivot.matrixWorld, owp, owq);
     decompose(camera.matrixWorld, cwp, cwq);
     rig.getWorldQuaternion(rwq);
 
@@ -69,34 +94,39 @@ const orbit = (function() {
   };
 })();
 
-const moveRigSoCameraLooksAtObject = (function() {
+const moveRigSoCameraLooksAtPivot = (function() {
   const owq = new THREE.Quaternion();
   const owp = new THREE.Vector3();
   const cwq = new THREE.Quaternion();
   const cwp = new THREE.Vector3();
   const oForw = new THREE.Vector3();
   const center = new THREE.Vector3();
+  const defaultBoxMax = new THREE.Vector3(0.3, 0.3, 0.3);
   const target = new THREE.Object3D();
-  return function moveRigSoCameraLooksAtObject(rig, camera, object, distanceMod) {
+  return function moveRigSoCameraLooksAtPivot(rig, camera, inspectable, pivot, distanceMod) {
     if (!target.parent) {
       // add dummy object to the scene, if this is the first time we call this function
       AFRAME.scenes[0].object3D.add(target);
       target.applyMatrix(IDENTITY); // make sure target gets updated at least once for our matrix optimizations
     }
 
-    object.updateMatrices();
-    decompose(object.matrixWorld, owp, owq);
+    pivot.updateMatrices();
+    decompose(pivot.matrixWorld, owp, owq);
     decompose(camera.matrixWorld, cwp, cwq);
     rig.getWorldQuaternion(cwq);
 
-    const box = getBox(object.el, object.el.getObject3D("mesh") || object, true);
+    const box = getBox(inspectable.el, inspectable.el.getObject3D("mesh") || inspectable, true);
+    if (box.min.x === Infinity) {
+      // fix edgecase where inspectable object has no mesh / dimensions
+      box.min.subVectors(owp, defaultBoxMax);
+      box.max.addVectors(owp, defaultBoxMax);
+    }
     box.getCenter(center);
-    const vrMode = object.el.sceneEl.is("vr-mode");
+    const vrMode = inspectable.el.sceneEl.is("vr-mode");
     const dist =
       calculateViewingDistance(
-        object.el.sceneEl.camera.fov,
-        object.el.sceneEl.camera.aspect,
-        object,
+        inspectable.el.sceneEl.camera.fov,
+        inspectable.el.sceneEl.camera.aspect,
         box,
         center,
         vrMode
@@ -104,7 +134,7 @@ const moveRigSoCameraLooksAtObject = (function() {
     target.position.addVectors(
       owp,
       oForw
-        .set(0, 0, 1)
+        .set(0, 0, 1) //TODO: Suspicious that this is called oForw but (0,0,1) is backwards
         .multiplyScalar(dist)
         .applyQuaternion(owq)
     );
@@ -176,7 +206,7 @@ export class CameraSystem {
     this.inspectZoom = 0;
     this.mode = CAMERA_MODE_SCENE_PREVIEW;
     this.snapshot = { audioTransform: new THREE.Matrix4(), matrixWorld: new THREE.Matrix4() };
-    this.audioListenerTargetTransform = new THREE.Matrix4();
+    this.audioSourceTargetTransform = new THREE.Matrix4();
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
@@ -213,7 +243,7 @@ export class CameraSystem {
     this.mode = NEXT_MODES[this.mode] || 0;
   }
 
-  inspect(o, distanceMod, temporarilyDisableRegularExit) {
+  inspect(inspectable, pivot, distanceMod, temporarilyDisableRegularExit) {
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -227,7 +257,8 @@ export class CameraSystem {
     scene.classList.remove("no-cursor");
     this.snapshot.mode = this.mode;
     this.mode = CAMERA_MODE_INSPECT;
-    this.inspected = o;
+    this.inspectable = inspectable;
+    this.pivot = pivot;
 
     const vrMode = scene.is("vr-mode");
     const camera = vrMode ? scene.renderer.vr.getCamera(scene.camera) : scene.camera;
@@ -237,27 +268,28 @@ export class CameraSystem {
       this.snapshot.mask1 = camera.cameras[1].layers.mask;
     }
     if (!this.enableLights) {
-      this.hideEverythingButThisObject(o);
+      this.hideEverythingButThisObject(inspectable);
     }
 
     this.viewingCamera.object3DMap.camera.updateMatrices();
     this.snapshot.matrixWorld.copy(this.viewingRig.object3D.matrixWorld);
 
-    moveRigSoCameraLooksAtObject(
-      this.viewingRig.object3D,
-      this.viewingCamera.object3DMap.camera,
-      this.inspected,
-      distanceMod || 1
-    );
-
-    this.snapshot.audio = getAudio(o);
+    this.snapshot.audio = !(inspectable.el && isTagged(inspectable.el, "preventAudioBoost")) && getAudio(inspectable);
     if (this.snapshot.audio) {
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
       scene.audioListener.updateMatrices();
-      this.audioListenerTargetTransform.makeTranslation(0, 0, 1).premultiply(scene.audioListener.matrixWorld);
-      setMatrixWorld(this.snapshot.audio, this.audioListenerTargetTransform);
+      this.audioSourceTargetTransform.makeTranslation(0, 0, -0.25).premultiply(scene.audioListener.matrixWorld);
+      setMatrixWorld(this.snapshot.audio, this.audioSourceTargetTransform);
     }
+
+    moveRigSoCameraLooksAtPivot(
+      this.viewingRig.object3D,
+      this.viewingCamera.object3DMap.camera,
+      this.inspectable,
+      this.pivot,
+      distanceMod || 1
+    );
   }
 
   uninspect() {
@@ -269,7 +301,8 @@ export class CameraSystem {
       scene.classList.add("no-cursor");
     }
     this.showEverythingAsNormal();
-    this.inspected = null;
+    this.inspectable = null;
+    this.pivot = null;
     if (this.snapshot.audio) {
       setMatrixWorld(this.snapshot.audio, this.snapshot.audioTransform);
       this.snapshot.audio = null;
@@ -284,6 +317,7 @@ export class CameraSystem {
   }
 
   hideEverythingButThisObject(o) {
+    this.notHiddenObject = o;
     o.traverse(enableInspectLayer);
 
     const scene = AFRAME.scenes[0];
@@ -297,8 +331,9 @@ export class CameraSystem {
   }
 
   showEverythingAsNormal() {
-    if (this.inspected) {
-      this.inspected.traverse(disableInspectLayer);
+    if (this.notHiddenObject) {
+      this.notHiddenObject.traverse(disableInspectLayer);
+      this.notHiddenObject = null;
     }
     const scene = AFRAME.scenes[0];
     const vrMode = scene.is("vr-mode");
@@ -358,10 +393,9 @@ export class CameraSystem {
         const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
 
         if (hoverEl) {
-          const inspectable = getInspectable(hoverEl);
-
+          const { inspectable, pivot } = getInspectableAndPivot(hoverEl);
           if (inspectable) {
-            this.inspect(inspectable.object3D);
+            this.inspect(inspectable, pivot, 1, false);
           }
         }
       } else if (
@@ -434,12 +468,16 @@ export class CameraSystem {
         }
         const panY = this.userinput.get(paths.actions.inspectPanY) || 0;
         if (this.userinput.get(paths.actions.resetInspectView)) {
-          moveRigSoCameraLooksAtObject(
+          moveRigSoCameraLooksAtPivot(
             this.viewingRig.object3D,
             this.viewingCamera.object3DMap.camera,
-            this.inspected,
+            this.inspectable,
+            this.pivot,
             1
           );
+        }
+        if (this.snapshot.audio) {
+          setMatrixWorld(this.snapshot.audio, this.audioSourceTargetTransform);
         }
 
         if (
@@ -449,7 +487,7 @@ export class CameraSystem {
           Math.abs(panY) > 0.0001
         ) {
           orbit(
-            this.inspected,
+            this.pivot,
             this.viewingRig.object3D,
             this.viewingCamera.object3DMap.camera,
             this.horizontalDelta,
