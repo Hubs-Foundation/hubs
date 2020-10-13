@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, createContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, createContext, useCallback, Children, cloneElement } from "react";
 import PropTypes from "prop-types";
 import { mediaSort, getMediaType } from "../../utils/media-sorting.js";
 
@@ -121,19 +121,22 @@ export function ObjectListProvider({ scene, children }) {
     [scene, focusedObject, selectedObject]
   );
 
+  const context = {
+    objects,
+    focusedObject,
+    selectedObject,
+    focusObject: setFocusedObject,
+    unfocusObject,
+    selectObject: setSelectedObject,
+    deselectObject
+  };
+
+  // Note: If we move ui-root to a functional component and use hooks,
+  // we can use the useObjectList hook instead of cloneElement.
+
   return (
-    <ObjectListContext.Provider
-      value={{
-        objects,
-        focusedObject,
-        selectedObject,
-        focusObject: setFocusedObject,
-        unfocusObject,
-        selectObject: setSelectedObject,
-        deselectObject
-      }}
-    >
-      {children}
+    <ObjectListContext.Provider value={context}>
+      {Children.map(children, child => cloneElement(child, { ...context }))}
     </ObjectListContext.Provider>
   );
 }

@@ -45,6 +45,7 @@ import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
+import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
@@ -180,7 +181,8 @@ class UIRoot extends Component {
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
     embedToken: PropTypes.string,
-    onLoaded: PropTypes.func
+    onLoaded: PropTypes.func,
+    selectedObject: PropTypes.object
   };
 
   state = {
@@ -1730,6 +1732,18 @@ class UIRoot extends Component {
                       this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })
                     }
                   />
+                  {this.props.selectedObject && (
+                    <ObjectInfoDialog
+                      scene={this.props.scene}
+                      el={this.props.selectedObject.el}
+                      src={this.props.selectedObject.el.components["media-loader"].data.src}
+                      pinned={this.props.selectedObject.el.components["networked"].data.persistent}
+                      hubChannel={this.props.hubChannel}
+                      onPinChanged={() => {}}
+                      onNavigated={el => {}}
+                      onClose={() => {}}
+                    />
+                  )}
                   {this.state.sidebarId !== "chat" &&
                     this.props.hub && (
                       <PresenceLog
