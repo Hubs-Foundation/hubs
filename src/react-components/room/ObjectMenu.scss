@@ -1,0 +1,58 @@
+@use "../styles/theme.scss";
+
+:local(.object-menu) {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+  width: max-content;
+  color: theme.$white;
+  border-radius: 12px;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$white;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$white;
+    }
+  }
+}
+
+:local(.header) {
+  display: flex;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+
+  h1 {
+    font-size: theme.$font-size-sm;
+    font-weight: theme.$font-weight-bold;
+  }
+}
+
+:local(.close-button) {
+  position: absolute;
+  left: 16px;
+}
+
+:local(.menu) {
+  display: flex;
+  padding: 0 16px 16px 16px;
+}
+
+:local(.object-menu-button) {
+  height: 36px;
+  padding: 0 16px
+}
+
+:local(.separator) {
+  width: 1px;
+  margin: 0 4px;
+  background-color: theme.$grey;
+}
