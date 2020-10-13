@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import classNames from "classnames";
 import styles from "./ObjectsSidebar.scss";
 import { Sidebar, CloseButton } from "../sidebar/Sidebar";
 import { List, ButtonListItem } from "../layout/List";
@@ -58,20 +57,15 @@ ObjectsSidebarItem.propTypes = {
   })
 };
 
-export function ObjectsSidebar({ children, objectCount, objectSelected, onClose }) {
+export function ObjectsSidebar({ children, objectCount, onClose }) {
   return (
-    <Sidebar
-      title={`Objects (${objectCount})`}
-      beforeTitle={<CloseButton onClick={onClose} />}
-      className={classNames({ [styles.objectSelected]: objectSelected })}
-    >
+    <Sidebar title={`Objects (${objectCount})`} beforeTitle={<CloseButton onClick={onClose} />}>
       <List>{children}</List>
     </Sidebar>
   );
 }
 
 ObjectsSidebar.propTypes = {
-  objectSelected: PropTypes.bool,
   objectCount: PropTypes.number.isRequired,
   children: PropTypes.node,
   onClose: PropTypes.func

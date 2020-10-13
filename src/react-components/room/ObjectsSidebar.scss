@@ -11,9 +11,3 @@
     }
   }
 }
-
-:local(.object-selected) {
-  @media(max-width: theme.$breakpoint-md - 1) {
-    display: none;
-  }
-}

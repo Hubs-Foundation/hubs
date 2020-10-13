@@ -45,14 +45,12 @@ import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
-import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
-import ObjectList from "./object-list.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
@@ -64,7 +62,6 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
-import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
 import "./styles/global.scss";
@@ -96,6 +93,8 @@ import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
+import { ObjectListProvider } from "./room/useObjectList";
+import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1324,21 +1323,11 @@ class UIRoot extends Component {
 
     const presenceLogEntries = this.props.presenceLogEntries || [];
 
-    const switchToInspectingObject = el => {
-      const src = el.components["media-loader"].data.src;
-      this.setState({ objectInfo: el, objectSrc: src });
-      const cameraSystem = this.props.scene.systems["hubs-systems"].cameraSystem;
-      cameraSystem.uninspect();
-      cameraSystem.inspect(el.object3D, el.object3D, 1.5, true);
-    };
-
     const mediaSource = this.props.mediaSearchStore.getUrlMediaSource(this.props.history.location);
 
     // Allow scene picker pre-entry, otherwise wait until entry
     const showMediaBrowser =
       mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
-
-    const showObjectInfo = !!(this.state.objectInfo && this.state.objectInfo.object3D);
 
     const discordBridges = this.discordBridges();
     const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
@@ -1349,9 +1338,8 @@ class UIRoot extends Component {
 
     const streaming = this.state.isStreaming;
 
-    const showTopHud = enteredOrWatching && !showObjectInfo;
-    const showObjectList = enteredOrWatching && !showObjectInfo;
-    const showPresenceList = !showObjectInfo;
+    const showTopHud = enteredOrWatching;
+    const showObjectList = enteredOrWatching;
 
     const streamingTip = streaming &&
       this.state.showStreamingTip && (
@@ -1374,7 +1362,7 @@ class UIRoot extends Component {
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
 
-    const renderEntryFlow = (!enteredOrWatching && !showObjectInfo && this.props.hub) || this.isWaitingForAutoExit();
+    const renderEntryFlow = (!enteredOrWatching && this.props.hub) || this.isWaitingForAutoExit();
 
     const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
     const canUpdateRoom = this.props.hubChannel.canOrWillIfCreator("update_hub");
@@ -1627,15 +1615,13 @@ class UIRoot extends Component {
                         <span>Objects</span>
                       </ContentMenuButton>
                     )}
-                    {showPresenceList && (
-                      <ContentMenuButton
-                        active={this.state.sidebarId === "people"}
-                        onClick={() => this.toggleSidebar("people")}
-                      >
-                        <PeopleIcon />
-                        <span>People</span>
-                      </ContentMenuButton>
-                    )}
+                    <ContentMenuButton
+                      active={this.state.sidebarId === "people"}
+                      onClick={() => this.toggleSidebar("people")}
+                    >
+                      <PeopleIcon />
+                      <span>People</span>
+                    </ContentMenuButton>
                   </ContentMenu>
                   <StateRoute
                     stateKey="modal"
@@ -1744,23 +1730,6 @@ class UIRoot extends Component {
                       this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })
                     }
                   />
-                  {this.state.objectInfo && (
-                    <ObjectInfoDialog
-                      scene={this.props.scene}
-                      el={this.state.objectInfo}
-                      src={this.state.objectSrc}
-                      pinned={this.state.objectInfo && this.state.objectInfo.components["networked"].data.persistent}
-                      hubChannel={this.props.hubChannel}
-                      onPinChanged={() => switchToInspectingObject(this.state.objectInfo)}
-                      onNavigated={el => switchToInspectingObject(el)}
-                      onClose={() => {
-                        if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                          this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
-                        }
-                        this.setState({ objectInfo: null });
-                      }}
-                    />
-                  )}
                   {this.state.sidebarId !== "chat" &&
                     this.props.hub && (
                       <PresenceLog
@@ -1869,18 +1838,7 @@ class UIRoot extends Component {
                       />
                     )}
                     {this.state.sidebarId === "objects" && (
-                      <ObjectList
-                        selectedObject={this.state.objectInfo}
-                        scene={this.props.scene}
-                        onInspectObject={el => switchToInspectingObject(el)}
-                        onUninspectObject={() => {
-                          this.setState({ objectInfo: null });
-                          if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                            this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
-                          }
-                        }}
-                        onClose={() => this.setSidebar(null)}
-                      />
+                      <ObjectsSidebarContainer onClose={() => this.setSidebar(null)} />
                     )}
                     {this.state.sidebarId === "people" && (
                       <PeopleSidebarContainer
@@ -1973,7 +1931,9 @@ function UIRootHooksWrapper(props) {
 
   return (
     <ChatContextProvider messageDispatch={props.messageDispatch}>
-      <UIRoot {...props} />
+      <ObjectListProvider scene={props.scene}>
+        <UIRoot {...props} />
+      </ObjectListProvider>
     </ChatContextProvider>
   );
 }
