@@ -8,7 +8,7 @@ export function ObjectsSidebarContainer({ onClose }) {
   const listRef = useRef();
   const { objects, selectObject, unfocusObject, focusObject } = useObjectList();
 
-  const onUnfocusObject = useCallback(
+  const onUnfocusListItem = useCallback(
     e => {
       if (e.relatedTarget === listRef.current || !listRef.current.contains(e.relatedTarget)) {
         unfocusObject();
@@ -27,8 +27,8 @@ export function ObjectsSidebarContainer({ onClose }) {
             onClick={() => selectObject(object)}
             onMouseOver={() => focusObject(object)}
             onFocus={() => focusObject(object)}
-            onMouseOut={onUnfocusObject}
-            onBlur={onUnfocusObject}
+            onMouseOut={onUnfocusListItem}
+            onBlur={onUnfocusListItem}
           />
         ))}
       </List>
