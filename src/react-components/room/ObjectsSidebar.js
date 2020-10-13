@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import styles from "./ObjectsSidebar.scss";
 import { Sidebar, CloseButton } from "../sidebar/Sidebar";
-import { List, ButtonListItem } from "../layout/List";
+import { ButtonListItem } from "../layout/List";
 import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
 import { ReactComponent as ImageIcon } from "../icons/Image.svg";
 import { ReactComponent as VideoIcon } from "../icons/Video.svg";
@@ -60,7 +60,7 @@ ObjectsSidebarItem.propTypes = {
 export function ObjectsSidebar({ children, objectCount, onClose }) {
   return (
     <Sidebar title={`Objects (${objectCount})`} beforeTitle={<CloseButton onClick={onClose} />}>
-      <List>{children}</List>
+      {children}
     </Sidebar>
   );
 }

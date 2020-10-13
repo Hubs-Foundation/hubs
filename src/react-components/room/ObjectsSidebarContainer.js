@@ -1,24 +1,37 @@
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import { ObjectsSidebar, ObjectsSidebarItem } from "./ObjectsSidebar";
+import { List } from "../layout/List";
 import { useObjectList } from "./useObjectList";
 
 export function ObjectsSidebarContainer({ onClose }) {
-  const { selectObject, unfocusObject, focusObject, objects } = useObjectList();
+  const listRef = useRef();
+  const { objects, selectObject, unfocusObject, focusObject } = useObjectList();
+
+  const onUnfocusObject = useCallback(
+    e => {
+      if (e.relatedTarget === listRef.current || !listRef.current.contains(e.relatedTarget)) {
+        unfocusObject();
+      }
+    },
+    [unfocusObject, listRef]
+  );
 
   return (
     <ObjectsSidebar objectCount={objects.length} onClose={onClose}>
-      {objects.map(object => (
-        <ObjectsSidebarItem
-          object={object}
-          key={object.id}
-          onClick={() => selectObject(object)}
-          onMouseOut={unfocusObject}
-          onMouseOver={() => focusObject(object)}
-          onFocus={() => focusObject(object)}
-          onBlur={unfocusObject}
-        />
-      ))}
+      <List ref={listRef}>
+        {objects.map(object => (
+          <ObjectsSidebarItem
+            object={object}
+            key={object.id}
+            onClick={() => selectObject(object)}
+            onMouseOver={() => focusObject(object)}
+            onFocus={() => focusObject(object)}
+            onMouseOut={onUnfocusObject}
+            onBlur={onUnfocusObject}
+          />
+        ))}
+      </List>
     </ObjectsSidebar>
   );
 }
