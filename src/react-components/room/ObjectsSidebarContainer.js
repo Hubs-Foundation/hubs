@@ -6,7 +6,7 @@ import { useObjectList } from "./useObjectList";
 
 export function ObjectsSidebarContainer({ onClose }) {
   const listRef = useRef();
-  const { objects, selectObject, unfocusObject, focusObject } = useObjectList();
+  const { objects, selectedObject, selectObject, unfocusObject, focusObject } = useObjectList();
 
   const onUnfocusListItem = useCallback(
     e => {
@@ -22,6 +22,7 @@ export function ObjectsSidebarContainer({ onClose }) {
       <List ref={listRef}>
         {objects.map(object => (
           <ObjectsSidebarItem
+            selected={selectedObject === object}
             object={object}
             key={object.id}
             onClick={() => selectObject(object)}

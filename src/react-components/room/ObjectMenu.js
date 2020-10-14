@@ -18,11 +18,11 @@ ObjectMenuButton.propTypes = {
   children: PropTypes.node
 };
 
-export function ObjectMenu({ children, title }) {
+export function ObjectMenu({ children, title, onClose }) {
   return (
     <div className={styles.objectMenu}>
       <div className={styles.header}>
-        <IconButton className={styles.closeButton}>
+        <IconButton className={styles.closeButton} onClick={onClose}>
           <CloseIcon width={16} height={16} />
         </IconButton>
         <h1>{title}</h1>
@@ -34,5 +34,6 @@ export function ObjectMenu({ children, title }) {
 
 ObjectMenu.propTypes = {
   children: PropTypes.node,
-  title: PropTypes.node
+  title: PropTypes.node,
+  onClose: PropTypes.func
 };

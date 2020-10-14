@@ -1735,6 +1735,7 @@ class UIRoot extends Component {
                   {this.props.selectedObject && (
                     <ObjectInfoDialog
                       scene={this.props.scene}
+                      object={this.props.selectedObject}
                       el={this.props.selectedObject.el}
                       src={this.props.selectedObject.el.components["media-loader"].data.src}
                       pinned={this.props.selectedObject.el.components["networked"].data.persistent}

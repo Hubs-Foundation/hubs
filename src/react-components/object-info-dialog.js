@@ -2,25 +2,26 @@ import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../utils/three-utils";
 import classNames from "classnames";
-import DialogContainer from "./dialog-container.js";
-import cStyles from "../assets/stylesheets/client-info-dialog.scss";
 import rootStyles from "../assets/stylesheets/ui-root.scss";
 import oStyles from "../assets/stylesheets/object-info-dialog.scss";
 import { FormattedMessage } from "react-intl";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons/faChevronDown";
-import { faChevronUp } from "@fortawesome/free-solid-svg-icons/faChevronUp";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import { faStreetView } from "@fortawesome/free-solid-svg-icons/faStreetView";
 import { faLightbulb } from "@fortawesome/free-solid-svg-icons/faLightbulb";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import entryStyles from "../assets/stylesheets/entry.scss";
 import { mediaSort, mediaSortOrder, DISPLAY_IMAGE } from "../utils/media-sorting";
 import { getPromotionTokenForFile } from "../utils/media-utils";
 import { HorizontalScrollView } from "./horizontal-scroll-view";
+import { ObjectMenu, ObjectMenuButton } from "./room/ObjectMenu";
+import { ReactComponent as PinIcon } from "./icons/Pin.svg";
+import { ReactComponent as LinkIcon } from "./icons/Link.svg";
+import { ReactComponent as GoToIcon } from "./icons/GoTo.svg";
+import { ReactComponent as DeleteIcon } from "./icons/Delete.svg";
+import { useObjectList } from "./room/useObjectList";
 
 export function NavigationRowItem(props) {
   const { onClick, icon, isSelected } = props;
@@ -93,8 +94,9 @@ ActionRowIcon.propTypes = {
 };
 
 let uiRoot;
-export default class ObjectInfoDialog extends Component {
+class ObjectInfoDialog extends Component {
   static propTypes = {
+    object: PropTypes.object.isRequired,
     scene: PropTypes.object,
     el: PropTypes.object,
     pinned: PropTypes.bool,
@@ -102,7 +104,8 @@ export default class ObjectInfoDialog extends Component {
     onClose: PropTypes.func,
     onPinChanged: PropTypes.func,
     onNavigated: PropTypes.func,
-    hubChannel: PropTypes.object
+    hubChannel: PropTypes.object,
+    deselectObject: PropTypes.func
   };
 
   state = {
@@ -397,89 +400,29 @@ export default class ObjectInfoDialog extends Component {
     }
 
     return (
-      <DialogContainer
-        noOverlay={true}
-        wide={true}
-        className={classNames({ [oStyles.hidden]: this.state.hidden })}
-        {...this.props}
-      >
-        <div className={cStyles.roomInfo}>
-          <div className={cStyles.titleAndClose}>
-            <button
-              aria-label={`Close object info panel`}
-              autoFocus
-              className={entryStyles.collapseButton}
-              onClick={onClose}
-            >
-              <i>
-                <FontAwesomeIcon icon={faTimes} />
-              </i>
-            </button>
-            <a className={cStyles.objectDisplayString} href={this.props.src} target="_blank" rel="noopener noreferrer">
-              <FormattedMessage id={`object-info.open-link`} />
-            </a>
-            <button
-              aria-label={`${this.state.hidden ? "Show" : "Hide"} object info panel`}
-              className={entryStyles.hideButton}
-              onClick={this.onToggleHidden}
-            >
-              <i>
-                <FontAwesomeIcon icon={this.state.hidden ? faChevronUp : faChevronDown} />
-              </i>
-            </button>
-          </div>
-          {!this.state.hidden && (
-            <div className={cStyles.actionButtonSections}>
-              <div className={cStyles.leftActionButtons}>
-                {showNavigationButtons && (
-                  <button aria-label="Previous Object" className={cStyles.navigationButton} onClick={this.navigatePrev}>
-                    <i>
-                      <FontAwesomeIcon icon={faChevronLeft} />
-                    </i>
-                  </button>
-                )}
-              </div>
-              <div className={cStyles.primaryActionButtons}>
-                <button onClick={this.toggleLights.bind(this)}>
-                  <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
-                </button>
-                {this.props.scene.is("entered") && (
-                  <button onClick={this.enqueueWaypointTravel}>
-                    <FormattedMessage id="object-info.waypoint" />
-                  </button>
-                )}
-                {showRemoveButton ? (
-                  <button onClick={this.remove.bind(this)}>
-                    <FormattedMessage id="object-info.remove-button" />
-                  </button>
-                ) : (
-                  <div className={cStyles.actionButtonPlaceholder} />
-                )}
-                {showPinOrUnpin && (
-                  <button
-                    className={pinned ? "" : cStyles.primaryActionButton}
-                    onClick={pinned ? this.unpin : this.pin}
-                  >
-                    <FormattedMessage id={`object-info.${pinned ? "unpin-button" : "pin-button"}`} />
-                  </button>
-                )}
-                <a className={cStyles.cancelText} href="#" onClick={onClose}>
-                  <FormattedMessage id="client-info.cancel" />
-                </a>
-              </div>
-              <div className={cStyles.rightActionButtons}>
-                {showNavigationButtons && (
-                  <button aria-label="Next Object" className={cStyles.navigationButton} onClick={this.navigateNext}>
-                    <i>
-                      <FontAwesomeIcon icon={faChevronRight} />
-                    </i>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </DialogContainer>
+      <ObjectMenu title={this.props.object.name} onClose={this.props.deselectObject}>
+        <ObjectMenuButton>
+          <PinIcon />
+          <span>Pin</span>
+        </ObjectMenuButton>
+        <ObjectMenuButton>
+          <LinkIcon />
+          <span>Open Link</span>
+        </ObjectMenuButton>
+        <ObjectMenuButton>
+          <GoToIcon />
+          <span>Go To</span>
+        </ObjectMenuButton>
+        <ObjectMenuButton>
+          <DeleteIcon />
+          <span>Delete</span>
+        </ObjectMenuButton>
+      </ObjectMenu>
     );
   }
+}
+
+export default function ObjectInfoDialogContainer(props) {
+  const { deselectObject } = useObjectList();
+  return <ObjectInfoDialog {...props} deselectObject={deselectObject} />;
 }

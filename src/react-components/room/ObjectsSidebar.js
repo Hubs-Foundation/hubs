@@ -1,8 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
+import classNames from "classnames";
 import styles from "./ObjectsSidebar.scss";
 import { Sidebar, CloseButton } from "../sidebar/Sidebar";
 import { ButtonListItem } from "../layout/List";
+import listStyles from "../layout/List.scss";
 import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
 import { ReactComponent as ImageIcon } from "../icons/Image.svg";
 import { ReactComponent as VideoIcon } from "../icons/Video.svg";
@@ -38,11 +40,16 @@ function getLabel(object) {
   return `${objectTypeNames[object.type] || objectTypeNames.default}: ${object.name}`;
 }
 
-export function ObjectsSidebarItem({ object, ...rest }) {
+export function ObjectsSidebarItem({ selected, object, ...rest }) {
   const ObjectTypeIcon = getObjectIcon(object.type);
 
   return (
-    <ButtonListItem {...rest} className={styles.object} type="button" aria-label={getLabel(object)}>
+    <ButtonListItem
+      {...rest}
+      className={classNames(styles.object, { [listStyles.selected]: selected })}
+      type="button"
+      aria-label={getLabel(object)}
+    >
       <ObjectTypeIcon />
       <p>{object.name}</p>
     </ButtonListItem>
@@ -50,6 +57,7 @@ export function ObjectsSidebarItem({ object, ...rest }) {
 }
 
 ObjectsSidebarItem.propTypes = {
+  selected: PropTypes.bool,
   object: PropTypes.shape({
     id: PropTypes.any.isRequired,
     name: PropTypes.string.isRequired,

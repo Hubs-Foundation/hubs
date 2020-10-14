@@ -16,7 +16,5 @@ export function joinChildren(children, renderSeparator) {
     null
   );
 
-  console.log(result);
-
   return result;
 }

@@ -36,20 +36,17 @@
     box-shadow: inset 0 0 0 3px theme.$black;
   }
 
-  :local(.selected) {
+  &:local(.selected) {
+    color: theme.$white;
     background-color: theme.$blue;
 
-    &:hover, &:active {
-      color: theme.$white;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$white;
+      }
   
-      svg {
-        *[stroke=\#000] {
-          stroke: theme.$white;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$white;
-        }
+      *[fill=\#000] {
+        fill: theme.$white;
       }
     }
 
