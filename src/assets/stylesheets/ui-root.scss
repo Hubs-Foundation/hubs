@@ -209,7 +209,7 @@ body.vr-mode {
   @extend %button-with-count;
 
   @media(min-width: 501px) {
-    top: 16px;
+    top: 20px;
     right: 122px;
     justify-content: space-evenly;
   }
@@ -223,7 +223,7 @@ body.vr-mode {
 :local(.presence-list-button) {
   @extend %button-with-count;
 
-  top: 16px;
+  top: 20px;
   right: 16px;
 }
 
@@ -238,7 +238,7 @@ body.vr-mode {
   z-index: 1;
   top: 0;
   left: 16px;
-  margin: 16px 0;
+  margin: 20px 0;
   display: flex;
   align-items: center;
   justify-content: center;

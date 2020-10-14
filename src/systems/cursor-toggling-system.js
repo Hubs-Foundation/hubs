@@ -1,6 +1,7 @@
 import { paths } from "./userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { isTagged } from "../components/tags";
+import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 import { hackyMobileSafariTest } from "../utils/detect-touchscreen";
 
 function shouldEnableRemote(scene, hand, remote, teleporting, woke) {
@@ -49,9 +50,9 @@ export class CursorTogglingSystem {
       }
     }
 
-    const inspectingInVR = interaction.el.systems["hubs-systems"].cameraSystem.inspected; // && this.el.sceneEl.is("vr-mode");
+    const inspecting = interaction.el.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT;
     const shouldEnableLeftRemote =
-      !inspectingInVR &&
+      !inspecting &&
       shouldEnableRemote(
         scene,
         leftHand,
@@ -63,7 +64,7 @@ export class CursorTogglingSystem {
     const shouldEnableRightRemote =
       isMobile ||
       hackyMobileSafariTest() ||
-      (!inspectingInVR &&
+      (!inspecting &&
         shouldEnableRemote(
           scene,
           rightHand,

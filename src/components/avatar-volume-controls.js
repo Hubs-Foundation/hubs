@@ -55,7 +55,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
       let gain = volumeModifier * this.data.volume;
       if (audioOutputMode === "audio") {
         this.avatarAudioSource.el.object3D.getWorldPosition(positionA);
-        this.el.sceneEl.camera.getWorldPosition(positionB);
+        this.el.sceneEl.audioListener.getWorldPosition(positionB);
         const squaredDistance = positionA.distanceToSquared(positionB);
         gain = gain * Math.min(1, 10 / Math.max(1, squaredDistance));
       }

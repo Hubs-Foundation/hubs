@@ -13,6 +13,7 @@
     "url": "https://github.com/mozilla/hubs/issues"
   },
   "scripts": {
+    "info": "npm-scripts-info",
     "start": "webpack-dev-server --mode=development --env.loadAppConfig",
     "dev": "webpack-dev-server --mode=development --env.remoteDev",
     "local": "webpack-dev-server --mode=development --env.localDev",
@@ -33,6 +34,20 @@
     "spritesheet": "npm run spritesheet:system-action && npm run spritesheet:system-notice",
     "spritesheet:system-action": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-action-spritesheet --powerOfTwo src/assets/images/sprites/action/*",
     "spritesheet:system-notice": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-notice-spritesheet --powerOfTwo src/assets/images/sprites/notice/*"
+  },
+  "scripts-info": {
+    "start": "Run the client against your Hubs Cloud instance, or Mozilla's developer infrastructure,\n  using application configs pulled from the server",
+    "dev": "Run the client against Mozilla's developer infrastructure with all features enabled",
+    "local": "Run the client against you local reticulum server",
+    "login": "Log in to your Hubs Cloud instance",
+    "logout": "Log out of your Hubs Cloud instance",
+    "deploy": "Build and deploy the client to your Hubs Cloud instance",
+    "undeploy": "Undeploy your custom client from your Hubs Cloud instance and revert it to the standard client",
+    "build": "Build production-ready code and assets",
+    "lint": "Check the source code for formatting and errors",
+    "prettier": "Format all source code in-place",
+    "test": "Check code, run tests and build the code",
+    "spritesheet": "Re-build spritesheets from their source images"
   },
   "ava": {
     "files": [
@@ -103,7 +118,7 @@
     "screenfull": "^4.0.1",
     "semver": "^7.3.2",
     "three": "github:mozillareality/three.js#hubs/master",
-    "three-ammo": "^1.0.11",
+    "three-ammo": "^1.0.12",
     "three-bmfont-text": "github:mozillareality/three-bmfont-text#hubs/master",
     "three-mesh-bvh": "^0.1.2",
     "three-pathfinding": "github:MozillaReality/three-pathfinding#hubs/master2",
@@ -148,6 +163,7 @@
     "mini-css-extract-plugin": "^0.8.0",
     "ncp": "^2.0.0",
     "node-fetch": "^2.6.0",
+    "npm-scripts-info": "0.3.9",
     "ora": "^4.0.2",
     "phoenix-channels": "^1.0.0",
     "prettier": "^1.7.0",

@@ -148,6 +148,25 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
   el.setAttribute("waypoint", componentData);
 });
 
+AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, componentName, componentData, components) => {
+  el.setAttribute("networked", {
+    template: "#interactable-media-frame",
+    owner: "scene",
+    persistent: true,
+    networkId: components.networked.id
+  });
+  el.setAttribute("shape-helper", {
+    type: "box",
+    fit: "manual",
+    halfExtents: {
+      x: componentData.bounds.x / 2,
+      y: componentData.bounds.y / 2,
+      z: componentData.bounds.z / 2
+    }
+  });
+  el.setAttribute("media-frame", componentData);
+});
+
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
   if (componentData.id) {
     el.setAttribute("networked", {
