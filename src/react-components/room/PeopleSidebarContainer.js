@@ -133,7 +133,6 @@ PeopleSidebarContainer.propTypes = {
   mediaSearchStore: PropTypes.object.isRequired,
   hubChannel: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
-  onOpenAvatarSettings: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   mySessionId: PropTypes.string.isRequired,
   presences: PropTypes.object.isRequired,
