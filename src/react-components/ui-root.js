@@ -182,7 +182,7 @@ class UIRoot extends Component {
     embed: PropTypes.bool,
     embedToken: PropTypes.string,
     onLoaded: PropTypes.func,
-    selectedObject: PropTypes.object
+    activeObject: PropTypes.object
   };
 
   state = {
@@ -1732,13 +1732,13 @@ class UIRoot extends Component {
                       this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })
                     }
                   />
-                  {this.props.selectedObject && (
+                  {this.props.activeObject && (
                     <ObjectInfoDialog
                       scene={this.props.scene}
-                      object={this.props.selectedObject}
-                      el={this.props.selectedObject.el}
-                      src={this.props.selectedObject.el.components["media-loader"].data.src}
-                      pinned={this.props.selectedObject.el.components["networked"].data.persistent}
+                      object={this.props.activeObject}
+                      el={this.props.activeObject.el}
+                      src={this.props.activeObject.el.components["media-loader"].data.src}
+                      pinned={this.props.activeObject.el.components["networked"].data.persistent}
                       hubChannel={this.props.hubChannel}
                       onPinChanged={() => {}}
                       onNavigated={el => {}}

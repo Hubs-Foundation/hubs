@@ -123,6 +123,7 @@ export function ObjectListProvider({ scene, children }) {
 
   const context = {
     objects,
+    activeObject: focusedObject || selectedObject,
     focusedObject,
     selectedObject,
     focusObject: setFocusedObject,
