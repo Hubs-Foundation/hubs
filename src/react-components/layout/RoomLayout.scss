@@ -75,3 +75,13 @@
     right: 450px;
   }
 }
+
+:local(.object-focused) {
+  @media(max-width: theme.$breakpoint-md - 1) {
+    background-color: theme.$black;
+
+    :local(.toolbar) {
+      display: none;
+    }
+  }
+}

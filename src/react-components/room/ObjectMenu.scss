@@ -1,14 +1,40 @@
 @use "../styles/theme.scss";
 
-:local(.object-menu) {
+:local(.back-button) {
+  position: absolute;
+  top: 16px;
+  left: 8px;
+  pointer-events: auto;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$white;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$white;
+    }
+  }
+
+  @media(min-width: theme.$breakpoint-md) {
+    display: none;
+  }
+}
+
+:local(.object-menu-container) {
   position: absolute;
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  background-color: rgba(0, 0, 0, 0.7);
   pointer-events: auto;
+}
+
+:local(.object-menu) {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.3);
   width: max-content;
   color: theme.$white;
   border-radius: 12px;
@@ -21,6 +47,10 @@
     *[fill=\#000] {
       fill: theme.$white;
     }
+  }
+
+  @media(min-width: theme.$breakpoint-md) {
+    background-color: rgba(0, 0, 0, 0.7);
   }
 }
 
@@ -63,4 +93,31 @@
   width: 1px;
   margin: 0 4px;
   background-color: theme.$grey;
+}
+
+:local(.pagination) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: theme.$white;
+  margin-top: 24px;
+  padding: 0 4px;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$white;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$white;
+    }
+  }
+}
+
+@media(max-width: theme.$breakpoint-md - 1) {
+  :global(.keyboard-user)  {
+    :local(.back-button):focus, :local(.pagination) :focus {
+      box-shadow: 0 0 0 3px theme.$white;
+    }
+  }
 }

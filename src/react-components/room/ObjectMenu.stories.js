@@ -13,8 +13,9 @@ export default {
 
 export const Base = () => (
   <RoomLayout
+    objectFocused
     viewport={
-      <ObjectMenu title="Object">
+      <ObjectMenu title="Object" currentObjectIndex={1} objectCount={12}>
         <ObjectMenuButton>
           <PinIcon />
           <span>Pin</span>
@@ -38,8 +39,9 @@ export const Base = () => (
 
 export const WithSidebarOpen = () => (
   <RoomLayout
+    objectFocused
     viewport={
-      <ObjectMenu title="Object">
+      <ObjectMenu title="Object" currentObjectIndex={1} objectCount={12}>
         <ObjectMenuButton>
           <PinIcon />
           <span>Pin</span>
