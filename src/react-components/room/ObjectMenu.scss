@@ -114,10 +114,8 @@
   }
 }
 
-@media(max-width: theme.$breakpoint-md - 1) {
-  :global(.keyboard-user)  {
-    :local(.back-button):focus, :local(.pagination) :focus {
-      box-shadow: 0 0 0 3px theme.$white;
-    }
+:global(.keyboard-user)  {
+  :local(.back-button):focus, :local(.object-menu-container) :focus {
+    box-shadow: 0 0 0 3px theme.$white;
   }
 }
