@@ -21,11 +21,11 @@ export const Base = () => (
         </ObjectMenuButton>
         <ObjectMenuButton>
           <LinkIcon />
-          <span>Open Link</span>
+          <span>Link</span>
         </ObjectMenuButton>
         <ObjectMenuButton>
           <GoToIcon />
-          <span>Go To</span>
+          <span>View</span>
         </ObjectMenuButton>
         <ObjectMenuButton>
           <DeleteIcon />
@@ -46,11 +46,11 @@ export const WithSidebarOpen = () => (
         </ObjectMenuButton>
         <ObjectMenuButton>
           <LinkIcon />
-          <span>Open Link</span>
+          <span>Link</span>
         </ObjectMenuButton>
         <ObjectMenuButton>
           <GoToIcon />
-          <span>Go To</span>
+          <span>View</span>
         </ObjectMenuButton>
         <ObjectMenuButton>
           <DeleteIcon />

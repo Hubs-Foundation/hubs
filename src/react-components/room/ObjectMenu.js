@@ -8,7 +8,7 @@ import { ReactComponent as CloseIcon } from "../icons/Close.svg";
 
 export function ObjectMenuButton({ children, className, ...rest }) {
   return (
-    <IconButton className={classNames(styles.objectMenuButton, className)} {...rest}>
+    <IconButton compactSm className={classNames(styles.objectMenuButton, className)} {...rest}>
       {children}
     </IconButton>
   );

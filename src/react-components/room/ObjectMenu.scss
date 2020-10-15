@@ -25,7 +25,7 @@
 }
 
 :local(.header) {
-  display: flex;
+  display: none;
   height: 48px;
   align-items: center;
   justify-content: center;
@@ -33,6 +33,10 @@
   h1 {
     font-size: theme.$font-size-sm;
     font-weight: theme.$font-weight-bold;
+  }
+
+  @media(min-width: theme.$breakpoint-md) {
+    display: flex;
   }
 }
 
@@ -43,7 +47,11 @@
 
 :local(.menu) {
   display: flex;
-  padding: 0 16px 16px 16px;
+  padding: 16px;
+
+  @media(min-width: theme.$breakpoint-md) {
+    padding-top: 0;
+  }
 }
 
 :local(.object-menu-button) {
