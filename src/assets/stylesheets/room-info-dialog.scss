@@ -62,7 +62,7 @@
   display: flex;
   flex-direction: column;
   max-height: 90px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 :local(.attribution) {
