@@ -1,9 +1,0 @@
-@use "../styles/theme.scss";
-
-:local(.avatar-preview-canvas) {
-  width: 168px;
-  height: 300px;
-  min-height: 300px;
-  border-radius: 8px;
-  background-color: theme.$lightgrey;
-}

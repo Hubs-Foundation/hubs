@@ -1,8 +1,7 @@
 import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import { Sidebar } from "../sidebar/Sidebar";
-import { ReactComponent as CloseIcon } from "../icons/Close.svg";
+import { CloseButton, Sidebar } from "../sidebar/Sidebar";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
 import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
@@ -181,16 +180,7 @@ ChatMessageList.propTypes = {
 
 export function ChatSidebar({ onClose, children, ...rest }) {
   return (
-    <Sidebar
-      title="Chat"
-      beforeTitle={
-        <IconButton className={styles.closeButton} onClick={onClose}>
-          <CloseIcon width={16} height={16} />
-        </IconButton>
-      }
-      contentClassName={styles.content}
-      {...rest}
-    >
+    <Sidebar title="Chat" beforeTitle={<CloseButton onClick={onClose} />} contentClassName={styles.content} {...rest}>
       {children}
     </Sidebar>
   );
