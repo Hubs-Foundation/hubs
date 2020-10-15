@@ -1,47 +1,60 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Sidebar } from "../sidebar/Sidebar";
-import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
-import { IconButton } from "../input/IconButton";
+import { Sidebar, BackButton, CloseButton } from "../sidebar/Sidebar";
 import { Button } from "../input/Button";
 import styles from "./UserProfileSidebar.scss";
-import { AvatarPreviewCanvas } from "../avatar/AvatarPreviewCanvas";
 
 export function UserProfileSidebar({
   className,
   displayName,
-  avatarPreviewCanvasRef,
+  identityName,
+  avatarPreview,
+  isSignedIn,
   canPromote,
   onPromote,
-  canHide,
-  onHide,
+  canDemote,
+  onDemote,
+  isHidden,
+  onToggleHidden,
   canMute,
   onMute,
   canKick,
   onKick,
+  showBackButton,
   onBack,
+  onClose,
   ...rest
 }) {
   return (
     <Sidebar
-      title={displayName}
-      beforeTitle={
-        <IconButton onClick={onBack}>
-          <ChevronBackIcon />
-          <span>Back</span>
-        </IconButton>
-      }
+      title={identityName ? `${displayName} (${identityName})` : displayName}
+      beforeTitle={showBackButton ? <BackButton onClick={onBack} /> : <CloseButton onClick={onClose} />}
       className={className}
       contentClassName={styles.content}
       {...rest}
     >
-      <AvatarPreviewCanvas ref={avatarPreviewCanvasRef} />
+      <div className={styles.avatarPreviewContainer}>{avatarPreview || <div />}</div>
       {canPromote && (
-        <Button preset="green" onClick={onPromote}>
+        <Button
+          preset="green"
+          disabled={!isSignedIn}
+          title={isSignedIn ? "Promote" : `${displayName} is signed out.`}
+          onClick={onPromote}
+        >
           Promote
         </Button>
       )}
-      {canHide && <Button onClick={onHide}>Hide</Button>}
+      {canDemote && (
+        <Button
+          preset="red"
+          disabled={!isSignedIn}
+          title={isSignedIn ? "Demote" : `${displayName} is signed out.`}
+          onClick={onDemote}
+        >
+          Demote
+        </Button>
+      )}
+      <Button onClick={onToggleHidden}>{isHidden ? "Unhide" : "Hide"}</Button>
       {canMute && (
         <Button preset="red" onClick={onMute}>
           Mute
@@ -59,14 +72,20 @@ export function UserProfileSidebar({
 UserProfileSidebar.propTypes = {
   className: PropTypes.string,
   displayName: PropTypes.string,
-  avatarPreviewCanvasRef: PropTypes.object,
+  identityName: PropTypes.string,
+  avatarPreview: PropTypes.node,
+  isSignedIn: PropTypes.bool,
   canPromote: PropTypes.bool,
   onPromote: PropTypes.func,
-  canHide: PropTypes.bool,
-  onHide: PropTypes.func,
+  canDemote: PropTypes.bool,
+  onDemote: PropTypes.func,
+  isHidden: PropTypes.bool,
+  onToggleHidden: PropTypes.func,
   canMute: PropTypes.bool,
   onMute: PropTypes.func,
   canKick: PropTypes.bool,
   onKick: PropTypes.func,
-  onBack: PropTypes.func
+  showBackButton: PropTypes.bool,
+  onBack: PropTypes.func,
+  onClose: PropTypes.func
 };

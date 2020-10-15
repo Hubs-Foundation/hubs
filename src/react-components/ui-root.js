@@ -20,7 +20,7 @@ import {
 } from "../utils/history";
 import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
-import { getClientInfoClientId } from "./client-info-dialog";
+import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
 
 import { getMessages } from "../utils/i18n";
@@ -52,7 +52,6 @@ import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
-import PresenceList from "./presence-list.js";
 import ObjectList from "./object-list.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
@@ -79,6 +78,7 @@ import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
 import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
+import { ContentMenu, ContentMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as SceneIcon } from "./icons/Scene.svg";
@@ -92,6 +92,9 @@ import { ReactComponent as SupportIcon } from "./icons/Support.svg";
 import { ReactComponent as ShieldIcon } from "./icons/Shield.svg";
 import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
+import { ReactComponent as PeopleIcon } from "./icons/People.svg";
+import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
+import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -221,8 +224,6 @@ class UIRoot extends Component {
 
     objectInfo: null,
     objectSrc: "",
-    isObjectListExpanded: false,
-    isPresenceListExpanded: false,
     sidebarId: null
   };
 
@@ -1148,7 +1149,7 @@ class UIRoot extends Component {
     if (this.state.objectInfo && this.state.objectInfo.object3D) {
       return true; // TODO: Get object info dialog to use history
     }
-    if (this.state.isObjectListExpanded) {
+    if (this.state.sidebarId !== null) {
       return true;
     }
 
@@ -1159,6 +1160,13 @@ class UIRoot extends Component {
       this.state.dialog
     );
   };
+
+  getSelectedUser() {
+    const selectedUserId = this.state.selectedUserId;
+    const presence = this.props.presences[selectedUserId];
+    const micPresences = getMicrophonePresences();
+    return userFromPresence(selectedUserId, presence, micPresences, this.props.sessionId);
+  }
 
   render() {
     const rootStyles = {
@@ -1259,7 +1267,8 @@ class UIRoot extends Component {
                     this.pushHistoryState("entry_step", "mic_grant");
                   }
                 }}
-                onClose={() => this.pushHistoryState()}
+                showBackButton
+                onBack={() => this.pushHistoryState()}
                 store={this.props.store}
                 mediaSearchStore={this.props.mediaSearchStore}
                 avatarId={props.location.state.detail && props.location.state.detail.avatarId}
@@ -1288,8 +1297,6 @@ class UIRoot extends Component {
     const showMediaBrowser =
       mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
 
-    const clientInfoClientId = getClientInfoClientId(this.props.history.location);
-    const showClientInfo = !!clientInfoClientId;
     const showObjectInfo = !!(this.state.objectInfo && this.state.objectInfo.object3D);
 
     const discordBridges = this.discordBridges();
@@ -1302,7 +1309,7 @@ class UIRoot extends Component {
     const streaming = this.state.isStreaming;
 
     const showTopHud = enteredOrWatching && !showObjectInfo;
-    const showObjectList = !showObjectInfo;
+    const showObjectList = enteredOrWatching && !showObjectInfo;
     const showPresenceList = !showObjectInfo;
 
     const streamingTip = streaming &&
@@ -1326,9 +1333,7 @@ class UIRoot extends Component {
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
 
-    const renderEntryFlow =
-      (!enteredOrWatching && !this.state.isObjectListExpanded && !showObjectInfo && this.props.hub) ||
-      this.isWaitingForAutoExit();
+    const renderEntryFlow = (!enteredOrWatching && !showObjectInfo && this.props.hub) || this.isWaitingForAutoExit();
 
     const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
     const canUpdateRoom = this.props.hubChannel.canOrWillIfCreator("update_hub");
@@ -1355,7 +1360,7 @@ class UIRoot extends Component {
             id: "user-profile",
             label: "Change Name & Avatar",
             icon: AvatarIcon,
-            onClick: () => this.pushHistoryState("overlay", "profile")
+            onClick: () => this.setState({ sidebarId: "profile" })
           },
           {
             id: "favorite-rooms",
@@ -1523,22 +1528,6 @@ class UIRoot extends Component {
               )}
             <StateRoute
               stateKey="overlay"
-              stateValue="profile"
-              history={this.props.history}
-              render={props => (
-                <ProfileEntryPanel
-                  {...props}
-                  displayNameOverride={displayNameOverride}
-                  finished={() => this.pushHistoryState()}
-                  onClose={() => this.pushHistoryState()}
-                  store={this.props.store}
-                  mediaSearchStore={this.props.mediaSearchStore}
-                  avatarId={props.location.state.detail && props.location.state.detail.avatarId}
-                />
-              )}
-            />
-            <StateRoute
-              stateKey="overlay"
               stateValue="avatar-editor"
               history={this.props.history}
               render={props => (
@@ -1587,6 +1576,34 @@ class UIRoot extends Component {
               viewport={
                 <>
                   <CompactMoreMenuButton />
+                  <ContentMenu>
+                    {showObjectList && (
+                      <ContentMenuButton
+                        active={this.state.sidebarId === "objects"}
+                        onClick={() =>
+                          this.setState(({ sidebarId }) => ({
+                            sidebarId: sidebarId === "objects" ? null : "objects"
+                          }))
+                        }
+                      >
+                        <ObjectsIcon />
+                        <span>Objects</span>
+                      </ContentMenuButton>
+                    )}
+                    {showPresenceList && (
+                      <ContentMenuButton
+                        active={this.state.sidebarId === "people"}
+                        onClick={() =>
+                          this.setState(({ sidebarId }) => ({
+                            sidebarId: sidebarId === "people" ? null : "people"
+                          }))
+                        }
+                      >
+                        <PeopleIcon />
+                        <span>People</span>
+                      </ContentMenuButton>
+                    )}
+                  </ContentMenu>
                   <StateRoute
                     stateKey="modal"
                     stateValue="room_settings"
@@ -1694,18 +1711,7 @@ class UIRoot extends Component {
                       this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })
                     }
                   />
-                  {showClientInfo && (
-                    <ClientInfoDialog
-                      clientId={clientInfoClientId}
-                      onClose={this.closeDialog}
-                      history={this.props.history}
-                      presences={this.props.presences}
-                      hubChannel={this.props.hubChannel}
-                      showNonHistoriedDialog={this.showNonHistoriedDialog}
-                      performConditionalSignIn={this.props.performConditionalSignIn}
-                    />
-                  )}
-                  {showObjectInfo && (
+                  {this.state.objectInfo && (
                     <ObjectInfoDialog
                       scene={this.props.scene}
                       el={this.state.objectInfo}
@@ -1718,7 +1724,7 @@ class UIRoot extends Component {
                         if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
                           this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
                         }
-                        this.setState({ isObjectListExpanded: false, objectInfo: null });
+                        this.setState({ objectInfo: null });
                       }}
                     />
                   )}
@@ -1730,6 +1736,7 @@ class UIRoot extends Component {
                         entries={presenceLogEntries}
                         hubId={this.props.hub.hub_id}
                         history={this.props.history}
+                        onViewProfile={sessionId => this.setState({ sidebarId: "user", selectedUserId: sessionId })}
                       />
                     )}
                   {entered &&
@@ -1783,49 +1790,6 @@ class UIRoot extends Component {
                     </button>
                   )}
                   {streamingTip}
-
-                  {showObjectList && (
-                    <ObjectList
-                      scene={this.props.scene}
-                      onExpand={(expand, uninspect) => {
-                        if (expand) {
-                          this.setState({ isPresenceListExpanded: false, isObjectListExpanded: expand });
-                        } else {
-                          this.setState({ isObjectListExpanded: expand });
-                        }
-
-                        if (uninspect) {
-                          this.setState({ objectInfo: null });
-                          if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-                            this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
-                          }
-                        }
-                      }}
-                      expanded={this.state.isObjectListExpanded && !this.state.isPresenceListExpanded}
-                      onInspectObject={el => switchToInspectingObject(el)}
-                    />
-                  )}
-
-                  {showPresenceList && (
-                    <PresenceList
-                      hubChannel={this.props.hubChannel}
-                      history={this.props.history}
-                      presences={this.props.presences}
-                      sessionId={this.props.sessionId}
-                      signedIn={this.state.signedIn}
-                      email={this.props.store.state.credentials.email}
-                      onSignIn={this.showSignInDialog}
-                      onSignOut={this.signOut}
-                      expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
-                      onExpand={expand => {
-                        if (expand) {
-                          this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
-                        } else {
-                          this.setState({ isPresenceListExpanded: expand });
-                        }
-                      }}
-                    />
-                  )}
                   {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
                   {showTopHud && (
                     <div className={styles.topHud}>
@@ -1860,14 +1824,66 @@ class UIRoot extends Component {
                 </>
               }
               sidebar={
-                this.state.sidebarId === "chat" && (
-                  <ChatSidebarContainer
-                    occupantCount={this.occupantCount()}
-                    discordBridges={discordBridges}
-                    canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
-                    onUploadFile={this.createObject}
-                    onClose={() => this.setState({ sidebarId: null })}
-                  />
+                this.state.sidebarId ? (
+                  <>
+                    {this.state.sidebarId === "chat" && (
+                      <ChatSidebarContainer
+                        occupantCount={this.occupantCount()}
+                        discordBridges={discordBridges}
+                        canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
+                        onUploadFile={this.createObject}
+                        onClose={() => this.setState({ sidebarId: null })}
+                      />
+                    )}
+                    {this.state.sidebarId === "objects" && (
+                      <ObjectList
+                        scene={this.props.scene}
+                        onInspectObject={el => switchToInspectingObject(el)}
+                        onUninspectObject={() => {
+                          this.setState({ objectInfo: null });
+                          if (this.props.scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
+                            this.props.scene.systems["hubs-systems"].cameraSystem.uninspect();
+                          }
+                        }}
+                      />
+                    )}
+                    {this.state.sidebarId === "people" && (
+                      <PeopleSidebarContainer
+                        displayNameOverride={displayNameOverride}
+                        store={this.props.store}
+                        mediaSearchStore={this.props.mediaSearchStore}
+                        hubChannel={this.props.hubChannel}
+                        history={this.props.history}
+                        mySessionId={this.props.sessionId}
+                        presences={this.props.presences}
+                        onClose={() => this.setState({ sidebarId: null })}
+                        showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        performConditionalSignIn={this.props.performConditionalSignIn}
+                      />
+                    )}
+                    {this.state.sidebarId === "profile" && (
+                      <ProfileEntryPanel
+                        history={this.props.history}
+                        containerType="sidebar"
+                        displayNameOverride={displayNameOverride}
+                        finished={() => this.setState({ sidebarId: null })}
+                        onClose={() => this.setState({ sidebarId: null })}
+                        store={this.props.store}
+                        mediaSearchStore={this.props.mediaSearchStore}
+                      />
+                    )}
+                    {this.state.sidebarId === "user" && (
+                      <ClientInfoDialog
+                        user={this.getSelectedUser()}
+                        hubChannel={this.props.hubChannel}
+                        performConditionalSignIn={this.props.performConditionalSignIn}
+                        onClose={() => this.setState({ sidebarId: null, selectedUserId: null })}
+                        showNonHistoriedDialog={this.showNonHistoriedDialog}
+                      />
+                    )}
+                  </>
+                ) : (
+                  undefined
                 )
               }
               modal={renderEntryFlow && entryDialog}
