@@ -16,6 +16,7 @@ export function ObjectMenuButton({ children, className, ...rest }) {
     </IconButton>
   );
 }
+
 ObjectMenuButton.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node

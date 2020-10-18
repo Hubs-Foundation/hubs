@@ -86,7 +86,8 @@
 
 :local(.object-menu-button) {
   height: 36px;
-  padding: 0 16px
+  padding: 0 16px;
+  color: theme.$white;
 }
 
 :local(.separator) {
@@ -111,6 +112,10 @@
     *[fill=\#000] {
       fill: theme.$white;
     }
+  }
+
+  @media(min-width: theme.$breakpoint-md) {
+    display: none;
   }
 }
 

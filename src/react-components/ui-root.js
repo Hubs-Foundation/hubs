@@ -45,7 +45,6 @@ import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
-import ObjectInfoDialog from "./object-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
@@ -96,6 +95,8 @@ import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 import { ObjectListProvider } from "./room/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
+import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
+import { useCssBreakpoints } from "react-use-css-breakpoints";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -182,7 +183,9 @@ class UIRoot extends Component {
     embed: PropTypes.bool,
     embedToken: PropTypes.string,
     onLoaded: PropTypes.func,
-    activeObject: PropTypes.object
+    activeObject: PropTypes.object,
+    selectedObject: PropTypes.object,
+    breakpoint: PropTypes.string
   };
 
   state = {
@@ -276,6 +279,20 @@ class UIRoot extends Component {
           }
         }, 0);
       });
+    }
+
+    if (!this.props.selectedObject || !prevProps.selectedObject) {
+      const sceneEl = this.props.scene;
+
+      if (this.props.selectedObject) {
+        sceneEl.classList.add(roomLayoutStyles.sceneSmFullScreen);
+      } else {
+        sceneEl.classList.remove(roomLayoutStyles.sceneSmFullScreen);
+      }
+
+      sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
+      sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
+      sceneEl.camera.updateProjectionMatrix();
     }
   }
 
@@ -1611,27 +1628,30 @@ class UIRoot extends Component {
               />
             )}
             <RoomLayout
+              objectFocused={!!this.props.selectedObject}
               viewport={
                 <>
-                  <CompactMoreMenuButton />
-                  <ContentMenu>
-                    {showObjectList && (
+                  {!this.props.selectedObject && <CompactMoreMenuButton />}
+                  {(!this.props.selectedObject || this.props.breakpoint !== "sm") && (
+                    <ContentMenu>
+                      {showObjectList && (
+                        <ContentMenuButton
+                          active={this.state.sidebarId === "objects"}
+                          onClick={() => this.toggleSidebar("objects")}
+                        >
+                          <ObjectsIcon />
+                          <span>Objects</span>
+                        </ContentMenuButton>
+                      )}
                       <ContentMenuButton
-                        active={this.state.sidebarId === "objects"}
-                        onClick={() => this.toggleSidebar("objects")}
+                        active={this.state.sidebarId === "people"}
+                        onClick={() => this.toggleSidebar("people")}
                       >
-                        <ObjectsIcon />
-                        <span>Objects</span>
+                        <PeopleIcon />
+                        <span>People</span>
                       </ContentMenuButton>
-                    )}
-                    <ContentMenuButton
-                      active={this.state.sidebarId === "people"}
-                      onClick={() => this.toggleSidebar("people")}
-                    >
-                      <PeopleIcon />
-                      <span>People</span>
-                    </ContentMenuButton>
-                  </ContentMenu>
+                    </ContentMenu>
+                  )}
                   <StateRoute
                     stateKey="modal"
                     stateValue="room_settings"
@@ -1740,17 +1760,7 @@ class UIRoot extends Component {
                     }
                   />
                   {this.props.activeObject && (
-                    <ObjectInfoDialog
-                      scene={this.props.scene}
-                      object={this.props.activeObject}
-                      el={this.props.activeObject.el}
-                      src={this.props.activeObject.el.components["media-loader"].data.src}
-                      pinned={this.props.activeObject.el.components["networked"].data.persistent}
-                      hubChannel={this.props.hubChannel}
-                      onPinChanged={() => {}}
-                      onNavigated={el => {}}
-                      onClose={() => {}}
-                    />
+                    <ObjectMenuContainer hubChannel={this.props.hubChannel} scene={this.props.scene} />
                   )}
                   {this.state.sidebarId !== "chat" &&
                     this.props.hub && (
@@ -1928,6 +1938,7 @@ class UIRoot extends Component {
 
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
+  const breakpoint = useCssBreakpoints();
 
   useEffect(
     () => {
@@ -1954,7 +1965,7 @@ function UIRootHooksWrapper(props) {
   return (
     <ChatContextProvider messageDispatch={props.messageDispatch}>
       <ObjectListProvider scene={props.scene}>
-        <UIRoot {...props} />
+        <UIRoot breakpoint={breakpoint} {...props} />
       </ObjectListProvider>
     </ChatContextProvider>
   );

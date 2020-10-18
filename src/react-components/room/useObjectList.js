@@ -47,6 +47,21 @@ const ObjectListContext = createContext({
   uninspectObject: () => {}
 });
 
+// const pinObject = useCallback(object => {
+//   const el = object.el;
+//   if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) return;
+//   el.setAttribute("pinnable", "pinned", true);
+//   el.emit("pinned", { el });
+//   this.props.onPinChanged && this.props.onPinChanged();
+// }, []);
+
+// const unpinObject = useCallback(object => {
+//   const el = object.el;
+//   if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) return;
+//   el.setAttribute("pinnable", "pinned", false);
+//   el.emit("unpinned", { el });
+// }, []);
+
 export function ObjectListProvider({ scene, children }) {
   const [objects, setObjects] = useState([]);
   const [focusedObject, setFocusedObject] = useState(null); // The object currently shown in the viewport
@@ -102,19 +117,18 @@ export function ObjectListProvider({ scene, children }) {
   useEffect(
     () => {
       const activeObject = focusedObject || selectedObject;
+      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
 
       if (activeObject) {
-        scene.systems["hubs-systems"].cameraSystem.inspect(
-          activeObject.el.object3D,
-          activeObject.el.object3D,
-          1.5,
-          true
-        );
+        cameraSystem.enableLights = false;
+        cameraSystem.inspect(activeObject.el.object3D, activeObject.el.object3D, 1.5, true);
       } else {
-        scene.systems["hubs-systems"].cameraSystem.uninspect();
+        cameraSystem.enableLights = true;
+        cameraSystem.uninspect();
       }
 
       return () => {
+        cameraSystem.enableLights = true;
         scene.systems["hubs-systems"].cameraSystem.uninspect();
       };
     },
