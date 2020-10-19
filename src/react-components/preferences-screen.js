@@ -9,9 +9,8 @@ import { FormattedMessage } from "react-intl";
 import { WrappedIntlProvider } from "./wrapped-intl-provider";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import { getMessages } from "../utils/i18n";
+import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
-
-const isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
 
 function round(step, n) {
   return Math.round(n / step) * step;
@@ -606,7 +605,7 @@ const DEFINITIONS = new Map([
         key: "materialQualitySetting",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "low", text: "Low" }, { value: "medium", text: "Medium" }, { value: "high", text: "High" }],
-        defaultString: isMobile ? "low" : "high",
+        defaultString: defaultMaterialQualitySetting,
         promptForRefresh: true
       },
       {
