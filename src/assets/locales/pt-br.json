@@ -368,7 +368,7 @@
   "tips.desktop.turning": "Perfeito. Use as teclas Q e E para girar.",
   "tips.desktop.spawn_menu-pre": "Para criar objetos, clique no ",
   "tips.desktop.spawn_menu-post": "botão na parte superior da tela ou pressione Ctrl 1 a 7.",
-    "tips.desktop.freeze_gesture": "Pressione e segure a barra de espaço para mostrar os menus de objetos.",
+  "tips.desktop.freeze_gesture": "Pressione e segure a barra de espaço para mostrar os menus de objetos.",
   "tips.desktop.menu_hover": "Agora, aponte o cursor para um objeto para mostrar o menu.",
   "tips.desktop.object_grab": "Clique e arraste um objeto para movê-lo. Ou toque levemente para jogá-lo!",
   "tips.desktop.object_pin": "Fixe um objeto para salvá-lo na sala.",
