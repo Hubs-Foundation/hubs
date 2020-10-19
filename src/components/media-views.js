@@ -931,7 +931,7 @@ AFRAME.registerComponent("media-video", {
       if (this.audio) {
         if (window.APP.store.state.preferences.audioOutputMode === "audio") {
           this.el.object3D.getWorldPosition(positionA);
-          this.el.sceneEl.camera.getWorldPosition(positionB);
+          this.el.sceneEl.audioListener.getWorldPosition(positionB);
           const distance = positionA.distanceTo(positionB);
           this.distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, distance * distance));
           const globalMediaVolume =
