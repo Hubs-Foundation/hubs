@@ -1760,7 +1760,11 @@ class UIRoot extends Component {
                     }
                   />
                   {this.props.activeObject && (
-                    <ObjectMenuContainer hubChannel={this.props.hubChannel} scene={this.props.scene} />
+                    <ObjectMenuContainer
+                      hubChannel={this.props.hubChannel}
+                      scene={this.props.scene}
+                      onOpenProfile={() => this.setSidebar("profile")}
+                    />
                   )}
                   {this.state.sidebarId !== "chat" &&
                     this.props.hub && (

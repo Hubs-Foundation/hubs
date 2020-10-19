@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { removeNetworkedObject } from "../../utils/removeNetworkedObject";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { getPromotionTokenForFile } from "../../utils/media-utils";
@@ -11,9 +11,13 @@ function hasIsStaticTag(el) {
   return el.components.tags && el.components.tags.data.isStatic;
 }
 
+export function getPlayerInfo(object) {
+  return object.el.components["player-info"] && object.el.components["player-info"].data;
+}
+
 export function getObjectUrl(object) {
   const mediaLoader = object.el.components["media-loader"];
-  return (mediaLoader && mediaLoader.data.src) || "#";
+  return (mediaLoader && mediaLoader.data.src) || null;
 }
 
 export function usePinObject(hubChannel, scene, object) {
@@ -70,24 +74,26 @@ export function usePinObject(hubChannel, scene, object) {
   );
 
   const el = object.el;
-  const { fileIsOwned, fileId } = el.components["media-loader"].data;
+
+  let userOwnsFile = false;
+
+  if (el.components["media-loader"]) {
+    const { fileIsOwned, fileId } = el.components["media-loader"].data;
+    userOwnsFile = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
+  }
 
   const canPin = !!(
     scene.is("entered") &&
+    !getPlayerInfo(object) &&
     !hasIsStaticTag(el) &&
     hubChannel.can("pin_objects") &&
-    (fileIsOwned || (fileId && getPromotionTokenForFile(fileId)))
+    userOwnsFile
   );
 
   return { canPin, isPinned, togglePinned, pinObject, unpinObject };
 }
 
-export function useGoToSelectedObject(scene) {
-  const [canGoTo] = useState(() => {
-    const uiRoot = document.getElementById("ui-root");
-    return !(uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost"));
-  });
-
+export function useGoToSelectedObject(scene, object) {
   const goToSelectedObject = useCallback(
     () => {
       const viewingCamera = document.getElementById("viewing-camera");
@@ -110,6 +116,10 @@ export function useGoToSelectedObject(scene) {
     [scene]
   );
 
+  const uiRoot = useMemo(() => document.getElementById("ui-root"), []);
+  const isSpectating = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
+  const canGoTo = !isSpectating && !getPlayerInfo(object);
+
   return { canGoTo, goToSelectedObject };
 }
 
@@ -125,6 +135,7 @@ export function useRemoveObject(hubChannel, scene, object) {
 
   const canRemoveObject = !!(
     scene.is("entered") &&
+    !getPlayerInfo(object) &&
     !getPinnedState(el) &&
     !hasIsStaticTag(el) &&
     hubChannel.can("spawn_and_move_media")

@@ -290,6 +290,8 @@ export class CameraSystem {
       this.pivot,
       distanceMod || 1
     );
+
+    scene.emit("inspect-target-changed");
   }
 
   uninspect() {
@@ -314,6 +316,7 @@ export class CameraSystem {
     }
     this.snapshot.mode = null;
     this.tick(AFRAME.scenes[0]);
+    scene.emit("inspect-target-changed");
   }
 
   hideEverythingButThisObject(o) {
