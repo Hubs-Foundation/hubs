@@ -445,6 +445,10 @@ async function updateEnvironmentForHub(hub, entryManager) {
         );
 
         sceneEl.emit("leaving_loading_environment");
+        if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
+          console.warn("Updating environment to the same url.");
+          environmentEl.setAttribute("gltf-model-plus", { src: "" });
+        }
         environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
       },
       { once: true }
@@ -454,6 +458,10 @@ async function updateEnvironmentForHub(hub, entryManager) {
       environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
     }
 
+    if (environmentEl.components["gltf-model-plus"].data.src === loadingEnvironment) {
+      console.warn("Transitioning to loading environment but was already in loading environment.");
+      environmentEl.setAttribute("gltf-model-plus", { src: "" });
+    }
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
 }
