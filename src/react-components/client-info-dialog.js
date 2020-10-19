@@ -116,7 +116,7 @@ export default class ClientInfoDialog extends Component {
         displayName={displayName}
         identityName={identityName}
         avatarPreview={<img src={this.state.avatarThumbnailUrl} />}
-        signedIn={targetIsSignedIn}
+        isSignedIn={targetIsSignedIn}
         canPromote={mayAddOwner}
         onPromote={() => this.addOwner()}
         canDemote={mayRemoveOwner}
