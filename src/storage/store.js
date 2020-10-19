@@ -13,16 +13,11 @@ import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identit
 
 export const defaultMaterialQualitySetting = (function() {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
-  let isMobile;
-  try {
-    // HACK: AFRAME is not available on all pages, so we catch the ReferenceError.
-    // We could move AFRAME's device utils into a separate package (or into this repo)
-    // if we wanted to use these checks without having to import all of AFRAME.
-    isMobile = AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR();
-  } catch (e) {
-    isMobile = false;
-  }
 
+  // HACK: AFRAME is not available on all pages, so we catch the ReferenceError.
+  // We could move AFRAME's device utils into a separate package (or into this repo)
+  // if we wanted to use these checks without having to import all of AFRAME.
+  const isMobile = window.AFRAME && (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR());
   if (isMobile) {
     const qsMobileDefault = qsGet("default_mobile_material_quality");
     if (qsMobileDefault && MATERIAL_QUALITY_OPTIONS.indexOf(qsMobileDefault) !== -1) {
