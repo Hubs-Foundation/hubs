@@ -76,3 +76,6 @@ links.issue_report = { category = "links", type = "string", name = "Issue Report
 links.promotion = { category = "links", type = "string", name = "Promotion Info", description = "Link to info about promotion info and licensing."}
 links.remixing = { category = "links", type = "string", name = "Remixing Info", description = "Link to info about remixing info and licensing."}
 links.model_collection = { category = "links", type = "string", name = "Model Collection", description = "Link to a collection of recommended models."}
+
+auth.login_subject = { category = "auth", type="string", name="Magic Link Email Subject", description="Customize the email subject line for users logging in" }
+auth.login_body = { category = "auth", type="longstring", name="Magic Link Email Body", description="Customize message. Add '{{ link }}' to insert the magic link, otherwise it will be appended at the end." }
