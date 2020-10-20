@@ -101,6 +101,8 @@ import { ObjectListProvider } from "./room/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
 import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
+import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
+import { SharePopoverContainer } from "./room/SharePopoverContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1895,8 +1897,8 @@ class UIRoot extends Component {
                   {entered && (
                     <>
                       <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />
-                      <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" />
-                      <ToolbarButton icon={<ObjectIcon />} label="Place" preset="green" />
+                      <SharePopoverContainer />
+                      <PlacePopoverContainer />
                       <ToolbarButton icon={<ReactionIcon />} label="React" preset="orange" />
                     </>
                   )}
