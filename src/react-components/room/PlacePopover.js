@@ -5,7 +5,7 @@ import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
 
-export function PlacePopoverButton({ items, onSelect }) {
+export function PlacePopoverButton({ items }) {
   // The button is removed if you can't place anything.
   if (items.length === 0) {
     return undefined;
@@ -14,7 +14,7 @@ export function PlacePopoverButton({ items, onSelect }) {
   return (
     <Popover
       title="Place"
-      content={props => <ButtonGridPopover items={items} onSelect={onSelect} {...props} />}
+      content={props => <ButtonGridPopover items={items} {...props} />}
       placement="top"
       offsetDistance={28}
       initiallyVisible
@@ -34,6 +34,5 @@ export function PlacePopoverButton({ items, onSelect }) {
 }
 
 PlacePopoverButton.propTypes = {
-  items: ButtonGridPopover.propTypes.items,
-  onSelect: PropTypes.func
+  items: ButtonGridPopover.propTypes.items
 };

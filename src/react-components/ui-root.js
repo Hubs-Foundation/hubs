@@ -1898,7 +1898,11 @@ class UIRoot extends Component {
                     <>
                       <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />
                       <SharePopoverContainer />
-                      <PlacePopoverContainer />
+                      <PlacePopoverContainer
+                        scene={this.props.scene}
+                        mediaSearchStore={this.props.mediaSearchStore}
+                        pushHistoryState={this.pushHistoryState}
+                      />
                       <ToolbarButton icon={<ReactionIcon />} label="React" preset="orange" />
                     </>
                   )}
