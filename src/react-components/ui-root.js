@@ -52,7 +52,6 @@ import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
-import TwoDHUD from "./2d-hud";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
@@ -92,6 +91,11 @@ import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
+import { ReactComponent as MicrophoneIcon } from "./icons/Microphone.svg";
+import { ReactComponent as ShareIcon } from "./icons/Share.svg";
+import { ReactComponent as ObjectIcon } from "./icons/Object.svg";
+import { ReactComponent as ReactionIcon } from "./icons/Reaction.svg";
+import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 import { ObjectListProvider } from "./room/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
@@ -1364,7 +1368,6 @@ class UIRoot extends Component {
 
     const streaming = this.state.isStreaming;
 
-    const showTopHud = enteredOrWatching;
     const showObjectList = enteredOrWatching;
 
     const streamingTip = streaming &&
@@ -1829,36 +1832,6 @@ class UIRoot extends Component {
                   )}
                   {streamingTip}
                   {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
-                  {showTopHud && (
-                    <div className={styles.topHud}>
-                      <TwoDHUD.TopHUD
-                        scene={this.props.scene}
-                        history={this.props.history}
-                        mediaSearchStore={this.props.mediaSearchStore}
-                        muted={this.state.muted}
-                        frozen={this.state.frozen}
-                        watching={this.state.watching}
-                        onWatchEnded={() => this.setState({ watching: false })}
-                        videoShareMediaSource={this.state.videoShareMediaSource}
-                        showVideoShareFailed={this.state.showVideoShareFailed}
-                        hideVideoShareFailedTip={() => this.setState({ showVideoShareFailed: false })}
-                        activeTip={this.props.activeTips && this.props.activeTips.top}
-                        isCursorHoldingPen={this.props.isCursorHoldingPen}
-                        hasActiveCamera={this.props.hasActiveCamera}
-                        onToggleMute={this.toggleMute}
-                        onSpawnPen={this.spawnPen}
-                        onSpawnCamera={() => this.props.scene.emit("action_toggle_camera")}
-                        onShareVideo={this.shareVideo}
-                        onEndShareVideo={this.endShareVideo}
-                        onShareVideoNotCapable={() => this.showWebRTCScreenshareUnsupportedDialog()}
-                        isStreaming={streaming}
-                        showStreamingTip={this.state.showStreamingTip}
-                        hideStreamingTip={() => {
-                          this.setState({ showStreamingTip: false });
-                        }}
-                      />
-                    </div>
-                  )}
                 </>
               }
               sidebar={
@@ -1917,7 +1890,19 @@ class UIRoot extends Component {
               }
               modal={renderEntryFlow && entryDialog}
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
-              toolbarCenter={<ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />}
+              toolbarCenter={
+                <>
+                  {entered && (
+                    <>
+                      <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />
+                      <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" />
+                      <ToolbarButton icon={<ObjectIcon />} label="Place" preset="green" />
+                      <ToolbarButton icon={<ReactionIcon />} label="React" preset="orange" />
+                    </>
+                  )}
+                  <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
+                </>
+              }
               toolbarRight={
                 <>
                   {entered &&
@@ -1929,6 +1914,7 @@ class UIRoot extends Component {
                         onClick={() => exit2DInterstitialAndEnterVR(true)}
                       />
                     )}
+                  {entered && <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="red" />}
                   <MoreMenuPopoverButton menu={moreMenu} />
                 </>
               }
