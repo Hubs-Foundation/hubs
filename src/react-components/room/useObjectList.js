@@ -59,7 +59,8 @@ export function ObjectListProvider({ scene, children }) {
           id: el.object3D.id,
           name: getDisplayString(el),
           type: getMediaType(el),
-          el
+          el,
+          enableLights: false
         }));
 
         setObjects(objects);
@@ -85,42 +86,34 @@ export function ObjectListProvider({ scene, children }) {
     [scene, setObjects]
   );
 
-  // useEffect(
-  //   () => {
-  //     function onInspectTargetChanged() {
-  //       const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+  useEffect(
+    () => {
+      function onInspectTargetChanged() {
+        const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
 
-  //       const focusedEl = focusedObject && focusedObject.el;
-  //       const selectedEl = selectedObject && selectedObject.el;
-  //       const inspectedEl = cameraSystem.inspectable && cameraSystem.inspectable.el;
+        const inspectedEl = cameraSystem.inspectable && cameraSystem.inspectable.el;
 
-  //       console.log(
-  //         "onInspectTargetChanged",
-  //         inspectedEl,
-  //         inspectedEl && inspectedEl !== selectedEl && inspectedEl !== focusedEl,
-  //         !inspectedEl && !focusedEl && selectedEl
-  //       );
+        if (inspectedEl) {
+          setSelectedObject({
+            id: inspectedEl.object3D.id,
+            name: getDisplayString(inspectedEl),
+            type: getMediaType(inspectedEl),
+            el: inspectedEl,
+            enableLights: true
+          });
+        } else {
+          setSelectedObject(null);
+        }
+      }
 
-  //       if (inspectedEl && inspectedEl !== selectedEl && inspectedEl !== focusedEl) {
-  //         setSelectedObject({
-  //           id: inspectedEl.object3D.id,
-  //           name: getDisplayString(inspectedEl),
-  //           type: getMediaType(inspectedEl),
-  //           el: inspectedEl
-  //         });
-  //       } else if (!inspectedEl && !focusedEl && selectedEl) {
-  //         setSelectedObject(null);
-  //       }
-  //     }
+      scene.addEventListener("inspect-target-changed", onInspectTargetChanged);
 
-  //     scene.addEventListener("inspect-target-changed", onInspectTargetChanged);
-
-  //     return () => {
-  //       scene.removeEventListener("inspect-target-changed", onInspectTargetChanged);
-  //     };
-  //   },
-  //   [scene, setSelectedObject, objects, focusedObject, selectedObject]
-  // );
+      return () => {
+        scene.removeEventListener("inspect-target-changed", onInspectTargetChanged);
+      };
+    },
+    [scene, setSelectedObject, objects, selectedObject]
+  );
 
   const selectObject = useCallback(
     object => {
@@ -130,11 +123,11 @@ export function ObjectListProvider({ scene, children }) {
 
       if (object.el.object3D !== cameraSystem.inspectable) {
         if (cameraSystem.inspectable) {
-          cameraSystem.uninspect();
+          cameraSystem.uninspect(false);
         }
 
-        cameraSystem.enableLights = false;
-        cameraSystem.inspect(object.el.object3D, object.el.object3D, 1.5, true);
+        cameraSystem.enableLights = object.enableLights;
+        cameraSystem.inspect(object.el, 1.5, true, false);
       }
     },
     [scene, setSelectedObject]
@@ -147,11 +140,11 @@ export function ObjectListProvider({ scene, children }) {
       setSelectedObject(null);
 
       cameraSystem.enableLights = true;
-      cameraSystem.uninspect();
+      cameraSystem.uninspect(false);
 
       if (focusedObject) {
-        cameraSystem.enableLights = false;
-        cameraSystem.inspect(focusedObject.el.object3D, focusedObject.el.object3D, 1.5, true);
+        cameraSystem.enableLights = focusedObject.enableLights;
+        cameraSystem.inspect(focusedObject.el, 1.5, true, false);
       }
     },
     [scene, setSelectedObject, focusedObject]
@@ -165,11 +158,11 @@ export function ObjectListProvider({ scene, children }) {
 
       if (object.el.object3D !== cameraSystem.inspectable) {
         if (cameraSystem.inspectable) {
-          cameraSystem.uninspect();
+          cameraSystem.uninspect(false);
         }
 
-        cameraSystem.enableLights = false;
-        cameraSystem.inspect(object.el.object3D, object.el.object3D, 1.5, true);
+        cameraSystem.enableLights = object.enableLights;
+        cameraSystem.inspect(object.el, 1.5, true, false);
       }
     },
     [scene, setFocusedObject]
@@ -182,11 +175,11 @@ export function ObjectListProvider({ scene, children }) {
       setFocusedObject(null);
 
       cameraSystem.enableLights = true;
-      cameraSystem.uninspect();
+      cameraSystem.uninspect(false);
 
       if (selectedObject) {
-        cameraSystem.enableLights = false;
-        cameraSystem.inspect(selectedObject.el.object3D, selectedObject.el.object3D, 1.5, true);
+        cameraSystem.enableLights = selectedObject.enableLights;
+        cameraSystem.inspect(selectedObject.el, 1.5, true, false);
       }
     },
     [scene, setFocusedObject, selectedObject]

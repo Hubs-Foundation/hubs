@@ -243,7 +243,9 @@ export class CameraSystem {
     this.mode = NEXT_MODES[this.mode] || 0;
   }
 
-  inspect(inspectable, pivot, distanceMod, temporarilyDisableRegularExit) {
+  inspect(el, distanceMod, temporarilyDisableRegularExit, fireChangeEvent = true) {
+    const { inspectable, pivot } = getInspectableAndPivot(el);
+
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -291,10 +293,12 @@ export class CameraSystem {
       distanceMod || 1
     );
 
-    scene.emit("inspect-target-changed");
+    if (fireChangeEvent) {
+      scene.emit("inspect-target-changed");
+    }
   }
 
-  uninspect() {
+  uninspect(fireChangeEvent = true) {
     this.temporarilyDisableRegularExit = false;
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     const scene = AFRAME.scenes[0];
@@ -316,7 +320,10 @@ export class CameraSystem {
     }
     this.snapshot.mode = null;
     this.tick(AFRAME.scenes[0]);
-    scene.emit("inspect-target-changed");
+
+    if (fireChangeEvent) {
+      scene.emit("inspect-target-changed");
+    }
   }
 
   hideEverythingButThisObject(o) {
@@ -396,10 +403,7 @@ export class CameraSystem {
         const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
 
         if (hoverEl) {
-          const { inspectable, pivot } = getInspectableAndPivot(hoverEl);
-          if (inspectable) {
-            this.inspect(inspectable, pivot, 1, false);
-          }
+          this.inspect(hoverEl, 1, false);
         }
       } else if (
         !this.temporarilyDisableRegularExit &&
