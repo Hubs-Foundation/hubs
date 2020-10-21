@@ -106,6 +106,7 @@ export default class RoomSettingsDialog extends Component {
             required
             autoComplete="off"
             placeholder="Room name"
+            maxLength={64}
             minLength={1}
             value={this.state.name}
             onFocus={e => handleTextFieldFocus(e.target)}
