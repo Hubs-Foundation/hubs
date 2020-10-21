@@ -126,6 +126,7 @@ import { Router, Route } from "react-router-dom";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import { pushHistoryState } from "./utils/history";
 import UIRoot from "./react-components/ui-root";
+import { ExitedRoomScreen } from "./react-components/room/ExitedRoomScreen";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
@@ -285,22 +286,26 @@ function mountUI(props = {}) {
     <WrappedIntlProvider>
       <Router history={history}>
         <Route
-          render={routeProps => (
-            <UIRoot
-              {...{
-                scene,
-                isBotMode,
-                disableAutoExitOnIdle,
-                forcedVREntryType,
-                store,
-                mediaSearchStore,
-                isCursorHoldingPen,
-                hasActiveCamera,
-                ...props,
-                ...routeProps
-              }}
-            />
-          )}
+          render={routeProps =>
+            props.roomUnavailableReason ? (
+              <ExitedRoomScreen reason={props.roomUnavailableReason} />
+            ) : (
+              <UIRoot
+                {...{
+                  scene,
+                  isBotMode,
+                  disableAutoExitOnIdle,
+                  forcedVREntryType,
+                  store,
+                  mediaSearchStore,
+                  isCursorHoldingPen,
+                  hasActiveCamera,
+                  ...props,
+                  ...routeProps
+                }}
+              />
+            )
+          }
         />
       </Router>
     </WrappedIntlProvider>,
@@ -1000,10 +1005,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     enterScene: entryManager.enterScene,
     exitScene: reason => {
       entryManager.exitScene();
-
-      if (reason) {
-        remountUI({ roomUnavailableReason: reason });
-      }
+      remountUI({ roomUnavailableReason: reason || "exited" });
     },
     initialIsSubscribed: subscriptions.isSubscribed(),
     activeTips: scene.systems.tips.activeTips

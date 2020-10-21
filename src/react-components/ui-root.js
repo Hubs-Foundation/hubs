@@ -6,7 +6,6 @@ import { FormattedMessage } from "react-intl";
 import screenfull from "screenfull";
 
 import configs from "../utils/configs";
-import IfFeature from "./if-feature";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
@@ -225,8 +224,6 @@ class UIRoot extends Component {
     muted: false,
     frozen: false,
 
-    exited: false,
-
     signedIn: false,
     videoShareMediaSource: null,
     showVideoShareFailed: false,
@@ -246,7 +243,7 @@ class UIRoot extends Component {
     props.mediaSearchStore.setHistory(props.history);
 
     // An exit handler that discards event arguments and can be cleaned up.
-    this.exitEventHandler = () => this.exit();
+    this.exitEventHandler = () => this.props.exitScene();
   }
 
   componentDidUpdate(prevProps) {
@@ -274,7 +271,7 @@ class UIRoot extends Component {
             try {
               this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
             } catch {
-              this.exit("scene_error"); // https://github.com/mozilla/hubs/issues/1950
+              this.props.exitScene("scene_error"); // https://github.com/mozilla/hubs/issues/1950
             }
           }
 
@@ -407,6 +404,9 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
+    window.removeEventListener("concurrentload", this.onConcurrentLoad);
+    window.removeEventListener("idle_detected", this.onIdleDetected);
+    window.removeEventListener("activity_detected", this.onActivityDetected);
   }
 
   storeUpdated = () => {
@@ -554,19 +554,7 @@ class UIRoot extends Component {
   checkForAutoExit = () => {
     if (this.state.secondsRemainingBeforeAutoExit !== 0) return;
     this.endAutoExitTimer();
-    this.exit();
-  };
-
-  exit = reason => {
-    window.removeEventListener("concurrentload", this.onConcurrentLoad);
-    window.removeEventListener("idle_detected", this.onIdleDetected);
-    window.removeEventListener("activity_detected", this.onActivityDetected);
-
-    if (this.props.exitScene) {
-      this.props.exitScene(reason);
-    }
-
-    this.setState({ exited: true });
+    this.props.exitScene();
   };
 
   isWaitingForAutoExit = () => {
@@ -830,7 +818,7 @@ class UIRoot extends Component {
     this.setState({ linkCode: code, linkCodeCancel: cancel });
     onFinished.then(() => {
       this.setState({ log: false, linkCode: null, linkCodeCancel: null });
-      this.exit();
+      this.props.exitScene();
     });
   };
 
@@ -1021,72 +1009,6 @@ class UIRoot extends Component {
     );
   };
 
-  renderExitedPane = () => {
-    let subtitle = null;
-    if (this.props.roomUnavailableReason === "closed") {
-      // TODO i18n, due to links and markup
-      subtitle = (
-        <div>
-          Sorry, this room is no longer available.
-          <p />
-          <IfFeature name="show_terms">
-            A room may be closed by the room owner, or if we receive reports that it violates our{" "}
-            <a
-              target="_blank"
-              rel="noreferrer noopener"
-              href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-            >
-              Terms of Use
-            </a>
-            .<br />
-          </IfFeature>
-          If you have questions, contact us at{" "}
-          <a href={`mailto:${getMessages()["contact-email"]}`}>
-            <FormattedMessage id="contact-email" />
-          </a>
-          .<p />
-          <IfFeature name="show_source_link">
-            If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
-            <a href="https://github.com/mozilla/hubs">GitHub</a>
-            .
-          </IfFeature>
-        </div>
-      );
-    } else {
-      const reason = this.props.roomUnavailableReason;
-      const tcpUrl = new URL(document.location.toString());
-      const tcpParams = new URLSearchParams(tcpUrl.search);
-      tcpParams.set("force_tcp", true);
-      tcpUrl.search = tcpParams.toString();
-
-      const exitSubtitleId = `exit.subtitle.${reason || "exited"}`;
-      subtitle = (
-        <div>
-          <FormattedMessage id={exitSubtitleId} />
-          <p />
-          {this.props.roomUnavailableReason === "connect_error" && (
-            <div>
-              You can try <a href={tcpUrl.toString()}>connecting via TCP</a>, which may work better on some networks.
-            </div>
-          )}
-          {!["left", "disconnected", "scene_error"].includes(this.props.roomUnavailableReason) && (
-            <div>
-              You can also <a href="/">create a new room</a>
-              .
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="exited-panel">
-        <img className="exited-panel__logo" src={configs.image("logo")} />
-        <div className="exited-panel__subtitle">{subtitle}</div>
-      </div>
-    );
-  };
-
   renderBotMode = () => {
     return (
       <div className="loading-panel">
@@ -1248,7 +1170,6 @@ class UIRoot extends Component {
     };
     if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
 
-    const isExited = this.state.exited || this.props.roomUnavailableReason;
     const preload = this.props.showPreload;
 
     const isLoading = !preload && !this.state.hideLoader && !this.props.showSafariMicDialog;
@@ -1259,7 +1180,7 @@ class UIRoot extends Component {
           <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
         </div>
       );
-    if (isExited) return this.renderExitedPane();
+
     if (isLoading && this.state.showPrefs) {
       return (
         <div>
@@ -1800,7 +1721,7 @@ class UIRoot extends Component {
                       />
                     )}
                   {this.state.frozen && (
-                    <button className={styles.leaveButton} onClick={() => this.exit("left")}>
+                    <button className={styles.leaveButton} onClick={() => this.props.exitScene("left")}>
                       <FormattedMessage id="entry.leave-room" />
                     </button>
                   )}
@@ -1919,7 +1840,14 @@ class UIRoot extends Component {
                         onClick={() => exit2DInterstitialAndEnterVR(true)}
                       />
                     )}
-                  {entered && <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="red" />}
+                  {entered && (
+                    <ToolbarButton
+                      icon={<LeaveIcon />}
+                      label="Leave"
+                      preset="red"
+                      onClick={() => this.props.exitScene("left")}
+                    />
+                  )}
                   <MoreMenuPopoverButton menu={moreMenu} />
                 </>
               }
