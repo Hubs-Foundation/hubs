@@ -5,22 +5,28 @@ import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as ShareIcon } from "../icons/Share.svg";
 
-export function SharePopoverButton({ items, onSelect }) {
+export function SharePopoverButton({ items }) {
+  const filteredItems = items.filter(item => !!item);
+
   // The button is removed if you can't share anything.
-  if (items.length === 0) {
-    return undefined;
+  if (filteredItems.length === 0) {
+    return null;
   }
 
-  const activeItem = items.find(item => item.active);
+  const activeItem = filteredItems.find(item => item.active);
 
   // If there's one item to share (your smartphone camera), or an item is active (recording), then only show that button.
-  if (items.length === 1 || activeItem) {
-    const item = items[0];
+  if (filteredItems.length === 1 || activeItem) {
+    const item = filteredItems[0];
     const Icon = item.icon;
     return (
       <ToolbarButton
         icon={<Icon />}
-        onClick={() => onSelect(item)}
+        onClick={() => {
+          if (item.onSelect) {
+            item.onSelect(item);
+          }
+        }}
         label="Share"
         preset="purple"
         statusColor={activeItem && "red"}
@@ -31,10 +37,9 @@ export function SharePopoverButton({ items, onSelect }) {
   return (
     <Popover
       title="Share"
-      content={props => <ButtonGridPopover items={items} onSelect={onSelect} {...props} />}
+      content={props => <ButtonGridPopover items={filteredItems} {...props} />}
       placement="top"
       offsetDistance={28}
-      initiallyVisible
       disableFullscreen
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
@@ -58,8 +63,8 @@ SharePopoverButton.propTypes = {
       icon: PropTypes.elementType.isRequired,
       color: PropTypes.string,
       name: PropTypes.string.isRequired,
-      active: PropTypes.bool
+      active: PropTypes.bool,
+      onSelect: PropTypes.func
     })
-  ).isRequired,
-  onSelect: PropTypes.func
+  ).isRequired
 };

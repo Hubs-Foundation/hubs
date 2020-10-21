@@ -1897,7 +1897,7 @@ class UIRoot extends Component {
                   {entered && (
                     <>
                       <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />
-                      <SharePopoverContainer />
+                      <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                       <PlacePopoverContainer
                         scene={this.props.scene}
                         mediaSearchStore={this.props.mediaSearchStore}
