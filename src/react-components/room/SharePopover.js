@@ -57,14 +57,5 @@ export function SharePopoverButton({ items }) {
 }
 
 SharePopoverButton.propTypes = {
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      icon: PropTypes.elementType.isRequired,
-      color: PropTypes.string,
-      name: PropTypes.string.isRequired,
-      active: PropTypes.bool,
-      onSelect: PropTypes.func
-    })
-  ).isRequired
+  items: PropTypes.array.isRequired
 };

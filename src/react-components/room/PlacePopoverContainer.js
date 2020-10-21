@@ -81,5 +81,5 @@ PlacePopoverContainer.propTypes = {
   hubChannel: PropTypes.object.isRequired,
   scene: PropTypes.object.isRequired,
   mediaSearchStore: PropTypes.object.isRequired,
-  pushHistoryState: PropTypes.object.isRequired
+  pushHistoryState: PropTypes.func.isRequired
 };
