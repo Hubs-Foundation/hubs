@@ -152,6 +152,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
             this.avatarAudioSource && this.avatarAudioSource.el.getObject3D(this.avatarAudioSource.attrName);
           if (audio) {
             this.normalizer = new AudioNormalizer(audio);
+            this.normalizer.apply();
           }
         });
       }
