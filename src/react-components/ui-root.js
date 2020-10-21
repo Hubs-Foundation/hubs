@@ -221,9 +221,6 @@ class UIRoot extends Component {
     autoExitMessage: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
-    muted: false,
-    frozen: false,
-
     signedIn: false,
     videoShareMediaSource: null,
     showVideoShareFailed: false,
@@ -476,14 +473,6 @@ class UIRoot extends Component {
 
   onSceneLoaded = () => {
     this.setState({ sceneLoaded: true });
-  };
-
-  // TODO: we need to come up with a cleaner way to handle the shared state between aframe and react than emmitting events and setting state on the scene
-  onAframeStateChanged = e => {
-    if (!(e.detail === "muted" || e.detail === "frozen")) return;
-    this.setState({
-      [e.detail]: this.props.scene.is(e.detail)
-    });
   };
 
   onShareVideoEnabled = e => {
@@ -1720,11 +1709,6 @@ class UIRoot extends Component {
                         onClose={() => this.confirmBroadcastedRoom()}
                       />
                     )}
-                  {this.state.frozen && (
-                    <button className={styles.leaveButton} onClick={() => this.props.exitScene("left")}>
-                      <FormattedMessage id="entry.leave-room" />
-                    </button>
-                  )}
                   <StateRoute
                     stateKey="overlay"
                     stateValue="invite"
