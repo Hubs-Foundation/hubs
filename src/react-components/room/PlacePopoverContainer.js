@@ -11,68 +11,74 @@ import { ReactComponent as SceneIcon } from "../icons/Scene.svg";
 import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
 import { PlacePopoverButton } from "./PlacePopover";
 
-export function PlacePopoverContainer({ scene, mediaSearchStore, pushHistoryState }) {
-  // TODO: Check permissions for each item
-  const items = [
-    {
+export function PlacePopoverContainer({ scene, mediaSearchStore, pushHistoryState, hubChannel }) {
+  let items = [
+    hubChannel.can("spawn_drawing") && {
       id: "pen",
       icon: PenIcon,
       color: "purple",
       label: "Pen",
       onSelect: () => scene.emit("penButtonPressed")
     },
-    {
+    hubChannel.can("spawn_camera") && {
       id: "camera",
       icon: CameraIcon,
       color: "purple",
       label: "Camera",
       onSelect: () => scene.emit("action_toggle_camera")
-    },
-    // TODO: Create text/link dialog
-    // { id: "text", icon: TextIcon, color: "blue", label: "Text" },
-    // { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
-    {
-      id: "gif",
-      icon: GIFIcon,
-      color: "orange",
-      label: "GIF",
-      onSelect: () => mediaSearchStore.sourceNavigate("gifs")
-    },
-    {
-      id: "model",
-      icon: ObjectIcon,
-      color: "orange",
-      label: "3D Model",
-      onSelect: () => mediaSearchStore.sourceNavigate("poly")
-    },
-    {
-      id: "avatar",
-      icon: AvatarIcon,
-      color: "red",
-      label: "Avatar",
-      onSelect: () => mediaSearchStore.sourceNavigate("avatars")
-    },
-    {
-      id: "scene",
-      icon: SceneIcon,
-      color: "red",
-      label: "Scene",
-      onSelect: () => mediaSearchStore.sourceNavigate("scenes")
-    },
-    // TODO: Launch system file prompt directly
-    {
-      id: "upload",
-      icon: UploadIcon,
-      color: "green",
-      label: "Upload",
-      onSelect: () => pushHistoryState("modal", "create")
     }
   ];
+
+  if (hubChannel.can("spawn_and_move_media")) {
+    items = [
+      ...items,
+      // TODO: Create text/link dialog
+      // { id: "text", icon: TextIcon, color: "blue", label: "Text" },
+      // { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
+      {
+        id: "gif",
+        icon: GIFIcon,
+        color: "orange",
+        label: "GIF",
+        onSelect: () => mediaSearchStore.sourceNavigate("gifs")
+      },
+      {
+        id: "model",
+        icon: ObjectIcon,
+        color: "orange",
+        label: "3D Model",
+        onSelect: () => mediaSearchStore.sourceNavigate("poly")
+      },
+      {
+        id: "avatar",
+        icon: AvatarIcon,
+        color: "red",
+        label: "Avatar",
+        onSelect: () => mediaSearchStore.sourceNavigate("avatars")
+      },
+      {
+        id: "scene",
+        icon: SceneIcon,
+        color: "red",
+        label: "Scene",
+        onSelect: () => mediaSearchStore.sourceNavigate("scenes")
+      },
+      // TODO: Launch system file prompt directly
+      {
+        id: "upload",
+        icon: UploadIcon,
+        color: "green",
+        label: "Upload",
+        onSelect: () => pushHistoryState("modal", "create")
+      }
+    ];
+  }
 
   return <PlacePopoverButton items={items} />;
 }
 
 PlacePopoverContainer.propTypes = {
+  hubChannel: PropTypes.object.isRequired,
   scene: PropTypes.object.isRequired,
   mediaSearchStore: PropTypes.object.isRequired,
   pushHistoryState: PropTypes.object.isRequired

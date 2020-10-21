@@ -27,9 +27,7 @@ const items = [
   { id: "upload", icon: UploadIcon, color: "green", label: "Upload" }
 ];
 
-export const Base = () => (
-  <RoomLayout toolbarCenter={<PlacePopoverButton items={items} onSelect={item => console.log(item)} />} />
-);
+export const Base = () => <RoomLayout toolbarCenter={<PlacePopoverButton items={items} />} />;
 
 Base.parameters = {
   layout: "fullscreen"

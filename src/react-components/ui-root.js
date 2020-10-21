@@ -92,8 +92,6 @@ import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import { ReactComponent as MicrophoneIcon } from "./icons/Microphone.svg";
-import { ReactComponent as ShareIcon } from "./icons/Share.svg";
-import { ReactComponent as ObjectIcon } from "./icons/Object.svg";
 import { ReactComponent as ReactionIcon } from "./icons/Reaction.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
@@ -1900,6 +1898,7 @@ class UIRoot extends Component {
                       <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                       <PlacePopoverContainer
                         scene={this.props.scene}
+                        hubChannel={this.props.hubChannel}
                         mediaSearchStore={this.props.mediaSearchStore}
                         pushHistoryState={this.pushHistoryState}
                       />
