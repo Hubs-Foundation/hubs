@@ -91,7 +91,6 @@ import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
-import { ReactComponent as MicrophoneIcon } from "./icons/Microphone.svg";
 import { ReactComponent as ReactionIcon } from "./icons/Reaction.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
@@ -101,6 +100,7 @@ import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
+import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1894,7 +1894,7 @@ class UIRoot extends Component {
                 <>
                   {entered && (
                     <>
-                      <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />
+                      <VoiceButtonContainer scene={this.props.scene} microphoneEnabled={!!this.state.audioTrack} />
                       <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                       <PlacePopoverContainer
                         scene={this.props.scene}

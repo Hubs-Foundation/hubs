@@ -55,7 +55,6 @@ AFRAME.registerComponent("mute-mic", {
     if (!NAF.connection.adapter) return;
     if (!this.el.sceneEl.is("entered")) return;
 
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
     if (this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");

@@ -396,7 +396,10 @@ module.exports = async (env, argv) => {
                 template: require("./src/react-components/icons/IconTemplate"),
                 svgoConfig: {
                   plugins: {
-                    removeViewBox: false
+                    removeViewBox: false,
+                    mergePaths: false,
+                    convertShapeToPath: false,
+                    removeHiddenElems: false
                   }
                 }
               }

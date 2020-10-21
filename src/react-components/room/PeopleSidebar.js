@@ -54,10 +54,10 @@ function getVoiceLabel(micPresence) {
 
 function getVoiceIconComponent(micPresence) {
   if (micPresence) {
-    if (micPresence.talking) {
-      return VolumeHighIcon;
-    } else if (micPresence.muted) {
+    if (micPresence.muted) {
       return VolumeMutedIcon;
+    } else if (micPresence.talking) {
+      return VolumeHighIcon;
     }
   }
 
