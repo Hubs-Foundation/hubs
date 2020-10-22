@@ -90,7 +90,6 @@ import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
-import { ReactComponent as ReactionIcon } from "./icons/Reaction.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 import { ObjectListProvider } from "./room/useObjectList";
@@ -100,6 +99,7 @@ import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
+import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1805,7 +1805,7 @@ class UIRoot extends Component {
                         mediaSearchStore={this.props.mediaSearchStore}
                         pushHistoryState={this.pushHistoryState}
                       />
-                      <ToolbarButton icon={<ReactionIcon />} label="React" preset="orange" />
+                      <ReactionButtonContainer scene={this.props.scene} />
                     </>
                   )}
                   <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
