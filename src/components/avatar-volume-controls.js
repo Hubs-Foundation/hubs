@@ -76,9 +76,9 @@ class AudioNormalizer {
     if (this.audio.source && !this.audio.isPlaying) {
       this.audio.disconnect();
     }
-    // @TODO: Here overrides filters even if filters are already set other places.
-    // Should we check whether filters are already set for robustness?
-    this.audio.setFilters([this.analyser, this.gain, this.compressor]);
+    const filters = this.audio.getFilters();
+    filters.unshift(this.analyser, this.gain, this.compressor);
+    this.audio.setFilters(filters);
     if (this.audio.source && !this.audio.isPlaying) {
       this.audio.connect();
     }
@@ -89,7 +89,8 @@ class AudioNormalizer {
     if (this.audio.source && !this.audio.isPlaying) {
       this.audio.disconnect();
     }
-    this.audio.setFilters([]);
+    const filters = [this.analyser, this.gain, this.compressor];
+    this.audio.setFilters(this.audio.getFilters().filter(filter => !filters.includes(filter)));
     if (this.audio.source && !this.audio.isPlaying) {
       this.audio.connect();
     }
