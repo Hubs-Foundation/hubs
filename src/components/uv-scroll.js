@@ -35,19 +35,19 @@ AFRAME.registerComponent("uv-scroll", {
       const instance = { component: this, mesh };
 
       this.instance = instance;
-      this.map = material.map;
+      this.map = material.map || material.emissiveMap;
 
-      if (!textureToData.has(material.map)) {
-        textureToData.set(material.map, {
+      if (!textureToData.has(this.map)) {
+        textureToData.set(this.map, {
           offset: new THREE.Vector2(),
           instances: [instance]
         });
-        registeredTextures.push(material.map);
+        registeredTextures.push(this.map);
       } else {
         console.warn(
           "Multiple uv-scroll instances added to objects sharing a texture, only the speed/increment from the first one will have any effect"
         );
-        textureToData.get(material.map).instances.push(instance);
+        textureToData.get(this.map).instances.push(instance);
       }
     }
   },
