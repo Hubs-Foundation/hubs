@@ -118,7 +118,6 @@ import "./components/optional-alternative-to-not-hide";
 import "./components/set-max-resolution";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
-import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -150,6 +149,7 @@ import "./systems/exit-on-blur";
 import "./systems/auto-pixel-ratio";
 import "./systems/idle-detector";
 import "./systems/camera-tools";
+import "./systems/pen-tools";
 import "./systems/userinput/userinput";
 import "./systems/userinput/userinput-debug";
 import "./systems/ui-hotkeys";
@@ -275,11 +275,6 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnIdle =
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
-  const isCursorHoldingPen =
-    scene &&
-    (scene.systems.userinput.activeSets.includes(userinputSets.rightCursorHoldingPen) ||
-      scene.systems.userinput.activeSets.includes(userinputSets.leftCursorHoldingPen));
-  const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
   const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
@@ -298,8 +293,6 @@ function mountUI(props = {}) {
                   forcedVREntryType,
                   store,
                   mediaSearchStore,
-                  isCursorHoldingPen,
-                  hasActiveCamera,
                   ...props,
                   ...routeProps
                 }}
@@ -1024,13 +1017,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     entryManager.exitScene("left");
     remountUI({ roomUnavailableReason: "left" });
   });
-
-  const updateCameraUI = function(e) {
-    if (e.detail !== "camera") return;
-    remountUI({});
-  };
-  scene.addEventListener("stateadded", updateCameraUI);
-  scene.addEventListener("stateremoved", updateCameraUI);
 
   scene.addEventListener("hub_closed", () => {
     scene.exitVR();

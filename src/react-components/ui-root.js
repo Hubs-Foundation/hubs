@@ -170,8 +170,6 @@ class UIRoot extends Component {
     showOAuthDialog: PropTypes.bool,
     onCloseOAuthDialog: PropTypes.func,
     oauthInfo: PropTypes.array,
-    isCursorHoldingPen: PropTypes.bool,
-    hasActiveCamera: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     onAvatarSaved: PropTypes.func,
     activeTips: PropTypes.object,

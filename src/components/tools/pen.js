@@ -164,6 +164,9 @@ AFRAME.registerComponent("pen", {
       scene.addEventListener("object3dset", this.setDirty);
       scene.addEventListener("object3dremove", this.setDirty);
     });
+
+    this.penSystem = this.el.sceneEl.systems["pen-tools"];
+    this.penSystem.register(this.el);
   },
 
   play() {
@@ -498,5 +501,6 @@ AFRAME.registerComponent("pen", {
     this.observer.disconnect();
     AFRAME.scenes[0].removeEventListener("object3dset", this.setDirty);
     AFRAME.scenes[0].removeEventListener("object3dremove", this.setDirty);
+    this.penSystem.deregister(this.el);
   }
 });

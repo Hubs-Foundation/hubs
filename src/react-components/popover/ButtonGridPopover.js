@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { ToolbarButton } from "../input/ToolbarButton";
 import styles from "./ButtonGridPopover.scss";
 
-export function ButtonGridPopover({ fullscreen, items }) {
+export function ButtonGridPopover({ fullscreen, items, closePopover }) {
   return (
     <div className={classNames(styles.buttonGridPopover, { [styles.fullscreen]: fullscreen })}>
       {items.map(item => {
@@ -18,8 +18,11 @@ export function ButtonGridPopover({ fullscreen, items }) {
               if (item.onSelect) {
                 item.onSelect(item);
               }
+
+              closePopover();
             }}
             label={item.label}
+            selected={item.selected}
           />
         );
       })}
@@ -37,5 +40,6 @@ ButtonGridPopover.propTypes = {
       name: PropTypes.string.isRequired,
       onSelect: PropTypes.func
     })
-  ).isRequired
+  ).isRequired,
+  closePopover: PropTypes.func.isRequired
 };

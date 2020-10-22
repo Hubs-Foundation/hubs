@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { ReactComponent as PenIcon } from "../icons/Pen.svg";
 import { ReactComponent as CameraIcon } from "../icons/Camera.svg";
@@ -12,67 +12,102 @@ import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
 import { PlacePopoverButton } from "./PlacePopover";
 
 export function PlacePopoverContainer({ scene, mediaSearchStore, pushHistoryState, hubChannel }) {
-  let items = [
-    hubChannel.can("spawn_drawing") && {
-      id: "pen",
-      icon: PenIcon,
-      color: "purple",
-      label: "Pen",
-      onSelect: () => scene.emit("penButtonPressed")
-    },
-    hubChannel.can("spawn_camera") && {
-      id: "camera",
-      icon: CameraIcon,
-      color: "purple",
-      label: "Camera",
-      onSelect: () => scene.emit("action_toggle_camera")
-    }
-  ];
+  const [items, setItems] = useState([]);
 
-  if (hubChannel.can("spawn_and_move_media")) {
-    items = [
-      ...items,
-      // TODO: Create text/link dialog
-      // { id: "text", icon: TextIcon, color: "blue", label: "Text" },
-      // { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
-      {
-        id: "gif",
-        icon: GIFIcon,
-        color: "orange",
-        label: "GIF",
-        onSelect: () => mediaSearchStore.sourceNavigate("gifs")
-      },
-      {
-        id: "model",
-        icon: ObjectIcon,
-        color: "orange",
-        label: "3D Model",
-        onSelect: () => mediaSearchStore.sourceNavigate("poly")
-      },
-      {
-        id: "avatar",
-        icon: AvatarIcon,
-        color: "red",
-        label: "Avatar",
-        onSelect: () => mediaSearchStore.sourceNavigate("avatars")
-      },
-      {
-        id: "scene",
-        icon: SceneIcon,
-        color: "red",
-        label: "Scene",
-        onSelect: () => mediaSearchStore.sourceNavigate("scenes")
-      },
-      // TODO: Launch system file prompt directly
-      {
-        id: "upload",
-        icon: UploadIcon,
-        color: "green",
-        label: "Upload",
-        onSelect: () => pushHistoryState("modal", "create")
+  useEffect(
+    () => {
+      function updateItems() {
+        const hasActiveCamera = !!scene.systems["camera-tools"].getMyCamera();
+        const hasActivePen = !!scene.systems["pen-tools"].getMyPen();
+
+        let nextItems = [
+          hubChannel.can("spawn_drawing") && {
+            id: "pen",
+            icon: PenIcon,
+            color: "purple",
+            label: "Pen",
+            onSelect: () => scene.emit("penButtonPressed"),
+            selected: hasActivePen
+          },
+          hubChannel.can("spawn_camera") && {
+            id: "camera",
+            icon: CameraIcon,
+            color: "purple",
+            label: "Camera",
+            onSelect: () => scene.emit("action_toggle_camera"),
+            selected: hasActiveCamera
+          }
+        ];
+
+        if (hubChannel.can("spawn_and_move_media")) {
+          nextItems = [
+            ...nextItems,
+            // TODO: Create text/link dialog
+            // { id: "text", icon: TextIcon, color: "blue", label: "Text" },
+            // { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
+            {
+              id: "gif",
+              icon: GIFIcon,
+              color: "orange",
+              label: "GIF",
+              onSelect: () => mediaSearchStore.sourceNavigate("gifs")
+            },
+            {
+              id: "model",
+              icon: ObjectIcon,
+              color: "orange",
+              label: "3D Model",
+              onSelect: () => mediaSearchStore.sourceNavigate("poly")
+            },
+            {
+              id: "avatar",
+              icon: AvatarIcon,
+              color: "red",
+              label: "Avatar",
+              onSelect: () => mediaSearchStore.sourceNavigate("avatars")
+            },
+            {
+              id: "scene",
+              icon: SceneIcon,
+              color: "red",
+              label: "Scene",
+              onSelect: () => mediaSearchStore.sourceNavigate("scenes")
+            },
+            // TODO: Launch system file prompt directly
+            {
+              id: "upload",
+              icon: UploadIcon,
+              color: "green",
+              label: "Upload",
+              onSelect: () => pushHistoryState("modal", "create")
+            }
+          ];
+        }
+
+        setItems(nextItems);
       }
-    ];
-  }
+
+      hubChannel.addEventListener("permissions_updated", updateItems);
+
+      updateItems();
+
+      function onSceneStateChange(event) {
+        if (event.detail === "camera" || event.detail === "pen") {
+          updateItems();
+        }
+      }
+
+      scene.addEventListener("stateadded", onSceneStateChange);
+      scene.addEventListener("stateremoved", onSceneStateChange);
+
+      return () => {
+        hubChannel.removeEventListener("permissions_updated", updateItems);
+        scene.removeEventListener("stateadded", onSceneStateChange);
+        scene.removeEventListener("stateremoved", onSceneStateChange);
+      };
+    },
+    [hubChannel, mediaSearchStore, pushHistoryState, scene]
+  );
 
   return <PlacePopoverButton items={items} />;
 }
