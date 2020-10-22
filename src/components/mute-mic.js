@@ -1,5 +1,3 @@
-import { SOUND_TOGGLE_MIC } from "../systems/sound-effects-system";
-
 const bindAllEvents = function(elements, events, f) {
   if (!elements || !elements.length) return;
   for (const el of elements) {
