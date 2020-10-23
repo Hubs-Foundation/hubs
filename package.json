@@ -162,7 +162,7 @@
     "mediasoup-client": "github:versatica/mediasoup-client#v3",
     "mini-css-extract-plugin": "^0.8.0",
     "ncp": "^2.0.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "npm-scripts-info": "0.3.9",
     "ora": "^4.0.2",
     "phoenix-channels": "^1.0.0",
