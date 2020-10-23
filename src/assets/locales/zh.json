@@ -278,6 +278,7 @@
   "commands.debug": "切换物理属性除错",
   "commands.vrstats": "切换VR统计数据",
   "commands.audiomode": "(实验的) 音频切换位置",
+  "commands.audioNormalization": "(experimental) Change audio normalization factor.",
   "preferences.closeButton": "Close Preferences Menu",
   "preferences.selectCategory": "Select category",
   "preferences.resetToDefault": "Reset preference to default",

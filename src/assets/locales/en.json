@@ -278,6 +278,7 @@
   "commands.debug": "Toggle physics debug rendering.",
   "commands.vrstats": "Toggle stats in VR.",
   "commands.audiomode": "(experimental) Toggle positional audio.",
+  "commands.audioNormalization": "(experimental) Change audio normalization factor.",
   "preferences.closeButton": "Close Preferences Menu",
   "preferences.selectCategory": "Select category",
   "preferences.resetToDefault": "Reset preference to default",
