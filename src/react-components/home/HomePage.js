@@ -78,27 +78,30 @@ export function HomePage() {
         <IfFeature name="show_feature_panels">
           <section className={classNames(styles.features, styles.colLg, styles.centerLg)}>
             <div className={styles.center}>
-              <h3>Instantly create rooms</h3>
+              <h3>
+                <FormattedMessage id="home.rooms-title" />
+              </h3>
               <img src={configs.image("landing_rooms_thumb")} />
               <p>
-                Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs,
-                you’ll have a private virtual meeting space that you can immediately share - no downloads necessary.
+                <FormattedMessage id="home.rooms-blurb" />
               </p>
             </div>
             <div className={styles.center}>
-              <h3>Communicate naturally</h3>
+              <h3>
+                <FormattedMessage id="home.communicate-title" />
+              </h3>
               <img src={configs.image("landing_communicate_thumb")} />
               <p>
-                Choose an avatar to represent you, put on your headphones, and jump right in. Hubs makes it easy to stay
-                connected with voice and text chat to other people in your private room.
+                <FormattedMessage id="home.communicate-blurb" />
               </p>
             </div>
             <div className={styles.center}>
-              <h3>An easier way to share media</h3>
+              <h3>
+                <FormattedMessage id="home.media-title" />
+              </h3>
               <img src={configs.image("landing_media_thumb")} />
               <p>
-                Share content with others in your room by dragging and dropping photos, videos, PDF files, links, and 3D
-                models into your space.
+                <FormattedMessage id="home.media-blurb" />
               </p>
             </div>
           </section>
