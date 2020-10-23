@@ -10,7 +10,7 @@ import { ReactComponent as DeleteIcon } from "../icons/Delete.svg";
 import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 
 export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
-  const { objects, activeObject, deselectObject } = useObjectList();
+  const { objects, activeObject, deselectObject, selectNextObject, selectPrevObject } = useObjectList();
   const { canPin, isPinned, togglePinned } = usePinObject(hubChannel, scene, activeObject);
   const { canRemoveObject, removeObject } = useRemoveObject(hubChannel, scene, activeObject);
   const { canGoTo, goToSelectedObject } = useGoToSelectedObject(scene, activeObject);
@@ -20,10 +20,12 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
   return (
     <ObjectMenu
       title="Object"
-      currentObjectIndex={objects.indexOf(activeObject)}
+      currentObjectIndex={objects.indexOf(activeObject) + 1}
       objectCount={objects.length}
       onClose={deselectObject}
       onBack={deselectObject}
+      onNextObject={selectNextObject}
+      onPrevObject={selectPrevObject}
     >
       {canPin && (
         <ObjectMenuButton onClick={togglePinned}>

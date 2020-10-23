@@ -185,6 +185,30 @@ export function ObjectListProvider({ scene, children }) {
     [scene, setFocusedObject, selectedObject]
   );
 
+  const selectNextObject = useCallback(
+    () => {
+      const curObjIdx = objects.indexOf(selectedObject);
+
+      if (curObjIdx !== -1) {
+        const nextObjIdx = (curObjIdx + 1) % objects.length;
+        selectObject(objects[nextObjIdx]);
+      }
+    },
+    [selectObject, objects, selectedObject]
+  );
+
+  const selectPrevObject = useCallback(
+    () => {
+      const curObjIdx = objects.indexOf(selectedObject);
+
+      if (curObjIdx !== -1) {
+        const nextObjIdx = curObjIdx === 0 ? objects.length - 1 : curObjIdx - 1;
+        selectObject(objects[nextObjIdx]);
+      }
+    },
+    [selectObject, objects, selectedObject]
+  );
+
   const context = {
     objects,
     activeObject: focusedObject || selectedObject,
@@ -193,7 +217,9 @@ export function ObjectListProvider({ scene, children }) {
     focusObject,
     unfocusObject,
     selectObject,
-    deselectObject
+    deselectObject,
+    selectPrevObject,
+    selectNextObject
   };
 
   // Note: If we move ui-root to a functional component and use hooks,
