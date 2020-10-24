@@ -9,6 +9,9 @@ export class UVScrollSystem {
       const { component } = instances[0];
 
       offset.addScaledVector(component.data.speed, dt / 1000);
+      
+      offset.x = offset.x % 1.0;
+      offset.y = offset.y % 1.0;
 
       const increment = component.data.increment;
       map.offset.x = increment.x ? offset.x - (offset.x % increment.x) : offset.x;
