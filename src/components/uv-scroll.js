@@ -37,12 +37,14 @@ AFRAME.registerComponent("uv-scroll", {
       this.instance = instance;
       this.map = material.map || material.emissiveMap;
 
-      if (!textureToData.has(this.map)) {
+      if (this.map && !textureToData.has(this.map)) {
         textureToData.set(this.map, {
           offset: new THREE.Vector2(),
           instances: [instance]
         });
         registeredTextures.push(this.map);
+      } else if (!this.map) {
+        console.warn("Ignoring uv-scroll added to mesh with no scrollable texture.");
       } else {
         console.warn(
           "Multiple uv-scroll instances added to objects sharing a texture, only the speed/increment from the first one will have any effect"
