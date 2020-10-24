@@ -4,7 +4,6 @@
   flex: 1;
   background-size: cover;
   padding: 1.5em;
-  display: flex;
   flex-direction: column;
   align-items: center;
   @media (min-width: $breakpoint-lg) {
@@ -13,7 +12,7 @@
   }
 
   & > section {
-    margin: 2em 0;
+    margin: 2em auto;
   }
 }
 
