@@ -47,6 +47,35 @@ const ObjectListContext = createContext({
   uninspectObject: () => {}
 });
 
+function handleInspect(scene, object, callback) {
+  const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+
+  callback(object);
+
+  if (object.el.object3D !== cameraSystem.inspectable) {
+    if (cameraSystem.inspectable) {
+      cameraSystem.uninspect(false);
+    }
+
+    cameraSystem.enableLights = object.enableLights;
+    cameraSystem.inspect(object.el, 1.5, true, false);
+  }
+}
+
+function handleDeselect(scene, object, callback) {
+  const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+
+  callback(null);
+
+  cameraSystem.enableLights = true;
+  cameraSystem.uninspect(false);
+
+  if (object) {
+    cameraSystem.enableLights = object.enableLights;
+    cameraSystem.inspect(object.el, 1.5, true, false);
+  }
+}
+
 export function ObjectListProvider({ scene, children }) {
   const [objects, setObjects] = useState([]);
   const [focusedObject, setFocusedObject] = useState(null); // The object currently shown in the viewport
@@ -115,75 +144,24 @@ export function ObjectListProvider({ scene, children }) {
     [scene, setSelectedObject, objects, selectedObject]
   );
 
-  const selectObject = useCallback(
-    object => {
-      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+  const selectObject = useCallback(object => handleInspect(scene, object, setSelectedObject), [
+    scene,
+    setSelectedObject
+  ]);
 
-      setSelectedObject(object);
+  const deselectObject = useCallback(() => handleDeselect(scene, focusedObject, setSelectedObject), [
+    scene,
+    setSelectedObject,
+    focusedObject
+  ]);
 
-      if (object.el.object3D !== cameraSystem.inspectable) {
-        if (cameraSystem.inspectable) {
-          cameraSystem.uninspect(false);
-        }
+  const focusObject = useCallback(object => handleInspect(scene, object, setFocusedObject), [scene, setFocusedObject]);
 
-        cameraSystem.enableLights = object.enableLights;
-        cameraSystem.inspect(object.el, 1.5, true, false);
-      }
-    },
-    [scene, setSelectedObject]
-  );
-
-  const deselectObject = useCallback(
-    () => {
-      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
-
-      setSelectedObject(null);
-
-      cameraSystem.enableLights = true;
-      cameraSystem.uninspect(false);
-
-      if (focusedObject) {
-        cameraSystem.enableLights = focusedObject.enableLights;
-        cameraSystem.inspect(focusedObject.el, 1.5, true, false);
-      }
-    },
-    [scene, setSelectedObject, focusedObject]
-  );
-
-  const focusObject = useCallback(
-    object => {
-      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
-
-      setFocusedObject(object);
-
-      if (object.el.object3D !== cameraSystem.inspectable) {
-        if (cameraSystem.inspectable) {
-          cameraSystem.uninspect(false);
-        }
-
-        cameraSystem.enableLights = object.enableLights;
-        cameraSystem.inspect(object.el, 1.5, true, false);
-      }
-    },
-    [scene, setFocusedObject]
-  );
-
-  const unfocusObject = useCallback(
-    () => {
-      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
-
-      setFocusedObject(null);
-
-      cameraSystem.enableLights = true;
-      cameraSystem.uninspect(false);
-
-      if (selectedObject) {
-        cameraSystem.enableLights = selectedObject.enableLights;
-        cameraSystem.inspect(selectedObject.el, 1.5, true, false);
-      }
-    },
-    [scene, setFocusedObject, selectedObject]
-  );
+  const unfocusObject = useCallback(() => handleDeselect(scene, selectedObject, setFocusedObject), [
+    scene,
+    setFocusedObject,
+    selectedObject
+  ]);
 
   const selectNextObject = useCallback(
     () => {
