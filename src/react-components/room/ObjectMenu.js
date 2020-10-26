@@ -52,7 +52,7 @@ export function ObjectMenu({
             <ArrowBackIcon width={24} height={24} />
           </IconButton>
           <p>
-            {currentObjectIndex}/{objectCount}
+            {currentObjectIndex + 1}/{objectCount}
           </p>
           <IconButton onClick={onNextObject}>
             <ArrowForwardIcon width={24} height={24} />

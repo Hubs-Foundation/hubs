@@ -20,7 +20,7 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
   return (
     <ObjectMenu
       title="Object"
-      currentObjectIndex={objects.indexOf(activeObject) + 1}
+      currentObjectIndex={objects.indexOf(activeObject)}
       objectCount={objects.length}
       onClose={deselectObject}
       onBack={deselectObject}
