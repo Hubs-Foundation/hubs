@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { ObjectMenu, ObjectMenuButton } from "./ObjectMenu";
 import { useObjectList } from "./useObjectList";
-import { usePinObject, useRemoveObject, useGoToSelectedObject, getObjectUrl, getPlayerInfo } from "./object-hooks";
+import { usePinObject, useRemoveObject, useGoToSelectedObject, getObjectUrl, isPlayer } from "./object-hooks";
 import { ReactComponent as PinIcon } from "../icons/Pin.svg";
 import { ReactComponent as LinkIcon } from "../icons/Link.svg";
 import { ReactComponent as GoToIcon } from "../icons/GoTo.svg";
@@ -71,7 +71,6 @@ ObjectMenuItems.propTypes = {
 
 export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
   const { objects, activeObject, deselectObject, selectNextObject, selectPrevObject } = useObjectList();
-  const isPlayer = getPlayerInfo(activeObject);
 
   return (
     <ObjectMenu
@@ -83,7 +82,7 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
       onNextObject={selectNextObject}
       onPrevObject={selectPrevObject}
     >
-      {isPlayer ? (
+      {isPlayer(activeObject) ? (
         <PlayerMenuItems onOpenProfile={onOpenProfile} />
       ) : (
         <ObjectMenuItems
