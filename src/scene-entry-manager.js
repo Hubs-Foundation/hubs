@@ -619,10 +619,10 @@ export default class SceneEntryManager {
     await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
 
     const audioStream = audioEl.captureStream
-        ? audioEl.captureStream()
-        : audioEl.mozCaptureStream
-          ? audioEl.mozCaptureStream()
-          : null;
+      ? audioEl.captureStream()
+      : audioEl.mozCaptureStream
+        ? audioEl.mozCaptureStream()
+        : null;
 
     if (audioStream) {
       let audioVolume = Number(qs.get("audio_volume") || "1.0");
