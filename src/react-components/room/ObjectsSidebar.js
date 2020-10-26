@@ -65,6 +65,19 @@ ObjectsSidebarItem.propTypes = {
   })
 };
 
+export function NoObjects({ canAddObjects }) {
+  return (
+    <li className={styles.noObjects}>
+      <p>There are no objects in the room.</p>
+      {canAddObjects && <p>Use the place menu to add objects.</p>}
+    </li>
+  );
+}
+
+NoObjects.propTypes = {
+  canAddObjects: PropTypes.bool
+};
+
 export function ObjectsSidebar({ children, objectCount, onClose }) {
   return (
     <Sidebar title={`Objects (${objectCount})`} beforeTitle={<CloseButton onClick={onClose} />}>

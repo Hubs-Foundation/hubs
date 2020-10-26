@@ -1874,7 +1874,10 @@ class UIRoot extends Component {
                       />
                     )}
                     {this.state.sidebarId === "objects" && (
-                      <ObjectsSidebarContainer onClose={() => this.setSidebar(null)} />
+                      <ObjectsSidebarContainer
+                        hubChannel={this.props.hubChannel}
+                        onClose={() => this.setSidebar(null)}
+                      />
                     )}
                     {this.state.sidebarId === "people" && (
                       <PeopleSidebarContainer

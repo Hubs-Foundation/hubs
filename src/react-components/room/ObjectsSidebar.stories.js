@@ -1,6 +1,6 @@
 import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
-import { ObjectsSidebar, ObjectsSidebarItem } from "./ObjectsSidebar";
+import { ObjectsSidebar, ObjectsSidebarItem, NoObjects } from "./ObjectsSidebar";
 
 export default {
   title: "ObjectsSidebar"
@@ -49,5 +49,33 @@ export const Base = () => (
 );
 
 Base.parameters = {
+  layout: "fullscreen"
+};
+
+export const Empty = () => (
+  <RoomLayout
+    sidebar={
+      <ObjectsSidebar objectCount={0}>
+        <NoObjects />
+      </ObjectsSidebar>
+    }
+  />
+);
+
+Empty.parameters = {
+  layout: "fullscreen"
+};
+
+export const EmptyWithAddObjectsPerms = () => (
+  <RoomLayout
+    sidebar={
+      <ObjectsSidebar objectCount={0}>
+        <NoObjects canAddObjects />
+      </ObjectsSidebar>
+    }
+  />
+);
+
+EmptyWithAddObjectsPerms.parameters = {
   layout: "fullscreen"
 };

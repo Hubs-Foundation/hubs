@@ -11,3 +11,14 @@
     }
   }
 }
+
+:local(.no-objects) {
+  text-align: center;
+  list-style: none;
+  margin-top: 20px;
+
+  p {
+    margin: 20px;
+    color: theme.$darkgrey;
+  }
+}
