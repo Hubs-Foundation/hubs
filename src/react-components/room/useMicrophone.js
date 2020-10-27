@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import MovingAverage from "moving-average";
 
-const UPDATE_RATE = 50;
-
-export function useMicrophone(scene, updateRate = UPDATE_RATE) {
+export function useMicrophone(scene, updateRate = 50) {
   const movingAvgRef = useRef();
   const [isMuted, setIsMuted] = useState(scene.is("muted"));
   const [volume, setVolume] = useState(0);
@@ -26,7 +24,7 @@ export function useMicrophone(scene, updateRate = UPDATE_RATE) {
         const average = movingAvgRef.current.movingAverage();
         const nextVolume = max === 0 ? 0 : average / max;
         setVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
-        timeout = setTimeout(updateMicVolume, UPDATE_RATE);
+        timeout = setTimeout(updateMicVolume, updateRate);
       };
 
       updateMicVolume();

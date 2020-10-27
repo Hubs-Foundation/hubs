@@ -28,11 +28,7 @@ AFRAME.registerSystem("pen-tools", {
   },
 
   updateMyPen() {
-    if (!this.penEls.length) {
-      this.myPen = null;
-    } else {
-      this.myPen = this.penEls.find(NAF.utils.isMine);
-    }
+    this.myPen = this.penEls.find(NAF.utils.isMine);
 
     if (this.myPen) {
       this.sceneEl.addState("pen");

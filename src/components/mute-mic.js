@@ -1,3 +1,5 @@
+import { SOUND_TOGGLE_MIC } from "../systems/sound-effects-system";
+
 const bindAllEvents = function(elements, events, f) {
   if (!elements || !elements.length) return;
   for (const el of elements) {
@@ -53,6 +55,7 @@ AFRAME.registerComponent("mute-mic", {
     if (!NAF.connection.adapter) return;
     if (!this.el.sceneEl.is("entered")) return;
 
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
     if (this.el.is("muted")) {
       NAF.connection.adapter.enableMicrophone(true);
       this.el.removeState("muted");
