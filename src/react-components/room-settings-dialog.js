@@ -6,8 +6,12 @@ import { FormattedMessage } from "react-intl";
 import { hubUrl } from "../utils/phoenix-utils";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import styles from "../assets/stylesheets/room-settings-dialog.scss";
-import DialogContainer from "./dialog-container";
 import configs from "../utils/configs";
+import { Sidebar, CloseButton } from "./sidebar/Sidebar";
+import { Button } from "./input/Button";
+import { TextInputField } from "./input/TextInputField";
+import { TextAreaInputField } from "./input/TextAreaInputField";
+import { ToggleInput } from "./input/ToggleInput";
 
 export default class RoomSettingsDialog extends Component {
   static propTypes = {
@@ -58,21 +62,18 @@ export default class RoomSettingsDialog extends Component {
 
   renderCheckbox(member_permission, disabled, onChange) {
     return (
-      <label className={cx(styles.permission, { [styles.permissionDisabled]: disabled })} key={member_permission}>
-        <input
-          type="checkbox"
-          checked={this.state.member_permissions[member_permission]}
-          disabled={disabled}
-          onChange={
-            onChange ||
-            (e =>
-              this.setState({
-                member_permissions: { ...this.state.member_permissions, [member_permission]: e.target.checked }
-              }))
-          }
-        />
-        <FormattedMessage id={`room-settings.${member_permission}`} />
-      </label>
+      <ToggleInput
+        value={this.state.member_permissions[member_permission]}
+        disabled={disabled}
+        onChange={
+          onChange ||
+          (e =>
+            this.setState({
+              member_permissions: { ...this.state.member_permissions, [member_permission]: e.target.checked }
+            }))
+        }
+        label={<FormattedMessage id={`room-settings.${member_permission}`} />}
+      />
     );
   }
 
@@ -83,41 +84,30 @@ export default class RoomSettingsDialog extends Component {
   }
 
   render() {
-    const { showPublicRoomSetting } = this.props;
+    const { showPublicRoomSetting, onClose } = this.props;
 
     const maxRoomSize = configs.feature("max_room_size");
 
     return (
-      <DialogContainer title="Room Settings" {...this.props}>
+      <Sidebar title="Room Settings" beforeTitle={<CloseButton onClick={onClose} />}>
         <form onSubmit={this.onSubmit} className={styles.roomSettingsForm}>
-          <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.name-subtitle" />
-          </span>
-          <input
+          <TextInputField
             name="name"
             type="text"
             required
             autoComplete="off"
             placeholder="Room name"
             value={this.state.name}
-            onFocus={e => handleTextFieldFocus(e.target)}
-            onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ name: e.target.value })}
-            className={styles.nameField}
+            label={<FormattedMessage id="room-settings.name-subtitle" />}
           />
-          <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.description-subtitle" />
-          </span>
-          <textarea
+          <TextAreaInputField
             name="description"
-            rows="5"
             autoComplete="off"
             placeholder="Room description"
             value={this.state.description || ""}
-            onFocus={e => handleTextFieldFocus(e.target)}
-            onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ description: e.target.value })}
-            className={styles.descriptionField}
+            label={<FormattedMessage id="room-settings.description-subtitle" />}
           />
           <span className={styles.subtitle}>
             <FormattedMessage id="room-settings.room-size-subtitle" />
@@ -246,11 +236,11 @@ export default class RoomSettingsDialog extends Component {
             <div />
             {this.renderCheckbox("fly")}
           </div>
-          <button type="submit" className={styles.nextButton}>
+          <Button type="submit" preset="accept">
             <FormattedMessage id="room-settings.apply" />
-          </button>
+          </Button>
         </form>
-      </DialogContainer>
+      </Sidebar>
     );
   }
 }
