@@ -420,12 +420,6 @@ module.exports = async (env, argv) => {
           }
         },
         {
-          test: /\.(svgi)$/,
-          use: {
-            loader: "svg-inline-loader"
-          }
-        },
-        {
           test: /\.(wasm)$/,
           type: "javascript/auto",
           use: {
