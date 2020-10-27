@@ -1,6 +1,7 @@
-import React, { Children } from "react";
+import React from "react";
 import className from "classnames";
 import PropTypes from "prop-types";
+import { joinChildren } from "../misc/joinChildren";
 import styles from "./ContentMenu.scss";
 
 export function ContentMenuButton({ active, children, ...props }) {
@@ -17,23 +18,7 @@ ContentMenuButton.propTypes = {
 };
 
 export function ContentMenu({ children }) {
-  return (
-    <div className={styles.contentMenu}>
-      {Children.toArray(children).reduce(
-        (acc, child) =>
-          acc === null ? (
-            child
-          ) : (
-            <>
-              {acc}
-              {<div className={styles.separator} />}
-              {child}
-            </>
-          ),
-        null
-      )}
-    </div>
-  );
+  return <div className={styles.contentMenu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>;
 }
 
 ContentMenu.propTypes = {

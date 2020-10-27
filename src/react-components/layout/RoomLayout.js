@@ -15,10 +15,11 @@ export function RoomLayout({
   toolbarClassName,
   modal,
   viewport,
+  objectFocused,
   ...rest
 }) {
   return (
-    <div className={classNames(styles.roomLayout, className)} {...rest}>
+    <div className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)} {...rest}>
       {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       <Toolbar
@@ -42,5 +43,6 @@ RoomLayout.propTypes = {
   toolbarRight: PropTypes.node,
   toolbarClassName: PropTypes.string,
   modal: PropTypes.node,
-  viewport: PropTypes.node
+  viewport: PropTypes.node,
+  objectFocused: PropTypes.bool
 };

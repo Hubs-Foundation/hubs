@@ -87,9 +87,11 @@ export class AppAwareTouchscreenDevice {
     this.pendingTap = { maxTouchCount: 0, startedAt: 0 };
     this.tapIndexToWriteNextFrame = 0;
 
+    this.canvas = document.querySelector("canvas");
+
     this.events = [];
     ["touchstart", "touchend", "touchmove", "touchcancel"].map(x =>
-      document.querySelector("canvas").addEventListener(x, this.events.push.bind(this.events))
+      this.canvas.addEventListener(x, this.events.push.bind(this.events))
     );
   }
 
@@ -171,8 +173,8 @@ export class AppAwareTouchscreenDevice {
       case MOVE_CURSOR_JOB:
         assignment.cursorPose.fromCameraProjection(
           getPlayerCamera(),
-          (touch.clientX / window.innerWidth) * 2 - 1,
-          -(touch.clientY / window.innerHeight) * 2 + 1
+          (touch.clientX / this.canvas.clientWidth) * 2 - 1,
+          -(touch.clientY / this.canvas.clientHeight) * 2 + 1
         );
         break;
       case MOVE_CAMERA_JOB:
@@ -231,8 +233,8 @@ export class AppAwareTouchscreenDevice {
       // the touch will then track the cursor (instead of the camera)
       assignment.cursorPose = new Pose().fromCameraProjection(
         getPlayerCamera(),
-        (touch.clientX / window.innerWidth) * 2 - 1,
-        -(touch.clientY / window.innerHeight) * 2 + 1
+        (touch.clientX / this.canvas.clientWidth) * 2 - 1,
+        -(touch.clientY / this.canvas.clientHeight) * 2 + 1
       );
     } else if (isSecondTouch || isThirdTouch) {
       const cursorJob = findByJob(MOVE_CURSOR_JOB, this.assignments);
@@ -352,7 +354,7 @@ export class AppAwareTouchscreenDevice {
 
     if (hasCameraJob) {
       const delta = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
-      frame.setVector2(path.touchCameraDelta, delta[0] / window.innerWidth, delta[1] / window.innerHeight);
+      frame.setVector2(path.touchCameraDelta, delta[0] / this.canvas.clientWidth, delta[1] / this.canvas.clientHeight);
     }
 
     frame.setValueType(path.pinch.delta, this.pinch.delta);

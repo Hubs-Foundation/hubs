@@ -23,11 +23,9 @@
 
 :local(.sidebar) {
   grid-column-start: sidebar;
-  background-color: theme.$white;
   height: 100%;
   overflow: hidden;
   width: 450px;
-  pointer-events: auto;
 
   @media(max-width: theme.$breakpoint-md - 1) {
     position: fixed;
@@ -64,5 +62,39 @@
 
   & > * {
     pointer-events: auto;
+  }
+}
+
+:local(.scene) {
+  position: absolute;
+  top: 0;
+  bottom: 96px;
+  left: 0;
+  right: 0;
+  width: auto;
+  height: auto;
+}
+
+:local(.scene-sm-full-screen) {
+  @media(max-width: theme.$breakpoint-md - 1) {
+    bottom: 0;
+  }
+}
+
+:local(.sidebar-open) {
+  @media(min-width: theme.$breakpoint-md) {
+    right: 450px;
+  }
+}
+
+:local(.object-focused) {
+  @media(max-width: theme.$breakpoint-md - 1) {
+    :local(.toolbar) {
+      display: none;
+    }
+
+    :local(.sidebar) {
+      display: none;
+    }
   }
 }

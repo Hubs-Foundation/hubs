@@ -74,6 +74,22 @@
     }
   }
 
+  &:local(.compact-sm) {
+    @media(max-width: theme.$breakpoint-md - 1) {
+      flex-direction: column;
+      justify-content: center;
+
+      & > * {
+        margin-right: 0;
+        margin-bottom: 4px;
+    
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
   :global(.keyboard-user) &:focus-within {
     box-shadow: 0 0 0 2px theme.$black;
   }

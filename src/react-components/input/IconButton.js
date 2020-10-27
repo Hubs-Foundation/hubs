@@ -5,10 +5,15 @@ import styles from "./IconButton.scss";
 import textInputStyles from "./TextInput.scss";
 
 export const IconButton = memo(
-  forwardRef(({ className, as: ButtonComponent, children, ...rest }, ref) => {
+  forwardRef(({ className, as: ButtonComponent, compactSm, children, ...rest }, ref) => {
     return (
       <ButtonComponent
-        className={classNames(styles.iconButton, textInputStyles.iconButton, className)}
+        className={classNames(
+          styles.iconButton,
+          textInputStyles.iconButton,
+          { [styles.compactSm]: compactSm },
+          className
+        )}
         {...rest}
         ref={ref}
       >
@@ -19,6 +24,8 @@ export const IconButton = memo(
 );
 
 IconButton.propTypes = {
+  // compactSm makes the icon button shift to a vertical layout in the "sm" (mobile) breakpoint
+  compactSm: PropTypes.bool,
   className: PropTypes.string,
   children: PropTypes.node
 };
