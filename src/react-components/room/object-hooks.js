@@ -4,15 +4,15 @@ import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-ut
 import { getPromotionTokenForFile } from "../../utils/media-utils";
 
 function getPinnedState(el) {
-  return el.components.pinnable && el.components.pinnable.data.pinned;
+  return !!(el.components.pinnable && el.components.pinnable.data.pinned);
 }
 
 function hasIsStaticTag(el) {
-  return el.components.tags && el.components.tags.data.isStatic;
+  return !!(el.components.tags && el.components.tags.data.isStatic);
 }
 
-export function getPlayerInfo(object) {
-  return object.el.components["player-info"] && object.el.components["player-info"].data;
+export function isPlayer(object) {
+  return !!(object.el.components["player-info"] && object.el.components["player-info"].data);
 }
 
 export function getObjectUrl(object) {
@@ -84,7 +84,7 @@ export function usePinObject(hubChannel, scene, object) {
 
   const canPin = !!(
     scene.is("entered") &&
-    !getPlayerInfo(object) &&
+    !isPlayer(object) &&
     !hasIsStaticTag(el) &&
     hubChannel.can("pin_objects") &&
     userOwnsFile
@@ -118,7 +118,7 @@ export function useGoToSelectedObject(scene, object) {
 
   const uiRoot = useMemo(() => document.getElementById("ui-root"), []);
   const isSpectating = uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
-  const canGoTo = !isSpectating && !getPlayerInfo(object);
+  const canGoTo = !isSpectating && !isPlayer(object);
 
   return { canGoTo, goToSelectedObject };
 }
@@ -135,7 +135,7 @@ export function useRemoveObject(hubChannel, scene, object) {
 
   const canRemoveObject = !!(
     scene.is("entered") &&
-    !getPlayerInfo(object) &&
+    !isPlayer(object) &&
     !getPinnedState(el) &&
     !hasIsStaticTag(el) &&
     hubChannel.can("spawn_and_move_media")
