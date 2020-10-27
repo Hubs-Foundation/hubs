@@ -4,11 +4,11 @@ import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-ut
 import { getPromotionTokenForFile } from "../../utils/media-utils";
 
 function getPinnedState(el) {
-  return el.components.pinnable && el.components.pinnable.data.pinned;
+  return !!(el.components.pinnable && el.components.pinnable.data.pinned);
 }
 
 function hasIsStaticTag(el) {
-  return el.components.tags && el.components.tags.data.isStatic;
+  return !!(el.components.tags && el.components.tags.data.isStatic);
 }
 
 export function isPlayer(object) {
