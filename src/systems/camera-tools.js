@@ -51,11 +51,7 @@ AFRAME.registerSystem("camera-tools", {
   },
 
   updateMyCamera() {
-    if (!this.cameraEls.length) {
-      this.myCamera = null;
-    } else {
-      this.myCamera = this.cameraEls.find(NAF.utils.isMine);
-    }
+    this.myCamera = this.cameraEls.find(NAF.utils.isMine);
 
     if (this.myCamera) {
       this.sceneEl.addState("camera");

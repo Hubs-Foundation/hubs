@@ -13,17 +13,13 @@ const items = [
   { id: "screen", icon: DesktopIcon, color: "purple", label: "Screen" }
 ];
 
-export const Base = () => (
-  <RoomLayout toolbarCenter={<SharePopoverButton items={items} onSelect={item => console.log(item)} />} />
-);
+export const Base = () => <RoomLayout toolbarCenter={<SharePopoverButton items={items} />} />;
 
 Base.parameters = {
   layout: "fullscreen"
 };
 
-export const Mobile = () => (
-  <RoomLayout toolbarCenter={<SharePopoverButton items={[items[0]]} onSelect={item => console.log(item)} />} />
-);
+export const Mobile = () => <RoomLayout toolbarCenter={<SharePopoverButton items={[items[0]]} />} />;
 
 Mobile.parameters = {
   layout: "fullscreen"
@@ -34,9 +30,7 @@ const activeItems = [
   { id: "screen", icon: DesktopIcon, color: "purple", label: "Screen" }
 ];
 
-export const Active = () => (
-  <RoomLayout toolbarCenter={<SharePopoverButton items={activeItems} onSelect={item => console.log(item)} />} />
-);
+export const Active = () => <RoomLayout toolbarCenter={<SharePopoverButton items={activeItems} />} />;
 
 Active.parameters = {
   layout: "fullscreen"

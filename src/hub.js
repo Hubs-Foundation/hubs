@@ -118,7 +118,6 @@ import "./components/optional-alternative-to-not-hide";
 import "./components/set-max-resolution";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
-import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -126,6 +125,7 @@ import { Router, Route } from "react-router-dom";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import { pushHistoryState } from "./utils/history";
 import UIRoot from "./react-components/ui-root";
+import { ExitedRoomScreen } from "./react-components/room/ExitedRoomScreen";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
@@ -149,6 +149,7 @@ import "./systems/exit-on-blur";
 import "./systems/auto-pixel-ratio";
 import "./systems/idle-detector";
 import "./systems/camera-tools";
+import "./systems/pen-tools";
 import "./systems/userinput/userinput";
 import "./systems/userinput/userinput-debug";
 import "./systems/ui-hotkeys";
@@ -274,33 +275,30 @@ function mountUI(props = {}) {
   const scene = document.querySelector("a-scene");
   const disableAutoExitOnIdle =
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
-  const isCursorHoldingPen =
-    scene &&
-    (scene.systems.userinput.activeSets.includes(userinputSets.rightCursorHoldingPen) ||
-      scene.systems.userinput.activeSets.includes(userinputSets.leftCursorHoldingPen));
-  const hasActiveCamera = scene && !!scene.systems["camera-tools"].getMyCamera();
   const forcedVREntryType = qsVREntryType;
 
   ReactDOM.render(
     <WrappedIntlProvider>
       <Router history={history}>
         <Route
-          render={routeProps => (
-            <UIRoot
-              {...{
-                scene,
-                isBotMode,
-                disableAutoExitOnIdle,
-                forcedVREntryType,
-                store,
-                mediaSearchStore,
-                isCursorHoldingPen,
-                hasActiveCamera,
-                ...props,
-                ...routeProps
-              }}
-            />
-          )}
+          render={routeProps =>
+            props.roomUnavailableReason ? (
+              <ExitedRoomScreen reason={props.roomUnavailableReason} />
+            ) : (
+              <UIRoot
+                {...{
+                  scene,
+                  isBotMode,
+                  disableAutoExitOnIdle,
+                  forcedVREntryType,
+                  store,
+                  mediaSearchStore,
+                  ...props,
+                  ...routeProps
+                }}
+              />
+            )
+          }
         />
       </Router>
     </WrappedIntlProvider>,
@@ -1008,10 +1006,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     enterScene: entryManager.enterScene,
     exitScene: reason => {
       entryManager.exitScene();
-
-      if (reason) {
-        remountUI({ roomUnavailableReason: reason });
-      }
+      remountUI({ roomUnavailableReason: reason || "exited" });
     },
     initialIsSubscribed: subscriptions.isSubscribed(),
     activeTips: scene.systems.tips.activeTips
@@ -1030,13 +1025,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     entryManager.exitScene("left");
     remountUI({ roomUnavailableReason: "left" });
   });
-
-  const updateCameraUI = function(e) {
-    if (e.detail !== "camera") return;
-    remountUI({});
-  };
-  scene.addEventListener("stateadded", updateCameraUI);
-  scene.addEventListener("stateremoved", updateCameraUI);
 
   scene.addEventListener("hub_closed", () => {
     scene.exitVR();
