@@ -411,6 +411,19 @@ export class CameraSystem {
         this.nextMode();
       }
 
+      if (scene.audioListener && this.avatarPOV) {
+        if (this.mode === CAMERA_MODE_INSPECT && scene.audioListener.parent !== this.avatarPOV.object3D) {
+          this.avatarPOV.object3D.add(scene.audioListener);
+        } else if (
+          (this.mode === CAMERA_MODE_FIRST_PERSON ||
+            this.mode === CAMERA_MODE_THIRD_PERSON_NEAR ||
+            this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
+          scene.audioListener.parent !== this.viewingCamera.object3DMap.camera
+        ) {
+          this.viewingCamera.object3DMap.camera.add(scene.audioListener);
+        }
+      }
+
       const headShouldBeVisible = this.mode !== CAMERA_MODE_FIRST_PERSON;
       this.playerHead = this.playerHead || document.getElementById("avatar-head");
       if (this.playerHead && headShouldBeVisible !== this.playerHead.object3D.visible) {
@@ -496,19 +509,6 @@ export class CameraSystem {
             dt,
             panY
           );
-        }
-      }
-
-      if (scene.audioListener && this.avatarPOV) {
-        if (this.mode === CAMERA_MODE_INSPECT && scene.audioListener.parent !== this.avatarPOV.object3D) {
-          this.avatarPOV.object3D.add(scene.audioListener);
-        } else if (
-          (this.mode === CAMERA_MODE_FIRST_PERSON ||
-            this.mode === CAMERA_MODE_THIRD_PERSON_NEAR ||
-            this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
-          scene.audioListener.parent !== this.viewingCamera.object3DMap.camera
-        ) {
-          this.viewingCamera.object3DMap.camera.add(scene.audioListener);
         }
       }
     };
