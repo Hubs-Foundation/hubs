@@ -14,6 +14,11 @@
   margin-left: 16px;
   cursor: pointer;
   user-select: none;
+  text-align: left;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 :local(.input) {
