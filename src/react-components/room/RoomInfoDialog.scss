@@ -1,0 +1,56 @@
+@use "../styles/theme.scss";
+
+:local(.room-info-dialog) {
+  margin: 20px;
+
+  & > * {
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+:local(.section-title) {
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-bold;
+  color: theme.$darkgrey;
+  margin-bottom: 16px;
+  margin-top: 16px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+:local(.scene-screenshot), :local(.scene-screenshot) img {
+  border-radius: 12px;
+  width: 286px;
+  height: 200px;
+}
+
+:local(.scene-info) {
+  margin-bottom: 16px;
+}
+
+:local(.scene-name) {
+  font-size: theme.$font-size-lg;
+  font-weight: theme.$font-weight-bold;
+}
+
+:local(.scene-creator) {
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-medium;
+  color: theme.$darkgrey;
+}
+
+:local(.attribution) {
+  margin-top: 4px;
+  font-size: theme.$font-size-sm;
+}
+
+:local(.attribution-author) {
+  margin-top: 4px;
+  color: theme.$darkgrey;
+}
