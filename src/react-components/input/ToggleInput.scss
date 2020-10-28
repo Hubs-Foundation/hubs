@@ -4,6 +4,7 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+  user-select: none;
 
   input {
     opacity: 0;
@@ -20,10 +21,21 @@
   cursor: not-allowed;
 }
 
-:local(.label) {
+:local(.label-container) {
   margin-right: 16px;
-  font-size: 12px;
-  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  color: theme.$darkgrey;
+}
+
+:local(.label) {
+  font-size: theme.$font-size-sm;
+}
+
+:local(.description) {
+  margin-top: 8px;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-regular;
 }
 
 :local(.track) {
