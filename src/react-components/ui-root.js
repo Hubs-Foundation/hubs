@@ -1482,7 +1482,6 @@ class UIRoot extends Component {
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
           <div className={classNames(rootStyles)}>
-            {this.state.dialog}
             {preload &&
               this.props.hub && (
                 <PreloadOverlay
@@ -1794,7 +1793,7 @@ class UIRoot extends Component {
                   undefined
                 )
               }
-              modal={renderEntryFlow && entryDialog}
+              modal={this.state.dialog || (renderEntryFlow && entryDialog)}
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
               toolbarCenter={
                 <>

@@ -1,7 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import styles from "./PeopleSidebar.scss";
-import { Sidebar, CloseButton, SidebarButton } from "../sidebar/Sidebar";
+import { Sidebar } from "../sidebar/Sidebar";
+import { CloseButton } from "../input/CloseButton";
+import { IconButton } from "../input/IconButton";
 import { ReactComponent as StarIcon } from "../icons/Star.svg";
 import { ReactComponent as DesktopIcon } from "../icons/Desktop.svg";
 import { ReactComponent as DiscordIcon } from "../icons/Discord.svg";
@@ -97,7 +99,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
     <Sidebar
       title={`People (${people.length})`}
       beforeTitle={<CloseButton onClick={onClose} />}
-      afterTitle={showMuteAll ? <SidebarButton onClick={onMuteAll}>Mute All</SidebarButton> : undefined}
+      afterTitle={showMuteAll ? <IconButton onClick={onMuteAll}>Mute All</IconButton> : undefined}
     >
       <List>
         {people.map(person => {

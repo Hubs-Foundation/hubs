@@ -4,9 +4,8 @@ import classNames from "classnames";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import { ReactComponent as VRIcon } from "../icons/VR.svg";
-import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
 import styles from "./EnterOnDeviceModal.scss";
-import { IconButton } from "../input/IconButton";
+import { BackButton } from "../input/BackButton";
 
 export function EnterOnDeviceModal({
   className,
@@ -22,12 +21,7 @@ export function EnterOnDeviceModal({
   return (
     <Modal
       title="Enter on Device"
-      beforeTitle={
-        <IconButton onClick={onBack}>
-          <ChevronBackIcon />
-          <span>Back</span>
-        </IconButton>
-      }
+      beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       contentClassName={classNames(styles.content, { [styles.loadingCode]: loadingCode })}
       {...rest}

@@ -1,7 +1,8 @@
 import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import { CloseButton, Sidebar } from "../sidebar/Sidebar";
+import { Sidebar } from "../sidebar/Sidebar";
+import { CloseButton } from "../input/CloseButton";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
 import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import { ReactComponent as ChatIcon } from "../icons/Chat.svg";

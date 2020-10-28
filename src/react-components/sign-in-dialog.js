@@ -5,8 +5,9 @@ import { FormattedMessage } from "react-intl";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/sign-in-dialog.scss";
-import DialogContainer from "./dialog-container";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
+import { Modal } from "./modal/Modal";
+import { CloseButton } from "./input/CloseButton";
 
 export default class SignInDialog extends Component {
   static propTypes = {
@@ -16,6 +17,7 @@ export default class SignInDialog extends Component {
     onContinue: PropTypes.func,
     message: PropTypes.string,
     continueText: PropTypes.string,
+    onClose: PropTypes.func,
     closable: PropTypes.bool
   };
 
@@ -107,9 +109,9 @@ export default class SignInDialog extends Component {
     }
 
     return (
-      <DialogContainer title="Sign In" {...this.props}>
+      <Modal title="Sign In" beforeTitle={this.props.closable && <CloseButton onClick={this.props.onClose} />}>
         {contents}
-      </DialogContainer>
+      </Modal>
     );
   }
 }
