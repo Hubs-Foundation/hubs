@@ -109,6 +109,7 @@ export default class RoomSettingsDialog extends Component {
             value={this.state.description || ""}
             onChange={e => this.setState({ description: e.target.value })}
             label={<FormattedMessage id="room-settings.description-subtitle" />}
+            minRows={3}
           />
           <NumericInputField
             name="room_size"
