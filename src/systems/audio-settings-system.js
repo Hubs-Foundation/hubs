@@ -49,6 +49,13 @@ export class AudioSettingsSystem {
         preferences: { audioOutputMode: "panner" }
       });
     }
+    if (window.APP.store.state.preferences.audioNormalization !== 0.0) {
+      //hack to always reset to 0.0 (disabled)
+      window.APP.store.update({
+        preferences: { audioNormalization: 0.0 }
+      });
+    }
+
     this.audioOutputMode = window.APP.store.state.preferences.audioOutputMode;
     this.onPreferenceChanged = () => {
       const newPref = window.APP.store.state.preferences.audioOutputMode;
