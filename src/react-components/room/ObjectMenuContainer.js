@@ -2,14 +2,23 @@ import React from "react";
 import PropTypes from "prop-types";
 import { ObjectMenu, ObjectMenuButton } from "./ObjectMenu";
 import { useObjectList } from "./useObjectList";
-import { usePinObject, useRemoveObject, useGoToSelectedObject, getObjectUrl, isPlayer } from "./object-hooks";
+import {
+  usePinObject,
+  useRemoveObject,
+  useGoToSelectedObject,
+  getObjectUrl,
+  isPlayer,
+  isMe,
+  useHideAvatar
+} from "./object-hooks";
 import { ReactComponent as PinIcon } from "../icons/Pin.svg";
 import { ReactComponent as LinkIcon } from "../icons/Link.svg";
 import { ReactComponent as GoToIcon } from "../icons/GoTo.svg";
 import { ReactComponent as DeleteIcon } from "../icons/Delete.svg";
 import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
+import { ReactComponent as HideIcon } from "../icons/Hide.svg";
 
-function PlayerMenuItems({ onOpenProfile }) {
+function MyMenuItems({ onOpenProfile }) {
   return (
     <ObjectMenuButton onClick={onOpenProfile}>
       <AvatarIcon />
@@ -18,8 +27,30 @@ function PlayerMenuItems({ onOpenProfile }) {
   );
 }
 
-PlayerMenuItems.propTypes = {
+MyMenuItems.propTypes = {
   onOpenProfile: PropTypes.func.isRequired
+};
+
+function PlayerMenuItems({ hubChannel, activeObject, deselectObject }) {
+  const hideAvatar = useHideAvatar(hubChannel, activeObject.el);
+
+  return (
+    <ObjectMenuButton
+      onClick={() => {
+        deselectObject();
+        hideAvatar();
+      }}
+    >
+      <HideIcon />
+      <span>Hide</span>
+    </ObjectMenuButton>
+  );
+}
+
+PlayerMenuItems.propTypes = {
+  hubChannel: PropTypes.object.isRequired,
+  activeObject: PropTypes.object.isRequired,
+  deselectObject: PropTypes.func.isRequired
 };
 
 function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject }) {
@@ -72,6 +103,23 @@ ObjectMenuItems.propTypes = {
 export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
   const { objects, activeObject, deselectObject, selectNextObject, selectPrevObject } = useObjectList();
 
+  let menuItems;
+
+  if (isMe(activeObject)) {
+    menuItems = <MyMenuItems onOpenProfile={onOpenProfile} />;
+  } else if (isPlayer(activeObject)) {
+    menuItems = <PlayerMenuItems hubChannel={hubChannel} activeObject={activeObject} deselectObject={deselectObject} />;
+  } else {
+    menuItems = (
+      <ObjectMenuItems
+        hubChannel={hubChannel}
+        scene={scene}
+        activeObject={activeObject}
+        deselectObject={deselectObject}
+      />
+    );
+  }
+
   return (
     <ObjectMenu
       title="Object"
@@ -82,16 +130,7 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
       onNextObject={selectNextObject}
       onPrevObject={selectPrevObject}
     >
-      {isPlayer(activeObject) ? (
-        <PlayerMenuItems onOpenProfile={onOpenProfile} />
-      ) : (
-        <ObjectMenuItems
-          hubChannel={hubChannel}
-          scene={scene}
-          activeObject={activeObject}
-          deselectObject={deselectObject}
-        />
-      )}
+      {menuItems}
     </ObjectMenu>
   );
 }
