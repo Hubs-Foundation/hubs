@@ -217,7 +217,7 @@ class UIRoot extends Component {
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
-    autoExitMessage: null,
+    autoExitReason: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
     signedIn: false,
@@ -295,7 +295,7 @@ class UIRoot extends Component {
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
-    this.startAutoExitTimer("autoexit.concurrent_subtitle");
+    this.startAutoExitTimer("concurrent-session");
   };
 
   onIdleDetected = () => {
@@ -305,7 +305,7 @@ class UIRoot extends Component {
       this.props.store.state.preferences["disableIdleDetection"]
     )
       return;
-    this.startAutoExitTimer("autoexit.idle_subtitle");
+    this.startAutoExitTimer("idle");
   };
 
   onActivityDetected = () => {
@@ -525,7 +525,7 @@ class UIRoot extends Component {
     }
   };
 
-  startAutoExitTimer = autoExitMessage => {
+  startAutoExitTimer = autoExitReason => {
     if (this.state.autoExitTimerInterval) return;
 
     const autoExitTimerInterval = setInterval(() => {
@@ -540,7 +540,7 @@ class UIRoot extends Component {
       this.checkForAutoExit();
     }, 500);
 
-    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitMessage });
+    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitReason });
   };
 
   checkForAutoExit = () => {
@@ -558,7 +558,7 @@ class UIRoot extends Component {
     this.setState({
       autoExitTimerStartedAt: null,
       autoExitTimerInterval: null,
-      autoExitMessage: null,
+      autoExitReason: null,
       secondsRemainingBeforeAutoExit: Infinity
     });
   };
@@ -1201,7 +1201,7 @@ class UIRoot extends Component {
       !preload &&
       (this.isWaitingForAutoExit() ? (
         <AutoExitWarningModal
-          message={this.state.autoExitMessage}
+          reason={this.state.autoExitReason}
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
           onCancel={this.endAutoExitTimer}
         />

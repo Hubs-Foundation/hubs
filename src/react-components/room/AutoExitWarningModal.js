@@ -1,11 +1,24 @@
 import React from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, defineMessages, useIntl } from "react-intl";
 import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import styles from "./AutoExitWarningModal.scss";
 
-export function AutoExitWarningModal({ onCancel, message, secondsRemaining }) {
+const messages = defineMessages({
+  concurrentSession: {
+    id: "autoexit.concurrent_subtitle",
+    defaultMessage: "You have started another session."
+  },
+  idle: {
+    id: "autoexit.idle_subtitle",
+    defaultMessage: "You have been idle for too long."
+  }
+});
+
+export function AutoExitWarningModal({ onCancel, reason, secondsRemaining }) {
+  const intl = useIntl();
+
   return (
     <Modal title="Warning">
       <div className={styles.autoExitWarningModal}>
@@ -14,9 +27,7 @@ export function AutoExitWarningModal({ onCancel, message, secondsRemaining }) {
           <span>{secondsRemaining}</span>
           <FormattedMessage id="autoexit.title_units" />
         </b>
-        <p>
-          <FormattedMessage id={message} />
-        </p>
+        <p>{intl.formatMessage(messages[reason])}</p>
         <Button preset="red" onClick={onCancel}>
           <FormattedMessage id="autoexit.cancel" />
         </Button>
@@ -26,7 +37,7 @@ export function AutoExitWarningModal({ onCancel, message, secondsRemaining }) {
 }
 
 AutoExitWarningModal.propTypes = {
-  message: PropTypes.string,
-  secondsRemaining: PropTypes.number,
+  reason: PropTypes.string.isRequired,
+  secondsRemaining: PropTypes.number.isRequired,
   onCancel: PropTypes.func
 };
