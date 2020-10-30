@@ -23,7 +23,6 @@ import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
 
 import { getMessages } from "../utils/i18n";
-import AutoExitWarning from "./auto-exit-warning";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
@@ -101,6 +100,7 @@ import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
+import { AutoExitWarningModal } from "./room/AutoExitWarningModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1200,7 +1200,7 @@ class UIRoot extends Component {
       this.props.availableVREntryTypes &&
       !preload &&
       (this.isWaitingForAutoExit() ? (
-        <AutoExitWarning
+        <AutoExitWarningModal
           message={this.state.autoExitMessage}
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
           onCancel={this.endAutoExitTimer}
