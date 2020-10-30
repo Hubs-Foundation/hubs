@@ -125,7 +125,7 @@ import { Router, Route } from "react-router-dom";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import { pushHistoryState } from "./utils/history";
 import UIRoot from "./react-components/ui-root";
-import { ExitedRoomScreen } from "./react-components/room/ExitedRoomScreen";
+import { ExitedRoomScreenContainer } from "./react-components/room/ExitedRoomScreenContainer";
 import AuthChannel from "./utils/auth-channel";
 import HubChannel from "./utils/hub-channel";
 import LinkChannel from "./utils/link-channel";
@@ -283,7 +283,7 @@ function mountUI(props = {}) {
         <Route
           render={routeProps =>
             props.roomUnavailableReason ? (
-              <ExitedRoomScreen reason={props.roomUnavailableReason} />
+              <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
             ) : (
               <UIRoot
                 {...{

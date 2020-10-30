@@ -1,38 +1,72 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { getMessages } from "../../utils/i18n";
-import configs from "../../utils/configs";
-import { FormattedMessage } from "react-intl";
+import { defineMessages, useIntl } from "react-intl";
 import { LoadingScreenLayout } from "../layout/LoadingScreenLayout";
 
-export function ExitedRoomScreen({ reason }) {
+const messages = defineMessages({
+  exited: {
+    id: "exit.subtitle.exited",
+    defaultMessage: "Your session has ended. Refresh your browser to start a new one."
+  },
+  closed: {
+    id: "exit.subtitle.closed",
+    defaultMessage: "This room is no longer available."
+  },
+  denied: {
+    id: "exit.subtitle.denied",
+    defaultMessage: "You are not permitted to join this room. Please request permission from the room creator."
+  },
+  disconnected: {
+    id: "exit.subtitle.disconnected",
+    defaultMessage: "You have disconnected from the room. Refresh the page to try to reconnect."
+  },
+  left: {
+    id: "exit.subtitle.left",
+    defaultMessage: "You have left the room."
+  },
+  full: {
+    id: "exit.subtitle.full",
+    defaultMessage: "This room is full, please try again later."
+  },
+  scene_error: {
+    id: "exit.subtitle.scene_error",
+    defaultMessage: "The scene failed to load."
+  },
+  connect_error: {
+    id: "exit.subtitle.connect_error",
+    defaultMessage: "Unable to connect to this room, please try again later."
+  },
+  version_mismatch: {
+    id: "exit.subtitle.version_mismatch",
+    defaultMessage: "The version you deployed is not available yet. Your browser will refresh in 5 seconds."
+  }
+});
+
+export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSourceLink }) {
+  const intl = useIntl();
+
   let subtitle = null;
   if (reason === "closed") {
+    const contactEmail = intl.formatMessage({ id: "contact-email" });
+
     // TODO i18n, due to links and markup
     subtitle = (
       <>
         <b>Sorry, this room is no longer available.</b>
-        {configs.feature("show_terms") && (
+        {showTerms && (
           <p>
             A room may be closed by the room owner, or if we receive reports that it violates our{" "}
-            <a
-              target="_blank"
-              rel="noreferrer noopener"
-              href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-            >
+            <a target="_blank" rel="noreferrer noopener" href={termsUrl}>
               Terms of Use
             </a>
             .
           </p>
         )}
         <p>
-          If you have questions, contact us at{" "}
-          <a href={`mailto:${getMessages()["contact-email"]}`}>
-            <FormattedMessage id="contact-email" />
-          </a>
+          If you have questions, contact us at <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
           .
         </p>
-        {configs.feature("show_source_link") && (
+        {showSourceLink && (
           <p>
             If you&apos;d like to run your own server, Hubs&apos;s source code is available on{" "}
             <a href="https://github.com/mozilla/hubs">GitHub</a>.
@@ -46,12 +80,9 @@ export function ExitedRoomScreen({ reason }) {
     tcpParams.set("force_tcp", true);
     tcpUrl.search = tcpParams.toString();
 
-    const exitSubtitleId = `exit.subtitle.${reason}`;
     subtitle = (
       <>
-        <b>
-          <FormattedMessage id={exitSubtitleId} />
-        </b>
+        <b>{intl.formatMessage(messages[reason])}</b>
 
         {reason === "connect_error" && (
           <p>
@@ -67,9 +98,13 @@ export function ExitedRoomScreen({ reason }) {
     );
   }
 
-  return <LoadingScreenLayout center={subtitle} logoSrc={configs.image("logo")} />;
+  return <LoadingScreenLayout center={subtitle} logoSrc={logoSrc} />;
 }
 
 ExitedRoomScreen.propTypes = {
-  reason: PropTypes.string
+  reason: PropTypes.string.isRequired,
+  showTerms: PropTypes.bool,
+  termsUrl: PropTypes.string,
+  logoSrc: PropTypes.string,
+  showSourceLink: PropTypes.bool
 };
