@@ -40,7 +40,6 @@ import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
 import HelpDialog from "./help-dialog.js";
-import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
@@ -100,6 +99,7 @@ import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
+import { SafariMicModal } from "./room/SafariMicModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -232,7 +232,7 @@ class UIRoot extends Component {
     super(props);
 
     if (props.showSafariMicDialog) {
-      this.state.dialog = <SafariMicDialog closable={false} />;
+      this.state.dialog = <SafariMicModal />;
     }
 
     props.mediaSearchStore.setHistory(props.history);
