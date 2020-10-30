@@ -31,7 +31,6 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
 import InviteDialog from "./invite-dialog.js";
-import InviteTeamDialog from "./invite-team-dialog.js";
 import SignInDialog from "./sign-in-dialog.js";
 import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
@@ -39,7 +38,6 @@ import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
-import HelpDialog from "./help-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
@@ -1593,12 +1591,6 @@ class UIRoot extends Component {
                   />
                   <StateRoute
                     stateKey="modal"
-                    stateValue="support"
-                    history={this.props.history}
-                    render={() => this.renderDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel })}
-                  />
-                  <StateRoute
-                    stateKey="modal"
                     stateValue="create"
                     history={this.props.history}
                     render={() => this.renderDialog(CreateObjectDialog, { onCreate: this.createObject })}
@@ -1646,17 +1638,6 @@ class UIRoot extends Component {
                     history={this.props.history}
                     render={() =>
                       this.renderDialog(FeedbackDialog, {
-                        history: this.props.history,
-                        onClose: () => this.pushHistoryState("modal", null)
-                      })
-                    }
-                  />
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="help"
-                    history={this.props.history}
-                    render={() =>
-                      this.renderDialog(HelpDialog, {
                         history: this.props.history,
                         onClose: () => this.pushHistoryState("modal", null)
                       })
