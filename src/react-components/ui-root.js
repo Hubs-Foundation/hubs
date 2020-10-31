@@ -40,7 +40,6 @@ import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
-import LeaveRoomDialog from "./leave-room-dialog.js";
 import RoomInfoDialog from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
@@ -101,6 +100,7 @@ import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
+import { LeaveRoomModal } from "./room/LeaveRoomModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1306,7 +1306,7 @@ class UIRoot extends Component {
             label: "Create Room",
             icon: HomeIcon,
             onClick: () =>
-              this.showNonHistoriedDialog(LeaveRoomDialog, {
+              this.showNonHistoriedDialog(LeaveRoomModal, {
                 destinationUrl: "/",
                 messageType: "create-room"
               })
@@ -1515,7 +1515,7 @@ class UIRoot extends Component {
                 hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={(entry, selectAction) => {
                   if (entry.type === "room") {
-                    this.showNonHistoriedDialog(LeaveRoomDialog, {
+                    this.showNonHistoriedDialog(LeaveRoomModal, {
                       destinationUrl: entry.url,
                       messageType: "join-room"
                     });
