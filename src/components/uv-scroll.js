@@ -9,7 +9,7 @@ export class UVScrollSystem {
       const { component } = instances[0];
 
       offset.addScaledVector(component.data.speed, dt / 1000);
-      
+
       offset.x = offset.x % 1.0;
       offset.y = offset.y % 1.0;
 

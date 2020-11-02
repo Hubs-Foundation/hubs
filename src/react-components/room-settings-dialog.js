@@ -85,7 +85,7 @@ export default class RoomSettingsDialog extends Component {
   handleRoomNameFieldBlur() {
     handleTextFieldBlur();
     this.setState({
-        name: this.state.name.trim()
+      name: this.state.name.trim()
     });
   }
 
