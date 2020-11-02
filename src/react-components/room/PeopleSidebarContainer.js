@@ -83,6 +83,7 @@ export function PeopleSidebarContainer({
   store,
   mediaSearchStore,
   performConditionalSignIn,
+  onCloseDialog,
   showNonHistoriedDialog,
   onClose
 }) {
@@ -110,6 +111,7 @@ export function PeopleSidebarContainer({
           performConditionalSignIn={performConditionalSignIn}
           showBackButton
           onBack={() => setSelectedPerson(null)}
+          onCloseDialog={onCloseDialog}
           showNonHistoriedDialog={showNonHistoriedDialog}
         />
       );
@@ -137,5 +139,6 @@ PeopleSidebarContainer.propTypes = {
   mySessionId: PropTypes.string.isRequired,
   presences: PropTypes.object.isRequired,
   performConditionalSignIn: PropTypes.func.isRequired,
+  onCloseDialog: PropTypes.func.isRequired,
   showNonHistoriedDialog: PropTypes.func.isRequired
 };
