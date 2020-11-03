@@ -1,6 +1,7 @@
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
+import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -53,21 +54,29 @@ AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
     this.prevVolume = 0;
-    this.loudest = 0;
+    this.avatarIsQuiet = true;
 
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
-    this.el.sceneEl.systems["frame-scheduler"].schedule(this._updateAnalysis, "audio-analyser");
-    this.el.addEventListener("sound-source-set", event => {
-      const ctx = THREE.AudioContext.getContext();
-      this.analyser = ctx.createAnalyser();
-      this.analyser.fftSize = 32;
-      this.levels = new Uint8Array(this.analyser.fftSize);
-      event.detail.soundSource.connect(this.analyser);
-    });
+    this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "audio-analyser");
+    this.el.addEventListener(
+      "sound-source-set",
+      event => {
+        const ctx = THREE.AudioContext.getContext();
+        this.analyser = ctx.createAnalyser();
+        this.analyser.fftSize = 32;
+        this.levels = new Uint8Array(this.analyser.fftSize);
+        event.detail.soundSource.connect(this.analyser);
+      },
+      { once: true }
+    );
+
+    this.playerSessionId = findAncestorWithComponent(this.el, "player-info").components["player-info"].playerSessionId;
+    registerComponentInstance(this, "networked-audio-analyser");
   },
 
   remove: function() {
+    deregisterComponentInstance(this, "networked-audio-analyser");
     this.el.sceneEl.systems["frame-scheduler"].unschedule(this._runScheduledWork, "audio-analyser");
   },
 
@@ -124,7 +133,6 @@ function getAnalyser(el) {
 AFRAME.registerSystem("local-audio-analyser", {
   init() {
     this.volume = 0;
-    this.loudest = 0;
     this.prevVolume = 0;
 
     this.el.addEventListener("local-media-stream-created", () => {
@@ -193,23 +201,36 @@ AFRAME.registerComponent("morph-audio-feedback", {
   },
 
   init() {
-    this.mesh = this.el.object3DMap.skinnedmesh;
-    this.morphNumber = this.mesh.morphTargetDictionary[this.data.name];
+    const meshes = [];
+    if (this.el.object3DMap.skinnedmesh) {
+      meshes.push(this.el.object3DMap.skinnedmesh);
+    } else if (this.el.object3DMap.group) {
+      // skinned mesh with multiple materials
+      this.el.object3DMap.group.traverse(o => o.isSkinnedMesh && meshes.push(o));
+    }
+    if (meshes.length) {
+      this.morphs = meshes
+        .map(mesh => ({ mesh, morphNumber: mesh.morphTargetDictionary[this.data.name] }))
+        .filter(m => m.morphNumber !== undefined);
+    }
   },
 
   tick() {
-    if (!this.mesh) return;
+    if (!this.morphs.length) return;
 
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
     const { minValue, maxValue } = this.data;
-    this.mesh.morphTargetInfluences[this.morphNumber] = THREE.Math.mapLinear(
+    const morphValue = THREE.Math.mapLinear(
       easeOutQuadratic(this.analyser ? this.analyser.volume : 0),
       0,
       1,
       minValue,
       maxValue
     );
+    for (let i = 0; i < this.morphs.length; i++) {
+      this.morphs[i].mesh.morphTargetInfluences[this.morphs[i].morphNumber] = morphValue;
+    }
   }
 });
 

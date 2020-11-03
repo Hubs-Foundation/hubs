@@ -290,7 +290,7 @@ export const calculateCameraTransformForWaypoint = (function() {
 })();
 
 export const calculateViewingDistance = (function() {
-  return function calculateViewingDistance(fov, aspect, object, box, center, vrMode) {
+  return function calculateViewingDistance(fov, aspect, box, center, vrMode) {
     const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
     const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
     const halfVertFOV = THREE.Math.degToRad(fov / 2);
@@ -334,3 +334,22 @@ export const childMatch = (function() {
     setMatrixWorld(parent, newParentMatrix);
   };
 })();
+
+export function traverseAnimationTargets(rootObject, animations, callback) {
+  if (animations && animations.length > 0) {
+    for (const animation of animations) {
+      for (const track of animation.tracks) {
+        const { nodeName } = THREE.PropertyBinding.parseTrackName(track.name);
+        let animatedNode = rootObject.getObjectByProperty("uuid", nodeName);
+
+        if (!animatedNode) {
+          animatedNode = rootObject.getObjectByName(nodeName);
+        }
+
+        if (animatedNode) {
+          callback(animatedNode);
+        }
+      }
+    }
+  }
+}

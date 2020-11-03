@@ -2,6 +2,7 @@ import { CursorTargettingSystem } from "./cursor-targetting-system";
 import { PositionAtBorderSystem } from "../components/position-at-border";
 import { BoneVisibilitySystem } from "../components/bone-visibility";
 import { AnimationMixerSystem } from "../components/animation-mixer";
+import { UVScrollSystem } from "../components/uv-scroll";
 import { CursorTogglingSystem } from "./cursor-toggling-system";
 import { PhysicsSystem } from "./physics-system";
 import { ConstraintsSystem } from "./constraints-system";
@@ -26,6 +27,9 @@ import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { EnterVRButtonSystem } from "./enter-vr-button-system";
 import { AudioSystem } from "./audio-system";
+import { ShadowSystem } from "./shadow-system";
+import { MediaFramesSystem } from "./media-frames";
+import { InspectYourselfSystem } from "./inspect-yourself-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -61,6 +65,10 @@ AFRAME.registerSystem("hubs-systems", {
     this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
     this.animationMixerSystem = new AnimationMixerSystem();
     this.boneVisibilitySystem = new BoneVisibilitySystem();
+    this.uvScrollSystem = new UVScrollSystem();
+    this.shadowSystem = new ShadowSystem(this.el);
+    this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
+    this.inspectYourselfSystem = new InspectYourselfSystem();
   },
 
   tick(t, dt) {
@@ -96,11 +104,15 @@ AFRAME.registerSystem("hubs-systems", {
     this.scenePreviewCameraSystem.tick();
     this.physicsSystem.tick(dt);
     this.batchManagerSystem.tick(t);
+    this.inspectYourselfSystem.tick(this.el, systems.userinput, this.cameraSystem);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
     this.enterVRButtonSystem.tick();
+    this.uvScrollSystem.tick(dt);
+    this.shadowSystem.tick();
+    this.mediaFramesSystem.tick();
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();

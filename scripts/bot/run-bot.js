@@ -3,12 +3,13 @@ const doc = `
 Usage:
     ./run-bot.js [options]
 Options:
-    -h --help         Show this screen
-    -u --url=<url>    URL
-    -o --host=<host>  Hubs host if URL is not specified [default: localhost:8080]
-    -r --room=<room>  Room id
-    -a --audio=<file> File to replay for the bot's outgoing audio
-    -d --data=<file>  File to replay for the bot's data channel
+    -h --help            Show this screen
+    -u --url=<url>       URL
+    -o --host=<host>     Hubs host if URL is not specified [default: localhost:8080]
+    -r --room=<room>     Room id
+    -a --audio=<file>    File to replay for the bot's outgoing audio
+    -v --volume=<number> Audio volume (default: 1.0)
+    -d --data=<file>     File to replay for the bot's data channel
 `;
 
 const docopt = require("docopt").docopt;
@@ -22,7 +23,10 @@ function log(...objs) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
+  const browser = await puppeteer.launch({
+    ignoreHTTPSErrors: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--ignore-gpu-blacklist", "--ignore-certificate-errors"]
+  });
   const page = await browser.newPage();
   await page.setBypassCSP(true);
   page.on("console", msg => log("PAGE: ", msg.text()));
@@ -38,6 +42,10 @@ function log(...objs) {
   const roomOption = options["--room"];
   if (roomOption) {
     params.hub_id = roomOption;
+  }
+  const volumeOption = options["--volume"];
+  if (volumeOption !== null && options["--audio"]) {
+    params.audio_volume = volumeOption;
   }
 
   const url = `${baseUrl}?${querystring.stringify(params)}`;

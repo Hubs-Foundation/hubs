@@ -1,0 +1,67 @@
+@import '../../assets/stylesheets/root-vars';
+@import '../../assets/stylesheets/shared';
+@import '../../assets/stylesheets/loader';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #ui-root, .home-root {
+  margin: 0;
+  height:100%;
+}
+
+body {
+  @extend %default-font;
+  background: var(--home-background-color);
+  color: var(--home-text-color);
+}
+
+#ui-root, .home-root {
+  display:flex; 
+  flex-direction:column;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+main {
+  display: block;
+  order: -1;
+
+  @media(min-width: $breakpoint-lg) {
+    order: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  section {
+    margin: auto;
+    max-width: 100%;
+
+    @media(min-width: $breakpoint-sm) {
+      max-width: 540px;
+    }
+
+    @media(min-width: $breakpoint-md) {
+      max-width: 720px;
+    }
+
+    @media(min-width: $breakpoint-lg) {
+      max-width: 960px;
+    }
+
+    @media(min-width: $breakpoint-xl) {
+      max-width: 1140px;
+    }
+
+    @media(min-width: $breakpoint-xxl) {
+      max-width: 1410px;
+    }
+  }
+}

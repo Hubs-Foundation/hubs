@@ -10,6 +10,8 @@ import { FormattedMessage } from "react-intl";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons/faChevronDown";
+import { faChevronUp } from "@fortawesome/free-solid-svg-icons/faChevronUp";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import { faStreetView } from "@fortawesome/free-solid-svg-icons/faStreetView";
 import { faLightbulb } from "@fortawesome/free-solid-svg-icons/faLightbulb";
@@ -23,7 +25,7 @@ import { HorizontalScrollView } from "./horizontal-scroll-view";
 export function NavigationRowItem(props) {
   const { onClick, icon, isSelected } = props;
   return (
-    <button className={classNames(oStyles.noDefaultButtonStyle, oStyles.innerNavigationRowItem)} onClick={onClick}>
+    <button className={oStyles.innerNavigationRowItem} onClick={onClick}>
       <i className={oStyles.flex}>
         <FontAwesomeIcon
           className={classNames(oStyles.navigationRowItem, { [oStyles.selected]: isSelected })}
@@ -42,7 +44,7 @@ NavigationRowItem.propTypes = {
 function HeaderIcon(props) {
   const { icon, onClick, ariaLabel, small } = props;
   return (
-    <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
+    <button aria-label={ariaLabel} className={oStyles.noDefaultButtonStyle} onClick={onClick}>
       <i className={oStyles.flex}>
         <FontAwesomeIcon className={classNames(oStyles.headerIcon, { [oStyles.small]: small })} icon={icon} />
       </i>
@@ -77,7 +79,7 @@ HeaderIconLink.propTypes = {
 function ActionRowIcon(props) {
   const { icon, onClick, ariaLabel } = props;
   return (
-    <button aria-label={ariaLabel} className={classNames(oStyles.noDefaultButtonStyle)} onClick={onClick}>
+    <button aria-label={ariaLabel} className={oStyles.noDefaultButtonStyle} onClick={onClick}>
       <i className={oStyles.flex}>
         <FontAwesomeIcon className={classNames(oStyles.actionRowIcon)} icon={icon} />
       </i>
@@ -105,10 +107,15 @@ export default class ObjectInfoDialog extends Component {
 
   state = {
     enableLights: false,
-    mediaEntities: []
+    mediaEntities: [],
+    hidden: false
   };
 
   componentDidMount() {
+    this.onresize = () => {
+      this.forceUpdate();
+    };
+    window.addEventListener("resize", this.onresize);
     this.updateMediaEntities = this.updateMediaEntities.bind(this);
     this.navigateNext = this.navigateNext.bind(this);
     this.navigatePrev = this.navigatePrev.bind(this);
@@ -123,6 +130,10 @@ export default class ObjectInfoDialog extends Component {
     this.setState({ enableLights: cameraSystem.enableLights });
     this.updateMediaEntities();
     this.props.scene.addEventListener("listed_media_changed", () => setTimeout(() => this.updateMediaEntities(), 0));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.onresize);
   }
 
   updateMediaEntities() {
@@ -227,6 +238,10 @@ export default class ObjectInfoDialog extends Component {
       this._isRemoving = false;
     });
   }
+
+  onToggleHidden = () => {
+    this.setState({ hidden: !this.state.hidden });
+  };
 
   renderSmallScreen(
     targetIndex,
@@ -382,7 +397,12 @@ export default class ObjectInfoDialog extends Component {
     }
 
     return (
-      <DialogContainer noOverlay={true} wide={true} {...this.props}>
+      <DialogContainer
+        noOverlay={true}
+        wide={true}
+        className={classNames({ [oStyles.hidden]: this.state.hidden })}
+        {...this.props}
+      >
         <div className={cStyles.roomInfo}>
           <div className={cStyles.titleAndClose}>
             <button
@@ -398,52 +418,66 @@ export default class ObjectInfoDialog extends Component {
             <a className={cStyles.objectDisplayString} href={this.props.src} target="_blank" rel="noopener noreferrer">
               <FormattedMessage id={`object-info.open-link`} />
             </a>
+            <button
+              aria-label={`${this.state.hidden ? "Show" : "Hide"} object info panel`}
+              className={entryStyles.hideButton}
+              onClick={this.onToggleHidden}
+            >
+              <i>
+                <FontAwesomeIcon icon={this.state.hidden ? faChevronUp : faChevronDown} />
+              </i>
+            </button>
           </div>
-          <div className={cStyles.actionButtonSections}>
-            <div className={cStyles.leftActionButtons}>
-              {showNavigationButtons && (
-                <button aria-label="Previous Object" className={cStyles.navigationButton} onClick={this.navigatePrev}>
-                  <i>
-                    <FontAwesomeIcon icon={faChevronLeft} />
-                  </i>
+          {!this.state.hidden && (
+            <div className={cStyles.actionButtonSections}>
+              <div className={cStyles.leftActionButtons}>
+                {showNavigationButtons && (
+                  <button aria-label="Previous Object" className={cStyles.navigationButton} onClick={this.navigatePrev}>
+                    <i>
+                      <FontAwesomeIcon icon={faChevronLeft} />
+                    </i>
+                  </button>
+                )}
+              </div>
+              <div className={cStyles.primaryActionButtons}>
+                <button onClick={this.toggleLights.bind(this)}>
+                  <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
                 </button>
-              )}
+                {this.props.scene.is("entered") && (
+                  <button onClick={this.enqueueWaypointTravel}>
+                    <FormattedMessage id="object-info.waypoint" />
+                  </button>
+                )}
+                {showRemoveButton ? (
+                  <button onClick={this.remove.bind(this)}>
+                    <FormattedMessage id="object-info.remove-button" />
+                  </button>
+                ) : (
+                  <div className={cStyles.actionButtonPlaceholder} />
+                )}
+                {showPinOrUnpin && (
+                  <button
+                    className={pinned ? "" : cStyles.primaryActionButton}
+                    onClick={pinned ? this.unpin : this.pin}
+                  >
+                    <FormattedMessage id={`object-info.${pinned ? "unpin-button" : "pin-button"}`} />
+                  </button>
+                )}
+                <a className={cStyles.cancelText} href="#" onClick={onClose}>
+                  <FormattedMessage id="client-info.cancel" />
+                </a>
+              </div>
+              <div className={cStyles.rightActionButtons}>
+                {showNavigationButtons && (
+                  <button aria-label="Next Object" className={cStyles.navigationButton} onClick={this.navigateNext}>
+                    <i>
+                      <FontAwesomeIcon icon={faChevronRight} />
+                    </i>
+                  </button>
+                )}
+              </div>
             </div>
-            <div className={cStyles.primaryActionButtons}>
-              <button onClick={this.toggleLights.bind(this)}>
-                <FormattedMessage id={`object-info.${this.state.enableLights ? "lower" : "raise"}-lights`} />
-              </button>
-              {this.props.scene.is("entered") && (
-                <button onClick={this.enqueueWaypointTravel}>
-                  <FormattedMessage id="object-info.waypoint" />
-                </button>
-              )}
-              {showRemoveButton ? (
-                <button onClick={this.remove.bind(this)}>
-                  <FormattedMessage id="object-info.remove-button" />
-                </button>
-              ) : (
-                <div className={cStyles.actionButtonPlaceholder} />
-              )}
-              {showPinOrUnpin && (
-                <button className={pinned ? "" : cStyles.primaryActionButton} onClick={pinned ? this.unpin : this.pin}>
-                  <FormattedMessage id={`object-info.${pinned ? "unpin-button" : "pin-button"}`} />
-                </button>
-              )}
-              <a className={cStyles.cancelText} href="#" onClick={onClose}>
-                <FormattedMessage id="client-info.cancel" />
-              </a>
-            </div>
-            <div className={cStyles.rightActionButtons}>
-              {showNavigationButtons && (
-                <button aria-label="Next Object" className={cStyles.navigationButton} onClick={this.navigateNext}>
-                  <i>
-                    <FontAwesomeIcon icon={faChevronRight} />
-                  </i>
-                </button>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </DialogContainer>
     );

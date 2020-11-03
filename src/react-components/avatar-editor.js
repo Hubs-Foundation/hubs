@@ -6,7 +6,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { messages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
@@ -24,8 +24,8 @@ const defaultEditors = [
     url: "https://tryquilt.io/?gltf=$AVATAR_GLTF"
   }
 ];
-const useEditorWhitelist = true;
-const editorWhitelist = [
+const useAllowedEditors = true;
+const allowedEditors = [
   ...defaultEditors,
   {
     name: "Skindex Editor",
@@ -147,7 +147,7 @@ export default class AvatarEditor extends Component {
       });
     }
 
-    this.inputFiles.thumbnail = new File([await this.preview.getWrappedInstance().snapshot()], "thumbnail.png", {
+    this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", {
       type: "image/png"
     });
 
@@ -430,8 +430,8 @@ export default class AvatarEditor extends Component {
   handleGltfLoaded = gltf => {
     const ext = gltf.parser.json.extensions && gltf.parser.json.extensions["MOZ_hubs_avatar"];
     let editorLinks = (ext && ext.editors) || defaultEditors;
-    if (useEditorWhitelist) {
-      editorLinks = editorLinks.filter(e => editorWhitelist.some(w => w.name === e.name && w.url === e.url));
+    if (useAllowedEditors) {
+      editorLinks = editorLinks.filter(e => allowedEditors.some(w => w.name === e.name && w.url === e.url));
     }
     this.setState({ editorLinks });
   };
@@ -476,7 +476,7 @@ export default class AvatarEditor extends Component {
                 <label>Share Settings</label>
                 {this.checkbox(
                   "allow_promotion",
-                  `Allow ${messages["company-name"]} to promote your avatar, and show it in search results.`,
+                  `Allow ${getMessages()["company-name"]} to promote your avatar, and show it in search results.`,
                   <span>
                     Allow{" "}
                     <a

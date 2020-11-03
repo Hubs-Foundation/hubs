@@ -1,0 +1,143 @@
+@import '../../assets/stylesheets/shared';
+
+:local(.home-page) {
+  flex: 1;
+  background-size: cover;
+  padding: 1.5em;
+  flex-direction: column;
+  align-items: center;
+  @media (min-width: $breakpoint-lg) {
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  & > section {
+    margin: 2em auto;
+  }
+}
+
+:local(.app-info) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin-top: 36px;
+}
+
+:local(.app-description) {
+  white-space: pre-wrap;
+  align-self: auto;
+  font-size: 14pt;
+  text-align: center;
+  margin: 0.5em 0;
+  margin-bottom: 1em;
+
+  @media (min-width: $breakpoint-lg) {
+    font-size: 18pt;
+    align-self: flex-start;
+    text-align: start;
+  }
+}
+
+:local(.logo-container) {
+  max-width: 250px;
+  align-self: auto;
+
+  @media (min-width: $breakpoint-lg) {
+    align-self: flex-start;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+
+:local(.center-logo) {
+  align-self: auto;
+  margin: 24px 0;
+}
+
+:local(.cta-buttons) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+:local(.featured-rooms) {
+  width: 100%;
+  background-color: var(--home-media-panel-background-color);
+}
+
+:local(.secondary-links) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: var(--home-header-link-color);
+
+  & > * {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+
+  a { 
+    color: var(--home-header-link-color);
+    margin-right: 4px;
+    margin-left: 2px;
+  }
+}
+
+:local(.features) {
+  display: flex;
+  padding: 1em;
+  background-color: var(--home-media-panel-background-color);
+  margin-bottom: 2em;
+  
+  & > * {
+    margin: 0 2em;
+    @media(min-width: $breakpoint-lg) {
+      flex-direction: row;
+      max-width: 310px;
+    }
+  }
+  
+  img {
+    width: 100%;
+    border-radius: 12px;
+  }
+}
+
+:local(.row) {
+  display: flex;
+  justify-content: space-evenly !important;
+}
+
+:local(.col-lg) {
+  flex-direction: column;
+
+  @media(min-width: $breakpoint-lg) {
+    flex-direction: row;
+  }
+}
+
+:local(.center) {
+  justify-content: center;
+  text-align: center;
+}
+
+:local(.center-lg) {
+  @media(max-width: $breakpoint-lg) {
+    text-align: center;
+    align-items: center;
+  }
+}

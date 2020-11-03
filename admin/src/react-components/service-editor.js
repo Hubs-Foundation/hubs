@@ -211,11 +211,31 @@ class ConfigurationEditor extends Component {
         key={displayPath}
         id={displayPath}
         label={descriptor.name || displayPath}
+        inputProps={{ maxLength: 4096 }}
         value={currentValue || ""}
         onChange={ev => this.onChange(path, ev.target.value)}
         helperText={descriptor.description}
         type={inputType}
         fullWidth
+        margin="normal"
+      />
+    );
+  }
+
+  renderLongTextInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return (
+      <TextField
+        key={displayPath}
+        id={displayPath}
+        label={descriptor.name || displayPath}
+        inputProps={{ maxLength: 4096 }}
+        value={currentValue || ""}
+        onChange={ev => this.onChange(path, ev.target.value)}
+        helperText={descriptor.description}
+        type="text"
+        fullWidth
+        multiline
         margin="normal"
       />
     );
@@ -291,6 +311,8 @@ class ConfigurationEditor extends Component {
         return this.renderSwitchInput(path, descriptor, currentValue);
       case "color":
         return this.renderColorInput(path, descriptor, currentValue);
+      case "longstring":
+        return this.renderLongTextInput(path, descriptor, currentValue);
       case "string":
       case "number":
       default:

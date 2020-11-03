@@ -43,6 +43,8 @@ export default class SceneEntryManager {
     this.whenSceneLoaded(() => {
       this.rightCursorController.components["cursor-controller"].enabled = false;
       this.leftCursorController.components["cursor-controller"].enabled = false;
+
+      this._setupBlocking();
     });
   };
 
@@ -72,12 +74,11 @@ export default class SceneEntryManager {
     const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
     waypointSystem.moveToSpawnPoint();
 
-    if (isMobile || forceEnableTouchscreen || qsTruthy("mobile")) {
+    if (isMobile || forceEnableTouchscreen || qsTruthy("force_enable_touchscreen")) {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
     this._setupPlayerRig();
-    this._setupBlocking();
     this._setupKicking();
     this._setupMedia(mediaStream);
     this._setupCamera();
@@ -437,14 +438,30 @@ export default class SceneEntryManager {
     };
 
     this.scene.addEventListener("action_share_camera", () => {
-      shareVideoMediaStream({
+      const constraints = {
         video: {
-          mediaSource: "camera",
           width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
           frameRate: 30
         }
         //TODO: Capture audio from camera?
-      });
+      };
+
+      // check preferences
+      const store = window.APP.store;
+      const preferredCamera = store.state.preferences.preferredCamera || "default";
+      switch (preferredCamera) {
+        case "default":
+          constraints.video.mediaSource = "camera";
+          break;
+        case "user":
+        case "environment":
+          constraints.video.facingMode = preferredCamera;
+          break;
+        default:
+          constraints.video.deviceId = preferredCamera;
+          break;
+      }
+      shareVideoMediaStream(constraints);
     });
 
     this.scene.addEventListener("action_share_screen", () => {
@@ -477,6 +494,7 @@ export default class SceneEntryManager {
       }
 
       for (const track of mediaStream.getVideoTracks()) {
+        track.stop(); // Stop video track to remove the "Stop screen sharing" bar right away.
         mediaStream.removeTrack(track);
       }
 
@@ -521,7 +539,6 @@ export default class SceneEntryManager {
 
       if (myCamera) {
         myCamera.parentNode.removeChild(myCamera);
-        this.scene.removeState("camera");
       } else {
         const entity = document.createElement("a-entity");
         entity.setAttribute("networked", { template: "#interactable-camera" });
@@ -530,11 +547,7 @@ export default class SceneEntryManager {
           offset: { x: 0, y: 0, z: -1.5 }
         });
         this.scene.appendChild(entity);
-        this.scene.addState("camera");
       }
-
-      // Need to wait a frame so camera is registered with system.
-      setTimeout(() => this.scene.emit("camera_toggled"));
     });
 
     this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
@@ -604,13 +617,28 @@ export default class SceneEntryManager {
     }
 
     await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
-    mediaStream.addTrack(
-      audioEl.captureStream
-        ? audioEl.captureStream().getAudioTracks()[0]
-        : audioEl.mozCaptureStream
-          ? audioEl.mozCaptureStream().getAudioTracks()[0]
-          : null
-    );
+
+    const audioStream = audioEl.captureStream
+      ? audioEl.captureStream()
+      : audioEl.mozCaptureStream
+        ? audioEl.mozCaptureStream()
+        : null;
+
+    if (audioStream) {
+      let audioVolume = Number(qs.get("audio_volume") || "1.0");
+      if (isNaN(audioVolume)) {
+        audioVolume = 1.0;
+      }
+      const audioContext = THREE.AudioContext.getContext();
+      const audioSource = audioContext.createMediaStreamSource(audioStream);
+      const audioDestination = audioContext.createMediaStreamDestination();
+      const gainNode = audioContext.createGain();
+      audioSource.connect(gainNode);
+      gainNode.connect(audioDestination);
+      gainNode.gain.value = audioVolume;
+      mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+    }
+
     await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };

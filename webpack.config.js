@@ -122,7 +122,7 @@ function createDefaultAppConfig() {
     // Enable all features with a boolean type
     if (categoryName === "features") {
       for (const [key, schema] of Object.entries(category)) {
-        if (key === "require_account_for_join") {
+        if (key === "require_account_for_join" || key === "disable_room_creation") {
           appConfig[categoryName][key] = false;
         } else {
           appConfig[categoryName][key] = schema.type === "boolean" ? true : null;
@@ -202,8 +202,10 @@ module.exports = async (env, argv) => {
         appConfig = await fetchAppConfigAndEnvironmentVars();
       }
     } else {
-      // Use the default app config with all featured enabled.
-      appConfig = createDefaultAppConfig();
+      if (!env.localDev) {
+        // Use the default app config with all features enabled.
+        appConfig = createDefaultAppConfig();
+      }
     }
 
     if (env.localDev) {
@@ -226,13 +228,14 @@ module.exports = async (env, argv) => {
 
   const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
 
-  // Remove comments from .babelrc
-  const babelConfig = JSON.parse(
-    fs
-      .readFileSync(path.resolve(__dirname, ".babelrc"))
-      .toString()
-      .replace(/\/\/.+/g, "")
-  );
+  const legacyBabelConfig = {
+    presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
+    plugins: [
+      "@babel/proposal-class-properties",
+      "@babel/proposal-object-rest-spread",
+      "@babel/plugin-transform-async-to-generator"
+    ]
+  };
 
   return {
     node: {
@@ -242,6 +245,7 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },
     entry: {
+      support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
       hub: path.join(__dirname, "src", "hub.js"),
       scene: path.join(__dirname, "src", "scene.js"),
@@ -249,6 +253,8 @@ module.exports = async (env, argv) => {
       link: path.join(__dirname, "src", "link.js"),
       discord: path.join(__dirname, "src", "discord.js"),
       cloud: path.join(__dirname, "src", "cloud.js"),
+      signin: path.join(__dirname, "src", "signin.js"),
+      verify: path.join(__dirname, "src", "verify.js"),
       "whats-new": path.join(__dirname, "src", "whats-new.js")
     },
     output: {
@@ -266,6 +272,15 @@ module.exports = async (env, argv) => {
         "Access-Control-Allow-Origin": "*"
       },
       inline: !env.bundleAnalyzer,
+      historyApiFallback: {
+        rewrites: [
+          { from: /^\/signin/, to: "/signin.html" },
+          { from: /^\/discord/, to: "/discord.html" },
+          { from: /^\/cloud/, to: "/cloud.html" },
+          { from: /^\/verify/, to: "/verify.html" },
+          { from: /^\/whats-new/, to: "/whats-new.html" }
+        ]
+      },
       before: function(app) {
         // Local CORS proxy
         app.all("/cors-proxy/*", (req, res) => {
@@ -337,11 +352,13 @@ module.exports = async (env, argv) => {
           }
         },
         {
-          // We reference the sources of some libraries directly, and they use async/await,
-          // so we have to run it through babel in order to support the Samsung browser on Oculus Go.
-          test: [path.resolve(__dirname, "node_modules/naf-janus-adapter")],
+          test: [
+            path.resolve(__dirname, "src", "utils", "configs.js"),
+            path.resolve(__dirname, "src", "utils", "i18n.js"),
+            path.resolve(__dirname, "src", "support.js")
+          ],
           loader: "babel-loader",
-          options: babelConfig
+          options: legacyBabelConfig
         },
         {
           test: /\.js$/,
@@ -454,7 +471,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
-        chunks: ["index"],
+        chunks: ["support", "index"],
+        chunksSortMode: "manual",
         minify: {
           removeComments: false
         }
@@ -462,7 +480,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["hub"],
+        chunks: ["support", "hub"],
+        chunksSortMode: "manual",
         inject: "head",
         minify: {
           removeComments: false
@@ -471,7 +490,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "scene.html",
         template: path.join(__dirname, "src", "scene.html"),
-        chunks: ["scene"],
+        chunks: ["support", "scene"],
+        chunksSortMode: "manual",
         inject: "head",
         minify: {
           removeComments: false
@@ -480,7 +500,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "avatar.html",
         template: path.join(__dirname, "src", "avatar.html"),
-        chunks: ["avatar"],
+        chunks: ["support", "avatar"],
+        chunksSortMode: "manual",
         inject: "head",
         minify: {
           removeComments: false
@@ -489,7 +510,8 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "link.html",
         template: path.join(__dirname, "src", "link.html"),
-        chunks: ["link"],
+        chunks: ["support", "link"],
+        chunksSortMode: "manual",
         minify: {
           removeComments: false
         }
@@ -516,6 +538,22 @@ module.exports = async (env, argv) => {
         template: path.join(__dirname, "src", "cloud.html"),
         chunks: ["cloud"],
         inject: "head",
+        minify: {
+          removeComments: false
+        }
+      }),
+      new HTMLWebpackPlugin({
+        filename: "signin.html",
+        template: path.join(__dirname, "src", "signin.html"),
+        chunks: ["signin"],
+        minify: {
+          removeComments: false
+        }
+      }),
+      new HTMLWebpackPlugin({
+        filename: "verify.html",
+        template: path.join(__dirname, "src", "verify.html"),
+        chunks: ["verify"],
         minify: {
           removeComments: false
         }

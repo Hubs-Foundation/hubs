@@ -1,0 +1,14 @@
+@import '../../assets/stylesheets/shared';
+
+:local(.media-grid) {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 20px;
+  justify-items: center;
+  justify-content: space-evenly;
+
+  & > * {
+    margin: 8px;
+  }
+}

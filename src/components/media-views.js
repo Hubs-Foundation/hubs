@@ -14,25 +14,29 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
+import { detect } from "detect-browser";
+import semver from "semver";
 
-if (process.env.NODE_ENV === "production") {
-  // Using external CDN to reduce build size
-  pdfjs.GlobalWorkerOptions.workerSrc =
-    "https://assets-prod.reticulum.io/assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js";
-} else {
-  pdfjs.GlobalWorkerOptions.workerSrc = `${
-    configs.BASE_ASSETS_PATH
-  }../assets/js/pdfjs-dist@2.1.266/build/pdf.worker.js`;
-}
+import qsTruthy from "../utils/qs_truthy";
+
+/**
+ * Warning! This require statement is fragile!
+ *
+ * How it works:
+ * require -> require the file after all import statements have been called, particularly the configs.js import which modifies __webpack_public_path__
+ * !! -> don't run any other loaders
+ * file-loader -> make webpack move the file into the dist directory and return the file path
+ * outputPath -> where to put the file
+ * name -> how to name the file
+ * Then the path to the worker script
+ */
+pdfjs.GlobalWorkerOptions.workerSrc = require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js");
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
 const parseGIF = promisifyWorker(new GIFWorker());
 
 const isIOS = AFRAME.utils.device.isIOS();
-const isMobileVR = AFRAME.utils.device.isMobileVR();
-const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
-const HLS_TIMEOUT = 10000; // HLS can sometimes fail, we re-try after this duration
 const audioIconTexture = new THREE.TextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
@@ -542,6 +546,11 @@ AFRAME.registerComponent("media-video", {
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
+
+    // Make sure that the audio is initialized to the right place.
+    // Its matrix may not update if this element is not visible.
+    // See https://github.com/mozilla/hubs/issues/2855
+    this.audio.updateMatrixWorld();
   },
 
   setPositionalAudioProperties() {
@@ -582,10 +591,9 @@ AFRAME.registerComponent("media-video", {
       }
 
       this.mediaElementAudioSource = null;
-
       if (!src.startsWith("hubs://")) {
-        // iOS video audio is broken, see: https://github.com/mozilla/hubs/issues/1797
-        if (!isIOS) {
+        // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/mozilla/hubs/issues/1797
+        if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
           this.mediaElementAudioSource =
             linkedMediaElementAudioSource ||
@@ -601,31 +609,19 @@ AFRAME.registerComponent("media-video", {
       this.video.addEventListener("play", this.onPauseStateChange);
 
       if (texture.hls) {
-        const updateLiveState = () => {
+        const updateHLSLiveState = () => {
           if (texture.hls.currentLevel >= 0) {
-            const videoWasLive = !!this.videoIsLive;
             this.videoIsLive = texture.hls.levels[texture.hls.currentLevel].details.live;
             this.updateHoverMenu();
-
-            if (!videoWasLive && this.videoIsLive) {
-              this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
-              // We just determined the video is live (there can be a delay due to autoplay issues, etc)
-              // so catch it up to HEAD.
-              if (!isFirefoxReality) {
-                // HACK this causes live streams to freeze in FxR due to https://github.com/MozillaReality/FirefoxReality/issues/1602, TODO remove once 1.4 ships
-                this.video.currentTime = this.video.duration - 0.01;
-              }
-            }
           }
         };
-        texture.hls.on(HLS.Events.LEVEL_LOADED, updateLiveState);
-        texture.hls.on(HLS.Events.LEVEL_SWITCHED, updateLiveState);
+        texture.hls.on(HLS.Events.LEVEL_LOADED, updateHLSLiveState);
+        texture.hls.on(HLS.Events.LEVEL_SWITCHED, updateHLSLiveState);
         if (texture.hls.currentLevel >= 0) {
-          updateLiveState();
+          updateHLSLiveState();
         }
       } else {
         this.videoIsLive = this.video.duration === Infinity;
-        this.el.emit("video_is_live_update", { videoIsLive: this.videoIsLive });
         this.updateHoverMenu();
       }
 
@@ -666,19 +662,18 @@ AFRAME.registerComponent("media-video", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    if (this.data.contentType.startsWith("audio/")) {
+    if (!texture.isVideoTexture) {
       this.mesh.material.map = audioIconTexture;
     } else {
       this.mesh.material.map = texture;
+      if (projection === "flat") {
+        scaleToAspectRatio(
+          this.el,
+          (texture.image.videoHeight || texture.image.height) / (texture.image.videoWidth || texture.image.width)
+        );
+      }
     }
     this.mesh.material.needsUpdate = true;
-
-    if (projection === "flat" && !this.data.contentType.startsWith("audio/")) {
-      scaleToAspectRatio(
-        this.el,
-        (texture.image.videoHeight || texture.image.height) / (texture.image.videoWidth || texture.image.width)
-      );
-    }
 
     this.updatePlaybackState(true);
 
@@ -700,7 +695,10 @@ AFRAME.registerComponent("media-video", {
         this._audioSyncInterval = null;
       }
 
+      let resolved = false;
       const failLoad = function(e) {
+        if (resolved) return;
+        resolved = true;
         clearTimeout(pollTimeout);
         reject(e);
       };
@@ -717,8 +715,21 @@ AFRAME.registerComponent("media-video", {
         texture = new THREE.VideoTexture(videoEl);
         texture.minFilter = THREE.LinearFilter;
         texture.encoding = THREE.sRGBEncoding;
-        isReady = () =>
-          (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+
+        isReady = () => {
+          if (texture.hls && texture.hls.streamController.audioOnly) {
+            audioEl = videoEl;
+            const hls = texture.hls;
+            texture = new THREE.Texture();
+            texture.image = videoEl;
+            texture.hls = hls;
+            return true;
+          } else {
+            const ready =
+              (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
+            return ready;
+          }
+        };
       }
 
       // Set src on video to begin loading.
@@ -759,6 +770,7 @@ AFRAME.registerComponent("media-video", {
             }
 
             const hls = new HLS({
+              debug: qsTruthy("hlsDebug"),
               xhrSetup: (xhr, u) => {
                 if (u.startsWith(corsProxyPrefix)) {
                   u = u.substring(corsProxyPrefix.length);
@@ -770,7 +782,7 @@ AFRAME.registerComponent("media-video", {
                   u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
                 }
 
-                xhr.open("GET", proxiedUrlFor(u));
+                xhr.open("GET", proxiedUrlFor(u), true);
               }
             });
 
@@ -797,20 +809,6 @@ AFRAME.registerComponent("media-video", {
           };
 
           setupHls();
-
-          // Sometimes for weird streams HLS fails to initialize.
-          const setupInterval = setInterval(() => {
-            // Stop retrying if the src changed.
-            const isNoLongerSrc = this.data.src !== url;
-
-            if (isReady() || isNoLongerSrc) {
-              clearInterval(setupInterval);
-            } else {
-              console.warn("HLS failed to read video, trying again");
-              setupHls();
-            }
-          }, HLS_TIMEOUT);
-          // If not, see if native support will work
         } else if (videoEl.canPlayType(contentType)) {
           videoEl.src = url;
           videoEl.onerror = failLoad;
@@ -847,6 +845,7 @@ AFRAME.registerComponent("media-video", {
       // and also sometimes in Chrome it seems.
       const poll = () => {
         if (isReady()) {
+          resolved = true;
           resolve({ texture, audioSourceEl: audioEl || texture.image });
         } else {
           pollTimeout = setTimeout(poll, 500);
@@ -937,7 +936,7 @@ AFRAME.registerComponent("media-video", {
       if (this.audio) {
         if (window.APP.store.state.preferences.audioOutputMode === "audio") {
           this.el.object3D.getWorldPosition(positionA);
-          this.el.sceneEl.camera.getWorldPosition(positionB);
+          this.el.sceneEl.audioListener.getWorldPosition(positionB);
           const distance = positionA.distanceTo(positionB);
           this.distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, distance * distance));
           const globalMediaVolume =
@@ -951,10 +950,8 @@ AFRAME.registerComponent("media-video", {
   })(),
 
   cleanUp() {
-    if (this.mesh && this.mesh.material) {
-      if (!this.data.linkedVideoTexture) {
-        disposeTexture(this.mesh.material.map);
-      }
+    if (this.videoTexture && !this.data.linkedVideoTexture) {
+      disposeTexture(this.videoTexture);
     }
   },
 
@@ -1006,7 +1003,9 @@ AFRAME.registerComponent("media-image", {
     version: { type: "number" },
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
-    batch: { default: false }
+    batch: { default: false },
+    alphaMode: { type: "string", default: undefined },
+    alphaCutoff: { type: "number" }
   },
 
   remove() {
@@ -1124,12 +1123,30 @@ AFRAME.registerComponent("media-image", {
       this.el.setObject3D("mesh", this.mesh);
     }
 
-    // We only support transparency on gifs. Other images will support cutout as part of batching, but not alpha transparency for now
-    this.mesh.material.transparent =
-      !this.data.batch ||
-      texture == errorTexture ||
-      this.data.contentType.includes("image/gif") ||
-      !!(texture.image && texture.image.hasAlpha);
+    if (texture == errorTexture) {
+      this.mesh.material.transparent = true;
+    } else {
+      // if transparency setting isnt explicitly defined, default to on for all non batched things, gifs, and basis textures with alpha
+      switch (this.data.alphaMode) {
+        case "opaque":
+          this.mesh.material.transparent = false;
+          break;
+        case "blend":
+          this.mesh.material.transparent = true;
+          this.mesh.material.alphaTest = 0;
+          break;
+        case "mask":
+          this.mesh.material.transparent = false;
+          this.mesh.material.alphaTest = this.data.alphaCutoff;
+          break;
+        default:
+          this.mesh.material.transparent =
+            !this.data.batch ||
+            this.data.contentType.includes("image/gif") ||
+            !!(texture.image && texture.image.hasAlpha);
+          this.mesh.material.alphaTest = 0;
+      }
+    }
 
     this.mesh.material.map = texture;
     this.mesh.material.needsUpdate = true;
@@ -1232,8 +1249,6 @@ AFRAME.registerComponent("media-pdf", {
       this.renderTask = null;
 
       if (src !== this.data.src || index !== this.data.index) return;
-
-      this.currentPageTextureIsRetained = true;
     } catch (e) {
       console.error("Error loading PDF", this.data.src, e);
       texture = errorTexture;

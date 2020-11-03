@@ -1,7 +1,7 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
 import { AVATAR_TYPES } from "../utils/avatar-utils";
-import { registerComponentInstance } from "../utils/component-utils";
-import { deregisterComponentInstance } from "../utils/component-utils";
+import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
+import defaultAvatar from "../assets/models/DefaultAvatar.glb";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -36,7 +36,8 @@ function ensureAvatarNodes(json) {
 AFRAME.registerComponent("player-info", {
   schema: {
     avatarSrc: { type: "string" },
-    avatarType: { type: "string", default: AVATAR_TYPES.SKINNABLE }
+    avatarType: { type: "string", default: AVATAR_TYPES.SKINNABLE },
+    muted: { default: false }
   },
   init() {
     this.displayName = null;
@@ -47,7 +48,10 @@ AFRAME.registerComponent("player-info", {
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
     this.handleModelError = this.handleModelError.bind(this);
+    this.handleRemoteModelError = this.handleRemoteModelError.bind(this);
     this.update = this.update.bind(this);
+    this.localStateAdded = this.localStateAdded.bind(this);
+    this.localStateRemoved = this.localStateRemoved.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -71,21 +75,35 @@ AFRAME.registerComponent("player-info", {
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").addEventListener("model-error", this.handleModelError);
+    } else {
+      this.el.querySelector(".model").addEventListener("model-error", this.handleRemoteModelError);
     }
     window.APP.store.addEventListener("statechanged", this.update);
 
     this.el.sceneEl.addEventListener("stateadded", this.update);
     this.el.sceneEl.addEventListener("stateremoved", this.update);
+
+    if (this.isLocalPlayerInfo) {
+      this.el.sceneEl.addEventListener("stateadded", this.localStateAdded);
+      this.el.sceneEl.addEventListener("stateremoved", this.localStateRemoved);
+    }
   },
   pause() {
     this.el.removeEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.removeEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);
+    } else {
+      this.el.querySelector(".model").removeEventListener("model-error", this.handleRemoteModelError);
     }
     this.el.sceneEl.removeEventListener("stateadded", this.update);
     this.el.sceneEl.removeEventListener("stateremoved", this.update);
     window.APP.store.removeEventListener("statechanged", this.update);
+
+    if (this.isLocalPlayerInfo) {
+      this.el.sceneEl.removeEventListener("stateadded", this.localStateAdded);
+      this.el.sceneEl.removeEventListener("stateremoved", this.localStateRemoved);
+    }
   },
 
   update() {
@@ -153,5 +171,19 @@ AFRAME.registerComponent("player-info", {
   },
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();
+  },
+  handleRemoteModelError() {
+    this.data.avatarSrc = defaultAvatar;
+    this.applyProperties();
+  },
+  localStateAdded(e) {
+    if (e.detail === "muted") {
+      this.el.setAttribute("player-info", { muted: true });
+    }
+  },
+  localStateRemoved(e) {
+    if (e.detail === "muted") {
+      this.el.setAttribute("player-info", { muted: false });
+    }
   }
 });

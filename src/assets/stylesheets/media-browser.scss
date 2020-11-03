@@ -486,14 +486,6 @@
         font-weight: bold;
       }
 
-      :local(.page-number) {
-        font-size: 1.2em;
-        font-weight: bold;
-        text-align: center;
-        color: var(--panel-subtext-link-color);
-        margin: 12px;
-      }
-
       :local(.pager-button-disabled) {
         pointer-events: none;
         background-color: var(--panel-subtext-disabled-color);
@@ -558,6 +550,10 @@
 }
 
 :local(.media-browser-inline) {
+  :local(.body) {
+    width: 100%;
+  }
+
   position: relative;
   background-color: var(--home-media-panel-background-color);
   width: 100%;

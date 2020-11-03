@@ -2,11 +2,13 @@ function loadAsync(loader, url, onProgress) {
   return new Promise((resolve, reject) => loader.load(url, resolve, onProgress, reject));
 }
 
-export default class HubsTextureLoader {
-  static crossOrigin = "anonymous";
+const HAS_IMAGE_BITMAP = window.createImageBitmap !== undefined;
+export const TEXTURES_FLIP_Y = !HAS_IMAGE_BITMAP;
 
+export default class HubsTextureLoader {
   constructor(manager = THREE.DefaultLoadingManager) {
     this.manager = manager;
+    this.crossOrigin = "anonymous";
   }
 
   load(url, onLoad, onProgress, onError) {
@@ -22,7 +24,7 @@ export default class HubsTextureLoader {
   async loadTextureAsync(texture, src, onProgress) {
     let imageLoader;
 
-    if (window.createImageBitmap !== undefined) {
+    if (HAS_IMAGE_BITMAP) {
       imageLoader = new THREE.ImageBitmapLoader(this.manager);
       texture.flipY = false;
     } else {

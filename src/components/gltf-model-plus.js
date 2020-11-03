@@ -1,7 +1,6 @@
 import nextTick from "../utils/next-tick";
-import { mapMaterials } from "../utils/material-utils";
+import { mapMaterials, convertStandardMaterial } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
-import MobileStandardMaterial from "../materials/MobileStandardMaterial";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
@@ -310,7 +309,18 @@ function runMigration(version, json) {
   }
 }
 
-export async function loadGLTF(src, contentType, preferredTechnique, onProgress, jsonPreprocessor) {
+const loadLightmap = async (parser, materialIndex) => {
+  const lightmapDef = parser.json.materials[materialIndex].extensions.MOZ_lightmap;
+  const [material, lightMap] = await Promise.all([
+    parser.getDependency("material", materialIndex),
+    parser.getDependency("texture", lightmapDef.index)
+  ]);
+  material.lightMap = lightMap;
+  material.lightMapIntensity = lightmapDef.intensity !== undefined ? lightmapDef.intensity : 1;
+  return lightMap;
+};
+
+export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
 
@@ -342,42 +352,7 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
   }
   runMigration(version, parser.json);
 
-  const materials = parser.json.materials;
-  const dependencies = [];
-
-  if (materials) {
-    for (let i = 0; i < materials.length; i++) {
-      const material = materials[i];
-
-      if (!material.extensions) {
-        continue;
-      }
-
-      if (
-        material.extensions.MOZ_alt_materials &&
-        material.extensions.MOZ_alt_materials[preferredTechnique] !== undefined
-      ) {
-        const altMaterialIndex = material.extensions.MOZ_alt_materials[preferredTechnique];
-        materials[i] = materials[altMaterialIndex];
-      } else if (material.extensions.MOZ_lightmap) {
-        const lightmapDef = material.extensions.MOZ_lightmap;
-
-        const loadLightmap = async () => {
-          const [material, lightMap] = await Promise.all([
-            parser.getDependency("material", i),
-            parser.getDependency("texture", lightmapDef.index)
-          ]);
-
-          material.lightMap = lightMap;
-        };
-
-        dependencies.push(loadLightmap);
-      }
-    }
-  }
-
   const nodes = parser.json.nodes;
-
   if (nodes) {
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
@@ -390,20 +365,48 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
     }
   }
 
-  // Note: dependency functions need to be called after parser.parse() so that the cache isn't cleared.
-  const [gltf] = await Promise.all([new Promise(parser.parse.bind(parser)), dependencies.map(fn => fn())]);
+  // Mark the special nodes/meshes in json for efficient parse, all json manipulation should happen before this point
+  parser.markDefs();
+
+  const materials = parser.json.materials;
+  const extensionDeps = [];
+  if (materials) {
+    for (let i = 0; i < materials.length; i++) {
+      const materialNode = materials[i];
+
+      if (!materialNode.extensions) continue;
+
+      if (materialNode.extensions.MOZ_lightmap) {
+        extensionDeps.push(loadLightmap(parser, i));
+      }
+    }
+  }
+
+  // Note this is being done in place of parser.parse() which we now no longer call. This gives us more control over the order of execution.
+  const [scenes, animations, cameras] = await Promise.all([
+    parser.getDependencies("scene"),
+    parser.getDependencies("animation"),
+    parser.getDependencies("camera"),
+    Promise.all(extensionDeps)
+  ]);
+  const gltf = {
+    scene: scenes[parser.json.scene || 0],
+    scenes,
+    animations,
+    cameras,
+    asset: parser.json.asset,
+    parser,
+    userData: {}
+  };
+
+  // this is likely a noop since the whole parser will get GCed
+  parser.cache.removeAll();
 
   gltf.scene.traverse(object => {
     // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
     object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
-
-    object.material = mapMaterials(object, material => {
-      if (material.isMeshStandardMaterial && preferredTechnique === "KHR_materials_unlit") {
-        return MobileStandardMaterial.fromStandardMaterial(material);
-      }
-
-      return material;
-    });
+    const materialQuality = window.APP.store.materialQualitySetting;
+    object.material = mapMaterials(object, material => convertStandardMaterial(material, materialQuality));
   });
 
   if (fileMap) {
@@ -417,9 +420,6 @@ export async function loadGLTF(src, contentType, preferredTechnique, onProgress,
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
-  const preferredTechnique =
-    window.APP && window.APP.quality === "low" ? "KHR_materials_unlit" : "pbrMetallicRoughness";
-
   if (useCache) {
     if (gltfCache.has(src)) {
       gltfCache.retain(src);
@@ -430,7 +430,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
         gltfCache.retain(src);
         return cloneGltf(gltf);
       } else {
-        const promise = loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+        const promise = loadGLTF(src, contentType, null, jsonPreprocessor);
         inflightGltfs.set(src, promise);
         const gltf = await promise;
         inflightGltfs.delete(src);
@@ -439,7 +439,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
       }
     }
   } else {
-    return loadGLTF(src, contentType, preferredTechnique, null, jsonPreprocessor);
+    return loadGLTF(src, contentType, null, jsonPreprocessor);
   }
 }
 
@@ -456,7 +456,7 @@ function resolveAsset(src) {
 
 /**
  * Loads a GLTF model, optionally recursively "inflates" the child nodes of a model into a-entities and sets
- * whitelisted components on them if defined in the node's extras.
+ * allowed components on them if defined in the node's extras.
  * @namespace gltf
  * @component gltf-model-plus
  */
@@ -595,7 +595,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       rewires.forEach(f => f());
 
       object3DToSet.visible = true;
-      this.el.emit("model-loaded", { format: "gltf", model: this.model });
+      this.el.emit("model-loaded", { format: "gltf", model: object3DToSet });
     } catch (e) {
       gltfCache.release(src);
       console.error("Failed to load glTF model", e, this);

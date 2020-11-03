@@ -129,6 +129,7 @@ export default class SettingsMenu extends Component {
               <div className={styles.listItem}>
                 <div
                   className={styles.listItemLink}
+                  role="button"
                   onClick={() => {
                     this.props.performConditionalSignIn(
                       () => this.props.hubChannel.signedIn,
@@ -153,6 +154,7 @@ export default class SettingsMenu extends Component {
               <div className={styles.listItem}>
                 <div
                   className={styles.listItemLink}
+                  role="button"
                   onClick={() => {
                     this.props.showPreferencesScreen();
                   }}
@@ -177,6 +179,7 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <div
                     className={styles.listItemLink}
+                    role="button"
                     onClick={() => {
                       this.props.performConditionalSignIn(
                         () => this.props.hubChannel.can("update_hub"),
@@ -204,6 +207,7 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <a
                     href="#"
+                    role="button"
                     onClick={e => {
                       e.preventDefault();
 
@@ -232,6 +236,7 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <a
                     href="#"
+                    role="button"
                     onClick={e => {
                       e.preventDefault();
 
@@ -262,6 +267,7 @@ export default class SettingsMenu extends Component {
                     stateKey="modal"
                     stateValue="room_info"
                     history={this.props.history}
+                    role="button"
                     onClick={() => this.unexpand()}
                   >
                     <FormattedMessage id="settings.room-info" />
@@ -279,6 +285,7 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <a
                     href="#"
+                    role="button"
                     onClick={e => {
                       e.preventDefault();
                       this.props.showNonHistoriedDialog(LeaveRoomDialog, {
@@ -310,6 +317,7 @@ export default class SettingsMenu extends Component {
                 <div className={styles.listItem}>
                   <div
                     className={styles.listItemLink}
+                    role="button"
                     onClick={() => {
                       this.props.toggleStreamerMode(true);
                       this.unexpand();
@@ -391,7 +399,7 @@ export default class SettingsMenu extends Component {
                 <IfFeature name="show_issue_report_link">
                   <a
                     className={styles.bottomLink}
-                    href={configs.link("issue_report", "/#/report")}
+                    href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
@@ -430,14 +438,17 @@ export default class SettingsMenu extends Component {
     return (
       <div>
         {!this.props.showAsOverlay && (
-          <FontAwesomeIcon
-            icon={faBars}
+          <div
+            role="button"
+            aria-label="settings menu"
             onClick={() => this.setState({ expanded: !this.state.expanded })}
             className={classNames({
               [rootStyles.cornerButton]: true,
               [rootStyles.cornerButtonSelected]: this.state.expanded
             })}
-          />
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </div>
         )}
         {this.props.showAsOverlay ? (
           <div className={styles.settingsMenuOverlayWrap}>{this.renderExpandedMenu()}</div>

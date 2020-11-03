@@ -15,7 +15,6 @@ body {
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  overflow-y: hidden;
 }
 
 button {
@@ -40,12 +39,13 @@ a {
 }
 
 :local(.logo) {
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-top: 24px;
 
   img {
@@ -65,7 +65,6 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
 }
 
 :local(.link-contents) {
@@ -105,7 +104,7 @@ a {
 }
 
 :local(.create-link) {
-  margin-top: 36px;
+  margin-top: 1em;
   font-size: 0.8em;
 
   @media(max-width: 690px) {

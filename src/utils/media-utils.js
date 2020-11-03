@@ -11,6 +11,15 @@ import tlds from "tlds";
 
 import anime from "animejs";
 
+export const MediaType = {
+  ALL: "all",
+  ALL_2D: "all-2d",
+  MODEL: "model",
+  IMAGE: "image",
+  VIDEO: "video",
+  PDF: "pdf"
+};
+
 const linkify = Linkify();
 linkify.tlds(tlds);
 
@@ -284,8 +293,12 @@ export function injectCustomShaderChunks(obj) {
 
       const newMaterial = material.clone();
       // This will not run if the object is never rendered unbatched, since its unbatched shader will never be compiled
-      newMaterial.onBeforeCompile = shader => {
+      newMaterial.onBeforeCompile = (shader, renderer) => {
         if (!vertexRegex.test(shader.vertexShader)) return;
+
+        if (material.onBeforeCompile) {
+          material.onBeforeCompile(shader, renderer);
+        }
 
         shader.uniforms.hubs_IsFrozen = { value: false };
         shader.uniforms.hubs_EnableSweepingEffect = { value: false };

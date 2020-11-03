@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { messages } from "../utils/i18n";
+import { getMessages } from "../utils/i18n";
 import styles from "../assets/stylesheets/presence-log.scss";
 import configs from "../utils/configs";
 import classNames from "classnames";
@@ -13,7 +13,7 @@ export default function PhotoMessage({ name, body: { src: url }, className, mayS
   const landingPageUrl = getLandingPageForPhoto(url);
   const onShareClicked = share.bind(null, {
     url: landingPageUrl,
-    title: `Taken in ${messages["share-hashtag"]}, join me at https://${configs.SHORTLINK_DOMAIN}/${hubId}`
+    title: `Taken in ${getMessages()["share-hashtag"]}, join me at https://${configs.SHORTLINK_DOMAIN}/${hubId}`
   });
   return (
     <div className={className}>

@@ -112,8 +112,12 @@ import "./components/hubs-text";
 import "./components/billboard";
 import "./components/periodic-full-syncs";
 import "./components/inspect-button";
+import "./components/inspect-pivot-child-selector";
+import "./components/inspect-pivot-offset-from-camera";
+import "./components/optional-alternative-to-not-hide";
 import "./components/set-max-resolution";
 import "./components/avatar-audio-source";
+import "./components/avatar-inspect-collider";
 import { sets as userinputSets } from "./systems/userinput/sets";
 
 import ReactDOM from "react-dom";
@@ -159,6 +163,7 @@ import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
 import "./gltf-component-mappings";
 
 import { App } from "./App";
+import { platformUnsupported } from "./support";
 
 window.APP = new App();
 window.APP.RENDER_ORDER = {
@@ -167,6 +172,7 @@ window.APP.RENDER_ORDER = {
   CURSOR: 3
 };
 const store = window.APP.store;
+store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 12; // Above this # of occupants, we stop posting join/leaves/renames
@@ -181,14 +187,6 @@ if (isEmbed && !qs.get("embed_token")) {
 }
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
-window.APP.quality =
-  window.APP.store.state.preferences.materialQualitySetting === "low"
-    ? "low"
-    : window.APP.store.state.preferences.materialQualitySetting === "high"
-      ? "high"
-      : isMobile || isMobileVR
-        ? "low"
-        : "high";
 
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
@@ -233,11 +231,6 @@ if (!isBotMode && !isTelemetryDisabled) {
 
 disableiOSZoom();
 detectConcurrentLoad();
-
-function getPlatformUnsupportedReason() {
-  if (typeof RTCDataChannelEvent === "undefined") return "no_data_channels";
-  return null;
-}
 
 function setupLobbyCamera() {
   const camera = document.getElementById("scene-preview-node");
@@ -452,6 +445,10 @@ async function updateEnvironmentForHub(hub, entryManager) {
         );
 
         sceneEl.emit("leaving_loading_environment");
+        if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
+          console.warn("Updating environment to the same url.");
+          environmentEl.setAttribute("gltf-model-plus", { src: "" });
+        }
         environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
       },
       { once: true }
@@ -461,6 +458,10 @@ async function updateEnvironmentForHub(hub, entryManager) {
       environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
     }
 
+    if (environmentEl.components["gltf-model-plus"].data.src === loadingEnvironment) {
+      console.warn("Transitioning to loading environment but was already in loading environment.");
+      environmentEl.setAttribute("gltf-model-plus", { src: "" });
+    }
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
 }
@@ -668,7 +669,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         });
     };
 
+    window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
+    scene.emit("hub_updated", { hub });
 
     if (!isEmbed) {
       loadEnvironmentAndConnect();
@@ -688,7 +691,14 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
 async function runBotMode(scene, entryManager) {
   const noop = () => {};
-  scene.renderer = { setAnimationLoop: noop, render: noop };
+  const alwaysFalse = () => false;
+  scene.renderer = {
+    setAnimationLoop: noop,
+    render: noop,
+    shadowMap: {},
+    vr: { isPresenting: alwaysFalse },
+    setSize: noop
+  };
 
   while (!NAF.connection.isConnected()) await nextTick();
   entryManager.enterSceneWhenLoaded(new MediaStream(), false);
@@ -711,28 +721,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   warmSerializeElement();
 
-  if (!window.WebAssembly) {
-    remountUI({ showWebAssemblyDialog: true });
+  if (platformUnsupported()) {
     return;
   }
 
-  // Some apps like Twitter, Discord and Facebook on Android and iOS open links in
-  // their own embedded preview browsers.
-  //
-  // On iOS this WebView does not have a mediaDevices API at all, but in Android apps
-  // like Facebook, the browser pretends to have a mediaDevices, but never actually
-  // prompts the user for device access. So, we show a dialog that tells users to open
-  // the room in an actual browser like Safari, Chrome or Firefox.
-  //
-  // Facebook Mobile Browser on Android has a userAgent like this:
-  // Mozilla/5.0 (Linux; Android 9; SM-G950U1 Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko)
-  // Version/4.0 Chrome/80.0.3987.149 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/262.0.0.34.117;]
   const detectedOS = detectOS(navigator.userAgent);
-  if ((detectedOS === "iOS" && !navigator.mediaDevices) || /\bfb_iab\b/i.test(navigator.userAgent)) {
-    remountUI({ showInAppBrowserDialog: true });
-    return;
-  }
-
   const browser = detect();
   // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
   // safari when initializing it later.
@@ -779,7 +772,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const scene = document.querySelector("a-scene");
-  scene.setAttribute("shadow", { enabled: window.APP.quality !== "low" }); // Disable shadows on low quality
   scene.renderer.debug.checkShaderErrors = false;
 
   // HACK - Trigger initial batch preparation with an invisible object
@@ -1035,9 +1027,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ roomUnavailableReason: "left" });
   });
 
-  scene.addEventListener("camera_toggled", () => remountUI({}));
-
-  scene.addEventListener("camera_removed", () => remountUI({}));
+  const updateCameraUI = function(e) {
+    if (e.detail !== "camera") return;
+    remountUI({});
+  };
+  scene.addEventListener("stateadded", updateCameraUI);
+  scene.addEventListener("stateremoved", updateCameraUI);
 
   scene.addEventListener("hub_closed", () => {
     scene.exitVR();
@@ -1047,14 +1042,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
   scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
-
-  const platformUnsupportedReason = getPlatformUnsupportedReason();
-
-  if (platformUnsupportedReason) {
-    remountUI({ platformUnsupportedReason });
-    entryManager.exitScene();
-    return;
-  }
 
   if (qs.get("required_version") && process.env.BUILD_VERSION) {
     const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
@@ -1120,14 +1107,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   environmentScene.addEventListener("model-loaded", onFirstEnvironmentLoad);
 
-  environmentScene.addEventListener("model-loaded", () => {
+  environmentScene.addEventListener("model-loaded", ({ detail: { model } }) => {
     if (!scene.is("entered")) {
       setupLobbyCamera();
     }
 
     // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
-    scene.emit("environment-scene-loaded");
+    scene.emit("environment-scene-loaded", model);
 
     // Re-bind the teleporter controls collision meshes in case the scene changed.
     document.querySelectorAll("a-entity[teleporter]").forEach(x => x.components["teleporter"].queryCollisionEntities());
@@ -1185,7 +1172,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       context: {
         mobile: isMobile || isMobileVR,
         embed: isEmbed
-      }
+      },
+      hub_invite_id: qs.get("hub_invite_id")
     };
 
     if (isMobileVR) {
@@ -1572,7 +1560,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("hub_refresh", ({ session_id, hubs, stale_fields }) => {
     const hub = hubs[0];
     const userInfo = hubChannel.presence.state[session_id];
+    const displayName = (userInfo && userInfo.metas[0].profile.displayName) || "API";
 
+    window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
 
     if (stale_fields.includes("scene")) {
@@ -1585,7 +1575,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       addToPresenceLog({
         type: "scene_changed",
-        name: userInfo.metas[0].profile.displayName,
+        name: displayName,
         sceneName: hub.scene ? hub.scene.name : "a custom URL"
       });
     }
@@ -1609,7 +1599,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       addToPresenceLog({
         type: "hub_name_changed",
-        name: userInfo.metas[0].profile.displayName,
+        name: displayName,
         hubName: hub.name
       });
     }
@@ -1617,6 +1607,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (hub.entry_mode === "deny") {
       scene.emit("hub_closed");
     }
+
+    scene.emit("hub_updated", { hub });
   });
 
   hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());

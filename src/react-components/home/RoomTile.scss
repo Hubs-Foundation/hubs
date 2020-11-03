@@ -1,0 +1,58 @@
+@import '../../assets/stylesheets/shared';
+
+:local(.room-tile) {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+:local(.thumbnail-container) {
+  display: flex;
+  background-color: var(--tile-background-color);
+  border-radius: 12px;
+  position: relative;
+
+  img {
+    border-radius: 12px;
+  }
+}
+
+:local(.favorite-icon) {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: $favorited-color;
+}
+
+:local(.member-count) {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: var(--tile-button-background-color);
+  color: var(--tile-button-icon-color);
+  height: 30px;
+  border-radius: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+}
+
+:local(.room-info) {
+  margin-top: 4px;
+
+  & > * {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: 0;
+    display:block;
+  }
+
+
+  h3 {
+    color: var(--tile-title-color);
+  }
+
+  small {
+    color: var(--tile-subtitle-color);
+  }
+}

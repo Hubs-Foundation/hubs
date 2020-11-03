@@ -11,10 +11,15 @@
 :local(.collapse-button) {
   @extend %fa-icon-button;
   color: var(--panel-widget-color);
-  display: inline;
-  position: absolute;
-  top: 0px;
-  left: 24px;
+
+  i {
+    font-size: 24px;
+  }
+}
+
+:local(.hide-button) {
+  @extend %fa-icon-button;
+  color: var(--panel-widget-color);
 
   i {
     font-size: 24px;
@@ -23,11 +28,7 @@
 
 :local(.favorite-button) {
   @extend %fa-icon-button;
-  position: absolute;
-  top: 0px;
-  right: 24px;
   color: var(--unfavorited-color);
-  display: inline;
 
   i {
     font-size: 1.2em;
@@ -134,9 +135,11 @@
   :local(.name) {
     @extend %top-title;
     @extend %glass-text;
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 4px;
-    margin-right: 48px;
-    margin-left: 48px;
+    margin-right: 20px;
+    margin-left: 20px;
 
     :local(.rename-button) {
       @extend %glass-text;
@@ -275,7 +278,7 @@
 
   @media (min-width: 768px) {
     position: absolute;
-    top: 12px;
+    top: 28px;
     left: 26px;
   }
 
