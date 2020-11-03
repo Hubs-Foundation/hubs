@@ -187,10 +187,9 @@ These steps are what's necessary to enable development on your device
     If you encounter the following error:
     adb: error: more than one device/emulator
 
-    Try killing and restarting adb with the following commands:
-     `adb kill-server` or
-     `adb start-server`
-    Then retry the reverse command above again
+    Try killing adb with the following commands:
+     `adb kill-server` 
+    Then try the reverse command above again (the server will be restarted).
 
 3. Open a browser on the Quest device and test. Either  
     `adb shell am start -a android.intent.action.VIEW -d 'https://localhost:8080'`  
@@ -202,6 +201,16 @@ These steps are what's necessary to enable development on your device
 
 You may find the tool [scrcpy](https://github.com/Genymobile/scrcpy) useful to display the screen of your headset on your development computer. It doesn't require the headset user to accept, so it's less hassle than casting to a phone or tablet, in some circumstances.
 
+#### Pico G2 / Neo 2
+
+Follow the directions for the Quest, except
+
+* Setup the Pico device for development. (You may need to press the Confirm and Volume Down buttons on the headset simultaneously to enter the system settings.)  
+    `https://developer.pico-interactive.com/question/neo` 
+
+* Open Hubs in the Firefox Reality browser:  
+    `adb shell am start -a android.intent.action.VIEW -d 'https://localhost:8080/hub.html' org.mozilla.vrbrowser/org.mozilla.vrbrowser.VRBrowserActivity`
+
 #### Other Devices
 
-Please feel free to contribute setup instructions for additional devices. Pico headsets use command very similar to the Quest ones.
+Please feel free to contribute setup instructions for additional devices.
