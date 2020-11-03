@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import styles from "./LoadingScreen.scss";
-import { ReactComponent as Spinner } from "../misc/Spinner.svg";
+import { Spinner } from "../misc/Spinner";
 import { useRandomMessageTransition } from "./useRandomMessageTransition";
 
 export function LoadingScreen({ logoSrc, message, infoMessages }) {
@@ -11,7 +11,7 @@ export function LoadingScreen({ logoSrc, message, infoMessages }) {
     <div className={styles.loadingScreen}>
       <div className={styles.center}>
         <img className={styles.logo} src={logoSrc} />
-        <Spinner className={styles.spinner} />
+        <Spinner />
         <p>{message}</p>
       </div>
       <div className={styles.bottom}>
