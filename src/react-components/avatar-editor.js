@@ -45,10 +45,8 @@ const fetchAvatar = async avatarId => {
 export default class AvatarEditor extends Component {
   static propTypes = {
     avatarId: PropTypes.string,
-    onSignIn: PropTypes.func,
     onSave: PropTypes.func,
     onClose: PropTypes.func,
-    signedIn: PropTypes.bool,
     hideDelete: PropTypes.bool,
     debug: PropTypes.bool,
     className: PropTypes.string
@@ -453,7 +451,7 @@ export default class AvatarEditor extends Component {
           <div className="loader">
             <div className="loader-center" />
           </div>
-        ) : this.props.signedIn ? (
+        ) : (
           <form onSubmit={this.uploadAvatar} className="center">
             {this.textField("name", "Name", false, true)}
             <div className="split">
@@ -580,10 +578,6 @@ export default class AvatarEditor extends Component {
               </div>
             )}
           </form>
-        ) : (
-          <a onClick={this.props.onSignIn}>
-            <FormattedMessage id="sign-in.in" />
-          </a>
         )}
       </div>
     );

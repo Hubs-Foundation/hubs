@@ -32,11 +32,13 @@
 :local(.before-title) {
   position: absolute;
   left: 0;
+  margin-left: 16px;
 }
 
 :local(.after-title) {
   position: absolute;
   right: 0;
+  margin-right: 16px;
 }
 
 :local(.content) {

@@ -5,8 +5,11 @@ import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
-import { VerifyPage } from "./react-components/auth/VerifyPage";
+import { VerifyModalContainer } from "./react-components/auth/VerifyModalContainer";
+import configs from "./utils/configs";
 import "./assets/stylesheets/globals.scss";
+import { PageContainer } from "./react-components/layout/PageContainer";
+import { Center } from "./react-components/layout/Center";
 
 registerTelemetry("/verify", "Hubs Verify Email Page");
 
@@ -17,7 +20,11 @@ function Root() {
   return (
     <WrappedIntlProvider>
       <AuthContextProvider store={store}>
-        <VerifyPage />
+        <PageContainer style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
+          <Center>
+            <VerifyModalContainer />
+          </Center>
+        </PageContainer>
       </AuthContextProvider>
     </WrappedIntlProvider>
   );

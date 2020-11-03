@@ -3,13 +3,12 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
-import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
 import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeOffIcon } from "../icons/VolumeOff.svg";
 import styles from "./MicSetupModal.scss";
-import { IconButton } from "../input/IconButton";
+import { BackButton } from "../input/BackButton";
 import { SelectInputField } from "../input/SelectInputField";
 import { ToggleInput } from "../input/ToggleInput";
 import { ToolbarButton } from "../input/ToolbarButton";
@@ -35,12 +34,7 @@ export function MicSetupModal({
   return (
     <Modal
       title="Microphone Setup"
-      beforeTitle={
-        <IconButton onClick={onBack}>
-          <ChevronBackIcon />
-          <span>Back</span>
-        </IconButton>
-      }
+      beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       contentClassName={styles.content}
       {...rest}

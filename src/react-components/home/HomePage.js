@@ -3,7 +3,6 @@ import { FormattedMessage } from "react-intl";
 import classNames from "classnames";
 import configs from "../../utils/configs";
 import IfFeature from "../if-feature";
-import { Page } from "../layout/Page";
 import { CreateRoomButton } from "./CreateRoomButton";
 import { PWAButton } from "./PWAButton";
 import { useFavoriteRooms } from "./useFavoriteRooms";
@@ -14,6 +13,7 @@ import { AuthContext } from "../auth/AuthContext";
 import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
 import { MediaGrid } from "./MediaGrid";
 import { RoomTile } from "./RoomTile";
+import { PageContainer } from "../layout/PageContainer";
 
 export function HomePage() {
   const auth = useContext(AuthContext);
@@ -57,7 +57,7 @@ export function HomePage() {
   });
 
   return (
-    <Page className={styles.homePage} style={pageStyle}>
+    <PageContainer className={styles.homePage} style={pageStyle}>
       <section>
         <div className={styles.appInfo}>
           <div className={logoStyles}>
@@ -129,6 +129,6 @@ export function HomePage() {
           </div>
         </div>
       </section>
-    </Page>
+    </PageContainer>
   );
 }

@@ -31,7 +31,6 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
 import InviteDialog from "./invite-dialog.js";
-import SignInDialog from "./sign-in-dialog.js";
 import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
 import Tip from "./tip.js";
@@ -98,6 +97,8 @@ import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
+import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
+import { SignInStep } from "./auth/SignInModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -415,18 +416,22 @@ class UIRoot extends Component {
       onContinueAfterSignIn
     } = this.props;
 
-    this.showNonHistoriedDialog(SignInDialog, {
+    this.showNonHistoriedDialog(RoomSignInModalContainer, {
+      step: SignInStep.submit,
       message: getMessages()[signInMessageId],
-      onSignIn: async email => {
+      onSubmitEmail: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
-        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: onContinueAfterSignIn });
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.waitForVerification,
+          onClose: onContinueAfterSignIn
+        });
 
         await authComplete;
 
         this.setState({ signedIn: true });
-        this.showNonHistoriedDialog(SignInDialog, {
-          authComplete: true,
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.complete,
           message: getMessages()[signInCompleteMessageId],
           continueText: getMessages()[signInContinueTextId],
           onClose: onContinueAfterSignIn,
@@ -858,22 +863,6 @@ class UIRoot extends Component {
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
-
-  showSignInDialog = () => {
-    this.showNonHistoriedDialog(SignInDialog, {
-      message: getMessages()["sign-in.prompt"],
-      onSignIn: async email => {
-        const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
-
-        this.showNonHistoriedDialog(SignInDialog, { authStarted: true });
-
-        await authComplete;
-
-        this.setState({ signedIn: true });
-        this.closeDialog();
-      }
-    });
-  };
 
   signOut = async () => {
     await this.props.authChannel.signOut(this.props.hubChannel);
@@ -1480,7 +1469,6 @@ class UIRoot extends Component {
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
           <div className={classNames(rootStyles)}>
-            {this.state.dialog}
             {preload &&
               this.props.hub && (
                 <PreloadOverlay
@@ -1498,7 +1486,7 @@ class UIRoot extends Component {
                 <AvatarEditor
                   className={styles.avatarEditor}
                   signedIn={this.state.signedIn}
-                  onSignIn={this.showSignInDialog}
+                  onSignIn={this.showContextualSignInDialog}
                   onSave={() => {
                     if (props.location.state.detail && props.location.state.detail.returnToProfile) {
                       this.props.history.goBack();
@@ -1775,7 +1763,7 @@ class UIRoot extends Component {
                   undefined
                 )
               }
-              modal={renderEntryFlow && entryDialog}
+              modal={this.state.dialog || (renderEntryFlow && entryDialog)}
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
               toolbarCenter={
                 <>

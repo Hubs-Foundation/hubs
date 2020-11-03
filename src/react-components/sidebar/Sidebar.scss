@@ -29,11 +29,13 @@
 :local(.before-title) {
   position: absolute;
   left: 0;
+  margin-left: 16px;
 }
 
 :local(.after-title) {
   position: absolute;
   right: 0;
+  margin-right: 16px;
 }
 
 :local(.content) {
@@ -41,18 +43,4 @@
   flex: 1;
   flex-direction: column;
   overflow-y: auto;
-}
-
-:local(.back-button) {
-  margin-left: 8px;
-}
-
-:local(.sidebar-button) {
-  &:first-child {
-    margin-left: 16px;
-  }
-
-  &:last-child {
-    margin-right: 16px;
-  }
 }
