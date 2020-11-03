@@ -99,7 +99,7 @@ import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
-import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
+import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1808,7 +1808,7 @@ class UIRoot extends Component {
                         mediaSearchStore={this.props.mediaSearchStore}
                         pushHistoryState={this.pushHistoryState}
                       />
-                      <ReactionButtonContainer scene={this.props.scene} />
+                      <ReactionPopoverContainer scene={this.props.scene} />
                     </>
                   )}
                   <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
