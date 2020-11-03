@@ -24,6 +24,13 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, showPrivacy, privacyU
     [onSubmitEmail, email]
   );
 
+  const onChangeEmail = useCallback(
+    e => {
+      setEmail(e.target.value);
+    },
+    [setEmail]
+  );
+
   return (
     <form onSubmit={onSubmitForm} className={styles.modalContent}>
       <p>{message || <FormattedMessage id="sign-in.prompt" />}</p>
@@ -32,7 +39,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, showPrivacy, privacyU
         type="email"
         required
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={onChangeEmail}
         placeholder="example@example.com"
       />
       {(showTerms || showPrivacy) && (
