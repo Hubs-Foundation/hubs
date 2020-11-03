@@ -5,7 +5,7 @@
 export const AVAILABLE_LOCALES = {
   en: "English",
   zh: "简体中文",
-  "pt-br": "Portugês (Brasil)",
+  "pt-br": "Português (Brasil)",
   jp: "日本語",
   es: "Español"
 };
@@ -15,5 +15,6 @@ export const FALLBACK_LOCALES = {
   "zh-hans": "zh",
   "zh-hans-cn": "zh",
   pt: "pt-br",
+  "pt-pt": "pt-br",
   ja: "jp"
 };
