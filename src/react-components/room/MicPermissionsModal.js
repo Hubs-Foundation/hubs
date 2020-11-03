@@ -2,21 +2,15 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
-import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import styles from "./MicPermissionsModal.scss";
-import { IconButton } from "../input/IconButton";
+import { BackButton } from "../input/BackButton";
 
 export function MicPermissionsModal({ className, error, onClickErrorButton, errorButtonLabel, onBack, ...rest }) {
   return (
     <Modal
       title="Enter on Device"
-      beforeTitle={
-        <IconButton onClick={onBack}>
-          <ChevronBackIcon />
-          <span>Back</span>
-        </IconButton>
-      }
+      beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       contentClassName={styles.content}
       {...rest}
