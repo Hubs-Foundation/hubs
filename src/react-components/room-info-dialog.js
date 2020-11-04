@@ -4,7 +4,8 @@ import { FormattedMessage } from "react-intl";
 import styles from "./room/RoomInfoDialog.scss";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import { allowDisplayOfSceneLink } from "../utils/scene-url-utils";
-import { Sidebar, CloseButton } from "./sidebar/Sidebar";
+import { Sidebar } from "./sidebar/Sidebar";
+import { CloseButton } from "./input/CloseButton";
 import { InputField } from "./input/InputField";
 
 function SceneAttribution({ attribution }) {
