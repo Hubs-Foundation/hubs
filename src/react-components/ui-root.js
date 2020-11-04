@@ -41,7 +41,7 @@ import FeedbackDialog from "./feedback-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
-import RoomInfoDialog from "./room-info-dialog.js";
+import { RoomInfoDialog } from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
@@ -1347,7 +1347,7 @@ class UIRoot extends Component {
             id: "room-info",
             label: "Room Info",
             icon: HomeIcon,
-            onClick: () => this.pushHistoryState("modal", "room_info")
+            onClick: () => this.setSidebar("room-info")
           },
           canUpdateRoom && {
             id: "room-settings",
@@ -1597,19 +1597,6 @@ class UIRoot extends Component {
                   />
                   <StateRoute
                     stateKey="modal"
-                    stateValue="room_info"
-                    history={this.props.history}
-                    render={() => {
-                      return this.renderDialog(RoomInfoDialog, {
-                        store: this.props.store,
-                        scene: this.props.hub.scene,
-                        hubName: this.props.hub.name,
-                        hubDescription: this.props.hub.description
-                      });
-                    }}
-                  />
-                  <StateRoute
-                    stateKey="modal"
                     stateValue="feedback"
                     history={this.props.history}
                     render={() =>
@@ -1755,6 +1742,15 @@ class UIRoot extends Component {
                         performConditionalSignIn={this.props.performConditionalSignIn}
                         onClose={() => this.setSidebar(null)}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
+                      />
+                    )}
+                    {this.state.sidebarId === "room-info" && (
+                      <RoomInfoDialog
+                        store={this.props.store}
+                        scene={this.props.hub.scene}
+                        hubName={this.props.hub.name}
+                        hubDescription={this.props.hub.description}
+                        onClose={() => this.setSidebar(null)}
                       />
                     )}
                     {this.state.sidebarId === "room-settings" && (
