@@ -1,0 +1,81 @@
+@use "../styles/theme";
+
+:local(.numeric-input) {
+  input::-webkit-inner-spin-button, 
+  input::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input {
+    -moz-appearance: textfield;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
+:local(.numeric-buttons) {
+  display: flex;
+  flex-direction: column;
+  margin-right: 4px;
+}
+
+:local(.numeric-button) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: theme.$white;
+  border: 1px solid theme.$darkgrey;
+  width: 16px;
+  height: 16px;
+
+  &:hover {
+    background-color: theme.$white-hover;
+  }
+
+  &:active {
+    background-color: theme.$white-pressed;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+    background-color: theme.$lightgrey;
+
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$darkgrey;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$darkgrey;
+      }
+    }
+  }
+
+  :global(.keyboard-user) &:focus {
+    border-color: theme.$black;
+    outline: none;
+
+    &:first-child {
+      box-shadow: inset 0 0 0 2px theme.$black;
+    }
+
+    &:last-child {
+      box-shadow: inset 0 0 0 2px theme.$black;
+    }
+  }
+
+  &:first-child {
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom: 0;
+  }
+
+  &:last-child {
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+  }
+}

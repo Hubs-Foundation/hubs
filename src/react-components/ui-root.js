@@ -40,7 +40,7 @@ import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
-import RoomInfoDialog from "./room-info-dialog.js";
+import { RoomInfoDialog } from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
@@ -1038,7 +1038,7 @@ class UIRoot extends Component {
           onOptions={() => {
             this.props.performConditionalSignIn(
               () => this.props.hubChannel.can("update_hub"),
-              () => this.pushHistoryState("modal", "room_settings"),
+              () => this.setSidebar("room-settings"),
               "room-settings"
             );
           }}
@@ -1347,7 +1347,7 @@ class UIRoot extends Component {
             id: "room-info",
             label: "Room Info",
             icon: HomeIcon,
-            onClick: () => this.pushHistoryState("modal", "room_info")
+            onClick: () => this.setSidebar("room-info")
           },
           canUpdateRoom && {
             id: "room-settings",
@@ -1357,7 +1357,7 @@ class UIRoot extends Component {
               this.props.performConditionalSignIn(
                 () => this.props.hubChannel.can("update_hub"),
                 () => {
-                  this.pushHistoryState("modal", "room_settings");
+                  this.setSidebar("room-settings");
                 },
                 "room-settings"
               )
@@ -1553,26 +1553,6 @@ class UIRoot extends Component {
                   )}
                   <StateRoute
                     stateKey="modal"
-                    stateValue="room_settings"
-                    history={this.props.history}
-                    render={() =>
-                      this.renderDialog(RoomSettingsDialog, {
-                        showPublicRoomSetting: this.props.hubChannel.can("update_hub_promotion"),
-                        initialSettings: {
-                          name: this.props.hub.name,
-                          description: this.props.hub.description,
-                          member_permissions: this.props.hub.member_permissions,
-                          room_size: this.props.hub.room_size,
-                          allow_promotion: this.props.hub.allow_promotion,
-                          entry_mode: this.props.hub.entry_mode
-                        },
-                        onChange: settings => this.props.hubChannel.updateHub(settings),
-                        hubChannel: this.props.hubChannel
-                      })
-                    }
-                  />
-                  <StateRoute
-                    stateKey="modal"
                     stateValue="close_room"
                     history={this.props.history}
                     render={() =>
@@ -1614,19 +1594,6 @@ class UIRoot extends Component {
                     stateValue="webrtc-screenshare"
                     history={this.props.history}
                     render={() => this.renderDialog(WebRTCScreenshareUnsupportedDialog)}
-                  />
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="room_info"
-                    history={this.props.history}
-                    render={() => {
-                      return this.renderDialog(RoomInfoDialog, {
-                        store: this.props.store,
-                        scene: this.props.hub.scene,
-                        hubName: this.props.hub.name,
-                        hubDescription: this.props.hub.description
-                      });
-                    }}
                   />
                   <StateRoute
                     stateKey="modal"
@@ -1753,6 +1720,7 @@ class UIRoot extends Component {
                         mySessionId={this.props.sessionId}
                         presences={this.props.presences}
                         onClose={() => this.setSidebar(null)}
+                        onCloseDialog={() => this.closeDialog()}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
                         performConditionalSignIn={this.props.performConditionalSignIn}
                       />
@@ -1774,7 +1742,33 @@ class UIRoot extends Component {
                         hubChannel={this.props.hubChannel}
                         performConditionalSignIn={this.props.performConditionalSignIn}
                         onClose={() => this.setSidebar(null)}
+                        onCloseDialog={() => this.closeDialog()}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
+                      />
+                    )}
+                    {this.state.sidebarId === "room-info" && (
+                      <RoomInfoDialog
+                        store={this.props.store}
+                        scene={this.props.hub.scene}
+                        hubName={this.props.hub.name}
+                        hubDescription={this.props.hub.description}
+                        onClose={() => this.setSidebar(null)}
+                      />
+                    )}
+                    {this.state.sidebarId === "room-settings" && (
+                      <RoomSettingsDialog
+                        showPublicRoomSetting={this.props.hubChannel.can("update_hub_promotion")}
+                        initialSettings={{
+                          name: this.props.hub.name,
+                          description: this.props.hub.description,
+                          member_permissions: this.props.hub.member_permissions,
+                          room_size: this.props.hub.room_size,
+                          allow_promotion: this.props.hub.allow_promotion,
+                          entry_mode: this.props.hub.entry_mode
+                        }}
+                        onChange={settings => this.props.hubChannel.updateHub(settings)}
+                        hubChannel={this.props.hubChannel}
+                        onClose={() => this.setSidebar(null)}
                       />
                     )}
                   </>

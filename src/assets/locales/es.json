@@ -73,7 +73,7 @@
   "close-room.confirm": "Sí, cerrar habitación",
   "close-room.cancel": "Cancelar",
   "promote.message": "Promocionar a un usuario otorgará acceso completo a la configuración de la sala y las herramientas de moderación.\n\n¿Estás seguro?",
-  "promote.confirm-prefix": "Sí, Promocionar ",
+  "promote.confirm-prefix": "Sí, promocionar {name}",
   "promote.cancel": "Cancelar",
   "entry.room": "vestíbulo",
   "entry.enter-room-title": "Vestíbulo",
