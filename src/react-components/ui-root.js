@@ -1038,7 +1038,7 @@ class UIRoot extends Component {
           onOptions={() => {
             this.props.performConditionalSignIn(
               () => this.props.hubChannel.can("update_hub"),
-              () => this.pushHistoryState("modal", "room_settings"),
+              () => this.setSidebar("room-settings"),
               "room-settings"
             );
           }}
@@ -1357,7 +1357,7 @@ class UIRoot extends Component {
               this.props.performConditionalSignIn(
                 () => this.props.hubChannel.can("update_hub"),
                 () => {
-                  this.pushHistoryState("modal", "room_settings");
+                  this.setSidebar("room-settings");
                 },
                 "room-settings"
               )
@@ -1551,26 +1551,6 @@ class UIRoot extends Component {
                       </ContentMenuButton>
                     </ContentMenu>
                   )}
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="room_settings"
-                    history={this.props.history}
-                    render={() =>
-                      this.renderDialog(RoomSettingsDialog, {
-                        showPublicRoomSetting: this.props.hubChannel.can("update_hub_promotion"),
-                        initialSettings: {
-                          name: this.props.hub.name,
-                          description: this.props.hub.description,
-                          member_permissions: this.props.hub.member_permissions,
-                          room_size: this.props.hub.room_size,
-                          allow_promotion: this.props.hub.allow_promotion,
-                          entry_mode: this.props.hub.entry_mode
-                        },
-                        onChange: settings => this.props.hubChannel.updateHub(settings),
-                        hubChannel: this.props.hubChannel
-                      })
-                    }
-                  />
                   <StateRoute
                     stateKey="modal"
                     stateValue="close_room"
@@ -1775,6 +1755,22 @@ class UIRoot extends Component {
                         performConditionalSignIn={this.props.performConditionalSignIn}
                         onClose={() => this.setSidebar(null)}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
+                      />
+                    )}
+                    {this.state.sidebarId === "room-settings" && (
+                      <RoomSettingsDialog
+                        showPublicRoomSetting={this.props.hubChannel.can("update_hub_promotion")}
+                        initialSettings={{
+                          name: this.props.hub.name,
+                          description: this.props.hub.description,
+                          member_permissions: this.props.hub.member_permissions,
+                          room_size: this.props.hub.room_size,
+                          allow_promotion: this.props.hub.allow_promotion,
+                          entry_mode: this.props.hub.entry_mode
+                        }}
+                        onChange={settings => this.props.hubChannel.updateHub(settings)}
+                        hubChannel={this.props.hubChannel}
+                        onClose={() => this.setSidebar(null)}
                       />
                     )}
                   </>

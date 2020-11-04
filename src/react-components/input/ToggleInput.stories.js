@@ -14,5 +14,6 @@ export const All = args => (
     <ToggleInput label="Toggle Input" value={true} {...args} />
     <ToggleInput label="Toggle Input" value={false} disabled {...args} />
     <ToggleInput label="Toggle Input" value={true} disabled {...args} />
+    <ToggleInput label="Toggle Input" description="With description" {...args} />
   </div>
 );
