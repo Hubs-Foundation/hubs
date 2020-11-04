@@ -73,7 +73,7 @@
   "close-room.confirm": "Yes, Close Room",
   "close-room.cancel": "Cancel",
   "promote.message": "Promoting a user will grant full access to room settings and moderation tools.\n\nAre you sure?",
-  "promote.confirm-prefix": "Yes, Promote ",
+  "promote.confirm-prefix": "Yes, promote {name}",
   "promote.cancel": "Cancel",
   "entry.room": "lobby",
   "entry.enter-room-title": "Lobby",

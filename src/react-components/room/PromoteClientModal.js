@@ -13,8 +13,7 @@ export function PromoteClientModal({ onClose, onConfirm, displayName }) {
         <FormattedMessage id="promote.message" />
       </p>
       <Button preset="accept" onClick={onConfirm}>
-        <FormattedMessage id="promote.confirm-prefix" />
-        <span>{displayName}</span>
+        <FormattedMessage id="promote.confirm-prefix" values={{ name: displayName }} />
       </Button>
       <Button preset="cancel" onClick={onClose}>
         <FormattedMessage id="promote.cancel" />

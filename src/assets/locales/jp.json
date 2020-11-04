@@ -73,7 +73,7 @@
   "close-room.confirm": "はい,部屋を閉じます",
   "close-room.cancel": "キャンセル",
   "promote.message": "ユーザーを昇格させると,部屋の設定とモデレートツールへのフルアクセスが許可されます。\n  \n よろしいですか？",
-  "promote.confirm-prefix": "はい,昇格させます",
+  "promote.confirm-prefix": "はい,昇格させます {name}",
   "promote.cancel": "キャンセル",
   "entry.room": "ロビー",
   "entry.enter-room-title": "ロビー",
