@@ -2,6 +2,7 @@ import React, { forwardRef, memo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Button.scss";
+import textInputStyles from "./TextInput.scss";
 
 export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
@@ -10,7 +11,11 @@ export const Button = memo(
     const ButtonComponent = as;
 
     return (
-      <ButtonComponent className={classNames(styles.button, styles[preset], className)} {...rest} ref={ref}>
+      <ButtonComponent
+        className={classNames(styles.button, textInputStyles.button, styles[preset], className)}
+        {...rest}
+        ref={ref}
+      >
         {children}
       </ButtonComponent>
     );

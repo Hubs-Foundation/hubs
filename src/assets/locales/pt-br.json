@@ -73,7 +73,7 @@
   "close-room.confirm": "Sim, fechar sala",
   "close-room.cancel": "Cancelar",
   "promote.message": "A promoção de um usuário concederá acesso total às configurações da sala e ferramentas de moderação.\n\nVocê tem certeza?",
-  "promote.confirm-prefix": "Sim, promover ",
+  "promote.confirm-prefix": "Sim, promover {name}",
   "promote.cancel": "Cancelar",
   "entry.room": "sala de espera",
   "entry.enter-room-title": "Sala de espera",

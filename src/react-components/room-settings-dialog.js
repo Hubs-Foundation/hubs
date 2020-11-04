@@ -1,13 +1,19 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import cx from "classnames";
 import { FormattedMessage } from "react-intl";
-
 import { hubUrl } from "../utils/phoenix-utils";
-import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import styles from "../assets/stylesheets/room-settings-dialog.scss";
-import DialogContainer from "./dialog-container";
 import configs from "../utils/configs";
+import { Sidebar } from "./sidebar/Sidebar";
+import { CloseButton } from "./input/CloseButton";
+import { Button } from "./input/Button";
+import { TextInputField } from "./input/TextInputField";
+import { TextAreaInputField } from "./input/TextAreaInputField";
+import { ToggleInput } from "./input/ToggleInput";
+import { RadioInputField } from "./input/RadioInputField";
+import { NumericInputField } from "./input/NumericInputField";
+import { InputField } from "./input/InputField";
+import { CopyableTextInputField } from "./input/CopyableTextInputField";
 
 export default class RoomSettingsDialog extends Component {
   static propTypes = {
@@ -58,21 +64,18 @@ export default class RoomSettingsDialog extends Component {
 
   renderCheckbox(member_permission, disabled, onChange) {
     return (
-      <label className={cx(styles.permission, { [styles.permissionDisabled]: disabled })} key={member_permission}>
-        <input
-          type="checkbox"
-          checked={this.state.member_permissions[member_permission]}
-          disabled={disabled}
-          onChange={
-            onChange ||
-            (e =>
-              this.setState({
-                member_permissions: { ...this.state.member_permissions, [member_permission]: e.target.checked }
-              }))
-          }
-        />
-        <FormattedMessage id={`room-settings.${member_permission}`} />
-      </label>
+      <ToggleInput
+        value={this.state.member_permissions[member_permission]}
+        disabled={disabled}
+        onChange={
+          onChange ||
+          (e =>
+            this.setState({
+              member_permissions: { ...this.state.member_permissions, [member_permission]: e.target.checked }
+            }))
+        }
+        label={<FormattedMessage id={`room-settings.${member_permission}`} />}
+      />
     );
   }
 
@@ -82,175 +85,133 @@ export default class RoomSettingsDialog extends Component {
     return url.toString();
   }
 
+  handleRoomNameFieldBlur() {
+    this.setState({
+      name: this.state.name.trim()
+    });
+  }
+
   render() {
-    const { showPublicRoomSetting } = this.props;
+    const { showPublicRoomSetting, onClose } = this.props;
 
     const maxRoomSize = configs.feature("max_room_size");
 
     return (
-      <DialogContainer title="Room Settings" {...this.props}>
+      <Sidebar title="Room Settings" beforeTitle={<CloseButton onClick={onClose} />}>
         <form onSubmit={this.onSubmit} className={styles.roomSettingsForm}>
-          <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.name-subtitle" />
-          </span>
-          <input
+          <TextInputField
             name="name"
             type="text"
             required
             autoComplete="off"
             placeholder="Room name"
+            maxLength={64}
+            minLength={1}
             value={this.state.name}
-            onFocus={e => handleTextFieldFocus(e.target)}
-            onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ name: e.target.value })}
-            className={styles.nameField}
+            label={<FormattedMessage id="room-settings.name-subtitle" />}
           />
-          <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.description-subtitle" />
-          </span>
-          <textarea
+          <TextAreaInputField
             name="description"
-            rows="5"
             autoComplete="off"
             placeholder="Room description"
             value={this.state.description || ""}
-            onFocus={e => handleTextFieldFocus(e.target)}
-            onBlur={() => handleTextFieldBlur()}
             onChange={e => this.setState({ description: e.target.value })}
-            className={styles.descriptionField}
+            label={<FormattedMessage id="room-settings.description-subtitle" />}
+            minRows={3}
           />
-          <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.room-size-subtitle" />
-          </span>
-          <div className={styles.memberCapContainer}>
-            <input
-              name="room_size"
-              type="number"
-              required
-              min={0}
-              max={maxRoomSize}
-              placeholder="Member Limit"
-              value={this.state.room_size}
-              onFocus={e => handleTextFieldFocus(e.target)}
-              onBlur={() => handleTextFieldBlur()}
-              onChange={e => this.setState({ room_size: e.target.value })}
-              className={styles.nameField}
-            />
-          </div>
-          <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.room-access-subtitle" />
-          </span>
-          <div className={styles.selectContainer}>
-            <label>
-              <input
-                type="radio"
-                value="allow"
-                checked={this.state.entry_mode === "allow"}
-                onChange={this.onRoomAccessSettingsChange}
-              />
-              <div className={styles.radioText}>
-                <span className={styles.radioTitle}>
-                  <FormattedMessage id="room-settings.access-shared-link" />
-                </span>
-                <span className={styles.radioText}>
-                  <FormattedMessage id="room-settings.access-shared-link-subtitle" />
-                </span>
-              </div>
-            </label>
-            <label>
-              <input
-                type="radio"
-                value="invite"
-                checked={this.state.entry_mode === "invite"}
-                onChange={this.onRoomAccessSettingsChange}
-              />
-              <div className={styles.radioText}>
-                <span className={styles.radioTitle}>
-                  <FormattedMessage id="room-settings.access-invite" />
-                </span>
-                <span className={styles.radioText}>
-                  <FormattedMessage id="room-settings.access-invite-subtitle" />
-                </span>
-                {this.state.entry_mode === "invite" && (
-                  <div className={styles.inviteLink}>
-                    <span>Invite link:</span>{" "}
-                    {this.state.fetchingInvite ? (
-                      <span>...</span>
-                    ) : (
-                      <>
-                        <a href={this.inviteUrl()} className="link">
-                          {this.state.hubInviteId}
-                        </a>{" "}
-                        <span className="revoke">
-                          {this.state.confirmRevoke ? (
-                            <>
-                              <FormattedMessage id="room-settings.revoke-confirm" />{" "}
-                              <a onClick={this.onRevokeInvite}>
-                                <FormattedMessage id="room-settings.revoke-confirm-yes" />
-                              </a>{" "}
-                              /{" "}
-                              <a onClick={() => this.setState({ confirmRevoke: false })}>
-                                <FormattedMessage id="room-settings.revoke-confirm-no" />
-                              </a>
-                            </>
-                          ) : (
-                            <a onClick={() => this.setState({ confirmRevoke: true })}>
-                              <FormattedMessage id="room-settings.revoke" />
-                            </a>
-                          )}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            </label>
-            {showPublicRoomSetting && (
-              <label>
-                <input
-                  type="checkbox"
-                  checked={this.state.allow_promotion}
-                  onChange={e => this.setState({ allow_promotion: e.target.checked })}
-                />
-                <div className={styles.radioText}>
-                  <span className={styles.radioTitle}>
-                    <FormattedMessage id="room-settings.access-public" />
-                  </span>
-                  <span className={styles.radioText}>
-                    <FormattedMessage id="room-settings.access-public-subtitle" />
-                  </span>
-                </div>
-              </label>
-            )}
-          </div>
-          <span className={styles.subtitle}>
-            <FormattedMessage id="room-settings.permissions-subtitle" />
-          </span>
-          <div className={styles.permissions}>
-            {this.renderCheckbox("spawn_and_move_media", false, e => {
-              const newMemberPermissions = {
-                spawn_and_move_media: e.target.checked
-              };
-              if (!e.target.checked) {
-                newMemberPermissions.spawn_camera = false;
-                newMemberPermissions.pin_objects = false;
+          <NumericInputField
+            name="room_size"
+            required
+            min={0}
+            max={maxRoomSize}
+            placeholder="Member Limit"
+            value={this.state.room_size}
+            onChange={e => this.setState({ room_size: e.target.value })}
+            label={<FormattedMessage id="room-settings.room-size-subtitle" />}
+          />
+          <RadioInputField
+            label={<FormattedMessage id="room-settings.room-access-subtitle" />}
+            value={this.state.entry_mode}
+            options={[
+              {
+                id: "allow",
+                value: "allow",
+                label: <FormattedMessage id="room-settings.access-shared-link" />,
+                description: <FormattedMessage id="room-settings.access-shared-link-subtitle" />
+              },
+              {
+                id: "invite",
+                value: "invite",
+                label: <FormattedMessage id="room-settings.access-invite" />,
+                description: <FormattedMessage id="room-settings.access-invite-subtitle" />
               }
-              this.setState({ member_permissions: { ...this.state.member_permissions, ...newMemberPermissions } });
-            })}
-            <div className={styles.permissionsGroup}>
-              {this.renderCheckbox("spawn_camera", !this.state.member_permissions.spawn_and_move_media)}
-              {this.renderCheckbox("pin_objects", !this.state.member_permissions.spawn_and_move_media)}
+            ]}
+            onChange={this.onRoomAccessSettingsChange}
+          />
+          {this.state.entry_mode === "invite" && (
+            <div className={styles.inviteLinkContainer}>
+              <CopyableTextInputField
+                label="Invite link"
+                disabled={this.state.fetchingInvite}
+                value={this.state.fetchingInvite ? "..." : this.inviteUrl()}
+                buttonPreset="blue"
+                description={
+                  !this.state.fetchingInvite &&
+                  (this.state.confirmRevoke ? (
+                    <>
+                      <FormattedMessage id="room-settings.revoke-confirm" />{" "}
+                      <a onClick={this.onRevokeInvite}>
+                        <FormattedMessage id="room-settings.revoke-confirm-yes" />
+                      </a>{" "}
+                      /{" "}
+                      <a onClick={() => this.setState({ confirmRevoke: false })}>
+                        <FormattedMessage id="room-settings.revoke-confirm-no" />
+                      </a>
+                    </>
+                  ) : (
+                    <a onClick={() => this.setState({ confirmRevoke: true })}>
+                      <FormattedMessage id="room-settings.revoke" />
+                    </a>
+                  ))
+                }
+              />
             </div>
-            {this.renderCheckbox("spawn_drawing")}
-            {this.renderCheckbox("spawn_emoji")}
-            <div />
-            {this.renderCheckbox("fly")}
-          </div>
-          <button type="submit" className={styles.nextButton}>
+          )}
+          {showPublicRoomSetting && (
+            <ToggleInput
+              value={this.state.allow_promotion}
+              onChange={e => this.setState({ allow_promotion: e.target.checked })}
+              label={<FormattedMessage id="room-settings.access-public" />}
+              description={<FormattedMessage id="room-settings.access-public-subtitle" />}
+            />
+          )}
+          <InputField label={<FormattedMessage id="room-settings.permissions-subtitle" />}>
+            <div className={styles.roomPermissions}>
+              {this.renderCheckbox("spawn_and_move_media", false, e => {
+                const newMemberPermissions = {
+                  spawn_and_move_media: e.target.checked
+                };
+                if (!e.target.checked) {
+                  newMemberPermissions.spawn_camera = false;
+                  newMemberPermissions.pin_objects = false;
+                }
+                this.setState({ member_permissions: { ...this.state.member_permissions, ...newMemberPermissions } });
+              })}
+              <div className={styles.permissionsGroup}>
+                {this.renderCheckbox("spawn_camera", !this.state.member_permissions.spawn_and_move_media)}
+                {this.renderCheckbox("pin_objects", !this.state.member_permissions.spawn_and_move_media)}
+              </div>
+              {this.renderCheckbox("spawn_drawing")}
+              {this.renderCheckbox("spawn_emoji")}
+              {this.renderCheckbox("fly")}
+            </div>
+          </InputField>
+          <Button type="submit" preset="accept">
             <FormattedMessage id="room-settings.apply" />
-          </button>
+          </Button>
         </form>
-      </DialogContainer>
+      </Sidebar>
     );
   }
 }

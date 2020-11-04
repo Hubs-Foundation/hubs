@@ -32,7 +32,6 @@ import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
-import SignInDialog from "./sign-in-dialog.js";
 import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
 import Tip from "./tip.js";
@@ -42,7 +41,7 @@ import FeedbackDialog from "./feedback-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
-import RoomInfoDialog from "./room-info-dialog.js";
+import { RoomInfoDialog } from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
@@ -100,6 +99,8 @@ import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
+import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
+import { SignInStep } from "./auth/SignInModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -417,18 +418,22 @@ class UIRoot extends Component {
       onContinueAfterSignIn
     } = this.props;
 
-    this.showNonHistoriedDialog(SignInDialog, {
+    this.showNonHistoriedDialog(RoomSignInModalContainer, {
+      step: SignInStep.submit,
       message: getMessages()[signInMessageId],
-      onSignIn: async email => {
+      onSubmitEmail: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
-        this.showNonHistoriedDialog(SignInDialog, { authStarted: true, onClose: onContinueAfterSignIn });
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.waitForVerification,
+          onClose: onContinueAfterSignIn
+        });
 
         await authComplete;
 
         this.setState({ signedIn: true });
-        this.showNonHistoriedDialog(SignInDialog, {
-          authComplete: true,
+        this.showNonHistoriedDialog(RoomSignInModalContainer, {
+          step: SignInStep.complete,
           message: getMessages()[signInCompleteMessageId],
           continueText: getMessages()[signInContinueTextId],
           onClose: onContinueAfterSignIn,
@@ -861,22 +866,6 @@ class UIRoot extends Component {
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
 
-  showSignInDialog = () => {
-    this.showNonHistoriedDialog(SignInDialog, {
-      message: getMessages()["sign-in.prompt"],
-      onSignIn: async email => {
-        const { authComplete } = await this.props.authChannel.startAuthentication(email, this.props.hubChannel);
-
-        this.showNonHistoriedDialog(SignInDialog, { authStarted: true });
-
-        await authComplete;
-
-        this.setState({ signedIn: true });
-        this.closeDialog();
-      }
-    });
-  };
-
   signOut = async () => {
     await this.props.authChannel.signOut(this.props.hubChannel);
     this.setState({ signedIn: false });
@@ -1049,7 +1038,7 @@ class UIRoot extends Component {
           onOptions={() => {
             this.props.performConditionalSignIn(
               () => this.props.hubChannel.can("update_hub"),
-              () => this.pushHistoryState("modal", "room_settings"),
+              () => this.setSidebar("room-settings"),
               "room-settings"
             );
           }}
@@ -1358,7 +1347,7 @@ class UIRoot extends Component {
             id: "room-info",
             label: "Room Info",
             icon: HomeIcon,
-            onClick: () => this.pushHistoryState("modal", "room_info")
+            onClick: () => this.setSidebar("room-info")
           },
           canUpdateRoom && {
             id: "room-settings",
@@ -1368,7 +1357,7 @@ class UIRoot extends Component {
               this.props.performConditionalSignIn(
                 () => this.props.hubChannel.can("update_hub"),
                 () => {
-                  this.pushHistoryState("modal", "room_settings");
+                  this.setSidebar("room-settings");
                 },
                 "room-settings"
               )
@@ -1482,7 +1471,6 @@ class UIRoot extends Component {
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
           <div className={classNames(rootStyles)}>
-            {this.state.dialog}
             {preload &&
               this.props.hub && (
                 <PreloadOverlay
@@ -1500,7 +1488,7 @@ class UIRoot extends Component {
                 <AvatarEditor
                   className={styles.avatarEditor}
                   signedIn={this.state.signedIn}
-                  onSignIn={this.showSignInDialog}
+                  onSignIn={this.showContextualSignInDialog}
                   onSave={() => {
                     if (props.location.state.detail && props.location.state.detail.returnToProfile) {
                       this.props.history.goBack();
@@ -1565,26 +1553,6 @@ class UIRoot extends Component {
                   )}
                   <StateRoute
                     stateKey="modal"
-                    stateValue="room_settings"
-                    history={this.props.history}
-                    render={() =>
-                      this.renderDialog(RoomSettingsDialog, {
-                        showPublicRoomSetting: this.props.hubChannel.can("update_hub_promotion"),
-                        initialSettings: {
-                          name: this.props.hub.name,
-                          description: this.props.hub.description,
-                          member_permissions: this.props.hub.member_permissions,
-                          room_size: this.props.hub.room_size,
-                          allow_promotion: this.props.hub.allow_promotion,
-                          entry_mode: this.props.hub.entry_mode
-                        },
-                        onChange: settings => this.props.hubChannel.updateHub(settings),
-                        hubChannel: this.props.hubChannel
-                      })
-                    }
-                  />
-                  <StateRoute
-                    stateKey="modal"
                     stateValue="close_room"
                     history={this.props.history}
                     render={() =>
@@ -1626,19 +1594,6 @@ class UIRoot extends Component {
                     stateValue="webrtc-screenshare"
                     history={this.props.history}
                     render={() => this.renderDialog(WebRTCScreenshareUnsupportedDialog)}
-                  />
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="room_info"
-                    history={this.props.history}
-                    render={() => {
-                      return this.renderDialog(RoomInfoDialog, {
-                        store: this.props.store,
-                        scene: this.props.hub.scene,
-                        hubName: this.props.hub.name,
-                        hubDescription: this.props.hub.description
-                      });
-                    }}
                   />
                   <StateRoute
                     stateKey="modal"
@@ -1765,6 +1720,7 @@ class UIRoot extends Component {
                         mySessionId={this.props.sessionId}
                         presences={this.props.presences}
                         onClose={() => this.setSidebar(null)}
+                        onCloseDialog={() => this.closeDialog()}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
                         performConditionalSignIn={this.props.performConditionalSignIn}
                       />
@@ -1786,7 +1742,33 @@ class UIRoot extends Component {
                         hubChannel={this.props.hubChannel}
                         performConditionalSignIn={this.props.performConditionalSignIn}
                         onClose={() => this.setSidebar(null)}
+                        onCloseDialog={() => this.closeDialog()}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
+                      />
+                    )}
+                    {this.state.sidebarId === "room-info" && (
+                      <RoomInfoDialog
+                        store={this.props.store}
+                        scene={this.props.hub.scene}
+                        hubName={this.props.hub.name}
+                        hubDescription={this.props.hub.description}
+                        onClose={() => this.setSidebar(null)}
+                      />
+                    )}
+                    {this.state.sidebarId === "room-settings" && (
+                      <RoomSettingsDialog
+                        showPublicRoomSetting={this.props.hubChannel.can("update_hub_promotion")}
+                        initialSettings={{
+                          name: this.props.hub.name,
+                          description: this.props.hub.description,
+                          member_permissions: this.props.hub.member_permissions,
+                          room_size: this.props.hub.room_size,
+                          allow_promotion: this.props.hub.allow_promotion,
+                          entry_mode: this.props.hub.entry_mode
+                        }}
+                        onChange={settings => this.props.hubChannel.updateHub(settings)}
+                        hubChannel={this.props.hubChannel}
+                        onClose={() => this.setSidebar(null)}
                       />
                     )}
                   </>
@@ -1794,7 +1776,7 @@ class UIRoot extends Component {
                   undefined
                 )
               }
-              modal={renderEntryFlow && entryDialog}
+              modal={this.state.dialog || (renderEntryFlow && entryDialog)}
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
               toolbarCenter={
                 <>

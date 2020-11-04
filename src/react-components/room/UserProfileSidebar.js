@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Sidebar, BackButton, CloseButton } from "../sidebar/Sidebar";
+import { Sidebar } from "../sidebar/Sidebar";
+import { CloseButton } from "../input/CloseButton";
+import { BackButton } from "../input/BackButton";
 import { Button } from "../input/Button";
 import styles from "./UserProfileSidebar.scss";
 

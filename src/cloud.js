@@ -4,7 +4,7 @@ import "./utils/configs";
 import styles from "./assets/stylesheets/cloud.scss";
 import classNames from "classnames";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
-import { Page } from "./react-components/layout/Page";
+import { PageContainer } from "./react-components/layout/PageContainer";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import Store from "./storage/store";
 
@@ -14,7 +14,7 @@ registerTelemetry("/cloud", "Hubs Cloud Landing Page");
 
 function HubsCloudPage() {
   return (
-    <Page>
+    <PageContainer>
       <div className={styles.hero}>
         <section className={styles.colLg}>
           <div className={classNames(styles.hideLgUp, styles.centerLg)}>
@@ -76,7 +76,7 @@ function HubsCloudPage() {
           </p>
         </div>
       </section>
-    </Page>
+    </PageContainer>
   );
 }
 
