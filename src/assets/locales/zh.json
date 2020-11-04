@@ -73,7 +73,7 @@
   "close-room.confirm": "是的，关闭房间",
   "close-room.cancel": "取消",
   "promote.message": "晋升一个用户，会给他房间设置以及使用工具的权限\n\n你确定吗?",
-  "promote.confirm-prefix": "是的，晋升",
+  "promote.confirm-prefix": "是的，晋升 {name}",
   "promote.cancel": "取消",
   "entry.room": "休息室",
   "entry.enter-room-title": "休息室",

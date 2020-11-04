@@ -1720,6 +1720,7 @@ class UIRoot extends Component {
                         mySessionId={this.props.sessionId}
                         presences={this.props.presences}
                         onClose={() => this.setSidebar(null)}
+                        onCloseDialog={() => this.closeDialog()}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
                         performConditionalSignIn={this.props.performConditionalSignIn}
                       />
@@ -1741,6 +1742,7 @@ class UIRoot extends Component {
                         hubChannel={this.props.hubChannel}
                         performConditionalSignIn={this.props.performConditionalSignIn}
                         onClose={() => this.setSidebar(null)}
+                        onCloseDialog={() => this.closeDialog()}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
                       />
                     )}
