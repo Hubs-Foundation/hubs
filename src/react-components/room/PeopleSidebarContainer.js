@@ -42,9 +42,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   return people;
 }
 
-function PeopleListContainer({ hubChannel, presences, mySessionId, onSelectPerson, onClose }) {
-  const people = usePeopleList(presences, mySessionId);
-
+function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
   const onMuteAll = useCallback(
     () => {
       for (const person of people) {
@@ -71,8 +69,7 @@ PeopleListContainer.propTypes = {
   onSelectPerson: PropTypes.func.isRequired,
   hubChannel: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-  mySessionId: PropTypes.string.isRequired,
-  presences: PropTypes.object.isRequired
+  people: PropTypes.array.isRequired
 };
 
 export function PeopleSidebarContainer({
@@ -87,7 +84,15 @@ export function PeopleSidebarContainer({
   showNonHistoriedDialog,
   onClose
 }) {
-  const [selectedPerson, setSelectedPerson] = useState(null);
+  const people = usePeopleList(presences, mySessionId);
+  const [selectedPersonId, setSelectedPersonId] = useState(null);
+  const selectedPerson = people.find(person => person.id === selectedPersonId);
+  const setSelectedPerson = useCallback(
+    person => {
+      setSelectedPersonId(person.id);
+    },
+    [setSelectedPersonId]
+  );
 
   if (selectedPerson) {
     if (selectedPerson.id === mySessionId) {
@@ -97,10 +102,10 @@ export function PeopleSidebarContainer({
           displayNameOverride={displayNameOverride}
           store={store}
           mediaSearchStore={mediaSearchStore}
-          finished={() => setSelectedPerson(null)}
+          finished={() => setSelectedPersonId(null)}
           history={history}
           showBackButton
-          onBack={() => setSelectedPerson(null)}
+          onBack={() => setSelectedPersonId(null)}
         />
       );
     } else {
@@ -110,7 +115,7 @@ export function PeopleSidebarContainer({
           hubChannel={hubChannel}
           performConditionalSignIn={performConditionalSignIn}
           showBackButton
-          onBack={() => setSelectedPerson(null)}
+          onBack={() => setSelectedPersonId(null)}
           onCloseDialog={onCloseDialog}
           showNonHistoriedDialog={showNonHistoriedDialog}
         />
@@ -119,13 +124,7 @@ export function PeopleSidebarContainer({
   }
 
   return (
-    <PeopleListContainer
-      onSelectPerson={setSelectedPerson}
-      onClose={onClose}
-      hubChannel={hubChannel}
-      presences={presences}
-      mySessionId={mySessionId}
-    />
+    <PeopleListContainer onSelectPerson={setSelectedPerson} onClose={onClose} hubChannel={hubChannel} people={people} />
   );
 }
 
