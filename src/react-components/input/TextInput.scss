@@ -27,7 +27,7 @@ $input-height: 40px;
   height: $input-height;
   align-items: center;
 
-  button:not(:local(.icon-button)) {
+  :local(.button) {
     height: 100%;
     border-radius: 0;
     min-width: auto;
@@ -65,13 +65,13 @@ $input-height: 40px;
 }
 
 :local(.before-input) {
-  button:not(:local(.icon-button)) {
+  :local(.button) {
     border-right-width: 1px;
   }
 }
 
 :local(.after-input) {
-  button:not(:local(.icon-button)) {
+  :local(.button) {
     border-left-width: 1px;
   }
 }
