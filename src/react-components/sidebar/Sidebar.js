@@ -59,7 +59,7 @@ export function Sidebar({ title, beforeTitle, afterTitle, children, contentClass
 }
 
 Sidebar.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.node,
   beforeTitle: PropTypes.node,
   afterTitle: PropTypes.node,
   children: PropTypes.node,
