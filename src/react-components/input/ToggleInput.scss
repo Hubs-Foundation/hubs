@@ -7,6 +7,9 @@
   user-select: none;
 
   input {
+    position: absolute;
+    width: 0;
+    height: 0;
     opacity: 0;
   }
 
@@ -22,7 +25,7 @@
 }
 
 :local(.label-container) {
-  margin-right: 16px;
+  margin-left: 16px;
   display: flex;
   flex-direction: column;
   color: theme.$darkgrey;
