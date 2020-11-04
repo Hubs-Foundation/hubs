@@ -85,6 +85,13 @@ export default class RoomSettingsDialog extends Component {
     return url.toString();
   }
 
+  handleRoomNameFieldBlur() {
+    handleTextFieldBlur();
+    this.setState({
+      name: this.state.name.trim()
+    });
+  }
+
   render() {
     const { showPublicRoomSetting, onClose } = this.props;
 
@@ -99,6 +106,8 @@ export default class RoomSettingsDialog extends Component {
             required
             autoComplete="off"
             placeholder="Room name"
+            maxLength={64}
+            minLength={1}
             value={this.state.name}
             onChange={e => this.setState({ name: e.target.value })}
             label={<FormattedMessage id="room-settings.name-subtitle" />}
