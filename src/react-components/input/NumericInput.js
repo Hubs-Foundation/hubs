@@ -10,7 +10,7 @@ export const NumericInput = memo(
   forwardRef(({ className, afterInput, disabled, value, onChange, ...rest }, ref) => {
     return (
       <TextInput
-        inputmode="numeric"
+        inputMode="numeric"
         {...rest}
         type="number"
         className={classNames(styles.numericInput, className)}
