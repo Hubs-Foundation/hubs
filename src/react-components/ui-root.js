@@ -1790,7 +1790,7 @@ class UIRoot extends Component {
                         mediaSearchStore={this.props.mediaSearchStore}
                         pushHistoryState={this.pushHistoryState}
                       />
-                      <ReactionPopoverContainer scene={this.props.scene} />
+                      <ReactionPopoverContainer />
                     </>
                   )}
                   <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
