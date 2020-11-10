@@ -98,6 +98,7 @@ export const SCHEMA = {
         invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
+        enableGyro: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
         animateWaypointTransitions: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },

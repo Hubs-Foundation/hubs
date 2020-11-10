@@ -55,10 +55,16 @@ export class GyroDevice {
       this.vrDisplay = window.webvrpolyfill.getPolyfillDisplays()[0];
       this.frameData = new window.webvrpolyfill.constructor.VRFrameData();
     }
+
+    // undefined means no preference. Default is true, so check for false explicitly
+    this.enableGyro = window.APP.store.state.preferences.enableGyro !== false;
+    window.APP.store.addEventListener("statechanged", () => {
+      this.enableGyro = window.APP.store.state.preferences.enableGyro !== false;
+    });
   }
 
   write(frame) {
-    if (!this.hasPolyfill || !this.vrDisplay || !this.frameData) {
+    if (!this.enableGyro || !this.hasPolyfill || !this.vrDisplay || !this.frameData) {
       return;
     }
     const hmdEuler = this.hmdEuler;

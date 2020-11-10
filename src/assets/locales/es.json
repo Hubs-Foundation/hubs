@@ -310,6 +310,7 @@
   "preferences.movementSpeedModifier": "Modificador de velocidad de movimiento",
   "preferences.enableOnScreenJoystickLeft": "Habilitar el joystick izquierdo en pantalla para moverse",
   "preferences.enableOnScreenJoystickRight": "Habilita el joystick derecho en pantalla para mirar alrededor",
+  "preferences.enableGyro": "Enable gyroscope (when supported by browser/device",
   "preferences.invertTouchscreenCameraMove": "Invertir la dirección del movimiento de la cámara para pantallas táctiles",
   "preferences.browserDefault": "Navegador predeterminado",
   "preferences.locale": "Idioma",
