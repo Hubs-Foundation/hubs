@@ -1343,38 +1343,11 @@ class UIRoot extends Component {
         id: "room",
         label: "Room",
         items: [
-          roomHasSceneInfo && {
+          {
             id: "room-info",
-            label: "Room Info",
+            label: "Room Info and Settings",
             icon: HomeIcon,
             onClick: () => this.setSidebar("room-info")
-          },
-          canUpdateRoom && {
-            id: "room-settings",
-            label: "Room Settings",
-            icon: HomeIcon,
-            onClick: () =>
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.can("update_hub"),
-                () => {
-                  this.setSidebar("room-settings");
-                },
-                "room-settings"
-              )
-          },
-          canUpdateRoom && {
-            id: "change-scene",
-            label: "Change Scene",
-            icon: SceneIcon,
-            onClick: () =>
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.can("update_hub"),
-                () => {
-                  showFullScreenIfAvailable();
-                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
-                },
-                "change-scene"
-              )
           },
           this.isFavorited()
             ? { id: "unfavorite-room", label: "Unfavorite Room", icon: StarIcon, onClick: () => this.toggleFavorited() }
@@ -1766,8 +1739,19 @@ class UIRoot extends Component {
                     {this.state.sidebarId === "room-settings" && (
                       <RoomSettingsSidebarContainer
                         room={this.props.hub}
+                        accountId={this.props.sessionId}
                         hubChannel={this.props.hubChannel}
                         onClose={() => this.setSidebar(null)}
+                        onChangeScene={() => {
+                          this.props.performConditionalSignIn(
+                            () => this.props.hubChannel.can("update_hub"),
+                            () => {
+                              showFullScreenIfAvailable();
+                              this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
+                            },
+                            "change-scene"
+                          );
+                        }}
                       />
                     )}
                   </>

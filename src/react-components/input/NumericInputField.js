@@ -5,12 +5,20 @@ import { useId } from "./useId";
 import { NumericInput } from "./NumericInput";
 
 export const NumericInputField = memo(
-  forwardRef(({ className, error, description, inputClassName, label, ...rest }, ref) => {
+  forwardRef(({ className, error, description, inputClassName, label, fullWidth, ...rest }, ref) => {
     const id = useId();
     const labelId = useId();
 
     return (
-      <InputField id={labelId} htmlFor={id} className={className} label={label} error={error} description={description}>
+      <InputField
+        id={labelId}
+        htmlFor={id}
+        className={className}
+        label={label}
+        error={error}
+        description={description}
+        fullWidth={fullWidth}
+      >
         <NumericInput id={id} ref={ref} className={inputClassName} {...rest} />
       </InputField>
     );
@@ -23,5 +31,6 @@ NumericInputField.propTypes = {
   error: PropTypes.node,
   description: PropTypes.node,
   labelClassName: PropTypes.string,
-  inputClassName: PropTypes.string
+  inputClassName: PropTypes.string,
+  fullWidth: PropTypes.bool
 };

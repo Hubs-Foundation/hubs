@@ -15,9 +15,11 @@ import { RadioInputField, RadioInputOption } from "../input/RadioInputField";
 import { NumericInputField } from "../input/NumericInputField";
 import { CopyableTextInputField } from "../input/CopyableTextInputField";
 import { BackButton } from "../input/BackButton";
+import { SceneInfo } from "./RoomSidebar";
 
 export function RoomSettingsSidebar({
   showBackButton,
+  accountId,
   room,
   fetchingInvite,
   inviteUrl,
@@ -25,7 +27,9 @@ export function RoomSettingsSidebar({
   maxRoomSize,
   showPublicRoomSetting,
   onSubmit,
-  onClose
+  onClose,
+  canChangeScene,
+  onChangeScene
 }) {
   const { handleSubmit, register, watch, errors, setValue } = useForm({
     defaultValues: room
@@ -65,6 +69,12 @@ export function RoomSettingsSidebar({
       beforeTitle={showBackButton ? <BackButton onClick={onClose} /> : <CloseButton onClick={onClose} />}
     >
       <form onSubmit={handleSubmit(onSubmit)} className={styles.roomSettingsForm}>
+        <SceneInfo
+          accountId={accountId}
+          scene={room.scene}
+          canChangeScene={canChangeScene}
+          onChangeScene={onChangeScene}
+        />
         <TextInputField
           name="name"
           type="text"
@@ -76,6 +86,7 @@ export function RoomSettingsSidebar({
           label={<FormattedMessage id="room-settings.name-subtitle" />}
           ref={register}
           error={errors.name}
+          fullWidth
         />
         <TextAreaInputField
           name="description"
@@ -85,6 +96,7 @@ export function RoomSettingsSidebar({
           minRows={3}
           ref={register}
           error={errors.description}
+          fullWidth
         />
         <NumericInputField
           name="room_size"
@@ -95,8 +107,9 @@ export function RoomSettingsSidebar({
           label={<FormattedMessage id="room-settings.room-size-subtitle" />}
           ref={register}
           error={errors.room_size}
+          fullWidth
         />
-        <RadioInputField label={<FormattedMessage id="room-settings.room-access-subtitle" />}>
+        <RadioInputField label={<FormattedMessage id="room-settings.room-access-subtitle" />} fullWidth>
           <RadioInputOption
             name="entry_mode"
             value="allow"
@@ -140,6 +153,7 @@ export function RoomSettingsSidebar({
                   </IconButton>
                 ))
               }
+              fullWidth
             />
           </div>
         )}
@@ -151,7 +165,7 @@ export function RoomSettingsSidebar({
             ref={register}
           />
         )}
-        <InputField label={<FormattedMessage id="room-settings.permissions-subtitle" />}>
+        <InputField label={<FormattedMessage id="room-settings.permissions-subtitle" />} fullWidth>
           <div className={styles.roomPermissions}>
             <ToggleInput
               name="member_permissions.spawn_and_move_media"
@@ -198,6 +212,7 @@ export function RoomSettingsSidebar({
 }
 
 RoomSettingsSidebar.propTypes = {
+  accountId: PropTypes.string,
   showBackButton: PropTypes.bool,
   room: PropTypes.object.isRequired,
   fetchingInvite: PropTypes.bool,
@@ -207,5 +222,7 @@ RoomSettingsSidebar.propTypes = {
   maxRoomSize: PropTypes.number,
   showPublicRoomSetting: PropTypes.bool,
   onSubmit: PropTypes.func,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  canChangeScene: PropTypes.bool,
+  onChangeScene: PropTypes.func
 };

@@ -57,7 +57,7 @@ function useInviteUrl(hubChannel) {
   return { fetchingInvite, inviteUrl, revokeInvite };
 }
 
-export function RoomSettingsSidebarContainer({ showBackButton, room, hubChannel, onClose }) {
+export function RoomSettingsSidebarContainer({ showBackButton, room, hubChannel, onChangeScene, onClose }) {
   const maxRoomSize = configs.feature("max_room_size");
 
   const { fetchingInvite, inviteUrl, revokeInvite } = useInviteUrl(hubChannel);
@@ -80,6 +80,8 @@ export function RoomSettingsSidebarContainer({ showBackButton, room, hubChannel,
       maxRoomSize={maxRoomSize}
       showPublicRoomSetting={hubChannel.can("update_hub_promotion")}
       onSubmit={applyChanges}
+      canChangeScene
+      onChangeScene={onChangeScene}
       onClose={onClose}
     />
   );
@@ -89,5 +91,6 @@ RoomSettingsSidebarContainer.propTypes = {
   showBackButton: PropTypes.bool,
   room: PropTypes.object.isRequired,
   hubChannel: PropTypes.object.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  onChangeScene: PropTypes.func
 };

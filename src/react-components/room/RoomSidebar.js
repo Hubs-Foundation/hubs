@@ -5,6 +5,7 @@ import { Sidebar } from "../sidebar/Sidebar";
 import { CloseButton } from "../input/CloseButton";
 import { InputField } from "../input/InputField";
 import { IconButton } from "../input/IconButton";
+import { Button } from "../input/Button";
 
 function SceneAttribution({ attribution }) {
   if (attribution.url) {
@@ -42,11 +43,52 @@ function allowDisplayOfSceneLink(accountId, scene) {
   return (accountId && scene.account_id === accountId) || scene.allow_promotion || scene.allow_remixing;
 }
 
-export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit }) {
-  const showSceneLink = room.scene && allowDisplayOfSceneLink(accountId, room.scene);
-  const attributions = (room.scene && room.scene.attributions && room.scene.attributions.content) || [];
-  const creator = room.scene && room.scene.attributions && room.scene.attributions.creator;
+export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, onChangeScene }) {
+  const showSceneLink = allowDisplayOfSceneLink(accountId, scene);
+  const attributions = (scene.attributions && scene.attributions.content) || [];
+  const creator = scene.attributions && scene.attributions.creator;
 
+  return (
+    <>
+      <h2 className={styles.sectionTitle}>Scene</h2>
+      <div className={styles.sceneScreenshotContainer}>
+        {showSceneLink ? (
+          <a href={scene.url} target="_blank" rel="noopener noreferrer">
+            <img className={styles.sceneScreenshotImage} src={scene.screenshot_url} />
+          </a>
+        ) : (
+          <img className={styles.sceneScreenshotImage} src={scene.screenshot_url} />
+        )}
+      </div>
+      <div className={styles.sceneInfo}>
+        {showSceneLink ? (
+          <b className={styles.sceneName}>
+            <a href={scene.url} target="_blank" rel="noopener noreferrer">
+              {scene.name}
+            </a>
+          </b>
+        ) : (
+          <b className={styles.sceneName}>{scene.name}</b>
+        )}
+        <div className={styles.sceneCreator}>by {creator}</div>
+      </div>
+      {showAttributions && (
+        <InputField label="Attributions">
+          <ul className={styles.attributions}>
+            {attributions.map((attribution, i) => <SceneAttribution attribution={attribution} key={i} />)}
+          </ul>
+        </InputField>
+      )}
+      {canChangeScene && (
+        <Button preset="blue" onClick={onChangeScene}>
+          Change Scene
+        </Button>
+      )}
+    </>
+  );
+}
+
+export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit }) {
   return (
     <Sidebar
       title="Room"
@@ -56,37 +98,7 @@ export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit }) {
       <div className={styles.roomInfoDialog}>
         <InputField label="Name">{room.name}</InputField>
         {room.description && <InputField label="Description">{room.description}</InputField>}
-        {room.scene && (
-          <>
-            <h2 className={styles.sectionTitle}>Scene</h2>
-            <div className={styles.sceneScreenshotContainer}>
-              {showSceneLink ? (
-                <a href={room.scene.url} target="_blank" rel="noopener noreferrer">
-                  <img className={styles.sceneScreenshotImage} src={room.scene.screenshot_url} />
-                </a>
-              ) : (
-                <img className={styles.sceneScreenshotImage} src={room.scene.screenshot_url} />
-              )}
-            </div>
-            <div className={styles.sceneInfo}>
-              {showSceneLink ? (
-                <b className={styles.sceneName}>
-                  <a href={room.scene.url} target="_blank" rel="noopener noreferrer">
-                    {room.scene.name}
-                  </a>
-                </b>
-              ) : (
-                <b className={styles.sceneName}>{room.scene.name}</b>
-              )}
-              <div className={styles.sceneCreator}>by {creator}</div>
-            </div>
-            <InputField label="Attributions">
-              <ul className={styles.attributions}>
-                {attributions.map((attribution, i) => <SceneAttribution attribution={attribution} key={i} />)}
-              </ul>
-            </InputField>
-          </>
-        )}
+        {room.scene && <SceneInfo accountId={accountId} scene={room.scene} showAttributions />}
       </div>
     </Sidebar>
   );

@@ -13,6 +13,10 @@
   max-width: 300px;
 }
 
+:local(.fullWidth) {
+  max-width: 100%;
+}
+
 :local(.error) {
   margin-top: 8px;
   color: theme.$red;

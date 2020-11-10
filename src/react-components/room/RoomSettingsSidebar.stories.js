@@ -42,4 +42,6 @@ const room = {
   }
 };
 
-export const Base = () => <RoomLayout sidebar={<RoomSettingsSidebar room={room} onSubmit={e => console.log(e)} />} />;
+export const Base = () => (
+  <RoomLayout sidebar={<RoomSettingsSidebar room={room} onSubmit={e => console.log(e)} canChangeScene />} />
+);
