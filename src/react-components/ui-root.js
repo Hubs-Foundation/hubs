@@ -74,7 +74,6 @@ import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer }
 import { ContentMenu, ContentMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
-import { ReactComponent as SceneIcon } from "./icons/Scene.svg";
 import { ReactComponent as StarOutlineIcon } from "./icons/StarOutline.svg";
 import { ReactComponent as StarIcon } from "./icons/Star.svg";
 import { ReactComponent as SettingsIcon } from "./icons/Settings.svg";
@@ -1291,9 +1290,7 @@ class UIRoot extends Component {
     const renderEntryFlow = (!enteredOrWatching && this.props.hub) || this.isWaitingForAutoExit();
 
     const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
-    const canUpdateRoom = this.props.hubChannel.canOrWillIfCreator("update_hub");
     const canCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
-    const roomHasSceneInfo = !!(this.props.hub && this.props.hub.scene);
     const isModerator = this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
 
     const moreMenu = [
