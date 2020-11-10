@@ -19,7 +19,7 @@ export const NumericInputField = memo(
 
 NumericInputField.propTypes = {
   className: PropTypes.string,
-  label: PropTypes.string,
+  label: PropTypes.node,
   error: PropTypes.node,
   description: PropTypes.node,
   labelClassName: PropTypes.string,

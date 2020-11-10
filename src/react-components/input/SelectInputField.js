@@ -84,7 +84,7 @@ export function SelectInputField({
 
 SelectInputField.propTypes = {
   className: PropTypes.string,
-  label: PropTypes.string,
+  label: PropTypes.node,
   error: PropTypes.node,
   description: PropTypes.node,
   labelClassName: PropTypes.string,

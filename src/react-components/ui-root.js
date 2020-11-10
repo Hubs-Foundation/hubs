@@ -32,7 +32,6 @@ import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
 import InviteDialog from "./invite-dialog.js";
 import InviteTeamDialog from "./invite-team-dialog.js";
-import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
 import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
@@ -41,7 +40,6 @@ import FeedbackDialog from "./feedback-dialog.js";
 import HelpDialog from "./help-dialog.js";
 import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
-import { RoomInfoDialog } from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
@@ -101,6 +99,8 @@ import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
+import { RoomSidebar } from "./room/RoomSidebar";
+import { RoomSettingsSidebarContainer } from "./room/RoomSettingsSidebarContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1747,26 +1747,25 @@ class UIRoot extends Component {
                       />
                     )}
                     {this.state.sidebarId === "room-info" && (
-                      <RoomInfoDialog
-                        store={this.props.store}
-                        scene={this.props.hub.scene}
-                        hubName={this.props.hub.name}
-                        hubDescription={this.props.hub.description}
+                      <RoomSidebar
+                        accountId={this.props.sessionId}
+                        room={this.props.hub}
+                        canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+                        onEdit={() => this.setSidebar("room-info-settings")}
                         onClose={() => this.setSidebar(null)}
                       />
                     )}
+                    {this.state.sidebarId === "room-info-settings" && (
+                      <RoomSettingsSidebarContainer
+                        room={this.props.hub}
+                        hubChannel={this.props.hubChannel}
+                        showBackButton
+                        onClose={() => this.setSidebar("room-info")}
+                      />
+                    )}
                     {this.state.sidebarId === "room-settings" && (
-                      <RoomSettingsDialog
-                        showPublicRoomSetting={this.props.hubChannel.can("update_hub_promotion")}
-                        initialSettings={{
-                          name: this.props.hub.name,
-                          description: this.props.hub.description,
-                          member_permissions: this.props.hub.member_permissions,
-                          room_size: this.props.hub.room_size,
-                          allow_promotion: this.props.hub.allow_promotion,
-                          entry_mode: this.props.hub.entry_mode
-                        }}
-                        onChange={settings => this.props.hubChannel.updateHub(settings)}
+                      <RoomSettingsSidebarContainer
+                        room={this.props.hub}
                         hubChannel={this.props.hubChannel}
                         onClose={() => this.setSidebar(null)}
                       />
