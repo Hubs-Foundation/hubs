@@ -6,12 +6,11 @@
   right: 8px;
   display: flex;
   flex-direction: row;
-  padding: 8px 10px;
   background-color: theme.$white;
   border: 1px solid theme.$lightgrey;
   border-radius: 12px;
-  width: min-content;
   pointer-events: auto;
+  padding: 4px;
 
   @media(min-width: theme.$breakpoint-md) {
     top: 24px;
@@ -28,8 +27,7 @@
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
   align-items: center;
-  height: 32px;
-  padding: 0 8px;
+  padding: 8px 10px;
 
   & > * {
     margin-right: 8px;
