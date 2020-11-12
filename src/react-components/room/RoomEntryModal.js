@@ -40,7 +40,7 @@ export function RoomEntryModal({
           <h5>Room Name</h5>
           <p>{roomName}</p>
         </div>
-        <Column center gap className={styles.buttons}>
+        <Column center className={styles.buttons}>
           {showJoinRoom && (
             <Button preset="blue" onClick={onJoinRoom}>
               <EnterIcon /> Join Room
