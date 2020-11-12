@@ -35,7 +35,6 @@ import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
-import LeaveRoomDialog from "./leave-room-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
@@ -95,6 +94,7 @@ import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
+import { LeaveReason, LeaveRoomModal } from "./room/LeaveRoomModal";
 import { RoomSidebar } from "./room/RoomSidebar";
 import { RoomSettingsSidebarContainer } from "./room/RoomSettingsSidebarContainer";
 import { AutoExitWarningModal, AutoExitReason } from "./room/AutoExitWarningModal";
@@ -1302,9 +1302,9 @@ class UIRoot extends Component {
             label: "Create Room",
             icon: HomeIcon,
             onClick: () =>
-              this.showNonHistoriedDialog(LeaveRoomDialog, {
+              this.showNonHistoriedDialog(LeaveRoomModal, {
                 destinationUrl: "/",
-                messageType: "create-room"
+                reacon: LeaveReason.createRoom
               })
           },
           {
@@ -1484,9 +1484,9 @@ class UIRoot extends Component {
                 hubChannel={this.props.hubChannel}
                 onMediaSearchResultEntrySelected={(entry, selectAction) => {
                   if (entry.type === "room") {
-                    this.showNonHistoriedDialog(LeaveRoomDialog, {
+                    this.showNonHistoriedDialog(LeaveRoomModal, {
                       destinationUrl: entry.url,
-                      messageType: "join-room"
+                      reason: LeaveReason.joinRoom
                     });
                   } else {
                     this.props.onMediaSearchResultEntrySelected(entry, selectAction);

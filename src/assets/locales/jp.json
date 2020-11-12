@@ -438,7 +438,7 @@
   "leave-room-dialog.join-room.message": "新しい部屋に参加すると,この部屋から退室します。よろしいですか？",
   "leave-room-dialog.join-room.confirm": "Join Room",
   "leave-room-dialog.create-room.message": "新しい部屋を作成し、この部屋が残ります。よろしいですか？",
-  "leave-room-dialog.create-room.confirm": "Leave Room",
+  "leave-room-dialog.create-room.confirm": "Leave and Create Room",
   "embed.load-button": "ロードルーム",
   "embed.presence-warning": "この部屋は埋め込まれているため,他のWebサイトの訪問者に表示される可能性があります。",
   "tweet-dialog.tweet": "Tweet",
