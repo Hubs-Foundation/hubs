@@ -94,7 +94,7 @@ import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
-import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
+import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
@@ -1772,7 +1772,7 @@ class UIRoot extends Component {
                         mediaSearchStore={this.props.mediaSearchStore}
                         pushHistoryState={this.pushHistoryState}
                       />
-                      <ReactionButtonContainer scene={this.props.scene} />
+                      <ReactionPopoverContainer />
                     </>
                   )}
                   <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
