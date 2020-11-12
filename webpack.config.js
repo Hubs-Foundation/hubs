@@ -12,6 +12,7 @@ const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
 const packageLock = require("./package-lock.json");
 const request = require("request");
+const internalIp = require("internal-ip");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -170,11 +171,13 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
 
+  const localIp = process.env.HOST_IP || (await internalIp.v4()) || "localhost";
+
   process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
-  process.env.CORS_PROXY_SERVER = "localhost:8080/cors-proxy";
+  process.env.CORS_PROXY_SERVER = `${localIp}:8080/cors-proxy`;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
-  process.env.NON_CORS_PROXY_DOMAINS = "hubs.local,localhost";
+  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},hubs.local,localhost`;
 
   return appConfig;
 }
@@ -228,6 +231,8 @@ module.exports = async (env, argv) => {
 
   const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
 
+  const liveReload = !!process.env.LIVE_RELOAD || false;
+
   const legacyBabelConfig = {
     presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
     plugins: [
@@ -271,7 +276,8 @@ module.exports = async (env, argv) => {
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
-      inline: !env.bundleAnalyzer,
+      hot: liveReload,
+      inline: liveReload,
       historyApiFallback: {
         rewrites: [
           { from: /^\/signin/, to: "/signin.html" },
