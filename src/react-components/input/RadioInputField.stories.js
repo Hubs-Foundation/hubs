@@ -1,16 +1,17 @@
 import React from "react";
 import { RadioInputField } from "./RadioInputField";
+import { Column } from "../layout/Column";
 
 export default {
   title: "RadioInputField"
 };
 
 export const All = args => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+  <Column padding>
     <RadioInputField {...args} />
     <RadioInputField label="With Label" {...args} />
     <RadioInputField label="Selected" {...args} value={2} />
-  </div>
+  </Column>
 );
 
 All.args = {

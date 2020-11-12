@@ -1,16 +1,7 @@
 @use "../styles/theme.scss";
 
 :local(.content) {
-  align-items: center;
   padding: 24px 8px;
-
-  & > * {
-    margin-bottom: 16px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
 
   hr {
     width: 100%;
@@ -62,14 +53,6 @@
     @media(min-width: theme.$breakpoint-md) {
       margin-left: 8px;
       margin-right: 8px;
-    }
-  }
-
-  & > * {
-    margin-bottom: 16px;
-
-    &:last-child {
-      margin-bottom: 0;
     }
   }
 }

@@ -5,19 +5,22 @@ import { Modal } from "../modal/Modal";
 import styles from "./PromoteClientModal.scss";
 import { Button } from "../input/Button";
 import { CloseButton } from "../input/CloseButton";
+import { Column } from "../layout/Column";
 
 export function PromoteClientModal({ onClose, onConfirm, displayName }) {
   return (
-    <Modal title="Promote User" beforeTitle={<CloseButton onClick={onClose} />} contentClassName={styles.modalContent}>
-      <p>
-        <FormattedMessage id="promote.message" />
-      </p>
-      <Button preset="accept" onClick={onConfirm}>
-        <FormattedMessage id="promote.confirm-prefix" values={{ name: displayName }} />
-      </Button>
-      <Button preset="cancel" onClick={onClose}>
-        <FormattedMessage id="promote.cancel" />
-      </Button>
+    <Modal title="Promote User" beforeTitle={<CloseButton onClick={onClose} />}>
+      <Column center padding className={styles.modalContent}>
+        <p>
+          <FormattedMessage id="promote.message" />
+        </p>
+        <Button preset="accept" onClick={onConfirm}>
+          <FormattedMessage id="promote.confirm-prefix" values={{ name: displayName }} />
+        </Button>
+        <Button preset="cancel" onClick={onClose}>
+          <FormattedMessage id="promote.cancel" />
+        </Button>
+      </Column>
     </Modal>
   );
 }

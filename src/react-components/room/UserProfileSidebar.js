@@ -4,6 +4,7 @@ import { Sidebar } from "../sidebar/Sidebar";
 import { CloseButton } from "../input/CloseButton";
 import { BackButton } from "../input/BackButton";
 import { Button } from "../input/Button";
+import { Column } from "../layout/Column";
 import styles from "./UserProfileSidebar.scss";
 
 export function UserProfileSidebar({
@@ -35,38 +36,40 @@ export function UserProfileSidebar({
       contentClassName={styles.content}
       {...rest}
     >
-      <div className={styles.avatarPreviewContainer}>{avatarPreview || <div />}</div>
-      {canPromote && (
-        <Button
-          preset="green"
-          disabled={!isSignedIn}
-          title={isSignedIn ? "Promote" : `${displayName} is signed out.`}
-          onClick={onPromote}
-        >
-          Promote
-        </Button>
-      )}
-      {canDemote && (
-        <Button
-          preset="red"
-          disabled={!isSignedIn}
-          title={isSignedIn ? "Demote" : `${displayName} is signed out.`}
-          onClick={onDemote}
-        >
-          Demote
-        </Button>
-      )}
-      <Button onClick={onToggleHidden}>{isHidden ? "Unhide" : "Hide"}</Button>
-      {canMute && (
-        <Button preset="red" onClick={onMute}>
-          Mute
-        </Button>
-      )}
-      {canKick && (
-        <Button preset="red" onClick={onKick}>
-          Kick
-        </Button>
-      )}
+      <Column center padding>
+        <div className={styles.avatarPreviewContainer}>{avatarPreview || <div />}</div>
+        {canPromote && (
+          <Button
+            preset="green"
+            disabled={!isSignedIn}
+            title={isSignedIn ? "Promote" : `${displayName} is signed out.`}
+            onClick={onPromote}
+          >
+            Promote
+          </Button>
+        )}
+        {canDemote && (
+          <Button
+            preset="red"
+            disabled={!isSignedIn}
+            title={isSignedIn ? "Demote" : `${displayName} is signed out.`}
+            onClick={onDemote}
+          >
+            Demote
+          </Button>
+        )}
+        <Button onClick={onToggleHidden}>{isHidden ? "Unhide" : "Hide"}</Button>
+        {canMute && (
+          <Button preset="red" onClick={onMute}>
+            Mute
+          </Button>
+        )}
+        {canKick && (
+          <Button preset="red" onClick={onKick}>
+            Kick
+          </Button>
+        )}
+      </Column>
     </Sidebar>
   );
 }

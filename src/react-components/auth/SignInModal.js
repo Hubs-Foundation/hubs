@@ -6,6 +6,7 @@ import { FormattedMessage } from "react-intl";
 import styles from "./SignInModal.scss";
 import { Button } from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
+import { Column } from "../layout/Column";
 
 export const SignInStep = {
   submit: "submit",
@@ -32,7 +33,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, showPrivacy, privacyU
   );
 
   return (
-    <form onSubmit={onSubmitForm} className={styles.modalContent}>
+    <Column center padding as="form" onSubmit={onSubmitForm} className={styles.modalContent}>
       <p>{message || <FormattedMessage id="sign-in.prompt" />}</p>
       <TextInputField
         name="email"
@@ -63,7 +64,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, showPrivacy, privacyU
       <Button preset="accept" type="submit">
         Next
       </Button>
-    </form>
+    </Column>
   );
 }
 
@@ -83,7 +84,7 @@ SubmitEmail.propTypes = {
 
 export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
   return (
-    <div className={styles.modalContent}>
+    <Column center padding className={styles.modalContent}>
       <p>
         <FormattedMessage id="sign-in.auth-started" values={{ email }} />
       </p>
@@ -98,7 +99,7 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
       <Button preset="cancel" onClick={onCancel}>
         Cancel
       </Button>
-    </div>
+    </Column>
   );
 }
 
@@ -110,13 +111,13 @@ WaitForVerification.propTypes = {
 
 export function SignInComplete({ message, continueText, onContinue }) {
   return (
-    <div className={styles.modalContent}>
+    <Column center padding className={styles.modalContent}>
       <b>{message}</b>
       <p>{continueText}</p>
       <Button preset="green" onClick={onContinue}>
         Continue
       </Button>
-    </div>
+    </Column>
   );
 }
 

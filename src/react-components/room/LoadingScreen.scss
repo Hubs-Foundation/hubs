@@ -5,6 +5,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   position: fixed;
   left: 0;
   right: 0;
@@ -20,17 +21,7 @@
 }
 
 :local(.center) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  & > * {
-    margin-bottom: 24px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
+  flex-grow: 0;
 }
 
 :local(.logo) {
@@ -44,18 +35,14 @@
 :local(.bottom) {
   position: absolute;
   bottom: 10%;
-  margin: 0 24px;
-  text-align: center;
+  width: 100%;
+  padding: 0 48px;
 
   h3 {
     font-weight: theme.$font-weight-bold;
   }
 
-  & > * {
-    margin-bottom: 16px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+  p {
+    line-height: 1.25;
   }
 }
