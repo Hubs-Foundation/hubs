@@ -1,35 +1,7 @@
-import emoji_particle_0 from "../assets/images/emojis/emoji_0.png";
-import emoji_particle_1 from "../assets/images/emojis/emoji_1.png";
-import emoji_particle_2 from "../assets/images/emojis/emoji_2.png";
-import emoji_particle_3 from "../assets/images/emojis/emoji_3.png";
-import emoji_particle_4 from "../assets/images/emojis/emoji_4.png";
-import emoji_particle_5 from "../assets/images/emojis/emoji_5.png";
-import emoji_particle_6 from "../assets/images/emojis/emoji_6.png";
-
-import emoji_0 from "../assets/models/emojis/emoji_0.glb";
-import emoji_1 from "../assets/models/emojis/emoji_1.glb";
-import emoji_2 from "../assets/models/emojis/emoji_2.glb";
-import emoji_3 from "../assets/models/emojis/emoji_3.glb";
-import emoji_4 from "../assets/models/emojis/emoji_4.glb";
-import emoji_5 from "../assets/models/emojis/emoji_5.glb";
-import emoji_6 from "../assets/models/emojis/emoji_6.glb";
-
 import { TYPE } from "three-ammo/constants";
-
-import { paths } from "../systems/userinput/paths";
+import { emojis } from "./emoji";
 
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
-
-const EMOJIS = [emoji_0, emoji_1, emoji_2, emoji_3, emoji_4, emoji_5, emoji_6];
-const particles = [
-  emoji_particle_0,
-  emoji_particle_1,
-  emoji_particle_2,
-  emoji_particle_3,
-  emoji_particle_4,
-  emoji_particle_5,
-  emoji_particle_6
-];
 
 function setOffsetVector(i, totalNumEmojis, width, spacing, offsetVector) {
   const sign = i & 1 ? -1 : 1;
@@ -47,14 +19,13 @@ AFRAME.registerComponent("emoji-hud", {
   schema: {
     spawnerScale: { default: 0.1 },
     spawnedScale: { default: 0.5 },
-    camera: { type: "selector" },
+    camera: { type: "selector", default: "#avatar-pov-node" },
     hudAngle: { default: -0.5 },
     minHudAngle: { default: -0.2 },
     maxHudAngle: { default: 0.7 },
     hudDistance: { default: 0.4 },
     spawnerPlatformWidth: { default: 0.0625 },
-    spawnerPlatformSpacing: { default: 0.021 },
-    spawnCooldown: { default: 1 }
+    spawnerPlatformSpacing: { default: 0.021 }
   },
 
   init: (() => {
@@ -67,16 +38,11 @@ AFRAME.registerComponent("emoji-hud", {
       const width = this.data.spawnerPlatformWidth;
       const spacing = this.data.spawnerPlatformSpacing;
 
-      this.emojiUrls = [];
       this.spawnerEntities = [];
-      this.spawnEvents = [];
-      this.lastSpawnTime = 0;
 
-      for (let i = 0; i < EMOJIS.length; i++) {
+      for (let i = 0; i < emojis.length; i++) {
         const spawnerEntity = document.createElement("a-entity");
-        const url = new URL(EMOJIS[i], window.location.href).href;
-        this.emojiUrls.push(url);
-        spawnerEntity.setAttribute("media-loader", { src: url });
+        spawnerEntity.setAttribute("media-loader", { src: emojis[i].model });
         spawnerEntity.setAttribute("hoverable-visuals", "");
         spawnerEntity.setAttribute("scale", {
           x: this.data.spawnerScale,
@@ -97,24 +63,6 @@ AFRAME.registerComponent("emoji-hud", {
           collisionFilterMask: COLLISION_LAYERS.DEFAULT_SPAWNER
         });
 
-        const particle = new URL(particles[i], window.location.href).href;
-        const particleEmitterConfig = {
-          src: particle,
-          resolve: false,
-          particleCount: 20,
-          startSize: 0.01,
-          endSize: 0.2,
-          sizeRandomness: 0.05,
-          lifetime: 1,
-          lifetimeRandomness: 0.2,
-          ageRandomness: 1,
-          startVelocity: { x: 0, y: 1, z: 0 },
-          endVelocity: { x: 0, y: 0.25, z: 0 },
-          startOpacity: 1,
-          middleOpacity: 1,
-          endOpacity: 0
-        };
-
         spawnerEntity.addEventListener("spawned-entity-created", e => {
           if (this.el.sceneEl.is("vr-mode")) {
             return;
@@ -128,18 +76,15 @@ AFRAME.registerComponent("emoji-hud", {
         });
 
         spawnerEntity.addEventListener("spawned-entity-loaded", e => {
+          const particleEmitterConfig = emojis[i].particleEmitterConfig;
           e.detail.target.querySelector(".particle-emitter").setAttribute("particle-emitter", particleEmitterConfig);
           e.detail.target.setAttribute("emoji", { particleEmitterConfig: particleEmitterConfig });
         });
 
-        const spawnEvent = `spawnEmoji${i}`;
-        this.spawnEvents.push(spawnEvent);
-
         spawnerEntity.setAttribute("super-spawner", {
-          src: url,
+          src: emojis[i].model,
           template: "#interactable-emoji",
-          spawnScale: { x: this.data.spawnedScale, y: this.data.spawnedScale, z: this.data.spawnedScale },
-          spawnEvent
+          spawnScale: { x: this.data.spawnedScale, y: this.data.spawnedScale, z: this.data.spawnedScale }
         });
 
         const cylinder = document.createElement("a-cylinder");
@@ -153,7 +98,7 @@ AFRAME.registerComponent("emoji-hud", {
         cylinder.setAttribute("scale", { x: width / 2, y: width / 20, z: width / 5 });
         cylinder.setAttribute("rotation", { x: 45, y: 0, z: 0 });
 
-        setOffsetVector(i, EMOJIS.length, width, spacing, offsetVector);
+        setOffsetVector(i, emojis.length, width, spacing, offsetVector);
 
         spawnerEntity.object3D.position.copy(offsetVector);
         spawnerEntity.object3D.matrixNeedsUpdate = true;
@@ -178,24 +123,6 @@ AFRAME.registerComponent("emoji-hud", {
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this._onFrozen);
     this.el.sceneEl.removeEventListener("stateremoved", this._onThaw);
-  },
-
-  tick() {
-    if (
-      window.APP.hubChannel &&
-      window.APP.hubChannel.can("spawn_emoji") &&
-      this.lastSpawnTime + this.data.spawnCooldown * 1000 < performance.now()
-    ) {
-      const userinput = AFRAME.scenes[0].systems.userinput;
-
-      for (let i = 0; i < this.spawnEvents.length; i++) {
-        if (userinput.get(paths.actions[this.spawnEvents[i]])) {
-          this.lastSpawnTime = performance.now();
-          this.el.sceneEl.emit(this.spawnEvents[i]);
-          break;
-        }
-      }
-    }
   },
 
   _onFrozen(e) {
