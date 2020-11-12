@@ -171,7 +171,7 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
 
-  const localIp = (await internalIp.v4()) || "localhost";
+  const localIp = process.env.HOST_IP || (await internalIp.v4()) || "localhost";
 
   process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
@@ -231,6 +231,8 @@ module.exports = async (env, argv) => {
 
   const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
 
+  const liveReload = !!process.env.LIVE_RELOAD || false;
+
   const legacyBabelConfig = {
     presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
     plugins: [
@@ -274,8 +276,8 @@ module.exports = async (env, argv) => {
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
-      hot: false,
-      inline: false,
+      hot: liveReload,
+      inline: liveReload,
       historyApiFallback: {
         rewrites: [
           { from: /^\/signin/, to: "/signin.html" },
