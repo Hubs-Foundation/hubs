@@ -441,7 +441,7 @@
   "leave-room-dialog.join-room.message": "Joining a new room will leave this one. Are you sure?",
   "leave-room-dialog.join-room.confirm": "Join Room",
   "leave-room-dialog.create-room.message": "Creating a new room will leave this one. Are you sure?",
-  "leave-room-dialog.create-room.confirm": "Leave Room",
+  "leave-room-dialog.create-room.confirm": "Leave and Create Room",
   "embed.load-button": "Load Room",
   "embed.presence-warning": "This room is embedded, so may be visible to visitors on other websites.",
   "tweet-dialog.tweet": "Tweet",

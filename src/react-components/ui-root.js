@@ -100,7 +100,7 @@ import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
-import { LeaveRoomModal } from "./room/LeaveRoomModal";
+import { LeaveReason, LeaveRoomModal } from "./room/LeaveRoomModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1308,7 +1308,7 @@ class UIRoot extends Component {
             onClick: () =>
               this.showNonHistoriedDialog(LeaveRoomModal, {
                 destinationUrl: "/",
-                messageType: "create-room"
+                reacon: LeaveReason.createRoom
               })
           },
           {
@@ -1517,7 +1517,7 @@ class UIRoot extends Component {
                   if (entry.type === "room") {
                     this.showNonHistoriedDialog(LeaveRoomModal, {
                       destinationUrl: entry.url,
-                      messageType: "join-room"
+                      reason: LeaveReason.joinRoom
                     });
                   } else {
                     this.props.onMediaSearchResultEntrySelected(entry, selectAction);

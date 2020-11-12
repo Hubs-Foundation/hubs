@@ -1,6 +1,6 @@
 import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
-import { LeaveRoomModal } from "./LeaveRoomModal";
+import { LeaveReason, LeaveRoomModal } from "./LeaveRoomModal";
 
 export default {
   title: "LeaveRoomModal",
@@ -12,6 +12,6 @@ export default {
   }
 };
 
-export const LeaveRoom = args => <RoomLayout modal={<LeaveRoomModal messageType="join-room" {...args} />} />;
+export const LeaveRoom = args => <RoomLayout modal={<LeaveRoomModal reason={LeaveReason.joinRoom} {...args} />} />;
 
-export const CreateRoom = args => <RoomLayout modal={<LeaveRoomModal messageType="create-room" {...args} />} />;
+export const CreateRoom = args => <RoomLayout modal={<LeaveRoomModal reason={LeaveReason.createRoom} {...args} />} />;
