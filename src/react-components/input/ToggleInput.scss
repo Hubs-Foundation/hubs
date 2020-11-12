@@ -59,7 +59,7 @@
   background-color: theme.$grey;
 }
 
-:local(.on) :local(.button) {
+:local(.toggle-input) input:checked + :local(.track) :local(.button) {
   left: auto;
   right: 1px;
   background-color: theme.$blue;

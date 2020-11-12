@@ -1,32 +1,33 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./RadioInput.scss";
 
-export function RadioInput({ options, value, onChange }) {
+export function RadioInputContainer({ className, children, ...rest }) {
   return (
-    <div className={classNames(styles.radioInput)}>
-      {options.map(option => (
-        <label key={option.id} className={styles.option}>
-          <input
-            className={styles.input}
-            type="radio"
-            value={option.value}
-            checked={option.value === value}
-            onChange={onChange}
-          />
-          <div className={styles.content}>
-            <span className={styles.label}>{option.label}</span>
-            {option.description && <span className={styles.description}>{option.description}</span>}
-          </div>
-        </label>
-      ))}
+    <div className={classNames(styles.radioInput, className)} {...rest}>
+      {children}
     </div>
   );
 }
 
-RadioInput.propTypes = {
-  options: PropTypes.array.isRequired,
-  value: PropTypes.any,
-  onChange: PropTypes.func
+RadioInputContainer.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node
+};
+
+export const RadioInputOption = forwardRef(({ label, description, className, ...rest }, ref) => (
+  <label className={classNames(styles.option, className)}>
+    <input className={styles.input} type="radio" ref={ref} {...rest} />
+    <div className={styles.content}>
+      <span className={styles.label}>{label}</span>
+      {description && <span className={styles.description}>{description}</span>}
+    </div>
+  </label>
+));
+
+RadioInputOption.propTypes = {
+  className: PropTypes.string,
+  label: PropTypes.node.isRequired,
+  description: PropTypes.node
 };

@@ -5,12 +5,20 @@ import { useId } from "./useId";
 import { TextAreaInput } from "./TextAreaInput";
 
 export const TextAreaInputField = memo(
-  forwardRef(({ className, error, description, inputClassName, label, ...rest }, ref) => {
+  forwardRef(({ className, error, description, inputClassName, label, fullWidth, ...rest }, ref) => {
     const id = useId();
     const labelId = useId();
 
     return (
-      <InputField id={labelId} htmlFor={id} className={className} label={label} error={error} description={description}>
+      <InputField
+        id={labelId}
+        htmlFor={id}
+        className={className}
+        label={label}
+        error={error}
+        description={description}
+        fullWidth={fullWidth}
+      >
         <TextAreaInput id={id} ref={ref} className={inputClassName} {...rest} />
       </InputField>
     );
@@ -19,9 +27,10 @@ export const TextAreaInputField = memo(
 
 TextAreaInputField.propTypes = {
   className: PropTypes.string,
-  label: PropTypes.string,
+  label: PropTypes.node,
   error: PropTypes.node,
   description: PropTypes.node,
   labelClassName: PropTypes.string,
-  inputClassName: PropTypes.string
+  inputClassName: PropTypes.string,
+  fullWidth: PropTypes.bool
 };

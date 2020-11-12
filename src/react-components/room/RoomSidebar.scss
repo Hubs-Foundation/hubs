@@ -24,10 +24,15 @@
   }
 }
 
-:local(.scene-screenshot), :local(.scene-screenshot) img {
+:local(.scene-screenshot-container) {
+  position: relative;
+  width: 100%;
   border-radius: 12px;
-  width: 286px;
-  height: 200px;
+}
+
+:local(.scene-screenshot-image) {
+  background-color: theme.$lightgrey;
+  border-radius: 12px;
 }
 
 :local(.scene-info) {
@@ -35,22 +40,29 @@
 }
 
 :local(.scene-name) {
-  font-size: theme.$font-size-lg;
-  font-weight: theme.$font-weight-bold;
+  color: theme.$darkgrey;
 }
 
 :local(.scene-creator) {
+  margin-top: 4px;
   font-size: theme.$font-size-sm;
-  font-weight: theme.$font-weight-medium;
   color: theme.$darkgrey;
 }
 
 :local(.attribution) {
-  margin-top: 4px;
   font-size: theme.$font-size-sm;
+  margin-top: 8px;
+  color: theme.$darkgrey;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+:local(.attribution-name) {
+  font-weight: theme.$font-weight-bold;
 }
 
 :local(.attribution-author) {
   margin-top: 4px;
-  color: theme.$darkgrey;
 }

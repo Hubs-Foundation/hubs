@@ -9,10 +9,12 @@ export const presets = ["transparent", "basic", "accept", "cancel", "red", "oran
 export const Button = memo(
   forwardRef(({ as, preset, className, children, ...rest }, ref) => {
     const ButtonComponent = as;
+    const buttonProps = ButtonComponent === "button" ? { type: "button" } : {};
 
     return (
       <ButtonComponent
         className={classNames(styles.button, textInputStyles.button, styles[preset], className)}
+        {...buttonProps}
         {...rest}
         ref={ref}
       >

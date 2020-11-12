@@ -1,27 +1,29 @@
-import React, { forwardRef, memo } from "react";
+import React, { memo } from "react";
 import PropTypes from "prop-types";
 import { InputField } from "./InputField";
-import { RadioInput } from "./RadioInput";
-import { useId } from "./useId";
+import { RadioInputContainer, RadioInputOption as _RadioInputOption } from "./RadioInput";
 
 export const RadioInputField = memo(
-  forwardRef(({ className, error, description, inputClassName, label, ...rest }, ref) => {
-    const id = useId();
-    const labelId = useId();
-
+  ({ className, error, description, inputClassName, label, children, fullWidth, ...rest }) => {
     return (
-      <InputField id={labelId} htmlFor={id} className={className} label={label} error={error} description={description}>
-        <RadioInput id={id} ref={ref} className={inputClassName} {...rest} />
+      <InputField className={className} label={label} error={error} description={description} fullWidth={fullWidth}>
+        <RadioInputContainer className={inputClassName} {...rest}>
+          {children}
+        </RadioInputContainer>
       </InputField>
     );
-  })
+  }
 );
 
 RadioInputField.propTypes = {
   className: PropTypes.string,
-  label: PropTypes.string,
+  label: PropTypes.node,
   error: PropTypes.node,
   description: PropTypes.node,
   labelClassName: PropTypes.string,
-  inputClassName: PropTypes.string
+  inputClassName: PropTypes.string,
+  children: PropTypes.node,
+  fullWidth: PropTypes.bool
 };
+
+export const RadioInputOption = _RadioInputOption;

@@ -30,13 +30,11 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
 import InviteDialog from "./invite-dialog.js";
-import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
 import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
-import { RoomInfoDialog } from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
@@ -71,7 +69,6 @@ import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer }
 import { ContentMenu, ContentMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
-import { ReactComponent as SceneIcon } from "./icons/Scene.svg";
 import { ReactComponent as StarOutlineIcon } from "./icons/StarOutline.svg";
 import { ReactComponent as StarIcon } from "./icons/Star.svg";
 import { ReactComponent as SettingsIcon } from "./icons/Settings.svg";
@@ -93,11 +90,13 @@ import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
-import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
+import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
 import { LeaveReason, LeaveRoomModal } from "./room/LeaveRoomModal";
+import { RoomSidebar } from "./room/RoomSidebar";
+import { RoomSettingsSidebarContainer } from "./room/RoomSettingsSidebarContainer";
 import { AutoExitWarningModal, AutoExitReason } from "./room/AutoExitWarningModal";
 import { ExitReason } from "./room/ExitedRoomScreen";
 
@@ -1290,9 +1289,7 @@ class UIRoot extends Component {
     const renderEntryFlow = (!enteredOrWatching && this.props.hub) || this.isWaitingForAutoExit();
 
     const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
-    const canUpdateRoom = this.props.hubChannel.canOrWillIfCreator("update_hub");
     const canCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
-    const roomHasSceneInfo = !!(this.props.hub && this.props.hub.scene);
     const isModerator = this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
 
     const moreMenu = [
@@ -1342,38 +1339,11 @@ class UIRoot extends Component {
         id: "room",
         label: "Room",
         items: [
-          roomHasSceneInfo && {
+          {
             id: "room-info",
-            label: "Room Info",
+            label: "Room Info and Settings",
             icon: HomeIcon,
             onClick: () => this.setSidebar("room-info")
-          },
-          canUpdateRoom && {
-            id: "room-settings",
-            label: "Room Settings",
-            icon: HomeIcon,
-            onClick: () =>
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.can("update_hub"),
-                () => {
-                  this.setSidebar("room-settings");
-                },
-                "room-settings"
-              )
-          },
-          canUpdateRoom && {
-            id: "change-scene",
-            label: "Change Scene",
-            icon: SceneIcon,
-            onClick: () =>
-              this.props.performConditionalSignIn(
-                () => this.props.hubChannel.can("update_hub"),
-                () => {
-                  showFullScreenIfAvailable();
-                  this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
-                },
-                "change-scene"
-              )
           },
           this.isFavorited()
             ? { id: "unfavorite-room", label: "Unfavorite Room", icon: StarIcon, onClick: () => this.toggleFavorited() }
@@ -1729,28 +1699,38 @@ class UIRoot extends Component {
                       />
                     )}
                     {this.state.sidebarId === "room-info" && (
-                      <RoomInfoDialog
-                        store={this.props.store}
-                        scene={this.props.hub.scene}
-                        hubName={this.props.hub.name}
-                        hubDescription={this.props.hub.description}
+                      <RoomSidebar
+                        accountId={this.props.sessionId}
+                        room={this.props.hub}
+                        canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+                        onEdit={() => this.setSidebar("room-info-settings")}
                         onClose={() => this.setSidebar(null)}
                       />
                     )}
+                    {this.state.sidebarId === "room-info-settings" && (
+                      <RoomSettingsSidebarContainer
+                        room={this.props.hub}
+                        hubChannel={this.props.hubChannel}
+                        showBackButton
+                        onClose={() => this.setSidebar("room-info")}
+                      />
+                    )}
                     {this.state.sidebarId === "room-settings" && (
-                      <RoomSettingsDialog
-                        showPublicRoomSetting={this.props.hubChannel.can("update_hub_promotion")}
-                        initialSettings={{
-                          name: this.props.hub.name,
-                          description: this.props.hub.description,
-                          member_permissions: this.props.hub.member_permissions,
-                          room_size: this.props.hub.room_size,
-                          allow_promotion: this.props.hub.allow_promotion,
-                          entry_mode: this.props.hub.entry_mode
-                        }}
-                        onChange={settings => this.props.hubChannel.updateHub(settings)}
+                      <RoomSettingsSidebarContainer
+                        room={this.props.hub}
+                        accountId={this.props.sessionId}
                         hubChannel={this.props.hubChannel}
                         onClose={() => this.setSidebar(null)}
+                        onChangeScene={() => {
+                          this.props.performConditionalSignIn(
+                            () => this.props.hubChannel.can("update_hub"),
+                            () => {
+                              showFullScreenIfAvailable();
+                              this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
+                            },
+                            "change-scene"
+                          );
+                        }}
                       />
                     )}
                   </>
@@ -1772,7 +1752,7 @@ class UIRoot extends Component {
                         mediaSearchStore={this.props.mediaSearchStore}
                         pushHistoryState={this.pushHistoryState}
                       />
-                      <ReactionButtonContainer scene={this.props.scene} />
+                      <ReactionPopoverContainer />
                     </>
                   )}
                   <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
