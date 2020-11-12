@@ -4,8 +4,12 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+  user-select: none;
 
   input {
+    position: absolute;
+    width: 0;
+    height: 0;
     opacity: 0;
   }
 
@@ -20,10 +24,21 @@
   cursor: not-allowed;
 }
 
+:local(.label-container) {
+  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  color: theme.$darkgrey;
+}
+
 :local(.label) {
-  margin-right: 16px;
-  font-size: 12px;
-  background-color: transparent;
+  font-size: theme.$font-size-sm;
+}
+
+:local(.description) {
+  margin-top: 8px;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-regular;
 }
 
 :local(.track) {

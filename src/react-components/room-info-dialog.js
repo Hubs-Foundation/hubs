@@ -1,118 +1,96 @@
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import { injectIntl, FormattedMessage } from "react-intl";
-
-import DialogContainer from "./dialog-container.js";
-import styles from "../assets/stylesheets/room-info-dialog.scss";
+import { FormattedMessage } from "react-intl";
+import styles from "./room/RoomInfoDialog.scss";
 import { scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import { allowDisplayOfSceneLink } from "../utils/scene-url-utils";
+import { Sidebar } from "./sidebar/Sidebar";
+import { CloseButton } from "./input/CloseButton";
+import { InputField } from "./input/InputField";
 
-class RoomInfoDialog extends Component {
-  static propTypes = {
-    hubName: PropTypes.string,
-    hubDescription: PropTypes.string,
-    scene: PropTypes.object,
-    store: PropTypes.object
-  };
-
-  render() {
-    const hasDescription = !!this.props.hubDescription;
-    const hasScene = !!this.props.scene;
-
-    const showSceneLink = hasScene && allowDisplayOfSceneLink(this.props.scene, this.props.store);
-
-    const toAttributionDiv = (a, i) => {
-      if (a.url) {
-        const source = a.url.includes("sketchfab.com")
-          ? "on Sketchfab"
-          : a.url.includes("poly.google.com")
-            ? "on Google Poly"
-            : "";
-
-        return (
-          <div className={styles.attribution} key={`${a.url} ${i}`}>
-            <div className={styles.attributionName}>
-              <a href={a.url} target="_blank" rel="noopener noreferrer">
-                {a.name}
-              </a>
-            </div>
-            <div className={styles.attributionAuthor}>
-              by {a.author} {source}
-            </div>
-          </div>
-        );
-      } else {
-        return (
-          <div className={styles.attribution} key={`${a.name} ${a.author} {i}`}>
-            <div className={styles.attributionName}>{a.name}</div>
-            <div className={styles.attributionAuthor}>by {a.author}</div>
-          </div>
-        );
-      }
-    };
-
-    let attributions = null;
-    let creator = null;
-
-    if (hasScene && this.props.scene.attributions) {
-      creator = this.props.scene.attributions.creator;
-      attributions = (
-        <div>
-          {this.props.scene.attributions.content && this.props.scene.attributions.content.map(toAttributionDiv)}
-        </div>
-      );
-    }
-
-    const title = (
-      <div className={styles.title}>
-        {hasDescription && hasScene ? <FormattedMessage id="room-info.title" /> : this.props.hubName}
-      </div>
-    );
+function SceneAttribution({ attribution }) {
+  if (attribution.url) {
+    const source = attribution.url.includes("sketchfab.com")
+      ? "on Sketchfab"
+      : attribution.url.includes("poly.google.com")
+        ? "on Google Poly"
+        : "";
 
     return (
-      <DialogContainer title={title} wide={true} {...this.props}>
-        {hasDescription && (
-          <>
-            {hasScene && <div className={styles.hubTitle}>{this.props.hubName}</div>}
-            <div className={styles.description}>{this.props.hubDescription}</div>
-          </>
-        )}
-        {hasScene && (
-          <>
-            <div className={styles.subtitle}>
-              <FormattedMessage id="room-info.scene-info" />
-            </div>
-            <div className={styles.roomInfo}>
-              <div className={styles.sceneScreenshot}>
-                {showSceneLink ? (
-                  <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
-                    <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
-                  </a>
-                ) : (
-                  <img src={scaledThumbnailUrlFor(this.props.scene.screenshot_url, 400, 480)} />
-                )}
-              </div>
-              <div className={styles.sceneDetails}>
-                <div className={styles.sceneMain}>
-                  <div className={styles.sceneName}>
-                    {showSceneLink ? (
-                      <a href={this.props.scene.url} target="_blank" rel="noopener noreferrer">
-                        {this.props.scene.name}
-                      </a>
-                    ) : (
-                      <span>{this.props.scene.name}</span>
-                    )}
-                  </div>
-                  <div className={styles.sceneCreator}>{creator}</div>
-                </div>
-                <div className={styles.sceneAttributions}>{attributions}</div>
-                <div className={styles.sceneButtons}> </div>
-              </div>
-            </div>
-          </>
-        )}
-      </DialogContainer>
+      <li className={styles.attribution}>
+        <div className={styles.attributionName}>
+          <a href={attribution.url} target="_blank" rel="noopener noreferrer">
+            {attribution.name}
+          </a>
+        </div>
+        <div className={styles.attributionAuthor}>
+          by {attribution.author} {source}
+        </div>
+      </li>
+    );
+  } else {
+    return (
+      <li className={styles.attribution}>
+        <div className={styles.attributionName}>{attribution.name}</div>
+        <div className={styles.attributionAuthor}>by {attribution.author}</div>
+      </li>
     );
   }
 }
-export default injectIntl(RoomInfoDialog);
+
+// TODO: Move to /room folder
+export function RoomInfoDialog({ scene, store, hubName, hubDescription, onClose }) {
+  const hasScene = !!scene;
+  const showSceneLink = hasScene && allowDisplayOfSceneLink(scene, store);
+  const attributions = (scene && scene.attributions && scene.attributions.content) || [];
+  const creator = scene && scene.attributions && scene.attributions.creator;
+
+  return (
+    <Sidebar title={<FormattedMessage id="room-info.title" />} beforeTitle={<CloseButton onClick={onClose} />}>
+      <div className={styles.roomInfoDialog}>
+        <h2 className={styles.sectionTitle}>Room</h2>
+        {hubName && <InputField label="Name">{hubName}</InputField>}
+        {hubDescription && <InputField label="Description">{hubDescription}</InputField>}
+        {hasScene && (
+          <>
+            <h2 className={styles.sectionTitle}>Scene</h2>
+            <div className={styles.sceneScreenshot}>
+              {showSceneLink ? (
+                <a href={scene.url} target="_blank" rel="noopener noreferrer">
+                  <img src={scaledThumbnailUrlFor(scene.screenshot_url, 400, 480)} />
+                </a>
+              ) : (
+                <img src={scaledThumbnailUrlFor(scene.screenshot_url, 400, 480)} />
+              )}
+            </div>
+            <div className={styles.sceneInfo}>
+              {showSceneLink ? (
+                <h1 className={styles.sceneName}>
+                  <a href={scene.url} target="_blank" rel="noopener noreferrer">
+                    {scene.name}
+                  </a>
+                </h1>
+              ) : (
+                <h1 className={styles.sceneName}>{scene.name}</h1>
+              )}
+              <div className={styles.sceneCreator}>{creator}</div>
+            </div>
+            <InputField label="Attributions">
+              <ul className={styles.attributions}>
+                {attributions.map((attribution, i) => <SceneAttribution attribution={attribution} key={i} />)}
+              </ul>
+            </InputField>
+          </>
+        )}
+      </div>
+    </Sidebar>
+  );
+}
+
+RoomInfoDialog.propTypes = {
+  hubName: PropTypes.string,
+  hubDescription: PropTypes.string,
+  scene: PropTypes.object,
+  store: PropTypes.object,
+  onClose: PropTypes.func
+};

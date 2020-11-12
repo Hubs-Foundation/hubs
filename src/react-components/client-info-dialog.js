@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import PromoteClientDialog from "./promote-client-dialog.js";
+import { PromoteClientModal } from "./room/PromoteClientModal";
 import { getAvatarThumbnailUrl } from "../utils/avatar-utils";
 import { UserProfileSidebar } from "./room/UserProfileSidebar.js";
 
@@ -12,6 +12,7 @@ export default class ClientInfoDialog extends Component {
     showBackButton: PropTypes.bool,
     onBack: PropTypes.func,
     onClose: PropTypes.func,
+    onCloseDialog: PropTypes.func.isRequired,
     showNonHistoriedDialog: PropTypes.func
   };
 
@@ -55,15 +56,18 @@ export default class ClientInfoDialog extends Component {
   }
 
   addOwner() {
-    const { user, performConditionalSignIn, hubChannel } = this.props;
+    const { user, performConditionalSignIn, hubChannel, onCloseDialog } = this.props;
     const { profile } = this.props.user;
 
     performConditionalSignIn(
       () => hubChannel.can("update_roles"),
       async () => {
-        this.props.showNonHistoriedDialog(PromoteClientDialog, {
+        this.props.showNonHistoriedDialog(PromoteClientModal, {
           displayName: profile.displayName,
-          onConfirm: () => hubChannel.addOwner(user.id)
+          onConfirm: () => {
+            hubChannel.addOwner(user.id);
+            onCloseDialog();
+          }
         });
       },
       "add-owner"

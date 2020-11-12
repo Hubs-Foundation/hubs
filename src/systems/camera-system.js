@@ -285,6 +285,8 @@ export class CameraSystem {
       setMatrixWorld(this.snapshot.audio, this.audioSourceTargetTransform);
     }
 
+    this.ensureListenerIsParentedCorrectly(scene);
+
     moveRigSoCameraLooksAtPivot(
       this.viewingRig.object3D,
       this.viewingCamera.object3DMap.camera,
@@ -323,6 +325,21 @@ export class CameraSystem {
 
     if (fireChangeEvent) {
       scene.emit("inspect-target-changed");
+    }
+  }
+
+  ensureListenerIsParentedCorrectly(scene) {
+    if (scene.audioListener && this.avatarPOV) {
+      if (this.mode === CAMERA_MODE_INSPECT && scene.audioListener.parent !== this.avatarPOV.object3D) {
+        this.avatarPOV.object3D.add(scene.audioListener);
+      } else if (
+        (this.mode === CAMERA_MODE_FIRST_PERSON ||
+          this.mode === CAMERA_MODE_THIRD_PERSON_NEAR ||
+          this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
+        scene.audioListener.parent !== this.viewingCamera.object3DMap.camera
+      ) {
+        this.viewingCamera.object3DMap.camera.add(scene.audioListener);
+      }
     }
   }
 
@@ -427,6 +444,8 @@ export class CameraSystem {
         return;
       }
 
+      this.ensureListenerIsParentedCorrectly(scene);
+
       if (this.mode === CAMERA_MODE_FIRST_PERSON) {
         this.viewingCameraRotator.on = false;
         this.avatarRig.object3D.updateMatrices();
@@ -503,19 +522,6 @@ export class CameraSystem {
             dt,
             panY
           );
-        }
-      }
-
-      if (scene.audioListener && this.avatarPOV) {
-        if (this.mode === CAMERA_MODE_INSPECT && scene.audioListener.parent !== this.avatarPOV.object3D) {
-          this.avatarPOV.object3D.add(scene.audioListener);
-        } else if (
-          (this.mode === CAMERA_MODE_FIRST_PERSON ||
-            this.mode === CAMERA_MODE_THIRD_PERSON_NEAR ||
-            this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
-          scene.audioListener.parent !== this.viewingCamera.object3DMap.camera
-        ) {
-          this.viewingCamera.object3DMap.camera.add(scene.audioListener);
         }
       }
     };
