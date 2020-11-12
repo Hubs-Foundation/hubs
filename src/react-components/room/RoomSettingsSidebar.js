@@ -16,6 +16,7 @@ import { NumericInputField } from "../input/NumericInputField";
 import { CopyableTextInputField } from "../input/CopyableTextInputField";
 import { BackButton } from "../input/BackButton";
 import { SceneInfo } from "./RoomSidebar";
+import { Column } from "../layout/Column";
 
 export function RoomSettingsSidebar({
   showBackButton,
@@ -68,7 +69,7 @@ export function RoomSettingsSidebar({
       title="Room Settings"
       beforeTitle={showBackButton ? <BackButton onClick={onClose} /> : <CloseButton onClick={onClose} />}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className={styles.roomSettingsForm}>
+      <Column padding as="form" onSubmit={handleSubmit(onSubmit)}>
         <SceneInfo
           accountId={accountId}
           scene={room.scene}
@@ -206,7 +207,7 @@ export function RoomSettingsSidebar({
         <Button type="submit" preset="accept">
           <FormattedMessage id="room-settings.apply" />
         </Button>
-      </form>
+      </Column>
     </Sidebar>
   );
 }
