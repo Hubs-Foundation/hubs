@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
 import { CloseButton } from "../input/CloseButton";
 import { Button } from "../input/Button";
+import { Column } from "../layout/Column";
 
 export const LeaveReason = {
   joinRoom: "joinRoom",
@@ -37,11 +38,13 @@ export function LeaveRoomModal({ reason, destinationUrl, onClose }) {
   const intl = useIntl();
 
   return (
-    <Modal title="Leave Room" beforeTitle={<CloseButton onClick={onClose} />} contentClassName={styles.leaveRoomModal}>
-      <p>{intl.formatMessage(reasonMessages[reason])}</p>
-      <Button as="a" preset="cancel" href={destinationUrl} rel="noopener noreferrer">
-        {intl.formatMessage(confirmationMessages[reason])}
-      </Button>
+    <Modal title="Leave Room" beforeTitle={<CloseButton onClick={onClose} />}>
+      <Column padding center grow className={styles.leaveRoomModal}>
+        <p>{intl.formatMessage(reasonMessages[reason])}</p>
+        <Button as="a" preset="cancel" href={destinationUrl} rel="noopener noreferrer">
+          {intl.formatMessage(confirmationMessages[reason])}
+        </Button>
+      </Column>
     </Modal>
   );
 }

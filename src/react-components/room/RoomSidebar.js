@@ -6,6 +6,7 @@ import { CloseButton } from "../input/CloseButton";
 import { InputField } from "../input/InputField";
 import { IconButton } from "../input/IconButton";
 import { Button } from "../input/Button";
+import { Column } from "../layout/Column";
 
 function SceneAttribution({ attribution }) {
   if (attribution.url) {
@@ -95,11 +96,11 @@ export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit }) {
       beforeTitle={<CloseButton onClick={onClose} />}
       afterTitle={canEdit && <IconButton onClick={onEdit}>Edit</IconButton>}
     >
-      <div className={styles.roomInfoDialog}>
+      <Column padding>
         <InputField label="Name">{room.name}</InputField>
         {room.description && <InputField label="Description">{room.description}</InputField>}
         {room.scene && <SceneInfo accountId={accountId} scene={room.scene} showAttributions />}
-      </div>
+      </Column>
     </Sidebar>
   );
 }

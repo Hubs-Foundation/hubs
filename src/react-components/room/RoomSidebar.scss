@@ -1,17 +1,5 @@
 @use "../styles/theme.scss";
 
-:local(.room-info-dialog) {
-  margin: 20px;
-
-  & > * {
-    margin-bottom: 8px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-}
-
 :local(.section-title) {
   font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-bold;
