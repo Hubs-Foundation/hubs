@@ -101,7 +101,7 @@ export function MicSetupModal({
         {microphoneEnabled && (
           <>
             <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
-            <ToggleInput label="Mute My Microphone" value={microphoneMuted} onChange={onChangeMicrophoneMuted} />
+            <ToggleInput label="Mute My Microphone" checked={microphoneMuted} onChange={onChangeMicrophoneMuted} />
           </>
         )}
         <Button preset="green" onClick={onEnterRoom}>

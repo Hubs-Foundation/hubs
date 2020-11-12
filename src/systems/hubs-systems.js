@@ -30,6 +30,7 @@ import { AudioSystem } from "./audio-system";
 import { ShadowSystem } from "./shadow-system";
 import { MediaFramesSystem } from "./media-frames";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
+import { EmojiSystem } from "./emoji-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -69,6 +70,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.shadowSystem = new ShadowSystem(this.el);
     this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
     this.inspectYourselfSystem = new InspectYourselfSystem();
+    this.emojiSystem = new EmojiSystem(this.el);
   },
 
   tick(t, dt) {
@@ -84,6 +86,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.cursorTogglingSystem.tick(systems.interaction, systems.userinput, this.el);
     this.interactionSfxSystem.tick(systems.interaction, systems.userinput, this.soundEffectsSystem);
     this.superSpawnerSystem.tick();
+    this.emojiSystem.tick(t, systems.userinput);
     this.cursorPoseTrackingSystem.tick();
     this.cursorTargettingSystem.tick(t);
     this.positionAtBorderSystem.tick();

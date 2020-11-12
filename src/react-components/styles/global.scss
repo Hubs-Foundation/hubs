@@ -160,6 +160,10 @@ object {
   vertical-align: middle;
 }
 
+img:-moz-broken {
+  opacity: 0;
+}
+
 /**
  * Constrain images and videos to the parent width and preserve
  * their instrinsic aspect ratio.

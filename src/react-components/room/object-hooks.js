@@ -11,8 +11,12 @@ function hasIsStaticTag(el) {
   return !!(el.components.tags && el.components.tags.data.isStatic);
 }
 
+export function isMe(object) {
+  return object.el.id === "avatar-rig";
+}
+
 export function isPlayer(object) {
-  return !!(object.el.components["player-info"] && object.el.components["player-info"].data);
+  return !!object.el.components["networked-avatar"];
 }
 
 export function getObjectUrl(object) {
@@ -142,4 +146,21 @@ export function useRemoveObject(hubChannel, scene, object) {
   );
 
   return { removeObject, canRemoveObject };
+}
+
+export function useHideAvatar(hubChannel, avatarEl) {
+  const hideAvatar = useCallback(
+    () => {
+      if (avatarEl.components.networked) {
+        const clientId = avatarEl.components.networked.data.owner;
+
+        if (clientId && clientId !== NAF.clientId) {
+          hubChannel.hide(clientId);
+        }
+      }
+    },
+    [hubChannel, avatarEl]
+  );
+
+  return hideAvatar;
 }
