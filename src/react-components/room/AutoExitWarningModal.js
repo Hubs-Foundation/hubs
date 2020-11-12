@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import styles from "./AutoExitWarningModal.scss";
+import { Column } from "../layout/Column";
 
 export const AutoExitReason = {
   concurrentSession: "concurrentSession",
@@ -26,7 +27,7 @@ export function AutoExitWarningModal({ onCancel, reason, secondsRemaining }) {
 
   return (
     <Modal title="Warning">
-      <div className={styles.autoExitWarningModal}>
+      <Column padding center className={styles.autoExitWarningModal}>
         <b>
           <FormattedMessage id="autoexit.title" />
           <span>{secondsRemaining}</span>
@@ -36,7 +37,7 @@ export function AutoExitWarningModal({ onCancel, reason, secondsRemaining }) {
         <Button preset="red" onClick={onCancel}>
           <FormattedMessage id="autoexit.cancel" />
         </Button>
-      </div>
+      </Column>
     </Modal>
   );
 }

@@ -1,17 +1,9 @@
+@use "../styles/theme.scss";
+
 :local(.leave-room-modal) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 20px;
   line-height: 1.25;
 
-  & > * {
-    margin-bottom: 16px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+  @media(min-width: theme.$breakpoint-md) {
+    justify-content: center;
   }
 }
