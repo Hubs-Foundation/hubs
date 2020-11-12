@@ -218,6 +218,7 @@ import detectConcurrentLoad from "./utils/concurrent-load-detector";
 
 import qsTruthy from "./utils/qs_truthy";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -355,7 +356,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
   let isLegacyBundle; // Deprecated
 
   const sceneErrorHandler = () => {
-    remountUI({ roomUnavailableReason: "scene_error" });
+    remountUI({ roomUnavailableReason: ExitReason.sceneError });
     entryManager.exitScene();
   };
 
@@ -648,7 +649,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
       updateEnvironmentForHub(hub, entryManager);
       function onConnectionError() {
         console.error("Unknown error occurred while attempting to connect to networked scene.");
-        remountUI({ roomUnavailableReason: "connect_error" });
+        remountUI({ roomUnavailableReason: ExitReason.connectError });
         entryManager.exitScene();
       }
 
@@ -664,7 +665,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
           // hacky until we get return codes
           const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
           console.error(connectError);
-          remountUI({ roomUnavailableReason: isFull ? "full" : "connect_error" });
+          remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
           entryManager.exitScene();
 
           return;
@@ -1006,7 +1007,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     enterScene: entryManager.enterScene,
     exitScene: reason => {
       entryManager.exitScene();
-      remountUI({ roomUnavailableReason: reason || "exited" });
+      remountUI({ roomUnavailableReason: reason || ExitReason.exited });
     },
     initialIsSubscribed: subscriptions.isSubscribed(),
     activeTips: scene.systems.tips.activeTips
@@ -1022,14 +1023,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   scene.addEventListener("leave_room_requested", () => {
-    entryManager.exitScene("left");
-    remountUI({ roomUnavailableReason: "left" });
+    entryManager.exitScene();
+    remountUI({ roomUnavailableReason: ExitReason.left });
   });
 
   scene.addEventListener("hub_closed", () => {
     scene.exitVR();
-    entryManager.exitScene("closed");
-    remountUI({ roomUnavailableReason: "closed" });
+    entryManager.exitScene();
+    remountUI({ roomUnavailableReason: ExitReason.closed });
   });
 
   scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
@@ -1039,7 +1040,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
 
     if (qs.get("required_version") !== buildNumber) {
-      remountUI({ roomUnavailableReason: "version_mismatch" });
+      remountUI({ roomUnavailableReason: ExitReason.versionMismatch });
       setTimeout(() => document.location.reload(), 5000);
       entryManager.exitScene();
       return;
@@ -1053,7 +1054,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       qs.get("required_ret_version") &&
       (qs.get("required_ret_version") !== reticulumMeta.version || qs.get("required_ret_pool") !== reticulumMeta.pool)
     ) {
-      remountUI({ roomUnavailableReason: "version_mismatch" });
+      remountUI({ roomUnavailableReason: ExitReason.versionMismatch });
       setTimeout(() => document.location.reload(), 5000);
       entryManager.exitScene();
       return;
@@ -1130,7 +1131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (e.code === NORMAL_CLOSURE && !isReloading) {
       entryManager.exitScene();
-      remountUI({ roomUnavailableReason: "disconnected" });
+      remountUI({ roomUnavailableReason: ExitReason.disconnected });
     }
   });
 
@@ -1499,13 +1500,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     .receive("error", res => {
       if (res.reason === "closed") {
         entryManager.exitScene();
-        remountUI({ roomUnavailableReason: "closed" });
+        remountUI({ roomUnavailableReason: ExitReason.closed });
       } else if (res.reason === "oauth_required") {
         entryManager.exitScene();
         remountUI({ oauthInfo: res.oauth_info, showOAuthDialog: true });
       } else if (res.reason === "join_denied") {
         entryManager.exitScene();
-        remountUI({ roomUnavailableReason: "denied" });
+        remountUI({ roomUnavailableReason: ExitReason.denied });
       }
 
       console.error(res);

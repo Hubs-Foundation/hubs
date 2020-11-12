@@ -100,7 +100,8 @@ import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
-import { AutoExitWarningModal } from "./room/AutoExitWarningModal";
+import { AutoExitWarningModal, AutoExitReason } from "./room/AutoExitWarningModal";
+import { ExitReason } from "./room/ExitedRoomScreen";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -267,7 +268,7 @@ class UIRoot extends Component {
             try {
               this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
             } catch {
-              this.props.exitScene("scene_error"); // https://github.com/mozilla/hubs/issues/1950
+              this.props.exitScene(ExitReason.sceneError); // https://github.com/mozilla/hubs/issues/1950
             }
           }
 
@@ -295,7 +296,7 @@ class UIRoot extends Component {
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
-    this.startAutoExitTimer("concurrent-session");
+    this.startAutoExitTimer(AutoExitReason.concurrentSession);
   };
 
   onIdleDetected = () => {
@@ -305,7 +306,7 @@ class UIRoot extends Component {
       this.props.store.state.preferences["disableIdleDetection"]
     )
       return;
-    this.startAutoExitTimer("idle");
+    this.startAutoExitTimer(AutoExitReason.idle);
   };
 
   onActivityDetected = () => {
@@ -1818,7 +1819,7 @@ class UIRoot extends Component {
                       icon={<LeaveIcon />}
                       label="Leave"
                       preset="red"
-                      onClick={() => this.props.exitScene("left")}
+                      onClick={() => this.props.exitScene(ExitReason.left)}
                     />
                   )}
                   <MoreMenuPopoverButton menu={moreMenu} />

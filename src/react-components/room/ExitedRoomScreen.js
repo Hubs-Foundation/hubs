@@ -3,40 +3,52 @@ import PropTypes from "prop-types";
 import { defineMessages, useIntl } from "react-intl";
 import { LoadingScreenLayout } from "../layout/LoadingScreenLayout";
 
+export const ExitReason = {
+  exited: "exited",
+  closed: "closed",
+  denied: "denied",
+  disconnected: "disconnected",
+  left: "left",
+  full: "full",
+  sceneError: "sceneError",
+  connectError: "connectError",
+  versionMismatch: "versionMismatch"
+};
+
 const messages = defineMessages({
-  exited: {
+  [ExitReason.exited]: {
     id: "exit.subtitle.exited",
     defaultMessage: "Your session has ended. Refresh your browser to start a new one."
   },
-  closed: {
+  [ExitReason.closed]: {
     id: "exit.subtitle.closed",
     defaultMessage: "This room is no longer available."
   },
-  denied: {
+  [ExitReason.denied]: {
     id: "exit.subtitle.denied",
     defaultMessage: "You are not permitted to join this room. Please request permission from the room creator."
   },
-  disconnected: {
+  [ExitReason.disconnected]: {
     id: "exit.subtitle.disconnected",
     defaultMessage: "You have disconnected from the room. Refresh the page to try to reconnect."
   },
-  left: {
+  [ExitReason.left]: {
     id: "exit.subtitle.left",
     defaultMessage: "You have left the room."
   },
-  full: {
+  [ExitReason.full]: {
     id: "exit.subtitle.full",
     defaultMessage: "This room is full, please try again later."
   },
-  scene_error: {
+  [ExitReason.sceneError]: {
     id: "exit.subtitle.scene_error",
     defaultMessage: "The scene failed to load."
   },
-  connect_error: {
+  [ExitReason.connectError]: {
     id: "exit.subtitle.connect_error",
     defaultMessage: "Unable to connect to this room, please try again later."
   },
-  version_mismatch: {
+  [ExitReason.versionMismatch]: {
     id: "exit.subtitle.version_mismatch",
     defaultMessage: "The version you deployed is not available yet. Your browser will refresh in 5 seconds."
   }
@@ -46,7 +58,7 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSou
   const intl = useIntl();
 
   let subtitle = null;
-  if (reason === "closed") {
+  if (reason === ExitReason.closed) {
     const contactEmail = intl.formatMessage({ id: "contact-email" });
 
     // TODO i18n, due to links and markup
@@ -84,12 +96,12 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSou
       <>
         <b>{intl.formatMessage(messages[reason])}</b>
 
-        {reason === "connect_error" && (
+        {reason === ExitReason.connectError && (
           <p>
             You can try <a href={tcpUrl.toString()}>connecting via TCP</a>, which may work better on some networks.
           </p>
         )}
-        {!["left", "disconnected", "scene_error"].includes(reason) && (
+        {![ExitReason.left, ExitReason.disconnected, ExitReason.sceneError].includes(reason) && (
           <p>
             You can also <a href="/">create a new room</a>.
           </p>

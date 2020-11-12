@@ -6,6 +6,7 @@ import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
 import ducky from "./assets/models/DuckyMesh.glb";
 import { EventTarget } from "event-target-shim";
+import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 
 let uiRoot;
 // Handles user-entered messages
@@ -89,7 +90,7 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "leave":
         this.entryManager.exitScene();
-        this.remountUI({ roomUnavailableReason: "left" });
+        this.remountUI({ roomUnavailableReason: ExitReason.left });
         break;
       case "duck":
         spawnChatMessage(getAbsoluteHref(location.href, ducky));

@@ -5,12 +5,17 @@ import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import styles from "./AutoExitWarningModal.scss";
 
+export const AutoExitReason = {
+  concurrentSession: "concurrentSession",
+  idle: "idle"
+};
+
 const messages = defineMessages({
-  concurrentSession: {
+  [AutoExitReason.concurrentSession]: {
     id: "autoexit.concurrent_subtitle",
     defaultMessage: "You have started another session."
   },
-  idle: {
+  [AutoExitReason.idle]: {
     id: "autoexit.idle_subtitle",
     defaultMessage: "You have been idle for too long."
   }
