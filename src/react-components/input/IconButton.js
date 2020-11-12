@@ -6,6 +6,8 @@ import textInputStyles from "./TextInput.scss";
 
 export const IconButton = memo(
   forwardRef(({ className, as: ButtonComponent, compactSm, children, ...rest }, ref) => {
+    const buttonProps = ButtonComponent === "button" ? { type: "button" } : {};
+
     return (
       <ButtonComponent
         className={classNames(
@@ -14,6 +16,7 @@ export const IconButton = memo(
           { [styles.compactSm]: compactSm },
           className
         )}
+        {...buttonProps}
         {...rest}
         ref={ref}
       >

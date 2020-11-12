@@ -65,7 +65,7 @@ export function formatSystemMessage(entry) {
     case "scene_changed":
       return (
         <FormattedMessage
-          id="presence.name_change"
+          id="presence.scene_change"
           values={{ name: <b>{entry.name}</b>, sceneName: <b>{entry.sceneName}</b> }}
         />
       );

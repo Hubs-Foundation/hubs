@@ -4,13 +4,13 @@ import classNames from "classnames";
 import styles from "./ToggleInput.scss";
 
 export const ToggleInput = memo(
-  forwardRef(({ className, label, description, value, disabled, ...rest }, ref) => {
+  forwardRef(({ className, label, description, disabled, ...rest }, ref) => {
     return (
       <label className={classNames(styles.toggleInput, { [styles.disabled]: disabled }, className)}>
-        <div className={classNames(styles.track, { [styles.on]: !!value })}>
+        <input type="checkbox" disabled={disabled} ref={ref} {...rest} />
+        <div className={classNames(styles.track)}>
           <div className={styles.button} />
         </div>
-        <input type="checkbox" {...rest} disabled={disabled} checked={!!value} value={value} ref={ref} />
         {label && (
           <div className={styles.labelContainer}>
             <p className={styles.label}>{label}</p>
@@ -23,6 +23,7 @@ export const ToggleInput = memo(
 );
 
 ToggleInput.propTypes = {
-  value: PropTypes.bool,
+  checked: PropTypes.bool,
+  disabled: PropTypes.bool,
   className: PropTypes.string
 };
