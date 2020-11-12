@@ -5,14 +5,15 @@ import { CopyableTextInputField } from "../input/CopyableTextInputField";
 import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
+import { Column } from "../layout/Column";
 
 function InvitePopoverContent({ url, code, embed }) {
   return (
-    <div className={styles.invitePopover}>
+    <Column center padding gap className={styles.invitePopover}>
       <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
       <CopyableTextInputField label="Room Code" value={code} buttonPreset="blue" />
       <CopyableTextInputField label="Embed Code" value={embed} buttonPreset="purple" />
-    </div>
+    </Column>
   );
 }
 

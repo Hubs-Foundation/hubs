@@ -2,6 +2,17 @@
 @use "./theme.scss";
 @import "~normalize.css";
 
+html {
+  height  : 100%;
+  overflow: hidden;
+}
+
+body {
+  height  : 100%;
+  overflow: auto;
+  overscroll-behavior-y: none;
+}
+
 /**
  * https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/
  */

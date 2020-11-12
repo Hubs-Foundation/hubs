@@ -5,23 +5,20 @@
   background-color: theme.$white;
 }
 
-:local(.content) {
-  min-height: 0;
-}
-
 :local(.message-list) {
   display: flex;
-  flex: 1;
-  flex-shrink: 1;
+  flex-grow: 1;
   flex-direction: column;
   list-style: none;
   padding: 0 16px;
   overflow-y: auto;
+  min-height: 0;
 }
 
 :local(.message-group) {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   width: 100%;
   padding-top: 16px;
 
@@ -99,6 +96,7 @@
 
 :local(.chat-input-icon) {
   cursor: pointer;
+  width: 24px;
 
   svg {
     *[stroke=\#000] {

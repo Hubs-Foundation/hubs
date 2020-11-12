@@ -3,13 +3,14 @@ import { NumericInputField } from "./NumericInputField";
 import { Button } from "./Button";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
 import { IconButton } from "./IconButton";
+import { Column } from "../layout/Column";
 
 export default {
   title: "NumericInputField"
 };
 
 export const All = () => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+  <Column padding>
     <NumericInputField />
     <NumericInputField placeholder="Placeholder Text" />
     <NumericInputField value={123} />
@@ -66,5 +67,5 @@ export const All = () => (
       }
       error="Network error. Please try again."
     />
-  </div>
+  </Column>
 );

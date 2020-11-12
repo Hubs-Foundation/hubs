@@ -1,4 +1,5 @@
 import React from "react";
+import { Column } from "../layout/Column";
 import { SelectInputField } from "./SelectInputField";
 
 export default {
@@ -6,11 +7,11 @@ export default {
 };
 
 export const All = args => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+  <Column padding>
     <SelectInputField {...args} />
     <SelectInputField label="With Label" {...args} />
     <SelectInputField label="Selected" {...args} value={2} />
-  </div>
+  </Column>
 );
 
 All.args = {
@@ -22,11 +23,11 @@ All.args = {
 };
 
 export const StringOptions = args => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+  <Column padding>
     <SelectInputField {...args} />
     <SelectInputField label="With Label" {...args} />
     <SelectInputField label="Selected" {...args} value="Option B" />
-  </div>
+  </Column>
 );
 
 StringOptions.args = {
@@ -34,11 +35,11 @@ StringOptions.args = {
 };
 
 export const NumberOptions = args => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+  <Column padding>
     <SelectInputField {...args} />
     <SelectInputField label="With Label" {...args} />
     <SelectInputField label="Selected" {...args} value={2} />
-  </div>
+  </Column>
 );
 
 NumberOptions.args = {

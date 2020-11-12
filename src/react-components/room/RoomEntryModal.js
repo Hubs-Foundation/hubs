@@ -10,6 +10,7 @@ import { ReactComponent as SettingsIcon } from "../icons/Settings.svg";
 import styles from "./RoomEntryModal.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
+import { Column } from "../layout/Column";
 
 export function RoomEntryModal({
   appName,
@@ -28,47 +29,44 @@ export function RoomEntryModal({
 }) {
   const breakpoint = useCssBreakpoints();
   return (
-    <Modal
-      className={classNames(styles.roomEntryModal, className)}
-      contentClassName={styles.content}
-      disableFullscreen
-      {...rest}
-    >
-      {breakpoint !== "sm" && (
-        <div className={styles.logoContainer}>
-          <img src={logoSrc} alt={appName} />
+    <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
+      <Column center className={styles.content}>
+        {breakpoint !== "sm" && (
+          <div className={styles.logoContainer}>
+            <img src={logoSrc} alt={appName} />
+          </div>
+        )}
+        <div className={styles.roomName}>
+          <h5>Room Name</h5>
+          <p>{roomName}</p>
         </div>
-      )}
-      <div className={styles.roomName}>
-        <h5>Room Name</h5>
-        <p>{roomName}</p>
-      </div>
-      <div className={styles.buttons}>
-        {showJoinRoom && (
-          <Button preset="blue" onClick={onJoinRoom}>
-            <EnterIcon /> Join Room
-          </Button>
-        )}
-        {showEnterOnDevice && (
-          <Button preset="purple" onClick={onEnterOnDevice}>
-            <VRIcon /> Enter On Device
-          </Button>
-        )}
-        {showSpectate && (
-          <Button preset="orange" onClick={onSpectate}>
-            <ShowIcon /> Spectate
-          </Button>
-        )}
-        {showOptions &&
-          breakpoint !== "sm" && (
-            <>
-              <hr className={styleUtils.showMd} />
-              <Button preset="transparent" className={styleUtils.showMd} onClick={onOptions}>
-                <SettingsIcon /> Options
-              </Button>
-            </>
+        <Column center gap className={styles.buttons}>
+          {showJoinRoom && (
+            <Button preset="blue" onClick={onJoinRoom}>
+              <EnterIcon /> Join Room
+            </Button>
           )}
-      </div>
+          {showEnterOnDevice && (
+            <Button preset="purple" onClick={onEnterOnDevice}>
+              <VRIcon /> Enter On Device
+            </Button>
+          )}
+          {showSpectate && (
+            <Button preset="orange" onClick={onSpectate}>
+              <ShowIcon /> Spectate
+            </Button>
+          )}
+          {showOptions &&
+            breakpoint !== "sm" && (
+              <>
+                <hr className={styleUtils.showMd} />
+                <Button preset="transparent" className={styleUtils.showMd} onClick={onOptions}>
+                  <SettingsIcon /> Options
+                </Button>
+              </>
+            )}
+        </Column>
+      </Column>
     </Modal>
   );
 }

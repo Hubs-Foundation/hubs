@@ -1,4 +1,5 @@
 import React from "react";
+import { Column } from "../layout/Column";
 import { ToggleInput } from "./ToggleInput";
 
 export default {
@@ -7,7 +8,7 @@ export default {
 };
 
 export const All = args => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+  <Column padding>
     <ToggleInput {...args} />
     <ToggleInput label="Toggle Input" {...args} />
     <ToggleInput label="Toggle Input" checked={false} {...args} />
@@ -15,5 +16,5 @@ export const All = args => (
     <ToggleInput label="Toggle Input" checked={false} disabled {...args} />
     <ToggleInput label="Toggle Input" checked={true} disabled {...args} />
     <ToggleInput label="Toggle Input" description="With description" {...args} />
-  </div>
+  </Column>
 );

@@ -4,6 +4,7 @@ import { TextInputField } from "./TextInputField";
 import { Button } from "./Button";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
 import { IconButton } from "./IconButton";
+import { Column } from "../layout/Column";
 
 export default {
   title: "TextInputField",
@@ -11,7 +12,7 @@ export default {
 };
 
 export const All = () => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+  <Column padding>
     <TextInputField />
     <TextInputField placeholder="Placeholder Text" />
     <TextInputField value="Example Text" />
@@ -76,7 +77,7 @@ export const All = () => (
       }
       error="Network error. Please try again."
     />
-  </div>
+  </Column>
 );
 
 All.parameters = {

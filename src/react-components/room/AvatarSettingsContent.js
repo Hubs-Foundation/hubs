@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Button } from "../input/Button";
 import styles from "./AvatarSettingsContent.scss";
 import { TextInputField } from "../input/TextInputField";
+import { Column } from "../layout/Column";
 
 export function AvatarSettingsContent({
   displayName,
@@ -16,7 +17,7 @@ export function AvatarSettingsContent({
   ...rest
 }) {
   return (
-    <form className={styles.content} {...rest}>
+    <Column as="form" className={styles.content} {...rest}>
       <TextInputField
         disabled={disableDisplayNameInput}
         label="Display Name"
@@ -37,7 +38,7 @@ export function AvatarSettingsContent({
       <Button preset="accept" type="submit">
         Accept
       </Button>
-    </form>
+    </Column>
   );
 }
 

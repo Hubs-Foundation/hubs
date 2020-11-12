@@ -10,7 +10,8 @@ import { ReactComponent as LeaveIcon } from "../icons/Leave.svg";
 import { ReactComponent as MoreIcon } from "../icons/More.svg";
 import { ToolbarButton, presets } from "./ToolbarButton";
 import styleUtils from "../styles/style-utils.scss";
-import { Toolbar } from "../layout/Toolbar";
+import { Column } from "../layout/Column";
+import { RoomLayout } from "../layout/RoomLayout";
 
 export default {
   title: "Toolbar",
@@ -20,14 +21,14 @@ export default {
   }
 };
 
-export const AllButtons = ({ selected }) => (
-  <>
+export const AllButtons = args => (
+  <Column padding>
     {presets.map(preset => (
-      <ToolbarButton key={preset} icon={<ShareIcon />} label={preset} preset={preset} selected={selected} />
+      <ToolbarButton key={preset} icon={<ShareIcon />} label={preset} preset={preset} {...args} />
     ))}
     <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" statusColor="red" />
     <ToolbarButton icon={<MicrophoneIcon />} label="Voice" statusColor="green" />
-  </>
+  </Column>
 );
 
 AllButtons.parameters = {
@@ -39,9 +40,9 @@ AllButtons.parameters = {
 };
 
 export const RoomToolbar = () => (
-  <Toolbar
-    left={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" />}
-    center={
+  <RoomLayout
+    toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" />}
+    toolbarCenter={
       <>
         <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />
         <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" />
@@ -50,7 +51,7 @@ export const RoomToolbar = () => (
         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="blue" />
       </>
     }
-    right={
+    toolbarRight={
       <>
         <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="red" />
         <ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />
@@ -67,15 +68,15 @@ RoomToolbar.parameters = {
 };
 
 export const EntryToolbar = () => (
-  <Toolbar
-    left={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" />}
-    center={
+  <RoomLayout
+    toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" />}
+    toolbarCenter={
       <>
         <ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" className={styleUtils.hideMd} />
         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="blue" />
       </>
     }
-    right={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />}
+    toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />}
   />
 );
 

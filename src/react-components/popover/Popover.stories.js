@@ -2,6 +2,7 @@ import React from "react";
 import { Popover } from "./Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
+import { Column } from "../layout/Column";
 
 export default {
   title: "Popover",
@@ -39,7 +40,7 @@ const containerStyles = {
 
 export const All = args => (
   <div style={containerStyles}>
-    <Popover title="Invite" content={<div style={{ padding: "8px" }}>Content</div>} initiallyVisible {...args}>
+    <Popover title="Invite" content={<Column padding>Content</Column>} initiallyVisible {...args}>
       {({ togglePopover, popoverVisible, triggerRef }) => (
         <ToolbarButton
           ref={triggerRef}

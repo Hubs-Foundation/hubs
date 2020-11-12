@@ -1,20 +1,11 @@
 @use "../styles/theme.scss";
 
 :local(.content) {
-  align-items: center;
   padding: 24px 8px;
-  text-align: center;
-
-  & > * {
-    margin-bottom: 16px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
 
   h1 {
-    font-weight: theme.$font-weight-bold; 
+    font-weight: theme.$font-weight-bold;
+    font-size: theme.$font-size-md;
   }
 
   p {
@@ -51,6 +42,7 @@
 
 :local(.code-container) {
   display: flex;
+  flex: 1 0 auto;
 
   & > * {
     margin-right: 4px;
@@ -63,6 +55,7 @@
 
 :local(.short-url-container), :local(.code-letter) {
   display: flex;
+  flex: 1 0 auto;
   align-items: center;
   justify-content: center;
   height: 64px;

@@ -34,7 +34,7 @@
 :local(.object-menu) {
   display: flex;
   flex-direction: column;
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(0, 0, 0, 0.7);
   width: max-content;
   color: theme.$white;
   border-radius: 12px;
@@ -47,10 +47,6 @@
     *[fill=\#000] {
       fill: theme.$white;
     }
-  }
-
-  @media(min-width: theme.$breakpoint-md) {
-    background-color: rgba(0, 0, 0, 0.7);
   }
 }
 

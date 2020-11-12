@@ -1,5 +1,6 @@
 import React from "react";
 import { withDesign } from "storybook-addon-designs";
+import { Column } from "../layout/Column";
 import { Button, presets } from "./Button";
 
 export default {
@@ -8,7 +9,7 @@ export default {
 };
 
 export const All = () => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+  <Column padding>
     {presets.map(preset => (
       <Button key={preset} preset={preset}>
         {preset.replace(/^\w/, c => c.toUpperCase())}
@@ -16,7 +17,7 @@ export const All = () => (
     ))}
     <Button disabled>Disabled</Button>
     <Button>Really Really Long Button Name</Button>
-  </div>
+  </Column>
 );
 
 All.parameters = {
