@@ -23,7 +23,6 @@ import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
 
 import { getMessages } from "../utils/i18n";
-import AutoExitWarning from "./auto-exit-warning";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
@@ -101,6 +100,8 @@ import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionButtonContainer } from "./room/ReactionButtonContainer";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
+import { AutoExitWarningModal, AutoExitReason } from "./room/AutoExitWarningModal";
+import { ExitReason } from "./room/ExitedRoomScreen";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -217,7 +218,7 @@ class UIRoot extends Component {
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
-    autoExitMessage: null,
+    autoExitReason: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
     signedIn: false,
@@ -267,7 +268,7 @@ class UIRoot extends Component {
             try {
               this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
             } catch {
-              this.props.exitScene("scene_error"); // https://github.com/mozilla/hubs/issues/1950
+              this.props.exitScene(ExitReason.sceneError); // https://github.com/mozilla/hubs/issues/1950
             }
           }
 
@@ -295,7 +296,7 @@ class UIRoot extends Component {
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
-    this.startAutoExitTimer("autoexit.concurrent_subtitle");
+    this.startAutoExitTimer(AutoExitReason.concurrentSession);
   };
 
   onIdleDetected = () => {
@@ -305,7 +306,7 @@ class UIRoot extends Component {
       this.props.store.state.preferences["disableIdleDetection"]
     )
       return;
-    this.startAutoExitTimer("autoexit.idle_subtitle");
+    this.startAutoExitTimer(AutoExitReason.idle);
   };
 
   onActivityDetected = () => {
@@ -525,7 +526,7 @@ class UIRoot extends Component {
     }
   };
 
-  startAutoExitTimer = autoExitMessage => {
+  startAutoExitTimer = autoExitReason => {
     if (this.state.autoExitTimerInterval) return;
 
     const autoExitTimerInterval = setInterval(() => {
@@ -540,7 +541,7 @@ class UIRoot extends Component {
       this.checkForAutoExit();
     }, 500);
 
-    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitMessage });
+    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitReason });
   };
 
   checkForAutoExit = () => {
@@ -558,7 +559,7 @@ class UIRoot extends Component {
     this.setState({
       autoExitTimerStartedAt: null,
       autoExitTimerInterval: null,
-      autoExitMessage: null,
+      autoExitReason: null,
       secondsRemainingBeforeAutoExit: Infinity
     });
   };
@@ -1200,8 +1201,8 @@ class UIRoot extends Component {
       this.props.availableVREntryTypes &&
       !preload &&
       (this.isWaitingForAutoExit() ? (
-        <AutoExitWarning
-          message={this.state.autoExitMessage}
+        <AutoExitWarningModal
+          reason={this.state.autoExitReason}
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
           onCancel={this.endAutoExitTimer}
         />
@@ -1812,7 +1813,7 @@ class UIRoot extends Component {
                       icon={<LeaveIcon />}
                       label="Leave"
                       preset="red"
-                      onClick={() => this.props.exitScene("left")}
+                      onClick={() => this.props.exitScene(ExitReason.left)}
                     />
                   )}
                   <MoreMenuPopoverButton menu={moreMenu} />
