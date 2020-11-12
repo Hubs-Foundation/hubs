@@ -284,6 +284,7 @@
   "commands.debug": "Alternar renderização de depuração física.",
   "commands.vrstats": "Alternar estatísticas em VR.",
   "commands.audiomode": "(experimental) Alternar áudio posicional.",
+  "commands.audioNormalization": "(experimental) Change audio normalization factor.",
   "preferences.closeButton": "Fechar Menu de Preferências",
   "preferences.selectCategory": "Selecionar categoria",
   "preferences.resetToDefault": "Restaurar preferências para padrão",
@@ -322,6 +323,7 @@
   "preferences.allowMultipleHubsInstances": "Desativar a saída automática quando várias instâncias do hubs estiverem abertas",
   "preferences.disableIdleDetection": "Desativar saída automática quando ocioso ou em segundo plano",
   "preferences.preferMobileObjectInfoPanel": "Painel de informações do objeto selecionado",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "Voltar para VR",
   "settings.change-avatar": "Definir Nome e Avatar",
   "settings.change-scene": "Escolha um cenário",
@@ -462,5 +464,8 @@
   "support.copied": "copiado!",
   "support.details": "detalhes",
   "support.supported": "com suporte",
-  "support.unsupported": "sem suporte"
+  "support.unsupported": "sem suporte",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect Signaling",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect Signaling"
 }

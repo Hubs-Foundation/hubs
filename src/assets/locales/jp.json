@@ -284,6 +284,7 @@
   "commands.debug": "物理デバッグレンダリングを切り替えます。",
   "commands.vrstats": "VRで統計情報を切り替えます。",
   "commands.audiomode": "（実験的）位置オーディオを切り替えます。",
+  "commands.audioNormalization": "(experimental) Change audio normalization factor.",
   "preferences.closeButton": "環境設定メニューを閉じる",
   "preferences.selectCategory": "カテゴリを選択",
   "preferences.resetToDefault": "設定をデフォルトにリセット",
@@ -322,6 +323,7 @@
   "preferences.allowMultipleHubsInstances": "複数のHubsインスタンスが開いているときに自動終了を無効にする",
   "preferences.disableIdleDetection": "アイドル時またはバックグラウンド時の自動終了を無効にする",
   "preferences.preferMobileObjectInfoPanel": "モバイルオブジェクト情報パネルを優先する",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "VRに戻る",
   "settings.change-avatar": "名前とアバターの設定",
   "settings.change-scene": "シーンを選択",
@@ -462,5 +464,8 @@
   "support.copied": "コピーされました！",
   "support.details": "詳細",
   "support.supported": "supported",
-  "support.unsupported": "サポートされていません"
+  "support.unsupported": "サポートされていません",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect Signaling",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect Signaling"
 }

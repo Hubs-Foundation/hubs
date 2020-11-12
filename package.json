@@ -159,7 +159,7 @@
     "htmlhint": "^0.11.0",
     "jsdom": "^15.1.1",
     "localstorage-memory": "^1.0.3",
-    "mediasoup-client": "github:versatica/mediasoup-client#v3",
+    "mediasoup-client": "^3.6.21",
     "mini-css-extract-plugin": "^0.8.0",
     "ncp": "^2.0.0",
     "node-fetch": "^2.6.1",
@@ -187,7 +187,8 @@
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.1.14",
-    "worker-loader": "^2.0.0"
+    "worker-loader": "^2.0.0",
+    "recharts": "^1.8.5"
   },
   "optionalDependencies": {
     "fsevents": "^2.1.3"
