@@ -1,6 +1,6 @@
 @use "../styles/theme.scss";
 
-:local(.loading-screen) {
+:local(.loading-screen-layout) {
   pointer-events: auto;
   display: flex;
   justify-content: center;
