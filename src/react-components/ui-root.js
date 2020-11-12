@@ -23,7 +23,6 @@ import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
 
 import { getMessages } from "../utils/i18n";
-import AutoExitWarning from "./auto-exit-warning";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
@@ -31,15 +30,12 @@ import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
 import InviteDialog from "./invite-dialog.js";
-import InviteTeamDialog from "./invite-team-dialog.js";
 import RoomSettingsDialog from "./room-settings-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
 import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
-import HelpDialog from "./help-dialog.js";
-import SafariMicDialog from "./safari-mic-dialog.js";
 import LeaveRoomDialog from "./leave-room-dialog.js";
 import { RoomInfoDialog } from "./room-info-dialog.js";
 import ClientInfoDialog from "./client-info-dialog.js";
@@ -99,8 +95,11 @@ import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
+import { SafariMicModal } from "./room/SafariMicModal";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
+import { AutoExitWarningModal, AutoExitReason } from "./room/AutoExitWarningModal";
+import { ExitReason } from "./room/ExitedRoomScreen";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -217,7 +216,7 @@ class UIRoot extends Component {
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
-    autoExitMessage: null,
+    autoExitReason: null,
     secondsRemainingBeforeAutoExit: Infinity,
 
     signedIn: false,
@@ -233,7 +232,7 @@ class UIRoot extends Component {
     super(props);
 
     if (props.showSafariMicDialog) {
-      this.state.dialog = <SafariMicDialog closable={false} />;
+      this.state.dialog = <SafariMicModal />;
     }
 
     props.mediaSearchStore.setHistory(props.history);
@@ -267,7 +266,7 @@ class UIRoot extends Component {
             try {
               this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
             } catch {
-              this.props.exitScene("scene_error"); // https://github.com/mozilla/hubs/issues/1950
+              this.props.exitScene(ExitReason.sceneError); // https://github.com/mozilla/hubs/issues/1950
             }
           }
 
@@ -295,7 +294,7 @@ class UIRoot extends Component {
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
-    this.startAutoExitTimer("autoexit.concurrent_subtitle");
+    this.startAutoExitTimer(AutoExitReason.concurrentSession);
   };
 
   onIdleDetected = () => {
@@ -305,7 +304,7 @@ class UIRoot extends Component {
       this.props.store.state.preferences["disableIdleDetection"]
     )
       return;
-    this.startAutoExitTimer("autoexit.idle_subtitle");
+    this.startAutoExitTimer(AutoExitReason.idle);
   };
 
   onActivityDetected = () => {
@@ -525,7 +524,7 @@ class UIRoot extends Component {
     }
   };
 
-  startAutoExitTimer = autoExitMessage => {
+  startAutoExitTimer = autoExitReason => {
     if (this.state.autoExitTimerInterval) return;
 
     const autoExitTimerInterval = setInterval(() => {
@@ -540,7 +539,7 @@ class UIRoot extends Component {
       this.checkForAutoExit();
     }, 500);
 
-    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitMessage });
+    this.setState({ autoExitTimerStartedAt: new Date(), autoExitTimerInterval, autoExitReason });
   };
 
   checkForAutoExit = () => {
@@ -558,7 +557,7 @@ class UIRoot extends Component {
     this.setState({
       autoExitTimerStartedAt: null,
       autoExitTimerInterval: null,
-      autoExitMessage: null,
+      autoExitReason: null,
       secondsRemainingBeforeAutoExit: Infinity
     });
   };
@@ -1200,8 +1199,8 @@ class UIRoot extends Component {
       this.props.availableVREntryTypes &&
       !preload &&
       (this.isWaitingForAutoExit() ? (
-        <AutoExitWarning
-          message={this.state.autoExitMessage}
+        <AutoExitWarningModal
+          reason={this.state.autoExitReason}
           secondsRemaining={this.state.secondsRemainingBeforeAutoExit}
           onCancel={this.endAutoExitTimer}
         />
@@ -1561,12 +1560,6 @@ class UIRoot extends Component {
                   />
                   <StateRoute
                     stateKey="modal"
-                    stateValue="support"
-                    history={this.props.history}
-                    render={() => this.renderDialog(InviteTeamDialog, { hubChannel: this.props.hubChannel })}
-                  />
-                  <StateRoute
-                    stateKey="modal"
                     stateValue="create"
                     history={this.props.history}
                     render={() => this.renderDialog(CreateObjectDialog, { onCreate: this.createObject })}
@@ -1601,17 +1594,6 @@ class UIRoot extends Component {
                     history={this.props.history}
                     render={() =>
                       this.renderDialog(FeedbackDialog, {
-                        history: this.props.history,
-                        onClose: () => this.pushHistoryState("modal", null)
-                      })
-                    }
-                  />
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="help"
-                    history={this.props.history}
-                    render={() =>
-                      this.renderDialog(HelpDialog, {
                         history: this.props.history,
                         onClose: () => this.pushHistoryState("modal", null)
                       })
@@ -1812,7 +1794,7 @@ class UIRoot extends Component {
                       icon={<LeaveIcon />}
                       label="Leave"
                       preset="red"
-                      onClick={() => this.props.exitScene("left")}
+                      onClick={() => this.props.exitScene(ExitReason.left)}
                     />
                   )}
                   <MoreMenuPopoverButton menu={moreMenu} />
