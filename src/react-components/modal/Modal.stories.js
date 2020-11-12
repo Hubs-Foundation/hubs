@@ -11,7 +11,7 @@ export const Base = () => (
   <RoomLayout
     modal={
       <Modal title="Modal">
-        <Column padding="sm">Test</Column>
+        <Column padding>Test</Column>
       </Modal>
     }
   />

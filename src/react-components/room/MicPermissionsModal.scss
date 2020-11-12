@@ -1,8 +1,6 @@
 @use "../styles/theme.scss";
 
 :local(.content) {
-  padding: 24px 8px;
-
   h1 {
     font-weight: theme.$font-weight-bold;
     font-size: theme.$font-size-md;

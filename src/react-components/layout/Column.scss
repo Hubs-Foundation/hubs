@@ -1,3 +1,5 @@
+@use "../styles/theme.scss";
+
 :local(.column) {
   display: flex;
   flex-direction: column;
@@ -6,35 +8,43 @@
 }
 
 :local(.xs-gap) > * {
-  margin-bottom: 8px;
+  margin-bottom: theme.$spacing-xs;
 }
 
 :local(.sm-gap) > * {
-  margin-bottom: 16px;
+  margin-bottom: theme.$spacing-sm;
 }
 
 :local(.md-gap) > * {
-  margin-bottom: 20px;
+  margin-bottom: theme.$spacing-md;
 }
 
 :local(.lg-gap) > * {
-  margin-bottom: 24px;
+  margin-bottom: theme.$spacing-lg;
+}
+
+:local(.xl-gap) > * {
+  margin-bottom: theme.$spacing-xl;
 }
 
 :local(.xs-padding) {
-  padding: 8px;
+  padding: theme.$spacing-xs;
 }
 
 :local(.sm-padding) {
-  padding: 16px;
+  padding: theme.$spacing-sm;
 }
 
 :local(.md-padding) {
-  padding: 20px;
+  padding: theme.$spacing-md;
 }
 
 :local(.lg-padding) {
-  padding: 24px;
+  padding: theme.$spacing-lg;
+}
+
+:local(.xl-padding) {
+  padding: theme.$spacing-xl;
 }
 
 :local(.center) {

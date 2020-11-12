@@ -40,7 +40,7 @@ const containerStyles = {
 
 export const All = args => (
   <div style={containerStyles}>
-    <Popover title="Invite" content={<Column padding="sm">Content</Column>} initiallyVisible {...args}>
+    <Popover title="Invite" content={<Column padding>Content</Column>} initiallyVisible {...args}>
       {({ togglePopover, popoverVisible, triggerRef }) => (
         <ToolbarButton
           ref={triggerRef}

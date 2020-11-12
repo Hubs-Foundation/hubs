@@ -34,7 +34,7 @@ export function MicSetupModal({
 }) {
   return (
     <Modal title="Microphone Setup" beforeTitle={<BackButton onClick={onBack} />} className={className} {...rest}>
-      <Column center className={styles.content}>
+      <Column center padding className={styles.content}>
         <p>Check your microphone and audio before entering.</p>
         <div className={styles.audioCheckContainer}>
           <ToolbarButton

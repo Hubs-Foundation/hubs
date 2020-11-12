@@ -9,7 +9,7 @@ import { Column } from "../layout/Column";
 
 function InvitePopoverContent({ url, code, embed }) {
   return (
-    <Column center padding="sm" gap="sm" className={styles.invitePopover}>
+    <Column center padding gap className={styles.invitePopover}>
       <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
       <CopyableTextInputField label="Room Code" value={code} buttonPreset="blue" />
       <CopyableTextInputField label="Embed Code" value={embed} buttonPreset="purple" />
