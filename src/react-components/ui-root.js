@@ -1719,7 +1719,7 @@ class UIRoot extends Component {
                         scene={this.props.scene}
                         hubChannel={this.props.hubChannel}
                         mediaSearchStore={this.props.mediaSearchStore}
-                        pushHistoryState={this.pushHistoryState}
+                        showNonHistoriedDialog={this.showNonHistoriedDialog}
                       />
                       <ReactionPopoverContainer />
                     </>

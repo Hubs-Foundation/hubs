@@ -10,8 +10,9 @@ import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { ReactComponent as SceneIcon } from "../icons/Scene.svg";
 import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
 import { PlacePopoverButton } from "./PlacePopover";
+import { ObjectUrlModalContainer } from "./ObjectUrlModalContainer";
 
-export function PlacePopoverContainer({ scene, mediaSearchStore, pushHistoryState, hubChannel }) {
+export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {
   const [items, setItems] = useState([]);
 
   useEffect(
@@ -79,7 +80,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, pushHistoryStat
               icon: UploadIcon,
               color: "green",
               label: "Upload",
-              onSelect: () => pushHistoryState("modal", "create")
+              onSelect: () => showNonHistoriedDialog(ObjectUrlModalContainer, { scene })
             }
           ];
         }
@@ -106,7 +107,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, pushHistoryStat
         scene.removeEventListener("stateremoved", onSceneStateChange);
       };
     },
-    [hubChannel, mediaSearchStore, pushHistoryState, scene]
+    [hubChannel, mediaSearchStore, showNonHistoriedDialog, scene]
   );
 
   return <PlacePopoverButton items={items} />;
@@ -116,5 +117,5 @@ PlacePopoverContainer.propTypes = {
   hubChannel: PropTypes.object.isRequired,
   scene: PropTypes.object.isRequired,
   mediaSearchStore: PropTypes.object.isRequired,
-  pushHistoryState: PropTypes.func.isRequired
+  showNonHistoriedDialog: PropTypes.func.isRequired
 };

@@ -26,6 +26,8 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
   const hasFile = file && file.length > 0;
   const fileName = hasFile ? file[0].name : undefined;
 
+  console.log(file, hasFile, fileName);
+
   const onClear = useCallback(
     () => {
       if (hasFile) {
@@ -81,7 +83,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           name="url"
           label="Object URL or File"
           placeholder="https://example.com/avatar.glb"
-          type="url"
+          type={hasFile ? "text" : "url"}
           value={fileName || url || ""}
           onChange={onChange}
           afterInput={
