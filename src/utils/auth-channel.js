@@ -39,12 +39,10 @@ export default class AuthChannel {
       channel
         .join()
         .receive("ok", () => {
-          channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
-            await this.handleAuthCredentials(payload.email, token);
-            resolve();
-          });
-
-          channel.push("auth_verified", { token: authToken, payload: authPayload });
+            channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
+              await this.handleAuthCredentials({ email: payload.email }, token);
+              resolve();
+            });
         })
         .receive("error", reject);
     });
@@ -61,7 +59,7 @@ export default class AuthChannel {
 
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ credentials: token }) => {
-        await this.handleAuthCredentials(email, token, hubChannel);
+        await this.handleAuthCredentials({ email }, token, hubChannel);
         resolve();
       })
     );
@@ -73,8 +71,9 @@ export default class AuthChannel {
     return { authComplete };
   }
 
-  async handleAuthCredentials(email, token, hubChannel) {
-    this.store.update({ credentials: { email, token } });
+  async handleAuthCredentials(userInfo, token, hubChannel) {
+    console.log("handleAuthCredentials", userInfo, token, hubChannel);
+    this.store.update({ credentials: { ...userInfo, token } });
 
     if (hubChannel) {
       await hubChannel.signIn(token);
