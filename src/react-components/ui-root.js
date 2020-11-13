@@ -28,7 +28,6 @@ import MediaBrowser from "./media-browser";
 
 import InviteDialog from "./invite-dialog.js";
 import Tip from "./tip.js";
-import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
@@ -853,10 +852,6 @@ class UIRoot extends Component {
     this.setState({ signedIn: false });
   };
 
-  showWebRTCScreenshareUnsupportedDialog = () => {
-    this.pushHistoryState("modal", "webrtc-screenshare");
-  };
-
   onMiniInviteClicked = () => {
     const link = `https://${configs.SHORTLINK_DOMAIN}/${this.props.hub.hub_id}`;
 
@@ -1514,12 +1509,6 @@ class UIRoot extends Component {
                       </ContentMenuButton>
                     </ContentMenu>
                   )}
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="webrtc-screenshare"
-                    history={this.props.history}
-                    render={() => this.renderDialog(WebRTCScreenshareUnsupportedDialog)}
-                  />
                   <StateRoute
                     stateKey="modal"
                     stateValue="feedback"
