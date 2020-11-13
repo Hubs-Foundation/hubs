@@ -27,7 +27,6 @@ import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
 import InviteDialog from "./invite-dialog.js";
-import CloseRoomDialog from "./close-room-dialog.js";
 import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
 import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
