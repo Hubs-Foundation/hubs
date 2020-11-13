@@ -806,15 +806,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
-    const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
-
     await handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
 
     remountUI({
       showSignInDialog: true,
       signInMessageId: `sign-in.${messageId}`,
       signInCompleteMessageId: `sign-in.${messageId}-complete`,
-      signInContinueTextId,
       onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
         let actionError = null;

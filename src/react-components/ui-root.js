@@ -1433,55 +1433,58 @@ class UIRoot extends Component {
                   onLoadClicked={this.props.onPreloadLoadClicked}
                 />
               )}
-            <StateRoute
-              stateKey="overlay"
-              stateValue="avatar-editor"
-              history={this.props.history}
-              render={props => (
-                <AvatarEditor
-                  className={styles.avatarEditor}
-                  signedIn={this.state.signedIn}
-                  onSignIn={this.showContextualSignInDialog}
-                  onSave={() => {
-                    if (props.location.state.detail && props.location.state.detail.returnToProfile) {
-                      this.props.history.goBack();
-                    } else {
-                      this.props.history.goBack();
-                      // We are returning to the media browser. Trigger an update so that the filter switches to
-                      // my-avatars, now that we've saved an avatar.
-                      this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
-                    }
-                    this.props.onAvatarSaved();
-                  }}
-                  onClose={() => this.props.history.goBack()}
-                  store={this.props.store}
-                  debug={avatarEditorDebug}
-                  avatarId={props.location.state.detail && props.location.state.detail.avatarId}
-                  hideDelete={props.location.state.detail && props.location.state.detail.hideDelete}
-                />
-              )}
-            />
-            {showMediaBrowser && (
-              <MediaBrowser
+            {!this.state.dialog && (
+              <StateRoute
+                stateKey="overlay"
+                stateValue="avatar-editor"
                 history={this.props.history}
-                mediaSearchStore={this.props.mediaSearchStore}
-                hubChannel={this.props.hubChannel}
-                onMediaSearchResultEntrySelected={(entry, selectAction) => {
-                  if (entry.type === "room") {
-                    this.showNonHistoriedDialog(LeaveRoomModal, {
-                      destinationUrl: entry.url,
-                      reason: LeaveReason.joinRoom
-                    });
-                  } else {
-                    this.props.onMediaSearchResultEntrySelected(entry, selectAction);
-                  }
-                }}
-                performConditionalSignIn={this.props.performConditionalSignIn}
-                showNonHistoriedDialog={this.showNonHistoriedDialog}
-                store={this.props.store}
-                scene={this.props.scene}
+                render={props => (
+                  <AvatarEditor
+                    className={styles.avatarEditor}
+                    signedIn={this.state.signedIn}
+                    onSignIn={this.showContextualSignInDialog}
+                    onSave={() => {
+                      if (props.location.state.detail && props.location.state.detail.returnToProfile) {
+                        this.props.history.goBack();
+                      } else {
+                        this.props.history.goBack();
+                        // We are returning to the media browser. Trigger an update so that the filter switches to
+                        // my-avatars, now that we've saved an avatar.
+                        this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
+                      }
+                      this.props.onAvatarSaved();
+                    }}
+                    onClose={() => this.props.history.goBack()}
+                    store={this.props.store}
+                    debug={avatarEditorDebug}
+                    avatarId={props.location.state.detail && props.location.state.detail.avatarId}
+                    hideDelete={props.location.state.detail && props.location.state.detail.hideDelete}
+                  />
+                )}
               />
             )}
+            {!this.state.dialog &&
+              showMediaBrowser && (
+                <MediaBrowser
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  hubChannel={this.props.hubChannel}
+                  onMediaSearchResultEntrySelected={(entry, selectAction) => {
+                    if (entry.type === "room") {
+                      this.showNonHistoriedDialog(LeaveRoomModal, {
+                        destinationUrl: entry.url,
+                        reason: LeaveReason.joinRoom
+                      });
+                    } else {
+                      this.props.onMediaSearchResultEntrySelected(entry, selectAction);
+                    }
+                  }}
+                  performConditionalSignIn={this.props.performConditionalSignIn}
+                  showNonHistoriedDialog={this.showNonHistoriedDialog}
+                  store={this.props.store}
+                  scene={this.props.scene}
+                />
+              )}
             <RoomLayout
               objectFocused={!!this.props.selectedObject}
               viewport={

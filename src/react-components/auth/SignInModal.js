@@ -118,7 +118,7 @@ export function SignInComplete({ message, continueText, onContinue }) {
       <p>
         <b>{message}</b>
       </p>
-      <p>{continueText}</p>
+      {continueText && <p>{continueText}</p>}
       <Button preset="green" onClick={onContinue}>
         Continue
       </Button>

@@ -7,8 +7,9 @@ export function AvatarUrlModalContainer({ store, scene, onClose }) {
     ({ url }) => {
       store.update({ profile: { ...store.state.profile, ...{ avatarId: url } } });
       scene.emit("avatar_updated");
+      onClose();
     },
-    [store, scene]
+    [store, scene, onClose]
   );
 
   return <AvatarUrlModal onSubmit={onSubmit} onClose={onClose} />;

@@ -239,6 +239,8 @@ class MediaBrowser extends Component {
     const isAvatarApiType = source === "avatars";
     this.pushExitMediaBrowserHistory(!isAvatarApiType);
 
+    console.log("showCustomMediaDialog", source);
+
     if (source === "scenes") {
       this.props.showNonHistoriedDialog(SceneUrlModalContainer, { hubChannel });
     } else if (isAvatarApiType) {
@@ -284,6 +286,7 @@ class MediaBrowser extends Component {
       if (isAvatarApiType) {
         this.showCustomMediaDialog(urlSource);
       } else {
+        console.log(isSceneApiType, this.props.hubChannel.can("update_hub"), urlSource);
         this.props.performConditionalSignIn(
           () => !isSceneApiType || this.props.hubChannel.can("update_hub"),
           () => this.showCustomMediaDialog(urlSource),
