@@ -65,7 +65,7 @@ export function AuthContextProvider({ children, store }) {
       const authChannel = new AuthChannel(store);
       const socket = await connectToReticulum();
       authChannel.setSocket(socket);
-      await authChannel.verifyAuthentication(authParams.topic, authParams.token, authParams.payload);
+      await authChannel.verifyAuthentication(authParams.topic, authParams.token, authParams.payload, authParams.origin);
     },
     [store]
   );

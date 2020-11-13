@@ -28,7 +28,7 @@ export default class AuthChannel {
     this._signedIn = false;
   };
 
-  verifyAuthentication(authTopic, authToken, authPayload) {
+  verifyAuthentication(authTopic, authToken, authPayload, origin) {
     const channel = this.socket.channel(authTopic);
     return new Promise((resolve, reject) => {
       channel.onError(() => {
@@ -39,13 +39,54 @@ export default class AuthChannel {
       channel
         .join()
         .receive("ok", () => {
+          if (origin === "oidc") {
+            channel
+              .push("auth_verified", { token: authToken, payload: authPayload })
+              .receive("ok", resolve)
+              .receive("error", reject);
+          } else {
+            channel.push("auth_verified", { token: authToken, payload: authPayload });
             channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
               await this.handleAuthCredentials({ email: payload.email }, token);
               resolve();
             });
+          }
         })
         .receive("error", reject);
     });
+  }
+
+  async startOIDCAuthentication(hubChannel) {
+    const channel = this.socket.channel(`oidc:${uuid()}`);
+    await new Promise((resolve, reject) =>
+      channel
+        .join()
+        .receive("ok", resolve)
+        .receive("error", reject)
+    );
+
+    const authorizeUrl = await new Promise((resolve, reject) =>
+      channel
+        .push("auth_request")
+        .receive("ok", function({ authorize_url }) {
+          resolve(authorize_url);
+        })
+        .receive("error", reject)
+    );
+
+    window.open(authorizeUrl, "hubs_oidc");
+
+    const authComplete = new Promise(resolve =>
+      channel.on("auth_credentials", async ({ user_info, credentials: token }) => {
+        console.log("got credentials", user_info, token);
+        await this.handleAuthCredentials(user_info, token, hubChannel);
+        resolve();
+      })
+    );
+
+    // Returning an object with the authComplete promise since we want the caller to wait for the above await but not
+    // for authComplete.
+    return { authComplete };
   }
 
   async startAuthentication(email, hubChannel) {

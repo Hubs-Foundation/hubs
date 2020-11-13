@@ -33,6 +33,12 @@ export default class SignInDialog extends Component {
     this.props.onSignIn(this.state.email);
   };
 
+  startOIDCFlow = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.props.onSignIn("oidc");
+  };
+
   render() {
     let contents;
     if (this.props.authStarted) {
@@ -103,6 +109,13 @@ export default class SignInDialog extends Component {
             next
           </button>
         </form>
+      );
+
+      // TODO check app config to decide login type and customize button
+      contents = (
+        <div>
+          <button onClick={this.startOIDCFlow}>Sign in with OIDC</button>
+        </div>
       );
     }
 
