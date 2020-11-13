@@ -96,6 +96,7 @@ import { RoomSettingsSidebarContainer } from "./room/RoomSettingsSidebarContaine
 import { AutoExitWarningModal, AutoExitReason } from "./room/AutoExitWarningModal";
 import { ExitReason } from "./room/ExitedRoomScreen";
 import { UserProfileSidebarContainer } from "./room/UserProfileSidebarContainer";
+import { CloseRoomModal } from "./room/CloseRoomModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1351,7 +1352,11 @@ class UIRoot extends Component {
               this.props.performConditionalSignIn(
                 () => this.props.hubChannel.can("update_hub"),
                 () => {
-                  this.pushHistoryState("modal", "close_room");
+                  this.showNonHistoriedDialog(CloseRoomModal, {
+                    onConfirm: () => {
+                      this.props.hubChannel.closeHub();
+                    }
+                  });
                 },
                 "close-room"
               )
@@ -1510,14 +1515,6 @@ class UIRoot extends Component {
                       </ContentMenuButton>
                     </ContentMenu>
                   )}
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="close_room"
-                    history={this.props.history}
-                    render={() =>
-                      this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })
-                    }
-                  />
                   <StateRoute
                     stateKey="modal"
                     stateValue="webvr"
