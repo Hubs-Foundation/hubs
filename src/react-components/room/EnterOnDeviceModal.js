@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import classNames from "classnames";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import { ReactComponent as VRIcon } from "../icons/VR.svg";
@@ -21,15 +20,15 @@ export function EnterOnDeviceModal({
 }) {
   return (
     <Modal title="Enter on Device" beforeTitle={<BackButton onClick={onBack} />} className={className} {...rest}>
-      <Column center padding className={classNames(styles.content, { [styles.loadingCode]: loadingCode })}>
+      <Column center={loadingCode ? "both" : true} padding grow>
         {loadingCode ? (
-          <h1>Generating join code...</h1>
+          <b>Generating join code...</b>
         ) : (
           <>
-            <h1>Enter on Wireless Headset / Phone</h1>
-            <p>{"In your device's web browser, go to:"}</p>
+            <b>Enter on Wireless Headset / Phone</b>
+            <small>{"In your device's web browser, go to:"}</small>
             <div className={styles.shortUrlContainer}>{shortUrl}</div>
-            <p>Then, enter this one-time code:</p>
+            <small>Then, enter this one-time code:</small>
             <div className={styles.codeContainer}>
               {code.split("").map((char, i) => (
                 <div key={i} className={styles.codeLetter}>
@@ -37,15 +36,17 @@ export function EnterOnDeviceModal({
                 </div>
               ))}
             </div>
-            <small>Your account and avatar will be transferred to the device.</small>
-            <small>Keep this page open to use this code.</small>
+            <strong>Your account and avatar will be transferred to the device.</strong>
+            <strong>Keep this page open to use this code.</strong>
             {headsetConnected && (
               <>
                 <hr data-or-text="or" />
-                <h1>Enter on Connected Headset</h1>
+                <b>Enter on Connected Headset</b>
                 {unsupportedBrowser ? (
                   <>
-                    <p>{"WebVR isn't supported in this browser, to enter with Oculus or SteamVR, use Firefox."}</p>
+                    <small>
+                      {"WebVR isn't supported in this browser, to enter with Oculus or SteamVR, use Firefox."}
+                    </small>
                     <Button
                       as="a"
                       preset="orange"
@@ -58,7 +59,7 @@ export function EnterOnDeviceModal({
                   </>
                 ) : (
                   <>
-                    <p>You have a VR headset connected to this device.</p>
+                    <small>You have a VR headset connected to this device.</small>
                     <Button preset="purple" onClick={onEnterOnConnectedHeadset}>
                       <VRIcon />
                       <span>Enter in VR</span>

@@ -20,11 +20,6 @@
   border-bottom: 1px solid theme.$lightgrey;
   align-items: center;
   justify-content: center;
-
-  h1 {
-    font-size: theme.$font-size-sm;
-    font-weight: theme.$font-weight-bold;
-  }
 }
 
 :local(.before-title) {

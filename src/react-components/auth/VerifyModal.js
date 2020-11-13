@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import styles from "./VerifyModal.scss";
 import { Spinner } from "../misc/Spinner";
 import { Modal } from "../modal/Modal";
 import { Column } from "../layout/Column";
@@ -13,8 +12,9 @@ export const VerificationStep = {
 
 export function EmailVerifying() {
   return (
-    <Column center padding className={styles.modalContent}>
+    <Column center padding grow>
       <b>Email Verifying</b>
+      <br />
       <Spinner />
     </Column>
   );
@@ -22,7 +22,7 @@ export function EmailVerifying() {
 
 export function EmailVerified({ origin }) {
   return (
-    <Column center padding className={styles.modalContent}>
+    <Column center padding grow>
       <b>Verification Complete</b>
       <p>Please close this browser window and return to {origin}.</p>
     </Column>
@@ -35,7 +35,7 @@ EmailVerified.propTypes = {
 
 export function VerificationError({ error }) {
   return (
-    <Column center padding className={styles.modalContent}>
+    <Column center padding grow>
       <b>Error Verifying Email</b>
       <p>{(error && error.message) || "Unknown Error"}</p>
     </Column>

@@ -1,13 +1,5 @@
 @use "../styles/theme.scss";
 
-:local(.content) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px;
-  text-align: center;
-}
-
 :local(.avatar-preview-container) {
   display: flex;
   flex-direction: column;

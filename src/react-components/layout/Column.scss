@@ -52,6 +52,23 @@
   text-align: center;
 }
 
+:local(.center-vertical) {
+  justify-content: center;
+}
+
+:local(.center-md) {
+  @media(min-width: theme.$breakpoint-md) {
+    align-items: center;
+    text-align: center;
+  }
+}
+
+:local(.center-vertical-md) {
+  @media(min-width: theme.$breakpoint-md) {
+    justify-content: center;
+  }
+}
+
 :local(.grow) {
   flex-grow: 1;
 }

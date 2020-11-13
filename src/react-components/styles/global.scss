@@ -69,14 +69,6 @@ html {
  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
 }
 
-/*
- * Ensure horizontal rules are visible by default
- */
-
-hr {
-  border-top-width: 1px;
-}
-
 textarea {
   resize: vertical;
 }
@@ -98,7 +90,7 @@ h4,
 h5,
 h6 {
   font-size: inherit;
-  font-weight: inherit;
+  font-weight: theme.$font-weight-bold;
 }
 
 /**
@@ -232,12 +224,19 @@ body::before {
 
 h5 {
   font-size: theme.$font-size-sm;
+}
+
+label, small, strong {
+  font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
 }
 
-label, small {
-  font-size: theme.$font-size-xs;
-  font-weight: theme.$font-weight-bold;
+small {
+  color: theme.$darkgrey;
+}
+
+p, small, strong {
+  line-height: 1.25;
 }
 
 a {
@@ -249,6 +248,26 @@ a {
 
   &:active {
     color: theme.$blue-pressed;
+  }
+}
+
+hr {
+  position: relative;
+  width: 90%;
+  border: none;
+  border-bottom: 1px solid theme.$grey;
+  margin: 16px 0;
+
+  &:after {
+    background: theme.$white;
+    content: attr(data-or-text);
+    padding: 0 4px;
+    position: relative;
+    color: theme.$black;
+    font-size: theme.$font-size-sm;
+    font-weight: theme.$font-weight-bold;
+    position: absolute;
+    transform: translateY(-50%) translateX(-50%);
   }
 }
 

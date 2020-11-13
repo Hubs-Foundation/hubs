@@ -11,16 +11,16 @@ export function MicPermissionsModal({ className, error, onClickErrorButton, erro
   return (
     <Modal title="Enter on Device" beforeTitle={<BackButton onClick={onBack} />} className={className} {...rest}>
       <Column padding center className={styles.content}>
-        <h1>Grant Microphone Permissions</h1>
-        <p>
+        <b>Grant Microphone Permissions</b>
+        <small>
           Microphone access needed to be heard by others.<br />Microphone can be muted in room.
-        </p>
+        </small>
         <div className={styles.microphoneIconContainer}>
           <MicrophoneIcon />
         </div>
         {error && (
           <>
-            <p className={styles.error}>{error}</p>
+            <small className={styles.error}>{error}</small>
             <Button preset="blue" onClick={onClickErrorButton}>
               {errorButtonLabel}
             </Button>
