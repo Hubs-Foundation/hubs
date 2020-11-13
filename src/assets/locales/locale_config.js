@@ -7,7 +7,8 @@ export const AVAILABLE_LOCALES = {
   zh: "简体中文",
   "pt-br": "Portugês (Brasil)",
   jp: "日本語",
-  es: "Español"
+  es: "Español",
+  ru: "Pусский"
 };
 
 export const FALLBACK_LOCALES = {
