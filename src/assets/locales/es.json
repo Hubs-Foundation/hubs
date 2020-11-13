@@ -284,6 +284,7 @@
   "commands.debug": "Alternar renderizado de depuración física.",
   "commands.vrstats": "Alternar estadísticas en realidad virtual",
   "commands.audiomode": "(experimental) Alternar audio posicional.",
+  "commands.audioNormalization": "(experimental) Change audio normalization factor.",
   "preferences.closeButton": "Cerrar el menú de preferencias ",
   "preferences.selectCategory": "Seleccionar categoría",
   "preferences.resetToDefault": "Restablecer preferencias a las predeterminadas",
