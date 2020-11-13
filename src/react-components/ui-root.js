@@ -29,7 +29,6 @@ import MediaBrowser from "./media-browser";
 import InviteDialog from "./invite-dialog.js";
 import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
-import WebVRRecommendDialog from "./webvr-recommend-dialog.js";
 import FeedbackDialog from "./feedback-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
 import TweetDialog from "./tweet-dialog.js";
@@ -96,6 +95,7 @@ import { AutoExitWarningModal, AutoExitReason } from "./room/AutoExitWarningModa
 import { ExitReason } from "./room/ExitedRoomScreen";
 import { UserProfileSidebarContainer } from "./room/UserProfileSidebarContainer";
 import { CloseRoomModal } from "./room/CloseRoomModal";
+import { WebVRUnsupportedModal } from "./room/WebVRUnsupportedModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -582,7 +582,7 @@ class UIRoot extends Component {
     if (this.props.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
-      this.pushHistoryState("modal", "webvr");
+      this.showNonHistoriedDialog(WebVRUnsupportedModal);
     }
   };
 
@@ -1514,12 +1514,6 @@ class UIRoot extends Component {
                       </ContentMenuButton>
                     </ContentMenu>
                   )}
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="webvr"
-                    history={this.props.history}
-                    render={() => this.renderDialog(WebVRRecommendDialog)}
-                  />
                   <StateRoute
                     stateKey="modal"
                     stateValue="webrtc-screenshare"
