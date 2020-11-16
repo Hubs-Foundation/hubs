@@ -26,10 +26,10 @@ AFRAME.registerComponent("tweet-media-button", {
   },
 
   play() {
-    // if (!configs.AVAILABLE_INTEGRATIONS.twitter) {
-    //   this.el.object3D.visible = false;
-    //   return;
-    // }
+    if (!configs.AVAILABLE_INTEGRATIONS.twitter) {
+      this.el.object3D.visible = false;
+      return;
+    }
     this.el.object3D.addEventListener("interact", this.onClick);
   },
 
