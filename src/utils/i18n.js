@@ -27,19 +27,20 @@ function findLocale() {
     locales.unshift(preferences.locale);
   }
 
-  let locale = DEFAULT_LOCALE;
   for (let i = 0; i < locales.length; i++) {
-    locale = locales[i].toLowerCase();
-
-    if (!AVAILABLE_LOCALES[locale]) {
-      if (FALLBACK_LOCALES[locale]) {
-        return FALLBACK_LOCALES[locale];
-      } else {
-        continue;
-      }
+    // Only check the primary language subtag because
+    // we not have any region specific translations yet
+    // See https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags
+    // and https://github.com/mozilla/hubs/pull/3350/files#diff-70ef5717d3da03ef288e8d15c2fda32c5237d7f37074421496f22403e4475bf1R16
+    const primaryLanguageSubtag = locales[i].split("-")[0].toLowerCase();
+    if (AVAILABLE_LOCALES.hasOwnProperty(primaryLanguageSubtag)) {
+      return primaryLanguageSubtag;
     }
-    return locale;
+    if (FALLBACK_LOCALES.hasOwnProperty(primaryLanguageSubtag)) {
+      return FALLBACK_LOCALES[primaryLanguageSubtag];
+    }
   }
+  return DEFAULT_LOCALE;
 }
 
 function updateLocale() {
