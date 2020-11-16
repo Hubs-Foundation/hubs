@@ -11,6 +11,7 @@ export const AVAILABLE_LOCALES = {
 };
 
 export const FALLBACK_LOCALES = {
+  "en-us": "en",
   "zh-cn": "zh",
   "zh-hans": "zh",
   "zh-hans-cn": "zh",
