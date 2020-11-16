@@ -30,7 +30,6 @@ import InviteDialog from "./invite-dialog.js";
 import Tip from "./tip.js";
 import FeedbackDialog from "./feedback-dialog.js";
 import OAuthDialog from "./oauth-dialog.js";
-import TweetDialog from "./tweet-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
@@ -38,7 +37,7 @@ import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
+import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 import { resetTips } from "../systems/tips";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -95,6 +94,7 @@ import { ExitReason } from "./room/ExitedRoomScreen";
 import { UserProfileSidebarContainer } from "./room/UserProfileSidebarContainer";
 import { CloseRoomModal } from "./room/CloseRoomModal";
 import { WebVRUnsupportedModal } from "./room/WebVRUnsupportedModal";
+import { TweetModalContainer } from "./room/TweetModalContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -381,6 +381,8 @@ class UIRoot extends Component {
     }
 
     this.playerRig = scene.querySelector("#avatar-rig");
+
+    scene.addEventListener("action_media_tweet", this.onTweet);
   }
 
   UNSAFE_componentWillMount() {
@@ -393,6 +395,7 @@ class UIRoot extends Component {
     this.props.scene.removeEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.removeEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.removeEventListener("share_video_failed", this.onShareVideoFailed);
+    this.props.scene.removeEventListener("action_media_tweet", this.onTweet);
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
     window.removeEventListener("concurrentload", this.onConcurrentLoad);
     window.removeEventListener("idle_detected", this.onIdleDetected);
@@ -910,6 +913,23 @@ class UIRoot extends Component {
     return false;
   };
 
+  onTweet = ({ detail: { src, contentSubtype, text } }) => {
+    handleExitTo2DInterstitial(true, () => {}).then(() => {
+      this.props.performConditionalSignIn(
+        () => this.props.hubChannel.signedIn,
+        () => {
+          this.showNonHistoriedDialog(TweetModalContainer, {
+            hubChannel: this.props.hubChannel,
+            initialTweet: text,
+            mediaUrl: src,
+            contentSubtype: contentSubtype
+          });
+        },
+        "tweet"
+      );
+    });
+  };
+
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
@@ -1283,7 +1303,7 @@ class UIRoot extends Component {
             onClick: () =>
               this.showNonHistoriedDialog(LeaveRoomModal, {
                 destinationUrl: "/",
-                reacon: LeaveReason.createRoom
+                reason: LeaveReason.createRoom
               })
           },
           {
@@ -1518,14 +1538,6 @@ class UIRoot extends Component {
                         history: this.props.history,
                         onClose: () => this.pushHistoryState("modal", null)
                       })
-                    }
-                  />
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="tweet"
-                    history={this.props.history}
-                    render={() =>
-                      this.renderDialog(TweetDialog, { history: this.props.history, onClose: this.closeDialog })
                     }
                   />
                   {this.props.activeObject && (

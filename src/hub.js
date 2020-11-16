@@ -224,6 +224,11 @@ const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
 NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
+// OAuth popup handler
+if (window.opener) {
+  window.opener.postMessage("opened");
+}
+
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
 const isDebug = qsTruthy("debug");
@@ -846,54 +851,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => hubChannel.can("update_hub"),
       () => hubChannel.updateScene(sceneInfo),
       "change-scene"
-    );
-  });
-
-  scene.addEventListener("action_media_tweet", async e => {
-    let isInModal = false;
-    let isInOAuth = false;
-
-    const exitOAuth = () => {
-      isInOAuth = false;
-      store.clearOnLoadActions();
-      remountUI({ showOAuthDialog: false, oauthInfo: null });
-    };
-
-    await handleExitTo2DInterstitial(true, () => {
-      if (isInModal) history.goBack();
-      if (isInOAuth) exitOAuth();
-    });
-
-    performConditionalSignIn(
-      () => hubChannel.signedIn,
-      async () => {
-        // Strip el from stored payload because it won't serialize into the store.
-        const serializableDetail = {};
-        Object.assign(serializableDetail, e.detail);
-        delete serializableDetail.el;
-
-        if (hubChannel.can("tweet")) {
-          isInModal = true;
-          pushHistoryState(history, "modal", "tweet", serializableDetail);
-        } else {
-          if (e.detail.el) {
-            // Pin the object if we have to go through OAuth, since the page will refresh and
-            // the object will otherwise be removed
-            e.detail.el.setAttribute("pinnable", "pinned", true);
-          }
-
-          const url = await hubChannel.getTwitterOAuthURL();
-
-          isInOAuth = true;
-          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
-          remountUI({
-            showOAuthDialog: true,
-            oauthInfo: [{ type: "twitter", url: url }],
-            onCloseOAuthDialog: () => exitOAuth()
-          });
-        }
-      },
-      "tweet"
     );
   });
 

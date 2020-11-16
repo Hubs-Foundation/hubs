@@ -21,15 +21,15 @@ AFRAME.registerComponent("tweet-media-button", {
         : `Taken in ${location.hostname} `;
 
       const { src, contentSubtype } = this.targetEl.components["media-loader"].data;
-      this.el.sceneEl.emit("action_media_tweet", { url: src, contentSubtype, text, el: this.targetEl });
+      this.el.sceneEl.emit("action_media_tweet", { url: src, contentSubtype, text });
     };
   },
 
   play() {
-    if (!configs.AVAILABLE_INTEGRATIONS.twitter) {
-      this.el.object3D.visible = false;
-      return;
-    }
+    // if (!configs.AVAILABLE_INTEGRATIONS.twitter) {
+    //   this.el.object3D.visible = false;
+    //   return;
+    // }
     this.el.object3D.addEventListener("interact", this.onClick);
   },
 
