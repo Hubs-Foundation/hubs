@@ -29,7 +29,6 @@ import MediaBrowser from "./media-browser";
 import InviteDialog from "./invite-dialog.js";
 import Tip from "./tip.js";
 import FeedbackDialog from "./feedback-dialog.js";
-import OAuthDialog from "./oauth-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
@@ -162,9 +161,6 @@ class UIRoot extends Component {
     signInContinueTextId: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
-    showOAuthDialog: PropTypes.bool,
-    onCloseOAuthDialog: PropTypes.func,
-    oauthInfo: PropTypes.array,
     onMediaSearchResultEntrySelected: PropTypes.func,
     onAvatarSaved: PropTypes.func,
     activeTips: PropTypes.object,
@@ -1146,13 +1142,6 @@ class UIRoot extends Component {
     const preload = this.props.showPreload;
 
     const isLoading = !preload && !this.state.hideLoader && !this.props.showSafariMicDialog;
-
-    if (this.props.showOAuthDialog && !this.props.showInterstitialPrompt)
-      return (
-        <div className={classNames(rootStyles)}>
-          <OAuthDialog onClose={this.props.onCloseOAuthDialog} oauthInfo={this.props.oauthInfo} />
-        </div>
-      );
 
     if (isLoading && this.state.showPrefs) {
       return (

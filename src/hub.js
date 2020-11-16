@@ -219,6 +219,7 @@ import detectConcurrentLoad from "./utils/concurrent-load-detector";
 import qsTruthy from "./utils/qs_truthy";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
+import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -288,7 +289,9 @@ function mountUI(props = {}) {
       <Router history={history}>
         <Route
           render={routeProps =>
-            props.roomUnavailableReason ? (
+            props.showOAuthScreen ? (
+              <OAuthScreenContainer oauthInfo={props.oauthInfo} />
+            ) : props.roomUnavailableReason ? (
               <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
             ) : (
               <UIRoot
@@ -1457,7 +1460,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         remountUI({ roomUnavailableReason: ExitReason.closed });
       } else if (res.reason === "oauth_required") {
         entryManager.exitScene();
-        remountUI({ oauthInfo: res.oauth_info, showOAuthDialog: true });
+        remountUI({ oauthInfo: res.oauth_info, showOAuthScreen: true });
       } else if (res.reason === "join_denied") {
         entryManager.exitScene();
         remountUI({ roomUnavailableReason: ExitReason.denied });
