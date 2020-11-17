@@ -3,13 +3,14 @@ import PropTypes from "prop-types";
 import { TweetEditorModalContainer } from "./TweetEditorModalContainer";
 import { TwitterOAuthModalContainer } from "./TwitterOAuthModalContainer";
 
-export function TweetModalContainer({ hubChannel, entity, initialTweet, mediaUrl, contentSubtype, onClose }) {
+export function TweetModalContainer({ hubChannel, initialTweet, mediaUrl, contentSubtype, onClose }) {
   const [canTweet, setCanTweet] = useState(hubChannel.can("tweet"));
 
   const onConnected = useCallback(
     () => {
-      console.log({ canTweet: hubChannel.can("tweet") });
-      setCanTweet(true);
+      hubChannel.fetchPermissions().then(() => {
+        setCanTweet(hubChannel.can("tweet"));
+      });
     },
     [hubChannel]
   );
@@ -20,7 +21,6 @@ export function TweetModalContainer({ hubChannel, entity, initialTweet, mediaUrl
         initialTweet={initialTweet}
         mediaUrl={mediaUrl}
         contentSubtype={contentSubtype}
-        entity={entity}
         onClose={onClose}
       />
     );
