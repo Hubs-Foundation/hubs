@@ -225,11 +225,13 @@ const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
 NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
+let isOAuthModal = false;
+
 // OAuth popup handler
 // TODO: Replace with a new oauth callback route that has this postMessage script.
-if (window.opener && window.opener.location.hostname === location.hostname) {
+if (window.opener && window.opener.doingTwitterOAuth) {
   window.opener.postMessage("opened");
-  throw Error("OAuth Dialog Detected. Stopping page load.");
+  isOAuthModal = true;
 }
 
 const isBotMode = qsTruthy("bot");
@@ -241,7 +243,10 @@ if (!isBotMode && !isTelemetryDisabled) {
 }
 
 disableiOSZoom();
-detectConcurrentLoad();
+
+if (!isOAuthModal) {
+  detectConcurrentLoad();
+}
 
 function setupLobbyCamera() {
   const camera = document.getElementById("scene-preview-node");
@@ -727,6 +732,10 @@ function checkForAccountRequired() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if (isOAuthModal) {
+    return;
+  }
+
   await store.initProfile();
 
   const canvas = document.querySelector(".a-canvas");

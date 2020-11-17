@@ -32,6 +32,8 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
 
         popup.focus();
         popupRef.current = popup;
+
+        window.popup = popup;
       } catch (error) {
         console.error(error);
       }
