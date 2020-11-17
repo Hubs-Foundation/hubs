@@ -19,39 +19,43 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
         const left = (window.innerWidth - width) / 2 + window.screenLeft;
         const top = (window.innerHeight - height) / 2 + window.screenTop;
 
+        window.doingTwitterOAuth = true;
+
         const popup = window.open(
           url,
           "_blank",
           `resizable=yes,width=${width},height=${height},left=${left},top=${top}toolbar=no,titlebar=no,menubar=no,scrollbars=yes`
         );
-
-        window.doingTwitterOAuth = true;
-
-        popup.addEventListener("message", () => {
-          popup.close();
-          onConnected();
-        });
-
         popup.focus();
         popupRef.current = popup;
-
-        window.popup = popup;
       } catch (error) {
         console.error(error);
       }
     },
-    [hubChannel, onConnected]
+    [hubChannel]
   );
 
-  useEffect(() => {
-    return () => {
-      if (popupRef.current) {
-        popupRef.current.close();
+  useEffect(
+    () => {
+      function onMessage({ data }) {
+        if (data === "oauth-successful") {
+          onConnected();
+        }
       }
 
-      delete window.doingTwitterOAuth;
-    };
-  }, []);
+      window.addEventListener("message", onMessage);
+
+      return () => {
+        if (popupRef.current) {
+          popupRef.current.close();
+        }
+
+        delete window.doingTwitterOAuth;
+        window.removeEventListener("message", onMessage);
+      };
+    },
+    [onConnected]
+  );
 
   return <TwitterOAuthModal onConnect={onConnect} onClose={onClose} />;
 }
