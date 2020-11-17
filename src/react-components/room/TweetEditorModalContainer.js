@@ -44,9 +44,6 @@ export function TweetEditorModalContainer({ initialTweet, mediaUrl, contentSubty
   const editorRef = useRef();
 
   useEffect(() => {
-    // Calling this immediately seems to break editor initialization
-    editorRef.current.focus();
-
     // Other attempts at doing this resulted in no visible cursor or weird editor behavior:
     setEditorState(editorState => addEmoji("🐤", editorState));
   }, []);

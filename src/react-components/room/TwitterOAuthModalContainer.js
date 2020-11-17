@@ -14,30 +14,15 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
 
         const url = await hubChannel.getTwitterOAuthURL();
 
-        const popupWidth = 600;
-        const popupHeight = 400;
-        const screenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
-        const screenTop = window.screenTop !== undefined ? window.screenTop : window.screenY;
-
-        const width = window.innerWidth
-          ? window.innerWidth
-          : document.documentElement.clientWidth
-            ? document.documentElement.clientWidth
-            : screen.width;
-        const height = window.innerHeight
-          ? window.innerHeight
-          : document.documentElement.clientHeight
-            ? document.documentElement.clientHeight
-            : screen.height;
-
-        const systemZoom = width / window.screen.availWidth;
-        const left = (width - popupWidth) / 2 / systemZoom + screenLeft;
-        const top = (height - popupHeight) / 2 / systemZoom + screenTop;
+        const width = 600;
+        const height = 760;
+        const left = (window.innerWidth - width) / 2 + window.screenLeft;
+        const top = (window.innerHeight - height) / 2 + window.screenTop;
 
         const popup = window.open(
           url,
           "_blank",
-          `resizable=yes,width=${popupWidth},height=${popupHeight},left=${left},top=${top}toolbar=no,titlebar=no,menubar=no,scrollbars=yes`
+          `resizable=yes,width=${width},height=${height},left=${left},top=${top}toolbar=no,titlebar=no,menubar=no,scrollbars=yes`
         );
 
         popup.addEventListener("message", () => {

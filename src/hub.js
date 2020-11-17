@@ -226,8 +226,10 @@ NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
 NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 
 // OAuth popup handler
-if (window.opener) {
+// TODO: Replace with a new oauth callback route that has this postMessage script.
+if (window.opener && window.opener.location.hostname === location.hostname) {
   window.opener.postMessage("opened");
+  return;
 }
 
 const isBotMode = qsTruthy("bot");

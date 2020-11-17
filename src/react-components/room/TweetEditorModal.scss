@@ -1,10 +1,8 @@
 @use "../styles/theme.scss";
 
-:local(.media) {
-  img, video {
-    border-radius: theme.$border-radius-regular;
-    background-color: theme.$lightgrey;
-  }
+:local(.media), :local(.media) img, :local(.media) video {
+  border-radius: theme.$border-radius-regular;
+  background-color: theme.$lightgrey;
 }
 
 :local(.editor) {
