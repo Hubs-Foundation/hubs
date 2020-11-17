@@ -112,13 +112,12 @@ WaitForVerification.propTypes = {
   onCancel: PropTypes.func.isRequired
 };
 
-export function SignInComplete({ message, continueText, onContinue }) {
+export function SignInComplete({ message, onContinue }) {
   return (
     <Column center padding>
       <p>
         <b>{message}</b>
       </p>
-      {continueText && <p>{continueText}</p>}
       <Button preset="green" onClick={onContinue}>
         Continue
       </Button>
@@ -128,7 +127,6 @@ export function SignInComplete({ message, continueText, onContinue }) {
 
 SignInComplete.propTypes = {
   message: PropTypes.string.isRequired,
-  continueText: PropTypes.string.isRequired,
   onContinue: PropTypes.func.isRequired
 };
 

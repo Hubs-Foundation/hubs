@@ -1197,6 +1197,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  console.log(oauthFlowPermsToken);
+
   const hubPhxChannel = socket.channel(`hub:${hubId}`, createHubChannelParams(oauthFlowPermsToken));
 
   const presenceLogEntries = [];
