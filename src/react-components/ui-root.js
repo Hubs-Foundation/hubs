@@ -909,16 +909,14 @@ class UIRoot extends Component {
     return false;
   };
 
-  onTweet = ({ detail: { src, contentSubtype, text } }) => {
+  onTweet = ({ detail }) => {
     handleExitTo2DInterstitial(true, () => {}).then(() => {
       this.props.performConditionalSignIn(
         () => this.props.hubChannel.signedIn,
         () => {
           this.showNonHistoriedDialog(TweetModalContainer, {
             hubChannel: this.props.hubChannel,
-            initialTweet: text,
-            mediaUrl: src,
-            contentSubtype: contentSubtype
+            ...detail
           });
         },
         "tweet"

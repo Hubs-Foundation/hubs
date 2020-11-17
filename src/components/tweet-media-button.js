@@ -15,13 +15,13 @@ AFRAME.registerComponent("tweet-media-button", {
     this.onClick = () => {
       const hasDiscordBridges = window.APP.hubChannel && window.APP.hubChannel.discordBridges().length > 0;
 
-      const text = !hasDiscordBridges
+      const initialTweet = !hasDiscordBridges
         ? `Taken in ${location.hostname} - ` +
           `join me now at ${configs.SHORTLINK_DOMAIN}/${window.APP.hubChannel.hubId}! `
         : `Taken in ${location.hostname} `;
 
       const { src, contentSubtype } = this.targetEl.components["media-loader"].data;
-      this.el.sceneEl.emit("action_media_tweet", { url: src, contentSubtype, text });
+      this.el.sceneEl.emit("action_media_tweet", { mediaUrl: src, contentSubtype, initialTweet });
     };
   },
 
