@@ -77,6 +77,8 @@ export function TweetEditorModalContainer({ initialTweet, mediaUrl, contentSubty
     [contentSubtype, mediaUrl]
   );
 
+  console.log({ mediaUrl, mediaThumbnailUrl });
+
   return (
     <TweetEditorModal
       editorState={editorState}
