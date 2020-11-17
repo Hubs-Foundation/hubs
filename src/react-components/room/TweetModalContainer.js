@@ -6,14 +6,9 @@ import { TwitterOAuthModalContainer } from "./TwitterOAuthModalContainer";
 export function TweetModalContainer({ hubChannel, initialTweet, mediaUrl, contentSubtype, onClose }) {
   const [canTweet, setCanTweet] = useState(hubChannel.can("tweet"));
 
-  const onConnected = useCallback(
-    () => {
-      hubChannel.fetchPermissions().then(() => {
-        setCanTweet(hubChannel.can("tweet"));
-      });
-    },
-    [hubChannel]
-  );
+  const onConnected = useCallback(() => {
+    setCanTweet(true);
+  }, []);
 
   if (canTweet) {
     return (
