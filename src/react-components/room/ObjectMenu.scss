@@ -56,11 +56,6 @@
   align-items: center;
   justify-content: center;
 
-  h1 {
-    font-size: theme.$font-size-sm;
-    font-weight: theme.$font-weight-bold;
-  }
-
   @media(min-width: theme.$breakpoint-md) {
     display: flex;
   }

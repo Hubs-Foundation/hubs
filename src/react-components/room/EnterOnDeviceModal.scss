@@ -1,45 +1,5 @@
 @use "../styles/theme.scss";
 
-:local(.content) {
-  padding: 24px 8px;
-
-  h1 {
-    font-weight: theme.$font-weight-bold;
-    font-size: theme.$font-size-md;
-  }
-
-  p {
-    font-size: theme.$font-size-sm;
-    font-weight: theme.$font-weight-medium;
-  }
-
-  small {
-    font-size: theme.$font-size-xs;
-    font-weight: theme.$font-weight-regular;
-    margin-bottom: 8px;
-  }
-
-  hr {
-    position: relative;
-    width: 90%;
-    border: none;
-    border-bottom: 1px solid theme.$grey;
-    margin: 16px 0;
-
-    &:after {
-      background: theme.$white;
-      content: attr(data-or-text);
-      padding: 0 4px;
-      position: relative;
-      color: theme.$black;
-      font-size: theme.$font-size-sm;
-      font-weight: theme.$font-weight-bold;
-      position: absolute;
-      transform: translateY(-50%);
-    }
-  }
-}
-
 :local(.code-container) {
   display: flex;
   flex: 1 0 auto;
@@ -71,8 +31,4 @@
 
 :local(.code-letter) {
   width: 40px;
-}
-
-:local(.loading-code) {
-  justify-content: center;
 }

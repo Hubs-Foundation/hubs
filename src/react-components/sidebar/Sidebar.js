@@ -9,7 +9,7 @@ export function Sidebar({ title, beforeTitle, afterTitle, children, contentClass
       {(title || beforeTitle || afterTitle) && (
         <div className={styles.header}>
           <div className={styles.beforeTitle}>{beforeTitle}</div>
-          <h1>{title}</h1>
+          <h5>{title}</h5>
           <div className={styles.afterTitle}>{afterTitle}</div>
         </div>
       )}

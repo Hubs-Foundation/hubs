@@ -3,7 +3,6 @@ import { FormattedMessage, defineMessages, useIntl } from "react-intl";
 import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
-import styles from "./AutoExitWarningModal.scss";
 import { Column } from "../layout/Column";
 
 export const AutoExitReason = {
@@ -27,7 +26,7 @@ export function AutoExitWarningModal({ onCancel, reason, secondsRemaining }) {
 
   return (
     <Modal title="Warning">
-      <Column padding center className={styles.autoExitWarningModal}>
+      <Column padding center>
         <b>
           <FormattedMessage id="autoexit.title" />
           <span>{secondsRemaining}</span>
