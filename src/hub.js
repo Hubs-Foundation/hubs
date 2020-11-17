@@ -229,7 +229,7 @@ NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
 // TODO: Replace with a new oauth callback route that has this postMessage script.
 if (window.opener && window.opener.location.hostname === location.hostname) {
   window.opener.postMessage("opened");
-  return;
+  throw Error("OAuth Dialog Detected. Stopping page load.");
 }
 
 const isBotMode = qsTruthy("bot");
