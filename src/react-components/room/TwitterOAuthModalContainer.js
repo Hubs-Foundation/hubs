@@ -25,6 +25,8 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
           `resizable=yes,width=${width},height=${height},left=${left},top=${top}toolbar=no,titlebar=no,menubar=no,scrollbars=yes`
         );
 
+        window.doingTwitterOAuth = true;
+
         popup.addEventListener("message", () => {
           popup.close();
           onConnected();
@@ -46,6 +48,8 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
       if (popupRef.current) {
         popupRef.current.close();
       }
+
+      delete window.doingTwitterOAuth;
     };
   }, []);
 
