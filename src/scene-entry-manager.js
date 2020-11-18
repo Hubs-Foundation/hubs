@@ -322,11 +322,6 @@ export default class SceneEntryManager {
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
-    this.scene.addEventListener("action_invite", () => {
-      handleExitTo2DInterstitial(false, () => this.history.goBack());
-      pushHistoryState(this.history, "overlay", "invite");
-    });
-
     this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
       this.performConditionalSignIn(
         () => this.hubChannel.can("kick_users"),

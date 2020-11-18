@@ -29,7 +29,6 @@ import MediaBrowser from "./media-browser";
 import CreateObjectDialog from "./create-object-dialog.js";
 import ChangeSceneDialog from "./change-scene-dialog.js";
 import AvatarUrlDialog from "./avatar-url-dialog.js";
-import InviteDialog from "./invite-dialog.js";
 import CloseRoomDialog from "./close-room-dialog.js";
 import Tip from "./tip.js";
 import WebRTCScreenshareUnsupportedDialog from "./webrtc-screenshare-unsupported-dialog.js";
@@ -1614,23 +1613,6 @@ class UIRoot extends Component {
                         onClose={() => this.confirmBroadcastedRoom()}
                       />
                     )}
-                  <StateRoute
-                    stateKey="overlay"
-                    stateValue="invite"
-                    history={this.props.history}
-                    render={() => (
-                      <InviteDialog
-                        allowShare={!!navigator.share}
-                        entryCode={this.props.hub.entry_code}
-                        hubId={this.props.hub.hub_id}
-                        isModal={true}
-                        onClose={() => {
-                          this.props.history.goBack();
-                          exit2DInterstitialAndEnterVR();
-                        }}
-                      />
-                    )}
-                  />
                   {streaming && (
                     <button
                       title="Exit Streamer Mode"
