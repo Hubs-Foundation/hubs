@@ -16,6 +16,7 @@ export function RoomLayout({
   modal,
   viewport,
   objectFocused,
+  streaming,
   ...rest
 }) {
   return (
@@ -28,7 +29,9 @@ export function RoomLayout({
         center={toolbarCenter}
         right={toolbarRight}
       />
-      <div className={classNames(styles.main, styles.viewport, viewportClassName)}>{viewport}</div>
+      <div className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}>
+        {viewport}
+      </div>
     </div>
   );
 }
@@ -44,5 +47,6 @@ RoomLayout.propTypes = {
   toolbarClassName: PropTypes.string,
   modal: PropTypes.node,
   viewport: PropTypes.node,
-  objectFocused: PropTypes.bool
+  objectFocused: PropTypes.bool,
+  streaming: PropTypes.bool
 };

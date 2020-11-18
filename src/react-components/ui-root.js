@@ -18,7 +18,7 @@ import {
   sluglessPath
 } from "../utils/history";
 import StateRoute from "./state-route.js";
-import { getPresenceProfileForSession, discordBridgesForPresences } from "../utils/phoenix-utils";
+import { getPresenceProfileForSession } from "../utils/phoenix-utils";
 import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
 
@@ -27,20 +27,13 @@ import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
 import InviteDialog from "./invite-dialog.js";
-import Tip from "./tip.js";
-import FeedbackDialog from "./feedback-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
-import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
-import { resetTips } from "../systems/tips";
-
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import qsTruthy from "../utils/qs_truthy";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
@@ -73,6 +66,7 @@ import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
+import { ReactComponent as EnterIcon } from "./icons/Enter.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 import { ObjectListProvider } from "./room/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
@@ -94,6 +88,8 @@ import { UserProfileSidebarContainer } from "./room/UserProfileSidebarContainer"
 import { CloseRoomModal } from "./room/CloseRoomModal";
 import { WebVRUnsupportedModal } from "./room/WebVRUnsupportedModal";
 import { TweetModalContainer } from "./room/TweetModalContainer";
+import { TipContainer } from "./room/TipContainer";
+import { SpectatingLabel } from "./room/SpectatingLabel";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -162,7 +158,6 @@ class UIRoot extends Component {
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     onAvatarSaved: PropTypes.func,
-    activeTips: PropTypes.object,
     location: PropTypes.object,
     history: PropTypes.object,
     showInterstitialPrompt: PropTypes.bool,
@@ -185,7 +180,6 @@ class UIRoot extends Component {
     entering: false,
     dialog: null,
     showShareDialog: false,
-    broadcastTipDismissed: false,
     linkCode: null,
     linkCodeCancel: null,
     miniInviteActivated: false,
@@ -196,7 +190,6 @@ class UIRoot extends Component {
     showPrefs: false,
     watching: false,
     isStreaming: false,
-    showStreamingTip: false,
 
     waitingOnAudio: false,
     mediaStream: null,
@@ -330,8 +323,6 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("action_toggle_ui", () => this.setState({ hide: !this.state.hide }));
 
     const scene = this.props.scene;
-
-    this.props.store.addEventListener("statechanged", this.onStoreChanged);
 
     const unsubscribe = this.props.history.listen((location, action) => {
       const state = location.state;
@@ -824,16 +815,17 @@ class UIRoot extends Component {
     });
   };
 
-  toggleStreamerMode = enable => {
-    this.props.scene.systems["hubs-systems"].characterController.fly = enable;
+  toggleStreamerMode = () => {
+    const isStreaming = !this.state.isStreaming;
+    this.props.scene.systems["hubs-systems"].characterController.fly = isStreaming;
 
-    if (enable) {
+    if (isStreaming) {
       this.props.hubChannel.beginStreaming();
-      this.setState({ isStreaming: true, showStreamingTip: true });
     } else {
       this.props.hubChannel.endStreaming();
-      this.setState({ isStreaming: false });
     }
+
+    this.setState({ isStreaming });
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
@@ -864,25 +856,6 @@ class UIRoot extends Component {
 
   occupantCount = () => {
     return this.props.presences ? Object.entries(this.props.presences).length : 0;
-  };
-
-  onStoreChanged = () => {
-    const broadcastedRoomConfirmed = this.props.store.state.confirmedBroadcastedRooms.includes(this.props.hub.hub_id);
-    if (broadcastedRoomConfirmed !== this.state.broadcastTipDismissed) {
-      this.setState({ broadcastTipDismissed: broadcastedRoomConfirmed });
-    }
-  };
-
-  confirmBroadcastedRoom = () => {
-    this.props.store.update({ confirmedBroadcastedRooms: [this.props.hub.hub_id] });
-  };
-
-  discordBridges = () => {
-    if (!this.props.presences) {
-      return [];
-    } else {
-      return discordBridgesForPresences(this.props.presences);
-    }
   };
 
   hasEmbedPresence = () => {
@@ -1120,12 +1093,16 @@ class UIRoot extends Component {
   }
 
   render() {
+    const isGhost =
+      configs.feature("enable_lobby_ghosts") && (this.state.watching || (this.state.hide || this.props.hide));
+    const hide = this.state.hide || this.props.hide;
+
     const rootStyles = {
       [styles.ui]: true,
       "ui-root": true,
       "in-modal-or-overlay": this.isInModalOrOverlay(),
-      isGhost: configs.feature("enable_lobby_ghosts") && (this.state.watching || (this.state.hide || this.props.hide)),
-      hide: this.state.hide || this.props.hide
+      isGhost,
+      hide
     };
     if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
 
@@ -1166,11 +1143,16 @@ class UIRoot extends Component {
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
-    const enteredOrWatchingOrPreload = entered || watching || preload;
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
+
+    const enableSpectateVRButton =
+      configs.feature("enable_lobby_ghosts") &&
+      isGhost &&
+      !hide &&
+      this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no;
 
     const entryDialog =
       this.props.availableVREntryTypes &&
@@ -1232,34 +1214,9 @@ class UIRoot extends Component {
     const showMediaBrowser =
       mediaSource && (["scenes", "avatars", "favorites"].includes(mediaSource) || this.state.entered);
 
-    const discordBridges = this.discordBridges();
-    const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
-    const hasEmbedPresence = this.hasEmbedPresence();
-    const hasDiscordBridges = discordBridges.length > 0;
-    const showBroadcastTip =
-      (hasDiscordBridges || (hasEmbedPresence && !this.props.embed)) && !this.state.broadcastTipDismissed;
-
     const streaming = this.state.isStreaming;
 
     const showObjectList = enteredOrWatching;
-
-    const streamingTip = streaming &&
-      this.state.showStreamingTip && (
-        <div className={classNames([styles.streamingTip])}>
-          <div className={classNames([styles.streamingTipAttachPoint])} />
-          <button
-            title="Dismiss"
-            className={styles.streamingTipClose}
-            onClick={() => this.setState({ showStreamingTip: false })}
-          >
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
-
-          <div className={styles.streamingTipMessage}>
-            <FormattedMessage id="tips.streaming" />
-          </div>
-        </div>
-      );
 
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
@@ -1331,12 +1288,13 @@ class UIRoot extends Component {
                 icon: StarOutlineIcon,
                 onClick: () => this.toggleFavorited()
               },
-          isModerator && {
-            id: "streamer-mode",
-            label: "Enter Streamer Mode",
-            icon: CameraIcon,
-            onClick: () => this.toggleStreamerMode(true)
-          },
+          isModerator &&
+            entered && {
+              id: "streamer-mode",
+              label: streaming ? "Exit Streamer Mode" : "Enter Streamer Mode",
+              icon: CameraIcon,
+              onClick: () => this.toggleStreamerMode()
+            },
           canCloseRoom && {
             id: "close-room",
             label: "Close Room",
@@ -1382,7 +1340,7 @@ class UIRoot extends Component {
             id: "start-tour",
             label: "Start Tour",
             icon: SupportIcon,
-            onClick: () => resetTips()
+            onClick: () => this.props.scene.systems.tips.resetTips()
           },
           configs.feature("show_docs_link") && {
             id: "help",
@@ -1485,6 +1443,7 @@ class UIRoot extends Component {
               )}
             <RoomLayout
               objectFocused={!!this.props.selectedObject}
+              streaming={streaming}
               viewport={
                 <>
                   {!this.props.selectedObject && <CompactMoreMenuButton />}
@@ -1508,17 +1467,7 @@ class UIRoot extends Component {
                       </ContentMenuButton>
                     </ContentMenu>
                   )}
-                  <StateRoute
-                    stateKey="modal"
-                    stateValue="feedback"
-                    history={this.props.history}
-                    render={() =>
-                      this.renderDialog(FeedbackDialog, {
-                        history: this.props.history,
-                        onClose: () => this.pushHistoryState("modal", null)
-                      })
-                    }
-                  />
+                  {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
                   {this.props.activeObject && (
                     <ObjectMenuContainer
                       hubChannel={this.props.hubChannel}
@@ -1535,25 +1484,6 @@ class UIRoot extends Component {
                         hubId={this.props.hub.hub_id}
                         history={this.props.history}
                         onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
-                      />
-                    )}
-                  {entered &&
-                    this.props.activeTips &&
-                    this.props.activeTips.bottom &&
-                    (!presenceLogEntries || presenceLogEntries.length === 0) &&
-                    !showBroadcastTip && (
-                      <Tip
-                        tip={this.props.activeTips.bottom}
-                        tipRegion="bottom"
-                        pushHistoryState={this.pushHistoryState}
-                      />
-                    )}
-                  {enteredOrWatchingOrPreload &&
-                    showBroadcastTip && (
-                      <Tip
-                        tip={hasDiscordBridges ? "discord" : "embed"}
-                        broadcastTarget={discordSnippet}
-                        onClose={() => this.confirmBroadcastedRoom()}
                       />
                     )}
                   <StateRoute
@@ -1573,17 +1503,16 @@ class UIRoot extends Component {
                       />
                     )}
                   />
-                  {streaming && (
-                    <button
-                      title="Exit Streamer Mode"
-                      onClick={() => this.toggleStreamerMode(false)}
-                      className={classNames([styles.cornerButton, styles.cameraModeExitButton])}
-                    >
-                      <FontAwesomeIcon icon={faTimes} />
-                    </button>
-                  )}
-                  {streamingTip}
-                  {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
+                  <TipContainer
+                    inLobby={watching}
+                    inRoom={entered}
+                    isEmbedded={this.props.embed}
+                    isStreaming={streaming}
+                    hubId={this.props.hub.hub_id}
+                    presences={this.props.presences}
+                    scene={this.props.scene}
+                    store={this.props.store}
+                  />
                 </>
               }
               sidebar={
@@ -1591,8 +1520,8 @@ class UIRoot extends Component {
                   <>
                     {this.state.sidebarId === "chat" && (
                       <ChatSidebarContainer
+                        presences={this.props.presences}
                         occupantCount={this.occupantCount()}
-                        discordBridges={discordBridges}
                         canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
                         onUploadFile={this.createObject}
                         onClose={() => this.setSidebar(null)}
@@ -1684,6 +1613,24 @@ class UIRoot extends Component {
               toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
               toolbarCenter={
                 <>
+                  {watching && (
+                    <>
+                      <ToolbarButton
+                        icon={<EnterIcon />}
+                        label="Join Room"
+                        preset="green"
+                        onClick={() => this.setState({ watching: false })}
+                      />
+                      {enableSpectateVRButton && (
+                        <ToolbarButton
+                          icon={<VRIcon />}
+                          preset="purple"
+                          label="Spectate in VR"
+                          onClick={() => this.props.scene.enterVR()}
+                        />
+                      )}
+                    </>
+                  )}
                   {entered && (
                     <>
                       <VoiceButtonContainer scene={this.props.scene} microphoneEnabled={!!this.state.audioTrack} />

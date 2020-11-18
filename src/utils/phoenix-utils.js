@@ -287,3 +287,15 @@ export function discordBridgesForPresences(presences) {
   }
   return channels;
 }
+
+export function hasEmbedPresences(presences) {
+  for (const p of Object.values(presences)) {
+    for (const m of p.metas) {
+      if (m.context && m.context.embed) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
