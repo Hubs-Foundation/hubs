@@ -230,6 +230,23 @@ class ConfigurationEditor extends Component {
     );
   }
 
+  renderListInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return (
+      <TextField
+        key={displayPath}
+        id={displayPath}
+        label={descriptor.name || displayPath}
+        value={((currentValue && Object.values(currentValue)) || []).join(",")}
+        onChange={ev => this.onChange(path, ev.target.value.split(",").map(v => v.trim()))}
+        helperText={descriptor.description}
+        type="text"
+        fullWidth
+        margin="normal"
+      />
+    );
+  }
+
   renderLongTextInput(path, descriptor, currentValue) {
     const displayPath = path.join(" > ");
     return (
@@ -312,7 +329,7 @@ class ConfigurationEditor extends Component {
   renderConfigurable(path, descriptor, currentValue) {
     switch (descriptor.type) {
       case "list":
-        return null;
+        return descriptor.of === "string" ? this.renderListInput(path, descriptor, currentValue) : null;
       case "file":
         return this.renderFileInput(path, descriptor, currentValue);
       case "boolean":
