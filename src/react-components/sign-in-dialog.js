@@ -39,10 +39,9 @@ export default class SignInDialog extends Component {
     this.props.onSignIn("oidc");
   };
 
-  render() {
-    let contents;
+  renderEmailAuth() {
     if (this.props.authStarted) {
-      contents = (
+      return (
         <div>
           <p>
             <FormattedMessage className="preformatted" id="sign-in.auth-started" values={{ email: this.state.email }} />
@@ -58,7 +57,7 @@ export default class SignInDialog extends Component {
         </div>
       );
     } else if (this.props.authComplete) {
-      contents = (
+      return (
         <div className={styles.signInComplete}>
           <p>{this.props.message}</p>
           <button onClick={this.props.onContinue} className={styles.continueButton}>
@@ -67,7 +66,7 @@ export default class SignInDialog extends Component {
         </div>
       );
     } else {
-      contents = (
+      return (
         <form onSubmit={this.onSubmit} className={styles.signInForm}>
           <span>{this.props.message}</span>
           <input
@@ -110,18 +109,40 @@ export default class SignInDialog extends Component {
           </button>
         </form>
       );
+    }
+  }
 
-      // TODO check app config to decide login type and customize button
-      contents = (
+  renderOIDCAuth() {
+    if (this.props.authStarted) {
+      return (
         <div>
-          <button onClick={this.startOIDCFlow}>Sign in with OIDC</button>
+          <p>
+            <FormattedMessage className="preformatted" id="sign-in.oidc-auth-started" />
+          </p>
+        </div>
+      );
+    } else if (this.props.authComplete) {
+      return (
+        <div className={styles.signInComplete}>
+          <p>{this.props.message}</p>
+          <button onClick={this.props.onContinue} className={styles.continueButton}>
+            {this.props.continueText}
+          </button>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <button onClick={this.startOIDCFlow}>{configs.APP_CONFIG.auth.oidc_button_label || "Sign In"}</button>
         </div>
       );
     }
+  }
 
+  render() {
     return (
       <DialogContainer title="Sign In" {...this.props}>
-        {contents}
+        {configs.APP_CONFIG.auth.use_oidc ? this.renderOIDCAuth() : this.renderEmailAuth()}
       </DialogContainer>
     );
   }

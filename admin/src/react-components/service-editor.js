@@ -124,6 +124,14 @@ function isEmptyObject(obj) {
   return true;
 }
 
+function getConfigurables(categorySchema) {
+  return getDescriptors(categorySchema).filter(
+    ([path, descriptor]) =>
+      (qs.get("show_internal_configs") !== null || descriptor.internal !== "true") &&
+      (qs.get("show_oidc_configs") !== null || path[1] !== "oidc")
+  );
+}
+
 class ConfigurationEditor extends Component {
   constructor(props) {
     super(props);
@@ -321,9 +329,9 @@ class ConfigurationEditor extends Component {
   }
 
   renderTree(schema, category, config) {
-    const configurables = getDescriptors(schema[category])
-      .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
-      .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
+    const configurables = getConfigurables(schema[category]).map(([path, descriptor]) =>
+      this.renderConfigurable(path, descriptor, getConfigValue(config, path))
+    );
 
     return (
       <form onSubmit={this.onSubmit.bind(this)}>
@@ -363,7 +371,7 @@ class ConfigurationEditor extends Component {
             onChange={this.handleTabChange.bind(this)}
           >
             {schemaCategories
-              .filter(c => this.props.schema[c] && !isEmptyObject(this.props.schema[c]))
+              .filter(c => this.props.schema[c] && !isEmptyObject(getConfigurables(this.props.schema[c])))
               .map(c => (
                 <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
               ))}
