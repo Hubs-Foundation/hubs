@@ -46,6 +46,7 @@ import PreloadOverlay from "./preload-overlay.js";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
+import maskEmail from "../utils/mask-email";
 import { resetTips } from "../systems/tips";
 
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -82,6 +83,7 @@ import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as PeopleIcon } from "./icons/People.svg";
 import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
+import { ReactComponent as EnterIcon } from "./icons/Enter.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 import { ObjectListProvider } from "./room/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
@@ -434,8 +436,8 @@ class UIRoot extends Component {
           step: SignInStep.complete,
           message: getMessages()[signInCompleteMessageId],
           continueText: getMessages()[signInContinueTextId],
-          onClose: onContinueAfterSignIn,
-          onContinue: onContinueAfterSignIn
+          onClose: onContinueAfterSignIn || this.closeDialog,
+          onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
       onClose: onContinueAfterSignIn
@@ -1295,8 +1297,26 @@ class UIRoot extends Component {
     const moreMenu = [
       {
         id: "user",
-        label: "You",
+        label:
+          "You" +
+          (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
         items: [
+          this.state.signedIn
+            ? {
+                id: "sign-out",
+                label: "Sign Out",
+                icon: LeaveIcon,
+                onClick: async () => {
+                  await this.props.authChannel.signOut(this.props.hubChannel);
+                  this.setState({ signedIn: false });
+                }
+              }
+            : {
+                id: "sign-in",
+                label: "Sign In",
+                icon: EnterIcon,
+                onClick: () => this.showContextualSignInDialog()
+              },
           canCreateRoom && {
             id: "create-room",
             label: "Create Room",
