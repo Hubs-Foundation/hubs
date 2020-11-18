@@ -270,8 +270,11 @@ class UIRoot extends Component {
       }
 
       sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
-      sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
-      sceneEl.camera.updateProjectionMatrix();
+
+      if (sceneEl.camera) {
+        sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
+        sceneEl.camera.updateProjectionMatrix();
+      }
     }
   }
 
