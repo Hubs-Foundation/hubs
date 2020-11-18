@@ -1327,12 +1327,6 @@ class UIRoot extends Component {
             icon: DiscordIcon,
             href: configs.link("community", "https://discord.gg/wHmY4nd")
           },
-          configs.feature("show_feedback_ui") && {
-            id: "feedback",
-            label: "Leave Feedback",
-            icon: SupportIcon, // TODO: Use a unique icon
-            onClick: () => this.pushHistoryState("modal", "feedback")
-          },
           configs.feature("show_issue_report_link") && {
             id: "report-issue",
             label: "Report Issue",

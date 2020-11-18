@@ -375,7 +375,6 @@
   "invalid-scene-url": "This URL does not point to a scene or valid GLB.",
   "avatar-url-dialog.apply": "Apply",
   "interstitial.prompt": "Continue",
-  "feedback.prompt": "🦆 Feedback ",
   "help.prompt": "Help",
   "hide-ui.prompt": "Hide All",
   "discord.primary_tagline": "Share a virtual room with your community.\nWatch videos, play with 3D objects, or just hang out.",
