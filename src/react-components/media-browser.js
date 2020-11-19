@@ -2,13 +2,12 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import classNames from "classnames";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
-import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
-import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
-import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
-import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ReactComponent as ArrowForwardIcon } from "./icons/ArrowForward.svg";
+import { ReactComponent as SearchIcon } from "./icons/Search.svg";
+import { ReactComponent as StarIcon } from "./icons/Star.svg";
+import { ReactComponent as UploadIcon } from "./icons/Upload.svg";
+import { ReactComponent as LinkIcon } from "./icons/Link.svg";
+import { ReactComponent as CloseIcon } from "./icons/Close.svg";
 
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
@@ -308,7 +307,7 @@ class MediaBrowser extends Component {
             <div className={styles.headerLeft}>
               <button onClick={() => this.close()}>
                 <i>
-                  <FontAwesomeIcon icon={faTimes} />
+                  <CloseIcon />
                 </i>
               </button>
             </div>
@@ -316,7 +315,7 @@ class MediaBrowser extends Component {
               {urlSource === "favorites" && (
                 <div className={styles.favoritesHeader}>
                   <i>
-                    <FontAwesomeIcon icon={faStar} />
+                    <StarIcon />
                   </i>
                   <FormattedMessage id="media-browser.favorites-header" />
                 </div>
@@ -324,7 +323,7 @@ class MediaBrowser extends Component {
               {!hideSearch && (
                 <div className={styles.search}>
                   <i className={styles.searchIcon}>
-                    <FontAwesomeIcon icon={faSearch} />
+                    <SearchIcon />
                   </i>
                   <input
                     type="text"
@@ -353,7 +352,7 @@ class MediaBrowser extends Component {
                     onChange={e => this.handleQueryUpdated(e.target.value)}
                   />
                   <i className={styles.searchClear} onClick={() => this.handleQueryUpdated("", true)}>
-                    <FontAwesomeIcon icon={faTimes} />
+                    <CloseIcon />
                   </i>
                 </div>
               )}
@@ -396,9 +395,7 @@ class MediaBrowser extends Component {
             <div className={styles.headerRight}>
               {showCustomOption && (
                 <a onClick={() => handleCustomClicked(urlSource)} className={styles.createButton}>
-                  <i>
-                    <FontAwesomeIcon icon={["scenes", "avatars"].includes(urlSource) ? faLink : faCloudUploadAlt} />
-                  </i>
+                  <i>{["scenes", "avatars"].includes(urlSource) ? <LinkIcon /> : <UploadIcon />}</i>
                 </a>
               )}
               {showCustomOption && (
@@ -426,7 +423,7 @@ class MediaBrowser extends Component {
               ))}
               <div className={styles.navRightPad}>&nbsp;</div>
               <div className={styles.navScrollArrow}>
-                <FontAwesomeIcon icon={faAngleRight} />
+                <ArrowForwardIcon />
               </div>
             </div>
           )}

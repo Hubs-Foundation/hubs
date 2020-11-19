@@ -4,17 +4,16 @@ import classNames from "classnames";
 import dayjs from "dayjs-ext";
 import relativeTime from "dayjs-ext/plugin/relativeTime";
 import { injectIntl, FormattedMessage } from "react-intl";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
-import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons/faExternalLinkAlt";
-import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
-import { faInfo } from "@fortawesome/free-solid-svg-icons/faInfo";
-import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
-import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
-import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
-import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
-import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
+import { ReactComponent as ArrowForwardIcon } from "./icons/ArrowForward.svg";
+import { ReactComponent as ArrowBackIcon } from "./icons/ArrowBack.svg";
+import { ReactComponent as ExternalLinkIcon } from "./icons/ExternalLink.svg";
+import { ReactComponent as PenIcon } from "./icons/Pen.svg";
+import { ReactComponent as HelpIcon } from "./icons/Help.svg";
+import { ReactComponent as DuplicateIcon } from "./icons/Duplicate.svg";
+import { ReactComponent as AddIcon } from "./icons/Add.svg";
+import { ReactComponent as SearchIcon } from "./icons/Search.svg";
+import { ReactComponent as PeopleIcon } from "./icons/People.svg";
+import { ReactComponent as StarIcon } from "./icons/Star.svg";
 
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
@@ -85,7 +84,7 @@ class MediaTiles extends Component {
                 <IfFeature name="enable_spoke">
                   <a href="/spoke/new" rel="noopener noreferrer" target="_blank" className={styles.tileLink}>
                     <div className={styles.tileContent}>
-                      <FontAwesomeIcon icon={faPlus} />
+                      <AddIcon />
                       <FormattedMessage id="media-browser.create-scene" />
                     </div>
                   </a>
@@ -99,7 +98,7 @@ class MediaTiles extends Component {
                   className={styles.tileLink}
                 >
                   <div className={styles.tileContent}>
-                    <FontAwesomeIcon icon={faPlus} />
+                    <AddIcon />
                     <FormattedMessage id="media-browser.create-avatar" />
                   </div>
                 </a>
@@ -117,13 +116,13 @@ class MediaTiles extends Component {
                 className={classNames({ [styles.previousPage]: true, [styles.pagerButtonDisabled]: !hasPrevious })}
                 onClick={() => this.props.handlePager(-1)}
               >
-                <FontAwesomeIcon icon={faAngleLeft} />
+                <ArrowBackIcon />
               </a>
               <a
                 className={classNames({ [styles.nextPage]: true, [styles.pagerButtonDisabled]: !hasNext })}
                 onClick={() => this.props.handlePager(1)}
               >
-                <FontAwesomeIcon icon={faAngleRight} />
+                <ArrowForwardIcon />
               </a>
             </div>
           )}
@@ -206,7 +205,7 @@ class MediaTiles extends Component {
               history={this.props.history}
               title="Edit"
             >
-              <FontAwesomeIcon icon={faPencilAlt} />
+              <PenIcon />
             </StateLink>
           )}
           {entry.type === "avatar_listing" && (
@@ -217,19 +216,19 @@ class MediaTiles extends Component {
               }}
               title="Show Similar"
             >
-              <FontAwesomeIcon icon={faSearch} />
+              <SearchIcon />
             </a>
           )}
           {entry.type === "avatar_listing" &&
             entry.allow_remixing && (
               <a onClick={e => this.handleCopyAvatar(e, entry)} title="Copy to my avatars">
-                <FontAwesomeIcon icon={faClone} />
+                <DuplicateIcon />
               </a>
             )}
           {entry.type === "scene_listing" &&
             entry.allow_remixing && (
               <a onClick={e => this.handleCopyScene(e, entry)} title="Copy to my scenes">
-                <FontAwesomeIcon icon={faClone} />
+                <DuplicateIcon />
               </a>
             )}
           {entry.type === "scene" &&
@@ -240,7 +239,7 @@ class MediaTiles extends Component {
                 href={getReticulumFetchUrl(`/spoke/projects/${entry.project_id}`)}
                 title={formatMessage({ id: "scene.edit_button" })}
               >
-                <FontAwesomeIcon icon={faPencilAlt} />
+                <PenIcon />
               </a>
             )}
           {entry.type === "room" &&
@@ -253,14 +252,14 @@ class MediaTiles extends Component {
                   this.props.handleEntryInfoClicked(entry);
                 }}
               >
-                <FontAwesomeIcon icon={faInfo} />
+                <HelpIcon />
               </a>
             )}
         </div>
 
         {entry.favorited && (
           <div className={styles.favorite}>
-            <FontAwesomeIcon icon={faStar} />
+            <StarIcon />
           </div>
         )}
 
@@ -291,7 +290,7 @@ class MediaTiles extends Component {
                   {publisherName && (
                     <div className={styles.publisher}>
                       <i>
-                        <FontAwesomeIcon icon={faExternalLinkAlt} />
+                        <ExternalLinkIcon />
                       </i>
                       &nbsp;<a href={entry.url} target="_blank" rel="noopener noreferrer">
                         {publisherName}
@@ -309,7 +308,7 @@ class MediaTiles extends Component {
                   </div>
                 </div>
                 <div className={styles.presence}>
-                  <FontAwesomeIcon icon={faUsers} />
+                  <PeopleIcon />
                   <span>{entry.member_count}</span>
                 </div>
               </>
