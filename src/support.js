@@ -93,6 +93,12 @@ class Support extends React.Component {
                 <FormattedMessage
                   id={detectedOS === "iOS" ? "support.in-app-browser-ios" : "support.in-app-browser-android"}
                 />
+              ) : detectedOS === "Mac OS" && navigator.maxTouchPoints > 2 ? (
+                <div>
+                  <FormattedMessage id={"support.non-safari-ios"} />
+                  <br />
+                  <FormattedMessage id={"support.in-app-browser-ios"} />
+                </div>
               ) : (
                 <FormattedMessage id="support.update-browser" />
               )}

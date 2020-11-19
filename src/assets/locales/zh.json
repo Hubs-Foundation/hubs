@@ -459,6 +459,7 @@
   "support.in-app-browser-ios": "Copy and paste this link directly into Safari",
   "support.in-app-browser-android": "Copy and paste this link directly into Chrome or Firefox",
   "support.update-browser": "Please try switching or updating to a newer browser",
+  "support.non-safari-ios": "Apple prevents third-party browsers from accessing media devices.",
   "support.copy": "copy",
   "support.copied": "copied!",
   "support.details": "details",

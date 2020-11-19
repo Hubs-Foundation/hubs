@@ -457,6 +457,7 @@
   "support.missing-features": "Tu navegador web no cumple con las características requeridas.",
   "support.in-app-browser-ios": "Copia y pega este vínculo directamente en Safari",
   "support.in-app-browser-android": "Copia y pega este vínculo directamente en Chrome o Firefox",
+  "support.non-safari-ios": "Apple impide navegadores web tercero de usar características requeridas.",
   "support.update-browser": "Por favor, trata de cambiar a otro navegador web o actualizar éste",
   "support.copy": "copiar",
   "support.copied": "¡copiado!",

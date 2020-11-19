@@ -457,6 +457,7 @@
   "support.missing-features": "ブラウザに必要な機能がありません。",
   "support.in-app-browser-ios": "このリンクをコピーしてSafariに直接貼り付けます",
   "support.in-app-browser-android": "このリンクをコピーしてChromeまたはFirefoxに直接貼り付けます",
+  "support.non-safari-ios": "Apple prevents third-party browsers from accessing media devices.",
   "support.update-browser": "新しいブラウザに切り替えてみてください",
   "support.copy": "copy",
   "support.copied": "コピーされました！",

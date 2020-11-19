@@ -457,6 +457,7 @@
   "support.missing-features": "Seu navegador não possui os recursos necessários.",
   "support.in-app-browser-ios": "Copie e cole este link diretamente no Safari",
   "support.in-app-browser-android": "Copie e cole este link diretamente no Chrome ou Firefox",
+  "support.non-safari-ios": "Apple prevents third-party browsers from accessing media devices.",
   "support.update-browser": "Tente trocar ou atualizar para um navegador mais recente",
   "support.copy": "copiar",
   "support.copied": "copiado!",
