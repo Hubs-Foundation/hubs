@@ -54,7 +54,7 @@ $input-height: 40px;
     }
   }
 
-  :local(.icon-button) {
+  :local(.icon-button), & > svg  {
     padding: 0;
     margin-left: 8px;
     

@@ -1,25 +1,18 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
-import classNames from "classnames";
-import { ReactComponent as ArrowForwardIcon } from "./icons/ArrowForward.svg";
-import { ReactComponent as SearchIcon } from "./icons/Search.svg";
-import { ReactComponent as StarIcon } from "./icons/Star.svg";
-import { ReactComponent as UploadIcon } from "./icons/Upload.svg";
-import { ReactComponent as LinkIcon } from "./icons/Link.svg";
-import { ReactComponent as CloseIcon } from "./icons/Close.svg";
-
 import configs from "../utils/configs";
-import IfFeature from "./if-feature";
-import styles from "../assets/stylesheets/media-browser.scss";
 import { pushHistoryPath, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
-import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import MediaTiles from "./media-tiles";
 import { AvatarUrlModalContainer } from "./room/AvatarUrlModalContainer";
 import { SceneUrlModalContainer } from "./room/SceneUrlModalContainer";
 import { ObjectUrlModalContainer } from "./room/ObjectUrlModalContainer";
+import { MediaBrowser } from "./room/MediaBrowser";
+import { IconButton } from "./input/IconButton";
+import { ReactComponent as UploadIcon } from "./icons/Upload.svg";
+import { ReactComponent as LinkIcon } from "./icons/Link.svg";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -78,7 +71,7 @@ const DEFAULT_FACETS = {
 };
 
 // TODO: Migrate to use MediaGrid and media specific components like RoomTile
-class MediaBrowser extends Component {
+class MediaBrowserContainer extends Component {
   static propTypes = {
     mediaSearchStore: PropTypes.object,
     history: PropTypes.object,
@@ -300,183 +293,114 @@ class MediaBrowser extends Component {
     const apiSource = (meta && meta.source) || null;
     const isVariableWidth = ["bing_images", "tenor"].includes(apiSource);
 
+    let searchDescription;
+
+    if (!hideSearch && urlSource !== "scenes" && urlSource !== "avatars" && urlSource !== "favorites") {
+      searchDescription = (
+        <>
+          <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+          {PRIVACY_POLICY_LINKS[urlSource] && (
+            <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
+              <FormattedMessage id="media-browser.privacy_policy" />
+            </a>
+          )}
+        </>
+      );
+    } else if (urlSource === "scenes") {
+      searchDescription = (
+        <>
+          {configs.feature("enable_spoke") && (
+            <>
+              <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+              <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                <FormattedMessage id="editor-name" />
+              </a>
+            </>
+          )}
+          {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
+          {configs.feature("show_issue_report_link") && (
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
+            >
+              <FormattedMessage id="media-browser.report_issue" />
+            </a>
+          )}
+        </>
+      );
+    }
+
     return (
-      <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
-        <div className={classNames([styles.box, styles.darkened])}>
-          <div className={classNames(styles.header, { [styles.noSearch]: hideSearch })}>
-            <div className={styles.headerLeft}>
-              <button onClick={() => this.close()}>
-                <i>
-                  <CloseIcon />
-                </i>
-              </button>
-            </div>
-            <div className={styles.headerCenter}>
-              {urlSource === "favorites" && (
-                <div className={styles.favoritesHeader}>
-                  <i>
-                    <StarIcon />
-                  </i>
-                  <FormattedMessage id="media-browser.favorites-header" />
-                </div>
-              )}
-              {!hideSearch && (
-                <div className={styles.search}>
-                  <i className={styles.searchIcon}>
-                    <SearchIcon />
-                  </i>
-                  <input
-                    type="text"
-                    autoFocus={!isMobile && !isMobileVR}
-                    ref={r => (this.inputRef = r)}
-                    placeholder={formatMessage({
-                      id: `media-browser.search-placeholder.${urlSource}`
-                    })}
-                    onFocus={e => handleTextFieldFocus(e.target)}
-                    onBlur={() => handleTextFieldBlur()}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" && e.ctrlKey) {
-                        if (entries.length > 0 && !this._sendQueryTimeout) {
-                          this.handleEntryClicked(e, entries[0]);
-                        } else if (this.state.query.trim() !== "") {
-                          this.handleQueryUpdated(this.state.query, true);
-                          this.setState({ selectNextResult: true });
-                        } else {
-                          this.close();
-                        }
-                      } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
-                        e.target.blur();
-                      }
-                    }}
-                    value={this.state.query}
-                    onChange={e => this.handleQueryUpdated(e.target.value)}
-                  />
-                  <i className={styles.searchClear} onClick={() => this.handleQueryUpdated("", true)}>
-                    <CloseIcon />
-                  </i>
-                </div>
-              )}
-              <div className={styles.engineAttribution}>
-                {!hideSearch &&
-                  urlSource !== "scenes" &&
-                  urlSource !== "avatars" &&
-                  urlSource !== "favorites" && (
-                    <div className={styles.engineAttributionContents}>
-                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                      {PRIVACY_POLICY_LINKS[urlSource] && (
-                        <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
-                          <FormattedMessage id="media-browser.privacy_policy" />
-                        </a>
-                      )}
-                    </div>
-                  )}
-                {urlSource === "scenes" && (
-                  <div className={styles.engineAttributionContents}>
-                    <IfFeature name="enable_spoke">
-                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                      <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                        <FormattedMessage id="editor-name" />
-                      </a>
-                    </IfFeature>
-                    {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
-                    <IfFeature name="show_issue_report_link">
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
-                      >
-                        <FormattedMessage id="media-browser.report_issue" />
-                      </a>
-                    </IfFeature>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className={styles.headerRight}>
-              {showCustomOption && (
-                <a onClick={() => handleCustomClicked(urlSource)} className={styles.createButton}>
-                  <i>{["scenes", "avatars"].includes(urlSource) ? <LinkIcon /> : <UploadIcon />}</i>
-                </a>
-              )}
-              {showCustomOption && (
-                <a onClick={() => handleCustomClicked(urlSource)} className={styles.createLink}>
-                  <FormattedMessage
-                    id={`media-browser.add_custom_${
-                      this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object"
-                    }`}
-                  />
-                </a>
-              )}
-            </div>
-          </div>
-
-          {this.state.showNav && (
-            <div className={styles.nav}>
-              {SOURCES.map(s => (
-                <a
-                  onClick={() => this.handleSourceClicked(s)}
-                  key={s}
-                  className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
-                >
-                  <FormattedMessage id={`media-browser.nav_title.${s}`} />
-                </a>
-              ))}
-              <div className={styles.navRightPad}>&nbsp;</div>
-              <div className={styles.navScrollArrow}>
-                <ArrowForwardIcon />
-              </div>
-            </div>
-          )}
-
-          {(facets || activeFilter === "similar") && (
-            <div className={styles.facets}>
-              {facets &&
-                facets.map((s, i) => (
-                  <a
-                    onClick={() => this.handleFacetClicked(s)}
-                    key={i}
-                    className={classNames(styles.facet, { selected: s.params.filter === activeFilter })}
-                  >
-                    {s.text}
-                  </a>
-                ))}
-              {activeFilter === "similar" && (
-                <a className={classNames(styles.facet, "selected")}>
-                  <FormattedMessage
-                    id="media-browser.similar-to-facet"
-                    values={{ name: searchParams.get("similar_name") }}
-                  />
-                </a>
-              )}
-            </div>
-          )}
-
-          {this.props.mediaSearchStore.isFetching ||
-          this._sendQueryTimeout ||
-          entries.length > 0 ||
-          !showEmptyStringOnNoResult ? (
-            <MediaTiles
-              entries={entries}
-              hasNext={hasNext}
-              hasPrevious={hasPrevious}
-              isVariableWidth={isVariableWidth}
-              history={this.props.history}
-              urlSource={urlSource}
-              handleEntryClicked={this.handleEntryClicked}
-              onCopyAvatar={this.onCopyAvatar}
-              onCopyScene={this.onCopyScene}
-              onShowSimilar={this.onShowSimilar}
-              handlePager={this.handlePager}
-            />
-          ) : (
-            <div className={styles.emptyString}>
-              <FormattedMessage id={`media-browser.empty.${urlSource}`} />
-            </div>
-          )}
-        </div>
-      </div>
+      <MediaBrowser
+        onClose={this.close}
+        searchInputRef={r => (this.inputRef = r)}
+        autoFocusSearch={!isMobile && !isMobileVR}
+        query={this.state.query}
+        onChangeQuery={e => this.handleQueryUpdated(e.target.value)}
+        onSearchKeyDown={e => {
+          if (e.key === "Enter" && e.ctrlKey) {
+            if (entries.length > 0 && !this._sendQueryTimeout) {
+              this.handleEntryClicked(e, entries[0]);
+            } else if (this.state.query.trim() !== "") {
+              this.handleQueryUpdated(this.state.query, true);
+              this.setState({ selectNextResult: true });
+            } else {
+              this.close();
+            }
+          } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
+            e.target.blur();
+          }
+        }}
+        onClearSearch={() => this.handleQueryUpdated("", true)}
+        mediaSources={SOURCES}
+        selectedSource={urlSource}
+        onSelectSource={this.handleSourceClicked}
+        activeFilter={activeFilter}
+        facets={facets}
+        onSelectFacet={this.handleFacetClicked}
+        searchPlaceholder={formatMessage({
+          id: `media-browser.search-placeholder.${urlSource}`
+        })}
+        searchDescription={searchDescription}
+        headerRight={
+          showCustomOption && (
+            <IconButton lg onClick={() => handleCustomClicked(urlSource)}>
+              {["scenes", "avatars"].includes(urlSource) ? <LinkIcon /> : <UploadIcon />}
+              <p>
+                <FormattedMessage
+                  id={`media-browser.add_custom_${
+                    this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object"
+                  }`}
+                />
+              </p>
+            </IconButton>
+          )
+        }
+      >
+        {this.props.mediaSearchStore.isFetching ||
+        this._sendQueryTimeout ||
+        entries.length > 0 ||
+        !showEmptyStringOnNoResult ? (
+          <MediaTiles
+            entries={entries}
+            hasNext={hasNext}
+            hasPrevious={hasPrevious}
+            isVariableWidth={isVariableWidth}
+            history={this.props.history}
+            urlSource={urlSource}
+            handleEntryClicked={this.handleEntryClicked}
+            onCopyAvatar={this.onCopyAvatar}
+            onCopyScene={this.onCopyScene}
+            onShowSimilar={this.onShowSimilar}
+            handlePager={this.handlePager}
+          />
+        ) : (
+          <FormattedMessage id={`media-browser.empty.${urlSource}`} />
+        )}
+      </MediaBrowser>
     );
   }
 }
 
-export default injectIntl(MediaBrowser);
+export default injectIntl(MediaBrowserContainer);

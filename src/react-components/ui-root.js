@@ -24,7 +24,7 @@ import { getCurrentStreamer } from "../utils/component-utils";
 
 import { getMessages } from "../utils/i18n";
 import ProfileEntryPanel from "./profile-entry-panel";
-import MediaBrowser from "./media-browser";
+import MediaBrowserContainer from "./media-browser";
 
 import InviteDialog from "./invite-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
@@ -1416,28 +1416,6 @@ class UIRoot extends Component {
                 )}
               />
             )}
-            {!this.state.dialog &&
-              showMediaBrowser && (
-                <MediaBrowser
-                  history={this.props.history}
-                  mediaSearchStore={this.props.mediaSearchStore}
-                  hubChannel={this.props.hubChannel}
-                  onMediaSearchResultEntrySelected={(entry, selectAction) => {
-                    if (entry.type === "room") {
-                      this.showNonHistoriedDialog(LeaveRoomModal, {
-                        destinationUrl: entry.url,
-                        reason: LeaveReason.joinRoom
-                      });
-                    } else {
-                      this.props.onMediaSearchResultEntrySelected(entry, selectAction);
-                    }
-                  }}
-                  performConditionalSignIn={this.props.performConditionalSignIn}
-                  showNonHistoriedDialog={this.showNonHistoriedDialog}
-                  store={this.props.store}
-                  scene={this.props.scene}
-                />
-              )}
             <RoomLayout
               objectFocused={!!this.props.selectedObject}
               streaming={streaming}
@@ -1667,6 +1645,28 @@ class UIRoot extends Component {
                 </>
               }
             />
+            {!this.state.dialog &&
+              showMediaBrowser && (
+                <MediaBrowserContainer
+                  history={this.props.history}
+                  mediaSearchStore={this.props.mediaSearchStore}
+                  hubChannel={this.props.hubChannel}
+                  onMediaSearchResultEntrySelected={(entry, selectAction) => {
+                    if (entry.type === "room") {
+                      this.showNonHistoriedDialog(LeaveRoomModal, {
+                        destinationUrl: entry.url,
+                        reason: LeaveReason.joinRoom
+                      });
+                    } else {
+                      this.props.onMediaSearchResultEntrySelected(entry, selectAction);
+                    }
+                  }}
+                  performConditionalSignIn={this.props.performConditionalSignIn}
+                  showNonHistoriedDialog={this.showNonHistoriedDialog}
+                  store={this.props.store}
+                  scene={this.props.scene}
+                />
+              )}
           </div>
         </ReactAudioContext.Provider>
       </MoreMenuContextProvider>

@@ -1,0 +1,28 @@
+@use "../styles/theme.scss";
+
+:local(.button-nav) {
+  display: flex;
+  padding: 8px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-bottom: 1px solid theme.$lightgrey;
+}
+
+:local(.button-nav) > * {
+  margin-right: theme.$spacing-sm;
+}
+
+:local(.button-nav) > :last-child {
+  margin-right: 0;
+}
+
+:local(.facets-nav) {
+  background-color: theme.$recessed-bg;
+}
+
+:local(.content) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+}
