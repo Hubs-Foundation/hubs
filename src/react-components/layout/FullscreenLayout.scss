@@ -10,6 +10,7 @@
   top: 0;
   bottom: 0;
   background-color: theme.$white;
+  z-index: 10;
 }
 
 :local(.header) {

@@ -2,10 +2,9 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
 import configs from "../utils/configs";
-import { pushHistoryPath, sluglessPath } from "../utils/history";
+import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import MediaTiles from "./media-tiles";
 import { AvatarUrlModalContainer } from "./room/AvatarUrlModalContainer";
 import { SceneUrlModalContainer } from "./room/SceneUrlModalContainer";
 import { ObjectUrlModalContainer } from "./room/ObjectUrlModalContainer";
@@ -13,7 +12,10 @@ import { MediaBrowser } from "./room/MediaBrowser";
 import { IconButton } from "./input/IconButton";
 import { ReactComponent as UploadIcon } from "./icons/Upload.svg";
 import { ReactComponent as LinkIcon } from "./icons/Link.svg";
-
+import { remixAvatar } from "../utils/avatar-utils";
+import { fetchReticulumAuthenticated, getReticulumFetchUrl } from "../utils/phoenix-utils";
+import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
+import { CreateTile, MediaTile } from "./room/MediaTiles";
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
@@ -255,6 +257,32 @@ class MediaBrowserContainer extends Component {
     this.browserDiv.scrollTop = 0;
   };
 
+  handleCopyAvatar = async (e, entry) => {
+    e.preventDefault();
+    await remixAvatar(entry.id, entry.name);
+    this.onCopyAvatar();
+  };
+
+  handleCopyScene = async (e, entry) => {
+    e.preventDefault();
+    await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
+      parent_scene_id: entry.id
+    });
+    this.onCopyScene();
+  };
+
+  onCreateAvatar = () => {
+    window.dispatchEvent(new CustomEvent("action_create_avatar"));
+  };
+
+  processThumbnailUrl = (entry, thumbnailWidth, thumbnailHeight) => {
+    if (entry.images.preview.type === "mp4") {
+      return proxiedUrlFor(entry.images.preview.url);
+    } else {
+      return scaledThumbnailUrlFor(entry.images.preview.url, thumbnailWidth, thumbnailHeight);
+    }
+  };
+
   render() {
     const { formatMessage } = this.props.intl;
     const searchParams = new URLSearchParams(this.props.history.location.search);
@@ -267,7 +295,7 @@ class MediaBrowserContainer extends Component {
     const hideSearch = urlSource === "favorites";
     const showEmptyStringOnNoResult = urlSource !== "avatars" && urlSource !== "scenes";
 
-    const facets = this.state.facets && this.state.facets.length > 0 && this.state.facets;
+    const facets = this.state.facets && this.state.facets.length > 0 ? this.state.facets : undefined;
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
@@ -289,7 +317,7 @@ class MediaBrowserContainer extends Component {
 
     const meta = this.state.result && this.state.result.meta;
     const hasNext = !!(meta && meta.next_cursor);
-    const hasPrevious = searchParams.get("cursor");
+    const hasPrevious = !!searchParams.get("cursor");
     const apiSource = (meta && meta.source) || null;
     const isVariableWidth = ["bing_images", "tenor"].includes(apiSource);
 
@@ -317,7 +345,7 @@ class MediaBrowserContainer extends Component {
               </a>
             </>
           )}
-          {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
+          {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && " | "}
           {configs.feature("show_issue_report_link") && (
             <a
               target="_blank"
@@ -333,6 +361,7 @@ class MediaBrowserContainer extends Component {
 
     return (
       <MediaBrowser
+        browserRef={r => (this.browserDiv = r)}
         onClose={this.close}
         searchInputRef={r => (this.inputRef = r)}
         autoFocusSearch={!isMobile && !isMobileVR}
@@ -353,7 +382,7 @@ class MediaBrowserContainer extends Component {
           }
         }}
         onClearSearch={() => this.handleQueryUpdated("", true)}
-        mediaSources={SOURCES}
+        mediaSources={urlSource === "favorites" ? undefined : SOURCES}
         selectedSource={urlSource}
         onSelectSource={this.handleSourceClicked}
         activeFilter={activeFilter}
@@ -377,24 +406,82 @@ class MediaBrowserContainer extends Component {
             </IconButton>
           )
         }
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
+        onNextPage={() => this.handlePager(1)}
+        onPreviousPage={() => this.handlePager(-1)}
+        isVariableWidth={isVariableWidth}
       >
         {this.props.mediaSearchStore.isFetching ||
         this._sendQueryTimeout ||
         entries.length > 0 ||
         !showEmptyStringOnNoResult ? (
-          <MediaTiles
-            entries={entries}
-            hasNext={hasNext}
-            hasPrevious={hasPrevious}
-            isVariableWidth={isVariableWidth}
-            history={this.props.history}
-            urlSource={urlSource}
-            handleEntryClicked={this.handleEntryClicked}
-            onCopyAvatar={this.onCopyAvatar}
-            onCopyScene={this.onCopyScene}
-            onShowSimilar={this.onShowSimilar}
-            handlePager={this.handlePager}
-          />
+          <>
+            {urlSource === "avatars" && (
+              <CreateTile
+                type="avatar"
+                onClick={this.onCreateAvatar}
+                label={<FormattedMessage id="media-browser.create-avatar" />}
+              />
+            )}
+            {urlSource === "scenes" &&
+              configs.feature("enable_spoke") && (
+                <CreateTile
+                  as="a"
+                  href="/spoke/new"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  type="scene"
+                  label={<FormattedMessage id="media-browser.create-scene" />}
+                />
+              )}
+            {entries.map((entry, idx) => {
+              const isAvatar = entry.type === "avatar" || entry.type === "avatar_listing";
+              const isScene = entry.type === "scene" || entry.type === "scene_listing";
+              const onShowSimilar =
+                entry.type === "avatar_listing"
+                  ? e => {
+                      e.preventDefault();
+                      this.onShowSimilar(entry.id, entry.name);
+                    }
+                  : undefined;
+
+              let onEdit;
+
+              if (entry.type === "avatar") {
+                onEdit = e => {
+                  e.preventDefault();
+                  pushHistoryState(this.props.history, "overlay", "avatar-editor", { avatarId: entry.id });
+                };
+              } else if (entry.type === "scene") {
+                onEdit = e => {
+                  e.preventDefault();
+                  const spokeProjectUrl = getReticulumFetchUrl(`/spoke/projects/${entry.project_id}`);
+                  window.open(spokeProjectUrl);
+                };
+              }
+
+              let onCopy;
+
+              if (isAvatar) {
+                onCopy = e => this.handleCopyAvatar(e, entry);
+              } else if (isScene) {
+                onCopy = e => this.handleCopyScene(e, entry);
+              }
+
+              return (
+                <MediaTile
+                  key={`${entry.id}_${idx}`}
+                  entry={entry}
+                  processThumbnailUrl={this.processThumbnailUrl}
+                  onClick={e => this.handleEntryClicked(e, entry)}
+                  onEdit={onEdit}
+                  onShowSimilar={onShowSimilar}
+                  onCopy={onCopy}
+                />
+              );
+            })}
+          </>
         ) : (
           <FormattedMessage id={`media-browser.empty.${urlSource}`} />
         )}

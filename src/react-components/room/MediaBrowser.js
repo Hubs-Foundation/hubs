@@ -5,15 +5,19 @@ import styles from "./MediaBrowser.scss";
 import { ReactComponent as SearchIcon } from "../icons/Search.svg";
 import { ReactComponent as StarIcon } from "../icons/Star.svg";
 import { ReactComponent as CloseIcon } from "../icons/Close.svg";
+import { ReactComponent as ArrowForwardIcon } from "../icons/ArrowForward.svg";
+import { ReactComponent as ArrowBackIcon } from "../icons/ArrowBack.svg";
 import { FormattedMessage } from "react-intl";
 import { TextInputField } from "../input/TextInputField";
 import { IconButton } from "../input/IconButton";
 import { FullscreenLayout } from "../layout/FullscreenLayout";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
+import { MediaGrid } from "./MediaGrid";
 
 export function MediaBrowser({
   onClose,
+  browserRef,
   searchInputRef,
   autoFocusSearch,
   searchPlaceholder,
@@ -29,6 +33,11 @@ export function MediaBrowser({
   query,
   onChangeQuery,
   headerRight,
+  hasNext,
+  hasPrevious,
+  onNextPage,
+  onPreviousPage,
+  isVariableWidth,
   children
 }) {
   return (
@@ -41,10 +50,12 @@ export function MediaBrowser({
       headerCenter={
         <>
           {selectedSource === "favorites" ? (
-            <h3>
-              <StarIcon />
-              <FormattedMessage id="media-browser.favorites-header" />
-            </h3>
+            <>
+              <StarIcon className={styles.favoriteIcon} />
+              <h3>
+                <FormattedMessage id="media-browser.favorites-header" />
+              </h3>
+            </>
           ) : (
             <TextInputField
               value={query}
@@ -95,7 +106,19 @@ export function MediaBrowser({
         </div>
       )}
       <div className={styles.content}>
-        <Column padding>{children}</Column>
+        <Column grow ref={browserRef}>
+          <MediaGrid isVariableWidth={isVariableWidth}>{children}</MediaGrid>
+          {(hasNext || hasPrevious) && (
+            <div className={styles.pager}>
+              <button type="button" className={styles.pagerButton} disabled={!hasPrevious} onClick={onPreviousPage}>
+                <ArrowBackIcon />
+              </button>
+              <button type="button" className={styles.pagerButton} disabled={!hasNext} onClick={onNextPage}>
+                <ArrowForwardIcon />
+              </button>
+            </div>
+          )}
+        </Column>
       </div>
     </FullscreenLayout>
   );
@@ -103,6 +126,7 @@ export function MediaBrowser({
 
 MediaBrowser.propTypes = {
   onClose: PropTypes.func,
+  browserRef: PropTypes.any,
   searchInputRef: PropTypes.any,
   autoFocusSearch: PropTypes.bool,
   searchPlaceholder: PropTypes.string,
@@ -118,5 +142,10 @@ MediaBrowser.propTypes = {
   query: PropTypes.string,
   onChangeQuery: PropTypes.func,
   headerRight: PropTypes.node,
+  hasNext: PropTypes.bool,
+  hasPrevious: PropTypes.bool,
+  onNextPage: PropTypes.func,
+  onPreviousPage: PropTypes.func,
+  isVariableWidth: PropTypes.bool,
   children: PropTypes.node
 };
