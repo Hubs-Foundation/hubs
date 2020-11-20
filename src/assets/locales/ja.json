@@ -284,6 +284,7 @@
   "commands.debug": "物理デバッグレンダリングを切り替えます。",
   "commands.vrstats": "VRで統計情報を切り替えます。",
   "commands.audiomode": "（実験的）位置オーディオを切り替えます。",
+  "commands.audioNormalization": "(experimental) Change audio normalization factor.",
   "preferences.closeButton": "環境設定メニューを閉じる",
   "preferences.selectCategory": "カテゴリを選択",
   "preferences.resetToDefault": "設定をデフォルトにリセット",
