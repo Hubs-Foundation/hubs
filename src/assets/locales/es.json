@@ -284,12 +284,8 @@
   "commands.debug": "Alternar el procesamiento de depuración de la física.",
   "commands.vrstats": "Alternar estadísticas en VR.",
   "commands.audiomode": "(experimental) Alternar audio posicional.",
-<<<<<<< HEAD
   "commands.audioNormalization": "(experimental) Change audio normalization factor.",
-  "preferences.closeButton": "Cerrar el menú de preferencias ",
-=======
   "preferences.closeButton": "Cerrar menú de preferencias",
->>>>>>> origin/master
   "preferences.selectCategory": "Seleccionar categoría",
   "preferences.resetToDefault": "Restaurar preferencias por defecto",
   "preferences.promptForRefresh": "Tus preferencias están guardadas, pero algunos de los cambios no entrarán en vigencia hasta que refresques la página.",
