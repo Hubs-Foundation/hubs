@@ -311,6 +311,7 @@
   "preferences.movementSpeedModifier": "移動速度モディファイア",
   "preferences.enableOnScreenJoystickLeft": "画面上の左側のジョイスティックで移動できるようにする",
   "preferences.enableOnScreenJoystickRight": "画面上の右のジョイスティックで見回せるようにする",
+  "preferences.enableGyro": "Enable gyroscope (when supported by browser/device)",
   "preferences.invertTouchscreenCameraMove": "タッチスクリーンのカメラ移動の方向を反転",
   "preferences.browserDefault": "ブラウザのデフォルト",
   "preferences.locale": "言語",
