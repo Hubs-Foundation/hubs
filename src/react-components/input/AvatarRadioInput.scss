@@ -1,0 +1,45 @@
+@use '../styles/theme';
+
+:local(.avatar-radio-input) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+:local(.thumbnail) {
+  height: 142px;
+  width: 80px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background-color: theme.$lightgrey;
+}
+
+:local(.avatar-radio-input):hover {
+  :local(.thumbnail) {
+    background-color: theme.$lightgrey-hover;
+  }
+}
+
+:local(.avatar-radio-input):active {
+  :local(.thumbnail) {
+    background-color: theme.$lightgrey-pressed;
+  }
+}
+
+:local(.label) {
+  color: theme.$black;
+}
+
+:local(.input) {
+  opacity: 0;
+  width: 0;
+
+  :global(.keyboard-user) &:focus + :local(.thumbnail) {
+    box-shadow: 0 0 0 2px theme.$black;
+  }
+
+  &:checked + :local(.thumbnail) {
+    box-shadow: 0 0 0 2px theme.$blue;
+  }
+}

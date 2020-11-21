@@ -1,0 +1,55 @@
+@use "../styles/theme.scss";
+
+:local(.row) {
+  display: flex;
+  flex-shrink: 0;
+  flex-basis: auto;
+}
+
+:local(.xs-gap) > * {
+  margin-right: theme.$spacing-xs;
+}
+
+:local(.sm-gap) > * {
+  margin-right: theme.$spacing-sm;
+}
+
+:local(.md-gap) > * {
+  margin-right: theme.$spacing-md;
+}
+
+:local(.lg-gap) > * {
+  margin-right: theme.$spacing-lg;
+}
+
+:local(.xl-gap) > * {
+  margin-right: theme.$spacing-xl;
+}
+
+:local(.xs-padding) {
+  padding: theme.$spacing-xs;
+}
+
+:local(.sm-padding) {
+  padding: theme.$spacing-sm;
+}
+
+:local(.md-padding) {
+  padding: theme.$spacing-md;
+}
+
+:local(.lg-padding) {
+  padding: theme.$spacing-lg;
+}
+
+:local(.xl-padding) {
+  padding: theme.$spacing-xl;
+}
+
+:local(.center) {
+  justify-content: center;
+}
+
+:local(.row) > :last-child {
+  margin-right: 0;
+}

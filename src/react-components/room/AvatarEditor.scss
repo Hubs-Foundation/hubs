@@ -1,0 +1,60 @@
+@use "../styles/theme.scss";
+
+:local(.editor-container) {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 760px;
+  
+
+  @media(min-width: theme.$breakpoint-md) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+:local(.model-choices) {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+:local(.advanced-details) {
+  align-self: flex-start;
+  text-align: left;
+
+  summary {
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: theme.$font-weight-bold;
+    color: theme.$grey;
+  }
+}
+
+:local(.avatar-preview-container) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 20px;
+  width: 200px;
+  order: -1;
+  margin-bottom: 24px;
+
+  @media(min-width: theme.$breakpoint-md) {
+    order: 0;
+    margin-bottom: 0;
+  }
+
+  :local(.avatar-preview) {
+    background-color: theme.$lightgrey;
+    border-radius: 20px;
+    width: 200px;
+    height: 356px;
+
+    & > * {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}

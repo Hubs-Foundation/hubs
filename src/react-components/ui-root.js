@@ -28,7 +28,7 @@ import MediaBrowserContainer from "./media-browser";
 
 import InviteDialog from "./invite-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
-import AvatarEditor from "./avatar-editor";
+import AvatarEditorContainer from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
@@ -1386,36 +1386,6 @@ class UIRoot extends Component {
                   onLoadClicked={this.props.onPreloadLoadClicked}
                 />
               )}
-            {!this.state.dialog && (
-              <StateRoute
-                stateKey="overlay"
-                stateValue="avatar-editor"
-                history={this.props.history}
-                render={props => (
-                  <AvatarEditor
-                    className={styles.avatarEditor}
-                    signedIn={this.state.signedIn}
-                    onSignIn={this.showContextualSignInDialog}
-                    onSave={() => {
-                      if (props.location.state.detail && props.location.state.detail.returnToProfile) {
-                        this.props.history.goBack();
-                      } else {
-                        this.props.history.goBack();
-                        // We are returning to the media browser. Trigger an update so that the filter switches to
-                        // my-avatars, now that we've saved an avatar.
-                        this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
-                      }
-                      this.props.onAvatarSaved();
-                    }}
-                    onClose={() => this.props.history.goBack()}
-                    store={this.props.store}
-                    debug={avatarEditorDebug}
-                    avatarId={props.location.state.detail && props.location.state.detail.avatarId}
-                    hideDelete={props.location.state.detail && props.location.state.detail.hideDelete}
-                  />
-                )}
-              />
-            )}
             {!this.state.dialog &&
               showMediaBrowser && (
                 <MediaBrowserContainer
@@ -1438,6 +1408,35 @@ class UIRoot extends Component {
                   scene={this.props.scene}
                 />
               )}
+            {!this.state.dialog && (
+              <StateRoute
+                stateKey="overlay"
+                stateValue="avatar-editor"
+                history={this.props.history}
+                render={props => (
+                  <AvatarEditorContainer
+                    signedIn={this.state.signedIn}
+                    onSignIn={this.showContextualSignInDialog}
+                    onSave={() => {
+                      if (props.location.state.detail && props.location.state.detail.returnToProfile) {
+                        this.props.history.goBack();
+                      } else {
+                        this.props.history.goBack();
+                        // We are returning to the media browser. Trigger an update so that the filter switches to
+                        // my-avatars, now that we've saved an avatar.
+                        this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
+                      }
+                      this.props.onAvatarSaved();
+                    }}
+                    onClose={() => this.props.history.goBack()}
+                    store={this.props.store}
+                    debug={avatarEditorDebug}
+                    avatarId={props.location.state.detail && props.location.state.detail.avatarId}
+                    hideDelete={props.location.state.detail && props.location.state.detail.hideDelete}
+                  />
+                )}
+              />
+            )}
             <RoomLayout
               objectFocused={!!this.props.selectedObject}
               streaming={streaming}

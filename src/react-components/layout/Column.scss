@@ -47,6 +47,26 @@
   padding: theme.$spacing-xl;
 }
 
+:local(.xs-padding-left) {
+  padding-left: theme.$spacing-xs;
+}
+
+:local(.sm-padding-left) {
+  padding-left: theme.$spacing-sm;
+}
+
+:local(.md-padding-left) {
+  padding-left: theme.$spacing-md;
+}
+
+:local(.lg-padding-left) {
+  padding-left: theme.$spacing-lg;
+}
+
+:local(.xl-padding-left) {
+  padding-left: theme.$spacing-xl;
+}
+
 :local(.center) {
   align-items: center;
   text-align: center;

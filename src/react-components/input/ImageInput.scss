@@ -1,0 +1,65 @@
+@use '../styles/theme';
+
+:local(.image-input) {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: max-content;
+
+  small {
+    color: theme.$black;
+    padding: 0 16px;
+  }
+}
+
+:global(.keyboard-user) :local(.image-input):focus-within {
+  box-shadow: 0 0 0 2px theme.$black;
+}
+
+:local(.thumbnail-container) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  background-color: theme.$lightgrey;
+
+  img {
+    border-radius: 8px;
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+  }
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$darkgrey;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$darkgrey;
+    }
+  }
+}
+
+:local(.image-input):hover {
+  :local(.thumbnail-container) {
+    background-color: theme.$lightgrey-hover;
+  }
+}
+
+:local(.image-input):active {
+  :local(.thumbnail-container) {
+    background-color: theme.$lightgrey-pressed;
+  }
+}
+
+:local(.input) {
+  opacity: 0;
+  width: 0;
+
+  &:focus {
+    outline: none;
+  }
+}

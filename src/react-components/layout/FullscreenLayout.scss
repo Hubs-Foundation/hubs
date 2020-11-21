@@ -15,8 +15,22 @@
 
 :local(.header) {
   position: relative;
-  height: 144px;
+  height: 48px;
   border-bottom: 1px solid theme.$lightgrey;
+
+  @media(min-width: theme.$breakpoint-md) {
+    height: 96px;
+  }
+}
+
+:local(.header-left), :local(.header-center), :local(.header-right) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:local(.header-center) {
+  height: 48px;
 
   @media(min-width: theme.$breakpoint-md) {
     height: 96px;
@@ -29,28 +43,10 @@
   top: 0;
   margin-left: 16px;
   height: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 
   @media(min-width: theme.$breakpoint-md) {
     margin-left: 24px;
     height: 96px;
-  }
-}
-
-:local(.header-center) {
-  margin-top: 48px;
-  border-top: 1px solid theme.$lightgrey;
-  width: 100%;
-  height: 96px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  @media(min-width: theme.$breakpoint-md) {
-    margin-top: 0;
-    border-top: none;
   }
 }
 
@@ -60,9 +56,6 @@
   top: 0;
   margin-right: 16px;
   height: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 
   @media(min-width: theme.$breakpoint-md) {
     margin-right: 24px;
@@ -75,4 +68,26 @@
   flex: 1;
   flex-direction: column;
   overflow: auto;
+}
+
+:local(.wrap-center) {
+  :local(.header) {
+    height: 144px;
+  
+    @media(min-width: theme.$breakpoint-md) {
+      height: 96px;
+    }
+  }
+
+  :local(.header-center) {
+    margin-top: 48px;
+    border-top: 1px solid theme.$lightgrey;
+    width: 100%;
+    height: 96px;
+    
+    @media(min-width: theme.$breakpoint-md) {
+      margin-top: 0;
+      border-top: none;
+    }
+  }
 }
