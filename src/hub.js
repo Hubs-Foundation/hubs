@@ -1070,7 +1070,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   availableVREntryTypesPromise.then(async availableVREntryTypes => {
     if (isMobileVR) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "vr", checkingForDeviceAvailability: false });
+      remountUI({
+        availableVREntryTypes,
+        forcedVREntryType: qsVREntryType || "vr",
+        checkingForDeviceAvailability: false
+      });
 
       if (/Oculus/.test(navigator.userAgent) && "getVRDisplays" in navigator) {
         // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of
