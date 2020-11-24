@@ -1,19 +1,22 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { FormattedMessage } from "react-intl";
+import { injectIntl, FormattedMessage } from "react-intl";
 
 import styles from "../assets/stylesheets/close-room-dialog.scss";
 import DialogContainer from "./dialog-container";
 
-export default class CloseRoomDialog extends Component {
+class CloseRoomDialog extends Component {
   static propTypes = {
+    intl: PropTypes.object,
     onConfirm: PropTypes.func,
     onClose: PropTypes.func
   };
 
   render() {
+    const { formatMessage } = this.props.intl;
+
     return (
-      <DialogContainer title="Close Room" {...this.props}>
+      <DialogContainer title={formatMessage({ id: "close-room.title" })} {...this.props}>
         <div className={styles.message}>
           <FormattedMessage id="close-room.message" />
         </div>
@@ -33,3 +36,5 @@ export default class CloseRoomDialog extends Component {
     );
   }
 }
+
+export default injectIntl(CloseRoomDialog);
