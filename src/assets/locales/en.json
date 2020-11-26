@@ -324,6 +324,7 @@
   "preferences.allowMultipleHubsInstances": "Disable auto-exit when multiple hubs instances are open",
   "preferences.disableIdleDetection": "Disable auto-exit when idle or backgrounded",
   "preferences.preferMobileObjectInfoPanel": "Prefer Mobile Object Info Panel",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "Return to VR",
   "settings.change-avatar": "Set Name & Avatar",
   "settings.change-scene": "Choose a Scene",
@@ -464,5 +465,8 @@
   "support.copied": "copied!",
   "support.details": "details",
   "support.supported": "supported",
-  "support.unsupported": "unsupported"
+  "support.unsupported": "unsupported",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
 }
