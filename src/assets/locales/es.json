@@ -325,6 +325,7 @@
   "preferences.disableIdleDetection": "Deshabilitar salida automática cuando el avatar está inactivo o en segundo plano",
   "preferences.preferMobileObjectInfoPanel": "Preferir panel de móviles para información de objetos",
   "settings.return-to-vr": "Volver a VR",
+  "preferences.showRtcDebugPanel": "Mostrar el panel de RTC",
   "settings.change-avatar": "Establecer nombre y avatar",
   "settings.change-scene": "Elegir escena",
   "settings.favorites": "Salas favoritas",
@@ -464,5 +465,8 @@
   "support.copied": "¡copiado!",
   "support.details": "detalles",
   "support.supported": "soportado",
-  "support.unsupported": "no soportado"
+  "support.unsupported": "no soportado",
+  "rtcDebugPanel.restartIceButton": "Reiniciar ICE",
+  "rtcDebugPanel.connectSignalingButton": "Conectar",
+  "rtcDebugPanel.disconnectSignalingButton": "Desconectar"
 }

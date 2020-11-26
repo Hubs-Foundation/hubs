@@ -324,6 +324,7 @@
   "preferences.allowMultipleHubsInstances": "当多个hubs打开时暂停自动离开功能",
   "preferences.disableIdleDetection": "当没在使用或是后台运行时暂停自动离开功能",
   "preferences.preferMobileObjectInfoPanel": "优先移动对象信息版面",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "跳转到 VR（虚拟现实）",
   "settings.change-avatar": "设置名字 & 头像",
   "settings.change-scene": "选择一个场景",
@@ -464,5 +465,8 @@
   "support.copied": "copied!",
   "support.details": "details",
   "support.supported": "supported",
-  "support.unsupported": "unsupported"
+  "support.unsupported": "unsupported",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect Signaling",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect Signaling"
 }
