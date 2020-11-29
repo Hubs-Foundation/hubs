@@ -4,6 +4,7 @@
 
 export const AVAILABLE_LOCALES = {
   en: "English",
+  de: "Deutsch",
   zh: "简体中文",
   jp: "日本語"
 };
