@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
-import ClientInfoDialog from "../client-info-dialog";
+import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
 
 export function userFromPresence(sessionId, presence, micPresences, mySessionId) {
   const meta = presence.metas[presence.metas.length - 1];
@@ -110,7 +110,7 @@ export function PeopleSidebarContainer({
       );
     } else {
       return (
-        <ClientInfoDialog
+        <UserProfileSidebarContainer
           user={selectedPerson}
           hubChannel={hubChannel}
           performConditionalSignIn={performConditionalSignIn}

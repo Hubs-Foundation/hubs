@@ -13,11 +13,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import styles from "../assets/stylesheets/media-browser.scss";
-import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
+import { pushHistoryPath, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
 import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import MediaTiles from "./media-tiles";
+import { AvatarUrlModalContainer } from "./room/AvatarUrlModalContainer";
+import { SceneUrlModalContainer } from "./room/SceneUrlModalContainer";
+import { ObjectUrlModalContainer } from "./room/ObjectUrlModalContainer";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -83,7 +86,10 @@ class MediaBrowser extends Component {
     intl: PropTypes.object,
     hubChannel: PropTypes.object,
     onMediaSearchResultEntrySelected: PropTypes.func,
-    performConditionalSignIn: PropTypes.func
+    performConditionalSignIn: PropTypes.func,
+    showNonHistoriedDialog: PropTypes.func.isRequired,
+    scene: PropTypes.object.isRequired,
+    store: PropTypes.object.isRequired
   };
 
   state = { query: "", facets: [], showNav: true, selectNextResult: false, clearStashedQueryOnClose: false };
@@ -229,11 +235,17 @@ class MediaBrowser extends Component {
   };
 
   showCustomMediaDialog = source => {
-    const isSceneApiType = source === "scenes";
+    const { scene, store, hubChannel } = this.props;
     const isAvatarApiType = source === "avatars";
     this.pushExitMediaBrowserHistory(!isAvatarApiType);
-    const dialog = isSceneApiType ? "change_scene" : isAvatarApiType ? "avatar_url" : "create";
-    pushHistoryState(this.props.history, "modal", dialog);
+
+    if (source === "scenes") {
+      this.props.showNonHistoriedDialog(SceneUrlModalContainer, { hubChannel });
+    } else if (isAvatarApiType) {
+      this.props.showNonHistoriedDialog(AvatarUrlModalContainer, { scene, store });
+    } else {
+      this.props.showNonHistoriedDialog(ObjectUrlModalContainer, { scene });
+    }
   };
 
   close = () => {
