@@ -26,7 +26,6 @@ import { getMessages } from "../utils/i18n";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowser from "./media-browser";
 
-import InviteDialog from "./invite-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
@@ -1483,23 +1482,6 @@ class UIRoot extends Component {
                         onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                       />
                     )}
-                  <StateRoute
-                    stateKey="overlay"
-                    stateValue="invite"
-                    history={this.props.history}
-                    render={() => (
-                      <InviteDialog
-                        allowShare={!!navigator.share}
-                        entryCode={this.props.hub.entry_code}
-                        hubId={this.props.hub.hub_id}
-                        isModal={true}
-                        onClose={() => {
-                          this.props.history.goBack();
-                          exit2DInterstitialAndEnterVR();
-                        }}
-                      />
-                    )}
-                  />
                   <TipContainer
                     inLobby={watching}
                     inRoom={entered}

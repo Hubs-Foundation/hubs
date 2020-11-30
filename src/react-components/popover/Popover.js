@@ -20,7 +20,8 @@ export function Popover({
   initiallyVisible,
   disableFullscreen,
   isVisible,
-  onChangeVisible
+  onChangeVisible,
+  popoverApiRef
 }) {
   const [_visible, _setVisible] = useState(initiallyVisible);
   const visible = isVisible === undefined ? _visible : isVisible;
@@ -40,8 +41,20 @@ export function Popover({
   });
   const breakpoint = useCssBreakpoints();
   const fullscreen = !disableFullscreen && breakpoint === "sm";
+  const openPopover = useCallback(() => setVisible(true), [setVisible]);
   const closePopover = useCallback(() => setVisible(false), [setVisible]);
   const togglePopover = useCallback(() => setVisible(visible => !visible), [setVisible]);
+
+  useEffect(
+    () => {
+      popoverApiRef.current = {
+        openPopover,
+        closePopover,
+        togglePopover
+      };
+    },
+    [popoverApiRef, openPopover, closePopover, togglePopover]
+  );
 
   useEffect(
     () => {
@@ -136,7 +149,8 @@ Popover.propTypes = {
   title: PropTypes.string.isRequired,
   children: PropTypes.func.isRequired,
   content: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
-  disableFullscreen: PropTypes.bool
+  disableFullscreen: PropTypes.bool,
+  popoverApiRef: PropTypes.object
 };
 
 Popover.defaultProps = {
