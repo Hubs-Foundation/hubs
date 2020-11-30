@@ -130,6 +130,13 @@ AFRAME.registerComponent("stats-plus", {
   tick(time) {
     const stats = this.stats;
     if (!this.statsEl) return;
+    if (this.showFPSCounter !== window.APP.store.state.preferences.showFPSCounter) {
+      this.showFPSCounter = window.APP.store.state.preferences.showFPSCounter;
+      this.fpsEl.style.display = this.showFPSCounter ? "block" : "none";
+    }
+    if (!this.showFPSCounter) {
+      return;
+    }
     if (this.data || this.vrStatsEnabled) {
       // Update rStats
       stats("rAF").tick();
@@ -180,10 +187,6 @@ AFRAME.registerComponent("stats-plus", {
         ].join("\n")
       );
       this.lastUpdate = time;
-    }
-    if (this.showFPSCounter !== window.APP.store.state.preferences.showFPSCounter) {
-      this.showFPSCounter = window.APP.store.state.preferences.showFPSCounter;
-      this.fpsEl.style.display = this.showFPSCounter ? "block" : "none";
     }
   },
   onEnterVr() {
