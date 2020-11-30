@@ -1,15 +1,16 @@
 // this script syncs changes made in en.json to any other .json files found in this directory
 
 const fs = require("fs");
+const path = require("path");
 
 const localeFiles = [];
-fs.readdirSync(".").forEach(file => {
+fs.readdirSync(__dirname).forEach(file => {
   if (file.endsWith(".json") && file !== "en.json") {
-    localeFiles.push(file);
+    localeFiles.push(path.resolve(__dirname, file));
   }
 });
 
-const raw_default_en = fs.readFileSync("en.json");
+const raw_default_en = fs.readFileSync(path.resolve(__dirname, "en.json"));
 const parsed_default_en = JSON.parse(raw_default_en);
 
 for (let i = 0; i < localeFiles.length; i++) {
@@ -27,12 +28,20 @@ for (let i = 0; i < localeFiles.length; i++) {
 
   const output = {};
 
+  const keysToRemove = new Set(Object.keys(parsed_locale));
+
   for (const key in parsed_default_en) {
     if (parsed_locale[key]) {
       output[key] = parsed_locale[key];
     } else {
       output[key] = parsed_default_en[key];
     }
+
+    keysToRemove.delete(key);
+  }
+
+  for (const key of keysToRemove) {
+    delete output[key];
   }
 
   const stringified_output = JSON.stringify(output, null, 2);

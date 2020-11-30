@@ -977,17 +977,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       entryManager.exitScene();
       remountUI({ roomUnavailableReason: reason || ExitReason.exited });
     },
-    initialIsSubscribed: subscriptions.isSubscribed(),
-    activeTips: scene.systems.tips.activeTips
+    initialIsSubscribed: subscriptions.isSubscribed()
   });
 
   scene.addEventListener("action_focus_chat", () => {
     const chatFocusTarget = document.querySelector(".chat-focus-target");
     chatFocusTarget && chatFocusTarget.focus();
-  });
-
-  scene.addEventListener("tips_changed", e => {
-    remountUI({ activeTips: e.detail });
   });
 
   scene.addEventListener("leave_room_requested", () => {

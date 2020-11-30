@@ -12,6 +12,7 @@ import {
 } from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
+import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 
@@ -154,7 +155,7 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, discordBridges, occupantCount, onClose }) {
+export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, presences, occupantCount, onClose }) {
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
@@ -190,8 +191,8 @@ export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, discordBr
     },
     [messageGroups, scrolledToBottom, setMessagesRead]
   );
-
   // TODO: Add i18n for this placeholder
+  const discordBridges = discordBridgesForPresences(presences);
   const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
   const occupantSnippet = `${occupantCount - 1} other${occupantCount > 2 ? "s" : ""}`;
   const placeholder =
@@ -233,7 +234,7 @@ export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, discordBr
 
 ChatSidebarContainer.propTypes = {
   canSpawnMessages: PropTypes.bool,
-  discordBridges: PropTypes.array.isRequired,
+  presences: PropTypes.object.isRequired,
   occupantCount: PropTypes.number.isRequired,
   onUploadFile: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired
