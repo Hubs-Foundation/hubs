@@ -96,7 +96,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           description="Accepts glb, png, jpg, gif, mp4, and mp3 files"
         />
         <Button type="submit" preset="accept">
-          <FormattedMessage id="avatar-url-dialog.apply" />
+          Create Object
         </Button>
       </Column>
     </Modal>
