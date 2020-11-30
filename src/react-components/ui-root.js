@@ -1482,7 +1482,6 @@ class UIRoot extends Component {
                         onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                       />
                     )}
-                  {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
                   <TipContainer
                     inLobby={watching}
                     inRoom={entered}
