@@ -316,6 +316,7 @@
   "preferences.locale": "Language",
   "preferences.onlyShowNametagsInFreeze": "Only show nametags while frozen",
   "preferences.animateWaypointTransitions": "Animate waypoint transitions",
+  "preferences.showFPSCounter": "Show FPS Counter",
   "preferences.maxResolution": "Max Resolution",
   "preferences.materialQualitySetting": "Material quality",
   "preferences.enableDynamicShadows": "Enable Dynamic Shadows",

@@ -316,6 +316,7 @@
   "preferences.locale": "Language",
   "preferences.onlyShowNametagsInFreeze": "当停止不动时只显示用户标签",
   "preferences.animateWaypointTransitions": "Animate waypoint transitions",
+  "preferences.showFPSCounter": "Show FPS Counter",
   "preferences.maxResolution": "最大分辨率 (宽 x 高 以像素为单位)",
   "preferences.materialQualitySetting": "材质质量 (需要重启)",
   "preferences.enableDynamicShadows": "Enable Dynamic Shadows",

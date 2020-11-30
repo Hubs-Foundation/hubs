@@ -316,6 +316,7 @@
   "preferences.locale": "Idioma",
   "preferences.onlyShowNametagsInFreeze": "Mostrar nomes de usuário apenas quando congelado",
   "preferences.animateWaypointTransitions": "Transições de pontos de referência animados",
+  "preferences.showFPSCounter": "Show FPS Counter",
   "preferences.maxResolution": "Resolução máxima",
   "preferences.materialQualitySetting": "Qualidade do material",
   "preferences.enableDynamicShadows": "Habilitar Sombras Dinâmicas",

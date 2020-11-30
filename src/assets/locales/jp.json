@@ -316,6 +316,7 @@
   "preferences.locale": "言語",
   "preferences.onlyShowNametagsInFreeze": "フリーズ中の名前タグのみを表示",
   "preferences.animateWaypointTransitions": "ウェイポイントトランジションをアニメーション化",
+  "preferences.showFPSCounter": "Show FPS Counter",
   "preferences.maxResolution": "最大解像度",
   "preferences.materialQualitySetting": "マテリアル品質",
   "preferences.enableDynamicShadows": "ダイナミックシャドウを有効にする",
