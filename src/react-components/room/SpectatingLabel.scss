@@ -1,0 +1,12 @@
+@use "../styles/theme.scss";
+
+:local(.label) {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  color: theme.$white;
+  white-space: wrap;
+  text-shadow: 0px 0px 3px theme.$black;
+}

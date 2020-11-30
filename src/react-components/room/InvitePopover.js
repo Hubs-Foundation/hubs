@@ -23,7 +23,7 @@ InvitePopoverContent.propTypes = {
   embed: PropTypes.string.isRequired
 };
 
-export function InvitePopoverButton({ url, code, embed, initiallyVisible, ...rest }) {
+export function InvitePopoverButton({ url, code, embed, initiallyVisible, popoverApiRef, ...rest }) {
   return (
     <Popover
       title="Invite"
@@ -31,6 +31,7 @@ export function InvitePopoverButton({ url, code, embed, initiallyVisible, ...res
       placement="top-start"
       offsetDistance={28}
       initiallyVisible={initiallyVisible}
+      popoverApiRef={popoverApiRef}
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
         <ToolbarButton
@@ -48,5 +49,6 @@ export function InvitePopoverButton({ url, code, embed, initiallyVisible, ...res
 
 InvitePopoverButton.propTypes = {
   initiallyVisible: PropTypes.bool,
+  popoverApiRef: PropTypes.object,
   ...InvitePopoverContent.propTypes
 };

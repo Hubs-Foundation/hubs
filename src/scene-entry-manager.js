@@ -19,7 +19,6 @@ import {
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
-import { pushHistoryState } from "./utils/history";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
 const isIOS = AFRAME.utils.device.isIOS();
@@ -320,11 +319,6 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_spawn", () => {
       handleExitTo2DInterstitial(false, () => window.APP.mediaSearchStore.pushExitMediaBrowserHistory());
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
-    });
-
-    this.scene.addEventListener("action_invite", () => {
-      handleExitTo2DInterstitial(false, () => this.history.goBack());
-      pushHistoryState(this.history, "overlay", "invite");
     });
 
     this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
