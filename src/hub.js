@@ -219,10 +219,20 @@ import detectConcurrentLoad from "./utils/concurrent-load-detector";
 import qsTruthy from "./utils/qs_truthy";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
+import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
 NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
+
+let isOAuthModal = false;
+
+// OAuth popup handler
+// TODO: Replace with a new oauth callback route that has this postMessage script.
+if (window.opener && window.opener.doingTwitterOAuth) {
+  window.opener.postMessage("oauth-successful");
+  isOAuthModal = true;
+}
 
 const isBotMode = qsTruthy("bot");
 const isTelemetryDisabled = qsTruthy("disable_telemetry");
@@ -233,7 +243,10 @@ if (!isBotMode && !isTelemetryDisabled) {
 }
 
 disableiOSZoom();
-detectConcurrentLoad();
+
+if (!isOAuthModal) {
+  detectConcurrentLoad();
+}
 
 function setupLobbyCamera() {
   const camera = document.getElementById("scene-preview-node");
@@ -283,7 +296,9 @@ function mountUI(props = {}) {
       <Router history={history}>
         <Route
           render={routeProps =>
-            props.roomUnavailableReason ? (
+            props.showOAuthScreen ? (
+              <OAuthScreenContainer oauthInfo={props.oauthInfo} />
+            ) : props.roomUnavailableReason ? (
               <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
             ) : (
               <UIRoot
@@ -717,6 +732,10 @@ function checkForAccountRequired() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if (isOAuthModal) {
+    return;
+  }
+
   await store.initProfile();
 
   const canvas = document.querySelector(".a-canvas");
@@ -806,15 +825,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const performConditionalSignIn = async (predicate, action, messageId, onFailure) => {
     if (predicate()) return action();
 
-    const signInContinueTextId = scene.is("vr-mode") ? "entry.return-to-vr" : "dialog.close";
-
     await handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
 
     remountUI({
       showSignInDialog: true,
       signInMessageId: `sign-in.${messageId}`,
       signInCompleteMessageId: `sign-in.${messageId}-complete`,
-      signInContinueTextId,
       onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
         let actionError = null;
@@ -849,54 +865,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => hubChannel.can("update_hub"),
       () => hubChannel.updateScene(sceneInfo),
       "change-scene"
-    );
-  });
-
-  scene.addEventListener("action_media_tweet", async e => {
-    let isInModal = false;
-    let isInOAuth = false;
-
-    const exitOAuth = () => {
-      isInOAuth = false;
-      store.clearOnLoadActions();
-      remountUI({ showOAuthDialog: false, oauthInfo: null });
-    };
-
-    await handleExitTo2DInterstitial(true, () => {
-      if (isInModal) history.goBack();
-      if (isInOAuth) exitOAuth();
-    });
-
-    performConditionalSignIn(
-      () => hubChannel.signedIn,
-      async () => {
-        // Strip el from stored payload because it won't serialize into the store.
-        const serializableDetail = {};
-        Object.assign(serializableDetail, e.detail);
-        delete serializableDetail.el;
-
-        if (hubChannel.can("tweet")) {
-          isInModal = true;
-          pushHistoryState(history, "modal", "tweet", serializableDetail);
-        } else {
-          if (e.detail.el) {
-            // Pin the object if we have to go through OAuth, since the page will refresh and
-            // the object will otherwise be removed
-            e.detail.el.setAttribute("pinnable", "pinned", true);
-          }
-
-          const url = await hubChannel.getTwitterOAuthURL();
-
-          isInOAuth = true;
-          store.enqueueOnLoadAction("emit_scene_event", { event: "action_media_tweet", detail: serializableDetail });
-          remountUI({
-            showOAuthDialog: true,
-            oauthInfo: [{ type: "twitter", url: url }],
-            onCloseOAuthDialog: () => exitOAuth()
-          });
-        }
-      },
-      "tweet"
     );
   });
 
@@ -1009,17 +977,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       entryManager.exitScene();
       remountUI({ roomUnavailableReason: reason || ExitReason.exited });
     },
-    initialIsSubscribed: subscriptions.isSubscribed(),
-    activeTips: scene.systems.tips.activeTips
+    initialIsSubscribed: subscriptions.isSubscribed()
   });
 
   scene.addEventListener("action_focus_chat", () => {
     const chatFocusTarget = document.querySelector(".chat-focus-target");
     chatFocusTarget && chatFocusTarget.focus();
-  });
-
-  scene.addEventListener("tips_changed", e => {
-    remountUI({ activeTips: e.detail });
   });
 
   scene.addEventListener("leave_room_requested", () => {
@@ -1503,7 +1466,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         remountUI({ roomUnavailableReason: ExitReason.closed });
       } else if (res.reason === "oauth_required") {
         entryManager.exitScene();
-        remountUI({ oauthInfo: res.oauth_info, showOAuthDialog: true });
+        remountUI({ oauthInfo: res.oauth_info, showOAuthScreen: true });
       } else if (res.reason === "join_denied") {
         entryManager.exitScene();
         remountUI({ roomUnavailableReason: ExitReason.denied });

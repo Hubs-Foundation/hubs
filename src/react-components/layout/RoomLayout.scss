@@ -98,3 +98,7 @@
     }
   }
 }
+
+:local(.streaming) {
+  border: 3px solid theme.$red;
+}

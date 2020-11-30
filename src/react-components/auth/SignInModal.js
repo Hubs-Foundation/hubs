@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { CloseButton } from "../input/CloseButton";
 import { Modal } from "../modal/Modal";
 import { FormattedMessage } from "react-intl";
-import styles from "./SignInModal.scss";
 import { Button } from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
@@ -33,7 +32,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, showPrivacy, privacyU
   );
 
   return (
-    <Column center padding as="form" onSubmit={onSubmitForm} className={styles.modalContent}>
+    <Column center padding as="form" onSubmit={onSubmitForm}>
       <p>{message || <FormattedMessage id="sign-in.prompt" />}</p>
       <TextInputField
         name="email"
@@ -44,22 +43,24 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, showPrivacy, privacyU
         placeholder="example@example.com"
       />
       {(showTerms || showPrivacy) && (
-        <b className={styles.terms}>
-          By proceeding, you agree to the{" "}
-          {showTerms && (
-            <>
-              <a rel="noopener noreferrer" target="_blank" href={termsUrl}>
-                terms of use
-              </a>{" "}
-            </>
-          )}
-          {showTerms && showPrivacy && "and "}
-          {showPrivacy && (
-            <a rel="noopener noreferrer" target="_blank" href={privacyUrl}>
-              privacy notice
-            </a>
-          )}.
-        </b>
+        <p>
+          <small>
+            By proceeding, you agree to the{" "}
+            {showTerms && (
+              <>
+                <a rel="noopener noreferrer" target="_blank" href={termsUrl}>
+                  terms of use
+                </a>{" "}
+              </>
+            )}
+            {showTerms && showPrivacy && "and "}
+            {showPrivacy && (
+              <a rel="noopener noreferrer" target="_blank" href={privacyUrl}>
+                privacy notice
+              </a>
+            )}.
+          </small>
+        </p>
       )}
       <Button preset="accept" type="submit">
         Next
@@ -84,16 +85,18 @@ SubmitEmail.propTypes = {
 
 export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
   return (
-    <Column center padding className={styles.modalContent}>
+    <Column center padding>
       <p>
         <FormattedMessage id="sign-in.auth-started" values={{ email }} />
       </p>
       {showNewsletterSignup && (
-        <p className={styles.newsletter}>
-          Want Hubs news sent to your inbox?<br />
-          <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-            Subscribe for updates
-          </a>
+        <p>
+          <small>
+            Want Hubs news sent to your inbox?<br />
+            <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
+              Subscribe for updates
+            </a>
+          </small>
         </p>
       )}
       <Button preset="cancel" onClick={onCancel}>
@@ -109,11 +112,12 @@ WaitForVerification.propTypes = {
   onCancel: PropTypes.func.isRequired
 };
 
-export function SignInComplete({ message, continueText, onContinue }) {
+export function SignInComplete({ message, onContinue }) {
   return (
-    <Column center padding className={styles.modalContent}>
-      <b>{message}</b>
-      <p>{continueText}</p>
+    <Column center padding>
+      <p>
+        <b>{message}</b>
+      </p>
       <Button preset="green" onClick={onContinue}>
         Continue
       </Button>
@@ -123,7 +127,6 @@ export function SignInComplete({ message, continueText, onContinue }) {
 
 SignInComplete.propTypes = {
   message: PropTypes.string.isRequired,
-  continueText: PropTypes.string.isRequired,
   onContinue: PropTypes.func.isRequired
 };
 

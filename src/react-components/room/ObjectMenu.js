@@ -43,7 +43,7 @@ export function ObjectMenu({
             <IconButton className={styles.closeButton} onClick={onClose}>
               <CloseIcon width={16} height={16} />
             </IconButton>
-            <h1>{title}</h1>
+            <h5>{title}</h5>
           </div>
           <div className={styles.menu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>
         </div>

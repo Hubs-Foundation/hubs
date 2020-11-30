@@ -4,7 +4,7 @@ import configs from "../../utils/configs";
 import { SignInModal, SignInStep, SubmitEmail, WaitForVerification, SignInComplete } from "./SignInModal";
 
 // TODO: Migrate to use AuthContext
-export function RoomSignInModalContainer({ onClose, step, onSubmitEmail, message, continueText, onContinue }) {
+export function RoomSignInModalContainer({ onClose, step, onSubmitEmail, message, onContinue }) {
   const [cachedEmail, setCachedEmail] = useState();
 
   return (
@@ -30,9 +30,7 @@ export function RoomSignInModalContainer({ onClose, step, onSubmitEmail, message
           showNewsletterSignup={configs.feature("show_newsletter_signup")}
         />
       )}
-      {step === SignInStep.complete && (
-        <SignInComplete message={message} continueText={continueText} onContinue={onContinue} />
-      )}
+      {step === SignInStep.complete && <SignInComplete message={message} onContinue={onContinue} />}
     </SignInModal>
   );
 }
@@ -42,6 +40,5 @@ RoomSignInModalContainer.propTypes = {
   onSubmitEmail: PropTypes.func,
   step: PropTypes.string,
   message: PropTypes.string,
-  continueText: PropTypes.string,
   onContinue: PropTypes.func
 };

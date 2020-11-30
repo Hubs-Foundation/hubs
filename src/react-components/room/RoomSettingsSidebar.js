@@ -129,34 +129,32 @@ export function RoomSettingsSidebar({
           />
         </RadioInputField>
         {entryMode === "invite" && (
-          <div className={styles.inviteLinkContainer}>
-            <CopyableTextInputField
-              label="Invite link"
-              disabled={fetchingInvite}
-              value={fetchingInvite ? "..." : inviteUrl}
-              buttonPreset="blue"
-              description={
-                !fetchingInvite &&
-                (showRevokeConfirmation ? (
-                  <>
-                    <FormattedMessage id="room-settings.revoke-confirm" />{" "}
-                    <IconButton className={styles.confirmRevokeButton} onClick={confirmRevokeInvite}>
-                      <FormattedMessage id="room-settings.revoke-confirm-yes" />
-                    </IconButton>{" "}
-                    /{" "}
-                    <IconButton className={styles.confirmRevokeButton} onClick={cancelConfirmRevokeInvite}>
-                      <FormattedMessage id="room-settings.revoke-confirm-no" />
-                    </IconButton>
-                  </>
-                ) : (
-                  <IconButton className={styles.confirmRevokeButton} onClick={revokeInvite}>
-                    <FormattedMessage id="room-settings.revoke" />
+          <CopyableTextInputField
+            label="Invite link"
+            disabled={fetchingInvite}
+            value={fetchingInvite ? "..." : inviteUrl}
+            buttonPreset="blue"
+            description={
+              !fetchingInvite &&
+              (showRevokeConfirmation ? (
+                <>
+                  <FormattedMessage id="room-settings.revoke-confirm" />{" "}
+                  <IconButton className={styles.confirmRevokeButton} onClick={confirmRevokeInvite}>
+                    <FormattedMessage id="room-settings.revoke-confirm-yes" />
+                  </IconButton>{" "}
+                  /{" "}
+                  <IconButton className={styles.confirmRevokeButton} onClick={cancelConfirmRevokeInvite}>
+                    <FormattedMessage id="room-settings.revoke-confirm-no" />
                   </IconButton>
-                ))
-              }
-              fullWidth
-            />
-          </div>
+                </>
+              ) : (
+                <IconButton className={styles.confirmRevokeButton} onClick={revokeInvite}>
+                  <FormattedMessage id="room-settings.revoke" />
+                </IconButton>
+              ))
+            }
+            fullWidth
+          />
         )}
         {showPublicRoomSetting && (
           <ToggleInput

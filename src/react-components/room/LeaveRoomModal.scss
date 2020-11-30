@@ -1,9 +1,0 @@
-@use "../styles/theme.scss";
-
-:local(.leave-room-modal) {
-  line-height: 1.25;
-
-  @media(min-width: theme.$breakpoint-md) {
-    justify-content: center;
-  }
-}

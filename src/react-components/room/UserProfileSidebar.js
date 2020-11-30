@@ -33,7 +33,6 @@ export function UserProfileSidebar({
       title={identityName ? `${displayName} (${identityName})` : displayName}
       beforeTitle={showBackButton ? <BackButton onClick={onBack} /> : <CloseButton onClick={onClose} />}
       className={className}
-      contentClassName={styles.content}
       {...rest}
     >
       <Column center padding>

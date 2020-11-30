@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./LeaveRoomModal.scss";
 import { useIntl, defineMessages } from "react-intl";
 import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
@@ -39,7 +38,7 @@ export function LeaveRoomModal({ reason, destinationUrl, onClose }) {
 
   return (
     <Modal title="Leave Room" beforeTitle={<CloseButton onClick={onClose} />}>
-      <Column padding center grow className={styles.leaveRoomModal}>
+      <Column padding center centerMd="both" grow>
         <p>{intl.formatMessage(reasonMessages[reason])}</p>
         <Button as="a" preset="cancel" href={destinationUrl} rel="noopener noreferrer">
           {intl.formatMessage(confirmationMessages[reason])}

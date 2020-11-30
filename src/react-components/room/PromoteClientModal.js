@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { Modal } from "../modal/Modal";
-import styles from "./PromoteClientModal.scss";
 import { Button } from "../input/Button";
 import { CloseButton } from "../input/CloseButton";
 import { Column } from "../layout/Column";
@@ -10,7 +9,7 @@ import { Column } from "../layout/Column";
 export function PromoteClientModal({ onClose, onConfirm, displayName }) {
   return (
     <Modal title="Promote User" beforeTitle={<CloseButton onClick={onClose} />}>
-      <Column center padding className={styles.modalContent}>
+      <Column center padding>
         <p>
           <FormattedMessage id="promote.message" />
         </p>
