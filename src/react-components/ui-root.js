@@ -33,6 +33,7 @@ import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
+import maskEmail from "../utils/mask-email";
 
 import qsTruthy from "../utils/qs_truthy";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
@@ -414,8 +415,8 @@ class UIRoot extends Component {
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
           message: getMessages()[signInCompleteMessageId],
-          onClose: onContinueAfterSignIn,
-          onContinue: onContinueAfterSignIn
+          onClose: onContinueAfterSignIn || this.closeDialog,
+          onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
       onClose: onContinueAfterSignIn
@@ -1232,8 +1233,26 @@ class UIRoot extends Component {
     const moreMenu = [
       {
         id: "user",
-        label: "You",
+        label:
+          "You" +
+          (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
         items: [
+          this.state.signedIn
+            ? {
+                id: "sign-out",
+                label: "Sign Out",
+                icon: LeaveIcon,
+                onClick: async () => {
+                  await this.props.authChannel.signOut(this.props.hubChannel);
+                  this.setState({ signedIn: false });
+                }
+              }
+            : {
+                id: "sign-in",
+                label: "Sign In",
+                icon: EnterIcon,
+                onClick: () => this.showContextualSignInDialog()
+              },
           canCreateRoom && {
             id: "create-room",
             label: "Create Room",
