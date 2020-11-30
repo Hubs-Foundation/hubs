@@ -17,7 +17,7 @@ export function InvitePopoverContainer({ hub, scene, ...rest }) {
     () => {
       function onInviteButtonClicked() {
         handleExitTo2DInterstitial(true, () => {}).then(() => {
-          popoverApiRef.openPopover();
+          popoverApiRef.current.openPopover();
         });
       }
 

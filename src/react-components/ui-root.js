@@ -1589,7 +1589,7 @@ class UIRoot extends Component {
                 )
               }
               modal={this.state.dialog || (renderEntryFlow && entryDialog)}
-              toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
+              toolbarLeft={<InvitePopoverContainer hub={this.props.hub} scene={this.props.scene} />}
               toolbarCenter={
                 <>
                   {watching && (

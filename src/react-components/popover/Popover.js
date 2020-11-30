@@ -47,6 +47,10 @@ export function Popover({
 
   useEffect(
     () => {
+      if (!popoverApiRef) {
+        return;
+      }
+
       popoverApiRef.current = {
         openPopover,
         closePopover,
