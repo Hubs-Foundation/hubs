@@ -89,7 +89,7 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
   );
 }
 
-export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit }) {
+export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChangeScene }) {
   return (
     <Sidebar
       title="Room"
@@ -99,7 +99,15 @@ export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit }) {
       <Column padding>
         <InputField label="Name">{room.name}</InputField>
         {room.description && <InputField label="Description">{room.description}</InputField>}
-        {room.scene && <SceneInfo accountId={accountId} scene={room.scene} showAttributions />}
+        {room.scene && (
+          <SceneInfo
+            accountId={accountId}
+            scene={room.scene}
+            showAttributions
+            canChangeScene={canEdit}
+            onChangeScene={onChangeScene}
+          />
+        )}
       </Column>
     </Sidebar>
   );
@@ -110,5 +118,6 @@ RoomSidebar.propTypes = {
   room: PropTypes.object.isRequired,
   onClose: PropTypes.func,
   canEdit: PropTypes.bool,
-  onEdit: PropTypes.func
+  onEdit: PropTypes.func,
+  onChangeScene: PropTypes.func
 };

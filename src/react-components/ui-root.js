@@ -892,6 +892,17 @@ class UIRoot extends Component {
     });
   };
 
+  onChangeScene = () => {
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.can("update_hub"),
+      () => {
+        showFullScreenIfAvailable();
+        this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
+      },
+      "change-scene"
+    );
+  };
+
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
@@ -1574,6 +1585,7 @@ class UIRoot extends Component {
                         canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
                         onEdit={() => this.setSidebar("room-info-settings")}
                         onClose={() => this.setSidebar(null)}
+                        onChangeScene={this.onChangeScene}
                       />
                     )}
                     {this.state.sidebarId === "room-info-settings" && (
@@ -1582,6 +1594,7 @@ class UIRoot extends Component {
                         hubChannel={this.props.hubChannel}
                         showBackButton
                         onClose={() => this.setSidebar("room-info")}
+                        onChangeScene={this.onChangeScene}
                       />
                     )}
                     {this.state.sidebarId === "room-settings" && (
@@ -1590,16 +1603,7 @@ class UIRoot extends Component {
                         accountId={this.props.sessionId}
                         hubChannel={this.props.hubChannel}
                         onClose={() => this.setSidebar(null)}
-                        onChangeScene={() => {
-                          this.props.performConditionalSignIn(
-                            () => this.props.hubChannel.can("update_hub"),
-                            () => {
-                              showFullScreenIfAvailable();
-                              this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
-                            },
-                            "change-scene"
-                          );
-                        }}
+                        onChangeScene={this.onChangeScene}
                       />
                     )}
                   </>
