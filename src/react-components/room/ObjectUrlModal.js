@@ -5,7 +5,6 @@ import { CloseButton } from "../input/CloseButton";
 import { TextInputField } from "../input/TextInputField";
 import { useForm } from "react-hook-form";
 import { Button } from "../input/Button";
-import { FormattedMessage } from "react-intl";
 import { Column } from "../layout/Column";
 import { IconButton } from "../input/IconButton";
 import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
