@@ -37,7 +37,6 @@ export function MediaBrowser({
   hasPrevious,
   onNextPage,
   onPreviousPage,
-  isVariableWidth,
   children
 }) {
   return (
