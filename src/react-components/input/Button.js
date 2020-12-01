@@ -7,13 +7,13 @@ import textInputStyles from "./TextInput.scss";
 export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
 export const Button = memo(
-  forwardRef(({ as, preset, className, children, ...rest }, ref) => {
+  forwardRef(({ as, sm, preset, className, children, ...rest }, ref) => {
     const ButtonComponent = as;
     const buttonProps = ButtonComponent === "button" ? { type: "button" } : {};
 
     return (
       <ButtonComponent
-        className={classNames(styles.button, textInputStyles.button, styles[preset], className)}
+        className={classNames(styles.button, textInputStyles.button, styles[preset], { [styles.sm]: sm }, className)}
         {...buttonProps}
         {...rest}
         ref={ref}
@@ -28,7 +28,8 @@ Button.propTypes = {
   as: PropTypes.elementType,
   preset: PropTypes.oneOf(presets),
   className: PropTypes.string,
-  children: PropTypes.node
+  children: PropTypes.node,
+  sm: PropTypes.bool
 };
 
 Button.defaultProps = {

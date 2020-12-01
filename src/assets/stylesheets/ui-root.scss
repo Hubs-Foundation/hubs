@@ -256,12 +256,12 @@ body.vr-mode {
 }
 
 :local(.avatar-editor) {
-  position:absolute;
-  background: var(--full-panel-background-color);
-  top: 0;
+  position: fixed;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--full-panel-background-color);
   z-index: 11;
   pointer-events: auto;
 }

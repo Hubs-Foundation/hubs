@@ -94,3 +94,14 @@
     box-shadow: 0 0 0 2px theme.$black;
   }
 }
+
+:local(.lg) {
+  @media(min-width: theme.$breakpoint-md) {
+    font-size: theme.$font-size-sm;
+
+    svg {
+      height: 24px;
+      width: 24px;
+    }
+  }
+}

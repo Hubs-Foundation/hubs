@@ -11,9 +11,10 @@ import styles from "./HomePage.scss";
 import discordLogoUrl from "../../assets/images/discord-logo-small.png";
 import { AuthContext } from "../auth/AuthContext";
 import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
-import { MediaGrid } from "./MediaGrid";
-import { RoomTile } from "./RoomTile";
+import { MediaGrid } from "../room/MediaGrid";
+import { MediaTile } from "../room/MediaTiles";
 import { PageContainer } from "../layout/PageContainer";
+import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
 
 export function HomePage() {
   const auth = useContext(AuthContext);
@@ -109,7 +110,19 @@ export function HomePage() {
       )}
       {featuredRooms.length > 0 && (
         <section className={styles.featuredRooms}>
-          <MediaGrid>{featuredRooms.map(room => <RoomTile key={room.id} room={room} />)}</MediaGrid>
+          <MediaGrid center>
+            {featuredRooms.map(room => {
+              return (
+                <MediaTile
+                  key={room.id}
+                  entry={room}
+                  processThumbnailUrl={(entry, width, height) =>
+                    scaledThumbnailUrlFor(entry.images.preview.url, width, height)
+                  }
+                />
+              );
+            })}
+          </MediaGrid>
         </section>
       )}
       <section>

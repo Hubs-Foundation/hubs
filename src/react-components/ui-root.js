@@ -24,7 +24,7 @@ import { getCurrentStreamer } from "../utils/component-utils";
 
 import { getMessages } from "../utils/i18n";
 import ProfileEntryPanel from "./profile-entry-panel";
-import MediaBrowser from "./media-browser";
+import MediaBrowserContainer from "./media-browser";
 
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
@@ -1447,7 +1447,7 @@ class UIRoot extends Component {
             )}
             {!this.state.dialog &&
               showMediaBrowser && (
-                <MediaBrowser
+                <MediaBrowserContainer
                   history={this.props.history}
                   mediaSearchStore={this.props.mediaSearchStore}
                   hubChannel={this.props.hubChannel}

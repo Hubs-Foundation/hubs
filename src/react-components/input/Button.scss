@@ -142,3 +142,10 @@
 :global(.keyboard-user) :local(.button):focus {
   border-color: transparent;
 }
+
+:local(.sm) {
+  height: 32px;
+  min-height: 32px;
+  min-width: 100px;
+  padding: 0 8px;
+}
