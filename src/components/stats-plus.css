@@ -14,10 +14,11 @@
   font-family: monospace;
   cursor: pointer;
   position: absolute;
-  bottom: 0px;
+  bottom: 96px;
   right: 2px;
   padding: 4px 8px;
-  color: #aaa;
+  color: #ffffff;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
   font-size: 10px;
   -moz-user-select: none;
   -webkit-user-select: none;

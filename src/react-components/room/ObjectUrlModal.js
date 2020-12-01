@@ -5,7 +5,6 @@ import { CloseButton } from "../input/CloseButton";
 import { TextInputField } from "../input/TextInputField";
 import { useForm } from "react-hook-form";
 import { Button } from "../input/Button";
-import { FormattedMessage } from "react-intl";
 import { Column } from "../layout/Column";
 import { IconButton } from "../input/IconButton";
 import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
@@ -96,7 +95,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           description="Accepts glb, png, jpg, gif, mp4, and mp3 files"
         />
         <Button type="submit" preset="accept">
-          <FormattedMessage id="avatar-url-dialog.apply" />
+          Create Object
         </Button>
       </Column>
     </Modal>

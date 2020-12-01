@@ -26,7 +26,6 @@ import { getMessages } from "../utils/i18n";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowserContainer from "./media-browser";
 
-import InviteDialog from "./invite-dialog.js";
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
@@ -34,6 +33,7 @@ import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
+import maskEmail from "../utils/mask-email";
 
 import qsTruthy from "../utils/qs_truthy";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
@@ -415,8 +415,8 @@ class UIRoot extends Component {
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
           message: getMessages()[signInCompleteMessageId],
-          onClose: onContinueAfterSignIn,
-          onContinue: onContinueAfterSignIn
+          onClose: onContinueAfterSignIn || this.closeDialog,
+          onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
       onClose: onContinueAfterSignIn
@@ -892,6 +892,17 @@ class UIRoot extends Component {
     });
   };
 
+  onChangeScene = () => {
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.can("update_hub"),
+      () => {
+        showFullScreenIfAvailable();
+        this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
+      },
+      "change-scene"
+    );
+  };
+
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
@@ -1233,8 +1244,26 @@ class UIRoot extends Component {
     const moreMenu = [
       {
         id: "user",
-        label: "You",
+        label:
+          "You" +
+          (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
         items: [
+          this.state.signedIn
+            ? {
+                id: "sign-out",
+                label: "Sign Out",
+                icon: LeaveIcon,
+                onClick: async () => {
+                  await this.props.authChannel.signOut(this.props.hubChannel);
+                  this.setState({ signedIn: false });
+                }
+              }
+            : {
+                id: "sign-in",
+                label: "Sign In",
+                icon: EnterIcon,
+                onClick: () => this.showContextualSignInDialog()
+              },
           canCreateRoom && {
             id: "create-room",
             label: "Create Room",
@@ -1483,23 +1512,6 @@ class UIRoot extends Component {
                         onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                       />
                     )}
-                  <StateRoute
-                    stateKey="overlay"
-                    stateValue="invite"
-                    history={this.props.history}
-                    render={() => (
-                      <InviteDialog
-                        allowShare={!!navigator.share}
-                        entryCode={this.props.hub.entry_code}
-                        hubId={this.props.hub.hub_id}
-                        isModal={true}
-                        onClose={() => {
-                          this.props.history.goBack();
-                          exit2DInterstitialAndEnterVR();
-                        }}
-                      />
-                    )}
-                  />
                   <TipContainer
                     inLobby={watching}
                     inRoom={entered}
@@ -1573,6 +1585,7 @@ class UIRoot extends Component {
                         canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
                         onEdit={() => this.setSidebar("room-info-settings")}
                         onClose={() => this.setSidebar(null)}
+                        onChangeScene={this.onChangeScene}
                       />
                     )}
                     {this.state.sidebarId === "room-info-settings" && (
@@ -1581,6 +1594,7 @@ class UIRoot extends Component {
                         hubChannel={this.props.hubChannel}
                         showBackButton
                         onClose={() => this.setSidebar("room-info")}
+                        onChangeScene={this.onChangeScene}
                       />
                     )}
                     {this.state.sidebarId === "room-settings" && (
@@ -1589,16 +1603,7 @@ class UIRoot extends Component {
                         accountId={this.props.sessionId}
                         hubChannel={this.props.hubChannel}
                         onClose={() => this.setSidebar(null)}
-                        onChangeScene={() => {
-                          this.props.performConditionalSignIn(
-                            () => this.props.hubChannel.can("update_hub"),
-                            () => {
-                              showFullScreenIfAvailable();
-                              this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
-                            },
-                            "change-scene"
-                          );
-                        }}
+                        onChangeScene={this.onChangeScene}
                       />
                     )}
                   </>
@@ -1607,7 +1612,7 @@ class UIRoot extends Component {
                 )
               }
               modal={this.state.dialog || (renderEntryFlow && entryDialog)}
-              toolbarLeft={<InvitePopoverContainer hub={this.props.hub} />}
+              toolbarLeft={<InvitePopoverContainer hub={this.props.hub} scene={this.props.scene} />}
               toolbarCenter={
                 <>
                   {watching && (
