@@ -294,6 +294,11 @@ export const Scenes = () => (
   >
     <CreateTile label="Create Scene" type="scene" />
     <MediaTile entry={scene} />
+    <MediaTile entry={scene} />
+    <MediaTile entry={scene} />
+    <MediaTile entry={scene} />
+    <MediaTile entry={scene} />
+    <MediaTile entry={scene} />
   </MediaBrowser>
 );
 
@@ -313,6 +318,11 @@ export const AvatarListings = () => (
     hasNext
   >
     <CreateTile label="Create Avatar" type="avatar" />
+    <MediaTile entry={avatarListing} />
+    <MediaTile entry={avatarListing} />
+    <MediaTile entry={avatarListing} />
+    <MediaTile entry={avatarListing} />
+    <MediaTile entry={avatarListing} />
     <MediaTile entry={avatarListing} />
   </MediaBrowser>
 );
@@ -334,6 +344,11 @@ export const Avatars = () => (
   >
     <CreateTile label="Create Avatar" type="avatar" />
     <MediaTile entry={avatar} />
+    <MediaTile entry={avatar} />
+    <MediaTile entry={avatar} />
+    <MediaTile entry={avatar} />
+    <MediaTile entry={avatar} />
+    <MediaTile entry={avatar} />
   </MediaBrowser>
 );
 
@@ -352,6 +367,11 @@ export const SketchfabModel = () => (
     hasNext
   >
     <MediaTile entry={sketchfabModel} />
+    <MediaTile entry={sketchfabModel} />
+    <MediaTile entry={sketchfabModel} />
+    <MediaTile entry={sketchfabModel} />
+    <MediaTile entry={sketchfabModel} />
+    <MediaTile entry={sketchfabModel} />
   </MediaBrowser>
 );
 
@@ -363,6 +383,11 @@ export const Gif = () => (
     facets={FACETS.tenor}
     hasNext
   >
+    <MediaTile entry={gif} />
+    <MediaTile entry={gif} />
+    <MediaTile entry={gif} />
+    <MediaTile entry={gif} />
+    <MediaTile entry={gif} />
     <MediaTile entry={gif} />
   </MediaBrowser>
 );

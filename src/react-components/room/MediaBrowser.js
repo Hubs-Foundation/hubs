@@ -107,7 +107,12 @@ export function MediaBrowser({
       )}
       <div className={styles.content}>
         <Column grow ref={browserRef}>
-          <MediaGrid isVariableWidth={isVariableWidth}>{children}</MediaGrid>
+          <MediaGrid
+            isVariableWidth={selectedSource === "gifs" || selectedSource === "images"}
+            sm={selectedSource === "avatars"}
+          >
+            {children}
+          </MediaGrid>
           {(hasNext || hasPrevious) && (
             <div className={styles.pager}>
               <button type="button" className={styles.pagerButton} disabled={!hasPrevious} onClick={onPreviousPage}>
@@ -146,6 +151,5 @@ MediaBrowser.propTypes = {
   hasPrevious: PropTypes.bool,
   onNextPage: PropTypes.func,
   onPreviousPage: PropTypes.func,
-  isVariableWidth: PropTypes.bool,
   children: PropTypes.node
 };

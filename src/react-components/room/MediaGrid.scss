@@ -1,13 +1,28 @@
+@use "../styles/theme.scss";
+
 :local(.media-grid) {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  place-items: start;
   width: 100%;
-  padding: 20px;
-  flex: 1;
+  padding: 8px;
   align-content: flex-start;
 
+  @media(min-width: theme.$breakpoint-md) {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
   & > * {
-    margin: 8px;
+    width: 100%;
+    padding: 8px;
+  }
+}
+
+:local(.sm) {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+
+  @media(min-width: theme.$breakpoint-md) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }
 
@@ -16,5 +31,15 @@
 }
 
 :local(.variable-width) {
+  display: flex;
   justify-content: flex-start;
+  flex-wrap: wrap;
+
+  & > * {
+    min-width: 200px;
+    min-height: 200px;
+    max-height: 240px;
+    max-width: 320px;
+    width: auto;
+  }
 }

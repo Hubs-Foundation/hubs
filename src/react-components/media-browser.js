@@ -181,14 +181,6 @@ class MediaBrowserContainer extends Component {
     }
   };
 
-  onCopyAvatar = () => {
-    this.handleFacetClicked({ params: { filter: "my-avatars" } });
-  };
-
-  onCopyScene = () => {
-    this.handleFacetClicked({ params: { filter: "my-scenes" } });
-  };
-
   onShowSimilar = (id, name) => {
     this.handleFacetClicked({ params: { similar_to: id, similar_name: name } });
   };
@@ -257,18 +249,32 @@ class MediaBrowserContainer extends Component {
     this.browserDiv.scrollTop = 0;
   };
 
-  handleCopyAvatar = async (e, entry) => {
+  handleCopyAvatar = (e, entry) => {
     e.preventDefault();
-    await remixAvatar(entry.id, entry.name);
-    this.onCopyAvatar();
+
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.signedIn,
+      async () => {
+        await remixAvatar(entry.id, entry.name);
+        this.handleFacetClicked({ params: { filter: "my-avatars" } });
+      },
+      "remix-avatar"
+    );
   };
 
   handleCopyScene = async (e, entry) => {
     e.preventDefault();
-    await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
-      parent_scene_id: entry.id
-    });
-    this.onCopyScene();
+
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.signedIn,
+      async () => {
+        await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
+          parent_scene_id: entry.id
+        });
+        this.handleFacetClicked({ params: { filter: "my-scenes" } });
+      },
+      "remix-scene"
+    );
   };
 
   onCreateAvatar = () => {
@@ -318,8 +324,6 @@ class MediaBrowserContainer extends Component {
     const meta = this.state.result && this.state.result.meta;
     const hasNext = !!(meta && meta.next_cursor);
     const hasPrevious = !!searchParams.get("cursor");
-    const apiSource = (meta && meta.source) || null;
-    const isVariableWidth = ["bing_images", "tenor"].includes(apiSource);
 
     let searchDescription;
 
@@ -410,7 +414,6 @@ class MediaBrowserContainer extends Component {
         hasPrevious={hasPrevious}
         onNextPage={() => this.handlePager(1)}
         onPreviousPage={() => this.handlePager(-1)}
-        isVariableWidth={isVariableWidth}
       >
         {this.props.mediaSearchStore.isFetching ||
         this._sendQueryTimeout ||

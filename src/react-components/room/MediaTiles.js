@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -23,11 +23,25 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
 dayjs.extend(relativeTime);
 
 function useThumbnailSize(isImage, isAvatar, imageAspect) {
+  const [windowInnerWidth, setWindowInnerWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    function onResize() {
+      setWindowInnerWidth(window.innerWidth);
+    }
+
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
   return useMemo(
     () => {
       // Doing breakpointing here, so we can have proper image placeholder based upon dynamic aspect ratio
-      const clientWidth = window.innerWidth;
-      let imageHeight = clientWidth < 1079 ? (clientWidth < 768 ? (clientWidth < 400 ? 85 : 100) : 150) : 200;
+      let imageHeight =
+        windowInnerWidth < 1079 ? (windowInnerWidth < 768 ? (windowInnerWidth < 400 ? 85 : 100) : 150) : 200;
       if (isAvatar) imageHeight = Math.floor(imageHeight * 1.5);
 
       // Aspect ratio can vary per image if its an image result. Avatars are a taller portrait aspect, o/w assume 720p
@@ -42,7 +56,7 @@ function useThumbnailSize(isImage, isAvatar, imageAspect) {
 
       return [imageWidth, imageHeight];
     },
-    [isImage, isAvatar, imageAspect]
+    [isImage, isAvatar, imageAspect, windowInnerWidth]
   );
 }
 
@@ -65,7 +79,7 @@ function useThumbnail(entry, processThumbnailUrl) {
   return [thumbnailUrl, thumbnailWidth, thumbnailHeight];
 }
 
-function BaseTile({ as: TileComponent, className, name, description, children, ...rest }) {
+function BaseTile({ as: TileComponent, className, name, description, tall, wide, children, ...rest }) {
   let additionalProps;
 
   if (TileComponent === "div") {
@@ -76,7 +90,11 @@ function BaseTile({ as: TileComponent, className, name, description, children, .
   }
 
   return (
-    <TileComponent className={classNames(styles.mediaTile, className)} {...additionalProps} {...rest}>
+    <TileComponent
+      className={classNames(styles.mediaTile, { [styles.tall]: tall, [styles.wide]: wide }, className)}
+      {...additionalProps}
+      {...rest}
+    >
       <div className={styles.thumbnailContainer}>{children}</div>
       {(name || description) && (
         <div className={styles.info}>
@@ -93,7 +111,9 @@ BaseTile.propTypes = {
   className: PropTypes.string,
   name: PropTypes.string,
   description: PropTypes.node,
-  children: PropTypes.node
+  children: PropTypes.node,
+  tall: PropTypes.bool,
+  wide: PropTypes.bool
 };
 
 BaseTile.defaultProps = {
@@ -116,11 +136,15 @@ TileAction.propTypes = {
 export function CreateTile({ as: TileComponent, label, type, ...rest }) {
   const LabelComponent = TileComponent === "button" ? "label" : "p";
 
-  const [thumbnailWidth, thumbnailHeight] = useThumbnailSize(false, type === "avatar");
-
   return (
-    <BaseTile as={TileComponent} {...rest}>
-      <div className={styles.createTile} style={{ width: thumbnailWidth, height: thumbnailHeight }}>
+    <BaseTile
+      className={styles.createTile}
+      as={TileComponent}
+      wide={type === "scene"}
+      tall={type === "avatar"}
+      {...rest}
+    >
+      <div className={styles.createTileContent}>
         <AddIcon width={48} height={48} />
         <LabelComponent>{label}</LabelComponent>
       </div>
@@ -149,6 +173,8 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
 
   return (
     <BaseTile
+      wide={entry.type === "scene" || entry.type === "scene_listing" || entry.type === "room"}
+      tall={entry.type === "avatar" || entry.type === "avatar_listing"}
       name={entry.name}
       description={
         <>
@@ -175,7 +201,6 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
           )}
         </>
       }
-      style={{ width: thumbnailWidth }}
       {...rest}
     >
       <a className={styles.thumbnailLink} href={entry.url} rel="noreferrer noopener" onClick={onClick}>
@@ -186,12 +211,12 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
             playsInline
             loop
             src={thumbnailUrl}
+            alt={entry.name}
             width={thumbnailWidth}
             height={thumbnailHeight}
-            alt={entry.name}
           />
         ) : (
-          <img src={thumbnailUrl} width={thumbnailWidth} height={thumbnailHeight} alt={entry.name} />
+          <img src={thumbnailUrl} alt={entry.name} width={thumbnailWidth} height={thumbnailHeight} />
         )}
       </a>
       {entry.favorited && <StarIcon className={styles.favoriteIcon} />}
