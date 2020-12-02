@@ -37,6 +37,7 @@ export function MediaBrowser({
   hasPrevious,
   onNextPage,
   onPreviousPage,
+  noResultsMessage,
   children
 }) {
   return (
@@ -106,12 +107,16 @@ export function MediaBrowser({
       )}
       <div className={styles.content}>
         <Column grow ref={browserRef}>
-          <MediaGrid
-            isVariableWidth={selectedSource === "gifs" || selectedSource === "images"}
-            sm={selectedSource === "avatars"}
-          >
-            {children}
-          </MediaGrid>
+          {children ? (
+            <MediaGrid
+              isVariableWidth={selectedSource === "gifs" || selectedSource === "images"}
+              sm={selectedSource === "avatars"}
+            >
+              {children}
+            </MediaGrid>
+          ) : (
+            <div className={styles.noResults}>{noResultsMessage}</div>
+          )}
           {(hasNext || hasPrevious) && (
             <div className={styles.pager}>
               <button type="button" className={styles.pagerButton} disabled={!hasPrevious} onClick={onPreviousPage}>
@@ -150,5 +155,10 @@ MediaBrowser.propTypes = {
   hasPrevious: PropTypes.bool,
   onNextPage: PropTypes.func,
   onPreviousPage: PropTypes.func,
+  noResultsMessage: PropTypes.node,
   children: PropTypes.node
+};
+
+MediaBrowser.defaultProps = {
+  noResultsMessage: "No Results"
 };

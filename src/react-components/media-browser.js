@@ -414,6 +414,7 @@ class MediaBrowserContainer extends Component {
         hasPrevious={hasPrevious}
         onNextPage={() => this.handlePager(1)}
         onPreviousPage={() => this.handlePager(-1)}
+        noResultsMessage={<FormattedMessage id={`media-browser.empty.${urlSource}`} />}
       >
         {this.props.mediaSearchStore.isFetching ||
         this._sendQueryTimeout ||
@@ -485,9 +486,7 @@ class MediaBrowserContainer extends Component {
               );
             })}
           </>
-        ) : (
-          <FormattedMessage id={`media-browser.empty.${urlSource}`} />
-        )}
+        ) : null}
       </MediaBrowser>
     );
   }
