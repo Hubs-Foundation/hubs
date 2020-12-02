@@ -133,31 +133,18 @@ TileAction.propTypes = {
   children: PropTypes.node
 };
 
-export function CreateTile({ as: TileComponent, label, type, ...rest }) {
-  const LabelComponent = TileComponent === "button" ? "label" : "p";
-
+export function CreateTile({ label, type, ...rest }) {
   return (
-    <BaseTile
-      className={styles.createTile}
-      as={TileComponent}
-      wide={type === "scene"}
-      tall={type === "avatar"}
-      {...rest}
-    >
+    <BaseTile className={styles.createTile} wide={type === "scene"} tall={type === "avatar"} {...rest}>
       <div className={styles.createTileContent}>
         <AddIcon width={48} height={48} />
-        <LabelComponent>{label}</LabelComponent>
+        <p>{label}</p>
       </div>
     </BaseTile>
   );
 }
 
-CreateTile.defaultProps = {
-  as: "button"
-};
-
 CreateTile.propTypes = {
-  as: PropTypes.elementType,
   label: PropTypes.node,
   type: PropTypes.string
 };
