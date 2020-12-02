@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -23,25 +23,9 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
 dayjs.extend(relativeTime);
 
 function useThumbnailSize(isImage, isAvatar, imageAspect) {
-  const [windowInnerWidth, setWindowInnerWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    function onResize() {
-      setWindowInnerWidth(window.innerWidth);
-    }
-
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
   return useMemo(
     () => {
-      // Doing breakpointing here, so we can have proper image placeholder based upon dynamic aspect ratio
-      let imageHeight =
-        windowInnerWidth < 1079 ? (windowInnerWidth < 768 ? (windowInnerWidth < 400 ? 85 : 100) : 150) : 200;
+      let imageHeight = 220;
       if (isAvatar) imageHeight = Math.floor(imageHeight * 1.5);
 
       // Aspect ratio can vary per image if its an image result. Avatars are a taller portrait aspect, o/w assume 720p
@@ -56,7 +40,7 @@ function useThumbnailSize(isImage, isAvatar, imageAspect) {
 
       return [imageWidth, imageHeight];
     },
-    [isImage, isAvatar, imageAspect, windowInnerWidth]
+    [isImage, isAvatar, imageAspect]
   );
 }
 
