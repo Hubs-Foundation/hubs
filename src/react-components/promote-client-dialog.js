@@ -19,7 +19,7 @@ export default class PromoteClientDialog extends Component {
           <FormattedMessage id="promote.message" />
         </div>
         <button
-          className={styles.confirmButton}
+          className={styles.promoteButton}
           onClick={() => {
             this.props.onConfirm();
             this.props.onClose();

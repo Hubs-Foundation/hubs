@@ -1,6 +1,6 @@
 @import 'shared';
 
-:local(.confirm-button) {
+:local(.promote-button) {
   @extend %action-button;
   margin-top: 8px;
   flex-direction: row;
