@@ -2,7 +2,6 @@
 
 :local(.code-container) {
   display: flex;
-  flex: 1 0 auto;
 
   & > * {
     margin-right: 4px;
@@ -15,7 +14,6 @@
 
 :local(.short-url-container), :local(.code-letter) {
   display: flex;
-  flex: 1 0 auto;
   align-items: center;
   justify-content: center;
   height: 64px;

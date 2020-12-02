@@ -18,7 +18,7 @@
   height: 144px;
   border-bottom: 1px solid theme.$lightgrey;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
     height: 96px;
   }
 }
@@ -33,7 +33,7 @@
   justify-content: center;
   align-items: center;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
     margin-left: 24px;
     height: 96px;
   }
@@ -48,7 +48,7 @@
   justify-content: center;
   align-items: center;
   
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
     margin-top: 0;
     border-top: none;
   }
@@ -64,7 +64,7 @@
   justify-content: center;
   align-items: center;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
     margin-right: 24px;
     height: 96px;
   }

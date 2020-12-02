@@ -196,25 +196,25 @@ body::before {
   display: none;
 }
 
-@media (min-width: theme.$breakpoint-md) {
+@media (min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
   body::before {
     content: "md";
   }
 }
 
-@media (min-width: theme.$breakpoint-lg) {
+@media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
   body::before {
     content: "lg";
   }
 }
 
-@media (min-width: theme.$breakpoint-xl) {
+@media (min-width: theme.$breakpoint-xl) and (min-height: theme.$breakpoint-vr) {
   body::before {
     content: "xl";
   }
 }
 
-@media (min-width: theme.$breakpoint-xxl) {
+@media (min-width: theme.$breakpoint-xxl) and (min-height: theme.$breakpoint-vr) {
   body::before {
     content: "xxl";
   }

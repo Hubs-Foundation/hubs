@@ -9,10 +9,10 @@ import { Column } from "../layout/Column";
 
 function InvitePopoverContent({ url, code, embed }) {
   return (
-    <Column center padding className={styles.invitePopover}>
-      <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
-      <CopyableTextInputField label="Room Code" value={code} buttonPreset="blue" />
-      <CopyableTextInputField label="Embed Code" value={embed} buttonPreset="purple" />
+    <Column center padding grow className={styles.invitePopover}>
+      <CopyableTextInputField fullWidth label="Room Link" value={url} buttonPreset="green" />
+      <CopyableTextInputField fullWidth label="Room Code" value={code} buttonPreset="blue" />
+      <CopyableTextInputField fullWidth label="Embed Code" value={embed} buttonPreset="purple" />
     </Column>
   );
 }
