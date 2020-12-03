@@ -49,11 +49,13 @@ async function checkIsAdmin(socket, store) {
 
 export function AuthContextProvider({ children, store }) {
   const signIn = useCallback(
-    async email => {
+    async authPayload => {
       const authChannel = new AuthChannel(store);
       const socket = await connectToReticulum();
       authChannel.setSocket(socket);
-      const { authComplete } = await authChannel.startAuthentication(email);
+      const { authComplete } = await (authPayload == "oidc"
+        ? authChannel.startOIDCAuthentication()
+        : authChannel.startAuthentication(authPayload));
       await authComplete;
       await checkIsAdmin(socket, store);
     },
