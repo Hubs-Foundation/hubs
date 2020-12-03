@@ -1,11 +1,37 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Sidebar.scss";
-import useFocusLock from "focus-layers";
+import useFocusLock, { LOCK_STACK } from "focus-layers";
+import { useCssBreakpoints } from "react-use-css-breakpoints";
 
 export function Sidebar({ title, beforeTitle, afterTitle, children, contentClassName, onEscape, className }) {
   const sidebarRef = useRef();
+  const breakpoint = useCssBreakpoints();
+
+  const [focusLockEnabled, setFocusLockEnabled] = useState(breakpoint !== "sm");
+
+  useEffect(
+    () => {
+      setFocusLockEnabled(breakpoint !== "sm");
+    },
+    [breakpoint]
+  );
+
+  useEffect(
+    () => {
+      const layerId = "sidebar";
+
+      if (focusLockEnabled) {
+        LOCK_STACK.add(layerId, setFocusLockEnabled);
+      } else {
+        LOCK_STACK.remove(layerId);
+      }
+
+      return () => LOCK_STACK.remove(layerId);
+    },
+    [focusLockEnabled]
+  );
 
   useFocusLock(sidebarRef);
 

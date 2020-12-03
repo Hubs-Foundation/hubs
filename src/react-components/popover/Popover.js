@@ -17,7 +17,7 @@ function ContentContainer({ closePopover, title, children }) {
   useFocusLock(containerRef);
 
   return (
-    <div ref={containerRef} tabIndex={-1}>
+    <div ref={containerRef} tabIndex={-1} role="dialog" aria-modal="true">
       <div className={styles.header}>
         <button onClick={closePopover}>
           <CloseIcon width={16} height={16} />

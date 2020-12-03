@@ -36,7 +36,12 @@ export function Modal({
   );
 
   return (
-    <div className={classNames(styles.modal, { [styles.smFullscreen]: !disableFullscreen }, className)} ref={modalRef}>
+    <div
+      className={classNames(styles.modal, { [styles.smFullscreen]: !disableFullscreen }, className)}
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+    >
       {(title || beforeTitle || afterTitle) && (
         <div className={styles.header}>
           <div className={styles.beforeTitle}>{beforeTitle}</div>
