@@ -1532,7 +1532,7 @@ class UIRoot extends Component {
                         presences={this.props.presences}
                         occupantCount={this.occupantCount()}
                         canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
-                        onUploadFile={this.createObject}
+                        scene={this.props.scene}
                         onClose={() => this.setSidebar(null)}
                       />
                     )}
