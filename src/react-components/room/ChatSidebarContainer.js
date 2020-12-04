@@ -155,7 +155,7 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, presences, occupantCount, onClose }) {
+export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occupantCount, onClose }) {
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
@@ -174,14 +174,17 @@ export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, presences
     setMessage("");
   };
 
-  const onUploadAttachments = e => {
-    // TODO: Right now there's no way to upload files to the chat only.
-    // When we add the place menu whcih will have an explicit button for uploading files,
-    // should we make this attach button only upload to chat?
-    for (const file of e.target.files) {
-      onUploadFile(file);
-    }
-  };
+  const onUploadAttachments = useCallback(
+    e => {
+      // TODO: Right now there's no way to upload files to the chat only.
+      // When we add the place menu whcih will have an explicit button for uploading files,
+      // should we make this attach button only upload to chat?
+      for (const file of e.target.files) {
+        scene.emit("add_media", file);
+      }
+    },
+    [scene]
+  );
 
   useEffect(
     () => {
@@ -236,7 +239,7 @@ ChatSidebarContainer.propTypes = {
   canSpawnMessages: PropTypes.bool,
   presences: PropTypes.object.isRequired,
   occupantCount: PropTypes.number.isRequired,
-  onUploadFile: PropTypes.func.isRequired,
+  scene: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired
 };
 
