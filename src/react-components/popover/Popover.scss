@@ -105,6 +105,10 @@
 
   :local(.header) {
     border-bottom: 1px solid theme.$lightgrey;
+
+    button {
+      left: 16px;
+    }
   }
 
   :local(.content) {
