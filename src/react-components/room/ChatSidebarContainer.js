@@ -235,7 +235,7 @@ export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, presences
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
-              <SendMessageButton onClick={onSendMessage} />
+              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0} />
             )}
             {canSpawnMessages && <SpawnMessageButton disabled={message.length === 0} onClick={onSpawnMessage} />}
           </>
