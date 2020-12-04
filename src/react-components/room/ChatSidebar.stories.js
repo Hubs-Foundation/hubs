@@ -62,6 +62,15 @@ export const Base = () => (
             timestamp={Date.now()}
             messages={[{ type: "chat", body: '`console.log("Hello World")`' }]}
           />
+          <ChatMessageGroup
+            sent
+            sender="Robert"
+            timestamp={Date.now()}
+            messages={[
+              { type: "chat", body: "https://mozilla.org" },
+              { type: "chat", body: "Test message with url. https://hubs.mozilla.com" }
+            ]}
+          />
         </ChatMessageList>
         <ChatInput
           afterInput={
