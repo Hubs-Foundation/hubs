@@ -1327,6 +1327,12 @@ class UIRoot extends Component {
               icon: CameraIcon,
               onClick: () => this.toggleStreamerMode()
             },
+          {
+            id: "leave-room",
+            label: "Leave Room",
+            icon: LeaveIcon,
+            onClick: () => this.props.exitScene(ExitReason.left)
+          },
           canCloseRoom && {
             id: "close-room",
             label: "Close Room",
