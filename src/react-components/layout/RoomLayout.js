@@ -50,12 +50,14 @@ export function RoomLayout({
       <div className={classNames(styles.modalContainer, styles.viewport)} ref={viewportRef}>
         {modal}
       </div>
-      <Toolbar
-        className={classNames(styles.main, styles.toolbar, toolbarClassName)}
-        left={toolbarLeft}
-        center={toolbarCenter}
-        right={toolbarRight}
-      />
+      {(toolbarLeft || toolbarCenter || toolbarRight) && (
+        <Toolbar
+          className={classNames(styles.main, styles.toolbar, toolbarClassName)}
+          left={toolbarLeft}
+          center={toolbarCenter}
+          right={toolbarRight}
+        />
+      )}
       <div className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}>
         {viewport}
       </div>

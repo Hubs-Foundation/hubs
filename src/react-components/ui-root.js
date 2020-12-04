@@ -90,6 +90,7 @@ import { WebVRUnsupportedModal } from "./room/WebVRUnsupportedModal";
 import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
+import { Tip } from "./room/Tip";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -324,12 +325,14 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => {
       if (this.state.hide) {
-        this.setState({ hide: false });
+        this.setState({ hide: false, hideUITip: false });
       } else {
         this.setState({ watching: false });
       }
     });
-    this.props.scene.addEventListener("action_toggle_ui", () => this.setState({ hide: !this.state.hide }));
+    this.props.scene.addEventListener("action_toggle_ui", () =>
+      this.setState({ hide: !this.state.hide, hideUITip: false })
+    );
 
     const scene = this.props.scene;
 
@@ -1100,7 +1103,25 @@ class UIRoot extends Component {
       isGhost,
       hide
     };
-    if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
+    if (this.props.hide || this.state.hide) {
+      return (
+        <div className={classNames(rootStyles)}>
+          <RoomLayout
+            onResizeViewport={this.onResizeViewport}
+            viewport={
+              !this.state.hideUITip && (
+                <Tip
+                  onDismiss={() => this.setState({ hideUITip: true })}
+                  dismissLabel={<FormattedMessage id="tips.dismiss.ok" />}
+                >
+                  {"Entered fullscreen mode. Press Escape to show UI."}
+                </Tip>
+              )
+            }
+          />
+        </div>
+      );
+    }
 
     const preload = this.props.showPreload;
 
