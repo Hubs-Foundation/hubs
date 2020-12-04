@@ -95,4 +95,10 @@ configs.setIsAdmin = _isAdmin => {
 };
 configs.isAdmin = () => isAdmin;
 
+configs.integration = integration => {
+  const availableIntegrations = configs.AVAILABLE_INTEGRATIONS;
+  // AVAILABLE_INTEGRATIONS has no properties defined on the dev server, but does support all integrations.
+  return !availableIntegrations.hasOwnProperty(integration) || availableIntegrations[integration];
+};
+
 export default configs;
