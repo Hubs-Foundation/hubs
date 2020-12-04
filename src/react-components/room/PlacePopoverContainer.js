@@ -11,6 +11,7 @@ import { ReactComponent as SceneIcon } from "../icons/Scene.svg";
 import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
 import { PlacePopoverButton } from "./PlacePopover";
 import { ObjectUrlModalContainer } from "./ObjectUrlModalContainer";
+import configs from "../../utils/configs";
 
 export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {
   const [items, setItems] = useState([]);
@@ -46,19 +47,19 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
             // TODO: Create text/link dialog
             // { id: "text", icon: TextIcon, color: "blue", label: "Text" },
             // { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
-            {
+            configs.integration("tenor") && {
               id: "gif",
               icon: GIFIcon,
               color: "orange",
               label: "GIF",
               onSelect: () => mediaSearchStore.sourceNavigate("gifs")
             },
-            {
+            (configs.integration("poly") || configs.integration("sketchfab")) && {
               id: "model",
               icon: ObjectIcon,
               color: "orange",
               label: "3D Model",
-              onSelect: () => mediaSearchStore.sourceNavigate("poly")
+              onSelect: () => mediaSearchStore.sourceNavigate(configs.integration("poly") ? "poly" : "sketchfab")
             },
             {
               id: "avatar",

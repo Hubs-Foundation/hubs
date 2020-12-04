@@ -26,7 +26,7 @@ AFRAME.registerComponent("tweet-media-button", {
   },
 
   play() {
-    if (!configs.AVAILABLE_INTEGRATIONS.twitter) {
+    if (!configs.integration("twitter")) {
       this.el.object3D.visible = false;
       return;
     }
