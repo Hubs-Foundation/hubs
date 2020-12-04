@@ -268,15 +268,21 @@ class UIRoot extends Component {
       } else {
         sceneEl.classList.remove(roomLayoutStyles.sceneSmFullScreen);
       }
-
-      sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
-
-      if (sceneEl.camera) {
-        sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
-        sceneEl.camera.updateProjectionMatrix();
-      }
     }
   }
+
+  onResizeViewport = ({ width, height }) => {
+    const sceneEl = this.props.scene;
+
+    sceneEl.renderer.setSize(width, height);
+
+    if (sceneEl.camera) {
+      sceneEl.camera.aspect = width / height;
+      sceneEl.camera.updateProjectionMatrix();
+      // Resizing the canvas clears it, so render immediately after resize to prevent flicker.
+      sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
+    }
+  };
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
@@ -906,36 +912,12 @@ class UIRoot extends Component {
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
-    const sceneEl = this.props.scene;
-
-    if (sidebarId) {
-      sceneEl.classList.add(roomLayoutStyles.sidebarOpen);
-    } else {
-      sceneEl.classList.remove(roomLayoutStyles.sidebarOpen);
-    }
-
-    sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
-    sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
-    sceneEl.camera.updateProjectionMatrix();
-
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
   }
 
   toggleSidebar(sidebarId, otherState) {
-    const sceneEl = this.props.scene;
-
     this.setState(({ sidebarId: curSidebarId }) => {
       const nextSidebarId = curSidebarId === sidebarId ? null : sidebarId;
-
-      if (nextSidebarId) {
-        sceneEl.classList.add(roomLayoutStyles.sidebarOpen);
-      } else {
-        sceneEl.classList.remove(roomLayoutStyles.sidebarOpen);
-      }
-
-      sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
-      sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
-      sceneEl.camera.updateProjectionMatrix();
 
       return {
         sidebarId: nextSidebarId,
@@ -1476,6 +1458,7 @@ class UIRoot extends Component {
             <RoomLayout
               objectFocused={!!this.props.selectedObject}
               streaming={streaming}
+              onResizeViewport={this.onResizeViewport}
               viewport={
                 <>
                   {!this.props.selectedObject && <CompactMoreMenuButton />}

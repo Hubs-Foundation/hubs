@@ -68,17 +68,9 @@
 :local(.scene) {
   position: absolute;
   top: 0;
-  bottom: 96px;
   left: 0;
-  right: 0;
-  width: auto;
-  height: auto;
-}
-
-:local(.scene-sm-full-screen) {
-  @media(max-width: theme.$breakpoint-md - 1) {
-    bottom: 0;
-  }
+  width: 100%;
+  height: 100%;
 }
 
 :local(.sidebar-open) {

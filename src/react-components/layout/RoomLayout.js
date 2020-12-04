@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./RoomLayout.scss";
+// ResizeObserver not currently supported in Firefox Android
+import ResizeObserver from "resize-observer-polyfill";
 import { Toolbar } from "./Toolbar";
 
 export function RoomLayout({
@@ -17,12 +19,37 @@ export function RoomLayout({
   viewport,
   objectFocused,
   streaming,
+  onResizeViewport,
   ...rest
 }) {
+  const viewportRef = useRef();
+
+  useEffect(
+    () => {
+      let observer = null;
+
+      if (onResizeViewport) {
+        observer = new ResizeObserver(entries => {
+          onResizeViewport(entries[0].contentRect);
+        });
+        observer.observe(viewportRef.current);
+      }
+
+      return () => {
+        if (observer) {
+          observer.disconnect();
+        }
+      };
+    },
+    [onResizeViewport]
+  );
+
   return (
     <div className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)} {...rest}>
       {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
-      <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
+      <div className={classNames(styles.modalContainer, styles.viewport)} ref={viewportRef}>
+        {modal}
+      </div>
       <Toolbar
         className={classNames(styles.main, styles.toolbar, toolbarClassName)}
         left={toolbarLeft}
@@ -48,5 +75,6 @@ RoomLayout.propTypes = {
   modal: PropTypes.node,
   viewport: PropTypes.node,
   objectFocused: PropTypes.bool,
-  streaming: PropTypes.bool
+  streaming: PropTypes.bool,
+  onResizeViewport: PropTypes.func
 };
