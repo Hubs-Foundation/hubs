@@ -6,6 +6,7 @@ import { CloseButton } from "../input/CloseButton";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
 import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
+import { ReactComponent as SendIcon } from "../icons/Send.svg";
 import { IconButton } from "../input/IconButton";
 import { TextAreaInput } from "../input/TextAreaInput";
 import { ToolbarButton } from "../input/ToolbarButton";
@@ -18,6 +19,14 @@ export function SpawnMessageButton(props) {
   return (
     <IconButton className={styles.chatInputIcon} {...props}>
       <WandIcon />
+    </IconButton>
+  );
+}
+
+export function SendMessageButton(props) {
+  return (
+    <IconButton className={styles.chatInputIcon} {...props}>
+      <SendIcon />
     </IconButton>
   );
 }
