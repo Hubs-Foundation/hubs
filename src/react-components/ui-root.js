@@ -1649,7 +1649,7 @@ class UIRoot extends Component {
                         mediaSearchStore={this.props.mediaSearchStore}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
                       />
-                      <ReactionPopoverContainer />
+                      {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
                     </>
                   )}
                   <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
