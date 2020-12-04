@@ -8,7 +8,8 @@ import {
   ChatInput,
   MessageAttachmentButton,
   SpawnMessageButton,
-  ChatToolbarButton
+  ChatToolbarButton,
+  SendMessageButton
 } from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
@@ -159,6 +160,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
+
   const onKeyDown = useCallback(
     e => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -169,6 +171,15 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     },
     [sendMessage, setMessage]
   );
+
+  const onSendMessage = useCallback(
+    () => {
+      sendMessage(message);
+      setMessage("");
+    },
+    [message, sendMessage, setMessage]
+  );
+
   const onSpawnMessage = () => {
     spawnChatMessage(message);
     setMessage("");
@@ -223,12 +234,14 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         placeholder={placeholder}
         value={message}
         afterInput={
-          canSpawnMessages && (
-            <>
+          <>
+            {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
-              <SpawnMessageButton disabled={message.length === 0} onClick={onSpawnMessage} />
-            </>
-          )
+            ) : (
+              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0} />
+            )}
+            {canSpawnMessages && <SpawnMessageButton disabled={message.length === 0} onClick={onSpawnMessage} />}
+          </>
         }
       />
     </ChatSidebar>
