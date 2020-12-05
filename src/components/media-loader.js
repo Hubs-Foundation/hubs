@@ -557,9 +557,9 @@ AFRAME.registerComponent("media-loader", {
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }
-        if (this.data.mediaOptions.hasOwnProperty("modifyGravityOnRelease")) {
+        if (this.data.mediaOptions.hasOwnProperty("applyGravity")) {
           this.el.setAttribute("floaty-object", {
-            modifyGravityOnRelease: this.data.mediaOptions.modifyGravityOnRelease
+            modifyGravityOnRelease: !this.data.mediaOptions.applyGravity
           });
         }
         this.el.setAttribute(
