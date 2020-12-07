@@ -31,6 +31,7 @@ import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
+import RTCDebugPanel from "./debug-panel/RtcDebugPanel.js";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 import maskEmail from "../utils/mask-email";
@@ -1160,6 +1161,7 @@ class UIRoot extends Component {
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
+    const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
@@ -1532,6 +1534,15 @@ class UIRoot extends Component {
                     scene={this.props.scene}
                     store={this.props.store}
                   />
+                  {showRtcDebugPanel && (
+                    <RTCDebugPanel
+                      history={this.props.history}
+                      store={window.APP.store}
+                      scene={this.props.scene}
+                      presences={this.props.presences}
+                      sessionId={this.props.sessionId}
+                    />
+                  )}
                 </>
               }
               sidebar={
