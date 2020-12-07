@@ -318,8 +318,6 @@ class UIRoot extends Component {
     });
 
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
-    this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
-    this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
