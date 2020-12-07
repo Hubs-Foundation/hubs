@@ -1593,7 +1593,13 @@ class UIRoot extends Component {
                         accountId={this.props.sessionId}
                         room={this.props.hub}
                         canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
-                        onEdit={() => this.setSidebar("room-info-settings")}
+                        onEdit={() => {
+                          this.props.performConditionalSignIn(
+                            () => this.props.hubChannel.can("update_hub"),
+                            () => this.setSidebar("room-info-settings"),
+                            "room-settings"
+                          );
+                        }}
                         onClose={() => this.setSidebar(null)}
                         onChangeScene={this.onChangeScene}
                       />
@@ -1622,7 +1628,13 @@ class UIRoot extends Component {
                 )
               }
               modal={this.state.dialog || (renderEntryFlow && entryDialog)}
-              toolbarLeft={<InvitePopoverContainer hub={this.props.hub} scene={this.props.scene} />}
+              toolbarLeft={
+                <InvitePopoverContainer
+                  hub={this.props.hub}
+                  hubChannel={this.props.hubChannel}
+                  scene={this.props.scene}
+                />
+              }
               toolbarCenter={
                 <>
                   {watching && (

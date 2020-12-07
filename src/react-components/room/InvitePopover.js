@@ -6,13 +6,22 @@ import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { Column } from "../layout/Column";
+import { InviteLinkInputField } from "./InviteLinkInputField";
 
-function InvitePopoverContent({ url, code, embed }) {
+function InvitePopoverContent({ url, code, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
   return (
     <Column center padding className={styles.invitePopover}>
-      <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
-      <CopyableTextInputField label="Room Code" value={code} buttonPreset="blue" />
-      <CopyableTextInputField label="Embed Code" value={embed} buttonPreset="purple" />
+      {inviteRequired ? (
+        <>
+          <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={revokeInvite} />
+        </>
+      ) : (
+        <>
+          <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
+          <CopyableTextInputField label="Room Code" value={code} buttonPreset="blue" />
+          <CopyableTextInputField label="Embed Code" value={embed} buttonPreset="purple" />
+        </>
+      )}
     </Column>
   );
 }
@@ -20,14 +29,39 @@ function InvitePopoverContent({ url, code, embed }) {
 InvitePopoverContent.propTypes = {
   url: PropTypes.string.isRequired,
   code: PropTypes.string.isRequired,
-  embed: PropTypes.string.isRequired
+  embed: PropTypes.string.isRequired,
+  inviteRequired: PropTypes.bool,
+  fetchingInvite: PropTypes.bool,
+  inviteUrl: PropTypes.string,
+  revokeInvite: PropTypes.func
 };
 
-export function InvitePopoverButton({ url, code, embed, initiallyVisible, popoverApiRef, ...rest }) {
+export function InvitePopoverButton({
+  url,
+  code,
+  embed,
+  initiallyVisible,
+  popoverApiRef,
+  inviteRequired,
+  fetchingInvite,
+  inviteUrl,
+  revokeInvite,
+  ...rest
+}) {
   return (
     <Popover
       title="Invite"
-      content={() => <InvitePopoverContent url={url} code={code} embed={embed} />}
+      content={() => (
+        <InvitePopoverContent
+          url={url}
+          code={code}
+          embed={embed}
+          inviteRequired={inviteRequired}
+          fetchingInvite={fetchingInvite}
+          inviteUrl={inviteUrl}
+          revokeInvite={revokeInvite}
+        />
+      )}
       placement="top-start"
       offsetDistance={28}
       initiallyVisible={initiallyVisible}

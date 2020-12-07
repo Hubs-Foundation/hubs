@@ -3,7 +3,10 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { InvitePopoverButton } from "./InvitePopover";
 
 export default {
-  title: "InvitePopover"
+  title: "InvitePopover",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 const room = {
@@ -19,6 +22,10 @@ export const Base = () => (
   />
 );
 
-Base.parameters = {
-  layout: "fullscreen"
-};
+export const InviteLink = () => (
+  <RoomLayout
+    toolbarCenter={
+      <InvitePopoverButton inviteRequired initiallyVisible inviteUrl="https://hubs.mozilla.com/123?hub_invite_id=123" />
+    }
+  />
+);
