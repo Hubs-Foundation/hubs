@@ -1014,7 +1014,10 @@ class UIRoot extends Component {
         shortUrl={configs.SHORTLINK_DOMAIN}
         loadingCode={!this.state.linkCode}
         code={this.state.linkCode}
-        headsetConnected={this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no}
+        headsetConnected={
+          this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
+          this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no
+        }
         unsupportedBrowser={this.props.availableVREntryTypes.generic === VR_DEVICE_AVAILABILITY.maybe}
         onEnterOnConnectedHeadset={() => {
           // TODO: This is bad. linkCodeCancel should be tied to component lifecycle not these callback methods.
