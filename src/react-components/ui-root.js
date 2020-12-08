@@ -1752,7 +1752,12 @@ class UIRoot extends Component {
               stateKey="modal"
               stateValue="close_room"
               history={this.props.history}
-              render={() => this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })}
+              render={() =>
+                this.renderDialog(CloseRoomDialog, {
+                  roomName: this.props.hub.name,
+                  onConfirm: () => this.props.hubChannel.closeHub()
+                })
+              }
             />
             <StateRoute
               stateKey="modal"
