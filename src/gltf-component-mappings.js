@@ -297,7 +297,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   el.setAttribute("super-spawner", {
     src: componentData.src,
     resolve: true,
-    template: "#interactable-media"
+    template: "#interactable-media",
+    mediaOptions: componentData.mediaOptions || {}
   });
   el.setAttribute("hoverable-visuals", "");
   el.setAttribute("body-helper", {
