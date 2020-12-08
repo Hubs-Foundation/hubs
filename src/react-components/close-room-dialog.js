@@ -38,7 +38,6 @@ export default class CloseRoomDialog extends Component {
           onChange={e => this.setState({ confirmText: e.target.value })}
           required
           spellCheck="false"
-          ref={inp => (this.nameInput = inp)}
         />
         <button
           className={classNames(styles.confirmButton, isMatch ? "" : styles.notMatch)}
