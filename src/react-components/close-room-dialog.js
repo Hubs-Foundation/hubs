@@ -30,7 +30,10 @@ export default class CloseRoomDialog extends Component {
         </div>
         <span className={styles.roomName}>{this.props.roomName}</span>
         <input
-          className={classNames(styles.formFieldText, this.state.showIsNotMatchError ? styles.errorBorder : "")}
+          className={classNames(
+            styles.formFieldText,
+            !isMatch && this.state.showIsNotMatchError ? styles.errorBorder : ""
+          )}
           value={this.state.confirmText}
           onChange={e => this.setState({ confirmText: e.target.value })}
           required
