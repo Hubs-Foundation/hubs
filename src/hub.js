@@ -553,11 +553,17 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   const connectToScene = async () => {
     let adapter = "janus";
 
+    console.log(`inside connectToScene()`);
+    console.log(`${hub.host}:${hub.port}`);
+
     try {
+      console.log("I SHOULD BE HERE 1/2");
       // Meta endpoint exists only on dialog
       await fetch(`https://${hub.host}:${hub.port}/meta`);
       adapter = "dialog";
+      console.log("I SHOULD BE HERE 2/2");
     } catch (e) {
+      console.log("I SHOULD *NOT* BE HERE");
       // Ignore, set to janus.
     }
 
