@@ -414,7 +414,7 @@ class UIRoot extends Component {
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
-          onClose: onContinueAfterSignIn
+          onClose: onContinueAfterSignIn || this.closeDialog
         });
 
         await authComplete;
@@ -427,7 +427,7 @@ class UIRoot extends Component {
           onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
-      onClose: onContinueAfterSignIn
+      onClose: onContinueAfterSignIn || this.closeDialog
     });
   };
 
