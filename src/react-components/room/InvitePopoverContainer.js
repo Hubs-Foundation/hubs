@@ -3,8 +3,9 @@ import PropTypes from "prop-types";
 import configs from "../../utils/configs";
 import { InvitePopoverButton } from "./InvitePopover";
 import { handleExitTo2DInterstitial } from "../../utils/vr-interstitial";
+import { useInviteUrl } from "./useInviteUrl";
 
-export function InvitePopoverContainer({ hub, scene, ...rest }) {
+export function InvitePopoverContainer({ hub, hubChannel, scene, ...rest }) {
   // TODO: Move to Hub class
   const shortLink = `https://${configs.SHORTLINK_DOMAIN}/${hub.hub_id}`;
   const embedUrl = `${location.protocol}//${location.host}${location.pathname}?embed_token=${hub.embed_token}`;
@@ -30,10 +31,35 @@ export function InvitePopoverContainer({ hub, scene, ...rest }) {
     [scene, popoverApiRef]
   );
 
-  return <InvitePopoverButton url={shortLink} code={code} embed={embedText} popoverApiRef={popoverApiRef} {...rest} />;
+  const inviteRequired = hub.entry_mode === "invite";
+  const canGenerateInviteUrl = hubChannel.can("update_hub");
+
+  const { fetchingInvite, inviteUrl, revokeInvite } = useInviteUrl(
+    hubChannel,
+    !inviteRequired || !canGenerateInviteUrl
+  );
+
+  if (inviteRequired && !canGenerateInviteUrl) {
+    return null;
+  }
+
+  return (
+    <InvitePopoverButton
+      inviteRequired={inviteRequired}
+      fetchingInvite={fetchingInvite}
+      inviteUrl={inviteUrl}
+      revokeInvite={revokeInvite}
+      url={shortLink}
+      code={code}
+      embed={embedText}
+      popoverApiRef={popoverApiRef}
+      {...rest}
+    />
+  );
 }
 
 InvitePopoverContainer.propTypes = {
-  hub: PropTypes.object,
-  scene: PropTypes.object
+  hub: PropTypes.object.isRequired,
+  scene: PropTypes.object.isRequired,
+  hubChannel: PropTypes.object.isRequired
 };

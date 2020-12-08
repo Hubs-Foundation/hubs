@@ -6,11 +6,11 @@ import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as MoreIcon } from "../icons/More.svg";
 
-function MoreMenuItem({ item }) {
+function MoreMenuItem({ item, closePopover }) {
   const Icon = item.icon;
 
   return (
-    <li>
+    <li onClick={closePopover}>
       {item.href ? (
         <a
           className={styles.moreMenuItemTarget}
@@ -38,32 +38,37 @@ MoreMenuItem.propTypes = {
     icon: PropTypes.elementType.isRequired,
     label: PropTypes.node.isRequired,
     onClick: PropTypes.func
-  }).isRequired
+  }).isRequired,
+  closePopover: PropTypes.func.isRequired
 };
 
-function MoreMenuGroup({ group }) {
+function MoreMenuGroup({ group, closePopover }) {
   return (
     <li>
       <h1 className={styles.moreMenuGroupLabel}>{group.label}</h1>
-      <ul className={styles.moreMenuItemList}>{group.items.map(item => <MoreMenuItem key={item.id} item={item} />)}</ul>
+      <ul className={styles.moreMenuItemList}>
+        {group.items.map(item => <MoreMenuItem key={item.id} item={item} closePopover={closePopover} />)}
+      </ul>
     </li>
   );
 }
 
 MoreMenuGroup.propTypes = {
-  group: PropTypes.object.isRequired
+  group: PropTypes.object.isRequired,
+  closePopover: PropTypes.func.isRequired
 };
 
-function MoreMenuPopoverContent({ menu }) {
+function MoreMenuPopoverContent({ menu, closePopover }) {
   return (
     <div className={styles.moreMenuPopover}>
-      <ul>{menu.map(group => <MoreMenuGroup key={group.id} group={group} />)}</ul>
+      <ul>{menu.map(group => <MoreMenuGroup key={group.id} group={group} closePopover={closePopover} />)}</ul>
     </div>
   );
 }
 
 MoreMenuPopoverContent.propTypes = {
-  menu: PropTypes.array.isRequired
+  menu: PropTypes.array.isRequired,
+  closePopover: PropTypes.func.isRequired
 };
 
 // The MoreMenuContext allows us to control the more menu popover visibility from the MoreMenuPopoverButton
@@ -86,7 +91,7 @@ export function MoreMenuPopoverButton({ menu }) {
   return (
     <Popover
       title="More"
-      content={() => <MoreMenuPopoverContent menu={menu} />}
+      content={props => <MoreMenuPopoverContent menu={menu} {...props} />}
       placement="top-end"
       offsetDistance={28}
       isVisible={visible}
