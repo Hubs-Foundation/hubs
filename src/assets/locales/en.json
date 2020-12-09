@@ -72,6 +72,7 @@
   "close-room.message": "Closing this room will remove yourself and others from the room, shutting it down permanently.\n\nAre you sure? This action cannot be undone.",
   "close-room.confirm": "Yes, Close Room",
   "close-room.cancel": "Cancel",
+  "close-room.type-to-confirm": "Type room name to confirm:",
   "promote.message": "Promoting a user will grant full access to room settings and moderation tools.\n\nAre you sure?",
   "promote.confirm-prefix": "Yes, Promote ",
   "promote.cancel": "Cancel",
