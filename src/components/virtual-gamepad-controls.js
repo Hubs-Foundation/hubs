@@ -124,7 +124,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   createRightStick() {
     this.rightTouchZone = document.createElement("div");
     this.rightTouchZone.classList.add(styles.touchZone, styles.right);
-    insertAfter(this.rightTouchZone, this.el.sceneEl.canvas);
+    insertAfter(this.rightTouchZone, this.mockJoystickContainer);
     this.rightStick = nipplejs.create({
       zone: this.rightTouchZone,
       color: "white",
@@ -138,7 +138,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   createLeftStick() {
     this.leftTouchZone = document.createElement("div");
     this.leftTouchZone.classList.add(styles.touchZone, styles.left);
-    insertAfter(this.leftTouchZone, this.el.sceneEl.canvas);
+    insertAfter(this.leftTouchZone, this.mockJoystickContainer);
     this.leftStick = nipplejs.create({
       zone: this.leftTouchZone,
       color: "white",

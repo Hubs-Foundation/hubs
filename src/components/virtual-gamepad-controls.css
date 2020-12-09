@@ -24,9 +24,10 @@
   height: 0;
   left: 0;
   right: 0;
-  bottom: 15vh;
+  bottom: 146px;
+  padding: 16px;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   display: none;
 
   /* Orientation selector fails here when keyboard pops up on shorter screens */
