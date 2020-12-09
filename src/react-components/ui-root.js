@@ -1485,6 +1485,7 @@ class UIRoot extends Component {
               onResizeViewport={this.onResizeViewport}
               viewport={
                 <>
+                  {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                   {!this.props.selectedObject && <CompactMoreMenuButton />}
                   {(!this.props.selectedObject || this.props.breakpoint !== "sm") && (
                     <ContentMenu>
@@ -1640,7 +1641,7 @@ class UIRoot extends Component {
                   undefined
                 )
               }
-              modal={this.state.dialog || (renderEntryFlow && entryDialog)}
+              modal={this.state.dialog}
               toolbarLeft={
                 <InvitePopoverContainer
                   hub={this.props.hub}

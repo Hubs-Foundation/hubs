@@ -47,9 +47,7 @@ export function RoomLayout({
   return (
     <div className={classNames(styles.roomLayout, { [styles.objectFocused]: objectFocused }, className)} {...rest}>
       {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
-      <div className={classNames(styles.modalContainer, styles.viewport)} ref={viewportRef}>
-        {modal}
-      </div>
+      <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       {(toolbarLeft || toolbarCenter || toolbarRight) && (
         <Toolbar
           className={classNames(styles.main, styles.toolbar, toolbarClassName)}
@@ -58,7 +56,10 @@ export function RoomLayout({
           right={toolbarRight}
         />
       )}
-      <div className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}>
+      <div
+        className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}
+        ref={viewportRef}
+      >
         {viewport}
       </div>
     </div>

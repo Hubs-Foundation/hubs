@@ -7,6 +7,7 @@
   background-color: theme.$white;
   border: 1px solid theme.$lightgrey;
   min-width: 160px;
+  z-index: 10;
 
   &[data-popper-placement^=bottom] {
     :local(.content) {

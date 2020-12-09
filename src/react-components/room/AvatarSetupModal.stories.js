@@ -6,7 +6,7 @@ export default {
   title: "AvatarSetupModal"
 };
 
-export const Base = () => <RoomLayout modal={<AvatarSetupModal />} />;
+export const Base = () => <RoomLayout viewport={<AvatarSetupModal />} />;
 
 Base.parameters = {
   layout: "fullscreen"

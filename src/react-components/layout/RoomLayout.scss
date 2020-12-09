@@ -42,6 +42,13 @@
 :local(.viewport) {
   position: relative;
   grid-row-start: viewport;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & > * {
+    pointer-events: auto;
+  }
 }
 
 :local(.toolbar) {
