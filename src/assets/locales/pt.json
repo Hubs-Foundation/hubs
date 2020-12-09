@@ -1,6 +1,6 @@
 {
   "app-name": "Aplicativo",
-    "editor-name": "Editor de Sala",
+  "editor-name": "Editor de Sala",
   "contact-email": "app@company.com",
   "company-name": "Empresa",
   "share-hashtag": "#app",
@@ -56,7 +56,6 @@
   "room-settings.pin_objects": "Fixar objetos",
   "room-settings.spawn_emoji": "Criar emojis",
   "room-settings.fly": "Permitir voar",
-
   "room-settings.access-shared-link": "Link compartilhado",
   "room-settings.access-private-subtitle": "Apenas quem tem o link pode entrar",
   "room-settings.access-shared-link-subtitle": "Apenas quem tem o link pode entrar",
