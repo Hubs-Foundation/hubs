@@ -1337,7 +1337,12 @@ class UIRoot extends Component {
             id: "leave-room",
             label: "Leave Room",
             icon: LeaveIcon,
-            onClick: () => this.props.exitScene(ExitReason.left)
+            onClick: () => {
+              this.showNonHistoriedDialog(LeaveRoomModal, {
+                destinationUrl: "/",
+                reason: LeaveReason.leaveRoom
+              });
+            }
           },
           canCloseRoom && {
             id: "close-room",
@@ -1701,7 +1706,12 @@ class UIRoot extends Component {
                       icon={<LeaveIcon />}
                       label="Leave"
                       preset="red"
-                      onClick={() => this.props.exitScene(ExitReason.left)}
+                      onClick={() => {
+                        this.showNonHistoriedDialog(LeaveRoomModal, {
+                          destinationUrl: "/",
+                          reason: LeaveReason.leaveRoom
+                        });
+                      }}
                     />
                   )}
                   <MoreMenuPopoverButton menu={moreMenu} />
