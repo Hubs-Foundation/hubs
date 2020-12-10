@@ -27,7 +27,7 @@
   overflow: hidden;
   width: 450px;
 
-  @media(max-width: theme.$breakpoint-md - 1) {
+  @media(max-width: theme.$breakpoint-md - 1), (max-height: theme.$breakpoint-vr - 1) {
     position: fixed;
     top: 0;
     left: 0;
@@ -80,14 +80,8 @@
   height: 100%;
 }
 
-:local(.sidebar-open) {
-  @media(min-width: theme.$breakpoint-md) {
-    right: 450px;
-  }
-}
-
 :local(.object-focused) {
-  @media(max-width: theme.$breakpoint-md - 1) {
+  @media(max-width: theme.$breakpoint-md - 1), (max-height: theme.$breakpoint-vr - 1) {
     :local(.toolbar) {
       display: none;
     }

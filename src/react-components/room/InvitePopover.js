@@ -10,7 +10,7 @@ import { InviteLinkInputField } from "./InviteLinkInputField";
 
 function InvitePopoverContent({ url, code, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
   return (
-    <Column center padding className={styles.invitePopover}>
+    <Column center padding grow className={styles.invitePopover}>
       {inviteRequired ? (
         <>
           <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={revokeInvite} />

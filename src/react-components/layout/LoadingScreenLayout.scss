@@ -15,7 +15,7 @@
 
   font-size: theme.$font-size-sm;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
     font-size: theme.$font-size-md;
   }
 }

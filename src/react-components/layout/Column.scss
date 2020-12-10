@@ -57,14 +57,14 @@
 }
 
 :local(.center-md) {
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
     align-items: center;
     text-align: center;
   }
 }
 
 :local(.center-vertical-md) {
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
     justify-content: center;
   }
 }

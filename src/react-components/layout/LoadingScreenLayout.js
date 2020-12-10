@@ -6,7 +6,7 @@ import { Column } from "../layout/Column";
 export function LoadingScreenLayout({ center, bottom, logoSrc }) {
   return (
     <div className={styles.loadingScreenLayout}>
-      <Column center gap="lg" className={styles.center}>
+      <Column center padding gap="lg" className={styles.center}>
         <img className={styles.logo} src={logoSrc} />
         {center}
       </Column>
