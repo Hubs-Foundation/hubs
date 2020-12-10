@@ -76,9 +76,9 @@ export function UserProfileSidebarContainer({
   const toggleHidden = useCallback(
     () => {
       if (isHidden) {
-        hubChannel.hide(userId);
-      } else {
         hubChannel.unhide(userId);
+      } else {
+        hubChannel.hide(userId);
       }
 
       setIsHidden(!isHidden);
