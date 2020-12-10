@@ -67,16 +67,19 @@
 
   // For file upload buttons
   input {
+    position: absolute;
+    top: 0;
+    right: 0;
     opacity: 0;
     width: 0;
 
     &:focus {
       outline: none;
     }
-  }
 
-  ::-webkit-file-upload-button {
-    visibility: hidden;
+    &::-webkit-file-upload-button, &::file-selector-button {
+      visibility: hidden;
+    }
   }
 
   &:local(.compact-sm) {
