@@ -67,11 +67,9 @@
 
   // For file upload buttons
   input {
-    position: absolute;
-    top: 0;
-    right: 0;
     opacity: 0;
     width: 0;
+    overflow: hidden;
 
     &:focus {
       outline: none;
