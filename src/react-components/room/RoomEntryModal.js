@@ -31,11 +31,12 @@ export function RoomEntryModal({
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
       <Column center className={styles.content}>
-        {breakpoint !== "sm" && (
-          <div className={styles.logoContainer}>
-            <img src={logoSrc} alt={appName} />
-          </div>
-        )}
+        {breakpoint !== "sm" &&
+          breakpoint !== "md" && (
+            <div className={styles.logoContainer}>
+              <img src={logoSrc} alt={appName} />
+            </div>
+          )}
         <div className={styles.roomName}>
           <h5>Room Name</h5>
           <p>{roomName}</p>
@@ -59,8 +60,8 @@ export function RoomEntryModal({
           {showOptions &&
             breakpoint !== "sm" && (
               <>
-                <hr className={styleUtils.showMd} />
-                <Button preset="transparent" className={styleUtils.showMd} onClick={onOptions}>
+                <hr className={styleUtils.showLg} />
+                <Button preset="transparent" className={styleUtils.showLg} onClick={onOptions}>
                   <SettingsIcon /> Options
                 </Button>
               </>

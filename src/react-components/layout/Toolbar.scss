@@ -7,7 +7,7 @@
   background-color: theme.$white;
   border-top: 1px solid theme.$lightgrey;
 
-  @media (min-width: theme.$breakpoint-md) {
+  @media (min-width: theme.$breakpoint-lg) {
     padding: 12px 24px;
     justify-content: space-between;
   }
@@ -18,7 +18,7 @@
   flex: 1;
   justify-content: space-around;
 
-  @media (min-width: theme.$breakpoint-md) {
+  @media (min-width: theme.$breakpoint-lg) {
     flex: 0;
 
     & > * {

@@ -8,7 +8,7 @@
   background-color: theme.$white;
   pointer-events: auto;
 
-  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     border-left: 1px solid theme.$lightgrey;
   }
 }

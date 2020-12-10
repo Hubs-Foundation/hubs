@@ -72,7 +72,7 @@ export const EntryToolbar = () => (
     toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" />}
     toolbarCenter={
       <>
-        <ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" className={styleUtils.hideMd} />
+        <ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" className={styleUtils.hideLg} />
         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="blue" />
       </>
     }

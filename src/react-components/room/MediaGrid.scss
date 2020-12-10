@@ -9,7 +9,7 @@
   align-content: flex-start;
   flex: 1;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-lg) {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   }
 
@@ -22,7 +22,7 @@
 :local(.sm) {
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-lg) {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }

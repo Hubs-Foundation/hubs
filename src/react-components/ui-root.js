@@ -1492,7 +1492,8 @@ class UIRoot extends Component {
                 <>
                   {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                   {!this.props.selectedObject && <CompactMoreMenuButton />}
-                  {(!this.props.selectedObject || this.props.breakpoint !== "sm") && (
+                  {(!this.props.selectedObject ||
+                    (this.props.breakpoint !== "sm" || this.props.breakpoint !== "md")) && (
                     <ContentMenu>
                       {showObjectList && (
                         <ContentMenuButton

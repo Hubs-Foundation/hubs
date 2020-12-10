@@ -1,13 +1,13 @@
 @use './theme';
 
-:local(.hide-md) {
-  @media (min-width: theme.$breakpoint-md) {
+:local(.hide-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
     display: none !important;
   }
 }
 
-:local(.show-md) {
-  @media (max-width: theme.$breakpoint-md - 1px) {
+:local(.show-lg) {
+  @media (max-width: theme.$breakpoint-lg - 1px) {
     display: none !important;
   }
 }
