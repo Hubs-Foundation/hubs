@@ -115,7 +115,6 @@ import "./components/inspect-button";
 import "./components/inspect-pivot-child-selector";
 import "./components/inspect-pivot-offset-from-camera";
 import "./components/optional-alternative-to-not-hide";
-import "./components/set-max-resolution";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
 
