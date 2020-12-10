@@ -315,6 +315,7 @@
   "preferences.movementSpeedModifier": "移動速度モディファイア",
   "preferences.enableOnScreenJoystickLeft": "画面上の左側のジョイスティックで移動できるようにする",
   "preferences.enableOnScreenJoystickRight": "画面上の右のジョイスティックで見回せるようにする",
+  "preferences.enableGyro": "Enable gyroscope (when supported by browser/device)",
   "preferences.invertTouchscreenCameraMove": "タッチスクリーンのカメラ移動の方向を反転",
   "preferences.browserDefault": "ブラウザのデフォルト",
   "preferences.locale": "言語",
@@ -328,6 +329,7 @@
   "preferences.allowMultipleHubsInstances": "複数のHubsインスタンスが開いているときに自動終了を無効にする",
   "preferences.disableIdleDetection": "アイドル時またはバックグラウンド時の自動終了を無効にする",
   "preferences.preferMobileObjectInfoPanel": "モバイルオブジェクト情報パネルを優先する",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "VRに戻る",
   "settings.change-avatar": "名前とアバターの設定",
   "settings.change-scene": "シーンを選択",
@@ -430,5 +432,8 @@
   "support.copied": "コピーされました！",
   "support.details": "詳細",
   "support.supported": "supported",
-  "support.unsupported": "サポートされていません"
+  "support.unsupported": "サポートされていません",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
 }

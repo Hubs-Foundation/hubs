@@ -8,7 +8,8 @@ import {
   ChatInput,
   MessageAttachmentButton,
   SpawnMessageButton,
-  ChatToolbarButton
+  ChatToolbarButton,
+  SendMessageButton
 } from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
@@ -155,10 +156,11 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, presences, occupantCount, onClose }) {
+export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occupantCount, onClose }) {
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
+
   const onKeyDown = useCallback(
     e => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -169,19 +171,31 @@ export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, presences
     },
     [sendMessage, setMessage]
   );
+
+  const onSendMessage = useCallback(
+    () => {
+      sendMessage(message);
+      setMessage("");
+    },
+    [message, sendMessage, setMessage]
+  );
+
   const onSpawnMessage = () => {
     spawnChatMessage(message);
     setMessage("");
   };
 
-  const onUploadAttachments = e => {
-    // TODO: Right now there's no way to upload files to the chat only.
-    // When we add the place menu whcih will have an explicit button for uploading files,
-    // should we make this attach button only upload to chat?
-    for (const file of e.target.files) {
-      onUploadFile(file);
-    }
-  };
+  const onUploadAttachments = useCallback(
+    e => {
+      // TODO: Right now there's no way to upload files to the chat only.
+      // When we add the place menu whcih will have an explicit button for uploading files,
+      // should we make this attach button only upload to chat?
+      for (const file of e.target.files) {
+        scene.emit("add_media", file);
+      }
+    },
+    [scene]
+  );
 
   useEffect(
     () => {
@@ -220,12 +234,14 @@ export function ChatSidebarContainer({ canSpawnMessages, onUploadFile, presences
         placeholder={placeholder}
         value={message}
         afterInput={
-          canSpawnMessages && (
-            <>
+          <>
+            {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
-              <SpawnMessageButton disabled={message.length === 0} onClick={onSpawnMessage} />
-            </>
-          )
+            ) : (
+              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0} />
+            )}
+            {canSpawnMessages && <SpawnMessageButton disabled={message.length === 0} onClick={onSpawnMessage} />}
+          </>
         }
       />
     </ChatSidebar>
@@ -236,7 +252,7 @@ ChatSidebarContainer.propTypes = {
   canSpawnMessages: PropTypes.bool,
   presences: PropTypes.object.isRequired,
   occupantCount: PropTypes.number.isRequired,
-  onUploadFile: PropTypes.func.isRequired,
+  scene: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired
 };
 

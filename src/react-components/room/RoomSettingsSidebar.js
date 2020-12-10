@@ -1,11 +1,10 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import styles from "./RoomSettingsSidebar.scss";
 import { Sidebar } from "../sidebar/Sidebar";
 import { CloseButton } from "../input/CloseButton";
 import { InputField } from "../input/InputField";
-import { IconButton } from "../input/IconButton";
 import { FormattedMessage } from "react-intl";
 import { Button } from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
@@ -13,10 +12,10 @@ import { TextAreaInputField } from "../input/TextAreaInputField";
 import { ToggleInput } from "../input/ToggleInput";
 import { RadioInputField, RadioInputOption } from "../input/RadioInputField";
 import { NumericInputField } from "../input/NumericInputField";
-import { CopyableTextInputField } from "../input/CopyableTextInputField";
 import { BackButton } from "../input/BackButton";
 import { SceneInfo } from "./RoomSidebar";
 import { Column } from "../layout/Column";
+import { InviteLinkInputField } from "./InviteLinkInputField";
 
 export function RoomSettingsSidebar({
   showBackButton,
@@ -35,21 +34,6 @@ export function RoomSettingsSidebar({
   const { handleSubmit, register, watch, errors, setValue } = useForm({
     defaultValues: room
   });
-
-  const [showRevokeConfirmation, setShowRevokeConfirmation] = useState(false);
-  const revokeInvite = useCallback(() => {
-    setShowRevokeConfirmation(true);
-  }, []);
-  const cancelConfirmRevokeInvite = useCallback(() => {
-    setShowRevokeConfirmation(false);
-  }, []);
-  const confirmRevokeInvite = useCallback(
-    () => {
-      onRevokeInvite();
-      setShowRevokeConfirmation(false);
-    },
-    [onRevokeInvite]
-  );
 
   const entryMode = watch("entry_mode");
   const spawnAndMoveMedia = watch("member_permissions.spawn_and_move_media");
@@ -129,32 +113,7 @@ export function RoomSettingsSidebar({
           />
         </RadioInputField>
         {entryMode === "invite" && (
-          <CopyableTextInputField
-            label="Invite link"
-            disabled={fetchingInvite}
-            value={fetchingInvite ? "..." : inviteUrl}
-            buttonPreset="blue"
-            description={
-              !fetchingInvite &&
-              (showRevokeConfirmation ? (
-                <>
-                  <FormattedMessage id="room-settings.revoke-confirm" />{" "}
-                  <IconButton className={styles.confirmRevokeButton} onClick={confirmRevokeInvite}>
-                    <FormattedMessage id="room-settings.revoke-confirm-yes" />
-                  </IconButton>{" "}
-                  /{" "}
-                  <IconButton className={styles.confirmRevokeButton} onClick={cancelConfirmRevokeInvite}>
-                    <FormattedMessage id="room-settings.revoke-confirm-no" />
-                  </IconButton>
-                </>
-              ) : (
-                <IconButton className={styles.confirmRevokeButton} onClick={revokeInvite}>
-                  <FormattedMessage id="room-settings.revoke" />
-                </IconButton>
-              ))
-            }
-            fullWidth
-          />
+          <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={onRevokeInvite} />
         )}
         {showPublicRoomSetting && (
           <ToggleInput

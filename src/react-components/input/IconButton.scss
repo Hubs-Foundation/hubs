@@ -8,6 +8,7 @@
   border-color: transparent;
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
+  cursor: pointer;
 
   & > * {
     margin-right: 4px;
@@ -66,11 +67,18 @@
 
   // For file upload buttons
   input {
+    position: absolute;
+    top: 0;
+    right: 0;
     opacity: 0;
     width: 0;
 
     &:focus {
       outline: none;
+    }
+
+    &::-webkit-file-upload-button, &::file-selector-button {
+      visibility: hidden;
     }
   }
 

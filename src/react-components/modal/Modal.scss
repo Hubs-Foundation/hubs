@@ -10,6 +10,7 @@
   border-radius: theme.$border-radius-regular;
   margin: 24px;
   width: 204px;
+  z-index: 1;
 
   @media (min-width: theme.$breakpoint-md) {
     width: 360px;

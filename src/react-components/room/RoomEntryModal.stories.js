@@ -7,7 +7,7 @@ export default {
   title: "RoomEntryModal"
 };
 
-export const Base = () => <RoomLayout modal={<RoomEntryModal logoSrc={logoSrc} roomName="Example Room" />} />;
+export const Base = () => <RoomLayout viewport={<RoomEntryModal logoSrc={logoSrc} roomName="Example Room" />} />;
 
 Base.parameters = {
   layout: "fullscreen"

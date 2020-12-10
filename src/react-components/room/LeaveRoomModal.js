@@ -7,11 +7,16 @@ import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 
 export const LeaveReason = {
+  leaveRoom: "leaveRoom",
   joinRoom: "joinRoom",
   createRoom: "createRoom"
 };
 
 const reasonMessages = defineMessages({
+  [LeaveReason.leaveRoom]: {
+    id: "leave-room-dialog.leave-room.message",
+    defaultMessage: "Are you sure you want to leave the room?"
+  },
   [LeaveReason.joinRoom]: {
     id: "leave-room-dialog.join-room.message",
     defaultMessage: "Joining a new room will leave this one. Are you sure?"
@@ -23,6 +28,10 @@ const reasonMessages = defineMessages({
 });
 
 const confirmationMessages = defineMessages({
+  [LeaveReason.leaveRoom]: {
+    id: "leave-room-dialog.leave-room.confirm",
+    defaultMessage: "Leave Room"
+  },
   [LeaveReason.joinRoom]: {
     id: "leave-room-dialog.join-room.confirm",
     defaultMessage: "Join Room"

@@ -29,7 +29,7 @@
 
 :local(.message-group-label) {
   color: theme.$darkgrey;
-  font-size: theme.$font-size-2xs;
+  font-size: theme.$font-size-xs;
   display: flex;
   margin: 2px;
 }
@@ -46,11 +46,15 @@
   padding: 10px 16px;
   max-width: 80%;
   width: max-content;
-  font-size: theme.$font-size-sm;
+  font-size: theme.$font-size-md;
 
   img, video {
     max-height: 240px;
     border-radius: 18px;
+  }
+
+  a {
+    text-decoration: underline;
   }
 }
 
@@ -91,6 +95,18 @@
     background-color: theme.$blue;
     color: theme.$white;
     align-self: flex-end;
+
+    a {
+      color: theme.$white;
+
+      &:hover {
+        color: theme.$white-hover;
+      }
+
+      &:active {
+        color: theme.$white-pressed;
+      }
+    }
   }
 }
 

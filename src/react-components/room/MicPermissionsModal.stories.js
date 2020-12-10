@@ -6,14 +6,14 @@ export default {
   title: "MicPermissionsModal"
 };
 
-export const Base = () => <RoomLayout modal={<MicPermissionsModal />} />;
+export const Base = () => <RoomLayout viewport={<MicPermissionsModal />} />;
 
 Base.parameters = {
   layout: "fullscreen"
 };
 
 export const Error = () => (
-  <RoomLayout modal={<MicPermissionsModal error="Microphone access not allowed." errorButtonLabel="Help" />} />
+  <RoomLayout viewport={<MicPermissionsModal error="Microphone access not allowed." errorButtonLabel="Help" />} />
 );
 
 Error.parameters = {

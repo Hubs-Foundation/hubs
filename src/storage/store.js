@@ -98,6 +98,7 @@ export const SCHEMA = {
         invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
+        enableGyro: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
         animateWaypointTransitions: { type: "bool" },
         showFPSCounter: { type: "bool" },
@@ -121,7 +122,8 @@ export const SCHEMA = {
         disableEchoCancellation: { type: "bool" },
         disableNoiseSuppression: { type: "bool" },
         disableAutoGainControl: { type: "bool" },
-        locale: { type: "string" }
+        locale: { type: "string" },
+        showRtcDebugPanel: { type: "bool" }
       }
     },
 

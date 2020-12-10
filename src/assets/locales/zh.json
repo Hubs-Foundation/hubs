@@ -315,6 +315,7 @@
   "preferences.movementSpeedModifier": "移动速度调整器",
   "preferences.enableOnScreenJoystickLeft": "允许使用屏幕上左侧的操纵杆四处走动",
   "preferences.enableOnScreenJoystickRight": "允许使用屏幕上右侧的操纵杆四处走动",
+  "preferences.enableGyro": "Enable gyroscope (when supported by browser/device)",
   "preferences.invertTouchscreenCameraMove": "Invert direction of camera movement for touchscreens",
   "preferences.browserDefault": "Browser Default",
   "preferences.locale": "Language",
@@ -328,6 +329,7 @@
   "preferences.allowMultipleHubsInstances": "当多个hubs打开时暂停自动离开功能",
   "preferences.disableIdleDetection": "当没在使用或是后台运行时暂停自动离开功能",
   "preferences.preferMobileObjectInfoPanel": "优先移动对象信息版面",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "跳转到 VR（虚拟现实）",
   "settings.change-avatar": "设置名字 & 头像",
   "settings.change-scene": "选择一个场景",
@@ -430,5 +432,8 @@
   "support.copied": "copied!",
   "support.details": "details",
   "support.supported": "supported",
-  "support.unsupported": "unsupported"
+  "support.unsupported": "unsupported",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect Signaling",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect Signaling"
 }

@@ -315,6 +315,7 @@
   "preferences.movementSpeedModifier": "Modificador de velocidade de movimento",
   "preferences.enableOnScreenJoystickLeft": "Habilitar Joystick no canto esquerdo da tela para se mover",
   "preferences.enableOnScreenJoystickRight": "Habilitar Joystick no canto direito da tela para se mover",
+  "preferences.enableGyro": "Enable gyroscope (when supported by browser/device)",
   "preferences.invertTouchscreenCameraMove": "Inverter direção do movimento de câmera no touchscreen",
   "preferences.browserDefault": "Padrão do navegador",
   "preferences.locale": "Idioma",
@@ -328,6 +329,7 @@
   "preferences.allowMultipleHubsInstances": "Desativar a saída automática quando várias instâncias do hubs estiverem abertas",
   "preferences.disableIdleDetection": "Desativar saída automática quando ocioso ou em segundo plano",
   "preferences.preferMobileObjectInfoPanel": "Painel de informações do objeto selecionado",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "Voltar para VR",
   "settings.change-avatar": "Definir Nome e Avatar",
   "settings.change-scene": "Escolha um cenário",
@@ -430,5 +432,8 @@
   "support.copied": "copiado!",
   "support.details": "detalhes",
   "support.supported": "com suporte",
-  "support.unsupported": "sem suporte"
+  "support.unsupported": "sem suporte",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
 }

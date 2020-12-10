@@ -80,12 +80,12 @@ export function Popover({
       };
 
       if (visible) {
-        window.addEventListener("click", onClick);
+        window.addEventListener("mousedown", onClick);
         window.addEventListener("keydown", onKeyDown);
       }
 
       return () => {
-        window.removeEventListener("click", onClick);
+        window.removeEventListener("mousedown", onClick);
         window.removeEventListener("keydown", onKeyDown);
       };
     },

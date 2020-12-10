@@ -10,7 +10,7 @@ const micOptions = ["Microphone 1", "Microphone 2", "Microphone 3"];
 
 export const Base = () => (
   <RoomLayout
-    modal={<MicSetupModal selectedMicrophone="Microphone 1" microphoneEnabled microphoneOptions={micOptions} />}
+    viewport={<MicSetupModal selectedMicrophone="Microphone 1" microphoneEnabled microphoneOptions={micOptions} />}
   />
 );
 
@@ -20,7 +20,7 @@ Base.parameters = {
 
 export const TestMicrophone = () => (
   <RoomLayout
-    modal={
+    viewport={
       <MicSetupModal
         selectedMicrophone="Microphone 1"
         microphoneEnabled
@@ -37,7 +37,7 @@ TestMicrophone.parameters = {
 
 export const TestSound = () => (
   <RoomLayout
-    modal={
+    viewport={
       <MicSetupModal selectedMicrophone="Microphone 1" microphoneEnabled microphoneOptions={micOptions} soundPlaying />
     }
   />
@@ -48,7 +48,7 @@ TestSound.parameters = {
 };
 
 export const MicrophoneDisabled = () => (
-  <RoomLayout modal={<MicSetupModal selectedMicrophone="Microphone 1" microphoneOptions={micOptions} />} />
+  <RoomLayout viewport={<MicSetupModal selectedMicrophone="Microphone 1" microphoneOptions={micOptions} />} />
 );
 
 MicrophoneDisabled.parameters = {

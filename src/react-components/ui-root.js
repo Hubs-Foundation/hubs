@@ -31,6 +31,7 @@ import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
+import RTCDebugPanel from "./debug-panel/RtcDebugPanel.js";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 import maskEmail from "../utils/mask-email";
@@ -90,6 +91,7 @@ import { WebVRUnsupportedModal } from "./room/WebVRUnsupportedModal";
 import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
+import { Tip } from "./room/Tip";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -268,15 +270,21 @@ class UIRoot extends Component {
       } else {
         sceneEl.classList.remove(roomLayoutStyles.sceneSmFullScreen);
       }
-
-      sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
-
-      if (sceneEl.camera) {
-        sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
-        sceneEl.camera.updateProjectionMatrix();
-      }
     }
   }
+
+  onResizeViewport = ({ width, height }) => {
+    const sceneEl = this.props.scene;
+
+    sceneEl.renderer.setSize(width, height);
+
+    if (sceneEl.camera) {
+      sceneEl.camera.aspect = width / height;
+      sceneEl.camera.updateProjectionMatrix();
+      // Resizing the canvas clears it, so render immediately after resize to prevent flicker.
+      sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
+    }
+  };
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
@@ -310,20 +318,20 @@ class UIRoot extends Component {
     });
 
     this.props.scene.addEventListener("loaded", this.onSceneLoaded);
-    this.props.scene.addEventListener("stateadded", this.onAframeStateChanged);
-    this.props.scene.addEventListener("stateremoved", this.onAframeStateChanged);
     this.props.scene.addEventListener("share_video_enabled", this.onShareVideoEnabled);
     this.props.scene.addEventListener("share_video_disabled", this.onShareVideoDisabled);
     this.props.scene.addEventListener("share_video_failed", this.onShareVideoFailed);
     this.props.scene.addEventListener("exit", this.exitEventHandler);
     this.props.scene.addEventListener("action_exit_watch", () => {
       if (this.state.hide) {
-        this.setState({ hide: false });
+        this.setState({ hide: false, hideUITip: false });
       } else {
         this.setState({ watching: false });
       }
     });
-    this.props.scene.addEventListener("action_toggle_ui", () => this.setState({ hide: !this.state.hide }));
+    this.props.scene.addEventListener("action_toggle_ui", () =>
+      this.setState({ hide: !this.state.hide, hideUITip: false })
+    );
 
     const scene = this.props.scene;
 
@@ -406,7 +414,7 @@ class UIRoot extends Component {
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
-          onClose: onContinueAfterSignIn
+          onClose: onContinueAfterSignIn || this.closeDialog
         });
 
         await authComplete;
@@ -419,7 +427,7 @@ class UIRoot extends Component {
           onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
-      onClose: onContinueAfterSignIn
+      onClose: onContinueAfterSignIn || this.closeDialog
     });
   };
 
@@ -906,36 +914,12 @@ class UIRoot extends Component {
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
-    const sceneEl = this.props.scene;
-
-    if (sidebarId) {
-      sceneEl.classList.add(roomLayoutStyles.sidebarOpen);
-    } else {
-      sceneEl.classList.remove(roomLayoutStyles.sidebarOpen);
-    }
-
-    sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
-    sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
-    sceneEl.camera.updateProjectionMatrix();
-
     this.setState({ sidebarId, selectedUserId: null, ...otherState });
   }
 
   toggleSidebar(sidebarId, otherState) {
-    const sceneEl = this.props.scene;
-
     this.setState(({ sidebarId: curSidebarId }) => {
       const nextSidebarId = curSidebarId === sidebarId ? null : sidebarId;
-
-      if (nextSidebarId) {
-        sceneEl.classList.add(roomLayoutStyles.sidebarOpen);
-      } else {
-        sceneEl.classList.remove(roomLayoutStyles.sidebarOpen);
-      }
-
-      sceneEl.renderer.setSize(sceneEl.clientWidth, sceneEl.clientHeight, false);
-      sceneEl.camera.aspect = sceneEl.clientWidth / sceneEl.clientHeight;
-      sceneEl.camera.updateProjectionMatrix();
 
       return {
         sidebarId: nextSidebarId,
@@ -1030,7 +1014,10 @@ class UIRoot extends Component {
         shortUrl={configs.SHORTLINK_DOMAIN}
         loadingCode={!this.state.linkCode}
         code={this.state.linkCode}
-        headsetConnected={this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no}
+        headsetConnected={
+          this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no ||
+          this.props.availableVREntryTypes.cardboard !== VR_DEVICE_AVAILABILITY.no
+        }
         unsupportedBrowser={this.props.availableVREntryTypes.generic === VR_DEVICE_AVAILABILITY.maybe}
         onEnterOnConnectedHeadset={() => {
           // TODO: This is bad. linkCodeCancel should be tied to component lifecycle not these callback methods.
@@ -1118,7 +1105,25 @@ class UIRoot extends Component {
       isGhost,
       hide
     };
-    if (this.props.hide || this.state.hide) return <div className={classNames(rootStyles)} />;
+    if (this.props.hide || this.state.hide) {
+      return (
+        <div className={classNames(rootStyles)}>
+          <RoomLayout
+            onResizeViewport={this.onResizeViewport}
+            viewport={
+              !this.state.hideUITip && (
+                <Tip
+                  onDismiss={() => this.setState({ hideUITip: true })}
+                  dismissLabel={<FormattedMessage id="tips.dismiss.ok" />}
+                >
+                  {"Entered fullscreen mode. Press Escape to show UI."}
+                </Tip>
+              )
+            }
+          />
+        </div>
+      );
+    }
 
     const preload = this.props.showPreload;
 
@@ -1157,6 +1162,7 @@ class UIRoot extends Component {
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
+    const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
@@ -1327,6 +1333,17 @@ class UIRoot extends Component {
               icon: CameraIcon,
               onClick: () => this.toggleStreamerMode()
             },
+          {
+            id: "leave-room",
+            label: "Leave Room",
+            icon: LeaveIcon,
+            onClick: () => {
+              this.showNonHistoriedDialog(LeaveRoomModal, {
+                destinationUrl: "/",
+                reason: LeaveReason.leaveRoom
+              });
+            }
+          },
           canCloseRoom && {
             id: "close-room",
             label: "Close Room",
@@ -1470,8 +1487,10 @@ class UIRoot extends Component {
             <RoomLayout
               objectFocused={!!this.props.selectedObject}
               streaming={streaming}
+              onResizeViewport={this.onResizeViewport}
               viewport={
                 <>
+                  {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
                   {!this.props.selectedObject && <CompactMoreMenuButton />}
                   {(!this.props.selectedObject || this.props.breakpoint !== "sm") && (
                     <ContentMenu>
@@ -1513,6 +1532,7 @@ class UIRoot extends Component {
                       />
                     )}
                   <TipContainer
+                    hide={this.props.activeObject}
                     inLobby={watching}
                     inRoom={entered}
                     isEmbedded={this.props.embed}
@@ -1522,6 +1542,15 @@ class UIRoot extends Component {
                     scene={this.props.scene}
                     store={this.props.store}
                   />
+                  {showRtcDebugPanel && (
+                    <RTCDebugPanel
+                      history={this.props.history}
+                      store={window.APP.store}
+                      scene={this.props.scene}
+                      presences={this.props.presences}
+                      sessionId={this.props.sessionId}
+                    />
+                  )}
                 </>
               }
               sidebar={
@@ -1532,7 +1561,7 @@ class UIRoot extends Component {
                         presences={this.props.presences}
                         occupantCount={this.occupantCount()}
                         canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
-                        onUploadFile={this.createObject}
+                        scene={this.props.scene}
                         onClose={() => this.setSidebar(null)}
                       />
                     )}
@@ -1583,7 +1612,13 @@ class UIRoot extends Component {
                         accountId={this.props.sessionId}
                         room={this.props.hub}
                         canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
-                        onEdit={() => this.setSidebar("room-info-settings")}
+                        onEdit={() => {
+                          this.props.performConditionalSignIn(
+                            () => this.props.hubChannel.can("update_hub"),
+                            () => this.setSidebar("room-info-settings"),
+                            "room-settings"
+                          );
+                        }}
                         onClose={() => this.setSidebar(null)}
                         onChangeScene={this.onChangeScene}
                       />
@@ -1611,8 +1646,14 @@ class UIRoot extends Component {
                   undefined
                 )
               }
-              modal={this.state.dialog || (renderEntryFlow && entryDialog)}
-              toolbarLeft={<InvitePopoverContainer hub={this.props.hub} scene={this.props.scene} />}
+              modal={this.state.dialog}
+              toolbarLeft={
+                <InvitePopoverContainer
+                  hub={this.props.hub}
+                  hubChannel={this.props.hubChannel}
+                  scene={this.props.scene}
+                />
+              }
               toolbarCenter={
                 <>
                   {watching && (
@@ -1643,7 +1684,7 @@ class UIRoot extends Component {
                         mediaSearchStore={this.props.mediaSearchStore}
                         showNonHistoriedDialog={this.showNonHistoriedDialog}
                       />
-                      <ReactionPopoverContainer />
+                      {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
                     </>
                   )}
                   <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
@@ -1665,7 +1706,12 @@ class UIRoot extends Component {
                       icon={<LeaveIcon />}
                       label="Leave"
                       preset="red"
-                      onClick={() => this.props.exitScene(ExitReason.left)}
+                      onClick={() => {
+                        this.showNonHistoriedDialog(LeaveRoomModal, {
+                          destinationUrl: "/",
+                          reason: LeaveReason.leaveRoom
+                        });
+                      }}
                     />
                   )}
                   <MoreMenuPopoverButton menu={moreMenu} />
