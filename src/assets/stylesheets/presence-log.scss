@@ -2,7 +2,6 @@
 
 :local(.presence-log) {
   align-self: flex-start;
-  flex: 10;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -33,7 +32,7 @@
 
     :local(.message-body) {
       margin-left: 4px;
-      white-space: pre;
+      word-break: break-all;
     }
 
     :local(.message-body-multi) {
@@ -61,6 +60,7 @@
     :local(.message-source) {
       align-self: flex-start;
       font-weight: bold;
+      flex-shrink: 0;
     }
 
     :local(.message-source-link) {
@@ -94,6 +94,7 @@
       margin-right: 6px;
       border-radius: 12px;
       background-color: transparent;
+      flex-shrink: 0;
 
       &:hover {
         @media (pointer: fine) {
