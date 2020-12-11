@@ -12,7 +12,7 @@
   pointer-events: auto;
   padding: 4px;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-lg) {
     top: 24px;
     right: 24px;
   }

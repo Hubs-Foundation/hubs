@@ -81,7 +81,7 @@
   }
 
   &:local(.compact-sm) {
-    @media(max-width: theme.$breakpoint-md - 1), (max-height: theme.$breakpoint-vr - 1) {
+    @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
       flex-direction: column;
       justify-content: center;
 
@@ -102,7 +102,7 @@
 }
 
 :local(.lg) {
-  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     font-size: theme.$font-size-sm;
 
     svg {

@@ -12,7 +12,7 @@
   width: 204px;
   z-index: 1;
 
-  @media (min-width: theme.$breakpoint-md) {
+  @media (min-width: theme.$breakpoint-lg) {
     width: 360px;
   }
 }
@@ -45,7 +45,7 @@
 }
 
 :local(.sm-fullscreen) {
-  @media(max-width: theme.$breakpoint-md - 1), (max-height: theme.$breakpoint-vr - 1) {
+  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
     position: fixed;
     top: 0;
     left: 0;

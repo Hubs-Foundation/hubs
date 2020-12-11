@@ -4,7 +4,7 @@
   min-width: 240px;
   padding-top: 16px;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-lg) {
     padding-top: 0px;
   }
 }
@@ -40,7 +40,7 @@
   }
 
   // Hack to make hover styles overlap popover border and look correct.
-  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     width: calc(100% + 2px);
 
     &:hover, &:active, :global(body.keyboard-user) &:focus {
@@ -98,7 +98,7 @@ button:local(.more-menu-item-target) {
   justify-content: center;
   align-items: center;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media(min-width: theme.$breakpoint-lg) {
     display: none;
   }
 }

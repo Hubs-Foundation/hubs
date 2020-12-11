@@ -40,7 +40,7 @@ export function Popover({
     ]
   });
   const breakpoint = useCssBreakpoints();
-  const fullscreen = !disableFullscreen && breakpoint === "sm";
+  const fullscreen = !disableFullscreen && (breakpoint === "sm" || breakpoint === "md");
   const openPopover = useCallback(() => setVisible(true), [setVisible]);
   const closePopover = useCallback(() => setVisible(false), [setVisible]);
   const togglePopover = useCallback(() => setVisible(visible => !visible), [setVisible]);

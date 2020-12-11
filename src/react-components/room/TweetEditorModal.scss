@@ -33,7 +33,7 @@
   bottom: theme.$spacing-2xs;
   right: theme.$spacing-2xs;
 
-  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     display: block;
   }
 }
