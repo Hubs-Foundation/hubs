@@ -65,10 +65,12 @@ function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject }) {
         <PinIcon />
         <span>{isPinned ? "Unpin" : "Pin"}</span>
       </ObjectMenuButton>
-      <ObjectMenuButton disabled={!url} as="a" href={url} target="_blank" rel="noopener noreferrer">
-        <LinkIcon />
-        <span>Link</span>
-      </ObjectMenuButton>
+      {url && (
+        <ObjectMenuButton as="a" href={url} target="_blank" rel="noopener noreferrer">
+          <LinkIcon />
+          <span>Link</span>
+        </ObjectMenuButton>
+      )}
       <ObjectMenuButton
         disabled={!canGoTo}
         onClick={() => {
