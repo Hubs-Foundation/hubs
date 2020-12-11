@@ -649,28 +649,69 @@ class UIRoot extends Component {
 
       this.setState({ audioTrack, mediaStream });
 
-      if (/Oculus/.test(navigator.userAgent)) {
-        // HACK Oculus Browser 6 seems to randomly end the microphone audio stream. This re-creates it.
-        // Note the ended event will only fire if some external event ends the stream, not if we call stop().
-        const recreateAudioStream = async () => {
+      // Chrome ends the microphone audio stream if the USB is disconnected a few sceonds. This re-creates it.
+      // Note the ended event will only fire if some external event ends the stream, not if we call stop().
+      const recreateAudioStream = async (showWarning=true) => {
+        if (showWarning) {
           console.warn(
-            "Oculus Browser 6 bug hit: Audio stream track ended without calling stop. Recreating audio stream."
+            "Audio stream track ended without calling stop. Recreating audio stream."
           );
+        }
 
-          const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-          const audioTrack = newStream.getAudioTracks()[0];
+        const { lastUsedMicDeviceId } = this.props.store.state.settings;
+        constraints.audio.deviceId = { exact: lastUsedMicDeviceId };
+        const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const audioTrack = newStream.getAudioTracks()[0];
 
-          audioSystem.addStreamToOutboundAudio("microphone", newStream);
+        audioSystem.addStreamToOutboundAudio("microphone", newStream);
 
-          this.setState({ audioTrack });
+        this.setState({ audioTrack });
 
-          this.props.scene.emit("local-media-stream-created");
+        this.props.scene.emit("local-media-stream-created");
 
-          audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
-        };
-
-        audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
+        audioTrack.addEventListener("ended", recreateAudioStreamWithDelay, { once: true });
+      };
+      const recreateAudioStreamWithMaxRetries = async (maxRetries=2) => {
+        try {
+          if (maxRetries > 0) {
+            await recreateAudioStream(maxRetries === 2);
+            // Some times we have no error, but the browser selected another mic!
+            // The {deviceId: {ideal: deviceId}} wasn't honored.
+            // This should not happen anymore because we now use {deviceId: {exact: deviceId}} for the retries.
+            const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForAudioTrack(this.state.audioTrack));
+            const { lastUsedMicDeviceId } = this.props.store.state.settings;
+            if (micDeviceId !== lastUsedMicDeviceId) {
+              console.log('Mic lost, another mic has been selected');
+              await this.fetchMicDevices();
+              await this.setupNewMediaStream();
+              // TODO notify the user
+              // showAlert("Your mic has been disconnected, another mic has been selected, Please look at the mic list in the menu.");
+            } else {
+              console.warn("Successfully reconnected the mic");
+            }
+            console.log("Selected mic", micDeviceId);
+          } else {
+            console.warn("Gave up trying to reconnect the mic");
+            await this.fetchMicDevices();
+            // select the first mic in the list
+            if (this.state.micDevices.length > 0) {
+              this.micDeviceChanged({target: {value: this.state.micDevices[0].deviceId}});
+            }
+            // TODO notify the user
+            // showAlert("Your mic has been disconnected, another mic has been selected, Please look at the mic list in the menu.");
+          }
+        } catch (e) {
+          // OverconstrainedError {name: "OverconstrainedError", message: "", constraint: "deviceId"}
+          console.error(e);
+          console.warn("Failed reconnecting the mic, retry in 5s, attempts left: ", maxRetries - 1);
+          setTimeout(() => recreateAudioStreamWithMaxRetries(maxRetries - 1), 5000);
+        }
+      };
+      const recreateAudioStreamWithDelay = async (evt) => {
+        await recreateAudioStreamWithMaxRetries();
       }
+
+      audioTrack.addEventListener("ended", recreateAudioStreamWithDelay, { once: true });
 
       return true;
     } catch (e) {
@@ -722,6 +763,9 @@ class UIRoot extends Component {
   };
 
   fetchMicDevices = () => {
+    // Note that mic permission needs to be accepted before we can see mic labels
+    // with the enumerateDevices api, so fetchMicDevices needs to be called
+    // after an initial getUserMedia.
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
         this.setState(
