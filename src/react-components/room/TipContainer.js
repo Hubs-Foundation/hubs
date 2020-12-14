@@ -1,11 +1,43 @@
 import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl, defineMessages } from "react-intl";
 import { Tip } from "./Tip";
 import { useEffect } from "react";
 import { discordBridgesForPresences, hasEmbedPresences } from "../../utils/phoenix-utils";
 
+const onboardingMessages = defineMessages({
+  "tips.mobile.look": {
+    id: "tips.mobile.look",
+    defaultMessage: "Welcome! 👋 Tap and drag to look around."
+  },
+  "tips.mobile.locomotion": {
+    id: "tips.mobile.locomotion",
+    defaultMessage: "Great! To move, pinch with two fingers."
+  },
+  "tips.mobile.invite": {
+    id: "tips.mobile.invite",
+    defaultMessage: "Use the Invite button in the bottom left to share this room."
+  },
+  "tips.desktop.look": {
+    id: "tips.desktop.look",
+    defaultMessage: "Welcome to %app-name%! Let's take a quick tour. 👋 Click and drag to look around."
+  },
+  "tips.desktop.locomotion": {
+    id: "tips.desktop.locomotion",
+    defaultMessage: "Use the W A S D keys to move. Hold shift to boost."
+  },
+  "tips.desktop.turning": {
+    id: "tips.desktop.turning",
+    defaultMessage: "Perfect. Use the Q and E keys to rotate."
+  },
+  "tips.desktop.invite": {
+    id: "tips.desktop.invite",
+    defaultMessage: "Nobody else is here. Use the invite button in the bottom left to share this room."
+  }
+});
+
 export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
+  const intl = useIntl();
   const [lobbyTipDismissed, setLobbyTipDismissed] = useState(false);
   const [broadcastTipDismissed, setBroadcastTipDismissed] = useState(() =>
     store.state.confirmedBroadcastedRooms.includes(hubId)
@@ -57,7 +89,7 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
     if (onboardingTipId) {
       return (
         <Tip onDismiss={onSkipOnboarding} dismissLabel={<FormattedMessage id="tips.dismiss.skip" />}>
-          <FormattedMessage id={onboardingTipId} />
+          {intl.formatMessage(onboardingMessages[onboardingTipId])}
         </Tip>
       );
     }

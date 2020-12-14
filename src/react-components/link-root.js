@@ -174,13 +174,13 @@ class LinkRoot extends Component {
 
             <div className={styles.enteredContents}>
               <div className={styles.header}>
-                <FormattedMessage
-                  id={
-                    this.state.failedAtLeastOnce
-                      ? "link.try_again"
-                      : "link.link_page_header_" + (!this.state.isAlphaMode ? "entry" : "headset")
-                  }
-                />
+                {this.state.failedAtLeastOnce ? (
+                  <FormattedMessage id="link.try_again" />
+                ) : this.state.isAlphaMode ? (
+                  <FormattedMessage id="link.link_page_header_headset" />
+                ) : (
+                  <FormattedMessage id="link.link_page_header_entry" />
+                )}
               </div>
 
               <div className={styles.entered}>

@@ -3,8 +3,9 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { DataPanel } from "./DataPanel.js";
 import { CollapsiblePanel } from "./CollapsiblePanel.js";
-import { MessageButton } from "../input/MessageButton.js";
+import { Button } from "../input/Button.js";
 import styles from "./RtcDebugPanel.scss";
+import { FormattedMessage } from "react-intl";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -36,9 +37,17 @@ const MessageButtonStyle = {
   minWidth: "120px"
 };
 
-export function PanelMessageButton(props) {
-  return <MessageButton {...props} style={MessageButtonStyle} />;
+export function PanelMessageButton({ children, ...rest }) {
+  return (
+    <Button {...rest} style={MessageButtonStyle}>
+      {children}
+    </Button>
+  );
 }
+
+PanelMessageButton.propTypes = {
+  children: PropTypes.node
+};
 
 function TrackStatsPanel({ title, data, xAxis, yAxis, stats }) {
   const props = {
@@ -79,12 +88,9 @@ TrackStatsPanel.propTypes = {
 function TransportPanel({ title, data, candidates, producers, consumers, isButtonEnabled, onRestart }) {
   return (
     <CollapsiblePanel key={title} title={title} border url={`${MEDIASOUP_DOC_BASE_URL}#Transport`} data={data}>
-      <PanelMessageButton
-        id={"rtcDebugPanel.restartIceButton"}
-        onClick={onRestart}
-        disabled={!isButtonEnabled}
-        primary
-      />
+      <PanelMessageButton onClick={onRestart} disabled={!isButtonEnabled} primary>
+        <FormattedMessage id="rtcDebugPanel.restartIceButton" />
+      </PanelMessageButton>
       {candidates?.length && (
         <CollapsiblePanel key={`Candidates`} title={`Candidates`} row url={`${MDN_DOC_BASE_URL}RTCIceCandidate`} border>
           {candidates}
@@ -120,7 +126,6 @@ function SignalingPanel({ data, onConnect, onDisconnect }) {
   return (
     <CollapsiblePanel title={"Signaling"} border data={data}>
       <PanelMessageButton
-        id={data.connected ? "rtcDebugPanel.disconnectSignalingButton" : "rtcDebugPanel.connectSignalingButton"}
         onClick={() => {
           if (data.connected) {
             onDisconnect();
@@ -130,7 +135,13 @@ function SignalingPanel({ data, onConnect, onDisconnect }) {
         }}
         disabled={false}
         primary
-      />
+      >
+        {data.connected ? (
+          <FormattedMessage id="rtcDebugPanel.disconnectSignalingButton" />
+        ) : (
+          <FormattedMessage id="rtcDebugPanel.connectSignalingButton" />
+        )}
+      </PanelMessageButton>
     </CollapsiblePanel>
   );
 }

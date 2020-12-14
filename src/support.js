@@ -90,9 +90,11 @@ class Support extends React.Component {
               <FormattedMessage id="support.missing-features" />
               <br />
               {inAppBrowser ? (
-                <FormattedMessage
-                  id={detectedOS === "iOS" ? "support.in-app-browser-ios" : "support.in-app-browser-android"}
-                />
+                detectedOS === "iOS" ? (
+                  <FormattedMessage id="support.in-app-browser-ios" />
+                ) : (
+                  <FormattedMessage id="support.in-app-browser-android" />
+                )
               ) : (
                 <FormattedMessage id="support.update-browser" />
               )}
@@ -100,7 +102,11 @@ class Support extends React.Component {
               <br />
               <input type="text" readOnly onFocus={e => e.target.select()} value={document.location} />
               <a className="copy-link" href="#" onClick={this.onCopyClicked}>
-                <FormattedMessage id={this.state.hasCopied ? "support.copied" : "support.copy"} />
+                {this.state.hasCopied ? (
+                  <FormattedMessage id="support.copied" />
+                ) : (
+                  <FormattedMessage id="support.copy" />
+                )}
               </a>
               <br />
               <br />
@@ -115,7 +121,11 @@ class Support extends React.Component {
                     <tr key={s.name}>
                       <td>{s.name}</td>
                       <td>
-                        <FormattedMessage id={s.supported ? "support.supported" : "support.unsupported"} />
+                        {s.supported ? (
+                          <FormattedMessage id="support.supported" />
+                        ) : (
+                          <FormattedMessage id="support.unsupported" />
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { injectIntl, FormattedMessage } from "react-intl";
+import { injectIntl, FormattedMessage, defineMessages } from "react-intl";
 import configs from "../utils/configs";
 import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
@@ -16,7 +16,7 @@ import { remixAvatar } from "../utils/avatar-utils";
 import { fetchReticulumAuthenticated, getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import { CreateTile, MediaTile } from "./room/MediaTiles";
-import { SignInMessages } from "./react-components/auth/SignInModal";
+import { SignInMessages } from "./auth/SignInModal";
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
@@ -72,6 +72,108 @@ const DEFAULT_FACETS = {
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
 };
+
+const poweredByMessages = defineMessages({
+  images: {
+    id: "media-browser.powered_by.images",
+    defaultMessage: "Search by Bing | "
+  },
+  videos: {
+    id: "media-browser.powered_by.videos",
+    defaultMessage: "Search by Bing | "
+  },
+  youtube: {
+    id: "media-browser.powered_by.youtube",
+    defaultMessage: "Search by Google | "
+  },
+  gifs: {
+    id: "media-browser.powered_by.gifs",
+    defaultMessage: "Search by Tenor | "
+  },
+  sketchfab: {
+    id: "media-browser.powered_by.sketchfab",
+    defaultMessage: "Search by Sketchfab | "
+  },
+  poly: {
+    id: "media-browser.powered_by.poly",
+    defaultMessage: "Search by Google | "
+  },
+  twitch: {
+    id: "media-browser.powered_by.twitch",
+    defaultMessage: "Search by Twitch | "
+  },
+  scenes: {
+    id: "media-browser.powered_by.scenes",
+    defaultMessage: "Made with "
+  },
+  avatars: {
+    id: "media-browser.powered_by.avatars",
+    defaultMessage: " "
+  }
+});
+
+const customObjectMessages = defineMessages({
+  object: {
+    id: "media-browser.add_custom_object",
+    defaultMessage: "Custom URL or File"
+  },
+  scene: {
+    id: "media-browser.add_custom_scene",
+    defaultMessage: "Custom Scene"
+  },
+  avatar: {
+    id: "media-browser.add_custom_avatar",
+    defaultMessage: "Avatar GLB URL"
+  }
+});
+
+const searchPlaceholderMessages = defineMessages({
+  scenes: { id: "media-browser.search-placeholder.scenes", defaultMessage: "Search Scenes..." },
+  avatars: { id: "media-browser.search-placeholder.avatars", defaultMessage: "Search Avatars..." },
+  videos: { id: "media-browser.search-placeholder.videos", defaultMessage: "Search for Videos..." },
+  images: { id: "media-browser.search-placeholder.images", defaultMessage: "Search for Images..." },
+  youtube: { id: "media-browser.search-placeholder.youtube", defaultMessage: "Search for Youtube videos..." },
+  gifs: { id: "media-browser.search-placeholder.gifs", defaultMessage: "Search for GIFs..." },
+  twitch: { id: "media-browser.search-placeholder.twitch", defaultMessage: "Search for Twitch streams..." },
+  sketchfab: { id: "media-browser.search-placeholder.sketchfab", defaultMessage: "Search Sketchfab Models..." },
+  poly: { id: "media-browser.search-placeholder.poly", defaultMessage: "Search Google Poly Models..." },
+  base: { id: "media-browser.search-placeholder.base", defaultMessage: "Search..." }
+});
+
+const emptyMessages = defineMessages({
+  images: {
+    id: "media-browser.empty.images",
+    defaultMessage: "No results. Try entering a new search above."
+  },
+  videos: {
+    id: "media-browser.empty.videos",
+    defaultMessage: "No results. Try entering a new search above."
+  },
+  youtube: {
+    id: "media-browser.empty.youtube",
+    defaultMessage: "No results. Try entering a new search above."
+  },
+  gifs: {
+    id: "media-browser.empty.gifs",
+    defaultMessage: "No result. Try entering a new search above."
+  },
+  sketchfab: {
+    id: "media-browser.empty.sketchfab",
+    defaultMessage: "No results. Try entering a new search above."
+  },
+  poly: {
+    id: "media-browser.empty.poly",
+    defaultMessage: "No results. Try entering a new search above."
+  },
+  twitch: {
+    id: "media-browser.empty.twitch",
+    defaultMessage: "No results. Try entering a new search above."
+  },
+  favorites: {
+    id: "media-browser.empty.favorites",
+    defaultMessage: "You don't have any favorites. Click a ⭐ to add to your favorites."
+  }
+});
 
 // TODO: Migrate to use MediaGrid and media specific components like RoomTile
 class MediaBrowserContainer extends Component {
@@ -291,7 +393,7 @@ class MediaBrowserContainer extends Component {
   };
 
   render() {
-    const { formatMessage } = this.props.intl;
+    const intl = this.props.intl;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const urlSource = this.getUrlSource(searchParams);
     const isSceneApiType = urlSource === "scenes";
@@ -326,12 +428,15 @@ class MediaBrowserContainer extends Component {
     const hasNext = !!(meta && meta.next_cursor);
     const hasPrevious = !!searchParams.get("cursor");
 
+    const customObjectType =
+      this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
+
     let searchDescription;
 
     if (!hideSearch && urlSource !== "scenes" && urlSource !== "avatars" && urlSource !== "favorites") {
       searchDescription = (
         <>
-          <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+          {intl.formatMessage(poweredByMessages[urlSource])}
           {PRIVACY_POLICY_LINKS[urlSource] && (
             <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
               <FormattedMessage id="media-browser.privacy_policy" />
@@ -344,7 +449,7 @@ class MediaBrowserContainer extends Component {
         <>
           {configs.feature("enable_spoke") && (
             <>
-              <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
+              {intl.formatMessage(poweredByMessages[urlSource])}
               <a href="/spoke" target="_blank" rel="noreferrer noopener">
                 <FormattedMessage id="editor-name" />
               </a>
@@ -393,21 +498,13 @@ class MediaBrowserContainer extends Component {
         activeFilter={activeFilter}
         facets={facets}
         onSelectFacet={this.handleFacetClicked}
-        searchPlaceholder={formatMessage({
-          id: `media-browser.search-placeholder.${urlSource}`
-        })}
+        searchPlaceholder={intl.formatMessage(searchPlaceholderMessages[urlSource])}
         searchDescription={searchDescription}
         headerRight={
           showCustomOption && (
             <IconButton lg onClick={() => handleCustomClicked(urlSource)}>
               {["scenes", "avatars"].includes(urlSource) ? <LinkIcon /> : <UploadIcon />}
-              <p>
-                <FormattedMessage
-                  id={`media-browser.add_custom_${
-                    this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object"
-                  }`}
-                />
-              </p>
+              <p>{intl.formatMessage(customObjectMessages[customObjectType])}</p>
             </IconButton>
           )
         }
@@ -415,7 +512,7 @@ class MediaBrowserContainer extends Component {
         hasPrevious={hasPrevious}
         onNextPage={() => this.handlePager(1)}
         onPreviousPage={() => this.handlePager(-1)}
-        noResultsMessage={<FormattedMessage id={`media-browser.empty.${urlSource}`} />}
+        noResultsMessage={intl.formatMessage(emptyMessages[urlSource])}
       >
         {this.props.mediaSearchStore.isFetching ||
         this._sendQueryTimeout ||
