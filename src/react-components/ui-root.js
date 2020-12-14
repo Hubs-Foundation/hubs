@@ -91,7 +91,7 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { Tip } from "./room/Tip";
-import { SignInMessages } from "./react-components/auth/SignInModal";
+import { SignInMessages } from "./auth/SignInModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 

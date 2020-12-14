@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { PromoteClientModal } from "./PromoteClientModal";
 import { getAvatarThumbnailUrl } from "../../utils/avatar-utils";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
-import { SignInMessages } from "./react-components/auth/SignInModal";
+import { SignInMessages } from "../auth/SignInModal";
 
 export function UserProfileSidebarContainer({
   user,
