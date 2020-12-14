@@ -22,7 +22,6 @@ import { getPresenceProfileForSession } from "../utils/phoenix-utils";
 import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
 
-import { getMessages } from "../utils/i18n";
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowserContainer from "./media-browser";
 
@@ -92,6 +91,7 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { Tip } from "./room/Tip";
+import { SignInMessages } from "./react-components/auth/SignInModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -154,8 +154,8 @@ class UIRoot extends Component {
     initialIsSubscribed: PropTypes.bool,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
-    signInMessageId: PropTypes.string,
-    signInCompleteMessageId: PropTypes.string,
+    signInMessage: PropTypes.string,
+    signInCompleteMessage: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
@@ -404,11 +404,11 @@ class UIRoot extends Component {
   };
 
   showContextualSignInDialog = () => {
-    const { signInMessageId, authChannel, signInCompleteMessageId, onContinueAfterSignIn } = this.props;
+    const { signInMessage, authChannel, signInCompleteMessage, onContinueAfterSignIn } = this.props;
 
     this.showNonHistoriedDialog(RoomSignInModalContainer, {
       step: SignInStep.submit,
-      message: getMessages()[signInMessageId],
+      message: signInMessage,
       onSubmitEmail: async email => {
         const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
 
@@ -422,7 +422,7 @@ class UIRoot extends Component {
         this.setState({ signedIn: true });
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
-          message: getMessages()[signInCompleteMessageId],
+          message: signInCompleteMessage,
           onClose: onContinueAfterSignIn || this.closeDialog,
           onContinue: onContinueAfterSignIn || this.closeDialog
         });
@@ -445,7 +445,7 @@ class UIRoot extends Component {
         this.props.hubChannel[isFavorited ? "unfavorite" : "favorite"]();
         this.setState({ isFavorited: !isFavorited });
       },
-      "favorite-room"
+      SignInMessages.favoriteRoom
     );
   };
 
@@ -895,7 +895,7 @@ class UIRoot extends Component {
             ...detail
           });
         },
-        "tweet"
+        SignInMessages.tweet
       );
     });
   };
@@ -907,7 +907,7 @@ class UIRoot extends Component {
         showFullScreenIfAvailable();
         this.props.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
       },
-      "change-scene"
+      SignInMessages.changeScene
     );
   };
 
@@ -993,7 +993,7 @@ class UIRoot extends Component {
             this.props.performConditionalSignIn(
               () => this.props.hubChannel.can("update_hub"),
               () => this.setSidebar("room-settings"),
-              "room-settings"
+              SignInMessages.roomSettings
             );
           }}
         />
@@ -1297,7 +1297,7 @@ class UIRoot extends Component {
                   showFullScreenIfAvailable();
                   this.props.mediaSearchStore.sourceNavigateWithNoNav("favorites", "use");
                 },
-                "favorite-rooms"
+                SignInMessages.favoriteRooms
               )
           },
           {
@@ -1358,7 +1358,7 @@ class UIRoot extends Component {
                     }
                   });
                 },
-                "close-room"
+                SignInMessages.closeRoom
               )
           }
         ].filter(item => item)
@@ -1617,7 +1617,7 @@ class UIRoot extends Component {
                           this.props.performConditionalSignIn(
                             () => this.props.hubChannel.can("update_hub"),
                             () => this.setSidebar("room-info-settings"),
-                            "room-settings"
+                            SignInMessages.roomSettings
                           );
                         }}
                         onClose={() => this.setSidebar(null)}

@@ -3,55 +3,43 @@ import PropTypes from "prop-types";
 import styles from "./OAuthScreen.scss";
 import { Modal } from "../modal/Modal";
 import { Column } from "../layout/Column";
-import { defineMessages, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { Button } from "../input/Button";
+import { LegalMessage } from "./LegalMessage";
 
 const providerLabel = {
   discord: "Discord",
   slack: "Slack"
 };
-
-const messages = defineMessages({
-  discord: {
-    id: "oauth-dialog.sign-in.discord",
-    defaultMessage: "Sign in to Discord"
-  },
-  slack: {
-    id: "oauth-dialog.sign-in.slack",
-    defaultMessage: "Sign in to Slack"
-  }
-});
-
-export function OAuthScreen({ provider, redirectUrl, showTerms, termsUrl, showPrivacy, privacyUrl, ...rest }) {
-  const intl = useIntl();
-
+export function OAuthScreen({ provider, redirectUrl, termsUrl, privacyUrl, ...rest }) {
   return (
     <div className={styles.oauthScreen} {...rest}>
-      <Modal title="Sign In To Continue">
+      <Modal title={<FormattedMessage id="oauth-screen.title" defaultMessage="Sign In To Continue" />}>
         <Column center padding>
-          <p>You&apos;ll need to sign in to {providerLabel[provider]} to access this room.</p>
-          <br />
-          <p>We&apos;ll ask for access to your e-mail address so you can skip signing in next time.</p>
-          {(showTerms || showPrivacy) && (
+          <p>
+            <FormattedMessage
+              id="oauth-screen.description"
+              defaultMessage="You'll need to sign in to {provider} to access this room."
+              values={{ provider: providerLabel[provider] }}
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="oauth-screen.email-reason"
+              defaultMessage="We'll ask for access to your e-mail address so you can skip signing in next time."
+            />
+          </p>
+          <p>
             <small>
-              By proceeding, you agree to the{" "}
-              {showTerms && (
-                <>
-                  <a rel="noopener noreferrer" target="_blank" href={termsUrl}>
-                    terms of use
-                  </a>{" "}
-                </>
-              )}
-              {showTerms && showPrivacy && "and "}
-              {showPrivacy && (
-                <a rel="noopener noreferrer" target="_blank" href={privacyUrl}>
-                  privacy notice
-                </a>
-              )}.
+              <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
             </small>
-          )}
+          </p>
           <Button as="a" href={redirectUrl} preset={provider === "discord" ? "purple" : "blue"}>
-            {intl.formatMessage(messages[provider])}
+            <FormattedMessage
+              id="oauth-screen.sign-in-button"
+              defaultMessage="Sign Into {provider}"
+              values={{ provider: providerLabel[provider] }}
+            />
           </Button>
         </Column>
       </Modal>
@@ -62,8 +50,6 @@ export function OAuthScreen({ provider, redirectUrl, showTerms, termsUrl, showPr
 OAuthScreen.propTypes = {
   provider: PropTypes.string.isRequired,
   redirectUrl: PropTypes.string.isRequired,
-  showTerms: PropTypes.bool,
   termsUrl: PropTypes.string,
-  showPrivacy: PropTypes.bool,
   privacyUrl: PropTypes.string
 };

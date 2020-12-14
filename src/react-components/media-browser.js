@@ -16,6 +16,7 @@ import { remixAvatar } from "../utils/avatar-utils";
 import { fetchReticulumAuthenticated, getReticulumFetchUrl } from "../utils/phoenix-utils";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
 import { CreateTile, MediaTile } from "./room/MediaTiles";
+import { SignInMessages } from "./react-components/auth/SignInModal";
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
@@ -258,7 +259,7 @@ class MediaBrowserContainer extends Component {
         await remixAvatar(entry.id, entry.name);
         this.handleFacetClicked({ params: { filter: "my-avatars" } });
       },
-      "remix-avatar"
+      SignInMessages.remixAvatar
     );
   };
 
@@ -273,7 +274,7 @@ class MediaBrowserContainer extends Component {
         });
         this.handleFacetClicked({ params: { filter: "my-scenes" } });
       },
-      "remix-scene"
+      SignInMessages.remixScene
     );
   };
 
@@ -313,7 +314,7 @@ class MediaBrowserContainer extends Component {
         this.props.performConditionalSignIn(
           () => !isSceneApiType || this.props.hubChannel.can("update_hub"),
           () => this.showCustomMediaDialog(urlSource),
-          "change-scene"
+          SignInMessages.changeScene
         );
       }
     };

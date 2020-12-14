@@ -1,26 +1,25 @@
 import React from "react";
 import { Center } from "../layout/Center";
 import { Page } from "../layout/Page";
-import { VerifyModal, EmailVerifying, EmailVerified, VerificationError } from "./VerifyModal";
+import { VerifyModal, VerifyingEmail, EmailVerified, VerificationError } from "./VerifyModal";
 import backgroundUrl from "../../assets/images/home-hero-background-unbranded.png";
 
 export default {
-  title: "VerifyModal"
+  title: "Auth/VerifyModal",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 export const Verifying = () => (
   <Page style={{ backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover" }}>
     <Center>
       <VerifyModal>
-        <EmailVerifying />
+        <VerifyingEmail />
       </VerifyModal>
     </Center>
   </Page>
 );
-
-Verifying.parameters = {
-  layout: "fullscreen"
-};
 
 export const Verified = () => (
   <Page style={{ backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover" }}>
@@ -32,10 +31,6 @@ export const Verified = () => (
   </Page>
 );
 
-Verified.parameters = {
-  layout: "fullscreen"
-};
-
 export const Error = () => (
   <Page style={{ backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover" }}>
     <Center>
@@ -45,7 +40,3 @@ export const Error = () => (
     </Center>
   </Page>
 );
-
-Error.parameters = {
-  layout: "fullscreen"
-};

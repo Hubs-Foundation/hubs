@@ -11,10 +11,14 @@ export function OAuthScreenContainer({ oauthInfo }) {
       style={{ backgroundImage: configs.image("home_background", true) }}
       provider={type}
       redirectUrl={url}
-      showTerms={configs.feature("show_terms")}
-      termsUrl={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-      showPrivacy={configs.feature("show_privacy")}
-      privacyUrl={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+      termsUrl={
+        configs.feature("show_terms") &&
+        configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
+      }
+      privacyUrl={
+        configs.feature("show_privacy") &&
+        configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+      }
     />
   );
 }
