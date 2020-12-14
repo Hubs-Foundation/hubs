@@ -21,8 +21,9 @@ module.exports = {
     "no-console": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
+    // TODO: Move to throwing lint errors for react-intl once migration is complete
     "@calm/react-intl/missing-formatted-message": [
-      2,
+      "warn",
       {
         noTrailingWhitespace: true,
         ignoreLinks: true,
@@ -32,7 +33,7 @@ module.exports = {
       }
     ],
     "@calm/react-intl/missing-attribute": [
-      2,
+      "warn",
       {
         noTrailingWhitespace: true,
         noSpreadOperator: true,
@@ -42,7 +43,7 @@ module.exports = {
         requireDefaultMessage: true
       }
     ],
-    "@calm/react-intl/missing-values": 2
+    "@calm/react-intl/missing-values": "warn"
   },
   extends: ["prettier", "plugin:react/recommended", "eslint:recommended"]
 };
