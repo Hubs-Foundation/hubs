@@ -66,7 +66,10 @@ export function HomePage() {
           </div>
           {showDescription && (
             <div className={styles.appDescription}>
-              <FormattedMessage id="app-description" />
+              <FormattedMessage
+                id="app-description"
+                defaultMessage="Share a virtual room with friends.\nWatch videos, play with 3D objects, or just hang out."
+              />
             </div>
           )}
         </div>
@@ -80,29 +83,38 @@ export function HomePage() {
           <section className={classNames(styles.features, styles.colLg, styles.centerLg)}>
             <div className={styles.center}>
               <h3>
-                <FormattedMessage id="home.rooms_title" />
+                <FormattedMessage id="home.rooms-title" defaultMessage="Instantly create rooms" />
               </h3>
               <img src={configs.image("landing_rooms_thumb")} />
               <p>
-                <FormattedMessage id="home.rooms_blurb" />
+                <FormattedMessage
+                  id="home.rooms-blurb"
+                  defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs, you’ll have a private virtual meeting space that you can instantly share - no downloads or VR headset necessary."
+                />
               </p>
             </div>
             <div className={styles.center}>
               <h3>
-                <FormattedMessage id="home.communicate_title" />
+                <FormattedMessage id="home.communicate-title" defaultMessage="Communicate naturally" />
               </h3>
               <img src={configs.image("landing_communicate_thumb")} />
               <p>
-                <FormattedMessage id="home.communicate_blurb" />
+                <FormattedMessage
+                  id="home.communicate-blurb"
+                  defaultMessage="Choose an avatar to represent you, put on your headphones, and jump right in. Hubs makes it easy to stay connected with voice and text chat to other people in your private room."
+                />
               </p>
             </div>
             <div className={styles.center}>
               <h3>
-                <FormattedMessage id="home.media_title" />
+                <FormattedMessage id="home.media-title" defaultMessage="An easier way to share media" />
               </h3>
               <img src={configs.image("landing_media_thumb")} />
               <p>
-                <FormattedMessage id="home.media_blurb" />
+                <FormattedMessage
+                  id="home.media-blurb"
+                  defaultMessage="Share content with others in your room by dragging and dropping photos, videos, PDF files, links, and 3D models into your space."
+                />
               </p>
             </div>
           </section>
@@ -128,16 +140,23 @@ export function HomePage() {
       <section>
         <div className={styles.secondaryLinks}>
           <a href="/link">
-            <FormattedMessage id="home.have_code" />
+            <FormattedMessage id="home.have-code" defaultMessage="Have a room code?" />
           </a>
           <div>
             <IfFeature name="show_discord_bot_link">
-              <FormattedMessage id="home.add_to_discord_1" />
-              <img src={discordLogoUrl} />
-              <a href="/discord">
-                <FormattedMessage id="home.add_to_discord_2" />
-              </a>
-              <FormattedMessage id="home.add_to_discord_3" />
+              <FormattedMessage
+                id="home.add-to-discord"
+                defaultMessage="Add the <a>{appName} Bot</a> to Discord"
+                values={{
+                  a: chunks => (
+                    <>
+                      <img src={discordLogoUrl} />
+                      <a href="/discord">{chunks}</a>
+                    </>
+                  ),
+                  appName: configs.translation("app-name")
+                }}
+              />
             </IfFeature>
           </div>
         </div>
