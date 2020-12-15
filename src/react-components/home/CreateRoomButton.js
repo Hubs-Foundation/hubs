@@ -13,7 +13,7 @@ export function CreateRoomButton() {
         createAndRedirectToNewHub(null, null, false);
       }}
     >
-      <FormattedMessage id="home.create-a-room" defaultMessage="Create a Room" />
+      <FormattedMessage id="create-room-button" defaultMessage="Create Room" />
     </Button>
   );
 }

@@ -11,6 +11,7 @@ export function PageContainer({ children, ...rest }) {
     <Page
       showCloud={configs.feature("show_cloud")}
       enableSpoke={configs.feature("enable_spoke")}
+      editorName={configs.translation("editor-name")}
       showDocsLink={configs.feature("show_docs_link")}
       docsUrl={configs.link("docs", "https://hubs.mozilla.com/docs")}
       showSourceLink={configs.feature("show_source_link")}

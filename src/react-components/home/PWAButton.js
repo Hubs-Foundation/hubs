@@ -19,9 +19,9 @@ export function PWAButton() {
             <FontAwesomeIcon icon={faPlus} />
           </i>
           {isMobile ? (
-            <FormattedMessage id="home.mobile.add-pwa" defaultMessage="Add to Home Screen" />
+            <FormattedMessage id="pwa-button.mobile" defaultMessage="Add to Home Screen" />
           ) : (
-            <FormattedMessage id="home.desktop.add-pwa" defaultMessage="Install Desktop App" />
+            <FormattedMessage id="pwa-button.desktop" defaultMessage="Install Desktop App" />
           )}
         </Button>
       )}

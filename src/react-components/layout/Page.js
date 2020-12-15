@@ -7,6 +7,7 @@ import { Footer } from "./Footer";
 export function Page({
   showCloud,
   enableSpoke,
+  editorName,
   showDocsLink,
   docsUrl,
   showSourceLink,
@@ -32,6 +33,7 @@ export function Page({
       <Header
         showCloud={showCloud}
         enableSpoke={enableSpoke}
+        editorName={editorName}
         showDocsLink={showDocsLink}
         docsUrl={docsUrl}
         showSourceLink={showSourceLink}
@@ -60,6 +62,7 @@ export function Page({
 Page.propTypes = {
   showCloud: PropTypes.bool,
   enableSpoke: PropTypes.bool,
+  editorName: PropTypes.string,
   showDocsLink: PropTypes.bool,
   docsUrl: PropTypes.string,
   showSourceLink: PropTypes.bool,
