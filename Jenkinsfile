@@ -35,7 +35,7 @@ pipeline {
           def promoteToChannel = env.PROMOTE_TO_CHANNEL
 
           def habCommand = (
-            "/bin/bash scripts/hab-build-and-push.sh " +
+            "/bin/bash scripts/hab-build-and-push.sh "
             + "\\\"${baseAssetsPath}\\\" "
             + "\\\"${shortlinkDomain}\\\" "
             + "\\\"${reticulumServer}\\\" "
