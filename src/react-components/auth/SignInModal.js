@@ -16,63 +16,63 @@ export const SignInStep = {
 
 export const SignInMessages = defineMessages({
   pin: {
-    id: "sign-in.pin",
+    id: "sign-in-modal.signin-message.pin",
     defaultMessage: "You'll need to sign in to pin objects."
   },
   unpin: {
-    id: "sign-in.unpin",
+    id: "sign-in-modal.signin-message.unpin",
     defaultMessage: "You'll need to sign in to un-pin objects."
   },
   changeScene: {
-    id: "sign-in.change-scene",
+    id: "sign-in-modal.signin-message.change-scene",
     defaultMessage: "You'll need to sign in to change the scene."
   },
   roomSettings: {
-    id: "sign-in.room-settings",
+    id: "sign-in-modal.signin-message.room-settings",
     defaultMessage: "You'll need to sign in to change the room's settings."
   },
   closeRoom: {
-    id: "sign-in.close-room",
+    id: "sign-in-modal.signin-message.close-room",
     defaultMessage: "You'll need to sign in to close the room."
   },
   muteUser: {
-    id: "sign-in.mute-user",
+    id: "sign-in-modal.signin-message.mute-user",
     defaultMessage: "You'll need to sign in to mute other users."
   },
   kickUser: {
-    id: "sign-in.kick-user",
+    id: "sign-in-modal.signin-message.kick-user",
     defaultMessage: "You'll need to sign in to kick other users."
   },
   addOwner: {
-    id: "sign-in.add-owner",
+    id: "sign-in-modal.signin-message.add-owner",
     defaultMessage: "You'll need to sign in to assign moderators."
   },
   removeOwner: {
-    id: "sign-in.remove-owner",
+    id: "sign-in-modal.signin-message.remove-owner",
     defaultMessage: "You'll need to sign in to assign moderators."
   },
   createAvatar: {
-    id: "sign-in.create-avatar",
+    id: "sign-in-modal.signin-message.create-avatar",
     defaultMessage: "You'll need to sign in to create avatars."
   },
   remixAvatar: {
-    id: "sign-in.remix-avatar",
+    id: "sign-in-modal.signin-message.remix-avatar",
     defaultMessage: "You'll need to sign in to remix avatars."
   },
   remixScene: {
-    id: "sign-in.remix-scene",
+    id: "sign-in-modal.signin-message.remix-scene",
     defaultMessage: "You'll need to sign in to remix scenes."
   },
   favoriteRoom: {
-    id: "sign-in.favorite-room",
+    id: "sign-in-modal.signin-message.favorite-room",
     defaultMessage: "You'll need to sign in to add this room to your favorites."
   },
   favoriteRooms: {
-    id: "sign-in.favorite-rooms",
+    id: "sign-in-modal.signin-message.favorite-rooms",
     defaultMessage: "You'll need to sign in to add favorite rooms."
   },
   tweet: {
-    id: "sign-in.tweet",
+    id: "sign-in-modal.signin-message.tweet",
     defaultMessage: "You'll need to sign in to send tweets."
   }
 });
@@ -103,7 +103,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
         {message ? (
           intl.formatMessage(message)
         ) : (
-          <FormattedMessage id="sign-in.prompt" defaultMessage="Please Sign In" />
+          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
         )}
       </p>
       <TextInputField
@@ -140,7 +140,7 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
   return (
     <Column center padding>
       <FormattedMessage
-        id="sign-in-modal.wait-for-verification-message"
+        id="sign-in-modal.wait-for-verification"
         defaultMessage="<p>Email sent to {email}!</p><p>To continue, click on the link in the email using your phone, tablet, or PC.</p><p>No email? You may not be able to create an account.</p>"
         // eslint-disable-next-line react/display-name
         values={{ email, p: chunks => <p>{chunks}</p> }}
@@ -180,7 +180,7 @@ export function SignInComplete({ message, onContinue }) {
           {message ? (
             intl.formatMessage(message)
           ) : (
-            <FormattedMessage id="sign-in.complete" defaultMessage="You are now signed in." />
+            <FormattedMessage id="sign-in-modal.complete" defaultMessage="You are now signed in." />
           )}
         </b>
       </p>
