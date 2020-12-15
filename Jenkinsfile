@@ -66,7 +66,7 @@ pipeline {
           if (promoteToChannel != "") {
             runCommand("sudo /usr/bin/hab-ret-pkg-promote mozillareality/hubs/${major}.${minor}.${version}/${packageTimeVersion} ${promoteToChannel}")
             def text = "*${jobName}* promoted ${hubsVersion} to ${promoteToChannel}"
-            sendSlackMessage(text, "#mr-builds", ":gift:")
+            sendSlackMessage(text, "#mr-builds", ":gift:", slackURL)
           } else {
             def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
             def gitSha = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
@@ -77,7 +77,7 @@ pipeline {
               "<${smokeURL}?required_version=${hubsVersion}|Smoke Test> - to push:\n" +
               "`/mr hubs deploy ${hubsVersion} s3://${targetS3Bucket}`"
             )
-            sendSlackMessage(text, "#mr-builds", ":gift:")
+            sendSlackMessage(text, "#mr-builds", ":gift:", slackURL)
           }
         }
       }
@@ -95,7 +95,7 @@ def runCommand(command) {
   sh "/usr/bin/script --return -c ${shellString(command)} /dev/null"
 }
 
-def sendSlackMessage(text, channel, icon) {
+def sendSlackMessage(text, channel, icon, slackURL) {
   def payload = 'payload=' + JsonOutput.toJson([
     text      : text,
     channel   : channel,
