@@ -12,7 +12,7 @@ import { TextAreaInput } from "../input/TextAreaInput";
 import { ToolbarButton } from "../input/ToolbarButton";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl, defineMessages } from "react-intl";
 import { useRelativeTime } from "../misc/useRelativeTime";
 
 export function SpawnMessageButton(props) {
@@ -54,16 +54,25 @@ ChatInput.propTypes = {
   onSpawn: PropTypes.func
 };
 
+const joinMessages = defineMessages({
+  room: { id: "presence.entered_room", defaultMessage: "{name} entered the room." },
+  lobby: { id: "presence.entered_lobby", defaultMessage: "{name} entered the lobby." }
+});
+
+const enteredMessages = defineMessages({
+  lobby: { id: "presence.join_lobby", defaultMessage: "{name} joined the lobby." },
+  room: { id: "presence.join_room", defaultMessage: "{name} joined the room." }
+});
+
 // TODO: use react-intl's defineMessages to get proper extraction
-export function formatSystemMessage(entry) {
+export function formatSystemMessage(entry, intl) {
   switch (entry.type) {
     case "join":
+      return intl.formatMessage(joinMessages[entry.presence], { name: <b>{entry.name}</b> });
     case "entered":
-      return (
-        <FormattedMessage id={`presence.${entry.type}_${entry.presence}`} values={{ name: <b>{entry.name}</b> }} />
-      );
+      return intl.formatMessage(enteredMessages[entry.presence], { name: <b>{entry.name}</b> });
     case "leave":
-      return <FormattedMessage id={`presence.${entry.type}`} values={{ name: <b>{entry.name}</b> }} />;
+      return <FormattedMessage id="presence.leave" values={{ name: <b>{entry.name}</b> }} />;
     case "display_name_changed":
       return (
         <FormattedMessage
@@ -94,11 +103,12 @@ export function formatSystemMessage(entry) {
 
 export function SystemMessage(props) {
   const relativeTime = useRelativeTime(props.timestamp);
+  const intl = useIntl();
 
   return (
     <li className={classNames(styles.messageGroup, styles.systemMessage)}>
       <p className={styles.messageGroupLabel}>
-        <i>{formatSystemMessage(props)}</i>
+        <i>{formatSystemMessage(props, intl)}</i>
         <span>{relativeTime}</span>
       </p>
     </li>

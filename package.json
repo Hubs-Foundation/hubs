@@ -35,7 +35,8 @@
     "spritesheet:system-action": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-action-spritesheet --powerOfTwo src/assets/images/sprites/action/*",
     "spritesheet:system-notice": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-notice-spritesheet --powerOfTwo src/assets/images/sprites/notice/*",
     "storybook": "start-storybook -p 6006",
-    "deploy-storybook": "storybook-to-ghpages"
+    "deploy-storybook": "storybook-to-ghpages",
+    "extract": "formatjs extract src/**/*.js --throws --extract-source-location --extract-from-format-message-call"
   },
   "scripts-info": {
     "start": "Run the client against your Hubs Cloud instance, or Mozilla's developer infrastructure,\n  using application configs pulled from the server",
@@ -143,11 +144,13 @@
     "@babel/core": "^7.3.3",
     "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
+    "@babel/plugin-proposal-optional-chaining": "7.12.1",
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@babel/plugin-proposal-optional-chaining": "7.12.1",
+    "@calm/eslint-plugin-react-intl": "^1.4.1",
+    "@formatjs/cli": "^2.13.15",
     "@iarna/toml": "^2.2.3",
     "@storybook/addon-actions": "^6.0.12",
     "@storybook/addon-essentials": "^6.0.12",
@@ -159,7 +162,7 @@
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
-    "babel-plugin-react-intl": "^3.0.1",
+    "babel-plugin-react-intl": "^8.2.21",
     "babel-plugin-transform-react-jsx-img-import": "^0.1.4",
     "copy-webpack-plugin": "^4.5.1",
     "cors": "^2.8.4",

@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
-import { VerifyModal, VerificationError, EmailVerified, EmailVerifying } from "./VerifyModal";
+import { VerifyModal, VerificationError, EmailVerified, VerifyingEmail } from "./VerifyModal";
 
 const VerificationStep = {
   verifying: "verifying",
@@ -54,7 +54,7 @@ export function VerifyModalContainer() {
     const origin = qs.get("auth_origin");
     content = <EmailVerified origin={origin} />;
   } else {
-    content = <EmailVerifying />;
+    content = <VerifyingEmail />;
   }
 
   return <VerifyModal>{content}</VerifyModal>;

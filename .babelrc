@@ -29,7 +29,8 @@
     ]
   ],
   "plugins": [
-    [ "react-intl", { "messagesDir": "./dist/messages", "enforceDescriptions": false } ],
+    // TODO: When i18n build pipeline is finished move to: [ "react-intl", { "removeDefaultMessage": true } ]
+    "react-intl",
     "transform-react-jsx-img-import",
     ["@babel/proposal-class-properties", { "loose": true }],
     "@babel/proposal-object-rest-spread",

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { PromoteClientModal } from "./PromoteClientModal";
 import { getAvatarThumbnailUrl } from "../../utils/avatar-utils";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
+import { SignInMessages } from "../auth/SignInModal";
 
 export function UserProfileSidebarContainer({
   user,
@@ -53,7 +54,7 @@ export function UserProfileSidebarContainer({
             }
           });
         },
-        "add-owner"
+        SignInMessages.addOwner
       );
     },
     [performConditionalSignIn, hubChannel, showNonHistoriedDialog, userId, onCloseDialog, displayName]
@@ -67,7 +68,7 @@ export function UserProfileSidebarContainer({
           setIsOwner(false);
           await hubChannel.removeOwner(userId);
         },
-        "remove-owner"
+        SignInMessages.removeOwner
       );
     },
     [performConditionalSignIn, hubChannel, userId]
@@ -91,7 +92,7 @@ export function UserProfileSidebarContainer({
       performConditionalSignIn(
         () => hubChannel.can("mute_users"),
         async () => await hubChannel.mute(userId),
-        "mute-user"
+        SignInMessages.muteUser
       );
     },
     [performConditionalSignIn, hubChannel, userId]
@@ -102,7 +103,7 @@ export function UserProfileSidebarContainer({
       performConditionalSignIn(
         () => hubChannel.can("kick_users"),
         async () => await hubChannel.kick(userId),
-        "kick-user"
+        SignInMessages.kickUser
       );
 
       if (onClose) {

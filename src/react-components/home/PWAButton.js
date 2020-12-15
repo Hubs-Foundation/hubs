@@ -18,7 +18,7 @@ export function PWAButton() {
           <i>
             <FontAwesomeIcon icon={faPlus} />
           </i>
-          <FormattedMessage id={`home.${isMobile ? "mobile" : "desktop"}.add_pwa`} />
+          {isMobile ? <FormattedMessage id="home.mobile.add_pwa" /> : <FormattedMessage id="home.desktop.add_pwa" />}
         </Button>
       )}
     </>

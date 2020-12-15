@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Button.scss";
 import textInputStyles from "./TextInput.scss";
+import { FormattedMessage } from "react-intl";
 
 export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
@@ -36,3 +37,27 @@ Button.defaultProps = {
   as: "button",
   preset: "basic"
 };
+
+export function NextButton(props) {
+  return (
+    <Button preset="accept" {...props}>
+      <FormattedMessage id="button.next" defaultMessage="Next" />
+    </Button>
+  );
+}
+
+export function CancelButton(props) {
+  return (
+    <Button preset="cancel" {...props}>
+      <FormattedMessage id="button.cancel" defaultMessage="Cancel" />
+    </Button>
+  );
+}
+
+export function ContinueButton(props) {
+  return (
+    <Button preset="accept" {...props}>
+      <FormattedMessage id="button.continue" defaultMessage="Continue" />
+    </Button>
+  );
+}

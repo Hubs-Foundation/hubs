@@ -7,13 +7,25 @@ import { ReactComponent as StarIcon } from "../icons/Star.svg";
 import { ReactComponent as CloseIcon } from "../icons/Close.svg";
 import { ReactComponent as ArrowForwardIcon } from "../icons/ArrowForward.svg";
 import { ReactComponent as ArrowBackIcon } from "../icons/ArrowBack.svg";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, defineMessages, useIntl } from "react-intl";
 import { TextInputField } from "../input/TextInputField";
 import { IconButton } from "../input/IconButton";
 import { FullscreenLayout } from "../layout/FullscreenLayout";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import { MediaGrid } from "./MediaGrid";
+
+const navTitleMessages = defineMessages({
+  youtube: { id: "media-browser.nav_title.youtube", defaultMessage: "YouTube" },
+  videos: { id: "media-browser.nav_title.videos", defaultMessage: "Videos" },
+  images: { id: "media-browser.nav_title.images", defaultMessage: "Images" },
+  gifs: { id: "media-browser.nav_title.gifs", defaultMessage: "GIFs" },
+  scenes: { id: "media-browser.nav_title.scenes", defaultMessage: "Scenes" },
+  avatars: { id: "media-browser.nav_title.avatars", defaultMessage: "Avatars" },
+  sketchfab: { id: "media-browser.nav_title.sketchfab", defaultMessage: "Sketchfab" },
+  poly: { id: "media-browser.nav_title.poly", defaultMessage: "Google Poly" },
+  twitch: { id: "media-browser.nav_title.twitch", defaultMessage: "Twitch" }
+});
 
 export function MediaBrowser({
   onClose,
@@ -40,6 +52,8 @@ export function MediaBrowser({
   noResultsMessage,
   children
 }) {
+  const intl = useIntl();
+
   return (
     <FullscreenLayout
       headerLeft={
@@ -86,7 +100,7 @@ export function MediaBrowser({
               preset={selectedSource === source ? "blue" : "transparent"}
               onClick={() => onSelectSource(source)}
             >
-              <FormattedMessage id={`media-browser.nav_title.${source}`} />
+              {intl.formatMessage(navTitleMessages[source])}
             </Button>
           ))}
         </div>

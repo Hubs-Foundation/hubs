@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
+import { injectIntl } from "react-intl";
 import { formatSystemMessage } from "./room/ChatSidebar";
 
 import ChatMessage from "./chat-message";
@@ -10,14 +11,15 @@ import VideoMessage from "./video-message";
 import ImageMessage from "./image-message";
 import { getPresenceContextForSession } from "../utils/phoenix-utils";
 
-export default class PresenceLog extends Component {
+class PresenceLog extends Component {
   static propTypes = {
     entries: PropTypes.array,
     inRoom: PropTypes.bool,
     hubId: PropTypes.string,
     history: PropTypes.object,
     presences: PropTypes.object,
-    onViewProfile: PropTypes.func
+    onViewProfile: PropTypes.func,
+    intl: PropTypes.object
   };
 
   constructor(props) {
@@ -83,7 +85,7 @@ export default class PresenceLog extends Component {
           />
         );
       default: {
-        const systemMessage = formatSystemMessage(e);
+        const systemMessage = formatSystemMessage(e, this.props.intl);
 
         return (
           systemMessage && (
@@ -105,3 +107,5 @@ export default class PresenceLog extends Component {
     return <div className={classNames(presenceClasses)}>{this.props.entries.map(this.domForEntry)}</div>;
   }
 }
+
+export default injectIntl(PresenceLog);

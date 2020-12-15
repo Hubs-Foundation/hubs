@@ -2,6 +2,7 @@ import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
+import { SignInMessages } from "./react-components/auth/SignInModal";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -247,13 +248,18 @@ export default class SceneEntryManager {
           await this._unpinElement(el);
         };
 
-    this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
-      // UI pins/un-pins the entity optimistically, so we undo that here.
-      // Note we have to disable the sign in flow here otherwise this will recurse.
-      this._disableSignInOnPinAction = true;
-      el.setAttribute("pinnable", "pinned", !pin);
-      this._disableSignInOnPinAction = false;
-    });
+    this.performConditionalSignIn(
+      () => this.hubChannel.signedIn,
+      action,
+      pin ? SignInMessages.pin : SignInMessages.unpin,
+      () => {
+        // UI pins/un-pins the entity optimistically, so we undo that here.
+        // Note we have to disable the sign in flow here otherwise this will recurse.
+        this._disableSignInOnPinAction = true;
+        el.setAttribute("pinnable", "pinned", !pin);
+        this._disableSignInOnPinAction = false;
+      }
+    );
   };
 
   _unpinElement = el => {
@@ -325,7 +331,7 @@ export default class SceneEntryManager {
       this.performConditionalSignIn(
         () => this.hubChannel.can("kick_users"),
         async () => await window.APP.hubChannel.kick(clientId),
-        "kick-user"
+        SignInMessages.kickUser
       );
     });
 
@@ -333,7 +339,7 @@ export default class SceneEntryManager {
       this.performConditionalSignIn(
         () => this.hubChannel.can("mute_users"),
         () => window.APP.hubChannel.mute(clientId),
-        "mute-user"
+        SignInMessages.muteUser
       );
     });
 
