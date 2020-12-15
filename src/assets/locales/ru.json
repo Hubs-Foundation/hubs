@@ -407,8 +407,5 @@
   "support.copied": "скопировано",
   "support.details": "подробнее",
   "support.supported": "поддерживается",
-  "support.unsupported": "не поддерживается",
-  "rtcDebugPanel.restartIceButton": "Restart ICE",
-  "rtcDebugPanel.connectSignalingButton": "Connect",
-  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
+  "support.unsupported": "не поддерживается"
 }

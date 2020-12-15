@@ -408,7 +408,7 @@
   "support.details": "detalles",
   "support.supported": "soportado",
   "support.unsupported": "no soportado",
-  "rtcDebugPanel.restartIceButton": "Reiniciar ICE",
-  "rtcDebugPanel.connectSignalingButton": "Conectar",
-  "rtcDebugPanel.disconnectSignalingButton": "Desconectar"
+  "rtc-debug-panel.restart-ice-button": "Reiniciar ICE",
+  "rtc-debug-panel.connect-signaling-button": "Conectar",
+  "rtc-debug-panel.disconnect-signaling-button": "Desconectar"
 }

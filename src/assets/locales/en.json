@@ -343,8 +343,5 @@
   "support.copied": "copied!",
   "support.details": "details",
   "support.supported": "supported",
-  "support.unsupported": "unsupported",
-  "rtcDebugPanel.restartIceButton": "Restart ICE",
-  "rtcDebugPanel.connectSignalingButton": "Connect",
-  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
+  "support.unsupported": "unsupported"
 }
