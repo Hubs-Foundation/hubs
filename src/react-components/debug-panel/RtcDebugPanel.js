@@ -37,6 +37,10 @@ const MessageButtonStyle = {
   minWidth: "120px"
 };
 
+function capitalize(str) {
+  return str ? str.replace(/\b\w/g, c => c.toUpperCase()) : "";
+}
+
 export function PanelMessageButton({ children, ...rest }) {
   return (
     <Button {...rest} style={MessageButtonStyle}>
@@ -56,9 +60,16 @@ function TrackStatsPanel({ title, data, xAxis, yAxis, stats }) {
     paused: data.paused,
     kind: data.kind
   };
+
   return (
-    <DataPanel title={`${data?.kind} ${title}`} data={props}>
-      {data?.track && <DataPanel key={data.id} data={data.track} title={`track`} />}
+    <DataPanel title={title} data={props}>
+      {data?.track && (
+        <DataPanel
+          key={data.id}
+          data={data.track}
+          title={<FormattedMessage id="rtc-debug-panel.track-panel-title" defaultMessage="Track" />}
+        />
+      )}
       {stats && (
         <DataPanel
           key={stats.rtpStats?.id}
@@ -70,7 +81,7 @@ function TrackStatsPanel({ title, data, xAxis, yAxis, stats }) {
           data={stats.rtpStats}
           xAxis={xAxis}
           yAxis={yAxis}
-          title={`stats`}
+          title={<FormattedMessage id="rtc-debug-panel.stats-panel-title" defaultMessage="Stats" />}
         />
       )}
     </DataPanel>
@@ -78,7 +89,7 @@ function TrackStatsPanel({ title, data, xAxis, yAxis, stats }) {
 }
 
 TrackStatsPanel.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.node,
   data: PropTypes.object,
   xAxis: PropTypes.string,
   yAxis: PropTypes.string,
@@ -89,17 +100,23 @@ function TransportPanel({ title, data, candidates, producers, consumers, isButto
   return (
     <CollapsiblePanel key={title} title={title} border url={`${MEDIASOUP_DOC_BASE_URL}#Transport`} data={data}>
       <PanelMessageButton onClick={onRestart} disabled={!isButtonEnabled} primary>
-        <FormattedMessage id="rtcDebugPanel.restartIceButton" />
+        <FormattedMessage id="rtc-debug-panel.restart-ice-button" defaultMessage="Restart ICE" />
       </PanelMessageButton>
       {candidates?.length && (
-        <CollapsiblePanel key={`Candidates`} title={`Candidates`} row url={`${MDN_DOC_BASE_URL}RTCIceCandidate`} border>
+        <CollapsiblePanel
+          key={`Candidates`}
+          title={<FormattedMessage id="rtc-debug-panel.candidates-panel-title" defaultMessage="Candidates" />}
+          row
+          url={`${MDN_DOC_BASE_URL}RTCIceCandidate`}
+          border
+        >
           {candidates}
         </CollapsiblePanel>
       )}
       {producers?.length && (
         <CollapsiblePanel
           key={`Local producers`}
-          title={`Local producers`}
+          title={<FormattedMessage id="rtc-debug-panel.local-producers-panel-title" defaultMessage="Local Producers" />}
           row
           url={`${MEDIASOUP_DOC_BASE_URL}#Producer`}
           border
@@ -118,13 +135,17 @@ TransportPanel.propTypes = {
   consumers: PropTypes.array,
   data: PropTypes.object,
   onRestart: PropTypes.func,
-  title: PropTypes.string,
+  title: PropTypes.node,
   isButtonEnabled: PropTypes.bool
 };
 
 function SignalingPanel({ data, onConnect, onDisconnect }) {
   return (
-    <CollapsiblePanel title={"Signaling"} border data={data}>
+    <CollapsiblePanel
+      title={<FormattedMessage id="rtc-debug-panel.signaling-panel-title" defaultMessage="Signaling" />}
+      border
+      data={data}
+    >
       <PanelMessageButton
         onClick={() => {
           if (data.connected) {
@@ -137,9 +158,9 @@ function SignalingPanel({ data, onConnect, onDisconnect }) {
         primary
       >
         {data.connected ? (
-          <FormattedMessage id="rtcDebugPanel.disconnectSignalingButton" />
+          <FormattedMessage id="rtc-debug-panel.disconnect-signaling-button" defaultMessage="Disconnect" />
         ) : (
-          <FormattedMessage id="rtcDebugPanel.connectSignalingButton" />
+          <FormattedMessage id="rtc-debug-panel.connect-signaling-button" defaultMessage="Connect" />
         )}
       </PanelMessageButton>
     </CollapsiblePanel>
@@ -509,7 +530,9 @@ export default class RtcDebugPanel extends Component {
           <DataPanel
             key={StatsType.LOCAL_CANDIDATE}
             data={candidates[StatsType.LOCAL_CANDIDATE]}
-            title={`Local candidate`}
+            title={
+              <FormattedMessage id="rtc-debug-panel.local-candidate-panel-title" defaultMessage="Local Candidate" />
+            }
           />
         );
       candidates[StatsType.REMOTE_CANDIDATE] &&
@@ -517,7 +540,9 @@ export default class RtcDebugPanel extends Component {
           <DataPanel
             key={StatsType.REMOTE_CANDIDATE}
             data={candidates[StatsType.REMOTE_CANDIDATE]}
-            title={`Remote candidate`}
+            title={
+              <FormattedMessage id="rtc-debug-panel.remote-candidate-panel-title" defaultMessage="Remote Candidate" />
+            }
           />
         );
     }
@@ -529,7 +554,13 @@ export default class RtcDebugPanel extends Component {
       return (
         <TrackStatsPanel
           key={producer.id}
-          title={"producer"}
+          title={
+            <FormattedMessage
+              id="rtc-debug-panel.producer-panel-title"
+              defaultMessage="{kind} Producer"
+              values={{ kind: capitalize(producer?.kind) }}
+            />
+          }
           data={producer}
           xAxis={"timeDelta"}
           yAxis={"bytesSent"}
@@ -555,7 +586,13 @@ export default class RtcDebugPanel extends Component {
         return (
           <TrackStatsPanel
             key={consumer.id}
-            title={"consumer"}
+            title={
+              <FormattedMessage
+                id="rtc-debug-panel.consumer-panel-title"
+                defaultMessage="{kind} Consumer"
+                values={{ kind: capitalize(consumer?.kind) }}
+              />
+            }
             data={consumer}
             xAxis={"timeDelta"}
             yAxis={"bytesReceived"}
@@ -588,7 +625,19 @@ export default class RtcDebugPanel extends Component {
           for (const producerId in transport.producers) {
             const stats = transport.producers[producerId];
             stats.forEach((stat, index) => {
-              producers.push(<DataPanel key={`${producerId}${index}`} data={stat} title={`${stat.kind} stats`} />);
+              producers.push(
+                <DataPanel
+                  key={`${producerId}${index}`}
+                  data={stat}
+                  title={
+                    <FormattedMessage
+                      id="rtc-debug-panel.producer-transport-stats-title"
+                      defaultMessage="{kind} Stats"
+                      values={{ kind: capitalize(stat.kind) }}
+                    />
+                  }
+                />
+              );
             });
           }
         }
@@ -597,7 +646,19 @@ export default class RtcDebugPanel extends Component {
           for (const consumerId in transport.consumers) {
             const stats = transport.consumers[consumerId];
             stats.forEach((stat, index) => {
-              consumers.push(<DataPanel key={`${consumerId}${index}`} data={stat} title={`${stat.kind} stats`} />);
+              consumers.push(
+                <DataPanel
+                  key={`${consumerId}${index}`}
+                  data={stat}
+                  title={
+                    <FormattedMessage
+                      id="rtc-debug-panel.consumer-transport-stats-title"
+                      defaultMessage="{kind} Stats"
+                      values={{ kind: capitalize(stat.kind) }}
+                    />
+                  }
+                />
+              );
             });
           }
         }
@@ -612,7 +673,12 @@ export default class RtcDebugPanel extends Component {
             {producers?.length && (
               <CollapsiblePanel
                 key={`producers`}
-                title={`Producer Stats`}
+                title={
+                  <FormattedMessage
+                    id="rtc-debug-panel.producer-transport-stats-panel-title"
+                    defaultMessage="Producer Stats"
+                  />
+                }
                 row
                 wrap
                 url={`${MDN_DOC_BASE_URL}RTCStatsReport`}
@@ -624,7 +690,12 @@ export default class RtcDebugPanel extends Component {
             {consumers?.length && (
               <CollapsiblePanel
                 key={`consumers`}
-                title={`Consumer Stats`}
+                title={
+                  <FormattedMessage
+                    id="rtc-debug-panel.consumer-transport-stats-panel-title"
+                    defaultMessage="Consumer Stats"
+                  />
+                }
                 row
                 wrap
                 url={`${MDN_DOC_BASE_URL}RTCStatsReport`}
@@ -672,7 +743,7 @@ export default class RtcDebugPanel extends Component {
             }}
           >
             <CollapsiblePanel
-              title={"Local"}
+              title={<FormattedMessage id="rtc-debug-panel.local-panel-title" defaultMessage="Local" />}
               isRoot
               border
               grow
@@ -680,7 +751,12 @@ export default class RtcDebugPanel extends Component {
               onCollapse={this.onCollapse}
             >
               {deviceData && (
-                <CollapsiblePanel title={"Device"} border url={`${MEDIASOUP_DOC_BASE_URL}#Device`} data={deviceData} />
+                <CollapsiblePanel
+                  title={<FormattedMessage id="rtc-debug-panel.device-panel-title" defaultMessage="Device" />}
+                  border
+                  url={`${MEDIASOUP_DOC_BASE_URL}#Device`}
+                  data={deviceData}
+                />
               )}
               {signalingData && (
                 <SignalingPanel
@@ -691,7 +767,9 @@ export default class RtcDebugPanel extends Component {
               )}
               <div style={{ display: "flex", flexFlow: "column" }}>
                 <TransportPanel
-                  title={`Send Transport`}
+                  title={
+                    <FormattedMessage id="rtc-debug-panel.send-transport-panel-title" defaultMessage="Send Transport" />
+                  }
                   data={{
                     id: transportsData?.[TransportType.SEND]?.id,
                     opened: transportsData?.[TransportType.SEND]?.opened,
@@ -708,7 +786,12 @@ export default class RtcDebugPanel extends Component {
               </div>
               <div style={{ display: "flex", flexFlow: "column" }}>
                 <TransportPanel
-                  title={`Receive Transport`}
+                  title={
+                    <FormattedMessage
+                      id="rtc-debug-panel.receive-transport-panel-title"
+                      defaultMessage="Receive Transport"
+                    />
+                  }
                   data={{
                     id: transportsData?.[TransportType.RECEIVE]?.id,
                     opened: transportsData?.[TransportType.RECEIVE]?.opened,
@@ -731,7 +814,14 @@ export default class RtcDebugPanel extends Component {
               maxHeight: isNarrow && !collapsed.Log && "80%"
             }}
           >
-            <CollapsiblePanel title={"Log"} isRoot border grow collapsed={collapsed.Log} onCollapse={this.onCollapse}>
+            <CollapsiblePanel
+              title={<FormattedMessage id="rtc-debug-panel.log-panel-title" defaultMessage="Log" />}
+              isRoot
+              border
+              grow
+              collapsed={collapsed.Log}
+              onCollapse={this.onCollapse}
+            >
               <p className={classNames(styles.rtcLogMsgContainer)}>{this.createLogMsgs()}</p>
             </CollapsiblePanel>
           </div>
@@ -743,7 +833,7 @@ export default class RtcDebugPanel extends Component {
             }}
           >
             <CollapsiblePanel
-              title={"Remote"}
+              title={<FormattedMessage id="rtc-debug-panel.remote-panel-title" defaultMessage="Remote" />}
               isRoot
               border
               grow
