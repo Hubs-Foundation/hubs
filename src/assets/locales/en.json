@@ -228,7 +228,6 @@
   "change-scene-dialog.create-in-spoke": "Or, create a new scene using %editor-name%.",
   "change-scene-dialog.new-spoke-project": "Launch %editor-name%",
   "invalid-scene-url": "This URL does not point to a scene or valid GLB.",
-  "avatar-url-dialog.apply": "Apply",
   "interstitial.prompt": "Continue",
   "help.prompt": "Help",
   "hide-ui.prompt": "Hide All",

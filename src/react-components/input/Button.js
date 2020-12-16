@@ -69,3 +69,11 @@ export function AcceptButton(props) {
     </Button>
   );
 }
+
+export function ApplyButton(props) {
+  return (
+    <Button preset="accept" {...props}>
+      <FormattedMessage id="button.apply" defaultMessage="Apply" />
+    </Button>
+  );
+}

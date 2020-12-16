@@ -330,7 +330,7 @@
   "change-scene-dialog.create-in-spoke": "または,%editor-name%を使用して新しいシーンを作成します。",
   "change-scene-dialog.new-spoke-project": "Launch%editor-name%",
   "invalid-scene-url": "このURLはシーンまたは有効なGLBを指していません。",
-  "avatar-url-dialog.apply": "適用",
+  "button.apply": "適用",
   "interstitial.prompt": "続行",
   "help.prompt": "ヘルプ",
   "hide-ui.prompt": "Hide All",

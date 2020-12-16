@@ -332,7 +332,7 @@
   "change-scene-dialog.create-in-spoke": "Или создать новую комнату в %editor-name%.",
   "change-scene-dialog.new-spoke-project": "Открыть %editor-name%",
   "invalid-scene-url": "Этот URL не ведёт на какую-либо сцену или действующий файл .GLB",
-  "avatar-url-dialog.apply": "Применить",
+  "button.apply": "Применить",
   "interstitial.prompt": "Продолжить",
   "help.prompt": "Помощь",
   "hide-ui.prompt": "Скрыть всех",

@@ -345,7 +345,7 @@
   "change-scene-dialog.create-in-spoke": "O crear una nueva sala usando %editor-name%.",
   "change-scene-dialog.new-spoke-project": "Abrir %editor-name%",
   "invalid-scene-url": "Esta URL no apunta a una escena o a un archivo .GLB válido.",
-  "avatar-url-dialog.apply": "Aplicar",
+  "button.apply": "Aplicar",
   "interstitial.prompt": "Continuar",
   "help.prompt": "Ayuda",
   "hide-ui.prompt": "Ocultar a todos",

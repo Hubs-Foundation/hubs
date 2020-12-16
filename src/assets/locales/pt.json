@@ -329,7 +329,7 @@
   "change-scene-dialog.create-in-spoke": "Ou crie um novo cenário usando o %editor-name%.",
   "change-scene-dialog.new-spoke-project": "Iniciar %editor-name%",
   "invalid-scene-url": "Este URL não aponta para uma cena ou GLB válido.",
-  "avatar-url-dialog.apply": "Aplicar",
+  "button.apply": "Aplicar",
   "interstitial.prompt": "Continuar",
   "help.prompt": "Ajuda",
   "hide-ui.prompt": "Ocultar tudo",
