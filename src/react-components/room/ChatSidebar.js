@@ -43,9 +43,14 @@ export function MessageAttachmentButton(props) {
 }
 
 export function ChatInput(props) {
+  const intl = useIntl();
+
   return (
     <div className={styles.chatInputContainer}>
-      <TextAreaInput placeholder="Message..." {...props} />
+      <TextAreaInput
+        placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
+        {...props}
+      />
     </div>
   );
 }
@@ -54,43 +59,52 @@ ChatInput.propTypes = {
   onSpawn: PropTypes.func
 };
 
-const joinMessages = defineMessages({
-  room: { id: "presence.entered_room", defaultMessage: "{name} entered the room." },
-  lobby: { id: "presence.entered_lobby", defaultMessage: "{name} entered the lobby." }
+const enteredMessages = defineMessages({
+  room: { id: "chat-sidebar.system-message.entered-room", defaultMessage: "{name} entered the room." },
+  lobby: { id: "chat-sidebar.system-message.entered-lobby", defaultMessage: "{name} entered the lobby." }
 });
 
-const enteredMessages = defineMessages({
-  lobby: { id: "presence.join_lobby", defaultMessage: "{name} joined the lobby." },
-  room: { id: "presence.join_room", defaultMessage: "{name} joined the room." }
+const joinedMessages = defineMessages({
+  lobby: { id: "chat-sidebar.system-message.joined-lobby", defaultMessage: "{name} joined the lobby." },
+  room: { id: "chat-sidebar.system-message.joined-room", defaultMessage: "{name} joined the room." }
 });
 
 // TODO: use react-intl's defineMessages to get proper extraction
 export function formatSystemMessage(entry, intl) {
   switch (entry.type) {
     case "join":
-      return intl.formatMessage(joinMessages[entry.presence], { name: <b>{entry.name}</b> });
+      return intl.formatMessage(joinedMessages[entry.presence], { name: <b>{entry.name}</b> });
     case "entered":
       return intl.formatMessage(enteredMessages[entry.presence], { name: <b>{entry.name}</b> });
     case "leave":
-      return <FormattedMessage id="presence.leave" values={{ name: <b>{entry.name}</b> }} />;
+      return (
+        <FormattedMessage
+          id="chat-sidebar.system-message.leave"
+          defaultMessage="{name} left."
+          values={{ name: <b>{entry.name}</b> }}
+        />
+      );
     case "display_name_changed":
       return (
         <FormattedMessage
-          id="presence.name_change"
+          id="chat-sidebar.system-message.name-change"
+          defaultMessage="{oldName} is now known as {newName}"
           values={{ oldName: <b>{entry.oldName}</b>, newName: <b>{entry.newName}</b> }}
         />
       );
     case "scene_changed":
       return (
         <FormattedMessage
-          id="presence.scene_change"
+          id="chat-sidebar.system-message.scene-change"
+          defaultMessage="{name} changed the scene to {sceneName}"
           values={{ name: <b>{entry.name}</b>, sceneName: <b>{entry.sceneName}</b> }}
         />
       );
     case "hub_name_changed":
       return (
         <FormattedMessage
-          id="presence.hub_name_change"
+          id="chat-sidebar.system-message.hub-name-change"
+          defaultMessage="{name} changed the name of the room to {hubName}"
           values={{ name: <b>{entry.name}</b>, hubName: <b>{entry.hubName}</b> }}
         />
       );
@@ -214,5 +228,12 @@ ChatSidebar.propTypes = {
 };
 
 export function ChatToolbarButton(props) {
-  return <ToolbarButton {...props} icon={<ChatIcon />} preset="blue" label="Chat" />;
+  return (
+    <ToolbarButton
+      {...props}
+      icon={<ChatIcon />}
+      preset="blue"
+      label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
+    />
+  );
 }
