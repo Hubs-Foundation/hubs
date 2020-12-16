@@ -275,14 +275,5 @@
   "tweet-dialog.posted": "Your tweet has been posted.",
   "tweet-dialog.close": "close",
   "oauth-dialog.sign-in.twitter": "Connect to Twitter",
-  "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%.",
-  "support.missing-features": "Your browser is missing required features.",
-  "support.in-app-browser-ios": "Copy and paste this link directly into Safari",
-  "support.in-app-browser-android": "Copy and paste this link directly into Chrome or Firefox",
-  "support.update-browser": "Please try switching or updating to a newer browser",
-  "support.copy": "copy",
-  "support.copied": "copied!",
-  "support.details": "details",
-  "support.supported": "supported",
-  "support.unsupported": "unsupported"
+  "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%."
 }
