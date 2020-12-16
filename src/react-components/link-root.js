@@ -190,7 +190,8 @@ class LinkRoot extends Component {
                 {this.state.failedAtLeastOnce ? (
                   <FormattedMessage
                     id="link-page.try-again"
-                    defaultMessage="We couldn't find that code.\nPlease try again."
+                    defaultMessage="We couldn't find that code.{linebreak}Please try again."
+                    values={{ linebreak: <br /> }}
                   />
                 ) : (
                   <FormattedMessage id="link-page.enter-code" defaultMessage="Enter code:" />

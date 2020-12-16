@@ -40,7 +40,8 @@ class DiscordPage extends Component {
                 <div className={styles.primaryTagline}>
                   <FormattedMessage
                     id="discord-page.primary-tagline"
-                    defaultMessage="Share a virtual room with your community.\nWatch videos, play with 3D objects, or just hang out."
+                    defaultMessage="Share a virtual room with your community.{linebreak}Watch videos, play with 3D objects, or just hang out."
+                    values={{ linebreak: <br /> }}
                   />
                 </div>
                 <div className={styles.secondaryTagline}>
