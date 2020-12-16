@@ -262,8 +262,6 @@
   "object-info.raise-lights": "Show Background",
   "object-info.lower-lights": "Hide Background",
   "object-info.unpin-button": "Unpin",
-  "avatar-page.select": "Select",
-  "avatar-page.selected": "This is your current avatar",
   "leave-room-dialog.leave-room.message": "Are you sure you want to leave the room?",
   "leave-room-dialog.leave-room.confirm": "Leave Room",
   "leave-room-dialog.join-room.message": "Joining a new room will leave this one. Are you sure?",
