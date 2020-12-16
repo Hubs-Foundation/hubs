@@ -106,7 +106,7 @@
   "profile.tabs.url": "Modelo personalizado",
   "avatar-editor.info": "Encuentra más recursos para personalizar tu avatar <a>aquí</a>",
   "avatar-editor.external-editor-info": "Crea una apariencia personalizada para este avatar: ",
-  "avatar-preview.loading-failed": "Carga fallida\nPor favor, elige otro avatar",
+  "avatar-preview.loading-failed": "Carga fallida{linebreak}Por favor, elige otro avatar",
   "media-browser.search-placeholder.scenes": "Buscar escenas...",
   "media-browser.search-placeholder.avatars": "Buscar avatares...",
   "media-browser.search-placeholder.videos": "Buscar videos...",

@@ -103,7 +103,7 @@
   "profile.tabs.url": "カスタムモデル",
   "avatar-editor.info": "カスタムアバターの追加情報は <a>こちら</a>",
   "avatar-editor.external-editor-info": "このアバターのカスタムスキンを作成します:",
-  "avatar-preview.loading-failed": "読み込みに失敗しました\n 別のアバターを選択してください",
+  "avatar-preview.loading-failed": "読み込みに失敗しました{linebreak}別のアバターを選択してください",
   "media-browser.search-placeholder.scenes": "シーンを検索...",
   "media-browser.search-placeholder.avatars": "アバターを検索...",
   "media-browser.search-placeholder.videos": "動画を検索...",

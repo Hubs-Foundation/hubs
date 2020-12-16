@@ -84,7 +84,6 @@
   "profile.tabs.legacy": "Default",
   "profile.tabs.skinnable": "Custom Skin",
   "profile.tabs.url": "Custom Model",
-  "avatar-preview.loading-failed": "Loading failed\nPlease choose another avatar",
   "media-browser.hub.joined-prefix": "Joined ",
   "media-browser.hub.visited-prefix": "Visited ",
   "media-browser.similar-to-facet": "Similar to: \"{name}\"",

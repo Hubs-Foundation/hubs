@@ -103,7 +103,7 @@
   "profile.tabs.url": "自定义模式",
   "avatar-editor.info": "发现更多自定义头像资源 <a>这里</a>",
   "avatar-editor.external-editor-info": "为头像自定义皮肤: ",
-  "avatar-preview.loading-failed": "加载失败\n请选择其他的头像",
+  "avatar-preview.loading-failed": "加载失败{linebreak}请选择其他的头像",
   "media-browser.search-placeholder.scenes": "搜索场景...",
   "media-browser.search-placeholder.avatars": "搜索头像...",
   "media-browser.search-placeholder.videos": "搜索视频...",

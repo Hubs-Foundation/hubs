@@ -103,7 +103,7 @@
   "profile.tabs.url": "Персонализированная 3D-модель",
   "avatar-editor.info": "Больше ресурсов, чтобы персонализировать ваш аватар <a>здесь</a>",
   "avatar-editor.external-editor-info": "Создайте персонализированную внешность для этого аватара: ",
-  "avatar-preview.loading-failed": "Loading failed.\nПожалуйста, выберите другой аватар",
+  "avatar-preview.loading-failed": "Loading failed.{linebreak}Пожалуйста, выберите другой аватар",
   "media-browser.search-placeholder.scenes": "Искать сцены...",
   "media-browser.search-placeholder.avatars": "Искать аватары...",
   "media-browser.search-placeholder.videos": "Искать видео...",

@@ -103,7 +103,7 @@
   "profile.tabs.url": "Modelo customizado",
   "avatar-editor.info": "Encontre mais recursos de avatar personalizados <a>aqui</a>",
   "avatar-editor.external-editor-info": "Crie uma skin personalizada para este avatar: ",
-  "avatar-preview.loading-failed": "O carregamento falhou\nPor favor escolha outro avatar",
+  "avatar-preview.loading-failed": "O carregamento falhou{linebreak}Por favor escolha outro avatar",
   "media-browser.search-placeholder.scenes": "Procurar cenários...",
   "media-browser.search-placeholder.avatars": "Procurar avatares...",
   "media-browser.search-placeholder.videos": "Procurar por vídeos...",
