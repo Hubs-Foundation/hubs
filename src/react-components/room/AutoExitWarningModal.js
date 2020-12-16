@@ -2,7 +2,7 @@ import React from "react";
 import { FormattedMessage, defineMessages, useIntl } from "react-intl";
 import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
-import { Button } from "../input/Button";
+import { CancelButton } from "../input/Button";
 import { Column } from "../layout/Column";
 
 export const AutoExitReason = {
@@ -12,11 +12,11 @@ export const AutoExitReason = {
 
 const messages = defineMessages({
   [AutoExitReason.concurrentSession]: {
-    id: "autoexit.concurrent_subtitle",
+    id: "auto-exit-warning-modal.reason.concurrent-session",
     defaultMessage: "You have started another session."
   },
   [AutoExitReason.idle]: {
-    id: "autoexit.idle_subtitle",
+    id: "auto-exit-warning-modal.reason.idle",
     defaultMessage: "You have been idle for too long."
   }
 });
@@ -28,14 +28,14 @@ export function AutoExitWarningModal({ onCancel, reason, secondsRemaining }) {
     <Modal title="Warning">
       <Column padding center>
         <b>
-          <FormattedMessage id="autoexit.title" />
-          <span>{secondsRemaining}</span>
-          <FormattedMessage id="autoexit.title_units" />
+          <FormattedMessage
+            id="auto-exit-warning-modal.message"
+            defaultMessage="Auto-ending session in {secondsRemaining} seconds"
+            values={{ secondsRemaining }}
+          />
         </b>
         <p>{intl.formatMessage(messages[reason])}</p>
-        <Button preset="red" onClick={onCancel}>
-          <FormattedMessage id="autoexit.cancel" />
-        </Button>
+        <CancelButton onClick={onCancel} />
       </Column>
     </Modal>
   );
