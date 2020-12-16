@@ -6,7 +6,6 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { getMessages } from "../utils/i18n";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
