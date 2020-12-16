@@ -259,7 +259,6 @@
   "leave-room-dialog.join-room.confirm": "Join Room",
   "leave-room-dialog.create-room.message": "Creating a new room will leave this one. Are you sure?",
   "leave-room-dialog.create-room.confirm": "Leave and Create Room",
-  "embed.load-button": "Load Room",
   "tweet-dialog.tweet": "Tweet",
   "tweet-dialog.posted": "Your tweet has been posted.",
   "tweet-dialog.close": "close",
