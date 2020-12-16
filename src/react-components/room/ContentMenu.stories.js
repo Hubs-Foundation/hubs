@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
 import { ContentMenu, ContentMenuButton } from "./ContentMenu";
