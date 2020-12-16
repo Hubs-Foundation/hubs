@@ -170,7 +170,10 @@ class LinkRoot extends Component {
         <div className={styles.link}>
           <div className={styles.linkContents}>
             <a className={styles.logo} href="/">
-              <img src={configs.image("logo")} alt={<FormattedMessage id="link-page.logo" defaultMessage="Logo" />} />
+              <img
+                src={configs.image("logo")}
+                alt={<FormattedMessage id="link-page.logo-alt" defaultMessage="Logo" />}
+              />
             </a>
             {this.state.entered.length === this.maxAllowedChars() && (
               <div className={classNames("loading-panel", styles.codeLoadingPanel)}>
