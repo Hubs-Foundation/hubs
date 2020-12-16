@@ -93,7 +93,7 @@
   "entry.notify_me": "Сообщить, когда войдут другие пользователи",
   "entry.mute-on-entry": "Отключить мой микрофон",
   "profile.save": "Применить",
-  "profile.display_name.validation_warning": "Используйте буквы, цифры и тире. Не менее трёх и не более 32-х символов",
+  "avatar-settings-content.display-name-description": "Используйте буквы, цифры и тире. Не менее трёх и не более 32-х символов",
   "profile.header": "Имя и аватар",
   "profile.terms_of_use": "Пользовательское соглашение",
   "profile.privacy_notice": "Уведомление о конфиденциальности",

@@ -96,7 +96,7 @@
   "entry.notify_me": "Notificarme cuando lleguen otros",
   "entry.mute-on-entry": "Silenciar mi micrófono",
   "profile.save": "Aceptar",
-  "profile.display_name.validation_warning": "Caracteres alfanuméricos y guiones. Al menos 3 caracteres, máximo 32",
+  "avatar-settings-content.display-name-description": "Caracteres alfanuméricos y guiones. Al menos 3 caracteres, máximo 32",
   "profile.header": "Nombre y avatar",
   "profile.terms_of_use": "Términos de uso",
   "profile.privacy_notice": "Aviso de privacidad",

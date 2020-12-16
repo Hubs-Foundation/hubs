@@ -93,7 +93,7 @@
   "entry.notify_me": "他の人が到着したら通知する",
   "entry.mute-on-entry": "マイクをミュート",
   "profile.save": "承認",
-  "profile.display_name.validation_warning": "英数字とハイフン。3文字以上,32文字以下",
+  "avatar-settings-content.display-name-description": "英数字とハイフン。3文字以上,32文字以下",
   "profile.header": "名前とアバター",
   "profile.terms_of_use": "利用規約",
   "profile.privacy_notice": "プライバシーに関する通知",

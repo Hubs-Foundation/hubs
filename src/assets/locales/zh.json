@@ -93,7 +93,7 @@
   "entry.notify_me": "其他人到达时通知我",
   "entry.mute-on-entry": "静音我的麦克风",
   "profile.save": "接受",
-  "profile.display_name.validation_warning": "字母数字与连字符号。至少三个字母，不要超过32个",
+  "avatar-settings-content.display-name-description": "字母数字与连字符号。至少三个字母，不要超过32个",
   "profile.header": "名字&头像",
   "profile.terms_of_use": "使用条款",
   "profile.privacy_notice": "隐私声明",

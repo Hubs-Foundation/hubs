@@ -4,6 +4,7 @@ import { Button } from "../input/Button";
 import styles from "./AvatarSettingsContent.scss";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
+import { FormattedMessage } from "react-intl";
 
 export function AvatarSettingsContent({
   displayName,
@@ -12,7 +13,6 @@ export function AvatarSettingsContent({
   onChangeDisplayName,
   avatarPreview,
   displayNamePattern,
-  displayNameDescription,
   onChangeAvatar,
   ...rest
 }) {
@@ -26,7 +26,12 @@ export function AvatarSettingsContent({
         spellCheck="false"
         required
         onChange={onChangeDisplayName}
-        description={displayNameDescription}
+        description={
+          <FormattedMessage
+            id="avatar-settings-content.display-name-description"
+            defaultMessage="Alphanumerics and hyphens. At least 3 characters, no more than 32"
+          />
+        }
         ref={displayNameInputRef}
       />
       <div className={styles.avatarPreviewContainer}>
@@ -48,7 +53,6 @@ AvatarSettingsContent.propTypes = {
   displayNameInputRef: PropTypes.func,
   disableDisplayNameInput: PropTypes.bool,
   displayNamePattern: PropTypes.string,
-  displayNameDescription: PropTypes.string,
   onChangeDisplayName: PropTypes.func,
   avatarPreview: PropTypes.node,
   onChangeAvatar: PropTypes.func

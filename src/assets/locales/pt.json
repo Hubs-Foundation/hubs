@@ -93,7 +93,7 @@
   "entry.notify_me": "Me notificar quando outros chegarem",
   "entry.mute-on-entry": "Silenciar meu microfone",
   "profile.save": "Aceitar",
-  "profile.display_name.validation_warning": "Alfanuméricos e hifens. Pelo menos 3 caracteres, não mais que 32",
+  "avatar-settings-content.display-name-description": "Alfanuméricos e hifens. Pelo menos 3 caracteres, não mais que 32",
   "profile.header": "Nome & Avatar",
   "profile.terms_of_use": "Termos de Uso",
   "profile.privacy_notice": "Notificação de privacidade",
