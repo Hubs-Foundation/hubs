@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
 import { withDesign } from "storybook-addon-designs";
 import { Column } from "../layout/Column";

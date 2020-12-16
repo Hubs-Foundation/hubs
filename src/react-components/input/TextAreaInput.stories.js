@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
 import { TextAreaInput } from "./TextAreaInput";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";

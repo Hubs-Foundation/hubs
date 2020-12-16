@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
 import { NumericInputField } from "./NumericInputField";
 import { Button } from "./Button";
