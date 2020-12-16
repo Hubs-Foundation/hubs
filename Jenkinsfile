@@ -64,7 +64,7 @@ pipeline {
           def hubsVersion = "${major}.${minor}.${version}.${packageTimeVersion}"
 
           if (promoteToChannel != "") {
-            runCommand("sudo /usr/bin/hab-ret-pkg-promote mozillareality/hubs/${major}.${minor}.${version}/${packageTimeVersion} ${promoteToChannel}")
+            runCommand("sudo /usr/bin/hab-ret-pkg-promote ${packageIdent} ${promoteToChannel}")
             def text = "*${jobName}* promoted ${hubsVersion} to ${promoteToChannel}"
             sendSlackMessage(text, "#mr-builds", ":gift:", slackURL)
           } else {
