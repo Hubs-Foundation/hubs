@@ -4,8 +4,15 @@ import { ButtonGridPopover } from "../popover/ButtonGridPopover";
 import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
+import { defineMessage, useIntl } from "react-intl";
+
+const placePopoverTitle = defineMessage({
+  id: "place-popover.title",
+  defaultMessage: "Place"
+});
 
 export function PlacePopoverButton({ items }) {
+  const intl = useIntl();
   const filteredItems = items.filter(item => !!item);
 
   // The button is removed if you can't place anything.
@@ -13,9 +20,11 @@ export function PlacePopoverButton({ items }) {
     return null;
   }
 
+  const title = intl.formatMessage(placePopoverTitle);
+
   return (
     <Popover
-      title="Place"
+      title={title}
       content={props => <ButtonGridPopover items={filteredItems} {...props} />}
       placement="top"
       offsetDistance={28}
@@ -26,7 +35,7 @@ export function PlacePopoverButton({ items }) {
           icon={<ObjectIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label="Place"
+          label={title}
           preset="green"
         />
       )}
