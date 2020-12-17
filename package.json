@@ -65,6 +65,7 @@
     ]
   },
   "dependencies": {
+    "@formatjs/intl-relativetimeformat": "^8.0.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
@@ -83,7 +84,6 @@
     "copy-to-clipboard": "^3.0.8",
     "core-js": "^3.6.5",
     "dashjs": "^3.1.0",
-    "dayjs-ext": "^2.2.0",
     "deepmerge": "^2.1.1",
     "detect-browser": "^3.0.1",
     "downshift": "^6.0.5",

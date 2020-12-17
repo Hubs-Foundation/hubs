@@ -1,9 +1,7 @@
 import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import { FormattedMessage, useIntl } from "react-intl";
-import dayjs from "dayjs-ext";
-import relativeTime from "dayjs-ext/plugin/relativeTime";
+import { FormattedMessage, FormattedRelativeTime, useIntl } from "react-intl";
 import styles from "./MediaTiles.scss";
 import { ReactComponent as PeopleIcon } from "../icons/People.svg";
 import { ReactComponent as StarIcon } from "../icons/Star.svg";
@@ -19,8 +17,6 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
   poly_model: "Google Poly",
   twitch_stream: "Twitch"
 };
-
-dayjs.extend(relativeTime);
 
 function useThumbnailSize(isImage, isAvatar, imageAspect) {
   return useMemo(
@@ -167,7 +163,8 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
           )}
           {entry.last_activated_at && (
             <small>
-              <FormattedMessage id="media-browser.hub.joined-prefix" /> {dayjs(entry.last_activated_at).fromNow()}
+              <FormattedMessage id="media-browser.hub.joined-prefix" />{" "}
+              <FormattedRelativeTime updateIntervalInSeconds={10} value={entry.last_activated_at - Date.now()} />
             </small>
           )}
         </>

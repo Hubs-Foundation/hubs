@@ -12,8 +12,7 @@ import { TextAreaInput } from "../input/TextAreaInput";
 import { ToolbarButton } from "../input/ToolbarButton";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
-import { FormattedMessage, useIntl, defineMessages } from "react-intl";
-import { useRelativeTime } from "../misc/useRelativeTime";
+import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
 
 export function SpawnMessageButton(props) {
   return (
@@ -116,14 +115,15 @@ export function formatSystemMessage(entry, intl) {
 }
 
 export function SystemMessage(props) {
-  const relativeTime = useRelativeTime(props.timestamp);
   const intl = useIntl();
 
   return (
     <li className={classNames(styles.messageGroup, styles.systemMessage)}>
       <p className={styles.messageGroupLabel}>
         <i>{formatSystemMessage(props, intl)}</i>
-        <span>{relativeTime}</span>
+        <span>
+          <FormattedRelativeTime updateIntervalInSeconds={10} value={props.timestamp - Date.now()} />
+        </span>
       </p>
     </li>
   );
@@ -183,12 +183,10 @@ function getMessageComponent(message) {
 }
 
 export function ChatMessageGroup({ sent, sender, timestamp, messages }) {
-  const relativeTime = useRelativeTime(timestamp);
-
   return (
     <li className={classNames(styles.messageGroup, { [styles.sent]: sent })}>
       <p className={styles.messageGroupLabel}>
-        {sender} | {relativeTime}
+        {sender} | <FormattedRelativeTime updateIntervalInSeconds={10} value={timestamp - Date.now()} />
       </p>
       <ul className={styles.messageGroupMessages}>{messages.map(message => getMessageComponent(message))}</ul>
     </li>
