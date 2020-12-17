@@ -147,7 +147,7 @@
   "media-browser.nav_title.twitch": "Twitch",
   "media-browser.create-avatar": "Создать аватар",
   "media-browser.create-scene": "Создать сцену в {editorName}",
-  "media-browser.hub.joined-prefix": "Вы присоединились ",
+  "media-tile.joined-room": "Вы присоединились {relativeTime}",
   "media-browser.hub.visited-prefix": "Вы посетили ",
   "media-browser.similar-to-facet": "Похоже на: \"{name}\"",
   "audio.title": "Настройки аудио",

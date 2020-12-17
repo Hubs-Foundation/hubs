@@ -163,8 +163,15 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
           )}
           {entry.last_activated_at && (
             <small>
-              <FormattedMessage id="media-browser.hub.joined-prefix" />{" "}
-              <FormattedRelativeTime updateIntervalInSeconds={10} value={entry.last_activated_at - Date.now()} />
+              <FormattedMessage
+                id="media-tile.joined-room"
+                defaultMessage="Joined {relativeTime}"
+                values={{
+                  relativeTime: (
+                    <FormattedRelativeTime updateIntervalInSeconds={10} value={entry.last_activated_at - Date.now()} />
+                  )
+                }}
+              />
             </small>
           )}
         </>
@@ -195,37 +202,67 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
       )}
       <div className={styles.tileActions}>
         {entry.type === "avatar" && (
-          <TileAction title="Edit avatar" onClick={onEdit}>
+          <TileAction
+            title={intl.formatMessage({ id: "media-tile.action.edit-avatar", defaultMessage: "Edit avatar" })}
+            onClick={onEdit}
+          >
             <PenIcon />
           </TileAction>
         )}
         {entry.type === "scene" &&
           entry.project_id && (
-            <TileAction onClick={onEdit} title={intl.formatMessage({ id: "scene.edit_button" })}>
+            <TileAction
+              onClick={onEdit}
+              title={intl.formatMessage({ id: "media-tile.action.edit-scene", defaultMessage: "Edit scene" })}
+            >
               <PenIcon />
             </TileAction>
           )}
         {entry.type === "avatar_listing" && (
-          <TileAction title="Show similar avatars" onClick={onShowSimilar}>
+          <TileAction
+            title={intl.formatMessage({
+              id: "media-tile.action.show-similar-avatars",
+              defaultMessage: "Show similar avatars"
+            })}
+            onClick={onShowSimilar}
+          >
             <SearchIcon />
           </TileAction>
         )}
         {entry.type === "avatar_listing" &&
           entry.allow_remixing && (
-            <TileAction title="Copy to my avatars" onClick={onCopy}>
+            <TileAction
+              title={intl.formatMessage({
+                id: "media-tile.action.copy-avatar",
+                defaultMessage: "Copy to my avatars"
+              })}
+              onClick={onCopy}
+            >
               <DuplicateIcon />
             </TileAction>
           )}
         {entry.type === "scene_listing" &&
           entry.allow_remixing && (
-            <TileAction title="Copy to my scenes" onClick={onCopy}>
+            <TileAction
+              title={intl.formatMessage({
+                id: "media-tile.action.copy-scene",
+                defaultMessage: "Copy to my scenes"
+              })}
+              onClick={onCopy}
+            >
               <DuplicateIcon />
             </TileAction>
           )}
         {entry.type === "room" &&
           onInfo &&
           entry.description && (
-            <TileAction title="Room info" onClick={onInfo}>
+            <TileAction
+              title={intl.formatMessage({
+                id: "media-tile.action.room-info",
+                defaultMessage: "Room info"
+              })}
+              onClick={onInfo}
+            >
               <HelpIcon />
             </TileAction>
           )}

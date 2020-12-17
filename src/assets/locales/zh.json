@@ -147,7 +147,7 @@
   "media-browser.nav_title.twitch": "Twitch",
   "media-browser.create-avatar": "新建头像",
   "media-browser.create-scene": "通过 {editorName}新建场景",
-  "media-browser.hub.joined-prefix": "已加入 ",
+  "media-tile.joined-room": "已加入 {relativeTime}",
   "media-browser.hub.visited-prefix": "已访问",
   "media-browser.similar-to-facet": "与: \"{name}\"一样",
   "audio.title": "语音设置",

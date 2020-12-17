@@ -147,7 +147,7 @@
   "media-browser.nav_title.twitch": "Twitch",
   "media-browser.create-avatar": "Criar Avatar",
   "media-browser.create-scene": "Criar Cenário com {editorName}",
-  "media-browser.hub.joined-prefix": "Entrou ",
+  "media-tile.joined-room": "Entrou {relativeTime}",
   "media-browser.hub.visited-prefix": "Visitou ",
   "media-browser.similar-to-facet": "Igual a: \"{name}\"",
   "audio.title": "Configurações de Áudio",

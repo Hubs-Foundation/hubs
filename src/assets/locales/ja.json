@@ -147,7 +147,7 @@
   "media-browser.nav_title.twitch": "Twitch",
   "media-browser.create-avatar": "アバターの作成",
   "media-browser.create-scene": "{editorName}でシーンを作成",
-  "media-browser.hub.joined-prefix": "Joined",
+  "media-tile.joined-room": "Joined {relativeTime}",
   "media-browser.hub.visited-prefix": "Visited",
   "media-browser.similar-to-facet": "類似:\" {name} \"",
   "audio.title": "オーディオ設定",

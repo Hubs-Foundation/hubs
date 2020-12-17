@@ -150,7 +150,7 @@
   "media-browser.nav_title.twitch": "Twitch",
   "media-browser.create-avatar": "Crear avatar",
   "media-browser.create-scene": "Crear escena con {editorName}",
-  "media-browser.hub.joined-prefix": "Unido ",
+  "media-tile.joined-room": "Unido {relativeTime}",
   "media-browser.hub.visited-prefix": "Visitado ",
   "media-browser.similar-to-facet": "Parecido a: \"{name}\"",
   "audio.title": "Configuración de audio",
