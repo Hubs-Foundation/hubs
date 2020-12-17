@@ -6,6 +6,7 @@ import { ReactComponent as VRIcon } from "../icons/VR.svg";
 import styles from "./EnterOnDeviceModal.scss";
 import { BackButton } from "../input/BackButton";
 import { Column } from "../layout/Column";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export function EnterOnDeviceModal({
   className,
@@ -18,17 +19,38 @@ export function EnterOnDeviceModal({
   onBack,
   ...rest
 }) {
+  const intl = useIntl();
+
   return (
-    <Modal title="Enter on Device" beforeTitle={<BackButton onClick={onBack} />} className={className} {...rest}>
+    <Modal
+      title={<FormattedMessage id="enter-on-device-modal.title" defaultMessage="Enter on Device" />}
+      beforeTitle={<BackButton onClick={onBack} />}
+      className={className}
+      {...rest}
+    >
       <Column center={loadingCode ? "both" : true} padding grow>
         {loadingCode ? (
-          <b>Generating join code...</b>
+          <b>
+            <FormattedMessage id="enter-on-device-modal.generating-code" defaultMessage="Generating join code..." />
+          </b>
         ) : (
           <>
-            <b>Enter on Wireless Headset / Phone</b>
-            <small>{"In your device's web browser, go to:"}</small>
+            <b>
+              <FormattedMessage id="enter-on-device-modal.heading" defaultMessage="Enter on Wireless Headset / Phone" />
+            </b>
+            <small>
+              <FormattedMessage
+                id="enter-on-device-modal.short-url-directions"
+                defaultMessage="In your device's web browser, go to:"
+              />
+            </small>
             <div className={styles.shortUrlContainer}>{shortUrl}</div>
-            <small>Then, enter this one-time code:</small>
+            <small>
+              <FormattedMessage
+                id="enter-on-device-modal.code-directions"
+                defaultMessage="Then, enter this one-time code:"
+              />
+            </small>
             <div className={styles.codeContainer}>
               {code.split("").map((char, i) => (
                 <div key={i} className={styles.codeLetter}>
@@ -36,16 +58,36 @@ export function EnterOnDeviceModal({
                 </div>
               ))}
             </div>
-            <strong>Your account and avatar will be transferred to the device.</strong>
-            <strong>Keep this page open to use this code.</strong>
+            <strong>
+              <FormattedMessage
+                id="enter-on-device-modal.data-transfer"
+                defaultMessage="Your account and avatar will be transferred to the device."
+              />
+            </strong>
+            <strong>
+              <FormattedMessage
+                id="enter-on-device-modal.keep-page-open"
+                defaultMessage="Keep this page open to use this code."
+              />
+            </strong>
             {headsetConnected && (
               <>
-                <hr data-or-text="or" />
-                <b>Enter on Connected Headset</b>
+                <hr
+                  data-or-text={intl.formatMessage({ id: "enter-on-device-modal.divider-label", defaultMessage: "or" })}
+                />
+                <b>
+                  <FormattedMessage
+                    id="enter-on-device-modal.headset-connected-heading"
+                    defaultMessage="Enter on Connected Headset"
+                  />
+                </b>
                 {unsupportedBrowser ? (
                   <>
                     <small>
-                      {"WebVR isn't supported in this browser, to enter with Oculus or SteamVR, use Firefox."}
+                      <FormattedMessage
+                        id="enter-on-device-modal.unsupported-browser"
+                        defaultMessage="WebVR isn't supported in this browser, to enter with Oculus or SteamVR, use Firefox."
+                      />
                     </small>
                     <Button
                       as="a"
@@ -54,15 +96,27 @@ export function EnterOnDeviceModal({
                       target="_blank"
                       rel="noreferrer noopener"
                     >
-                      <span>Download Firefox</span>
+                      <span>
+                        <FormattedMessage
+                          id="enter-on-device-modal.download-firefox-button"
+                          defaultMessage="Download Firefox"
+                        />
+                      </span>
                     </Button>
                   </>
                 ) : (
                   <>
-                    <small>You have a VR headset connected to this device.</small>
+                    <small>
+                      <FormattedMessage
+                        id="enter-on-device-modal.headset-connected-message"
+                        defaultMessage="You have a VR headset connected to this device."
+                      />
+                    </small>
                     <Button preset="purple" onClick={onEnterOnConnectedHeadset}>
                       <VRIcon />
-                      <span>Enter in VR</span>
+                      <span>
+                        <FormattedMessage id="enter-on-device-modal.enter-in-vr-button" defaultMessage="Enter in VR" />
+                      </span>
                     </Button>
                   </>
                 )}
