@@ -2,10 +2,12 @@ import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import styles from "./RoomSettingsSidebar.scss";
 import { IconButton } from "../input/IconButton";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { CopyableTextInputField } from "../input/CopyableTextInputField";
 
 export function InviteLinkInputField({ fetchingInvite, inviteUrl, onRevokeInvite }) {
+  const intl = useIntl();
+
   const [showRevokeConfirmation, setShowRevokeConfirmation] = useState(false);
 
   const revokeInvite = useCallback(() => {
@@ -26,26 +28,33 @@ export function InviteLinkInputField({ fetchingInvite, inviteUrl, onRevokeInvite
 
   return (
     <CopyableTextInputField
-      label="Invite link"
+      label={<FormattedMessage id="invite-link-input-field.label" defaultMessage="Invite link" />}
       disabled={fetchingInvite}
-      value={fetchingInvite ? "Generating invite..." : inviteUrl}
+      value={
+        fetchingInvite
+          ? intl.formatMessage({
+              id: "invite-link-input-field.generating-invite",
+              defaultMessage: "Generating invite..."
+            })
+          : inviteUrl
+      }
       buttonPreset="blue"
       description={
         !fetchingInvite &&
         (showRevokeConfirmation ? (
           <>
-            <FormattedMessage id="room-settings.revoke-confirm" />{" "}
+            <FormattedMessage id="invite-link-input-field.revoke-confirm" defaultMessage="are you sure?" />{" "}
             <IconButton className={styles.confirmRevokeButton} onClick={confirmRevokeInvite}>
-              <FormattedMessage id="room-settings.revoke-confirm-yes" />
+              <FormattedMessage id="invite-link-input-field.revoke-confirm-yes" defaultMessage="yes" />
             </IconButton>{" "}
             /{" "}
             <IconButton className={styles.confirmRevokeButton} onClick={cancelConfirmRevokeInvite}>
-              <FormattedMessage id="room-settings.revoke-confirm-no" />
+              <FormattedMessage id="invite-link-input-field.revoke-confirm-no" defaultMessage="no" />
             </IconButton>
           </>
         ) : (
           <IconButton className={styles.confirmRevokeButton} onClick={revokeInvite}>
-            <FormattedMessage id="room-settings.revoke" />
+            <FormattedMessage id="invite-link-input-field.revoke" defaultMessage="revoke" />
           </IconButton>
         ))
       }
