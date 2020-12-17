@@ -212,7 +212,12 @@ ChatMessageList.propTypes = {
 
 export function ChatSidebar({ onClose, children, ...rest }) {
   return (
-    <Sidebar title="Chat" beforeTitle={<CloseButton onClick={onClose} />} contentClassName={styles.content} {...rest}>
+    <Sidebar
+      title={<FormattedMessage id="chat-sidebar.title" defaultMessage="Chat" />}
+      beforeTitle={<CloseButton onClick={onClose} />}
+      contentClassName={styles.content}
+      {...rest}
+    >
       {children}
     </Sidebar>
   );
