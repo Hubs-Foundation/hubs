@@ -21,21 +21,25 @@ ContentMenuButton.propTypes = {
 };
 
 export function ObjectsMenuButton(props) {
-  <ContentMenuButton {...props}>
-    <ObjectsIcon />
-    <span>
-      <FormattedMessage id="content-menu.objects-menu-button" defaultMessage="Objects" />
-    </span>
-  </ContentMenuButton>;
+  return (
+    <ContentMenuButton {...props}>
+      <ObjectsIcon />
+      <span>
+        <FormattedMessage id="content-menu.objects-menu-button" defaultMessage="Objects" />
+      </span>
+    </ContentMenuButton>
+  );
 }
 
 export function PeopleMenuButton(props) {
-  <ContentMenuButton {...props}>
-    <PeopleIcon />
-    <span>
-      <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />
-    </span>
-  </ContentMenuButton>;
+  return (
+    <ContentMenuButton {...props}>
+      <PeopleIcon />
+      <span>
+        <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />
+      </span>
+    </ContentMenuButton>
+  );
 }
 
 export function ContentMenu({ children }) {
