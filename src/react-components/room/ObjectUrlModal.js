@@ -10,6 +10,7 @@ import { IconButton } from "../input/IconButton";
 import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import styles from "./ObjectUrlModal.scss";
 import classNames from "classnames";
+import { FormattedMessage } from "react-intl";
 
 export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, onSubmit, onClose }) {
   const { handleSubmit, register, watch, setValue } = useForm();
@@ -52,33 +53,69 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
   const showCloseButton = hasFile || url.length > 0;
 
   return (
-    <Modal title="Custom Object" beforeTitle={<CloseButton onClick={onClose} />}>
+    <Modal
+      title={<FormattedMessage id="object-url-modal.title" defaultMessage="Custom Object" />}
+      beforeTitle={<CloseButton onClick={onClose} />}
+    >
       <Column as="form" padding center onSubmit={handleSubmit(onSubmit)}>
         <p>
-          Upload or paste a URL to an image, video, model, or scene. Models can be found on{" "}
-          <a
-            href="https://sketchfab.com/search?features=downloadable&type=models"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Sketchfab
-          </a>{" "}
-          and{" "}
-          <a href="http://poly.google.com/" target="_blank" rel="noopener noreferrer">
-            Google Poly
-          </a>
-          {showModelCollectionLink && (
-            <>
-              , or our{" "}
-              <a href={modelCollectionUrl} target="_blank" rel="noopener noreferrer">
-                collection
-              </a>
-            </>
-          )}.
+          {showModelCollectionLink ? (
+            <FormattedMessage
+              id="object-url-modal.message-with-collection"
+              defaultMessage="Upload or paste a URL to an image, video, model, or scene. Models can be found on <sketchfablink>Sketchfab</sketchfablink> and <polylink>Google Poly</polylink>, or our <collectionlink>collection</collectionlink>."
+              values={{
+                // eslint-disable-next-line react/display-name
+                sketchfablink: chunks => (
+                  <a
+                    href="https://sketchfab.com/search?features=downloadable&type=models"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {chunks}
+                  </a>
+                ),
+                // eslint-disable-next-line react/display-name
+                polylink: chunks => (
+                  <a href="http://poly.google.com/" target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </a>
+                ),
+                // eslint-disable-next-line react/display-name
+                collectionlink: chunks => (
+                  <a href={modelCollectionUrl} target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </a>
+                )
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="object-url-modal.message"
+              defaultMessage="Upload or paste a URL to an image, video, model, or scene. Models can be found on <sketchfablink>Sketchfab</sketchfablink> and <polylink>Google Poly</polylink>."
+              values={{
+                // eslint-disable-next-line react/display-name
+                sketchfablink: chunks => (
+                  <a
+                    href="https://sketchfab.com/search?features=downloadable&type=models"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {chunks}
+                  </a>
+                ),
+                // eslint-disable-next-line react/display-name
+                polylink: chunks => (
+                  <a href="http://poly.google.com/" target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </a>
+                )
+              }}
+            />
+          )}
         </p>
         <TextInputField
           name="url"
-          label="Object URL or File"
+          label={<FormattedMessage id="object-url-modal.url-field-label" defaultMessage="Object URL or File" />}
           placeholder="https://example.com/avatar.glb"
           type={hasFile ? "text" : "url"}
           value={fileName || url || ""}
@@ -92,10 +129,15 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
               </IconButton>
             </>
           }
-          description="Accepts glb, png, jpg, gif, mp4, and mp3 files"
+          description={
+            <FormattedMessage
+              id="object-url-modal.url-field-description"
+              defaultMessage="Accepts glb, png, jpg, gif, mp4, and mp3 files"
+            />
+          }
         />
         <Button type="submit" preset="accept">
-          Create Object
+          <FormattedMessage id="object-url-modal.create-object-button" defaultMessage="Create Object" />
         </Button>
       </Column>
     </Modal>
