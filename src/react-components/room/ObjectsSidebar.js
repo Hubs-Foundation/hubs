@@ -11,6 +11,7 @@ import { ReactComponent as ImageIcon } from "../icons/Image.svg";
 import { ReactComponent as VideoIcon } from "../icons/Video.svg";
 import { ReactComponent as AudioIcon } from "../icons/Audio.svg";
 import { ReactComponent as TextDocumentIcon } from "../icons/TextDocument.svg";
+import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 
 function getObjectIcon(type) {
   switch (type) {
@@ -28,20 +29,17 @@ function getObjectIcon(type) {
   }
 }
 
-const objectTypeNames = {
-  video: "Video",
-  audio: "Audio",
-  image: "Image",
-  pdf: "PDF",
-  model: "Model",
-  default: "Object"
-};
-
-function getLabel(object) {
-  return `${objectTypeNames[object.type] || objectTypeNames.default}: ${object.name}`;
-}
+const objectTypeNames = defineMessages({
+  video: { id: "objects-sidebar.object-type.video", defaultMessage: "Video" },
+  audio: { id: "objects-sidebar.object-type.audio", defaultMessage: "Audio" },
+  image: { id: "objects-sidebar.object-type.image", defaultMessage: "Image" },
+  pdf: { id: "objects-sidebar.object-type.pdf", defaultMessage: "PDF" },
+  model: { id: "objects-sidebar.object-type.model", defaultMessage: "Model" },
+  default: { id: "objects-sidebar.object-type.default", defaultMessage: "Object" }
+});
 
 export function ObjectsSidebarItem({ selected, object, ...rest }) {
+  const intl = useIntl();
   const ObjectTypeIcon = getObjectIcon(object.type);
 
   return (
@@ -49,7 +47,13 @@ export function ObjectsSidebarItem({ selected, object, ...rest }) {
       {...rest}
       className={classNames(styles.object, { [listStyles.selected]: selected })}
       type="button"
-      aria-label={getLabel(object)}
+      aria-label={intl.formatMessage(
+        { id: "objects-sidebar.object-label", defaultMessage: "{objectType}: {objectName}" },
+        {
+          objectType: intl.formatMessage(objectTypeNames[object.type] || objectTypeNames.default),
+          objectName: object.name
+        }
+      )}
     >
       <ObjectTypeIcon />
       <p>{object.name}</p>
@@ -69,8 +73,14 @@ ObjectsSidebarItem.propTypes = {
 export function NoObjects({ canAddObjects }) {
   return (
     <li className={styles.noObjects}>
-      <p>There are no objects in the room.</p>
-      {canAddObjects && <p>Use the place menu to add objects.</p>}
+      <p>
+        <FormattedMessage id="objects-sidebar.no-objects" defaultMessage="There are no objects in the room." />
+      </p>
+      {canAddObjects && (
+        <p>
+          <FormattedMessage id="objects-sidebar.place-menu-tip" defaultMessage="Use the place menu to add objects." />
+        </p>
+      )}
     </li>
   );
 }
@@ -81,7 +91,16 @@ NoObjects.propTypes = {
 
 export function ObjectsSidebar({ children, objectCount, onClose }) {
   return (
-    <Sidebar title={`Objects (${objectCount})`} beforeTitle={<CloseButton onClick={onClose} />}>
+    <Sidebar
+      title={
+        <FormattedMessage
+          id="objects-sidebar.title"
+          defaultMessage="Objects ({objectCount})"
+          values={{ objectCount }}
+        />
+      }
+      beforeTitle={<CloseButton onClick={onClose} />}
+    >
       <ul>{children}</ul>
     </Sidebar>
   );
