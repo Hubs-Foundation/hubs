@@ -14,6 +14,7 @@ import {
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
 import { discordBridgesForPresences } from "../../utils/phoenix-utils";
+import { useIntl } from "react-intl";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 
@@ -160,6 +161,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
+  const intl = useIntl();
 
   const onKeyDown = useCallback(
     e => {
@@ -205,16 +207,47 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     },
     [messageGroups, scrolledToBottom, setMessagesRead]
   );
-  // TODO: Add i18n for this placeholder
+
   const discordBridges = discordBridgesForPresences(presences);
   const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
-  const occupantSnippet = `${occupantCount - 1} other${occupantCount > 2 ? "s" : ""}`;
-  const placeholder =
-    occupantCount <= 1
-      ? "Nobody is here yet..."
-      : discordBridges.length
-        ? `Send message to ${occupantSnippet} and ${discordSnippet}...`
-        : `Send message to ${occupantSnippet}...`;
+  let placeholder;
+
+  if (occupantCount <= 1) {
+    if (discordBridges.length === 0) {
+      placeholder = intl.formatMessage({
+        id: "chat-sidebar-container.input-placeholder.empty-room",
+        defaultMessage: "Nobody is here yet..."
+      });
+    } else {
+      placeholder = intl.formatMessage(
+        {
+          id: "chat-sidebar-container.input-placeholder.empty-room-bot",
+          defaultMessage: "Send message to {discordChannels}"
+        },
+        { discordChannels: discordSnippet }
+      );
+    }
+  } else {
+    if (discordBridges.length === 0) {
+      placeholder = intl.formatMessage(
+        {
+          id: "chat-sidebar-container.input-placeholder.occupants",
+          defaultMessage:
+            "{occupantCount, plural, one {Send message to one other...} other {Send message to {occupantCount} others...} }"
+        },
+        { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
+      );
+    } else {
+      placeholder = intl.formatMessage(
+        {
+          id: "chat-sidebar-container.input-placeholder.occupants-and-bot",
+          defaultMessage:
+            "{occupantCount, plural, one {Send message to one other and {discordChannels}...} other {Send message to {occupantCount} others and {discordChannels}...} }"
+        },
+        { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
+      );
+    }
+  }
 
   return (
     <ChatSidebar onClose={onClose}>
