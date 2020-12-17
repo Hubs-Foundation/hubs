@@ -50,7 +50,7 @@ import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
 import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
-import { ContentMenu, ContentMenuButton } from "./room/ContentMenu";
+import { ContentMenu, PeopleMenuButton, ObjectsMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as StarOutlineIcon } from "./icons/StarOutline.svg";
@@ -63,8 +63,6 @@ import { ReactComponent as SupportIcon } from "./icons/Support.svg";
 import { ReactComponent as ShieldIcon } from "./icons/Shield.svg";
 import { ReactComponent as DiscordIcon } from "./icons/Discord.svg";
 import { ReactComponent as VRIcon } from "./icons/VR.svg";
-import { ReactComponent as PeopleIcon } from "./icons/People.svg";
-import { ReactComponent as ObjectsIcon } from "./icons/Objects.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { ReactComponent as EnterIcon } from "./icons/Enter.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
@@ -1496,21 +1494,15 @@ class UIRoot extends Component {
                     (this.props.breakpoint !== "sm" || this.props.breakpoint !== "md")) && (
                     <ContentMenu>
                       {showObjectList && (
-                        <ContentMenuButton
+                        <ObjectsMenuButton
                           active={this.state.sidebarId === "objects"}
                           onClick={() => this.toggleSidebar("objects")}
-                        >
-                          <ObjectsIcon />
-                          <span>Objects</span>
-                        </ContentMenuButton>
+                        />
                       )}
-                      <ContentMenuButton
+                      <PeopleMenuButton
                         active={this.state.sidebarId === "people"}
                         onClick={() => this.toggleSidebar("people")}
-                      >
-                        <PeopleIcon />
-                        <span>People</span>
-                      </ContentMenuButton>
+                      />
                     </ContentMenu>
                   )}
                   {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
