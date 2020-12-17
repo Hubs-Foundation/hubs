@@ -5,6 +5,7 @@ import styles from "./MoreMenuPopover.scss";
 import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as MoreIcon } from "../icons/More.svg";
+import { useIntl, defineMessage } from "react-intl";
 
 function MoreMenuItem({ item, closePopover }) {
   const Icon = item.icon;
@@ -85,12 +86,19 @@ MoreMenuContextProvider.propTypes = {
   children: PropTypes.node
 };
 
+const moreMenuTitle = defineMessage({
+  id: "more-menu-popover.title",
+  defaultMessage: "More"
+});
+
 export function MoreMenuPopoverButton({ menu }) {
+  const intl = useIntl();
   const [visible, setVisible] = useContext(MoreMenuContext);
+  const title = intl.formatMessage(moreMenuTitle);
 
   return (
     <Popover
-      title="More"
+      title={title}
       content={props => <MoreMenuPopoverContent menu={menu} {...props} />}
       placement="top-end"
       offsetDistance={28}
@@ -103,7 +111,7 @@ export function MoreMenuPopoverButton({ menu }) {
           icon={<MoreIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label="More"
+          label={title}
         />
       )}
     </Popover>
@@ -118,12 +126,13 @@ MoreMenuPopoverButton.propTypes = {
 // We actually render the popover in the MoreMenuPopoverButton so that when resizing the window,
 // the popover positions itself relative to the correct element.
 export function CompactMoreMenuButton({ className, ...rest }) {
+  const intl = useIntl();
   const [, setVisible] = useContext(MoreMenuContext);
 
   return (
     <button
       className={classNames(styles.compactButton, className)}
-      aria-label="More"
+      aria-label={intl.formatMessage(moreMenuTitle)}
       onClick={e => {
         // Stop event bubbling so we don't immediately close the popover by clicking outside it.
         e.stopPropagation();
