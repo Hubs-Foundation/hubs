@@ -1,27 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import configs from "../../utils/configs";
-
+import { useIntl } from "react-intl";
 import { LoadingScreen } from "./LoadingScreen";
 import { useRoomLoadingState } from "./useRoomLoadingState";
 
-//TODO: Make these configurable
-const infoMessages = [
-  { heading: "Tip:", message: "Press the Q & E keys to turn left and right." },
-  {
-    heading: "What's New?",
-    message: (
-      <>
-        You can now set the default locale in your preferences.{" "}
-        <a href="/whats-new" target="_blank">
-          Read More
-        </a>
-      </>
-    )
-  }
-];
-
 export function LoadingScreenContainer({ onLoaded, scene }) {
+  const intl = useIntl();
+
   const { loading, message } = useRoomLoadingState(scene);
 
   useEffect(
@@ -31,6 +17,37 @@ export function LoadingScreenContainer({ onLoaded, scene }) {
       }
     },
     [loading, onLoaded]
+  );
+
+  //TODO: Make these configurable
+  const infoMessages = useMemo(
+    () => [
+      {
+        heading: intl.formatMessage({ id: "loading-screen.heading.tip", defaultText: "Tip:" }),
+        message: intl.formatMessage({
+          id: "loading-screen.message.keyboard-controls",
+          defaultText: "Press the Q & E keys to turn left and right."
+        })
+      },
+      {
+        heading: intl.formatMessage({ id: "loading-screen.heading.whats-new", defaultText: "What's New?" }),
+        message: intl.formatMessage(
+          {
+            id: "loading-screen.message.whats-new",
+            defaultText: "You can now set the default locale in your preferences. <a>Read More</a>"
+          },
+          {
+            // eslint-disable-next-line react/display-name
+            a: chunks => (
+              <a href="/whats-new" target="_blank">
+                {chunks}
+              </a>
+            )
+          }
+        )
+      }
+    ],
+    [intl]
   );
 
   return <LoadingScreen logoSrc={configs.image("logo")} message={message} infoMessages={infoMessages} />;
