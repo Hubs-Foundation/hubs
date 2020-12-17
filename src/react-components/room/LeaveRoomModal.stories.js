@@ -12,6 +12,8 @@ export default {
   }
 };
 
-export const LeaveRoom = args => <RoomLayout modal={<LeaveRoomModal reason={LeaveReason.joinRoom} {...args} />} />;
+export const LeaveRoom = args => <RoomLayout modal={<LeaveRoomModal reason={LeaveReason.leaveRoom} {...args} />} />;
 
 export const CreateRoom = args => <RoomLayout modal={<LeaveRoomModal reason={LeaveReason.createRoom} {...args} />} />;
+
+export const JoinRoom = args => <RoomLayout modal={<LeaveRoomModal reason={LeaveReason.joinRoom} {...args} />} />;
