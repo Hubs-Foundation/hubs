@@ -36,7 +36,7 @@ export const ToolbarButton = forwardRef(
 
 ToolbarButton.propTypes = {
   icon: PropTypes.node,
-  label: PropTypes.string,
+  label: PropTypes.node,
   selected: PropTypes.bool,
   preset: PropTypes.oneOf(presets),
   statusColor: PropTypes.oneOf(statusColors),
