@@ -329,7 +329,7 @@
   "tips.dismiss.ok": "Ok",
   "tips.dismiss.skip": "Skip",
   "tips.dismiss.enter-room": "Enter Room",
-  "lobby.watching": "Estás mirando ",
+  "spectating-label.label": "Estás mirando",
   "loader.entering_lobby": "Entrando a la antesala...",
   "loader.loading": "Cargando ",
   "loader.connecting": "Conectando...",

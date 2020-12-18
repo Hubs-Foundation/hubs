@@ -316,7 +316,7 @@
   "tips.dismiss.ok": "Ok",
   "tips.dismiss.skip": "Skip",
   "tips.dismiss.enter-room": "Enter Room",
-  "lobby.watching": "看 ",
+  "spectating-label.label": "看",
   "loader.entering_lobby": "正在进入休息室...",
   "loader.loading": "加载中 ",
   "loader.connecting": "正在连接...",

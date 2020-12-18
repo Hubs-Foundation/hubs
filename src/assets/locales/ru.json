@@ -316,7 +316,7 @@
   "tips.dismiss.ok": "Ok",
   "tips.dismiss.skip": "Skip",
   "tips.dismiss.enter-room": "Enter Room",
-  "lobby.watching": "Вы наблюдаете за ",
+  "spectating-label.label": "Вы наблюдаете за",
   "loader.entering_lobby": "Вы входите в холл...",
   "loader.loading": "Идёт скачивание ",
   "loader.connecting": "Идёт подключение...",
