@@ -15,7 +15,7 @@ The following GitHub projects are part of the Hubs platform and governed by thes
 
 ## Quick Start
 
-We are happy to receive contributions to the Hubs platform in a number of different ways as outlined below. Please note that all contributions are subject to approval by the project maintainers. We ask (but do not require) that those interested in contributing to Hubs consider joining the public [Hubs Discord server](https://discord.gg/wHmY4nd) to connect with the dev team, ask questions, and view discussions about work being done on the project. 
+We are happy to receive contributions to the Hubs platform in a number of different ways as outlined below. Please note that all contributions are subject to approval by the project maintainers. We ask (but do not require) that those interested in contributing to Hubs consider joining the public [Hubs Discord server](https://discord.gg/dFJncWwHun) to connect with the dev team, ask questions, and view discussions about work being done on the project. 
 
 ### 💻 Code Contributions
 Hubs has a client-server architecture that gives multiple users the ability to connect to a shared room on the server. If you are interested in contributing to the Hubs client, continue on to the [development workflow guide](#development-workflow) to get started. If you want to contribute to the networking or infrastructure, consider looking at the [reticulum](https://github.com/mozilla/reticulum) or [janus](https://github.com/mozilla/janus-plugin-sfu) repositories. If you are interested in working on the code for Spoke, the 3D editor used to create custom environments for Hubs rooms, explore the [Spoke](https://github.com/mozilla/spoke) repository.
@@ -60,7 +60,7 @@ Our documentation for Hubs is hosted on the [GitHub Hubs Wiki](https://github.co
 If you would like to add/update a localization translation for Hubs, please see the [Localization README](src/assets/locales/README.md). Then, please submit a pull request with your new/updated localization changes.
 
 ### 🦆 General Help
-We believe in the power of community (that's why we're building this, after all!) and know that not all forms of support will come from something outlined here. Feel free to jump into our public [Discord server](https://discord.gg/wHmY4nd) to chat with us and ask about how you can get involved!
+We believe in the power of community (that's why we're building this, after all!) and know that not all forms of support will come from something outlined here. Feel free to jump into our public [Discord server](https://discord.gg/dFJncWwHun) to chat with us and ask about how you can get involved!
 
 ## Development Workflow
 
