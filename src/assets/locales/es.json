@@ -367,7 +367,7 @@
   "leave-room-modal.create-room.message": "Al crear una nueva sala, saldrás de ésta. ¿Estás seguro(a)?",
   "leave-room-modal.create-room.confirm": "Salir de la sala",
   "embed.load-button": "Cargar sala",
-  "tweet-dialog.tweet": "Tuitear",
+  "tweet-editor-modal.tweet-button" : "Tuitear",
   "tweet-dialog.posted": "Tu tuit ha sido publicado.",
   "tweet-dialog.close": "cerrar",
   "oauth-dialog.sign-in.twitter": "Conectarse a Twitter",

@@ -354,7 +354,7 @@
   "leave-room-modal.create-room.message": "Создав новую комнату, вы покинете эту. Вы уверены?",
   "leave-room-modal.create-room.confirm": "Выйти из комнаты",
   "embed.load-button": "Загрузить комнату",
-  "tweet-dialog.tweet": "Написать твит",
+  "tweet-editor-modal.tweet-button" : "Написать твит",
   "tweet-dialog.posted": "Ваш твит успешно опубликован.",
   "tweet-dialog.close": "закрыть",
   "oauth-dialog.sign-in.twitter": "Подключиться к Twitter",

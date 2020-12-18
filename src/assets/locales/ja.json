@@ -350,7 +350,7 @@
   "leave-room-modal.create-room.message": "新しい部屋を作成し、この部屋が残ります。よろしいですか？",
   "leave-room-modal.create-room.confirm": "Leave and Create Room",
   "embed.load-button": "ロードルーム",
-  "tweet-dialog.tweet": "Tweet",
+  "tweet-editor-modal.tweet-button" : "Tweet",
   "tweet-dialog.posted": "あなたのツイートは投稿されました。",
   "tweet-dialog.close": "close",
   "oauth-dialog.sign-in.twitter": "Twitterに接続",

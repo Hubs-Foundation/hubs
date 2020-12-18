@@ -351,7 +351,7 @@
   "leave-room-modal.create-room.message": "Se você criar uma nova sala, você sairá da sala atual. Você tem certeza?",
   "leave-room-modal.create-room.confirm": "Sair da Sala",
   "embed.load-button": "Carregar Sala",
-  "tweet-dialog.tweet": "Tuítar",
+  "tweet-editor-modal.tweet-button" : "Tuítar",
   "tweet-dialog.posted": "Seu tweet foi postado.",
   "tweet-dialog.close": "fechar",
   "oauth-dialog.sign-in.twitter": "Conectar ao Twitter",

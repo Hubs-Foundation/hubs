@@ -38,7 +38,10 @@ export function TweetEditorModal({
   const tweetLength = editorState.getCurrentContent().getPlainText().length;
 
   return (
-    <Modal title="Tweet" beforeTitle={<CloseButton onClick={onClose} />}>
+    <Modal
+      title={<FormattedMessage id="tweet-editor-modal.title" defaultMessage="Tweet" />}
+      beforeTitle={<CloseButton onClick={onClose} />}
+    >
       <Column padding center>
         <div className={styles.media}>
           {contentSubtype && contentSubtype.startsWith("video") ? (
@@ -72,7 +75,11 @@ export function TweetEditorModal({
           )}
         </div>
         <Button preset="blue" disabled={sending || tweetLength > 280} onClick={onSend}>
-          {sending ? "Sending Tweet..." : <FormattedMessage id="tweet-dialog.tweet" />}
+          {sending ? (
+            <FormattedMessage id="tweet-editor-modal.sending-tweet" defaultMessage="Sending Tweet..." />
+          ) : (
+            <FormattedMessage id="tweet-editor-modal.tweet-button" defaultMessage="Tweet" />
+          )}
         </Button>
       </Column>
     </Modal>
