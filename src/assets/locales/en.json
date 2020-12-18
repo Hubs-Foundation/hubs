@@ -205,7 +205,5 @@
   "leave-room-modal.create-room.confirm": "Leave and Create Room",
   "tweet-editor-modal.tweet-button" : "Tweet",
   "tweet-dialog.posted": "Your tweet has been posted.",
-  "tweet-dialog.close": "close",
-  "oauth-dialog.sign-in.twitter": "Connect to Twitter",
-  "oauth-dialog.message.twitter": "Connect to Twitter to send tweets from %app-name%."
+  "tweet-dialog.close": "close"
 }

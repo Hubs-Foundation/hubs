@@ -9,4 +9,4 @@ export default {
   }
 };
 
-export const Base = () => <RoomLayout modal={<TwitterOAuthModal url="#" />} />;
+export const Base = () => <RoomLayout modal={<TwitterOAuthModal appName="Hubs" />} />;
