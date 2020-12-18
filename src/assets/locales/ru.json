@@ -324,7 +324,7 @@
   "scene-url-modal.new-spoke-project-button": "Открыть {editorName}",
   "invalid-scene-url": "Этот URL не ведёт на какую-либо сцену или действующий файл .GLB",
   "button.apply": "Применить",
-  "interstitial.prompt": "Продолжить",
+  "ui-root.interstitial-prompt": "Продолжить",
   "help.prompt": "Помощь",
   "hide-ui.prompt": "Скрыть всех",
   "discord-page.primary-tagline": "Делитесь виртуальными комнатами с друзьями.{linebreak}Смотрите видео, играйте с 3D-объектами и просто хорошо проводите время.",

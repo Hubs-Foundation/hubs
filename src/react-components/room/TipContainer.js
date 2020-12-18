@@ -45,6 +45,12 @@ function SkipDismissLabel() {
   return <FormattedMessage id="tips.dismiss.skip" defaultMessage="Skip" />;
 }
 
+export function FullscreenTip(props) {
+  <Tip {...props} dismissLabel={<OkDismissLabel />}>
+    <FormattedMessage id="tips.fullscreen" defaultMessage="Entered fullscreen mode. Press Escape to show UI." />
+  </Tip>;
+}
+
 export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
   const intl = useIntl();
   const [lobbyTipDismissed, setLobbyTipDismissed] = useState(false);

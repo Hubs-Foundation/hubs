@@ -337,7 +337,7 @@
   "scene-url-modal.new-spoke-project-button": "Abrir {editorName}",
   "invalid-scene-url": "Esta URL no apunta a una escena o a un archivo .GLB válido.",
   "button.apply": "Aplicar",
-  "interstitial.prompt": "Continuar",
+  "ui-root.interstitial-prompt": "Continuar",
   "help.prompt": "Ayuda",
   "hide-ui.prompt": "Ocultar a todos",
   "discord-page.primary-tagline": "Comparte una sala virtual con tu comunidad.{linebreak}Mira videos, juega con objetos 3D o simplemente pasa el rato.",

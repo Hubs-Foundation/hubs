@@ -179,7 +179,6 @@
   "loading-screen.default": "Loading scene...",
   "loading-screen.loading-objects": "Loading objects {loadedCount}/{objectCount}",
   "invalid-scene-url": "This URL does not point to a scene or valid GLB.",
-  "interstitial.prompt": "Continue",
   "help.prompt": "Help",
   "hide-ui.prompt": "Hide All",
   "client-info.kick-button": "Kick",

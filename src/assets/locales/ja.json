@@ -321,7 +321,7 @@
   "scene-url-modal.create-in-spoke": "または,{editorName}を使用して新しいシーンを作成します。",
   "invalid-scene-url": "このURLはシーンまたは有効なGLBを指していません。",
   "button.apply": "適用",
-  "interstitial.prompt": "続行",
+  "ui-root.interstitial-prompt": "続行",
   "help.prompt": "ヘルプ",
   "hide-ui.prompt": "Hide All",
   "discord-page.primary-tagline": "友達とヴァーチャルルームを共有しましょう。{linebreak}ビデオを見たり,3Dオブジェクトで遊んだり,自由に過ごすことができます。",

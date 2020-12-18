@@ -324,7 +324,7 @@
   "scene-url-modal.new-spoke-project-button": "打开 {editorName}",
   "invalid-scene-url": "这个链接无法打开场景或是有效的GLB.",
   "button.apply": "应用",
-  "interstitial.prompt": "继续",
+  "ui-root.interstitial-prompt": "继续",
   "help.prompt": "帮助",
   "hide-ui.prompt": "隐藏所有",
   "discord-page.primary-tagline": "与你的社区分享虚拟房间。{linebreak}看视频，体验3D效果，或是跟朋友一起玩耍。",
