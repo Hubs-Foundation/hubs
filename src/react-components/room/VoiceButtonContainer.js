@@ -4,6 +4,7 @@ import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { useMicrophone } from "./useMicrophone";
+import { FormattedMessage } from "react-intl";
 
 export function VoiceButtonContainer({ scene, microphoneEnabled }) {
   const buttonRef = useRef();
@@ -31,7 +32,7 @@ export function VoiceButtonContainer({ scene, microphoneEnabled }) {
     <ToolbarButton
       ref={buttonRef}
       icon={isMuted || !microphoneEnabled ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
-      label="Voice"
+      label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}
       preset="basic"
       onClick={toggleMute}
       statusColor={microphoneEnabled ? "green" : undefined}
