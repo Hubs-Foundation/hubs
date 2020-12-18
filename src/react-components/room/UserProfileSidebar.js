@@ -6,6 +6,7 @@ import { BackButton } from "../input/BackButton";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import styles from "./UserProfileSidebar.scss";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export function UserProfileSidebar({
   className,
@@ -28,6 +29,8 @@ export function UserProfileSidebar({
   onClose,
   ...rest
 }) {
+  const intl = useIntl();
+
   return (
     <Sidebar
       title={identityName ? `${displayName} (${identityName})` : displayName}
@@ -41,31 +44,57 @@ export function UserProfileSidebar({
           <Button
             preset="green"
             disabled={!isSignedIn}
-            title={isSignedIn ? "Promote" : `${displayName} is signed out.`}
+            title={
+              isSignedIn
+                ? intl.formatMessage({ id: "user-profile-sidebar.promote-button", defaultMessage: "Promote" })
+                : intl.formatMessage(
+                    {
+                      id: "user-profile-sidebar.promote-button-disabled-label",
+                      defaultMessage: "{displayName} is signed out."
+                    },
+                    { displayName }
+                  )
+            }
             onClick={onPromote}
           >
-            Promote
+            <FormattedMessage id="user-profile-sidebar.promote-button" defaultMessage="Promote" />
           </Button>
         )}
         {canDemote && (
           <Button
             preset="red"
             disabled={!isSignedIn}
-            title={isSignedIn ? "Demote" : `${displayName} is signed out.`}
+            title={
+              isSignedIn
+                ? intl.formatMessage({ id: "user-profile-sidebar.demote-button", defaultMessage: "Demote" })
+                : intl.formatMessage(
+                    {
+                      id: "user-profile-sidebar.demote-button-disabled-label",
+                      defaultMessage: "{displayName} is signed out."
+                    },
+                    { displayName }
+                  )
+            }
             onClick={onDemote}
           >
-            Demote
+            <FormattedMessage id="user-profile-sidebar.demote-button" defaultMessage="Demote" />
           </Button>
         )}
-        <Button onClick={onToggleHidden}>{isHidden ? "Unhide" : "Hide"}</Button>
+        <Button onClick={onToggleHidden}>
+          {isHidden ? (
+            <FormattedMessage id="user-profile-sidebar.unhide-button" defaultMessage="Unhide" />
+          ) : (
+            <FormattedMessage id="user-profile-sidebar.hide-button" defaultMessage="Hide" />
+          )}
+        </Button>
         {canMute && (
           <Button preset="red" onClick={onMute}>
-            Mute
+            <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute" />
           </Button>
         )}
         {canKick && (
           <Button preset="red" onClick={onKick}>
-            Kick
+            <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick" />
           </Button>
         )}
       </Column>
