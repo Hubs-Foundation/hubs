@@ -8,26 +8,51 @@ import { Button } from "../input/Button";
 import { FormattedMessage } from "react-intl";
 import { Column } from "../layout/Column";
 
-export function SceneUrlModal({ enableSpoke, onValidateUrl, onSubmit, onClose }) {
+export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit, onClose }) {
   const { isSubmitting, handleSubmit, register, errors } = useForm();
   return (
-    <Modal title="Custom Scene URL" beforeTitle={<CloseButton onClick={onClose} />}>
+    <Modal
+      title={<FormattedMessage id="scene-url-modal.title" defaultMessage="Custom Scene URL" />}
+      beforeTitle={<CloseButton onClick={onClose} />}
+    >
       <Column as="form" padding center onSubmit={handleSubmit(onSubmit)}>
         <p>
-          Paste a URL to a{" "}
-          {enableSpoke && (
-            <a href="/spoke" target="_blank" rel="noopener noreferrer">
-              <FormattedMessage id="editor-name" />
-            </a>
-          )}{" "}
-          scene or a URL to a{" "}
-          <a href="https://en.wikipedia.org/wiki/GlTF#GLB" target="_blank" rel="noopener noreferrer">
-            GLB
-          </a>.
+          {enableSpoke ? (
+            <FormattedMessage
+              id="scene-url-modal.message-with-spoke"
+              defaultMessage="Paste a URL to a {editorName} scene or a URL to a <glblink>GLB</glblink>."
+              values={{
+                editorName: (
+                  <a href="/spoke" target="_blank" rel="noopener noreferrer">
+                    {editorName}
+                  </a>
+                ),
+                // eslint-disable-next-line react/display-name
+                glblink: chunks => (
+                  <a href="https://en.wikipedia.org/wiki/GlTF#GLB" target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </a>
+                )
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="scene-url-modal.message"
+              defaultMessage="Paste a URL to a scene or a URL to a <glblink>GLB</glblink>."
+              values={{
+                // eslint-disable-next-line react/display-name
+                glblink: chunks => (
+                  <a href="https://en.wikipedia.org/wiki/GlTF#GLB" target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </a>
+                )
+              }}
+            />
+          )}
         </p>
         <TextInputField
           name="url"
-          label="Scene URL"
+          label={<FormattedMessage id="scene-url-modal.url-input" defaultMessage="Scene URL" />}
           placeholder="https://example.com/scene.glb"
           type="url"
           required
@@ -35,15 +60,23 @@ export function SceneUrlModal({ enableSpoke, onValidateUrl, onSubmit, onClose })
           error={errors.url && errors.url.message}
         />
         <Button type="submit" preset="accept" disabled={isSubmitting}>
-          <FormattedMessage id="change-scene-dialog.change-scene" />
+          <FormattedMessage id="scene-url-modal.change-scene-button" defaultMessage="Change Scene" />
         </Button>
         {enableSpoke && (
           <>
             <p>
-              <FormattedMessage id="change-scene-dialog.create-in-spoke" />
+              <FormattedMessage
+                id="scene-url-modal.create-in-spoke"
+                defaultMessage="Or, create a new scene using {editorName}."
+                values={{ editorName }}
+              />
             </p>
             <Button as="a" preset="blue" href="/spoke/new" target="_blank" rel="noopener noreferrer">
-              <FormattedMessage id="change-scene-dialog.new-spoke-project" />
+              <FormattedMessage
+                id="scene-url-modal.new-spoke-project-button"
+                defaultMessage="Launch {editorName}"
+                values={{ editorName }}
+              />
             </Button>
           </>
         )}
@@ -54,6 +87,7 @@ export function SceneUrlModal({ enableSpoke, onValidateUrl, onSubmit, onClose })
 
 SceneUrlModal.propTypes = {
   enableSpoke: PropTypes.bool,
+  editorName: PropTypes.string,
   onSubmit: PropTypes.func,
   onClose: PropTypes.func,
   onValidateUrl: PropTypes.isRequired
