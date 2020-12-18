@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { ReactComponent as VideoIcon } from "../icons/Video.svg";
 import { ReactComponent as DesktopIcon } from "../icons/Desktop.svg";
 import { SharePopoverButton } from "./SharePopover";
+import { FormattedMessage } from "react-intl";
 
 function useShare(scene, hubChannel) {
   const [sharingSource, setSharingSource] = useState(null);
@@ -100,7 +101,7 @@ export function SharePopoverContainer({ scene, hubChannel }) {
       id: "camera",
       icon: VideoIcon,
       color: "purple",
-      label: "Camera",
+      label: <FormattedMessage id="share-popover.source.camera" defaultMessage="Camera" />,
       onSelect: toggleShareCamera,
       active: sharingSource === "camera"
     },
@@ -108,7 +109,7 @@ export function SharePopoverContainer({ scene, hubChannel }) {
       id: "screen",
       icon: DesktopIcon,
       color: "purple",
-      label: "Screen",
+      label: <FormattedMessage id="share-popover.source.screen" defaultMessage="Screen" />,
       onSelect: toggleShareScreen,
       active: sharingSource === "screen"
     }
