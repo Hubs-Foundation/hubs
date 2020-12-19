@@ -72,7 +72,7 @@
   "close-room.message": "このルームを閉じると、自分や他の人がルームから削除され、完全にシャットダウンされます。\n\nよろしいですか？この操作は元に戻せません。",
   "close-room.confirm": "はい、ルームを閉じます",
   "close-room.cancel": "キャンセル",
-  "close-room.type-to-confirm": "Type room name to confirm:",
+  "close-room.type-to-confirm": "よろしければ、ルームの名前を入力してください:",
   "promote.message": "ユーザーを昇格させると、ルームの設定とモデレートツールへのフルアクセスが許可されます。\n\nよろしいですか？",
   "promote.confirm-prefix": "はい、昇格させます",
   "promote.cancel": "キャンセル",
@@ -325,7 +325,7 @@
   "preferences.allowMultipleHubsInstances": "複数のHubsインスタンスが開いているときに自動終了を無効にする",
   "preferences.disableIdleDetection": "アイドル時またはバックグラウンド時の自動終了を無効にする",
   "preferences.preferMobileObjectInfoPanel": "モバイルオブジェクト情報パネルを優先する",
-  "preferences.showRtcDebugPanel": "Show RTC Panel",
+  "preferences.showRtcDebugPanel": "RTCパネルを表示",
   "settings.return-to-vr": "VRに戻る",
   "settings.change-avatar": "名前とアバターの設定",
   "settings.change-scene": "シーンを選択",
@@ -467,7 +467,7 @@
   "support.details": "詳細",
   "support.supported": "サポートされています",
   "support.unsupported": "サポートされていません",
-  "rtcDebugPanel.restartIceButton": "Restart ICE",
-  "rtcDebugPanel.connectSignalingButton": "Connect",
-  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
+  "rtcDebugPanel.restartIceButton": "ICEを再起動",
+  "rtcDebugPanel.connectSignalingButton": "接続",
+  "rtcDebugPanel.disconnectSignalingButton": "切断"
 }
