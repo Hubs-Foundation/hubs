@@ -1,3 +1,16 @@
+let delayedReconnectTimeout = null;
+function performDelayedReconnect(gainNode) {
+  if (delayedReconnectTimeout) {
+    clearTimeout(delayedReconnectTimeout);
+  }
+
+  delayedReconnectTimeout = setTimeout(() => {
+    delayedReconnectTimeout = null;
+    console.warn("enableChromeAEC: recreate RTCPeerConnection loopback because the local connection was disconnected for 10s");
+    enableChromeAEC(gainNode);
+  }, 10000);
+}
+
 async function enableChromeAEC(gainNode) {
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
@@ -20,15 +33,41 @@ async function enableChromeAEC(gainNode) {
   const inboundPeerConnection = new RTCPeerConnection();
 
   const onError = e => {
-    console.error("RTCPeerConnection loopback initialization error", e);
+    console.error("enableChromeAEC: RTCPeerConnection loopback initialization error", e);
   };
 
   outboundPeerConnection.addEventListener("icecandidate", e => {
     inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
   });
+  outboundPeerConnection.addEventListener("iceconnectionstatechange", e => {
+    console.warn("enableChromeAEC: outboundPeerConnection state changed to " + outboundPeerConnection.iceConnectionState);
+    if (outboundPeerConnection.iceConnectionState === "disconnected") {
+      performDelayedReconnect(gainNode);
+    }
+    if (outboundPeerConnection.iceConnectionState === "connected") {
+      if (delayedReconnectTimeout) {
+        // The RTCPeerConnection reconnected by itself, cancel recreating the
+        // local connection.
+        clearTimeout(delayedReconnectTimeout);
+      }
+    }
+  });
 
   inboundPeerConnection.addEventListener("icecandidate", e => {
     outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+  });
+  inboundPeerConnection.addEventListener("iceconnectionstatechange", e => {
+    console.warn("enableChromeAEC: inboundPeerConnection state changed to " + inboundPeerConnection.iceConnectionState);
+    if (inboundPeerConnection.iceConnectionState === "disconnected") {
+      performDelayedReconnect(gainNode);
+    }
+    if (inboundPeerConnection.iceConnectionState === "connected") {
+      if (delayedReconnectTimeout) {
+        // The RTCPeerConnection reconnected by itself, cancel recreating the
+        // local connection.
+        clearTimeout(delayedReconnectTimeout);
+      }
+    }
   });
 
   inboundPeerConnection.addEventListener("track", e => {
@@ -76,12 +115,15 @@ export class AudioSystem {
     this.analyserLevels = new Uint8Array(this.outboundAnalyser.fftSize);
     this.outboundGainNode.connect(this.outboundAnalyser);
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
+    let alreadyExecuting = false;
 
     /**
      * Chrome and Safari will start Audio contexts in a "suspended" state.
      * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
      */
     const resume = () => {
+      if (alreadyExecuting) return;
+      alreadyExecuting = true;
       this.audioContext.resume();
 
       setTimeout(() => {
