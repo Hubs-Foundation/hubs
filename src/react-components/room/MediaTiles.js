@@ -168,7 +168,10 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
                 defaultMessage="Joined {relativeTime}"
                 values={{
                   relativeTime: (
-                    <FormattedRelativeTime updateIntervalInSeconds={10} value={entry.last_activated_at - Date.now()} />
+                    <FormattedRelativeTime
+                      updateIntervalInSeconds={10}
+                      value={(new Date(entry.last_activated_at).getTime() - Date.now()) / 1000}
+                    />
                   )
                 }}
               />
