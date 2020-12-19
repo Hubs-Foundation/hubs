@@ -36,7 +36,8 @@
     "spritesheet:system-notice": "spritesheet-js -f json -p src/assets/images/spritesheets/ --padding 8 --divisibleByTwo -n sprite-system-notice-spritesheet --powerOfTwo src/assets/images/sprites/notice/*",
     "storybook": "start-storybook -p 6006",
     "deploy-storybook": "storybook-to-ghpages",
-    "extract": "formatjs extract src/**/*.js --throws --extract-source-location --extract-from-format-message-call"
+    "intl-extract": "node ./src/assets/locales/intl-extract.js",
+    "intl-extract-en-locale": "node ./src/assets/locales/intl-extract.js en"
   },
   "scripts-info": {
     "start": "Run the client against your Hubs Cloud instance, or Mozilla's developer infrastructure,\n  using application configs pulled from the server",
@@ -176,6 +177,7 @@
     "esm": "^3.2.5",
     "fast-plural-rules": "0.0.3",
     "file-loader": "^1.1.10",
+    "glob": "^7.1.6",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^4.2.0",
     "htmlhint": "^0.11.0",

@@ -958,12 +958,11 @@ class UIRoot extends Component {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
-    // TODO: use appName from admin panel.
     // TODO: What does onEnteringCanceled do?
     return (
       <>
         <RoomEntryModal
-          appName="Hubs by Mozilla"
+          appName={configs.translation("app-name")}
           logoSrc={configs.image("logo")}
           roomName={this.props.hub.name}
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}

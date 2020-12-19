@@ -242,7 +242,7 @@ class SceneUI extends Component {
                   <FormattedMessage
                     id="scene-page.edit-button"
                     defaultMessage="Edit in {editorName}"
-                    values={{ editorName: configs.translation("editorName") }}
+                    values={{ editorName: configs.translation("editor-name") }}
                   />
                 </a>
               ) : (
@@ -257,7 +257,7 @@ class SceneUI extends Component {
                     <FormattedMessage
                       id="scene-page.remix-button"
                       defaultMessage="Remix in {editorName}"
-                      values={{ editorName: configs.translation("editorName") }}
+                      values={{ editorName: configs.translation("editor-name") }}
                     />
                   </a>
                 )
