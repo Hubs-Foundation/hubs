@@ -557,6 +557,11 @@ AFRAME.registerComponent("media-loader", {
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
         }
+        if (this.data.mediaOptions.hasOwnProperty("applyGravity")) {
+          this.el.setAttribute("floaty-object", {
+            modifyGravityOnRelease: !this.data.mediaOptions.applyGravity
+          });
+        }
         this.el.setAttribute(
           "gltf-model-plus",
           Object.assign({}, this.data.mediaOptions, {

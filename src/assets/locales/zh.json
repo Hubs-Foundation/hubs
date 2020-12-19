@@ -72,6 +72,7 @@
   "close-room.message": "关闭这个房间会把你与朋友都移除这个房间，会永久关闭.\n\n确定? 该操作不能撤销",
   "close-room.confirm": "是的，关闭房间",
   "close-room.cancel": "取消",
+  "close-room.type-to-confirm": "Type room name to confirm:",
   "promote.message": "晋升一个用户，会给他房间设置以及使用工具的权限\n\n你确定吗?",
   "promote.confirm-prefix": "是的，晋升",
   "promote.cancel": "取消",
@@ -324,6 +325,7 @@
   "preferences.allowMultipleHubsInstances": "当多个hubs打开时暂停自动离开功能",
   "preferences.disableIdleDetection": "当没在使用或是后台运行时暂停自动离开功能",
   "preferences.preferMobileObjectInfoPanel": "优先移动对象信息版面",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "跳转到 VR（虚拟现实）",
   "settings.change-avatar": "设置名字 & 头像",
   "settings.change-scene": "选择一个场景",
@@ -464,5 +466,8 @@
   "support.copied": "copied!",
   "support.details": "details",
   "support.supported": "supported",
-  "support.unsupported": "unsupported"
+  "support.unsupported": "unsupported",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect Signaling",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect Signaling"
 }

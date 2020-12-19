@@ -72,6 +72,7 @@
   "close-room.message": "Al cerrar esta sala, te expulsarás a ti y a otros y la eliminarás permanentemente.\n\n¿Estás seguro(a)? Está acción no puede ser revertida.",
   "close-room.confirm": "Sí, cerrar la sala",
   "close-room.cancel": "Cancelar",
+  "close-room.type-to-confirm": "Type room name to confirm:",
   "promote.message": "Al promover al usuario, le darás acceso completo a las características de la sala y a las herramientas de moderación.\n\n¿Estás seguro(a)?",
   "promote.confirm-prefix": "Sí, promover a ",
   "promote.cancel": "Cancelar",
@@ -324,6 +325,7 @@
   "preferences.allowMultipleHubsInstances": "Deshabilitar salida automática cuando hay varias salas abiertas simultáneamente",
   "preferences.disableIdleDetection": "Deshabilitar salida automática cuando el avatar está inactivo o en segundo plano",
   "preferences.preferMobileObjectInfoPanel": "Preferir panel de móviles para información de objetos",
+  "preferences.showRtcDebugPanel": "Mostrar el panel de RTC",
   "settings.return-to-vr": "Volver a VR",
   "settings.change-avatar": "Establecer nombre y avatar",
   "settings.change-scene": "Elegir escena",
@@ -464,5 +466,8 @@
   "support.copied": "¡copiado!",
   "support.details": "detalles",
   "support.supported": "soportado",
-  "support.unsupported": "no soportado"
+  "support.unsupported": "no soportado",
+  "rtcDebugPanel.restartIceButton": "Reiniciar ICE",
+  "rtcDebugPanel.connectSignalingButton": "Conectar",
+  "rtcDebugPanel.disconnectSignalingButton": "Desconectar"
 }

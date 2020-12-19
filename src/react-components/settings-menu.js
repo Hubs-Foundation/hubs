@@ -379,7 +379,7 @@ export default class SettingsMenu extends Component {
                 </IfFeature>
                 <IfFeature name="show_community_link">
                   <a
-                    href={configs.link("community", "https://discord.gg/wHmY4nd")}
+                    href={configs.link("community", "https://discord.gg/dFJncWwHun")}
                     target="_blank"
                     rel="noreferrer noopener"
                   >

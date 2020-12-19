@@ -74,6 +74,7 @@
   "close-room.message": "この部屋を閉じると,自分や他の人が部屋から削除され,完全にシャットダウンされます。\n  \n よろしいですか？この操作は元に戻せません。",
   "close-room.confirm": "はい,部屋を閉じます",
   "close-room.cancel": "キャンセル",
+  "close-room.type-to-confirm": "Type room name to confirm:",
   "promote.message": "ユーザーを昇格させると,部屋の設定とモデレートツールへのフルアクセスが許可されます。\n  \n よろしいですか？",
   "promote.confirm-prefix": "はい,昇格させます",
   "promote.cancel": "キャンセル",
@@ -350,6 +351,7 @@
   "preferences.allowMultipleHubsInstances": "複数のHubsインスタンスが開いているときに自動終了を無効にする",
   "preferences.disableIdleDetection": "アイドル時またはバックグラウンド時の自動終了を無効にする",
   "preferences.preferMobileObjectInfoPanel": "モバイルオブジェクト情報パネルを優先する",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "VRに戻る",
   "settings.change-avatar": "名前とアバターの設定",
   "settings.change-scene": "シーンを選択",
@@ -491,5 +493,8 @@
   "support.copied": "コピーされました！",
   "support.details": "詳細",
   "support.supported": "supported",
-  "support.unsupported": "サポートされていません"
+  "support.unsupported": "サポートされていません",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
 }

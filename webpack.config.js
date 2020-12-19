@@ -233,7 +233,8 @@ module.exports = async (env, argv) => {
     plugins: [
       "@babel/proposal-class-properties",
       "@babel/proposal-object-rest-spread",
-      "@babel/plugin-transform-async-to-generator"
+      "@babel/plugin-transform-async-to-generator",
+      "@babel/plugin-proposal-optional-chaining"
     ]
   };
 
