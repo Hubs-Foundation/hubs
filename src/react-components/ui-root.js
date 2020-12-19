@@ -39,7 +39,7 @@ import qsTruthy from "../utils/qs_truthy";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
 import "./styles/global.scss";
-import { RoomLayout } from "./layout/RoomLayout";
+import { RoomLayoutContainer } from "./room/RoomLayoutContainer";
 import roomLayoutStyles from "./layout/RoomLayout.scss";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { ToolbarButton } from "./input/ToolbarButton";
@@ -272,19 +272,6 @@ class UIRoot extends Component {
       }
     }
   }
-
-  onResizeViewport = ({ width, height }) => {
-    const sceneEl = this.props.scene;
-
-    sceneEl.renderer.setSize(width, height);
-
-    if (sceneEl.camera) {
-      sceneEl.camera.aspect = width / height;
-      sceneEl.camera.updateProjectionMatrix();
-      // Resizing the canvas clears it, so render immediately after resize to prevent flicker.
-      sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
-    }
-  };
 
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
@@ -1108,8 +1095,9 @@ class UIRoot extends Component {
     if (this.props.hide || this.state.hide) {
       return (
         <div className={classNames(rootStyles)}>
-          <RoomLayout
-            onResizeViewport={this.onResizeViewport}
+          <RoomLayoutContainer
+            scene={this.props.scene}
+            store={this.props.store}
             viewport={
               !this.state.hideUITip && (
                 <Tip
@@ -1484,10 +1472,11 @@ class UIRoot extends Component {
                   scene={this.props.scene}
                 />
               )}
-            <RoomLayout
+            <RoomLayoutContainer
+              scene={this.props.scene}
+              store={this.props.store}
               objectFocused={!!this.props.selectedObject}
               streaming={streaming}
-              onResizeViewport={this.onResizeViewport}
               viewport={
                 <>
                   {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
