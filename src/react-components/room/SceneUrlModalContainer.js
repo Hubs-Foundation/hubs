@@ -11,7 +11,7 @@ export function SceneUrlModalContainer({ hubChannel, onClose }) {
   const onValidateUrl = useCallback(
     async url => {
       const valid = await isValidSceneUrl(url.trim());
-      return valid || intl.formatMessage("invalid-scene-url");
+      return valid || intl.formatMessage("scene-url-modal.invalid-scene-url");
     },
     [intl]
   );

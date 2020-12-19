@@ -68,6 +68,98 @@ const joinedMessages = defineMessages({
   room: { id: "chat-sidebar.system-message.joined-room", defaultMessage: "{name} joined the room." }
 });
 
+export const LogMessageType = {
+  roomEntryRequired: "roomEntryRequired",
+  flyModeDisabled: "flyModeDisabled",
+  flyModeEnabled: "flyModeEnabled",
+  unauthorizedSceneChange: "unauthorizedSceneChange",
+  invalidSceneUrl: "invalidSceneUrl",
+  unauthorizedRoomRename: "unauthorizedRoomRename",
+  captureUnavailable: "captureUnavailable",
+  captureStopped: "captureStopped",
+  captureStarted: "captureStarted",
+  captureAlreadyStopped: "captureAlreadyStopped",
+  captureAlreadyRunning: "captureAlreadyRunning",
+  positionalAudioEnabled: "positionalAudioEnabled",
+  positionalAudioDisabled: "positionalAudioDisabled",
+  setAudioNormalizationFactor: "setAudioNormalizationFactor",
+  audioNormalizationDisabled: "audioNormalizationDisabled",
+  audioNormalizationNaN: "audioNormalizationNaN",
+  invalidAudioNormalizationRange: "invalidAudioNormalizationRange"
+};
+
+const logMessages = defineMessages({
+  [LogMessageType.roomEntryRequired]: {
+    id: "chat-sidebar.log-message.room-entry-required",
+    defaultMessage: "You must enter the room to use this command."
+  },
+  [LogMessageType.flyModeDisabled]: {
+    id: "chat-sidebar.log-message.fly-mode-disabled",
+    defaultMessage: "Fly mode disabled."
+  },
+  [LogMessageType.flyModeEnabled]: {
+    id: "chat-sidebar.log-message.fly-mode-enabled",
+    defaultMessage: "Fly mode enabled."
+  },
+  [LogMessageType.unauthorizedSceneChange]: {
+    id: "chat-sidebar.log-message.unauthorized-scene-change",
+    defaultMessage: "You do not have permission to change the scene."
+  },
+  [LogMessageType.invalidSceneUrl]: {
+    id: "chat-sidebar.log-message.invalid-scene-url",
+    defaultMessage: "This URL does not point to a scene or valid GLB."
+  },
+  [LogMessageType.unauthorizedRoomRename]: {
+    id: "chat-sidebar.log-message.unauthorized-room-rename",
+    defaultMessage: "You do not have permission to rename this room."
+  },
+  [LogMessageType.captureUnavailable]: {
+    id: "chat-sidebar.log-message.capture-unavailable",
+    defaultMessage: "Capture unavailable."
+  },
+  [LogMessageType.captureStopped]: {
+    id: "chat-sidebar.log-message.capture-stopped",
+    defaultMessage: "Capture stopped."
+  },
+  [LogMessageType.captureStarted]: {
+    id: "chat-sidebar.log-message.capture-started",
+    defaultMessage: "Capture started."
+  },
+  [LogMessageType.captureAlreadyStopped]: {
+    id: "chat-sidebar.log-message.capture-already-stopped",
+    defaultMessage: "Capture already stopped."
+  },
+  [LogMessageType.captureAlreadyRunning]: {
+    id: "chat-sidebar.log-message.capture-already-running",
+    defaultMessage: "Capture already running."
+  },
+  [LogMessageType.positionalAudioEnabled]: {
+    id: "chat-sidebar.log-message.positional-audio-enabled",
+    defaultMessage: "Positional audio enabled."
+  },
+  [LogMessageType.positionalAudioDisabled]: {
+    id: "chat-sidebar.log-message.positional-audio-disabled",
+    defaultMessage: "Positional audio disabled."
+  },
+  [LogMessageType.setAudioNormalizationFactor]: {
+    id: "chat-sidebar.log-message.set-audio-normalization-factor",
+    defaultMessage: "audioNormalization factor is set to {factor}."
+  },
+  [LogMessageType.audioNormalizationDisabled]: {
+    id: "chat-sidebar.log-message.audio-normalization-disabled",
+    defaultMessage: "audioNormalization is disabled."
+  },
+  [LogMessageType.audioNormalizationNaN]: {
+    id: "chat-sidebar.log-message.audio-normalization-nan",
+    defaultMessage: "audioNormalization command needs a valid number parameter."
+  },
+  [LogMessageType.invalidAudioNormalizationRange]: {
+    id: "chat-sidebar.log-message.invalid-audio-normalization-range",
+    defaultMessage:
+      "audioNormalization command needs a base volume number between 0 [no normalization] and 255. Default is 0. The recommended value is 4, if you would like to enable normalization."
+  }
+});
+
 // TODO: use react-intl's defineMessages to get proper extraction
 export function formatSystemMessage(entry, intl) {
   switch (entry.type) {
@@ -108,7 +200,7 @@ export function formatSystemMessage(entry, intl) {
         />
       );
     case "log":
-      return entry.body;
+      return intl.formatMessage(logMessages[entry.messageType], entry.props);
     default:
       return null;
   }
@@ -122,7 +214,7 @@ export function SystemMessage(props) {
       <p className={styles.messageGroupLabel}>
         <i>{formatSystemMessage(props, intl)}</i>
         <span>
-          <FormattedRelativeTime updateIntervalInSeconds={10} value={props.timestamp - Date.now()} />
+          <FormattedRelativeTime updateIntervalInSeconds={10} value={(props.timestamp - Date.now()) / 1000} />
         </span>
       </p>
     </li>
@@ -186,7 +278,7 @@ export function ChatMessageGroup({ sent, sender, timestamp, messages }) {
   return (
     <li className={classNames(styles.messageGroup, { [styles.sent]: sent })}>
       <p className={styles.messageGroupLabel}>
-        {sender} | <FormattedRelativeTime updateIntervalInSeconds={10} value={timestamp - Date.now()} />
+        {sender} | <FormattedRelativeTime updateIntervalInSeconds={10} value={(timestamp - Date.now()) / 1000} />
       </p>
       <ul className={styles.messageGroupMessages}>{messages.map(message => getMessageComponent(message))}</ul>
     </li>
