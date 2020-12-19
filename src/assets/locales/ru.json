@@ -72,6 +72,7 @@
   "close-room.message": "Закрыв эту комнату, вы и остальные пользователи автоматически из неё выйдете. Комната будет удалена навсегда.\n\nВы уверены? Это действие нельзя отменить.",
   "close-room.confirm": "Да, закрыть эту комнату",
   "close-room.cancel": "Отмена",
+  "close-room.type-to-confirm": "Type room name to confirm:",
   "promote.message": "Назначая пользователя администратором, вы даёте ему полный доступ к настройкам комнаты и инструментам модерирования.\n\nВы уверены?",
   "promote.confirm-prefix": "Да, назначить ",
   "promote.cancel": "Отмена",
@@ -311,6 +312,7 @@
   "preferences.movementSpeedModifier": "Модификатор скорости перемещения",
   "preferences.enableOnScreenJoystickLeft": "Активировать контроллер движения в левой части экрана",
   "preferences.enableOnScreenJoystickRight": "Активировать контроллер поворота в правой части экрана",
+  "preferences.enableGyro": "Enable gyroscope (when supported by browser/device)",
   "preferences.invertTouchscreenCameraMove": "Изменить направление движения камеры для сенсорных экранов",
   "preferences.browserDefault": "Браузер по умолчанию",
   "preferences.locale": "Язык",
@@ -323,6 +325,7 @@
   "preferences.allowMultipleHubsInstances": "Отключить автоматический выход при нескольких одновременно открытых комнатах",
   "preferences.disableIdleDetection": "Отключить автоматический выход при нахождении аватара в неактивном состоянии или на втором плане",
   "preferences.preferMobileObjectInfoPanel": "Предпочитать мобильные панели для отображения информации об объектах",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "Вернуться в виртуальную реальность",
   "settings.change-avatar": "Изменить имя и аватар",
   "settings.change-scene": "Выбрать сцену",
@@ -463,5 +466,8 @@
   "support.copied": "скопировано",
   "support.details": "подробнее",
   "support.supported": "поддерживается",
-  "support.unsupported": "не поддерживается"
+  "support.unsupported": "не поддерживается",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
 }

@@ -72,6 +72,7 @@
   "close-room.message": "Closing this room will remove yourself and others from the room, shutting it down permanently.\n\nAre you sure? This action cannot be undone.",
   "close-room.confirm": "Yes, Close Room",
   "close-room.cancel": "Cancel",
+  "close-room.type-to-confirm": "Type room name to confirm:",
   "promote.message": "Promoting a user will grant full access to room settings and moderation tools.\n\nAre you sure?",
   "promote.confirm-prefix": "Yes, Promote ",
   "promote.cancel": "Cancel",
@@ -324,6 +325,7 @@
   "preferences.allowMultipleHubsInstances": "Disable auto-exit when multiple hubs instances are open",
   "preferences.disableIdleDetection": "Disable auto-exit when idle or backgrounded",
   "preferences.preferMobileObjectInfoPanel": "Prefer Mobile Object Info Panel",
+  "preferences.showRtcDebugPanel": "Show RTC Panel",
   "settings.return-to-vr": "Return to VR",
   "settings.change-avatar": "Set Name & Avatar",
   "settings.change-scene": "Choose a Scene",
@@ -464,5 +466,8 @@
   "support.copied": "copied!",
   "support.details": "details",
   "support.supported": "supported",
-  "support.unsupported": "unsupported"
+  "support.unsupported": "unsupported",
+  "rtcDebugPanel.restartIceButton": "Restart ICE",
+  "rtcDebugPanel.connectSignalingButton": "Connect",
+  "rtcDebugPanel.disconnectSignalingButton": "Disconnect"
 }

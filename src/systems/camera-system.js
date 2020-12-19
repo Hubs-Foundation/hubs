@@ -228,7 +228,16 @@ export class CameraSystem {
           });
         }
       }
+      // TODO this bookkeeping also exists elsewhere in the code, it would be nice to put these references in one place
+      const playerModelEl = document.querySelector("#avatar-rig .model");
+      playerModelEl.addEventListener("model-loading", () => (this.playerHead = null));
+      playerModelEl.addEventListener("model-loaded", this.updatePlayerHead.bind(this));
+      this.updatePlayerHead();
     });
+  }
+
+  updatePlayerHead() {
+    this.playerHead = document.getElementById("avatar-head");
   }
 
   nextMode() {
@@ -429,7 +438,6 @@ export class CameraSystem {
       }
 
       const headShouldBeVisible = this.mode !== CAMERA_MODE_FIRST_PERSON;
-      this.playerHead = this.playerHead || document.getElementById("avatar-head");
       if (this.playerHead && headShouldBeVisible !== this.playerHead.object3D.visible) {
         this.playerHead.object3D.visible = headShouldBeVisible;
 

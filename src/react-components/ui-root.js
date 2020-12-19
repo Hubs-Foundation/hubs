@@ -68,6 +68,7 @@ import ObjectList from "./object-list.js";
 import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
+import RTCDebugPanel from "./debug-panel/RtcDebugPanel.js";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
@@ -1496,6 +1497,7 @@ class UIRoot extends Component {
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
     const enteredOrWatchingOrPreload = entered || watching || preload;
+    const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
     const inEntryFlow = !!(
       this.props.history &&
@@ -1750,7 +1752,12 @@ class UIRoot extends Component {
               stateKey="modal"
               stateValue="close_room"
               history={this.props.history}
-              render={() => this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })}
+              render={() =>
+                this.renderDialog(CloseRoomDialog, {
+                  roomName: this.props.hub.name,
+                  onConfirm: () => this.props.hubChannel.closeHub()
+                })
+              }
             />
             <StateRoute
               stateKey="modal"
@@ -1905,6 +1912,15 @@ class UIRoot extends Component {
                   history={this.props.history}
                 />
               )}
+            {showRtcDebugPanel && (
+              <RTCDebugPanel
+                history={this.props.history}
+                store={window.APP.store}
+                scene={this.props.scene}
+                presences={this.props.presences}
+                sessionId={this.props.sessionId}
+              />
+            )}
             {this.state.frozen && (
               <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                 <FormattedMessage id="entry.leave-room" />
