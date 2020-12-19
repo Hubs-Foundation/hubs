@@ -273,19 +273,6 @@ class UIRoot extends Component {
     }
   }
 
-  onResizeViewport = ({ width, height }) => {
-    const sceneEl = this.props.scene;
-
-    sceneEl.renderer.setSize(width, height);
-
-    if (sceneEl.camera) {
-      sceneEl.camera.aspect = width / height;
-      sceneEl.camera.updateProjectionMatrix();
-      // Resizing the canvas clears it, so render immediately after resize to prevent flicker.
-      sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
-    }
-  };
-
   onConcurrentLoad = () => {
     if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
     this.startAutoExitTimer(AutoExitReason.concurrentSession);
