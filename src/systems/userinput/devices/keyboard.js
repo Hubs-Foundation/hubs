@@ -1,5 +1,15 @@
 import { paths } from "../paths";
 import { ArrayBackedSet } from "../array-backed-set";
+
+const CODE_TO_KEY = {
+  "KeyW": "w",
+  "KeyA": "a",
+  "KeyS": "s",
+  "KeyD": "d",
+  "KeyQ": "q",
+  "KeyE": "e",
+};
+
 export class KeyboardDevice {
   constructor() {
     this.seenKeys = new ArrayBackedSet();
@@ -45,7 +55,10 @@ export class KeyboardDevice {
         this.keys = {};
         this.seenKeys.clear();
       } else {
-        const key = event.key.toLowerCase();
+        let key = event.key.toLowerCase();
+        // Use event.code and not event.key for wasdqe controls so this works
+        // for non QWERTY keyboards.
+        key = (event.code && CODE_TO_KEY[event.code]) || key;
         this.keys[key] = event.type === "keydown";
         this.seenKeys.add(key);
       }
