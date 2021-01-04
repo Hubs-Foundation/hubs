@@ -1340,6 +1340,7 @@ class UIRoot extends Component {
                 () => this.props.hubChannel.can("update_hub"),
                 () => {
                   this.showNonHistoriedDialog(CloseRoomModal, {
+                    roomName: this.props.hub.name,
                     onConfirm: () => {
                       this.props.hubChannel.closeHub();
                     }
@@ -1358,7 +1359,7 @@ class UIRoot extends Component {
             id: "community",
             label: <FormattedMessage id="more-menu.community" defaultMessage="Community" />,
             icon: DiscordIcon,
-            href: configs.link("community", "https://discord.gg/wHmY4nd")
+            href: configs.link("community", "https://discord.gg/dFJncWwHun")
           },
           configs.feature("show_issue_report_link") && {
             id: "report-issue",

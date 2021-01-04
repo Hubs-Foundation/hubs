@@ -175,7 +175,7 @@ const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
-const NOISY_OCCUPANT_COUNT = 12; // Above this # of occupants, we stop posting join/leaves/renames
+const NOISY_OCCUPANT_COUNT = 30; // Above this # of occupants, we stop posting join/leaves/renames
 
 const qs = new URLSearchParams(location.search);
 const isMobile = AFRAME.utils.device.isMobile();
@@ -1528,7 +1528,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.APP.hub = hub;
     updateUIForHub(hub, hubChannel);
 
-    if (stale_fields.includes("scene")) {
+    if (
+      stale_fields.includes("scene") ||
+      stale_fields.includes("scene_listing") ||
+      stale_fields.includes("default_environment_gltf_bundle_url")
+    ) {
       const fader = document.getElementById("viewing-camera").components["fader"];
 
       fader.fadeOut().then(() => {

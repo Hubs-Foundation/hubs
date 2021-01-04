@@ -26,7 +26,7 @@ class DiscordPage extends Component {
               <a href="/" rel="noreferrer noopener">
                 <FormattedMessage id="discord-page.hubs-cta" defaultMessage="Try Hubs" />
               </a>
-              <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
+              <a href="https://discord.gg/dFJncWwHun" rel="noreferrer noopener">
                 <FormattedMessage id="discord-page.community-link" defaultMessage="Hubs Discord" />
               </a>
             </div>

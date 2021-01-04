@@ -16,7 +16,7 @@ export function PageContainer({ children, ...rest }) {
       docsUrl={configs.link("docs", "https://hubs.mozilla.com/docs")}
       showSourceLink={configs.feature("show_source_link")}
       showCommunityLink={configs.feature("show_community_link")}
-      communityUrl={configs.link("community", "https://discord.gg/wHmY4nd")}
+      communityUrl={configs.link("community", "https://discord.gg/dFJncWwHun")}
       isAdmin={auth.isAdmin}
       isSignedIn={auth.isSignedIn}
       email={auth.email}
