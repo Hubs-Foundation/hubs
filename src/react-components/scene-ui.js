@@ -67,7 +67,7 @@ class SceneUI extends Component {
           <div className={styles.ui}>
             <div className={styles.unavailable}>
               <div>
-                <FormattedMessage id="scene.unavailable" />
+                <FormattedMessage id="scene-page.unavailable" defaultMessage="This scene is no longer available." />
               </div>
             </div>
           </div>
@@ -85,27 +85,77 @@ class SceneUI extends Component {
 
     let attributions;
 
-    const toAttributionSpan = a => {
-      if (a.url) {
-        const source = a.url.includes("sketchfab.com")
-          ? "on Sketchfab"
-          : a.url.includes("poly.google.com")
-            ? "on Google Poly"
-            : "";
+    const toAttributionSpan = ({ name, url, author, remix }) => {
+      let source = "";
 
+      if (url) {
+        if (url.includes("sketchfab.com")) {
+          source = "Sketchfab";
+        } else if (url.includes("poly.google.com")) {
+          source = "Google Poly";
+        }
+      }
+
+      if (remix) {
+        <span className="remix">
+          <FormattedMessage
+            id="scene-page.remix-attribution"
+            defaultMessage="(Remixed from <a>{name} by {author}</a>)"
+            values={{
+              name,
+              author,
+              a: chunks =>
+                url ? (
+                  <a href={url} target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </a>
+                ) : (
+                  <>{chunks}</>
+                )
+            }}
+          />
+        </span>;
+      } else if (source) {
         return (
-          <span key={a.url}>
-            <a href={a.url} target="_blank" rel="noopener noreferrer">
-              {a.name} by {a.author} {source}
-            </a>
-            &nbsp;
+          <span key={url}>
+            <FormattedMessage
+              id="scene-page.attribution-with-source"
+              defaultMessage="<a>{name} by {author} on {source}</a>"
+              values={{
+                name,
+                author,
+                source,
+                a: chunks =>
+                  url ? (
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      {chunks}
+                    </a>
+                  ) : (
+                    <>{chunks}</>
+                  )
+              }}
+            />
           </span>
         );
       } else {
         return (
-          <span key={`${a.name} ${a.author}`}>
-            {a.name} by {a.author}
-            &nbsp;
+          <span key={`${name} ${author}`}>
+            <FormattedMessage
+              id="scene-page.attribution"
+              defaultMessage="<a>{name} by {author}</a>"
+              values={{
+                name,
+                author,
+                a: chunks =>
+                  url ? (
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      {chunks}
+                    </a>
+                  ) : (
+                    <>{chunks}</>
+                  )
+              }}
+            />
           </span>
         );
       }
@@ -115,20 +165,26 @@ class SceneUI extends Component {
       if (!this.props.sceneAttributions.extras) {
         attributions = (
           <span>
-            <span>{this.props.sceneAttributions.creator ? `by ${this.props.sceneAttributions.creator}` : ""}</span>
+            <span>
+              {this.props.sceneAttributions.creator ? (
+                <FormattedMessage
+                  id="scene-page.scene-attribution"
+                  defaultMessage="by {creator}"
+                  values={{ creator: this.props.sceneAttributions.creator }}
+                />
+              ) : (
+                ""
+              )}
+            </span>
             {parentScene &&
               parentScene.attributions &&
-              parentScene.attributions.creator && (
-                <span className="remix">
-                  &nbsp;(Remixed from&nbsp;
-                  {toAttributionSpan({
-                    name: parentScene.name,
-                    url: parentScene.url,
-                    author: parentScene.attributions.creator
-                  })}
-                  )
-                </span>
-              )}
+              parentScene.attributions.creator &&
+              toAttributionSpan({
+                name: parentScene.name,
+                url: parentScene.url,
+                author: parentScene.attributions.creator,
+                remix: true
+              })}
             <br />
             {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
           </span>
@@ -154,15 +210,16 @@ class SceneUI extends Component {
           <div className={styles.grid}>
             <div className={styles.mainPanel}>
               <a href="/" className={styles.logo}>
-                <img src={configs.image("logo")} />
+                <img
+                  src={configs.image("logo")}
+                  alt={<FormattedMessage id="scene-page.logo-alt" defaultMessage="Logo" />}
+                />
               </a>
-              <div className={styles.logoTagline}>
-                <FormattedMessage id="app-tagline" />
-              </div>
+              <div className={styles.logoTagline}>{configs.translation("app-tagline")}</div>
               {this.props.showCreateRoom && (
                 <div className={styles.createButtons}>
                   <button className={styles.createButton} onClick={this.createRoom}>
-                    <FormattedMessage id="scene.create_button" />
+                    <FormattedMessage id="scene-page.create-button" defaultMessage="Create a room with this scene" />
                   </button>
                   <button
                     className={styles.optionsButton}
@@ -181,7 +238,11 @@ class SceneUI extends Component {
                     className={styles.spokeButton}
                   >
                     <FontAwesomeIcon icon={faPencilAlt} />
-                    <FormattedMessage id="scene.edit_button" />
+                    <FormattedMessage
+                      id="scene-page.edit-button"
+                      defaultMessage="Edit in {editorName}"
+                      values={{ editorName: configs.translation("editorName") }}
+                    />
                   </a>
                 ) : (
                   sceneAllowRemixing && (
@@ -192,7 +253,11 @@ class SceneUI extends Component {
                       className={styles.spokeButton}
                     >
                       <FontAwesomeIcon icon={faCodeBranch} />
-                      <FormattedMessage id="scene.remix_button" />
+                      <FormattedMessage
+                        id="scene-page.remix-button"
+                        defaultMessage="Remix in {editorName}"
+                        values={{ editorName: configs.translation("editorName") }}
+                      />
                     </a>
                   )
                 )}
@@ -200,7 +265,7 @@ class SceneUI extends Component {
               <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
                 <img src="../assets/images/twitter.svg" />
                 <div>
-                  <FormattedMessage id="scene.tweet_button" />
+                  <FormattedMessage id="scene-page.tweet-button" defaultMessage="Share on Twitter" />
                 </div>
               </a>
             </div>
@@ -211,10 +276,19 @@ class SceneUI extends Component {
           </div>
           <IfFeature name="enable_spoke">
             <div className={styles.spoke}>
-              <div className={styles.madeWith}>made with</div>
-              <a href="/spoke">
-                <img src={configs.image("editor_logo")} />
-              </a>
+              <div className={styles.madeWith}>
+                <FormattedMessage
+                  id="scene-page.made-with"
+                  defaultMessage="made with <a/>"
+                  values={{
+                    a: () => (
+                      <a href="/spoke">
+                        <img src={configs.image("editor_logo")} />
+                      </a>
+                    )
+                  }}
+                />
+              </div>
             </div>
           </IfFeature>
           {this.state.showCustomRoomDialog && (

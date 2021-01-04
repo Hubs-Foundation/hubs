@@ -85,6 +85,11 @@ export const getLocale = () => {
   return _locale;
 };
 
+export const getMessage = key => {
+  return _localeData[key];
+};
+
+// TODO: This should be removed, lets not inject app config data up front but rather via variables so that defaultMessage works properly.
 export const getMessages = () => {
   if (cachedMessages.has(_locale)) {
     return cachedMessages.get(_locale);
