@@ -4,12 +4,15 @@ import classNames from "classnames";
 import styles from "./BackButton.scss";
 import { IconButton } from "../input/IconButton";
 import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
+import { FormattedMessage } from "react-intl";
 
-export function BackButton({ children, className, ...rest }) {
+export function BackButton({ className, ...rest }) {
   return (
     <IconButton className={classNames(styles.backButton, className)} {...rest}>
       <ChevronBackIcon />
-      <span>{children}</span>
+      <span>
+        <FormattedMessage id="back-button" defaultMessage="Back" />
+      </span>
     </IconButton>
   );
 }
@@ -17,8 +20,4 @@ export function BackButton({ children, className, ...rest }) {
 BackButton.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node
-};
-
-BackButton.defaultProps = {
-  children: "Back"
 };
