@@ -12,6 +12,7 @@ import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
 import { PlacePopoverButton } from "./PlacePopover";
 import { ObjectUrlModalContainer } from "./ObjectUrlModalContainer";
 import configs from "../../utils/configs";
+import { FormattedMessage } from "react-intl";
 
 export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {
   const [items, setItems] = useState([]);
@@ -27,7 +28,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
             id: "pen",
             icon: PenIcon,
             color: "purple",
-            label: "Pen",
+            label: <FormattedMessage id="place-popover.item-type.pen" defaultMessage="Pen" />,
             onSelect: () => scene.emit("penButtonPressed"),
             selected: hasActivePen
           },
@@ -35,7 +36,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
             id: "camera",
             icon: CameraIcon,
             color: "purple",
-            label: "Camera",
+            label: <FormattedMessage id="place-popover.item-type.camera" defaultMessage="Camera" />,
             onSelect: () => scene.emit("action_toggle_camera"),
             selected: hasActiveCamera
           }
@@ -51,28 +52,28 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
               id: "gif",
               icon: GIFIcon,
               color: "orange",
-              label: "GIF",
+              label: <FormattedMessage id="place-popover.item-type.gif" defaultMessage="GIF" />,
               onSelect: () => mediaSearchStore.sourceNavigate("gifs")
             },
             (configs.integration("poly") || configs.integration("sketchfab")) && {
               id: "model",
               icon: ObjectIcon,
               color: "orange",
-              label: "3D Model",
+              label: <FormattedMessage id="place-popover.item-type.model" defaultMessage="3D Model" />,
               onSelect: () => mediaSearchStore.sourceNavigate(configs.integration("poly") ? "poly" : "sketchfab")
             },
             {
               id: "avatar",
               icon: AvatarIcon,
               color: "red",
-              label: "Avatar",
+              label: <FormattedMessage id="place-popover.item-type.avatar" defaultMessage="Avatar" />,
               onSelect: () => mediaSearchStore.sourceNavigate("avatars")
             },
             {
               id: "scene",
               icon: SceneIcon,
               color: "red",
-              label: "Scene",
+              label: <FormattedMessage id="place-popover.item-type.scene" defaultMessage="Scene" />,
               onSelect: () => mediaSearchStore.sourceNavigate("scenes")
             },
             // TODO: Launch system file prompt directly
@@ -80,7 +81,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
               id: "upload",
               icon: UploadIcon,
               color: "green",
-              label: "Upload",
+              label: <FormattedMessage id="place-popover.item-type.upload" defaultMessage="Upload" />,
               onSelect: () => showNonHistoriedDialog(ObjectUrlModalContainer, { scene })
             }
           ];

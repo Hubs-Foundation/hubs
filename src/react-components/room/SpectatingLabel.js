@@ -7,7 +7,7 @@ export function SpectatingLabel({ name }) {
   return (
     <div className={styles.label}>
       <b>
-        <FormattedMessage id="lobby.watching" />
+        <FormattedMessage id="spectating-label.label" defaultMessage="Spectating" />
       </b>
       <p>{name}</p>
     </div>

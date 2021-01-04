@@ -23,6 +23,8 @@ export const ToggleInput = memo(
 );
 
 ToggleInput.propTypes = {
+  label: PropTypes.node,
+  description: PropTypes.node,
   checked: PropTypes.bool,
   disabled: PropTypes.bool,
   className: PropTypes.string

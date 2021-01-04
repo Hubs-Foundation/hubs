@@ -17,13 +17,13 @@ import emoji5Model from "../assets/models/emojis/emoji_5.glb";
 import emoji6Model from "../assets/models/emojis/emoji_6.glb";
 
 export const emojis = [
-  { id: "smile", label: "Smile", model: emoji0Model, particle: emoji0Particle },
-  { id: "laugh", label: "Laugh", model: emoji1Model, particle: emoji1Particle },
-  { id: "clap", label: "Clap", model: emoji2Model, particle: emoji2Particle },
-  { id: "heart", label: "Heart", model: emoji3Model, particle: emoji3Particle },
-  { id: "wave", label: "Wave", model: emoji4Model, particle: emoji4Particle },
-  { id: "angry", label: "Angry", model: emoji5Model, particle: emoji5Particle },
-  { id: "cry", label: "Cry", model: emoji6Model, particle: emoji6Particle }
+  { id: "smile", model: emoji0Model, particle: emoji0Particle },
+  { id: "laugh", model: emoji1Model, particle: emoji1Particle },
+  { id: "clap", model: emoji2Model, particle: emoji2Particle },
+  { id: "heart", model: emoji3Model, particle: emoji3Particle },
+  { id: "wave", model: emoji4Model, particle: emoji4Particle },
+  { id: "angry", model: emoji5Model, particle: emoji5Particle },
+  { id: "cry", model: emoji6Model, particle: emoji6Particle }
 ].map(({ model, particle, ...rest }) => {
   return {
     ...rest,

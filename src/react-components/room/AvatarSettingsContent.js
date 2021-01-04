@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button } from "../input/Button";
+import { Button, AcceptButton } from "../input/Button";
 import styles from "./AvatarSettingsContent.scss";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
@@ -20,7 +20,7 @@ export function AvatarSettingsContent({
     <Column as="form" className={styles.content} {...rest}>
       <TextInputField
         disabled={disableDisplayNameInput}
-        label="Display Name"
+        label={<FormattedMessage id="avatar-settings-content.display-name-label" defaultMessage="Display Name" />}
         value={displayName}
         pattern={displayNamePattern}
         spellCheck="false"
@@ -37,12 +37,10 @@ export function AvatarSettingsContent({
       <div className={styles.avatarPreviewContainer}>
         {avatarPreview || <div />}
         <Button type="button" onClick={onChangeAvatar}>
-          Change Avatar
+          <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
         </Button>
       </div>
-      <Button preset="accept" type="submit">
-        Accept
-      </Button>
+      <AcceptButton preset="accept" type="submit" />
     </Column>
   );
 }

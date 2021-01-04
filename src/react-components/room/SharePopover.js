@@ -4,8 +4,17 @@ import { ButtonGridPopover } from "../popover/ButtonGridPopover";
 import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as ShareIcon } from "../icons/Share.svg";
+import { defineMessage, useIntl } from "react-intl";
+
+const sharePopoverTitle = defineMessage({
+  id: "share-popover.title",
+  defaultMessage: "Share"
+});
 
 export function SharePopoverButton({ items }) {
+  const intl = useIntl();
+  const title = intl.formatMessage(sharePopoverTitle);
+
   const filteredItems = items.filter(item => !!item);
 
   // The button is removed if you can't share anything.
@@ -27,7 +36,7 @@ export function SharePopoverButton({ items }) {
             item.onSelect(item);
           }
         }}
-        label="Share"
+        label={title}
         preset="purple"
         statusColor={activeItem && "red"}
       />
@@ -36,7 +45,7 @@ export function SharePopoverButton({ items }) {
 
   return (
     <Popover
-      title="Share"
+      title={title}
       content={props => <ButtonGridPopover items={filteredItems} {...props} />}
       placement="top"
       offsetDistance={28}
@@ -48,7 +57,7 @@ export function SharePopoverButton({ items }) {
           icon={<ShareIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label="Share"
+          label={title}
           preset="purple"
         />
       )}

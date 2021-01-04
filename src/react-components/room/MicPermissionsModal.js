@@ -6,14 +6,29 @@ import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import styles from "./MicPermissionsModal.scss";
 import { BackButton } from "../input/BackButton";
 import { Column } from "../layout/Column";
+import { FormattedMessage } from "react-intl";
 
 export function MicPermissionsModal({ className, error, onClickErrorButton, errorButtonLabel, onBack, ...rest }) {
   return (
-    <Modal title="Enter on Device" beforeTitle={<BackButton onClick={onBack} />} className={className} {...rest}>
+    <Modal
+      title={<FormattedMessage id="mic-permissions-modal.title" defaultMessage="Enter on Device" />}
+      beforeTitle={<BackButton onClick={onBack} />}
+      className={className}
+      {...rest}
+    >
       <Column padding center className={styles.content}>
-        <b>Grant Microphone Permissions</b>
+        <b>
+          <FormattedMessage
+            id="mic-permissions-modal.grant-mic-permissions"
+            defaultMessage="Grant Microphone Permissions"
+          />
+        </b>
         <small>
-          Microphone access needed to be heard by others.<br />Microphone can be muted in room.
+          <FormattedMessage
+            id="mic-permissions-modal.mic-access-needed"
+            defaultMessage="Microphone access needed to be heard by others.{linebreak}Microphone can be muted in room."
+            values={{ linebreak: <br /> }}
+          />
         </small>
         <div className={styles.microphoneIconContainer}>
           <MicrophoneIcon />

@@ -12,8 +12,7 @@ import { TextAreaInput } from "../input/TextAreaInput";
 import { ToolbarButton } from "../input/ToolbarButton";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
-import { FormattedMessage, useIntl, defineMessages } from "react-intl";
-import { useRelativeTime } from "../misc/useRelativeTime";
+import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
 
 export function SpawnMessageButton(props) {
   return (
@@ -43,9 +42,14 @@ export function MessageAttachmentButton(props) {
 }
 
 export function ChatInput(props) {
+  const intl = useIntl();
+
   return (
     <div className={styles.chatInputContainer}>
-      <TextAreaInput placeholder="Message..." {...props} />
+      <TextAreaInput
+        placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
+        {...props}
+      />
     </div>
   );
 }
@@ -54,43 +58,52 @@ ChatInput.propTypes = {
   onSpawn: PropTypes.func
 };
 
-const joinMessages = defineMessages({
-  room: { id: "presence.entered_room", defaultMessage: "{name} entered the room." },
-  lobby: { id: "presence.entered_lobby", defaultMessage: "{name} entered the lobby." }
+const enteredMessages = defineMessages({
+  room: { id: "chat-sidebar.system-message.entered-room", defaultMessage: "{name} entered the room." },
+  lobby: { id: "chat-sidebar.system-message.entered-lobby", defaultMessage: "{name} entered the lobby." }
 });
 
-const enteredMessages = defineMessages({
-  lobby: { id: "presence.join_lobby", defaultMessage: "{name} joined the lobby." },
-  room: { id: "presence.join_room", defaultMessage: "{name} joined the room." }
+const joinedMessages = defineMessages({
+  lobby: { id: "chat-sidebar.system-message.joined-lobby", defaultMessage: "{name} joined the lobby." },
+  room: { id: "chat-sidebar.system-message.joined-room", defaultMessage: "{name} joined the room." }
 });
 
 // TODO: use react-intl's defineMessages to get proper extraction
 export function formatSystemMessage(entry, intl) {
   switch (entry.type) {
     case "join":
-      return intl.formatMessage(joinMessages[entry.presence], { name: <b>{entry.name}</b> });
+      return intl.formatMessage(joinedMessages[entry.presence], { name: <b>{entry.name}</b> });
     case "entered":
       return intl.formatMessage(enteredMessages[entry.presence], { name: <b>{entry.name}</b> });
     case "leave":
-      return <FormattedMessage id="presence.leave" values={{ name: <b>{entry.name}</b> }} />;
+      return (
+        <FormattedMessage
+          id="chat-sidebar.system-message.leave"
+          defaultMessage="{name} left."
+          values={{ name: <b>{entry.name}</b> }}
+        />
+      );
     case "display_name_changed":
       return (
         <FormattedMessage
-          id="presence.name_change"
+          id="chat-sidebar.system-message.name-change"
+          defaultMessage="{oldName} is now known as {newName}"
           values={{ oldName: <b>{entry.oldName}</b>, newName: <b>{entry.newName}</b> }}
         />
       );
     case "scene_changed":
       return (
         <FormattedMessage
-          id="presence.scene_change"
+          id="chat-sidebar.system-message.scene-change"
+          defaultMessage="{name} changed the scene to {sceneName}"
           values={{ name: <b>{entry.name}</b>, sceneName: <b>{entry.sceneName}</b> }}
         />
       );
     case "hub_name_changed":
       return (
         <FormattedMessage
-          id="presence.hub_name_change"
+          id="chat-sidebar.system-message.hub-name-change"
+          defaultMessage="{name} changed the name of the room to {hubName}"
           values={{ name: <b>{entry.name}</b>, hubName: <b>{entry.hubName}</b> }}
         />
       );
@@ -102,14 +115,15 @@ export function formatSystemMessage(entry, intl) {
 }
 
 export function SystemMessage(props) {
-  const relativeTime = useRelativeTime(props.timestamp);
   const intl = useIntl();
 
   return (
     <li className={classNames(styles.messageGroup, styles.systemMessage)}>
       <p className={styles.messageGroupLabel}>
         <i>{formatSystemMessage(props, intl)}</i>
-        <span>{relativeTime}</span>
+        <span>
+          <FormattedRelativeTime updateIntervalInSeconds={10} value={props.timestamp - Date.now()} />
+        </span>
       </p>
     </li>
   );
@@ -169,12 +183,10 @@ function getMessageComponent(message) {
 }
 
 export function ChatMessageGroup({ sent, sender, timestamp, messages }) {
-  const relativeTime = useRelativeTime(timestamp);
-
   return (
     <li className={classNames(styles.messageGroup, { [styles.sent]: sent })}>
       <p className={styles.messageGroupLabel}>
-        {sender} | {relativeTime}
+        {sender} | <FormattedRelativeTime updateIntervalInSeconds={10} value={timestamp - Date.now()} />
       </p>
       <ul className={styles.messageGroupMessages}>{messages.map(message => getMessageComponent(message))}</ul>
     </li>
@@ -200,7 +212,12 @@ ChatMessageList.propTypes = {
 
 export function ChatSidebar({ onClose, children, ...rest }) {
   return (
-    <Sidebar title="Chat" beforeTitle={<CloseButton onClick={onClose} />} contentClassName={styles.content} {...rest}>
+    <Sidebar
+      title={<FormattedMessage id="chat-sidebar.title" defaultMessage="Chat" />}
+      beforeTitle={<CloseButton onClick={onClose} />}
+      contentClassName={styles.content}
+      {...rest}
+    >
       {children}
     </Sidebar>
   );
@@ -214,5 +231,12 @@ ChatSidebar.propTypes = {
 };
 
 export function ChatToolbarButton(props) {
-  return <ToolbarButton {...props} icon={<ChatIcon />} preset="blue" label="Chat" />;
+  return (
+    <ToolbarButton
+      {...props}
+      icon={<ChatIcon />}
+      preset="blue"
+      label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
+    />
+  );
 }

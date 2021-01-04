@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { TweetEditorModalContainer } from "./TweetEditorModalContainer";
 import { TwitterOAuthModalContainer } from "./TwitterOAuthModalContainer";
+import configs from "../../utils/configs";
 
 export function TweetModalContainer({ hubChannel, initialTweet, mediaUrl, contentSubtype, onClose }) {
   const [canTweet, setCanTweet] = useState(hubChannel.can("tweet"));
@@ -20,7 +21,14 @@ export function TweetModalContainer({ hubChannel, initialTweet, mediaUrl, conten
       />
     );
   } else {
-    return <TwitterOAuthModalContainer hubChannel={hubChannel} onConnected={onConnected} onClose={onClose} />;
+    return (
+      <TwitterOAuthModalContainer
+        appName={configs.translation("app-name")}
+        hubChannel={hubChannel}
+        onConnected={onConnected}
+        onClose={onClose}
+      />
+    );
   }
 }
 

@@ -27,6 +27,7 @@ export function SceneUrlModalContainer({ hubChannel, onClose }) {
   return (
     <SceneUrlModal
       enableSpoke={configs.feature("enable_spoke")}
+      editorName={configs.translation("editor-name")}
       onValidateUrl={onValidateUrl}
       onSubmit={onSubmit}
       onClose={onClose}

@@ -3,10 +3,15 @@ import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
 import { BackButton } from "../input/BackButton";
 import { AvatarSettingsContent } from "./AvatarSettingsContent";
+import { FormattedMessage } from "react-intl";
 
 export function AvatarSetupModal({ className, onBack, ...rest }) {
   return (
-    <Modal title="Avatar Setup" beforeTitle={<BackButton onClick={onBack} />} className={className}>
+    <Modal
+      title={<FormattedMessage id="avatar-settings-sidebar.title" defaultMessage="Avatar Setup" />}
+      beforeTitle={<BackButton onClick={onBack} />}
+      className={className}
+    >
       <AvatarSettingsContent {...rest} />
     </Modal>
   );

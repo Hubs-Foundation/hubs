@@ -11,6 +11,7 @@ import styles from "./RoomEntryModal.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { Column } from "../layout/Column";
+import { FormattedMessage } from "react-intl";
 
 export function RoomEntryModal({
   appName,
@@ -38,23 +39,34 @@ export function RoomEntryModal({
             </div>
           )}
         <div className={styles.roomName}>
-          <h5>Room Name</h5>
+          <h5>
+            <FormattedMessage id="room-entry-modal.room-name-label" defaultMessage="Room Name" />
+          </h5>
           <p>{roomName}</p>
         </div>
         <Column center className={styles.buttons}>
           {showJoinRoom && (
             <Button preset="blue" onClick={onJoinRoom}>
-              <EnterIcon /> Join Room
+              <EnterIcon />
+              <span>
+                <FormattedMessage id="room-entry-modal.join-room-button" defaultMessage="Join Room" />
+              </span>
             </Button>
           )}
           {showEnterOnDevice && (
             <Button preset="purple" onClick={onEnterOnDevice}>
-              <VRIcon /> Enter On Device
+              <VRIcon />
+              <span>
+                <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device" />
+              </span>
             </Button>
           )}
           {showSpectate && (
             <Button preset="orange" onClick={onSpectate}>
-              <ShowIcon /> Spectate
+              <ShowIcon />
+              <span>
+                <FormattedMessage id="room-entry-modal.spectate-button" defaultMessage="Spectate" />
+              </span>
             </Button>
           )}
           {showOptions &&
@@ -62,7 +74,10 @@ export function RoomEntryModal({
               <>
                 <hr className={styleUtils.showLg} />
                 <Button preset="transparent" className={styleUtils.showLg} onClick={onOptions}>
-                  <SettingsIcon /> Options
+                  <SettingsIcon />
+                  <span>
+                    <FormattedMessage id="room-entry-modal.options-button" defaultMessage="Options" />
+                  </span>
                 </Button>
               </>
             )}
