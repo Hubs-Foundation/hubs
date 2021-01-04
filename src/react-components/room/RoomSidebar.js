@@ -7,6 +7,7 @@ import { InputField } from "../input/InputField";
 import { IconButton } from "../input/IconButton";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
+import { FormattedMessage } from "react-intl";
 
 function SceneAttribution({ attribution }) {
   if (attribution.url) {
@@ -14,7 +15,7 @@ function SceneAttribution({ attribution }) {
       ? "on Sketchfab"
       : attribution.url.includes("poly.google.com")
         ? "on Google Poly"
-        : "";
+        : null;
 
     return (
       <li className={styles.attribution}>
@@ -24,7 +25,24 @@ function SceneAttribution({ attribution }) {
           </a>
         </div>
         <div className={styles.attributionAuthor}>
-          by {attribution.author} {source}
+          {source ? (
+            <FormattedMessage
+              id="room-sidebar.scene-attribution-with-source"
+              defaultMessage="by {author} on {source}"
+              values={{
+                author: attribution.author,
+                source
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="room-sidebar.scene-attribution"
+              defaultMessage="by {author}"
+              values={{
+                author: attribution.author
+              }}
+            />
+          )}
         </div>
       </li>
     );
@@ -32,7 +50,15 @@ function SceneAttribution({ attribution }) {
     return (
       <li className={styles.attribution}>
         <div className={styles.attributionName}>{attribution.name}</div>
-        <div className={styles.attributionAuthor}>by {attribution.author}</div>
+        <div className={styles.attributionAuthor}>
+          <FormattedMessage
+            id="room-sidebar.scene-attribution"
+            defaultMessage="by {author}"
+            values={{
+              author: attribution.author
+            }}
+          />
+        </div>
       </li>
     );
   }
@@ -51,7 +77,9 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
 
   return (
     <>
-      <h2 className={styles.sectionTitle}>Scene</h2>
+      <h2 className={styles.sectionTitle}>
+        <FormattedMessage id="room-sidebar.scene-info.title" defaultMessage="Scene" />
+      </h2>
       <div className={styles.sceneScreenshotContainer}>
         {showSceneLink ? (
           <a href={scene.url} target="_blank" rel="noopener noreferrer">
@@ -71,10 +99,18 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
         ) : (
           <b className={styles.sceneName}>{scene.name}</b>
         )}
-        <div className={styles.sceneCreator}>by {creator}</div>
+        <div className={styles.sceneCreator}>
+          <FormattedMessage
+            id="room-sidebar.scene-info.scene-creator"
+            defaultMessage="by {creator}"
+            values={{ creator }}
+          />
+        </div>
       </div>
       {showAttributions && (
-        <InputField label="Attributions">
+        <InputField
+          label={<FormattedMessage id="room-sidebar.scene-info.attributions" defaultMessage="Attributions" />}
+        >
           <ul className={styles.attributions}>
             {attributions.map((attribution, i) => <SceneAttribution attribution={attribution} key={i} />)}
           </ul>
@@ -82,7 +118,7 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
       )}
       {canChangeScene && (
         <Button preset="blue" onClick={onChangeScene}>
-          Change Scene
+          <FormattedMessage id="room-sidebar.scene-info.change-scene-button" defaultMessage="Change Scene" />
         </Button>
       )}
     </>
@@ -92,13 +128,25 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
 export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChangeScene }) {
   return (
     <Sidebar
-      title="Room"
+      title={<FormattedMessage id="room-sidebar.title" defaultMessage="Room" />}
       beforeTitle={<CloseButton onClick={onClose} />}
-      afterTitle={canEdit && <IconButton onClick={onEdit}>Edit</IconButton>}
+      afterTitle={
+        canEdit && (
+          <IconButton onClick={onEdit}>
+            <FormattedMessage id="room-sidebar.edit-button" defaultMessage="Edit" />
+          </IconButton>
+        )
+      }
     >
       <Column padding>
-        <InputField label="Name">{room.name}</InputField>
-        {room.description && <InputField label="Description">{room.description}</InputField>}
+        <InputField label={<FormattedMessage id="room-sidebar.room-name" defaultMessage="Name" />}>
+          {room.name}
+        </InputField>
+        {room.description && (
+          <InputField label={<FormattedMessage id="room-sidebar.room-description" defaultMessage="Description" />}>
+            {room.description}
+          </InputField>
+        )}
         {room.scene && (
           <SceneInfo
             accountId={accountId}

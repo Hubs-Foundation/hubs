@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { injectIntl } from "react-intl";
 import { SCHEMA } from "../storage/store";
 import { fetchAvatar } from "../utils/avatar-utils";
 import { replaceHistoryState } from "../utils/history";
@@ -8,7 +7,7 @@ import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
 import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
 
-class ProfileEntryPanel extends Component {
+export default class ProfileEntryPanel extends Component {
   static propTypes = {
     containerType: PropTypes.oneOf(["sidebar", "modal"]),
     displayNameOverride: PropTypes.string,
@@ -16,7 +15,6 @@ class ProfileEntryPanel extends Component {
     mediaSearchStore: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    intl: PropTypes.object,
     history: PropTypes.object,
     avatarId: PropTypes.string,
     onClose: PropTypes.func,
@@ -124,14 +122,11 @@ class ProfileEntryPanel extends Component {
   };
 
   render() {
-    const { formatMessage } = this.props.intl;
-
     const avatarSettingsProps = {
       displayNameInputRef: inp => (this.nameInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
       displayNamePattern: SCHEMA.definitions.profile.properties.displayName.pattern,
-      displayNameDescription: formatMessage({ id: "profile.display_name.validation_warning" }),
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
@@ -151,5 +146,3 @@ class ProfileEntryPanel extends Component {
     return <AvatarSetupModal {...avatarSettingsProps} />;
   }
 }
-
-export default injectIntl(ProfileEntryPanel);

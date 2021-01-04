@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
 import { FullscreenLayout } from "./FullscreenLayout";
 import { Column } from "./Column";

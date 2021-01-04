@@ -13,6 +13,7 @@ import { SelectInputField } from "../input/SelectInputField";
 import { ToggleInput } from "../input/ToggleInput";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { Column } from "../layout/Column";
+import { FormattedMessage } from "react-intl";
 
 const micButtonDiameter = 96;
 
@@ -33,9 +34,19 @@ export function MicSetupModal({
   ...rest
 }) {
   return (
-    <Modal title="Microphone Setup" beforeTitle={<BackButton onClick={onBack} />} className={className} {...rest}>
+    <Modal
+      title={<FormattedMessage id="mic-setup-modal.title" defaultMessage="Microphone Setup" />}
+      beforeTitle={<BackButton onClick={onBack} />}
+      className={className}
+      {...rest}
+    >
       <Column center padding className={styles.content}>
-        <p>Check your microphone and audio before entering.</p>
+        <p>
+          <FormattedMessage
+            id="mic-setup-modal.check-mic"
+            defaultMessage="Check your microphone and audio before entering."
+          />
+        </p>
         <div className={styles.audioCheckContainer}>
           <ToolbarButton
             icon={
@@ -45,7 +56,13 @@ export function MicSetupModal({
                 <MicrophoneMutedIcon width={48} height={48} />
               )
             }
-            label={microphoneEnabled ? "Talk to Test Microphone" : "Microphone Disabled"}
+            label={
+              microphoneEnabled ? (
+                <FormattedMessage id="mic-setup-modal.test-mic" defaultMessage="Talk to Test Microphone" />
+              ) : (
+                <FormattedMessage id="mic-setup-modal.mic-disabled" defaultMessage="Microphone Disabled" />
+              )
+            }
             className={classNames(styles.largeToolbarButton, styles.micButton)}
             iconContainerClassName={styles.micButtonContainer}
             onClick={onPromptMicrophone}
@@ -91,7 +108,7 @@ export function MicSetupModal({
           </ToolbarButton>
           <ToolbarButton
             icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
-            label="Click to Test Audio"
+            label={<FormattedMessage id="mic-setup-modal.test-audio" defaultMessage="Click to Test Audio" />}
             preset={soundPlaying ? "blue" : "basic"}
             className={styles.largeToolbarButton}
             onClick={onPlaySound}
@@ -101,11 +118,15 @@ export function MicSetupModal({
         {microphoneEnabled && (
           <>
             <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
-            <ToggleInput label="Mute My Microphone" checked={microphoneMuted} onChange={onChangeMicrophoneMuted} />
+            <ToggleInput
+              label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle" defaultMessage="Mute My Microphone" />}
+              checked={microphoneMuted}
+              onChange={onChangeMicrophoneMuted}
+            />
           </>
         )}
         <Button preset="green" onClick={onEnterRoom}>
-          Enter Room
+          <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
         </Button>
       </Column>
     </Modal>

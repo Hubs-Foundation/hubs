@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { IntlProvider } from "react-intl";
+import "@formatjs/intl-relativetimeformat/polyfill";
+import "@formatjs/intl-relativetimeformat/locale-data/en";
 import { getLocale, getMessages } from "../utils/i18n";
 
 export class WrappedIntlProvider extends React.Component {

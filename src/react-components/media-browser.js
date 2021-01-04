@@ -76,39 +76,35 @@ const DEFAULT_FACETS = {
 const poweredByMessages = defineMessages({
   images: {
     id: "media-browser.powered_by.images",
-    defaultMessage: "Search by Bing | "
+    defaultMessage: "Search by Bing"
   },
   videos: {
     id: "media-browser.powered_by.videos",
-    defaultMessage: "Search by Bing | "
+    defaultMessage: "Search by Bing"
   },
   youtube: {
     id: "media-browser.powered_by.youtube",
-    defaultMessage: "Search by Google | "
+    defaultMessage: "Search by Google"
   },
   gifs: {
     id: "media-browser.powered_by.gifs",
-    defaultMessage: "Search by Tenor | "
+    defaultMessage: "Search by Tenor"
   },
   sketchfab: {
     id: "media-browser.powered_by.sketchfab",
-    defaultMessage: "Search by Sketchfab | "
+    defaultMessage: "Search by Sketchfab"
   },
   poly: {
     id: "media-browser.powered_by.poly",
-    defaultMessage: "Search by Google | "
+    defaultMessage: "Search by Google"
   },
   twitch: {
     id: "media-browser.powered_by.twitch",
-    defaultMessage: "Search by Twitch | "
+    defaultMessage: "Search by Twitch"
   },
   scenes: {
     id: "media-browser.powered_by.scenes",
-    defaultMessage: "Made with "
-  },
-  avatars: {
-    id: "media-browser.powered_by.avatars",
-    defaultMessage: " "
+    defaultMessage: "Made with {editorName}"
   }
 });
 
@@ -137,41 +133,17 @@ const searchPlaceholderMessages = defineMessages({
   twitch: { id: "media-browser.search-placeholder.twitch", defaultMessage: "Search for Twitch streams..." },
   sketchfab: { id: "media-browser.search-placeholder.sketchfab", defaultMessage: "Search Sketchfab Models..." },
   poly: { id: "media-browser.search-placeholder.poly", defaultMessage: "Search Google Poly Models..." },
-  base: { id: "media-browser.search-placeholder.base", defaultMessage: "Search..." }
+  default: { id: "media-browser.search-placeholder.default", defaultMessage: "Search..." }
 });
 
 const emptyMessages = defineMessages({
-  images: {
-    id: "media-browser.empty.images",
-    defaultMessage: "No results. Try entering a new search above."
-  },
-  videos: {
-    id: "media-browser.empty.videos",
-    defaultMessage: "No results. Try entering a new search above."
-  },
-  youtube: {
-    id: "media-browser.empty.youtube",
-    defaultMessage: "No results. Try entering a new search above."
-  },
-  gifs: {
-    id: "media-browser.empty.gifs",
-    defaultMessage: "No result. Try entering a new search above."
-  },
-  sketchfab: {
-    id: "media-browser.empty.sketchfab",
-    defaultMessage: "No results. Try entering a new search above."
-  },
-  poly: {
-    id: "media-browser.empty.poly",
-    defaultMessage: "No results. Try entering a new search above."
-  },
-  twitch: {
-    id: "media-browser.empty.twitch",
-    defaultMessage: "No results. Try entering a new search above."
-  },
   favorites: {
     id: "media-browser.empty.favorites",
     defaultMessage: "You don't have any favorites. Click a ⭐ to add to your favorites."
+  },
+  default: {
+    id: "media-browser.empty.default",
+    defaultMessage: "No results. Try entering a new search above."
   }
 });
 
@@ -436,10 +408,11 @@ class MediaBrowserContainer extends Component {
     if (!hideSearch && urlSource !== "scenes" && urlSource !== "avatars" && urlSource !== "favorites") {
       searchDescription = (
         <>
-          {intl.formatMessage(poweredByMessages[urlSource])}
+          {poweredByMessages[urlSource] ? intl.formatMessage(poweredByMessages[urlSource]) : ""}
+          {poweredByMessages[urlSource] && PRIVACY_POLICY_LINKS[urlSource] ? " | " : ""}
           {PRIVACY_POLICY_LINKS[urlSource] && (
             <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
-              <FormattedMessage id="media-browser.privacy_policy" />
+              <FormattedMessage id="media-browser.privacy_policy" defaultMessage="Privacy Policy" />
             </a>
           )}
         </>
@@ -449,10 +422,13 @@ class MediaBrowserContainer extends Component {
         <>
           {configs.feature("enable_spoke") && (
             <>
-              {intl.formatMessage(poweredByMessages[urlSource])}
-              <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                <FormattedMessage id="editor-name" />
-              </a>
+              {intl.formatMessage(poweredByMessages.scenes, {
+                editorName: (
+                  <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                    {configs.translation("editor-name")}
+                  </a>
+                )
+              })}
             </>
           )}
           {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && " | "}
@@ -462,7 +438,7 @@ class MediaBrowserContainer extends Component {
               rel="noopener noreferrer"
               href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
             >
-              <FormattedMessage id="media-browser.report_issue" />
+              <FormattedMessage id="media-browser.report-issue" defaultMessage="Report Issue" />
             </a>
           )}
         </>
@@ -498,7 +474,11 @@ class MediaBrowserContainer extends Component {
         activeFilter={activeFilter}
         facets={facets}
         onSelectFacet={this.handleFacetClicked}
-        searchPlaceholder={intl.formatMessage(searchPlaceholderMessages[urlSource])}
+        searchPlaceholder={
+          searchPlaceholderMessages[urlSource]
+            ? intl.formatMessage(searchPlaceholderMessages[urlSource])
+            : intl.formatMessage(searchPlaceholderMessages.default)
+        }
         searchDescription={searchDescription}
         headerRight={
           showCustomOption && (
@@ -512,7 +492,11 @@ class MediaBrowserContainer extends Component {
         hasPrevious={hasPrevious}
         onNextPage={() => this.handlePager(1)}
         onPreviousPage={() => this.handlePager(-1)}
-        noResultsMessage={intl.formatMessage(emptyMessages[urlSource])}
+        noResultsMessage={
+          emptyMessages[urlSource]
+            ? intl.formatMessage(emptyMessages[urlSource])
+            : intl.formatMessage(emptyMessages.default)
+        }
       >
         {this.props.mediaSearchStore.isFetching ||
         this._sendQueryTimeout ||
@@ -523,7 +507,7 @@ class MediaBrowserContainer extends Component {
               <CreateTile
                 type="avatar"
                 onClick={this.onCreateAvatar}
-                label={<FormattedMessage id="media-browser.create-avatar" />}
+                label={<FormattedMessage id="media-browser.create-avatar" defaultMessage="Create Avatar" />}
               />
             )}
             {urlSource === "scenes" &&
@@ -534,7 +518,13 @@ class MediaBrowserContainer extends Component {
                   rel="noopener noreferrer"
                   target="_blank"
                   type="scene"
-                  label={<FormattedMessage id="media-browser.create-scene" />}
+                  label={
+                    <FormattedMessage
+                      id="media-browser.create-scene"
+                      defaultMessage="Create Scene with {editorName}"
+                      values={{ editorName: configs.translation("editor-name") }}
+                    />
+                  }
                 />
               )}
             {entries.map((entry, idx) => {

@@ -5,6 +5,7 @@ import classNames from "classnames";
 import styles from "./SelectInputField.scss";
 import { ReactComponent as CaretDownIcon } from "../icons/CaretDown.svg";
 import { useSelect } from "downshift";
+import { FormattedMessage } from "react-intl";
 
 function getItemValue(item) {
   return typeof item === "object" ? item.value : item;
@@ -68,7 +69,13 @@ export function SelectInputField({
     >
       <div className={classNames(styles.selectInput, { [styles.open]: isOpen }, inputClassName)}>
         <button className={styles.dropdownButton} type="button" {...getToggleButtonProps()}>
-          <span>{selectedItemLabel !== undefined ? selectedItemLabel : "Select..."}</span>
+          <span>
+            {selectedItemLabel !== undefined ? (
+              selectedItemLabel
+            ) : (
+              <FormattedMessage id="select-input-field.placeholder" defaultMessage="Select..." />
+            )}
+          </span>
           <CaretDownIcon />
         </button>
         {options.length > 0 && (

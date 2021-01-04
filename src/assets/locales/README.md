@@ -1,5 +1,21 @@
 # Localization
 
+The Hubs redesign has a lot of new text and we need help from people like you to translate it. Follow the steps below to get started.
+
+## CLI Tools
+
+### `npm run intl-extract`
+
+This script extracts all existing messages in the Hubs codebase to a temporary file, `extracted-messages.json`. This file includes the message id, default message, and where the translation is used in the codebase.
+
+### `npm run intl-extract-en-locale`
+
+This script extracts all existing messages in the Hubs codebase to a temporary file `en.json`. It does not contain any metadata, just the id and English translation. It can be used as a template for other locales.
+
+### Coming Soon
+
+Our goal is to integrate with [Mozilla Pontoon](https://pontoon.mozilla.org) in the near future.
+
 ## Adding Locales
 
 1. Add an entry to `AVAILABLE_LOCALES` in [locale_config.js](locale_config.js) with the appropriate locale code and in-language translation of the language.
@@ -8,9 +24,7 @@
 3. Edit your new locale file with your translations.
 
 ## Adding to existing Locales
-
-1. Add your new message to the Hubs client. Be sure to follow the best practices guide below. The default message should be in English. You do not need to add an additional message to the en.json file.
-2. Update the other locale files with correct translations if available.
+Add your new message to the Hubs client in the appropriate json file in this directory. Be sure to follow the best practices guide below. The default message should be in English.
 
 ## Best Practices
 The best practices for localization are the following:

@@ -1,12 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import configs from "../../utils/configs";
-import { getMessages } from "../../utils/i18n";
 import { ExitedRoomScreen } from "./ExitedRoomScreen";
 
 export function ExitedRoomScreenContainer({ reason }) {
-  const contactEmail = getMessages()["contact-email"];
-
   return (
     <ExitedRoomScreen
       showTerms={configs.feature("show_terms")}
@@ -14,7 +11,7 @@ export function ExitedRoomScreenContainer({ reason }) {
       logoSrc={configs.image("logo")}
       showSourceLink={configs.feature("show_source_link")}
       reason={reason}
-      contactEmail={contactEmail}
+      contactEmail={configs.translation("contact-email")}
     />
   );
 }

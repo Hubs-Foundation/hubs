@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { TwitterOAuthModal } from "./TwitterOAuthModal";
+import configs from "../../utils/configs";
 
 export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose }) {
   const popupRef = useRef();
@@ -61,7 +62,7 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
     [onConnected]
   );
 
-  return <TwitterOAuthModal onConnect={onConnect} onClose={onClose} />;
+  return <TwitterOAuthModal appName={configs.translation("app-name")} onConnect={onConnect} onClose={onClose} />;
 }
 
 TwitterOAuthModalContainer.propTypes = {

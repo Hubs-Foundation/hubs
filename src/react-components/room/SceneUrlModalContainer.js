@@ -11,7 +11,7 @@ export function SceneUrlModalContainer({ hubChannel, onClose }) {
   const onValidateUrl = useCallback(
     async url => {
       const valid = await isValidSceneUrl(url.trim());
-      return valid || intl.formatMessage("invalid-scene-url");
+      return valid || intl.formatMessage("scene-url-modal.invalid-scene-url");
     },
     [intl]
   );
@@ -27,6 +27,7 @@ export function SceneUrlModalContainer({ hubChannel, onClose }) {
   return (
     <SceneUrlModal
       enableSpoke={configs.feature("enable_spoke")}
+      editorName={configs.translation("editor-name")}
       onValidateUrl={onValidateUrl}
       onSubmit={onSubmit}
       onClose={onClose}

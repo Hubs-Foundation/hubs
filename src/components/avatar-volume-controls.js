@@ -10,7 +10,6 @@ class AudioNormalizer {
   constructor(audio) {
     this.audio = audio;
     this.analyser = audio.context.createAnalyser();
-    this.compressor = audio.context.createDynamicsCompressor();
     this.connected = false;
 
     // To analyse volume, 32 fftsize may be good enough
@@ -19,10 +18,6 @@ class AudioNormalizer {
     this.timeData = new Uint8Array(this.analyser.frequencyBinCount);
     this.volumes = [];
     this.volumeSum = 0;
-
-    // To protect user's ears, we insert compressor in case of misguessing the volume.
-    // Threshold -30 is just an arbitary number so far.
-    this.compressor.threshold.setValueAtTime(-30, audio.context.currentTime);
   }
 
   apply() {
@@ -77,7 +72,7 @@ class AudioNormalizer {
       this.audio.disconnect();
     }
     const filters = this.audio.getFilters();
-    filters.unshift(this.analyser, this.gain, this.compressor);
+    filters.unshift(this.analyser, this.gain);
     this.audio.setFilters(filters);
     if (this.audio.source && !this.audio.isPlaying) {
       this.audio.connect();
@@ -89,7 +84,7 @@ class AudioNormalizer {
     if (this.audio.source && !this.audio.isPlaying) {
       this.audio.disconnect();
     }
-    const filters = [this.analyser, this.gain, this.compressor];
+    const filters = [this.analyser, this.gain];
     this.audio.setFilters(this.audio.getFilters().filter(filter => !filters.includes(filter)));
     if (this.audio.source && !this.audio.isPlaying) {
       this.audio.connect();

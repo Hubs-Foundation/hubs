@@ -10,6 +10,7 @@ Options:
     -a --audio=<file>    File to replay for the bot's outgoing audio
     -v --volume=<number> Audio volume (default: 1.0)
     -d --data=<file>     File to replay for the bot's data channel
+    -s --spawn=<string>  Spawn point
 `;
 
 const docopt = require("docopt").docopt;
@@ -47,8 +48,9 @@ function log(...objs) {
   if (volumeOption !== null && options["--audio"]) {
     params.audio_volume = volumeOption;
   }
+  const spawnPoint = options["--spawn"] ? `#${options["--spawn"]}` : "";
 
-  const url = `${baseUrl}?${querystring.stringify(params)}`;
+  const url = `${baseUrl}?${querystring.stringify(params)}${spawnPoint}`;
   log(url);
 
   const navigate = async () => {

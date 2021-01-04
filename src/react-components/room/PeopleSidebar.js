@@ -13,19 +13,20 @@ import { ReactComponent as VolumeOffIcon } from "../icons/VolumeOff.svg";
 import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
 import { List, ButtonListItem } from "../layout/List";
+import { FormattedMessage, useIntl } from "react-intl";
 
-function getDeviceLabel(ctx) {
+function getDeviceLabel(ctx, intl) {
   if (ctx) {
     if (ctx.mobile) {
-      return "On Mobile";
+      return intl.formatMessage({ id: "people-sidebar.device-label.mobile", defaultMessage: "Mobile" });
     } else if (ctx.discord) {
-      return "Discord Bot";
+      return intl.formatMessage({ id: "people-sidebar.device-label.discord", defaultMessage: "Discord Bot" });
     } else if (ctx.hmd) {
-      return "In VR";
+      return intl.formatMessage({ id: "people-sidebar.device-label.vr", defaultMessage: "VR" });
     }
   }
 
-  return "On Desktop";
+  return intl.formatMessage({ id: "people-sidebar.device-label.desktop", defaultMessage: "Desktop" });
 }
 
 function getDeviceIconComponent(ctx) {
@@ -42,16 +43,16 @@ function getDeviceIconComponent(ctx) {
   return DesktopIcon;
 }
 
-function getVoiceLabel(micPresence) {
+function getVoiceLabel(micPresence, intl) {
   if (micPresence) {
     if (micPresence.talking) {
-      return "Talking";
+      return intl.formatMessage({ id: "people-sidebar.voice-label.talking", defaultMessage: "Talking" });
     } else if (micPresence.muted) {
-      return "Muted";
+      return intl.formatMessage({ id: "people-sidebar.voice-label.muted", defaultMessage: "Muted" });
     }
   }
 
-  return "Not Talking";
+  return intl.formatMessage({ id: "people-sidebar.voice-label.not-talking", defaultMessage: "Not Talking" });
 }
 
 function getVoiceIconComponent(micPresence) {
@@ -66,40 +67,50 @@ function getVoiceIconComponent(micPresence) {
   return VolumeOffIcon;
 }
 
-// TODO: i18n
-function getPresenceMessage(presence) {
+function getPresenceMessage(presence, intl) {
   switch (presence) {
     case "lobby":
-      return "In Lobby";
+      return intl.formatMessage({ id: "people-sidebar.presence.in-lobby", defaultMessage: "In Lobby" });
     case "room":
-      return "In Room";
+      return intl.formatMessage({ id: "people-sidebar.presence.in-room", defaultMessage: "In Room" });
     case "entering":
-      return "Entering Room";
+      return intl.formatMessage({ id: "people-sidebar.presence.entering", defaultMessage: "Entering Room" });
     default:
       return undefined;
   }
 }
 
-function getPersonName(person) {
-  return person.profile.displayName + (person.isMe ? " (You)" : "");
-}
+function getPersonName(person, intl) {
+  const you = intl.formatMessage({
+    id: "people-sidebar.person-name.you",
+    defaultMessage: "You"
+  });
 
-function getLabel(person) {
-  if (person.context.discord) {
-    return `${getDeviceLabel(person.context)}, ${getPersonName(person)} is ${getPresenceMessage(person.presence)}.`;
-  }
-
-  return `${person.roles.owner ? "Moderator " : ""}${getPersonName(person)}, is ${getPresenceMessage(
-    person.presence
-  )} and ${getVoiceLabel(person.micPresence)} ${getDeviceLabel(person.context)}.`;
+  return person.profile.displayName + (person.isMe ? ` (${you})` : "");
 }
 
 export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, onMuteAll }) {
+  const intl = useIntl();
+
   return (
     <Sidebar
-      title={`People (${people.length})`}
+      title={
+        <FormattedMessage
+          id="people-sidebar.title"
+          defaultMessage="People ({numPeople})"
+          values={{ numPeople: people.length }}
+        />
+      }
       beforeTitle={<CloseButton onClick={onClose} />}
-      afterTitle={showMuteAll ? <IconButton onClick={onMuteAll}>Mute All</IconButton> : undefined}
+      afterTitle={
+        showMuteAll ? (
+          <IconButton onClick={onMuteAll}>
+            <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="Mute All" />
+          </IconButton>
+        ) : (
+          undefined
+        )
+      }
     >
       <List>
         {people.map(person => {
@@ -111,16 +122,20 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
               className={styles.person}
               key={person.id}
               type="button"
-              aria-label={getLabel(person)}
               onClick={e => onSelectPerson(person, e)}
             >
-              {<DeviceIcon title={getDeviceLabel(person.context)} />}
-              {!person.context.discord && VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micPresence)} />}
-              <p>{getPersonName(person)}</p>
+              {<DeviceIcon title={getDeviceLabel(person.context, intl)} />}
+              {!person.context.discord && VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micPresence, intl)} />}
+              <p>{getPersonName(person, intl)}</p>
               {person.roles.owner && (
-                <StarIcon title="Moderator" className={styles.moderatorIcon} width={12} height={12} />
+                <StarIcon
+                  title={intl.formatMessage({ id: "people-sidebar.moderator-label", defaultMessage: "Moderator" })}
+                  className={styles.moderatorIcon}
+                  width={12}
+                  height={12}
+                />
               )}
-              <p className={styles.presence}>{getPresenceMessage(person.presence)}</p>
+              <p className={styles.presence}>{getPresenceMessage(person.presence, intl)}</p>
             </ButtonListItem>
           );
         })}

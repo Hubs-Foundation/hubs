@@ -150,7 +150,7 @@ export function Popover({
 Popover.propTypes = {
   initiallyVisible: PropTypes.bool,
   placement: PropTypes.string,
-  title: PropTypes.string.isRequired,
+  title: PropTypes.node.isRequired,
   children: PropTypes.func.isRequired,
   content: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
   disableFullscreen: PropTypes.bool,

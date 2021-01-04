@@ -11,11 +11,12 @@ export function PageContainer({ children, ...rest }) {
     <Page
       showCloud={configs.feature("show_cloud")}
       enableSpoke={configs.feature("enable_spoke")}
+      editorName={configs.translation("editor-name")}
       showDocsLink={configs.feature("show_docs_link")}
       docsUrl={configs.link("docs", "https://hubs.mozilla.com/docs")}
       showSourceLink={configs.feature("show_source_link")}
       showCommunityLink={configs.feature("show_community_link")}
-      communityUrl={configs.link("community", "https://discord.gg/wHmY4nd")}
+      communityUrl={configs.link("community", "https://discord.gg/dFJncWwHun")}
       isAdmin={auth.isAdmin}
       isSignedIn={auth.isSignedIn}
       email={auth.email}

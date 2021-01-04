@@ -19,7 +19,7 @@ export function Modal({ title, beforeTitle, afterTitle, children, contentClassNa
 }
 
 Modal.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.node,
   beforeTitle: PropTypes.node,
   afterTitle: PropTypes.node,
   children: PropTypes.node,

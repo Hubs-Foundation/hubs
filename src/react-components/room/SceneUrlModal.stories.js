@@ -12,3 +12,11 @@ export default {
 export const ValidUrl = () => <RoomLayout modal={<SceneUrlModal onValidateUrl={() => true} />} />;
 
 export const InvalidUrl = () => <RoomLayout modal={<SceneUrlModal onValidateUrl={() => "Invalid Scene Url"} />} />;
+
+export const ValidUrlWithSpoke = () => (
+  <RoomLayout modal={<SceneUrlModal enableSpoke editorName="Spoke" onValidateUrl={() => true} />} />
+);
+
+export const InvalidUrlWithSpoke = () => (
+  <RoomLayout modal={<SceneUrlModal enableSpoke editorName="Spoke" onValidateUrl={() => "Invalid Scene Url"} />} />
+);

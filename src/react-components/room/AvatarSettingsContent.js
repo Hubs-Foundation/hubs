@@ -1,9 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button } from "../input/Button";
+import { Button, AcceptButton } from "../input/Button";
 import styles from "./AvatarSettingsContent.scss";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
+import { FormattedMessage } from "react-intl";
 
 export function AvatarSettingsContent({
   displayName,
@@ -12,7 +13,6 @@ export function AvatarSettingsContent({
   onChangeDisplayName,
   avatarPreview,
   displayNamePattern,
-  displayNameDescription,
   onChangeAvatar,
   ...rest
 }) {
@@ -20,24 +20,27 @@ export function AvatarSettingsContent({
     <Column as="form" className={styles.content} {...rest}>
       <TextInputField
         disabled={disableDisplayNameInput}
-        label="Display Name"
+        label={<FormattedMessage id="avatar-settings-content.display-name-label" defaultMessage="Display Name" />}
         value={displayName}
         pattern={displayNamePattern}
         spellCheck="false"
         required
         onChange={onChangeDisplayName}
-        description={displayNameDescription}
+        description={
+          <FormattedMessage
+            id="avatar-settings-content.display-name-description"
+            defaultMessage="Alphanumerics and hyphens. At least 3 characters, no more than 32"
+          />
+        }
         ref={displayNameInputRef}
       />
       <div className={styles.avatarPreviewContainer}>
         {avatarPreview || <div />}
         <Button type="button" onClick={onChangeAvatar}>
-          Change Avatar
+          <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
         </Button>
       </div>
-      <Button preset="accept" type="submit">
-        Accept
-      </Button>
+      <AcceptButton preset="accept" type="submit" />
     </Column>
   );
 }
@@ -48,7 +51,6 @@ AvatarSettingsContent.propTypes = {
   displayNameInputRef: PropTypes.func,
   disableDisplayNameInput: PropTypes.bool,
   displayNamePattern: PropTypes.string,
-  displayNameDescription: PropTypes.string,
   onChangeDisplayName: PropTypes.func,
   avatarPreview: PropTypes.node,
   onChangeAvatar: PropTypes.func

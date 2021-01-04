@@ -17,14 +17,18 @@ export function Footer({
     <footer>
       <div className={styles.poweredBy}>
         {!hidePoweredBy && (
-          <>
-            <span className={styles.prefix}>
-              <FormattedMessage id="home.powered_by_prefix" />
-            </span>
-            <a className={styles.link} href="https://hubs.mozilla.com/cloud">
-              <FormattedMessage id="home.powered_by_link" />
-            </a>
-          </>
+          <FormattedMessage
+            id="footer.powered-by"
+            defaultMessage="Powered by <a>Hubs Cloud</a>"
+            values={{
+              // eslint-disable-next-line react/display-name
+              a: chunks => (
+                <a className={styles.link} href="https://hubs.mozilla.com/cloud">
+                  {chunks}
+                </a>
+              )
+            }}
+          />
         )}
       </div>
       <nav>
@@ -32,27 +36,31 @@ export function Footer({
           {showWhatsNewLink && (
             <li>
               <a href="/whats-new">
-                <FormattedMessage id="home.whats_new_link" />
+                <FormattedMessage id="footer.whats-new" defaultMessage="What's New" />
               </a>
             </li>
           )}
           {showTerms && (
             <li>
               <a target="_blank" rel="noopener noreferrer" href={termsUrl}>
-                <FormattedMessage id="home.terms_of_use" />
+                <FormattedMessage id="footer.terms-of-use" defaultMessage="Terms of Use" />
               </a>
             </li>
           )}
           {showPrivacy && (
             <li>
               <a className={styles.link} target="_blank" rel="noopener noreferrer" href={privacyUrl}>
-                <FormattedMessage id="home.privacy_notice" />
+                <FormattedMessage id="footer.privacy-notice" defaultMessage="Privacy Notice" />
               </a>
             </li>
           )}
           {showCompanyLogo && (
             <li>
-              <img className={styles.companyLogo} src={companyLogoUrl} />
+              <img
+                className={styles.companyLogo}
+                src={companyLogoUrl}
+                alt={<FormattedMessage id="footer.logo-alt" defaultMessage="Logo" />}
+              />
             </li>
           )}
         </ul>

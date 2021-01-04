@@ -6,15 +6,22 @@ import { CloseButton } from "../input/CloseButton";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 
-export function TwitterOAuthModal({ onConnect, onClose }) {
+export function TwitterOAuthModal({ appName, onConnect, onClose }) {
   return (
-    <Modal title="Connect to Twitter" beforeTitle={<CloseButton onClick={onClose} />}>
+    <Modal
+      title={<FormattedMessage id="twitter-oauth-modal.title" defaultMessage="Connect to Twitter" />}
+      beforeTitle={<CloseButton onClick={onClose} />}
+    >
       <Column padding center centerMd="both" grow>
         <p>
-          <FormattedMessage id="oauth-dialog.message.twitter" />
+          <FormattedMessage
+            id="twitter-oauth-modal.message"
+            defaultMessage="Connect to Twitter to send tweets from {appName}."
+            values={{ appName }}
+          />
         </p>
         <Button preset="blue" onClick={onConnect}>
-          <FormattedMessage id="oauth-dialog.sign-in.twitter" />
+          <FormattedMessage id="twitter-oauth-modal.connect-button" defaultMessage="Connect to Twitter" />
         </Button>
       </Column>
     </Modal>
@@ -22,6 +29,7 @@ export function TwitterOAuthModal({ onConnect, onClose }) {
 }
 
 TwitterOAuthModal.propTypes = {
+  appName: PropTypes.string.isRequired,
   onConnect: PropTypes.func,
   onClose: PropTypes.func
 };

@@ -4,7 +4,6 @@ import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
-import { getLocale, getMessages } from "./utils/i18n";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import { SignInModalContainer } from "./react-components/auth/SignInModalContainer";
 import { PageContainer } from "./react-components/layout/PageContainer";
@@ -19,7 +18,7 @@ window.APP = { store };
 
 function Root() {
   return (
-    <WrappedIntlProvider locale={getLocale()} messages={getMessages()}>
+    <WrappedIntlProvider>
       <AuthContextProvider store={store}>
         <PageContainer style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
           <Center>

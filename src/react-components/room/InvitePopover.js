@@ -7,6 +7,7 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
+import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 
 function InvitePopoverContent({ url, code, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
   return (
@@ -17,9 +18,21 @@ function InvitePopoverContent({ url, code, embed, inviteRequired, fetchingInvite
         </>
       ) : (
         <>
-          <CopyableTextInputField label="Room Link" value={url} buttonPreset="green" />
-          <CopyableTextInputField label="Room Code" value={code} buttonPreset="blue" />
-          <CopyableTextInputField label="Embed Code" value={embed} buttonPreset="purple" />
+          <CopyableTextInputField
+            label={<FormattedMessage id="invite-popover.room-link" defaultMessage="Room Link" />}
+            value={url}
+            buttonPreset="green"
+          />
+          <CopyableTextInputField
+            label={<FormattedMessage id="invite-popover.room-code" defaultMessage="Room Code" />}
+            value={code}
+            buttonPreset="blue"
+          />
+          <CopyableTextInputField
+            label={<FormattedMessage id="invite-popover.embed-code" defaultMessage="Embed Code" />}
+            value={embed}
+            buttonPreset="purple"
+          />
         </>
       )}
     </Column>
@@ -36,6 +49,11 @@ InvitePopoverContent.propTypes = {
   revokeInvite: PropTypes.func
 };
 
+const invitePopoverTitle = defineMessage({
+  id: "invite-popover.title",
+  defaultMessage: "Invite"
+});
+
 export function InvitePopoverButton({
   url,
   code,
@@ -48,9 +66,12 @@ export function InvitePopoverButton({
   revokeInvite,
   ...rest
 }) {
+  const intl = useIntl();
+  const title = intl.formatMessage(invitePopoverTitle);
+
   return (
     <Popover
-      title="Invite"
+      title={title}
       content={() => (
         <InvitePopoverContent
           url={url}
@@ -73,7 +94,7 @@ export function InvitePopoverButton({
           icon={<InviteIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label="Invite"
+          label={title}
           {...rest}
         />
       )}

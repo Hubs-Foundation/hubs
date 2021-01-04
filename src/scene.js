@@ -38,17 +38,20 @@ const qs = new URLSearchParams(location.search);
 import "./components/event-repeater";
 
 import registerTelemetry from "./telemetry";
+import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 
 disableiOSZoom();
 
 function mountUI(scene, props = {}) {
   ReactDOM.render(
-    <SceneUI
-      {...{
-        scene,
-        ...props
-      }}
-    />,
+    <WrappedIntlProvider>
+      <SceneUI
+        {...{
+          scene,
+          ...props
+        }}
+      />
+    </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );
 }

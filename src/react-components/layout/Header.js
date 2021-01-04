@@ -9,6 +9,7 @@ import styles from "./Header.scss";
 export function Header({
   showCloud,
   enableSpoke,
+  editorName,
   showDocsLink,
   docsUrl,
   showSourceLink,
@@ -24,40 +25,40 @@ export function Header({
       <nav>
         <ul>
           <li>
-            <a href="/">Home</a>
+            <a href="/">
+              <FormattedMessage id="header.home" defaultMessage="Home" />
+            </a>
           </li>
           {showCloud && (
             <li>
               <a href="/cloud">
-                <FormattedMessage id="home.cloud_link" />
+                <FormattedMessage id="header.cloud" defaultMessage="Hubs Cloud" />
               </a>
             </li>
           )}
           {enableSpoke && (
             <li>
-              <a href="/spoke">
-                <FormattedMessage id="editor-name" />
-              </a>
+              <a href="/spoke">{editorName}</a>
             </li>
           )}
           {showDocsLink && (
             <li>
               <a href={docsUrl}>
-                <FormattedMessage id="home.docs_link" />
+                <FormattedMessage id="header.docs" defaultMessage="Docs" />
               </a>
             </li>
           )}
           {showSourceLink && (
             <li>
               <a href="https://github.com/mozilla/hubs">
-                <FormattedMessage id="home.source_link" />
+                <FormattedMessage id="header.source" defaultMessage="Source" />
               </a>
             </li>
           )}
           {showCommunityLink && (
             <li>
               <a href={communityUrl}>
-                <FormattedMessage id="home.community_link" />
+                <FormattedMessage id="header.community" defaultMessage="Community" />
               </a>
             </li>
           )}
@@ -68,7 +69,7 @@ export function Header({
                   <FontAwesomeIcon icon={faCog} />
                 </i>
                 &nbsp;
-                <FormattedMessage id="home.admin" />
+                <FormattedMessage id="header.admin" defaultMessage="Admin" />
               </a>
             </li>
           )}
@@ -78,15 +79,19 @@ export function Header({
         {isSignedIn ? (
           <div>
             <span>
-              <FormattedMessage id="sign-in.as" /> {maskEmail(email)}
+              <FormattedMessage
+                id="header.signed-in-as"
+                defaultMessage="Signed in as {email}"
+                values={{ email: maskEmail(email) }}
+              />
             </span>{" "}
             <a href="#" onClick={onSignOut}>
-              <FormattedMessage id="sign-in.out" />
+              <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
             </a>
           </div>
         ) : (
           <a href="/signin" rel="noreferrer noopener">
-            <FormattedMessage id="sign-in.in" />
+            <FormattedMessage id="header.sign-in" defaultMessage="Sign In" />
           </a>
         )}
       </div>
@@ -97,6 +102,7 @@ export function Header({
 Header.propTypes = {
   showCloud: PropTypes.bool,
   enableSpoke: PropTypes.bool,
+  editorName: PropTypes.string,
   showDocsLink: PropTypes.bool,
   docsUrl: PropTypes.string,
   showSourceLink: PropTypes.bool,

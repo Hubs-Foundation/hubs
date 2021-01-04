@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import InfiniteScroll from "react-infinite-scroller";
 import markdownit from "markdown-it";
+import { FormattedMessage } from "react-intl";
+import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 
 import configs from "./utils/configs";
 import registerTelemetry from "./telemetry";
@@ -93,7 +95,9 @@ class WhatsNew extends Component {
           </div>
           <div className="main">
             <div className="content">
-              <h1>What&apos;s New</h1>
+              <h1>
+                <FormattedMessage id="whats-new-page.title" defaultMessage="What's New" />
+              </h1>
               {this.state.notes.map((note, i) => {
                 return (
                   <div key={i} className="note">
@@ -118,5 +122,10 @@ class WhatsNew extends Component {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  ReactDOM.render(<WhatsNew />, document.getElementById("ui-root"));
+  ReactDOM.render(
+    <WrappedIntlProvider>
+      <WhatsNew />
+    </WrappedIntlProvider>,
+    document.getElementById("ui-root")
+  );
 });

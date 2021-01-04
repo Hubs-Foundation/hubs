@@ -14,7 +14,7 @@ registerTelemetry("/discord", "Discord Landing Page");
 
 const inviteUrl = "https://forms.gle/GGPgarSuY5WaTNCT8";
 
-class DiscordLanding extends Component {
+class DiscordPage extends Component {
   componentDidMount() {}
 
   render() {
@@ -24,10 +24,10 @@ class DiscordLanding extends Component {
           <div className={styles.header}>
             <div className={styles.headerLinks}>
               <a href="/" rel="noreferrer noopener">
-                Try Hubs
+                <FormattedMessage id="discord-page.hubs-cta" defaultMessage="Try Hubs" />
               </a>
-              <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
-                <FormattedMessage id="discord.community_link" />
+              <a href="https://discord.gg/dFJncWwHun" rel="noreferrer noopener">
+                <FormattedMessage id="discord-page.community-link" defaultMessage="Hubs Discord" />
               </a>
             </div>
           </div>
@@ -38,15 +38,22 @@ class DiscordLanding extends Component {
                   <img src={discordBotLogo} />
                 </div>
                 <div className={styles.primaryTagline}>
-                  <FormattedMessage id="discord.primary_tagline" />
+                  <FormattedMessage
+                    id="discord-page.primary-tagline"
+                    defaultMessage="Share a virtual room with your community.{linebreak}Watch videos, play with 3D objects, or just hang out."
+                    values={{ linebreak: <br /> }}
+                  />
                 </div>
                 <div className={styles.secondaryTagline}>
-                  <FormattedMessage id="discord.secondary_tagline" />
+                  <FormattedMessage
+                    id="discord-page.secondary-tagline"
+                    defaultMessage="No downloads or sign up. Full VR support too."
+                  />
                 </div>
                 <div className={styles.actionButtons}>
                   <a href={inviteUrl} className={styles.downloadButton}>
                     <div>
-                      <FormattedMessage id="discord.contact_us" />
+                      <FormattedMessage id="discord-page.invite-button" defaultMessage="Invite Bot to Server" />
                     </div>
                   </a>
                 </div>
@@ -57,7 +64,7 @@ class DiscordLanding extends Component {
                   <source src={discordBotVideoWebM} type="video/webm" />
                 </video>
                 <div className={styles.splashTagline}>
-                  <FormattedMessage id="discord.splash_tag" />
+                  <FormattedMessage id="discord-page.splash-tag" defaultMessage="Designed for serious businessing." />
                 </div>
               </div>
             </div>
@@ -70,5 +77,5 @@ class DiscordLanding extends Component {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<DiscordLanding />, document.getElementById("ui-root"));
+  ReactDOM.render(<DiscordPage />, document.getElementById("ui-root"));
 });

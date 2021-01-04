@@ -4,6 +4,7 @@ import { FormattedMessage, useIntl, defineMessages } from "react-intl";
 import { Tip } from "./Tip";
 import { useEffect } from "react";
 import { discordBridgesForPresences, hasEmbedPresences } from "../../utils/phoenix-utils";
+import configs from "../../utils/configs";
 
 const onboardingMessages = defineMessages({
   "tips.mobile.look": {
@@ -20,7 +21,7 @@ const onboardingMessages = defineMessages({
   },
   "tips.desktop.look": {
     id: "tips.desktop.look",
-    defaultMessage: "Welcome to %app-name%! Let's take a quick tour. 👋 Click and drag to look around."
+    defaultMessage: "Welcome to {appName}! Let's take a quick tour. 👋 Click and drag to look around."
   },
   "tips.desktop.locomotion": {
     id: "tips.desktop.locomotion",
@@ -35,6 +36,20 @@ const onboardingMessages = defineMessages({
     defaultMessage: "Nobody else is here. Use the invite button in the bottom left to share this room."
   }
 });
+
+function OkDismissLabel() {
+  return <FormattedMessage id="tips.dismiss.ok" defaultMessage="Ok" />;
+}
+
+function SkipDismissLabel() {
+  return <FormattedMessage id="tips.dismiss.skip" defaultMessage="Skip" />;
+}
+
+export function FullscreenTip(props) {
+  <Tip {...props} dismissLabel={<OkDismissLabel />}>
+    <FormattedMessage id="tips.fullscreen" defaultMessage="Entered fullscreen mode. Press Escape to show UI." />
+  </Tip>;
+}
 
 export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
   const intl = useIntl();
@@ -81,32 +96,36 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
     }
 
     return (
-      <Tip onDismiss={() => setLobbyTipDismissed(true)} dismissLabel={<FormattedMessage id="tips.dismiss.ok" />}>
-        <FormattedMessage id="tips.lobby" />
+      <Tip onDismiss={() => setLobbyTipDismissed(true)} dismissLabel={<OkDismissLabel />}>
+        <FormattedMessage id="tips.lobby" defaultMessage="You're in the lobby. Others cannot see or hear you." />
       </Tip>
     );
   } else if (inRoom) {
     if (onboardingTipId) {
       return (
-        <Tip onDismiss={onSkipOnboarding} dismissLabel={<FormattedMessage id="tips.dismiss.skip" />}>
-          {intl.formatMessage(onboardingMessages[onboardingTipId])}
+        <Tip onDismiss={onSkipOnboarding} dismissLabel={<SkipDismissLabel />}>
+          {intl.formatMessage(onboardingMessages[onboardingTipId], { appName: configs.translation("app-name") })}
         </Tip>
       );
     }
 
     if (isStreaming && !streamingTipDismissed) {
       return (
-        <Tip onDismiss={() => setStreamingTipDismissed(true)} dismissLabel={<FormattedMessage id="tips.dismiss.ok" />}>
-          <FormattedMessage id="tips.streaming" />
+        <Tip onDismiss={() => setStreamingTipDismissed(true)} dismissLabel={<OkDismissLabel />}>
+          <FormattedMessage
+            id="tips.streaming"
+            defaultMessage="Now broadcasting to the lobby. Exit streamer mode in the more menu when you're done."
+          />
         </Tip>
       );
     }
 
     if (isBroadcasting && !broadcastTipDismissed) {
       return (
-        <Tip onDismiss={() => setBroadcastTipDismissed(true)} dismissLabel={<FormattedMessage id="tips.dismiss.ok" />}>
+        <Tip onDismiss={() => setBroadcastTipDismissed(true)} dismissLabel={<OkDismissLabel />}>
           <FormattedMessage
             id="tips.discord"
+            defaultMessage="Chat in this room is being bridged to {broadcastTarget} on Discord."
             values={{ broadcastTarget: discordBridges.map(channelName => "#" + channelName).join(", ") }}
           />
         </Tip>
@@ -115,8 +134,11 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
 
     if ((isEmbedded || hasEmbedPresences(presences)) && !embeddedTipDismissed) {
       return (
-        <Tip onDismiss={() => setEmbeddedTipDismissed(true)} dismissLabel={<FormattedMessage id="tips.dismiss.ok" />}>
-          <FormattedMessage id="tips.embedded" />
+        <Tip onDismiss={() => setEmbeddedTipDismissed(true)} dismissLabel={<OkDismissLabel />}>
+          <FormattedMessage
+            id="tips.embedded"
+            defaultMessage="This room is embedded, so it may be visible to visitors on other websites."
+          />
         </Tip>
       );
     }

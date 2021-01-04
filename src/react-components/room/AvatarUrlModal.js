@@ -4,7 +4,7 @@ import { Modal } from "../modal/Modal";
 import { CloseButton } from "../input/CloseButton";
 import { TextInputField } from "../input/TextInputField";
 import { useForm } from "react-hook-form";
-import { Button } from "../input/Button";
+import { ApplyButton } from "../input/Button";
 import { FormattedMessage } from "react-intl";
 import { Column } from "../layout/Column";
 
@@ -15,20 +15,21 @@ export function AvatarUrlModal({ onSubmit, onClose }) {
       <Column as="form" padding center onSubmit={handleSubmit(onSubmit)}>
         <TextInputField
           name="url"
-          label="Avatar GLB URL"
+          label={<FormattedMessage id="avatar-url-modal.avatar-url-label" defaultMessage="Avatar GLB URL" />}
           placeholder="https://example.com/avatar.glb"
           type="url"
           required
           ref={register}
           description={
             <a href="https://hubs.mozilla.com/docs/intro-avatars.html" target="_blank" rel="noopener noreferrer">
-              Learn more about custom avatars
+              <FormattedMessage
+                id="avatar-url-modal.custom-avatar-docs-link"
+                defaultMessage="Learn more about custom avatars"
+              />
             </a>
           }
         />
-        <Button type="submit" preset="accept">
-          <FormattedMessage id="avatar-url-dialog.apply" />
-        </Button>
+        <ApplyButton type="submit" />
       </Column>
     </Modal>
   );

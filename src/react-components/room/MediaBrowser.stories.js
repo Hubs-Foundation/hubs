@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
 import { MediaBrowser } from "./MediaBrowser";
 import { IconButton } from "../input/IconButton";

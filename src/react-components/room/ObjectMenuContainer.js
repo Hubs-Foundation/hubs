@@ -17,12 +17,15 @@ import { ReactComponent as GoToIcon } from "../icons/GoTo.svg";
 import { ReactComponent as DeleteIcon } from "../icons/Delete.svg";
 import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { ReactComponent as HideIcon } from "../icons/Hide.svg";
+import { FormattedMessage } from "react-intl";
 
 function MyMenuItems({ onOpenProfile }) {
   return (
     <ObjectMenuButton onClick={onOpenProfile}>
       <AvatarIcon />
-      <span>Edit Avatar</span>
+      <span>
+        <FormattedMessage id="object-menu.edit-avatar-button" defaultMessage="Edit Avatar" />
+      </span>
     </ObjectMenuButton>
   );
 }
@@ -42,7 +45,9 @@ function PlayerMenuItems({ hubChannel, activeObject, deselectObject }) {
       }}
     >
       <HideIcon />
-      <span>Hide</span>
+      <span>
+        <FormattedMessage id="object-menu.hide-avatar-button" defaultMessage="Hide" />
+      </span>
     </ObjectMenuButton>
   );
 }
@@ -63,12 +68,20 @@ function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject }) {
     <>
       <ObjectMenuButton disabled={!canPin} onClick={togglePinned}>
         <PinIcon />
-        <span>{isPinned ? "Unpin" : "Pin"}</span>
+        <span>
+          {isPinned ? (
+            <FormattedMessage id="object-menu.unpin-object-button" defaultMessage="Unpin" />
+          ) : (
+            <FormattedMessage id="object-menu.pin-object-button" defaultMessage="Pin" />
+          )}
+        </span>
       </ObjectMenuButton>
       {url && (
         <ObjectMenuButton as="a" href={url} target="_blank" rel="noopener noreferrer">
           <LinkIcon />
-          <span>Link</span>
+          <span>
+            <FormattedMessage id="object-menu.object-link-button" defaultMessage="Link" />
+          </span>
         </ObjectMenuButton>
       )}
       <ObjectMenuButton
@@ -79,7 +92,9 @@ function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject }) {
         }}
       >
         <GoToIcon />
-        <span>View</span>
+        <span>
+          <FormattedMessage id="object-menu.view-object-button" defaultMessage="View" />
+        </span>
       </ObjectMenuButton>
       <ObjectMenuButton
         disabled={!canRemoveObject}
@@ -89,7 +104,9 @@ function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject }) {
         }}
       >
         <DeleteIcon />
-        <span>Delete</span>
+        <span>
+          <FormattedMessage id="object-menu.delete-object-button" defaultMessage="Delete" />
+        </span>
       </ObjectMenuButton>
     </>
   );
@@ -124,7 +141,7 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
 
   return (
     <ObjectMenu
-      title="Object"
+      title={<FormattedMessage id="object-menu.title" defaultMessage="Object" />}
       currentObjectIndex={objects.indexOf(activeObject)}
       objectCount={objects.length}
       onClose={deselectObject}
