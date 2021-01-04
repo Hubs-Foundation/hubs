@@ -1,12 +1,12 @@
 import "./utils/configs";
 import { getAbsoluteHref } from "./utils/media-url-utils";
 import { isValidSceneUrl } from "./utils/scene-url-utils";
-import { getMessages } from "./utils/i18n";
 import { spawnChatMessage } from "./react-components/chat-message";
 import { SOUND_QUACK, SOUND_SPECIAL_QUACK } from "./systems/sound-effects-system";
 import ducky from "./assets/models/DuckyMesh.glb";
 import { EventTarget } from "event-target-shim";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
+import { LogMessageType } from "./react-components/room/ChatSidebar";
 
 let uiRoot;
 // Handles user-entered messages
@@ -26,8 +26,8 @@ export default class MessageDispatch extends EventTarget {
     this.dispatchEvent(new CustomEvent("message", { detail: message }));
   }
 
-  log = body => {
-    this.receive({ type: "log", body });
+  log = (messageType, props) => {
+    this.receive({ type: "log", messageType, props });
   };
 
   dispatch = message => {
@@ -46,7 +46,7 @@ export default class MessageDispatch extends EventTarget {
     const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
 
     if (!entered && (!isGhost || command === "duck")) {
-      this.receive({ type: "log", body: "You must enter the room to use this command." });
+      this.log(LogMessageType.roomEntryRequired);
       return;
     }
 
@@ -61,10 +61,10 @@ export default class MessageDispatch extends EventTarget {
       case "fly":
         if (this.scene.systems["hubs-systems"].characterController.fly) {
           this.scene.systems["hubs-systems"].characterController.enableFly(false);
-          this.receive({ type: "log", body: "Fly mode disabled." });
+          this.log(LogMessageType.flyModeDisabled);
         } else {
           if (this.scene.systems["hubs-systems"].characterController.enableFly(true)) {
-            this.receive({ type: "log", body: "Fly mode enabled." });
+            this.log(LogMessageType.flyModeEnabled);
           }
         }
         break;
@@ -112,10 +112,10 @@ export default class MessageDispatch extends EventTarget {
           if (await isValidSceneUrl(args[0])) {
             err = this.hubChannel.updateScene(args[0]);
             if (err === "unauthorized") {
-              this.receive({ type: "log", body: "You do not have permission to change the scene." });
+              this.log(LogMessageType.unauthorizedSceneChange);
             }
           } else {
-            this.receive({ type: "log", body: getMessages()["invalid-scene-url"] });
+            this.log(LogMessageType.inalidSceneUrl);
           }
         } else if (this.hubChannel.canOrWillIfCreator("update_hub")) {
           this.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
@@ -125,27 +125,27 @@ export default class MessageDispatch extends EventTarget {
       case "rename":
         err = this.hubChannel.rename(args.join(" "));
         if (err === "unauthorized") {
-          this.receive({ type: "log", body: "You do not have permission to rename this room." });
+          this.log(LogMessageType.unauthorizedRoomRename);
         }
         break;
       case "capture":
         if (!captureSystem.available()) {
-          this.log("Capture unavailable.");
+          this.log(LogMessageType.captureUnavailable);
           break;
         }
         if (args[0] === "stop") {
           if (captureSystem.started()) {
             captureSystem.stop();
-            this.log("Capture stopped.");
+            this.log(LogMessageType.captureStopped);
           } else {
-            this.log("Capture already stopped.");
+            this.log(LogMessageType.captureAlreadyStopped);
           }
         } else {
           if (captureSystem.started()) {
-            this.log("Capture already running.");
+            this.log(LogMessageType.captureAlreadyRunning);
           } else {
             captureSystem.start();
-            this.log("Capture started.");
+            this.log(LogMessageType.captureStarted);
           }
         }
         break;
@@ -155,7 +155,9 @@ export default class MessageDispatch extends EventTarget {
           window.APP.store.update({
             preferences: { audioOutputMode: shouldEnablePositionalAudio ? "panner" : "audio" }
           });
-          this.log(`Positional Audio ${shouldEnablePositionalAudio ? "enabled" : "disabled"}.`);
+          this.log(
+            shouldEnablePositionalAudio ? LogMessageType.positionalAudioEnabled : LogMessageType.positionalAudioDisabled
+          );
         }
         break;
       case "audioNormalization":
@@ -168,17 +170,15 @@ export default class MessageDispatch extends EventTarget {
                 preferences: { audioNormalization: effectiveFactor }
               });
               if (factor) {
-                this.log(`audioNormalization factor is set to ${effectiveFactor}.`);
+                this.log(LogMessageType.setAudioNormalizationFactor, { factor: effectiveFactor });
               } else {
-                this.log("audioNormalization is disabled.");
+                this.log(LogMessageType.audioNormalizationDisabled);
               }
             } else {
-              this.log("audioNormalization command needs a valid number parameter.");
+              this.log(LogMessageType.audioNormalizationNaN);
             }
           } else {
-            this.log(
-              "audioNormalization command needs a base volume number between 0 [no normalization] and 255. Default is 0. The recommended value is 4, if you would like to enable normalization."
-            );
+            this.log(LogMessageType.invalidAudioNormalizationRange);
           }
         }
         break;

@@ -74,7 +74,7 @@ function getPresenceMessage(presence, intl) {
     case "room":
       return intl.formatMessage({ id: "people-sidebar.presence.in-room", defaultMessage: "In Room" });
     case "entering":
-      return intl.formatMessage({ id: "people-sidebar.presence.in-room", defaultMessage: "Entering Room" });
+      return intl.formatMessage({ id: "people-sidebar.presence.entering", defaultMessage: "Entering Room" });
     default:
       return undefined;
   }

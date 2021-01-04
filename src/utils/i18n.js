@@ -1,6 +1,16 @@
 import configs from "./configs";
 import { AVAILABLE_LOCALES, FALLBACK_LOCALES } from "../assets/locales/locale_config";
-import defaultLocaleData from "../assets/locales/en.json";
+
+// These are set in the admin panel and are only included as fallbacks.
+const defaultLocaleData = {
+  "app-name": "App",
+  "editor-name": "Scene Editor",
+  "contact-email": "app@company.com",
+  "company-name": "Company",
+  "share-hashtag": "#app",
+  "app-description": "Share a virtual room with friends.\nWatch videos, play with 3D objects, or just hang out.",
+  "app-tagline": "Private social VR in your web browser"
+};
 
 const DEFAULT_LOCALE = "en";
 const cachedMessages = new Map();

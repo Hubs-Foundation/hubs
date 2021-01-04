@@ -7,7 +7,7 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 
 function InvitePopoverContent({ url, code, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
   return (
@@ -49,6 +49,11 @@ InvitePopoverContent.propTypes = {
   revokeInvite: PropTypes.func
 };
 
+const invitePopoverTitle = defineMessage({
+  id: "invite-popover.title",
+  defaultMessage: "Invite"
+});
+
 export function InvitePopoverButton({
   url,
   code,
@@ -61,9 +66,12 @@ export function InvitePopoverButton({
   revokeInvite,
   ...rest
 }) {
+  const intl = useIntl();
+  const title = intl.formatMessage(invitePopoverTitle);
+
   return (
     <Popover
-      title={<FormattedMessage id="invite-popover.title" defaultMessage="Invite" />}
+      title={title}
       content={() => (
         <InvitePopoverContent
           url={url}
@@ -86,7 +94,7 @@ export function InvitePopoverButton({
           icon={<InviteIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label={<FormattedMessage id="invite-popover.label" defaultMessage="Invite" />}
+          label={title}
           {...rest}
         />
       )}

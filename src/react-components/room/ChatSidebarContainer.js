@@ -67,7 +67,6 @@ function processChatMessage(messageGroups, newMessage) {
 
 // Returns the new message groups array when we receive a message.
 // If the message is ignored, we return the original message group array.
-// TODO: Add i18n
 function updateMessageGroups(messageGroups, newMessage) {
   switch (newMessage.type) {
     case "join":

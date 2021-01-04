@@ -65,3 +65,5 @@ dist/
 certs/
 results/
 .ret.credentials
+src/assets/locales/en.json
+src/assets/locales/extracted-messages.json
