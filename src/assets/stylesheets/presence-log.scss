@@ -32,7 +32,7 @@
 
     :local(.message-body) {
       margin-left: 4px;
-      word-break: break-all;
+      overflow-wrap: break-word;
     }
 
     :local(.message-body-multi) {
