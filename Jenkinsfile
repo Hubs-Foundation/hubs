@@ -63,13 +63,19 @@ pipeline {
           def (major, minor, version) = packageIdent.tokenize('/')[2].tokenize('.')
           def hubsVersion = "${major}.${minor}.${version}.${packageTimeVersion}"
 
+          def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
+          def gitSha = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
+
           if (promoteToChannel != "") {
             runCommand("sudo /usr/bin/hab-ret-pkg-promote ${packageIdent} ${promoteToChannel}")
-            def text = "*${jobName}* promoted ${hubsVersion} to ${promoteToChannel}"
+            def text = (
+              "*<http://localhost:8080/job/${jobName}/${buildNumber}|#${buildNumber}>* *${jobName}* " +
+              "<https://bldr.reticulum.io/#/pkgs/${packageIdent}|${packageIdent}>\n" +
+              "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> " +
+              "Promoted ${hubsVersion} to ${promoteToChannel}: ```${gitSha} ${gitMessage}```\n"
+            )
             sendSlackMessage(text, "#mr-builds", ":gift:", slackURL)
           } else {
-            def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
-            def gitSha = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
             def text = (
               "*<http://localhost:8080/job/${jobName}/${buildNumber}|#${buildNumber}>* *${jobName}* " +
               "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> ${hubsVersion} " +
