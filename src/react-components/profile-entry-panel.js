@@ -134,12 +134,12 @@ export default class ProfileEntryPanel extends Component {
         this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
       },
       onSubmit: this.saveStateAndFinish,
-      showBackButton: this.props.showBackButton,
       onClose: this.props.onClose,
       onBack: this.props.onBack
     };
 
     if (this.props.containerType === "sidebar") {
+      avatarSettingsProps.showBackButton = this.props.showBackButton;
       return <AvatarSettingsSidebar {...avatarSettingsProps} />;
     }
 
