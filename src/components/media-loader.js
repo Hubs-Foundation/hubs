@@ -35,6 +35,8 @@ waitForDOMContentLoaded().then(() => {
 });
 
 const fetchContentType = url => {
+  console.log("inside fetchContentType");
+  console.log(url);
   return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 };
 
@@ -392,7 +394,11 @@ AFRAME.registerComponent("media-loader", {
         }
 
         contentType = (result.meta && result.meta.expected_content_type) || contentType;
+        console.log(1);
+        console.log(contentType);
         thumbnail = result.meta && result.meta.thumbnail && proxiedUrlFor(result.meta.thumbnail);
+        console.log(2);
+        console.log(thumbnail);
       }
 
       // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
@@ -401,21 +407,27 @@ AFRAME.registerComponent("media-loader", {
       // if the component creator didn't know the content type, we didn't get it from reticulum, and
       // we don't think we can infer it from the extension, we need to make a HEAD request to find it out
       contentType = contentType || guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
+      console.log(3);
+      console.log(contentType);
 
       // TODO we should probably just never return "application/octet-stream" as expectedContentType, since its not really useful
       if (contentType === "application/octet-stream") {
+        console.log(4);
         contentType = guessContentType(canonicalUrl) || contentType;
       }
 
       // Some servers treat m3u8 playlists as "audio/x-mpegurl", we always want to treat them as HLS videos
       if (contentType === "audio/x-mpegurl" || contentType === "audio/mpegurl") {
+        console.log(5);
         contentType = "application/vnd.apple.mpegurl";
       }
 
       // We don't want to emit media_resolved for index updates.
       if (forceLocalRefresh || srcChanged) {
+        console.log(6);
         this.el.emit("media_resolved", { src, raw: accessibleUrl, contentType });
       } else {
+        console.log(7);
         this.el.emit("media_refreshed", { src, raw: accessibleUrl, contentType });
       }
 
@@ -426,7 +438,9 @@ AFRAME.registerComponent("media-loader", {
         AFRAME.utils.material.isHLS(canonicalUrl, contentType)
       ) {
         let linkedVideoTexture, linkedAudioSource, linkedMediaElementAudioSource;
+        console.log(8);
         if (this.data.linkedEl) {
+          console.log(9);
           const linkedMediaVideo = this.data.linkedEl.components["media-video"];
 
           linkedVideoTexture = linkedMediaVideo.videoTexture;

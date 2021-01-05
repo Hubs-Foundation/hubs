@@ -125,6 +125,7 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
 const dataUrlRegex = /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/;
 
 export const guessContentType = url => {
+  console.log("inside guessContentType");
   if (!url) return;
   if (url.startsWith("hubs://") && url.endsWith("/video")) return "video/vnd.hubs-webrtc";
   if (url.startsWith("data:")) {
@@ -134,6 +135,10 @@ export const guessContentType = url => {
     }
   }
   const extension = new URL(url, window.location).pathname.split(".").pop();
+  console.log("extension");
+  console.log(extension);
+  console.log("commonKnownContentTypes[extension]");
+  console.log(commonKnownContentTypes[extension]);
   return commonKnownContentTypes[extension];
 };
 
