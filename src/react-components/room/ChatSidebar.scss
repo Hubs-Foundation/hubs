@@ -47,7 +47,7 @@
   max-width: 80%;
   width: max-content;
   font-size: theme.$font-size-md;
-  word-break: break-all;
+  overflow-wrap: break-word;
 
   img, video {
     max-height: 240px;

@@ -6,7 +6,7 @@
   display: block;
   margin: 0;
   text-align: center;
-  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 :local(.rtc-value-text) {
