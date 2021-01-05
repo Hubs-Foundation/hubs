@@ -166,7 +166,7 @@
   "spectating-label.label": "看",
   "tips.desktop.invite": "没人在这里。 使用顶部的按钮分享此房间",
   "tips.desktop.locomotion": "使用 W A S D 键来移动。 按shift键快速移动",
-  "tips.desktop.look": "欢迎来到 %app-name%! 我们开始一个快速的介绍。 👋 点击拖拽四处查看",
+  "tips.desktop.look": "欢迎来到 {appName}! 我们开始一个快速的介绍。 👋 点击拖拽四处查看",
   "tips.desktop.turning": "好极了. 使用 Q and E 键旋转",
   "tips.mobile.invite": "使用分享按钮分享此房间。",
   "tips.mobile.locomotion": "很好! 移动的话，用两根手指",
