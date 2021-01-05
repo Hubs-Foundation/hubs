@@ -1012,7 +1012,15 @@ class UIRoot extends Component {
           this.enterVR();
         }}
         onBack={() => {
-          this.state.linkCodeCancel();
+          if (this.state.linkCodeCancel) {
+            // If the back button is pressed rapidly
+            // (before link code generation finishes),
+            // linkCodeCancel will not be a function
+            // and attempting to call it will throw.
+            // TODO: If that happens it may be ideal to
+            // interrupt and cancel link code generation.
+            this.state.linkCodeCancel();
+          }
           this.setState({ linkCode: null, linkCodeCancel: null });
           this.props.history.goBack();
         }}
