@@ -51,7 +51,7 @@ pipeline {
           )
           runCommand(habCommand)
 
-          def s = $/eval 'ls -rt results/*.hart | head -n 1'/$
+          def s = $/eval 'ls -t results/*.hart | head -n 1'/$
           def hart = sh(returnStdout: true, script: "${s}").trim()
 
           s = $/eval 'tail -n +6 ${hart} | xzcat | tar tf - | grep IDENT'/$
