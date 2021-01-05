@@ -66,8 +66,9 @@ pipeline {
           def gitMessage = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'[%an] %s'").trim()
           def gitSha = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
 
-          if (promoteToChannel != "") {
+          if (promoteToChannel != null && promoteToChannel != "") {
             runCommand("sudo /usr/bin/hab-ret-pkg-promote ${packageIdent} ${promoteToChannel}")
+
             def text = (
               "*<http://localhost:8080/job/${jobName}/${buildNumber}|#${buildNumber}>* *${jobName}* " +
               "<https://bldr.reticulum.io/#/pkgs/${packageIdent}|${packageIdent}>\n" +
