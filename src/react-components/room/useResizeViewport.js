@@ -43,20 +43,6 @@ export function useResizeViewport(viewportRef, store, scene) {
 
   useEffect(
     () => {
-      const oldResizeFunc = scene.resize;
-
-      // HACK: Override native AFRAME resize handler for our own.
-      scene.resize = () => {};
-
-      return () => {
-        scene.resize = oldResizeFunc;
-      };
-    },
-    [scene]
-  );
-
-  useEffect(
-    () => {
       function onStoreChanged() {
         const { maxResolutionWidth, maxResolutionHeight } = store.state.preferences;
 
@@ -107,6 +93,8 @@ export function useResizeViewport(viewportRef, store, scene) {
 
         // Resizing the canvas clears it, so render immediately after resize to prevent flicker.
         scene.renderer.render(scene.object3D, scene.camera);
+
+        scene.emit("rendererresize", null, false);
       });
 
       observer.observe(viewportRef.current);
