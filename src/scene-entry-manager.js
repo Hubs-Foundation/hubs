@@ -79,7 +79,7 @@ export default class SceneEntryManager {
     }
 
     this._setupPlayerRig();
-    this._setupKicking();
+    this._setupRemoving();
     this._setupMedia(mediaStream);
     this._setupCamera();
 
@@ -179,14 +179,14 @@ export default class SceneEntryManager {
     this.avatarRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
 
-  _setupKicking = () => {
-    // This event is only received by the kicker
-    document.body.addEventListener("kicked", ({ detail }) => {
-      const { clientId: kickedClientId } = detail;
+  _setupRemoving = () => {
+    // This event is only received by the remover
+    document.body.addEventListener("removed", ({ detail }) => {
+      const { clientId: removedClientId } = detail;
       const { entities } = NAF.connection.entities;
       for (const id in entities) {
         const entity = entities[id];
-        if (NAF.utils.getCreator(entity) !== kickedClientId) continue;
+        if (NAF.utils.getCreator(entity) !== removedClientId) continue;
 
         if (entity.components.networked.data.persistent) {
           NAF.utils.takeOwnership(entity);
@@ -327,11 +327,11 @@ export default class SceneEntryManager {
       pushHistoryState(this.history, "overlay", "invite");
     });
 
-    this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
+    this.scene.addEventListener("action_remove_client", ({ detail: { clientId } }) => {
       this.performConditionalSignIn(
-        () => this.hubChannel.can("kick_users"),
-        async () => await window.APP.hubChannel.kick(clientId),
-        "kick-user"
+        () => this.hubChannel.can("remove_users"),
+        async () => await window.APP.hubChannel.remove(clientId),
+        "remove-user"
       );
     });
 

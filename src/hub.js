@@ -62,7 +62,7 @@ import "./components/icon-button";
 import "./components/text-button";
 import "./components/block-button";
 import "./components/mute-button";
-import "./components/kick-button";
+import "./components/remove-button";
 import "./components/close-vr-notice-button";
 import "./components/leave-room-button";
 import "./components/visible-if-permitted";
@@ -1131,7 +1131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum(isDebug);
 
   socket.onClose(e => {
-    // We don't currently have an easy way to distinguish between being kicked (server closes socket)
+    // We don't currently have an easy way to distinguish between being removed (server closes socket)
     // and a variety of other network issues that seem to produce the 1000 closure code, but the
     // latter are probably more common. Either way, we just tell the user they got disconnected.
     const NORMAL_CLOSURE = 1000;

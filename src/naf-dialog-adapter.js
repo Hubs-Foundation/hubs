@@ -759,15 +759,15 @@ export default class DialogAdapter {
       });
   }
 
-  kick(clientId, permsToken) {
+  remove(clientId, permsToken) {
     return this._protoo
-      .request("kick", {
+      .request("remove", {
         room_id: this.room,
         user_id: clientId,
         token: permsToken
       })
       .then(() => {
-        document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
+removed", { detail: { clientId: clientId } }));
       });
   }
 

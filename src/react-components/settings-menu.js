@@ -78,7 +78,7 @@ export default class SettingsMenu extends Component {
     const showRoomInfo = !!this.props.hubScene && !hideExtranousItems;
     const showRoomSection = showRoomSettings || showRoomInfo || showCloseRoom;
     const showStreamerMode =
-      this.props.scene.is("entered") && !!this.props.hubChannel.canOrWillIfCreator("kick_users") && !hideExtranousItems;
+      this.props.scene.is("entered") && !!this.props.hubChannel.canOrWillIfCreator("remove_users") && !hideExtranousItems;
 
     // Draw self first
     return (

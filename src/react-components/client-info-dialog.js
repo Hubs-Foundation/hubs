@@ -31,13 +31,13 @@ export default class ClientInfoDialog extends Component {
     avatarThumbnailUrl: null
   };
 
-  kick() {
+  remove() {
     const { clientId, performConditionalSignIn, hubChannel, onClose } = this.props;
 
     performConditionalSignIn(
-      () => hubChannel.can("kick_users"),
-      async () => await hubChannel.kick(clientId),
-      "kick-user"
+      () => hubChannel.can("remove_users"),
+      async () => await hubChannel.remove(clientId),
+      "remove-user"
     );
 
     onClose();
@@ -125,7 +125,7 @@ export default class ClientInfoDialog extends Component {
         <div className={styles.identityName}>{identityName}</div>
       </div>
     );
-    const mayKick = hubChannel.canOrWillIfCreator("kick_users");
+    const mayRemove = hubChannel.canOrWillIfCreator("remove_users");
     const mayMute = hubChannel.canOrWillIfCreator("mute_users");
     const targetIsOwner = !!roles.owner;
     const targetIsCreator = !!roles.creator;
@@ -172,9 +172,9 @@ export default class ClientInfoDialog extends Component {
                 <FormattedMessage id="client-info.mute-button" />
               </button>
             )}
-            {mayKick && (
-              <button onClick={() => this.kick()}>
-                <FormattedMessage id="client-info.kick-button" />
+            { mayRemove && (
+              <button onClick={() => this.remove()}>
+                <FormattedMessage id="client-info.remove-button" />
               </button>
             )}
             <button className={styles.cancel} onClick={onClose}>

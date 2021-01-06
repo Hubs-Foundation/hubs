@@ -22,7 +22,7 @@ const HUB_CREATOR_PERMISSIONS = [
   "update_roles",
   "close_hub",
   "mute_users",
-  "kick_users"
+  "remove_users"
 ];
 const VALID_PERMISSIONS =
   HUB_CREATOR_PERMISSIONS +
@@ -387,10 +387,10 @@ export default class HubChannel extends EventTarget {
 
   isHidden = sessionId => this._blockedSessionIds.has(sessionId);
 
-  kick = async sessionId => {
+  remove = async sessionId => {
     const permsToken = await this.fetchPermissions();
-    NAF.connection.adapter.kick(sessionId, permsToken);
-    this.channel.push("kick", { session_id: sessionId });
+    NAF.connection.adapter.remove(sessionId, permsToken);
+    this.channel.push("remove", { session_id: sessionId });
   };
 
   requestSupport = () => this.channel.push("events:request_support", {});

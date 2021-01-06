@@ -1,7 +1,7 @@
-AFRAME.registerComponent("kick-button", {
+AFRAME.registerComponent("remove-button", {
   init() {
     this.onClick = () => {
-      this.kick(this.owner);
+      this.remove(this.owner);
     };
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.owner = networkedEl.components.networked.data.owner;
@@ -16,7 +16,7 @@ AFRAME.registerComponent("kick-button", {
     this.el.object3D.removeEventListener("interact", this.onClick);
   },
 
-  async kick(clientId) {
-    this.el.sceneEl.emit("action_kick_client", { clientId });
+  async remove(clientId) {
+    this.el.sceneEl.emit("action_remove_client", { clientId });
   }
 });
