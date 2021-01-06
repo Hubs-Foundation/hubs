@@ -15,9 +15,8 @@ const togglePenWithHud = "/vars/mouse-and-keyboard/drop_pen_with_hud";
 const togglePen = "/vars/mouse-and-keyboard/togglePen";
 const startInspectingViaMouse = "/vars/mouse-and-keyboard/startInspectingViaMouse";
 const startInspectingViaKeyboard = "/vars/mouse-and-keyboard/startInspectingViaKeyboard";
-const stopInspectingViaMouse = "/vars/mouse-and-keyboard/stopInspectingViaMouse";
-const stopInspectingViaKeyboardEscape = "/vars/mouse-and-keyboard/stopInspectingViaKeyboardEscape";
-const stopInspectingViaKeyboardFocusRelease = "/vars/mouse-and-keyboard/stopInspectingViaKeyboardFocusRelease";
+const stopInspectingViaKeyboard = "/vars/mouse-and-keyboard/stopInspectingViaKeyboard";
+const stopInspectingViaKeyboardFocus = "/vars/mouse-and-keyboard/stopInspectingViaKeyboardFocus";
 const stopInspectingSelf = "/vars/mouse-and-keyboard/stopInspectingSelf";
 
 const qs = new URLSearchParams(location.search);
@@ -871,6 +870,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: [
+        paths.device.keyboard.key("Escape"),
         paths.device.keyboard.key("w"),
         paths.device.keyboard.key("a"),
         paths.device.keyboard.key("s"),
@@ -879,7 +879,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         paths.device.keyboard.key("e"),
         k("space-rising")
       ],
-      dest: { value: stopInspectingViaKeyboardEscape },
+      dest: { value: stopInspectingViaKeyboard },
       xform: xforms.any
     },
     {
@@ -905,14 +905,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.keyboard.key("f") },
-      dest: { value: stopInspectingViaKeyboardFocusRelease },
-      xform: xforms.falling
-    },
-    {
-      src: { value: paths.device.mouse.buttonRight },
-      dest: { value: stopInspectingViaMouse },
-      xform: xforms.falling,
-      priority: 101
+      dest: { value: stopInspectingViaKeyboardFocus },
+      xform: xforms.rising
     },
     {
       src: { value: paths.device.keyboard.key("i") },
@@ -920,12 +914,7 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
-      src: [
-        stopInspectingViaMouse,
-        stopInspectingViaKeyboardEscape,
-        stopInspectingViaKeyboardFocusRelease,
-        stopInspectingSelf
-      ],
+      src: [stopInspectingViaKeyboard, stopInspectingViaKeyboardFocus, stopInspectingSelf],
       dest: { value: paths.actions.stopInspecting },
       xform: xforms.any
     }

@@ -8,6 +8,8 @@ import { ReactComponent as CloseIcon } from "../icons/Close.svg";
 import { ReactComponent as ChevronBackIcon } from "../icons/ChevronBack.svg";
 import { ReactComponent as ArrowBackIcon } from "../icons/ArrowBack.svg";
 import { ReactComponent as ArrowForwardIcon } from "../icons/ArrowForward.svg";
+import { ReactComponent as LightbulbIcon } from "../icons/Lightbulb.svg";
+import { ReactComponent as LightbulbOutlineIcon } from "../icons/LightbulbOutline.svg";
 
 export function ObjectMenuButton({ children, className, ...rest }) {
   return (
@@ -30,12 +32,21 @@ export function ObjectMenu({
   onPrevObject,
   onNextObject,
   currentObjectIndex,
-  objectCount
+  objectCount,
+  onToggleLights,
+  lightsEnabled
 }) {
   return (
     <>
       <IconButton className={styles.backButton} onClick={onBack}>
         <ChevronBackIcon width={24} height={24} />
+      </IconButton>
+      <IconButton className={styles.lightsButton} onClick={onToggleLights}>
+        {lightsEnabled ? (
+          <LightbulbOutlineIcon title="Turn Lights Off" width={24} height={24} />
+        ) : (
+          <LightbulbIcon title="Turn Lights On" width={24} height={24} />
+        )}
       </IconButton>
       <div className={styles.objectMenuContainer}>
         <div className={styles.objectMenu}>
@@ -44,6 +55,13 @@ export function ObjectMenu({
               <CloseIcon width={16} height={16} />
             </IconButton>
             <h5>{title}</h5>
+            <IconButton className={styles.lightsHeaderButton} onClick={onToggleLights}>
+              {lightsEnabled ? (
+                <LightbulbOutlineIcon title="Turn Lights Off" width={16} height={16} />
+              ) : (
+                <LightbulbIcon title="Turn Lights On" width={16} height={16} />
+              )}
+            </IconButton>
           </div>
           <div className={styles.menu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>
         </div>
@@ -71,5 +89,7 @@ ObjectMenu.propTypes = {
   children: PropTypes.node,
   title: PropTypes.node,
   onClose: PropTypes.func,
-  onBack: PropTypes.func
+  onBack: PropTypes.func,
+  onToggleLights: PropTypes.func,
+  lightsEnabled: PropTypes.bool
 };

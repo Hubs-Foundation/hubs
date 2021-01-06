@@ -57,8 +57,7 @@ function handleInspect(scene, object, callback) {
       cameraSystem.uninspect(false);
     }
 
-    cameraSystem.enableLights = object.enableLights;
-    cameraSystem.inspect(object.el, 1.5, true, false);
+    cameraSystem.inspect(object.el, 1.5, false);
   }
 }
 
@@ -67,12 +66,10 @@ function handleDeselect(scene, object, callback) {
 
   callback(null);
 
-  cameraSystem.enableLights = true;
   cameraSystem.uninspect(false);
 
   if (object) {
-    cameraSystem.enableLights = object.enableLights;
-    cameraSystem.inspect(object.el, 1.5, true, false);
+    cameraSystem.inspect(object.el, 1.5, false);
   }
 }
 
@@ -80,6 +77,8 @@ export function ObjectListProvider({ scene, children }) {
   const [objects, setObjects] = useState([]);
   const [focusedObject, setFocusedObject] = useState(null); // The object currently shown in the viewport
   const [selectedObject, setSelectedObject] = useState(null); // The object currently selected in the object list
+  const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+  const [lightsEnabled, setLightsEnabled] = useState(cameraSystem.lightsEnabled);
 
   useEffect(
     () => {
@@ -88,8 +87,7 @@ export function ObjectListProvider({ scene, children }) {
           id: el.object3D.id,
           name: getDisplayString(el),
           type: getMediaType(el),
-          el,
-          enableLights: false
+          el
         }));
 
         setObjects(objects);
@@ -123,13 +121,18 @@ export function ObjectListProvider({ scene, children }) {
         const inspectedEl = cameraSystem.inspectable && cameraSystem.inspectable.el;
 
         if (inspectedEl) {
-          setSelectedObject({
-            id: inspectedEl.object3D.id,
-            name: getDisplayString(inspectedEl),
-            type: getMediaType(inspectedEl),
-            el: inspectedEl,
-            enableLights: true
-          });
+          const object = objects.find(o => o.el === inspectedEl);
+
+          if (object) {
+            setSelectedObject(object);
+          } else {
+            setSelectedObject({
+              id: inspectedEl.object3D.id,
+              name: getDisplayString(inspectedEl),
+              type: getMediaType(inspectedEl),
+              el: inspectedEl
+            });
+          }
         } else {
           setSelectedObject(null);
         }
@@ -141,7 +144,23 @@ export function ObjectListProvider({ scene, children }) {
         scene.removeEventListener("inspect-target-changed", onInspectTargetChanged);
       };
     },
-    [scene, setSelectedObject, objects, selectedObject]
+    [scene, setSelectedObject, objects]
+  );
+
+  useEffect(
+    () => {
+      function onLightsChanged() {
+        const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+        setLightsEnabled(cameraSystem.lightsEnabled);
+      }
+
+      scene.addEventListener("inspect-lights-changed", onLightsChanged);
+
+      return () => {
+        scene.removeEventListener("inspect-lights-changed", onLightsChanged);
+      };
+    },
+    [scene]
   );
 
   const selectObject = useCallback(object => handleInspect(scene, object, setSelectedObject), [
@@ -187,6 +206,14 @@ export function ObjectListProvider({ scene, children }) {
     [selectObject, objects, selectedObject]
   );
 
+  const toggleLights = useCallback(
+    () => {
+      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+      cameraSystem.toggleLights();
+    },
+    [scene]
+  );
+
   const context = {
     objects,
     activeObject: focusedObject || selectedObject,
@@ -197,7 +224,9 @@ export function ObjectListProvider({ scene, children }) {
     selectObject,
     deselectObject,
     selectPrevObject,
-    selectNextObject
+    selectNextObject,
+    toggleLights,
+    lightsEnabled
   };
 
   // Note: If we move ui-root to a functional component and use hooks,
