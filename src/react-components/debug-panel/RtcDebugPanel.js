@@ -19,7 +19,8 @@ const StatsType = {
   OUTBOUND_RTP: "outbound-rtp",
   LOCAL_CANDIDATE: "local-candidate",
   REMOTE_CANDIDATE: "remote-candidate",
-  CANDIDATE_PAIR: "candidate-pair"
+  CANDIDATE_PAIR: "candidate-pair",
+  TRANSPORT: "transport"
 };
 
 const ERROR_COLOR = "#8b1c00";
@@ -37,6 +38,8 @@ const MessageButtonStyle = {
   fontSize: "12px",
   minWidth: "120px"
 };
+
+var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 function capitalize(str) {
   return str ? str.replace(/\b\w/g, c => c.toUpperCase()) : "";
@@ -246,10 +249,24 @@ export default class RtcDebugPanel extends Component {
   async getCandidatesData(peer) {
     const result = {};
     const stats = await peer.getStats();
+    let selectedCandidatePairId = null;
+    if (!isFirefox) {
+      for (const data of stats.values()) {
+        if (data["type"] === StatsType.TRANSPORT) {
+          selectedCandidatePairId = data["selectedCandidatePairId"];
+        }
+      }
+    }
     for (const data of stats.values()) {
       if (data["type"] === StatsType.CANDIDATE_PAIR) {
         const candidatePair = data;
-        if (candidatePair && candidatePair["selected"] && candidatePair["state"] === "succeeded") {
+        let isCandidate = false;
+        if (isFirefox) {
+          isCandidate = candidatePair && candidatePair["selected"] && candidatePair["state"] === "succeeded";
+        } else {
+          isCandidate = candidatePair["id"] === selectedCandidatePairId;
+        }
+        if (isCandidate) {
           for (const values of stats.values()) {
             if (candidatePair["localCandidateId"] === values["id"]) {
               result[StatsType.LOCAL_CANDIDATE] = values;
