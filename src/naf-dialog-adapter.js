@@ -767,7 +767,7 @@ export default class DialogAdapter {
         token: permsToken
       })
       .then(() => {
-removed", { detail: { clientId: clientId } }));
+        document.body.dispatchEvent(new CustomEvent("removed", { detail: { clientId: clientId } }));
       });
   }
 
