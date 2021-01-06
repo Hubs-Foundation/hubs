@@ -217,7 +217,10 @@ export default class DialogAdapter {
             // Store in the map.
             this._consumers.set(consumer.id, consumer);
 
-            consumer.on("transportclose", () => this.removeConsumer(consumer.id));
+            consumer.on("transportclose", () => {
+              this.emitRTCEvent("error", "RTC", () => `Consumer transport closed`);
+              this.removeConsumer(consumer.id);
+            });
 
             // We are ready. Answer the protoo request so the server will
             // resume this Consumer (which was paused for now if video).
@@ -481,7 +484,11 @@ export default class DialogAdapter {
       });
 
       this._sendTransport.on("connectionstatechange", connectionState => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [connectionstatechange]: ${connectionState}`);
+        let level = "info";
+        if (connectionState === "failed" || connectionState === "disconnected" || connectionState === "closed") {
+          level = "error";
+        }
+        this.emitRTCEvent(level, "RTC", () => `Send transport [connectionstatechange]: ${connectionState}`);
       });
 
       this._sendTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, errback) => {
@@ -547,7 +554,11 @@ export default class DialogAdapter {
       });
 
       this._recvTransport.on("connectionstatechange", connectionState => {
-        this.emitRTCEvent("info", "RTC", () => `Receive transport [connectionstatechange]: ${connectionState}`);
+        let level = "info";
+        if (connectionState === "failed" || connectionState === "disconnected" || connectionState === "closed") {
+          level = "error";
+        }
+        this.emitRTCEvent(level, "RTC", () => `Receive transport [connectionstatechange]: ${connectionState}`);
       });
 
       const { peers } = await this._protoo.request("join", {
@@ -622,7 +633,10 @@ export default class DialogAdapter {
             codecOptions: { opusStereo: false, opusDtx: true }
           });
 
-          this._micProducer.on("transportclose", () => (this._micProducer = null));
+          this._micProducer.on("transportclose", () => {
+            this.emitRTCEvent("error", "RTC", () => `Mic transport closed`);
+            this._micProducer = null;
+          });
 
           if (!this._micEnabled) {
             this._micProducer.pause();
@@ -646,7 +660,10 @@ export default class DialogAdapter {
             codecOptions: { videoGoogleStartBitrate: 1000 }
           });
 
-          this._videoProducer.on("transportclose", () => (this._videoProducer = null));
+          this._videoProducer.on("transportclose", () => {
+            this.emitRTCEvent("error", "RTC", () => `Video transport closed`);
+            this._videoProducer = null;
+          });
         }
       }
 
