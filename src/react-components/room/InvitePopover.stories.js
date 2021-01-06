@@ -18,7 +18,15 @@ const room = {
 
 export const Base = () => (
   <RoomLayout
-    toolbarCenter={<InvitePopoverButton url={room.url} code={room.code} embed={room.embed} initiallyVisible />}
+    toolbarCenter={
+      <InvitePopoverButton
+        shortUrl="https://hubs.link"
+        url={room.url}
+        code={room.code}
+        embed={room.embed}
+        initiallyVisible
+      />
+    }
   />
 );
 

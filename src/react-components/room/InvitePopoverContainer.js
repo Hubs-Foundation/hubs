@@ -7,7 +7,8 @@ import { useInviteUrl } from "./useInviteUrl";
 
 export function InvitePopoverContainer({ hub, hubChannel, scene, ...rest }) {
   // TODO: Move to Hub class
-  const shortLink = `https://${configs.SHORTLINK_DOMAIN}/${hub.hub_id}`;
+  const shortUrl = `https://${configs.SHORTLINK_DOMAIN}`;
+  const url = `${shortUrl}/${hub.hub_id}`;
   const embedUrl = `${location.protocol}//${location.host}${location.pathname}?embed_token=${hub.embed_token}`;
   const embedText = `<iframe src="${embedUrl}" style="width: 1024px; height: 768px;" allow="microphone; camera; vr; speaker;"></iframe>`;
   const code = hub.entry_code.toString();
@@ -49,7 +50,8 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, ...rest }) {
       fetchingInvite={fetchingInvite}
       inviteUrl={inviteUrl}
       revokeInvite={revokeInvite}
-      url={shortLink}
+      shortUrl={shortUrl}
+      url={url}
       code={code}
       embed={embedText}
       popoverApiRef={popoverApiRef}
