@@ -21,7 +21,12 @@ export function isPlayer(object) {
 
 export function getObjectUrl(object) {
   const mediaLoader = object.el.components["media-loader"];
-  return (mediaLoader && mediaLoader.data.src && !mediaLoader.data.src.startsWith("hubs://")) || null;
+
+  if (mediaLoader && mediaLoader.data.src && !mediaLoader.data.src.startsWith("hubs://")) {
+    return mediaLoader.data.src;
+  }
+
+  return null;
 }
 
 export function usePinObject(hubChannel, scene, object) {
