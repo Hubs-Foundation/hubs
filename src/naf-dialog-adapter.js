@@ -246,11 +246,6 @@ export default class DialogAdapter {
     });
 
     this._protoo.on("notification", notification => {
-      this.emitRTCEvent(
-        "debug",
-        "Signaling",
-        () => `Notification [${notification.method}]: ${JSON.stringify(notification.data)}`
-      );
       debug('proto "notification" event [method:%s, data:%o]', notification.method, notification.data);
 
       switch (notification.method) {
@@ -522,7 +517,8 @@ export default class DialogAdapter {
         iceCandidates: recvTransportInfo.iceCandidates,
         dtlsParameters: recvTransportInfo.dtlsParameters,
         sctpParameters: recvTransportInfo.sctpParameters,
-        iceServers: this._iceServers
+        iceServers: this._iceServers,
+        iceTransportPolicy: this._iceTransportPolicy
       });
 
       this._recvTransport.on("connect", (

@@ -26,11 +26,13 @@ export function CollapsiblePanel({
   children,
   data,
   collapsed,
-  onCollapse
+  onCollapse,
+  backgroundColor
 }) {
   const rootClassName = classNames(border ? styles.borderTile : styles.borderlessTile);
   const rootStyle = {
-    flexGrow: grow ? 1 : 0
+    flexGrow: grow ? 1 : 0,
+    backgroundColor
   };
   const contentClassName = classNames(
     isRoot
@@ -71,7 +73,7 @@ export function CollapsiblePanel({
 
 CollapsiblePanel.propTypes = {
   children: PropTypes.node,
-  title: PropTypes.string,
+  title: PropTypes.node,
   border: PropTypes.bool,
   row: PropTypes.bool,
   grow: PropTypes.bool,
@@ -80,5 +82,6 @@ CollapsiblePanel.propTypes = {
   isRoot: PropTypes.bool,
   data: PropTypes.object,
   collapsed: PropTypes.bool,
-  onCollapse: PropTypes.func
+  onCollapse: PropTypes.func,
+  backgroundColor: PropTypes.string
 };
