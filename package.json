@@ -66,6 +66,8 @@
     ]
   },
   "dependencies": {
+    "@formatjs/intl-locale": "^2.4.13",
+    "@formatjs/intl-pluralrules": "^4.0.3",
     "@formatjs/intl-relativetimeformat": "^8.0.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
