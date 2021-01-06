@@ -120,7 +120,15 @@ ObjectMenuItems.propTypes = {
 };
 
 export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
-  const { objects, activeObject, deselectObject, selectNextObject, selectPrevObject } = useObjectList();
+  const {
+    objects,
+    activeObject,
+    deselectObject,
+    selectNextObject,
+    selectPrevObject,
+    toggleLights,
+    lightsEnabled
+  } = useObjectList();
 
   let menuItems;
 
@@ -148,6 +156,8 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
       onBack={deselectObject}
       onNextObject={selectNextObject}
       onPrevObject={selectPrevObject}
+      onToggleLights={toggleLights}
+      lightsEnabled={lightsEnabled}
     >
       {menuItems}
     </ObjectMenu>

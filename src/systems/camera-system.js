@@ -200,7 +200,7 @@ function getAudio(o) {
 const FALLOFF = 0.9;
 export class CameraSystem {
   constructor(scene) {
-    this.enableLights = localStorage.getItem("show-background-while-inspecting") === "true";
+    this.lightsEnabled = false;
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -252,13 +252,12 @@ export class CameraSystem {
     this.mode = NEXT_MODES[this.mode] || 0;
   }
 
-  inspect(el, distanceMod, temporarilyDisableRegularExit, fireChangeEvent = true) {
+  inspect(el, distanceMod, fireChangeEvent = true) {
     const { inspectable, pivot } = getInspectableAndPivot(el);
 
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
-    this.temporarilyDisableRegularExit = temporarilyDisableRegularExit; // TODO: Do this at the action set layer
     if (this.mode === CAMERA_MODE_INSPECT) {
       return;
     }
@@ -278,7 +277,7 @@ export class CameraSystem {
       this.snapshot.mask0 = camera.cameras[0].layers.mask;
       this.snapshot.mask1 = camera.cameras[1].layers.mask;
     }
-    if (!this.enableLights) {
+    if (!this.lightsEnabled) {
       this.hideEverythingButThisObject(inspectable);
     }
 
@@ -310,7 +309,6 @@ export class CameraSystem {
   }
 
   uninspect(fireChangeEvent = true) {
-    this.temporarilyDisableRegularExit = false;
     if (this.mode !== CAMERA_MODE_INSPECT) return;
     const scene = AFRAME.scenes[0];
     if (scene.is("entered")) {
@@ -335,6 +333,20 @@ export class CameraSystem {
     if (fireChangeEvent) {
       scene.emit("inspect-target-changed");
     }
+  }
+
+  toggleLights() {
+    this.lightsEnabled = !this.lightsEnabled;
+
+    if (this.mode === CAMERA_MODE_INSPECT && this.inspectable) {
+      if (this.lightsEnabled) {
+        this.showEverythingAsNormal();
+      } else {
+        this.hideEverythingButThisObject(this.inspectable);
+      }
+    }
+
+    AFRAME.scenes[0].emit("inspect-lights-changed");
   }
 
   ensureListenerIsParentedCorrectly(scene) {
@@ -429,13 +441,9 @@ export class CameraSystem {
         const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
 
         if (hoverEl) {
-          this.inspect(hoverEl, 1, false);
+          this.inspect(hoverEl, 1.5);
         }
-      } else if (
-        !this.temporarilyDisableRegularExit &&
-        this.mode === CAMERA_MODE_INSPECT &&
-        this.userinput.get(paths.actions.stopInspecting)
-      ) {
+      } else if (this.mode === CAMERA_MODE_INSPECT && this.userinput.get(paths.actions.stopInspecting)) {
         scene.emit("uninspect");
         this.uninspect();
       }
