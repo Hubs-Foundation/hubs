@@ -213,6 +213,7 @@
   "presence.entering": "入室処理中",
   "presence.in_room": "在室中",
   "presence.mute_all": "すべてミュート",
+  "home.home_link": "Home",
   "home.create_a_room": "ルームを作成する",
   "home.desktop.add_pwa": "デスクトップアプリのインストール",
   "home.mobile.add_pwa": "ホーム画面に追加",

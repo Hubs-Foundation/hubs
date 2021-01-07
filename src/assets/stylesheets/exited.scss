@@ -23,6 +23,10 @@
       color: var(--post-session-splash-secondary-action-color);
     }
   }
+
+  &__button {
+    @extend %bottom-button;
+  }
 }
 
 .autoexit-panel {
