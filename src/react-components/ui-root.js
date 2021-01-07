@@ -1026,6 +1026,9 @@ class UIRoot extends Component {
         <div className="exited-panel">
           <img className="exited-panel__logo" src={configs.image("logo")} />
           <div className="exited-panel__subtitle">{subtitle}</div>
+          <a href="/" className="exited-panel__button">
+            <FormattedMessage id="home.home_link" />
+          </a>
         </div>
       </WrappedIntlProvider>
     );
