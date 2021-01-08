@@ -123,6 +123,8 @@
   "preferences-screen.preference.only-show-nametags-in-freeze": "Solo mostrar las etiquetas de nombre en modo contextual",
   "preferences-screen.preference.prefer-mobile-object-info-panel": "Preferir panel de móviles para información de objetos",
   "preferences-screen.preference.preferred-camera": "Cámara preferida",
+  "preferences-screen.preference.preferred-mic": "Micrófono preferido",
+  "preferences-screen.preference.preferred-mic.default": "Ninguno",
   "preferences-screen.preference.show-fps-counter": "Show FPS Counter",
   "preferences-screen.preference.show-rtc-debug-panel": "Mostrar el panel de RTC",
   "preferences-screen.preference.snap-rotation-degrees": "Rotación por bloque (en grados)",

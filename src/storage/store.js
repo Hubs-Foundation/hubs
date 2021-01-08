@@ -82,7 +82,8 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        lastUsedMicDeviceId: { type: "string" }
+        lastUsedMicDeviceId: { type: "string" },
+        micMuted: { type: "bool" }
       }
     },
 
@@ -91,6 +92,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
+        preferredMic: { type: "string" },
         preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
