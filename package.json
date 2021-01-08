@@ -140,7 +140,7 @@
     "three-to-ammo": "github:infinitelee/three-to-ammo",
     "use-clipboard-copy": "^0.1.2",
     "uuid": "^3.2.1",
-    "webrtc-adapter": "^6.0.2",
+    "webrtc-adapter": "^7.7.0",
     "zip-loader": "^1.1.0"
   },
   "devDependencies": {
