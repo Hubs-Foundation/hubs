@@ -252,19 +252,20 @@ class PreferenceSelect extends React.Component {
     defaultString: PropTypes.string,
     store: PropTypes.object,
     storeKey: PropTypes.string,
-    setValue: PropTypes.func
+    setValue: PropTypes.func,
+    onChanged: PropTypes.func
   };
-  constructor(props) {
+  constructor() {
     super();
-    this.options = props.options.map(({ text, value }, i) => {
+  }
+  render() {
+    const options = this.props.options.map(({ text, value }, i) => {
       return (
-        <option key={`option_${props.storeKey}_${i}`} value={value}>
+        <option key={`option_${this.props.storeKey}_${i}`} value={value}>
           {text}
         </option>
       );
     });
-  }
-  render() {
     const storedPref = this.props.store.state.preferences[this.props.storeKey];
     const value = storedPref === undefined || storedPref === "" ? this.props.defaultString : storedPref;
     return (
@@ -272,9 +273,10 @@ class PreferenceSelect extends React.Component {
         value={value}
         onChange={e => {
           this.props.setValue(e.target.value);
+          this.props.onChanged && this.props.onChanged(e.target.value);
         }}
       >
-        {this.options}
+        {options}
       </Select>
     );
   }
@@ -354,6 +356,10 @@ const preferenceLabels = defineMessages({
   preferredCamera: {
     id: "preferences-screen.preference.preferred-camera",
     defaultMessage: "Preferred camera"
+  },
+  preferredMic: {
+    id: "preferences-screen.preference.preferred-mic",
+    defaultMessage: "Preferred mic"
   },
   muteMicOnEntry: {
     id: "preferences-screen.preference.mute-mic-on-entry",
@@ -658,6 +664,7 @@ function createItem(itemProps, store) {
       store={store}
       storeKey={itemProps.key}
       setValue={setValue}
+      onChanged={itemProps.onChanged}
     />
   );
 }
@@ -733,50 +740,122 @@ class PreferencesScreen extends Component {
   static propTypes = {
     intl: PropTypes.object,
     onClose: PropTypes.func,
-    store: PropTypes.object
+    store: PropTypes.object,
+    scene: PropTypes.object
   };
 
-  state = {
-    category: CATEGORY_AUDIO,
-    toastHeight: "150px"
-  };
-
-  constructor(props) {
+  constructor() {
     // TODO: When this component is recreated it clears its state.
     // This happens several times as the page is loading.
     // We should either avoid remounting or persist the category somewhere besides state.
     super();
 
-    const intl = props.intl;
-
-    const preferredCamera = {
-      key: "preferredCamera",
-      prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-      options: [
-        {
-          value: "user",
-          text: intl.formatMessage({
-            id: "preferences-screen.preferred-camera.user-facing",
-            defaultMessage: "User-Facing"
-          })
-        },
-        {
-          value: "environment",
-          text: intl.formatMessage({
-            id: "preferences-screen.preferred-camera.environment",
-            defaultMessage: "Environment"
-          })
-        },
-        {
-          value: "default",
-          text: intl.formatMessage({
-            id: "preferences-screen.preferred-camera.default",
-            defaultMessage: "Default"
-          })
-        }
-      ],
-      defaultString: "default"
+    this.devicesUpdated = () => {
+      this.updateVideoDevices();
     };
+    this.mediaDevicesManager = window.APP.mediaDevicesManager;
+
+    this.state = {
+      category: CATEGORY_AUDIO,
+      toastHeight: "150px",
+      preferredMic: {
+        key: "preferredMic",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "none", text: "None" }],
+        defaultString: "none",
+        onChanged: this.onMicSelectionChanged
+      },
+      preferredCamera: {
+        key: "preferredCamera",
+        prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+        options: [{ value: "none", text: "None" }],
+        defaultString: "none"
+      }
+    };
+  }
+
+  onMicSelectionChanged = deviceId => {
+    this.mediaDevicesManager.selectMicDevice(deviceId === "none" ? null : deviceId).then(this.updateMediaDevices);
+  };
+
+  onMediaDevicesUpdated = () => {
+    this.updateMediaDevices();
+  };
+
+  updateMediaDevices = () => {
+    // Audio devices update
+    const micOptions = this.mediaDevicesManager.micDevices.map(device => ({
+      value: device.value,
+      text: device.label
+    }));
+    const preferredMic = { ...this.state.preferredMic };
+    preferredMic.options = [
+      {
+        value: "none",
+        text: this.props.intl.formatMessage({
+          id: "preferences-screen.preferred-mic.default",
+          defaultMessage: "None"
+        })
+      }
+    ];
+    preferredMic.options.push(...micOptions);
+    this.props.store.update({ preferences: { ["preferredMic"]: this.mediaDevicesManager.selectedMicDeviceId } });
+
+    // Video devices update
+    const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
+      value: device.value,
+      text: device.label
+    }));
+    const preferredCamera = { ...this.state.preferredCamera };
+    preferredCamera.options = [
+      {
+        value: "user",
+        text: this.props.intl.formatMessage({
+          id: "preferences-screen.preferred-camera.user-facing",
+          defaultMessage: "User-Facing"
+        })
+      },
+      {
+        value: "environment",
+        text: this.props.intl.formatMessage({
+          id: "preferences-screen.preferred-camera.environment",
+          defaultMessage: "Environment"
+        })
+      },
+      {
+        value: "default",
+        text: this.props.intl.formatMessage({
+          id: "preferences-screen.preferred-camera.default",
+          defaultMessage: "Default"
+        })
+      }
+    ];
+    preferredCamera.options.push(...videoOptions);
+
+    // Update media devices state
+    this.setState({ preferredMic, preferredCamera });
+  };
+
+  storeUpdated = () => {
+    if (!this.props.store?.state?.preferences?.preferredMic) {
+      this.mediaDevicesManager.selectMicDevice(null);
+    }
+  };
+
+  componentDidMount() {
+    this.props.store.addEventListener("statechanged", this.storeUpdated);
+    this.props.scene.addEventListener("devicechange", this.onMediaDevicesUpdated);
+
+    this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
+  }
+
+  componentWillUnmount() {
+    this.props.store.removeEventListener("statechanged", this.storeUpdated);
+    this.props.scene.removeEventListener("devicechange", this.onMediaDevicesUpdated);
+  }
+
+  createSections() {
+    const intl = this.props.intl;
 
     const availableLocales = [
       {
@@ -829,6 +908,7 @@ class PreferencesScreen extends Component {
       [
         CATEGORY_AUDIO,
         [
+          this.state.preferredMic,
           { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {
             key: "globalVoiceVolume",
@@ -880,7 +960,7 @@ class PreferencesScreen extends Component {
           },
           { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
-          preferredCamera,
+          this.state.preferredCamera,
           {
             key: "materialQualitySetting",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
@@ -927,33 +1007,7 @@ class PreferencesScreen extends Component {
       ]
     ]);
 
-    // add camera choices to preferredCamera's options
-    navigator.mediaDevices
-      .enumerateDevices()
-      .then(function(devices) {
-        devices.forEach(function(device) {
-          if (device.kind == "videoinput") {
-            const shortId = device.deviceId.substr(0, 9);
-            preferredCamera.options.push({
-              value: device.deviceId,
-              text:
-                device.label ||
-                intl.formatMessage(
-                  {
-                    id: "preferences-screen.preferred-camera.device",
-                    defaultMessage: "Camera ({shortId})"
-                  },
-                  { shortId }
-                )
-            });
-          }
-        });
-      })
-      .catch(function(err) {
-        console.log(err.name + ": " + err.message);
-      });
-
-    const toItem = itemProps => createItem(itemProps, props.store);
+    const toItem = itemProps => createItem(itemProps, this.props.store);
 
     const items = new Map();
 
@@ -961,7 +1015,7 @@ class PreferencesScreen extends Component {
       items.set(category, definitions.map(toItem));
     }
 
-    this.sections = new Map([
+    return new Map([
       [CATEGORY_AUDIO, [{ items: items.get(CATEGORY_AUDIO) }]],
       [
         CATEGORY_CONTROLS,
@@ -978,23 +1032,6 @@ class PreferencesScreen extends Component {
       ],
       [CATEGORY_MISC, [{ items: items.get(CATEGORY_MISC) }]]
     ]);
-    this.onresize = () => {
-      this.forceUpdate();
-    };
-    this.storeUpdated = () => {
-      this.forceUpdate();
-    };
-  }
-
-  componentDidMount() {
-    window.APP.preferenceScreenIsVisible = true;
-    window.addEventListener("resize", this.onresize);
-    this.props.store.addEventListener("statechanged", this.storeUpdated);
-  }
-  componentWillUnmount() {
-    window.APP.preferenceScreenIsVisible = false;
-    window.removeEventListener("resize", this.onresize);
-    this.props.store.removeEventListener("statechanged", this.storeUpdated);
   }
 
   render() {
@@ -1031,7 +1068,9 @@ class PreferencesScreen extends Component {
         </Nav>
         <div className={styles.contentContainer}>
           <div className={styles.scrollingContent}>
-            {this.sections.get(this.state.category).map(Section)}
+            {this.createSections()
+              .get(this.state.category)
+              .map(Section)}
             {shouldPromptForRefresh && (
               <div
                 style={{

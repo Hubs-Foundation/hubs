@@ -104,7 +104,7 @@ configs.integration = integration => {
 
 configs.translation = key => {
   const locale = getLocale();
-  const translationsConfig = configs.APP_CONFIG && configs.APP_CONFIG.translations;
+  const translationsConfig = (configs.APP_CONFIG && configs.APP_CONFIG.translations) || {};
 
   return (
     (translationsConfig[locale] && translationsConfig[locale][key]) ||

@@ -4,7 +4,7 @@ export class InspectYourselfSystem {
     if (!scene.is("entered")) return;
     if (userinput.get(paths.actions.startInspectingSelf)) {
       const rig = document.getElementById("avatar-rig");
-      cameraSystem.inspect(rig, 1.5, false);
+      cameraSystem.inspect(rig, 1.5);
     }
   }
 }

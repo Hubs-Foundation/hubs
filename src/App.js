@@ -7,5 +7,6 @@ export class App {
     this.store = new Store();
     this.mediaSearchStore = new MediaSearchStore();
     this.hubChannel = null;
+    this.mediaDevicesManager = null;
   }
 }

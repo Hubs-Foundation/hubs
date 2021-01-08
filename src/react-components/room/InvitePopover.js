@@ -9,9 +9,9 @@ import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 
-function InvitePopoverContent({ url, code, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
+function InvitePopoverContent({ url, shortUrl, code, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
   return (
-    <Column center padding grow className={styles.invitePopover}>
+    <Column center padding grow gap="lg" className={styles.invitePopover}>
       {inviteRequired ? (
         <>
           <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={revokeInvite} />
@@ -27,6 +27,14 @@ function InvitePopoverContent({ url, code, embed, inviteRequired, fetchingInvite
             label={<FormattedMessage id="invite-popover.room-code" defaultMessage="Room Code" />}
             value={code}
             buttonPreset="blue"
+            description={
+              <>
+                Enter code on{" "}
+                <a href={shortUrl} target="_blank" rel="noopener noreferrer">
+                  {shortUrl.replace("https://", "")}
+                </a>
+              </>
+            }
           />
           <CopyableTextInputField
             label={<FormattedMessage id="invite-popover.embed-code" defaultMessage="Embed Code" />}
@@ -40,6 +48,7 @@ function InvitePopoverContent({ url, code, embed, inviteRequired, fetchingInvite
 }
 
 InvitePopoverContent.propTypes = {
+  shortUrl: PropTypes.string,
   url: PropTypes.string.isRequired,
   code: PropTypes.string.isRequired,
   embed: PropTypes.string.isRequired,
@@ -55,6 +64,7 @@ const invitePopoverTitle = defineMessage({
 });
 
 export function InvitePopoverButton({
+  shortUrl,
   url,
   code,
   embed,
@@ -74,6 +84,7 @@ export function InvitePopoverButton({
       title={title}
       content={() => (
         <InvitePopoverContent
+          shortUrl={shortUrl}
           url={url}
           code={code}
           embed={embed}
