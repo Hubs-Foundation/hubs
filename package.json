@@ -124,7 +124,7 @@
     "three-pathfinding": "github:MozillaReality/three-pathfinding#hubs/master2",
     "three-to-ammo": "github:infinitelee/three-to-ammo",
     "uuid": "^3.2.1",
-    "webrtc-adapter": "^6.0.2",
+    "webrtc-adapter": "^7.7.0",
     "zip-loader": "^1.1.0"
   },
   "devDependencies": {
