@@ -1,8 +1,7 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
-import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button } from "./Button";
+import { ReactComponent as AddIcon } from "../icons/Add.svg";
+import { IconButton } from "../input/IconButton";
 import checkIsMobile from "../../utils/is-mobile";
 import { useInstallPWA } from "./useInstallPWA";
 
@@ -14,16 +13,14 @@ export function PWAButton() {
   return (
     <>
       {pwaAvailable && (
-        <Button secondary onClick={installPWA}>
-          <i>
-            <FontAwesomeIcon icon={faPlus} />
-          </i>
+        <IconButton lg onClick={installPWA}>
+          <AddIcon />
           {isMobile ? (
             <FormattedMessage id="pwa-button.mobile" defaultMessage="Add to Home Screen" />
           ) : (
             <FormattedMessage id="pwa-button.desktop" defaultMessage="Install Desktop App" />
           )}
-        </Button>
+        </IconButton>
       )}
     </>
   );

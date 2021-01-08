@@ -1,6 +1,4 @@
-@import '../../assets/stylesheets/root-vars';
-@import '../../assets/stylesheets/shared';
-@import '../../assets/stylesheets/loader';
+@use "../styles/theme.scss";
 
 * {
   box-sizing: border-box;
@@ -12,7 +10,6 @@ html, body, :global(#root), :global(#ui-root), :global(.home-root) {
 }
 
 body {
-  @extend %default-font;
   background: var(--home-background-color);
   color: var(--home-text-color);
 }
@@ -35,34 +32,9 @@ main {
   order: -1;
   flex: 1;
 
-  @media(min-width: $breakpoint-lg) {
+  @media(min-width: theme.$breakpoint-lg) {
     order: 0;
     display: flex;
     flex-direction: column;
-  }
-
-  section {
-    margin: auto;
-    max-width: 100%;
-
-    @media(min-width: $breakpoint-sm) {
-      max-width: 540px;
-    }
-
-    @media(min-width: $breakpoint-md) {
-      max-width: 720px;
-    }
-
-    @media(min-width: $breakpoint-lg) {
-      max-width: 960px;
-    }
-
-    @media(min-width: $breakpoint-xl) {
-      max-width: 1140px;
-    }
-
-    @media(min-width: $breakpoint-xxl) {
-      max-width: 1410px;
-    }
   }
 }

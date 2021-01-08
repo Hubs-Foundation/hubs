@@ -1,18 +1,17 @@
-@import '../../assets/stylesheets/shared';
+@use "../styles/theme.scss";
 
 header {
   display: block;
+  padding: 20px;
 
-  @media(min-width: $breakpoint-lg) {
-    display: flex;
-    flex-direction: row;
+  @media(min-width: theme.$breakpoint-lg) {
     height: 65px;
     min-height: 65px;
-    padding: 0 1.75em;
+    padding: 0;
   }
 
   a {
-    color: var(--home-header-link-color);
+    color: theme.$black;
     font-weight: bold;
     text-decoration: none;
     white-space: nowrap;
@@ -22,21 +21,22 @@ header {
     display: flex;
     flex-direction: column;
 
-    @media(min-width: $breakpoint-lg) {
+    @media(min-width: theme.$breakpoint-lg) {
       flex-direction: row;
     }
 
     li {
       padding-top: 20px;
 
-      @media(min-width: $breakpoint-lg) {
+      @media(min-width: theme.$breakpoint-lg) {
         padding-top: 0;
       }
     }
 
     a {
       margin: 0 16px;
-      font-size: 1.4em;
+      font-size: theme.$font-size-md;
+      color: theme.$black;
     }
 
     ul {
@@ -47,10 +47,16 @@ header {
       flex-direction: column;
       align-items: center;
 
-      @media(min-width: $breakpoint-lg) {
+      @media(min-width: theme.$breakpoint-lg) {
         justify-content: flex-end;
         flex-direction: row;
       }
+    }
+  }
+
+  :local(.home-link) {
+    img {
+      height: 32px;
     }
   }
 
@@ -59,16 +65,17 @@ header {
     flex-direction: column;
     align-items: center;
     padding-top: 20px;
+    
+    a {
+      color: theme.$blue;
+      font-size: theme.$font-size-md;
+    }
   
-    @media(min-width: $breakpoint-lg) {
+    @media(min-width: theme.$breakpoint-lg) {
       flex-direction: row;
       justify-content: flex-end;
       flex: 1;
       padding-top: 0;
-    }
-  
-    a {
-      text-decoration: underline;
     }
   }
 }

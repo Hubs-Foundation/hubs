@@ -46,7 +46,7 @@
   "header.sign-out": "退出",
   "header.signed-in-as": "登录为 {email}",
   "header.source": "来源",
-  "home-page.add-to-discord": "添加 <a>{appName} 自动程序</a> 到Discord",
+  "home-page.add-to-discord": "添加 {appName} 自动程序 到Discord",
   "home-page.have-code": "持有房间号?",
   "hubs-cloud-page.get-started": "快速开始指南",
   "hubs-cloud-page.hero-button.enterprise": "获得企业 Hubs Cloud",

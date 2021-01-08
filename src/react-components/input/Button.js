@@ -8,13 +8,19 @@ import { FormattedMessage } from "react-intl";
 export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
 
 export const Button = memo(
-  forwardRef(({ as, sm, preset, className, children, ...rest }, ref) => {
+  forwardRef(({ as, sm, lg, xl, preset, className, children, ...rest }, ref) => {
     const ButtonComponent = as;
     const buttonProps = ButtonComponent === "button" ? { type: "button" } : {};
 
     return (
       <ButtonComponent
-        className={classNames(styles.button, textInputStyles.button, styles[preset], { [styles.sm]: sm }, className)}
+        className={classNames(
+          styles.button,
+          textInputStyles.button,
+          styles[preset],
+          { [styles.sm]: sm, [styles.lg]: lg, [styles.xl]: xl },
+          className
+        )}
         {...buttonProps}
         {...rest}
         ref={ref}

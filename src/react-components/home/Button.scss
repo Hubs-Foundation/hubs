@@ -1,9 +1,8 @@
 
-@import '../../assets/stylesheets/root-vars';
-@import '../../assets/stylesheets/shared';
+@use "../styles/theme.scss";
 
 :local(.primary-button) {
-  @extend %big-action-button;
+
 }
 
 :local(.cta-button) {
@@ -17,7 +16,6 @@
 }
 
 :local(.secondary-button) {
-  @extend %action-button-secondary;
   display: flex;
   flex-direction: row;
   width: 250px;

@@ -43,7 +43,7 @@
   "header.sign-out": "サインアウト",
   "header.signed-in-as": "ログインしました {email}",
   "header.source": "ソース",
-  "home-page.add-to-discord": "Discordに <a>{appName} Bot</a> を追加する",
+  "home-page.add-to-discord": "Discordに {appName} Bot を追加する",
   "home-page.have-code": "ルームコードをお持ちですか？",
   "hubs-cloud-page.get-started": "クイックスタートガイド",
   "hubs-cloud-page.hero-button.enterprise": "Get Hubs Cloud Enterprise",

@@ -149,3 +149,17 @@
   min-width: 100px;
   padding: 0 8px;
 }
+
+:local(.lg), :local(.xl) {
+  border-radius: 32px;
+  padding: 0 48px;
+  font-size: 16px;
+}
+
+:local(.lg) {
+  height: 48px;
+}
+
+:local(.xl) {
+  height: 64px;
+}
