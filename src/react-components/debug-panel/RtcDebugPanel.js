@@ -39,7 +39,7 @@ const MessageButtonStyle = {
   minWidth: "120px"
 };
 
-var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+const isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
 
 function capitalize(str) {
   return str ? str.replace(/\b\w/g, c => c.toUpperCase()) : "";
