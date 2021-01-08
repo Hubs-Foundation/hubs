@@ -124,6 +124,7 @@
   "preferences-screen.preference.mute-mic-on-entry": "输入时静音麦克风",
   "preferences-screen.preference.only-show-nametags-in-freeze": "当停止不动时只显示用户标签",
   "preferences-screen.preference.prefer-mobile-object-info-panel": "优先移动对象信息版面",
+  "preferences-screen.preference.preferred-camera": "Preferred camera",
   "preferences-screen.preference.snap-rotation-degrees": "每拍的旋转数 (角度)",
   "promote-client-modal.confirm-prefix": "是的，晋升 {name}",
   "promote-client-modal.message": "晋升一个用户，会给他房间设置以及使用工具的权限{linebreak}你确定吗?",

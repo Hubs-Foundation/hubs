@@ -95,16 +95,6 @@ import { SignInMessages } from "./auth/SignInModal";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
-// This is a list of regexes that match the microphone labels of HMDs.
-//
-// If entering VR mode, and if any of these regexes match an audio device,
-// the user will be prevented from entering VR until one of those devices is
-// selected as the microphone.
-//
-// Note that this doesn't have to be exhaustive: if no devices match any regex
-// then we rely upon the user to select the proper mic.
-const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
-
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
 const IN_ROOM_MODAL_QUERY_VARS = ["media_source"];
 
@@ -119,8 +109,6 @@ async function grantedMicLabels() {
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
-const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
-
 const AUTO_EXIT_TIMER_SECONDS = 10;
 
 class UIRoot extends Component {
@@ -194,10 +182,7 @@ class UIRoot extends Component {
     isStreaming: false,
 
     waitingOnAudio: false,
-    mediaStream: null,
-    audioTrack: null,
     audioTrackClone: null,
-    micDevices: [],
 
     autoExitTimerStartedAt: null,
     autoExitTimerInterval: null,
@@ -224,6 +209,7 @@ class UIRoot extends Component {
 
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.props.exitScene();
+    this.mediaDevicesManager = window.APP.mediaDevicesManager;
   }
 
   componentDidUpdate(prevProps) {
@@ -319,6 +305,9 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("action_toggle_ui", () =>
       this.setState({ hide: !this.state.hide, hideUITip: false })
     );
+    this.props.scene.addEventListener("devicechange", () => {
+      this.forceUpdate();
+    });
 
     const scene = this.props.scene;
 
@@ -543,7 +532,9 @@ class UIRoot extends Component {
     const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
     if (hasGrantedMic) {
-      await this.setMediaStreamToDefault();
+      if (!this.mediaDevicesManager.isMicDeviceSelected) {
+        await this.mediaDevicesManager.setMediaStreamToDefault();
+      }
       this.beginOrSkipAudioSetup();
     } else {
       this.onRequestMicPermission();
@@ -570,118 +561,12 @@ class UIRoot extends Component {
   };
 
   micDeviceChanged = async deviceId => {
-    const constraints = { audio: { deviceId: { exact: [deviceId] } } };
-    await this.fetchAudioTrack(constraints);
-    await this.setupNewMediaStream();
-  };
-
-  setMediaStreamToDefault = async () => {
-    let hasAudio = false;
-    const { lastUsedMicDeviceId } = this.props.store.state.settings;
-
-    // Try to fetch last used mic, if there was one.
-    if (lastUsedMicDeviceId) {
-      hasAudio = await this.fetchAudioTrack({ audio: { deviceId: { ideal: lastUsedMicDeviceId } } });
-    } else {
-      hasAudio = await this.fetchAudioTrack({ audio: {} });
-    }
-
-    await this.setupNewMediaStream();
-
-    return { hasAudio };
-  };
-
-  fetchAudioTrack = async constraints => {
-    if (this.state.audioTrack) {
-      this.state.audioTrack.stop();
-    }
-
-    constraints.audio.echoCancellation =
-      window.APP.store.state.preferences.disableEchoCancellation === true ? false : true;
-    constraints.audio.noiseSuppression =
-      window.APP.store.state.preferences.disableNoiseSuppression === true ? false : true;
-    constraints.audio.autoGainControl =
-      window.APP.store.state.preferences.disableAutoGainControl === true ? false : true;
-
-    if (isFirefoxReality) {
-      //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081
-      constraints.audio.echoCancellation =
-        window.APP.store.state.preferences.disableEchoCancellation === false ? true : false;
-      constraints.audio.noiseSuppression =
-        window.APP.store.state.preferences.disableNoiseSuppression === false ? true : false;
-      constraints.audio.autoGainControl =
-        window.APP.store.state.preferences.disableAutoGainControl === false ? true : false;
-
-      window.APP.store.update({
-        preferences: {
-          disableEchoCancellation: !constraints.audio.echoCancellation,
-          disableNoiseSuppression: !constraints.audio.noiseSuppression,
-          disableAutoGainControl: !constraints.audio.autoGainControl
-        }
-      });
-    }
-
-    try {
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-
-      const audioSystem = this.props.scene.systems["hubs-systems"].audioSystem;
-      audioSystem.addStreamToOutboundAudio("microphone", newStream);
-      const mediaStream = audioSystem.outboundStream;
-      const audioTrack = newStream.getAudioTracks()[0];
-
-      this.setState({ audioTrack, mediaStream });
-
-      if (/Oculus/.test(navigator.userAgent)) {
-        // HACK Oculus Browser 6 seems to randomly end the microphone audio stream. This re-creates it.
-        // Note the ended event will only fire if some external event ends the stream, not if we call stop().
-        const recreateAudioStream = async () => {
-          console.warn(
-            "Oculus Browser 6 bug hit: Audio stream track ended without calling stop. Recreating audio stream."
-          );
-
-          const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-          const audioTrack = newStream.getAudioTracks()[0];
-
-          audioSystem.addStreamToOutboundAudio("microphone", newStream);
-
-          this.setState({ audioTrack });
-
-          this.props.scene.emit("local-media-stream-created");
-
-          audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
-        };
-
-        audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
-      }
-
-      return true;
-    } catch (e) {
-      // Error fetching audio track, most likely a permission denial.
-      console.error("Error during getUserMedia: ", e);
-      this.setState({ audioTrack: null });
-      return false;
-    }
-  };
-
-  setupNewMediaStream = async () => {
-    await this.fetchMicDevices();
-
-    // we should definitely have an audioTrack at this point unless they denied mic access
-    if (this.state.audioTrack) {
-      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForAudioTrack(this.state.audioTrack));
-      if (micDeviceId) {
-        this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
-        console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
-      }
-      this.props.scene.emit("local-media-stream-created");
-    } else {
-      console.log("No available audio tracks");
-    }
+    this.mediaDevicesManager.selectMicDevice(deviceId);
   };
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    await this.setMediaStreamToDefault();
+    await this.mediaDevicesManager.setMediaStreamToDefault();
     this.beginOrSkipAudioSetup();
   };
 
@@ -693,53 +578,6 @@ class UIRoot extends Component {
     } else {
       this.pushHistoryState("entry_step", "audio");
     }
-  };
-
-  fetchMicDevices = () => {
-    return new Promise(resolve => {
-      navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
-        this.setState(
-          {
-            micDevices: mediaDevices
-              .filter(d => d.kind === "audioinput")
-              .map(d => ({ value: d.deviceId, label: d.label }))
-          },
-          resolve
-        );
-      });
-    });
-  };
-
-  shouldShowHmdMicWarning = () => {
-    if (isMobile || AFRAME.utils.device.isMobileVR()) return false;
-    if (!this.state.enterInVR) return false;
-    if (!this.hasHmdMicrophone()) return false;
-
-    return !HMD_MIC_REGEXES.find(r => this.selectedMicLabel().match(r));
-  };
-
-  hasHmdMicrophone = () => {
-    return !!this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
-  };
-
-  micLabelForAudioTrack = audioTrack => {
-    return (audioTrack && audioTrack.label) || "";
-  };
-
-  selectedMicLabel = () => {
-    return this.micLabelForAudioTrack(this.state.audioTrack);
-  };
-
-  micDeviceIdForMicLabel = label => {
-    return this.state.micDevices.filter(d => d.label === label).map(d => d.value)[0];
-  };
-
-  micLabelForDeviceId = deviceId => {
-    return this.state.micDevices.filter(d => d.deviceId === deviceId).map(d => d.label)[0];
-  };
-
-  selectedMicDeviceId = () => {
-    return this.micDeviceIdForMicLabel(this.selectedMicLabel());
   };
 
   shouldShowFullScreen = () => {
@@ -761,15 +599,18 @@ class UIRoot extends Component {
     clearHistoryState(this.props.history);
 
     const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
-    await this.props.enterScene(this.state.mediaStream, this.state.enterInVR, muteOnEntry);
+    this.props.store.update({
+      settings: { micMuted: false }
+    });
+    await this.props.enterScene(this.mediaDevicesManager.mediaStream, this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
 
-    const mediaStream = this.state.mediaStream;
+    const mediaStream = this.mediaDevicesManager.mediaStream;
 
     if (mediaStream) {
-      if (this.state.audioTrack) {
-        console.log(`Using microphone: ${this.state.audioTrack.label}`);
+      if (this.mediaDevicesManager.audioTrack) {
+        console.log(`Using microphone: ${this.mediaDevicesManager.audioTrack.label}`);
       }
 
       if (mediaStream.getVideoTracks().length > 0) {
@@ -1026,10 +867,10 @@ class UIRoot extends Component {
     return (
       <MicSetupModalContainer
         scene={this.props.scene}
-        selectedMicrophone={this.selectedMicDeviceId()}
-        microphoneOptions={this.state.micDevices}
+        selectedMicrophone={this.mediaDevicesManager.selectedMicDeviceId}
+        microphoneOptions={this.mediaDevicesManager.micDevices}
         onChangeMicrophone={this.micDeviceChanged}
-        microphoneEnabled={!!this.state.audioTrack}
+        microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
         microphoneMuted={muteOnEntry}
         onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onEnterRoom={this.onAudioReadyButton}
@@ -1116,6 +957,7 @@ class UIRoot extends Component {
               this.setState({ showPrefs: false });
             }}
             store={this.props.store}
+            scene={this.props.scene}
           />
         </div>
       );
@@ -1130,6 +972,7 @@ class UIRoot extends Component {
             this.setState({ showPrefs: false });
           }}
           store={this.props.store}
+          scene={this.props.scene}
         />
       );
     }
@@ -1662,7 +1505,10 @@ class UIRoot extends Component {
                   )}
                   {entered && (
                     <>
-                      <VoiceButtonContainer scene={this.props.scene} microphoneEnabled={!!this.state.audioTrack} />
+                      <VoiceButtonContainer
+                        scene={this.props.scene}
+                        microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
+                      />
                       <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                       <PlacePopoverContainer
                         scene={this.props.scene}
