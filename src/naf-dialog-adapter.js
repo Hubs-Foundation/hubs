@@ -630,6 +630,8 @@ export default class DialogAdapter {
           this._micProducer = await this._sendTransport.produce({
             track,
             stopTracks: false,
+            zeroRtpOnPause: true,
+            disableTrackOnPause: true,
             codecOptions: { opusStereo: false, opusDtx: true }
           });
 
@@ -657,6 +659,8 @@ export default class DialogAdapter {
           this._videoProducer = await this._sendTransport.produce({
             track,
             stopTracks: false,
+            zeroRtpOnPause: true,
+            disableTrackOnPause: true,
             codecOptions: { videoGoogleStartBitrate: 1000 }
           });
 
