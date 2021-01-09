@@ -8,6 +8,7 @@ import styles from "./Header.scss";
 import { Container } from "./Container";
 
 export function Header({
+  appName,
   appLogo,
   showCloud,
   enableSpoke,
@@ -29,7 +30,7 @@ export function Header({
           <ul>
             <li>
               <a href="/" className={styles.homeLink}>
-                <img alt="Home" src={appLogo} />
+                <img alt={appName} src={appLogo} />
               </a>
             </li>
             {showCloud && (
@@ -104,6 +105,7 @@ export function Header({
 }
 
 Header.propTypes = {
+  appName: PropTypes.string,
   appLogo: PropTypes.string,
   showCloud: PropTypes.bool,
   enableSpoke: PropTypes.bool,

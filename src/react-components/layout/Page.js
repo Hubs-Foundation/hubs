@@ -34,6 +34,7 @@ export function Page({
   return (
     <>
       <Header
+        appName={appName}
         appLogo={appLogo}
         showCloud={showCloud}
         enableSpoke={enableSpoke}

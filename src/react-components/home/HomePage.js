@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import classNames from "classnames";
 import configs from "../../utils/configs";
 import { CreateRoomButton } from "./CreateRoomButton";
@@ -19,6 +19,7 @@ import { Container } from "../layout/Container";
 
 export function HomePage() {
   const auth = useContext(AuthContext);
+  const intl = useIntl();
 
   const { results: favoriteRooms } = useFavoriteRooms();
   const { results: publicRooms } = usePublicRooms();
@@ -53,7 +54,7 @@ export function HomePage() {
       <Container>
         <div className={styles.hero}>
           <div className={styles.logoContainer}>
-            <img src={configs.image("logo")} />
+            <img alt={configs.translation("app-name")} src={configs.image("logo")} />
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
@@ -61,7 +62,16 @@ export function HomePage() {
             <PWAButton />
           </div>
           <div className={styles.heroImageContainer}>
-            <img src={configs.image("home_background")} />
+            <img
+              alt={intl.formatMessage(
+                {
+                  id: "home-page.hero-image-alt",
+                  defaultMessage: "Screenshot of {appName}"
+                },
+                { appName: configs.translation("app-name") }
+              )}
+              src={configs.image("home_background")}
+            />
           </div>
         </div>
       </Container>
