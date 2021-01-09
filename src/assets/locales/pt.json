@@ -42,7 +42,7 @@
   "header.sign-in": "Entrar",
   "header.sign-out": "Sair",
   "header.signed-in-as": "Entrou como {email}",
-  "home-page.add-to-discord": "Adicionar o <a>Bot {appName}</a> ao Discord",
+  "home-page.add-to-discord": "Adicionar o Bot {appName} ao Discord",
   "home-page.have-code": "Tém um código de sala?",
   "hubs-cloud-page.get-started": "Guia rápido",
   "hubs-cloud-page.hero-button.enterprise": "Adquira o Hubs Cloud Enterprise",

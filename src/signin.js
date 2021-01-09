@@ -7,7 +7,6 @@ import "./utils/theme";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import { SignInModalContainer } from "./react-components/auth/SignInModalContainer";
 import { PageContainer } from "./react-components/layout/PageContainer";
-import configs from "./utils/configs";
 import "./assets/stylesheets/globals.scss";
 import { Center } from "./react-components/layout/Center";
 
@@ -20,7 +19,7 @@ function Root() {
   return (
     <WrappedIntlProvider>
       <AuthContextProvider store={store}>
-        <PageContainer style={{ backgroundImage: configs.image("home_background", true), backgroundSize: "cover" }}>
+        <PageContainer>
           <Center>
             <SignInModalContainer />
           </Center>

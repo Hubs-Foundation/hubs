@@ -7,6 +7,8 @@ import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { PageContainer } from "./react-components/layout/PageContainer";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import Store from "./storage/store";
+import { Container } from "./react-components/layout/Container";
+import { Button } from "./react-components/input/Button";
 
 import registerTelemetry from "./telemetry";
 import { FormattedMessage } from "react-intl";
@@ -17,7 +19,7 @@ function HubsCloudPage() {
   return (
     <PageContainer>
       <div className={styles.hero}>
-        <section className={styles.colLg}>
+        <Container className={styles.colLg}>
           <div className={classNames(styles.hideLgUp, styles.centerLg)}>
             <h1>
               <FormattedMessage id="hubs-cloud-page.page-heading" defaultMessage="Introducing Hubs Cloud" />
@@ -49,25 +51,25 @@ function HubsCloudPage() {
               <FormattedMessage id="hubs-cloud-page.hero-cta" defaultMessage="Get it today on the AWS Marketplace" />
             </h3>
             <div className={classNames(styles.row, styles.colLg, styles.centerLg)}>
-              <a className={styles.primaryButton} href="https://aws.amazon.com/marketplace/pp/B084RZH56R">
+              <Button as="a" preset="blue" href="https://aws.amazon.com/marketplace/pp/B084RZH56R">
                 <FormattedMessage id="hubs-cloud-page.hero-button.personal" defaultMessage="Get Hubs Cloud Personal" />
-              </a>
-              <a className={styles.primaryButton} href="https://aws.amazon.com/marketplace/pp/B084WNGRRP">
+              </Button>
+              <Button as="a" preset="blue" href="https://aws.amazon.com/marketplace/pp/B084WNGRRP">
                 <FormattedMessage
                   id="hubs-cloud-page.hero-button.enterprise"
                   defaultMessage="Get Hubs Cloud Enterprise"
                 />
-              </a>
+              </Button>
             </div>
             <div className={classNames(styles.getStarted, styles.center)}>
-              <a href="https://hubs.mozilla.com/docs/hubs-cloud-aws-quick-start.html">
+              <Button as="a" preset="transparent" href="https://hubs.mozilla.com/docs/hubs-cloud-aws-quick-start.html">
                 <FormattedMessage id="hubs-cloud-page.get-started" defaultMessage="Quick Start Guide" />
-              </a>
+              </Button>
             </div>
           </div>
-        </section>
+        </Container>
       </div>
-      <section className={classNames(styles.features, styles.colLg, styles.centerLg)}>
+      <Container className={classNames(styles.features, styles.colLg, styles.centerLg)}>
         <div className={styles.center}>
           <h3>
             <FormattedMessage id="hubs-cloud-page.features.diy-events-title" defaultMessage="Do-It-Yourself Events" />
@@ -108,7 +110,7 @@ function HubsCloudPage() {
             />
           </p>
         </div>
-      </section>
+      </Container>
     </PageContainer>
   );
 }

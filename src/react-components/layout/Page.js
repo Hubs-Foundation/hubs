@@ -5,6 +5,7 @@ import { Header } from "./Header";
 import { Footer } from "./Footer";
 
 export function Page({
+  appLogo,
   showCloud,
   enableSpoke,
   editorName,
@@ -25,12 +26,16 @@ export function Page({
   privacyUrl,
   showCompanyLogo,
   companyLogoUrl,
+  showDiscordBotLink,
+  appName,
   children,
   ...rest
 }) {
   return (
     <>
       <Header
+        appName={appName}
+        appLogo={appLogo}
         showCloud={showCloud}
         enableSpoke={enableSpoke}
         editorName={editorName}
@@ -54,12 +59,15 @@ export function Page({
         privacyUrl={privacyUrl}
         showCompanyLogo={showCompanyLogo}
         companyLogoUrl={companyLogoUrl}
+        showDiscordBotLink={showDiscordBotLink}
+        appName={appName}
       />
     </>
   );
 }
 
 Page.propTypes = {
+  appLogo: PropTypes.string,
   showCloud: PropTypes.bool,
   enableSpoke: PropTypes.bool,
   editorName: PropTypes.string,
@@ -80,5 +88,7 @@ Page.propTypes = {
   privacyUrl: PropTypes.string,
   showCompanyLogo: PropTypes.bool,
   companyLogoUrl: PropTypes.string,
+  showDiscordBotLink: PropTypes.bool,
+  appName: PropTypes.string,
   children: PropTypes.node
 };

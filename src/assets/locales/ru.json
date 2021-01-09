@@ -46,7 +46,7 @@
   "header.sign-out": "Выйти из системы",
   "header.signed-in-as": "Учётная запись {email}",
   "header.source": "Источник",
-  "home-page.add-to-discord": "Добавить <a>бот {appName}</a> в Discord",
+  "home-page.add-to-discord": "Добавить бот {appName} в Discord",
   "home-page.have-code": "У вас есть код комнаты?",
   "hubs-cloud-page.get-started": "Руководство для быстрого старта",
   "hubs-cloud-page.hero-button.enterprise": "Настроить корпоративный Hubs Cloud",
