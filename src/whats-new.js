@@ -10,11 +10,9 @@ import { AuthContextProvider } from "./react-components/auth/AuthContext";
 const store = new Store();
 window.APP = { store };
 
-import configs from "./utils/configs";
 import registerTelemetry from "./telemetry";
 import "./assets/stylesheets/whats-new.scss";
 import { PageContainer } from "./react-components/layout/PageContainer";
-import { Column } from "./react-components/layout/Column";
 import { Spinner } from "./react-components/misc/Spinner";
 import { Center } from "./react-components/layout/Center";
 
