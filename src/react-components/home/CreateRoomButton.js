@@ -2,11 +2,15 @@ import React from "react";
 import { FormattedMessage } from "react-intl";
 import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
 import { Button } from "../input/Button";
+import { useCssBreakpoints } from "react-use-css-breakpoints";
 
 export function CreateRoomButton() {
+  const breakpoint = useCssBreakpoints();
+
   return (
     <Button
-      xl
+      lg={breakpoint === "sm" || breakpoint === "md"}
+      xl={breakpoint !== "sm" && breakpoint !== "md"}
       preset="blue"
       onClick={e => {
         e.preventDefault();

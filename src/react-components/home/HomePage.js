@@ -6,7 +6,6 @@ import { CreateRoomButton } from "./CreateRoomButton";
 import { PWAButton } from "./PWAButton";
 import { useFavoriteRooms } from "./useFavoriteRooms";
 import { usePublicRooms } from "./usePublicRooms";
-import "../styles/global.scss";
 import styles from "./HomePage.scss";
 import { AuthContext } from "../auth/AuthContext";
 import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
@@ -49,20 +48,17 @@ export function HomePage() {
 
   const canCreateRooms = !configs.feature("disable_room_creation") || auth.isAdmin;
 
-  const showDescription = featuredRooms.length === 0;
-
   return (
     <PageContainer className={styles.homePage}>
       <Container>
         <div className={styles.hero}>
-          <div>
-            <div className={styles.appInfo}>
-              {showDescription && <div className={styles.appDescription}>{configs.translation("app-description")}</div>}
-            </div>
-            <div className={styles.ctaButtons}>
-              {canCreateRooms && <CreateRoomButton />}
-              <PWAButton />
-            </div>
+          <div className={styles.logoContainer}>
+            <img src={configs.image("logo")} />
+          </div>
+          <div className={styles.appInfo}>
+            <div className={styles.appDescription}>{configs.translation("app-description")}</div>
+            {canCreateRooms && <CreateRoomButton />}
+            <PWAButton />
           </div>
           <div className={styles.heroImageContainer}>
             <img src={configs.image("home_background")} />
@@ -111,26 +107,30 @@ export function HomePage() {
           </Container>
         )}
       {featuredRooms.length > 0 && (
-        <section className={styles.featuredRooms}>
-          <MediaGrid center>
-            {featuredRooms.map(room => {
-              return (
-                <MediaTile
-                  key={room.id}
-                  entry={room}
-                  processThumbnailUrl={(entry, width, height) =>
-                    scaledThumbnailUrlFor(entry.images.preview.url, width, height)
-                  }
-                />
-              );
-            })}
-          </MediaGrid>
-        </section>
+        <Container>
+          <Column grow padding className={styles.rooms}>
+            <MediaGrid center>
+              {featuredRooms.map(room => {
+                return (
+                  <MediaTile
+                    key={room.id}
+                    entry={room}
+                    processThumbnailUrl={(entry, width, height) =>
+                      scaledThumbnailUrlFor(entry.images.preview.url, width, height)
+                    }
+                  />
+                );
+              })}
+            </MediaGrid>
+          </Column>
+        </Container>
       )}
       <Container>
-        <Button lg preset="blue" as="a" href="/link">
-          <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
-        </Button>
+        <Column center grow>
+          <Button lg preset="blue" as="a" href="/link">
+            <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
+          </Button>
+        </Column>
       </Container>
     </PageContainer>
   );

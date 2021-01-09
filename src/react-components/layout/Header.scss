@@ -5,8 +5,6 @@ header {
   padding: 20px;
 
   @media(min-width: theme.$breakpoint-lg) {
-    height: 65px;
-    min-height: 65px;
     padding: 0;
   }
 
@@ -53,29 +51,44 @@ header {
       }
     }
   }
+}
 
-  :local(.home-link) {
-    img {
-      height: 32px;
-    }
+:local(.container) {
+  flex-direction: column;
+  align-items: center;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    height: 140px;
+    flex-direction: row;
+    align-items: inherit;
+  }
+}
+
+:local(.home-link) {
+  display: inline-block;
+
+  img {
+    height: 32px;
+  }
+}
+
+:local(.sign-in) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+  font-size: theme.$font-size-md;
+  font-weight: theme.$font-weight-bold;
+  
+  a {
+    margin-left: 8px;
+    color: theme.$blue;
   }
 
-  :local(.sign-in) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 20px;
-    
-    a {
-      color: theme.$blue;
-      font-size: theme.$font-size-md;
-    }
-  
-    @media(min-width: theme.$breakpoint-lg) {
-      flex-direction: row;
-      justify-content: flex-end;
-      flex: 1;
-      padding-top: 0;
-    }
+  @media(min-width: theme.$breakpoint-lg) {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex: 1;
+    padding-top: 0;
   }
 }

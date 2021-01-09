@@ -17,8 +17,27 @@
   }
 }
 
+:local(.logo-container) {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+
+  img {
+    max-width: 250px;
+  }
+
+  @media (min-width: theme.$breakpoint-lg) {
+    display: none;
+  }
+}
+
 :local(.hero) {
   display: flex;
+  flex-direction: column;
+
+  @media (min-width: theme.$breakpoint-lg) {
+    flex-direction: row;
+  }
 }
 
 :local(.hero-image-container) {
@@ -32,34 +51,30 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0;
-  margin-top: 36px;
+
+  margin-bottom: 20px;
+
+  & > * {
+    margin-bottom: 20px;
+  }
+  
+  @media (min-width: theme.$breakpoint-lg) {
+    margin-bottom: 0;
+  }
 }
 
 :local(.app-description) {
   white-space: pre-wrap;
   align-self: auto;
-  font-size: theme.$font-size-2xl;
+  font-size: theme.$font-size-lg;
   font-weight: theme.$font-weight-medium;
   text-align: center;
-  margin: 0.5em 0;
-  margin-bottom: 1em;
-}
-
-:local(.logo-container) {
-  max-width: 250px;
-  align-self: auto;
+  margin: 0 48px 20px 48px;
 
   @media (min-width: theme.$breakpoint-lg) {
-    align-self: flex-start;
-  }
-
-  img {
-    width: 100%;
-    height: auto;
+    font-size: theme.$font-size-2xl;
   }
 }
-
 
 :local(.center-logo) {
   align-self: auto;
@@ -72,16 +87,10 @@
   align-items: center;
 }
 
-:local(.featured-rooms) {
-  width: 100%;
-  background-color: var(--home-media-panel-background-color);
-}
-
 :local(.features) {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  background-color: var(--home-media-panel-background-color);
   margin-bottom: 24px;
   
   & > * {
@@ -107,6 +116,11 @@
     width: 100%;
     border-radius: 12px;
   }
+}
+
+:local(.rooms) {
+  background-color: theme.$recessed-bg;
+  border-radius: 16px;
 }
 
 :local(.row) {

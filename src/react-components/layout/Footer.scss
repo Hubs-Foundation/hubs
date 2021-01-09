@@ -6,21 +6,30 @@ footer {
   font-size: theme.$font-size-md;
   padding: 20px;
 
+  @media(min-width: theme.$breakpoint-lg) {
+    padding: 0;
+  }
+
   nav {
     display: flex;
-    
+
     @media(min-width: theme.$breakpoint-lg) {
+      flex: 1;
       justify-content: flex-end;
-      flex-direction: row;
     }
+
 
     ul {
       display: flex;
       margin: 0;
       padding: 0;
       list-style: none;
-      flex-direction: column;
       align-items: center;
+      flex-direction: column;
+
+      @media(min-width: theme.$breakpoint-lg) {
+        flex-direction: row;
+      }
     }
 
     a {
@@ -29,7 +38,9 @@ footer {
     }
 
     li {
+      display: flex;
       padding-top: 20px;
+      align-items: center;
 
       @media(min-width: theme.$breakpoint-lg) {
         padding-top: 0;
@@ -40,10 +51,13 @@ footer {
 }
 
 :local(.container) {
+  flex-direction: column;
+  align-items: center;
+
   @media(min-width: theme.$breakpoint-lg) {
     height: 80px;
-    min-height: 80px;
-    padding: 0;
+    flex-direction: row;
+    align-items: inherit;
   }
 }
 

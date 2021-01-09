@@ -24,7 +24,7 @@ export function Header({
 }) {
   return (
     <header>
-      <Container as="div">
+      <Container as="div" className={styles.container}>
         <nav>
           <ul>
             <li>

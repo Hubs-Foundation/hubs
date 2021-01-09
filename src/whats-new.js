@@ -4,10 +4,19 @@ import InfiniteScroll from "react-infinite-scroller";
 import markdownit from "markdown-it";
 import { FormattedMessage } from "react-intl";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import Store from "./storage/store";
+import { AuthContextProvider } from "./react-components/auth/AuthContext";
+
+const store = new Store();
+window.APP = { store };
 
 import configs from "./utils/configs";
 import registerTelemetry from "./telemetry";
 import "./assets/stylesheets/whats-new.scss";
+import { PageContainer } from "./react-components/layout/PageContainer";
+import { Column } from "./react-components/layout/Column";
+import { Spinner } from "./react-components/misc/Spinner";
+import { Center } from "./react-components/layout/Center";
 
 registerTelemetry("/whats-new", "Hubs What's New");
 
@@ -78,45 +87,44 @@ class WhatsNew extends Component {
     this.setState({ currentDate, notes: [...this.state.notes, ...merged] });
   }
   render() {
-    const loader = (
-      <div className="loader-wrap" key="0">
-        <div className="loader">
-          <div className="loader-center" />
-        </div>
-      </div>
-    );
     return (
-      <InfiniteScroll pageStart={0} loadMore={this.getNotes.bind(this)} hasMore={this.state.hasMore} loader={loader}>
-        <div className="container">
-          <div className="header">
-            <a href="/">
-              <img className="logo" src={configs.image("logo")} />
-            </a>
-          </div>
-          <div className="main">
-            <div className="content">
-              <h1>
-                <FormattedMessage id="whats-new-page.title" defaultMessage="What's New" />
-              </h1>
-              {this.state.notes.map((note, i) => {
-                return (
-                  <div key={i} className="note">
-                    <div className="note-header">
-                      <h2 className={note.merged_at ? "date" : "date-blank"}>{formatDate(note.merged_at)}</h2>
-                      <h2 className="title">
-                        <a href={note.html_url}>{note.title}</a>
-                      </h2>
-                    </div>
-                    {/* Setting HTML generated directly by markdownit, which is safe by default:
+      <PageContainer>
+        <InfiniteScroll
+          pageStart={0}
+          loadMore={this.getNotes.bind(this)}
+          hasMore={this.state.hasMore}
+          loader={
+            <Center>
+              <Spinner />
+            </Center>
+          }
+        >
+          <div className="container">
+            <div className="main">
+              <div className="content">
+                <h1>
+                  <FormattedMessage id="whats-new-page.title" defaultMessage="What's New" />
+                </h1>
+                {this.state.notes.map((note, i) => {
+                  return (
+                    <div key={i} className="note">
+                      <div className="note-header">
+                        <h2 className={note.merged_at ? "date" : "date-blank"}>{formatDate(note.merged_at)}</h2>
+                        <h2 className="title">
+                          <a href={note.html_url}>{note.title}</a>
+                        </h2>
+                      </div>
+                      {/* Setting HTML generated directly by markdownit, which is safe by default:
                       https://github.com/markdown-it/markdown-it/blob/master/docs/security.md */}
-                    <p className="body" dangerouslySetInnerHTML={{ __html: note.body }} />
-                  </div>
-                );
-              })}
+                      <p className="body" dangerouslySetInnerHTML={{ __html: note.body }} />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      </InfiniteScroll>
+        </InfiniteScroll>
+      </PageContainer>
     );
   }
 }
@@ -124,7 +132,9 @@ class WhatsNew extends Component {
 document.addEventListener("DOMContentLoaded", async () => {
   ReactDOM.render(
     <WrappedIntlProvider>
-      <WhatsNew />
+      <AuthContextProvider store={store}>
+        <WhatsNew />
+      </AuthContextProvider>
     </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );
