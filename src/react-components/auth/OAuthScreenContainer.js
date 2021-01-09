@@ -8,7 +8,6 @@ export function OAuthScreenContainer({ oauthInfo }) {
 
   return (
     <OAuthScreen
-      style={{ backgroundImage: configs.image("home_background", true) }}
       provider={type}
       redirectUrl={url}
       termsUrl={
