@@ -73,6 +73,7 @@
   font-weight: theme.$font-weight-medium;
   text-align: center;
   margin: 0 48px 20px 48px;
+  line-height: 1.25;
 
   @media (min-width: theme.$breakpoint-lg) {
     font-size: theme.$font-size-2xl;
@@ -121,6 +122,18 @@
   }
 }
 
+:local(.rooms-container) {
+  margin-top: 120px !important;
+  display: flex;
+  flex-direction: column;
+}
+
+:local(.rooms-heading) {
+  margin-left: 40px;
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+ 
 :local(.rooms) {
   background-color: theme.$recessed-bg;
   border-radius: 16px;

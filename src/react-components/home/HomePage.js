@@ -24,9 +24,8 @@ export function HomePage() {
   const { results: favoriteRooms } = useFavoriteRooms();
   const { results: publicRooms } = usePublicRooms();
 
-  const featuredRooms = Array.from(new Set([...favoriteRooms, ...publicRooms])).sort(
-    (a, b) => b.member_count - a.member_count
-  );
+  const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
+  const sortedPublicRooms = Array.from(publicRooms).sort((a, b) => b.member_count - a.member_count);
 
   useEffect(() => {
     const qs = new URLSearchParams(location.search);
@@ -75,52 +74,76 @@ export function HomePage() {
           </div>
         </div>
       </Container>
-      {featuredRooms.length === 0 &&
-        configs.feature("show_feature_panels") && (
-          <Container className={classNames(styles.features, styles.colLg, styles.centerLg)}>
-            <Column padding gap="xl" className={styles.card}>
-              <img src={configs.image("landing_rooms_thumb")} />
-              <h3>
-                <FormattedMessage id="home-page.rooms-title" defaultMessage="Instantly create rooms" />
-              </h3>
-              <p>
-                <FormattedMessage
-                  id="home-page.rooms-blurb"
-                  defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs, you’ll have a private virtual meeting space that you can instantly share - no downloads or VR headset necessary."
-                />
-              </p>
-            </Column>
-            <Column padding gap="xl" className={styles.card}>
-              <img src={configs.image("landing_communicate_thumb")} />
-              <h3>
-                <FormattedMessage id="home-page.communicate-title" defaultMessage="Communicate naturally" />
-              </h3>
-              <p>
-                <FormattedMessage
-                  id="home-page.communicate-blurb"
-                  defaultMessage="Choose an avatar to represent you, put on your headphones, and jump right in. Hubs makes it easy to stay connected with voice and text chat to other people in your private room."
-                />
-              </p>
-            </Column>
-            <Column padding gap="xl" className={styles.card}>
-              <img src={configs.image("landing_media_thumb")} />
-              <h3>
-                <FormattedMessage id="home-page.media-title" defaultMessage="An easier way to share media" />
-              </h3>
-              <p>
-                <FormattedMessage
-                  id="home-page.media-blurb"
-                  defaultMessage="Share content with others in your room by dragging and dropping photos, videos, PDF files, links, and 3D models into your space."
-                />
-              </p>
-            </Column>
-          </Container>
-        )}
-      {featuredRooms.length > 0 && (
-        <Container>
+      {configs.feature("show_feature_panels") && (
+        <Container className={classNames(styles.features, styles.colLg, styles.centerLg)}>
+          <Column padding gap="xl" className={styles.card}>
+            <img src={configs.image("landing_rooms_thumb")} />
+            <h3>
+              <FormattedMessage id="home-page.rooms-title" defaultMessage="Instantly create rooms" />
+            </h3>
+            <p>
+              <FormattedMessage
+                id="home-page.rooms-blurb"
+                defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs, you’ll have a private virtual meeting space that you can instantly share - no downloads or VR headset necessary."
+              />
+            </p>
+          </Column>
+          <Column padding gap="xl" className={styles.card}>
+            <img src={configs.image("landing_communicate_thumb")} />
+            <h3>
+              <FormattedMessage id="home-page.communicate-title" defaultMessage="Communicate naturally" />
+            </h3>
+            <p>
+              <FormattedMessage
+                id="home-page.communicate-blurb"
+                defaultMessage="Choose an avatar to represent you, put on your headphones, and jump right in. Hubs makes it easy to stay connected with voice and text chat to other people in your private room."
+              />
+            </p>
+          </Column>
+          <Column padding gap="xl" className={styles.card}>
+            <img src={configs.image("landing_media_thumb")} />
+            <h3>
+              <FormattedMessage id="home-page.media-title" defaultMessage="An easier way to share media" />
+            </h3>
+            <p>
+              <FormattedMessage
+                id="home-page.media-blurb"
+                defaultMessage="Share content with others in your room by dragging and dropping photos, videos, PDF files, links, and 3D models into your space."
+              />
+            </p>
+          </Column>
+        </Container>
+      )}
+      {sortedPublicRooms.length > 0 && (
+        <Container className={styles.roomsContainer}>
+          <h3 className={styles.roomsHeading}>
+            <FormattedMessage id="home-page.public--rooms" defaultMessage="Public Rooms" />
+          </h3>
           <Column grow padding className={styles.rooms}>
             <MediaGrid center>
-              {featuredRooms.map(room => {
+              {sortedPublicRooms.map(room => {
+                return (
+                  <MediaTile
+                    key={room.id}
+                    entry={room}
+                    processThumbnailUrl={(entry, width, height) =>
+                      scaledThumbnailUrlFor(entry.images.preview.url, width, height)
+                    }
+                  />
+                );
+              })}
+            </MediaGrid>
+          </Column>
+        </Container>
+      )}
+      {sortedFavoriteRooms.length > 0 && (
+        <Container className={styles.roomsContainer}>
+          <h3 className={styles.roomsHeading}>
+            <FormattedMessage id="home-page.favorite-rooms" defaultMessage="Favorite Rooms" />
+          </h3>
+          <Column grow padding className={styles.rooms}>
+            <MediaGrid center>
+              {sortedFavoriteRooms.map(room => {
                 return (
                   <MediaTile
                     key={room.id}
@@ -136,7 +159,7 @@ export function HomePage() {
         </Container>
       )}
       <Container>
-        <Column center grow>
+        <Column padding center grow>
           <Button lg preset="blue" as="a" href="/link">
             <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
           </Button>
