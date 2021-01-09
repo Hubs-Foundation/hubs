@@ -21,9 +21,11 @@
   display: flex;
   justify-content: center;
   padding: 20px;
+  width: 250px;
 
   img {
-    max-width: 250px;
+    width: 100%;
+    align-self: flex-start;
   }
 
   @media (min-width: theme.$breakpoint-lg) {
@@ -34,6 +36,7 @@
 :local(.hero) {
   display: flex;
   flex-direction: column;
+  align-items: center;
 
   @media (min-width: theme.$breakpoint-lg) {
     flex-direction: row;

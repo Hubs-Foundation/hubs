@@ -3,6 +3,14 @@
 :local(.hero) {
   background-color: theme.$recessed-bg;
 
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  iframe {
+    margin-bottom: 20px;
+  }
+
   & > section {
     display: flex; 
     padding: 32px;
