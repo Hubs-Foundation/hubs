@@ -1363,6 +1363,11 @@ class UIRoot extends Component {
                       hubChannel={this.props.hubChannel}
                       scene={this.props.scene}
                       onOpenProfile={() => this.setSidebar("profile")}
+                      onGoToObject={() => {
+                        if (this.props.breakpoint === "sm") {
+                          this.setSidebar(null);
+                        }
+                      }}
                     />
                   )}
                   {this.state.sidebarId !== "chat" &&
