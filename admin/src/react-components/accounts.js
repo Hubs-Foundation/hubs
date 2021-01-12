@@ -22,6 +22,7 @@ import {
   Filter,
   List,
   ReferenceManyField,
+  ReferenceField,
   SelectInput,
   SimpleForm,
   TextField,
@@ -172,6 +173,7 @@ export const AccountList = withStyles(styles)(
         // refreshView() is only needed in onCreateAccounts()
         // eslint-disable-next-line no-unused-vars
         const { classes, refreshView, ...other } = this.props;
+        console.log(other);
         return (
           <>
             <Card className={classes.searchCard}>
@@ -195,7 +197,7 @@ export const AccountList = withStyles(styles)(
                   />
                   <Button onClick={this.onCreateAccount.bind(this)}>Create</Button>
                   {this.state.creating && <CircularProgress />}
-                  <Snackbar open={this.state.createStatus} autoHideDuration={5000}>
+                  <Snackbar open={!!this.state.createStatus} autoHideDuration={5000}>
                     <SnackbarContent message={this.state.createStatus}></SnackbarContent>
                   </Snackbar>
                 </form>
@@ -228,7 +230,7 @@ export const AccountList = withStyles(styles)(
                   />
                   <Button onClick={this.onAccountSearch.bind(this)}>Find</Button>
                   {this.state.searching && <CircularProgress />}
-                  <Snackbar open={this.state.searchStatus} autoHideDuration={5000}>
+                  <Snackbar open={!!this.state.searchStatus} autoHideDuration={5000}>
                     <SnackbarContent message={this.state.searchStatus}></SnackbarContent>
                   </Snackbar>
                 </form>
@@ -239,13 +241,12 @@ export const AccountList = withStyles(styles)(
                 <TextField source="id" />
                 <DateField source="inserted_at" />
                 <DateField source="updated_at" />
-                <ReferenceManyField label="Identity" target="_account_id" reference="identities">
+                <ReferenceManyField label="Identity" source="id" target="_account_id" reference="identities">
                   <Datagrid classes={{ rowCell: classes.noBorder, thead: classes.hide }}>
                     <TextField source="name" />
                     <IdentityEditLink />
                   </Datagrid>
                 </ReferenceManyField>
-
                 <IdentityCreateLink />
                 <BooleanField source="is_admin" />
                 <TextField source="state" />
@@ -272,7 +273,7 @@ export const AccountEdit = withStyles(styles)(props => {
           choices={[{ id: "enabled", name: "enabled" }, { id: "disabled", name: "disabled" }]}
         />
 
-        <ReferenceManyField label="Identity" target="_account_id" reference="identities">
+        <ReferenceManyField label="Identity" source="id" target="_account_id" reference="identities">
           <Datagrid classes={{ rowCell: classes.noBorder, thead: classes.hide }}>
             <TextField source="name" />
             <IdentityEditLink />
