@@ -22,7 +22,6 @@ import {
   Filter,
   List,
   ReferenceManyField,
-  ReferenceField,
   SelectInput,
   SimpleForm,
   TextField,
@@ -241,11 +240,8 @@ export const AccountList = withStyles(styles)(
                 <TextField source="id" />
                 <DateField source="inserted_at" />
                 <DateField source="updated_at" />
-                <ReferenceManyField label="Identity" source="id" target="_account_id" reference="identities">
-                  <Datagrid classes={{ rowCell: classes.noBorder, thead: classes.hide }}>
-                    <TextField source="name" />
-                    <IdentityEditLink />
-                  </Datagrid>
+                <ReferenceManyField label="Identity" source="_text_id" target="_account_id" reference="identities">
+                  <IdentityInline />
                 </ReferenceManyField>
                 <IdentityCreateLink />
                 <BooleanField source="is_admin" />
@@ -273,13 +269,28 @@ export const AccountEdit = withStyles(styles)(props => {
           choices={[{ id: "enabled", name: "enabled" }, { id: "disabled", name: "disabled" }]}
         />
 
-        <ReferenceManyField label="Identity" source="id" target="_account_id" reference="identities">
-          <Datagrid classes={{ rowCell: classes.noBorder, thead: classes.hide }}>
-            <TextField source="name" />
-            <IdentityEditLink />
-          </Datagrid>
+        <ReferenceManyField label="Identity" source="_text_id" target="_account_id" reference="identities">
+          <IdentityInline hasPadding />
         </ReferenceManyField>
       </SimpleForm>
     </Edit>
   );
 });
+
+function IdentityInline(props) {
+  return (
+    <div>
+      {props.ids &&
+        props.ids.map(id => {
+          return (
+            <div key={id} style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
+              <span style={props.hasPadding ? { paddingRight: "20px" } : {}}>
+                {props.data[id].name ? props.data[id].name : ""}
+              </span>
+              <IdentityEditLink record={{ id }} />
+            </div>
+          );
+        })}
+    </div>
+  );
+}
