@@ -10,7 +10,7 @@
   font-weight: theme.$font-weight-bold;
 }
 
-:local(.help-button) {
+:local(.log-button) {
   color: theme.$black;
   background-color: theme.$lightgrey;
   border-radius: 50%;
@@ -60,4 +60,8 @@
   flex-flow: row nowrap;
   justify-content: space-between;
   margin-right: 4px;
+}
+
+:local(.collapsible-right-buttons) > * {
+  margin: 4px;
 }

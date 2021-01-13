@@ -27,7 +27,9 @@ export function CollapsiblePanel({
   data,
   collapsed,
   onCollapse,
-  backgroundColor
+  backgroundColor,
+  clear,
+  download
 }) {
   const rootClassName = classNames(border ? styles.borderTile : styles.borderlessTile);
   const rootStyle = {
@@ -58,9 +60,23 @@ export function CollapsiblePanel({
           </button>
         )}
         {url && (
-          <button className={classNames(styles.helpButton)} onClick={() => openLink(url)}>
+          <button className={classNames(styles.logButton)} onClick={() => openLink(url)}>
             ?
           </button>
+        )}
+        {(clear || download) && (
+          <div className={styles.collapsibleRightButtons}>
+            {download && (
+              <button className={classNames(styles.logButton)} onClick={download}>
+                &#x2193;
+              </button>
+            )}
+            {clear && (
+              <button className={classNames(styles.logButton)} onClick={clear}>
+                &#xd7;
+              </button>
+            )}
+          </div>
         )}
       </div>
       <div className={contentClassName} style={contentStyle}>
@@ -83,5 +99,7 @@ CollapsiblePanel.propTypes = {
   data: PropTypes.object,
   collapsed: PropTypes.bool,
   onCollapse: PropTypes.func,
-  backgroundColor: PropTypes.string
+  backgroundColor: PropTypes.string,
+  clear: PropTypes.func,
+  download: PropTypes.func
 };

@@ -24,7 +24,7 @@ const StatsType = {
 };
 
 const ERROR_COLOR = "#8b1c00";
-const STATS_REFRESH_TIME = 500;
+const STATS_REFRESH_TIME = 2000;
 const PRODUCERS_KEY = "producers";
 const CONSUMERS_KEY = "consumers";
 const MEDIASOUP_DOC_BASE_URL = "https://mediasoup.org/documentation/v3/libmediasoupclient/api/";
@@ -43,6 +43,19 @@ const isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
 
 function capitalize(str) {
   return str ? str.replace(/\b\w/g, c => c.toUpperCase()) : "";
+}
+
+function download(filename, text) {
+  const element = document.createElement("a");
+  element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
+  element.setAttribute("download", filename);
+
+  element.style.display = "none";
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
 }
 
 export function PanelMessageButton({ children, ...rest }) {
@@ -118,7 +131,7 @@ function TransportPanel({ title, data, candidates, producers, consumers, isButto
         row
         url={`${MDN_DOC_BASE_URL}RTCIceCandidate`}
         border
-        backgroundColor={candidates?.length === 0 && data?.state === "connected" ? ERROR_COLOR : null}
+        backgroundColor={candidates?.length === 0 && data?.state === "connected" && data?.opened ? ERROR_COLOR : null}
       >
         {(candidates?.length && candidates) || (
           <p className={classNames(styles.rtcLogMsg)}>
@@ -205,7 +218,7 @@ export default class RtcDebugPanel extends Component {
 
     this.state = {
       log: [],
-      collapsed: { Local: false, Log: isMobile, Remote: isMobile }
+      collapsed: { Local: false, Log: isMobile, Remote: true }
     };
   }
 
@@ -438,7 +451,7 @@ export default class RtcDebugPanel extends Component {
         (async () => {
           try {
             const deviceData = this.getDeviceData();
-            const serverData = await this.getServerData();
+            const serverData = this.state.collapsed.Remote ? {} : await this.getServerData();
             const signalingData = this.getSignalingData();
 
             // Tranports data
@@ -537,19 +550,33 @@ export default class RtcDebugPanel extends Component {
       ?.slice()
       .reverse()
       .forEach((log, index) => {
-        logLines.push(<span key={index << 2} className={classNames(styles.rtcLogTag)}>{`[${log.tag}] `}</span>);
+        logLines.push(<span key={index << 2} className={classNames(styles.rtcLogTime)}>{`[${log.time}] `}</span>);
+        logLines.push(
+          <span key={(index << 2) | 0x01} className={classNames(styles.rtcLogTag)}>{`[${log.tag}] `}</span>
+        );
         logLines.push(
           <span
-            key={(index << 2) | 0x01}
+            key={(index << 2) | 0x02}
             className={classNames(styles.rtcLogMsg)}
             style={{ color: this.colorForLevel(log.level) }}
           >
             {log.msg}
           </span>
         );
-        logLines.push(<br key={(index << 2) | 0x02} />);
+        logLines.push(<br key={(index << 2) | 0x03} />);
       });
     return logLines;
+  };
+
+  createLog = () => {
+    const logLines = [];
+    this.state.log
+      ?.slice()
+      .reverse()
+      .forEach(log => {
+        logLines.push(`[${log.time}] [${log.tag}] ${log.msg}`);
+      });
+    return logLines.join("\r");
   };
 
   createCandidates(candidates) {
@@ -750,10 +777,11 @@ export default class RtcDebugPanel extends Component {
   }
 
   onCollapse = (id, isCollapsed) => {
+    const title = id?.props["defaultMessage"];
+    const collapsed = { ...this.state.collapsed };
     if (isMobile || window.innerWidth < 500) {
-      const collapsed = { ...this.state.collapsed };
       for (const key of Object.keys(collapsed)) {
-        if (id === key) {
+        if (title === key) {
           collapsed[key] = isCollapsed;
         } else {
           if (!isCollapsed) {
@@ -761,10 +789,12 @@ export default class RtcDebugPanel extends Component {
           }
         }
       }
-      this.setState({
-        collapsed
-      });
+    } else {
+      collapsed[title] = isCollapsed;
     }
+    this.setState({
+      collapsed
+    });
   };
 
   render() {
@@ -860,6 +890,14 @@ export default class RtcDebugPanel extends Component {
               grow
               collapsed={collapsed.Log}
               onCollapse={this.onCollapse}
+              clear={() => {
+                this.setState({
+                  log: []
+                });
+              }}
+              download={() => {
+                download("rtc_log.txt", this.createLog());
+              }}
             >
               <p className={classNames(styles.rtcLogMsgContainer)}>{this.createLogMsgs()}</p>
             </CollapsiblePanel>

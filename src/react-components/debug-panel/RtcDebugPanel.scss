@@ -96,6 +96,12 @@
   }
 }
 
+:local(.rtc-log-time) {
+  font-size: theme.$font-size-xs;
+  color: theme.$blue;
+  margin: 0;
+}
+
 :local(.rtc-log-text) {
   font-size: theme.$font-size-xs;
   margin: 0;
