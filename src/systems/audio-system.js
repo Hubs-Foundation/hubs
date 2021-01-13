@@ -115,15 +115,12 @@ export class AudioSystem {
     this.analyserLevels = new Uint8Array(this.outboundAnalyser.fftSize);
     this.outboundGainNode.connect(this.outboundAnalyser);
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
-    let alreadyExecuting = false;
 
     /**
      * Chrome and Safari will start Audio contexts in a "suspended" state.
      * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
      */
     const resume = () => {
-      if (alreadyExecuting) return;
-      alreadyExecuting = true;
       this.audioContext.resume();
 
       setTimeout(() => {
