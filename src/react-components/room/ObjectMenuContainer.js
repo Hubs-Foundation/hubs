@@ -58,7 +58,7 @@ PlayerMenuItems.propTypes = {
   deselectObject: PropTypes.func.isRequired
 };
 
-function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject }) {
+function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject, onGoToObject }) {
   const { canPin, isPinned, togglePinned } = usePinObject(hubChannel, scene, activeObject);
   const { canRemoveObject, removeObject } = useRemoveObject(hubChannel, scene, activeObject);
   const { canGoTo, goToSelectedObject } = useGoToSelectedObject(scene, activeObject);
@@ -89,6 +89,7 @@ function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject }) {
         onClick={() => {
           goToSelectedObject();
           deselectObject();
+          onGoToObject();
         }}
       >
         <GoToIcon />
@@ -116,10 +117,11 @@ ObjectMenuItems.propTypes = {
   hubChannel: PropTypes.object.isRequired,
   scene: PropTypes.object.isRequired,
   activeObject: PropTypes.object.isRequired,
-  deselectObject: PropTypes.func.isRequired
+  deselectObject: PropTypes.func.isRequired,
+  onGoToObject: PropTypes.func.isRequired
 };
 
-export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
+export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile, onGoToObject }) {
   const {
     objects,
     activeObject,
@@ -143,6 +145,7 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
         scene={scene}
         activeObject={activeObject}
         deselectObject={deselectObject}
+        onGoToObject={onGoToObject}
       />
     );
   }
@@ -167,5 +170,6 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile }) {
 ObjectMenuContainer.propTypes = {
   hubChannel: PropTypes.object.isRequired,
   scene: PropTypes.object.isRequired,
-  onOpenProfile: PropTypes.func.isRequired
+  onOpenProfile: PropTypes.func.isRequired,
+  onGoToObject: PropTypes.func.isRequired
 };
