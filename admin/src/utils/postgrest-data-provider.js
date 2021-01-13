@@ -143,14 +143,12 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
       }
 
       case GET_ONE: {
-        console.log(params.id);
         options.headers.set("Accept", "application/vnd.pgrst.object+json");
         url = `${apiUrl}/${resource}?id=eq.${params.id}`;
         break;
       }
 
       case GET_MANY: {
-        console.log(params.ids);
         url = `${apiUrl}/${resource}?id=in.( ${params.ids.join(",")} )`;
         break;
       }

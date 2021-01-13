@@ -271,7 +271,7 @@ class ContentCDNComponent extends Component {
                 data transfer costs to your users.
               </Typography>
             )}
-            <Typography variant="h3" gutterBottom className={this.props.classes.section}>
+            <Typography variant="h6" gutterBottom className={this.props.classes.section}>
               Worker Setup
             </Typography>
             <Typography variant="body1" gutterBottom>
