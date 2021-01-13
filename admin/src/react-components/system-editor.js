@@ -64,18 +64,22 @@ class SystemEditorComponent extends Component {
     return (
       <>
         <Card className={this.props.classes.container} style={{ border: "5px solid #ffcc00" }}>
-          <CardContent className={this.props.classes.info} style={{}}>
+          <CardContent className={this.props.classes.info}>
             <Typography variant="title" gutterBottom>
               ⚠️ A future update will impact your Hubs Cloud deployment ⚠️
             </Typography>
-            <span>
-              We will be releasing an updated client interface for Hubs Cloud after March 25, 2021. This update includes
-              a significant change to the way Hubs will look, but all functionality will remain the same. For more
-              information visit the{" "}
-              <a href="https://hubs.mozilla.com/docs" target="_blank" rel="noopener noreferrer">
-                Hubs Docs.
+            <Typography variant="body1" gutterBottom>
+              We will release an updated client interface for Hubs Cloud after March 25, 2021. This update significantly
+              changes the way Hubs looks, but all functionality will remain the same. For more information visit{" "}
+              <a
+                href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-look-and-feel.html"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Hubs Docs: Hubs Cloud Customizing Look and Feel
               </a>
-            </span>
+              .
+            </Typography>
           </CardContent>
         </Card>
         <Card className={this.props.classes.container}>
