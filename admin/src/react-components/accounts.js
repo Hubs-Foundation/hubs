@@ -30,9 +30,9 @@ import {
 } from "react-admin";
 
 const styles = {
-  hide: { display: "none" },
-  noBorder: { border: "0px" },
-  searchCard: { marginBottom: "5px" }
+  searchCard: { marginBottom: "5px" },
+  paddingRight: { paddingRight: "20px" },
+  accountWrapper: { display: "flex", justifyContent: "space-between", flexWrap: "wrap" }
 };
 
 const AccountFilter = props => (
@@ -172,7 +172,6 @@ export const AccountList = withStyles(styles)(
         // refreshView() is only needed in onCreateAccounts()
         // eslint-disable-next-line no-unused-vars
         const { classes, refreshView, ...other } = this.props;
-        console.log(other);
         return (
           <>
             <Card className={classes.searchCard}>
@@ -256,11 +255,9 @@ export const AccountList = withStyles(styles)(
   )
 );
 
-export const AccountEdit = withStyles(styles)(props => {
-  const { classes, ...other } = props;
-
+export const AccountEdit = props => {
   return (
-    <Edit {...other}>
+    <Edit {...props}>
       <SimpleForm toolbar={<ToolbarWithoutDelete />}>
         <TextField label="Account ID" source="id" />
         <BooleanInput source="is_admin" />
@@ -275,16 +272,20 @@ export const AccountEdit = withStyles(styles)(props => {
       </SimpleForm>
     </Edit>
   );
-});
+};
 
-function IdentityInline(props) {
+const IdentityInline = withStyles(styles)(props => {
   return (
     <div>
       {props.ids &&
         props.ids.map(id => {
           return (
-            <div key={id} style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
-              <span style={props.hasPadding ? { paddingRight: "20px" } : {}}>
+            <div
+              key={id}
+              className={props.classes.accountWrapper}
+              style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}
+            >
+              <span className={props.hasPadding ? props.classes.paddingRight : ""}>
                 {props.data[id].name ? props.data[id].name : ""}
               </span>
               <IdentityEditLink record={{ id }} />
@@ -293,4 +294,4 @@ function IdentityInline(props) {
         })}
     </div>
   );
-}
+});
