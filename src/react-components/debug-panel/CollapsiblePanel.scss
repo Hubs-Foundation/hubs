@@ -62,3 +62,7 @@
   justify-content: space-between;
   margin-right: 4px;
 }
+
+:local(.collapsible-right-buttons) > * {
+  margin: 4px;
+}

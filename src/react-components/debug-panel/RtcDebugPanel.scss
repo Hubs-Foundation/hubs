@@ -96,6 +96,12 @@
   }
 }
 
+:local(.rtc-log-time) {
+  font-size: 10px;
+  color: blue;
+  margin: 0;
+}
+
 :local(.rtc-log-text) {
   font-size: 10px;
   margin: 0;

@@ -6,5 +6,6 @@ export class App {
     this.scene = null;
     this.store = new Store();
     this.mediaSearchStore = new MediaSearchStore();
+    this.hubChannel = null;
   }
 }
