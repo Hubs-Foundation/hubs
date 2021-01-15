@@ -2,6 +2,7 @@ import { Validator } from "jsonschema";
 import merge from "deepmerge";
 import Cookies from "js-cookie";
 import jwtDecode from "jwt-decode";
+import { qsGet } from "../utils/qs_truthy.js";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
@@ -9,6 +10,29 @@ const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
+
+export const defaultMaterialQualitySetting = (function() {
+  const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
+
+  // HACK: AFRAME is not available on all pages, so we catch the ReferenceError.
+  // We could move AFRAME's device utils into a separate package (or into this repo)
+  // if we wanted to use these checks without having to import all of AFRAME.
+  const isMobile = window.AFRAME && (AFRAME.utils.device.isMobile() || AFRAME.utils.device.isMobileVR());
+  if (isMobile) {
+    const qsMobileDefault = qsGet("default_mobile_material_quality");
+    if (qsMobileDefault && MATERIAL_QUALITY_OPTIONS.indexOf(qsMobileDefault) !== -1) {
+      return qsMobileDefault;
+    }
+    return "low";
+  }
+
+  const qsDefault = qsGet("default_material_quality");
+  if (qsDefault && MATERIAL_QUALITY_OPTIONS.indexOf(qsDefault) !== -1) {
+    return qsDefault;
+  }
+
+  return "high";
+})();
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
@@ -70,9 +94,11 @@ export const SCHEMA = {
         preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
+        audioNormalization: { type: "bool" },
         invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
+        enableGyro: { type: "bool" },
         onlyShowNametagsInFreeze: { type: "bool" },
         animateWaypointTransitions: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
@@ -95,7 +121,8 @@ export const SCHEMA = {
         disableEchoCancellation: { type: "bool" },
         disableNoiseSuppression: { type: "bool" },
         disableAutoGainControl: { type: "bool" },
-        locale: { type: "string" }
+        locale: { type: "string" },
+        showRtcDebugPanel: { type: "bool" }
       }
     },
 
@@ -335,13 +362,6 @@ export default class Store extends EventTarget {
       return this.state.preferences.materialQualitySetting;
     }
 
-    const isMobile = AFRAME.utils.device.isMobile();
-    const isMobileVR = AFRAME.utils.device.isMobileVR();
-
-    if (isMobile || isMobileVR) {
-      return "low";
-    }
-
-    return "high";
+    return defaultMaterialQualitySetting;
   }
 }

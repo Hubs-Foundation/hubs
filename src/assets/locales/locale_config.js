@@ -1,16 +1,14 @@
-// Certain locales are duplicates such as "zh-cn" and "zh" or "en-us" and "en".
-// For non "en" (since it's the default), use this mapping to define a fallback,
-// which will only be used if the specified locale file doesn't exist.
-
+// Primary language tags for those languages we support
 export const AVAILABLE_LOCALES = {
   en: "English",
   zh: "简体中文",
-  jp: "日本語"
+  pt: "Portugês (Brasil)",
+  ja: "日本語",
+  es: "Español",
+  ru: "Pусский"
 };
 
+// Map from alternative primary language tags to those we support
 export const FALLBACK_LOCALES = {
-  "zh-cn": "zh",
-  "zh-hans": "zh",
-  "zh-hans-cn": "zh",
-  ja: "jp"
+  jp: "ja"
 };

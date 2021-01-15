@@ -74,7 +74,7 @@ export default class SceneEntryManager {
     const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
     waypointSystem.moveToSpawnPoint();
 
-    if (isMobile || forceEnableTouchscreen || qsTruthy("mobile")) {
+    if (isMobile || forceEnableTouchscreen || qsTruthy("force_enable_touchscreen")) {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
@@ -617,13 +617,28 @@ export default class SceneEntryManager {
     }
 
     await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
-    mediaStream.addTrack(
-      audioEl.captureStream
-        ? audioEl.captureStream().getAudioTracks()[0]
-        : audioEl.mozCaptureStream
-          ? audioEl.mozCaptureStream().getAudioTracks()[0]
-          : null
-    );
+
+    const audioStream = audioEl.captureStream
+      ? audioEl.captureStream()
+      : audioEl.mozCaptureStream
+        ? audioEl.mozCaptureStream()
+        : null;
+
+    if (audioStream) {
+      let audioVolume = Number(qs.get("audio_volume") || "1.0");
+      if (isNaN(audioVolume)) {
+        audioVolume = 1.0;
+      }
+      const audioContext = THREE.AudioContext.getContext();
+      const audioSource = audioContext.createMediaStreamSource(audioStream);
+      const audioDestination = audioContext.createMediaStreamDestination();
+      const gainNode = audioContext.createGain();
+      audioSource.connect(gainNode);
+      gainNode.connect(audioDestination);
+      gainNode.gain.value = audioVolume;
+      mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+    }
+
     await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };

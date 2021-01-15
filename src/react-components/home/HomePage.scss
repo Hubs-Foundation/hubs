@@ -4,6 +4,16 @@
   flex: 1;
   background-size: cover;
   padding: 1.5em;
+  flex-direction: column;
+  align-items: center;
+  @media (min-width: $breakpoint-lg) {
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  & > section {
+    margin: 2em auto;
+  }
 }
 
 :local(.app-info) {
@@ -54,7 +64,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 150px;
 }
 
 :local(.featured-rooms) {
@@ -85,5 +94,50 @@
     color: var(--home-header-link-color);
     margin-right: 4px;
     margin-left: 2px;
+  }
+}
+
+:local(.features) {
+  display: flex;
+  padding: 1em;
+  background-color: var(--home-media-panel-background-color);
+  margin-bottom: 2em;
+  
+  & > * {
+    margin: 0 2em;
+    @media(min-width: $breakpoint-lg) {
+      flex-direction: row;
+      max-width: 310px;
+    }
+  }
+  
+  img {
+    width: 100%;
+    border-radius: 12px;
+  }
+}
+
+:local(.row) {
+  display: flex;
+  justify-content: space-evenly !important;
+}
+
+:local(.col-lg) {
+  flex-direction: column;
+
+  @media(min-width: $breakpoint-lg) {
+    flex-direction: row;
+  }
+}
+
+:local(.center) {
+  justify-content: center;
+  text-align: center;
+}
+
+:local(.center-lg) {
+  @media(max-width: $breakpoint-lg) {
+    text-align: center;
+    align-items: center;
   }
 }

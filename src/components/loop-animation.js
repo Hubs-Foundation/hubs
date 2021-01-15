@@ -9,7 +9,8 @@ AFRAME.registerComponent("loop-animation", {
     paused: { type: "boolean", default: false },
     /* DEPRECATED: Use activeClipIndex instead since animation names are not unique */
     clip: { type: "string", default: "" },
-    activeClipIndex: { type: "int", default: 0 }
+    activeClipIndex: { type: "int", default: 0 },
+    activeClipIndices: { type: "array" }
   },
 
   init() {
@@ -39,16 +40,23 @@ AFRAME.registerComponent("loop-animation", {
   updateClip() {
     const { mixer, animations } = this.mixerEl.components["animation-mixer"];
     const { clip: clipName, activeClipIndex } = this.data;
+    const { activeClipIndices } = this.data;
 
     if (animations.length === 0) {
       return;
     }
 
-    let clips;
-    if (clipName !== "") {
-      clips = clipName.split(",").map(n => animations.find(({ name }) => name === n));
+    let clips = [];
+    if (activeClipIndices && activeClipIndices.length > 0) {
+      // Support for Spoke->Hubs activeClipIndices struct
+      clips = activeClipIndices.map(index => animations[index]);
     } else {
-      clips = [animations[activeClipIndex]];
+      // Support for old Spoke->Hubs { clipName, activeClipIndex } struct. Still used for Blender imports.
+      if (clipName !== "") {
+        clips = clipName.split(",").map(n => animations.find(({ name }) => name === n));
+      } else {
+        clips = [animations[activeClipIndex]];
+      }
     }
 
     if (!(clips && clips.length)) return;

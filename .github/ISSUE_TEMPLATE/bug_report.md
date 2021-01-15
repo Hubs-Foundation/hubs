@@ -26,7 +26,7 @@ If applicable, add screenshots to help explain your problem.
 **Hardware** <!-- Please complete the following information -->
  - Device: [e.g. Desktop, phone, VR headset]
  - OS: [e.g. Windows, iOS, Linux]
- - Browser [e.g. Firefox]
+ - Browser: [e.g. Firefox]
 
 **Additional context**
 Add any other context about the problem here.

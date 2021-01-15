@@ -26,7 +26,7 @@ class DiscordLanding extends Component {
               <a href="/" rel="noreferrer noopener">
                 Try Hubs
               </a>
-              <a href="https://discord.gg/wHmY4nd" rel="noreferrer noopener">
+              <a href="https://discord.gg/dFJncWwHun" rel="noreferrer noopener">
                 <FormattedMessage id="discord.community_link" />
               </a>
             </div>
