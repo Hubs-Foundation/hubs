@@ -59,34 +59,6 @@
   }
 }
 
-:local(.media) {
-  padding: 0;
-  background-color: theme.$transparent;
-}
-
-:local(.emoji) {
-  font-size: 32px;
-  background-color: theme.$transparent;
-}
-
-:local(.monospace) {
-  font-family: monospace;
-}
-
-:local(.system-message) :local(.message-group-label) {
-  display: inline;
-  vertical-align: bottom;
-
-  i {
-    font-size: theme.$font-size-xs;
-    color: theme.$darkgrey;
-  }
-
-  span {
-    margin-left: 1ch;
-  }
-}
-
 :local(.sent) {
   :local(.message-group-label) {
     align-self: flex-end;
@@ -108,6 +80,30 @@
         color: theme.$white-pressed;
       }
     }
+  }
+}
+
+:local(.message-bubble):local(.emoji), :local(.message-bubble):local(.media) {
+  font-size: 32px;
+  background-color: theme.$transparent;
+  padding: 0;
+}
+
+:local(.message-bubble):local(.monospace) {
+  font-family: monospace;
+}
+
+:local(.system-message) :local(.message-group-label) {
+  display: inline;
+  vertical-align: bottom;
+
+  i {
+    font-size: theme.$font-size-xs;
+    color: theme.$darkgrey;
+  }
+
+  span {
+    margin-left: 1ch;
   }
 }
 
