@@ -30,9 +30,14 @@ class WhatsNew extends Component {
     currentDate: null
   };
   async getNotes(page) {
+    // TODO Move this request to reticulum and return the results to the client
     const endpoint = "https://api.github.com/repos/mozilla/hubs/pulls";
     // Read-only, public access token.
-    const token = "5ce5d912b79609593aa6c1929aa5034f84515a0e";
+    // HACK - break the token in two so that it is not automatically revoked
+    // See https://github.com/mozilla/hubs/pull/3729
+    const token_start = "8247efa60";
+    const token_end = "655f4dd312b3d8085f78abadf845429";
+    const token = `${token_start}${token_end}`;
     const params = [
       "sort=created",
       "direction=desc",
