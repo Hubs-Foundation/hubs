@@ -225,6 +225,7 @@
 
 :local(.emoji) {
   // Undo annoying CSS in emoji plugin
-  margin: auto !important;
-  vertical-align: 0em !important;
+  margin: 0.2em !important;
+  vertical-align: text-top !important;
+  line-height: 1em;
 }
