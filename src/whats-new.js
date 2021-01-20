@@ -32,7 +32,7 @@ class WhatsNew extends Component {
   async getNotes(page) {
     const endpoint = "https://api.github.com/repos/mozilla/hubs/pulls";
     // Read-only, public access token.
-    const token = "de8cbfb4cc0281c7b731c891df431016c29b0ace";
+    const token = "5ce5d912b79609593aa6c1929aa5034f84515a0e";
     const params = [
       "sort=created",
       "direction=desc",
