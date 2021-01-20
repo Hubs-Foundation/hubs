@@ -23,8 +23,7 @@ then
     exit 1
 fi
 
-echo "==="
-echo "Installing hooks..."
+echo "Installing git hooks..."
 for hook in $(find ${hooks_dir} -type f -exec basename {} \;);
 do
   echo "  Installing ${hook} hook:"
@@ -46,6 +45,4 @@ do
   echo "    Marking ${dest_hook} as executable."
   chmod +x "${dest_hook}"
 done
-
-
-echo "==="
+echo "Finished installing hooks."
