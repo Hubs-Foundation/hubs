@@ -101,6 +101,7 @@
     "form-urlencoded": "^2.0.4",
     "history": "^4.7.2",
     "hls.js": "^0.14.6",
+    "html2canvas": "^1.0.0-rc.7",
     "js-cookie": "^2.2.0",
     "jsonschema": "^1.2.2",
     "jwt-decode": "^2.2.0",
