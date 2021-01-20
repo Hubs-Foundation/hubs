@@ -10,6 +10,6 @@ then
   exit 1
 fi
 
-echo -e ">> pre-push git hook: Finished.\n==="
+echo -e "pre-push git hook: Finished."
 
 exit 0
