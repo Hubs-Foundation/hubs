@@ -211,7 +211,6 @@ import "./components/shape-helper";
 
 import registerNetworkSchemas from "./network-schemas";
 import registerTelemetry from "./telemetry";
-import { warmSerializeElement } from "./utils/serialize-element";
 
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY, ONLY_SCREEN_AVAILABLE } from "./utils/vr-caps-detect";
 import detectConcurrentLoad from "./utils/concurrent-load-detector";
@@ -704,8 +703,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const canvas = document.querySelector(".a-canvas");
   canvas.classList.add("a-hidden");
-
-  warmSerializeElement();
 
   if (platformUnsupported()) {
     return;
