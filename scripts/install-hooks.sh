@@ -35,7 +35,7 @@ do
       timestamp="$(date +%F_%H-%M-%S)"
       backup="${dest_hook}.backup.${timestamp}"
       echo "    Warning: ${dest_hook} already exists."
-      echo "    Creating a backup so that it is permanently lost:"
+      echo "    Creating a backup so that it is not lost:"
       echo "      ${backup}"
       mv "${dest_hook}" ${backup}
   fi
