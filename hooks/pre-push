@@ -1,0 +1,15 @@
+#!/bin/bash
+echo -e "pre-push git hook: Checking to make sure you are not pushing to a protected branch."
+
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+PROTECTED_BRANCHES="^(master|main|git-hook-pre-push-test)"
+
+if [[ "$BRANCH" =~ $PROTECTED_BRANCHES ]]
+then
+  echo -e "  🚫 error: The remote $BRANCH branch is protected. If this is not a mistake, disable this pre-push git hook (<hubs_dir>/.git/hooks/pre-push) and try again."
+  exit 1
+fi
+
+echo -e ">> pre-push git hook: Finished.\n==="
+
+exit 0
