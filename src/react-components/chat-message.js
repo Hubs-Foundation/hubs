@@ -3,20 +3,16 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
-import { toArray as toEmojis } from "react-emoji-render";
-import serializeElement from "../utils/serialize-element";
+import html2canvas from "html2canvas";
 import { coerceToUrl } from "../utils/media-utils";
 import { formatMessageBody } from "../utils/chat-message";
 
-const messageCanvas = document.createElement("canvas");
-
-const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/;
 const textureLoader = new THREE.TextureLoader();
 
 const CHAT_MESSAGE_TEXTURE_SIZE = 1024;
 
-const messageBodyDom = (body, from, fromSessionId, onViewProfile) => {
-  const { formattedBody, multiline, monospace } = formatMessageBody(body);
+const messageBodyDom = (body, from, fromSessionId, onViewProfile, emojiClassName) => {
+  const { formattedBody, multiline, monospace, emoji } = formatMessageBody(body, { emojiClassName });
   const wrapStyle = multiline ? styles.messageWrapMulti : styles.messageWrap;
   const messageBodyClasses = {
     [styles.messageBody]: true,
@@ -26,7 +22,7 @@ const messageBodyDom = (body, from, fromSessionId, onViewProfile) => {
   const includeClientLink = onViewProfile && fromSessionId && history && NAF.clientId !== fromSessionId;
   const onFromClick = includeClientLink ? () => onViewProfile(fromSessionId) : () => {};
 
-  return (
+  const content = (
     <div className={wrapStyle}>
       {from && (
         <div
@@ -39,67 +35,41 @@ const messageBodyDom = (body, from, fromSessionId, onViewProfile) => {
       <div className={classNames(messageBodyClasses)}>{formattedBody}</div>
     </div>
   );
+
+  return { content, multiline, emoji };
 };
 
 function renderChatMessage(body, from, allowEmojiRender) {
-  const isOneLine = body.split("\n").length === 1;
-  const context = messageCanvas.getContext("2d");
-  const emoji = toEmojis(body);
-  const isEmoji =
-    allowEmojiRender &&
-    emoji.length === 1 &&
-    emoji[0].props &&
-    emoji[0].props.children.match &&
-    emoji[0].props.children.match(emojiRegex);
-
+  const { content, emoji, multiline } = messageBodyDom(body, from, null, null, styles.emoji);
+  const isEmoji = allowEmojiRender && emoji;
   const el = document.createElement("div");
-  el.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
   el.setAttribute("class", `${styles.presenceLog} ${styles.presenceLogSpawn}`);
-
-  // The element is added to the DOM in order to have layout compute the width & height,
-  // and then it is removed after being rendered.
   document.body.appendChild(el);
 
   const entryDom = (
     <div
       className={classNames({
         [styles.presenceLogEntry]: !isEmoji,
-        [styles.presenceLogEntryOneLine]: !isEmoji && isOneLine,
+        [styles.presenceLogEntryOneLine]: !isEmoji && !multiline,
         [styles.presenceLogEmoji]: isEmoji
       })}
     >
-      {messageBodyDom(body, from)}
+      {content}
     </div>
   );
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     ReactDOM.render(entryDom, el, () => {
       const width = el.offsetWidth;
       const height = el.offsetHeight;
       const ratio = height / width;
       const scale = (CHAT_MESSAGE_TEXTURE_SIZE * Math.min(1.0, 1.0 / ratio)) / el.offsetWidth;
-      messageCanvas.width = width * scale;
-      messageCanvas.height = height * scale;
-
-      const xhtml = encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="${messageCanvas.width}px" height="${messageCanvas.height}px">
-            <foreignObject width="100%" height="100%" style="transform: scale(${scale});">
-              ${serializeElement(el)}
-            </foreignObject>
-          </svg>
-    `);
-      const img = new Image();
-
-      img.onload = () => {
-        context.drawImage(img, 0, 0);
-        ReactDOM.unmountComponentAtNode(el);
-        el.remove();
-        img.onload = null;
-        img.src = "";
-        messageCanvas.toBlob(blob => resolve([blob, width, height]));
-      };
-
-      img.src = "data:image/svg+xml," + xhtml;
+      html2canvas(el, { backgroundColor: null, scale, logging: false })
+        .then(canvas => {
+          canvas.toBlob(blob => resolve([blob, width, height]), "image/png");
+          el.remove();
+        })
+        .catch(reject);
     });
   });
 }
@@ -189,6 +159,8 @@ export async function spawnChatMessage(body, from) {
 }
 
 export default function ChatMessage(props) {
+  const { content } = messageBodyDom(props.body, props.name, props.sessionId, props.onViewProfile);
+
   return (
     <div className={props.className}>
       {props.maySpawn && (
@@ -197,7 +169,7 @@ export default function ChatMessage(props) {
           onClick={() => spawnChatMessage(props.body)}
         />
       )}
-      {messageBodyDom(props.body, props.name, props.sessionId, props.onViewProfile)}
+      {content}
     </div>
   );
 }

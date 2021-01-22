@@ -27,8 +27,8 @@ function getRenderResolution(canvasRect, maxResolution, isVR) {
 
   if (canvasRect.height * pixelRatio > maxResolution.height && maxResolution.height !== -1) {
     return {
-      width: Math.round(maxResolution.height / pixelRatio),
-      height: Math.round((maxResolution.height * aspectRatio) / pixelRatio)
+      height: Math.round(maxResolution.height / pixelRatio),
+      width: Math.round((maxResolution.height * aspectRatio) / pixelRatio)
     };
   }
 
