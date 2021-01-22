@@ -438,11 +438,10 @@
 
 :local(.status-indicator) {
   position: absolute;
-  top: 4px;
-  width: 6px;
-  height: 6px;
-  border-radius: 4px;
-  border: 1px solid theme.$lightgrey
+  top: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 5px;
 }
 
 :local(.status-green) {
