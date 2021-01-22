@@ -88,10 +88,15 @@ class SceneUI extends Component {
       tweetText
     )}`;
 
+    const unknownAuthor = intl.formatMessage({ id: "scene-page.unknown-author", defaultMessage: "unknown" });
+
     let attributions;
 
-    const toAttributionSpan = ({ name, url, author, remix }) => {
+    const toAttributionSpan = ({ title, name, url, author, remix }) => {
       let source = "";
+
+      const _name = name || title;
+      const _author = author || unknownAuthor;
 
       if (url) {
         if (url.includes("sketchfab.com")) {
@@ -107,8 +112,8 @@ class SceneUI extends Component {
             id="scene-page.remix-attribution"
             defaultMessage="(Remixed from <a>{name} by {author}</a>)"
             values={{
-              name,
-              author,
+              name: _name,
+              author: _author,
               a: chunks =>
                 url ? (
                   <a href={url} target="_blank" rel="noopener noreferrer">
@@ -127,8 +132,8 @@ class SceneUI extends Component {
               id="scene-page.attribution-with-source"
               defaultMessage="<a>{name} by {author} on {source}</a>"
               values={{
-                name,
-                author,
+                name: _name,
+                author: _author,
                 source,
                 a: chunks =>
                   url ? (
@@ -144,13 +149,13 @@ class SceneUI extends Component {
         );
       } else {
         return (
-          <span key={`${name} ${author}`}>
+          <span key={`${_name} ${_author}`}>
             <FormattedMessage
               id="scene-page.attribution"
               defaultMessage="<a>{name} by {author}</a>"
               values={{
-                name,
-                author,
+                name: _name,
+                author: _author,
                 a: chunks =>
                   url ? (
                     <a href={url} target="_blank" rel="noopener noreferrer">
@@ -175,7 +180,7 @@ class SceneUI extends Component {
                 <FormattedMessage
                   id="scene-page.scene-attribution"
                   defaultMessage="by {creator}"
-                  values={{ creator: this.props.sceneAttributions.creator }}
+                  values={{ creator: this.props.sceneAttributions.creator || unknownAuthor }}
                 />
               ) : (
                 ""
