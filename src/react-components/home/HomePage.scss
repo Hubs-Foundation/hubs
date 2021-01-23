@@ -55,7 +55,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
   margin-bottom: 20px;
 
   & > * {
@@ -64,6 +63,13 @@
   
   @media (min-width: theme.$breakpoint-lg) {
     margin-bottom: 0;
+    margin-left: 16px;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    & > :last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -77,6 +83,9 @@
   line-height: 1.25;
 
   @media (min-width: theme.$breakpoint-lg) {
+    text-align: left;
+    margin: 0 16px 48px 0px;
+    max-width: 860px;
     font-size: theme.$font-size-2xl;
   }
 }
