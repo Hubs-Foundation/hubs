@@ -11,6 +11,7 @@
   overflow: hidden;
   width: 100%;
   box-sizing: content-box;
+  pointer-events: none !important;
 
   :local(.presence-log-entry) {
     @extend %default-font;
@@ -29,6 +30,7 @@
     border-radius: 20px;
     display: flex;
     align-items: center;
+    pointer-events: all;
 
     &:last-child {
       margin-bottom: 0;
