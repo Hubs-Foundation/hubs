@@ -87,25 +87,43 @@ class Support extends React.Component {
               <img className={styles.logo} src={configs.image("logo")} />
             </div>
             <p>
-              <FormattedMessage id="support.missing-features" />
+              <FormattedMessage
+                id="support.missing-features"
+                defaultMessage="Your browser is missing required features."
+              />
               <br />
               {inAppBrowser ? (
-                <FormattedMessage
-                  id={detectedOS === "iOS" ? "support.in-app-browser-ios" : "support.in-app-browser-android"}
-                />
+                detectedOS === "iOS" ? (
+                  <FormattedMessage
+                    id="support.in-app-browser-ios"
+                    defaultMessage="Copy and paste this link directly into Safari"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="support.in-app-browser-android"
+                    defaultMessage="Copy and paste this link directly into Chrome or Firefox"
+                  />
+                )
               ) : (
-                <FormattedMessage id="support.update-browser" />
+                <FormattedMessage
+                  id="support.update-browser"
+                  defaultMessage="Please try switching or updating to a newer browser"
+                />
               )}
               <br />
               <br />
               <input type="text" readOnly onFocus={e => e.target.select()} value={document.location} />
               <a className="copy-link" href="#" onClick={this.onCopyClicked}>
-                <FormattedMessage id={this.state.hasCopied ? "support.copied" : "support.copy"} />
+                {this.state.hasCopied ? (
+                  <FormattedMessage id="support.copied" defaultMessage="copied!" />
+                ) : (
+                  <FormattedMessage id="support.copy" defaultMessage="copy" />
+                )}
               </a>
               <br />
               <br />
               <a className={styles.detailsLink} href="#" onClick={this.toggleDetails}>
-                <FormattedMessage id="support.details" />
+                <FormattedMessage id="support.details" defaultMessage="details" />
               </a>
             </p>
             {this.state.showDetails && (
@@ -115,7 +133,11 @@ class Support extends React.Component {
                     <tr key={s.name}>
                       <td>{s.name}</td>
                       <td>
-                        <FormattedMessage id={s.supported ? "support.supported" : "support.unsupported"} />
+                        {s.supported ? (
+                          <FormattedMessage id="support.supported" defaultMessage="supported" />
+                        ) : (
+                          <FormattedMessage id="support.unsupported" defaultMessage="unsupported" />
+                        )}
                       </td>
                     </tr>
                   ))}

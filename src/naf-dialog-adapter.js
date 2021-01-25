@@ -896,6 +896,10 @@ export default class DialogAdapter {
     }
 
     this._micEnabled = enabled;
+
+    window.APP.store.update({
+      settings: { micMuted: !this._micEnabled }
+    });
   }
 
   setWebRtcOptions() {

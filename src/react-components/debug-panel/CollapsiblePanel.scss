@@ -1,21 +1,20 @@
-@import '../../assets/stylesheets/root-vars';
-@import '../../assets/stylesheets/shared';
+@use "../styles/theme.scss";
 @import './RtcDebugPanel.scss';
 
 :local(.collapse-button) {
-  background-color: transparent;
-  border-color: transparent;
-  color: $light-grey;
+  background-color: theme.$transparent;
+  border-color: theme.$transparent;
+  color: theme.$lightgrey;
   cursor: pointer;
-  font-size: 15px;
-  font-weight: bold;
+  font-size: theme.$font-size-md;
+  font-weight: theme.$font-weight-bold;
 }
 
-:local(.help-button) {
-  color: black;
-  background-color: $light-grey;
+:local(.log-button) {
+  color: theme.$black;
+  background-color: theme.$lightgrey;
   border-radius: 50%;
-  font-weight: bold;
+  font-weight: theme.$font-weight-bold;
   width: 15px;
   height: 15px;
   padding: 0;
@@ -23,13 +22,13 @@
   border: none;
   cursor: pointer;
   align-self: center;
-  font-size: 10px;
+  font-size: theme.$font-size-xs;
 }
 
 :local(.collapse-button):after {
   content: '\2212';
-  color: $light-grey;
-  font-weight: bold;
+  color: theme.$lightgrey;
+  font-weight: theme.$font-weight-bold;
   float: left;
   align-self: stretch;
   padding-right: 6px;

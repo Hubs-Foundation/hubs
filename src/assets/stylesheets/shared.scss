@@ -28,11 +28,11 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
 }
 
 %default-font {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 %glass-text {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   color: var(--panel-text-color);
 }
 

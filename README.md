@@ -45,6 +45,8 @@ Join us on our [Discord Server](https://discord.gg/CzAbuGu) or [follow us on Twi
 
 Read our [contributor guide](./CONTRIBUTING.md) to learn how you can submit bug reports, feature requests, and pull requests.
 
+We're also looking for help with localization. The Hubs redesign has a lot of new text and we need help from people like you to translate it. Follow the [localization docs](./src/assets/locales/README.md) to get started.
+
 Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it. 
 
 ## Additional Resources

@@ -1,0 +1,27 @@
+@use "../styles/theme.scss";
+
+:local(.container) {
+  display: flex;
+  margin: auto;
+  max-width: 100%;
+
+  @media(min-width: theme.$breakpoint-sm) {
+    max-width: 540px;
+  }
+
+  @media(min-width: theme.$breakpoint-md) {
+    max-width: 720px;
+  }
+
+  @media(min-width: theme.$breakpoint-lg) {
+    max-width: 960px;
+  }
+
+  @media(min-width: theme.$breakpoint-xl) {
+    max-width: 1140px;
+  }
+
+  @media(min-width: theme.$breakpoint-xxl) {
+    max-width: 1140px;
+  }
+}

@@ -1,6 +1,16 @@
 import configs from "./configs";
 import { AVAILABLE_LOCALES, FALLBACK_LOCALES } from "../assets/locales/locale_config";
-import defaultLocaleData from "../assets/locales/en.json";
+
+// These are set in the admin panel and are only included as fallbacks.
+const defaultLocaleData = {
+  "app-name": "App",
+  "editor-name": "Scene Editor",
+  "contact-email": "app@company.com",
+  "company-name": "Company",
+  "share-hashtag": "#app",
+  "app-description": "Share a virtual room with friends. Watch videos, play with 3D objects, or just hang out.",
+  "app-tagline": "Private social VR in your web browser"
+};
 
 const DEFAULT_LOCALE = "en";
 const cachedMessages = new Map();
@@ -8,7 +18,7 @@ const cachedMessages = new Map();
 let _locale = DEFAULT_LOCALE;
 let _localeData = defaultLocaleData;
 
-function findLocale() {
+function findLocale(locale) {
   const locales = (() => {
     if (navigator.languages) {
       return [...navigator.languages];
@@ -21,25 +31,23 @@ function findLocale() {
     }
   })();
 
-  const preferences = window.APP.store.state.preferences;
-
-  if (preferences.locale && preferences.locale !== "browser") {
-    locales.unshift(preferences.locale);
+  if (locale && locale !== "browser") {
+    locales.unshift(locale);
   }
 
   for (let i = 0; i < locales.length; i++) {
-    const locale = locales[i];
-    if (AVAILABLE_LOCALES.hasOwnProperty(locale)) {
-      return locale;
+    const curLocale = locales[i];
+    if (AVAILABLE_LOCALES.hasOwnProperty(curLocale)) {
+      return curLocale;
     }
-    if (FALLBACK_LOCALES.hasOwnProperty(locale)) {
-      FALLBACK_LOCALES.hasOwnProperty(locale);
+    if (FALLBACK_LOCALES.hasOwnProperty(curLocale)) {
+      FALLBACK_LOCALES.hasOwnProperty(curLocale);
     }
     // Also check the primary language subtag in case
     // we do not have an entry for full tag
     // See https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags
     // and https://github.com/mozilla/hubs/pull/3350/files#diff-70ef5717d3da03ef288e8d15c2fda32c5237d7f37074421496f22403e4475bf1R16
-    const primaryLanguageSubtag = locale.split("-")[0].toLowerCase();
+    const primaryLanguageSubtag = curLocale.split("-")[0].toLowerCase();
     if (AVAILABLE_LOCALES.hasOwnProperty(primaryLanguageSubtag)) {
       return primaryLanguageSubtag;
     }
@@ -50,20 +58,20 @@ function findLocale() {
   return DEFAULT_LOCALE;
 }
 
-function updateLocale() {
-  const locale = findLocale();
+export function setLocale(locale) {
+  const resolvedLocale = findLocale(locale);
 
-  if (locale === DEFAULT_LOCALE) {
-    _locale = locale;
+  if (resolvedLocale === DEFAULT_LOCALE) {
+    _locale = resolvedLocale;
     _localeData = defaultLocaleData;
     document.body.dispatchEvent(new CustomEvent("locale-updated"));
   } else {
-    if (cachedMessages.has(locale)) {
-      _locale = locale;
+    if (cachedMessages.has(resolvedLocale)) {
+      _locale = resolvedLocale;
       document.body.dispatchEvent(new CustomEvent("locale-updated"));
     } else {
-      import(`../assets/locales/${locale}.json`).then(({ default: localeData }) => {
-        _locale = locale;
+      import(`../assets/locales/${resolvedLocale}.json`).then(({ default: localeData }) => {
+        _locale = resolvedLocale;
         _localeData = localeData;
         document.body.dispatchEvent(new CustomEvent("locale-updated"));
       });
@@ -74,9 +82,9 @@ function updateLocale() {
 const interval = window.setInterval(() => {
   if (window.APP && window.APP.store) {
     window.clearInterval(interval);
-    updateLocale();
+    setLocale(window.APP.store.state.preferences.locale);
     window.APP.store.addEventListener("statechanged", () => {
-      updateLocale();
+      setLocale(window.APP.store.state.preferences.locale);
     });
   }
 }, 100);
@@ -85,6 +93,11 @@ export const getLocale = () => {
   return _locale;
 };
 
+export const getMessage = key => {
+  return _localeData[key];
+};
+
+// TODO: This should be removed, lets not inject app config data up front but rather via variables so that defaultMessage works properly.
 export const getMessages = () => {
   if (cachedMessages.has(_locale)) {
     return cachedMessages.get(_locale);

@@ -1,6 +1,10 @@
 import nipplejs from "nipplejs";
 import styles from "./virtual-gamepad-controls.css";
 
+function insertAfter(el, referenceEl) {
+  referenceEl.parentNode.insertBefore(el, referenceEl.nextSibling);
+}
+
 /**
  * Instantiates 2D virtual gamepads and emits associated events.
  * @namespace user-input
@@ -38,7 +42,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.enableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
     this.enableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
     if (this.enableLeft || this.enableRight) {
-      document.body.appendChild(this.mockJoystickContainer);
+      // Add the joystick container after the canvas element but before the rest of the UI.
+      insertAfter(this.mockJoystickContainer, this.el.sceneEl.canvas);
     }
     if (this.enableLeft) {
       this.createLeftStick();
@@ -108,7 +113,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
       this.rightStick.on("start", this.onFirstInteraction);
     }
     if ((this.enableLeft || this.enableRight) && !this.mockJoystickContainer.parentNode) {
-      document.body.appendChild(this.mockJoystickContainer);
+      insertAfter(this.mockJoystickContainer, this.el.sceneEl.canvas);
     }
     if (!this.enableLeft && !this.enableRight) {
       this.mockJoystickContainer.parentNode &&
@@ -119,7 +124,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   createRightStick() {
     this.rightTouchZone = document.createElement("div");
     this.rightTouchZone.classList.add(styles.touchZone, styles.right);
-    document.body.appendChild(this.rightTouchZone);
+    insertAfter(this.rightTouchZone, this.mockJoystickContainer);
     this.rightStick = nipplejs.create({
       zone: this.rightTouchZone,
       color: "white",
@@ -133,7 +138,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   createLeftStick() {
     this.leftTouchZone = document.createElement("div");
     this.leftTouchZone.classList.add(styles.touchZone, styles.left);
-    document.body.appendChild(this.leftTouchZone);
+    insertAfter(this.leftTouchZone, this.mockJoystickContainer);
     this.leftStick = nipplejs.create({
       zone: this.leftTouchZone,
       color: "white",
@@ -214,7 +219,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.el.sceneEl.removeEventListener("exitvr", this.onExitVr);
     this.mockJoystickContainer.parentNode &&
       this.mockJoystickContainer.parentNode.removeChild(this.mockJoystickContainer);
-    if (this.leftTouchZone) document.body.removeChild(this.leftTouchZone);
-    if (this.rightTouchZone) document.body.removeChild(this.rightTouchZone);
+    if (this.leftTouchZone) this.leftTouchZone.parentNode.removeChild(this.leftTouchZone);
+    if (this.rightTouchZone) this.rightTouchZone.parentNode.removeChild(this.rightTouchZone);
   }
 });
