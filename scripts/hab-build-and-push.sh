@@ -11,6 +11,7 @@ export SENTRY_DSN=$8
 export GA_TRACKING_ID=$9
 export BUILD_NUMBER=${10}
 export GIT_COMMIT=${11}
+export DISABLE_DEPLOY=${12}
 export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
 
 # Build the package, upload it, and start the service so we deploy to staging target.
@@ -36,6 +37,11 @@ sudo /usr/bin/hab-pkg-install results/*.hart
 hab svc load $PKG
 hab svc stop $PKG
 
+DEPLOY_TYPE="s3"
+if [[ DISABLE_DEPLOY == "true" ]]; then
+  DEPLOY_TYPE="none"
+fi
+
 # Apparently these vars come in from jenkins with quotes already
 cat > build-config.toml << EOTOML
 [general]
@@ -49,7 +55,7 @@ sentry_dsn = $SENTRY_DSN
 ga_tracking_id = $GA_TRACKING_ID
 
 [deploy]
-type = "s3"
+type = "$DEPLOY_TYPE"
 target = $TARGET_S3_BUCKET
 region = "us-west-1"
 EOTOML
