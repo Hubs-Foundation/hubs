@@ -203,10 +203,6 @@ class UIRoot extends Component {
   constructor(props) {
     super(props);
 
-    if (props.showSafariMicDialog) {
-      this.state.dialog = <SafariMicModal />;
-    }
-
     props.mediaSearchStore.setHistory(props.history);
 
     // An exit handler that discards event arguments and can be cleaned up.
@@ -954,9 +950,17 @@ class UIRoot extends Component {
       );
     }
 
+    if (this.props.showSafariMicDialog) {
+      return (
+        <div className={classNames(rootStyles)}>
+          <RoomLayoutContainer scene={this.props.scene} store={this.props.store} modal={<SafariMicModal />} />
+        </div>
+      );
+    }
+
     const preload = this.props.showPreload;
 
-    const isLoading = !preload && !this.state.hideLoader && !this.props.showSafariMicDialog;
+    const isLoading = !preload && !this.state.hideLoader;
 
     if (isLoading && this.state.showPrefs) {
       return (
