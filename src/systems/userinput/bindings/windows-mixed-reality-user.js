@@ -224,7 +224,7 @@ function characterAccelerationBindings() {
     {
       src: { value: paths.device.wmr.left.joystick.axisX },
       dest: { value: lJoyXDeadzoned },
-      xform: xforms.deadzone(0.1)
+      xform: xforms.deadzone(0.2)
     },
     {
       src: { value: lJoyXDeadzoned },
@@ -234,7 +234,7 @@ function characterAccelerationBindings() {
     {
       src: { value: paths.device.wmr.left.joystick.axisY },
       dest: { value: lJoyYDeadzoned },
-      xform: xforms.deadzone(0.1)
+      xform: xforms.deadzone(0.2)
     },
     {
       src: { value: lJoyYDeadzoned },
