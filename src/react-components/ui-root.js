@@ -809,9 +809,7 @@ class UIRoot extends Component {
           }}
           showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
           onEnterOnDevice={() => this.attemptLink()}
-          showSpectate={
-            !this.state.waitingOnAudio && !this.props.entryDisallowed && configs.feature("enable_lobby_ghosts")
-          }
+          showSpectate={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onSpectate={() => this.setState({ watching: true })}
           showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
           onOptions={() => {
