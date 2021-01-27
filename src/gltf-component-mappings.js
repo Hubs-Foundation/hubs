@@ -70,7 +70,7 @@ AFRAME.GLTFModelPlus.registerComponent("directional-light", "directional-light")
 AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
 AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
 AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
-
+AFRAME.GLTFModelPlus.registerComponent("billboard", "billboard");
 AFRAME.GLTFModelPlus.registerComponent("simple-water", "simple-water");
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
