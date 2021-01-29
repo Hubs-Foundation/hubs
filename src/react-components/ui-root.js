@@ -1586,6 +1586,19 @@ class UIRoot extends Component {
               }
             />
           </div>
+          <video id="video" />
+          <style>
+            {`
+            #video {
+              width: 200px;
+              height: 200px;
+              position: absolute;
+              top: 0;
+              left: 0;
+              object-fit: cover;
+            }
+            `}
+          </style>
         </ReactAudioContext.Provider>
       </MoreMenuContextProvider>
     );
