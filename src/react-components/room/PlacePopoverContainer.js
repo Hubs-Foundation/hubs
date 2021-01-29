@@ -9,6 +9,7 @@ import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
 import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { ReactComponent as SceneIcon } from "../icons/Scene.svg";
 import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
+import { ReactComponent as BrowserIcon } from "../icons/Browser.svg";
 import { PlacePopoverButton } from "./PlacePopover";
 import { ObjectUrlModalContainer } from "./ObjectUrlModalContainer";
 import configs from "../../utils/configs";
@@ -61,6 +62,13 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
               color: "orange",
               label: <FormattedMessage id="place-popover.item-type.model" defaultMessage="3D Model" />,
               onSelect: () => mediaSearchStore.sourceNavigate(configs.integration("poly") ? "poly" : "sketchfab")
+            },
+            {
+              id: "iframe",
+              icon: BrowserIcon,
+              color: "orange",
+              label: <FormattedMessage id="place-popover.item-type.iframe" defaultMessage="Web Page" />,
+              onSelect: () => scene.emit("spawn-iframe")
             },
             {
               id: "avatar",
