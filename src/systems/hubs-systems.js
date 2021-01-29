@@ -30,6 +30,7 @@ import { ShadowSystem } from "./shadow-system";
 import { MediaFramesSystem } from "./media-frames";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
 import { EmojiSystem } from "./emoji-system";
+import { IframeSystem } from "./iframe-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -69,6 +70,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
     this.inspectYourselfSystem = new InspectYourselfSystem();
     this.emojiSystem = new EmojiSystem(this.el);
+    this.iframeSystem = new IframeSystem(this.el);
   },
 
   tick(t, dt) {
