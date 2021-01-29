@@ -37,6 +37,10 @@ AFRAME.registerComponent("hover-menu", {
             animate: false,
             scale: false
           });
+          const hoverContainer = this.el.querySelector(".hover-container").object3D;
+          const parentScale = hoverContainer.parent.scale;
+          hoverContainer.scale.divide(parentScale);
+          hoverContainer.matrixNeedsUpdate = true;
         } else {
           const hoverContainer = this.el.querySelector(".hover-container");
           hoverContainer.object3D.position.z = 0.001;
