@@ -138,5 +138,57 @@ export class IframeSystem {
 
 ## Step 4: Make the cube interactable
 
+The `interactable` css class and `is-remote-hover-target` component are necessary to make the object interactable.
+
+[iframe-system.js](/src/systems/iframe-system.js)
+```diff
+export class IframeSystem {
+  constructor(scene) {
+    this.scene = scene;
+
+    this.scene.addEventListener("spawn-iframe", this.onSpawnIframe);
+  }
+
+  onSpawnIframe = () => {
+    const entity = document.createElement("a-entity");
+    entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
+    entity.setAttribute("geometry", "primitive: box; width: 1; height: 1; depth: 1");
+    entity.setAttribute("material", "color: red");
++    entity.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
++    entity.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
+    this.scene.appendChild(entity);
+  }
+}
+```
+
+After you add these two attributes we should be able to hover over the cube and our cursor should change. At this point, the `interaction` system will have the held object state set for the cursor (`scene.systems.interaction.state.rightRemote.hovered`). You can't grab or move it yet, interactables don't have to be grabbable.
+
+## Step 5: Display the hover effect
+
+For this object we want to display the default hover effect (the blue sweeping effect). Internally it uses that `hovered` state to check to see if it his being hovered. You can use this state yourself to implement other hover behaviors.
+
+[iframe-system.js](/src/systems/iframe-system.js)
+```diff
+export class IframeSystem {
+  constructor(scene) {
+    this.scene = scene;
+
+    this.scene.addEventListener("spawn-iframe", this.onSpawnIframe);
+  }
+
+  onSpawnIframe = () => {
+    const entity = document.createElement("a-entity");
+    entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
+    entity.setAttribute("geometry", "primitive: box; width: 1; height: 1; depth: 1");
+    entity.setAttribute("material", "color: red");
+    entity.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
+    entity.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
++    entity.setAttribute("hoverable-visuals", ""); // This adds the hoverable effect to the object
+    this.scene.appendChild(entity);
+  }
+}
+```
+
+## Step 6: Make the object grabbable
 
 
