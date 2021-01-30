@@ -592,6 +592,24 @@
                 </a-entity>
             </template>
 
+            <template id="interactable-iframe-media">
+                <a-entity
+                    geometry="primitive: box; width: 1; height: 1; depth: 1"
+                    material="color: red"
+                    class="interactable"
+                    is-remote-hover-target
+                    hoverable-visuals
+                    tags="isHandCollisionTarget: true; isHoldable: true; offersRemoteConstraint: true; offersHandConstraint: true;"
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 31;"
+                    matrix-auto-update
+                    shape-helper="type: box"
+                    set-unowned-body-kinematic
+                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true; gravitySpeedLimit: 0; reduceAngularFloat: true;"
+                    set-yxz-order
+                    destroy-at-extreme-distances
+                    matrix-auto-update
+                ></a-entity>
+            </template>
 
             <template id="linked-media">
                 <a-entity

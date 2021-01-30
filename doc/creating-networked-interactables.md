@@ -236,7 +236,7 @@ export class IframeSystem {
 +      collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES, 
 +      collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
 +    });
-+    entity.setAttribute("shape-helper", { shape: SHAPE.BOX }); // Create a physics shape that is automatically sized to the bounding box
++    entity.setAttribute("shape-helper", { type: SHAPE.BOX }); // Create a physics shape that is automatically sized to the bounding box
 +    entity.setAttribute("set-unowned-body-kinematic", ""); // When the object has no owner (hasn't been grabbed yet, etc.) use a kinematic body
 +    entity.setAttribute("floaty-object", { // Manages the gravity of an object so that it doesn't fall straight to the floor
 +      modifyGravityOnRelease: true,
@@ -257,3 +257,78 @@ You should now be able to move the cube around with your cursor. It should float
 So far all this object is only visible locally. If we want to spawn in the other user's scenes we need to add some networking logic.
 
 First we need to add a network template to [hub.html](/src/hub.html). This template is used by networked aframe to instantiate an entity remotely. We can also use this templat to create the entity locally. Let's move all of the logic we've added so far to a template.
+
+And we'll also add a few new components:
+
+- `set-yxz-order`: This sets the rotation order to `yxz` which solves some networked rotation issues.
+- `destroy-at-extreme-distances`: This destroys the networked object if it goes too far away from the origin
+- `matrix-auto-update`: This undoes our matrix optimizations for this object and make it so that it updates every frame
+
+It is also important that your template id match one of the [existing template categories set in Reticulum](https://github.com/mozilla/reticulum/blob/master/lib/ret_web/channels/hub_channel.ex#L695). In this case we set our template id to `interactable-iframe-media`, the `-media` suffix allows our object to be passed through reticulum and allowed for any user that has the `spawn_and_move_media` permission.
+
+[hub.html](/src/hub.html)
+```diff
+<!DOCTYPE html>
+<html>
+
+<head>
+<!-- ...  -->
+</head>
+
+<body>
+    <!-- ...  -->
+
+    <a-scene>
+        <a-assets>
+          <!-- ...  -->
+
++          <template id="interactable-iframe-media">
++            <a-entity
++                geometry="primitive: box; width: 1; height: 1; depth: 1"
++                material="color: red"
++                class="interactable"
++                is-remote-hover-target
++                hoverable-visuals
++                tags="isHandCollisionTarget: true; isHoldable: true; offersRemoteConstraint: true; offersHandConstraint: true;"
++                body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 31;"
++                shape-helper="type: box"
++                set-unowned-body-kinematic
++                floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true; gravitySpeedLimit: 0; reduceAngularFloat: true;"
++                set-yxz-order
++                destroy-at-extreme-distances
++                matrix-auto-update
++            ></a-entity>
++          </template>
+
+        <!-- ...  -->
+      </a-assets>
+      <!-- ...  -->
+    </a-scene>
+
+    <!-- ...  -->
+</body>
+
+</html>
+```
+
+With the template in place our system can be simplified to:
+
+[iframe-system.js](/src/systems/iframe-system.js)
+```js
+export class IframeSystem {
+  constructor(scene) {
+    this.scene = scene;
+
+    this.scene.addEventListener("spawn-iframe", this.onSpawnIframe);
+  }
+
+  onSpawnIframe = () => {
+    const entity = document.createElement("a-entity");
+    this.scene.appendChild(entity);
+    entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
+    entity.setAttribute("networked", { template: "#interactable-iframe-media" });
+  };
+}
+```
+
+We set the local position with the `offset-relative-to` component and `networked` handles attaching the components from the template to the entity both locally and remotely. The `offset-relative-to` component will not be attached locally because it is not in the template.
