@@ -89,8 +89,8 @@ export class IframeSystem {
   onSpawnIframe = () => {
     const entity = document.createElement("a-entity");
     entity.setAttribute("position", "0 1 0");
-    entity.setAttribute("geometry", "primitive: box; width: 1; height: 1; depth: 1");
-    entity.setAttribute("material", "color: red");
+    entity.setAttribute("geometry", { primitive: "box", width: 1, height: 1, depth: 1 });
+    entity.setAttribute("material", { color: "red" });
     this.scene.appendChild(entity);
   }
 }
@@ -129,8 +129,8 @@ export class IframeSystem {
     const entity = document.createElement("a-entity");
 -    entity.setAttribute("position", "0 1 0");
 +    entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
-    entity.setAttribute("geometry", "primitive: box; width: 1; height: 1; depth: 1");
-    entity.setAttribute("material", "color: red");
+    entity.setAttribute("geometry", { primitive: "box", width: 1, height: 1, depth: 1 });
+    entity.setAttribute("material", { color: "red" });
     this.scene.appendChild(entity);
   }
 }
@@ -138,10 +138,12 @@ export class IframeSystem {
 
 ## Step 4: Make the cube interactable
 
-The `interactable` css class and `is-remote-hover-target` component are necessary to make the object interactable.
+The `interactable` css class and `is-remote-hover-target` component are necessary to make the object interactable with your cursor. And the `isHandCollisionTarget` and `
 
 [iframe-system.js](/src/systems/iframe-system.js)
 ```diff
++import { TYPE } from "three-ammo/constants";
++
 export class IframeSystem {
   constructor(scene) {
     this.scene = scene;
@@ -152,16 +154,18 @@ export class IframeSystem {
   onSpawnIframe = () => {
     const entity = document.createElement("a-entity");
     entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
-    entity.setAttribute("geometry", "primitive: box; width: 1; height: 1; depth: 1");
-    entity.setAttribute("material", "color: red");
+    entity.setAttribute("geometry", { primitive: "box", width: 1, height: 1, depth: 1 });
+    entity.setAttribute("material", { color: "red" });
 +    entity.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
 +    entity.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
++    entity.setAttribute("tags", { isHandCollisionTarget: true }); // This makes the object hoverable by your hands in VR
++    entity.setAttribute("body-helper", { type: TYPE.KINEMATIC }); // This registers a kinematic body with the physics system so you we can detect collisions with your hands
     this.scene.appendChild(entity);
   }
 }
 ```
 
-After you add these two attributes we should be able to hover over the cube and our cursor should change. At this point, the `interaction` system will have the held object state set for the cursor (`scene.systems.interaction.state.rightRemote.hovered`). You can't grab or move it yet, interactables don't have to be grabbable.
+After you add these attributes we should be able to hover over the cube and our cursor should change. At this point, the `interaction` system will have the held object state set for the cursor (`scene.systems.interaction.state.rightRemote.hovered`) or other interactor (left hand, right hand, left cursor), but you can't grab or move it yet.
 
 ## Step 5: Display the hover effect
 
@@ -179,10 +183,12 @@ export class IframeSystem {
   onSpawnIframe = () => {
     const entity = document.createElement("a-entity");
     entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
-    entity.setAttribute("geometry", "primitive: box; width: 1; height: 1; depth: 1");
-    entity.setAttribute("material", "color: red");
+    entity.setAttribute("geometry", { primitive: "box", width: 1, height: 1, depth: 1 });
+    entity.setAttribute("material", { color: "red" });
     entity.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
     entity.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
+    entity.setAttribute("tags", { isHandCollisionTarget: true }); // This makes the object hoverable by your hands in VR
+    entity.setAttribute("body-helper", { type: "kinematic" }); // This registers a kinematic body with the physics system so you we can detect collisions with your hands
 +    entity.setAttribute("hoverable-visuals", ""); // This adds the hoverable effect to the object
     this.scene.appendChild(entity);
   }
@@ -190,5 +196,64 @@ export class IframeSystem {
 ```
 
 ## Step 6: Make the object grabbable
+Now that we can hover on on object, we want to be able to grab and move it around. This is accomplished by adding some tags that register the object with the physics and interaction systems and a number of other supporting components.
 
+[iframe-system.js](/src/systems/iframe-system.js)
+```diff
+-import { TYPE } from "three-ammo/constants";
++import { COLLISION_LAYERS } from "../constants";
++import { SHAPE, TYPE } from "three-ammo/constants";
++
+export class IframeSystem {
+  constructor(scene) {
+    this.scene = scene;
 
+    this.scene.addEventListener("spawn-iframe", this.onSpawnIframe);
+  }
+
+  onSpawnIframe = () => {
+    const entity = document.createElement("a-entity");
+    entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
+    entity.setAttribute("geometry", { primitive: "box", width: 1, height: 1, depth: 1 });
+    entity.setAttribute("material", { color: "red" });
+    entity.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
+    entity.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
+-    entity.setAttribute("tags", { isHandCollisionTarget: true }); // This makes the object hoverable by your hands in VR
+-    entity.setAttribute("body-helper", { type: "kinematic" }); // This registers a kinematic body with the physics system so you we can detect collisions with your hands
++    entity.setAttribute("tags", {
++      // This makes the object hoverable by your hands in VR
++      isHandCollisionTarget: true,
++      // The interaction system will set it's held state to this object
++      isHoldable: true, 
++      // The physics system will create a constraint between your cursor and the object when grabbed allowing you to move it
++      offersRemoteConstraint: true
++      // The physics system will create a constraint between your hand and the object when grabbed allowing you to move it
++      offersHandConstraint: true
++    });
++    entity.setAttribute("body-helper", {
++      type: TYPE.DYNAMIC, // Now that the body can be grabbed, let's make it respond to gravity
++      mass: 1, // We'll give it a mass of 1kg
++      collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES, 
++      collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
++    });
++    entity.setAttribute("shape-helper", { shape: SHAPE.BOX }); // Create a physics shape that is automatically sized to the bounding box
++    entity.setAttribute("set-unowned-body-kinematic", ""); // When the object has no owner (hasn't been grabbed yet, etc.) use a kinematic body
++    entity.setAttribute("floaty-object", { // Manages the gravity of an object so that it doesn't fall straight to the floor
++      modifyGravityOnRelease: true,
++      autoLockOnLoad: true,
++      gravitySpeedLimit: 0,
++      reduceAngularFloat: true
++    });
+    entity.setAttribute("hoverable-visuals", ""); // This adds the hoverable effect to the object
+    this.scene.appendChild(entity);
+  }
+}
+```
+
+You should now be able to move the cube around with your cursor. It should float around in 3D space and eventually slow to a stop.
+
+## Step 7: Network the object
+
+So far all this object is only visible locally. If we want to spawn in the other user's scenes we need to add some networking logic.
+
+First we need to add a network template to [hub.html](/src/hub.html). This template is used by networked aframe to instantiate an entity remotely. We can also use this templat to create the entity locally. Let's move all of the logic we've added so far to a template.
