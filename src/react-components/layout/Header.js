@@ -18,7 +18,7 @@ export function Header() {
         <nav>
           <ul>
             <li>
-              <a href="/">Home</a>
+              <a href="/">Home Page</a>
             </li>
             <IfFeature name="show_cloud">
               <li>
