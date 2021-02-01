@@ -386,7 +386,6 @@ AFRAME.registerComponent("page-thumbnail", {
     this.el.setObject3D("mesh", mesh);
   }
 });
-
 ```
 
 And then we'll add this component to the entity in `iframe-system.js`. 
@@ -496,3 +495,267 @@ Now the thumbnail should show up in the remote client's view.
 
 Now we should be able to set or change the url whenever we want. Let's add some UI to set the web page url when adding it to the scene.
 
+We split our UI features into two parts, presentational and container components. Presentational components handle rendering the UI and do not depend on the state of the app or any non-presentational components. Container components compose one or more presentational components and contain all the business logic and app state bindings. We try to keep all of the UI and styles out of container components so that we can build and test presentational components with [Storybook](https://storybook.js.org/), a tool for rapidly iterating on components.
+
+We'll start by creating a new presentational React component, `/src/react-components/room/WebPageUrlModal.js`.
+
+[WebPageUrlModal.js](/src/react-components/room/WebPageUrlModal.js)
+```js
+import React from "react";
+import PropTypes from "prop-types";
+import { Modal } from "../modal/Modal";
+import { CloseButton } from "../input/CloseButton";
+import { TextInputField } from "../input/TextInputField";
+import { useForm } from "react-hook-form";
+import { Button } from "../input/Button";
+import { FormattedMessage } from "react-intl";
+import { Column } from "../layout/Column";
+
+export function WebPageUrlModal({ onSubmit, onClose }) {
+  const { isSubmitting, handleSubmit, register, errors } = useForm();
+
+  return (
+    <Modal
+      title={<FormattedMessage id="web-page-url-modal.title" defaultMessage="Web Page URL" />}
+      beforeTitle={<CloseButton onClick={onClose} />}
+    >
+      <Column as="form" padding center onSubmit={handleSubmit(onSubmit)}>
+        <p>
+          <FormattedMessage
+            id="web-page-url-modal.message"
+            defaultMessage="Paste a URL to the web page you want to embed in the scene."
+          />
+        </p>
+        <TextInputField
+          name="src"
+          label={<FormattedMessage id="web-page-url-modal.url-input" defaultMessage="Web Page URL" />}
+          placeholder="https://example.com"
+          type="url"
+          required
+          ref={register}
+          error={errors.src && errors.src.message}
+        />
+        <Button type="submit" preset="accept" disabled={isSubmitting}>
+          <FormattedMessage id="web-page-url-modal.spawn-web-page-button" defaultMessage="Spawn Web Page" />
+        </Button>
+      </Column>
+    </Modal>
+  );
+}
+
+WebPageUrlModal.propTypes = {
+  onSubmit: PropTypes.func,
+  onClose: PropTypes.func
+};
+```
+
+Then we'll create a story for this component so we can preview it and make sure it looks right. This file will be placed alongside the presentational component (`/src/react-components/room/WebPageUrlModal.stories.js`).
+
+
+[WebPageUrlModal.stories.js](/src/react-components/room/WebPageUrlModal.stories.js)
+```js
+import React from "react";
+import { RoomLayout } from "../layout/RoomLayout";
+import { WebPageUrlModal } from "./WebPageUrlModal";
+
+export default {
+  title: "WebPageUrlModal",
+  parameters: {
+    layout: "fullscreen"
+  }
+};
+
+export const Base = () => <RoomLayout modal={<WebPageUrlModal />} />;
+```
+
+You can then view this story by running `npm run storybook` and navigating to the `Web Page Url Modal` component in the sidebar.
+
+We'll then need to create a container component which interacts with the scene and triggers the spawn event with the provided url. We'll do that in `/src/react-components/room/WebPageUrlModalContainer.js`.
+
+[WebPageUrlModalContainer.js](/src/react-components/room/WebPageUrlModalContainer.js)
+```js
+import React, { useCallback } from "react";
+import PropTypes from "prop-types";
+import { WebPageUrlModal } from "./WebPageUrlModal";
+
+export function WebPageUrlModalContainer({ scene, onClose }) {
+  const onSubmit = useCallback(
+    ({ src }) => {
+      scene.emit("spawn-iframe", { src });
+      onClose();
+    },
+    [scene, onClose]
+  );
+
+  return <WebPageUrlModal onSubmit={onSubmit} onClose={onClose} />;
+}
+
+WebPageUrlModalContainer.propTypes = {
+  scene: PropTypes.object.isRequired,
+  onClose: PropTypes.func
+};
+
+```
+
+We also need to show this modal when you click the "Web Page" button in the place modal.
+
+In `PlacePopoverContainer.js` change this line:
+
+```diff
+export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {
+  const [items, setItems] = useState([]);
+
+  useEffect(
+    () => {
+      function updateItems() {
+        // ...
+
+        let nextItems = [
+          // ...
+        ];
+
+        if (hubChannel.can("spawn_and_move_media")) {
+          nextItems = [
+            ...nextItems,
+            // ...
+            {
+              id: "iframe",
+              icon: BrowserIcon,
+              color: "orange",
+              label: <FormattedMessage id="place-popover.item-type.iframe" defaultMessage="Web Page" />,
+-              onSelect: () => scene.emit("spawn-iframe")
++              () => showNonHistoriedDialog(WebPageUrlModalContainer, { scene })
+            },
+            // ...
+          ];
+        }
+
+        setItems(nextItems);
+      }
+
+      hubChannel.addEventListener("permissions_updated", updateItems);
+
+      updateItems();
+
+      // ...
+
+      return () => {
+        hubChannel.removeEventListener("permissions_updated", updateItems);
+        // ...
+      };
+    },
+    [hubChannel, mediaSearchStore, showNonHistoriedDialog, scene]
+  );
+
+  return <PlacePopoverButton items={items} />;
+}
+```
+
+This will show the modal in the viewport and pass the `scene` object into the container component's props.
+
+And finally we need to change `iframe-system.js` to use this `src` property in the `spawn-iframe` event.
+
+```diff
+export class IframeSystem {
+  constructor(scene) {
+    this.scene = scene;
+
+    this.scene.addEventListener("spawn-iframe", this.onSpawnIframe);
+  }
+
+-  onSpawnIframe = () => {
++  onSpawnIframe = event => {
+    const entity = document.createElement("a-entity");
+    this.scene.appendChild(entity);
+-    entity.setAttribute("page-thumbnail", { src: "https://mozilla.org" });
++    entity.setAttribute("page-thumbnail", { src: event.detail.src });
+    entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
+    entity.setAttribute("networked", { template: "#interactable-iframe-media" });
+  };
+}
+```
+
+Now when we click the "Web Page` button we should see the modal, we can fill it out with any url we want, and then click "Spawn Webpage". In a short while we'll see the object spawn.
+
+## Step 11: Show the loading state
+
+To polish it off, let's add a loader so that we have something to look at and grab while it's loading. Back in `hub.html` add the following line.
+
+```diff
+<template id="interactable-iframe-media">
+  <a-entity
+      class="interactable"
+      is-remote-hover-target
+      hoverable-visuals
+      tags="isHandCollisionTarget: true; isHoldable: true; offersRemoteConstraint: true; offersHandConstraint: true;"
+      body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 31;"
+      matrix-auto-update
+      shape-helper="type: box"
+      set-unowned-body-kinematic
+      floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true; gravitySpeedLimit: 0; reduceAngularFloat: true;"
+      set-yxz-order
+      destroy-at-extreme-distances
+      matrix-auto-update
++      loader="loadedEvent: page-thumbnail-loaded"
+  ></a-entity>
+</template>
+```
+
+Then we'll emit this event on the element when it's done loading
+
+[page-thumbnail.js](/src/components/page-thumbnail.js)
+```diff
+import { resolveUrl, createImageTexture } from "../utils/media-utils";
+import { proxiedUrlFor } from "../utils/media-url-utils";
+
+AFRAME.registerComponent("page-thumbnail", {
+  schema: {
+    src: { type: "string" }
+  },
+
+  init: function() {
+    this.updateThumbnail = this.updateThumbnail.bind(this);
+  },
+
+  update(prevData) {
+    if (this.data.src !== prevData.src) {
+      this.updateThumbnail();
+    }
+  },
+
+  updateThumbnail: async function updateThumbnail() {
+    if (this.el.object3DMap.mesh) {
+      this.el.removeObject3D("mesh");
+    }
+
+    const src = this.data.src;
+
+    const result = await resolveUrl(src);
+
+    const thumbnailUrl = result?.meta?.thumbnail;
+
+    if (!thumbnailUrl) {
+      throw Error("No thumbnail found");
+    }
+
+    const corsProxiedThumbnailUrl = proxiedUrlFor(thumbnailUrl);
+
+    const texture = await createImageTexture(corsProxiedThumbnailUrl);
+
+    const geometry = new THREE.PlaneBufferGeometry(1.6, 0.9, 1, 1, texture.flipY);
+    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(geometry, material);
+    this.el.setObject3D("mesh", mesh);
+
++    this.el.emit("page-thumbnail-loaded");
+  }
+});
+```
+
+Now you should see a loading indicator while the website thumbnail is being loaded.
+
+## What's Next
+
+You've successfully created a basic networked interactable object. From here you can modify the code you've written to have different visual behavior.You could also check the held or grabbed state to trigger different actions. Whatever interactable objects your app needs, these basic concepts can be applied to.
+
+The Hubs codebase can be challenging to work with. It's quite large and contains a wide vriety of libraries and javascript APIs. If you get stuck and want to find help, we recommend starting a [Github Discussion thread](https://github.com/mozilla/hubs/discussions). You can also [join our community on Discord](https://discord.com/invite/CzAbuGu), where our community members and developers are constantly talking about Hubs development.

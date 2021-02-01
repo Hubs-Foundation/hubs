@@ -39,5 +39,7 @@ AFRAME.registerComponent("page-thumbnail", {
     const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
     const mesh = new THREE.Mesh(geometry, material);
     this.el.setObject3D("mesh", mesh);
+
+    this.el.emit("page-thumbnail-loaded");
   }
 });
