@@ -1586,15 +1586,19 @@ class UIRoot extends Component {
               }
             />
           </div>
-          <video id="video" />
+          <div id="video-container" />
           <style>
             {`
-            #video {
-              width: 200px;
-              height: 200px;
+            #video-container {
+              display: flex;
+              flex-wrap: wrap;
+              width: 800px;
               position: absolute;
               top: 0;
               left: 0;
+            }
+            .video {
+              width: 200px;
               object-fit: cover;
             }
             `}

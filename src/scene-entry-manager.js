@@ -411,11 +411,13 @@ export default class SceneEntryManager {
           newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
         } else {
           newStream = await navigator.mediaDevices.getUserMedia(constraints);
-          const videoElem = document.getElementById("video");
-          videoElem.srcObject = newStream;
+          // const videoElem = document.getElementById("video");
+          // videoElem.srcObject = newStream;
           // videoElem.play();
-          console.log("videoElem");
-          console.log(videoElem);
+          // console.log("videoElem");
+          // console.log(videoElem);
+          // console.log("video tracks count");
+          // console.log(newStream.getVideoTracks().length);
         }
       } catch (e) {
         isHandlingVideoShare = false;
@@ -515,6 +517,7 @@ export default class SceneEntryManager {
 
       await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
+      NAF.connection.adapter.removeMyWebcam();
 
       this.scene.emit("share_video_disabled");
       this.scene.removeState("sharing_video");
