@@ -54,7 +54,7 @@ AFRAME.registerComponent("hand-controls2", {
     const thumb = userinput.get(subpath.thumb);
     const index = userinput.get(subpath.index);
     const middleRingPinky = userinput.get(subpath.middleRingPinky);
-    const pose = this.poseForFingers(thumb, index, middleRingPinky);
+    const pose = window.pose || this.poseForFingers(thumb, index, middleRingPinky);
     if (pose !== this.pose) {
       this.el.emit("hand-pose", { previous: this.pose, current: pose });
       this.pose = pose;

@@ -14,6 +14,7 @@ import "aframe";
 import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
+import "./utils/pretty-print";
 
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
