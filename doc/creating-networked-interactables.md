@@ -332,3 +332,167 @@ export class IframeSystem {
 ```
 
 We set the local position with the `offset-relative-to` component and `networked` handles attaching the components from the template to the entity both locally and remotely. The `offset-relative-to` component will not be attached locally because it is not in the template.
+
+You should now see the object spawn and move locally and on a remote client.
+
+## Step 8: Render a page thumbnail
+
+We won't be going into creating a complete 3D iframe implementation in this tutorial, but we will cover part of it. In the final implementation we will literally render an iframe and transform it in 3D with CSS. However, this isn't possible in WebXR. We can't yet render DOM elements into a WebGL context. So we'll be using a thumbnail for the site instead. We already have a backend service in Hubs that generates these thumbnails, all we need to do is provide it with a url. To start we'll use `https://mozilla.org` as our url and later we'll make it possible to set your own and change it.
+
+Let's create a new component to handle rendering this 3D thumbnail. Components are placed in the `/src/components` directory.
+
+[page-thumbnail.js](/src/components/page-thumbnail.js)
+```js
+import { resolveUrl, createImageTexture } from "../utils/media-utils";
+import { proxiedUrlFor } from "../utils/media-url-utils";
+
+AFRAME.registerComponent("page-thumbnail", {
+  schema: {
+    src: { type: "string" }
+  },
+
+  init: function() {
+    this.updateThumbnail = this.updateThumbnail.bind(this);
+  },
+
+  update(prevData) {
+    if (this.data.src !== prevData.src) {
+      this.updateThumbnail();
+    }
+  },
+
+  updateThumbnail: async function updateThumbnail() {
+    if (this.el.object3DMap.mesh) {
+      this.el.removeObject3D("mesh");
+    }
+
+    const src = this.data.src;
+
+    const result = await resolveUrl(src);
+
+    const thumbnailUrl = result?.meta?.thumbnail;
+
+    if (!thumbnailUrl) {
+      throw Error("No thumbnail found");
+    }
+
+    const corsProxiedThumbnailUrl = proxiedUrlFor(thumbnailUrl);
+
+    const texture = await createImageTexture(corsProxiedThumbnailUrl);
+
+    const geometry = new THREE.PlaneBufferGeometry(1.6, 0.9, 1, 1, texture.flipY);
+    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(geometry, material);
+    this.el.setObject3D("mesh", mesh);
+  }
+});
+
+```
+
+And then we'll add this component to the entity in `iframe-system.js`. 
+
+```diff
+export class IframeSystem {
+  constructor(scene) {
+    this.scene = scene;
+
+    this.scene.addEventListener("spawn-iframe", this.onSpawnIframe);
+  }
+
+  onSpawnIframe = () => {
+    const entity = document.createElement("a-entity");
+    this.scene.appendChild(entity);
++    entity.setAttribute("page-thumbnail", { src: "https://mozilla.org" });
+    entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
+    entity.setAttribute("networked", { template: "#interactable-iframe-media" });
+  };
+}
+
+```
+
+And finally remove the geometry and material components from the network template in `hub.html`.
+
+[hub.html](/src/hub.html)
+```diff
+<!DOCTYPE html>
+<html>
+
+<head>
+<!-- ...  -->
+</head>
+
+<body>
+    <!-- ...  -->
+
+    <a-scene>
+        <a-assets>
+          <!-- ...  -->
+
+          <template id="interactable-iframe-media">
+            <a-entity
+-                geometry="primitive: box; width: 1; height: 1; depth: 1"
+-                material="color: red"
+                class="interactable"
+                is-remote-hover-target
+                hoverable-visuals
+                tags="isHandCollisionTarget: true; isHoldable: true; offersRemoteConstraint: true; offersHandConstraint: true;"
+                body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 31;"
+                shape-helper="type: box"
+                set-unowned-body-kinematic
+                floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true; gravitySpeedLimit: 0; reduceAngularFloat: true;"
+                set-yxz-order
+                destroy-at-extreme-distances
+                matrix-auto-update
+            ></a-entity>
+          </template>
+
+        <!-- ...  -->
+      </a-assets>
+      <!-- ...  -->
+    </a-scene>
+
+    <!-- ...  -->
+</body>
+
+</html>
+```
+
+Now when you spawn the Web Page you should see a screenshot of the Mozilla.org homepage, but on the remote client we don't see it yet.
+
+## Step 9: Synchronizing the web page url
+
+The page isn't showing up because the `page-thumbnail` component isn't added on the remote client. We could add this component to the network template in `hub.html`, but then we wouldn't be able to change the url. By default networked aframe synchronizes position, rotation, and scale components every time they change. We want to add a new synchronized component. To do this, we need to create a network schema.
+
+Add the following code somewhere in `/src/network-schemas.js`
+
+[network-schemas.js](/src/network-schemas.js)
+```js
+NAF.schemas.add({
+  template: "#interactable-iframe-media",
+  components: [
+    {
+      component: "position",
+      requiresNetworkUpdate: vectorRequiresUpdate(0.001) // Only send updates when the object has moved over 0.001 meters
+    },
+    {
+      component: "rotation",
+      requiresNetworkUpdate: vectorRequiresUpdate(0.5) // Only send updates when the object has rotated over 0.5 degrees
+    },
+    {
+        component: "scale",
+        requiresNetworkUpdate: vectorRequiresUpdate(0.001)  // Only send updates when the object scale has changed over 0.001 units
+      },
+    {
+      component: "page-thumbnail",
+      property: "src" // Synchronize the page-thumbnail component's src property
+    }
+  ]
+});
+```
+
+Now the thumbnail should show up in the remote client's view.
+
+## Step 10: Changing the web page url
+
+Now we should be able to set or change the url whenever we want. Let's add some UI to set the web page url when adding it to the scene.
+
