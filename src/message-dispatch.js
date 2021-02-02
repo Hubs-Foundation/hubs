@@ -182,6 +182,11 @@ export default class MessageDispatch extends EventTarget {
           }
         }
         break;
+      case "emote":
+        {
+          document.dispatchEvent(new CustomEvent("emote", { detail: { name: args[0] } }));
+        }
+        break;
     }
   };
 }
