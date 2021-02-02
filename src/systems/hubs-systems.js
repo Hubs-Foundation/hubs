@@ -115,6 +115,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
     this.mediaFramesSystem.tick();
+    this.iframeSystem.tick();
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();

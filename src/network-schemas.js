@@ -193,9 +193,13 @@ function registerNetworkSchemas() {
         requiresNetworkUpdate: vectorRequiresUpdate(0.001)
       },
       {
-        component: "page-thumbnail",
+        component: "iframe",
         property: "src"
       }
+      // {
+      //   component: "page-thumbnail",
+      //   property: "src"
+      // }
     ]
   });
 
