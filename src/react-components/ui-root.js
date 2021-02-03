@@ -19,7 +19,7 @@ import {
   sluglessPath
 } from "../utils/history";
 import StateRoute from "./state-route.js";
-import { getPresenceProfileForSession } from "../utils/phoenix-utils";
+import { getPresenceProfileForSession, hubUrl } from "../utils/phoenix-utils";
 import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
 
@@ -996,7 +996,6 @@ class UIRoot extends Component {
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
     const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
-    const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
@@ -1077,8 +1076,8 @@ class UIRoot extends Component {
     const renderEntryFlow = (!enteredOrWatching && this.props.hub) || this.isWaitingForAutoExit();
 
     const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
-    const canCloseRoom = !!this.props.hubChannel.canOrWillIfCreator("close_hub");
-    const isModerator = this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
+    const canCloseRoom = this.props.hubChannel && !!this.props.hubChannel.canOrWillIfCreator("close_hub");
+    const isModerator = this.props.hubChannel && this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
 
     const moreMenu = [
       {
@@ -1279,7 +1278,7 @@ class UIRoot extends Component {
                 <PreloadOverlay
                   hubName={this.props.hub.name}
                   hubScene={this.props.hub.scene}
-                  baseUrl={baseUrl}
+                  baseUrl={hubUrl(this.props.hub.hub_id).href}
                   onLoadClicked={this.props.onPreloadLoadClicked}
                 />
               )}
@@ -1335,256 +1334,258 @@ class UIRoot extends Component {
                   scene={this.props.scene}
                 />
               )}
-            <RoomLayoutContainer
-              scene={this.props.scene}
-              store={this.props.store}
-              objectFocused={!!this.props.selectedObject}
-              streaming={streaming}
-              viewport={
-                <>
-                  {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
-                  {!this.props.selectedObject && <CompactMoreMenuButton />}
-                  {(!this.props.selectedObject ||
-                    (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
-                    <ContentMenu>
-                      {showObjectList && (
-                        <ObjectsMenuButton
-                          active={this.state.sidebarId === "objects"}
-                          onClick={() => this.toggleSidebar("objects")}
+            {this.props.hub && (
+              <RoomLayoutContainer
+                scene={this.props.scene}
+                store={this.props.store}
+                objectFocused={!!this.props.selectedObject}
+                streaming={streaming}
+                viewport={
+                  <>
+                    {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
+                    {!this.props.selectedObject && <CompactMoreMenuButton />}
+                    {(!this.props.selectedObject ||
+                      (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
+                      <ContentMenu>
+                        {showObjectList && (
+                          <ObjectsMenuButton
+                            active={this.state.sidebarId === "objects"}
+                            onClick={() => this.toggleSidebar("objects")}
+                          />
+                        )}
+                        <PeopleMenuButton
+                          active={this.state.sidebarId === "people"}
+                          onClick={() => this.toggleSidebar("people")}
+                        />
+                      </ContentMenu>
+                    )}
+                    {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
+                    {this.props.activeObject && (
+                      <ObjectMenuContainer
+                        hubChannel={this.props.hubChannel}
+                        scene={this.props.scene}
+                        onOpenProfile={() => this.setSidebar("profile")}
+                        onGoToObject={() => {
+                          if (this.props.breakpoint === "sm") {
+                            this.setSidebar(null);
+                          }
+                        }}
+                      />
+                    )}
+                    {this.state.sidebarId !== "chat" &&
+                      this.props.hub && (
+                        <PresenceLog
+                          inRoom={true}
+                          presences={this.props.presences}
+                          entries={presenceLogEntries}
+                          hubId={this.props.hub.hub_id}
+                          history={this.props.history}
+                          onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                         />
                       )}
-                      <PeopleMenuButton
-                        active={this.state.sidebarId === "people"}
-                        onClick={() => this.toggleSidebar("people")}
-                      />
-                    </ContentMenu>
-                  )}
-                  {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
-                  {this.props.activeObject && (
-                    <ObjectMenuContainer
-                      hubChannel={this.props.hubChannel}
-                      scene={this.props.scene}
-                      onOpenProfile={() => this.setSidebar("profile")}
-                      onGoToObject={() => {
-                        if (this.props.breakpoint === "sm") {
-                          this.setSidebar(null);
-                        }
-                      }}
-                    />
-                  )}
-                  {this.state.sidebarId !== "chat" &&
-                    this.props.hub && (
-                      <PresenceLog
-                        inRoom={true}
-                        presences={this.props.presences}
-                        entries={presenceLogEntries}
-                        hubId={this.props.hub.hub_id}
-                        history={this.props.history}
-                        onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
-                      />
-                    )}
-                  <TipContainer
-                    hide={this.props.activeObject}
-                    inLobby={watching}
-                    inRoom={entered}
-                    isEmbedded={this.props.embed}
-                    isStreaming={streaming}
-                    hubId={this.props.hub.hub_id}
-                    presences={this.props.presences}
-                    scene={this.props.scene}
-                    store={this.props.store}
-                  />
-                  {showRtcDebugPanel && (
-                    <RTCDebugPanel
-                      history={this.props.history}
-                      store={window.APP.store}
-                      scene={this.props.scene}
+                    <TipContainer
+                      hide={this.props.activeObject}
+                      inLobby={watching}
+                      inRoom={entered}
+                      isEmbedded={this.props.embed}
+                      isStreaming={streaming}
+                      hubId={this.props.hub.hub_id}
                       presences={this.props.presences}
-                      sessionId={this.props.sessionId}
+                      scene={this.props.scene}
+                      store={this.props.store}
                     />
-                  )}
-                </>
-              }
-              sidebar={
-                this.state.sidebarId ? (
-                  <>
-                    {this.state.sidebarId === "chat" && (
-                      <ChatSidebarContainer
-                        presences={this.props.presences}
-                        occupantCount={this.occupantCount()}
-                        canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
+                    {showRtcDebugPanel && (
+                      <RTCDebugPanel
+                        history={this.props.history}
+                        store={window.APP.store}
                         scene={this.props.scene}
-                        onClose={() => this.setSidebar(null)}
-                      />
-                    )}
-                    {this.state.sidebarId === "objects" && (
-                      <ObjectsSidebarContainer
-                        hubChannel={this.props.hubChannel}
-                        onClose={() => this.setSidebar(null)}
-                      />
-                    )}
-                    {this.state.sidebarId === "people" && (
-                      <PeopleSidebarContainer
-                        displayNameOverride={displayNameOverride}
-                        store={this.props.store}
-                        mediaSearchStore={this.props.mediaSearchStore}
-                        hubChannel={this.props.hubChannel}
-                        history={this.props.history}
-                        mySessionId={this.props.sessionId}
                         presences={this.props.presences}
-                        onClose={() => this.setSidebar(null)}
-                        onCloseDialog={() => this.closeDialog()}
-                        showNonHistoriedDialog={this.showNonHistoriedDialog}
-                        performConditionalSignIn={this.props.performConditionalSignIn}
-                      />
-                    )}
-                    {this.state.sidebarId === "profile" && (
-                      <ProfileEntryPanel
-                        history={this.props.history}
-                        containerType="sidebar"
-                        displayNameOverride={displayNameOverride}
-                        finished={() => this.setSidebar(null)}
-                        onClose={() => this.setSidebar(null)}
-                        store={this.props.store}
-                        mediaSearchStore={this.props.mediaSearchStore}
-                      />
-                    )}
-                    {this.state.sidebarId === "user" && (
-                      <UserProfileSidebarContainer
-                        user={this.getSelectedUser()}
-                        hubChannel={this.props.hubChannel}
-                        performConditionalSignIn={this.props.performConditionalSignIn}
-                        onClose={() => this.setSidebar(null)}
-                        onCloseDialog={() => this.closeDialog()}
-                        showNonHistoriedDialog={this.showNonHistoriedDialog}
-                      />
-                    )}
-                    {this.state.sidebarId === "room-info" && (
-                      <RoomSidebar
-                        accountId={this.props.sessionId}
-                        room={this.props.hub}
-                        canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
-                        onEdit={() => {
-                          this.props.performConditionalSignIn(
-                            () => this.props.hubChannel.can("update_hub"),
-                            () => this.setSidebar("room-info-settings"),
-                            SignInMessages.roomSettings
-                          );
-                        }}
-                        onClose={() => this.setSidebar(null)}
-                        onChangeScene={this.onChangeScene}
-                      />
-                    )}
-                    {this.state.sidebarId === "room-info-settings" && (
-                      <RoomSettingsSidebarContainer
-                        room={this.props.hub}
-                        hubChannel={this.props.hubChannel}
-                        showBackButton
-                        onClose={() => this.setSidebar("room-info")}
-                        onChangeScene={this.onChangeScene}
-                      />
-                    )}
-                    {this.state.sidebarId === "room-settings" && (
-                      <RoomSettingsSidebarContainer
-                        room={this.props.hub}
-                        accountId={this.props.sessionId}
-                        hubChannel={this.props.hubChannel}
-                        onClose={() => this.setSidebar(null)}
-                        onChangeScene={this.onChangeScene}
+                        sessionId={this.props.sessionId}
                       />
                     )}
                   </>
-                ) : (
-                  undefined
-                )
-              }
-              modal={this.state.dialog}
-              toolbarLeft={
-                <InvitePopoverContainer
-                  hub={this.props.hub}
-                  hubChannel={this.props.hubChannel}
-                  scene={this.props.scene}
-                />
-              }
-              toolbarCenter={
-                <>
-                  {watching && (
+                }
+                sidebar={
+                  this.state.sidebarId ? (
                     <>
-                      <ToolbarButton
-                        icon={<EnterIcon />}
-                        label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room" />}
-                        preset="green"
-                        onClick={() => this.setState({ watching: false })}
-                      />
-                      {enableSpectateVRButton && (
-                        <ToolbarButton
-                          icon={<VRIcon />}
-                          preset="purple"
-                          label={
-                            <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
-                          }
-                          onClick={() => this.props.scene.enterVR()}
+                      {this.state.sidebarId === "chat" && (
+                        <ChatSidebarContainer
+                          presences={this.props.presences}
+                          occupantCount={this.occupantCount()}
+                          canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
+                          scene={this.props.scene}
+                          onClose={() => this.setSidebar(null)}
+                        />
+                      )}
+                      {this.state.sidebarId === "objects" && (
+                        <ObjectsSidebarContainer
+                          hubChannel={this.props.hubChannel}
+                          onClose={() => this.setSidebar(null)}
+                        />
+                      )}
+                      {this.state.sidebarId === "people" && (
+                        <PeopleSidebarContainer
+                          displayNameOverride={displayNameOverride}
+                          store={this.props.store}
+                          mediaSearchStore={this.props.mediaSearchStore}
+                          hubChannel={this.props.hubChannel}
+                          history={this.props.history}
+                          mySessionId={this.props.sessionId}
+                          presences={this.props.presences}
+                          onClose={() => this.setSidebar(null)}
+                          onCloseDialog={() => this.closeDialog()}
+                          showNonHistoriedDialog={this.showNonHistoriedDialog}
+                          performConditionalSignIn={this.props.performConditionalSignIn}
+                        />
+                      )}
+                      {this.state.sidebarId === "profile" && (
+                        <ProfileEntryPanel
+                          history={this.props.history}
+                          containerType="sidebar"
+                          displayNameOverride={displayNameOverride}
+                          finished={() => this.setSidebar(null)}
+                          onClose={() => this.setSidebar(null)}
+                          store={this.props.store}
+                          mediaSearchStore={this.props.mediaSearchStore}
+                        />
+                      )}
+                      {this.state.sidebarId === "user" && (
+                        <UserProfileSidebarContainer
+                          user={this.getSelectedUser()}
+                          hubChannel={this.props.hubChannel}
+                          performConditionalSignIn={this.props.performConditionalSignIn}
+                          onClose={() => this.setSidebar(null)}
+                          onCloseDialog={() => this.closeDialog()}
+                          showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        />
+                      )}
+                      {this.state.sidebarId === "room-info" && (
+                        <RoomSidebar
+                          accountId={this.props.sessionId}
+                          room={this.props.hub}
+                          canEdit={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+                          onEdit={() => {
+                            this.props.performConditionalSignIn(
+                              () => this.props.hubChannel.can("update_hub"),
+                              () => this.setSidebar("room-info-settings"),
+                              SignInMessages.roomSettings
+                            );
+                          }}
+                          onClose={() => this.setSidebar(null)}
+                          onChangeScene={this.onChangeScene}
+                        />
+                      )}
+                      {this.state.sidebarId === "room-info-settings" && (
+                        <RoomSettingsSidebarContainer
+                          room={this.props.hub}
+                          hubChannel={this.props.hubChannel}
+                          showBackButton
+                          onClose={() => this.setSidebar("room-info")}
+                          onChangeScene={this.onChangeScene}
+                        />
+                      )}
+                      {this.state.sidebarId === "room-settings" && (
+                        <RoomSettingsSidebarContainer
+                          room={this.props.hub}
+                          accountId={this.props.sessionId}
+                          hubChannel={this.props.hubChannel}
+                          onClose={() => this.setSidebar(null)}
+                          onChangeScene={this.onChangeScene}
                         />
                       )}
                     </>
-                  )}
-                  {entered && (
-                    <>
-                      <VoiceButtonContainer
-                        scene={this.props.scene}
-                        microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
-                      />
-                      <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
-                      <PlacePopoverContainer
-                        scene={this.props.scene}
-                        hubChannel={this.props.hubChannel}
-                        mediaSearchStore={this.props.mediaSearchStore}
-                        showNonHistoriedDialog={this.showNonHistoriedDialog}
-                      />
-                      {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
-                    </>
-                  )}
-                  <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
-                  {entered &&
-                    isMobileVR && (
+                  ) : (
+                    undefined
+                  )
+                }
+                modal={this.state.dialog}
+                toolbarLeft={
+                  <InvitePopoverContainer
+                    hub={this.props.hub}
+                    hubChannel={this.props.hubChannel}
+                    scene={this.props.scene}
+                  />
+                }
+                toolbarCenter={
+                  <>
+                    {watching && (
+                      <>
+                        <ToolbarButton
+                          icon={<EnterIcon />}
+                          label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room" />}
+                          preset="green"
+                          onClick={() => this.setState({ watching: false })}
+                        />
+                        {enableSpectateVRButton && (
+                          <ToolbarButton
+                            icon={<VRIcon />}
+                            preset="purple"
+                            label={
+                              <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
+                            }
+                            onClick={() => this.props.scene.enterVR()}
+                          />
+                        )}
+                      </>
+                    )}
+                    {entered && (
+                      <>
+                        <VoiceButtonContainer
+                          scene={this.props.scene}
+                          microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
+                        />
+                        <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
+                        <PlacePopoverContainer
+                          scene={this.props.scene}
+                          hubChannel={this.props.hubChannel}
+                          mediaSearchStore={this.props.mediaSearchStore}
+                          showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        />
+                        {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
+                      </>
+                    )}
+                    <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
+                    {entered &&
+                      isMobileVR && (
+                        <ToolbarButton
+                          className={styleUtils.hideLg}
+                          icon={<VRIcon />}
+                          preset="accept"
+                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
+                          onClick={() => exit2DInterstitialAndEnterVR(true)}
+                        />
+                      )}
+                  </>
+                }
+                toolbarRight={
+                  <>
+                    {entered &&
+                      isMobileVR && (
+                        <ToolbarButton
+                          icon={<VRIcon />}
+                          preset="accept"
+                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
+                          onClick={() => exit2DInterstitialAndEnterVR(true)}
+                        />
+                      )}
+                    {entered && (
                       <ToolbarButton
-                        className={styleUtils.hideLg}
-                        icon={<VRIcon />}
-                        preset="accept"
-                        label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
-                        onClick={() => exit2DInterstitialAndEnterVR(true)}
+                        icon={<LeaveIcon />}
+                        label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
+                        preset="red"
+                        onClick={() => {
+                          this.showNonHistoriedDialog(LeaveRoomModal, {
+                            destinationUrl: "/",
+                            reason: LeaveReason.leaveRoom
+                          });
+                        }}
                       />
                     )}
-                </>
-              }
-              toolbarRight={
-                <>
-                  {entered &&
-                    isMobileVR && (
-                      <ToolbarButton
-                        icon={<VRIcon />}
-                        preset="accept"
-                        label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
-                        onClick={() => exit2DInterstitialAndEnterVR(true)}
-                      />
-                    )}
-                  {entered && (
-                    <ToolbarButton
-                      icon={<LeaveIcon />}
-                      label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
-                      preset="red"
-                      onClick={() => {
-                        this.showNonHistoriedDialog(LeaveRoomModal, {
-                          destinationUrl: "/",
-                          reason: LeaveReason.leaveRoom
-                        });
-                      }}
-                    />
-                  )}
-                  <MoreMenuPopoverButton menu={moreMenu} />
-                </>
-              }
-            />
+                    <MoreMenuPopoverButton menu={moreMenu} />
+                  </>
+                }
+              />
+            )}
           </div>
         </ReactAudioContext.Provider>
       </MoreMenuContextProvider>
