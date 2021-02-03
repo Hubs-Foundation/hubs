@@ -68,5 +68,9 @@ AFRAME.registerComponent("iframe", {
     if (this.data.src !== prevData.src) {
       render(<Browser src={this.data.src} onChangeSrc={this.onChangeSrc} />, this.browserEl);
     }
+  },
+
+  remove() {
+    this.iframeSystem.unregister(this);
   }
 });
