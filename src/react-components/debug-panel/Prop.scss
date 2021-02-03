@@ -1,0 +1,17 @@
+@import '../../assets/stylesheets/root-vars';
+@import '../../assets/stylesheets/shared';
+
+:local(.rtc-tile-text) {
+  color: $action-text-color;
+  font-size: 10px;
+  display: block;
+  margin: 0;
+  text-align: center;
+  word-break: break-all;
+}
+
+:local(.rtc-value-text) {
+  font-size: 10px;
+  margin: 0;
+  color: yellow;
+}

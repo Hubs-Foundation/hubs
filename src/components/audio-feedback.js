@@ -216,7 +216,7 @@ AFRAME.registerComponent("morph-audio-feedback", {
   },
 
   tick() {
-    if (!this.morphs.length) return;
+    if (!this.morphs || !this.morphs.length) return;
 
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 

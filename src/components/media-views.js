@@ -1,7 +1,7 @@
 /* global performance THREE AFRAME NAF MediaStream setTimeout */
 import configs from "../utils/configs";
 import GIFWorker from "../workers/gifparsing.worker.js";
-import errorImageSrc from "!!url-loader!../assets/images/media-error.gif";
+import errorImageSrc from "!!url-loader!../assets/images/media-error.png";
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
@@ -218,11 +218,10 @@ const inflightTextures = new Map();
 const errorImage = new Image();
 errorImage.src = errorImageSrc;
 const errorTexture = new THREE.Texture(errorImage);
-errorTexture.magFilter = THREE.NearestFilter;
 errorImage.onload = () => {
   errorTexture.needsUpdate = true;
 };
-const errorCacheItem = { texture: errorTexture, ratio: 1 };
+const errorCacheItem = { texture: errorTexture, ratio: 1400 / 1200 };
 
 function timeFmt(t) {
   let s = Math.floor(t),
@@ -546,6 +545,11 @@ AFRAME.registerComponent("media-video", {
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
+
+    // Make sure that the audio is initialized to the right place.
+    // Its matrix may not update if this element is not visible.
+    // See https://github.com/mozilla/hubs/issues/2855
+    this.audio.updateMatrixWorld();
   },
 
   setPositionalAudioProperties() {
@@ -931,7 +935,7 @@ AFRAME.registerComponent("media-video", {
       if (this.audio) {
         if (window.APP.store.state.preferences.audioOutputMode === "audio") {
           this.el.object3D.getWorldPosition(positionA);
-          this.el.sceneEl.camera.getWorldPosition(positionB);
+          this.el.sceneEl.audioListener.getWorldPosition(positionB);
           const distance = positionA.distanceTo(positionB);
           this.distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, distance * distance));
           const globalMediaVolume =

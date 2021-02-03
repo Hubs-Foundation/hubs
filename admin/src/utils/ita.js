@@ -10,7 +10,8 @@ const schemaCategories = [
   "rooms",
   "images",
   "theme",
-  "links"
+  "links",
+  "auth"
 ];
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 let currentAuthToken = null;
@@ -41,6 +42,8 @@ function getCategoryDisplayName(category) {
       return "Theme";
     case "links":
       return "Links";
+    case "auth":
+      return "Auth";
     default:
       return null;
   }
@@ -54,9 +57,9 @@ function getCategoryDescription(category, provider) {
       return "User-contributed content settings.";
     case "email":
       if (provider === "arbortect") {
-        return "Custom SMTP email provider settings. Leave blank to use the SMTP settings you chose when configuring your server.";
+        return "Custom SMTP email provider settings. Leave blank to use the SMTP settings you chose when configuring your server. Looking to customize magic link email? Go to App Settings > Auth";
       } else {
-        return "Custom SMTP email provider settings. Leave blank to use your cloud provider's email service.";
+        return "Custom SMTP email provider settings. Leave blank to use your cloud provider's email service. Looking to customize magic link email? Go to App Settings > Auth";
       }
     case "advanced":
       return "Advanced Settings for those who know what they're doing.";
@@ -70,6 +73,8 @@ function getCategoryDescription(category, provider) {
       return "Replace colors in the app.";
     case "links":
       return "Replace links in the app.";
+    case "auth":
+      return "Customize login email options.";
     default:
       return null;
   }
