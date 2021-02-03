@@ -7,9 +7,16 @@ import { InputField } from "../input/InputField";
 import { IconButton } from "../input/IconButton";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 function SceneAttribution({ attribution }) {
+  const intl = useIntl();
+
+  const unknown = intl.formatMessage({ id: "room-sidebar.unknown", defaultMessage: "unknown" });
+
+  const name = attribution.name || attribution.title || unknown;
+  const author = attribution.author || unknown;
+
   if (attribution.url) {
     const source = attribution.url.includes("sketchfab.com")
       ? "on Sketchfab"
@@ -21,7 +28,7 @@ function SceneAttribution({ attribution }) {
       <li className={styles.attribution}>
         <div className={styles.attributionName}>
           <a href={attribution.url} target="_blank" rel="noopener noreferrer">
-            {attribution.name}
+            {name}
           </a>
         </div>
         <div className={styles.attributionAuthor}>
@@ -30,7 +37,7 @@ function SceneAttribution({ attribution }) {
               id="room-sidebar.scene-attribution-with-source"
               defaultMessage="by {author} on {source}"
               values={{
-                author: attribution.author,
+                author,
                 source
               }}
             />
@@ -39,28 +46,30 @@ function SceneAttribution({ attribution }) {
               id="room-sidebar.scene-attribution"
               defaultMessage="by {author}"
               values={{
-                author: attribution.author
+                author
               }}
             />
           )}
         </div>
       </li>
     );
-  } else {
+  } else if (attribution.author) {
     return (
       <li className={styles.attribution}>
-        <div className={styles.attributionName}>{attribution.name}</div>
+        <div className={styles.attributionName}>{name}</div>
         <div className={styles.attributionAuthor}>
           <FormattedMessage
             id="room-sidebar.scene-attribution"
             defaultMessage="by {author}"
             values={{
-              author: attribution.author
+              author
             }}
           />
         </div>
       </li>
     );
+  } else {
+    return null;
   }
 }
 
@@ -74,6 +83,10 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
   const showSceneLink = allowDisplayOfSceneLink(accountId, scene);
   const attributions = (scene.attributions && scene.attributions.content) || [];
   const creator = scene.attributions && scene.attributions.creator;
+
+  const filteredAttributionElements = attributions
+    .filter(a => a.url || a.author)
+    .map((attribution, i) => <SceneAttribution attribution={attribution} key={i} />);
 
   return (
     <>
@@ -107,15 +120,14 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
           />
         </div>
       </div>
-      {showAttributions && (
-        <InputField
-          label={<FormattedMessage id="room-sidebar.scene-info.attributions" defaultMessage="Attributions" />}
-        >
-          <ul className={styles.attributions}>
-            {attributions.map((attribution, i) => <SceneAttribution attribution={attribution} key={i} />)}
-          </ul>
-        </InputField>
-      )}
+      {showAttributions &&
+        filteredAttributionElements.length > 0 && (
+          <InputField
+            label={<FormattedMessage id="room-sidebar.scene-info.attributions" defaultMessage="Attributions" />}
+          >
+            <ul className={styles.attributions}>{filteredAttributionElements}</ul>
+          </InputField>
+        )}
       {canChangeScene && (
         <Button preset="blue" onClick={onChangeScene}>
           <FormattedMessage id="room-sidebar.scene-info.change-scene-button" defaultMessage="Change Scene" />
