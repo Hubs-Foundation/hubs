@@ -1,8 +1,10 @@
+import styles from "../components/iframe.scss";
 export class IframeSystem {
   constructor(scene) {
     this.scene = scene;
 
     this.scene.addEventListener("spawn-iframe", this.onSpawnIframe);
+    this.scene.addEventListener("inspect-target-changed", this.onInspect);
 
     this.scene.renderer.setClearColor(0x000000, 0);
 
@@ -25,6 +27,18 @@ export class IframeSystem {
     entity.setAttribute("iframe", { src: event.detail.src });
     entity.setAttribute("offset-relative-to", { target: "#avatar-pov-node", offset: { x: 0, y: 0, z: -1.5 } });
     entity.setAttribute("networked", { template: "#interactable-iframe-media" });
+  };
+
+  onInspect = event => {
+    const inspectTarget = event.detail.inspectTarget;
+
+    const iframeComponent = inspectTarget?.el?.components.iframe;
+
+    if (iframeComponent) {
+      this.cssRenderer.domElement.classList.add(styles.inspectIframe);
+    } else {
+      this.cssRenderer.domElement.classList.remove(styles.inspectIframe);
+    }
   };
 
   register(iframeComponent) {

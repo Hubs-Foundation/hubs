@@ -1,5 +1,14 @@
-:local(.browser) {
+:local(.inspect-iframe) {
+  z-index: 0 !important;
   
+  * {
+    transform: none !important;
+  }
+
+  :local(.browser-container), :local(.browser), :local(.iframe) {
+    width: 100% !important;
+    height: 100% !important;
+  }
 }
 
 :local(.address-bar) {

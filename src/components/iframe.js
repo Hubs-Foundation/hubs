@@ -16,7 +16,7 @@ function Browser({ src, onChangeSrc }) {
       <div className={styles.addressBar}>
         <input className={styles.addressField} value={src} onChange={onChangeSrc} />
       </div>
-      <iframe src={src} style={{ width: IFRAME_WIDTH_PX, height: IFRAME_HEIGHT_PX }} />
+      <iframe className={styles.iframe} src={src} style={{ width: IFRAME_WIDTH_PX, height: IFRAME_HEIGHT_PX }} />
     </div>
   );
 }
@@ -35,6 +35,7 @@ AFRAME.registerComponent("iframe", {
     const browserEl = document.createElement("div");
     browserEl.style.width = `${IFRAME_WIDTH_PX}px`;
     browserEl.style.height = `${IFRAME_HEIGHT_PX}px`;
+    browserEl.classList.add(styles.browserContainer);
     this.browserEl = browserEl;
 
     const geometry = new THREE.PlaneBufferGeometry(IFRAME_WIDTH_M, IFRAME_HEIGHT_M, 1, 1);
