@@ -269,7 +269,7 @@
   "commands.grow": "Augmente la taille de votre avatar.",
   "commands.shrink": "Réduit la taille de votre avatar.",
   "commands.scene": "Change la scène.",
-  "commands.rename": "Renomme la salle.",
+  "commands.rename": "Renommer la salle.",
   "commands.help": "Affiche l'aide.",
   "commands.leave": "Se déconnecter de la salle.",
   "commands.duck": "Le canard approuve. Coin.",
