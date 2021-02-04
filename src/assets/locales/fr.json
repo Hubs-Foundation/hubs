@@ -179,7 +179,7 @@
   "audio.granted-title": "Micro autorisé",
   "audio.granted-subtitle": "Vous pourrez couper votre micro dans la salle",
   "audio.granted-next": "Suivant",
-  "exit.subtitle.exited": "Votre session est terminée. Actualisez votre navigateur pour commencer une nouvelle session.",
+  "exit.subtitle.exited": "Votre session est terminée. Actualisez votre navigateur pour en commencer une nouvelle.",
   "exit.subtitle.closed": "Cette salle n'est plus accessible.",
   "exit.subtitle.denied": "Vous n'êtes pas autorisé à rejoindre cette salle. Demandez l'accès au créateur de cette salle.",
   "exit.subtitle.disconnected": "Vous avez été déconnecté de la salle. Actualisez votre navigateur pour essayer de vous reconnecter.",
