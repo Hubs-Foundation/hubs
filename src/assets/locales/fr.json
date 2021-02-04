@@ -271,7 +271,7 @@
   "commands.scene": "Change la scène.",
   "commands.rename": "Renomme la salle.",
   "commands.help": "Affiche l'aide.",
-  "commands.leave": "Vous déconnecte de la salle.",
+  "commands.leave": "Se déconnecter de la salle.",
   "commands.duck": "Le canard approuve. Coin.",
   "commands.capture": "Filme pendant 15 secondes.",
   "commands.debug": "Active le rendu du débug physique.",
