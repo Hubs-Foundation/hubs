@@ -270,7 +270,7 @@
   "commands.shrink": "Réduit la taille de votre avatar.",
   "commands.scene": "Changer la scène.",
   "commands.rename": "Renommer la salle.",
-  "commands.help": "Affiche l'aide.",
+  "commands.help": "Afficher l'aide.",
   "commands.leave": "Se déconnecter de la salle.",
   "commands.duck": "Le canard approuve. Coin.",
   "commands.capture": "Filme pendant 15 secondes.",
