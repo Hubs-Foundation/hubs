@@ -194,7 +194,7 @@
   "autoexit.idle_subtitle": "Vous avez été inactif trop longtemps.",
   "autoexit.cancel": "ANNULER",
   "presence.entered_room": "est entré dans la salle.",
-  "presence.entered_lobby": "est arrivé dans le hall.",
+  "presence.entered_lobby": "est arrivé dans le hall d'attente.",
   "presence.join_lobby": "a rejoint le hall.",
   "presence.join_room": "a rejoint la salle.",
   "presence.leave": "est parti.",
