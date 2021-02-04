@@ -277,7 +277,7 @@
   "commands.debug": "Active le rendu du débug physique.",
   "commands.vrstats": "Active les stats en VR.",
   "commands.audiomode": "(en test) Active la position audio.",
-  "commands.audioNormalization": "(en test) Modifie le facteur de normalisation audio.",
+  "commands.audioNormalization": "(Mode expérimental) Modifie le facteur de normalisation audio.",
   "preferences.closeButton": "Fermer le menu des préférences",
   "preferences.selectCategory": "Selectionner une catégorie",
   "preferences.resetToDefault": "Restaurer les préférences par défaut",
