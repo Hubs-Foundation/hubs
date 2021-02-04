@@ -66,7 +66,7 @@
   "close-room.cancel": "Annuler",
   "close-room.type-to-confirm": "Entrez le nom de la salle pour confirmer :",
   "promote.message": "En distinguant un utilisateur, vous lui donnez accès à l'intégralité des paramètres de la salle ainsi qu'aux outils de modération.\n\nConfirmer ?",
-  "promote.confirm-prefix": "Oui, distinguer ",
+  "promote.confirm-prefix": "Oui, promouvoir",
   "promote.cancel": "Annuler",
   "entry.room": "hall",
   "entry.enter-room-title": "Hall",
