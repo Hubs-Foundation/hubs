@@ -443,7 +443,7 @@
   "oauth-dialog.sign-in.twitter": "Connecter via Twitter",
   "oauth-dialog.sign-in.discord": "S'identifier via Discord",
   "oauth-dialog.sign-in.slack": "S'identifier via Slack",
-  "oauth-dialog.message.twitter": "Connecter à Twitter pour envoyer des tweets depuis %app-name%.",
+  "oauth-dialog.message.twitter": "Se connecter à Twitter pour envoyer des tweets depuis %app-name%.",
   "cloud.primary_tagline": "Hubs Cloud déploie une infrastructure serveur pour des salles 3D privées\net et collaboratives, accessibles depuis votre\nordinateur, téléphone ou casque VR.",
   "cloud.secondary_tagline": "Obtenez-le aujourd'hui sur AWS Marketplace.",
   "cloud.call_to_action_personal": "Obtenez Hubs Cloud Personal",
