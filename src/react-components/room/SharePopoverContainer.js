@@ -9,6 +9,7 @@ function useShare(scene, hubChannel) {
   const [sharingSource, setSharingSource] = useState(null);
   const [canShareCamera, setCanShareCamera] = useState(false);
   const [canShareScreen, setCanShareScreen] = useState(false);
+  const [canShareCameraToAvatar, setCanShareCameraToAvatar] = useState(false);
 
   useEffect(
     () => {
@@ -29,15 +30,18 @@ function useShare(scene, hubChannel) {
             .then(devices => {
               const hasCamera = devices.find(device => device.kind === "videoinput");
               setCanShareCamera(hasCamera);
+              setCanShareCameraToAvatar(hasCamera); // TODO Check avatar model for component
             })
             .catch(() => {
               setCanShareCamera(false);
+              setCanShareCameraToAvatar(false);
             });
 
           setCanShareScreen(!!navigator.mediaDevices.getDisplayMedia);
         } else {
           setCanShareScreen(false);
           setCanShareCamera(false);
+          setCanShareCameraToAvatar(false);
         }
       }
 
@@ -81,20 +85,38 @@ function useShare(scene, hubChannel) {
     [scene, sharingSource]
   );
 
+  const toggleShareCameraToAvatar = useCallback(
+    () => {
+      if (sharingSource) {
+        scene.emit("action_end_video_sharing");
+      } else {
+        scene.emit("action_share_camera", { target: "avatar" });
+      }
+    },
+    [scene, sharingSource]
+  );
+
   return {
     sharingSource,
     canShareCamera,
+    canShareCameraToAvatar,
     canShareScreen,
     toggleShareCamera,
+    toggleShareCameraToAvatar,
     toggleShareScreen
   };
 }
 
 export function SharePopoverContainer({ scene, hubChannel }) {
-  const { sharingSource, canShareCamera, toggleShareCamera, canShareScreen, toggleShareScreen } = useShare(
-    scene,
-    hubChannel
-  );
+  const {
+    sharingSource,
+    canShareCamera,
+    toggleShareCamera,
+    canShareScreen,
+    toggleShareScreen,
+    canShareCameraToAvatar,
+    toggleShareCameraToAvatar
+  } = useShare(scene, hubChannel);
 
   const items = [
     canShareCamera && {
@@ -112,6 +134,14 @@ export function SharePopoverContainer({ scene, hubChannel }) {
       label: <FormattedMessage id="share-popover.source.screen" defaultMessage="Screen" />,
       onSelect: toggleShareScreen,
       active: sharingSource === "screen"
+    },
+    canShareCameraToAvatar && {
+      id: "camera-to-avatar",
+      icon: VideoIcon,
+      color: "purple",
+      label: <FormattedMessage id="share-popover.source.avatar-camera" defaultMessage="Camera to Avatar" />,
+      onSelect: toggleShareCameraToAvatar,
+      active: sharingSource === "camera-to-avatar"
     }
   ];
 

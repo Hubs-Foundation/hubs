@@ -41,6 +41,7 @@ function registerNetworkSchemas() {
       },
       "player-info",
       "networked-avatar",
+      "webcam-texture-target",
       {
         selector: ".camera",
         component: "position",
