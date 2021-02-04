@@ -73,7 +73,7 @@
   "entry.enter-room": "Entrer dans la salle",
   "entry.leave-room": "Quitter la salle",
   "entry.change-scene": "Choisir la scène",
-  "entry.in-lobby-notice": "Vous observez cette salle depuis le hall.",
+  "entry.in-lobby-notice": "Vous observez cette salle depuis la salle d'attente.",
   "entry.screen-prefix": "Entrer sur ",
   "entry.desktop-screen": "Cet écran",
   "entry.mobile-screen": "Ce téléphone",
