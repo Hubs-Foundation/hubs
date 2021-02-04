@@ -201,7 +201,7 @@
   "presence.name_change": "s'appelle à présent",
   "presence.scene_change": "a choisi la scène",
   "presence.hub_name_change": "a renommé la salle",
-  "presence.in_lobby": "Hall",
+  "presence.in_lobby": "Hall d'attente",
   "presence.entering": "Arrive dans la salle",
   "presence.in_room": "Dans la salle",
   "presence.mute_all": "Couper le son de tous les participants",
