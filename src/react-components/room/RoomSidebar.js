@@ -19,9 +19,9 @@ function SceneAttribution({ attribution }) {
 
   if (attribution.url) {
     const source = attribution.url.includes("sketchfab.com")
-      ? "on Sketchfab"
+      ? "Sketchfab"
       : attribution.url.includes("poly.google.com")
-        ? "on Google Poly"
+        ? "Google Poly"
         : null;
 
     return (
