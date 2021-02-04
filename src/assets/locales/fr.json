@@ -440,7 +440,7 @@
   "tweet-dialog.tweet": "Twitter",
   "tweet-dialog.posted": "Votre tweet a été publié.",
   "tweet-dialog.close": "Fermer",
-  "oauth-dialog.sign-in.twitter": "Connecter à Twitter",
+  "oauth-dialog.sign-in.twitter": "Connecter via Twitter",
   "oauth-dialog.sign-in.discord": "S'identifier sur Discord",
   "oauth-dialog.sign-in.slack": "S'identifier sur Slack",
   "oauth-dialog.message.twitter": "Connecter à Twitter pour envoyer des tweets depuis %app-name%.",
