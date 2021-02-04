@@ -268,7 +268,7 @@
   "commands.fly": "Active le mode fly.",
   "commands.grow": "Augmente la taille de votre avatar.",
   "commands.shrink": "Réduit la taille de votre avatar.",
-  "commands.scene": "Change la scène.",
+  "commands.scene": "Changer la scène.",
   "commands.rename": "Renommer la salle.",
   "commands.help": "Affiche l'aide.",
   "commands.leave": "Se déconnecter de la salle.",
