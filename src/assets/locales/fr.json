@@ -68,7 +68,7 @@
   "promote.message": "En promouvant utilisateur, vous lui donnez accès à l'intégralité des paramètres de la salle ainsi qu'aux outils de modération.\n\nConfirmer ?",
   "promote.confirm-prefix": "Oui, promouvoir",
   "promote.cancel": "Annuler",
-  "entry.room": "hall",
+  "entry.room": "hall d'attente",
   "entry.enter-room-title": "Hall",
   "entry.enter-room": "Entrer dans la salle",
   "entry.leave-room": "Quitter la salle",
