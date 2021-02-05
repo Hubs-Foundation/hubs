@@ -1,5 +1,5 @@
 import { THREE } from "aframe";
-import "three/examples/js/shaders/DigitalGlitch";
+import "three/examples/jsm/shaders/DigitalGlitch";
 import "three/examples/js/shaders/FilmShader";
 import "three/examples/js/shaders/SepiaShader";
 import "three/examples/js/shaders/VignetteShader";
@@ -148,7 +148,13 @@ class ChromaKeyMaterial extends THREE.ShaderMaterial {
           value: RGBAToCC(chromaKeyColor)
         },
         range: {
-          value: new THREE.Vector2(0.11, 0.22)
+          value: new THREE.Vector2(0.15, 0.35)
+        },
+        color: {
+          value: new THREE.Color().setRGB(0.3, 0.9, 1)
+        },
+        alpha: {
+          value: 0.7
         }
       },
       vertexShader: `
@@ -167,6 +173,8 @@ class ChromaKeyMaterial extends THREE.ShaderMaterial {
         uniform vec3 chromaKeyColor;    // key color as rgba
         uniform vec2 keyCC;      // the CC part of YCC color model of key color 
         uniform vec2 range;      // the smoothstep range
+        uniform vec3 color;
+        uniform float alpha;
 
         varying vec2 vUv;
 
@@ -181,8 +189,8 @@ class ChromaKeyMaterial extends THREE.ShaderMaterial {
           float mask = sqrt(pow(keyCC.x - CC.x, 2.0) + pow(keyCC.y - CC.y, 2.0));
           mask = smoothstep(range.x, range.y, mask);
           if (mask == 0.0) { discard; }
-          else if (mask == 1.0) { gl_FragColor = src1Color; }
-          else { gl_FragColor = max(src1Color - (1.0 - mask) * vec4(chromaKeyColor, 1.0), 0.0); }
+          else if (mask == 1.0) { gl_FragColor = src1Color * vec4(color, alpha); }
+          else { gl_FragColor = max(src1Color - (1.0 - mask) * vec4(chromaKeyColor, 1.0), 0.0) * vec4(color, alpha); }
         }
       `,
       transparent: true
@@ -231,9 +239,9 @@ AFRAME.registerComponent("webcam-texture-target", {
             obj.material?.userData.gltfExtensions?.MOZ_hubs_components?.["webcam-texture-target"];
 
           if (textureTargetComponent) {
-            const color = new THREE.Color(0xec540a);
-            0;
-            window.material = obj.material = new ChromaKeyMaterial(texture, color);
+            const color = new THREE.Color().setHex(0xff7800);
+            obj.material = new ChromaKeyMaterial(texture, color);
+            window.material = obj.material;
             this.effectMaterials.push(obj.material);
           }
         });
