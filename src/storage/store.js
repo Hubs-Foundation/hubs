@@ -212,7 +212,8 @@ export default class Store extends EventTarget {
   constructor() {
     super();
 
-    if (localStorage.getItem(LOCAL_STORE_KEY) === null) {
+    const savedState = localStorage.getItem(LOCAL_STORE_KEY)
+    if (savedState === null || !validator.validate(JSON.parse(savedState), SCHEMA).valid) {
       localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({}));
     }
 
