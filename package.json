@@ -100,7 +100,6 @@
     "event-target-shim": "^3.0.1",
     "form-data": "^3.0.0",
     "form-urlencoded": "^2.0.4",
-    "fsevents": "^2.2.1",
     "history": "^4.7.2",
     "hls.js": "^0.14.6",
     "html2canvas": "^1.0.0-rc.7",
