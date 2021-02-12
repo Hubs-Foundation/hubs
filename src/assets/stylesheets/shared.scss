@@ -368,6 +368,7 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
   position: relative;
   display: flex;
   align-items: center;
+  line-height: 20px;
 }
 %dropdown-select {
   @extend %rounded-border;
