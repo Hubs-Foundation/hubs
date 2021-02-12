@@ -551,10 +551,6 @@ AFRAME.registerComponent("media-loader", {
           () => {
             this.onMediaLoaded(SHAPE.HULL, true);
             addAnimationComponents(this.el);
-
-            if (this.data.mediaOptions.href) {
-              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", isFlat: false });
-            }
           },
           { once: true }
         );

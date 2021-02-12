@@ -210,8 +210,8 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 async function mediaInflator(el, componentName, componentData, components) {
   let isControlled = true;
 
-  if (componentName === "link" && (components.video || components.model || components.image)) {
-    // video/model/image component will set link url specified in link component.
+  if (componentName === "link" && (components.video || components.image)) {
+    // video/image component will set link url specified in link component.
     return;
   }
 
@@ -258,7 +258,7 @@ async function mediaInflator(el, componentName, componentData, components) {
     el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
   }
 
-  if ((componentName === "video" || componentName === "image" || componentName === "model") && components.link) {
+  if ((componentName === "video" || componentName === "image") && components.link) {
     mediaOptions.href = sanitizeUrl(components.link.href);
   }
 
@@ -266,7 +266,7 @@ async function mediaInflator(el, componentName, componentData, components) {
 
   el.setAttribute("media-loader", {
     src: sanitizeUrl(src),
-    fitToBox: componentName !== "model",
+    fitToBox: true,
     resolve: true,
     fileIsOwned: true,
     animate: false,

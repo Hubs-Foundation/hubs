@@ -56,13 +56,6 @@ const updateTargetRotationFromCamera = (function() {
   };
 })();
 
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(0.1, 0.1, 0.1),
-  new THREE.MeshBasicMaterial({
-    color: 0x020202
-  })
-);
-
 const positionAtBorderComponents = [];
 AFRAME.registerComponent("position-at-border", {
   multiple: true,
@@ -191,7 +184,6 @@ AFRAME.registerComponent("position-at-border", {
       centerToCamera.subVectors(cameraPosition, this.meshCenter);
       const needsYRotate = this.data.isFlat && meshForward.dot(centerToCamera) > 0;
       const intersection = this.el.sceneEl.systems.interaction.getActiveIntersection();
-      console.log(intersection);
       const meshSphereRadius =
         boxCorners
           .subVectors(this.meshLocalBoundingBox.max, this.meshLocalBoundingBox.min)
@@ -210,7 +202,7 @@ AFRAME.registerComponent("position-at-border", {
         desiredCenterPoint.lerpVectors(
           cameraPosition,
           intersection ? intersection.point : this.meshCenter,
-          intersection ? 0.8 : 0.5
+          intersection ? 0.8 : 0.25
         );
       } else if (intersection) {
         // Put it in the line towards the intersection, outside the bounding sphere
@@ -236,17 +228,14 @@ AFRAME.registerComponent("position-at-border", {
               .divide(currentTargetScale.setFromMatrixScale(this.target.matrixWorld))
               .multiply(desiredTargetScale)
           );
-      } else if (this.data.isFlat) {
+      } else {
         desiredTargetPosition.copy(this.meshCenter).add(
           centerToBorder
             .set(0, 0, this.meshHalfExtents.z + this.targetHalfExtents.z + 0.02)
             .multiplyScalar(needsYRotate ? -1 : 1)
             .applyMatrix4(currentMeshRotation)
         );
-      } else {
-        desiredTargetPosition.copy(desiredCenterPoint);
       }
-
       if (this.data.isFlat) {
         desiredTargetQuaternion.setFromRotationMatrix(currentMeshRotation);
         if (needsYRotate) {
