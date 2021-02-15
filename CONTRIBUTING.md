@@ -15,7 +15,7 @@ The following GitHub projects are part of the Hubs platform and governed by thes
 
 ## Quick Start
 
-We are happy to receive contributions to the Hubs platform in a number of different ways as outlined below. Please note that all contributions are subject to approval by the project maintainers. We ask (but do not require) that those interested in contributing to Hubs consider joining the public [Hubs Discord server](https://discord.gg/wHmY4nd) to connect with the dev team, ask questions, and view discussions about work being done on the project. 
+We are happy to receive contributions to the Hubs platform in a number of different ways as outlined below. Please note that all contributions are subject to approval by the project maintainers. We ask (but do not require) that those interested in contributing to Hubs consider joining the public [Hubs Discord server](https://discord.gg/dFJncWwHun) to connect with the dev team, ask questions, and view discussions about work being done on the project. 
 
 ### 💻 Code Contributions
 Hubs has a client-server architecture that gives multiple users the ability to connect to a shared room on the server. If you are interested in contributing to the Hubs client, continue on to the [development workflow guide](#development-workflow) to get started. If you want to contribute to the networking or infrastructure, consider looking at the [reticulum](https://github.com/mozilla/reticulum) or [janus](https://github.com/mozilla/janus-plugin-sfu) repositories. If you are interested in working on the code for Spoke, the 3D editor used to create custom environments for Hubs rooms, explore the [Spoke](https://github.com/mozilla/spoke) repository.
@@ -60,7 +60,7 @@ Our documentation for Hubs is hosted on the [GitHub Hubs Wiki](https://github.co
 If you would like to add/update a localization translation for Hubs, please see the [Localization README](src/assets/locales/README.md). Then, please submit a pull request with your new/updated localization changes.
 
 ### 🦆 General Help
-We believe in the power of community (that's why we're building this, after all!) and know that not all forms of support will come from something outlined here. Feel free to jump into our public [Discord server](https://discord.gg/wHmY4nd) to chat with us and ask about how you can get involved!
+We believe in the power of community (that's why we're building this, after all!) and know that not all forms of support will come from something outlined here. Feel free to jump into our public [Discord server](https://discord.gg/dFJncWwHun) to chat with us and ask about how you can get involved!
 
 ## Development Workflow
 
@@ -122,7 +122,13 @@ The testing process for Hubs is mostly a manual one. You need to test your chang
 
 The Hubs team has a more in-depth testing and release process internally, but we don't have any additional testing process for external contributors at this time.
 
-### 5. High Level Project Organization
+
+### 5. Modifying The 2-D Sprite Graphics
+
+To update the 2-D sprite graphics, you must (manually) install [ImageMagick](https://imagemagick.org/script/download.php) to your command line.  See `doc/spritesheet-generation.md` for further details
+
+
+### 6. High Level Project Organization
 
 ```
 hubs/
@@ -153,11 +159,11 @@ hubs/
     scene.html <- Scene Page html template
     scene.js <- Scene Page js entry point
 ```
-### 6. Testing on an HMD
+### 7. Testing on an HMD
 
 The simplest way to test on an HMD is to use `npm run dev` from Step 2 above while having 8080 port traffic on your device point to you local dev instance's port 8080. In order to do that, you'll need to do a few things that will vary per device. 
 
-### Oculus Quest
+#### Oculus Quest
 
 These steps are what's necessary to enable development on your device
 
@@ -174,25 +180,37 @@ These steps are what's necessary to enable development on your device
     `adb devices -l`
     Lists all connected devices. The -l flag will list device specific details, one of which should be: `model:Quest`
     
-    `adb -s model:Quest reverse tcp:8080 tcp:8080`
-    `adb reverse tcp:8080 tcp:8080`
+    `adb -s model:Quest reverse tcp:8080 tcp:8080`  
+    `adb reverse tcp:8080 tcp:8080`  
     This command routes all port 8080 requests from the Quest device to port 8080 on your local web server. The first one is if you want to do things wirelessly, while the second is a quicker (albeit tethered) solution that is less prone to the error below.
 
     If you encounter the following error:
     adb: error: more than one device/emulator
 
-    Try killing and restarting adb with the following commands:
-     `adb kill-server`
-     `adb start-server`
-    Then retry the reverse command above again
+    Try killing adb with the following commands:
+     `adb kill-server` 
+    Then try the reverse command above again (the server will be restarted).
 
-3. Open a browser on the Quest device and test.
-    Go to the following url: `https://localhost:8080` in the Oculus broswer or Firefox Reality browser
+3. Open a browser on the Quest device and test. Either  
+    `adb shell am start -a android.intent.action.VIEW -d 'https://localhost:8080'`  
+    or launch the Oculus browser or Firefox Reality browser and go to the following url: `https://localhost:8080`
 
     > Note the client runs over https with a self-signed SSL certificate. You'll be presented with a warning the first time you open the page. You can accept the SSL certificate warning and continue onto the site.
 
 4. You should see the Hubs index page, the same one you see in a browser on your development machine.
 
-### Other Devices
+You may find the tool [scrcpy](https://github.com/Genymobile/scrcpy) useful to display the screen of your headset on your development computer. It doesn't require the headset user to accept, so it's less hassle than casting to a phone or tablet, in some circumstances.
+
+#### Pico G2 / Neo 2
+
+Follow the directions for the Quest, except
+
+* Setup the Pico device for development. (You may need to press the Confirm and Volume Down buttons on the headset simultaneously to enter the system settings.)  
+    `https://developer.pico-interactive.com/question/neo` 
+
+* Open Hubs in the Firefox Reality browser:  
+    `adb shell am start -a android.intent.action.VIEW -d 'https://localhost:8080/hub.html' org.mozilla.vrbrowser/org.mozilla.vrbrowser.VRBrowserActivity`
+
+#### Other Devices
 
 Please feel free to contribute setup instructions for additional devices.

@@ -133,7 +133,8 @@ AFRAME.registerComponent("super-spawner", {
         x: this.data.spawnScale.x === null ? 1 : this.data.spawnScale.x,
         y: this.data.spawnScale.y === null ? 1 : this.data.spawnScale.y,
         z: this.data.spawnScale.z === null ? 1 : this.data.spawnScale.z
-      }
+      },
+      this.data.mediaOptions
     ).entity;
 
     const interaction = this.el.sceneEl.systems.interaction;

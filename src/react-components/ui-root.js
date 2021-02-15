@@ -68,6 +68,7 @@ import ObjectList from "./object-list.js";
 import SettingsMenu from "./settings-menu.js";
 import PreloadOverlay from "./preload-overlay.js";
 import TwoDHUD from "./2d-hud";
+import RTCDebugPanel from "./debug-panel/RtcDebugPanel.js";
 import { SpectatingLabel } from "./spectating-label";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
@@ -684,12 +685,15 @@ class UIRoot extends Component {
     await this.fetchMicDevices();
 
     // we should definitely have an audioTrack at this point unless they denied mic access
-    if (this.state.mediaStream) {
-      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForMediaStream(this.state.mediaStream));
+    if (this.state.audioTrack) {
+      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForAudioTrack(this.state.audioTrack));
       if (micDeviceId) {
         this.props.store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
+        console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
       }
       this.props.scene.emit("local-media-stream-created");
+    } else {
+      console.log("No available audio tracks");
     }
   };
 
@@ -744,16 +748,20 @@ class UIRoot extends Component {
     return !!this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
   };
 
-  micLabelForMediaStream = mediaStream => {
-    return (mediaStream && mediaStream.getAudioTracks().length > 0 && mediaStream.getAudioTracks()[0].label) || "";
+  micLabelForAudioTrack = audioTrack => {
+    return (audioTrack && audioTrack.label) || "";
   };
 
   selectedMicLabel = () => {
-    return this.micLabelForMediaStream(this.state.mediaStream);
+    return this.micLabelForAudioTrack(this.state.audioTrack);
   };
 
   micDeviceIdForMicLabel = label => {
     return this.state.micDevices.filter(d => d.label === label).map(d => d.deviceId)[0];
+  };
+
+  micLabelForDeviceId = deviceId => {
+    return this.state.micDevices.filter(d => d.deviceId === deviceId).map(d => d.label)[0];
   };
 
   selectedMicDeviceId = () => {
@@ -786,8 +794,8 @@ class UIRoot extends Component {
     const mediaStream = this.state.mediaStream;
 
     if (mediaStream) {
-      if (mediaStream.getAudioTracks().length > 0) {
-        console.log(`Using microphone: ${mediaStream.getAudioTracks()[0].label}`);
+      if (this.state.audioTrack) {
+        console.log(`Using microphone: ${this.state.audioTrack.label}`);
       }
 
       if (mediaStream.getVideoTracks().length > 0) {
@@ -1489,6 +1497,7 @@ class UIRoot extends Component {
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
     const enteredOrWatchingOrPreload = entered || watching || preload;
+    const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
     const baseUrl = `${location.protocol}//${location.host}${location.pathname}`;
     const inEntryFlow = !!(
       this.props.history &&
@@ -1743,7 +1752,12 @@ class UIRoot extends Component {
               stateKey="modal"
               stateValue="close_room"
               history={this.props.history}
-              render={() => this.renderDialog(CloseRoomDialog, { onConfirm: () => this.props.hubChannel.closeHub() })}
+              render={() =>
+                this.renderDialog(CloseRoomDialog, {
+                  roomName: this.props.hub.name,
+                  onConfirm: () => this.props.hubChannel.closeHub()
+                })
+              }
             />
             <StateRoute
               stateKey="modal"
@@ -1898,6 +1912,15 @@ class UIRoot extends Component {
                   history={this.props.history}
                 />
               )}
+            {showRtcDebugPanel && (
+              <RTCDebugPanel
+                history={this.props.history}
+                store={window.APP.store}
+                scene={this.props.scene}
+                presences={this.props.presences}
+                sessionId={this.props.sessionId}
+              />
+            )}
             {this.state.frozen && (
               <button className={styles.leaveButton} onClick={() => this.exit("left")}>
                 <FormattedMessage id="entry.leave-room" />

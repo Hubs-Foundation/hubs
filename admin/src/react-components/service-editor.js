@@ -222,6 +222,25 @@ class ConfigurationEditor extends Component {
     );
   }
 
+  renderLongTextInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return (
+      <TextField
+        key={displayPath}
+        id={displayPath}
+        label={descriptor.name || displayPath}
+        inputProps={{ maxLength: 4096 }}
+        value={currentValue || ""}
+        onChange={ev => this.onChange(path, ev.target.value)}
+        helperText={descriptor.description}
+        type="text"
+        fullWidth
+        multiline
+        margin="normal"
+      />
+    );
+  }
+
   renderFileInput(path, descriptor, currentValue) {
     let imageURL;
     if (!currentValue) {
@@ -292,6 +311,8 @@ class ConfigurationEditor extends Component {
         return this.renderSwitchInput(path, descriptor, currentValue);
       case "color":
         return this.renderColorInput(path, descriptor, currentValue);
+      case "longstring":
+        return this.renderLongTextInput(path, descriptor, currentValue);
       case "string":
       case "number":
       default:

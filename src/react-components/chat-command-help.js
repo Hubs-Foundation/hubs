@@ -21,7 +21,8 @@ export default class ChatCommandHelp extends Component {
       "vrstats",
       "scene <scene url>",
       "rename <new name>",
-      "audiomode"
+      "audiomode",
+      "audioNormalization <factor>"
     ];
 
     if (window.APP.hubChannel && window.APP.hubChannel.can("fly")) {
