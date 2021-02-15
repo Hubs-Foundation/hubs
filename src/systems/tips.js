@@ -38,9 +38,9 @@ const tipPlatform = () => {
 const platformTips = TIPS[tipPlatform()];
 
 function markTipFinished(tip) {
-  const storeData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+  const storeData = JSON.parse(safeLocalStorage.getItem(LOCAL_STORAGE_KEY));
   storeData[tip] = { finished: true };
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(storeData));
+  safeLocalStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(storeData));
   localStorageCache = null;
 }
 
@@ -72,13 +72,13 @@ AFRAME.registerSystem("tips", {
     this.activeTip = null;
     this._performStep = this._performStep.bind(this);
 
-    if (localStorage.getItem(LOCAL_STORAGE_KEY) === null) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
+    if (safeLocalStorage.getItem(LOCAL_STORAGE_KEY) === null) {
+      safeLocalStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
     }
   },
 
   resetTips: function() {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
+    safeLocalStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
     localStorageCache = null;
     window.APP.store.resetTipActivityFlags();
     window.APP.store.resetConfirmedBroadcastedRooms();
@@ -123,7 +123,7 @@ AFRAME.registerSystem("tips", {
       const tip = tips[i];
 
       if (localStorageCache === null) {
-        localStorageCache = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+        localStorageCache = JSON.parse(safeLocalStorage.getItem(LOCAL_STORAGE_KEY));
       }
 
       if (localStorageCache[tip] && localStorageCache[tip].finished) {

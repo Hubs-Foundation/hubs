@@ -6,6 +6,39 @@ import "@babel/polyfill";
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
+// AVN: Fallback behaviour for iframe secure context issue https://github.com/mozilla/hubs/issues/3911
+function storageAvailable(type) {
+  let storage;
+  try {
+      storage = window[type];
+      const x = '__storage_test__';
+      storage.setItem(x, x);
+      storage.removeItem(x);
+      return true;
+  }
+  catch(e) {
+      return e instanceof DOMException && (
+          // everything except Firefox
+          e.code === 22 ||
+          // Firefox
+          e.code === 1014 ||
+          // test name field too, because code might not be present
+          // everything except Firefox
+          e.name === 'QuotaExceededError' ||
+          // Firefox
+          e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+          // acknowledge QuotaExceededError only if there's something already stored
+          (storage && storage.length !== 0);
+  }
+}
+const ls = storageAvailable('localStorage') ? localStorage : { _data: {}
+  , setItem: (id, val) => ls._data[id] = String(val)
+  , getItem: id => ls._data.hasOwnProperty(id) ? ls._data[id] : null
+  , removeItem: id => delete ls._data[id]
+  , clear: () => ls._data = {}
+  }
+window.safeLocalStorage = ls;
+
 import "./assets/stylesheets/hub.scss";
 import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
