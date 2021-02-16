@@ -60,9 +60,7 @@ AFRAME.registerSystem("ui-hotkeys", {
     }
 
     if (this.userinput.get(paths.actions.toggleUI)) {
-      if (this.el.sceneEl.is("entered")) {
-        this.el.emit("action_toggle_ui");
-      }
+      this.el.emit("action_toggle_ui");
     }
   },
 

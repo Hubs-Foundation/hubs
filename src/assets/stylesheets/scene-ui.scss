@@ -201,3 +201,13 @@
     margin-right: 15px;
   }
 }
+
+:local(.attribution) {
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}

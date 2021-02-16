@@ -1,8 +1,8 @@
+import "./utils/debug-log";
 import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
-import "./utils/debug-log";
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
@@ -109,7 +109,6 @@ import "./components/replay";
 import "./components/visibility-by-path";
 import "./components/tags";
 import "./components/hubs-text";
-import "./components/billboard";
 import "./components/periodic-full-syncs";
 import "./components/inspect-button";
 import "./components/inspect-pivot-child-selector";
