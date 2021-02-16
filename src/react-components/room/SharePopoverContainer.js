@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { ReactComponent as VideoIcon } from "../icons/Video.svg";
 import { ReactComponent as DesktopIcon } from "../icons/Desktop.svg";
+import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { SharePopoverButton } from "./SharePopover";
 import { FormattedMessage } from "react-intl";
 
@@ -137,9 +138,9 @@ export function SharePopoverContainer({ scene, hubChannel }) {
     },
     canShareCameraToAvatar && {
       id: "camera-to-avatar",
-      icon: VideoIcon,
+      icon: AvatarIcon,
       color: "purple",
-      label: <FormattedMessage id="share-popover.source.avatar-camera" defaultMessage="Camera to Avatar" />,
+      label: <FormattedMessage id="share-popover.source.avatar-camera" defaultMessage="Avatar Camera" />,
       onSelect: toggleShareCameraToAvatar,
       active: sharingSource === "camera-to-avatar"
     }
