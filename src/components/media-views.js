@@ -6,7 +6,7 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createImageTexture, createBasisTexture } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createBasisTexture, createVideoOrAudioEl } from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
@@ -111,27 +111,6 @@ async function createGIFTexture(url) {
       })
       .catch(reject);
   });
-}
-
-/**
- * Create video element to be used as a texture.
- *
- * @param {string} src - Url to a video file.
- * @returns {Element} Video element.
- */
-function createVideoOrAudioEl(type) {
-  const el = document.createElement(type);
-  el.setAttribute("playsinline", "");
-  el.setAttribute("webkit-playsinline", "");
-  // iOS Safari requires the autoplay attribute, or it won't play the video at all.
-  el.autoplay = true;
-  // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
-  // allow the user to unmute it with an interaction in the unmute-video-button component.
-  el.muted = isIOS;
-  el.preload = "auto";
-  el.crossOrigin = "anonymous";
-
-  return el;
 }
 
 function scaleToAspectRatio(el, ratio) {

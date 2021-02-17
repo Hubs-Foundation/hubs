@@ -1,4 +1,5 @@
 import { disposeTexture } from "../utils/material-utils";
+import { createVideoOrAudioEl } from "../utils/media-utils";
 
 AFRAME.registerComponent("webcam-texture-target", {
   schema: {
@@ -44,16 +45,7 @@ AFRAME.registerComponent("webcam-texture-target", {
           return;
         }
 
-        const video = document.createElement("video");
-        video.setAttribute("playsinline", "");
-        video.setAttribute("webkit-playsinline", "");
-        // iOS Safari requires the autoplay attribute, or it won't play the video at all.
-        video.autoplay = true;
-        // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
-        // allow the user to unmute it with an interaction in the unmute-video-button component.
-        video.muted = AFRAME.utils.device.isIOS();
-        video.preload = "auto";
-        video.crossOrigin = "anonymous";
+        const video = createVideoOrAudioEl("video");
         video.srcObject = new MediaStream(stream.getVideoTracks());
 
         const texture = new THREE.VideoTexture(video);
