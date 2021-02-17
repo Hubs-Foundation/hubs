@@ -22,8 +22,11 @@ export function isPlayer(object) {
 export function getObjectUrl(object) {
   const mediaLoader = object.el.components["media-loader"];
 
-  if (mediaLoader && mediaLoader.data.src && !mediaLoader.data.src.startsWith("hubs://")) {
-    return mediaLoader.data.src;
+  const url =
+    mediaLoader && ((mediaLoader.data.mediaOptions && mediaLoader.data.mediaOptions.href) || mediaLoader.data.src);
+
+  if (url && !url.startsWith("hubs://")) {
+    return url;
   }
 
   return null;

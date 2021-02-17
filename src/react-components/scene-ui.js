@@ -200,7 +200,9 @@ class SceneUI extends Component {
                 remix: true
               })}
             <br />
-            {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
+            <div className={styles.attribution}>
+              {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
+            </div>
           </span>
         );
       } else {
