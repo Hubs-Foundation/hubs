@@ -33,7 +33,7 @@ function useShare(scene, hubChannel) {
             .then(devices => {
               const hasCamera = devices.find(device => device.kind === "videoinput");
               setCanShareCamera(hasCamera);
-              setCanShareCameraToAvatar(hasCamera && hasWebcamTextureTarget); // TODO Check avatar model for component
+              setCanShareCameraToAvatar(hasCamera && hasWebcamTextureTarget);
             })
             .catch(() => {
               setCanShareCamera(false);
