@@ -21,6 +21,8 @@ AFRAME.registerComponent("webcam-texture-target", {
   update(prevData) {
     const material = this.getMaterial();
 
+    console.log({ src: this.data.src, material, prevSrc: prevData.src });
+
     if (!material) {
       return;
     }
@@ -60,6 +62,7 @@ AFRAME.registerComponent("webcam-texture-target", {
         texture.encoding = THREE.sRGBEncoding;
 
         material.map = texture;
+        material.needsUpdate = true;
       });
     } else {
       if (material.map && material.map !== this.originalTexture) {
@@ -67,6 +70,7 @@ AFRAME.registerComponent("webcam-texture-target", {
       }
 
       material.map = this.originalTexture;
+      material.needsUpdate = true;
     }
   },
 

@@ -178,6 +178,10 @@ AFRAME.registerComponent("player-info", {
       el.setAttribute("webcam-texture-target", {
         src: this.data.sharingAvatarCamera ? `hubs://clients/${sessionId}/video` : ""
       });
+
+      if (this.isLocalPlayerInfo) {
+        el.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+      }
     }
   },
   handleModelError() {
