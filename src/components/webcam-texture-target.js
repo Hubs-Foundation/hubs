@@ -22,8 +22,6 @@ AFRAME.registerComponent("webcam-texture-target", {
   update(prevData) {
     const material = this.getMaterial();
 
-    console.log({ src: this.data.src, material, prevSrc: prevData.src });
-
     if (!material) {
       return;
     }
@@ -46,7 +44,7 @@ AFRAME.registerComponent("webcam-texture-target", {
         }
 
         const video = createVideoOrAudioEl("video");
-        video.srcObject = new MediaStream(stream.getVideoTracks());
+        video.srcObject = stream;
 
         const texture = new THREE.VideoTexture(video);
         texture.flipY = false;
