@@ -115,7 +115,7 @@ function getHubsComponents(node) {
   return hubsComponents || legacyComponents;
 }
 
-function getHubsMaterialComponents(node) {
+function getHubsComponentsFromMaterial(node) {
   const material = node.material;
 
   if (!material) {
@@ -152,7 +152,7 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
   }
 
   const entityComponents = getHubsComponents(node);
-  const materialComponents = getHubsMaterialComponents(node);
+  const materialComponents = getHubsComponentsFromMaterial(node);
 
   const nodeHasBehavior = !!entityComponents || !!materialComponents || node.name in templates;
   if (!nodeHasBehavior && !childEntities.length && !isRoot) {
@@ -244,7 +244,7 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
       }
     }
 
-    const materialComponents = getHubsMaterialComponents(object3D);
+    const materialComponents = getHubsComponentsFromMaterial(object3D);
 
     if (materialComponents && el) {
       for (const prop in materialComponents) {
