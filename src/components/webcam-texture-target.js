@@ -16,6 +16,11 @@ AFRAME.registerComponent("webcam-texture-target", {
 
   init() {
     const material = this.getMaterial();
+
+    if (!material) {
+      console.warn("webcam-texture-target added to an entity without a material");
+    }
+
     this.originalTexture = material && material.map;
   },
 
@@ -34,8 +39,6 @@ AFRAME.registerComponent("webcam-texture-target", {
 
     if (src && src.startsWith("hubs://")) {
       const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
-
-      this.originalTexture = material.map;
 
       NAF.connection.adapter.getMediaStream(streamClientId, "video").then(stream => {
         if (src !== this.data.src) {
@@ -67,7 +70,7 @@ AFRAME.registerComponent("webcam-texture-target", {
   remove() {
     const material = this.getMaterial();
 
-    if (material.map && material.map !== this.originalTexture) {
+    if (material && material.map && material.map !== this.originalTexture) {
       disposeTexture(material.map);
     }
   }
