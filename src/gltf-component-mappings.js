@@ -423,4 +423,4 @@ AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, 
   el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
 });
 
-AFRAME.GLTFModelPlus.registerComponent("webcam-texture-target", "webcam-texture-target");
+AFRAME.GLTFModelPlus.registerComponent("video-texture-target", "video-texture-target");

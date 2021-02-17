@@ -1,7 +1,7 @@
 import { disposeTexture } from "../utils/material-utils";
 import { createVideoOrAudioEl } from "../utils/media-utils";
 
-AFRAME.registerComponent("webcam-texture-target", {
+AFRAME.registerComponent("video-texture-target", {
   schema: {
     src: { type: "string" }
   },
@@ -18,7 +18,7 @@ AFRAME.registerComponent("webcam-texture-target", {
     const material = this.getMaterial();
 
     if (!material) {
-      console.warn("webcam-texture-target added to an entity without a material");
+      console.warn("video-texture-target added to an entity without a material");
     }
 
     this.originalTexture = material && material.map;

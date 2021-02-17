@@ -170,12 +170,12 @@ AFRAME.registerComponent("player-info", {
       });
     }
 
-    const webcamTextureTargets = modelEl.querySelectorAll("[webcam-texture-target]");
+    const webcamTextureTargets = modelEl.querySelectorAll("[video-texture-target]");
 
     const sessionId = this.isLocalPlayerInfo ? NAF.clientId : this.playerSessionId;
 
     for (const el of Array.from(webcamTextureTargets)) {
-      el.setAttribute("webcam-texture-target", {
+      el.setAttribute("video-texture-target", {
         src: this.data.isSharingAvatarCamera ? `hubs://clients/${sessionId}/video` : ""
       });
 

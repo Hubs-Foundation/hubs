@@ -116,7 +116,7 @@ import "./components/inspect-pivot-offset-from-camera";
 import "./components/optional-alternative-to-not-hide";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
-import "./components/webcam-texture-target";
+import "./components/video-texture-target";
 
 import ReactDOM from "react-dom";
 import React from "react";

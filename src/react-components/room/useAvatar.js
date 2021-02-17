@@ -7,7 +7,7 @@ export default function useAvatar() {
     const avatarModelEl = document.querySelector("#avatar-rig .model");
 
     function onAvatarModelLoaded() {
-      const hasWebcamTextureTarget = !!avatarModelEl.querySelector("[webcam-texture-target]");
+      const hasWebcamTextureTarget = !!avatarModelEl.querySelector("[video-texture-target]");
       setState({ hasWebcamTextureTarget });
     }
 
