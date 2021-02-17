@@ -68,5 +68,13 @@ AFRAME.registerComponent("webcam-texture-target", {
 
       material.map = this.originalTexture;
     }
+  },
+
+  remove() {
+    const material = this.getMaterial();
+
+    if (material.map && material.map !== this.originalTexture) {
+      disposeTexture(material.map);
+    }
   }
 });
