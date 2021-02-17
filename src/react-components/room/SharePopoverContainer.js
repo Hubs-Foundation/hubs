@@ -5,12 +5,14 @@ import { ReactComponent as DesktopIcon } from "../icons/Desktop.svg";
 import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { SharePopoverButton } from "./SharePopover";
 import { FormattedMessage } from "react-intl";
+import useAvatar from "./useAvatar";
 
 function useShare(scene, hubChannel) {
   const [sharingSource, setSharingSource] = useState(null);
   const [canShareCamera, setCanShareCamera] = useState(false);
   const [canShareScreen, setCanShareScreen] = useState(false);
   const [canShareCameraToAvatar, setCanShareCameraToAvatar] = useState(false);
+  const { hasWebcamTextureTarget } = useAvatar();
 
   useEffect(
     () => {
@@ -31,7 +33,7 @@ function useShare(scene, hubChannel) {
             .then(devices => {
               const hasCamera = devices.find(device => device.kind === "videoinput");
               setCanShareCamera(hasCamera);
-              setCanShareCameraToAvatar(hasCamera); // TODO Check avatar model for component
+              setCanShareCameraToAvatar(hasCamera && hasWebcamTextureTarget); // TODO Check avatar model for component
             })
             .catch(() => {
               setCanShareCamera(false);
@@ -61,7 +63,7 @@ function useShare(scene, hubChannel) {
         hubChannel.removeEventListener("permissions_updated", onPermissionsUpdated);
       };
     },
-    [scene, hubChannel]
+    [scene, hubChannel, hasWebcamTextureTarget]
   );
 
   const toggleShareCamera = useCallback(

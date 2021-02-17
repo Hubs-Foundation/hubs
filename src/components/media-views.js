@@ -7,6 +7,7 @@ import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
 import { addAndArrangeMedia, createImageTexture, createBasisTexture } from "../utils/media-utils";
+import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
@@ -138,28 +139,6 @@ function scaleToAspectRatio(el, ratio) {
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
   el.object3DMap.mesh.matrixNeedsUpdate = true;
-}
-
-function disposeTexture(texture) {
-  if (texture.image instanceof HTMLVideoElement) {
-    const video = texture.image;
-    video.pause();
-    video.src = "";
-    video.load();
-  }
-
-  if (texture.hls) {
-    texture.hls.stopLoad();
-    texture.hls.detachMedia();
-    texture.hls.destroy();
-    texture.hls = null;
-  }
-
-  if (texture.dash) {
-    texture.dash.reset();
-  }
-
-  texture.dispose();
 }
 
 class TextureCache {

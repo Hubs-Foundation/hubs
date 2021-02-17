@@ -37,7 +37,8 @@ AFRAME.registerComponent("player-info", {
   schema: {
     avatarSrc: { type: "string" },
     avatarType: { type: "string", default: AVATAR_TYPES.SKINNABLE },
-    muted: { default: false }
+    muted: { default: false },
+    sharingAvatarCamera: { default: false }
   },
   init() {
     this.displayName = null;
@@ -166,6 +167,16 @@ AFRAME.registerComponent("player-info", {
       const uniforms = injectCustomShaderChunks(this.el.object3D);
       this.el.querySelectorAll("[hover-visuals]").forEach(el => {
         el.components["hover-visuals"].uniforms = uniforms;
+      });
+    }
+
+    const webcamTextureTargets = modelEl.querySelectorAll("[webcam-texture-target]");
+
+    const sessionId = this.isLocalPlayerInfo ? NAF.clientId : this.playerSessionId;
+
+    for (const el of Array.from(webcamTextureTargets)) {
+      el.setAttribute("webcam-texture-target", {
+        src: this.data.sharingAvatarCamera ? `hubs://clients/${sessionId}/video` : ""
       });
     }
   },

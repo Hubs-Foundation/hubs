@@ -428,7 +428,7 @@ export default class SceneEntryManager {
         await NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
         if (target === "avatar") {
-          this.avatarRig.setAttribute("webcam-texture-target", { src: `hubs://clients/${NAF.clientId}/video` });
+          this.avatarRig.setAttribute("player-info", { sharingAvatarCamera: true });
         } else {
           currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
@@ -466,8 +466,6 @@ export default class SceneEntryManager {
           constraints.video.deviceId = preferredCamera;
           break;
       }
-
-      console.log(event.detail);
 
       shareVideoMediaStream(constraints, false, event.detail.target);
     });
@@ -512,6 +510,7 @@ export default class SceneEntryManager {
       await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
 
+      this.avatarRig.setAttribute("player-info", { sharingAvatarCamera: false });
       this.scene.emit("share_video_disabled");
       this.scene.removeState("sharing_video");
       isHandlingVideoShare = false;

@@ -1,19 +1,47 @@
+import { disposeTexture } from "../utils/material-utils";
+
 AFRAME.registerComponent("webcam-texture-target", {
   schema: {
     src: { type: "string" }
   },
 
-  init() {
-    this.effectMaterials = [];
+  getMaterial() {
+    return (
+      (this.el.object3DMap.skinnedmesh && this.el.object3DMap.skinnedmesh.material) ||
+      (this.el.object3DMap.mesh && this.el.object3DMap.mesh.material) ||
+      this.el.object3D.material
+    );
   },
 
-  update() {
+  init() {
+    const material = this.getMaterial();
+    this.originalTexture = material && material.map;
+  },
+
+  update(prevData) {
+    const material = this.getMaterial();
+
+    if (!material) {
+      return;
+    }
+
     const src = this.data.src;
 
-    if (src.startsWith("hubs://")) {
+    if (prevData.src === src) {
+      return;
+    }
+
+    if (src && src.startsWith("hubs://")) {
       const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
 
+      this.originalTexture = material.map;
+
       NAF.connection.adapter.getMediaStream(streamClientId, "video").then(stream => {
+        if (src !== this.data.src) {
+          // Prevent creating and loading video texture if the src changed while we were fetching the video stream.
+          return;
+        }
+
         const video = document.createElement("video");
         video.setAttribute("playsinline", "");
         video.setAttribute("webkit-playsinline", "");
@@ -24,7 +52,6 @@ AFRAME.registerComponent("webcam-texture-target", {
         video.muted = AFRAME.utils.device.isIOS();
         video.preload = "auto";
         video.crossOrigin = "anonymous";
-
         video.srcObject = new MediaStream(stream.getVideoTracks());
 
         const texture = new THREE.VideoTexture(video);
@@ -32,15 +59,14 @@ AFRAME.registerComponent("webcam-texture-target", {
         texture.minFilter = THREE.LinearFilter;
         texture.encoding = THREE.sRGBEncoding;
 
-        this.el.object3D.traverse(obj => {
-          const textureTargetComponent =
-            obj.material?.userData.gltfExtensions?.MOZ_hubs_components?.["webcam-texture-target"];
-
-          if (textureTargetComponent) {
-            obj.material.map = texture;
-          }
-        });
+        material.map = texture;
       });
+    } else {
+      if (material.map && material.map !== this.originalTexture) {
+        disposeTexture(material.map);
+      }
+
+      material.map = this.originalTexture;
     }
   }
 });
