@@ -38,7 +38,7 @@ AFRAME.registerComponent("player-info", {
     avatarSrc: { type: "string" },
     avatarType: { type: "string", default: AVATAR_TYPES.SKINNABLE },
     muted: { default: false },
-    sharingAvatarCamera: { default: false }
+    isSharingAvatarCamera: { default: false }
   },
   init() {
     this.displayName = null;
@@ -176,7 +176,7 @@ AFRAME.registerComponent("player-info", {
 
     for (const el of Array.from(webcamTextureTargets)) {
       el.setAttribute("webcam-texture-target", {
-        src: this.data.sharingAvatarCamera ? `hubs://clients/${sessionId}/video` : ""
+        src: this.data.isSharingAvatarCamera ? `hubs://clients/${sessionId}/video` : ""
       });
 
       if (this.isLocalPlayerInfo) {
