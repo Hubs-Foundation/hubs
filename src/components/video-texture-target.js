@@ -1,6 +1,13 @@
 import { disposeTexture } from "../utils/material-utils";
 import { createVideoOrAudioEl } from "../utils/media-utils";
 
+/**
+ * @component video-texture-target
+ * This compoennt is intended to be used on entities with a mesh/skinned mesh Object3D
+ * The component swaps the base color map on the mesh's material with a video texture
+ * Currently the video texture can only be a Webcam stream, but this component could be easily modified
+ * to work with normal urls, screensharing, etc.
+ */
 AFRAME.registerComponent("video-texture-target", {
   schema: {
     src: { type: "string" }
