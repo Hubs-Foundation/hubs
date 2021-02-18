@@ -12,7 +12,7 @@ function useShare(scene, hubChannel) {
   const [canShareCamera, setCanShareCamera] = useState(false);
   const [canShareScreen, setCanShareScreen] = useState(false);
   const [canShareCameraToAvatar, setCanShareCameraToAvatar] = useState(false);
-  const { hasWebcamTextureTarget } = useAvatar();
+  const { hasVideoTextureTarget } = useAvatar();
 
   useEffect(
     () => {
@@ -33,7 +33,7 @@ function useShare(scene, hubChannel) {
             .then(devices => {
               const hasCamera = devices.find(device => device.kind === "videoinput");
               setCanShareCamera(hasCamera);
-              setCanShareCameraToAvatar(hasCamera && hasWebcamTextureTarget);
+              setCanShareCameraToAvatar(hasCamera && hasVideoTextureTarget);
             })
             .catch(() => {
               setCanShareCamera(false);
@@ -63,7 +63,7 @@ function useShare(scene, hubChannel) {
         hubChannel.removeEventListener("permissions_updated", onPermissionsUpdated);
       };
     },
-    [scene, hubChannel, hasWebcamTextureTarget]
+    [scene, hubChannel, hasVideoTextureTarget]
   );
 
   const toggleShareCamera = useCallback(

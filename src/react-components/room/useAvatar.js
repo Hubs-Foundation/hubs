@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 
 export default function useAvatar() {
-  const [state, setState] = useState({ hasWebcamTextureTarget: false });
+  const [state, setState] = useState({ hasVideoTextureTarget: false });
 
   useEffect(() => {
     const avatarModelEl = document.querySelector("#avatar-rig .model");
 
     function onAvatarModelLoaded() {
-      const hasWebcamTextureTarget = !!avatarModelEl.querySelector("[video-texture-target]");
-      setState({ hasWebcamTextureTarget });
+      const hasVideoTextureTarget = !!avatarModelEl.querySelector("[video-texture-target]");
+      setState({ hasVideoTextureTarget });
     }
 
     onAvatarModelLoaded();

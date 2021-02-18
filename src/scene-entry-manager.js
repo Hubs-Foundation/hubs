@@ -428,7 +428,7 @@ export default class SceneEntryManager {
         await NAF.connection.adapter.setLocalMediaStream(mediaStream);
 
         if (target === "avatar") {
-          this.avatarRig.setAttribute("player-info", { sharingAvatarCamera: true });
+          this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
         } else {
           currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
@@ -510,7 +510,7 @@ export default class SceneEntryManager {
       await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
 
-      this.avatarRig.setAttribute("player-info", { sharingAvatarCamera: false });
+      this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: false });
       this.scene.emit("share_video_disabled");
       this.scene.removeState("sharing_video");
       isHandlingVideoShare = false;
