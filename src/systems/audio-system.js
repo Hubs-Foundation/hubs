@@ -6,7 +6,10 @@ function performDelayedReconnect(gainNode) {
 
   delayedReconnectTimeout = setTimeout(() => {
     delayedReconnectTimeout = null;
-    console.warn("enableChromeAEC: recreate RTCPeerConnection loopback because the local connection was disconnected for 10s");
+    console.warn(
+      "enableChromeAEC: recreate RTCPeerConnection loopback because the local connection was disconnected for 10s"
+    );
+    // eslint-disable-next-line no-use-before-define
     enableChromeAEC(gainNode);
   }, 10000);
 }
@@ -39,8 +42,10 @@ async function enableChromeAEC(gainNode) {
   outboundPeerConnection.addEventListener("icecandidate", e => {
     inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
   });
-  outboundPeerConnection.addEventListener("iceconnectionstatechange", e => {
-    console.warn("enableChromeAEC: outboundPeerConnection state changed to " + outboundPeerConnection.iceConnectionState);
+  outboundPeerConnection.addEventListener("iceconnectionstatechange", () => {
+    console.warn(
+      "enableChromeAEC: outboundPeerConnection state changed to " + outboundPeerConnection.iceConnectionState
+    );
     if (outboundPeerConnection.iceConnectionState === "disconnected") {
       performDelayedReconnect(gainNode);
     }
@@ -56,7 +61,7 @@ async function enableChromeAEC(gainNode) {
   inboundPeerConnection.addEventListener("icecandidate", e => {
     outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
   });
-  inboundPeerConnection.addEventListener("iceconnectionstatechange", e => {
+  inboundPeerConnection.addEventListener("iceconnectionstatechange", () => {
     console.warn("enableChromeAEC: inboundPeerConnection state changed to " + inboundPeerConnection.iceConnectionState);
     if (inboundPeerConnection.iceConnectionState === "disconnected") {
       performDelayedReconnect(gainNode);
