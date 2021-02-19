@@ -11,6 +11,15 @@ import tlds from "tlds";
 
 import anime from "animejs";
 
+export const MediaType = {
+  ALL: "all",
+  ALL_2D: "all-2d",
+  MODEL: "model",
+  IMAGE: "image",
+  VIDEO: "video",
+  PDF: "pdf"
+};
+
 const linkify = Linkify();
 linkify.tlds(tlds);
 

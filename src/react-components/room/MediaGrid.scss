@@ -1,0 +1,46 @@
+@use "../styles/theme.scss";
+
+:local(.media-grid) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  place-items: start;
+  width: 100%;
+  padding: 8px;
+  align-content: flex-start;
+  flex: 1;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
+  & > * {
+    width: 100%;
+    padding: 8px;
+  }
+}
+
+:local(.sm) {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+
+  @media(min-width: theme.$breakpoint-lg) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
+:local(.center) {
+  justify-content: space-evenly;
+}
+
+:local(.variable-width) {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+
+  & > * {
+    min-width: 200px;
+    min-height: 200px;
+    max-height: 240px;
+    max-width: 320px;
+    width: auto;
+  }
+}

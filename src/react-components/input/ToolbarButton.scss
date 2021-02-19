@@ -1,0 +1,457 @@
+@use '../styles/theme';
+
+:local(.toolbar-button) {
+  border: none;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+
+  label {
+    cursor: pointer;
+    color: black;
+    margin-top: 8px;
+    margin-bottom: 3px;
+  }
+}
+
+:local(.icon-container) {
+  position: relative;
+  border-radius: 9999px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid theme.$transparent;
+  background-color: theme.$transparent;
+
+  transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: white;
+      transition: stroke 0.1s ease-in-out;
+    }
+
+    *[fill=\#000] {
+      fill: white;
+      transition: fill 0.1s ease-in-out;
+    }
+  }
+}
+
+:local(.large) :local(.icon-container) {
+  width: 96px;
+  height: 96px;
+}
+
+:local(.basic), :local(.transparent) {
+  :local(.icon-container) {
+    border-color: theme.$lightgrey;
+
+    svg {
+      *[stroke=\#000] {
+        stroke: #000;
+      }
+  
+      *[fill=\#000] {
+        fill: #000;
+      }
+    }
+  }  
+
+  &:hover :local(.icon-container) {
+    border-color: theme.$white-hover;
+    background-color: theme.$white-hover;
+  }
+
+  &:active :local(.icon-container) {
+    border-color: theme.$white-pressed;
+    background-color: theme.$white-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: transparent;
+      background-color: theme.$lightgrey;
+    }
+
+    label {
+      color: theme.$darkgrey;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        background-color: theme.$lightgrey-hover;
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        background-color: theme.$lightgrey-pressed;
+      }
+    }
+  }
+}
+
+:local(.transparent) :local(.icon-container) {
+  border-color: theme.$transparent;
+}
+
+:local(.accept), :local(.green) {
+  :local(.icon-container) {
+    background-color: theme.$green;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$green-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$green-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$green;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$green;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$green;
+        }
+      }
+    }
+
+    label {
+      color: theme.$green;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$green-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$green-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$green-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$green-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$green-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$green-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+:local(.cancel), :local(.red) {
+  :local(.icon-container) {
+    background-color: theme.$red;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$red-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$red-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$red;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$red;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$red;
+        }
+      }
+    }
+
+    label {
+      color: theme.$red;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$red-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$red-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$red-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$red-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$red-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$red-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+:local(.blue) {
+  :local(.icon-container) {
+    background-color: theme.$blue;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$blue-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$blue-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$blue;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$blue;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$blue;
+        }
+      }
+    }
+
+    label {
+      color: theme.$blue;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$blue-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$blue-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$blue-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$blue-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$blue-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$blue-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+:local(.orange) {
+  :local(.icon-container) {
+    background-color: theme.$orange;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$orange-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$orange-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$orange;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$orange;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$orange;
+        }
+      }
+    }
+
+    label {
+      color: theme.$orange;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$orange-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$orange-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$orange-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$orange-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$orange-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$orange-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+:local(.purple) {
+  :local(.icon-container) {
+    background-color: theme.$purple;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$purple-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$purple-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$purple;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$purple;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$purple;
+        }
+      }
+    }
+
+    label {
+      color: theme.$purple;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$purple-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$purple-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$purple-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$purple-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$purple-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$purple-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+:local(.status-indicator) {
+  position: absolute;
+  top: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 5px;
+}
+
+:local(.status-green) {
+  background-color: theme.$green;
+}
+
+:local(.status-orange) {
+  background-color: theme.$orange;
+}
+
+:local(.status-red) {
+  background-color: theme.$red;
+}

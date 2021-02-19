@@ -2,6 +2,7 @@ import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
+import { SignInMessages } from "./react-components/auth/SignInModal";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -19,7 +20,6 @@ import {
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
-import { pushHistoryState } from "./utils/history";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
 const isIOS = AFRAME.utils.device.isIOS();
@@ -74,7 +74,7 @@ export default class SceneEntryManager {
     const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
     waypointSystem.moveToSpawnPoint();
 
-    if (isMobile || forceEnableTouchscreen || qsTruthy("mobile")) {
+    if (isMobile || forceEnableTouchscreen || qsTruthy("force_enable_touchscreen")) {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
 
@@ -248,13 +248,18 @@ export default class SceneEntryManager {
           await this._unpinElement(el);
         };
 
-    this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
-      // UI pins/un-pins the entity optimistically, so we undo that here.
-      // Note we have to disable the sign in flow here otherwise this will recurse.
-      this._disableSignInOnPinAction = true;
-      el.setAttribute("pinnable", "pinned", !pin);
-      this._disableSignInOnPinAction = false;
-    });
+    this.performConditionalSignIn(
+      () => this.hubChannel.signedIn,
+      action,
+      pin ? SignInMessages.pin : SignInMessages.unpin,
+      () => {
+        // UI pins/un-pins the entity optimistically, so we undo that here.
+        // Note we have to disable the sign in flow here otherwise this will recurse.
+        this._disableSignInOnPinAction = true;
+        el.setAttribute("pinnable", "pinned", !pin);
+        this._disableSignInOnPinAction = false;
+      }
+    );
   };
 
   _unpinElement = el => {
@@ -322,16 +327,11 @@ export default class SceneEntryManager {
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
-    this.scene.addEventListener("action_invite", () => {
-      handleExitTo2DInterstitial(false, () => this.history.goBack());
-      pushHistoryState(this.history, "overlay", "invite");
-    });
-
     this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
       this.performConditionalSignIn(
         () => this.hubChannel.can("kick_users"),
         async () => await window.APP.hubChannel.kick(clientId),
-        "kick-user"
+        SignInMessages.kickUser
       );
     });
 
@@ -339,7 +339,7 @@ export default class SceneEntryManager {
       this.performConditionalSignIn(
         () => this.hubChannel.can("mute_users"),
         () => window.APP.hubChannel.mute(clientId),
-        "mute-user"
+        SignInMessages.muteUser
       );
     });
 
@@ -617,13 +617,28 @@ export default class SceneEntryManager {
     }
 
     await new Promise(resolve => audioEl.addEventListener("canplay", resolve));
-    mediaStream.addTrack(
-      audioEl.captureStream
-        ? audioEl.captureStream().getAudioTracks()[0]
-        : audioEl.mozCaptureStream
-          ? audioEl.mozCaptureStream().getAudioTracks()[0]
-          : null
-    );
+
+    const audioStream = audioEl.captureStream
+      ? audioEl.captureStream()
+      : audioEl.mozCaptureStream
+        ? audioEl.mozCaptureStream()
+        : null;
+
+    if (audioStream) {
+      let audioVolume = Number(qs.get("audio_volume") || "1.0");
+      if (isNaN(audioVolume)) {
+        audioVolume = 1.0;
+      }
+      const audioContext = THREE.AudioContext.getContext();
+      const audioSource = audioContext.createMediaStreamSource(audioStream);
+      const audioDestination = audioContext.createMediaStreamDestination();
+      const gainNode = audioContext.createGain();
+      audioSource.connect(gainNode);
+      gainNode.connect(audioDestination);
+      gainNode.gain.value = audioVolume;
+      mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+    }
+
     await NAF.connection.adapter.setLocalMediaStream(mediaStream);
     audioEl.play();
   };

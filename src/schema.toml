@@ -29,6 +29,7 @@ features.public_rooms = { category = "features", type = "boolean", name = "Publi
 features.default_room_id = { category = "features", type = "string", name = "Homepage Room ID", description = "Use the specified room in place of the homepage."}
 features.enable_spoke = { category = "features", type = "boolean", name = "Enable Scene Editor", description = "Enable Scene Editor for all visitors."}
 features.enable_lobby_ghosts = { category = "features", type = "boolean", name = "Enable Lobby Ghosts", description = "Allow people in the lobby to explore the room while remaining invisible and inaudible." }
+features.public_api_access = { category = "features", type = "boolean", name = "Public API Access", description = "Enables a publicly-accessible API for managing backend resources programmatically.", internal = "true" }
 
 features.permissive_rooms = { category = "rooms", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
 features.disable_room_creation = { category = "rooms", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }
@@ -36,6 +37,7 @@ features.require_account_for_join = { category = "rooms", type = "boolean", name
 features.default_room_size = { category = "rooms", type = "number", name = "Default room size", description = "Default room size for new rooms. This does not include users in the lobby." }
 features.max_room_size = { category = "rooms", type = "number", name = "Maximum room size", description = "Maximum room size visitors can set." }
 
+features.show_feature_panels = { category = "features", type = "boolean", internal = "true" }
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_discord_bot_link = { category = "features", type = "boolean", internal = "true" }
 features.show_whats_new_link = { category = "features", type = "boolean", internal = "true" }
@@ -53,6 +55,9 @@ images.company_logo = { category = "images", type = "file", name = "Company Logo
 images.home_background = { category = "images", type = "file", name = "Home background", description = "Background image on the home page." }
 
 images.editor_logo = { category = "images", type = "file", internal = "true" }
+images.landing_rooms_thumb = { category = "images", type = "file", internal = "true" }
+images.landing_communicate_thumb = { category = "images", type = "file", internal = "true" }
+images.landing_media_thumb = { category = "images", type = "file", internal = "true" }
 
 theme.dark-theme = { category = "theme", type = "boolean", name = "Dark Mode", description = "Use dark UI styling." }
 theme.action-color = { category = "theme", type = "color", name = "Primary Color", description = "Call to action button color." }
@@ -76,3 +81,6 @@ links.issue_report = { category = "links", type = "string", name = "Issue Report
 links.promotion = { category = "links", type = "string", name = "Promotion Info", description = "Link to info about promotion info and licensing."}
 links.remixing = { category = "links", type = "string", name = "Remixing Info", description = "Link to info about remixing info and licensing."}
 links.model_collection = { category = "links", type = "string", name = "Model Collection", description = "Link to a collection of recommended models."}
+
+auth.login_subject = { category = "auth", type="string", name="Magic Link Email Subject", description="Customize the email subject line for users logging in" }
+auth.login_body = { category = "auth", type="longstring", name="Magic Link Email Body", description="Customize message. Add '{{ link }}' to insert the magic link, otherwise it will be appended at the end." }

@@ -2,6 +2,10 @@ export function isTagged(el, tag) {
   return el && el.components && el.components.tags && el.components.tags.data[tag];
 }
 
+export function setTag(el, tag, value = true) {
+  return (el.components.tags.data[tag] = !!value);
+}
+
 AFRAME.registerComponent("tags", {
   schema: {
     isHandCollisionTarget: { default: false },
@@ -14,7 +18,8 @@ AFRAME.registerComponent("tags", {
     isPen: { default: false },
     isHoverMenuChild: { default: false },
     isStatic: { default: false },
-    inspectable: { default: false }
+    inspectable: { default: false },
+    preventAudioBoost: { default: false }
   },
   update() {
     if (this.didUpdateOnce) {

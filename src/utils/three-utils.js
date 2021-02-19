@@ -290,7 +290,7 @@ export const calculateCameraTransformForWaypoint = (function() {
 })();
 
 export const calculateViewingDistance = (function() {
-  return function calculateViewingDistance(fov, aspect, object, box, center, vrMode) {
+  return function calculateViewingDistance(fov, aspect, box, center, vrMode) {
     const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
     const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
     const halfVertFOV = THREE.Math.degToRad(fov / 2);

@@ -38,6 +38,13 @@ export class SuperSpawnerSystem {
       data.mediaOptions
     ).entity;
 
+    // TODO HACK objects become held mid frame here, so if something runs between here and
+    // when the networked component is initialized isMine will throw since data doesnt exist
+    // should probably fix isMine in networked aframe instead of merging this
+    if (spawnedEntity.components.networked && !spawnedEntity.components.networked.data) {
+      spawnedEntity.components.networked.data = {};
+    }
+
     superSpawner.el.object3D.getWorldPosition(spawnedEntity.object3D.position);
     superSpawner.el.object3D.getWorldQuaternion(spawnedEntity.object3D.quaternion);
     spawnedEntity.object3D.matrixNeedsUpdate = true;

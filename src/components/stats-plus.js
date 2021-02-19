@@ -66,6 +66,8 @@ AFRAME.registerComponent("stats-plus", {
     this.lastFps = 0;
     this.frameCount = 0;
     this.inVR = scene.is("vr-mode");
+    this.showFPSCounter = window.APP.store.state.preferences.showFPSCounter;
+    this.fpsEl.style.display = this.showFPSCounter ? "block" : "none";
 
     if (scene.isMobile) {
       this.statsEl.classList.add("rs-mobile");
@@ -128,6 +130,13 @@ AFRAME.registerComponent("stats-plus", {
   tick(time) {
     const stats = this.stats;
     if (!this.statsEl) return;
+    if (this.showFPSCounter !== window.APP.store.state.preferences.showFPSCounter) {
+      this.showFPSCounter = window.APP.store.state.preferences.showFPSCounter;
+      this.fpsEl.style.display = this.showFPSCounter ? "block" : "none";
+    }
+    if (!this.showFPSCounter) {
+      return;
+    }
     if (this.data || this.vrStatsEnabled) {
       // Update rStats
       stats("rAF").tick();

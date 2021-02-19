@@ -25,9 +25,11 @@ import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
 import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
 import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
-import { EnterVRButtonSystem } from "./enter-vr-button-system";
 import { AudioSystem } from "./audio-system";
 import { ShadowSystem } from "./shadow-system";
+import { MediaFramesSystem } from "./media-frames";
+import { InspectYourselfSystem } from "./inspect-yourself-system";
+import { EmojiSystem } from "./emoji-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -60,11 +62,13 @@ AFRAME.registerSystem("hubs-systems", {
     this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
     this.menuAnimationSystem = new MenuAnimationSystem();
     this.audioSettingsSystem = new AudioSettingsSystem(this.el);
-    this.enterVRButtonSystem = new EnterVRButtonSystem(this.el);
     this.animationMixerSystem = new AnimationMixerSystem();
     this.boneVisibilitySystem = new BoneVisibilitySystem();
     this.uvScrollSystem = new UVScrollSystem();
     this.shadowSystem = new ShadowSystem(this.el);
+    this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
+    this.inspectYourselfSystem = new InspectYourselfSystem();
+    this.emojiSystem = new EmojiSystem(this.el);
   },
 
   tick(t, dt) {
@@ -80,8 +84,10 @@ AFRAME.registerSystem("hubs-systems", {
     this.cursorTogglingSystem.tick(systems.interaction, systems.userinput, this.el);
     this.interactionSfxSystem.tick(systems.interaction, systems.userinput, this.soundEffectsSystem);
     this.superSpawnerSystem.tick();
+    this.emojiSystem.tick(t, systems.userinput);
     this.cursorPoseTrackingSystem.tick();
     this.cursorTargettingSystem.tick(t);
+    this.hoverMenuSystem.tick();
     this.positionAtBorderSystem.tick();
     this.scaleInScreenSpaceSystem.tick();
     this.constraintsSystem.tick();
@@ -90,7 +96,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
     this.drawingMenuSystem.tick();
-    this.hoverMenuSystem.tick();
     this.hapticFeedbackSystem.tick(
       this.twoPointStretchingSystem,
       this.singleActionButtonSystem.didInteractLeftThisFrame,
@@ -100,13 +105,14 @@ AFRAME.registerSystem("hubs-systems", {
     this.scenePreviewCameraSystem.tick();
     this.physicsSystem.tick(dt);
     this.batchManagerSystem.tick(t);
+    this.inspectYourselfSystem.tick(this.el, systems.userinput, this.cameraSystem);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
-    this.enterVRButtonSystem.tick();
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
+    this.mediaFramesSystem.tick();
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();

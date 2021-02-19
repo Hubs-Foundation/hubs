@@ -481,6 +481,8 @@ AFRAME.registerComponent("media-loader", {
                 template: "#photo-hover-menu",
                 isFlat: true
               });
+            } else if (this.data.mediaOptions.href) {
+              this.el.setAttribute("hover-menu__link", { template: "#link-hover-menu", isFlat: true });
             }
           },
           { once: true }
@@ -556,6 +558,11 @@ AFRAME.registerComponent("media-loader", {
         let batch = !disableBatching && forceMeshBatching;
         if (this.data.mediaOptions.hasOwnProperty("batch") && !this.data.mediaOptions.batch) {
           batch = false;
+        }
+        if (this.data.mediaOptions.hasOwnProperty("applyGravity")) {
+          this.el.setAttribute("floaty-object", {
+            modifyGravityOnRelease: !this.data.mediaOptions.applyGravity
+          });
         }
         this.el.setAttribute(
           "gltf-model-plus",

@@ -4,10 +4,11 @@ import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
-import { getLocale, getMessages } from "./utils/i18n";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
-import { SignInPage } from "./react-components/auth/SignInPage";
+import { SignInModalContainer } from "./react-components/auth/SignInModalContainer";
+import { PageContainer } from "./react-components/layout/PageContainer";
 import "./assets/stylesheets/globals.scss";
+import { Center } from "./react-components/layout/Center";
 
 registerTelemetry("/signin", "Hubs Sign In Page");
 
@@ -16,9 +17,13 @@ window.APP = { store };
 
 function Root() {
   return (
-    <WrappedIntlProvider locale={getLocale()} messages={getMessages()}>
+    <WrappedIntlProvider>
       <AuthContextProvider store={store}>
-        <SignInPage />
+        <PageContainer>
+          <Center>
+            <SignInModalContainer />
+          </Center>
+        </PageContainer>
       </AuthContextProvider>
     </WrappedIntlProvider>
   );

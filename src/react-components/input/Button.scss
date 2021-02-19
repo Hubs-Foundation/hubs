@@ -1,31 +1,165 @@
+@use '../styles/theme';
 
-@import '../../assets/stylesheets/root-vars';
-@import '../../assets/stylesheets/shared';
-
-:local(.primary-button) {
-  @extend %big-action-button;
-}
-
-:local(.cta-button) {
-  font-size: 14pt;
-  width: 19em;
-  margin-right: 1em;
-
-  @media (max-width: 380px) {
-    width: 18em;
-  }
-}
-
-:local(.secondary-button) {
-  @extend %action-button-secondary;
+:local(.button) {
+  height: 48px;
+  min-height: 48px;
+  width: min-content;
+  min-width: 156px;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 8px;
+  border-width: 0;
+  border-color: transparent;
+  transition: background-color 0.1s ease-in-out;
+  white-space: nowrap;
+  padding: 0 24px;
   display: flex;
-  flex-direction: row;
-  width: 250px;
-  margin-top: 18px;
-  margin-bottom: 18px;
-  padding-right: 20px;
+  align-items: center;
+  justify-content: center;
+  color: theme.$white;
 
-  i {
-    margin-right: 16px;
+  svg {
+    flex-shrink: 0;
+    margin-right: 8px;
+
+    *[stroke=\#000] {
+      stroke: theme.$white;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$white;
+    }
   }
+
+  &:hover {
+    color: theme.$white;
+  }
+
+  &:active {
+    color: theme.$white;
+  }
+}
+
+:local(.basic), :local(.transparent) {
+  color: theme.$darkgrey;
+  border: 1px solid theme.$darkgrey;
+  background-color: theme.$white;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$darkgrey;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$darkgrey;
+    }
+  }
+
+  &:hover {
+    color: theme.$darkgrey;
+    background-color: theme.$white-hover;
+  }
+
+  &:active {
+    color: theme.$darkgrey;
+    background-color: theme.$white-pressed;
+  }
+}
+
+:local(.transparent) {
+  border-color: theme.$transparent;
+  background-color: theme.$transparent;
+}
+
+:local(.accept), :local(.green) {
+  background-color: theme.$green;
+
+  &:hover {
+    background-color: theme.$green-hover;
+  }
+
+  &:active {
+    background-color: theme.$green-pressed;
+  }
+}
+
+:local(.cancel), :local(.red) {
+  background-color: theme.$red;
+
+  &:hover {
+    background-color: theme.$red-hover;
+  }
+
+  &:active {
+    background-color: theme.$red-pressed;
+  }
+}
+
+:local(.blue) {
+  background-color: theme.$blue;
+
+  &:hover {
+    background-color: theme.$blue-hover;
+  }
+
+  &:active {
+    background-color: theme.$blue-pressed;
+  }
+}
+
+:local(.orange) {
+  background-color: theme.$orange;
+
+  &:hover {
+    background-color: theme.$orange-hover;
+  }
+
+  &:active {
+    background-color: theme.$orange-pressed;
+  }
+}
+
+:local(.purple) {
+  background-color: theme.$purple;
+
+  &:hover {
+    background-color: theme.$purple-hover;
+  }
+
+  &:active {
+    background-color: theme.$purple-pressed;
+  }
+}
+
+:local(.button):disabled {
+  border-color: transparent;
+  cursor: not-allowed;
+  color: theme.$darkgrey;
+  opacity: 0.7;
+  background-color: theme.$lightgrey;
+}
+
+:global(.keyboard-user) :local(.button):focus {
+  border-color: transparent;
+}
+
+:local(.sm) {
+  height: 32px;
+  min-height: 32px;
+  min-width: 100px;
+  padding: 0 8px;
+}
+
+:local(.lg), :local(.xl) {
+  border-radius: 32px;
+  padding: 0 48px;
+  font-size: 16px;
+}
+
+:local(.lg) {
+  height: 48px;
+}
+
+:local(.xl) {
+  height: 64px;
 }

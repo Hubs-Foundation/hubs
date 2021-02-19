@@ -62,7 +62,7 @@ export class AudioSystem {
     if (sceneEl.camera) {
       sceneEl.camera.add(sceneEl.audioListener);
     }
-    sceneEl.addEventListener("camera-set- active", evt => {
+    sceneEl.addEventListener("camera-set-active", evt => {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 

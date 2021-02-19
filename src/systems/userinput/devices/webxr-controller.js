@@ -27,13 +27,17 @@ export class WebXRControllerDevice {
     const hand = this.gamepad.hand || "right";
     const path = paths.device.webxr[hand];
 
-    frame.setValueType(path.button.trigger.pressed, this.gamepad.buttons[0].pressed);
-    frame.setValueType(path.button.trigger.touched, this.gamepad.buttons[0].touched);
-    frame.setValueType(path.button.trigger.value, this.gamepad.buttons[0].value);
+    if (this.gamepad.buttons[0]) {
+      frame.setValueType(path.button.trigger.pressed, this.gamepad.buttons[0].pressed);
+      frame.setValueType(path.button.trigger.touched, this.gamepad.buttons[0].touched);
+      frame.setValueType(path.button.trigger.value, this.gamepad.buttons[0].value);
+    }
 
-    frame.setValueType(path.button.grip.pressed, this.gamepad.buttons[1].pressed);
-    frame.setValueType(path.button.grip.touched, this.gamepad.buttons[1].touched);
-    frame.setValueType(path.button.grip.value, this.gamepad.buttons[1].value);
+    if (this.gamepad.buttons[1]) {
+      frame.setValueType(path.button.grip.pressed, this.gamepad.buttons[1].pressed);
+      frame.setValueType(path.button.grip.touched, this.gamepad.buttons[1].touched);
+      frame.setValueType(path.button.grip.value, this.gamepad.buttons[1].value);
+    }
 
     if (this.gamepad.buttons[2]) {
       frame.setValueType(path.button.touchpad.pressed, this.gamepad.buttons[2].pressed);
@@ -59,11 +63,12 @@ export class WebXRControllerDevice {
       frame.setValueType(path.button.b.value, this.gamepad.buttons[5].value);
     }
 
-    frame.setValueType(path.axis.touchpadX, this.gamepad.axes[0]);
-    frame.setValueType(path.axis.touchpadY, this.gamepad.axes[1]);
-    frame.setValueType(path.axis.joyX, this.gamepad.axes[2]);
-    frame.setValueType(path.axis.joyY, this.gamepad.axes[3]);
-
+    if (this.gamepad.axes.length >= 4) {
+      frame.setValueType(path.axis.touchpadX, this.gamepad.axes[0]);
+      frame.setValueType(path.axis.touchpadY, this.gamepad.axes[1]);
+      frame.setValueType(path.axis.joyX, this.gamepad.axes[2]);
+      frame.setValueType(path.axis.joyY, this.gamepad.axes[3]);
+    }
     this.rayObject = this.rayObject || document.querySelector(this.selector).object3D;
     this.rayObject.updateMatrixWorld();
     this.rayObjectRotation.setFromRotationMatrix(m.extractRotation(this.rayObject.matrixWorld));

@@ -51,11 +51,6 @@
       position: relative;
       background-color: var(--full-panel-background-color);
 
-
-      @media (max-width: 801px) {
-        padding: 5px;
-      }
-
       &__title {
         @extend %top-title;
         margin-bottom: 20px;
@@ -118,7 +113,7 @@
   margin-top: 0;
 }
 
-.invite-form, .invite-team-form, .add-media-form, .custom-scene-form {
+.invite-form, .add-media-form, .custom-scene-form {
   @extend %centered-flex-column;
 
   &__buttons {
@@ -145,12 +140,6 @@
     text-align: center;
     -moz-appearance: none;
     -webkit-appearance: none;
-  }
-}
-
-.invite-team-form {
-  &__action-button {
-    width: 350px;
   }
 }
 

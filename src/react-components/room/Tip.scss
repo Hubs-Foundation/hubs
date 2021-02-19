@@ -1,0 +1,57 @@
+@use "../styles/theme.scss";
+
+:local(.tip) {
+  pointer-events: all;
+  position: absolute;
+  bottom: 4px;
+  min-height: 48px;
+  background-color: theme.$blue;
+  border-radius: 16px;
+  display: flex;
+  color: theme.$white;
+  align-items: center;
+  width: max-content;
+  max-width: min(calc(100% - 8px), 360px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    bottom: 24px;
+    max-width: 360px;
+  }
+}
+
+:local(.content) {
+  margin: 16px;
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-bold;
+  padding: 0 8px;
+  line-height: 1.25;
+}
+
+:local(.dismiss-button) {
+  background: none;
+  height: 32px;
+  border-radius: 16px;
+  padding: 0 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid theme.$blue-pressed;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  min-width: 48px;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+  align-self: flex-end;
+
+  &:hover {
+    border-color: theme.$blue-hover;
+    background-color: theme.$blue-hover;
+  }
+
+  &:active {
+    border-color: theme.$blue-pressed;
+    background-color: theme.$blue-pressed;
+  }
+}
