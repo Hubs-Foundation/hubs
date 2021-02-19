@@ -66,7 +66,15 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSou
         <b>
           <FormattedMessage
             id="exited-room-screen.no-longer-availible"
-            defaultMessage="Sorry, this room is no longer available."
+            defaultMessage="Sorry, this room is no longer available. <toslink>Go to Home Page</toslink>"
+            values={{
+              // eslint-disable-next-line react/display-name
+              toslink: chunks => (
+                <a rel="noreferrer noopener" href={'/'}>
+                  {chunks}
+                </a>
+              )
+            }}
           />
         </b>
         {showTerms && (
