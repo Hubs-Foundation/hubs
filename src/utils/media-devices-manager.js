@@ -1,6 +1,7 @@
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
+import { detectOS, detect } from "detect-browser";
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -11,6 +12,10 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 // Note that this doesn't have to be exhaustive: if no devices match any regex
 // then we rely upon the user to select the proper mic.
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
+
+const IOS_MUTED_HACK_MIN_VERSION = 13;
+const detectedOS = detectOS(navigator.userAgent);
+const browser = detect();
 
 export default class MediaDevicesManager {
   constructor(scene, store, audioSystem) {
@@ -172,6 +177,8 @@ export default class MediaDevicesManager {
         this._scene.emit("action_end_mic_sharing");
       });
 
+      this._iOSTrackMutedHack();
+
       if (/Oculus/.test(navigator.userAgent)) {
         // HACK Oculus Browser 6 seems to randomly end the microphone audio stream. This re-creates it.
         // Note the ended event will only fire if some external event ends the stream, not if we call stop().
@@ -183,7 +190,9 @@ export default class MediaDevicesManager {
           const newStream = await navigator.mediaDevices.getUserMedia(constraints);
           this.audioTrack = newStream.getAudioTracks()[0];
 
-          this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
+          this._iOSTrackMutedHack();
+
+          audioSystem.addStreamToOutboundAudio("microphone", newStream);
 
           this._scene.emit("local-media-stream-created");
 
@@ -199,6 +208,36 @@ export default class MediaDevicesManager {
       console.error("Error during getUserMedia: ", e);
       this.audioTrack = null;
       return false;
+    }
+  }
+
+  /**
+   * Webkit issue on iOS>13: https://bugs.webkit.org/show_bug.cgi?id=213853
+   */
+  _iOSTrackMutedHack() {
+    const iOSVersion = parseInt(browser.version.split(".")[0]);
+    if (
+      ["iOS", "Mac OS"].includes(detectedOS) &&
+      ["safari", "ios"].includes(browser.name) &&
+      iOSVersion >= IOS_MUTED_HACK_MIN_VERSION
+    ) {
+      this.audioTrack.onmute = this._muteStateChanged;
+      this.audioTrack.onunmute = this._muteStateChanged;
+    }
+  }
+
+  _muteStateChanged() {
+    if (this._audioTrack && this._audioTrack.muted) {
+      if (!this.reconnectIfUnmuted) {
+        NAF.connection.adapter.enableMicrophone(false);
+      }
+      this.reconnectIfUnmuted = true;
+    } else {
+      if (this.reconnectIfUnmuted) {
+        this.reconnectIfUnmuted = false;
+        this.setMediaStreamToDefault();
+        NAF.connection.adapter.enableMicrophone(true);
+      }
     }
   }
 
