@@ -17,12 +17,12 @@ import { FormattedMessage, useIntl } from "react-intl";
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {
-    if (ctx.mobile) {
-      return intl.formatMessage({ id: "people-sidebar.device-label.mobile", defaultMessage: "Mobile" });
+    if (ctx.hmd) {
+      return intl.formatMessage({ id: "people-sidebar.device-label.vr", defaultMessage: "VR" });
     } else if (ctx.discord) {
       return intl.formatMessage({ id: "people-sidebar.device-label.discord", defaultMessage: "Discord Bot" });
-    } else if (ctx.hmd) {
-      return intl.formatMessage({ id: "people-sidebar.device-label.vr", defaultMessage: "VR" });
+    } else if (ctx.mobile) {
+      return intl.formatMessage({ id: "people-sidebar.device-label.mobile", defaultMessage: "Mobile" });
     }
   }
 
@@ -31,12 +31,12 @@ function getDeviceLabel(ctx, intl) {
 
 function getDeviceIconComponent(ctx) {
   if (ctx) {
-    if (ctx.mobile) {
-      return PhoneIcon;
+    if (ctx.hmd) {
+      return VRIcon;
     } else if (ctx.discord) {
       return DiscordIcon;
-    } else if (ctx.hmd) {
-      return VRIcon;
+    } else if (ctx.mobile) {
+      return PhoneIcon;
     }
   }
 
