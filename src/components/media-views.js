@@ -6,7 +6,8 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createImageTexture, createBasisTexture } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createBasisTexture, createVideoOrAudioEl } from "../utils/media-utils";
+import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
@@ -112,54 +113,11 @@ async function createGIFTexture(url) {
   });
 }
 
-/**
- * Create video element to be used as a texture.
- *
- * @param {string} src - Url to a video file.
- * @returns {Element} Video element.
- */
-function createVideoOrAudioEl(type) {
-  const el = document.createElement(type);
-  el.setAttribute("playsinline", "");
-  el.setAttribute("webkit-playsinline", "");
-  // iOS Safari requires the autoplay attribute, or it won't play the video at all.
-  el.autoplay = true;
-  // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
-  // allow the user to unmute it with an interaction in the unmute-video-button component.
-  el.muted = isIOS;
-  el.preload = "auto";
-  el.crossOrigin = "anonymous";
-
-  return el;
-}
-
 function scaleToAspectRatio(el, ratio) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
   el.object3DMap.mesh.matrixNeedsUpdate = true;
-}
-
-function disposeTexture(texture) {
-  if (texture.image instanceof HTMLVideoElement) {
-    const video = texture.image;
-    video.pause();
-    video.src = "";
-    video.load();
-  }
-
-  if (texture.hls) {
-    texture.hls.stopLoad();
-    texture.hls.detachMedia();
-    texture.hls.destroy();
-    texture.hls = null;
-  }
-
-  if (texture.dash) {
-    texture.dash.reset();
-  }
-
-  texture.dispose();
 }
 
 class TextureCache {

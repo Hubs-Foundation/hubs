@@ -422,3 +422,5 @@ AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-dr
 AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, _componentName, componentData) => {
   el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("video-texture-target", "video-texture-target");
