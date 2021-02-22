@@ -4,6 +4,7 @@ import qsTruthy from "../utils/qs_truthy";
 const Vector3 = THREE.Vector3;
 const Vector2 = THREE.Vector2;
 const Face3 = THREE.Face3;
+const Color = THREE.Color;
 
 // TODO this is backported from a later version of THREE.
 // Geometry is going to be dropped from ThreeJS anyway so just copying here for now.
