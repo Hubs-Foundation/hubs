@@ -3,14 +3,16 @@ import { createVideoOrAudioEl } from "../utils/media-utils";
 
 /**
  * @component video-texture-target
- * This compoennt is intended to be used on entities with a mesh/skinned mesh Object3D
+ * This component is intended to be used on entities with a mesh/skinned mesh Object3D
  * The component swaps the base color map on the mesh's material with a video texture
  * Currently the video texture can only be a Webcam stream, but this component could be easily modified
  * to work with normal urls, screensharing, etc.
  */
 AFRAME.registerComponent("video-texture-target", {
   schema: {
-    src: { type: "string" }
+    src: { type: "string" },
+    targetBaseColorMap: { type: "boolean", default: true },
+    targetEmissiveMap: { type: "boolean", default: false }
   },
 
   getMaterial() {
@@ -28,7 +30,8 @@ AFRAME.registerComponent("video-texture-target", {
       console.warn("video-texture-target added to an entity without a material");
     }
 
-    this.originalTexture = material && material.map;
+    this.originalMap = material && material.map;
+    this.originalEmissiveMap = material && material.emissiveMap;
   },
 
   update(prevData) {
@@ -61,15 +64,36 @@ AFRAME.registerComponent("video-texture-target", {
         texture.minFilter = THREE.LinearFilter;
         texture.encoding = THREE.sRGBEncoding;
 
-        material.map = texture;
+        // Copy texture settings from the original texture so that things like texture wrap settings are applied
+        const originalTexture = this.originalMap || this.originalEmissiveMap;
+
+        if (originalTexture) {
+          texture.wrapS = originalTexture.wrapS;
+          texture.wrapT = originalTexture.wrapT;
+        }
+
+        if (this.data.targetBaseColorMap) {
+          material.map = texture;
+        }
+
+        if (this.data.targetEmissiveMap) {
+          material.emissiveMap = texture;
+        }
+
         material.needsUpdate = true;
       });
     } else {
-      if (material.map && material.map !== this.originalTexture) {
+      if (material.map && material.map !== this.originalMap) {
         disposeTexture(material.map);
       }
 
-      material.map = this.originalTexture;
+      if (material.emissiveMap && material.emissiveMap !== this.originalEmissiveMap) {
+        disposeTexture(material.emissiveMap);
+      }
+
+      material.map = this.originalMap;
+      material.emissiveMap = this.originalEmissiveMap;
+
       material.needsUpdate = true;
     }
   },
@@ -77,8 +101,12 @@ AFRAME.registerComponent("video-texture-target", {
   remove() {
     const material = this.getMaterial();
 
-    if (material && material.map && material.map !== this.originalTexture) {
+    if (material && material.map && material.map !== this.originalMap) {
       disposeTexture(material.map);
+    }
+
+    if (material.emissiveMap && material.emissiveMap !== this.originalEmissiveMap) {
+      disposeTexture(material.emissiveMap);
     }
   }
 });
