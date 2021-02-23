@@ -99,17 +99,29 @@ AFRAME.registerComponent("avatar-audio-source", {
   },
 
   async _onStreamUpdated(peerId, kind) {
+    const audio = this.el.getObject3D(this.attrName);
+    if (!audio) return;
+    const stream = audio.source.mediaStream;
+    if (!stream) return;
+
     getOwnerId(this.el).then(async ownerId => {
       if (ownerId === peerId && kind === "audio") {
         // The audio stream for this peer has been updated
-        const stream = await NAF.connection.adapter.getMediaStream(peerId, "audio").catch(e => {
+        const newStream = await NAF.connection.adapter.getMediaStream(peerId, "audio").catch(e => {
           console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
         });
-        const audioListener = this.el.sceneEl.audioListener;
-        const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
-        const mediaStreamSource = audio.context.createMediaStreamSource(stream);
-        audio.setNodeSource(mediaStreamSource);
-        this.el.emit("sound-source-set", { soundSource: mediaStreamSource });
+
+        if (newStream) {
+          const oldAudioTrack = stream.getAudioTracks()[0];
+          const newAudioTrack = newStream.getAudioTracks()[0];
+          if (oldAudioTrack.id !== newAudioTrack.id) {
+            oldAudioTrack.stop();
+            stream.removeTrack(oldAudioTrack);
+            if (audio) {
+              stream.addTrack(newAudioTrack);
+            }
+          }
+        }
       }
     });
   },

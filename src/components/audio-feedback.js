@@ -68,7 +68,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
         this.levels = new Uint8Array(this.analyser.fftSize);
         event.detail.soundSource.connect(this.analyser);
       },
-      { once: false }
+      { once: true }
     );
 
     this.playerSessionId = findAncestorWithComponent(this.el, "player-info").components["player-info"].playerSessionId;
