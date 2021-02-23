@@ -1044,6 +1044,10 @@ export default class DialogAdapter extends EventEmitter {
     });
   }
 
+  get micEnabled() {
+    return this._micEnabled;
+  }
+
   setWebRtcOptions() {
     // Not implemented
   }
