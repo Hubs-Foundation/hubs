@@ -1,6 +1,7 @@
 import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
+import EventEmitter from "eventemitter3";
 
 // NOTE this adapter does not properly fire the onOccupantsReceived events since those are only needed for
 // data channels, which are not yet supported. To fire that event, this class would need to keep a list of
@@ -36,8 +37,10 @@ const DISCONNECT_RETRY_DELAY = 2000;
 
 const isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
 
-export default class DialogAdapter {
+export default class DialogAdapter extends EventEmitter {
   constructor() {
+    super();
+
     this._timeOffsets = [];
     this._occupants = {};
     this._micProducer = null;
@@ -69,7 +72,6 @@ export default class DialogAdapter {
     this._recvTaskId = null;
     this._closed = true;
     this.scene = document.querySelector("a-scene");
-    this._listeners = new Map();
     this._isRecreatingSendTransport = false;
     this._isRecreatingRecvTransport = false;
   }
@@ -148,24 +150,6 @@ export default class DialogAdapter {
     this._onOccupantConnected = openListener;
     this._onOccupantDisconnected = closedListener;
     this._onOccupantMessage = messageListener;
-  }
-
-  // Add an event listener for a peer and an event type
-  addEventListener(peerId, eventType, listener) {
-    if (!this._listeners.has(peerId)) {
-      this._listeners.set(peerId, {
-        [eventType]: listener
-      });
-    } else {
-      this._listeners.get(peerId)[eventType] = listener;
-    }
-  }
-
-  // Removes an event listener for a peer and an event type
-  removeEventListener(peerId, eventType) {
-    if (this._listeners.has(peerId)) {
-      delete this._listeners.get(peerId)[eventType];
-    }
   }
 
   /**
@@ -519,10 +503,8 @@ export default class DialogAdapter {
               }
             }
 
-            // Notify of an stream update event of type (audio/video)
-            if (this._listeners.has(peerId) && this._listeners.get(peerId)[kind]) {
-              this._listeners.get(peerId)[kind].onStreamUpdated(peerId, kind);
-            }
+            // Notify of an stream update event
+            this.emit("stream_updated", peerId, kind);
           } catch (err) {
             this.emitRTCEvent("error", "Adapter", () => `Error: ${err}`);
             error('"newConsumer" request failed:%o', err);
@@ -626,11 +608,6 @@ export default class DialogAdapter {
 
     if (this._onOccupantsChanged) {
       this._onOccupantsChanged(this.occupants);
-    }
-
-    // Remove all the event listeners for the peer
-    if (this._listeners.has(peerId)) {
-      this._listeners.remove(peerId);
     }
   }
 

@@ -94,24 +94,24 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
-    getOwnerId(this.el).then(peerId => {
-      NAF.connection.adapter.addEventListener(peerId, "audio", this);
-    });
+    NAF.connection.adapter.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
   },
 
-  async onStreamUpdated(peerId, kind) {
-    if (kind === "audio") {
-      // The audio stream for this peer has been updated
-      const stream = await NAF.connection.adapter.getMediaStream(peerId, "audio").catch(e => {
-        console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
-      });
-      const audioListener = this.el.sceneEl.audioListener;
-      const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
-      const mediaStreamSource = audio.context.createMediaStreamSource(stream);
-      audio.setNodeSource(mediaStreamSource);
-      this.el.emit("sound-source-set", { soundSource: mediaStreamSource });
-    }
+  async _onStreamUpdated(peerId, kind) {
+    getOwnerId(this.el).then(async ownerId => {
+      if (ownerId === peerId && kind === "audio") {
+        // The audio stream for this peer has been updated
+        const stream = await NAF.connection.adapter.getMediaStream(peerId, "audio").catch(e => {
+          console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
+        });
+        const audioListener = this.el.sceneEl.audioListener;
+        const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
+        const mediaStreamSource = audio.context.createMediaStreamSource(stream);
+        audio.setNodeSource(mediaStreamSource);
+        this.el.emit("sound-source-set", { soundSource: mediaStreamSource });
+      }
+    });
   },
 
   update(oldData) {
@@ -131,9 +131,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   remove: function() {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
-    getOwnerId(this.el).then(peerId => {
-      NAF.connection.adapter.removeEventListener(peerId);
-    });
+    NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
     this.destroyAudio();
   }
 });
