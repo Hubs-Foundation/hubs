@@ -262,7 +262,7 @@ AFRAME.registerComponent("personal-space-invader", {
           // This is generally fine for avatars since a material will only be shared within a glTF model,
           // not across avatars in the room.
           material.opacity = invading ? this.data.invadingOpacity : originalProps.opacity;
-          material.transparent = invading ? true : originalProps.transparent;
+          material.transparent = invading || originalProps.transparent;
         });
       });
     } else {
