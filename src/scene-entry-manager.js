@@ -467,7 +467,7 @@ export default class SceneEntryManager {
           break;
       }
 
-      shareVideoMediaStream(constraints, false, event.detail.target);
+      shareVideoMediaStream(constraints, false, event.detail?.target);
     });
 
     this.scene.addEventListener("action_share_screen", () => {
