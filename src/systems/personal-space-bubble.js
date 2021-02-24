@@ -239,7 +239,7 @@ AFRAME.registerComponent("personal-space-invader", {
     if (this.gltfRootEl && this.gltfRootEl.object3DMap.mesh && !this.alwaysHidden) {
       traverseFilteredSubtrees(this.gltfRootEl.object3DMap.mesh, obj => {
         // Prevents changing the opacity of ui elements
-        if (obj.el && obj.el.components.tags && obj.el.components.tags.data.spaceBubbleIgnore) {
+        if (obj.el && obj.el.components.tags && obj.el.components.tags.data.ignoreSpaceBubble) {
           // Skip all objects under this branch by returning false
           return false;
         }

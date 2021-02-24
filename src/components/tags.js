@@ -20,7 +20,7 @@ AFRAME.registerComponent("tags", {
     isStatic: { default: false },
     inspectable: { default: false },
     preventAudioBoost: { default: false },
-    spaceBubbleIgnore: { default: false }
+    ignoreSpaceBubble: { default: false }
   },
   update() {
     if (this.didUpdateOnce) {
