@@ -137,7 +137,7 @@
                         </template>
 
                         <template data-name="Neck">
-                            <a-entity>
+                            <a-entity tags="spaceBubbleIgnore: true;">
                                 <a-entity
                                     billboard
                                     class="nametag"
@@ -173,7 +173,7 @@
                         </template>
 
                         <template data-name="Spine">
-                            <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
+                            <a-entity tags="spaceBubbleIgnore: true;" is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity class="avatar-inspect-collider" avatar-inspect-collider tags="togglesHoveredActionSet: true;" is-remote-hover-target inspect-button></a-entity>
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
                                 <a-entity class="interactable ui interactable-ui">
