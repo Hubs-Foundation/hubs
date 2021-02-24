@@ -5,7 +5,7 @@ import configs from "../../utils/configs";
 // TODO: We really shouldn't include these dependencies on every page. A dynamic import would work better.
 import jwtDecode from "jwt-decode";
 import AuthChannel from "../../utils/auth-channel";
-import { connectToReticulum, getReticulumFetchUrl } from "../../utils/phoenix-utils";
+import { connectToReticulum, getReticulumFetchUrl, fetchReticulumAuthenticated } from "../../utils/phoenix-utils";
 
 export const AuthContext = createContext();
 
@@ -65,12 +65,7 @@ export function AuthContextProvider({ children, store }) {
       const socket = await connectToReticulum();
       authChannel.setSocket(socket);
       await authChannel.verifyAuthentication(authParams.topic, authParams.token, authParams.payload);
-      await fetch(getReticulumFetchUrl("/api/v1/accounts/set_cookie"), {
-        method: "GET",
-        headers: {
-          authorization: `bearer ${store.state.credentials.token}`
-        }
-      });
+      await fetchReticulumAuthenticated("/api/v1/accounts/set_cookie", "POST");
     },
     [store]
   );
@@ -81,7 +76,7 @@ export function AuthContextProvider({ children, store }) {
       store.update({ credentials: { token: null, email: null } });
       await store.resetToRandomDefaultAvatar();
       await fetch(getReticulumFetchUrl("/api/v1/accounts/expire_cookie"), {
-        method: "GET"
+        method: "POST"
       });
     },
     [store]
