@@ -879,7 +879,7 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   async createMissingConsumers() {
-    await this._protoo.request("getPeers");
+    await this._protoo.request("refreshConsumers");
   }
 
   async _joinRoom() {
