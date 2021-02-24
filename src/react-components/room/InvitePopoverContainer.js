@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import configs from "../../utils/configs";
+import { hubUrl } from "../../utils/phoenix-utils";
 import { InvitePopoverButton } from "./InvitePopover";
 import { handleExitTo2DInterstitial } from "../../utils/vr-interstitial";
 import { useInviteUrl } from "./useInviteUrl";
@@ -9,9 +10,9 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, ...rest }) {
   // TODO: Move to Hub class
   const shortUrl = `https://${configs.SHORTLINK_DOMAIN}`;
   const url = `${shortUrl}/${hub.hub_id}`;
-  const embedUrl = `${location.protocol}//${location.host}${location.pathname}?embed_token=${hub.embed_token}`;
+  const embedUrl = hubUrl(hub.hub_id, { embed_token: hub.embed_token });
   const embedText = `<iframe src="${embedUrl}" style="width: 1024px; height: 768px;" allow="microphone; camera; vr; speaker;"></iframe>`;
-  const code = hub.entry_code.toString();
+  const code = hub.entry_code.toString().padStart(6, "0");
   const popoverApiRef = useRef();
 
   // Handle clicking on the invite button while in VR.

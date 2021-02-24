@@ -6,7 +6,8 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createImageTexture, createBasisTexture } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createBasisTexture, createVideoOrAudioEl } from "../utils/media-utils";
+import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
@@ -112,54 +113,11 @@ async function createGIFTexture(url) {
   });
 }
 
-/**
- * Create video element to be used as a texture.
- *
- * @param {string} src - Url to a video file.
- * @returns {Element} Video element.
- */
-function createVideoOrAudioEl(type) {
-  const el = document.createElement(type);
-  el.setAttribute("playsinline", "");
-  el.setAttribute("webkit-playsinline", "");
-  // iOS Safari requires the autoplay attribute, or it won't play the video at all.
-  el.autoplay = true;
-  // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
-  // allow the user to unmute it with an interaction in the unmute-video-button component.
-  el.muted = isIOS;
-  el.preload = "auto";
-  el.crossOrigin = "anonymous";
-
-  return el;
-}
-
 function scaleToAspectRatio(el, ratio) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
   el.object3DMap.mesh.matrixNeedsUpdate = true;
-}
-
-function disposeTexture(texture) {
-  if (texture.image instanceof HTMLVideoElement) {
-    const video = texture.image;
-    video.pause();
-    video.src = "";
-    video.load();
-  }
-
-  if (texture.hls) {
-    texture.hls.stopLoad();
-    texture.hls.detachMedia();
-    texture.hls.destroy();
-    texture.hls = null;
-  }
-
-  if (texture.dash) {
-    texture.dash.reset();
-  }
-
-  texture.dispose();
 }
 
 class TextureCache {
@@ -299,6 +257,7 @@ AFRAME.registerComponent("media-video", {
       this.snapButton = this.el.querySelector(".video-snap-button");
       this.timeLabel = this.el.querySelector(".video-time-label");
       this.volumeLabel = this.el.querySelector(".video-volume-label");
+      this.linkButton = this.el.querySelector(".video-link-button");
 
       this.playPauseButton.object3D.addEventListener("interact", this.togglePlaying);
       this.seekForwardButton.object3D.addEventListener("interact", this.seekForward);
@@ -858,7 +817,8 @@ AFRAME.registerComponent("media-video", {
   updateHoverMenu() {
     if (!this.hoverMenu) return;
 
-    const pinnableElement = this.el.components["media-loader"].data.linkedEl || this.el;
+    const mediaLoader = this.el.components["media-loader"].data;
+    const pinnableElement = mediaLoader.linkedEl || this.el;
     const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
     this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
     this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
@@ -871,6 +831,8 @@ AFRAME.registerComponent("media-video", {
       !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
 
     this.playPauseButton.object3D.visible = this.seekForwardButton.object3D.visible = this.seekBackButton.object3D.visible = mayModifyPlayHead;
+
+    this.linkButton.object3D.visible = !!mediaLoader.mediaOptions.href;
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");
