@@ -31,11 +31,7 @@ const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
 };
 
-const ICE_RECONNECT_INTERVAL = 2000;
 const INITIAL_ROOM_RECONNECTION_INTERVAL = 2000;
-const DISCONNECT_RETRY_DELAY = 2000;
-
-const isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
 
 export default class DialogAdapter extends EventEmitter {
   constructor() {
@@ -61,19 +57,13 @@ export default class DialogAdapter extends EventEmitter {
     this._forceTcp = false;
     this._forceTurn = false;
     this._iceTransportPolicy = "all";
-    this._iceReconnectSendTaskId = null;
-    this._iceReconnectRecvTaskId = null;
     this._reconnectionDelay = INITIAL_ROOM_RECONNECTION_INTERVAL;
     this._reconnectionTimeout = null;
     this._reconnectionAttempts = 0;
     this._lastSendConnectionState = null;
     this._lastRecvConnectionState = null;
-    this._sendTaskId = null;
-    this._recvTaskId = null;
     this._closed = true;
     this.scene = document.querySelector("a-scene");
-    this._isRecreatingSendTransport = false;
-    this._isRecreatingRecvTransport = false;
   }
 
   get serverUrl() {
@@ -198,20 +188,6 @@ export default class DialogAdapter extends EventEmitter {
     }
   }
 
-  /**
-   * This applies to the ICE restart method below.
-   * Why do we need new ICE servers? In case the ICE fails we need to re-negotiate new candidates
-   * but most likely our TURN credentials have expired so we need to request new credentials and
-   * update the TURN servers to be able to gather new candidates.
-   * Firefox doesn't support hot updating ICE servers through mediasoup's updateIceServers (which
-   * internally uses setConfiguration):
-   * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/setConfiguration
-   * So we recreate the transports/consumer/producers through reconnect to force setting
-   * new ICE servers for both send and receive transports.
-   * If we are not using TURN at all we can just restart ICE in any navigator
-   * and avoid the server refresh part.
-   */
-
   async iceRestart(transport) {
     // Force an ICE restart to gather new candidates and trigger a reconnection
     this.emitRTCEvent(
@@ -221,19 +197,6 @@ export default class DialogAdapter extends EventEmitter {
     );
     const iceParameters = await this._protoo.request("restartIce", { transportId: transport.id });
     await transport.restartIce({ iceParameters });
-  }
-
-  async tryIceRestart(transport) {
-    // FF automatically attempts to connect after a disconnect but that doesn't happen in Chome/Safari so we retry after 2 secs
-    if (!isFirefox && transport.connectionState === "disconnected") {
-      setTimeout(async () => {
-        if (transport.connectionState === "disconnected") {
-          await this.iceRestart(transport);
-        }
-      }, DISCONNECT_RETRY_DELAY);
-    } else {
-      await this.iceRestart(transport);
-    }
   }
 
   async recreateSendTransport(iceServers) {
@@ -247,41 +210,20 @@ export default class DialogAdapter extends EventEmitter {
    */
   async restartSendICE(force = true) {
     // Do not restart ICE if Signaling is disconnected. We are not in the meeting room if that's the case.
-    if (this._closed || this._isRecreatingSendTransport) {
+    if (this._closed) {
       return;
     }
 
-    this._isRecreatingSendTransport = true;
     try {
       if (!this._sendTransport?._closed) {
         // Renegotiate ICE in case ICE state is "failed".
-        // Chrome note: Chrome doesn't seem to automatically reconnect after a "disconnected" so
-        // we renegotiate in that case.
-        // This can be tested taking down the network connection or the TURN server if using TURN, Chrome
-        // recovers fine from the former but not the later.
         // We also try to renegotiate in case we got stuck in a new state after an ICE failure.
         if (
           force ||
           this._sendTransport.connectionState === "failed" ||
-          (!isFirefox && this._sendTransport.connectionState === "disconnected") ||
           (this._sendTransport.connectionState === "new" && this._lastSendConnectionState === "failed")
         ) {
-          if (this._forceTurn || this._forceTcp) {
-            // In casen case we are using the TURN server we need to update the ICE servers as the credentials have probably expired
-            const { host, port, turn } = await window.APP.hubChannel.getHost();
-            const iceServers = this.getIceServers(host, port, turn);
-            if (isFirefox) {
-              // FF doesn't support hot updating the ICE servers so we need to recreate
-              await this.recreateSendTransport(iceServers);
-            } else {
-              // For other browsers we can just update them preserving the current transport
-              await this._sendTransport.updateIceServers({ iceServers });
-              await this.tryIceRestart(this._sendTransport);
-            }
-          } else {
-            // If we are using STUN, we can just restart ICE
-            await this.tryIceRestart(this._sendTransport);
-          }
+          await this.iceRestart(this._sendTransport);
         }
       } else {
         // If the transport is closed but the signaling is connected, we try to recreate
@@ -292,43 +234,20 @@ export default class DialogAdapter extends EventEmitter {
     } catch (err) {
       this.emitRTCEvent("error", "RTC", () => `Send transport [recreate] failed: ${err}`);
     }
-    this._isRecreatingSendTransport = false;
   }
 
   /**
-   * Checks the Send Transport ICE status and restarts it in case is in failed or disconnected states.
+   * Checks the Send Transport ICE status and restarts it in case is in failed state.
    * This is called by the Send Transport "connectionstatechange" event listener.
    * @param {boolean} connectionState The transport connnection state (ICE connection state)
    */
   checkSendIceStatus(connectionState) {
-    // If the ICE connection state is failed or disconnected, we force an ICE restart
-    if (connectionState === "failed" || connectionState === "disconnected") {
+    // If the ICE connection state is failed, we force an ICE restart
+    if (connectionState === "failed") {
       this.restartSendICE(false);
-    } else if (connectionState === "connected") {
-      this._iceReconnectSendTaskId && clearTimeout(this._iceReconnectSendTaskId);
-      this._iceReconnectSendTaskId = null;
     }
 
     this._lastSendConnectionState = connectionState;
-  }
-
-  /**
-   * Starts a watchdog to monitorize the state of the Send Transport ICE connection state.
-   */
-  startSendIceConnectionStateWd() {
-    if (!this._sendTaskId) {
-      this._sendTaskId = setInterval(() => {
-        this.restartSendICE(false);
-      }, ICE_RECONNECT_INTERVAL);
-    }
-  }
-
-  /**
-   * Stops the Send Transport ICE connection state watchdog.
-   */
-  stopSendIceConnectionStateWd() {
-    this._sendTaskId && clearInterval(this._sendTaskId);
-    this._sendTaskId = null;
   }
 
   async recreateRecvTransport(iceServers) {
@@ -344,41 +263,21 @@ export default class DialogAdapter extends EventEmitter {
    */
   async restartRecvICE(force = true) {
     // Do not restart ICE if Signaling is disconnected. We are not in the meeting room if that's the case.
-    if (this._closed || this._isRecreatingRecvTransport) {
+    if (this._closed) {
       return;
     }
 
-    this._isRecreatingRecvTransport = true;
     try {
       if (!this._recvTransport?._closed) {
         // Renegotiate ICE in case ICE state is "failed".
-        // Chrome note: Chrome doesn't seem to automatically reconnect after a "disconnected" so
-        // we renegotiate in that case.
-        // This can be tested taking down the network connection or the TURN server if using TURN, Chrome
-        // recovers fine from the former but not the later.
         // We also try to renegotiate in case we got stuck in a new state after an ICE failure.
         if (
           force ||
           this._recvTransport.connectionState === "failed" ||
-          (!isFirefox && this._recvTransport.connectionState === "disconnected") ||
           (this._recvTransport.connectionState === "new" && this._lastRecvConnectionState === "failed")
         ) {
-          if (this._forceTurn || this._forceTcp) {
-            // In casen case we are using the TURN server we need to update the ICE servers as the credentials have probably expired
-            const { host, port, turn } = await window.APP.hubChannel.getHost();
-            const iceServers = this.getIceServers(host, port, turn);
-            if (isFirefox) {
-              // FF doesn't support hot updating the ICE servers so we need to recreate
-              await this.recreateRecvTransport(iceServers);
-            } else {
-              // For other browsers we can just update them preserving the current transport
-              await this._recvTransport.updateIceServers({ iceServers });
-              await this.tryIceRestart(this._recvTransport);
-            }
-          } else {
-            // If we are using STUN, we can just restart ICE.
-            await this.tryIceRestart(this._recvTransport);
-          }
+          // If the transport is closed but the signaling is connected, we try to recreate
+          await this.iceRestart(this._recvTransport);
         }
       } else {
         // If the transport is closed but the signaling is connected, we try to recreate
@@ -389,43 +288,20 @@ export default class DialogAdapter extends EventEmitter {
     } catch (err) {
       this.emitRTCEvent("error", "RTC", () => `Receive transport [recreate] failed: ${err}`);
     }
-    this._isRecreatingRecvTransport = false;
   }
 
   /**
-   * Checks the ReeceiveReeceive Transport ICE status and restarts it in case is in failed or disconnected states.
+   * Checks the ReeceiveReeceive Transport ICE status and restarts it in case is in failed state.
    * This is called by the Reeceive Transport "connectionstatechange" event listener.
    * @param {boolean} connectionState The transport connection state (ICE connection state)
    */
   checkRecvIceStatus(connectionState) {
-    // If the ICE connection state is failed or disconnected, we force an ICE restart
-    if (connectionState === "failed" || connectionState === "disconnected") {
+    // If the ICE connection state is failed, we force an ICE restart
+    if (connectionState === "failed") {
       this.restartRecvICE(false);
-    } else if (connectionState === "connected") {
-      this._iceReconnectRecvTaskId && clearTimeout(this._iceReconnectRecvTaskId);
-      this._iceReconnectRecvTaskId = null;
     }
 
     this._lastRecvConnectionState = connectionState;
-  }
-
-  /**
-   * Starts a watchdog to monitorize the state of the Receive Transport ICE connection state.
-   */
-  startRecvIceConnectionStateWd() {
-    if (!this._recvTaskId) {
-      this._recvTaskId = setInterval(() => {
-        this.restartRecvICE(false);
-      }, ICE_RECONNECT_INTERVAL);
-    }
-  }
-
-  /**
-   * Stops the Receive Transport ICE connection state watchdog.
-   */
-  stopRecvIceConnectionStateWd() {
-    this._recvTaskId && clearInterval(this._recvTaskId);
-    this._recvTaskId = null;
   }
 
   async connect() {
@@ -933,10 +809,6 @@ export default class DialogAdapter extends EventEmitter {
         this._reconnectionTimeout = setTimeout(() => this.reconnect(), this._reconnectionDelay);
       }
     }
-
-    // Start the ICE connection state watchdogs
-    this.startSendIceConnectionStateWd();
-    this.startRecvIceConnectionStateWd();
   }
 
   setLocalMediaStream(stream) {
@@ -1084,10 +956,6 @@ export default class DialogAdapter extends EventEmitter {
     // Close mediasoup Transports.
     this.closeSendTransport();
     this.closeRecvTransport();
-
-    // Stop the ICE connection state watchdogs.
-    this.stopSendIceConnectionStateWd();
-    this.stopRecvIceConnectionStateWd();
 
     this._lastRecvConnectionState = null;
     this._lastSendConnectionState = null;
