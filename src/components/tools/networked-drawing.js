@@ -111,7 +111,7 @@ AFRAME.registerComponent("networked-drawing", {
   },
 
   play() {
-    AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.registerDrawingMenu(this.el);
+    this.el.sceneEl.systems["hubs-systems"].drawingMenuSystem.registerDrawingMenu(this.el);
   },
 
   remove() {
@@ -124,7 +124,7 @@ AFRAME.registerComponent("networked-drawing", {
     const drawingManager = this.el.sceneEl.querySelector("#drawing-manager").components["drawing-manager"];
     drawingManager.destroyDrawing(this);
 
-    AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.unregisterDrawingMenu(this.el);
+    this.el.sceneEl.systems["hubs-systems"].drawingMenuSystem.unregisterDrawingMenu(this.el);
   },
 
   tick(t) {
