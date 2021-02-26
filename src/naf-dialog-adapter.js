@@ -68,7 +68,6 @@ export default class DialogAdapter {
     this._recvTaskId = null;
     this._closed = true;
     this.scene = document.querySelector("a-scene");
-    this._webcams = {}; // { [consumerId]: {stream,order}, ["mine"]: {}}
   }
 
   get serverUrl() {
@@ -406,25 +405,13 @@ export default class DialogAdapter {
             consumer.on("transportclose", () => {
               this.emitRTCEvent("error", "RTC", () => `Consumer transport closed`);
               this.removeConsumer(consumer.id);
-              this.removeWebcam(consumer.id);
-
-              console.log("NAF dialog adapter.js request(): transportclosed");
-              // console.log("producerId: " + producerId);
-              // console.log("consumer.id: " + consumer.id);
-              // console.log("peerId: " + peerId);
             });
 
             // We are ready. Answer the protoo request so the server will
             // resume this Consumer (which was paused for now if video).
             accept();
 
-            // this.resolvePendingMediaRequestForTrack(peerId, consumer.track);
-
-            this.resolvePendingMediaRequestForTrack(peerId, consumer.track, consumer.id);
-
-            if (kind === "video") {
-              console.log("Is video stream");
-            }
+            this.resolvePendingMediaRequestForTrack(peerId, consumer.track);
 
             if (kind === "audio") {
               const initialAudioResolver = this._initialAudioConsumerResolvers.get(peerId);
@@ -509,7 +496,6 @@ export default class DialogAdapter {
 
           consumer.close();
           this.removeConsumer(consumer.id);
-          this.removeWebcam(consumer.id);
 
           break;
         }
@@ -533,46 +519,6 @@ export default class DialogAdapter {
     await Promise.all([this.updateTimeOffset(), this._initialAudioConsumerPromise]);
   }
 
-  removeWebcam(consumerId) {
-    console.log("removeWebCam()");
-    console.log("removeWebCam() consumerId: " + consumerId);
-    // const video = document.getElementById("webcam-feed-" + consumerId);
-    // console.log(video);
-    const webcam = this._webcams[consumerId];
-    if (webcam) {
-      delete this._webcams[consumerId];
-    } else {
-      // doesn't exist
-      console.error("The consumerId doesnt exist to delete webcam");
-    }
-    this.scene.emit("webcams-changed");
-    // if (video) {
-    //   console.log("video exists");
-    //   console.log(video);
-    //   video.remove();
-    // }
-  }
-
-  removeMyWebcam() {
-    console.log("removeMyWebCam()");
-    this.removeWebcam("mine");
-  }
-
-  addWebcam(consumerId, stream) {
-    // consumerId | mine
-    // consumerId or mine
-    console.log("addWebcam()");
-    console.log("clientId: " + consumerId);
-    const webcam = this._webcams[consumerId];
-    if (!webcam) {
-      this._webcams[consumerId] = { consumerId, stream, order: -1 };
-    } else {
-      // exists
-      this._webcams[consumerId].stream = stream;
-    }
-    this.scene.emit("webcams-changed");
-  }
-
   shouldStartConnectionTo() {
     return true;
   }
@@ -580,22 +526,13 @@ export default class DialogAdapter {
 
   closeStreamConnection() {}
 
-  resolvePendingMediaRequestForTrack(clientId, track, consumerId) {
+  resolvePendingMediaRequestForTrack(clientId, track) {
     const requests = this._pendingMediaRequests.get(clientId);
 
     if (requests && requests[track.kind]) {
       const resolve = requests[track.kind].resolve;
       delete requests[track.kind];
-      // resolve(new MediaStream([track]));
-      const stream = new MediaStream([track]);
-
-      if (track.kind === "video") {
-        console.log(2);
-        // this.addWebcam(clientId, stream);
-        if (consumerId === undefined) this.addWebcam("mine", stream);
-        else this.addWebcam(consumerId, stream);
-      }
-      resolve(stream);
+      resolve(new MediaStream([track]));
     }
 
     if (requests && Object.keys(requests).length === 0) {

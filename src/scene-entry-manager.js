@@ -509,7 +509,6 @@ export default class SceneEntryManager {
 
       await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
-      NAF.connection.adapter.removeMyWebcam();
 
       this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: false });
       this.scene.emit("share_video_disabled");
