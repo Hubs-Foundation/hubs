@@ -4,6 +4,7 @@ import classNames from "classnames";
 import copy from "copy-to-clipboard";
 import { FormattedMessage } from "react-intl";
 import screenfull from "screenfull";
+import { FloatingShareVideo } from "./room/FloatingShareVideo";
 
 import configs from "../utils/configs";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
@@ -1587,6 +1588,7 @@ class UIRoot extends Component {
               />
             )}
           </div>
+          <FloatingShareVideo scene={this.props.scene} />
         </ReactAudioContext.Provider>
       </MoreMenuContextProvider>
     );
