@@ -68,6 +68,7 @@ export default class DialogAdapter {
     this._recvTaskId = null;
     this._closed = true;
     this.scene = document.querySelector("a-scene");
+    this._webcams = {}; // { [consumerId]: {stream,order}, ["mine"]: {}}
   }
 
   get serverUrl() {
@@ -408,19 +409,19 @@ export default class DialogAdapter {
               this.removeWebcam(consumer.id);
 
               console.log("NAF dialog adapter.js request(): transportclosed");
-              console.log("producerId: " + producerId);
-              console.log("consumer.id: " + consumer.id);
-              console.log("peerId: " + peerId);
+              // console.log("producerId: " + producerId);
+              // console.log("consumer.id: " + consumer.id);
+              // console.log("peerId: " + peerId);
             });
 
             // We are ready. Answer the protoo request so the server will
             // resume this Consumer (which was paused for now if video).
             accept();
 
-            console.log("case newConsumer");
-            console.log("producerId: " + producerId);
-            console.log("consumer.id: " + consumer.id);
-            console.log("peerId: " + peerId);
+            // console.log("case newConsumer");
+            // console.log("producerId: " + producerId);
+            // console.log("consumer.id: " + consumer.id);
+            // console.log("peerId: " + peerId);
 
             this.resolvePendingMediaRequestForTrack(peerId, consumer.track, consumer.id);
 
@@ -506,21 +507,10 @@ export default class DialogAdapter {
         }
 
         case "consumerClosed": {
-          const { consumerId, peerId } = notification.data;
-          console.log("consumerClosed()");
-          console.log("notification.data: ");
-          console.log(notification.data);
+          const { consumerId } = notification.data;
 
           const consumer = this._consumers.get(consumerId);
 
-          if (!consumer) {
-            this.removeMyWebcam();
-            break;
-          }
-
-          console.log("consumer.id: " + consumer.id);
-          console.log("consumer.id: " + consumerId);
-          console.log("peerId: " + peerId);
           consumer.close();
           this.removeConsumer(consumer.id);
           this.removeWebcam(consumer.id);
@@ -550,45 +540,43 @@ export default class DialogAdapter {
   removeWebcam(consumerId) {
     console.log("removeWebCam()");
     console.log("removeWebCam() consumerId: " + consumerId);
-    // const peerId = this.getPeerId(consumerId);
-    // console.log("removeWebCam() peerid: " + peerId);
-    const video = document.getElementById("webcam-feed-" + consumerId);
-    console.log(video);
-    if (video) {
-      console.log("video exists");
-      console.log(video);
-      video.remove();
+    // const video = document.getElementById("webcam-feed-" + consumerId);
+    // console.log(video);
+    const webcam = this._webcams[consumerId];
+    if (webcam) {
+      delete this._webcams[consumerId];
+    } else {
+      // doesn't exist
+      console.error("The consumerId doesnt exist to delete webcam");
     }
-  }
-
-  getPeerId(consumerId) {
-    console.log("getPeerId(): " + consumerId);
-    const consumer = this._consumers.get(consumerId);
-    console.log("peerIdl: " + consumer.appData.peerId);
-    return consumer.appData.peerId;
+    this.scene.emit("webcams-changed");
+    // if (video) {
+    //   console.log("video exists");
+    //   console.log(video);
+    //   video.remove();
+    // }
   }
 
   removeMyWebcam() {
-    // TODO not used
     console.log("removeMyWebCam()");
-    // this.removeWebcam(this._clientId);
     this.removeWebcam("mine");
   }
 
-  addWebcam(clientId, stream) {
+  addWebcam(consumerId, stream) {
+    // consumerId | mine
+    // consumerId or mine
     console.log("addWebcam()");
-    console.log("clientId: " + clientId);
-    let videoElem = document.getElementById("webcam-feed-" + clientId);
-    if (!videoElem) {
-      const videoContainer = document.getElementById("video-container");
-      videoElem = document.createElement("video");
-      videoElem.classList.add("video");
-      videoContainer.append(videoElem);
-      videoElem.id = "webcam-feed-" + clientId;
+    console.log("clientId: " + consumerId);
+    const webcam = this._webcams[consumerId];
+    if (!webcam) {
+      this._webcams[consumerId] = { consumerId, stream, order: -1 };
+    } else {
+      // exists
+      this._webcams[consumerId].stream = stream;
     }
-    videoElem.srcObject = stream;
-    videoElem.play();
+    this.scene.emit("webcams-changed");
   }
+
   shouldStartConnectionTo() {
     return true;
   }
@@ -599,20 +587,20 @@ export default class DialogAdapter {
   resolvePendingMediaRequestForTrack(clientId, track, consumerId) {
     const requests = this._pendingMediaRequests.get(clientId);
     console.log("resolvePendingMediaRequestForTrack()");
+    console.log(0);
 
     if (requests && requests[track.kind]) {
+      console.log(1);
       const resolve = requests[track.kind].resolve;
       delete requests[track.kind];
 
       const stream = new MediaStream([track]);
 
       if (track.kind === "video") {
+        console.log(2);
         // this.addWebcam(clientId, stream);
-        if (consumerId === undefined) {
-          stream.onremovetrack = () => console.log("action_end_video_sharing");
-          this.addWebcam("mine", stream);
-          this._sendTransport.on("action_end_video_sharing", () => console.log("action_end_video_sharing"));
-        } else this.addWebcam(consumerId, stream);
+        if (consumerId === undefined) this.addWebcam("mine", stream);
+        else this.addWebcam(consumerId, stream);
       }
       resolve(stream);
     }
@@ -955,7 +943,6 @@ export default class DialogAdapter {
 
           this._videoProducer.on("transportclose", () => {
             console.log("transportclose my _videoProducer");
-            this.removeMyWebcam();
             this.emitRTCEvent("info", "RTC", () => `Video transport closed`);
             this._videoProducer = null;
           });

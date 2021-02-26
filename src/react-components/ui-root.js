@@ -94,6 +94,7 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
+import { FloatingShareVideo } from "./room/FloatingShareVideo";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1586,23 +1587,7 @@ class UIRoot extends Component {
               }
             />
           </div>
-          <div id="video-container" />
-          <style>
-            {`
-            #video-container {
-              display: flex;
-              flex-wrap: wrap;
-              width: 800px;
-              position: absolute;
-              top: 0;
-              left: 0;
-            }
-            .video {
-              width: 200px;
-              object-fit: cover;
-            }
-            `}
-          </style>
+          <FloatingShareVideo scene={this.props.scene} />
         </ReactAudioContext.Provider>
       </MoreMenuContextProvider>
     );
