@@ -88,15 +88,19 @@ class SceneUI extends Component {
       tweetText
     )}`;
 
-    const unknownAuthor = intl.formatMessage({ id: "scene-page.unknown-author", defaultMessage: "unknown" });
+    const unknown = intl.formatMessage({ id: "scene-page.unknown", defaultMessage: "unknown" });
 
     let attributions;
 
     const toAttributionSpan = ({ title, name, url, author, remix }) => {
       let source = "";
 
-      const _name = name || title;
-      const _author = author || unknownAuthor;
+      if (!author && !url) {
+        return null;
+      }
+
+      const _name = name || title || unknown;
+      const _author = author || unknown;
 
       if (url) {
         if (url.includes("sketchfab.com")) {
@@ -180,7 +184,7 @@ class SceneUI extends Component {
                 <FormattedMessage
                   id="scene-page.scene-attribution"
                   defaultMessage="by {creator}"
-                  values={{ creator: this.props.sceneAttributions.creator || unknownAuthor }}
+                  values={{ creator: this.props.sceneAttributions.creator || unknown }}
                 />
               ) : (
                 ""
@@ -196,7 +200,9 @@ class SceneUI extends Component {
                 remix: true
               })}
             <br />
-            {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
+            <div className={styles.attribution}>
+              {this.props.sceneAttributions.content && this.props.sceneAttributions.content.map(toAttributionSpan)}
+            </div>
           </span>
         );
       } else {

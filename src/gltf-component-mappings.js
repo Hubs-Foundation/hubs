@@ -1,3 +1,4 @@
+import { sanitizeUrl } from "@braintree/sanitize-url";
 import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
@@ -70,7 +71,7 @@ AFRAME.GLTFModelPlus.registerComponent("directional-light", "directional-light")
 AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
 AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
 AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
-
+AFRAME.GLTFModelPlus.registerComponent("billboard", "billboard");
 AFRAME.GLTFModelPlus.registerComponent("simple-water", "simple-water");
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
@@ -178,7 +179,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
   }
 
   const mediaLoaderAttributes = {
-    src: componentData.src,
+    src: sanitizeUrl(componentData.src),
     fitToBox: componentData.contentSubtype ? false : true,
     resolve: true,
     fileIsOwned: true,
@@ -209,11 +210,17 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
 async function mediaInflator(el, componentName, componentData, components) {
   let isControlled = true;
 
+  if (componentName === "link" && (components.video || components.image)) {
+    // video/image component will set link url specified in link component.
+    return;
+  }
+
   if (components.networked) {
     isControlled = componentData.controls || componentName === "link";
 
     const hasVolume = componentName === "video" || componentName === "audio";
-    const templateName = isControlled || hasVolume ? "#static-controlled-media" : "#static-media";
+    const templateName =
+      componentName === "model" || isControlled || hasVolume ? "#static-controlled-media" : "#static-media";
 
     el.setAttribute("networked", {
       template: templateName,
@@ -251,18 +258,24 @@ async function mediaInflator(el, componentName, componentData, components) {
     el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
   }
 
+  if ((componentName === "video" || componentName === "image") && components.link) {
+    mediaOptions.href = sanitizeUrl(components.link.href);
+  }
+
   const src = componentName === "link" ? componentData.href : componentData.src;
 
   el.setAttribute("media-loader", {
-    src,
+    src: sanitizeUrl(src),
     fitToBox: true,
     resolve: true,
     fileIsOwned: true,
     animate: false,
-    mediaOptions
+    mediaOptions,
+    moveTheParentNotTheMesh: true
   });
 }
 
+AFRAME.GLTFModelPlus.registerComponent("model", "model", mediaInflator);
 AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
 AFRAME.GLTFModelPlus.registerComponent("audio", "audio", mediaInflator, (name, property, value) => {
   if (property === "paused") {
@@ -287,7 +300,7 @@ AFRAME.GLTFModelPlus.registerComponent("hoverable", "is-remote-hover-target", el
 
 AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName, componentData) => {
   el.setAttribute("media-loader", {
-    src: componentData.src,
+    src: sanitizeUrl(componentData.src),
     resolve: true,
     fileIsOwned: true,
     animate: false,
@@ -295,7 +308,7 @@ AFRAME.GLTFModelPlus.registerComponent("spawner", "spawner", (el, componentName,
   });
   el.setAttribute("css-class", "interactable");
   el.setAttribute("super-spawner", {
-    src: componentData.src,
+    src: sanitizeUrl(componentData.src),
     resolve: true,
     template: "#interactable-media",
     mediaOptions: componentData.mediaOptions || {}
@@ -409,3 +422,5 @@ AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-dr
 AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, _componentName, componentData) => {
   el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("video-texture-target", "video-texture-target");

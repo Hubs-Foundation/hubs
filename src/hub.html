@@ -137,7 +137,7 @@
                         </template>
 
                         <template data-name="Neck">
-                            <a-entity>
+                            <a-entity tags="ignoreSpaceBubble: true;">
                                 <a-entity
                                     billboard
                                     class="nametag"
@@ -174,9 +174,9 @@
 
                         <template data-name="Spine">
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
-                                <a-entity class="avatar-inspect-collider" avatar-inspect-collider tags="togglesHoveredActionSet: true;" is-remote-hover-target inspect-button></a-entity>
+                                <a-entity class="avatar-inspect-collider" avatar-inspect-collider tags="togglesHoveredActionSet: true; ignoreSpaceBubble: true;" is-remote-hover-target inspect-button></a-entity>
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
-                                <a-entity class="interactable ui interactable-ui">
+                                <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui">
                                     <a-entity billboard class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
                                         <a-entity class="avatar-volume-label" text="value: 0%; anchor: center; align: center; color: #ff3464; letterSpacing: 4; width:1.5;" text-raycast-hack position="0.0 0.675 0.35" scale="1.25 1.25 1.25"></a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.675 0.35" class="avatar-volume-down-button">
@@ -907,6 +907,9 @@
                             visible="false"
                         ></a-entity>
                     </a-entity>
+                    <a-entity class="ui video-link-button" visible="false" mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button scale="0.8 0.8 0.8" position="0 -0.300 0.001">
+                        <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                    </a-entity>
                 </a-entity>
             </template>
 
@@ -932,12 +935,7 @@
 
             <template id="link-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
-                    <a-entity mixin="rounded-text-button ui"
-                    is-remote-hover-target tags="singleActionButton: true;
-                    isHoverMenuChild: true;" scale="0.8 0.8 0.8" refresh-media-button position="0 0.125 0.001">
-                        <a-entity text="value:refresh; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                    </a-entity>
-                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 -0.125 0.001">
+                    <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 0 0.001">
                         <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
                 </a-entity>

@@ -109,7 +109,6 @@ import "./components/replay";
 import "./components/visibility-by-path";
 import "./components/tags";
 import "./components/hubs-text";
-import "./components/billboard";
 import "./components/periodic-full-syncs";
 import "./components/inspect-button";
 import "./components/inspect-pivot-child-selector";
@@ -117,6 +116,7 @@ import "./components/inspect-pivot-offset-from-camera";
 import "./components/optional-alternative-to-not-hide";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
+import "./components/video-texture-target";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -989,7 +989,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   availableVREntryTypesPromise.then(async availableVREntryTypes => {
     if (isMobileVR) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "vr", checkingForDeviceAvailability: false });
+      remountUI({
+        availableVREntryTypes,
+        forcedVREntryType: qsVREntryType || "vr",
+        checkingForDeviceAvailability: false
+      });
 
       if (/Oculus/.test(navigator.userAgent) && "getVRDisplays" in navigator) {
         // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of
