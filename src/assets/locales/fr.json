@@ -150,7 +150,7 @@
   "header.sign-out": "Se déconnecter",
   "header.signed-in-as": "Connecté en tant que {email}",
   "header.source": "Source",
-  "home-page.add-to-discord": "Ajouter le bot de {appName} à Discord",
+  "home-page.add-to-discord": "Ajouter le bot {appName} à Discord",
   "home-page.communicate-blurb": "Choisissez un avatar qui vous représente, mettez votre casque audio, et franchissez le pas. Hubs rend facile la connexion avec les autres personnes par la voix, le chat dans votre salle privée.",
   "home-page.communicate-title": "Communiquez naturellement",
   "home-page.favorite-rooms": "Salles Favorites",
