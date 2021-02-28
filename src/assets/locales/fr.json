@@ -11,7 +11,7 @@
   "avatar-editor.delist-avatar-button": "Retirer l'avatar de la liste",
   "avatar-editor.delist-avatar-info": "Les autres utilisateurs utilisant déjà cet avatar pourront encore l'utiliser, mais il sera supprimé de 'Mes avatars' ainsi que des résultats de recherche.",
   "avatar-editor.external-editor-info": "Créer un costume personnalisé pour cet avatar:",
-  "avatar-editor.field.alllow-remixing": "Autoriser les autres utilisateurs à éditer et re-publlier votre avatar tant qu'ils vous créditent.",
+  "avatar-editor.field.alllow-remixing": "Autoriser les autres utilisateurs à éditer et re-publier votre avatar à condition de vous mentionner en crédits.",
   "avatar-editor.field.allow-promotion": "Autoriser {companyName} à promouvoir votre avatar et le montrer dans les résultats de recherche.",
   "avatar-editor.field.allow-promotion-checkbox": "Autoriser <a>Promotion</a>",
   "avatar-editor.field.allow-remixing-checkbox": "Autoriser le <a>Remixing</a> <license>(sous <licenselink>CC-BY 3.0</licenselink>)</license>",
