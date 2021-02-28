@@ -211,7 +211,7 @@
   "media-browser.add_custom_scene": "Custom Scene",
   "media-browser.create-avatar": "Créer un Avatar",
   "media-browser.create-scene": "Créer une scène avec {editorName}",
-  "media-browser.empty.default": "Aucun résultat. Essayer en entrant une nouvelle recherche au dessus.",
+  "media-browser.empty.default": "Aucun résultat. Essayez de faire une nouvelle recherche.",
   "media-browser.empty.favorites": "Vous n'avez pas de favoris. Cliquer sur ⭐ pour ajouter à vos favoris.",
   "media-browser.favorites-header": "Favorite Rooms",
   "media-browser.nav_title.avatars": "Avatars",
