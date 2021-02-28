@@ -195,7 +195,7 @@
   "legal-message.tos": "En procédant, vous acceptez les <toslink>conditions d'utilisation</toslink>.",
   "legal-message.tos-and-privacy": "En procédant, vous acceptez les <toslink>conditions d'utilisation</toslink> et les <privacylink>règles concernant la vie privée</privacylink>.",
   "link-page.create-room-button": "Créer une nouvelle salle",
-  "link-page.enter-code": "Entrer le code:",
+  "link-page.enter-code": "Entrer le code :",
   "link-page.logo-alt": "Logo",
   "link-page.toggle-mode-button": "Vous avez un code avec des lettres?",
   "link-page.try-again": "Nous n'avons pas pu trouver ce code.{linebreak}Merci de réessayer.",
