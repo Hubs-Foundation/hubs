@@ -101,7 +101,7 @@
   "create-room-dialog.room-name-placeholder": "Nom de la Salle",
   "create-room-dialog.room-name-requirements": "Les noms doivent faire au plus 64 caractères.",
   "create-room-dialog.scene-and-name-prompt": "Choisissez un nom et une URL GLTF pour la scène de votre salle:",
-  "create-room-dialog.scene-url-placeholder": "URL vers la Scene GLTF ou GLB (Optional)",
+  "create-room-dialog.scene-url-placeholder": "URL vers la Scene GLTF ou GLB (Optionel)",
   "create-room-dialog.title": "Créer une Salle",
   "discord-page.community-link": "Hubs Discord",
   "discord-page.hubs-cta": "Essayer Hubs",
