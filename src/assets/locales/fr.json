@@ -39,7 +39,7 @@
   "avatar-page.logo": "Logo",
   "avatar-page.select": "Selectionner",
   "avatar-page.selected": "Votre avatar actuel",
-  "avatar-preview.loading-failed": "Le chargement a échoué{linebreak}Choisissez un autre avatar svp",
+  "avatar-preview.loading-failed": "Le chargement a échoué{linebreak}Merci de choisir un autre avatar",
   "avatar-settings-content.change-avatar-button": "Changer d'Avatar",
   "avatar-settings-content.display-name-description": "Caractères alphanumériques et tirets. Au moins 3 caractères, pas plus que 32",
   "avatar-settings-content.display-name-label": "Nom affiché",
