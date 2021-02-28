@@ -67,7 +67,7 @@
   "chat-sidebar.log-message.capture-unavailable": "La capture est indisponible.",
   "chat-sidebar.log-message.fly-mode-disabled": "Mode déplacement en volant désactivé.",
   "chat-sidebar.log-message.fly-mode-enabled": "Mode déplacement en volant activé.",
-  "chat-sidebar.log-message.invalid-audio-normalization-range": "la commande audioNormalization nécessite un volume de base entre 0 [aucune normalisation] et 255. 0 par défaut. La valeur recommandée est 4, si vous souhaiteriez activer la normalisation.",
+  "chat-sidebar.log-message.invalid-audio-normalization-range": "la commande audioNormalization nécessite un volume de base entre 0 [aucune normalisation] et 255. 0 par défaut. La valeur recommandée est 4, si vous souhaitez activer la normalisation.",
   "chat-sidebar.log-message.invalid-scene-url": "Cette URL ne pointe pas vers une scène ou un fichier GLB valide.",
   "chat-sidebar.log-message.positional-audio-disabled": "Positional audio désactivé.",
   "chat-sidebar.log-message.positional-audio-enabled": "Positional audio activé.",
