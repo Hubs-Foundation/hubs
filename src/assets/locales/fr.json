@@ -197,7 +197,7 @@
   "link-page.create-room-button": "Créer une nouvelle salle",
   "link-page.enter-code": "Entrer le code :",
   "link-page.logo-alt": "Logo",
-  "link-page.toggle-mode-button": "Vous avez un code avec des lettres?",
+  "link-page.toggle-mode-button": "Vous avez un code avec des lettres ?",
   "link-page.try-again": "Nous n'avons pas pu trouver ce code.{linebreak}Merci de réessayer.",
   "loading-screen.default": "Chargement de la scène...",
   "loading-screen.entering-room": "Entrée dans la salle...",
