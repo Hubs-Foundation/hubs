@@ -135,7 +135,7 @@
   "exited-room-screen.reason.full": "La salle est pleine, s'il vous plait, essayez plus tard.",
   "exited-room-screen.reason.left": "Vous avez quitté la salle.",
   "exited-room-screen.reason.scene-error": "Le chargement de la scène a échoué.",
-  "exited-room-screen.reason.version-mismatch": "La version que vous avez déployé n'est pas encore disponible. Votre navigateur va se rafraichir dans 5 secondes.",
+  "exited-room-screen.reason.version-mismatch": "La version que vous avez déployée n'est pas encore disponible. Votre navigateur va se rafraîchir dans 5 secondes.",
   "exited-room-screen.source-link": "Si vous souhaitez utiliser votre propre serveur, le code source de Hubs est disponible sur <a>GitHub</a>.",
   "footer.logo-alt": "Logo",
   "footer.powered-by": "Propulsé par <a>Hubs Cloud</a>",
