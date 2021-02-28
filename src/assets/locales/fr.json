@@ -59,7 +59,7 @@
   "chat-sidebar-container.input-placeholder.occupants-and-bot": "{occupantCount, plural, one {Envoyer un message à un autre et {discordChannels}...} other {Envoyer un message aux {occupantCount} autres et {discordChannels}...} }",
   "chat-sidebar.input.placeholder": "Message...",
   "chat-sidebar.log-message.audio-normalization-disabled": "l'audioNormalization est désactivée.",
-  "chat-sidebar.log-message.audio-normalization-nan": "la commande audioNormalization nécessite un nombre valide en paramètre..",
+  "chat-sidebar.log-message.audio-normalization-nan": "la commande audioNormalization nécessite un nombre valide dans les paramètres...",
   "chat-sidebar.log-message.capture-already-running": "La capture est déjà en cours.",
   "chat-sidebar.log-message.capture-already-stopped": "La capture est déjà arrêtée.",
   "chat-sidebar.log-message.capture-started": "La capture a démarré.",
