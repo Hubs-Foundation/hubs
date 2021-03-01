@@ -41,7 +41,7 @@
   "avatar-page.selected": "Votre avatar actuel",
   "avatar-preview.loading-failed": "Le chargement a échoué{linebreak}Merci de choisir un autre avatar",
   "avatar-settings-content.change-avatar-button": "Changer d'avatar",
-  "avatar-settings-content.display-name-description": "Caractères alphanumériques et tirets. Au moins 3 caractères, pas plus que 32",
+  "avatar-settings-content.display-name-description": "Caractères alphanumériques et tirets. Minimum 3 caractères, maximum 32",
   "avatar-settings-content.display-name-label": "Nom affiché",
   "avatar-settings-sidebar.title": "Réglages d'avatar",
   "avatar-setup-sidebar.title": "Réglages d'avatar",
