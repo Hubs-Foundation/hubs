@@ -35,9 +35,13 @@ export function useTheme(themeId) {
 
       if (themeId) {
         theme = themes.find(t => t.id === themeId);
-      } else if (darkMode) {
+      }
+
+      if (!theme && darkMode) {
         theme = themes.find(t => t.darkModeDefault);
-      } else {
+      }
+
+      if (!theme) {
         theme = themes.find(t => t.default);
       }
 
