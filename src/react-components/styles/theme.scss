@@ -77,3 +77,105 @@ $spacing-sm: 12px;
 $spacing-md: 16px;
 $spacing-lg: 20px;
 $spacing-xl: 24px;
+
+// Default Theme
+$font-family-default: var(--font-family-default, 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol");
+$font-family-monospace: var(--font-family-monospace, Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace);
+
+$text1-color: var(--text1-color, $black);
+$text1-color-hover: var(--text1-color-hover, $black-hover);
+$text1-color-pressed: var(--text1-color-pressed, $black-pressed);
+$text2-color: var(--text2-color, $darkgrey);
+$text2-color-hover: var(--text2-color-hover, $darkgrey-hover);
+$text2-color-pressed: var(--text2-color-pressed, $darkgrey-pressed);
+$text3-color: var(--text3-color, $grey);
+$text3-color-hover: var(--text3-color-hover, $grey-hover);
+$text3-color-pressed: var(--text3-color-pressed, $grey-pressed);
+
+$disabled-text-color: var(--disabled-text-color, $darkgrey);
+$disabled-bg-color: var(--disabled-bg-color, $lightgrey);
+
+$active-color: var(--active-color, $blue);
+$active-color-hover: var(--active-color-hover, $blue-hover);
+$active-color-pressed: var(--active-color-pressed, $blue-pressed);
+
+$error-color: var(--error-color, $red);
+$error-color-hover: var(--error-color-hover, $red-hover);
+$error-color-pressed: var(--error-color-pressed, $red-pressed);
+
+$status-recording-color: var(--status-recording-color, $red);
+$status-enabled-color: var(--status-enabled-color, $green);
+
+$overlay-text-color: var(--overlay-text-color, $white);
+$overlay-text-color-hover: var(--overlay-text-color-hover, $blue-hover);
+$overlay-text-color-pressed: var(--overlay-text-color-pressed, $blue-pressed);
+
+$background1-color: var(--background1-color, $white);
+$background2-color: var(--background2-color, $recessed-bg);
+$loading-screen-background: var(--loading-screen-background, radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%));
+
+$border1-color: var(--border1-color, $lightgrey);
+$border2-color: var(--border2-color, $darkgrey);
+
+$basic-text-color: var(--basic-text-color, $darkgrey);
+$basic-text-color-hover: var(--basic-text-color-hover, $darkgrey);
+$basic-text-color-pressed: var(--basic-text-color-pressed, $darkgrey);
+$basic-bg-color: var(--basic-bg-color, $white);
+$basic-bg-color-hover: var(--basic-bg-color-hover, $white-hover);
+$basic-bg-color-pressed: var(--basic-bg-color-pressed, $white-pressed);
+
+$primary-text-color: var(--primary-text-color, $white);
+$primary-text-color-hover: var(--primary-text-color-hover, $white);
+$primary-text-color-pressed: var(--primary-text-color-pressed, $white);
+$primary-bg-color: var(--primary-bg-color, $blue);
+$primary-bg-color-hover: var(--primary-bg-color-hover, $blue-hover);
+$primary-bg-color-pressed: var(--primary-bg-color-pressed, $blue-pressed);
+
+$accept-text-color: var(--accept-text-color, $white);
+$accept-text-color-hover: var(--accept-text-color-hover, $white);
+$accept-text-color-pressed: var(--accept-text-color-pressed, $white);
+$accept-bg-color: var(--accept-bg-color, $green);
+$accept-bg-color-hover: var(--accept-bg-color-hover, $green-hover);
+$accept-bg-color-pressed: var(--accept-bg-color-pressed, $green-pressed);
+
+$cancel-text-color: var(--cancel-text-color, $white);
+$cancel-text-color-hover: var(--cancel-text-color-hover, $white);
+$cancel-text-color-pressed: var(--cancel-text-color-pressed, $white);
+$cancel-bg-color: var(--cancel-bg-color, $red);
+$cancel-bg-color-hover: var(--cancel-bg-color-hover, $red-hover);
+$cancel-bg-color-pressed: var(--cancel-bg-color-pressed, $red-pressed);
+
+$accent1-text-color: var(--accent1-text-color, $white);
+$accent1-text-color-hover: var(--accent1-text-color-hover, $white);
+$accent1-text-color-pressed: var(--accent1-text-color-pressed, $white);
+$accent1-bg-color: var(--accent1-bg-color, $red);
+$accent1-bg-color-hover: var(--accent1-bg-color-hover, $red-hover);
+$accent1-bg-color-pressed: var(--accent1-bg-color-pressed, $red-pressed);
+
+$accent2-text-color: var(--accent2-text-color, $white);
+$accent2-text-color-hover: var(--accent2-text-color-hover, $white);
+$accent2-text-color-pressed: var(--accent2-text-color-pressed, $white);
+$accent2-bg-color: var(--accent2-bg-color, $orange);
+$accent2-bg-color-hover: var(--accent2-bg-color-hover, $orange-hover);
+$accent2-bg-color-pressed: var(--accent2-bg-color-pressed, $orange-pressed);
+
+$accent3-text-color: var(--accent3-text-color, $white);
+$accent3-text-color-hover: var(--accent3-text-color-hover, $white);
+$accent3-text-color-pressed: var(--accent3-text-color-pressed, $white);
+$accent3-bg-color: var(--accent3-bg-color, $green);
+$accent3-bg-color-hover: var(--accent3-bg-color-hover, $green-hover);
+$accent3-bg-color-pressed: var(--accent3-bg-color-pressed, $green-pressed);
+
+$accent4-text-color: var(--accent4-text-color, $white);
+$accent4-text-color-hover: var(--accent4-text-color-hover, $white);
+$accent4-text-color-pressed: var(--accent4-text-color-pressed, $white);
+$accent4-bg-color: var(--accent4-bg-color, $blue);
+$accent4-bg-color-hover: var(--accent4-bg-color-hover, $blue-hover);
+$accent4-bg-color-pressed: var(--accent4-bg-color-pressed, $blue-pressed);
+
+$accent5-text-color: var(--accent5-text-color, $white);
+$accent5-text-color-hover: var(--accent5-text-color-hover, $white);
+$accent5-text-color-pressed: var(--accent5-text-color-pressed, $white);
+$accent5-bg-color: var(--accent5-bg-color, $purple);
+$accent5-bg-color-hover: var(--accent5-bg-color-hover, $purple-hover);
+$accent5-bg-color-pressed: var(--accent5-bg-color-pressed, $purple-pressed);

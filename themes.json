@@ -1,0 +1,216 @@
+[
+  {
+    "id": "hubs-default",
+    "default": true,
+    "name": "Hubs Default",
+    "variables": {
+      "font-family-default": "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+      "font-family-monospace": "Consolas, 'Andale Mono WT', 'Andale Mono', 'Lucida Console', 'Lucida Sans Typewriter', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Liberation Mono', 'Nimbus Mono L', Monaco, 'Courier New', Courier, monospace",
+  
+      "text1-color": "#000000",
+      "text1-color-hover": "#404040",
+      "text1-color-pressed": "#7A7A7A",
+      "text2-color": "#868686",
+      "text2-color-hover": "#949494",
+      "text2-color-pressed": "#7A7A7A",
+      "text3-color": "#BBBBBB",
+      "text3-color-hover": "#C7C7C7",
+      "text3-color-pressed": "#ADADAD",
+  
+      "disabled-text-color": "#868686",
+      "disabled-bg-color": "#E7E7E7",
+  
+      "active-color": "#12A4ED",
+      "active-color-hover": "#2AADEF",
+      "active-color-pressed": "#1094D5",
+  
+      "error-color": "#F5325C",
+      "error-color-hover": "#F64B70",
+      "error-color-pressed": "#F41A49",
+  
+      "status-recording-color": "#F5325C",
+      "status-enabled-color": "#7ED320",
+  
+      "overlay-text-color": "#FFFFFF",
+      "overlay-text-color-hover": "#2AADEF",
+      "overlay-text-color-pressed": "#1094D5",
+  
+      "background1-color": "#FFFFFF",
+      "background2-color": "#f9f9f9",
+      "loading-screen-background": "radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%)",
+  
+      "border1-color": "#E7E7E7",
+      "border2-color": "#868686",
+  
+      "basic-text-color": "#868686",
+      "basic-text-color-hover": "#868686",
+      "basic-text-color-pressed": "#868686",
+      "basic-bg-color": "#FFFFFF",
+      "basic-bg-color-hover": "#E7E7E7",
+      "basic-bg-color-pressed": "#DBDBDB",
+  
+      "primary-text-color": "#FFFFFF",
+      "primary-text-color-hover": "#FFFFFF",
+      "primary-text-color-pressed": "#FFFFFF",
+      "primary-bg-color": "red",
+      "primary-bg-color-hover": "#2AADEF",
+      "primary-bg-color-pressed": "#1094D5",
+  
+      "accept-text-color": "#FFFFFF",
+      "accept-text-color-hover": "#FFFFFF",
+      "accept-text-color-pressed": "#FFFFFF",
+      "accept-bg-color": "#7ED320",
+      "accept-bg-color-hover": "#8CDF2F",
+      "accept-bg-color-pressed": "#72BE1D",
+  
+      "cancel-text-color": "#FFFFFF",
+      "cancel-text-color-hover": "#FFFFFF",
+      "cancel-text-color-pressed": "#FFFFFF",
+      "cancel-bg-color": "#F5325C",
+      "cancel-bg-color-hover": "#F64B70",
+      "cancel-bg-color-pressed": "#F41A49",
+  
+      "accent1-text-color": "#FFFFFF",
+      "accent1-text-color-hover": "#FFFFFF",
+      "accent1-text-color-pressed": "#FFFFFF",
+      "accent1-bg-color": "#F5325C",
+      "accent1-bg-color-hover": "#F64B70",
+      "accent1-bg-color-pressed": "#F41A49",
+  
+      "accent2-text-color": "#FFFFFF",
+      "accent2-text-color-hover": "#FFFFFF",
+      "accent2-text-color-pressed": "#FFFFFF",
+      "accent2-bg-color": "#FF8500",
+      "accent2-bg-color-hover": "#FF911A",
+      "accent2-bg-color-pressed": "#E67800",
+  
+      "accent3-text-color": "#FFFFFF",
+      "accent3-text-color-hover": "#FFFFFF",
+      "accent3-text-color-pressed": "#FFFFFF",
+      "accent3-bg-color": "#7ED320",
+      "accent3-bg-color-hover": "#8CDF2F",
+      "accent3-bg-color-pressed": "#72BE1D",
+  
+      "accent4-text-color": "#FFFFFF",
+      "accent4-text-color-hover": "#FFFFFF",
+      "accent4-text-color-pressed": "#FFFFFF",
+      "accent4-bg-color": "#12A4ED",
+      "accent4-bg-color-hover": "#2AADEF",
+      "accent4-bg-color-pressed": "#1094D5",
+  
+      "accent5-text-color": "#FFFFFF",
+      "accent5-text-color-hover": "#FFFFFF",
+      "accent5-text-color-pressed": "#FFFFFF",
+      "accent5-bg-color": "#7854F6",
+      "accent5-bg-color-hover": "#8C6EF7",
+      "accent5-bg-color-pressed": "#663DF5"
+    }
+  },
+  {
+    "id": "hubs-dark-mode",
+    "darkModeDefault": true,
+    "name": "Hubs Dark Mode",
+    "variables": {
+      "font-family-default": "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+      "font-family-monospace": "Consolas, 'Andale Mono WT', 'Andale Mono', 'Lucida Console', 'Lucida Sans Typewriter', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Liberation Mono', 'Nimbus Mono L', Monaco, 'Courier New', Courier, monospace",
+  
+      "text1-color": "#000000",
+      "text1-color-hover": "#404040",
+      "text1-color-pressed": "#7A7A7A",
+      "text2-color": "#868686",
+      "text2-color-hover": "#949494",
+      "text2-color-pressed": "#7A7A7A",
+      "text3-color": "#BBBBBB",
+      "text3-color-hover": "#C7C7C7",
+      "text3-color-pressed": "#ADADAD",
+  
+      "disabled-text-color": "#868686",
+      "disabled-bg-color": "#E7E7E7",
+  
+      "active-color": "#12A4ED",
+      "active-color-hover": "#2AADEF",
+      "active-color-pressed": "#1094D5",
+  
+      "error-color": "#F5325C",
+      "error-color-hover": "#F64B70",
+      "error-color-pressed": "#F41A49",
+  
+      "status-recording-color": "#F5325C",
+      "status-enabled-color": "#7ED320",
+  
+      "overlay-text-color": "#FFFFFF",
+      "overlay-text-color-hover": "#2AADEF",
+      "overlay-text-color-pressed": "#1094D5",
+  
+      "background1-color": "#FFFFFF",
+      "background2-color": "#f9f9f9",
+      "loading-screen-background": "radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%)",
+  
+      "border1-color": "#E7E7E7",
+      "border2-color": "#868686",
+  
+      "basic-text-color": "#868686",
+      "basic-text-color-hover": "#868686",
+      "basic-text-color-pressed": "#868686",
+      "basic-bg-color": "#FFFFFF",
+      "basic-bg-color-hover": "#E7E7E7",
+      "basic-bg-color-pressed": "#DBDBDB",
+  
+      "primary-text-color": "#FFFFFF",
+      "primary-text-color-hover": "#FFFFFF",
+      "primary-text-color-pressed": "#FFFFFF",
+      "primary-bg-color": "black",
+      "primary-bg-color-hover": "#2AADEF",
+      "primary-bg-color-pressed": "#1094D5",
+  
+      "accept-text-color": "#FFFFFF",
+      "accept-text-color-hover": "#FFFFFF",
+      "accept-text-color-pressed": "#FFFFFF",
+      "accept-bg-color": "#7ED320",
+      "accept-bg-color-hover": "#8CDF2F",
+      "accept-bg-color-pressed": "#72BE1D",
+  
+      "cancel-text-color": "#FFFFFF",
+      "cancel-text-color-hover": "#FFFFFF",
+      "cancel-text-color-pressed": "#FFFFFF",
+      "cancel-bg-color": "#F5325C",
+      "cancel-bg-color-hover": "#F64B70",
+      "cancel-bg-color-pressed": "#F41A49",
+  
+      "accent1-text-color": "#FFFFFF",
+      "accent1-text-color-hover": "#FFFFFF",
+      "accent1-text-color-pressed": "#FFFFFF",
+      "accent1-bg-color": "#F5325C",
+      "accent1-bg-color-hover": "#F64B70",
+      "accent1-bg-color-pressed": "#F41A49",
+  
+      "accent2-text-color": "#FFFFFF",
+      "accent2-text-color-hover": "#FFFFFF",
+      "accent2-text-color-pressed": "#FFFFFF",
+      "accent2-bg-color": "#FF8500",
+      "accent2-bg-color-hover": "#FF911A",
+      "accent2-bg-color-pressed": "#E67800",
+  
+      "accent3-text-color": "#FFFFFF",
+      "accent3-text-color-hover": "#FFFFFF",
+      "accent3-text-color-pressed": "#FFFFFF",
+      "accent3-bg-color": "#7ED320",
+      "accent3-bg-color-hover": "#8CDF2F",
+      "accent3-bg-color-pressed": "#72BE1D",
+  
+      "accent4-text-color": "#FFFFFF",
+      "accent4-text-color-hover": "#FFFFFF",
+      "accent4-text-color-pressed": "#FFFFFF",
+      "accent4-bg-color": "#12A4ED",
+      "accent4-bg-color-hover": "#2AADEF",
+      "accent4-bg-color-pressed": "#1094D5",
+  
+      "accent5-text-color": "#FFFFFF",
+      "accent5-text-color-hover": "#FFFFFF",
+      "accent5-text-color-pressed": "#FFFFFF",
+      "accent5-bg-color": "#7854F6",
+      "accent5-bg-color-hover": "#8C6EF7",
+      "accent5-bg-color-pressed": "#663DF5"
+    }
+  }
+]

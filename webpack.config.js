@@ -132,6 +132,14 @@ function createDefaultAppConfig() {
     }
   }
 
+  const themesPath = path.join(__dirname, "themes.json");
+
+  if (fs.existsSync(themesPath)) {
+    const themesString = fs.readFileSync(themesPath).toString();
+    const themes = JSON.parse(themesString);
+    appConfig.themes = themes;
+  }
+
   return appConfig;
 }
 
