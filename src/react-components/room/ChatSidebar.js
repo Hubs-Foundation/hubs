@@ -157,6 +157,14 @@ const logMessages = defineMessages({
     id: "chat-sidebar.log-message.invalid-audio-normalization-range",
     defaultMessage:
       "audioNormalization command needs a base volume number between 0 [no normalization] and 255. Default is 0. The recommended value is 4, if you would like to enable normalization."
+  },
+  [LogMessageType.audioSuspended]: {
+    id: "chat-sidebar.log-message.audio-suspended",
+    defaultMessage: "Audio has been suspended, click somewhere in the room to resume the audio."
+  },
+  [LogMessageType.audioResumed]: {
+    id: "chat-sidebar.log-message.audio-resumed",
+    defaultMessage: "Audio has been resumed."
   }
 });
 
