@@ -208,7 +208,7 @@ export default class DialogAdapter extends EventEmitter {
   /**
    * Restart ICE in the underlying send peerconnection.
    */
-  async restartSendICE(force = true) {
+  async restartSendICE() {
     // Do not restart ICE if Signaling is disconnected. We are not in the meeting room if that's the case.
     if (this._closed) {
       return;
@@ -216,15 +216,7 @@ export default class DialogAdapter extends EventEmitter {
 
     try {
       if (!this._sendTransport?._closed) {
-        // Renegotiate ICE in case ICE state is "failed".
-        // We also try to renegotiate in case we got stuck in a new state after an ICE failure.
-        if (
-          force ||
-          this._sendTransport.connectionState === "failed" ||
-          (this._sendTransport.connectionState === "new" && this._lastSendConnectionState === "failed")
-        ) {
-          await this.iceRestart(this._sendTransport);
-        }
+        await this.iceRestart(this._sendTransport);
       } else {
         // If the transport is closed but the signaling is connected, we try to recreate
         const { host, port, turn } = await window.APP.hubChannel.getHost();
@@ -244,7 +236,7 @@ export default class DialogAdapter extends EventEmitter {
   checkSendIceStatus(connectionState) {
     // If the ICE connection state is failed, we force an ICE restart
     if (connectionState === "failed") {
-      this.restartSendICE(false);
+      this.restartSendICE();
     }
 
     this._lastSendConnectionState = connectionState;
@@ -261,7 +253,7 @@ export default class DialogAdapter extends EventEmitter {
    * Restart ICE in the underlying receive peerconnection.
    * @param {boolean} force Forces the execution of the reconnect.
    */
-  async restartRecvICE(force = true) {
+  async restartRecvICE() {
     // Do not restart ICE if Signaling is disconnected. We are not in the meeting room if that's the case.
     if (this._closed) {
       return;
@@ -269,16 +261,7 @@ export default class DialogAdapter extends EventEmitter {
 
     try {
       if (!this._recvTransport?._closed) {
-        // Renegotiate ICE in case ICE state is "failed".
-        // We also try to renegotiate in case we got stuck in a new state after an ICE failure.
-        if (
-          force ||
-          this._recvTransport.connectionState === "failed" ||
-          (this._recvTransport.connectionState === "new" && this._lastRecvConnectionState === "failed")
-        ) {
-          // If the transport is closed but the signaling is connected, we try to recreate
-          await this.iceRestart(this._recvTransport);
-        }
+        await this.iceRestart(this._recvTransport);
       } else {
         // If the transport is closed but the signaling is connected, we try to recreate
         const { host, port, turn } = await window.APP.hubChannel.getHost();
@@ -298,7 +281,7 @@ export default class DialogAdapter extends EventEmitter {
   checkRecvIceStatus(connectionState) {
     // If the ICE connection state is failed, we force an ICE restart
     if (connectionState === "failed") {
-      this.restartRecvICE(false);
+      this.restartRecvICE();
     }
 
     this._lastRecvConnectionState = connectionState;
