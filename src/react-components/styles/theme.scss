@@ -103,8 +103,10 @@ $error-color: var(--error-color, $red);
 $error-color-hover: var(--error-color-hover, $red-hover);
 $error-color-pressed: var(--error-color-pressed, $red-pressed);
 
+$status-unread-color: var(--status-unread-color, $orange);
 $status-recording-color: var(--status-recording-color, $red);
 $status-enabled-color: var(--status-enabled-color, $green);
+$status-disabled-color: var(--status-disabled-color, $red);
 
 $overlay-text-color: var(--overlay-text-color, $white);
 $overlay-text-color-hover: var(--overlay-text-color-hover, $blue-hover);
@@ -117,10 +119,16 @@ $loading-screen-background: var(--loading-screen-background, radial-gradient(50%
 $border1-color: var(--border1-color, $lightgrey);
 $border2-color: var(--border2-color, $darkgrey);
 
+$toolbar-icon-color: var(--toolbar-icon-color, $white);
+$toolbar-basic-icon-color: var(--toolbar-basic-icon-color, $black);
+$toolbar-basic-bg-color: var(--toolbar-basic-border-color, $lightgrey);
+$toolbar-basic-bg-color-hover: var(--toolbar-basic-bg-color-hover, $lightgrey-hover);
+$toolbar-basic-bg-color-pressed: var(--toolbar-basic-bg-color-pressed, $lightgrey-pressed);
+
 $basic-text-color: var(--basic-text-color, $darkgrey);
 $basic-text-color-hover: var(--basic-text-color-hover, $darkgrey);
 $basic-text-color-pressed: var(--basic-text-color-pressed, $darkgrey);
-$basic-bg-color: var(--basic-bg-color, $white);
+$basic-bg-color: var(--basic-border-color, $transparent);
 $basic-bg-color-hover: var(--basic-bg-color-hover, $white-hover);
 $basic-bg-color-pressed: var(--basic-bg-color-pressed, $white-pressed);
 

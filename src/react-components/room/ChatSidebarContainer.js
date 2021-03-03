@@ -290,5 +290,5 @@ ChatSidebarContainer.propTypes = {
 
 export function ChatToolbarButtonContainer(props) {
   const { unreadMessages } = useContext(ChatContext);
-  return <ChatToolbarButton {...props} statusColor={unreadMessages ? "orange" : undefined} />;
+  return <ChatToolbarButton {...props} statusColor={unreadMessages ? "unread" : undefined} />;
 }

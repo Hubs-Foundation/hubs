@@ -27,8 +27,8 @@ export const AllButtons = args => (
     {presets.map(preset => (
       <ToolbarButton key={preset} icon={<ShareIcon />} label={preset} preset={preset} {...args} />
     ))}
-    <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" statusColor="red" />
-    <ToolbarButton icon={<MicrophoneIcon />} label="Voice" statusColor="green" />
+    <ToolbarButton icon={<ShareIcon />} label="Share" preset="accent5" statusColor="recording" />
+    <ToolbarButton icon={<MicrophoneIcon />} label="Voice" statusColor="enabled" />
   </Column>
 );
 
@@ -46,15 +46,15 @@ export const RoomToolbar = () => (
     toolbarCenter={
       <>
         <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />
-        <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" />
-        <ToolbarButton icon={<ObjectIcon />} label="Place" preset="green" />
-        <ToolbarButton icon={<ReactionIcon />} label="React" preset="orange" />
-        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="blue" />
+        <ToolbarButton icon={<ShareIcon />} label="Share" preset="accent5" />
+        <ToolbarButton icon={<ObjectIcon />} label="Place" preset="accent3" />
+        <ToolbarButton icon={<ReactionIcon />} label="React" preset="accent2" />
+        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" />
       </>
     }
     toolbarRight={
       <>
-        <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="red" />
+        <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="accent1" />
         <ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />
       </>
     }
@@ -74,7 +74,7 @@ export const EntryToolbar = () => (
     toolbarCenter={
       <>
         <ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" className={styleUtils.hideLg} />
-        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="blue" />
+        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" />
       </>
     }
     toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />}

@@ -28,8 +28,10 @@
       "error-color-hover": "#F64B70",
       "error-color-pressed": "#F41A49",
   
+      "status-unread-color": "#FF8500",
       "status-recording-color": "#F5325C",
       "status-enabled-color": "#7ED320",
+      "status-disabled-color": "#F5325C",
   
       "overlay-text-color": "#FFFFFF",
       "overlay-text-color-hover": "#2AADEF",
@@ -41,18 +43,23 @@
   
       "border1-color": "#E7E7E7",
       "border2-color": "#868686",
+
+      "toolbar-icon-color": "#FFFFFF",
+      "basic-toolbar-icon-color": "#000000",
+      "basic-toolbar-bg-color-hover": "#F5F5F5",
+      "basic-toolbar-bg-color-pressed": "#E7E7E7",
   
       "basic-text-color": "#868686",
       "basic-text-color-hover": "#868686",
       "basic-text-color-pressed": "#868686",
-      "basic-bg-color": "#FFFFFF",
+      "basic-bg-color": "transparent",
       "basic-bg-color-hover": "#E7E7E7",
       "basic-bg-color-pressed": "#DBDBDB",
   
       "primary-text-color": "#FFFFFF",
       "primary-text-color-hover": "#FFFFFF",
       "primary-text-color-pressed": "#FFFFFF",
-      "primary-bg-color": "red",
+      "primary-bg-color": "#12A4ED",
       "primary-bg-color-hover": "#2AADEF",
       "primary-bg-color-pressed": "#1094D5",
   
@@ -135,8 +142,10 @@
       "error-color-hover": "#F64B70",
       "error-color-pressed": "#F41A49",
   
+      "status-unread-color": "#FF8500",
       "status-recording-color": "#F5325C",
       "status-enabled-color": "#7ED320",
+      "status-disabled-color": "#F5325C",
   
       "overlay-text-color": "#FFFFFF",
       "overlay-text-color-hover": "#2AADEF",
@@ -148,18 +157,23 @@
   
       "border1-color": "#E7E7E7",
       "border2-color": "#868686",
+
+      "toolbar-icon-color": "#FFFFFF",
+      "basic-toolbar-icon-color": "#000000",
+      "basic-toolbar-bg-color-hover": "#F5F5F5",
+      "basic-toolbar-bg-color-pressed": "#E7E7E7",
   
       "basic-text-color": "#868686",
       "basic-text-color-hover": "#868686",
       "basic-text-color-pressed": "#868686",
-      "basic-bg-color": "#FFFFFF",
+      "basic-bg-color": "transparent",
       "basic-bg-color-hover": "#E7E7E7",
       "basic-bg-color-pressed": "#DBDBDB",
   
       "primary-text-color": "#FFFFFF",
       "primary-text-color-hover": "#FFFFFF",
       "primary-text-color-pressed": "#FFFFFF",
-      "primary-bg-color": "black",
+      "primary-bg-color": "#12A4ED",
       "primary-bg-color-hover": "#2AADEF",
       "primary-bg-color-pressed": "#1094D5",
   

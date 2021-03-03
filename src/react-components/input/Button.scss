@@ -257,9 +257,9 @@
 :local(.button):disabled {
   border-color: transparent;
   cursor: not-allowed;
-  color: theme.$darkgrey;
+  color: theme.$disabled-text-color;
   opacity: 0.7;
-  background-color: theme.$lightgrey;
+  background-color: theme.$disabled-bg-color;
 }
 
 :global(.keyboard-user) :local(.button):focus {

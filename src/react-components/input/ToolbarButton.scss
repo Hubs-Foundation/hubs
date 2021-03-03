@@ -10,7 +10,7 @@
 
   label {
     cursor: pointer;
-    color: black;
+    color: theme.$text1-color;
     margin-top: 8px;
     margin-bottom: 3px;
   }
@@ -31,12 +31,12 @@
 
   svg {
     *[stroke=\#000] {
-      stroke: white;
+      stroke: theme.$toolbar-icon-color;
       transition: stroke 0.1s ease-in-out;
     }
 
     *[fill=\#000] {
-      fill: white;
+      fill: theme.$toolbar-icon-color;
       transition: fill 0.1s ease-in-out;
     }
   }
@@ -53,44 +53,44 @@
 
     svg {
       *[stroke=\#000] {
-        stroke: #000;
+        stroke: theme.$toolbar-basic-icon-color;
       }
   
       *[fill=\#000] {
-        fill: #000;
+        fill: theme.$toolbar-basic-icon-color;
       }
     }
   }  
 
   &:hover :local(.icon-container) {
-    border-color: theme.$white-hover;
-    background-color: theme.$white-hover;
+    border-color: theme.$basic-bg-color-hover;
+    background-color: theme.$basic-bg-color-hover;
   }
 
   &:active :local(.icon-container) {
-    border-color: theme.$white-pressed;
-    background-color: theme.$white-pressed;
+    border-color: theme.$basic-bg-color-pressed;
+    background-color: theme.$basic-bg-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
       border-color: transparent;
-      background-color: theme.$lightgrey;
+      background-color: theme.$toolbar-basic-bg-color;
     }
 
     label {
-      color: theme.$darkgrey;
+      color: theme.$basic-text-color;
     }
 
     &:hover {
       :local(.icon-container) {
-        background-color: theme.$lightgrey-hover;
+        background-color: theme.$toolbar-basic-bg-color-hover;
       }
     }
   
     &:active {
       :local(.icon-container) {
-        background-color: theme.$lightgrey-pressed;
+        background-color: theme.$toolbar-basic-bg-color-pressed;
       }
     }
   }
@@ -100,50 +100,50 @@
   border-color: theme.$transparent;
 }
 
-:local(.accept), :local(.green) {
+:local(.accept) {
   :local(.icon-container) {
-    background-color: theme.$green;
+    background-color: theme.$accept-bg-color;
   }  
 
   &:hover :local(.icon-container) {
-    background-color: theme.$green-hover;
+    background-color: theme.$accept-bg-color-hover;
   }
 
   &:active :local(.icon-container) {
-    background-color: theme.$green-pressed;
+    background-color: theme.$accept-bg-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$green;
+      border-color: theme.$accept-bg-color;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: theme.$green;
+          stroke: theme.$accept-bg-color;
         }
     
         *[fill=\#000] {
-          fill: theme.$green;
+          fill: theme.$accept-bg-color;
         }
       }
     }
 
     label {
-      color: theme.$green;
+      color: theme.$accept-bg-color;
     }
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$green-hover;
+        border-color: theme.$accept-bg-color-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$green-hover;
+            stroke: theme.$accept-bg-color-hover;
           }
       
           *[fill=\#000] {
-            fill: theme.$green-hover;
+            fill: theme.$accept-bg-color-hover;
           }
         }
       }
@@ -151,15 +151,15 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$green-pressed;
+        border-color: theme.$accept-bg-color-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$green-pressed;
+            stroke: theme.$accept-bg-color-pressed;
           }
       
           *[fill=\#000] {
-            fill: theme.$green-pressed;
+            fill: theme.$accept-bg-color-pressed;
           }
         }
       }
@@ -167,50 +167,50 @@
   }
 }
 
-:local(.cancel), :local(.red) {
+:local(.cancel) {
   :local(.icon-container) {
-    background-color: theme.$red;
+    background-color: theme.$cancel-bg-color;
   }  
 
   &:hover :local(.icon-container) {
-    background-color: theme.$red-hover;
+    background-color: theme.$cancel-bg-color-hover;
   }
 
   &:active :local(.icon-container) {
-    background-color: theme.$red-pressed;
+    background-color: theme.$cancel-bg-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$red;
+      border-color: theme.$cancel-bg-color;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: theme.$red;
+          stroke: theme.$cancel-bg-color;
         }
     
         *[fill=\#000] {
-          fill: theme.$red;
+          fill: theme.$cancel-bg-color;
         }
       }
     }
 
     label {
-      color: theme.$red;
+      color: theme.$cancel-bg-color;
     }
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$red-hover;
+        border-color: theme.$cancel-bg-color-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$red-hover;
+            stroke: theme.$cancel-bg-color-hover;
           }
       
           *[fill=\#000] {
-            fill: theme.$red-hover;
+            fill: theme.$cancel-bg-color-hover;
           }
         }
       }
@@ -218,15 +218,15 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$red-pressed;
+        border-color: theme.$cancel-bg-color-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$red-pressed;
+            stroke: theme.$cancel-bg-color-pressed;
           }
       
           *[fill=\#000] {
-            fill: theme.$red-pressed;
+            fill: theme.$cancel-bg-color-pressed;
           }
         }
       }
@@ -234,50 +234,50 @@
   }
 }
 
-:local(.blue) {
+:local(.accent1) {
   :local(.icon-container) {
-    background-color: theme.$blue;
+    background-color: theme.$accent1-bg-color;
   }  
 
   &:hover :local(.icon-container) {
-    background-color: theme.$blue-hover;
+    background-color: theme.$accent1-bg-color-hover;
   }
 
   &:active :local(.icon-container) {
-    background-color: theme.$blue-pressed;
+    background-color: theme.$accent1-bg-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$blue;
+      border-color: theme.$accent1-bg-color;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: theme.$blue;
+          stroke: theme.$accent1-bg-color;
         }
     
         *[fill=\#000] {
-          fill: theme.$blue;
+          fill: theme.$accent1-bg-color;
         }
       }
     }
 
     label {
-      color: theme.$blue;
+      color: theme.$accent1-bg-color;
     }
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$blue-hover;
+        border-color: theme.$accent1-bg-color-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$blue-hover;
+            stroke: theme.$accent1-bg-color-hover;
           }
       
           *[fill=\#000] {
-            fill: theme.$blue-hover;
+            fill: theme.$accent1-bg-color-hover;
           }
         }
       }
@@ -285,15 +285,15 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$blue-pressed;
+        border-color: theme.$accent1-bg-color-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$blue-pressed;
+            stroke: theme.$accent1-bg-color-pressed;
           }
       
           *[fill=\#000] {
-            fill: theme.$blue-pressed;
+            fill: theme.$accent1-bg-color-pressed;
           }
         }
       }
@@ -301,51 +301,50 @@
   }
 }
 
-
-:local(.orange) {
+:local(.accent2) {
   :local(.icon-container) {
-    background-color: theme.$orange;
+    background-color: theme.$accent2-bg-color;
   }  
 
   &:hover :local(.icon-container) {
-    background-color: theme.$orange-hover;
+    background-color: theme.$accent2-bg-color-hover;
   }
 
   &:active :local(.icon-container) {
-    background-color: theme.$orange-pressed;
+    background-color: theme.$accent2-bg-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$orange;
+      border-color: theme.$accent2-bg-color;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: theme.$orange;
+          stroke: theme.$accent2-bg-color;
         }
     
         *[fill=\#000] {
-          fill: theme.$orange;
+          fill: theme.$accent2-bg-color;
         }
       }
     }
 
     label {
-      color: theme.$orange;
+      color: theme.$accent2-bg-color;
     }
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$orange-hover;
+        border-color: theme.$accent2-bg-color-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$orange-hover;
+            stroke: theme.$accent2-bg-color-hover;
           }
       
           *[fill=\#000] {
-            fill: theme.$orange-hover;
+            fill: theme.$accent2-bg-color-hover;
           }
         }
       }
@@ -353,15 +352,15 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$orange-pressed;
+        border-color: theme.$accent2-bg-color-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$orange-pressed;
+            stroke: theme.$accent2-bg-color-pressed;
           }
       
           *[fill=\#000] {
-            fill: theme.$orange-pressed;
+            fill: theme.$accent2-bg-color-pressed;
           }
         }
       }
@@ -369,50 +368,50 @@
   }
 }
 
-:local(.purple) {
+:local(.accent3) {
   :local(.icon-container) {
-    background-color: theme.$purple;
+    background-color: theme.$accent3-bg-color;
   }  
 
   &:hover :local(.icon-container) {
-    background-color: theme.$purple-hover;
+    background-color: theme.$accent3-bg-color-hover;
   }
 
   &:active :local(.icon-container) {
-    background-color: theme.$purple-pressed;
+    background-color: theme.$accent3-bg-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$purple;
+      border-color: theme.$accent3-bg-color;
       background-color: transparent;
 
       svg {
         *[stroke=\#000] {
-          stroke: theme.$purple;
+          stroke: theme.$accent3-bg-color;
         }
     
         *[fill=\#000] {
-          fill: theme.$purple;
+          fill: theme.$accent3-bg-color;
         }
       }
     }
 
     label {
-      color: theme.$purple;
+      color: theme.$accent3-bg-color;
     }
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$purple-hover;
+        border-color: theme.$accent3-bg-color-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$purple-hover;
+            stroke: theme.$accent3-bg-color-hover;
           }
       
           *[fill=\#000] {
-            fill: theme.$purple-hover;
+            fill: theme.$accent3-bg-color-hover;
           }
         }
       }
@@ -420,15 +419,149 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$purple-pressed;
+        border-color: theme.$accent3-bg-color-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$purple-pressed;
+            stroke: theme.$accent3-bg-color-pressed;
           }
       
           *[fill=\#000] {
-            fill: theme.$purple-pressed;
+            fill: theme.$accent3-bg-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+:local(.accent4) {
+  :local(.icon-container) {
+    background-color: theme.$accent4-bg-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent4-bg-color-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent4-bg-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent4-bg-color;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent4-bg-color;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent4-bg-color;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent4-bg-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$accent4-bg-color-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent4-bg-color-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent4-bg-color-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent4-bg-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent4-bg-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent4-bg-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+:local(.accent5) {
+  :local(.icon-container) {
+    background-color: theme.$accent5-bg-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent5-bg-color-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent5-bg-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent5-bg-color;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent5-bg-color;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent5-bg-color;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent5-bg-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$accent5-bg-color-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent5-bg-color-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent5-bg-color-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent5-bg-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent5-bg-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent5-bg-color-pressed;
           }
         }
       }
@@ -444,14 +577,19 @@
   border-radius: 5px;
 }
 
-:local(.status-green) {
-  background-color: theme.$green;
+:local(.status-enabled) {
+  background-color: theme.$status-enabled-color;
 }
 
-:local(.status-orange) {
-  background-color: theme.$orange;
+:local(.status-disabled) {
+  background-color: theme.$status-disabled-color;
 }
 
-:local(.status-red) {
-  background-color: theme.$red;
+
+:local(.status-unread) {
+  background-color: theme.$status-unread-color;
+}
+
+:local(.status-recording) {
+  background-color: theme.$status-recording-color;
 }

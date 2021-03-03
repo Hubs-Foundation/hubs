@@ -97,7 +97,7 @@ export function MediaBrowser({
             <Button
               sm
               key={source}
-              preset={selectedSource === source ? "blue" : "transparent"}
+              preset={selectedSource === source ? "primary" : "transparent"}
               onClick={() => onSelectSource(source)}
             >
               {intl.formatMessage(navTitleMessages[source])}
@@ -111,7 +111,7 @@ export function MediaBrowser({
             <Button
               sm
               key={i}
-              preset={activeFilter === facet.params.filter ? "blue" : "transparent"}
+              preset={activeFilter === facet.params.filter ? "primary" : "transparent"}
               onClick={() => onSelectFacet(facet)}
             >
               {facet.text}

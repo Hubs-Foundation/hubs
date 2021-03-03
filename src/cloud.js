@@ -51,10 +51,10 @@ function HubsCloudPage() {
               <FormattedMessage id="hubs-cloud-page.hero-cta" defaultMessage="Get it today on the AWS Marketplace" />
             </h3>
             <div className={classNames(styles.row, styles.colLg, styles.centerLg)}>
-              <Button as="a" preset="blue" href="https://aws.amazon.com/marketplace/pp/B084RZH56R">
+              <Button as="a" preset="primary" href="https://aws.amazon.com/marketplace/pp/B084RZH56R">
                 <FormattedMessage id="hubs-cloud-page.hero-button.personal" defaultMessage="Get Hubs Cloud Personal" />
               </Button>
-              <Button as="a" preset="blue" href="https://aws.amazon.com/marketplace/pp/B084WNGRRP">
+              <Button as="a" preset="primary" href="https://aws.amazon.com/marketplace/pp/B084WNGRRP">
                 <FormattedMessage
                   id="hubs-cloud-page.hero-button.enterprise"
                   defaultMessage="Get Hubs Cloud Enterprise"
