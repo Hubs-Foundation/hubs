@@ -39,6 +39,7 @@
   
       "background1-color": "#FFFFFF",
       "background2-color": "#f9f9f9",
+      "background3-color": "#E7E7E7",
       "loading-screen-background": "radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%)",
   
       "border1-color": "#E7E7E7",
@@ -153,6 +154,7 @@
   
       "background1-color": "#FFFFFF",
       "background2-color": "#f9f9f9",
+      "background3-color": "#E7E7E7",
       "loading-screen-background": "radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%)",
   
       "border1-color": "#E7E7E7",

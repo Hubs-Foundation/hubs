@@ -114,6 +114,8 @@ $overlay-text-color-pressed: var(--overlay-text-color-pressed, $blue-pressed);
 
 $background1-color: var(--background1-color, $white);
 $background2-color: var(--background2-color, $recessed-bg);
+$background3-color: var(--background2-color, $lightgrey);
+
 $loading-screen-background: var(--loading-screen-background, radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%));
 
 $border1-color: var(--border1-color, $lightgrey);
