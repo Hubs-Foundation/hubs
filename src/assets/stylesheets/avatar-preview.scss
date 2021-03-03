@@ -1,9 +1,9 @@
-@import 'shared';
+@use "../../react-components/styles/theme.scss";
 
 :local(.preview) {
   position: relative;
   overflow: hidden;
-  background: var(--tile-selected-color);
+  background: theme.$tile-bg-color;
   border-radius: 20px;
 
   .loader {
@@ -12,7 +12,7 @@
     top: calc(50% - 4.5em);
   }
   .error {
-    color: var(--panel-subtext-color);
+    color: theme.$text2-color;
     text-align: center;
     padding: 1.5em;
     position: absolute;

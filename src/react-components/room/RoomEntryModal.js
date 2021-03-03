@@ -46,7 +46,7 @@ export function RoomEntryModal({
         </div>
         <Column center className={styles.buttons}>
           {showJoinRoom && (
-            <Button preset="accent3" onClick={onJoinRoom}>
+            <Button preset="accent4" onClick={onJoinRoom}>
               <EnterIcon />
               <span>
                 <FormattedMessage id="room-entry-modal.join-room-button" defaultMessage="Join Room" />

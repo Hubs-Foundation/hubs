@@ -3,7 +3,7 @@
 
 body {
   margin: 0;
-  background-color: var(--full-panel-background-color);
+  background-color: theme.$background1-color;
 }
 
 :local(.avatar-landing) {
@@ -51,12 +51,12 @@ body {
   :local(.title) {
     @extend %top-title;
     width: 100%;
-    color: var(--panel-text-color);
+    color: theme.$text1-color;
     text-align: center;
   }
 
   :local(.selected-message) {
-    color: var(--panel-subtext-color);
+    color: theme.$text2-color;
     margin-top: 16px;
     height: 48px;
   }
@@ -72,7 +72,7 @@ body {
     min-height: max-content;
     margin-top: 16px;
     &:disabled {
-      background-color: $action-color-disabled;
+      background-color: theme.$disabled-bg-color;
       cursor: default;
     }
   }
@@ -89,29 +89,29 @@ body {
   :local(.copy-tip) {
     position: absolute;
     padding: 5px 20px;
-    background: var(--tile-button-tip-background-color);
+    background: theme.$tile-button-bg-color;
     top: 5px;
     right: 10px;
     border-radius: 20px;
     height: 20px;
     line-height: 20px;
-    color: var(--tile-button-tip-text-color);
+    color: theme.$tile-button-text-color;
   }
 
   :local(.edit-avatar) {
     position: absolute;
     top: 6px;
     right: 7px;
-    color: var(--tile-button-icon-color);
-    background: var(--tile-button-background-color);
+    color: theme.$tile-button-text-color;
+    background: theme.$tile-button-bg-color;
     border-radius: 30px;
     width: 30px;
     height: 30px;
     text-align: center;
     line-height: 30px;
+
     &:hover {
-      background: $action-color;
-      color: var(--tile-button-icon-hover-color);
+      background: theme.$tile-button-bg-color-hover;
     }
   }
 }
