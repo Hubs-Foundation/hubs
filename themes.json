@@ -79,7 +79,7 @@
       "basic-text-color": "#868686",
       "basic-text-color-hover": "#868686",
       "basic-text-color-pressed": "#868686",
-      "basic-bg-color": "transparent",
+      "basic-bg-color": "#FFFFFF",
       "basic-bg-color-hover": "#E7E7E7",
       "basic-bg-color-pressed": "#DBDBDB",
   

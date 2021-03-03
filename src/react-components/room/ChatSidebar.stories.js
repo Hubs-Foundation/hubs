@@ -24,8 +24,8 @@ export const Base = () => (
     sidebar={
       <ChatSidebar>
         <ChatMessageList>
-          <SystemMessage type="log" body="Robert joined the room" timestamp={Date.now()} />
-          <SystemMessage type="log" body="Dom joined the room" timestamp={Date.now()} />
+          <SystemMessage type="join" presence="room" name="Robert" timestamp={Date.now()} />
+          <SystemMessage type="join" presence="room" name="Dom" timestamp={Date.now()} />
           <ChatMessageGroup
             sender="Dom"
             timestamp={Date.now()}
@@ -47,7 +47,7 @@ export const Base = () => (
               { type: "chat", body: "One last message" }
             ]}
           />
-          <SystemMessage type="log" body="John joined the room" timestamp={Date.now()} />
+          <SystemMessage type="join" presence="room" name="John" timestamp={Date.now()} />
           <ChatMessageGroup
             sender="John"
             timestamp={Date.now()}
@@ -57,8 +57,8 @@ export const Base = () => (
               { type: "chat", body: ":thumbsup:" }
             ]}
           />
-          <SystemMessage type="log" body="Liv joined the room" timestamp={Date.now()} />
-          <SystemMessage type="log" body="Robin joined the room" timestamp={Date.now()} />
+          <SystemMessage type="join" presence="room" name="Liv" timestamp={Date.now()} />
+          <SystemMessage type="join" presence="room" name="Robin" timestamp={Date.now()} />
           <ChatMessageGroup sender="Liv" timestamp={Date.now()} messages={[{ type: "chat", body: ":clap:" }]} />
           <ChatMessageGroup
             sender="Robin"

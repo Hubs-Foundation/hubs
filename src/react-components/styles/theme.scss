@@ -139,7 +139,15 @@ $chat-bubble-link-color-sent-hover: var(--chat-bubble-link-color-sent-hover, $wh
 $chat-bubble-link-color-sent-pressed: var(--chat-bubble-link-color-sent-pressed, $white-pressed);
 $chat-bubble-bg-color-received: var(--chat-bubble-bg-color-received, $lightgrey);
 
+$tip-text-color: var(--tip-text-color, $white);
+$tip-bg-color: var(--tip-bg-color, $blue);
+$tip-button-color: var(--tip-bg-color-pressed, $blue-pressed);
+$tip-button-color-hover: var(--tip-button-bg-color-hover, $blue-hover);
+$tip-button-color-pressed: var(--tip-button-bg-color-pressed, $blue-pressed);
+
 $favorite-color: var(--favorite-color, $yellow);
+
+$admin-color: var(--favorite-color, $red);
 
 $error-color: var(--error-color, $red);
 $error-color-hover: var(--error-color-hover, $red-hover);
@@ -161,7 +169,8 @@ $background3-color: var(--background2-color, $lightgrey);
 $loading-screen-background: var(--loading-screen-background, radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%));
 
 $border1-color: var(--border1-color, $lightgrey);
-$border2-color: var(--border2-color, $darkgrey);
+$border2-color: var(--border2-color, $grey);
+$border3-color: var(--border3-color, $darkgrey);
 
 $toolbar-icon-color: var(--toolbar-icon-color, $white);
 $toolbar-basic-icon-color: var(--toolbar-basic-icon-color, $black);
