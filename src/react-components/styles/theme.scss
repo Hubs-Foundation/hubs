@@ -92,6 +92,10 @@ $text3-color: var(--text3-color, $grey);
 $text3-color-hover: var(--text3-color-hover, $grey-hover);
 $text3-color-pressed: var(--text3-color-pressed, $grey-pressed);
 
+$link-color: var(--link-color, $blue);
+$link-color-hover: var(--link-color-hover, $blue-hover);
+$link-color-pressed: var(--link-color-pressed, $blue-pressed);
+
 $outline-color: var(--outline-color, $black);
 
 $radio-border-color: var(--radio-border-color, $lightgrey);
@@ -105,6 +109,9 @@ $input-bg-color: var(--input-bg-color, $white);
 $input-border-color: var(--input-border-color, $darkgrey);
 $input-border-color-hover: var(--input-border-color-hover, $blue-hover);
 $input-outline-color: var(--input-outline-color, $blue);
+
+$list-bg-color-hover: var(--list-bg-color-hover, $white-hover);
+$list-bg-color-pressed: var(--list-bg-color-hover, $white-pressed);
 
 $dropdown-bg-color: var(--dropdown-bg-color, $white);
 $dropdown-border-color: var(--dropdown-border-color, $lightgrey);

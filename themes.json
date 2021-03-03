@@ -17,6 +17,10 @@
       "text3-color-hover": "#C7C7C7",
       "text3-color-pressed": "#ADADAD",
 
+      "link-color": "#12A4ED",
+      "link-color-hover": "#2AADEF",
+      "link-color-pressed": "#1094D5",
+
       "outline-color": "#000000",
 
       "radio-border-color": "#E7E7E7",
@@ -30,6 +34,9 @@
       "input-border-color": "#868686",
       "input-border-color-hover": "#2AADEF",
       "input-outline-color": "#12A4ED",
+
+      "list-bg-color-hover": "#E7E7E7",
+      "list-bg-color-pressed": "#DBDBDB",
 
       "dropdown-bg-color": "#FFFFFF",
       "dropdown-border-color": "#E7E7E7",
@@ -151,6 +158,10 @@
       "text3-color-hover": "#C7C7C7",
       "text3-color-pressed": "#ADADAD",
 
+      "link-color": "#12A4ED",
+      "link-color-hover": "#2AADEF",
+      "link-color-pressed": "#1094D5",
+
       "outline-color": "#000000",
 
       "radio-border-color": "#E7E7E7",
@@ -164,6 +175,9 @@
       "input-border-color": "#868686",
       "input-border-color-hover": "#2AADEF",
       "input-outline-color": "#12A4ED",
+
+      "list-bg-color-hover": "#E7E7E7",
+      "list-bg-color-pressed": "#DBDBDB",
 
       "dropdown-bg-color": "#FFFFFF",
       "dropdown-border-color": "#E7E7E7",
