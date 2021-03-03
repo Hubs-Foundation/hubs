@@ -5,7 +5,10 @@ import { ReactComponent as DesktopIcon } from "../icons/Desktop.svg";
 import { SharePopoverButton } from "./SharePopover";
 
 export default {
-  title: "SharePopover"
+  title: "Room/SharePopover",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 const items = [
@@ -15,15 +18,7 @@ const items = [
 
 export const Base = () => <RoomLayout toolbarCenter={<SharePopoverButton items={items} />} />;
 
-Base.parameters = {
-  layout: "fullscreen"
-};
-
 export const Mobile = () => <RoomLayout toolbarCenter={<SharePopoverButton items={[items[0]]} />} />;
-
-Mobile.parameters = {
-  layout: "fullscreen"
-};
 
 const activeItems = [
   { id: "camera", icon: VideoIcon, color: "purple", label: "Camera", active: true },
@@ -31,7 +26,3 @@ const activeItems = [
 ];
 
 export const Active = () => <RoomLayout toolbarCenter={<SharePopoverButton items={activeItems} />} />;
-
-Active.parameters = {
-  layout: "fullscreen"
-};

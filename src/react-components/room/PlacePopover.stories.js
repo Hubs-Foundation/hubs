@@ -12,7 +12,10 @@ import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
 import { PlacePopoverButton } from "./PlacePopover";
 
 export default {
-  title: "PlacePopover"
+  title: "Room/PlacePopover",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 const items = [
@@ -28,7 +31,3 @@ const items = [
 ];
 
 export const Base = () => <RoomLayout toolbarCenter={<PlacePopoverButton items={items} />} />;
-
-Base.parameters = {
-  layout: "fullscreen"
-};

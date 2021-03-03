@@ -13,7 +13,10 @@ import imgSrc from "../../assets/background.jpg";
 import videoSrc from "../../assets/video/home.mp4";
 
 export default {
-  title: "ChatSidebar"
+  title: "Room/ChatSidebar",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 export const Base = () => (
@@ -84,7 +87,3 @@ export const Base = () => (
     }
   />
 );
-
-Base.parameters = {
-  layout: "fullscreen"
-};
