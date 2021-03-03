@@ -6,7 +6,7 @@ import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { Column } from "../layout/Column";
 
 export default {
-  title: "Popover",
+  title: "Popover/Popover",
   argTypes: {
     placement: {
       control: {

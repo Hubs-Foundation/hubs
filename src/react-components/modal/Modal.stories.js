@@ -5,7 +5,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { Modal } from "./Modal";
 
 export default {
-  title: "Modal"
+  title: "Modal/Modal"
 };
 
 export const Base = () => (
