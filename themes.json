@@ -16,9 +16,28 @@
       "text3-color": "#BBBBBB",
       "text3-color-hover": "#C7C7C7",
       "text3-color-pressed": "#ADADAD",
+
+      "outline-color": "#000000",
+
+      "radio-border-color": "#E7E7E7",
+      "radio-bg-color": "#FFFFFF",
+      "radio-bg-color-hover": "#E7E7E7",
+      "radio-bg-color-pressed": "#DBDBDB",
+
+      "toggle-button-color": "#BBBBBB",
+
+      "input-bg-color": "#FFFFFF",
+      "input-border-color": "#868686",
+      "input-border-color-hover": "#2AADEF",
+      "input-outline-color": "#12A4ED",
+
+      "dropdown-bg-color": "#FFFFFF",
+      "dropdown-border-color": "#E7E7E7",
+      "dropdown-shadow-color": "rgba(0, 0, 0, 0.2)",
   
       "disabled-text-color": "#868686",
       "disabled-bg-color": "#E7E7E7",
+      "disabled-icon-color": "#BBBBBB",
   
       "active-color": "#12A4ED",
       "active-color-hover": "#2AADEF",
@@ -131,9 +150,28 @@
       "text3-color": "#BBBBBB",
       "text3-color-hover": "#C7C7C7",
       "text3-color-pressed": "#ADADAD",
+
+      "outline-color": "#000000",
+
+      "radio-border-color": "#E7E7E7",
+      "radio-bg-color": "#FFFFFF",
+      "radio-bg-color-hover": "#E7E7E7",
+      "radio-bg-color-pressed": "#DBDBDB",
+
+      "toggle-button-color": "#BBBBBB",
+
+      "input-bg-color": "#FFFFFF",
+      "input-border-color": "#868686",
+      "input-border-color-hover": "#2AADEF",
+      "input-outline-color": "#12A4ED",
+
+      "dropdown-bg-color": "#FFFFFF",
+      "dropdown-border-color": "#E7E7E7",
+      "dropdown-shadow-color": "rgba(0, 0, 0, 0.2)",
   
       "disabled-text-color": "#868686",
       "disabled-bg-color": "#E7E7E7",
+      "disabled-icon-color": "#BBBBBB",
   
       "active-color": "#12A4ED",
       "active-color-hover": "#2AADEF",

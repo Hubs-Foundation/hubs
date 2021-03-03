@@ -1,6 +1,5 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
-import { withDesign } from "storybook-addon-designs";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as ShareIcon } from "../icons/Share.svg";
@@ -15,8 +14,7 @@ import { Column } from "../layout/Column";
 import { RoomLayout } from "../layout/RoomLayout";
 
 export default {
-  title: "Toolbar",
-  decorators: [withDesign],
+  title: "Input/Toolbar",
   argTypes: {
     selected: { control: "boolean" }
   }
@@ -33,10 +31,6 @@ export const AllButtons = args => (
 );
 
 AllButtons.parameters = {
-  design: {
-    type: "figma",
-    url: "https://www.figma.com/file/Xag5qaEgYs3KzXvoxx5m8y/Hubs-Redesign?node-id=17%3A725"
-  },
   selected: false
 };
 
@@ -61,13 +55,6 @@ export const RoomToolbar = () => (
   />
 );
 
-RoomToolbar.parameters = {
-  design: {
-    type: "figma",
-    url: "https://www.figma.com/file/Xag5qaEgYs3KzXvoxx5m8y/Hubs-Redesign?node-id=17%3A667"
-  }
-};
-
 export const EntryToolbar = () => (
   <RoomLayout
     toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" />}
@@ -80,10 +67,3 @@ export const EntryToolbar = () => (
     toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />}
   />
 );
-
-EntryToolbar.parameters = {
-  design: {
-    type: "figma",
-    url: "https://www.figma.com/file/Xag5qaEgYs3KzXvoxx5m8y/Hubs-Redesign?node-id=61%3A4500"
-  }
-};

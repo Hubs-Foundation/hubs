@@ -19,29 +19,29 @@
   }
 
   &:hover {
-    color: theme.$blue-hover;
+    color: theme.$primary-bg-color-hover;
 
     svg {
       *[stroke=\#000] {
-        stroke: theme.$blue-hover;
+        stroke: theme.$primary-bg-color-hover;
       }
   
       *[fill=\#000] {
-        fill: theme.$blue-hover;
+        fill: theme.$primary-bg-color-hover;
       }
     }
   }
 
   &:active {
-    color: theme.$blue-pressed;
+    color: theme.$primary-bg-color-pressed;
 
     svg {
       *[stroke=\#000] {
-        stroke: theme.$blue-pressed;
+        stroke: theme.$primary-bg-color-pressed;
       }
   
       *[fill=\#000] {
-        fill: theme.$blue-pressed;
+        fill: theme.$primary-bg-color-pressed;
       }
     }
   }
@@ -51,16 +51,16 @@
   }
 
   &:disabled {
-    color: theme.$grey;
+    color: theme.$disabled-icon-color;
     cursor: not-allowed;
 
     svg {
       *[stroke=\#000] {
-        stroke: theme.$grey;
+        stroke: theme.$disabled-icon-color;
       }
   
       *[fill=\#000] {
-        fill: theme.$grey;
+        fill: theme.$disabled-icon-color;
       }
     }
   }
@@ -97,7 +97,7 @@
   }
 
   :global(.keyboard-user) &:focus-within {
-    box-shadow: 0 0 0 2px theme.$black;
+    box-shadow: 0 0 0 2px theme.$outline-color;
   }
 }
 

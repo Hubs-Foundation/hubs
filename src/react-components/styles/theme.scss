@@ -92,9 +92,29 @@ $text3-color: var(--text3-color, $grey);
 $text3-color-hover: var(--text3-color-hover, $grey-hover);
 $text3-color-pressed: var(--text3-color-pressed, $grey-pressed);
 
+$outline-color: var(--outline-color, $black);
+
+$radio-border-color: var(--radio-border-color, $lightgrey);
+$radio-bg-color: var(--radio-bg-color, $white);
+$radio-bg-color-hover: var(--radio-bg-color-hover, $white-hover);
+$radio-bg-color-pressed: var(--radio-bg-color-pressed, $white-pressed);
+
+$toggle-button-color: var(--toggle-button-color, $grey);
+
+$input-bg-color: var(--input-bg-color, $white);
+$input-border-color: var(--input-border-color, $darkgrey);
+$input-border-color-hover: var(--input-border-color-hover, $blue-hover);
+$input-outline-color: var(--input-outline-color, $blue);
+
+$dropdown-bg-color: var(--dropdown-bg-color, $white);
+$dropdown-border-color: var(--dropdown-border-color, $lightgrey);
+$dropdown-shadow-color: var(--dropdown-shadow-color, rgba(0, 0, 0, 0.2));
+
 $disabled-text-color: var(--disabled-text-color, $darkgrey);
 $disabled-bg-color: var(--disabled-bg-color, $lightgrey);
+$disabled-icon-color: var(--disabled-icon-color, $grey);
 
+$active-text-color: var(--active-text-color, $white);
 $active-color: var(--active-color, $blue);
 $active-color-hover: var(--active-color-hover, $blue-hover);
 $active-color-pressed: var(--active-color-pressed, $blue-pressed);
