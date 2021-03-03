@@ -1,7 +1,7 @@
 @use "../styles/theme.scss";
 
 :local(.error) {
-  color: theme.$red;
+  color: theme.$error-color;
 }
 
 :local(.microphone-icon-container) {
@@ -11,7 +11,7 @@
   justify-content: center;
   align-items: center;
   border-radius: 96px;
-  border: 1px solid theme.$lightgrey;
+  border: 1px solid theme.$button-border-color;
   
   svg {
     path {
