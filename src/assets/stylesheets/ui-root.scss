@@ -1,5 +1,4 @@
 @import 'shared';
-@import 'drop-menus.scss';
 
 
 :local(.ui) {
@@ -114,15 +113,6 @@ body.vr-mode {
   }
 }
 
-:local(.object-list) {
-  @extend %drop-menu;
-  @media(max-width: 500px) {
-    top: 184px;
-  }
-  right: 16px;
-}
-
-
 %button-with-count {
   @extend %unselectable;
   pointer-events: auto;
@@ -158,27 +148,6 @@ body.vr-mode {
     height: 72px;
     justify-content: center;
   }
-}
-:local(.object-list-button) {
-  @extend %button-with-count;
-
-  @media(min-width: 501px) {
-    top: 20px;
-    right: 122px;
-    justify-content: space-evenly;
-  }
-
-  @media(max-width: 500px) {
-    right: 16px;
-    top: 96px;
-  }
-}
-
-:local(.presence-list-button) {
-  @extend %button-with-count;
-
-  top: 20px;
-  right: 16px;
 }
 
 :local(.presence-info-selected) {
