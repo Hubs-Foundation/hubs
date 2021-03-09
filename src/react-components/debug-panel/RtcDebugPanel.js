@@ -304,7 +304,7 @@ export default class RtcDebugPanel extends Component {
     const opened = (transport && !transport._closed && true) || false;
     result["opened"] = opened;
     if (transport) {
-      result["state"] = transport._connectionState;
+      result["state"] = opened ? transport._connectionState : "closed";
       result["id"] = transport._id;
       result[PRODUCERS_KEY] = [];
       result[CONSUMERS_KEY] = [];
@@ -846,10 +846,7 @@ export default class RtcDebugPanel extends Component {
                   candidates={this.createCandidates(transportsData?.[TransportType.SEND]?.candidates)}
                   producers={this.createProducers(transportsData?.[TransportType.SEND]?.producers, statsData)}
                   onRestart={this.restartSendICE}
-                  isButtonEnabled={
-                    transportsData?.[TransportType.SEND]?.opened &&
-                    transportsData?.[TransportType.SEND]?.state === "connected"
-                  }
+                  isButtonEnabled={transportsData?.[TransportType.SEND]?.opened}
                 />
               </div>
               <div style={{ display: "flex", flexFlow: "column" }}>
@@ -868,10 +865,7 @@ export default class RtcDebugPanel extends Component {
                   candidates={this.createCandidates(transportsData?.[TransportType.RECEIVE]?.candidates)}
                   consumers={this.createConsumers(transportsData?.[TransportType.RECEIVE]?.consumers, statsData)}
                   onRestart={this.restartRecvICE}
-                  isButtonEnabled={
-                    transportsData?.[TransportType.RECEIVE]?.opened &&
-                    transportsData?.[TransportType.RECEIVE]?.state === "connected"
-                  }
+                  isButtonEnabled={transportsData?.[TransportType.RECEIVE]?.opened}
                 />
               </div>
             </CollapsiblePanel>
