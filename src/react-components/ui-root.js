@@ -530,8 +530,8 @@ class UIRoot extends Component {
     const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
     if (hasGrantedMic) {
-      if (!this.mediaDevicesManager.isMicDeviceSelected) {
-        await this.mediaDevicesManager.setMediaStreamToDefault();
+      if (!this.mediaDevicesManager.isMicShared) {
+        await this.mediaDevicesManager.startLastUsedMicShare();
       }
       this.beginOrSkipAudioSetup();
     } else {
@@ -559,12 +559,12 @@ class UIRoot extends Component {
   };
 
   micDeviceChanged = async deviceId => {
-    this.mediaDevicesManager.selectMicDevice(deviceId);
+    this.mediaDevicesManager.startMicShare(deviceId);
   };
 
   onRequestMicPermission = async () => {
     // TODO: Show an error state if getting the microphone permissions fails
-    await this.mediaDevicesManager.setMediaStreamToDefault();
+    await this.mediaDevicesManager.startLastUsedMicShare();
     this.beginOrSkipAudioSetup();
   };
 
@@ -600,20 +600,16 @@ class UIRoot extends Component {
     this.props.store.update({
       settings: { micMuted: false }
     });
-    await this.props.enterScene(this.mediaDevicesManager.mediaStream, this.state.enterInVR, muteOnEntry);
+    await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
 
-    const mediaStream = this.mediaDevicesManager.mediaStream;
+    if (this.mediaDevicesManager.isMicShared) {
+      console.log(`Using microphone: ${this.mediaDevicesManager.selectedMicLabel}`);
+    }
 
-    if (mediaStream) {
-      if (this.mediaDevicesManager.audioTrack) {
-        console.log(`Using microphone: ${this.mediaDevicesManager.audioTrack.label}`);
-      }
-
-      if (mediaStream.getVideoTracks().length > 0) {
-        console.log("Screen sharing enabled.");
-      }
+    if (this.mediaDevicesManager.isVideoShared) {
+      console.log("Screen sharing enabled.");
     }
   };
 
@@ -874,7 +870,7 @@ class UIRoot extends Component {
         selectedMicrophone={this.mediaDevicesManager.selectedMicDeviceId}
         microphoneOptions={this.mediaDevicesManager.micDevices}
         onChangeMicrophone={this.micDeviceChanged}
-        microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
+        microphoneEnabled={this.mediaDevicesManager.isMicShared}
         microphoneMuted={muteOnEntry}
         onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onEnterRoom={this.onAudioReadyButton}
@@ -1532,7 +1528,7 @@ class UIRoot extends Component {
                       <>
                         <VoiceButtonContainer
                           scene={this.props.scene}
-                          microphoneEnabled={!!this.mediaDevicesManager.audioTrack}
+                          microphoneEnabled={this.mediaDevicesManager.isMicShared}
                         />
                         <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                         <PlacePopoverContainer

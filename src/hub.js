@@ -682,7 +682,7 @@ async function runBotMode(scene, entryManager) {
   };
 
   while (!NAF.connection.isConnected()) await nextTick();
-  entryManager.enterSceneWhenLoaded(new MediaStream(), false);
+  entryManager.enterSceneWhenLoaded(false);
 }
 
 function checkForAccountRequired() {
@@ -785,7 +785,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
 
   window.APP.scene = scene;
-  window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store);
+  const audioSystem = scene.systems["hubs-systems"].audioSystem;
+  window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);
   window.APP.hubChannel = hubChannel;
 
   const performConditionalSignIn = async (predicate, action, signInMessage, signInCompleteMessage, onFailure) => {

@@ -43,7 +43,7 @@ export default class SceneEntryManager {
     this.whenSceneLoaded(() => {
       this.rightCursorController.components["cursor-controller"].enabled = false;
       this.leftCursorController.components["cursor-controller"].enabled = false;
-
+      this.mediaDevicesManager = window.APP.mediaDevicesManager;
       this._setupBlocking();
     });
   };
@@ -52,7 +52,7 @@ export default class SceneEntryManager {
     return this._entered;
   };
 
-  enterScene = async (mediaStream, enterInVR, muteOnEntry) => {
+  enterScene = async (enterInVR, muteOnEntry) => {
     document.getElementById("viewing-camera").removeAttribute("scene-preview-camera");
 
     if (isDebug && NAF.connection.adapter.session) {
@@ -80,7 +80,7 @@ export default class SceneEntryManager {
 
     this._setupPlayerRig();
     this._setupKicking();
-    this._setupMedia(mediaStream);
+    this._setupMedia();
     this._setupCamera();
 
     if (qsTruthy("offline")) return;
@@ -90,14 +90,14 @@ export default class SceneEntryManager {
     this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_ENTER_SCENE);
 
     if (isBotMode) {
-      this._runBot(mediaStream);
+      this._runBot();
       this.scene.addState("entered");
       this.hubChannel.sendEnteredEvent();
       return;
     }
 
-    if (mediaStream) {
-      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    if (this.mediaDevicesManager.mediaStream) {
+      await NAF.connection.adapter.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
     }
 
     this.scene.classList.remove("hand-cursor");
@@ -136,8 +136,8 @@ export default class SceneEntryManager {
     }
   };
 
-  enterSceneWhenLoaded = (mediaStream, enterInVR) => {
-    this.whenSceneLoaded(() => this.enterScene(mediaStream, enterInVR));
+  enterSceneWhenLoaded = enterInVR => {
+    this.whenSceneLoaded(() => this.enterScene(enterInVR));
   };
 
   exitScene = () => {
@@ -277,7 +277,7 @@ export default class SceneEntryManager {
     this.hubChannel.unpin(networkId, fileId);
   };
 
-  _setupMedia = mediaStream => {
+  _setupMedia = () => {
     const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
       if (!this.hubChannel.can("spawn_and_move_media")) return;
@@ -397,52 +397,30 @@ export default class SceneEntryManager {
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
 
-    const shareVideoMediaStream = async (constraints, isDisplayMedia, target) => {
+    const shareSuccess = (isDisplayMedia, isVideoTrackAdded) => {
+      isHandlingVideoShare = false;
+
+      if (isVideoTrackAdded) {
+        currentVideoShareEntity = spawnMediaInfrontOfPlayer(this.mediaDevicesManager.mediaStream, undefined);
+
+        // Wire up custom removal event which will stop the stream.
+        currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+
+        this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
+        this.scene.addState("sharing_video");
+      }
+    };
+
+    const shareError = error => {
+      console.error(error);
+      isHandlingVideoShare = false;
+      this.scene.emit("share_video_failed");
+    };
+
+    this.scene.addEventListener("action_share_camera", () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
-      let newStream;
-
-      try {
-        if (isDisplayMedia) {
-          newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
-        } else {
-          newStream = await navigator.mediaDevices.getUserMedia(constraints);
-        }
-      } catch (e) {
-        isHandlingVideoShare = false;
-        this.scene.emit("share_video_failed");
-        return;
-      }
-
-      const videoTracks = newStream ? newStream.getVideoTracks() : [];
-
-      if (videoTracks.length > 0) {
-        newStream.getVideoTracks().forEach(track => mediaStream.addTrack(track));
-
-        if (newStream && newStream.getAudioTracks().length > 0) {
-          const audioSystem = this.scene.systems["hubs-systems"].audioSystem;
-          audioSystem.addStreamToOutboundAudio("screenshare", newStream);
-        }
-
-        await NAF.connection.adapter.setLocalMediaStream(mediaStream);
-
-        if (target === "avatar") {
-          this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
-        } else {
-          currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
-
-          // Wire up custom removal event which will stop the stream.
-          currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
-        }
-      }
-
-      this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
-      this.scene.addState("sharing_video");
-      isHandlingVideoShare = false;
-    };
-
-    this.scene.addEventListener("action_share_camera", event => {
       const constraints = {
         video: {
           width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
@@ -467,11 +445,14 @@ export default class SceneEntryManager {
           break;
       }
 
-      shareVideoMediaStream(constraints, false, event.detail?.target);
+      this.mediaDevicesManager.startVideoShare(constraints, false, shareSuccess, shareError);
     });
 
     this.scene.addEventListener("action_share_screen", () => {
-      shareVideoMediaStream(
+      if (isHandlingVideoShare) return;
+      isHandlingVideoShare = true;
+
+      this.mediaDevicesManager.startVideoShare(
         {
           video: {
             // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
@@ -486,7 +467,9 @@ export default class SceneEntryManager {
             autoGainControl: window.APP.store.state.preferences.disableAutoGainControl === true ? false : true
           }
         },
-        true
+        true,
+        shareSuccess,
+        shareError
       );
     });
 
@@ -499,21 +482,18 @@ export default class SceneEntryManager {
         currentVideoShareEntity.parentNode.removeChild(currentVideoShareEntity);
       }
 
-      for (const track of mediaStream.getVideoTracks()) {
-        track.stop(); // Stop video track to remove the "Stop screen sharing" bar right away.
-        mediaStream.removeTrack(track);
-      }
-
-      const audioSystem = this.scene.systems["hubs-systems"].audioSystem;
-      audioSystem.removeStreamFromOutboundAudio("screenshare");
-
-      await NAF.connection.adapter.setLocalMediaStream(mediaStream);
+      await this.mediaDevicesManager.stopVideoShare();
       currentVideoShareEntity = null;
 
       this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: false });
       this.scene.emit("share_video_disabled");
       this.scene.removeState("sharing_video");
       isHandlingVideoShare = false;
+    });
+
+    this.scene.addEventListener("action_end_mic_sharing", async () => {
+      await this.mediaDevicesManager.stopMicShare();
+      this.scene.emit("action_mute");
     });
 
     this.scene.addEventListener("action_selected_media_result_entry", async e => {
@@ -567,7 +547,7 @@ export default class SceneEntryManager {
     this.avatarRig.emit("entered");
   };
 
-  _runBot = async mediaStream => {
+  _runBot = async () => {
     const audioEl = document.createElement("audio");
     let audioInput;
     let dataInput;
@@ -643,10 +623,10 @@ export default class SceneEntryManager {
       audioSource.connect(gainNode);
       gainNode.connect(audioDestination);
       gainNode.gain.value = audioVolume;
-      mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+      this.mediaDevicesManager.mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
     }
 
-    await NAF.connection.adapter.setLocalMediaStream(mediaStream);
+    await NAF.connection.adapter.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
     audioEl.play();
   };
 }
