@@ -2,36 +2,52 @@ import React from "react";
 import PropTypes from "prop-types";
 import configs from "../utils/configs";
 
-import { getMessages } from "../utils/i18n";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import { share } from "../utils/share";
 
 export default function VideoMessage({ name, body: { src: url }, className, maySpawn, hubId }) {
+  const intl = useIntl();
+
   const onShareClicked = share.bind(null, {
     url: url,
-    title: `Taken in ${getMessages()["share-hashtag"]}, join me at https://${configs.SHORTLINK_DOMAIN}/${hubId}`
+    title: intl.formatMessage(
+      {
+        id: "video-message.default-tweet",
+        defaultMessage: "Taken in {shareHashtag}, join me at {url}"
+      },
+      {
+        shareHashtag: configs.translation("share-hashtag"),
+        url: `https://${configs.SHORTLINK_DOMAIN}/${hubId}`
+      }
+    )
   });
   return (
     <div className={className}>
       {maySpawn && <button className={classNames(styles.iconButton, styles.share)} onClick={onShareClicked} />}
       <div className={styles.mediaBody}>
-        <span>
-          <b>{name}</b>
-        </span>
-        <span>
-          {"took a "}
-          <b>
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              video
-            </a>
-          </b>.
-        </span>
+        <FormattedMessage
+          id="video-message.body"
+          defaultMessage="{name} took a <a>video</a>."
+          values={{
+            name: <b>{name}</b>,
+            // eslint-disable-next-line react/display-name
+            a: chunks => (
+              <b>
+                <a href={url} target="_blank" rel="noopener noreferrer">
+                  {chunks}
+                </a>
+              </b>
+            )
+          }}
+        />
       </div>
     </div>
   );
 }
+
 VideoMessage.propTypes = {
   name: PropTypes.string,
   maySpawn: PropTypes.bool,

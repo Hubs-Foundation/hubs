@@ -1,0 +1,104 @@
+@use "../styles/theme.scss";
+
+:local(.more-menu-popover) {
+  min-width: 240px;
+  padding-top: 16px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    padding-top: 0px;
+  }
+}
+
+:local(.more-menu-group-label) {
+  margin-left: 16px;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+  color: theme.$grey;
+}
+
+:local(.more-menu-item-list) {
+  padding-top: 4px;
+  padding-bottom: 16px;
+}
+
+:local(.more-menu-item-target) {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  color: theme.$black;
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-medium;
+
+  & > * {
+    margin-right: 16px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  // Hack to make hover styles overlap popover border and look correct.
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    width: calc(100% + 2px);
+
+    &:hover, &:active, :global(body.keyboard-user) &:focus {
+      margin-left: -1px;
+      margin-right: -1px;
+      padding-left: 17px;
+      padding-right: 17px;
+    }
+  }
+
+  &:hover, &:active, :global(body.keyboard-user) &:focus {
+    color: theme.$white;
+    font-weight: theme.$font-weight-bold;
+
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$white;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$white;
+      }
+    }
+  }
+
+  &:hover, :global(body.keyboard-user) &:focus {
+    background-color: theme.$blue-hover;
+  }
+
+  &:active {
+    background-color: theme.$blue-pressed;
+  }
+
+  :global(body.keyboard-user) &:focus {
+    box-shadow: inset 0 0 0 3px theme.$black;
+  }
+}
+
+button:local(.more-menu-item-target) {
+  background: transparent;
+  border: none; 
+}
+
+:local(.compact-button) {
+  pointer-events: auto;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 48px;
+  background-color: theme.$white;
+  border: 1px solid theme.$lightgrey;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    display: none;
+  }
+}

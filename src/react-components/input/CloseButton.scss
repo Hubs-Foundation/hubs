@@ -1,0 +1,10 @@
+@use "../styles/theme.scss";
+
+:local(.lg) {
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    svg {
+      height: 20px;
+      width: 20px;
+    }
+  }
+}

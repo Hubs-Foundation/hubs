@@ -1,65 +1,103 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
-import { WrappedIntlProvider } from "../wrapped-intl-provider";
-import IfFeature from "../if-feature";
-import UnlessFeature from "../unless-feature";
-import configs from "../../utils/configs";
 import styles from "./Footer.scss";
+import discordLogoUrl from "../../assets/images/discord-logo-small.png";
+import { Container } from "./Container";
 
-export function Footer() {
+export function Footer({
+  hidePoweredBy,
+  showWhatsNewLink,
+  showTerms,
+  termsUrl,
+  showPrivacy,
+  privacyUrl,
+  showCompanyLogo,
+  companyLogoUrl,
+  showDiscordBotLink,
+  appName
+}) {
   return (
-    <WrappedIntlProvider>
-      <footer>
+    <footer>
+      <Container as="div" className={styles.container}>
         <div className={styles.poweredBy}>
-          <UnlessFeature name="hide_powered_by">
-            <span className={styles.prefix}>
-              <FormattedMessage id="home.powered_by_prefix" />
-            </span>
-            <a className={styles.link} href="https://hubs.mozilla.com/cloud">
-              <FormattedMessage id="home.powered_by_link" />
-            </a>
-          </UnlessFeature>
+          {!hidePoweredBy && (
+            <FormattedMessage
+              id="footer.powered-by"
+              defaultMessage="Powered by <a>Hubs Cloud</a>"
+              values={{
+                // eslint-disable-next-line react/display-name
+                a: chunks => (
+                  <a className={styles.link} href="https://hubs.mozilla.com/cloud">
+                    {chunks}
+                  </a>
+                )
+              }}
+            />
+          )}
         </div>
         <nav>
           <ul>
-            <IfFeature name="show_whats_new_link">
+            {showDiscordBotLink && (
+              <li>
+                <img className={styles.discordLogo} src={discordLogoUrl} />
+                <a href="/discord">
+                  <FormattedMessage
+                    id="home-page.add-to-discord"
+                    defaultMessage="Add the {appName} Bot to Discord"
+                    values={{
+                      appName
+                    }}
+                  />
+                </a>
+              </li>
+            )}
+            {showWhatsNewLink && (
               <li>
                 <a href="/whats-new">
-                  <FormattedMessage id="home.whats_new_link" />
+                  <FormattedMessage id="footer.whats-new" defaultMessage="What's New" />
                 </a>
               </li>
-            </IfFeature>
-            <IfFeature name="show_terms">
+            )}
+            {showTerms && (
               <li>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-                >
-                  <FormattedMessage id="home.terms_of_use" />
+                <a target="_blank" rel="noopener noreferrer" href={termsUrl}>
+                  <FormattedMessage id="footer.terms-of-use" defaultMessage="Terms of Use" />
                 </a>
               </li>
-            </IfFeature>
-            <IfFeature name="show_privacy">
+            )}
+            {showPrivacy && (
               <li>
-                <a
-                  className={styles.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
-                >
-                  <FormattedMessage id="home.privacy_notice" />
+                <a className={styles.link} target="_blank" rel="noopener noreferrer" href={privacyUrl}>
+                  <FormattedMessage id="footer.privacy-notice" defaultMessage="Privacy Notice" />
                 </a>
               </li>
-            </IfFeature>
-            <IfFeature name="show_company_logo">
+            )}
+            {showCompanyLogo && (
               <li>
-                <img className={styles.companyLogo} src={configs.image("company_logo")} />
+                <img
+                  className={styles.companyLogo}
+                  src={companyLogoUrl}
+                  alt={<FormattedMessage id="footer.logo-alt" defaultMessage="Logo" />}
+                />
               </li>
-            </IfFeature>
+            )}
           </ul>
         </nav>
-      </footer>
-    </WrappedIntlProvider>
+      </Container>
+    </footer>
   );
 }
+
+Footer.propTypes = {
+  hidePoweredBy: PropTypes.bool,
+  showWhatsNewLink: PropTypes.bool,
+  showTerms: PropTypes.bool,
+  termsUrl: PropTypes.string,
+  showPrivacy: PropTypes.bool,
+  privacyUrl: PropTypes.string,
+  showCompanyLogo: PropTypes.bool,
+  companyLogoUrl: PropTypes.string,
+  showDiscordBotLink: PropTypes.bool,
+  appName: PropTypes.string
+};

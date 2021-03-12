@@ -1,0 +1,68 @@
+@use "../styles/theme.scss";
+
+:local(.content-menu) {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: row;
+  background-color: theme.$white;
+  border: 1px solid theme.$lightgrey;
+  border-radius: 12px;
+  pointer-events: auto;
+  padding: 4px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    top: 24px;
+    right: 24px;
+  }
+}
+
+:local(.content-menu-button) {
+  display: flex;
+  flex-direction: row;
+  border: none;
+  border-radius: 8px;
+  background-color: theme.$transparent;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+  align-items: center;
+  padding: 8px 10px;
+
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &:hover {
+    background-color: theme.$lightgrey;
+  }
+}
+
+:local(.active) {
+  color: theme.$white;
+  background-color: theme.$blue;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$white;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$white;
+    }
+  }
+
+  &:hover {
+    background-color: theme.$blue-hover;
+  }
+}
+
+:local(.separator) {
+  width: 1px;
+  margin: 0 8px;
+  background-color: theme.$lightgrey;
+}
