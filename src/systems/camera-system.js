@@ -200,7 +200,7 @@ function getAudio(o) {
 const FALLOFF = 0.9;
 export class CameraSystem {
   constructor(scene) {
-    this.lightsEnabled = false;
+    this.lightsEnabled = localStorage.getItem("show-background-while-inspecting") === "true";
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
@@ -337,6 +337,7 @@ export class CameraSystem {
 
   toggleLights() {
     this.lightsEnabled = !this.lightsEnabled;
+    localStorage.setItem("show-background-while-inspecting", this.lightsEnabled.toString());
 
     if (this.mode === CAMERA_MODE_INSPECT && this.inspectable) {
       if (this.lightsEnabled) {
