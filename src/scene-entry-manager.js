@@ -2,6 +2,7 @@ import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
+import { SignInMessages } from "./react-components/auth/SignInModal";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -19,7 +20,6 @@ import {
 } from "./utils/vr-interstitial";
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
-import { pushHistoryState } from "./utils/history";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
 const isIOS = AFRAME.utils.device.isIOS();
@@ -248,13 +248,18 @@ export default class SceneEntryManager {
           await this._unpinElement(el);
         };
 
-    this.performConditionalSignIn(() => this.hubChannel.signedIn, action, pin ? "pin" : "unpin", () => {
-      // UI pins/un-pins the entity optimistically, so we undo that here.
-      // Note we have to disable the sign in flow here otherwise this will recurse.
-      this._disableSignInOnPinAction = true;
-      el.setAttribute("pinnable", "pinned", !pin);
-      this._disableSignInOnPinAction = false;
-    });
+    this.performConditionalSignIn(
+      () => this.hubChannel.signedIn,
+      action,
+      pin ? SignInMessages.pin : SignInMessages.unpin,
+      () => {
+        // UI pins/un-pins the entity optimistically, so we undo that here.
+        // Note we have to disable the sign in flow here otherwise this will recurse.
+        this._disableSignInOnPinAction = true;
+        el.setAttribute("pinnable", "pinned", !pin);
+        this._disableSignInOnPinAction = false;
+      }
+    );
   };
 
   _unpinElement = el => {
@@ -322,16 +327,11 @@ export default class SceneEntryManager {
       window.APP.mediaSearchStore.sourceNavigateToDefaultSource();
     });
 
-    this.scene.addEventListener("action_invite", () => {
-      handleExitTo2DInterstitial(false, () => this.history.goBack());
-      pushHistoryState(this.history, "overlay", "invite");
-    });
-
     this.scene.addEventListener("action_kick_client", ({ detail: { clientId } }) => {
       this.performConditionalSignIn(
         () => this.hubChannel.can("kick_users"),
         async () => await window.APP.hubChannel.kick(clientId),
-        "kick-user"
+        SignInMessages.kickUser
       );
     });
 
@@ -339,7 +339,7 @@ export default class SceneEntryManager {
       this.performConditionalSignIn(
         () => this.hubChannel.can("mute_users"),
         () => window.APP.hubChannel.mute(clientId),
-        "mute-user"
+        SignInMessages.muteUser
       );
     });
 
@@ -397,7 +397,7 @@ export default class SceneEntryManager {
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
 
-    const shareVideoMediaStream = async (constraints, isDisplayMedia) => {
+    const shareVideoMediaStream = async (constraints, isDisplayMedia, target) => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -426,10 +426,15 @@ export default class SceneEntryManager {
         }
 
         await NAF.connection.adapter.setLocalMediaStream(mediaStream);
-        currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
 
-        // Wire up custom removal event which will stop the stream.
-        currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+        if (target === "avatar") {
+          this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
+        } else {
+          currentVideoShareEntity = spawnMediaInfrontOfPlayer(mediaStream, undefined);
+
+          // Wire up custom removal event which will stop the stream.
+          currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+        }
       }
 
       this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
@@ -437,7 +442,7 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
     };
 
-    this.scene.addEventListener("action_share_camera", () => {
+    this.scene.addEventListener("action_share_camera", event => {
       const constraints = {
         video: {
           width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
@@ -461,7 +466,8 @@ export default class SceneEntryManager {
           constraints.video.deviceId = preferredCamera;
           break;
       }
-      shareVideoMediaStream(constraints);
+
+      shareVideoMediaStream(constraints, false, event.detail?.target);
     });
 
     this.scene.addEventListener("action_share_screen", () => {
@@ -504,6 +510,7 @@ export default class SceneEntryManager {
       await NAF.connection.adapter.setLocalMediaStream(mediaStream);
       currentVideoShareEntity = null;
 
+      this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: false });
       this.scene.emit("share_video_disabled");
       this.scene.removeState("sharing_video");
       isHandlingVideoShare = false;

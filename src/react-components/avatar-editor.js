@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { FormattedMessage } from "react-intl";
+import { defineMessage, FormattedMessage, injectIntl } from "react-intl";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { getMessages } from "../utils/i18n";
 import configs from "../utils/configs";
 import IfFeature from "./if-feature";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
@@ -15,6 +14,12 @@ import { ensureAvatarMaterial } from "../utils/avatar-utils";
 
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
+
+const delistAvatarInfoMessage = defineMessage({
+  id: "avatar-editor.delist-avatar-info",
+  defaultMessage:
+    "Other users already using this avatar will still be able to use it, but it will be removed from 'My Avatars' and search results."
+});
 
 const AVATARS_API = "/api/v1/avatars";
 
@@ -42,16 +47,15 @@ const fetchAvatar = async avatarId => {
   return avatars[0];
 };
 
-export default class AvatarEditor extends Component {
+class AvatarEditor extends Component {
   static propTypes = {
     avatarId: PropTypes.string,
-    onSignIn: PropTypes.func,
     onSave: PropTypes.func,
     onClose: PropTypes.func,
-    signedIn: PropTypes.bool,
     hideDelete: PropTypes.bool,
     debug: PropTypes.bool,
-    className: PropTypes.string
+    className: PropTypes.string,
+    intl: PropTypes.object.isRequired
   };
 
   state = {
@@ -338,7 +342,9 @@ export default class AvatarEditor extends Component {
             {a.name}
           </option>
         ))}
-        <option value="">Custom GLB...</option>
+        <option value="">
+          <FormattedMessage id="avatar-editor.custom-avatar-option" defaultMessage="Custom GLB..." />
+        </option>
       </select>
       <img
         className="arrow"
@@ -394,8 +400,11 @@ export default class AvatarEditor extends Component {
         htmlFor="avatar-file_glb"
         className={classNames("item", "custom", { selected: "" === this.state.avatar[propName] })}
       >
-        <FontAwesomeIcon icon={faCloudUploadAlt} />
-        &nbsp; Custom GLB
+        <FormattedMessage
+          id="avatar-editor.upload-custom-avatar-button"
+          defaultMessage="{icon} Custom GLB"
+          values={{ icon: <FontAwesomeIcon icon={faCloudUploadAlt} /> }}
+        />
       </label>
     </div>
   );
@@ -437,7 +446,7 @@ export default class AvatarEditor extends Component {
   };
 
   render() {
-    const { debug } = this.props;
+    const { debug, intl } = this.props;
     const { avatar } = this.state;
 
     return (
@@ -453,62 +462,169 @@ export default class AvatarEditor extends Component {
           <div className="loader">
             <div className="loader-center" />
           </div>
-        ) : this.props.signedIn ? (
+        ) : (
           <form onSubmit={this.uploadAvatar} className="center">
             {this.textField("name", "Name", false, true)}
             <div className="split">
               <div className="form-body">
-                {debug && this.textField("avatar_id", "Avatar ID", true)}
-                {debug && this.textField("parent_avatar_id", "Parent Avatar ID")}
-                {debug && this.textField("parent_avatar_listing_id", "Parent Avatar Listing ID")}
-                {debug && this.textarea("description", "Description")}
-                {!this.props.avatarId && this.selectListingGrid("parent_avatar_listing_id", "Model")}
+                {debug &&
+                  this.textField(
+                    "avatar_id",
+                    intl.formatMessage({ id: "avatar-editor.field.avatar-id", defaultMessage: "Avatar ID" }),
+                    true
+                  )}
+                {debug &&
+                  this.textField(
+                    "parent_avatar_id",
+                    intl.formatMessage({
+                      id: "avatar-editor.field.parent-avatar-id",
+                      defaultMessage: "Parent Avatar ID"
+                    })
+                  )}
+                {debug &&
+                  this.textField(
+                    "parent_avatar_listing_id",
+                    intl.formatMessage({
+                      id: "avatar-editor.field.parent-avatar-listing-id",
+                      defaultMessage: "Parent Avatar Listing ID"
+                    })
+                  )}
+                {debug &&
+                  this.textarea(
+                    "description",
+                    intl.formatMessage({
+                      id: "avatar-editor.field.description",
+                      defaultMessage: "Description"
+                    })
+                  )}
+                {!this.props.avatarId &&
+                  this.selectListingGrid(
+                    "parent_avatar_listing_id",
+                    intl.formatMessage({
+                      id: "avatar-editor.field.model",
+                      defaultMessage: "Model"
+                    })
+                  )}
 
-                <label>Skin</label>
-                {this.mapField("base_map", "Base Map", "image/*")}
+                <label>
+                  <FormattedMessage id="avatar-editor.skin-section" defaultMessage="Skin" />
+                </label>
+                {this.mapField(
+                  "base_map",
+                  intl.formatMessage({
+                    id: "avatar-editor.field.base-map",
+                    defaultMessage: "Base Map"
+                  }),
+                  "image/*"
+                )}
                 <details>
-                  <summary>Advanced</summary>
-                  {this.mapField("emissive_map", "Emissive Map", "image/*")}
-                  {this.mapField("normal_map", "Normal Map", "image/*")}
-                  {this.mapField("orm_map", "ORM Map", "image/*", false, "Occlussion (r), Roughness (g), Metallic (b)")}
+                  <summary>
+                    <FormattedMessage id="avatar-editor.advanced-section" defaultMessage="Advanced" />
+                  </summary>
+                  {this.mapField(
+                    "emissive_map",
+                    intl.formatMessage({
+                      id: "avatar-editor.field.emissive-map",
+                      defaultMessage: "Emissive Map"
+                    }),
+                    "image/*"
+                  )}
+                  {this.mapField(
+                    "normal_map",
+                    intl.formatMessage({
+                      id: "avatar-editor.field.normal-map",
+                      defaultMessage: "Normal Map"
+                    }),
+                    "image/*"
+                  )}
+                  {this.mapField(
+                    "orm_map",
+                    intl.formatMessage({
+                      id: "avatar-editor.field.orm-map",
+                      defaultMessage: "ORM Map"
+                    }),
+                    "image/*",
+                    false,
+                    intl.formatMessage({
+                      id: "avatar-editor.field.orm-map-info",
+                      defaultMessage: "Occlussion (r), Roughness (g), Metallic (b)"
+                    })
+                  )}
                 </details>
 
-                <label>Share Settings</label>
+                <label>
+                  <FormattedMessage id="avatar-editor.share-settings" defaultMessage="Share Settings" />
+                </label>
                 {this.checkbox(
                   "allow_promotion",
-                  `Allow ${getMessages()["company-name"]} to promote your avatar, and show it in search results.`,
+                  intl.formatMessage(
+                    {
+                      id: "avatar-editor.field.allow-promotion",
+                      defaultMessage: "Allow {companyName} to promote your avatar, and show it in search results."
+                    },
+                    { companyName: configs.translation("company-name") }
+                  ),
                   <span>
-                    Allow{" "}
-                    <a
-                      href={configs.link("promotion", "https://github.com/mozilla/hubs/blob/master/PROMOTION.md")}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Promotion
-                    </a>
+                    <FormattedMessage
+                      id="avatar-editor.field.allow-promotion-checkbox"
+                      defaultMessage="Allow <a>Promotion</a>"
+                      values={{
+                        a: chunks => (
+                          <a
+                            href={configs.link("promotion", "https://github.com/mozilla/hubs/blob/master/PROMOTION.md")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {chunks}
+                          </a>
+                        )
+                      }}
+                    />
                   </span>
                 )}
                 {this.checkbox(
                   "allow_remixing",
-                  "Allow others to edit and re-publish your avatar as long as they give you credit.",
+                  intl.formatMessage({
+                    id: "avatar-editor.field.alllow-remixing",
+                    defaultMessage: "Allow others to edit and re-publish your avatar as long as they give you credit."
+                  }),
                   <span>
-                    Allow{" "}
-                    <a
-                      href={configs.link("remixing", "https://github.com/mozilla/hubs/blob/master/REMIXING.md")}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Remixing
-                    </a>{" "}
-                    <span className="license">
-                      (under{" "}
-                      <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">
-                        CC-BY 3.0
-                      </a>)
-                    </span>
+                    <FormattedMessage
+                      id="avatar-editor.field.allow-remixing-checkbox"
+                      defaultMessage="Allow <a>Remixing</a> <license>(under <licenselink>CC-BY 3.0</licenselink>)</license>"
+                      values={{
+                        a: chunks => (
+                          <a
+                            href={configs.link("remixing", "https://github.com/mozilla/hubs/blob/master/REMIXING.md")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {chunks}
+                          </a>
+                        ),
+                        license: chunks => <span className="license">{chunks}</span>,
+                        licenselink: chunks => (
+                          <a
+                            href="https://creativecommons.org/licenses/by/3.0/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {chunks}
+                          </a>
+                        )
+                      }}
+                    />
                   </span>
                 )}
-                {this.textField("creatorAttribution", "Attribution (optional)", false, false)}
+                {this.textField(
+                  "creatorAttribution",
+                  intl.formatMessage({
+                    id: "avatar-editor.field.creator-attribution",
+                    defaultMessage: "Attribution (optional)"
+                  }),
+                  false,
+                  false
+                )}
                 {/* {this.mapField("ao_map", "AO Map", "images/\*", true)} */}
                 {/* {this.mapField("metallic_map", "Metallic Map", "image/\*", true)} */}
                 {/* {this.mapField("roughness_map", "Roughness Map", "image/\*", true)} */}
@@ -524,7 +640,10 @@ export default class AvatarEditor extends Component {
             <div className="info">
               <IfFeature name="show_avatar_editor_link">
                 <p>
-                  <FormattedMessage id="avatar-editor.external-editor-info" />
+                  <FormattedMessage
+                    id="avatar-editor.external-editor-info"
+                    defaultMessage="Create a custom skin for this avatar:"
+                  />{" "}
                   {this.state.editorLinks.map(({ name, url }) => (
                     <a
                       key={name}
@@ -539,53 +658,68 @@ export default class AvatarEditor extends Component {
               </IfFeature>
               <IfFeature name="show_avatar_pipelines_link">
                 <p>
-                  <FormattedMessage id="avatar-editor.info" />
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/MozillaReality/hubs-avatar-pipelines"
-                  >
-                    <FormattedMessage id="avatar-editor.info-link" />
-                  </a>
+                  <FormattedMessage
+                    id="avatar-editor.info"
+                    defaultMessage="Find more custom avatar resources <a>here</a>"
+                    values={{
+                      a: chunks => (
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href="https://github.com/MozillaReality/hubs-avatar-pipelines"
+                        >
+                          {chunks}
+                        </a>
+                      )
+                    }}
+                  />
                 </p>
               </IfFeature>
             </div>
             <div>
-              <input
-                disabled={this.state.uploading}
-                className="form-submit"
-                type="submit"
-                value={this.state.uploading ? "Uploading..." : "Save"}
-              />
+              <button disabled={this.state.uploading} className="form-submit" type="submit">
+                {this.state.uploading ? (
+                  <FormattedMessage id="avatar-editor.submit-button.uploading" defaultMessage="Uploading..." />
+                ) : (
+                  <FormattedMessage id="avatar-editor.submit-button.save" defaultMessage="Save" />
+                )}
+              </button>
             </div>
             {!this.props.hideDelete && (
               <div className="delete-avatar">
                 {this.state.confirmDelete ? (
                   <span>
-                    are you sure? <a onClick={this.deleteAvatar}>yes</a> /{" "}
-                    <a onClick={() => this.setState({ confirmDelete: false })}>no</a>
+                    <FormattedMessage
+                      id="avatar-editor.delete-avatar.confirmation-prompt"
+                      defaultMessage="Are you sure?"
+                    />{" "}
+                    <a onClick={this.deleteAvatar}>
+                      <FormattedMessage id="avatar-editor.delete-avatar.confirm" defaultMessage="yes" />
+                    </a>{" "}
+                    /{" "}
+                    <a onClick={() => this.setState({ confirmDelete: false })}>
+                      <FormattedMessage id="avatar-editor.delete-avatar.cancel" defaultMessage="no" />
+                    </a>
                   </span>
                 ) : (
                   <a
                     onClick={() => this.setState({ confirmDelete: true })}
-                    title={
-                      avatar.has_listings
-                        ? "Other users already using this avatar will still be able to use it, but it will be removed from 'My Avatars' and search results."
-                        : ""
-                    }
+                    title={avatar.has_listings ? intl.formatMessage(delistAvatarInfoMessage) : ""}
                   >
-                    {avatar.has_listings ? "delist" : "delete"} avatar
+                    {avatar.has_listings ? (
+                      <FormattedMessage id="avatar-editor.delist-avatar-button" defaultMessage="Delist Avatar" />
+                    ) : (
+                      <FormattedMessage id="avatar-editor.delete-avatar-button" defaultMessage="Delete Avatar" />
+                    )}
                   </a>
                 )}
               </div>
             )}
           </form>
-        ) : (
-          <a onClick={this.props.onSignIn}>
-            <FormattedMessage id="sign-in.in" />
-          </a>
         )}
       </div>
     );
   }
 }
+
+export default injectIntl(AvatarEditor);

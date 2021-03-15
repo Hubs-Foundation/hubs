@@ -1,0 +1,102 @@
+@use "../styles/theme.scss";
+
+:local(.favorite-icon) {
+  margin-right: 4px;
+
+  *[stroke=\#000] {
+    stroke: theme.$yellow;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$yellow;
+  }
+}
+
+:local(.button-nav) {
+  display: flex;
+  padding: 8px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-bottom: 1px solid theme.$lightgrey;
+}
+
+:local(.button-nav) > * {
+  margin-right: theme.$spacing-sm;
+}
+
+:local(.button-nav) > :last-child {
+  margin-right: 0;
+}
+
+:local(.facets-nav) {
+  background-color: theme.$recessed-bg;
+}
+
+:local(.content) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+:local(.pager) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+:local(.pager-button) {
+  border: none;
+  border-radius: 24px;
+  background-color: theme.$blue;
+  height: 48px;
+  width: 48px;
+  margin: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$white;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$white;
+    }
+  }
+
+  &:hover {
+    background-color: theme.$blue-hover;
+  }
+
+  &:active {
+    background-color: theme.$blue-pressed;
+  }
+
+  &:disabled {
+    color: theme.$grey;
+    cursor: not-allowed;
+    background-color: theme.$lightgrey;
+
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$grey;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$grey;
+      }
+    }
+  }
+}
+
+:local(.no-results) {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}

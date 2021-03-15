@@ -1,33 +1,29 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { injectIntl, FormattedMessage } from "react-intl";
-import classNames from "classnames";
-import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import configs from "../utils/configs";
-import IfFeature from "./if-feature";
 import { SCHEMA } from "../storage/store";
-import styles from "../assets/stylesheets/profile.scss";
 import { fetchAvatar } from "../utils/avatar-utils";
-import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { replaceHistoryState } from "../utils/history";
-import StateLink from "./state-link";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-
+import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
+import { AvatarSetupModal } from "./room/AvatarSetupModal";
 import AvatarPreview from "./avatar-preview";
 
-class ProfileEntryPanel extends Component {
+export default class ProfileEntryPanel extends Component {
   static propTypes = {
+    containerType: PropTypes.oneOf(["sidebar", "modal"]),
     displayNameOverride: PropTypes.string,
     store: PropTypes.object,
     mediaSearchStore: PropTypes.object,
     messages: PropTypes.object,
     finished: PropTypes.func,
-    intl: PropTypes.object,
     history: PropTypes.object,
     avatarId: PropTypes.string,
-    onClose: PropTypes.func
+    onClose: PropTypes.func,
+    onBack: PropTypes.func,
+    showBackButton: PropTypes.bool
+  };
+
+  static defaultProps = {
+    containerType: "modal"
   };
 
   state = {
@@ -126,101 +122,26 @@ class ProfileEntryPanel extends Component {
   };
 
   render() {
-    const { formatMessage } = this.props.intl;
+    const avatarSettingsProps = {
+      displayNameInputRef: inp => (this.nameInput = inp),
+      disableDisplayNameInput: !!this.props.displayNameOverride,
+      displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
+      displayNamePattern: SCHEMA.definitions.profile.properties.displayName.pattern,
+      onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
+      avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
+      onChangeAvatar: e => {
+        e.preventDefault();
+        this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
+      },
+      onSubmit: this.saveStateAndFinish,
+      onClose: this.props.onClose,
+      onBack: this.props.onBack
+    };
 
-    return (
-      <div className={styles.profileEntry}>
-        <div className={styles.close}>
-          <button autoFocus onClick={() => this.props.onClose()}>
-            <i>
-              <FontAwesomeIcon icon={faTimes} />
-            </i>
-          </button>
-        </div>
-        <form onSubmit={this.saveStateAndFinish} className={styles.form}>
-          <div className={classNames([styles.box])}>
-            <label htmlFor="#profile-entry-display-name" className={styles.title}>
-              <FormattedMessage id="profile.header" />
-            </label>
-            {this.props.displayNameOverride ? (
-              <span className={styles.displayName}>{this.props.displayNameOverride}</span>
-            ) : (
-              <input
-                id="profile-entry-display-name"
-                className={styles.formFieldText}
-                value={this.state.displayName}
-                onFocus={e => handleTextFieldFocus(e.target)}
-                onBlur={() => handleTextFieldBlur()}
-                onChange={e => this.setState({ displayName: e.target.value })}
-                required
-                spellCheck="false"
-                pattern={SCHEMA.definitions.profile.properties.displayName.pattern}
-                title={formatMessage({ id: "profile.display_name.validation_warning" })}
-                ref={inp => (this.nameInput = inp)}
-              />
-            )}
+    if (this.props.containerType === "sidebar") {
+      return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton} />;
+    }
 
-            {this.state.avatar ? (
-              <div className={styles.preview}>
-                <AvatarPreview avatarGltfUrl={this.state.avatar.gltf_url} />
-
-                {this.state.avatar.account_id === this.props.store.credentialsAccountId && (
-                  <StateLink
-                    stateKey="overlay"
-                    stateValue="avatar-editor"
-                    stateDetail={{ avatarId: this.state.avatarId, hideDelete: true, returnToProfile: true }}
-                    history={this.props.history}
-                    className={styles.editAvatar}
-                  >
-                    <FontAwesomeIcon icon={faPencilAlt} />
-                  </StateLink>
-                )}
-
-                <div className={styles.chooseAvatar}>
-                  <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use")}>
-                    <FormattedMessage id="profile.choose_avatar" />
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <div className={styles.preview}>
-                <AvatarPreview />
-                <div className={styles.chooseAvatar}>
-                  <a onClick={() => this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use")}>
-                    <FormattedMessage id="profile.choose_avatar" />
-                  </a>
-                </div>
-              </div>
-            )}
-
-            <input className={styles.formSubmit} type="submit" value={formatMessage({ id: "profile.save" })} />
-            <div className={styles.links}>
-              <IfFeature name="show_terms">
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-                >
-                  <FormattedMessage id="profile.terms_of_use" />
-                </a>
-              </IfFeature>
-
-              <IfFeature name="show_privacy">
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
-                >
-                  <FormattedMessage id="profile.privacy_notice" />
-                </a>
-              </IfFeature>
-            </div>
-          </div>
-        </form>
-        <img className={styles.logo} src={configs.image("logo")} />
-      </div>
-    );
+    return <AvatarSetupModal {...avatarSettingsProps} />;
   }
 }
-
-export default injectIntl(ProfileEntryPanel);

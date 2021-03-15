@@ -223,3 +223,25 @@ export function convertStandardMaterial(source, quality) {
 
   return source;
 }
+
+export function disposeTexture(texture) {
+  if (texture.image instanceof HTMLVideoElement) {
+    const video = texture.image;
+    video.pause();
+    video.src = "";
+    video.load();
+  }
+
+  if (texture.hls) {
+    texture.hls.stopLoad();
+    texture.hls.detachMedia();
+    texture.hls.destroy();
+    texture.hls = null;
+  }
+
+  if (texture.dash) {
+    texture.dash.reset();
+  }
+
+  texture.dispose();
+}

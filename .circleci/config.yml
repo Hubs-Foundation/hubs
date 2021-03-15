@@ -1,9 +1,14 @@
-version: 2
-jobs:
-  build:
-    docker:
-      - image: circleci/node:10-browsers
+version: 2.1
+
+aliases:
+  - &defaults
     working_directory: ~/repo
+    docker:
+      - image: circleci/node:14.5-browsers
+
+jobs:
+  build_and_test:
+    <<: *defaults
     steps:
       - checkout
       - restore_cache:
@@ -18,3 +23,26 @@ jobs:
       - run: npm test
       - store_artifacts:
           path: dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - node_modules
+  deploy_storybook:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: npm run deploy-storybook -- --ci
+
+workflows:
+  version: 2
+  build_test_and_deploy_storybook:
+    jobs:
+      - build_and_test
+      - deploy_storybook:
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              only: room-ui-redesign

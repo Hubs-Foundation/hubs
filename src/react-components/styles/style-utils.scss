@@ -1,0 +1,14 @@
+@use './theme';
+
+:local(.hide-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
+    display: none !important;
+  }
+}
+
+:local(.show-lg) {
+  @media (max-width: theme.$breakpoint-lg - 1px) {
+    display: none !important;
+  }
+}
+

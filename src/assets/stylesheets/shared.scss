@@ -28,11 +28,11 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
 }
 
 %default-font {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 %glass-text {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   color: var(--panel-text-color);
 }
 
@@ -368,6 +368,7 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
   position: relative;
   display: flex;
   align-items: center;
+  line-height: 20px;
 }
 %dropdown-select {
   @extend %rounded-border;
@@ -381,6 +382,7 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
   padding: 6px;
   font-weight: bold;
   padding-right: 30px;
+  max-width: 170px;
 }
 %dropdown-arrow {
   pointer-events: none;
