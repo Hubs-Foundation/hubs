@@ -22,7 +22,7 @@ export class WebXRControllerDevice {
     this.orientation = new THREE.Quaternion();
   }
   write(frame, scene, referenceSpace) {
-    if (!referenceSpace || !this.gamepad || !this.gamepad.connected) return;
+    if (!referenceSpace || !this.gamepad) return;
 
     const hand = this.gamepad.hand || "right";
     const path = paths.device.webxr[hand];
