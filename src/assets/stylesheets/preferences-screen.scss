@@ -26,7 +26,11 @@ $fontSize: 16px;
 
   input[type=text],input[type=number] {
     cursor: pointer;
-    @extend %default-input-field;
+    @extend %rounded-border;
+    @extend %default-font;
+    color: theme.$text1-color;;
+    padding: 0px;
+    margin: 0px;
     background: transparent;
     line-height: 30px;
     font-size: $fontSize;
@@ -134,7 +138,10 @@ $fontSize: 16px;
 }
 
 %warn-icon-size {
-  @extend %s36x36;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  min-height: 36px;
 }
 :local(.warn-icon-placeholder){
   @extend %warn-icon-size;
@@ -184,7 +191,11 @@ $fontSize: 16px;
 }
 
 :local(.close-button) {
-  @extend %panel-widget;
+  cursor: pointer;
+  color: theme.$text2-color;
+  outline-style: none;
+  background: none;
+  border: none;
   @extend %no-default-button-style;
   margin: 16px auto 16px 16px;
 }
@@ -213,19 +224,26 @@ $fontSize: 16px;
 }
 :local(.refresh-now-button){
   @extend %action-button;
-  @extend %action-row-button;
+  min-width: 120px;
+  width: 120px;
+  height: 44px;
   width: 180px;
   min-width: 180px;
 }
 %reset-to-default-button-size {
-  @extend %s30x30;
+  width: 30px !important;
+  height: 30px !important;
 }
 :local(.reset-to-default-button) {
   cursor: pointer;
   @extend %no-default-button-style;
   @extend %reset-to-default-button-size;
-  @extend %panel-widget-color;
-  @extend %action-label-color-on-hover;
+  color: theme.$text2-color;
+  @media(hover: hover){
+    &:hover {
+      color: theme.$primary-bg-color;
+    }
+  }
 }
 :local(.reset-to-default-button-placeholder){
   @extend %reset-to-default-button-size;
@@ -234,7 +252,8 @@ $fontSize: 16px;
   display: flex;
 }
 :local(.icon){
-  @extend %s32x32;
+  width: 32px !important;
+  height: 32px !important;
 }
 
 :local(.content-container) {
@@ -246,7 +265,10 @@ $fontSize: 16px;
 }
 
 %checkbox-size {
-  @extend %s36x36;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  min-height: 36px;
 }
 
 :local(.checkbox-placeholder){
@@ -260,13 +282,30 @@ $fontSize: 16px;
 
   input[type=checkbox] {
     cursor: pointer;
-    @extend %default-checkbox;
+    cursor: pointer;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid theme.$input-border-color;
+    background-color: theme.$input-bg-color;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     @extend %checkbox-size;
   }
   input[type=checkbox]:checked {
-    @extend %default-checkbox-checked;
     &::after {
-      @extend %s24x24;
+      content: ' ';
+      position: absolute;
+      background: theme.$active-color;
+      border-radius: 6px;
+    }
+
+    &::after {
+      width: 24px !important;
+      height: 24px !important;
     }
   }
 }
@@ -279,20 +318,41 @@ $fontSize: 16px;
 }
 
 :local(.section-title){
-  @extend %subtitle-text;
+  @extend %default-font;
+  font-weight: normal;
+  text-transform: uppercase;
+  color: theme.$text2-color;
   margin: 0px 0px 16px 16px;
   font-size: $fontSize;
 }
 
 :local(.dropdown) {
-  @extend %dropdown;
+  position: relative;
+  display: flex;
+  align-items: center;
+  line-height: 20px;
+
   select {
     font-size: $fontSize;
-    @extend %dropdown-select;
+    @extend %rounded-border;
+    @extend %default-font;
+    font-family: theme.$font-family-default;
+    color: theme.$text1-color;
+    appearance: none;
+    background-color: theme.$input-bg-color;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid theme.$input-border-color;
+    padding: 6px;
+    font-weight: bold;
+    padding-right: 30px;
+    max-width: 170px;
   }
 }
 :local(.dropdown-arrow){
-  @extend %dropdown-arrow;
+  pointer-events: none;
+  position: absolute;
+  right: 7.5%;
 }
 
 :local(.number-with-range){

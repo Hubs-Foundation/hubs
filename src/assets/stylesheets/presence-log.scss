@@ -77,7 +77,7 @@
     }
 
     a {
-      color: $action-label-color;
+      color: theme.$link-color;
     }
 
     :local(.icon-button) {
@@ -102,7 +102,7 @@
 
       &:hover {
         @media (pointer: fine) {
-          background-color: $action-color;
+          background-color: theme.$primary-bg-color;
         }
       }
     }

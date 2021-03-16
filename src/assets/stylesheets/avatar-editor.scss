@@ -205,12 +205,32 @@
       margin: 5px 0;
 
       .checkbox {
-        @extend %checkbox;
+        cursor: pointer;
+        appearance: none;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        width: 2em;
+        height: 2em;
+        border: 1px solid theme.$input-border-color;
+        background-color: theme.$input-bg-color;
+        border-radius: 6px;
+        vertical-align: sub;
+        margin: 0 0.7em;
         min-width: 2em;
         min-height: 2em;
       }
       .checkbox:checked {
-        @extend %checkbox-checked;
+        position: relative;
+        &::after {
+          content: ' ';
+          position: absolute;
+          background: theme.$active-color;
+          top: 0.3em;
+          left: 0.3em;
+          right: 0.3em;
+          bottom: 0.3em;
+          border-radius: 0.3em;
+        }
       }
     }
 
@@ -243,7 +263,8 @@
   }
 
   .form-submit {
-    @extend %bottom-action-button;
+    @extend %action-button;
+    background: theme.$primary-bg-color;
     margin: 0;
     margin-bottom: 0.5em;
   }
@@ -273,7 +294,11 @@
   }
 
   .close-button {
-    @extend %panel-widget;
+    cursor: pointer;
+    color: theme.$text2-color;
+    outline-style: none;
+    background: none;
+    border: none;
 
     margin-top: 16px;
     font-size: 1.6em;

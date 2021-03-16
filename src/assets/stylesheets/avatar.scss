@@ -1,3 +1,4 @@
+@use "../../react-components/styles/theme.scss";
 @import 'root-vars';
 @import 'shared';
 
@@ -49,7 +50,9 @@ body {
   }
 
   :local(.title) {
-    @extend %top-title;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: theme.$text1-color;
     width: 100%;
     color: theme.$text1-color;
     text-align: center;
@@ -62,12 +65,14 @@ body {
   }
 
   :local(.attributions) {
-    @extend %top-subtitle;
+    font-size: 1.0em;
+    padding-top: 4px;
     margin-bottom: 1em;
   }
 
   :local(.form-submit) {
-    @extend %bottom-action-button;
+    @extend %action-button;
+    background: theme.$primary-bg-color;
     margin: 0;
     min-height: max-content;
     margin-top: 16px;
