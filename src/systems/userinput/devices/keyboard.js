@@ -1,13 +1,14 @@
 import { paths } from "../paths";
 import { ArrayBackedSet } from "../array-backed-set";
 
+// TODO currently hardcoding these keys to be physical location based instead of character based. We likely want to make this part of the bindings themselves.
 const CODE_TO_KEY = {
-  "KeyW": "w",
-  "KeyA": "a",
-  "KeyS": "s",
-  "KeyD": "d",
-  "KeyQ": "q",
-  "KeyE": "e",
+  KeyW: "w",
+  KeyA: "a",
+  KeyS: "s",
+  KeyD: "d",
+  KeyQ: "q",
+  KeyE: "e"
 };
 
 export class KeyboardDevice {
