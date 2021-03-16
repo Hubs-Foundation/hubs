@@ -67,9 +67,6 @@ export default class DialogAdapter extends EventEmitter {
     this._forceTcp = false;
     this._forceTurn = false;
     this._iceTransportPolicy = "all";
-    this._reconnectionDelay = INITIAL_ROOM_RECONNECTION_INTERVAL;
-    this._reconnectionTimeout = null;
-    this._reconnectionAttempts = 0;
     this._lastSendConnectionState = null;
     this._lastRecvConnectionState = null;
     this._closed = true;
@@ -315,12 +312,17 @@ export default class DialogAdapter extends EventEmitter {
     const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     this._protoo = new protooClient.Peer(protooTransport);
 
-    await new Promise(res => {
+    await new Promise((resolve, reject) => {
       this._protoo.on("open", async () => {
         this.emitRTCEvent("info", "Signaling", () => `Open`);
         this._closed = false;
-        await this._joinRoom();
-        res();
+        try {
+          await this._joinRoom();
+          resolve();
+        } catch (err) {
+          this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
+          reject(err);
+        }
       });
     });
 
@@ -330,8 +332,9 @@ export default class DialogAdapter extends EventEmitter {
     });
 
     this._protoo.on("close", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Close`);
+      this.emitRTCEvent("error", "Signaling", () => `Closed`);
       this.disconnect();
+      this.emit("closed", "Signaling has been closed.");
     });
 
     // eslint-disable-next-line no-unused-vars
@@ -632,12 +635,6 @@ export default class DialogAdapter extends EventEmitter {
     this.reliableTransport(undefined, dataType, data);
   }
 
-  setReconnectionListeners(reconnectingListener, reconnectedListener, reconnectionErrorListener) {
-    this._reconnectingListener = reconnectingListener;
-    this._reconnectedListener = reconnectedListener;
-    this._reconnectionErrorListener = reconnectionErrorListener;
-  }
-
   syncOccupants() {
     // Not implemented
   }
@@ -821,53 +818,44 @@ export default class DialogAdapter extends EventEmitter {
   async _joinRoom() {
     debug("_joinRoom()");
 
-    try {
-      this._mediasoupDevice = new mediasoupClient.Device({});
+    this._mediasoupDevice = new mediasoupClient.Device({});
 
-      const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
+    const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
 
-      await this._mediasoupDevice.load({ routerRtpCapabilities });
+    await this._mediasoupDevice.load({ routerRtpCapabilities });
 
-      const { host, port, turn } = await window.APP.hubChannel.getHost();
-      const iceServers = this.getIceServers(host, port, turn);
+    const { host, port, turn } = await window.APP.hubChannel.getHost();
+    const iceServers = this.getIceServers(host, port, turn);
 
-      await this.createSendTransport(iceServers);
-      await this.createRecvTransport(iceServers);
+    await this.createSendTransport(iceServers);
+    await this.createRecvTransport(iceServers);
 
-      const { peers } = await this._protoo.request("join", {
-        displayName: this._clientId,
-        device: this._device,
-        rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
-        sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
-        token: this._joinToken
-      });
+    const { peers } = await this._protoo.request("join", {
+      displayName: this._clientId,
+      device: this._device,
+      rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
+      sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
+      token: this._joinToken
+    });
 
-      const audioConsumerPromises = [];
-      this.occupants = {};
+    const audioConsumerPromises = [];
+    this.occupants = {};
 
-      // Create a promise that will be resolved once we attach to all the initial consumers.
-      // This will gate the connection flow until all voices will be heard.
-      for (let i = 0; i < peers.length; i++) {
-        const peerId = peers[i].id;
-        this._onOccupantConnected(peerId);
-        this.occupants[peerId] = peers[i];
-        if (!peers[i].hasProducers) continue;
-        audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
-      }
+    // Create a promise that will be resolved once we attach to all the initial consumers.
+    // This will gate the connection flow until all voices will be heard.
+    for (let i = 0; i < peers.length; i++) {
+      const peerId = peers[i].id;
+      this._onOccupantConnected(peerId);
+      this.occupants[peerId] = peers[i];
+      if (!peers[i].hasProducers) continue;
+      audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
+    }
 
-      this._connectSuccess(this._clientId);
-      this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
+    this._connectSuccess(this._clientId);
+    this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
 
-      if (this._onOccupantsChanged) {
-        this._onOccupantsChanged(this.occupants);
-      }
-    } catch (err) {
-      this.emitRTCEvent("error", "Adapter", () => `Join room failed: ${error}`);
-      error("_joinRoom() failed:%o", err);
-
-      if (!this._reconnectionTimeout) {
-        this._reconnectionTimeout = setTimeout(() => this.reconnect(), this._reconnectionDelay);
-      }
+    if (this._onOccupantsChanged) {
+      this._onOccupantsChanged(this.occupants);
     }
   }
 
@@ -1084,46 +1072,6 @@ export default class DialogAdapter extends EventEmitter {
 
     this._lastRecvConnectionState = null;
     this._lastSendConnectionState = null;
-  }
-
-  reconnect() {
-    // Dispose of all networked entities and other resources tied to the session.
-    this.disconnect();
-
-    this.connect()
-      .then(() => {
-        this._reconnectionDelay = INITIAL_ROOM_RECONNECTION_INTERVAL;
-        this._reconnectionAttempts = 0;
-
-        if (this._reconnectedListener) {
-          this._reconnectedListener();
-        }
-
-        clearInterval(this._reconnectionTimeout);
-        this._reconnectionTimeout = null;
-      })
-      .catch(error => {
-        this._reconnectionDelay += 1000;
-        this._reconnectionAttempts++;
-
-        if (this._reconnectionAttempts > this.max_reconnectionAttempts && this._reconnectionErrorListener) {
-          return this._reconnectionErrorListener(
-            new Error("Connection could not be reestablished, exceeded maximum number of reconnection attempts.")
-          );
-        }
-
-        this.emitRTCEvent("warn", "Adapter", () => `Error during reconnect, retrying: ${error}`);
-        console.warn("Error during reconnect, retrying.");
-        console.warn(error);
-
-        if (this._reconnectingListener) {
-          this._reconnectingListener(this._reconnectionDelay);
-        }
-
-        if (!this._reconnectionTimeout) {
-          this._reconnectionTimeout = setTimeout(() => this.reconnect(), this._reconnectionDelay);
-        }
-      });
   }
 
   kick(clientId, permsToken) {
