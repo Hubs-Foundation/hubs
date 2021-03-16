@@ -1372,26 +1372,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         setupPeerConnectionConfig(adapter);
 
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
-
-        // Stop the tone after we've connected, which seems to mitigate the issue without actually
-        // having to keep this playing and using bandwidth.
-        scene.addEventListener(
-          "didConnectToNetworkedScene",
-          () => {
-            if (oscillator) {
-              oscillator.stop();
-            }
-
-            if (track) {
-              track.enabled = false;
-            }
-          },
-          { once: true }
-        );
-
-        if (stream) {
-          await adapter.setLocalMediaStream(stream);
-        }
       });
 
       subscriptions.setHubChannel(hubChannel);
