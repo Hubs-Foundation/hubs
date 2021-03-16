@@ -20,8 +20,8 @@ body.vr-mode {
 
 :local(.interstitial) {
   @extend %default-font;
-  background-color: var(--vr-interstitial-background-color);
-  color: var(--vr-interstitial-text-color);
+  background-color: theme.$overlay-bg-color;
+  color: theme.$overlay-text-color;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +47,7 @@ body.vr-mode {
   right: 0;
   top: 0;
   bottom: 0;
-  background: var(--full-panel-background-color);
+  background: theme.$background1-color;
   z-index: 11;
   pointer-events: auto;
 }

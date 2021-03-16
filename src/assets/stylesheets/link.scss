@@ -1,5 +1,4 @@
 @use "../../react-components/styles/theme.scss";
-@import 'root-vars';
 @import 'shared';
 @import 'loader';
 
@@ -20,7 +19,6 @@ body {
 
 button {
   outline: none;
-  -webkit-tap-highlight-color: var(--link-button-highlight-color);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -47,7 +45,7 @@ a {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 24px;
+  margin: 24px 0;
 
   img {
     width: 247px;
@@ -114,7 +112,7 @@ a {
 }
 
 :local(.code-loading-panel) {
-  background: var(--link-code-loading-background);
+  background: theme.$overlay-bg-color;
 }
 
 :local(.entry-footer-image) {
@@ -157,7 +155,7 @@ a {
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
   text-align: center;
-  background-color: var(--link-keypad-background-color);
+  background-color: theme.$background2-color;
   border-radius: 24px;
   padding: 12px;
 }
@@ -172,24 +170,29 @@ a {
   outline-style: none;
   @extend %default-font;
   font-weight: bold;
-  color: theme.$text1-color;
+  color: theme.$button-text-color;
   font-size: 1.4em;
   border-radius: 128px;
-  box-shadow: 0px 2px 12px #ccc;
+  border: 1px solid theme.$button-border-color;
   min-width: 80px;
   min-height: 80px;
   cursor: pointer;
   line-height: 68px;
   margin: 8px;
-  background: var(--link-button-background-color);
+  background: theme.$button-bg-color;
+}
+
+:local(.keypad-button):hover {
+  background-color: theme.$button-bg-color-hover;
 }
 
 :local(.keypad-button):active {
-  background-color: var(--link-button-active-background-color);
+  background-color: theme.$button-bg-color-pressed;
 }
 
 :local(.keypad-button):disabled {
-  color: var(--link-button-disabled-color);
+  color: theme.$disabled-text-color;
+  background-color: theme.$disabled-bg-color;
 }
 
 :local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active, :local(.keypad-toggle-mode), :local(.keypad-toggle-mode):disabled, :local(.keypad-toggle-mode):active {
@@ -205,7 +208,7 @@ a {
 
 :local(.keypad-backspace):active {
   background-color: transparent;
-  color: var(--link-button-active-color);
+  color: theme.$text1-color;
 }
 
 :local(.keypad-toggle-mode) {
@@ -241,7 +244,7 @@ a {
   width: 295px;
   letter-spacing: 0.08em;
   text-align: center;
-  color: var(--link-entry-color);
+  color: theme.$text1-color;
 }
 
 :local(.char-input::placeholder) {
@@ -251,7 +254,7 @@ a {
 :local(.headset-icon) {
   width: 64px;
   height: 64px;
-  background-color: var(--link-icon-color);
+  background-color: theme.$text1-color;
   border-radius: 32px;
   margin-bottom: 8px;
   padding-right: 2px;

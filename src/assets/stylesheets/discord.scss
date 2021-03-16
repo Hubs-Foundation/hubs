@@ -1,5 +1,4 @@
 @use "../../react-components/styles/theme.scss";
-@import 'root-vars';
 @import 'shared';
 @import 'loader';
 
@@ -247,7 +246,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: theme.$overlay-color;
+  background-color: theme.$overlay-bg-color;
   display: flex;
   justify-content: center;
   align-items: center;

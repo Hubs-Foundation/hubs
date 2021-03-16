@@ -50,8 +50,6 @@ $purple: #7854F6;
 $purple-hover: #8C6EF7;
 $purple-pressed: #663DF5;
 
-$overlay-color: rgba(0, 0, 0, 0.5);
-
 $recessed-bg: #f9f9f9;
 
 $yellow: #FFC000;
@@ -171,6 +169,7 @@ $status-recording-color: var(--status-recording-color, $red);
 $status-enabled-color: var(--status-enabled-color, $green);
 $status-disabled-color: var(--status-disabled-color, $red);
 
+$overlay-bg-color: rgba(0, 0, 0, 0.5);
 $overlay-text-color: var(--overlay-text-color, $white);
 $overlay-border-color: var(--overlay-border-color, $grey);
 $overtlay-outline-color: var(--overlay-outline-color, $white);

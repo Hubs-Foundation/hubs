@@ -274,3 +274,7 @@ hr {
 input::placeholder {
   color: theme.$text2-color;
 }
+
+summary {
+  cursor: pointer;
+}
