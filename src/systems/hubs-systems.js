@@ -30,7 +30,6 @@ import { ShadowSystem } from "./shadow-system";
 import { MediaFramesSystem } from "./media-frames";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
 import { EmojiSystem } from "./emoji-system";
-import { IframeSystem } from "./iframe-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -70,7 +69,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
     this.inspectYourselfSystem = new InspectYourselfSystem();
     this.emojiSystem = new EmojiSystem(this.el);
-    this.iframeSystem = new IframeSystem(this.el);
   },
 
   tick(t, dt) {
@@ -115,7 +113,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
     this.mediaFramesSystem.tick();
-    this.iframeSystem.tick();
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();
