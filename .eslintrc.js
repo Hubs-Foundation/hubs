@@ -1,3 +1,4 @@
+// https://eslint.org/
 module.exports = {
   parser: "babel-eslint",
   env: {
@@ -11,19 +12,26 @@ module.exports = {
     NAF: true
   },
   plugins: ["prettier", "react", "react-hooks", "@calm/react-intl"],
+
+  // https://eslint.org/docs/rules/
   rules: {
+    // https://github.com/prettier/eslint-plugin-prettier
     "prettier/prettier": "error",
+
     "prefer-const": "error",
     "no-use-before-define": "error",
     "no-var": "error",
     "no-throw-literal": "error",
     // Light console usage is useful but remove debug logs before merging to master.
     "no-console": "off",
+
+    // https://www.npmjs.com/package/eslint-plugin-react-hooks
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    // TODO: Move to throwing lint errors for react-intl once migration is complete
+
+    // https://github.com/calm/eslint-plugin-react-intl
     "@calm/react-intl/missing-formatted-message": [
-      "warn",
+      "error",
       {
         noTrailingWhitespace: true,
         ignoreLinks: true,
@@ -33,7 +41,7 @@ module.exports = {
       }
     ],
     "@calm/react-intl/missing-attribute": [
-      "warn",
+      "error",
       {
         noTrailingWhitespace: true,
         noSpreadOperator: true,
@@ -43,7 +51,12 @@ module.exports = {
         requireDefaultMessage: true
       }
     ],
-    "@calm/react-intl/missing-values": "warn"
+    "@calm/react-intl/missing-values": "error"
   },
-  extends: ["prettier", "plugin:react/recommended", "eslint:recommended"]
+  extends: [
+    // https://github.com/prettier/eslint-config-prettier
+    "prettier",
+    "plugin:react/recommended",
+    "eslint:recommended"
+  ]
 };
