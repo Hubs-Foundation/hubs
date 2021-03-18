@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { LoadingScreenLayout } from "../layout/LoadingScreenLayout";
+import { Button } from "../input/Button";
 
 export const ExitReason = {
   exited: "exited",
@@ -104,6 +105,10 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSou
             />
           </p>
         )}
+
+        <Button as="a" preset="accept" href="/">
+          <FormattedMessage id="exited-room-screen.home-button" defaultMessage="Back to Home" />
+        </Button>
       </>
     );
   } else {
@@ -140,6 +145,10 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSou
             />
           </p>
         )}
+
+        <Button as="a" preset="accept" href={window.location.href}>
+          <FormattedMessage id="exited-room-screen.refresh-page-button" defaultMessage="Refresh Page" />
+        </Button>
       </>
     );
   }

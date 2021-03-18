@@ -115,6 +115,16 @@ function getHubsComponents(node) {
   return hubsComponents || legacyComponents;
 }
 
+function getHubsComponentsFromMaterial(node) {
+  const material = node.material;
+
+  if (!material) {
+    return null;
+  }
+
+  return getHubsComponents(material);
+}
+
 /// Walks the tree of three.js objects starting at the given node, using the GLTF data
 /// and template data to construct A-Frame entities and components when necessary.
 /// (It's unnecessary to construct entities for subtrees that have no component data
@@ -142,8 +152,9 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
   }
 
   const entityComponents = getHubsComponents(node);
+  const materialComponents = getHubsComponentsFromMaterial(node);
 
-  const nodeHasBehavior = !!entityComponents || node.name in templates;
+  const nodeHasBehavior = !!entityComponents || !!materialComponents || node.name in templates;
   if (!nodeHasBehavior && !childEntities.length && !isRoot) {
     return null; // we don't need an entity for this node
   }
@@ -229,6 +240,17 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
         if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
           await inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+        }
+      }
+    }
+
+    const materialComponents = getHubsComponentsFromMaterial(object3D);
+
+    if (materialComponents && el) {
+      for (const prop in materialComponents) {
+        if (materialComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+          const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
+          await inflator(el, componentName, materialComponents[prop], materialComponents, indexToEntityMap);
         }
       }
     }

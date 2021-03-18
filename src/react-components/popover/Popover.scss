@@ -8,6 +8,12 @@
   border: 1px solid theme.$lightgrey;
   min-width: 160px;
   z-index: 10;
+  max-height: calc(100vh - 200px);
+
+  :local(.content) {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 
   &[data-popper-placement^=bottom] {
     :local(.content) {
@@ -69,6 +75,7 @@
   padding: 0 8px;
   height: 48px;
   position: relative;
+  flex-shrink: 0;
 
   h5 {
     display: flex
@@ -103,6 +110,7 @@
   border-width: 0;
   border-radius: 0;
   z-index: 2;
+  max-height: none;
 
   :local(.header) {
     border-bottom: 1px solid theme.$lightgrey;

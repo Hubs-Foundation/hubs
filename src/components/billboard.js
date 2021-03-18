@@ -2,6 +2,9 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 // Billboard component that only updates visible objects and only those in the camera view on mobile VR.
 AFRAME.registerComponent("billboard", {
+  schema: {
+    onlyY: { type: "boolean" }
+  },
   init: function() {
     this.target = new THREE.Vector3();
     this._updateBillboard = this._updateBillboard.bind(this);
@@ -87,6 +90,11 @@ AFRAME.registerComponent("billboard", {
       // Set the camera world position as the target.
       this.target.setFromMatrixPosition(camera.matrixWorld);
       object3D.lookAt(this.target);
+
+      if (this.data.onlyY) {
+        object3D.rotation.x = 0;
+      }
+
       object3D.matrixNeedsUpdate = true;
     }
   }

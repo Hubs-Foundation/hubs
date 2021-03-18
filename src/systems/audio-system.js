@@ -1,3 +1,19 @@
+let delayedReconnectTimeout = null;
+function performDelayedReconnect(gainNode) {
+  if (delayedReconnectTimeout) {
+    clearTimeout(delayedReconnectTimeout);
+  }
+
+  delayedReconnectTimeout = setTimeout(() => {
+    delayedReconnectTimeout = null;
+    console.warn(
+      "enableChromeAEC: recreate RTCPeerConnection loopback because the local connection was disconnected for 10s"
+    );
+    // eslint-disable-next-line no-use-before-define
+    enableChromeAEC(gainNode);
+  }, 10000);
+}
+
 async function enableChromeAEC(gainNode) {
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
@@ -20,15 +36,43 @@ async function enableChromeAEC(gainNode) {
   const inboundPeerConnection = new RTCPeerConnection();
 
   const onError = e => {
-    console.error("RTCPeerConnection loopback initialization error", e);
+    console.error("enableChromeAEC: RTCPeerConnection loopback initialization error", e);
   };
 
   outboundPeerConnection.addEventListener("icecandidate", e => {
     inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
   });
+  outboundPeerConnection.addEventListener("iceconnectionstatechange", () => {
+    console.warn(
+      "enableChromeAEC: outboundPeerConnection state changed to " + outboundPeerConnection.iceConnectionState
+    );
+    if (outboundPeerConnection.iceConnectionState === "disconnected") {
+      performDelayedReconnect(gainNode);
+    }
+    if (outboundPeerConnection.iceConnectionState === "connected") {
+      if (delayedReconnectTimeout) {
+        // The RTCPeerConnection reconnected by itself, cancel recreating the
+        // local connection.
+        clearTimeout(delayedReconnectTimeout);
+      }
+    }
+  });
 
   inboundPeerConnection.addEventListener("icecandidate", e => {
     outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+  });
+  inboundPeerConnection.addEventListener("iceconnectionstatechange", () => {
+    console.warn("enableChromeAEC: inboundPeerConnection state changed to " + inboundPeerConnection.iceConnectionState);
+    if (inboundPeerConnection.iceConnectionState === "disconnected") {
+      performDelayedReconnect(gainNode);
+    }
+    if (inboundPeerConnection.iceConnectionState === "connected") {
+      if (delayedReconnectTimeout) {
+        // The RTCPeerConnection reconnected by itself, cancel recreating the
+        // local connection.
+        clearTimeout(delayedReconnectTimeout);
+      }
+    }
   });
 
   inboundPeerConnection.addEventListener("track", e => {

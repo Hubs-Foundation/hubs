@@ -4,6 +4,7 @@ import { FormattedMessage } from "react-intl";
 
 import configs from "../utils/configs";
 import styles from "../assets/stylesheets/preload-overlay.scss";
+import { Button } from "./input/Button";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -33,13 +34,13 @@ export default class PreloadOverlay extends Component {
           <div className={styles.hubName}>{this.props.hubName}</div>
           {this.props.onLoadClicked &&
             (!isMobile ? (
-              <button className={styles.loadButton} onClick={this.props.onLoadClicked}>
+              <Button preset="blue" onClick={this.props.onLoadClicked}>
                 {loadButtonText}
-              </button>
+              </Button>
             ) : (
-              <a href={this.props.baseUrl} target="_blank" className={styles.loadButton} rel="noreferrer noopener">
+              <Button preset="blue" as="a" href={this.props.baseUrl} target="_blank" rel="noreferrer noopener">
                 {loadButtonText}
-              </a>
+              </Button>
             ))}
         </div>
       </div>
