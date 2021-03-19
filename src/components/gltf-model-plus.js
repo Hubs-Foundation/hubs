@@ -7,6 +7,7 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -342,6 +343,8 @@ const loadLightmap = async (parser, materialIndex) => {
   return lightMap;
 };
 
+let ktxLoader;
+
 export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
@@ -354,7 +357,17 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
+  // TODO this is deprecated and we eventually want to get rid of it in favor of always using the now official ktx2 loader, but there are people using it so we will support both for awhile
   gltfLoader.setBasisTextureLoader(new HubsBasisTextureLoader(loadingManager));
+
+  // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube. They don't currently use KTX textures but if htey did this would be an issue. Fixing htis is hard but is part of "taking control of the render loop""
+  if (!ktxLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  }
+
+  if (ktxLoader) {
+    gltfLoader.setKTX2Loader(ktxLoader);
+  }
 
   const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
 

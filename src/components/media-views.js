@@ -50,6 +50,34 @@ for (let i = 0; i <= 20; i++) {
   VOLUME_LABELS[i] = s;
 }
 
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+
+let ktxLoader;
+export function createKTX2Texture(url) {
+  if (!ktxLoader) {
+    ktxLoader = new KTX2Loader().detectSupport(AFRAME.scenes[0].renderer);
+  }
+  return new Promise((resolve, reject) => {
+    ktxLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
+}
+
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
     super(document.createElement("canvas"));
@@ -1039,6 +1067,8 @@ AFRAME.registerComponent("media-image", {
             promise = createGIFTexture(src);
           } else if (contentType.includes("image/basis")) {
             promise = createBasisTexture(src);
+          } else if (contentType.includes("image/ktx2")) {
+            promise = createKTX2Texture(src);
           } else if (contentType.startsWith("image/")) {
             promise = createImageTexture(src);
           } else {

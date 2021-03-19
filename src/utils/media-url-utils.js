@@ -17,6 +17,7 @@ const commonKnownContentTypes = {
   mp4: "video/mp4",
   mp3: "audio/mpeg",
   basis: "image/basis",
+  ktx2: "image/ktx2",
   m3u8: "application/vnd.apple.mpegurl",
   mpd: "application/dash+xml"
 };
