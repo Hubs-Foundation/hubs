@@ -788,7 +788,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store);
   window.APP.hubChannel = hubChannel;
 
-  const performConditionalSignIn = async (predicate, action, signInMessage, signInCompleteMessage, onFailure) => {
+  const performConditionalSignIn = async (predicate, action, signInMessage, onFailure) => {
     if (predicate()) return action();
 
     await handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
@@ -796,7 +796,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({
       showSignInDialog: true,
       signInMessage,
-      signInCompleteMessage,
       onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
         let actionError = null;
