@@ -455,31 +455,6 @@ export async function createImageTexture(url, filter) {
   return texture;
 }
 
-import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
-export const basisTextureLoader = new HubsBasisTextureLoader();
-
-export function createBasisTexture(url) {
-  return new Promise((resolve, reject) => {
-    basisTextureLoader.load(
-      url,
-      function(texture) {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.onUpdate = function() {
-          // Delete texture data once it has been uploaded to the GPU
-          texture.mipmaps.length = 0;
-        };
-        // texture.anisotropy = 4;
-        resolve(texture);
-      },
-      undefined,
-      function(error) {
-        console.error(error);
-        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
-      }
-    );
-  });
-}
-
 const isIOS = AFRAME.utils.device.isIOS();
 
 /**

@@ -6,7 +6,6 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
-import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
@@ -85,10 +84,20 @@ function generateMeshBVH(object3D) {
     const hasBoundsTree = hasBufferGeometry && obj.geometry.boundsTree;
     if (hasBufferGeometry && !hasBoundsTree && obj.geometry.attributes.position) {
       const geo = obj.geometry;
+
+      if (
+        geo.attributes.position.isInterleavedBufferAttribute ||
+        (geo.index && geo.index.isInterleavedBufferAttribute)
+      ) {
+        console.warn("Skipping generaton of MeshBVH for interleaved geoemtry as it is not supported");
+        return;
+      }
+
       const triCount = geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3;
       // only bother using memory and time making a BVH if there are a reasonable number of tris,
       // and if there are too many it's too painful and large to tolerate doing it (at least until
       // we put this in a web worker)
+
       if (triCount > 1000 && triCount < 1000000) {
         // note that bounds tree construction creates an index as a side effect if one doesn't already exist
         geo.boundsTree = new MeshBVH(obj.geometry, { strategy: 0, maxDepth: 30 });
@@ -357,10 +366,10 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
-  // TODO this is deprecated and we eventually want to get rid of it in favor of always using the now official ktx2 loader, but there are people using it so we will support both for awhile
-  gltfLoader.setBasisTextureLoader(new HubsBasisTextureLoader(loadingManager));
 
-  // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube. They don't currently use KTX textures but if htey did this would be an issue. Fixing htis is hard but is part of "taking control of the render loop""
+  // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
+  // They don't currently use KTX textures but if htey did this would be an issue. Fixing this is hard but is part of
+  // "taking control of the render loop" which is something we want to tackle for many reasons.
   if (!ktxLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
     ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
   }

@@ -6,7 +6,7 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createImageTexture, createBasisTexture, createVideoOrAudioEl } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createVideoOrAudioEl } from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
@@ -53,6 +53,32 @@ for (let i = 0; i <= 20; i++) {
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 
 let ktxLoader;
+
+export function createBasisTexture(url) {
+  if (!ktxLoader) {
+    ktxLoader = new KTX2Loader().detectSupport(AFRAME.scenes[0].renderer);
+  }
+  return new Promise((resolve, reject) => {
+    ktxLoader.basisLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        // texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
+}
+
 export function createKTX2Texture(url) {
   if (!ktxLoader) {
     ktxLoader = new KTX2Loader().detectSupport(AFRAME.scenes[0].renderer);

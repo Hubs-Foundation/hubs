@@ -99,7 +99,17 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
   return getAbsoluteUrl(baseUrl, relativeUrl).href;
 }
 
+import basisJsUrl from "file-loader!three/examples/js/libs/basis/basis_transcoder.js";
+import basisWasmUrl from "three/examples/js/libs/basis/basis_transcoder.wasm";
+
 export const getCustomGLTFParserURLResolver = gltfUrl => url => {
+  // Intercept loading of basis transcoder with content hashed urls
+  if (url === "basis_transcoder.js") {
+    return basisJsUrl;
+  } else if (url === "basis_transcoder.wasm") {
+    return basisWasmUrl;
+  }
+
   if (typeof url !== "string" || url === "") return "";
   if (/^(https?:)?\/\//i.test(url)) return proxiedUrlFor(url);
   if (/^data:.*,.*$/i.test(url)) return url;
