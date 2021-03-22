@@ -102,6 +102,15 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
 import basisJsUrl from "file-loader!three/examples/js/libs/basis/basis_transcoder.js";
 import basisWasmUrl from "three/examples/js/libs/basis/basis_transcoder.wasm";
 
+export const rewriteBasisTranscoderUrls = function(url) {
+  if (url === "basis_transcoder.js") {
+    return basisJsUrl;
+  } else if (url === "basis_transcoder.wasm") {
+    return basisWasmUrl;
+  }
+  return url;
+};
+
 export const getCustomGLTFParserURLResolver = gltfUrl => url => {
   // Intercept loading of basis transcoder with content hashed urls
   if (url === "basis_transcoder.js") {

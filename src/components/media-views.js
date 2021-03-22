@@ -51,12 +51,15 @@ for (let i = 0; i <= 20; i++) {
 }
 
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
+const loadingManager = new THREE.LoadingManager();
+loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 
 let ktxLoader;
 
 export function createBasisTexture(url) {
   if (!ktxLoader) {
-    ktxLoader = new KTX2Loader().detectSupport(AFRAME.scenes[0].renderer);
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
   }
   return new Promise((resolve, reject) => {
     ktxLoader.basisLoader.load(
@@ -81,7 +84,7 @@ export function createBasisTexture(url) {
 
 export function createKTX2Texture(url) {
   if (!ktxLoader) {
-    ktxLoader = new KTX2Loader().detectSupport(AFRAME.scenes[0].renderer);
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
   }
   return new Promise((resolve, reject) => {
     ktxLoader.load(
