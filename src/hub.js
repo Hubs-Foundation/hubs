@@ -1113,19 +1113,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     return params;
   };
 
-  const reconnect = async ({ ret_pool, ret_version }) => {
-    invalidateReticulumMeta();
-    const { pool, version } = await getReticulumMeta();
-    return ret_pool === pool && ret_version === version;
-  };
-
-  const migrateToNewReticulumServer = async ({ ret_version, ret_pool }) => {
-    console.log(`[reconnect] Reticulum deploy detected v${ret_version} on ${ret_pool}.`);
-
+  const tryGetMatchingMeta = async ({ ret_pool, ret_version }) => {
     const maxAttempts = 4;
-    let didReconnect = false;
+    let didMatchMeta = false;
     let attempt = 0;
-    while (!didReconnect && attempt < maxAttempts) {
+    while (!didMatchMeta && attempt < maxAttempts) {
       try {
         // Add randomness to avoid flooding reticulum.
         const delayMS = attempt * 3000 + Math.random() * 15000;
@@ -1136,16 +1128,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         await sleep(delayMS);
         // Reconnect until reticulum meta matches expected version and pool.
-        didReconnect = await reconnect({ ret_version, ret_pool });
+        invalidateReticulumMeta();
+        const { pool, version } = await getReticulumMeta();
+        didMatchMeta = ret_pool === pool && ret_version === version;
       } catch {
-        didReconnect = false;
+        didMatchMeta = false;
       }
 
       attempt = attempt + 1;
     }
+    return didMatchMeta;
+  };
 
-    if (!didReconnect) {
-      console.error("[reconnect] Failed to reconnect to reticulum.");
+  const migrateToNewReticulumServer = async ({ ret_version, ret_pool }) => {
+    console.log(`[reconnect] Reticulum deploy detected v${ret_version} on ${ret_pool}.`);
+
+    if (await tryGetMatchingMeta({ ret_version, ret_pool })) {
+      console.error(`[reconnect] Failed to reconnect. Did not get meta for v${ret_version} on ${ret_pool}.`);
       return;
     }
 
