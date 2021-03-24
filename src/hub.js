@@ -164,6 +164,7 @@ import "./gltf-component-mappings";
 
 import { App } from "./App";
 import MediaDevicesManager from "./utils/media-devices-manager";
+import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 window.APP = new App();
@@ -1064,9 +1065,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  let retDeployReconnectInterval;
-  const retReconnectMaxDelayMs = 15000;
-
   // Reticulum global channel
   let retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
   retPhxChannel
@@ -1115,46 +1113,86 @@ document.addEventListener("DOMContentLoaded", async () => {
     return params;
   };
 
-  const migrateToNewReticulumServer = async deployNotification => {
-    // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
-    console.log(`Reticulum deploy detected v${deployNotification.ret_version} on ${deployNotification.ret_pool}`);
-    clearInterval(retDeployReconnectInterval);
-
-    setTimeout(() => {
-      const tryReconnect = async () => {
-        invalidateReticulumMeta();
-        const reticulumMeta = await getReticulumMeta();
-
-        if (
-          reticulumMeta.pool === deployNotification.ret_pool &&
-          reticulumMeta.version === deployNotification.ret_version
-        ) {
-          console.log("Reticulum reconnecting.");
-          clearInterval(retDeployReconnectInterval);
-          const oldSocket = retPhxChannel.socket;
-          const socket = await connectToReticulum(isDebug, oldSocket.params());
-          retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
-          await hubChannel.migrateToSocket(socket, createHubChannelParams());
-          authChannel.setSocket(socket);
-          linkChannel.setSocket(socket);
-
-          // Disconnect old socket after a delay to ensure this user is always registered in presence.
-          setTimeout(() => {
-            console.log("Reconnection complete. Disconnecting old reticulum socket.");
-            oldSocket.teardown();
-          }, 10000);
-        }
-      };
-
-      retDeployReconnectInterval = setInterval(tryReconnect, 5000);
-      tryReconnect();
-    }, Math.floor(Math.random() * retReconnectMaxDelayMs));
+  const reconnect = async ({ ret_pool, ret_version }) => {
+    invalidateReticulumMeta();
+    const { pool, version } = await getReticulumMeta();
+    return ret_pool === pool && ret_version === version;
   };
 
-  retPhxChannel.on("notice", async data => {
-    // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
+  const migrateToNewReticulumServer = async ({ ret_version, ret_pool }) => {
+    console.log(`[reconnect] Reticulum deploy detected v${ret_version} on ${ret_pool}.`);
+
+    const maxAttempts = 4;
+    let didReconnect = false;
+    let attempt = 0;
+    while (!didReconnect && attempt < maxAttempts) {
+      try {
+        // Add randomness to avoid flooding reticulum.
+        const delayMS = attempt * 3000 + Math.random() * 15000;
+        console.log(
+          `[reconnect] Attempting reconnect in ${Math.ceil(delayMS / 1000)} seconds.${
+            attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""
+          }`
+        );
+        await sleep(delayMS);
+        // Reconnect until reticulum meta matches expected version and pool.
+        didReconnect = await reconnect({ ret_version, ret_pool });
+      } catch {
+        didReconnect = false;
+      }
+
+      attempt = attempt + 1;
+    }
+
+    if (!didReconnect) {
+      console.error("[reconnect] Failed to reconnect to reticulum.");
+      return;
+    }
+
+    console.log("[reconnect] Reconnect in progress. Updated reticulum meta.");
+    const oldSocket = retPhxChannel.socket;
+    const socket = await connectToReticulum(isDebug, oldSocket.params());
+    retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
+    await hubChannel.migrateToSocket(socket, createHubChannelParams());
+    authChannel.setSocket(socket);
+    linkChannel.setSocket(socket);
+
+    // Disconnect old socket after a delay to ensure this user is always registered in presence.
+    await sleep(10000);
+    oldSocket.teardown();
+    console.log("[reconnect] Reconnection successful.");
+  };
+
+  const onRetDeploy = (function() {
+    const notificationQueue = [];
+
+    const handleNextMessage = (function() {
+      let isLocked = false;
+      return async function handleNextMessage() {
+        if (isLocked || !notificationQueue.length) return;
+
+        isLocked = true;
+        const [notification] = notificationQueue.splice(0, 1);
+        try {
+          await migrateToNewReticulumServer(notification);
+        } catch {
+          console.error("Failed to migrate to new reticulum server after deploy.", notification);
+        } finally {
+          isLocked = false;
+          handleNextMessage();
+        }
+      };
+    })();
+
+    return function onRetDeploy(deployNotification) {
+      notificationQueue.push(deployNotification);
+      handleNextMessage();
+    };
+  })();
+
+  retPhxChannel.on("notice", data => {
     if (data.event === "ret-deploy") {
-      await migrateToNewReticulumServer(data);
+      onRetDeploy(data);
     }
   });
 
