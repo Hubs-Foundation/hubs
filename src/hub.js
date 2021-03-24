@@ -1113,22 +1113,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     return params;
   };
 
-  const tryGetMatchingMeta = async ({ ret_pool, ret_version }) => {
-    const maxAttempts = 4;
+  const tryGetMatchingMeta = async ({ ret_pool, ret_version }, shouldAbandonMigration) => {
+    const backoffMS = 5000;
+    const randomMS = 15000;
+    const maxAttempts = 10;
     let didMatchMeta = false;
     let attempt = 0;
-    while (!didMatchMeta && attempt < maxAttempts) {
+    while (!didMatchMeta && attempt < maxAttempts && !shouldAbandonMigration()) {
       try {
         // Add randomness to avoid flooding reticulum.
-        const delayMS = attempt * 3000 + Math.random() * 15000;
+        const delayMS = attempt * backoffMS + Math.random() * randomMS;
         console.log(
-          `[reconnect] Attempting reconnect in ${Math.ceil(delayMS / 1000)} seconds.${
+          `[reconnect] Getting reticulum meta in ${Math.ceil(delayMS / 1000)} seconds.${
             attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""
           }`
         );
         await sleep(delayMS);
-        // Reconnect until reticulum meta matches expected version and pool.
         invalidateReticulumMeta();
+        console.log(
+          `[reconnect] Getting reticulum meta.${attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""}`
+        );
         const { pool, version } = await getReticulumMeta();
         didMatchMeta = ret_pool === pool && ret_version === version;
       } catch {
@@ -1140,10 +1144,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     return didMatchMeta;
   };
 
-  const migrateToNewReticulumServer = async ({ ret_version, ret_pool }) => {
+  const migrateToNewReticulumServer = async ({ ret_version, ret_pool }, shouldAbandonMigration) => {
     console.log(`[reconnect] Reticulum deploy detected v${ret_version} on ${ret_pool}.`);
 
-    if (await tryGetMatchingMeta({ ret_version, ret_pool })) {
+    const didMatchMeta = await tryGetMatchingMeta({ ret_version, ret_pool }, shouldAbandonMigration);
+    if (!didMatchMeta) {
       console.error(`[reconnect] Failed to reconnect. Did not get meta for v${ret_version} on ${ret_pool}.`);
       return;
     }
@@ -1163,19 +1168,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const onRetDeploy = (function() {
-    const notificationQueue = [];
+    let pendingNotification = null;
+    const hasPendingNotification = function() {
+      return !!pendingNotification;
+    };
 
     const handleNextMessage = (function() {
       let isLocked = false;
       return async function handleNextMessage() {
-        if (isLocked || !notificationQueue.length) return;
+        if (isLocked || !pendingNotification) return;
 
         isLocked = true;
-        const [notification] = notificationQueue.splice(0, 1);
+        const currentNotification = Object.assign({}, pendingNotification);
+        pendingNotification = null;
         try {
-          await migrateToNewReticulumServer(notification);
+          await migrateToNewReticulumServer(currentNotification, hasPendingNotification);
         } catch {
-          console.error("Failed to migrate to new reticulum server after deploy.", notification);
+          console.error("Failed to migrate to new reticulum server after deploy.", currentNotification);
         } finally {
           isLocked = false;
           handleNextMessage();
@@ -1184,7 +1193,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     })();
 
     return function onRetDeploy(deployNotification) {
-      notificationQueue.push(deployNotification);
+      // If for some reason we receive multiple deployNotifications, only the
+      // most recent one matters. The rest can be overwritten.
+      pendingNotification = deployNotification;
       handleNextMessage();
     };
   })();
