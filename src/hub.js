@@ -1121,8 +1121,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     let attempt = 0;
     while (!didMatchMeta && attempt < maxAttempts && !shouldAbandonMigration()) {
       try {
-        // Add randomness to avoid flooding reticulum.
-        const delayMS = attempt * backoffMS + Math.random() * randomMS;
+        // Add randomness to the first request avoid flooding reticulum.
+        const delayMS = attempt * backoffMS + (attempt === 0 ? Math.random() * randomMS : 0);
         console.log(
           `[reconnect] Getting reticulum meta in ${Math.ceil(delayMS / 1000)} seconds.${
             attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""
