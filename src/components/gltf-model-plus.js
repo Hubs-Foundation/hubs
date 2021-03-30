@@ -368,7 +368,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
 
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
-  // They don't currently use KTX textures but if htey did this would be an issue. Fixing this is hard but is part of
+  // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of
   // "taking control of the render loop" which is something we want to tackle for many reasons.
   if (!ktxLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
     ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
@@ -427,6 +427,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   }
 
   // Note this is being done in place of parser.parse() which we now no longer call. This gives us more control over the order of execution.
+  // TODO all of the weird stuff we are doing here and above would be much better implemented as "plugins" for the latst GLTFLoader
   const [scenes, animations, cameras] = await Promise.all([
     parser.getDependencies("scene"),
     parser.getDependencies("animation"),
