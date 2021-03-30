@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { useAccessibleOutlineStyle } from "../src/react-components/input/useAccessibleOutlineStyle";
-import "../src/react-components/styles/global.scss";
 import { WrappedIntlProvider } from "../src/react-components/wrapped-intl-provider";
 import { MINIMAL_VIEWPORTS } from "@storybook/addon-viewport";
 import { AVAILABLE_LOCALES } from "../src/assets/locales/locale_config";
 import { setLocale } from "../src/utils/i18n";
 import { useTheme, themes } from "../src/react-components/styles/theme";
+import "../src/react-components/styles/global.scss";
 
 const Layout = ({ children, locale, theme }) => {
   useTheme(theme);

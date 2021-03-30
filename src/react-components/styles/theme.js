@@ -62,7 +62,7 @@ export function useTheme(themeId) {
         ${variables.join("\n")}
       }`;
 
-      document.head.insertBefore(styleTag, document.head.firstChild);
+      document.head.appendChild(styleTag);
 
       return () => {
         document.head.removeChild(styleTag);

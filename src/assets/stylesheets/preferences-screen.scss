@@ -242,7 +242,7 @@ $semi-bold: 600;
   color: theme.$text2-color;
   @media(hover: hover){
     &:hover {
-      color: theme.$primary-bg-color;
+      color: theme.$primary-color;
     }
   }
 }
@@ -384,7 +384,7 @@ $semi-bold: 600;
 // MIT License
 
 $track-color: theme.$toggle-button-color !default;
-$thumb-color: theme.$primary-bg-color !default;
+$thumb-color: theme.$primary-color !default;
 
 $thumb-radius: 10px !default;
 $thumb-height: 20px !default;

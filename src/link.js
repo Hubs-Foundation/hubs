@@ -1,6 +1,7 @@
 import "./webxr-bypass-hacks";
 import "./utils/theme";
 import "./utils/configs";
+import "./react-components/styles/global.scss";
 import "./assets/stylesheets/link.scss";
 import "aframe";
 import React from "react";

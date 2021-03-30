@@ -11,6 +11,7 @@ const store = new Store();
 window.APP = { store };
 
 import registerTelemetry from "./telemetry";
+import "./react-components/styles/global.scss";
 import "./assets/stylesheets/whats-new.scss";
 import { PageContainer } from "./react-components/layout/PageContainer";
 import { Spinner } from "./react-components/misc/Spinner";

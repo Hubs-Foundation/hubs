@@ -39,7 +39,6 @@ import maskEmail from "../utils/mask-email";
 import qsTruthy from "../utils/qs_truthy";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
-import "./styles/global.scss";
 import { RoomLayoutContainer } from "./room/RoomLayoutContainer";
 import roomLayoutStyles from "./layout/RoomLayout.scss";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";

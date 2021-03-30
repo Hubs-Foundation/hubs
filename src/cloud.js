@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom";
 import React from "react";
 import "./utils/configs";
+import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/cloud.scss";
 import classNames from "classnames";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";

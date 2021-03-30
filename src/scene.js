@@ -4,6 +4,7 @@ import "./utils/configs";
 
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
+import "./react-components/styles/global.scss";
 import "./assets/stylesheets/scene.scss";
 
 import "aframe";

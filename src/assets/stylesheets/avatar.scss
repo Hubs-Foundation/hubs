@@ -71,7 +71,7 @@ body {
 
   :local(.form-submit) {
     @extend %action-button;
-    background: theme.$primary-bg-color;
+    background: theme.$primary-color;
     margin: 0;
     min-height: max-content;
     margin-top: 16px;

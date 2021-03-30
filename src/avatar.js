@@ -24,6 +24,7 @@ import AvatarPreview from "./react-components/avatar-preview";
 
 import { fetchAvatar, remixAvatar } from "./utils/avatar-utils";
 
+import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/avatar.scss";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

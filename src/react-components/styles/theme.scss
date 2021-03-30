@@ -89,175 +89,164 @@ $spacing-md: 16px;
 $spacing-lg: 20px;
 $spacing-xl: 24px;
 
-// Default Theme
-$font-family-default: var(--font-family-default, 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol");
-$font-family-monospace: var(--font-family-monospace, Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace);
+// Theme SCSS Variables:
+// Reference these variables in the Hubs codebase.
+// The CSS variables they reference are defined in ./global.scss such that they are only included on the page once.
+$font-family-default: var(--font-family-default);
+$font-family-monospace: var(--font-family-monospace);
 
-$text1-color: var(--text1-color, $black);
-$text1-color-hover: var(--text1-color-hover, $black-hover);
-$text1-color-pressed: var(--text1-color-pressed, $black-pressed);
-$text2-color: var(--text2-color, $darkgrey);
-$text2-color-hover: var(--text2-color-hover, $darkgrey-hover);
-$text2-color-pressed: var(--text2-color-pressed, $darkgrey-pressed);
-$text3-color: var(--text3-color, $grey);
-$text3-color-hover: var(--text3-color-hover, $grey-hover);
-$text3-color-pressed: var(--text3-color-pressed, $grey-pressed);
+$text1-color: var(--text1-color);
+$text1-color-hover: var(--text1-color-hover);
+$text1-color-pressed: var(--text1-color-pressed);
+$text2-color: var(--text2-color);
+$text2-color-hover: var(--text2-color-hover);
+$text2-color-pressed: var(--text2-color-pressed);
+$text3-color: var(--text3-color);
+$text3-color-hover: var(--text3-color-hover);
+$text3-color-pressed: var(--text3-color-pressed);
+$text4-color: var(--text4-color);
+$text4-color-hover: var(--text4-color-hover);
+$text4-color-pressed: var(--text4-color-pressed);
+$text5-color: var(--text5-color);
+$text5-color-hover: var(--text5-color-hover);
+$text5-color-pressed: var(--text5-color-pressed);
 
-$link-color: var(--link-color, $blue);
-$link-color-hover: var(--link-color-hover, $blue-hover);
-$link-color-pressed: var(--link-color-pressed, $blue-pressed);
+$link-color: var(--link-color);
+$link-color-hover: var(--link-color-hover);
+$link-color-pressed: var(--link-color-pressed);
 
-$outline-color: var(--outline-color, $black);
+$accept-color: var(--accept-color);
+$accept-color-hover: var(--accept-color-hover);
+$accept-color-pressed: var(--accept-color-pressed);
 
-$radio-border-color: var(--radio-border-color, $lightgrey);
-$radio-bg-color: var(--radio-bg-color, $white);
-$radio-bg-color-hover: var(--radio-bg-color-hover, $white-hover);
-$radio-bg-color-pressed: var(--radio-bg-color-pressed, $white-pressed);
+$cancel-color: var(--cancel-color);
+$cancel-color-hover: var(--cancel-color-hover);
+$cancel-color-pressed: var(--cancel-color-pressed);
 
-$toggle-button-color: var(--toggle-button-color, $grey);
+$accent1-color: var(--accent1-color);
+$accent1-color-hover: var(--accent1-color-hover);
+$accent1-color-pressed: var(--accent1-color-pressed);
 
-$input-bg-color: var(--input-bg-color, $white);
-$input-icon-color: var(--input-icon-color, $darkgrey);
-$input-border-color: var(--input-border-color, $darkgrey);
-$input-border-color-hover: var(--input-border-color-hover, $blue-hover);
-$input-outline-color: var(--input-outline-color, $blue);
+$accent2-color: var(--accent2-color);
+$accent2-color-hover: var(--accent2-color-hover);
+$accent2-color-pressed: var(--accent2-color-pressed);
 
-$list-bg-color-hover: var(--list-bg-color-hover, $white-hover);
-$list-bg-color-pressed: var(--list-bg-color-hover, $white-pressed);
+$accent3-color: var(--accent3-color);
+$accent3-color-hover: var(--accent3-color-hover);
+$accent3-color-pressed: var(--accent3-color-pressed);
 
-$dropdown-bg-color: var(--dropdown-bg-color, $white);
-$dropdown-border-color: var(--dropdown-border-color, $lightgrey);
-$dropdown-shadow-color: var(--dropdown-shadow-color, rgba(0, 0, 0, 0.2));
+$accent4-color: var(--accent4-color);
+$accent4-color-hover: var(--accent4-color-hover);
+$accent4-color-pressed: var(--accent4-color-pressed);
 
-$disabled-text-color: var(--disabled-text-color, $darkgrey);
-$disabled-bg-color: var(--disabled-bg-color, $lightgrey);
-$disabled-icon-color: var(--disabled-icon-color, $grey);
+$accent5-color: var(--accent5-color);
+$accent5-color-hover: var(--accent5-color-hover);
+$accent5-color-pressed: var(--accent5-color-pressed);
 
-$button-text-color: var(--button-text-color, $black);
-$button-border-color: var(--button-border-color, $lightgrey);
-$button-bg-color: var(--button-bg-color, $white);
-$button-bg-color-hover: var(--button-bg-color-hover, $white-hover);
-$button-bg-color-pressed: var(--button-bg-color-pressed, $white-pressed);
+$primary-color: var(--primary-color);
+$primary-color-hover: var(--primary-color-hover);
+$primary-color-pressed: var(--primary-color-pressed);
 
-$active-text-color: var(--active-text-color, $white);
-$active-color: var(--active-color, $blue);
-$active-color-hover: var(--active-color-hover, $blue-hover);
-$active-color-pressed: var(--active-color-pressed, $blue-pressed);
+$secondary-color: var(--secondary-color);
+$secondary-color-hover: var(--secondary-color-hover);
+$secondary-color-pressed: var(--secondary-color-pressed);
 
-$chat-bubble-bg-color-sent: var(--chat-bubble-bg-color-sent, $blue);
-$chat-bubble-text-color-sent: var(--chat-bubble-text-color-sent, $white);
-$chat-bubble-link-color-sent-hover: var(--chat-bubble-link-color-sent-hover, $white-hover);
-$chat-bubble-link-color-sent-pressed: var(--chat-bubble-link-color-sent-pressed, $white-pressed);
-$chat-bubble-bg-color-received: var(--chat-bubble-bg-color-received, $lightgrey);
+$basic-color: var(--basic-color);
+$basic-color-hover: var(--basic-color-hover);
+$basic-color-pressed: var(--basic-color-pressed);
 
-$tip-text-color: var(--tip-text-color, $white);
-$tip-bg-color: var(--tip-bg-color, $blue);
-$tip-button-color: var(--tip-bg-color-pressed, $blue-pressed);
-$tip-button-color-hover: var(--tip-button-bg-color-hover, $blue-hover);
-$tip-button-color-pressed: var(--tip-button-bg-color-pressed, $blue-pressed);
+$background1-color: var(--background1-color);
+$background2-color: var(--background2-color);
+$background3-color: var(--background3-color);
+$background4-color: var(--background4-color);
 
-$favorite-color: var(--favorite-color, $yellow);
+$loading-screen-background: var(--loading-screen-background);
 
-$admin-color: var(--favorite-color, $red);
+$border1-color: var(--border1-color);
+$border2-color: var(--border2-color);
+$border3-color: var(--border3-color);
 
-$error-color: var(--error-color, $red);
-$error-color-hover: var(--error-color-hover, $red-hover);
-$error-color-pressed: var(--error-color-pressed, $red-pressed);
+$outline-color: var(--outline-color);
 
-$status-unread-color: var(--status-unread-color, $orange);
-$status-recording-color: var(--status-recording-color, $red);
-$status-enabled-color: var(--status-enabled-color, $green);
-$status-disabled-color: var(--status-disabled-color, $red);
+$shadow-color: var(--shadow-color);
 
-$overlay-bg-color: rgba(0, 0, 0, 0.5);
-$overlay-text-color: var(--overlay-text-color, $white);
-$overlay-border-color: var(--overlay-border-color, $grey);
-$overtlay-outline-color: var(--overlay-outline-color, $white);
+$disabled-text-color: var(--disabled-text-color);
+$disabled-bg-color: var(--disabled-bg-color);
+$disabled-icon-color: var(--disabled-icon-color);
 
-$background1-color: var(--background1-color, $white);
-$background2-color: var(--background2-color, $recessed-bg);
-$background3-color: var(--background2-color, $lightgrey);
+$radio-border-color: var(--radio-border-color);
+$radio-bg-color: var(--radio-bg-color);
+$radio-bg-color-hover: var(--radio-bg-color-hover);
+$radio-bg-color-pressed: var(--radio-bg-color-pressed);
 
-$loading-screen-background: var(--loading-screen-background, radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%));
+$toggle-button-color: var(--toggle-button-color);
 
-$border1-color: var(--border1-color, $lightgrey);
-$border2-color: var(--border2-color, $grey);
-$border3-color: var(--border3-color, $darkgrey);
+$input-bg-color: var(--input-bg-color);
+$input-icon-color: var(--input-icon-color);
+$input-border-color: var(--input-border-color);
+$input-border-color-hover: var(--input-border-color-hover);
+$input-outline-color: var(--input-outline-color);
 
-$toolbar-icon-color: var(--toolbar-icon-color, $white);
-$toolbar-basic-icon-color: var(--toolbar-basic-icon-color, $black);
-$toolbar-basic-bg-color: var(--toolbar-basic-border-color, $lightgrey);
-$toolbar-basic-bg-color-hover: var(--toolbar-basic-bg-color-hover, $lightgrey-hover);
-$toolbar-basic-bg-color-pressed: var(--toolbar-basic-bg-color-pressed, $lightgrey-pressed);
+$list-bg-color-hover: var(--list-bg-color-hover);
+$list-bg-color-pressed: var(--list-bg-color-pressed);
 
-$basic-text-color: var(--basic-text-color, $darkgrey);
-$basic-text-color-hover: var(--basic-text-color-hover, $darkgrey);
-$basic-text-color-pressed: var(--basic-text-color-pressed, $darkgrey);
-$basic-bg-color: var(--basic-bg-color, $white);
-$basic-bg-color-hover: var(--basic-bg-color-hover, $white-hover);
-$basic-bg-color-pressed: var(--basic-bg-color-pressed, $white-pressed);
+$dropdown-bg-color: var(--dropdown-bg-color);
+$dropdown-border-color: var(--dropdown-border-color);
+$dropdown-shadow-color: var(--dropdown-shadow-color);
 
-$tile-text-color: var(--tile-text-color, $darkgrey);
-$tile-bg-color: var(--tile-bg-color, $lightgrey);
-$tile-bg-color-hover: var(--tile-bg-color-hover, $lightgrey-hover);
-$tile-bg-color-pressed: var(--tile-bg-color-pressed, $lightgrey-pressed);
-$tile-button-text-color: var(--tile-button-text-color, $black);
-$tile-button-bg-color: var(--tile-button-bg-color, $white);
-$tile-button-bg-color-hover: var(--tile-button-bg-color-hover, $white-hover);
-$tile-button-bg-color-pressed: var(--tile-button-bg-color-pressed, $white-pressed);
+$button-text-color: var(--button-text-color);
+$button-border-color: var(--button-border-color);
+$button-bg-color: var(--button-bg-color);
+$button-bg-color-hover: var(--button-bg-color-hover);
+$button-bg-color-pressed: var(--button-bg-color-pressed);
 
-$primary-text-color: var(--primary-text-color, $white);
-$primary-text-color-hover: var(--primary-text-color-hover, $white);
-$primary-text-color-pressed: var(--primary-text-color-pressed, $white);
-$primary-bg-color: var(--primary-bg-color, $blue);
-$primary-bg-color-hover: var(--primary-bg-color-hover, $blue-hover);
-$primary-bg-color-pressed: var(--primary-bg-color-pressed, $blue-pressed);
+$active-text-color: var(--active-text-color);
+$active-color: var(--active-color);
+$active-color-hover: var(--active-color-hover);
+$active-color-pressed: var(--active-color-pressed);
 
-$accept-text-color: var(--accept-text-color, $white);
-$accept-text-color-hover: var(--accept-text-color-hover, $white);
-$accept-text-color-pressed: var(--accept-text-color-pressed, $white);
-$accept-bg-color: var(--accept-bg-color, $green);
-$accept-bg-color-hover: var(--accept-bg-color-hover, $green-hover);
-$accept-bg-color-pressed: var(--accept-bg-color-pressed, $green-pressed);
+$chat-bubble-bg-color-sent: var(--chat-bubble-bg-color-sent);
+$chat-bubble-text-color-sent: var(--chat-bubble-text-color-sent);
+$chat-bubble-link-color-sent-hover: var(--chat-bubble-link-color-sent-hover);
+$chat-bubble-link-color-sent-pressed: var(--chat-bubble-link-color-sent-pressed);
+$chat-bubble-bg-color-received: var(--chat-bubble-bg-color-received);
 
-$cancel-text-color: var(--cancel-text-color, $white);
-$cancel-text-color-hover: var(--cancel-text-color-hover, $white);
-$cancel-text-color-pressed: var(--cancel-text-color-pressed, $white);
-$cancel-bg-color: var(--cancel-bg-color, $red);
-$cancel-bg-color-hover: var(--cancel-bg-color-hover, $red-hover);
-$cancel-bg-color-pressed: var(--cancel-bg-color-pressed, $red-pressed);
+$tip-text-color: var(--tip-text-color);
+$tip-bg-color: var(--tip-bg-color);
+$tip-button-color: var(--tip-button-color);
+$tip-button-color-hover: var(--tip-button-color-hover);
+$tip-button-color-pressed: var(--tip-button-color-pressed);
 
-$accent1-text-color: var(--accent1-text-color, $white);
-$accent1-text-color-hover: var(--accent1-text-color-hover, $white);
-$accent1-text-color-pressed: var(--accent1-text-color-pressed, $white);
-$accent1-bg-color: var(--accent1-bg-color, $red);
-$accent1-bg-color-hover: var(--accent1-bg-color-hover, $red-hover);
-$accent1-bg-color-pressed: var(--accent1-bg-color-pressed, $red-pressed);
+$favorite-color: var(--favorite-color);
 
-$accent2-text-color: var(--accent2-text-color, $white);
-$accent2-text-color-hover: var(--accent2-text-color-hover, $white);
-$accent2-text-color-pressed: var(--accent2-text-color-pressed, $white);
-$accent2-bg-color: var(--accent2-bg-color, $orange);
-$accent2-bg-color-hover: var(--accent2-bg-color-hover, $orange-hover);
-$accent2-bg-color-pressed: var(--accent2-bg-color-pressed, $orange-pressed);
+$admin-color: var(--admin-color);
 
-$accent3-text-color: var(--accent3-text-color, $white);
-$accent3-text-color-hover: var(--accent3-text-color-hover, $white);
-$accent3-text-color-pressed: var(--accent3-text-color-pressed, $white);
-$accent3-bg-color: var(--accent3-bg-color, $green);
-$accent3-bg-color-hover: var(--accent3-bg-color-hover, $green-hover);
-$accent3-bg-color-pressed: var(--accent3-bg-color-pressed, $green-pressed);
+$error-color: var(--error-color);
+$error-color-hover: var(--error-color-hover);
+$error-color-pressed: var(--error-color-pressed);
 
-$accent4-text-color: var(--accent4-text-color, $white);
-$accent4-text-color-hover: var(--accent4-text-color-hover, $white);
-$accent4-text-color-pressed: var(--accent4-text-color-pressed, $white);
-$accent4-bg-color: var(--accent4-bg-color, $blue);
-$accent4-bg-color-hover: var(--accent4-bg-color-hover, $blue-hover);
-$accent4-bg-color-pressed: var(--accent4-bg-color-pressed, $blue-pressed);
+$status-unread-color: var(--status-unread-color);
+$status-recording-color: var(--status-recording-color);
+$status-enabled-color: var(--status-enabled-color);
+$status-disabled-color: var(--status-disabled-color);
 
-$accent5-text-color: var(--accent5-text-color, $white);
-$accent5-text-color-hover: var(--accent5-text-color-hover, $white);
-$accent5-text-color-pressed: var(--accent5-text-color-pressed, $white);
-$accent5-bg-color: var(--accent5-bg-color, $purple);
-$accent5-bg-color-hover: var(--accent5-bg-color-hover, $purple-hover);
-$accent5-bg-color-pressed: var(--accent5-bg-color-pressed, $purple-pressed);
+$overlay-bg-color: var(--overlay-bg-color);
+$overlay-text-color: var(--overlay-text-color);
+$overlay-border-color: var(--overlay-border-color);
+$overlay-outline-color: var(--overlay-outline-color);
+
+$toolbar-icon-color: var(--toolbar-icon-color);
+$toolbar-basic-icon-color: var(--toolbar-basic-icon-color);
+$toolbar-basic-color: var(--toolbar-basic-color);
+$toolbar-basic-color-hover: var(--toolbar-basic-color-hover);
+$toolbar-basic-color-pressed: var(--toolbar-basic-color-pressed);
+
+$tile-text-color: var(--tile-text-color);
+$tile-bg-color: var(--tile-bg-color);
+$tile-bg-color-hover: var(--tile-bg-color-hover);
+$tile-bg-color-pressed: var(--tile-bg-color-pressed);
+$tile-button-text-color: var(--tile-button-text-color);
+$tile-button-bg-color: var(--tile-button-bg-color);
+$tile-button-bg-color-hover: var(--tile-button-bg-color-hover);
+$tile-button-bg-color-pressed: var(--tile-button-bg-color-pressed);
+

@@ -7,6 +7,7 @@ import "./utils/theme";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import { SignInModalContainer } from "./react-components/auth/SignInModalContainer";
 import { PageContainer } from "./react-components/layout/PageContainer";
+import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import { Center } from "./react-components/layout/Center";
 

@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import "./utils/configs";
 import { FormattedMessage } from "react-intl";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/discord.scss";
 import discordBotLogo from "./assets/images/discord-bot-logo.png";
 import discordBotVideoMP4 from "./assets/video/discord.mp4";

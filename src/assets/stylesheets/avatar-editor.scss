@@ -266,7 +266,7 @@
 
   .form-submit {
     @extend %action-button;
-    background: theme.$primary-bg-color;
+    background: theme.$primary-color;
     margin: 0;
     margin-bottom: 0.5em;
   }
@@ -291,7 +291,7 @@
     a {
       cursor: pointer;
       text-decoration: underline;
-      color: theme.$cancel-bg-color;
+      color: theme.$cancel-color;
     }
   }
 

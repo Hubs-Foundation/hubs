@@ -10,6 +10,7 @@ import copy from "copy-to-clipboard";
 import { detectOS } from "detect-browser";
 import { FormattedMessage } from "react-intl";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/support.scss";
 import configs from "./utils/configs";
 

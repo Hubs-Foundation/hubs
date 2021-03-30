@@ -6,6 +6,8 @@ import "@babel/polyfill";
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
+import "./react-components/styles/global.scss";
+import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
 import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";

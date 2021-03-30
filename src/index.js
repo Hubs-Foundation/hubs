@@ -6,6 +6,7 @@ import Store from "./storage/store";
 import "./utils/theme";
 import { HomePage } from "./react-components/home/HomePage";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
+import "./react-components/styles/global.scss";
 
 registerTelemetry("/home", "Hubs Home Page");
 
