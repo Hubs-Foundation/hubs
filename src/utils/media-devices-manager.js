@@ -214,7 +214,7 @@ export default class MediaDevicesManager {
     await NAF.connection.adapter.setLocalMediaStream(this._mediaStream);
   }
 
-  async startVideoShare(constraints, isDisplayMedia, success, error) {
+  async startVideoShare(constraints, isDisplayMedia, target, success, error) {
     let newStream;
     let videoTrackAdded = false;
 
@@ -250,7 +250,7 @@ export default class MediaDevicesManager {
       return;
     }
 
-    success(isDisplayMedia, videoTrackAdded);
+    success(isDisplayMedia, videoTrackAdded, target);
   }
 
   async stopVideoShare() {

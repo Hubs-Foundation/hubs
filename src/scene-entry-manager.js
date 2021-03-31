@@ -397,14 +397,17 @@ export default class SceneEntryManager {
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
 
-    const shareSuccess = (isDisplayMedia, isVideoTrackAdded) => {
+    const shareSuccess = (isDisplayMedia, isVideoTrackAdded, target) => {
       isHandlingVideoShare = false;
 
       if (isVideoTrackAdded) {
-        currentVideoShareEntity = spawnMediaInfrontOfPlayer(this.mediaDevicesManager.mediaStream, undefined);
-
-        // Wire up custom removal event which will stop the stream.
-        currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+        if (target === "avatar") {
+          this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
+        } else {
+          currentVideoShareEntity = spawnMediaInfrontOfPlayer(this.mediaDevicesManager.mediaStream, undefined);
+          // Wire up custom removal event which will stop the stream.
+          currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+        }
 
         this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
         this.scene.addState("sharing_video");
@@ -417,7 +420,7 @@ export default class SceneEntryManager {
       this.scene.emit("share_video_failed");
     };
 
-    this.scene.addEventListener("action_share_camera", () => {
+    this.scene.addEventListener("action_share_camera", event => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -445,7 +448,7 @@ export default class SceneEntryManager {
           break;
       }
 
-      this.mediaDevicesManager.startVideoShare(constraints, false, shareSuccess, shareError);
+      this.mediaDevicesManager.startVideoShare(constraints, false, event.detail?.target, shareSuccess, shareError);
     });
 
     this.scene.addEventListener("action_share_screen", () => {
@@ -468,6 +471,7 @@ export default class SceneEntryManager {
           }
         },
         true,
+        null,
         shareSuccess,
         shareError
       );
