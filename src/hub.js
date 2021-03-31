@@ -592,18 +592,25 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     });
 
     const connect = () => {
+      const onConnectionError = connectError => {
+        console.error("An error occurred while attempting to connect to networked scene:", connectError);
+        // hacky until we get return codes
+        const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
+        remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
+        entryManager.exitScene();
+      };
+      // Safety guard just in case Protoo doens't fail in some case so we don't get stuck in the loading screen forever.
+      const connectionErrorTimeout = setTimeout(onConnectionError, 90000, "Timeout connecting to the room");
       scene.components["networked-scene"]
         .connect()
         .then(() => {
+          clearTimeout(connectionErrorTimeout);
           console.log("Successfully connected to the networked scene.");
           scene.emit("didConnectToNetworkedScene");
         })
         .catch(connectError => {
-          console.error("Error occurred while attempting to connect to networked scene.", connectError);
-          // hacky until we get return codes
-          const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
-          remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
-          entryManager.exitScene();
+          clearTimeout(connectionErrorTimeout);
+          onConnectionError(connectError);
         });
     };
 
