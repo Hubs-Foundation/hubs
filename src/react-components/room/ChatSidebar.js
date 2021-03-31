@@ -7,9 +7,12 @@ import { ReactComponent as WandIcon } from "../icons/Wand.svg";
 import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
 import { ReactComponent as SendIcon } from "../icons/Send.svg";
+import { ReactComponent as ReactionIcon } from "../icons/Reaction.svg";
 import { IconButton } from "../input/IconButton";
 import { TextAreaInput } from "../input/TextAreaInput";
 import { ToolbarButton } from "../input/ToolbarButton";
+import { Popover } from "../popover/Popover";
+import { EmojiPicker } from "./EmojiPicker";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
@@ -29,6 +32,35 @@ export function SendMessageButton(props) {
     </IconButton>
   );
 }
+
+export function EmojiPickerPopoverButton({ onSelectEmoji }) {
+  return (
+    <Popover
+      content={props => (
+        <EmojiPicker
+          onSelect={emoji => {
+            onSelectEmoji(emoji);
+            // eslint-disable-next-line react/prop-types
+            props.closePopover();
+          }}
+          {...props}
+        />
+      )}
+      placement="top"
+      offsetDistance={28}
+    >
+      {({ togglePopover, popoverVisible, triggerRef }) => (
+        <IconButton ref={triggerRef} className={styles.chatInputIcon} selected={popoverVisible} onClick={togglePopover}>
+          <ReactionIcon />
+        </IconButton>
+      )}
+    </Popover>
+  );
+}
+
+EmojiPickerPopoverButton.propTypes = {
+  onSelectEmoji: PropTypes.func.isRequired
+};
 
 export function MessageAttachmentButton(props) {
   return (
