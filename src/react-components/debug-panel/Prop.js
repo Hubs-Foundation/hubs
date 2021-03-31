@@ -9,8 +9,13 @@ export function CreatePropsFromData(data) {
     let value = data[property];
     if (typeof value === "number" && !!(value % 1)) {
       value = value.toFixed(2);
+      props.push(<Prop key={property} propKey={property} propValue={value} />);
+    } else if (typeof value === "object") {
+      props.push(<Prop key={property} propKey={property} propValue={"-"} />);
+      props.push(CreatePropsFromData(value));
+    } else {
+      props.push(<Prop key={property} propKey={property} propValue={value} />);
     }
-    props.push(<Prop key={property} propKey={property} propValue={value} />);
   }
 
   return props;
