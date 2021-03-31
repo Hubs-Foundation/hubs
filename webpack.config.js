@@ -367,6 +367,17 @@ module.exports = async (env, argv) => {
           loader: "babel-loader",
           options: legacyBabelConfig
         },
+        // Some JS assets are loaded at runtime and should be coppied unmodified and loaded using file-loader
+        {
+          test: [
+            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js")
+          ],
+          loader: "file-loader",
+          options: {
+            outputPath: "assets/raw-js",
+            name: "[name]-[hash].[ext]"
+          }
+        },
         {
           test: /\.js$/,
           include: [path.resolve(__dirname, "src")],

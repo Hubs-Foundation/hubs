@@ -99,7 +99,8 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
   return getAbsoluteUrl(baseUrl, relativeUrl).href;
 }
 
-import basisJsUrl from "file-loader!three/examples/js/libs/basis/basis_transcoder.js";
+// Note this file is configured in webpack.config.js to be handled with file-loader, so this will be a string containing the file path
+import basisJsUrl from "three/examples/js/libs/basis/basis_transcoder.js";
 import basisWasmUrl from "three/examples/js/libs/basis/basis_transcoder.wasm";
 
 export const rewriteBasisTranscoderUrls = function(url) {
