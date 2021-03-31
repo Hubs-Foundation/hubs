@@ -309,8 +309,27 @@ export default class DialogAdapter extends EventEmitter {
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
 
-    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
+    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString(), {
+      retry: {
+        retries: 3
+      }
+    });
     this._protoo = new protooClient.Peer(protooTransport);
+
+    this._protoo.on("disconnected", () => {
+      this.emitRTCEvent("info", "Signaling", () => `Diconnected`);
+      this.disconnect();
+    });
+
+    this._protoo.on("close", () => {
+      this.emitRTCEvent("error", "Signaling", () => `Closed`);
+      this.disconnect();
+      this.emit("closed", "Signaling has been closed.");
+    });
+
+    this._protoo.on("failed", attempt => {
+      this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}`);
+    });
 
     await new Promise((resolve, reject) => {
       this._protoo.on("open", async () => {
@@ -324,17 +343,6 @@ export default class DialogAdapter extends EventEmitter {
           reject(err);
         }
       });
-    });
-
-    this._protoo.on("disconnected", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Diconnected`);
-      this.disconnect();
-    });
-
-    this._protoo.on("close", () => {
-      this.emitRTCEvent("error", "Signaling", () => `Closed`);
-      this.disconnect();
-      this.emit("closed", "Signaling has been closed.");
     });
 
     // eslint-disable-next-line no-unused-vars
@@ -730,7 +738,7 @@ export default class DialogAdapter extends EventEmitter {
       this._videoProducer = null;
     }
 
-    if (!this._sendTransport?._closed) {
+    if (this._sendTransport && !this._sendTransport._closed) {
       this._sendTransport.close();
     }
 
@@ -799,7 +807,7 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   async closeRecvTransport() {
-    if (!this._recvTransport?._closed) {
+    if (this._recvTransport && !this._recvTransport._closed) {
       this._recvTransport.close();
     }
     if (this._protoo.connected) {
