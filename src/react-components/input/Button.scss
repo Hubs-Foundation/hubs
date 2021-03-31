@@ -25,7 +25,7 @@
 
 :local(.basic), :local(.transparent) {
   color: theme.$text4-color;
-  border: 1px solid theme.$text4-color;
+  border: 1px solid theme.$basic-border-color;
   background-color: theme.$basic-color;
 
   svg {

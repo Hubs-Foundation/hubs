@@ -23,6 +23,7 @@
       "basic-color": "#3A4048",
       "basic-color-hover": "#4B5562",
       "basic-color-pressed": "#636F80",
+      "basic-border-color": "#5D646C",
       "secondary-color": "#3A4048",
       "secondary-color-hover": "#5D646C",
       "secondary-color-pressed": "#282C31",

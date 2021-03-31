@@ -72,7 +72,7 @@
 }
 
 :local(.tile-action), :local(.member-count) {
-  background: theme.$white;
+  background: theme.$tile-button-bg-color;
   color: theme.$tile-button-text-color;
   height: 30px;
   border-radius: 30px;
@@ -80,7 +80,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: none;
+  border: 1px solid theme.$tile-button-border-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$tile-button-text-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$tile-button-text-color;
+    }
+  }
 }
 
 :local(.tile-action) {

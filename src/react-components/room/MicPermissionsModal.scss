@@ -17,6 +17,15 @@
     path {
       stroke-width: 1;
     }
+
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
+
     width: 48px;
     height: 48px;
   }

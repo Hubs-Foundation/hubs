@@ -67,10 +67,6 @@
   --secondary-color-hover: #{theme.$lightgrey-hover};
   --secondary-color-pressed: #{theme.$lightgrey-pressed};
 
-  --basic-color: #{theme.$white};
-  --basic-color-hover: #{theme.$white-hover};
-  --basic-color-pressed: #{theme.$white-pressed};
-
   --background1-color: #{theme.$white};
   --background2-color: #{theme.$recessed-bg};
   --background3-color: #{theme.$lightgrey};
@@ -85,6 +81,11 @@
   --outline-color: #{theme.$black};
 
   --shadow-color: rgba(0, 0, 0, 0.2);
+
+  --basic-color: #{theme.$white};
+  --basic-color-hover: #{theme.$white-hover};
+  --basic-color-pressed: #{theme.$white-pressed};
+  --basic-border-color: var(--border1-color);
 
   --disabled-text-color: var(--text4-color);
   --disabled-bg-color:  var(--background3-color);
@@ -165,6 +166,7 @@
   --tile-button-bg-color: var(--basic-color);
   --tile-button-bg-color-hover: var(--basic-color-hover);
   --tile-button-bg-color-pressed: var(--basic-color-pressed);
+  --tile-button-border-color: var(--basic-border-color);
 }
 
 html {

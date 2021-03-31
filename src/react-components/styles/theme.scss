@@ -151,10 +151,6 @@ $secondary-color: var(--secondary-color);
 $secondary-color-hover: var(--secondary-color-hover);
 $secondary-color-pressed: var(--secondary-color-pressed);
 
-$basic-color: var(--basic-color);
-$basic-color-hover: var(--basic-color-hover);
-$basic-color-pressed: var(--basic-color-pressed);
-
 $background1-color: var(--background1-color);
 $background2-color: var(--background2-color);
 $background3-color: var(--background3-color);
@@ -169,6 +165,11 @@ $border3-color: var(--border3-color);
 $outline-color: var(--outline-color);
 
 $shadow-color: var(--shadow-color);
+
+$basic-color: var(--basic-color);
+$basic-color-hover: var(--basic-color-hover);
+$basic-color-pressed: var(--basic-color-pressed);
+$basic-border-color: var(--basic-border-color);
 
 $disabled-text-color: var(--disabled-text-color);
 $disabled-bg-color: var(--disabled-bg-color);
@@ -249,4 +250,5 @@ $tile-button-text-color: var(--tile-button-text-color);
 $tile-button-bg-color: var(--tile-button-bg-color);
 $tile-button-bg-color-hover: var(--tile-button-bg-color-hover);
 $tile-button-bg-color-pressed: var(--tile-button-bg-color-pressed);
+$tile-button-border-color: var(--tile-button-border-color);
 
