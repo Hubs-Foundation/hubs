@@ -1630,7 +1630,8 @@ function UIRootHooksWrapper(props) {
 
 UIRootHooksWrapper.propTypes = {
   scene: PropTypes.object.isRequired,
-  messageDispatch: PropTypes.object
+  messageDispatch: PropTypes.object,
+  store: PropTypes.object.isRequired
 };
 
 export default UIRootHooksWrapper;

@@ -125,7 +125,8 @@ export const SCHEMA = {
         disableNoiseSuppression: { type: "bool" },
         disableAutoGainControl: { type: "bool" },
         locale: { type: "string" },
-        showRtcDebugPanel: { type: "bool" }
+        showRtcDebugPanel: { type: "bool" },
+        theme: { type: "string" }
       }
     },
 

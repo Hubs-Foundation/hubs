@@ -8,7 +8,7 @@ $input-height: 40px;
   height: $input-height;
   border: 1px solid theme.$input-border-color;
   border-radius: theme.$border-radius-regular;
-  color: theme.$black;
+  color: theme.$text1-color;
   overflow: hidden;
 
   &:focus-within  {

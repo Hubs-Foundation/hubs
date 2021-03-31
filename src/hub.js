@@ -222,6 +222,7 @@ import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -295,30 +296,32 @@ function mountUI(props = {}) {
 
   ReactDOM.render(
     <WrappedIntlProvider>
-      <Router history={history}>
-        <Route
-          render={routeProps =>
-            props.showOAuthScreen ? (
-              <OAuthScreenContainer oauthInfo={props.oauthInfo} />
-            ) : props.roomUnavailableReason ? (
-              <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
-            ) : (
-              <UIRoot
-                {...{
-                  scene,
-                  isBotMode,
-                  disableAutoExitOnIdle,
-                  forcedVREntryType,
-                  store,
-                  mediaSearchStore,
-                  ...props,
-                  ...routeProps
-                }}
-              />
-            )
-          }
-        />
-      </Router>
+      <ThemeProvider store={store}>
+        <Router history={history}>
+          <Route
+            render={routeProps =>
+              props.showOAuthScreen ? (
+                <OAuthScreenContainer oauthInfo={props.oauthInfo} />
+              ) : props.roomUnavailableReason ? (
+                <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
+              ) : (
+                <UIRoot
+                  {...{
+                    scene,
+                    isBotMode,
+                    disableAutoExitOnIdle,
+                    forcedVREntryType,
+                    store,
+                    mediaSearchStore,
+                    ...props,
+                    ...routeProps
+                  }}
+                />
+              )
+            }
+          />
+        </Router>
+      </ThemeProvider>
     </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );

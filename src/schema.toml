@@ -71,9 +71,6 @@ theme.notice-text-color = { category = "theme", type = "color", name = "Secondar
 theme.notice-widget-color = { category = "theme", type = "color", name = "Secondary Widget Color", description = "Notice and indicator UI widget color.", deprecated="true" }
 theme.favorited-color = { category = "theme", type = "color", name = "Favorited Color", description = "Favorited Color" }
 
-themes.default.name = { category = "theme", type = "string", name = "Default Theme Name", description = "Default Theme Name" }
-themes.default.file = { category = "theme", type = "file", name = "Default Theme File", description = "Default Theme File" }
-
 links.terms_of_use = { category = "links", type = "string", name = "Terms of Use", description = "Link to your terms of use page."}
 links.privacy_notice = { category = "links", type = "string", name = "Privacy Notice", description = "Link to your privacy page."}
 links.controls = { category = "links", type = "string", name = "Controls Documentation", description = "Link to controls documentation."}

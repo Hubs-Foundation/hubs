@@ -101,6 +101,16 @@
   position: absolute;
 }
 
+:local(.arrow-bg) {
+  fill: theme.$background1-color;
+  stroke: theme.$background1-color;
+}
+
+:local(.arrow-border) {
+  stroke: theme.$border1-color;
+  fill: theme.$background1-color;
+}
+
 :local(.fullscreen) {
   position: fixed;
   top: 0;

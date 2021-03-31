@@ -78,7 +78,7 @@ export function MediaBrowser({
               ref={searchInputRef}
               placeholder={searchPlaceholder}
               onKeyDown={onSearchKeyDown}
-              beforeInput={<SearchIcon />}
+              beforeInput={<SearchIcon className={styles.searchIcon} />}
               afterInput={
                 <IconButton onClick={onClearSearch}>
                   <CloseIcon height={16} width={16} />

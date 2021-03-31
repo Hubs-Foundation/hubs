@@ -1,5 +1,15 @@
 @use "../styles/theme.scss";
 
+:local(.search-icon) {
+  *[stroke=\#000] {
+    stroke: theme.$text1-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$text1-color;
+  }
+}
+
 :local(.favorite-icon) {
   margin-right: 4px;
 
@@ -29,7 +39,7 @@
 }
 
 :local(.facets-nav) {
-  background-color: theme.$recessed-bg;
+  background-color: theme.$background2-color;
 }
 
 :local(.content) {

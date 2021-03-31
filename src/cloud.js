@@ -13,6 +13,7 @@ import { Button } from "./react-components/input/Button";
 
 import registerTelemetry from "./telemetry";
 import { FormattedMessage } from "react-intl";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 registerTelemetry("/cloud", "Hubs Cloud Landing Page");
 
@@ -122,9 +123,11 @@ window.APP = { store };
 function Root() {
   return (
     <WrappedIntlProvider>
-      <AuthContextProvider store={store}>
-        <HubsCloudPage />
-      </AuthContextProvider>
+      <ThemeProvider store={store}>
+        <AuthContextProvider store={store}>
+          <HubsCloudPage />
+        </AuthContextProvider>
+      </ThemeProvider>
     </WrappedIntlProvider>
   );
 }

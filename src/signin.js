@@ -10,6 +10,7 @@ import { PageContainer } from "./react-components/layout/PageContainer";
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import { Center } from "./react-components/layout/Center";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 registerTelemetry("/signin", "Hubs Sign In Page");
 
@@ -19,13 +20,15 @@ window.APP = { store };
 function Root() {
   return (
     <WrappedIntlProvider>
-      <AuthContextProvider store={store}>
-        <PageContainer>
-          <Center>
-            <SignInModalContainer />
-          </Center>
-        </PageContainer>
-      </AuthContextProvider>
+      <ThemeProvider store={store}>
+        <AuthContextProvider store={store}>
+          <PageContainer>
+            <Center>
+              <SignInModalContainer />
+            </Center>
+          </PageContainer>
+        </AuthContextProvider>
+      </ThemeProvider>
     </WrappedIntlProvider>
   );
 }

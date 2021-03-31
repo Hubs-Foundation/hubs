@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 
 let config = process.env.APP_CONFIG;
 
@@ -8,7 +9,9 @@ if (!config && process.env.STORYBOOK_APP_CONFIG) {
   config = JSON.parse(process.env.STORYBOOK_APP_CONFIG);
 }
 
-export const themes = config && config.themes;
+export const defaultTheme = "default";
+
+export const themes = (config && config.themes) || [];
 
 function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);
@@ -71,3 +74,39 @@ export function useTheme(themeId) {
     [themeId, darkMode]
   );
 }
+
+export function useThemeFromStore(store) {
+  const [themeId, setThemeId] = useState(store?.state?.preferences?.theme);
+
+  useEffect(() => {
+    function onStoreChanged() {
+      const nextThemeId = store.state?.preferences?.theme;
+
+      if (themeId !== nextThemeId) {
+        setThemeId(nextThemeId);
+      }
+    }
+
+    if (store) {
+      store.addEventListener("statechanged", onStoreChanged);
+    }
+
+    return () => {
+      if (store) {
+        store.removeEventListener("statechanged", onStoreChanged);
+      }
+    };
+  });
+
+  useTheme(themeId);
+}
+
+export function ThemeProvider({ store, children }) {
+  useThemeFromStore(store);
+  return children;
+}
+
+ThemeProvider.propTypes = {
+  store: PropTypes.object,
+  children: PropTypes.node
+};

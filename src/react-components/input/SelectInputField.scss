@@ -13,7 +13,7 @@ $input-height: 40px;
   height: $input-height;
   border: 1px solid theme.$input-border-color;
   border-radius: theme.$border-radius-regular;
-  color: theme.$black;
+  color: theme.$text1-color;
   background-color: theme.$input-bg-color;
   width: 100%;
   max-width: 300px;
@@ -36,6 +36,16 @@ $input-height: 40px;
   &:focus-within  {
     border-color: theme.$input-outline-color;
     box-shadow: 0 0 0 2px theme.$input-outline-color;
+  }
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
   }
 }
 

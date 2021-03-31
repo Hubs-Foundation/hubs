@@ -16,6 +16,7 @@ import "./assets/stylesheets/whats-new.scss";
 import { PageContainer } from "./react-components/layout/PageContainer";
 import { Spinner } from "./react-components/misc/Spinner";
 import { Center } from "./react-components/layout/Center";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 registerTelemetry("/whats-new", "Hubs What's New");
 
@@ -136,9 +137,11 @@ class WhatsNew extends Component {
 document.addEventListener("DOMContentLoaded", async () => {
   ReactDOM.render(
     <WrappedIntlProvider>
-      <AuthContextProvider store={store}>
-        <WhatsNew />
-      </AuthContextProvider>
+      <ThemeProvider store={store}>
+        <AuthContextProvider store={store}>
+          <WhatsNew />
+        </AuthContextProvider>
+      </ThemeProvider>
     </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );

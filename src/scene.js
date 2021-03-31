@@ -40,18 +40,21 @@ import "./components/event-repeater";
 
 import registerTelemetry from "./telemetry";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 disableiOSZoom();
 
 function mountUI(scene, props = {}) {
   ReactDOM.render(
     <WrappedIntlProvider>
-      <SceneUI
-        {...{
-          scene,
-          ...props
-        }}
-      />
+      <ThemeProvider store={window.APP.store}>
+        <SceneUI
+          {...{
+            scene,
+            ...props
+          }}
+        />
+      </ThemeProvider>
     </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );
