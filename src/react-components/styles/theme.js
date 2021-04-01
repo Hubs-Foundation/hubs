@@ -9,6 +9,10 @@ if (!config && process.env.STORYBOOK_APP_CONFIG) {
   config = JSON.parse(process.env.STORYBOOK_APP_CONFIG);
 }
 
+if (!config) {
+  config = window.APP_CONFIG;
+}
+
 export const defaultTheme = "default";
 
 export const themes = (config && config.themes) || [];
