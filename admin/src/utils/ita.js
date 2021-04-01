@@ -149,7 +149,8 @@ const DESCRIPTOR_FIELDS = [
   "name",
   "description",
   "internal",
-  "source"
+  "source",
+  "deprecated"
 ];
 function isDescriptor(obj) {
   if (typeof obj !== "object") return false;
