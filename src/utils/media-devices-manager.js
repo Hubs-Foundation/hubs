@@ -192,7 +192,7 @@ export default class MediaDevicesManager {
 
           this._iOSTrackMutedHack();
 
-          audioSystem.addStreamToOutboundAudio("microphone", newStream);
+          this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
 
           this._scene.emit("local-media-stream-created");
 
