@@ -85,7 +85,9 @@ export const LogMessageType = {
   setAudioNormalizationFactor: "setAudioNormalizationFactor",
   audioNormalizationDisabled: "audioNormalizationDisabled",
   audioNormalizationNaN: "audioNormalizationNaN",
-  invalidAudioNormalizationRange: "invalidAudioNormalizationRange"
+  invalidAudioNormalizationRange: "invalidAudioNormalizationRange",
+  audioSuspended: "audioSuspended",
+  audioResumed: "audioResumed"
 };
 
 const logMessages = defineMessages({
