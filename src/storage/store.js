@@ -96,7 +96,6 @@ export const SCHEMA = {
         preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
-        audioNormalization: { type: "bool" },
         invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
@@ -124,6 +123,7 @@ export const SCHEMA = {
         disableEchoCancellation: { type: "bool" },
         disableNoiseSuppression: { type: "bool" },
         disableAutoGainControl: { type: "bool" },
+        audioNormalization: { type: "number" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" }
       }

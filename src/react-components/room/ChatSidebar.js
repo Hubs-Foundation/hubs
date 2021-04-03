@@ -81,11 +81,7 @@ export const LogMessageType = {
   captureAlreadyStopped: "captureAlreadyStopped",
   captureAlreadyRunning: "captureAlreadyRunning",
   positionalAudioEnabled: "positionalAudioEnabled",
-  positionalAudioDisabled: "positionalAudioDisabled",
-  setAudioNormalizationFactor: "setAudioNormalizationFactor",
-  audioNormalizationDisabled: "audioNormalizationDisabled",
-  audioNormalizationNaN: "audioNormalizationNaN",
-  invalidAudioNormalizationRange: "invalidAudioNormalizationRange"
+  positionalAudioDisabled: "positionalAudioDisabled"
 };
 
 const logMessages = defineMessages({
@@ -140,23 +136,6 @@ const logMessages = defineMessages({
   [LogMessageType.positionalAudioDisabled]: {
     id: "chat-sidebar.log-message.positional-audio-disabled",
     defaultMessage: "Positional audio disabled."
-  },
-  [LogMessageType.setAudioNormalizationFactor]: {
-    id: "chat-sidebar.log-message.set-audio-normalization-factor",
-    defaultMessage: "audioNormalization factor is set to {factor}."
-  },
-  [LogMessageType.audioNormalizationDisabled]: {
-    id: "chat-sidebar.log-message.audio-normalization-disabled",
-    defaultMessage: "audioNormalization is disabled."
-  },
-  [LogMessageType.audioNormalizationNaN]: {
-    id: "chat-sidebar.log-message.audio-normalization-nan",
-    defaultMessage: "audioNormalization command needs a valid number parameter."
-  },
-  [LogMessageType.invalidAudioNormalizationRange]: {
-    id: "chat-sidebar.log-message.invalid-audio-normalization-range",
-    defaultMessage:
-      "audioNormalization command needs a base volume number between 0 [no normalization] and 255. Default is 0. The recommended value is 4, if you would like to enable normalization."
   }
 });
 
