@@ -232,6 +232,19 @@ class ConfigurationEditor extends Component {
         inputProps={{ maxLength: 4096 }}
         value={currentValue || ""}
         onChange={ev => this.onChange(path, ev.target.value)}
+        onBlur={ev => {
+          if (descriptor.json) {
+            // Pretty print json strings if they appear
+            let pretty;
+            try {
+              pretty = JSON.stringify(JSON.parse(ev.target.value), null, 2);
+            } catch {
+              console.error("Invalid string for descriptor. Could not parse JSON.", descriptor, ev.target.value);
+            }
+
+            this.onChange(path, pretty || ev.target.value);
+          }
+        }}
         helperText={descriptor.description}
         type="text"
         fullWidth
