@@ -238,8 +238,10 @@ class ConfigurationEditor extends Component {
             let pretty;
             try {
               pretty = JSON.stringify(JSON.parse(ev.target.value), null, 2);
-            } catch {
-              console.error("Invalid string for descriptor. Could not parse JSON.", descriptor, ev.target.value);
+            } catch (error) {
+              console.error(`Invalid JSON for ${descriptor.name || displayPath}.`);
+              console.error(error);
+              console.error(ev.target.value);
             }
 
             this.onChange(path, pretty || ev.target.value);
