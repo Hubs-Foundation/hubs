@@ -7,7 +7,8 @@ if (fs.existsSync(themesPath)) {
   const appConfig = {};
 
   const themesString = fs.readFileSync(themesPath).toString();
-  appConfig.themes = JSON.parse(themesString);
+  appConfig.theme = {};
+  appConfig.theme.themes = JSON.parse(themesString);
 
   process.env.STORYBOOK_APP_CONFIG = JSON.stringify(appConfig);
 }

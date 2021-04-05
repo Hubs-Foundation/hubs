@@ -10,7 +10,6 @@ const schemaCategories = [
   "rooms",
   "images",
   "theme",
-  "themes",
   "links",
   "auth"
 ];
@@ -40,8 +39,6 @@ function getCategoryDisplayName(category) {
     case "images":
       return "Images";
     case "theme":
-      return "Theme";
-    case "themes":
       return "Themes";
     case "links":
       return "Links";

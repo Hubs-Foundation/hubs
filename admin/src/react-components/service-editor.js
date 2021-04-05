@@ -355,6 +355,7 @@ class ConfigurationEditor extends Component {
   renderTree(schema, category, config) {
     const configurables = getDescriptors(schema[category])
       .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
+      .filter(([, descriptor]) => qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true")
       .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
 
     return (

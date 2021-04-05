@@ -13,13 +13,13 @@ if (!config) {
   config = window.APP_CONFIG;
 }
 
-if (config && config.themes_failed_to_load) {
+if (config && config.theme && config.theme.failed_to_load) {
   console.error("Custom themes failed to load. If you are an admin, reconfigure your themes in the admin panel.");
 }
 
 export const defaultTheme = "default";
 
-export const themes = (config && config.themes) || [];
+export const themes = (config && config.theme && config.theme.themes) || [];
 
 function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);

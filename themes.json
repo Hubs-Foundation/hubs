@@ -35,7 +35,11 @@
       "border1-color": "#3A4048",
       "border2-color": "#5D646C",
       "border3-color": "#5D646C",
-      "outline-color": "#ffffff"
+      "outline-color": "#ffffff",
+      "action-color": "#ff3464",
+      "action-color-highlight": "#ff74a4",
+      "background-hover-color": "#aaaaaa",
+      "notice-background-color": "#2f80ed"
     }
   }
 ]
