@@ -38,8 +38,8 @@ export function useTheme(themeId) {
 
   useEffect(
     () => {
-      // Make sure themes is properly configured. (It must be an array.)
-      if (!themes || !themes.find || !themes.__proto__ !== Array.prototype) return;
+      // Themes can come from an external source. Ensure it is an array.
+      if (!Array.isArray(themes)) return;
 
       let theme;
 
