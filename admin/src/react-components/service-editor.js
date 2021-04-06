@@ -246,13 +246,16 @@ class ConfigurationEditor extends Component {
         onChange={ev => {
           if (descriptor.json) {
             if (!isValidJSON(ev.target.value)) {
-              this.setState({
-                warningMessage: `Invalid JSON for ${descriptor.name || displayPath}. See console for details.`
-              });
+              const warningMessage = `Invalid JSON for ${descriptor.name || displayPath}. See console for details.`;
+              if (this.state.warningMessage !== warningMessage) {
+                this.setState({ warningMessage });
+              }
               console.error(`Invalid JSON for ${descriptor.name || displayPath}.`);
               console.error(ev.target.value);
             } else {
-              this.setState({ warningMessage: null });
+              if (this.state.warningMessage !== null) {
+                this.setState({ warningMessage: null });
+              }
             }
           }
           this.onChange(path, ev.target.value);
