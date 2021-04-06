@@ -249,6 +249,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     }
   }
 
+  const isMobile = AFRAME.utils.device.isMobile();
   return (
     <ChatSidebar onClose={onClose}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
@@ -268,7 +269,9 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         value={message}
         afterInput={
           <>
-            <EmojiPickerPopoverButton onSelectEmoji={emoji => setMessage(message => message + emoji.native)} />
+            {!isMobile && (
+              <EmojiPickerPopoverButton onSelectEmoji={emoji => setMessage(message => message + emoji.native)} />
+            )}
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
