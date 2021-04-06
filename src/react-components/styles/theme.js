@@ -13,8 +13,12 @@ if (!config) {
   config = window.APP_CONFIG;
 }
 
-if (config?.theme?.failed_to_load) {
-  console.error("Custom themes failed to load. If you are an admin, reconfigure your themes in the admin panel.");
+if (config?.theme?.error) {
+  console.error(
+    `Custom themes failed to load.\n${
+      config.theme.error
+    }\nIf you are an admin, reconfigure your themes in the admin panel.`
+  );
 }
 
 export const defaultTheme = "default";
