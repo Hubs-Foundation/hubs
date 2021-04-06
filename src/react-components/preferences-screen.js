@@ -775,7 +775,11 @@ class PreferencesScreen extends Component {
   }
 
   onMicSelectionChanged = deviceId => {
-    this.mediaDevicesManager.selectMicDevice(deviceId === "none" ? null : deviceId).then(this.updateMediaDevices);
+    if (deviceId === "none") {
+      this.mediaDevicesManager.stopMicShare().then(this.updateMediaDevices);
+    } else {
+      this.mediaDevicesManager.startMicShare(deviceId).then(this.updateMediaDevices);
+    }
   };
 
   onMediaDevicesUpdated = () => {
@@ -837,8 +841,9 @@ class PreferencesScreen extends Component {
   };
 
   storeUpdated = () => {
-    if (!this.props.store?.state?.preferences?.preferredMic) {
-      this.mediaDevicesManager.selectMicDevice(null);
+    const deviceId = this.props.store?.state?.preferences?.preferredMic;
+    if (!deviceId && this.mediaDevicesManager.isMicShared) {
+      this.mediaDevicesManager.stopMicShare();
     }
   };
 
@@ -846,7 +851,11 @@ class PreferencesScreen extends Component {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
     this.props.scene.addEventListener("devicechange", this.onMediaDevicesUpdated);
 
-    this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
+    if (!this.mediaDevicesManager.isMicShared) {
+      this.mediaDevicesManager.startMicShare().then(this.updateMediaDevices);
+    } else {
+      this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
+    }
   }
 
   componentWillUnmount() {
