@@ -15,20 +15,24 @@ function createSilentAudioEl(stream) {
   return audioEl;
 }
 
-async function getMediaStream(el) {
+async function getOwnerId(el) {
   const networkedEl = await NAF.utils.getNetworkedEntity(el).catch(e => {
     console.error(INFO_INIT_FAILED, INFO_NO_NETWORKED_EL, e);
   });
   if (!networkedEl) {
     return null;
   }
-  const ownerId = networkedEl.components.networked.data.owner;
-  if (!ownerId) {
+  return networkedEl.components.networked.data.owner;
+}
+
+async function getMediaStream(el) {
+  const peerId = await getOwnerId(el);
+  if (!peerId) {
     console.error(INFO_INIT_FAILED, INFO_NO_OWNER);
     return null;
   }
-  const stream = await NAF.connection.adapter.getMediaStream(ownerId).catch(e => {
-    console.error(INFO_INIT_FAILED, `Error getting media stream for ${ownerId}`, e);
+  const stream = await NAF.connection.adapter.getMediaStream(peerId).catch(e => {
+    console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
   });
   if (!stream) {
     return null;
@@ -72,10 +76,13 @@ AFRAME.registerComponent("avatar-audio-source", {
       createSilentAudioEl(stream); // TODO: Do the audio els need to get cleaned up?
     }
 
-    const mediaStreamSource = audio.context.createMediaStreamSource(stream);
-    audio.setNodeSource(mediaStreamSource);
+    this.destination = audio.context.createMediaStreamDestination();
+    this.mediaStreamSource = audio.context.createMediaStreamSource(stream);
+    const destinationSource = audio.context.createMediaStreamSource(this.destination.stream);
+    this.mediaStreamSource.connect(this.destination);
+    audio.setNodeSource(destinationSource);
     this.el.setObject3D(this.attrName, audio);
-    this.el.emit("sound-source-set", { soundSource: mediaStreamSource });
+    this.el.emit("sound-source-set", { soundSource: destinationSource });
   },
 
   destroyAudio() {
@@ -88,7 +95,32 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   init() {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
+    // We subscribe to audio stream notifications for this peer to update the audio source
+    // This could happen in case there is an ICE failure that requires a transport recreation.
+    NAF.connection.adapter.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
+  },
+
+  async _onStreamUpdated(peerId, kind) {
+    const audio = this.el.getObject3D(this.attrName);
+    if (!audio) return;
+    const stream = audio.source.mediaStream;
+    if (!stream) return;
+
+    getOwnerId(this.el).then(async ownerId => {
+      if (ownerId === peerId && kind === "audio") {
+        // The audio stream for this peer has been updated
+        const newStream = await NAF.connection.adapter.getMediaStream(peerId, "audio").catch(e => {
+          console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
+        });
+
+        if (newStream) {
+          this.mediaStreamSource.disconnect();
+          this.mediaStreamSource = audio.context.createMediaStreamSource(newStream);
+          this.mediaStreamSource.connect(this.destination);
+        }
+      }
+    });
   },
 
   update(oldData) {
@@ -108,6 +140,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   remove: function() {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
+    NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
     this.destroyAudio();
   }
 });

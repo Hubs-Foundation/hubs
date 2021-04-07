@@ -9,9 +9,21 @@ if (!config && process.env.STORYBOOK_APP_CONFIG) {
   config = JSON.parse(process.env.STORYBOOK_APP_CONFIG);
 }
 
+if (!config) {
+  config = window.APP_CONFIG;
+}
+
+if (config?.theme?.error) {
+  console.error(
+    `Custom themes failed to load.\n${
+      config.theme.error
+    }\nIf you are an admin, reconfigure your themes in the admin panel.`
+  );
+}
+
 export const defaultTheme = "default";
 
-export const themes = (config && config.themes) || [];
+export const themes = config?.theme?.themes || [];
 
 function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);
@@ -34,6 +46,9 @@ export function useTheme(themeId) {
 
   useEffect(
     () => {
+      // Themes can come from an external source. Ensure it is an array.
+      if (!Array.isArray(themes)) return;
+
       let theme;
 
       if (themeId) {

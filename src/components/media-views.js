@@ -6,7 +6,7 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createImageTexture, createBasisTexture, createVideoOrAudioEl } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createVideoOrAudioEl } from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
@@ -48,6 +48,63 @@ for (let i = 0; i <= 20; i++) {
   }
   s += "]";
   VOLUME_LABELS[i] = s;
+}
+
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
+const loadingManager = new THREE.LoadingManager();
+loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
+
+let ktxLoader;
+
+export function createBasisTexture(url) {
+  if (!ktxLoader) {
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  }
+  return new Promise((resolve, reject) => {
+    ktxLoader.basisLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        // texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
+}
+
+export function createKTX2Texture(url) {
+  if (!ktxLoader) {
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  }
+  return new Promise((resolve, reject) => {
+    ktxLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
 }
 
 class GIFTexture extends THREE.Texture {
@@ -694,6 +751,23 @@ AFRAME.registerComponent("media-video", {
       if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
         const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+        // We subscribe to video stream notifications for this peer to update the video element
+        // This could happen in case there is an ICE failure that requires a transport recreation.
+        if (this._onStreamUpdated) {
+          NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
+        }
+        this._onStreamUpdated = async (peerId, kind) => {
+          if (peerId === streamClientId && kind === "video") {
+            // The video stream for this peer has been updated
+            const stream = await NAF.connection.adapter.getMediaStream(peerId, "video").catch(e => {
+              console.error(`Error getting video stream for ${peerId}`, e);
+            });
+            if (stream) {
+              videoEl.srcObject = new MediaStream(stream);
+            }
+          }
+        };
+        NAF.connection.adapter.on("stream_updated", this._onStreamUpdated, this);
         videoEl.srcObject = new MediaStream(stream.getVideoTracks());
         // If hls.js is supported we always use it as it gives us better events
       } else if (contentType.startsWith("application/dash")) {
@@ -944,6 +1018,7 @@ AFRAME.registerComponent("media-video", {
     if (this.video) {
       this.video.removeEventListener("pause", this.onPauseStateChange);
       this.video.removeEventListener("play", this.onPauseStateChange);
+      NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
     }
 
     if (this.hoverMenu) {
@@ -1021,6 +1096,8 @@ AFRAME.registerComponent("media-image", {
             promise = createGIFTexture(src);
           } else if (contentType.includes("image/basis")) {
             promise = createBasisTexture(src);
+          } else if (contentType.includes("image/ktx2")) {
+            promise = createKTX2Texture(src);
           } else if (contentType.startsWith("image/")) {
             promise = createImageTexture(src);
           } else {
