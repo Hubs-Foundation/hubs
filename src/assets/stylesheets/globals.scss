@@ -1,4 +1,4 @@
-@import 'root-vars';
+@use "../../react-components/styles/theme.scss";
 @import 'shared';
 
 * {
@@ -12,8 +12,8 @@ html, body, #ui-root, .home-root {
 
 body {
   @extend %default-font;
-  background: var(--home-background-color);
-  color: var(--home-text-color);
+  background: theme.$background1-color;
+  color: theme.$text1-color;
 }
 
 #ui-root, .home-root {

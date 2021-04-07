@@ -370,7 +370,7 @@ export function ChatToolbarButton(props) {
     <ToolbarButton
       {...props}
       icon={<ChatIcon />}
-      preset="blue"
+      preset="accent4"
       label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
     />
   );

@@ -4,11 +4,11 @@
   animation: rotate 3s infinite linear;
 
   *[stroke=\#000] {
-    stroke: theme.$blue;
+    stroke: theme.$primary-color;
   }
 
   *[fill=\#000] {
-    fill: theme.$blue;
+    fill: theme.$primary-color;
   }
 
   @keyframes rotate {

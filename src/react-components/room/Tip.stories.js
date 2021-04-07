@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { Tip } from "./Tip";
 
 export default {
-  title: "Tip",
+  title: "Room/Tip",
   parameters: {
     layout: "fullscreen"
   }

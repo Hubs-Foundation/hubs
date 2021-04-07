@@ -4,11 +4,10 @@ import { RoomEntryModal } from "./RoomEntryModal";
 import logoSrc from "../../assets/images/app-logo.png";
 
 export default {
-  title: "RoomEntryModal"
+  title: "Room/RoomEntryModal",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 export const Base = () => <RoomLayout viewport={<RoomEntryModal logoSrc={logoSrc} roomName="Example Room" />} />;
-
-Base.parameters = {
-  layout: "fullscreen"
-};

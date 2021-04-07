@@ -11,7 +11,7 @@
   display: flex;
   flex-flow: column;
   flex: 0 1 auto;
-  background-color: theme.$overlay-color;
+  background-color: theme.$overlay-bg-color;
 
   @media not all and (min-resolution:.001dpcm){ @supports (-webkit-appearance:none) { height: 100%; }}
 }

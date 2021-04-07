@@ -4,7 +4,7 @@ import { ExitedRoomScreen, ExitReason } from "./ExitedRoomScreen";
 import logoSrc from "../../assets/images/company-logo.png";
 
 export default {
-  title: "ExitedRoomScreen",
+  title: "Room/ExitedRoomScreen",
   args: {
     showTerms: true,
     showSourceLink: true,

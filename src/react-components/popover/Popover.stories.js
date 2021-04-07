@@ -6,7 +6,10 @@ import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { Column } from "../layout/Column";
 
 export default {
-  title: "Popover",
+  title: "Popover/Popover",
+  parameters: {
+    layout: "fullscreen"
+  },
   argTypes: {
     placement: {
       control: {
@@ -54,10 +57,6 @@ export const All = args => (
     </Popover>
   </div>
 );
-
-All.parameters = {
-  layout: "fullscreen"
-};
 
 All.args = {
   placement: "auto"

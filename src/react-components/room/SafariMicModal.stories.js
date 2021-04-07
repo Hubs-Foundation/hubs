@@ -3,11 +3,10 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { SafariMicModal } from "./SafariMicModal";
 
 export default {
-  title: "SafariMicModal"
+  title: "Room/SafariMicModal",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 export const Base = () => <RoomLayout modal={<SafariMicModal />} />;
-
-Base.parameters = {
-  layout: "fullscreen"
-};

@@ -4,8 +4,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 8px;
-  background-color: theme.$white;
-  border: 1px solid theme.$lightgrey;
+  background-color: theme.$background1-color;
+  border: 1px solid theme.$border1-color;
   min-width: 160px;
   z-index: 10;
   max-height: calc(100vh - 200px);
@@ -88,17 +88,27 @@
     background-color: transparent;
 
     &:hover * {
-      stroke: theme.$black-hover;
+      stroke: theme.$link-color-hover;
     }
 
     &:active * {
-      stroke: theme.$black-pressed;
+      stroke: theme.$link-color-pressed;
     }
   }
 }
 
 :local(.arrow) {
   position: absolute;
+}
+
+:local(.arrow-bg) {
+  fill: theme.$background1-color;
+  stroke: theme.$background1-color;
+}
+
+:local(.arrow-border) {
+  stroke: theme.$border1-color;
+  fill: theme.$background1-color;
 }
 
 :local(.fullscreen) {
@@ -113,7 +123,7 @@
   max-height: none;
 
   :local(.header) {
-    border-bottom: 1px solid theme.$lightgrey;
+    border-bottom: 1px solid theme.$border1-color;
 
     button {
       left: 16px;
