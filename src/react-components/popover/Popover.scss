@@ -46,7 +46,7 @@
 
     :local(.arrow) {
       left: -16px;
-  
+
       svg {
         transform: rotate(90deg);
       }
@@ -109,7 +109,7 @@
   right: 0;
   border-width: 0;
   border-radius: 0;
-  z-index: 2;
+  z-index: 10;
   max-height: none;
 
   :local(.header) {
