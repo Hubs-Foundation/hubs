@@ -36,6 +36,7 @@ export function SendMessageButton(props) {
 export function EmojiPickerPopoverButton({ onSelectEmoji }) {
   return (
     <Popover
+      title=""
       content={props => (
         <EmojiPicker
           onSelect={emoji => {
@@ -284,7 +285,7 @@ function MessageBubble({ media, monospace, emoji, children }) {
 MessageBubble.propTypes = {
   media: PropTypes.bool,
   monospace: PropTypes.bool,
-  emoji: PropTypes.bool,
+  emoji: PropTypes.oneOfType([PropTypes.bool, PropTypes.array]),
   children: PropTypes.node
 };
 
