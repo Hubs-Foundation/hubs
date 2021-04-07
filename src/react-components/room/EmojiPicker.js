@@ -1,9 +1,10 @@
 import React from "react";
 import { Picker } from "emoji-mart";
-import emojiIcons16 from "../../assets/images/emoji-picker-icons-16.png";
-import emojiIcons20 from "../../assets/images/emoji-picker-icons-20.png";
-import emojiIcons32 from "../../assets/images/emoji-picker-icons-32.png";
-import emojiIcons64 from "../../assets/images/emoji-picker-icons-64.png";
+// Twitter emoji sheets downloaded from unpkg.com provided by https://github.com/missive/emoji-mart
+import emojiIcons16 from "../../assets/images/emoji-picker-16.png";
+import emojiIcons20 from "../../assets/images/emoji-picker-20.png";
+import emojiIcons32 from "../../assets/images/emoji-picker-32.png";
+import emojiIcons64 from "../../assets/images/emoji-picker-64.png";
 
 import "./EmojiPicker.scss";
 
