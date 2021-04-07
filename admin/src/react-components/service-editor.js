@@ -244,7 +244,7 @@ class ConfigurationEditor extends Component {
         inputProps={{ maxLength: 4096 }}
         value={currentValue || ""}
         onChange={ev => {
-          if (descriptor.json) {
+          if (descriptor.type === "json") {
             if (!isValidJSON(ev.target.value)) {
               const warningMessage = `Invalid JSON for ${descriptor.name || displayPath}. See console for details.`;
               if (this.state.warningMessage !== warningMessage) {
@@ -261,7 +261,7 @@ class ConfigurationEditor extends Component {
           this.onChange(path, ev.target.value);
         }}
         onBlur={ev => {
-          if (descriptor.json && isValidJSON(ev.target.value)) {
+          if (descriptor.type === "json" && isValidJSON(ev.target.value)) {
             // Pretty print json strings
             const pretty = JSON.stringify(JSON.parse(ev.target.value), null, 2);
             this.onChange(path, pretty);
@@ -347,6 +347,7 @@ class ConfigurationEditor extends Component {
       case "color":
         return this.renderColorInput(path, descriptor, currentValue);
       case "longstring":
+      case "json":
         return this.renderLongTextInput(path, descriptor, currentValue);
       case "string":
       case "number":
