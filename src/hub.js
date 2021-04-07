@@ -268,6 +268,7 @@ function setupLobbyCamera() {
 }
 
 let uiProps = {};
+let connectionErrorTimeout = null;
 
 // Hub ID and slug are the basename
 let routerBaseName = document.location.pathname
@@ -454,6 +455,14 @@ async function updateUIForHub(hub, hubChannel) {
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 
+function onConnectionError(entryManager, connectError) {
+  console.error("An error occurred while attempting to connect to networked scene:", connectError);
+  // hacky until we get return codes
+  const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
+  remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
+  entryManager.exitScene();
+}
+
 function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
@@ -592,25 +601,21 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     });
 
     const connect = () => {
-      const onConnectionError = connectError => {
-        console.error("An error occurred while attempting to connect to networked scene:", connectError);
-        // hacky until we get return codes
-        const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
-        remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
-        entryManager.exitScene();
-      };
       // Safety guard just in case Protoo doens't fail in some case so we don't get stuck in the loading screen forever.
-      const connectionErrorTimeout = setTimeout(onConnectionError, 90000, "Timeout connecting to the room");
+      connectionErrorTimeout = setTimeout(onConnectionError, 30000, entryManager, "Timeout connecting to the room");
       scene.components["networked-scene"]
         .connect()
         .then(() => {
           clearTimeout(connectionErrorTimeout);
+          connectionErrorTimeout = null;
           console.log("Successfully connected to the networked scene.");
           scene.emit("didConnectToNetworkedScene");
         })
         .catch(connectError => {
           clearTimeout(connectionErrorTimeout);
-          onConnectionError(connectError);
+          connectionErrorTimeout = null;
+          adapter.disconnect();
+          onConnectionError(entryManager, connectError);
         });
     };
 
@@ -1366,16 +1371,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
-      scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
+      scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
 
-        // If this event is emitted, the signaling has been disconnected after trying so the connection to Dialog is broken.
-        adapter.once("closed", connectError => {
-          console.error(connectError);
-          remountUI({ roomUnavailableReason: ExitReason.connectError });
-          entryManager.exitScene();
-        });
+        adapter.setReconnectionListeners(
+          async () => {
+            const { host, port } = await hubChannel.getHost();
+            const newServerURL = `wss://${host}:${port}`;
+            // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
+            if (adapter.serverUrl !== newServerURL) {
+              console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
+              scene.setAttribute("networked-scene", { serverURL: newServerURL });
+              adapter.setServerUrl(newServerURL);
+              adapter.reconnect();
+            }
+            // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
+            if (!connectionErrorTimeout) {
+              connectionErrorTimeout = setTimeout(() => {
+                adapter.disconnect();
+                onConnectionError(entryManager, "Timeout trying to reconnect to the room");
+              }, 30000);
+            }
+          },
+          () => {
+            clearTimeout(connectionErrorTimeout);
+            connectionErrorTimeout = null;
+          }
+        );
+
         setupPeerConnectionConfig(adapter);
 
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));

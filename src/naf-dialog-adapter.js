@@ -69,6 +69,7 @@ export default class DialogAdapter extends EventEmitter {
     this.scene = document.querySelector("a-scene");
     this._dialogServerParams = {};
     this._consumerStats = {};
+    this._isReconnect = false;
   }
 
   get consumerStats() {
@@ -301,11 +302,7 @@ export default class DialogAdapter extends EventEmitter {
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
 
-    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString(), {
-      retry: {
-        retries: 3
-      }
-    });
+    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     this._protoo = new protooClient.Peer(protooTransport);
 
     this._protoo.on("disconnected", () => {
@@ -313,20 +310,31 @@ export default class DialogAdapter extends EventEmitter {
       this.disconnect();
     });
 
+    this._protoo.on("failed", attempt => {
+      this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
+
+      if (this._isReconnect) {
+        this._reconnectingListener && this._reconnectingListener();
+      }
+    });
+
     this._protoo.on("close", () => {
       this.emitRTCEvent("error", "Signaling", () => `Closed`);
       this.disconnect();
-      this.emit("closed", "Signaling has been closed.");
-    });
-
-    this._protoo.on("failed", attempt => {
-      this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}`);
     });
 
     await new Promise((resolve, reject) => {
       this._protoo.on("open", async () => {
         this.emitRTCEvent("info", "Signaling", () => `Open`);
         this._closed = false;
+
+        // We only need to call the reconnect callbacks if it's a reconnection.
+        if (this._isReconnect) {
+          this._reconnectedListener && this._reconnectedListener();
+        } else {
+          this._isReconnect = true;
+        }
+
         try {
           await this._joinRoom();
           resolve();
@@ -635,6 +643,11 @@ export default class DialogAdapter extends EventEmitter {
     this.reliableTransport(undefined, dataType, data);
   }
 
+  setReconnectionListeners(reconnectingListener, reconnectedListener) {
+    this._reconnectingListener = reconnectingListener;
+    this._reconnectedListener = reconnectedListener;
+  }
+
   syncOccupants() {
     // Not implemented
   }
@@ -720,13 +733,13 @@ export default class DialogAdapter extends EventEmitter {
   async closeSendTransport() {
     if (this._micProducer) {
       this._micProducer.close();
-      this._protoo.connected && this._protoo.request("closeProducer", { producerId: this._micProducer.id });
+      this._protoo?.connected && this._protoo?.request("closeProducer", { producerId: this._micProducer.id });
       this._micProducer = null;
     }
 
     if (this._videoProducer) {
       this._videoProducer.close();
-      this._protoo.connected && this._protoo.request("closeProducer", { producerId: this._videoProducer.id });
+      this._protoo?.connected && this._protoo?.request("closeProducer", { producerId: this._videoProducer.id });
       this._videoProducer = null;
     }
 
@@ -734,7 +747,7 @@ export default class DialogAdapter extends EventEmitter {
       this._sendTransport.close();
     }
 
-    if (this._protoo.connected) {
+    if (this._protoo?.connected) {
       try {
         await this._protoo.request("closeWebRtcTransport", { transportId: this._sendTransport?.id });
       } catch (err) {
@@ -802,7 +815,7 @@ export default class DialogAdapter extends EventEmitter {
     if (this._recvTransport && !this._recvTransport._closed) {
       this._recvTransport.close();
     }
-    if (this._protoo.connected) {
+    if (this._protoo?.connected) {
       try {
         await this._protoo.request("closeWebRtcTransport", { transportId: this._recvTransport?.id });
       } catch (err) {
@@ -1061,18 +1074,28 @@ export default class DialogAdapter extends EventEmitter {
 
     debug("disconnect()");
 
+    // Close mediasoup Transports.
+    this.closeSendTransport();
+    this.closeRecvTransport();
+
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
     if (this._protoo && this._protoo.connected) {
       this._protoo.close();
       this.emitRTCEvent("info", "Signaling", () => `[close]`);
     }
+  }
 
-    // Close mediasoup Transports.
-    this.closeSendTransport();
-    this.closeRecvTransport();
-
-  async reconnect() {
-    const { host, port } = await window.APP.hubChannel.getHost();
+  reconnect(timeout = 2000) {
+    // The Protoo WebSocketTransport server url cannot be updated after it's been created so we need to orce a diconnect/connect
+    // to make sure we are using the updated server url for the WSS if it has changed.
+    this.disconnect();
+    if (this._protoo) {
+      this._protoo.removeAllListeners();
+      this._protoo.close();
+    }
+    setTimeout(() => {
+      this.connect();
+    }, timeout);
   }
 
   kick(clientId, permsToken) {
