@@ -1371,10 +1371,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
-      scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
+      scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
-
+        adapter.setServerParams(await window.APP.hubChannel.getHost());
         adapter.setReconnectionListeners(
           async () => {
             const { host, port } = await hubChannel.getHost();
@@ -1384,6 +1384,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
               scene.setAttribute("networked-scene", { serverURL: newServerURL });
               adapter.setServerUrl(newServerURL);
+              adapter.setServerParams(await window.APP.hubChannel.getHost());
               adapter.reconnect();
             }
             // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
