@@ -20,16 +20,25 @@ export default {
   }
 };
 
+const nextTimestamp = (function() {
+  const now = Date.now();
+  let time = now - 8 * 60 * 60 * 1000;
+  return function nextTimeStamp() {
+    time = time + (now - time) / 2.0;
+    return time;
+  };
+})();
+
 export const Base = () => (
   <RoomLayout
     sidebar={
       <ChatSidebar>
         <ChatMessageList>
-          <SystemMessage type="join" presence="room" name="Robert" timestamp={Date.now()} />
-          <SystemMessage type="join" presence="room" name="Dom" timestamp={Date.now()} />
+          <SystemMessage type="join" presence="room" name="Robert" timestamp={nextTimestamp()} />
+          <SystemMessage type="join" presence="room" name="Dom" timestamp={nextTimestamp()} />
           <ChatMessageGroup
             sender="Dom"
-            timestamp={Date.now()}
+            timestamp={nextTimestamp()}
             messages={[
               { type: "chat", body: "Hello!" },
               { type: "chat", body: "This is a really long message that should cause a new line." },
@@ -39,7 +48,7 @@ export const Base = () => (
           <ChatMessageGroup
             sent
             sender="Robert"
-            timestamp={Date.now()}
+            timestamp={nextTimestamp()}
             messages={[
               { type: "chat", body: "Hello!" },
               { type: "chat", body: "This is a really long message that should cause a new line." },
@@ -48,28 +57,28 @@ export const Base = () => (
               { type: "chat", body: "One last message" }
             ]}
           />
-          <SystemMessage type="join" presence="room" name="John" timestamp={Date.now()} />
+          <SystemMessage type="join" presence="room" name="John" timestamp={nextTimestamp()} />
           <ChatMessageGroup
             sender="John"
-            timestamp={Date.now()}
+            timestamp={nextTimestamp()}
             messages={[
               { type: "chat", body: "https://mozilla.org" },
               { type: "chat", body: "Test message with url. https://hubs.mozilla.com Best site :point_up:" },
               { type: "chat", body: ":thumbsup:" }
             ]}
           />
-          <SystemMessage type="join" presence="room" name="Liv" timestamp={Date.now()} />
-          <SystemMessage type="join" presence="room" name="Robin" timestamp={Date.now()} />
-          <ChatMessageGroup sender="Liv" timestamp={Date.now()} messages={[{ type: "chat", body: ":clap:" }]} />
+          <SystemMessage type="join" presence="room" name="Liv" timestamp={nextTimestamp()} />
+          <SystemMessage type="join" presence="room" name="Robin" timestamp={nextTimestamp()} />
+          <ChatMessageGroup sender="Liv" timestamp={nextTimestamp()} messages={[{ type: "chat", body: ":clap:" }]} />
           <ChatMessageGroup
             sender="Robin"
-            timestamp={Date.now()}
+            timestamp={nextTimestamp()}
             messages={[{ type: "chat", body: '`console.log("Hello World")`' }]}
           />
           <ChatMessageGroup
             sent
             sender="Robert"
-            timestamp={Date.now()}
+            timestamp={nextTimestamp()}
             messages={[
               { type: "chat", body: "https://mozilla.org" },
               { type: "chat", body: "Test message with url. https://hubs.mozilla.com" }
