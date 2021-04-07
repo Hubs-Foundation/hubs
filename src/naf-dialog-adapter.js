@@ -31,8 +31,6 @@ const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
 };
 
-const INITIAL_ROOM_RECONNECTION_INTERVAL = 2000;
-
 const WEBCAM_SIMULCAST_ENCODINGS = [
   { scaleResolutionDownBy: 4, maxBitrate: 500000 },
   { scaleResolutionDownBy: 2, maxBitrate: 1000000 },
@@ -67,11 +65,10 @@ export default class DialogAdapter extends EventEmitter {
     this._forceTcp = false;
     this._forceTurn = false;
     this._iceTransportPolicy = "all";
-    this._lastSendConnectionState = null;
-    this._lastRecvConnectionState = null;
     this._closed = true;
     this.scene = document.querySelector("a-scene");
     this._dialogServerParams = {};
+    this._consumerStats = {};
   }
 
   get consumerStats() {
@@ -254,8 +251,6 @@ export default class DialogAdapter extends EventEmitter {
     if (connectionState === "failed") {
       this.restartSendICE();
     }
-
-    this._lastSendConnectionState = connectionState;
   }
 
   async recreateRecvTransport(iceServers) {
@@ -299,8 +294,6 @@ export default class DialogAdapter extends EventEmitter {
     if (connectionState === "failed") {
       this.restartRecvICE();
     }
-
-    this._lastRecvConnectionState = connectionState;
   }
 
   async connect() {
@@ -1078,8 +1071,8 @@ export default class DialogAdapter extends EventEmitter {
     this.closeSendTransport();
     this.closeRecvTransport();
 
-    this._lastRecvConnectionState = null;
-    this._lastSendConnectionState = null;
+  async reconnect() {
+    const { host, port } = await window.APP.hubChannel.getHost();
   }
 
   kick(clientId, permsToken) {
