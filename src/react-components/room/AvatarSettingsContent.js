@@ -29,7 +29,7 @@ export function AvatarSettingsContent({
         description={
           <FormattedMessage
             id="avatar-settings-content.display-name-description"
-            defaultMessage="Alphanumerics and hyphens. At least 3 characters, no more than 32"
+            defaultMessage="Alphanumerics, hyphens, underscores, and tildes. At least 3 characters, no more than 32"
           />
         }
         ref={displayNameInputRef}
