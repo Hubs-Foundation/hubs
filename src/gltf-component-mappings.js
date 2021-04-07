@@ -423,4 +423,26 @@ AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, 
   el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
 });
 
-AFRAME.GLTFModelPlus.registerComponent("video-texture-target", "video-texture-target");
+AFRAME.GLTFModelPlus.registerComponent(
+  "video-texture-target",
+  "video-texture-target",
+  (el, componentName, componentData, _components, indexToEntityMap) => {
+    const { targetBaseColorMap, targetEmissiveMap, src } = componentData;
+
+    const target = indexToEntityMap[src];
+    if (!target) {
+      console.warn(
+        `Error inflating gltf component "video-texture-target": Couldn't find target entity with index ${src}`
+      );
+      return;
+    }
+
+    el.setAttribute(componentName, {
+      targetBaseColorMap,
+      targetEmissiveMap,
+      target
+    });
+  }
+);
+
+AFRAME.GLTFModelPlus.registerComponent("video-texture-source", "video-texture-source");
