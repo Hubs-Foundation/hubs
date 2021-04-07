@@ -7,8 +7,24 @@ import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import classNames from "classnames";
-import { ReactComponent as CloseIcon } from "../icons/Close.svg";
-import { ReactComponent as PopoverArrow } from "./PopoverArrow.svg";
+import { CloseButton } from "../input/CloseButton";
+
+function PopoverArrow() {
+  return (
+    <svg width="25" height="11" viewBox="0 0 25 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M1 1L11.1176 9.51209C11.8908 10.1626 13.1092 10.1626 13.8824 9.51209L24 1"
+        strokeWidth="2"
+        className={styles.arrowBg}
+      />
+      <path
+        d="M11.1176 9.51209L1 1H24L13.8824 9.51209C13.1092 10.1626 11.8908 10.1626 11.1176 9.51209Z"
+        className={styles.arrowBorder}
+      />
+      <path d="M0 1H25" strokeWidth="2" className={styles.arrowBg} />
+    </svg>
+  );
+}
 
 export function Popover({
   content: Content,
@@ -123,9 +139,7 @@ export function Popover({
             {...attributes.popper}
           >
             <div className={styles.header}>
-              <button onClick={closePopover}>
-                <CloseIcon width={16} height={16} />
-              </button>
+              <CloseButton onClick={closePopover} />
               <h5>{title}</h5>
             </div>
             <div className={styles.content}>

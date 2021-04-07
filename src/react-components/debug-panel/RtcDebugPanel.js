@@ -132,7 +132,7 @@ function TransportPanel({ title, data, candidates, producers, consumers, isButto
   const backgroundColor = error ? ERROR_COLOR : null;
   return (
     <CollapsiblePanel key={title} title={title} border url={`${MEDIASOUP_DOC_BASE_URL}#Transport`} data={data}>
-      <PanelMessageButton onClick={onRestart} disabled={!isButtonEnabled} preset={"green"}>
+      <PanelMessageButton onClick={onRestart} disabled={!isButtonEnabled} preset="accept">
         <FormattedMessage id="rtc-debug-panel.restart-ice-button" defaultMessage="Restart ICE" />
       </PanelMessageButton>
       <CollapsiblePanel
@@ -194,7 +194,7 @@ function SignalingPanel({ data, onConnect, onDisconnect }) {
           }
         }}
         disabled={false}
-        preset={"green"}
+        preset="accept"
       >
         {data.connected ? (
           <FormattedMessage id="rtc-debug-panel.disconnect-signaling-button" defaultMessage="Disconnect" />

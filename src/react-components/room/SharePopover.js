@@ -37,8 +37,8 @@ export function SharePopoverButton({ items }) {
           }
         }}
         label={title}
-        preset="purple"
-        statusColor={activeItem && "red"}
+        preset="accent5"
+        statusColor={activeItem && "recording"}
       />
     );
   }
@@ -58,7 +58,7 @@ export function SharePopoverButton({ items }) {
           selected={popoverVisible}
           onClick={togglePopover}
           label={title}
-          preset="purple"
+          preset="accent5"
         />
       )}
     </Popover>

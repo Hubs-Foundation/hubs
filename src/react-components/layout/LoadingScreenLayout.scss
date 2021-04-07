@@ -11,7 +11,7 @@
   right: 0;
   bottom: 0;
   top: 0;
-  background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%);
+  background: theme.$loading-screen-background;
 
   font-size: theme.$font-size-sm;
 

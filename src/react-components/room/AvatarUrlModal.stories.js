@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { AvatarUrlModal } from "./AvatarUrlModal";
 
 export default {
-  title: "AvatarUrlModal",
+  title: "Room/AvatarUrlModal",
   parameters: {
     layout: "fullscreen"
   }

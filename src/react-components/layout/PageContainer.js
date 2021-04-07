@@ -4,7 +4,6 @@ import { Page } from "./Page";
 import { AuthContext } from "../auth/AuthContext";
 import configs from "../../utils/configs";
 import { useAccessibleOutlineStyle } from "../input/useAccessibleOutlineStyle";
-import "../styles/global.scss";
 
 export function PageContainer({ children, ...rest }) {
   const auth = useContext(AuthContext);

@@ -1,6 +1,5 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
-import { withDesign } from "storybook-addon-designs";
 import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as ShareIcon } from "../icons/Share.svg";
@@ -15,8 +14,7 @@ import { Column } from "../layout/Column";
 import { RoomLayout } from "../layout/RoomLayout";
 
 export default {
-  title: "Toolbar",
-  decorators: [withDesign],
+  title: "Input/Toolbar",
   argTypes: {
     selected: { control: "boolean" }
   }
@@ -27,16 +25,12 @@ export const AllButtons = args => (
     {presets.map(preset => (
       <ToolbarButton key={preset} icon={<ShareIcon />} label={preset} preset={preset} {...args} />
     ))}
-    <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" statusColor="red" />
-    <ToolbarButton icon={<MicrophoneIcon />} label="Voice" statusColor="green" />
+    <ToolbarButton icon={<ShareIcon />} label="Share" preset="accent5" statusColor="recording" />
+    <ToolbarButton icon={<MicrophoneIcon />} label="Voice" statusColor="enabled" />
   </Column>
 );
 
 AllButtons.parameters = {
-  design: {
-    type: "figma",
-    url: "https://www.figma.com/file/Xag5qaEgYs3KzXvoxx5m8y/Hubs-Redesign?node-id=17%3A725"
-  },
   selected: false
 };
 
@@ -46,27 +40,20 @@ export const RoomToolbar = () => (
     toolbarCenter={
       <>
         <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />
-        <ToolbarButton icon={<ShareIcon />} label="Share" preset="purple" />
-        <ToolbarButton icon={<ObjectIcon />} label="Place" preset="green" />
-        <ToolbarButton icon={<ReactionIcon />} label="React" preset="orange" />
-        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="blue" />
+        <ToolbarButton icon={<ShareIcon />} label="Share" preset="accent5" />
+        <ToolbarButton icon={<ObjectIcon />} label="Place" preset="accent3" />
+        <ToolbarButton icon={<ReactionIcon />} label="React" preset="accent2" />
+        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" />
       </>
     }
     toolbarRight={
       <>
-        <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="red" />
+        <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="accent1" />
         <ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />
       </>
     }
   />
 );
-
-RoomToolbar.parameters = {
-  design: {
-    type: "figma",
-    url: "https://www.figma.com/file/Xag5qaEgYs3KzXvoxx5m8y/Hubs-Redesign?node-id=17%3A667"
-  }
-};
 
 export const EntryToolbar = () => (
   <RoomLayout
@@ -74,16 +61,9 @@ export const EntryToolbar = () => (
     toolbarCenter={
       <>
         <ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" className={styleUtils.hideLg} />
-        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="blue" />
+        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" />
       </>
     }
     toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />}
   />
 );
-
-EntryToolbar.parameters = {
-  design: {
-    type: "figma",
-    url: "https://www.figma.com/file/Xag5qaEgYs3KzXvoxx5m8y/Hubs-Redesign?node-id=61%3A4500"
-  }
-};

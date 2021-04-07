@@ -565,7 +565,7 @@ export default class SceneEntryManager {
 
     const getAudio = () => {
       audioEl.loop = true;
-      audioEl.muted = true;
+      audioEl.muted = false;
       audioEl.crossorigin = "anonymous";
       audioEl.src = URL.createObjectURL(audioInput.files[0]);
       document.body.appendChild(audioEl);

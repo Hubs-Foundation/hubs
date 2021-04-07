@@ -1,7 +1,7 @@
 @use "../../react-components/styles/theme.scss";
 
 :local(.hero) {
-  background-color: theme.$recessed-bg;
+  background-color: theme.$background2-color;
 
   h1 {
     margin-bottom: 20px;

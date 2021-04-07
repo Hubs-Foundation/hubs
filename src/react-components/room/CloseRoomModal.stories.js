@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { CloseRoomModal } from "./CloseRoomModal";
 
 export default {
-  title: "CloseRoomModal",
+  title: "Room/CloseRoomModal",
   parameters: {
     layout: "fullscreen"
   }

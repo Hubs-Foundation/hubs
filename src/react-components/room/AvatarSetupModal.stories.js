@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { AvatarSetupModal } from "./AvatarSetupModal";
 
 export default {
-  title: "AvatarSetupModal"
+  title: "Room/AvatarSetupModal"
 };
 
 export const Base = () => <RoomLayout viewport={<AvatarSetupModal />} />;

@@ -34,11 +34,11 @@ export default class PreloadOverlay extends Component {
           <div className={styles.hubName}>{this.props.hubName}</div>
           {this.props.onLoadClicked &&
             (!isMobile ? (
-              <Button preset="blue" onClick={this.props.onLoadClicked}>
+              <Button preset="primary" onClick={this.props.onLoadClicked}>
                 {loadButtonText}
               </Button>
             ) : (
-              <Button preset="blue" as="a" href={this.props.baseUrl} target="_blank" rel="noreferrer noopener">
+              <Button preset="primary" as="a" href={this.props.baseUrl} target="_blank" rel="noreferrer noopener">
                 {loadButtonText}
               </Button>
             ))}

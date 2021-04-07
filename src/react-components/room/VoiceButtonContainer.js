@@ -35,7 +35,7 @@ export function VoiceButtonContainer({ scene, microphoneEnabled }) {
       label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}
       preset="basic"
       onClick={toggleMute}
-      statusColor={isMuted || !microphoneEnabled ? "red" : "green"}
+      statusColor={isMuted || !microphoneEnabled ? "disabled" : "enabled"}
     />
   );
 }

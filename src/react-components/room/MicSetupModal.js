@@ -109,7 +109,7 @@ export function MicSetupModal({
           <ToolbarButton
             icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
             label={<FormattedMessage id="mic-setup-modal.test-audio" defaultMessage="Click to Test Audio" />}
-            preset={soundPlaying ? "blue" : "basic"}
+            preset={soundPlaying ? "primary" : "basic"}
             className={styles.largeToolbarButton}
             onClick={onPlaySound}
             large
@@ -125,7 +125,7 @@ export function MicSetupModal({
             />
           </>
         )}
-        <Button preset="green" onClick={onEnterRoom}>
+        <Button preset="accept" onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
         </Button>
       </Column>

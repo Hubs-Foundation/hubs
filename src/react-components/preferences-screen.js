@@ -9,6 +9,7 @@ import { FormattedMessage, injectIntl, useIntl, defineMessages } from "react-int
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
+import { themes } from "./styles/theme";
 
 function round(step, n) {
   return Math.round(n / step) * step;
@@ -480,6 +481,10 @@ const preferenceLabels = defineMessages({
   showRtcDebugPanel: {
     id: "preferences-screen.preference.show-rtc-debug-panel",
     defaultMessage: "Show RTC Panel"
+  },
+  theme: {
+    id: "preferences-screen.preference.theme",
+    defaultMessage: "Theme"
   }
 });
 
@@ -870,15 +875,34 @@ class PreferencesScreen extends Component {
   createSections() {
     const intl = this.props.intl;
 
+    const browserDefault = intl.formatMessage({
+      id: "preferences-screen.browser-default",
+      defaultMessage: "Browser Default"
+    });
+
     const availableLocales = [
       {
         value: "browser",
-        text: intl.formatMessage({ id: "preferences-screen.browser-default", defaultMessage: "Browser Default" })
+        text: browserDefault
       }
     ];
 
     for (const locale in AVAILABLE_LOCALES) {
       availableLocales.push({ value: locale, text: AVAILABLE_LOCALES[locale] });
+    }
+
+    const availableThemes = [
+      {
+        value: null,
+        text: browserDefault
+      }
+    ];
+
+    for (const { id, name } of themes) {
+      availableThemes.push({
+        value: id,
+        text: name
+      });
     }
 
     const DEFINITIONS = new Map([
@@ -979,6 +1003,12 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableLocales,
             defaultString: "browser"
+          },
+          {
+            key: "theme",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: availableThemes,
+            defaultString: "Browser Default"
           },
           { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },

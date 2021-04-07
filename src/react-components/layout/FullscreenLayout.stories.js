@@ -6,7 +6,7 @@ import { IconButton } from "../input/IconButton";
 import { CloseButton } from "../input/CloseButton";
 
 export default {
-  title: "FullscreenLayout",
+  title: "Layout/FullscreenLayout",
   parameters: {
     layout: "fullscreen"
   }

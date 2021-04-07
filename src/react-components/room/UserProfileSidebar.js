@@ -42,7 +42,7 @@ export function UserProfileSidebar({
         <div className={styles.avatarPreviewContainer}>{avatarPreview || <div />}</div>
         {canPromote && (
           <Button
-            preset="green"
+            preset="accept"
             disabled={!isSignedIn}
             title={
               isSignedIn
@@ -62,7 +62,7 @@ export function UserProfileSidebar({
         )}
         {canDemote && (
           <Button
-            preset="red"
+            preset="cancel"
             disabled={!isSignedIn}
             title={
               isSignedIn
@@ -88,12 +88,12 @@ export function UserProfileSidebar({
           )}
         </Button>
         {canMute && (
-          <Button preset="red" onClick={onMute}>
+          <Button preset="cancel" onClick={onMute}>
             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute" />
           </Button>
         )}
         {canKick && (
-          <Button preset="red" onClick={onKick}>
+          <Button preset="cancel" onClick={onKick}>
             <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick" />
           </Button>
         )}

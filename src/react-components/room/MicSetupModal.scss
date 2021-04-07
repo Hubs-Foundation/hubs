@@ -35,14 +35,14 @@
     transform: translateX(-50%) translateY(-50%);
   
     path {
-      stroke: theme.$white !important;
+      stroke: theme.$text5-color !important;
       stroke-width: 1.25;
     }
   }
 }
 
 :local(.mic-level) {
-  color: theme.$blue;
+  color: theme.$primary-color;
   position: absolute;
   z-index: 0;
 }
@@ -57,13 +57,13 @@
 :local(.mic-button) {
   &:hover {
     :local(.mic-level) {
-      color: theme.$blue-hover;
+      color: theme.$primary-color-hover;
     }
   }
 
   &:active {
     :local(.mic-level) {
-      color: theme.$blue-pressed;
+      color: theme.$primary-color-pressed;
     }
   }
 }

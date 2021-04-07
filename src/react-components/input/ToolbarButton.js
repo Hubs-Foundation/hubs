@@ -3,9 +3,19 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./ToolbarButton.scss";
 
-export const presets = ["basic", "transparent", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
+export const presets = [
+  "basic",
+  "transparent",
+  "accept",
+  "cancel",
+  "accent1",
+  "accent2",
+  "accent3",
+  "accent4",
+  "accent5"
+];
 
-export const statusColors = ["red", "orange", "green"];
+export const statusColors = ["recording", "unread", "enabled", "disabled"];
 
 export const ToolbarButton = forwardRef(
   (

@@ -39,7 +39,6 @@ import maskEmail from "../utils/mask-email";
 import qsTruthy from "../utils/qs_truthy";
 import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
-import "./styles/global.scss";
 import { RoomLayoutContainer } from "./room/RoomLayoutContainer";
 import roomLayoutStyles from "./layout/RoomLayout.scss";
 import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
@@ -567,6 +566,7 @@ class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
+    console.log(this.props.forcedVREntryType);
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
     if (skipAudioSetup) {
@@ -968,6 +968,7 @@ class UIRoot extends Component {
         </div>
       );
     }
+    if (this.props.isBotMode) return this.renderBotMode();
     if (isLoading) {
       return <LoadingScreenContainer scene={this.props.scene} onLoaded={this.onLoadingFinished} />;
     }
@@ -984,7 +985,6 @@ class UIRoot extends Component {
     }
 
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
-    if (this.props.isBotMode) return this.renderBotMode();
 
     const entered = this.state.entered;
     const watching = this.state.watching;
@@ -1507,13 +1507,13 @@ class UIRoot extends Component {
                         <ToolbarButton
                           icon={<EnterIcon />}
                           label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room" />}
-                          preset="green"
+                          preset="accept"
                           onClick={() => this.setState({ watching: false })}
                         />
                         {enableSpectateVRButton && (
                           <ToolbarButton
                             icon={<VRIcon />}
-                            preset="purple"
+                            preset="accent5"
                             label={
                               <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
                             }
@@ -1566,7 +1566,7 @@ class UIRoot extends Component {
                       <ToolbarButton
                         icon={<LeaveIcon />}
                         label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
-                        preset="red"
+                        preset="cancel"
                         onClick={() => {
                           this.showNonHistoriedDialog(LeaveRoomModal, {
                             destinationUrl: "/",
@@ -1624,7 +1624,8 @@ function UIRootHooksWrapper(props) {
 
 UIRootHooksWrapper.propTypes = {
   scene: PropTypes.object.isRequired,
-  messageDispatch: PropTypes.object
+  messageDispatch: PropTypes.object,
+  store: PropTypes.object.isRequired
 };
 
 export default UIRootHooksWrapper;

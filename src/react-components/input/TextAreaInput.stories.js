@@ -6,7 +6,7 @@ import { IconButton } from "./IconButton";
 import { Column } from "../layout/Column";
 
 export default {
-  title: "TextAreaInput"
+  title: "Input/TextAreaInput"
 };
 
 const multilineText = `Multiline

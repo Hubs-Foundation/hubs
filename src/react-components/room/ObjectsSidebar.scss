@@ -10,6 +10,16 @@
       margin-right: 0;
     }
   }
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
+  }
 }
 
 :local(.no-objects) {
@@ -19,6 +29,6 @@
 
   p {
     margin: 20px;
-    color: theme.$darkgrey;
+    color: theme.$text2-color;
   }
 }

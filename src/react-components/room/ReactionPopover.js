@@ -29,7 +29,7 @@ export function ReactionPopoverButton({ items }) {
           selected={popoverVisible}
           onClick={togglePopover}
           label={title}
-          preset="orange"
+          preset="accent2"
         />
       )}
     </Popover>

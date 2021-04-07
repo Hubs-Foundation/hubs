@@ -125,7 +125,8 @@ export const SCHEMA = {
         disableAutoGainControl: { type: "bool" },
         audioNormalization: { type: "number" },
         locale: { type: "string" },
-        showRtcDebugPanel: { type: "bool" }
+        showRtcDebugPanel: { type: "bool" },
+        theme: { type: "string" }
       }
     },
 
