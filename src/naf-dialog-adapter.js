@@ -306,7 +306,7 @@ export default class DialogAdapter extends EventEmitter {
     this._protoo = new protooClient.Peer(protooTransport);
 
     this._protoo.on("disconnected", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Diconnected`);
+      this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
       this.disconnect();
     });
 
