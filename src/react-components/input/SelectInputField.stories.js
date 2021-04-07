@@ -4,7 +4,7 @@ import { Column } from "../layout/Column";
 import { SelectInputField } from "./SelectInputField";
 
 export default {
-  title: "SelectInputField"
+  title: "Input/SelectInputField"
 };
 
 export const All = args => (

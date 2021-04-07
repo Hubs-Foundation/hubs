@@ -11,3 +11,9 @@ export const waitForDOMContentLoaded = function() {
     return waitForEvent("DOMContentLoaded", window);
   }
 };
+
+export const sleep = function(milliseconds) {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds);
+  });
+};

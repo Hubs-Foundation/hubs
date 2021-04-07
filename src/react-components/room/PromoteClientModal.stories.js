@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { PromoteClientModal } from "./PromoteClientModal";
 
 export default {
-  title: "PromoteClientModal",
+  title: "Room/PromoteClientModal",
   parameters: {
     layout: "fullscreen"
   }

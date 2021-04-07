@@ -1,3 +1,5 @@
+import { LogMessageType } from "../react-components/room/ChatSidebar";
+
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
   if (delayedReconnectTimeout) {
@@ -102,12 +104,13 @@ async function enableChromeAEC(gainNode) {
 
 export class AudioSystem {
   constructor(sceneEl) {
-    sceneEl.audioListener = sceneEl.audioListener || new THREE.AudioListener();
-    if (sceneEl.camera) {
-      sceneEl.camera.add(sceneEl.audioListener);
+    this._sceneEl = sceneEl;
+    this._sceneEl.audioListener = this._sceneEl.audioListener || new THREE.AudioListener();
+    if (this._sceneEl.camera) {
+      this._sceneEl.camera.add(this._sceneEl.audioListener);
     }
-    sceneEl.addEventListener("camera-set-active", evt => {
-      evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
+    this._sceneEl.addEventListener("camera-set-active", evt => {
+      evt.detail.cameraEl.getObject3D("camera").add(this._sceneEl.audioListener);
     });
 
     this.audioContext = THREE.AudioContext.getContext();
@@ -120,28 +123,13 @@ export class AudioSystem {
     this.analyserLevels = new Uint8Array(this.outboundAnalyser.fftSize);
     this.outboundGainNode.connect(this.outboundAnalyser);
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
+    this.audioContextNeedsToBeResumed = false;
 
-    /**
-     * Chrome and Safari will start Audio contexts in a "suspended" state.
-     * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
-     */
-    const resume = () => {
-      this.audioContext.resume();
+    // Webkit Mobile fix
+    this._safariMobileAudioInterruptionFix();
 
-      setTimeout(() => {
-        if (this.audioContext.state === "running") {
-          if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
-            enableChromeAEC(sceneEl.audioListener.gain);
-          }
-
-          document.body.removeEventListener("touchend", resume, false);
-          document.body.removeEventListener("mouseup", resume, false);
-        }
-      }, 0);
-    };
-
-    document.body.addEventListener("touchend", resume, false);
-    document.body.addEventListener("mouseup", resume, false);
+    document.body.addEventListener("touchend", this._resumeAudioContext, false);
+    document.body.addEventListener("mouseup", this._resumeAudioContext, false);
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -163,5 +151,44 @@ export class AudioSystem {
       nodes.gainNode.disconnect();
       this.audioNodes.delete(id);
     }
+  }
+
+  /**
+   * Chrome and Safari will start Audio contexts in a "suspended" state.
+   * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
+   */
+  _resumeAudioContext = () => {
+    this.audioContext.resume();
+
+    setTimeout(() => {
+      if (this.audioContext.state === "running") {
+        if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
+          enableChromeAEC(this._sceneEl.audioListener.gain);
+        }
+
+        document.body.removeEventListener("touchend", this._resumeAudioContext, false);
+        document.body.removeEventListener("mouseup", this._resumeAudioContext, false);
+      }
+    }, 0);
+  };
+
+  // Webkit mobile fix
+  // https://stackoverflow.com/questions/10232908/is-there-a-way-to-detect-a-mobile-safari-audio-interruption-headphones-unplugg
+  _safariMobileAudioInterruptionFix() {
+    this.audioContext.onstatechange = () => {
+      console.log(`AudioContext state changed to ${this.audioContext.state}`);
+      if (this.audioContext.state === "suspended") {
+        // When you unplug the headphone or when the bluetooth headset disconnects on
+        // iOS Safari or Chrome, the state changes to suspended.
+        // Chrome Android doesn't go in suspended state for this case.
+        document.getElementById("avatar-rig").messageDispatch.log(LogMessageType.audioSuspended);
+        document.body.addEventListener("touchend", this._resumeAudioContext, false);
+        document.body.addEventListener("mouseup", this._resumeAudioContext, false);
+        this.audioContextNeedsToBeResumed = true;
+      } else if (this.audioContext.state === "running" && this.audioContextNeedsToBeResumed) {
+        this.audioContextNeedsToBeResumed = false;
+        document.getElementById("avatar-rig").messageDispatch.log(LogMessageType.audioResumed);
+      }
+    };
   }
 }

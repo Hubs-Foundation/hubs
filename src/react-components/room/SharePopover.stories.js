@@ -5,33 +5,24 @@ import { ReactComponent as DesktopIcon } from "../icons/Desktop.svg";
 import { SharePopoverButton } from "./SharePopover";
 
 export default {
-  title: "SharePopover"
+  title: "Room/SharePopover",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 const items = [
-  { id: "camera", icon: VideoIcon, color: "purple", label: "Camera" },
-  { id: "screen", icon: DesktopIcon, color: "purple", label: "Screen" }
+  { id: "camera", icon: VideoIcon, color: "accent5", label: "Camera" },
+  { id: "screen", icon: DesktopIcon, color: "accent5", label: "Screen" }
 ];
 
 export const Base = () => <RoomLayout toolbarCenter={<SharePopoverButton items={items} />} />;
 
-Base.parameters = {
-  layout: "fullscreen"
-};
-
 export const Mobile = () => <RoomLayout toolbarCenter={<SharePopoverButton items={[items[0]]} />} />;
 
-Mobile.parameters = {
-  layout: "fullscreen"
-};
-
 const activeItems = [
-  { id: "camera", icon: VideoIcon, color: "purple", label: "Camera", active: true },
-  { id: "screen", icon: DesktopIcon, color: "purple", label: "Screen" }
+  { id: "camera", icon: VideoIcon, color: "accent5", label: "Camera", active: true },
+  { id: "screen", icon: DesktopIcon, color: "accent5", label: "Screen" }
 ];
 
 export const Active = () => <RoomLayout toolbarCenter={<SharePopoverButton items={activeItems} />} />;
-
-Active.parameters = {
-  layout: "fullscreen"
-};

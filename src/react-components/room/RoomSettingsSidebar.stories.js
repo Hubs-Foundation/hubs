@@ -4,7 +4,7 @@ import { RoomSettingsSidebar } from "./RoomSettingsSidebar";
 import backgroundUrl from "../../assets/images/home-hero-background-unbranded.png";
 
 export default {
-  title: "RoomSettingsSidebar",
+  title: "Room/RoomSettingsSidebar",
   parameters: {
     layout: "fullscreen"
   }

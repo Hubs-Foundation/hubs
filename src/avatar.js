@@ -24,10 +24,12 @@ import AvatarPreview from "./react-components/avatar-preview";
 
 import { fetchAvatar, remixAvatar } from "./utils/avatar-utils";
 
+import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/avatar.scss";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 const qs = new URLSearchParams(location.search);
 window.APP = new App();
@@ -149,7 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log(`Avatar ID: ${avatarId}`);
   ReactDOM.render(
     <WrappedIntlProvider>
-      <AvatarPage avatarId={avatarId} store={window.APP.store} />
+      <ThemeProvider store={window.APP.store}>
+        <AvatarPage avatarId={avatarId} store={window.APP.store} />
+      </ThemeProvider>
     </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );

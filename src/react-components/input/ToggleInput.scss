@@ -14,8 +14,8 @@
   }
 
   &:focus-within :local(.track) {
-    border-color: theme.$blue;
-    box-shadow: 0 0 0 2px theme.$blue;
+    border-color: theme.$active-color;
+    box-shadow: 0 0 0 2px theme.$active-color;
   }
 }
 
@@ -28,7 +28,7 @@
   margin-left: 16px;
   display: flex;
   flex-direction: column;
-  color: theme.$darkgrey;
+  color: theme.$text2-color;
 }
 
 :local(.label) {
@@ -45,7 +45,7 @@
   position: relative;
   width: 44px;
   height: 24px;
-  border: 1px solid theme.$lightgrey;
+  border: 1px solid theme.$radio-border-color;
   border-radius: 44px; 
 }
 
@@ -56,12 +56,12 @@
   width: 20px;
   height: 20px;
   border-radius: 20px;
-  background-color: theme.$grey;
+  background-color: theme.$toggle-button-color;
 }
 
 :local(.toggle-input) input:checked + :local(.track) :local(.button) {
   left: auto;
   right: 1px;
-  background-color: theme.$blue;
+  background-color: theme.$active-color;
 }
 

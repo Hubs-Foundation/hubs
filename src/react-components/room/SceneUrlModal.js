@@ -71,7 +71,7 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
                 values={{ editorName }}
               />
             </p>
-            <Button as="a" preset="blue" href="/spoke/new" target="_blank" rel="noopener noreferrer">
+            <Button as="a" preset="primary" href="/spoke/new" target="_blank" rel="noopener noreferrer">
               <FormattedMessage
                 id="scene-url-modal.new-spoke-project-button"
                 defaultMessage="Launch {editorName}"

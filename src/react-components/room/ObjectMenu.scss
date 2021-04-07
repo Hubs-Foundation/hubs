@@ -7,11 +7,11 @@
 
   svg {
     *[stroke=\#000] {
-      stroke: theme.$white;
+      stroke: theme.$overlay-text-color;
     }
 
     *[fill=\#000] {
-      fill: theme.$white;
+      fill: theme.$overlay-text-color;
     }
   }
 
@@ -43,16 +43,16 @@
   flex-direction: column;
   background-color: rgba(0, 0, 0, 0.7);
   width: max-content;
-  color: theme.$white;
+  color: theme.$overlay-text-color;
   border-radius: 12px;
 
   svg {
     *[stroke=\#000] {
-      stroke: theme.$white;
+      stroke: theme.$overlay-text-color;
     }
 
     *[fill=\#000] {
-      fill: theme.$white;
+      fill: theme.$overlay-text-color;
     }
   }
 }
@@ -91,30 +91,30 @@
 :local(.object-menu-button) {
   height: 36px;
   padding: 0 16px;
-  color: theme.$white;
+  color: theme.$overlay-text-color;
 }
 
 :local(.separator) {
   width: 1px;
   margin: 0 4px;
-  background-color: theme.$grey;
+  background-color: theme.$overlay-border-color;
 }
 
 :local(.pagination) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: theme.$white;
+  color: theme.$overlay-text-color;
   margin-top: 24px;
   padding: 0 4px;
 
   svg {
     *[stroke=\#000] {
-      stroke: theme.$white;
+      stroke: theme.$overlay-text-color;
     }
 
     *[fill=\#000] {
-      fill: theme.$white;
+      fill: theme.$overlay-text-color;
     }
   }
 
@@ -125,6 +125,6 @@
 
 :global(.keyboard-user)  {
   :local(.back-button):focus, :local(.object-menu-container) :focus {
-    box-shadow: 0 0 0 3px theme.$white;
+    box-shadow: 0 0 0 3px theme.$overlay-outline-color;
   }
 }

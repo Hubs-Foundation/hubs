@@ -12,23 +12,22 @@ import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
 import { PlacePopoverButton } from "./PlacePopover";
 
 export default {
-  title: "PlacePopover"
+  title: "Room/PlacePopover",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 const items = [
-  { id: "pen", icon: PenIcon, color: "purple", label: "Pen" },
-  { id: "camera", icon: CameraIcon, color: "purple", label: "Camera" },
-  { id: "text", icon: TextIcon, color: "blue", label: "Text" },
-  { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
-  { id: "gif", icon: GIFIcon, color: "orange", label: "GIF" },
-  { id: "model", icon: ObjectIcon, color: "orange", label: "3D Model" },
-  { id: "avatar", icon: AvatarIcon, color: "red", label: "Avatar" },
-  { id: "scene", icon: SceneIcon, color: "red", label: "Scene" },
-  { id: "upload", icon: UploadIcon, color: "green", label: "Upload" }
+  { id: "pen", icon: PenIcon, color: "accent5", label: "Pen" },
+  { id: "camera", icon: CameraIcon, color: "accent5", label: "Camera" },
+  { id: "text", icon: TextIcon, color: "accent4", label: "Text" },
+  { id: "link", icon: LinkIcon, color: "accent4", label: "Link" },
+  { id: "gif", icon: GIFIcon, color: "accent2", label: "GIF" },
+  { id: "model", icon: ObjectIcon, color: "accent2", label: "3D Model" },
+  { id: "avatar", icon: AvatarIcon, color: "accent1", label: "Avatar" },
+  { id: "scene", icon: SceneIcon, color: "accent1", label: "Scene" },
+  { id: "upload", icon: UploadIcon, color: "accent3", label: "Upload" }
 ];
 
 export const Base = () => <RoomLayout toolbarCenter={<PlacePopoverButton items={items} />} />;
-
-Base.parameters = {
-  layout: "fullscreen"
-};

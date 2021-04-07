@@ -6,14 +6,14 @@ $input-height: 40px;
   display: flex;
   position: relative;
   height: $input-height;
-  border: 1px solid theme.$darkgrey;
+  border: 1px solid theme.$input-border-color;
   border-radius: theme.$border-radius-regular;
-  color: theme.$black;
+  color: theme.$text1-color;
   overflow: hidden;
 
   &:focus-within  {
-    border-color: theme.$blue;
-    box-shadow: 0 0 0 2px theme.$blue;
+    border-color: theme.$input-outline-color;
+    box-shadow: 0 0 0 2px theme.$input-outline-color;
   }
 }
 
@@ -40,14 +40,14 @@ $input-height: 40px;
 
       &:first-child {
         margin-right: 1px;
-        box-shadow: inset 0 0 0 3px theme.$black, -1px 0 0 2px theme.$black;
+        box-shadow: inset 0 0 0 3px theme.$outline-color, -1px 0 0 2px theme.$outline-color;
         border-top-left-radius: theme.$border-radius-regular;
         border-bottom-left-radius: theme.$border-radius-regular;
       }
   
       &:last-child {
         margin-left: 1px;
-        box-shadow: inset 0 0 0 3px theme.$black, 1px 0 0 2px theme.$black;
+        box-shadow: inset 0 0 0 3px theme.$outline-color, 1px 0 0 2px theme.$outline-color;
         border-top-right-radius: theme.$border-radius-regular;
         border-bottom-right-radius: theme.$border-radius-regular;
       }
@@ -78,15 +78,15 @@ $input-height: 40px;
 
 :local(.disabled) {
   cursor: not-allowed;
-  color: theme.$darkgrey;
-  background-color: theme.$lightgrey;
+  color: theme.$disabled-text-color;
+  background-color: theme.$disabled-bg-color;
 }
 
 :local(.invalid) {
-  border-color: theme.$red !important;
+  border-color: theme.$error-color !important;
 
   &:focus-within  {
-    box-shadow: 0 0 0 2px theme.$red;
+    box-shadow: 0 0 0 2px theme.$error-color;
   }
 }
 
@@ -107,10 +107,10 @@ $input-height: 40px;
   margin: 0 8px;
 
   *[fill=\#000] {
-    stroke: theme.$red;
+    stroke: theme.$error-color;
   }
 
   *[stroke=\#000] {
-    stroke: theme.$red;
+    stroke: theme.$error-color;
   }
 }

@@ -11,10 +11,10 @@ $input-height: 40px;
   align-items: center;
   justify-content: space-between;
   height: $input-height;
-  border: 1px solid theme.$darkgrey;
+  border: 1px solid theme.$input-border-color;
   border-radius: theme.$border-radius-regular;
-  color: theme.$black;
-  background-color: theme.$white;
+  color: theme.$text1-color;
+  background-color: theme.$input-bg-color;
   width: 100%;
   max-width: 300px;
   padding: 0 8px;
@@ -26,7 +26,7 @@ $input-height: 40px;
   }
 
   &:hover {
-    border-color: theme.$blue-hover;
+    border-color: theme.$input-border-color-hover;
   }
   
   &:focus {
@@ -34,8 +34,18 @@ $input-height: 40px;
   }
   
   &:focus-within  {
-    border-color: theme.$blue;
-    box-shadow: 0 0 0 2px theme.$blue;
+    border-color: theme.$input-outline-color;
+    box-shadow: 0 0 0 2px theme.$input-outline-color;
+  }
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
   }
 }
 
@@ -44,13 +54,13 @@ $input-height: 40px;
   top: $input-height + 4px;
   display: none;
   flex-direction: column;
-  background-color: theme.$white;
+  background-color: theme.$dropdown-bg-color;
   border-radius: 8px;
   padding: 8px 0;
   z-index: 99999;
   left: 0;
   right: 0;
-  box-shadow: -1px -1px 1px theme.$lightgrey, 3px 3px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: -1px -1px 1px theme.$dropdown-border-color, 3px 3px 6px theme.$dropdown-shadow-color;
   max-height: 320px;
   overflow-y: auto;
 }
@@ -76,6 +86,6 @@ $input-height: 40px;
 }
 
 :local(.highlighted-item) {
-  color: theme.$white;
-  background-color: theme.$blue;
+  color: theme.$active-text-color;
+  background-color: theme.$active-color;
 }

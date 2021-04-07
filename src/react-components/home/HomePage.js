@@ -160,7 +160,7 @@ export function HomePage() {
       )}
       <Container>
         <Column padding center grow>
-          <Button lg preset="blue" as="a" href="/link">
+          <Button lg preset="primary" as="a" href="/link">
             <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
           </Button>
         </Column>

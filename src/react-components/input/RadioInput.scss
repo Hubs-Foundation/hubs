@@ -25,8 +25,8 @@
   width: 24px;
   height: 24px;
   border-radius: 24px;
-  border: 1px solid theme.$lightgrey;
-  background-color: theme.$white;
+  border: 1px solid theme.$radio-border-color;
+  background-color: theme.$radio-bg-color;
   align-self: center;
   position: relative;
   appearance: none;
@@ -47,23 +47,23 @@
   }
 
   &:hover::after {
-    background-color: theme.$white-hover;
+    background-color: theme.$radio-bg-color-hover;
   }
 
   &:active::after {
-    background-color: theme.$white-pressed;
+    background-color: theme.$radio-bg-color-pressed;
   }
 
   &:checked::after {
-    background-color: theme.$blue;
+    background-color: theme.$active-color;
   }
 
   &:checked:hover::after {
-    background-color: theme.$blue-hover;
+    background-color: theme.$active-color-hover;
   }
 
   &:checked:active::after {
-    background-color: theme.$blue-pressed;
+    background-color: theme.$active-color-pressed;
   }
 }
 
@@ -71,7 +71,7 @@
   display: flex;
   flex-direction: column;
   margin-left: 8px;
-  color: theme.$darkgrey;
+  color: theme.$text2-color;
 }
 
 :local(.label) {
