@@ -5,7 +5,18 @@ import styles from "./Button.scss";
 import textInputStyles from "./TextInput.scss";
 import { FormattedMessage } from "react-intl";
 
-export const presets = ["transparent", "basic", "accept", "cancel", "red", "orange", "green", "blue", "purple"];
+export const presets = [
+  "transparent",
+  "basic",
+  "primary",
+  "accept",
+  "cancel",
+  "accent1",
+  "accent2",
+  "accent3",
+  "accent4",
+  "accent5"
+];
 
 export const Button = memo(
   forwardRef(({ as, sm, lg, xl, preset, className, children, ...rest }, ref) => {

@@ -145,7 +145,7 @@
 }
  
 :local(.rooms) {
-  background-color: theme.$recessed-bg;
+  background-color: theme.$background2-color;
   border-radius: 16px;
 }
 
@@ -163,7 +163,7 @@
 }
 
 :local(.home-page) :local(.card) {
-  background-color: theme.$recessed-bg;
+  background-color: theme.$background2-color;
   border-radius: 16px;
   font-weight: theme.$font-weight-medium;
   padding-bottom: 32px !important;

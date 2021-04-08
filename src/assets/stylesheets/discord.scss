@@ -1,4 +1,4 @@
-@import 'root-vars';
+@use "../../react-components/styles/theme.scss";
 @import 'shared';
 @import 'loader';
 
@@ -8,13 +8,13 @@ $mobile-breakpoint-width: 450px;
 
 body {
   @extend %default-font;
-  background: var(--discord-background-color);
-  color: var(--discord-text-color);
+  background: theme.$discord-bg-color;
+  color: theme.$discord-text1-color;
   margin: 0;
 }
 
 :local(.bg) {
-  background: var(--discord-background-color);
+  background: theme.$discord-bg-color;
   top: 0;
   left: 0;
   position: absolute;
@@ -40,7 +40,7 @@ body {
 :local(.header) {
   font-size: 1.1em;
   font-weight: bold;
-  color: var(--discord-text-color);
+  color: theme.$discord-text1-color;
 }
 
 :local(.header-links) {
@@ -52,7 +52,7 @@ body {
   }
 
   a {
-    color: var(--discord-text-color);
+    color: theme.$discord-text1-color;
     text-decoration: none;
     margin: 0px 18px;
   }
@@ -173,7 +173,7 @@ body {
     right: 15%;
     width: 75%;
     text-align: center;
-    color: var(--discord-subtitle-color);
+    color: theme.$discord-text2-color;
   }
 }
 
@@ -185,11 +185,20 @@ body {
 
 :local(.download-button) {
   @extend %action-button;
-  @extend %wide-button;
+  width: 350px;
+
+  @media (max-width: 768px) {
+    width: 327px;
+  }
+
+  @media (max-width: 375px) {
+    width: 300px;
+  }
+  
   height: 64px;
   border-radius: 4px;
 
-  background-color: var(--discord-action-color);
+  background-color: theme.$discord--primary-color;
   margin-top: 64px;
   display: flex;
   flex-direction: column;
@@ -198,7 +207,7 @@ body {
 
 :local(.play-button), :local(.close-video) {
   @extend %action-button;
-  background-color: var(--discord-secondary-action-color);
+  background-color: theme.$discord-text4-color;
   margin: auto;
   padding: 0px 82px;
 }
@@ -216,7 +225,7 @@ body {
 }
 
 :local(.browse-versions) {
-  color: var(--discord-secondary-text-color);
+  color: theme.$discord-text3-color;
   margin-top: 12px;
   display: block;
   text-align: center;
@@ -227,7 +236,7 @@ body {
   text-align: center;
 
   a {
-    color: var(--discord-secondary-text-color);
+    color: theme.$discord-text3-color;
   }
 }
 
@@ -237,7 +246,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: var(--lightbox-background-color);
+  background-color: theme.$overlay-bg-color;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -274,5 +283,5 @@ body {
   position: absolute;
   bottom: -40px;
   right: 84px;
-  color: var(--discord-secondary-action-color);
+  color: theme.$discord-text4-color;
 }

@@ -2,7 +2,7 @@
 
 :local(.chat-input-container) {
   padding: 0 16px 8px 16px;
-  background-color: theme.$white;
+  background-color: theme.$input-bg-color;
 }
 
 :local(.message-list) {
@@ -28,7 +28,7 @@
 }
 
 :local(.message-group-label) {
-  color: theme.$darkgrey;
+  color: theme.$text2-color;
   font-size: theme.$font-size-xs;
   display: flex;
   margin: 2px;
@@ -40,7 +40,7 @@
 }
 
 :local(.message-bubble) {
-  background-color: theme.$lightgrey;
+  background-color: theme.$chat-bubble-bg-color-received;
   border-radius: 19px;
   margin: 2px;
   padding: 10px 16px;
@@ -66,19 +66,19 @@
   }
 
   :local(.message-bubble) {
-    background-color: theme.$blue;
-    color: theme.$white;
+    background-color: theme.$chat-bubble-bg-color-sent;
+    color: theme.$chat-bubble-text-color-sent;
     align-self: flex-end;
 
     a {
-      color: theme.$white;
+      color: theme.$chat-bubble-text-color-sent;
 
       &:hover {
-        color: theme.$white-hover;
+        color: theme.$chat-bubble-link-color-sent-hover;
       }
 
       &:active {
-        color: theme.$white-pressed;
+        color: theme.$chat-bubble-link-color-sent-pressed;
       }
     }
   }
@@ -100,7 +100,7 @@
 
   i {
     font-size: theme.$font-size-xs;
-    color: theme.$darkgrey;
+    color: theme.$text2-color;
   }
 
   span {
@@ -114,11 +114,11 @@
 
   svg {
     *[stroke=\#000] {
-      stroke: theme.$darkgrey;
+      stroke: theme.$input-icon-color;
     }
 
     *[fill=\#000] {
-      fill: theme.$darkgrey;
+      fill: theme.$input-icon-color;
     }
   }
 }

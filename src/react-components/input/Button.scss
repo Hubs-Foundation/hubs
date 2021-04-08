@@ -16,53 +16,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: theme.$white;
 
   svg {
     flex-shrink: 0;
     margin-right: 8px;
-
-    *[stroke=\#000] {
-      stroke: theme.$white;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$white;
-    }
-  }
-
-  &:hover {
-    color: theme.$white;
-  }
-
-  &:active {
-    color: theme.$white;
   }
 }
 
 :local(.basic), :local(.transparent) {
-  color: theme.$darkgrey;
-  border: 1px solid theme.$darkgrey;
-  background-color: theme.$white;
+  color: theme.$text4-color;
+  border: 1px solid theme.$basic-border-color;
+  background-color: theme.$basic-color;
 
   svg {
     *[stroke=\#000] {
-      stroke: theme.$darkgrey;
+      stroke: theme.$text4-color;
     }
 
     *[fill=\#000] {
-      fill: theme.$darkgrey;
+      fill: theme.$text4-color;
     }
   }
 
   &:hover {
-    color: theme.$darkgrey;
-    background-color: theme.$white-hover;
+    color: theme.$text4-color-hover;
+    background-color: theme.$basic-color-hover;
   }
 
   &:active {
-    color: theme.$darkgrey;
-    background-color: theme.$white-pressed;
+    color: theme.$text4-color-pressed;
+    background-color: theme.$basic-color-pressed;
   }
 }
 
@@ -71,72 +54,212 @@
   background-color: theme.$transparent;
 }
 
-:local(.accept), :local(.green) {
-  background-color: theme.$green;
+:local(.primary) {
+  color: theme.$text5-color;
+  background-color: theme.$primary-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
 
   &:hover {
-    background-color: theme.$green-hover;
+    color: theme.$text5-color-hover;
+    background-color: theme.$primary-color-hover;
   }
 
   &:active {
-    background-color: theme.$green-pressed;
+    color: theme.$text5-color-pressed;
+    background-color: theme.$primary-color-pressed;
   }
 }
 
-:local(.cancel), :local(.red) {
-  background-color: theme.$red;
+:local(.accept) {
+  color: theme.$text5-color;
+  background-color: theme.$accept-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
 
   &:hover {
-    background-color: theme.$red-hover;
+    color: theme.$text5-color-hover;
+    background-color: theme.$accept-color-hover;
   }
 
   &:active {
-    background-color: theme.$red-pressed;
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accept-color-pressed;
   }
 }
 
-:local(.blue) {
-  background-color: theme.$blue;
+:local(.cancel) {
+  color: theme.$text5-color;
+  background-color: theme.$cancel-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
 
   &:hover {
-    background-color: theme.$blue-hover;
+    color: theme.$text5-color-hover;
+    background-color: theme.$cancel-color-hover;
   }
 
   &:active {
-    background-color: theme.$blue-pressed;
+    color: theme.$text5-color-pressed;
+    background-color: theme.$cancel-color-pressed;
   }
 }
 
-:local(.orange) {
-  background-color: theme.$orange;
+:local(.accent1) {
+  color: theme.$text5-color;
+  background-color: theme.$accent1-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
 
   &:hover {
-    background-color: theme.$orange-hover;
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent1-color-hover;
   }
 
   &:active {
-    background-color: theme.$orange-pressed;
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent1-color-pressed;
   }
 }
 
-:local(.purple) {
-  background-color: theme.$purple;
+:local(.accent2) {
+  color: theme.$text5-color;
+  background-color: theme.$accent2-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
 
   &:hover {
-    background-color: theme.$purple-hover;
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent2-color-hover;
   }
 
   &:active {
-    background-color: theme.$purple-pressed;
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent2-color-pressed;
+  }
+}
+
+:local(.accent3) {
+  color: theme.$text5-color;
+  background-color: theme.$accent3-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent3-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent3-color-pressed;
+  }
+}
+
+:local(.accent4) {
+  color: theme.$text5-color;
+  background-color: theme.$accent4-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent4-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent4-color-pressed;
+  }
+}
+
+:local(.accent5) {
+  color: theme.$text5-color;
+  background-color: theme.$accent5-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent5-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent5-color-pressed;
   }
 }
 
 :local(.button):disabled {
   border-color: transparent;
   cursor: not-allowed;
-  color: theme.$darkgrey;
+  color: theme.$disabled-text-color;
   opacity: 0.7;
-  background-color: theme.$lightgrey;
+  background-color: theme.$disabled-bg-color;
 }
 
 :global(.keyboard-user) :local(.button):focus {

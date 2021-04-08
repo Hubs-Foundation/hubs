@@ -33,6 +33,15 @@ const PC_PROPRIETARY_CONSTRAINTS = {
 
 const INITIAL_ROOM_RECONNECTION_INTERVAL = 2000;
 
+const WEBCAM_SIMULCAST_ENCODINGS = [
+  { scaleResolutionDownBy: 4, maxBitrate: 500000 },
+  { scaleResolutionDownBy: 2, maxBitrate: 1000000 },
+  { scaleResolutionDownBy: 1, maxBitrate: 5000000 }
+];
+
+// Used for simulcast screen sharing.
+const SCREEN_SHARING_SIMULCAST_ENCODINGS = [{ dtx: true, maxBitrate: 1500000 }, { dtx: true, maxBitrate: 6000000 }];
+
 export default class DialogAdapter extends EventEmitter {
   constructor() {
     super();
@@ -40,7 +49,8 @@ export default class DialogAdapter extends EventEmitter {
     this._timeOffsets = [];
     this._occupants = {};
     this._micProducer = null;
-    this._videoProducer = null;
+    this._cameraProducer = null;
+    this._shareProducer = null;
     this._mediaStreams = {};
     this._localMediaStream = null;
     this._consumers = new Map();
@@ -64,6 +74,16 @@ export default class DialogAdapter extends EventEmitter {
     this._lastRecvConnectionState = null;
     this._closed = true;
     this.scene = document.querySelector("a-scene");
+    this._downlinkBwe = null;
+    this._consumerStats = {};
+  }
+
+  get consumerStats() {
+    return this._consumerStats;
+  }
+
+  get downlinkBwe() {
+    return this._downlinkBwe;
   }
 
   get serverUrl() {
@@ -347,6 +367,16 @@ export default class DialogAdapter extends EventEmitter {
               this.removeConsumer(consumer.id);
             });
 
+            if (kind === "video") {
+              const { spatialLayers, temporalLayers } = mediasoupClient.parseScalabilityMode(
+                consumer.rtpParameters.encodings[0].scalabilityMode
+              );
+
+              this._consumerStats[consumer.id] = this._consumerStats[consumer.id] || {};
+              this._consumerStats[consumer.id]["spatialLayers"] = spatialLayers;
+              this._consumerStats[consumer.id]["temporalLayers"] = temporalLayers;
+            }
+
             // We are ready. Answer the protoo request so the server will
             // resume this Consumer (which was paused for now if video).
             accept();
@@ -398,7 +428,10 @@ export default class DialogAdapter extends EventEmitter {
           const { consumerId } = notification.data;
           const consumer = this._consumers.get(consumerId);
 
-          if (!consumer) break;
+          if (!consumer) {
+            info(`consumerClosed event received without related consumer: ${consumerId}`);
+            break;
+          }
 
           consumer.close();
           this.removeConsumer(consumer.id);
@@ -418,6 +451,46 @@ export default class DialogAdapter extends EventEmitter {
           document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
 
           break;
+        }
+
+        case "downlinkBwe": {
+          this._downlinkBwe = notification.data;
+          break;
+        }
+
+        case "consumerLayersChanged": {
+          const { consumerId, spatialLayer, temporalLayer } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerLayersChanged event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
+          this._consumerStats[consumerId]["spatialLayer"] = spatialLayer;
+          this._consumerStats[consumerId]["temporalLayer"] = temporalLayer;
+
+          // TODO: If spatialLayer/temporalLayer are null, that's probably because the current downlink
+          // it's not enough forany spatial layer bitrate. In that case the server has paused the consumer.
+          // At this point we it would be nice to give the user some visual cue that this stream is paused.
+          // ie. A grey overlay with some icon or replacing the video stream por a generic person image.
+          break;
+        }
+
+        case "consumerScore": {
+          const { consumerId, score } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerScore event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
+          this._consumerStats[consumerId]["score"] = score;
         }
       }
     });
@@ -507,8 +580,12 @@ export default class DialogAdapter extends EventEmitter {
     if (this._clientId === clientId) {
       if (kind === "audio" && this._micProducer) {
         track = this._micProducer.track;
-      } else if (kind === "video" && this._videoProducer) {
-        track = this._videoProducer.track;
+      } else if (kind === "video") {
+        if (this._cameraProducer && !this._cameraProducer.closed) {
+          track = this._cameraProducer.track;
+        } else if (this._shareProducer && !this._shareProducer.closed) {
+          track = this._shareProducer.track;
+        }
       }
     } else {
       this._consumers.forEach(consumer => {
@@ -820,19 +897,7 @@ export default class DialogAdapter extends EventEmitter {
             track.enabled = false;
           }
 
-          // stopTracks = false because otherwise the track will end during a temporary disconnect
-          this._micProducer = await this._sendTransport.produce({
-            track,
-            stopTracks: false,
-            zeroRtpOnPause: true,
-            disableTrackOnPause: true,
-            codecOptions: { opusStereo: false, opusDtx: true }
-          });
-
-          this._micProducer.on("transportclose", () => {
-            this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
-            this._micProducer = null;
-          });
+          await this.enabledMic(track);
 
           if (!this._micEnabled) {
             this._micProducer.pause();
@@ -842,27 +907,12 @@ export default class DialogAdapter extends EventEmitter {
       } else {
         sawVideo = true;
 
-        if (this._videoProducer) {
-          if (this._videoProducer.track !== track) {
-            this._videoProducer.track.stop();
-            this._videoProducer.replaceTrack(track);
-          }
-        } else {
-          // TODO simulcasting
-
-          // stopTracks = false because otherwise the track will end during a temporary disconnect
-          this._videoProducer = await this._sendTransport.produce({
-            track,
-            stopTracks: false,
-            zeroRtpOnPause: true,
-            disableTrackOnPause: true,
-            codecOptions: { videoGoogleStartBitrate: 1000 }
-          });
-
-          this._videoProducer.on("transportclose", () => {
-            this.emitRTCEvent("info", "RTC", () => `Video transport closed`);
-            this._videoProducer = null;
-          });
+        if (track._hubs_contentHint === "share") {
+          await this.disableCamera();
+          await this.enableShare(track);
+        } else if (track._hubs_contentHint === "camera") {
+          await this.disableShare();
+          await this.enableCamera(track);
         }
       }
 
@@ -875,13 +925,105 @@ export default class DialogAdapter extends EventEmitter {
       this._micProducer = null;
     }
 
-    if (!sawVideo && this._videoProducer) {
-      this._videoProducer.close();
-      this._protoo.request("closeProducer", { producerId: this._videoProducer.id });
-      this._videoProducer = null;
+    if (!sawVideo) {
+      this.disableCamera();
+      this.disableShare();
     }
 
     this._localMediaStream = stream;
+  }
+
+  async enabledMic(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._micProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { opusStereo: false, opusDtx: true },
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true
+    });
+
+    this._micProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
+      this._micProducer = null;
+    });
+  }
+
+  async enableCamera(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._cameraProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { videoGoogleStartBitrate: 1000 },
+      encodings: WEBCAM_SIMULCAST_ENCODINGS,
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true
+    });
+
+    this._cameraProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera transport closed`);
+      this.disableCamera();
+    });
+    this._cameraProducer.observer.on("trackended", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera track ended`);
+      this.disableCamera();
+    });
+  }
+
+  async disableCamera() {
+    if (!this._cameraProducer) return;
+
+    this._cameraProducer.close();
+
+    try {
+      if (!this._sendTransport.closed) {
+        await this._protoo.request("closeProducer", { producerId: this._cameraProducer.id });
+      }
+    } catch (error) {
+      console.error(`disableCamera(): ${error}`);
+    }
+
+    this._cameraProducer = null;
+  }
+
+  async enableShare(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._shareProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { videoGoogleStartBitrate: 1000 },
+      encodings: SCREEN_SHARING_SIMULCAST_ENCODINGS,
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true,
+      appData: {
+        share: true
+      }
+    });
+
+    this._shareProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Desktop Share transport closed`);
+      this.disableShare();
+    });
+    this._shareProducer.observer.on("trackended", () => {
+      this.emitRTCEvent("info", "RTC", () => `Desktop Share transport track ended`);
+      this.disableShare();
+    });
+  }
+
+  async disableShare() {
+    if (!this._shareProducer) return;
+
+    this._shareProducer.close();
+
+    try {
+      if (!this._sendTransport.closed) {
+        await this._protoo.request("closeProducer", { producerId: this._shareProducer.id });
+      }
+    } catch (error) {
+      console.error(`disableShare(): ${error}`);
+    }
+
+    this._shareProducer = null;
   }
 
   enableMicrophone(enabled) {

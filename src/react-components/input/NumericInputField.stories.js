@@ -7,7 +7,7 @@ import { IconButton } from "./IconButton";
 import { Column } from "../layout/Column";
 
 export default {
-  title: "NumericInputField"
+  title: "Input/NumericInputField"
 };
 
 export const All = () => (

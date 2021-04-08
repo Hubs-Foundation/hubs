@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom";
 import React from "react";
 import "./utils/configs";
+import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/cloud.scss";
 import classNames from "classnames";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
@@ -12,6 +13,7 @@ import { Button } from "./react-components/input/Button";
 
 import registerTelemetry from "./telemetry";
 import { FormattedMessage } from "react-intl";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 registerTelemetry("/cloud", "Hubs Cloud Landing Page");
 
@@ -51,10 +53,10 @@ function HubsCloudPage() {
               <FormattedMessage id="hubs-cloud-page.hero-cta" defaultMessage="Get it today on the AWS Marketplace" />
             </h3>
             <div className={classNames(styles.row, styles.colLg, styles.centerLg)}>
-              <Button as="a" preset="blue" href="https://aws.amazon.com/marketplace/pp/B084RZH56R">
+              <Button as="a" preset="primary" href="https://aws.amazon.com/marketplace/pp/B084RZH56R">
                 <FormattedMessage id="hubs-cloud-page.hero-button.personal" defaultMessage="Get Hubs Cloud Personal" />
               </Button>
-              <Button as="a" preset="blue" href="https://aws.amazon.com/marketplace/pp/B084WNGRRP">
+              <Button as="a" preset="primary" href="https://aws.amazon.com/marketplace/pp/B084WNGRRP">
                 <FormattedMessage
                   id="hubs-cloud-page.hero-button.enterprise"
                   defaultMessage="Get Hubs Cloud Enterprise"
@@ -121,9 +123,11 @@ window.APP = { store };
 function Root() {
   return (
     <WrappedIntlProvider>
-      <AuthContextProvider store={store}>
-        <HubsCloudPage />
-      </AuthContextProvider>
+      <ThemeProvider store={store}>
+        <AuthContextProvider store={store}>
+          <HubsCloudPage />
+        </AuthContextProvider>
+      </ThemeProvider>
     </WrappedIntlProvider>
   );
 }
