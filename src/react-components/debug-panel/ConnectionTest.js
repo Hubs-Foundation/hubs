@@ -51,7 +51,7 @@ export class ConnectionTest extends React.Component {
       tests: {
         metadataTest: new TestState("Fetch Metadata"),
         roomTest: new TestState("Open Room"),
-        reticulumTest: new TestState("Connect Reticulum"),
+        reticulumTest: new TestState("Connect to Reticulum"),
         retChannelTest: new TestState("Open RET Channel"),
         hubChannelTest: new TestState("Open HUB Channel"),
         joinTest: new TestState("Join Room"),
@@ -62,7 +62,7 @@ export class ConnectionTest extends React.Component {
     };
 
     // Uncomment to test with existing room ID rather than creating a new one each time
-    //this._roomId = "ABCDEF";
+    //this._roomId = "3z2zcE3";
   }
 
   dowloadMetadata = async () => {
@@ -177,7 +177,7 @@ export class ConnectionTest extends React.Component {
         test.stop(true);
         console.info(data);
         this.setState(state => state.tests.hubChannelTest = test);
-        this.hub = data.hubs[0];
+        this._hub = data.hubs[0];
         this._perms_token = data.perms_token;
         this.joinRoom();
       })
@@ -214,7 +214,7 @@ export class ConnectionTest extends React.Component {
     };
 
     // Calls NAF::NetworkConnection::connect, which in turn calls DialogAdapter::connect
-    NAF.connection.connect(`wss://${this.hub.host}:${this.hub.port}`, "default", this._roomId, true).then(async () => {
+    NAF.connection.connect(`wss://${this._hub.host}:${this._hub.port}`, "default", this._roomId, true).then(async () => {
       test.stop(true);
       this.setState(state => state.tests.joinTest = test);
       this.enterRoom();
