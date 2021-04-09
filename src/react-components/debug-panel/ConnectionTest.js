@@ -61,8 +61,8 @@ export class ConnectionTest extends React.Component {
       hubId: null,
     };
 
-this._roomId = "pHUrQ5B";
-
+    // Uncomment to test with existing room ID rather than creating a new one each time
+    //this._roomId = "ABCDEF";
   }
 
   dowloadMetadata = async () => {
@@ -269,7 +269,8 @@ this._roomId = "pHUrQ5B";
       this.setState(state => state.tests.micTest = test);
     }
 
-    // this.disconnectAll();
+    // Comment out to keep connection open after test
+    this.disconnectAll();
   }
 
   disconnectAll = async () => {
