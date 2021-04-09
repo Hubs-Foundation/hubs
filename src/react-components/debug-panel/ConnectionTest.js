@@ -5,10 +5,8 @@ import {
   connectToReticulum,
   createAndRedirectToNewHub,
 } from "../../utils/phoenix-utils";
-
 import HubChannel from "../../utils/hub-channel";
 import "aframe";
-// NAF global is declared in here
 import "networked-aframe";
 import { DialogAdapter } from "../../naf-dialog-adapter";
 
@@ -21,7 +19,7 @@ import styles from "../../assets/stylesheets/connection-test.scss";
 class TestState {
   constructor(name) {
     this.name = name;
-    this.state = "Pending";
+    this.state = "";
     this.notes = "";
   }
 
@@ -58,6 +56,7 @@ export class ConnectionTest extends React.Component {
         hubChannelTest: new TestState("Open HUB Channel"),
         joinTest: new TestState("Join Room"),
         enterTest: new TestState("Enter Room"),
+        micTest: new TestState("Open Microphone"),
       },
       hubId: null,
     };
@@ -214,7 +213,6 @@ this._roomId = "pHUrQ5B";
       console.info(`adapter.unreliableTransport: ${clientId} ${dataType} ${data}}`);
     };
 
-
     // Calls NAF::NetworkConnection::connect, which in turn calls DialogAdapter::connect
     NAF.connection.connect(`wss://${this.hub.host}:${this.hub.port}`, "default", this._roomId, true).then(async () => {
       test.stop(true);
@@ -237,18 +235,38 @@ this._roomId = "pHUrQ5B";
     try {
       this._hubChannel.sendEnteredEvent();
       test.stop(true);
-
-      // Normally handled by the hubs media-devices-manager
-      const newStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      this._adapter.setLocalMediaStream(newStream);
-      this._adapter.enableMicrophone(true);
-
+      this.openMic()
     } catch (error) {
       console.error(error);
       test.stop(false);
       test.notes = error.toString();
     } finally {
       this.setState(state => state.tests.enterTest = test);
+    }
+
+  }
+
+  openMic = async () => {
+    console.info("Called openMic");
+    const test = this.state.tests.micTest;
+    test.start();
+    this.setState(state => state.tests.micTest = test);
+
+    try {
+      // Normally handled by the hubs media-devices-manager
+      const newStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      this._adapter.setLocalMediaStream(newStream);
+      this._adapter.enableMicrophone(true);
+      newStream.getAudioTracks().forEach(track => {
+        test.notes = `Microphone: ${track.label}`;
+      });
+      test.stop(true);
+    } catch (error) {
+      console.error(error);
+      test.stop(false);
+      test.notes = error.toString();
+    } finally {
+      this.setState(state => state.tests.micTest = test);
     }
 
     // this.disconnectAll();
@@ -272,7 +290,7 @@ this._roomId = "pHUrQ5B";
   render() {
     if (this.state.isStarted) {
       return (
-        <div>
+        <div className={styles.resultsContainer}>
           <table id="resultsTable" className={styles.resultsTable}>
             <thead>
               <tr>
@@ -294,13 +312,13 @@ this._roomId = "pHUrQ5B";
               ))}
             </tbody>
           </table>
-          <Button className={styles.actionButton} onClick={this.copyTable}>{this.state.copyButtonLabel}</Button>
+          <Button preset="blue" className={styles.actionButton} onClick={this.copyTable}>{this.state.copyButtonLabel}</Button>
         </div>
 
       );
     } else {
       return (
-        <Button className={styles.actionButton} onClick={this.dowloadMetadata}>Start Connection Test</Button>
+        <Button preset="blue" className={styles.actionButton} onClick={this.dowloadMetadata}>Start Connection Test</Button>
       );
     }
   }
