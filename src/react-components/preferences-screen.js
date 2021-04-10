@@ -390,9 +390,9 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.disable-auto-gain-control",
     defaultMessage: "Disable microphone automatic gain control"
   },
-  audioNormalization: {
-    id: "preferences-screen.preference.audio-normalization",
-    defaultMessage: "Dynamic audio normalization factor (0 is disabled, 4 is recommend)"
+  automaticOutputGainControlFactor: {
+    id: "preferences-screen.preference.audio-automatic-output-gain-control-factor",
+    defaultMessage: "Automatic Output Gain Control factor"
   },
   snapRotationDegrees: {
     id: "preferences-screen.preference.snap-rotation-degrees",
@@ -985,12 +985,11 @@ class PreferencesScreen extends Component {
             promptForRefresh: true
           },
           {
-            key: "audioNormalization",
+            key: "automaticOutputGainControlFactor",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 0,
             max: 10,
             step: 1,
-            digits: 1,
             defaultNumber: 0
           }
         ]
