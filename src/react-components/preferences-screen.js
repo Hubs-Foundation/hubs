@@ -10,6 +10,8 @@ import styles from "../assets/stylesheets/preferences-screen.scss";
 import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
+import { IconButton } from "./input/IconButton";
+import { ReactComponent as HelpIcon } from "./icons/Help.svg";
 
 function round(step, n) {
   return Math.round(n / step) * step;
@@ -488,6 +490,8 @@ const preferenceLabels = defineMessages({
   }
 });
 
+preferenceLabels.automaticOutputGainControlFactor.helpLink = "https://github.com/mozilla/hubs/issues/3214";
+
 class PreferenceListItem extends Component {
   static propTypes = {
     intl: PropTypes.object,
@@ -513,8 +517,20 @@ class PreferenceListItem extends Component {
     const intl = this.props.intl;
     const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isSmallScreen = window.innerWidth < 600;
+    const onHelpIconClick = () => {
+      window.open(preferenceLabels[this.props.storeKey].helpLink, "_blank");
+    };
     const label = (
-      <span className={styles.preferenceLabel}>{intl.formatMessage(preferenceLabels[this.props.storeKey])}</span>
+      <span className={styles.preferenceLabel}>
+        {intl.formatMessage(preferenceLabels[this.props.storeKey])}
+        {preferenceLabels[this.props.storeKey].helpLink !== undefined ? (
+          <IconButton onClick={onHelpIconClick}>
+            <HelpIcon />
+          </IconButton>
+        ) : (
+          <></>
+        )}
+      </span>
     );
     const hasPref =
       this.props.store.state.preferences[this.props.storeKey] !== undefined ||
