@@ -427,20 +427,23 @@ AFRAME.GLTFModelPlus.registerComponent(
   "video-texture-target",
   "video-texture-target",
   (el, componentName, componentData, _components, indexToEntityMap) => {
-    const { targetBaseColorMap, targetEmissiveMap, src } = componentData;
+    const { targetBaseColorMap, targetEmissiveMap, srcNode } = componentData;
 
-    const target = indexToEntityMap[src];
-    if (!target) {
-      console.warn(
-        `Error inflating gltf component "video-texture-target": Couldn't find target entity with index ${src}`
-      );
-      return;
+    let srcEl;
+    if (srcNode !== undefined) {
+      srcEl = indexToEntityMap[srcNode];
+      if (!srcEl) {
+        console.warn(
+          `Error inflating gltf component "video-texture-srcEl": Couldn't find srcEl entity with index ${src}`
+        );
+      }
     }
 
     el.setAttribute(componentName, {
+      src: srcEl ? "el" : "",
       targetBaseColorMap,
       targetEmissiveMap,
-      target
+      srcEl
     });
   }
 );

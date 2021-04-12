@@ -7,8 +7,8 @@ import { findNode } from "../utils/three-utils";
  * This component is intended to be used on entities with a Camera Object3D as a child.
  * That camera is used to render the scene to a WebGLRenderTarget of the specified resolution
  * at a maximum of the specified frame rate. It will only render a frame if something sets
- * it's textureNeedsUpdate property to true. Currently video-texture-target does this
- * whenever its material is used during the primary camera render (as in, its in view).
+ * its textureNeedsUpdate property to true. Currently video-texture-target does this
+ * whenever its material is used during the primary camera render (as in, it's in view).
  */
 AFRAME.registerComponent("video-texture-source", {
   schema: {
@@ -18,6 +18,12 @@ AFRAME.registerComponent("video-texture-source", {
 
   init() {
     this.camera = findNode(this.el.object3D, n => n.isCamera);
+
+    if (!this.camera) {
+      console.warn("video-texture-source added to an entity without a camera");
+      return;
+    }
+
     this.camera.aspect = this.data.resolution[0] / this.data.resolution[1];
 
     // TODO currently if a video-texture-source tries to render itself it will fail with a warning.
@@ -32,6 +38,9 @@ AFRAME.registerComponent("video-texture-source", {
     });
 
     const texture = this.renderTarget.texture;
+
+    // Since we are rendering directly to a texture we need to flip it vertically
+    // See https://github.com/mozilla/hubs/pull/4126#discussion_r610120237
     texture.matrixAutoUpdate = false;
     texture.matrix.scale(1, -1);
     texture.matrix.translate(0, 1);
@@ -39,8 +48,13 @@ AFRAME.registerComponent("video-texture-source", {
     this.textureNeedsUpdate = false;
   },
 
+  remove() {
+    disposeTexture(this.renderTarget.texture);
+    this.renderTarget.dispose();
+  },
+
   tock(time) {
-    if (!this.textureNeedsUpdate) return;
+    if (!this.renderTarget || !this.textureNeedsUpdate) return;
 
     if (time < this.lastRenderTime + 1000 / this.data.fps) return;
 
@@ -77,10 +91,10 @@ AFRAME.registerComponent("video-texture-source", {
 AFRAME.registerComponent("video-texture-target", {
   schema: {
     src: { type: "string" },
+    // only used when `src` === "el"
+    srcEl: { type: "selector" },
     targetBaseColorMap: { type: "boolean", default: true },
-    targetEmissiveMap: { type: "boolean", default: false },
-    // TODO having both src and target is a bit odd
-    target: { type: "selector" }
+    targetEmissiveMap: { type: "boolean", default: false }
   },
 
   getMaterial() {
@@ -111,32 +125,12 @@ AFRAME.registerComponent("video-texture-target", {
 
     const src = this.data.src;
 
-    if (src && src.startsWith("hubs://")) {
-      if (prevData.src === src) {
-        return;
-      }
+    // TODO it's pretty ugly to have these 2 unrelated code paths, it should probably be reworked such that both paths look more like the first branch
+    if (src === "el") {
+      if (prevData.srcEl === this.data.srcEl) return;
 
-      const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
-
-      NAF.connection.adapter.getMediaStream(streamClientId, "video").then(stream => {
-        if (src !== this.data.src) {
-          // Prevent creating and loading video texture if the src changed while we were fetching the video stream.
-          return;
-        }
-
-        const video = createVideoOrAudioEl("video");
-        video.srcObject = stream;
-
-        const texture = new THREE.VideoTexture(video);
-        texture.flipY = false;
-        texture.minFilter = THREE.LinearFilter;
-        texture.encoding = THREE.sRGBEncoding;
-
-        this.applyTexture(texture);
-      });
-    } else {
-      if (this.data.target) {
-        const videoTextureSource = this.data.target.components["video-texture-source"];
+      if (this.data.srcEl) {
+        const videoTextureSource = this.data.srcEl.components["video-texture-source"];
         const texture = videoTextureSource.renderTarget.texture;
         this.applyTexture(texture);
 
@@ -145,6 +139,35 @@ AFRAME.registerComponent("video-texture-target", {
         material.map.update = () => {
           videoTextureSource.textureNeedsUpdate = true;
         };
+      } else {
+        material.map = this.originalMap;
+        material.emissiveMap = this.originalEmissiveMap;
+        material.needsUpdate = true;
+      }
+    } else {
+      if (src && src.startsWith("hubs://")) {
+        if (prevData.src === src) {
+          return;
+        }
+
+        const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
+
+        NAF.connection.adapter.getMediaStream(streamClientId, "video").then(stream => {
+          if (src !== this.data.src) {
+            // Prevent creating and loading video texture if the src changed while we were fetching the video stream.
+            return;
+          }
+
+          const video = createVideoOrAudioEl("video");
+          video.srcObject = stream;
+
+          const texture = new THREE.VideoTexture(video);
+          texture.flipY = false;
+          texture.minFilter = THREE.LinearFilter;
+          texture.encoding = THREE.sRGBEncoding;
+
+          this.applyTexture(texture);
+        });
       } else {
         if (material.map && material.map !== this.originalMap) {
           disposeTexture(material.map);
@@ -185,6 +208,9 @@ AFRAME.registerComponent("video-texture-target", {
   },
 
   remove() {
+    // element sources can be shared and are expected to manage their own resources
+    if (this.data.src === "el") return;
+
     const material = this.getMaterial();
 
     if (material && material.map && material.map !== this.originalMap) {
