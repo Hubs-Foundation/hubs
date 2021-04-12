@@ -434,7 +434,7 @@ AFRAME.GLTFModelPlus.registerComponent(
       srcEl = indexToEntityMap[srcNode];
       if (!srcEl) {
         console.warn(
-          `Error inflating gltf component "video-texture-srcEl": Couldn't find srcEl entity with index ${src}`
+          `Error inflating gltf component "video-texture-srcEl": Couldn't find srcEl entity with index ${srcNode}`
         );
       }
     }
