@@ -21,7 +21,7 @@ class AutomaticOutputGainController {
   }
 
   apply() {
-    if (window.APP.store.state.preferences.automaticOutputGainControlFactor) {
+    if (window.APP.store.state.preferences.automaticOutputGainControl) {
       if (!this.connected) {
         this.connect();
       }
@@ -41,7 +41,7 @@ class AutomaticOutputGainController {
     this.analyser.getByteTimeDomainData(this.timeData);
     const squareSum = this.timeData.reduce((sum, num) => sum + Math.pow(num - 128, 2), 0);
     const volume = Math.sqrt(squareSum / this.analyser.frequencyBinCount);
-    const baseVolume = window.APP.store.state.preferences.automaticOutputGainControlFactor;
+    const baseVolume = 4.0; // heuristic
 
     // Regards volume under certain threshold as "not speaking" and skips.
     // I'm not sure if 0.4 is an appropriate threshold.

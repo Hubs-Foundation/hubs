@@ -392,9 +392,9 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.disable-auto-gain-control",
     defaultMessage: "Disable microphone automatic gain control"
   },
-  automaticOutputGainControlFactor: {
-    id: "preferences-screen.preference.audio-automatic-output-gain-control-factor",
-    defaultMessage: "Automatic Output Gain Control factor"
+  automaticOutputGainControl: {
+    id: "preferences-screen.preference.audio-automatic-output-gain-control",
+    defaultMessage: "[Experiment] Automatic Output Gain Control"
   },
   snapRotationDegrees: {
     id: "preferences-screen.preference.snap-rotation-degrees",
@@ -490,7 +490,7 @@ const preferenceLabels = defineMessages({
   }
 });
 
-preferenceLabels.automaticOutputGainControlFactor.helpLink = "https://github.com/mozilla/hubs/issues/3214";
+preferenceLabels.automaticOutputGainControl.helpLink = "https://github.com/mozilla/hubs/issues/3214";
 
 class PreferenceListItem extends Component {
   static propTypes = {
@@ -1001,12 +1001,9 @@ class PreferencesScreen extends Component {
             promptForRefresh: true
           },
           {
-            key: "automaticOutputGainControlFactor",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-            min: 0,
-            max: 10,
-            step: 1,
-            defaultNumber: 0
+            key: "automaticOutputGainControl",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: false
           }
         ]
       ],

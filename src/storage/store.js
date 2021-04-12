@@ -123,7 +123,7 @@ export const SCHEMA = {
         disableEchoCancellation: { type: "bool" },
         disableNoiseSuppression: { type: "bool" },
         disableAutoGainControl: { type: "bool" },
-        automaticOutputGainControlFactor: { type: "number" },
+        automaticOutputGainControl: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
         theme: { type: "string" }
