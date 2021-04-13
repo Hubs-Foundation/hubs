@@ -139,6 +139,7 @@ export class ConnectionTest extends React.Component {
         test.stop(true);
         console.info(data);
         this._clientId = data.session_id;
+        test.notes = `Session ID ${data.session_id}`;
         this.setState(state => state.tests.retChannelTest = test);
         this.openHubChannel();
       })
@@ -191,39 +192,48 @@ export class ConnectionTest extends React.Component {
 
   joinRoom = async () => {
     console.info("Called joinRoom");
+    const connectionUrl = `wss://${this._hub.host}:${this._hub.port}`;
     const test = this.state.tests.joinTest;
+    test.notes = connectionUrl;
     test.start();
     this.setState(state => state.tests.joinTest = test);
 
-    // This mimics what happens in NAF::networked-scene::setupNetworkAdapter
-    var adapter = NAF.adapters.make("dialog");
-    this._adapter = adapter;
-    NAF.connection.setNetworkAdapter(adapter);
+    try {
+      // This mimics what happens in NAF::networked-scene::setupNetworkAdapter
+      var adapter = NAF.adapters.make("dialog");
+      this._adapter = adapter;
+      NAF.connection.setNetworkAdapter(adapter);
 
-    // Normally set in hubs.js in response to the adapter-ready event
-    adapter.setClientId(this.session_id);
-    adapter.setRoom(this._roomId);
-    adapter.setJoinToken(this._perms_token);
+      // Normally set in hubs.js in response to the adapter-ready event
+      adapter.setClientId(this._clientId);
+      adapter.setRoom(this._roomId);
+      adapter.setJoinToken(this._perms_token);
 
-    // Normally hubs.js links these up to the phoenix hub channel
-    adapter.reliableTransport = (clientId, dataType, data) => {
-      console.info(`adapter.reliableTransport: ${clientId} ${dataType} ${data}}`);
-    };
-    adapter.unreliableTransport = (clientId, dataType, data) => {
-      console.info(`adapter.unreliableTransport: ${clientId} ${dataType} ${data}}`);
-    };
+      // Normally hubs.js links these up to the phoenix hub channel
+      adapter.reliableTransport = (clientId, dataType, data) => {
+        console.info(`adapter.reliableTransport: ${clientId} ${dataType} ${data}}`);
+      };
+      adapter.unreliableTransport = (clientId, dataType, data) => {
+        console.info(`adapter.unreliableTransport: ${clientId} ${dataType} ${data}}`);
+      };
 
-    // Calls NAF::NetworkConnection::connect, which in turn calls DialogAdapter::connect
-    NAF.connection.connect(`wss://${this._hub.host}:${this._hub.port}`, "default", this._roomId, true).then(async () => {
-      test.stop(true);
-      this.setState(state => state.tests.joinTest = test);
-      this.enterRoom();
-    }).catch(error => {
+      // Calls NAF::NetworkConnection::connect, which in turn calls DialogAdapter::connect
+      NAF.connection.connect(connectionUrl, "default", this._roomId, true).then(async () => {
+        test.stop(true);
+        this.setState(state => state.tests.joinTest = test);
+        this.enterRoom();
+      }).catch(error => {
+        console.error(error);
+        test.stop(false);
+        test.notes = error.reason;
+        this.setState(state => state.tests.joinTest = test);
+      });
+    } catch (error) {
       console.error(error);
       test.stop(false);
-      test.notes = error.reason;
+      test.notes = error.toString();
       this.setState(state => state.tests.joinTest = test);
-    });
+    }
   }
 
   enterRoom = async () => {
