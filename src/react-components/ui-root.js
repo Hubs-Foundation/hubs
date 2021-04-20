@@ -1353,6 +1353,7 @@ class UIRoot extends Component {
                         )}
                         <PeopleMenuButton
                           active={this.state.sidebarId === "people"}
+                          presences={this.props.presences}
                           onClick={() => this.toggleSidebar("people")}
                         />
                       </ContentMenu>

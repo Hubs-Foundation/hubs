@@ -6,6 +6,7 @@ import styles from "./ContentMenu.scss";
 import { ReactComponent as ObjectsIcon } from "../icons/Objects.svg";
 import { ReactComponent as PeopleIcon } from "../icons/People.svg";
 import { FormattedMessage } from "react-intl";
+import { useState, useEffect } from "react";
 
 export function ContentMenuButton({ active, children, ...props }) {
   return (
@@ -31,12 +32,25 @@ export function ObjectsMenuButton(props) {
   );
 }
 
+const OccupancyCountUpdateFrequencyMilliseconds = 500;
+
 export function PeopleMenuButton(props) {
+  const presences = props.presences;
+  const [peopleCount, setPeopleCount] = useState(0);
+  useEffect(() => {
+    let timeout;
+    function update() {
+      setPeopleCount(Object.entries(presences).length);
+      timeout = setTimeout(update, OccupancyCountUpdateFrequencyMilliseconds);
+    }
+    update();
+    return () => { clearTimeout(timeout); };
+});
   return (
     <ContentMenuButton {...props}>
       <PeopleIcon />
       <span>
-        <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />
+        <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People ({numPeople})" values={{ numPeople: peopleCount}} />
       </span>
     </ContentMenuButton>
   );
