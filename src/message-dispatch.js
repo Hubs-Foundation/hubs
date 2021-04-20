@@ -70,6 +70,18 @@ export default class MessageDispatch extends EventTarget {
           avatarHead.setAttribute("isMegaphone", false);
         }        
       break;
+      case "fov":
+        var customFOV = args[0];
+        console.log("fov customFOV", customFOV);
+        var viewingCamera = document.getElementById("viewing-camera");
+        if (viewingCamera?.components.camera) 
+        {
+          viewingCamera.setAttribute("camera", { fov: customFOV });
+        }
+        viewingCamera.object3DMap.camera.matrixNeedsUpdate = true;
+        viewingCamera.object3DMap.camera.updateMatrix();
+        viewingCamera.object3DMap.camera.updateMatrixWorld();
+      break;
       case "fly":
         if (this.scene.systems["hubs-systems"].characterController.fly) {
           this.scene.systems["hubs-systems"].characterController.enableFly(false);
