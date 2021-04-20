@@ -18,19 +18,17 @@ const DEFAULT_COLORS = {
 };
 
 function getThemeColor(name) {
-  if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme[name])
-    return configs.APP_CONFIG.theme[name];
+  const themeId = window.APP?.store?.state?.preferences?.theme;
+
+  const theme = themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId);
+  if (theme?.variables?.[name]) {
+    return theme.variables[name];
+  }
 
   return DEFAULT_COLORS[name];
 }
 
-waitForDOMContentLoaded().then(() => {
-  if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme["dark-theme"]) {
-    document.body.classList.add("dark-theme");
-  } else {
-    document.body.classList.add("light-theme");
-  }
-
+function activateTheme() {
   const actionColor = getThemeColor("action-color");
   const actionHoverColor = getThemeColor("action-color-highlight");
 
@@ -66,6 +64,27 @@ waitForDOMContentLoaded().then(() => {
         `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
       );
   }
+}
+
+const onStoreChanged = (function() {
+  let themeId;
+  return function onStoreChanged() {
+    const newThemeId = window.APP?.store?.state?.preferences?.theme;
+    if (themeId !== newThemeId) {
+      themeId = newThemeId;
+      activateTheme();
+    }
+  };
+})();
+
+waitForDOMContentLoaded().then(() => {
+  if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme["dark-theme"]) {
+    document.body.classList.add("dark-theme");
+  } else {
+    document.body.classList.add("light-theme");
+  }
+  activateTheme();
+  window.APP?.store?.addEventListener("statechanged", onStoreChanged);
 });
 
 function applyThemeToTextButton(el, highlighted) {

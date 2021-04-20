@@ -1,0 +1,86 @@
+@use "../styles/theme.scss";
+
+:local(.content-menu) {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: row;
+  background-color: theme.$button-bg-color;
+  border: 1px solid theme.$button-border-color;
+  border-radius: 12px;
+  pointer-events: auto;
+  padding: 4px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    top: 24px;
+    right: 24px;
+  }
+}
+
+:local(.content-menu-button) {
+  display: flex;
+  flex-direction: row;
+  border: none;
+  border-radius: 8px;
+  background-color: theme.$transparent;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+  align-items: center;
+  padding: 8px 10px;
+
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &:hover {
+    background-color: theme.$button-bg-color-hover;
+  }
+
+  &:active {
+    background-color: theme.$button-bg-color-pressed;
+  }
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
+  }
+}
+
+:local(.active) {
+  color: theme.$text5-color;
+  background-color: theme.$active-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    background-color: theme.$active-color-hover;
+  }
+
+  &:active {
+    background-color: theme.$active-color-pressed;
+  }
+}
+
+:local(.separator) {
+  width: 1px;
+  margin: 0 8px;
+  background-color: theme.$border1-color;
+}

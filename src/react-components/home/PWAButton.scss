@@ -1,0 +1,13 @@
+@use "../styles/theme.scss";
+
+:local(.pwa-button) {
+  color: theme.$primary-color;
+
+  *[stroke=\#000] {
+    stroke: theme.$primary-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$primary-color;
+  }
+}

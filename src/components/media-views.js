@@ -6,7 +6,8 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createImageTexture, createBasisTexture } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createVideoOrAudioEl } from "../utils/media-utils";
+import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
@@ -47,6 +48,63 @@ for (let i = 0; i <= 20; i++) {
   }
   s += "]";
   VOLUME_LABELS[i] = s;
+}
+
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
+const loadingManager = new THREE.LoadingManager();
+loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
+
+let ktxLoader;
+
+export function createBasisTexture(url) {
+  if (!ktxLoader) {
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  }
+  return new Promise((resolve, reject) => {
+    ktxLoader.basisLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        // texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
+}
+
+export function createKTX2Texture(url) {
+  if (!ktxLoader) {
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  }
+  return new Promise((resolve, reject) => {
+    ktxLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
 }
 
 class GIFTexture extends THREE.Texture {
@@ -112,54 +170,11 @@ async function createGIFTexture(url) {
   });
 }
 
-/**
- * Create video element to be used as a texture.
- *
- * @param {string} src - Url to a video file.
- * @returns {Element} Video element.
- */
-function createVideoOrAudioEl(type) {
-  const el = document.createElement(type);
-  el.setAttribute("playsinline", "");
-  el.setAttribute("webkit-playsinline", "");
-  // iOS Safari requires the autoplay attribute, or it won't play the video at all.
-  el.autoplay = true;
-  // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
-  // allow the user to unmute it with an interaction in the unmute-video-button component.
-  el.muted = isIOS;
-  el.preload = "auto";
-  el.crossOrigin = "anonymous";
-
-  return el;
-}
-
 function scaleToAspectRatio(el, ratio) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   el.object3DMap.mesh.scale.set(width, height, 1);
   el.object3DMap.mesh.matrixNeedsUpdate = true;
-}
-
-function disposeTexture(texture) {
-  if (texture.image instanceof HTMLVideoElement) {
-    const video = texture.image;
-    video.pause();
-    video.src = "";
-    video.load();
-  }
-
-  if (texture.hls) {
-    texture.hls.stopLoad();
-    texture.hls.detachMedia();
-    texture.hls.destroy();
-    texture.hls = null;
-  }
-
-  if (texture.dash) {
-    texture.dash.reset();
-  }
-
-  texture.dispose();
 }
 
 class TextureCache {
@@ -299,6 +314,7 @@ AFRAME.registerComponent("media-video", {
       this.snapButton = this.el.querySelector(".video-snap-button");
       this.timeLabel = this.el.querySelector(".video-time-label");
       this.volumeLabel = this.el.querySelector(".video-volume-label");
+      this.linkButton = this.el.querySelector(".video-link-button");
 
       this.playPauseButton.object3D.addEventListener("interact", this.togglePlaying);
       this.seekForwardButton.object3D.addEventListener("interact", this.seekForward);
@@ -735,6 +751,23 @@ AFRAME.registerComponent("media-video", {
       if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
         const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+        // We subscribe to video stream notifications for this peer to update the video element
+        // This could happen in case there is an ICE failure that requires a transport recreation.
+        if (this._onStreamUpdated) {
+          NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
+        }
+        this._onStreamUpdated = async (peerId, kind) => {
+          if (peerId === streamClientId && kind === "video") {
+            // The video stream for this peer has been updated
+            const stream = await NAF.connection.adapter.getMediaStream(peerId, "video").catch(e => {
+              console.error(`Error getting video stream for ${peerId}`, e);
+            });
+            if (stream) {
+              videoEl.srcObject = new MediaStream(stream);
+            }
+          }
+        };
+        NAF.connection.adapter.on("stream_updated", this._onStreamUpdated, this);
         videoEl.srcObject = new MediaStream(stream.getVideoTracks());
         // If hls.js is supported we always use it as it gives us better events
       } else if (contentType.startsWith("application/dash")) {
@@ -858,7 +891,8 @@ AFRAME.registerComponent("media-video", {
   updateHoverMenu() {
     if (!this.hoverMenu) return;
 
-    const pinnableElement = this.el.components["media-loader"].data.linkedEl || this.el;
+    const mediaLoader = this.el.components["media-loader"].data;
+    const pinnableElement = mediaLoader.linkedEl || this.el;
     const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
     this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
     this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
@@ -871,6 +905,8 @@ AFRAME.registerComponent("media-video", {
       !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
 
     this.playPauseButton.object3D.visible = this.seekForwardButton.object3D.visible = this.seekBackButton.object3D.visible = mayModifyPlayHead;
+
+    this.linkButton.object3D.visible = !!mediaLoader.mediaOptions.href;
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");
@@ -982,6 +1018,7 @@ AFRAME.registerComponent("media-video", {
     if (this.video) {
       this.video.removeEventListener("pause", this.onPauseStateChange);
       this.video.removeEventListener("play", this.onPauseStateChange);
+      NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
     }
 
     if (this.hoverMenu) {
@@ -1059,6 +1096,8 @@ AFRAME.registerComponent("media-image", {
             promise = createGIFTexture(src);
           } else if (contentType.includes("image/basis")) {
             promise = createBasisTexture(src);
+          } else if (contentType.includes("image/ktx2")) {
+            promise = createKTX2Texture(src);
           } else if (contentType.startsWith("image/")) {
             promise = createImageTexture(src);
           } else {

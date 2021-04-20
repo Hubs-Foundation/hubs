@@ -10,8 +10,10 @@ import copy from "copy-to-clipboard";
 import { detectOS } from "detect-browser";
 import { FormattedMessage } from "react-intl";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/support.scss";
 import configs from "./utils/configs";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 const SHORTHAND_INITIALIZER = "var foo = 'bar'; var baz = { foo };";
 const SPREAD_SYNTAX = "var foo = {}; var baz = { ...foo };";
@@ -81,49 +83,73 @@ class Support extends React.Component {
 
     return (
       <WrappedIntlProvider>
-        <div className={styles.supportMain}>
-          <div className={styles.supportContent}>
-            <div>
-              <img className={styles.logo} src={configs.image("logo")} />
-            </div>
-            <p>
-              <FormattedMessage id="support.missing-features" />
-              <br />
-              {inAppBrowser ? (
+        <ThemeProvider>
+          <div className={styles.supportMain}>
+            <div className={styles.supportContent}>
+              <div>
+                <img className={styles.logo} src={configs.image("logo")} />
+              </div>
+              <p>
                 <FormattedMessage
-                  id={detectedOS === "iOS" ? "support.in-app-browser-ios" : "support.in-app-browser-android"}
+                  id="support.missing-features"
+                  defaultMessage="Your browser is missing required features."
                 />
-              ) : (
-                <FormattedMessage id="support.update-browser" />
+                <br />
+                {inAppBrowser ? (
+                  detectedOS === "iOS" ? (
+                    <FormattedMessage
+                      id="support.in-app-browser-ios"
+                      defaultMessage="Copy and paste this link directly into Safari"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="support.in-app-browser-android"
+                      defaultMessage="Copy and paste this link directly into Chrome or Firefox"
+                    />
+                  )
+                ) : (
+                  <FormattedMessage
+                    id="support.update-browser"
+                    defaultMessage="Please try switching or updating to a newer browser"
+                  />
+                )}
+                <br />
+                <br />
+                <input type="text" readOnly onFocus={e => e.target.select()} value={document.location} />
+                <a className="copy-link" href="#" onClick={this.onCopyClicked}>
+                  {this.state.hasCopied ? (
+                    <FormattedMessage id="support.copied" defaultMessage="copied!" />
+                  ) : (
+                    <FormattedMessage id="support.copy" defaultMessage="copy" />
+                  )}
+                </a>
+                <br />
+                <br />
+                <a className={styles.detailsLink} href="#" onClick={this.toggleDetails}>
+                  <FormattedMessage id="support.details" defaultMessage="details" />
+                </a>
+              </p>
+              {this.state.showDetails && (
+                <table className={styles.details}>
+                  <tbody>
+                    {platformSupport.sort((a, b) => (a.supported && !b.supported ? 1 : -1)).map(s => (
+                      <tr key={s.name}>
+                        <td>{s.name}</td>
+                        <td>
+                          {s.supported ? (
+                            <FormattedMessage id="support.supported" defaultMessage="supported" />
+                          ) : (
+                            <FormattedMessage id="support.unsupported" defaultMessage="unsupported" />
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
-              <br />
-              <br />
-              <input type="text" readOnly onFocus={e => e.target.select()} value={document.location} />
-              <a className="copy-link" href="#" onClick={this.onCopyClicked}>
-                <FormattedMessage id={this.state.hasCopied ? "support.copied" : "support.copy"} />
-              </a>
-              <br />
-              <br />
-              <a className={styles.detailsLink} href="#" onClick={this.toggleDetails}>
-                <FormattedMessage id="support.details" />
-              </a>
-            </p>
-            {this.state.showDetails && (
-              <table className={styles.details}>
-                <tbody>
-                  {platformSupport.sort((a, b) => (a.supported && !b.supported ? 1 : -1)).map(s => (
-                    <tr key={s.name}>
-                      <td>{s.name}</td>
-                      <td>
-                        <FormattedMessage id={s.supported ? "support.supported" : "support.unsupported"} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            </div>
           </div>
-        </div>
+        </ThemeProvider>
       </WrappedIntlProvider>
     );
   }

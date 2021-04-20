@@ -1,0 +1,116 @@
+@use "../styles/theme";
+
+$input-height: 40px;
+
+:local(.outer-wrapper) {
+  display: flex;
+  position: relative;
+  height: $input-height;
+  border: 1px solid theme.$input-border-color;
+  border-radius: theme.$border-radius-regular;
+  color: theme.$text1-color;
+  overflow: hidden;
+
+  &:focus-within  {
+    border-color: theme.$input-outline-color;
+    box-shadow: 0 0 0 2px theme.$input-outline-color;
+  }
+}
+
+:local(.input-wrapper) {
+  flex: 1;
+  height: 100%;
+}
+
+:local(.before-input), :local(.after-input) {
+  display: flex;
+  height: $input-height;
+  align-items: center;
+
+  :local(.button) {
+    height: 100%;
+    border-radius: 0;
+    min-width: auto;
+    padding: 0 16px;
+    border-width: 0;
+    min-height: auto;
+
+    :global(.keyboard-user) &:focus {
+      border-width: 0;
+
+      &:first-child {
+        margin-right: 1px;
+        box-shadow: inset 0 0 0 3px theme.$outline-color, -1px 0 0 2px theme.$outline-color;
+        border-top-left-radius: theme.$border-radius-regular;
+        border-bottom-left-radius: theme.$border-radius-regular;
+      }
+  
+      &:last-child {
+        margin-left: 1px;
+        box-shadow: inset 0 0 0 3px theme.$outline-color, 1px 0 0 2px theme.$outline-color;
+        border-top-right-radius: theme.$border-radius-regular;
+        border-bottom-right-radius: theme.$border-radius-regular;
+      }
+    }
+  }
+
+  :local(.icon-button), & > svg  {
+    padding: 0;
+    margin-left: 8px;
+    
+    &:last-child {
+      margin-right: 8px;
+    }
+  }
+}
+
+:local(.before-input) {
+  :local(.button) {
+    border-right-width: 1px;
+  }
+}
+
+:local(.after-input) {
+  :local(.button) {
+    border-left-width: 1px;
+  }
+}
+
+:local(.disabled) {
+  cursor: not-allowed;
+  color: theme.$disabled-text-color;
+  background-color: theme.$disabled-bg-color;
+}
+
+:local(.invalid) {
+  border-color: theme.$error-color !important;
+
+  &:focus-within  {
+    box-shadow: 0 0 0 2px theme.$error-color;
+  }
+}
+
+:local(.text-input) {
+  height: 100%;
+  width: 100%;
+  border: none;
+  background-color: transparent;
+  padding-left: 8px;
+  line-height: calc(#{$input-height} - 2px);
+
+  &:focus {
+    box-shadow: none;
+  }
+}
+
+:local(.invalid-icon) {
+  margin: 0 8px;
+
+  *[fill=\#000] {
+    stroke: theme.$error-color;
+  }
+
+  *[stroke=\#000] {
+    stroke: theme.$error-color;
+  }
+}

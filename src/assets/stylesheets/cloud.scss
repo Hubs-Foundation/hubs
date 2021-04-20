@@ -1,8 +1,15 @@
-@import 'root-vars';
-@import 'shared';
+@use "../../react-components/styles/theme.scss";
 
 :local(.hero) {
-  background-color: #F3F3F3;
+  background-color: theme.$background2-color;
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  iframe {
+    margin-bottom: 20px;
+  }
 
   & > section {
     display: flex; 
@@ -17,20 +24,20 @@
     height: 240px;
     width: 100%;
 
-    @media(min-width: $breakpoint-sm) {
+    @media(min-width: theme.$breakpoint-sm) {
       height: 300px;
     }
 
-    @media(min-width: $breakpoint-md) {
+    @media(min-width: theme.$breakpoint-md) {
       height: 360px;
     }
 
-    @media(min-width: $breakpoint-lg) {
+    @media(min-width: theme.$breakpoint-lg) {
       height: 100%;
     }
   }
 
-  @media(min-width: $breakpoint-lg) {
+  @media(min-width: theme.$breakpoint-lg) {
     margin-right: 40px;
   }
 }
@@ -38,34 +45,12 @@
 :local(.hero-content) {
   flex: 10;
 
-  :local(.primary-button) {
-    margin-top: 20px;
-
-    @media(min-width: $breakpoint-lg) {
-      margin-top: 0;
-    }
+  & > * {
+    margin-bottom: theme.$spacing-md;
   }
-}
 
-:local(.get-started) {
-  margin-top: 20px;
-
-  a {
-    color: var(--home-text-color);
-  }
-}
-
-:local(.primary-button) {
-  @extend %action-button;
-  height: 64px;
-  border-radius: 4px;
-  background-color: $action-color;
-  font-size: 1.2em;
-  max-width: 300px;
-
-  @media(min-width: $breakpoint-md) {
-    font-size: 1em;
-    height: 56px;
+  & > :last-child {
+    margin-bottom: 0;
   }
 }
 
@@ -74,19 +59,29 @@
   padding: 5px;
   
   & > * {
-    margin: 5px;
+    margin: theme.$spacing-md;
+  }
+
+  :local(.center) {
+    & > * {
+      margin-bottom: theme.$spacing-md;
+    }
+  
+    & > :last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
 // Utility Classes
 :local(.hide-lg-down) {
-  @media(max-width: $breakpoint-lg) {
+  @media(max-width: theme.$breakpoint-lg) {
     display: none;
   }
 }
 
 :local(.hide-lg-up) {
-  @media(min-width: $breakpoint-lg) {
+  @media(min-width: theme.$breakpoint-lg) {
     display: none;
   }
 }
@@ -94,23 +89,29 @@
 :local(.row) {
   display: flex;
   justify-content: space-evenly !important;
+
+  & > * {
+    margin: theme.$spacing-sm;
+  }
 }
 
 :local(.col-lg) {
   flex-direction: column;
 
-  @media(min-width: $breakpoint-lg) {
+  @media(min-width: theme.$breakpoint-lg) {
     flex-direction: row;
   }
 }
 
 :local(.center) {
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
 :local(.center-lg) {
-  @media(max-width: $breakpoint-lg) {
+  @media(max-width: theme.$breakpoint-lg) {
     text-align: center;
     align-items: center;
   }

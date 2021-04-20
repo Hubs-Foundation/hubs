@@ -26,11 +26,15 @@ export function CollapsiblePanel({
   children,
   data,
   collapsed,
-  onCollapse
+  onCollapse,
+  backgroundColor,
+  clear,
+  download
 }) {
   const rootClassName = classNames(border ? styles.borderTile : styles.borderlessTile);
   const rootStyle = {
-    flexGrow: grow ? 1 : 0
+    flexGrow: grow ? 1 : 0,
+    backgroundColor
   };
   const contentClassName = classNames(
     isRoot
@@ -56,9 +60,23 @@ export function CollapsiblePanel({
           </button>
         )}
         {url && (
-          <button className={classNames(styles.helpButton)} onClick={() => openLink(url)}>
+          <button className={classNames(styles.logButton)} onClick={() => openLink(url)}>
             ?
           </button>
+        )}
+        {(clear || download) && (
+          <div className={styles.collapsibleRightButtons}>
+            {download && (
+              <button className={classNames(styles.logButton)} onClick={download}>
+                &#x2193;
+              </button>
+            )}
+            {clear && (
+              <button className={classNames(styles.logButton)} onClick={clear}>
+                &#xd7;
+              </button>
+            )}
+          </div>
         )}
       </div>
       <div className={contentClassName} style={contentStyle}>
@@ -71,7 +89,7 @@ export function CollapsiblePanel({
 
 CollapsiblePanel.propTypes = {
   children: PropTypes.node,
-  title: PropTypes.string,
+  title: PropTypes.node,
   border: PropTypes.bool,
   row: PropTypes.bool,
   grow: PropTypes.bool,
@@ -80,5 +98,8 @@ CollapsiblePanel.propTypes = {
   isRoot: PropTypes.bool,
   data: PropTypes.object,
   collapsed: PropTypes.bool,
-  onCollapse: PropTypes.func
+  onCollapse: PropTypes.func,
+  backgroundColor: PropTypes.string,
+  clear: PropTypes.func,
+  download: PropTypes.func
 };

@@ -26,13 +26,3 @@ export async function isValidSceneUrl(url) {
     return isValidGLB(proxiedUrlFor(url));
   }
 }
-
-// To assist with content control, we avoid displaying scene links to users who are not the scene
-// creator, unless the scene is remixable or promotable.
-export function allowDisplayOfSceneLink(scene, store) {
-  return (
-    (store.credentialsAccountId && scene.account_id === store.credentialsAccountId) ||
-    scene.allow_promotion ||
-    scene.allow_remixing
-  );
-}

@@ -1,8 +1,8 @@
+@use "../../react-components/styles/theme.scss";
 @import 'shared.scss';
 
 :local(.presence-log) {
   align-self: flex-start;
-  flex: 10;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -11,6 +11,8 @@
   margin-top: 90px;
   overflow: hidden;
   width: 100%;
+  box-sizing: content-box;
+  pointer-events: none !important;
 
   :local(.presence-log-entry) {
     @extend %default-font;
@@ -21,18 +23,25 @@
     -webkit-user-select: text;
     -ms-user-select: text;
 
-    background-color: var(--lobby-overlay-widget-background-color);
-    color: var(--lobby-overlay-widget-text-color);
-    margin: 0px 64px 8px 8px;
+    background-color: theme.$overlay-bg-color;
+    color: theme.$overlay-text-color;
+    margin-bottom: 8px;
     font-size: 0.8em;
     padding: 8px 16px;
     border-radius: 20px;
     display: flex;
     align-items: center;
+    pointer-events: all;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     :local(.message-body) {
       margin-left: 4px;
-      white-space: pre;
+      overflow-wrap: break-word;
+      overflow: hidden;
+      max-width: 500px;
     }
 
     :local(.message-body-multi) {
@@ -58,8 +67,8 @@
     }
 
     :local(.message-source) {
-      align-self: flex-start;
       font-weight: bold;
+      flex-shrink: 0;
     }
 
     :local(.message-source-link) {
@@ -68,11 +77,7 @@
     }
 
     a {
-      color: $action-label-color;
-    }
-
-    @media (max-width: 1000px) {
-      max-width: 75%;
+      color: theme.$link-color;
     }
 
     :local(.icon-button) {
@@ -93,10 +98,11 @@
       margin-right: 6px;
       border-radius: 12px;
       background-color: transparent;
+      flex-shrink: 0;
 
       &:hover {
         @media (pointer: fine) {
-          background-color: $action-color;
+          background-color: theme.$primary-color;
         }
       }
     }
@@ -123,7 +129,7 @@
       img {
         height: 35px;
         margin-left: 8px;
-        border: 2px solid var(--lobby-overlay-widget-thumbnail-border-color);
+        border: 2px solid theme.$overlay-border-color;
         display: block;
         border-radius: 5px;
       }
@@ -144,17 +150,12 @@
 
 :local(.presence-log-in-room) {
   position: absolute;
-  bottom: 64px;
-  z-index: 1;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  width: 95%;
-  max-width: 700px;
+  left: 20px;
+  bottom: 20px;
 
   :local(.presence-log-entry) {
-    background-color: var(--hud-panel-background);
-    color: var(--hud-panel-text-color);
+    background-color: theme.$overlay-bg-color;
+    color: theme.$overlay-text-color;
     min-height: 18px;
 
     // If this is selectable, tap holding on mobile anywhere on the screen will result
@@ -165,7 +166,7 @@
     -ms-user-select: none;
 
     a {
-      color: var(--hud-panel-link-color);
+      color: theme.$link-color;
     }
   }
 }
@@ -178,8 +179,8 @@
   margin: 0;
 
   :local(.presence-log-entry) {
-    background-color: var(--spawned-overlay-widget-background-color);
-    color: var(--spawned-overlay-widget-text-color);
+    background-color: black;
+    color: white;
     min-height: 18px;
     padding: 8px 16px;
     border-radius: 16px;
@@ -192,7 +193,7 @@
     }
 
     a {
-      color: var(--spawned-overlay-widget-link-color);
+      color: white;
     }
   }
 
@@ -216,7 +217,7 @@
     font-weight: normal;
     font-size: 0.7em;
     white-space: nowrap;
-    color: var(--spawned-overlay-widget-source-text-color);
+    color: white;
   }
 
   :local(.message-source-link) {
@@ -227,6 +228,7 @@
 
 :local(.emoji) {
   // Undo annoying CSS in emoji plugin
-  margin: auto !important;
-  vertical-align: 0em !important;
+  margin: 0.2em !important;
+  vertical-align: text-top !important;
+  line-height: 1em;
 }

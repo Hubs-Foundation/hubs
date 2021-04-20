@@ -1,18 +1,15 @@
-@import '../../assets/stylesheets/shared';
+@use "../styles/theme.scss";
 
 header {
   display: block;
+  padding: 20px;
 
-  @media(min-width: $breakpoint-lg) {
-    display: flex;
-    flex-direction: row;
-    height: 65px;
-    min-height: 65px;
-    padding: 0 1.75em;
+  @media(min-width: theme.$breakpoint-lg) {
+    padding: 0;
   }
 
   a {
-    color: var(--home-header-link-color);
+    color: theme.$black;
     font-weight: bold;
     text-decoration: none;
     white-space: nowrap;
@@ -22,21 +19,22 @@ header {
     display: flex;
     flex-direction: column;
 
-    @media(min-width: $breakpoint-lg) {
+    @media(min-width: theme.$breakpoint-lg) {
       flex-direction: row;
     }
 
     li {
       padding-top: 20px;
 
-      @media(min-width: $breakpoint-lg) {
+      @media(min-width: theme.$breakpoint-lg) {
         padding-top: 0;
       }
     }
 
     a {
       margin: 0 16px;
-      font-size: 1.4em;
+      font-size: theme.$font-size-md;
+      color: theme.$text1-color;
     }
 
     ul {
@@ -47,28 +45,50 @@ header {
       flex-direction: column;
       align-items: center;
 
-      @media(min-width: $breakpoint-lg) {
+      @media(min-width: theme.$breakpoint-lg) {
         justify-content: flex-end;
         flex-direction: row;
       }
     }
   }
+}
 
-  :local(.sign-in) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 20px;
+:local(.container) {
+  flex-direction: column;
+  align-items: center;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    height: 140px;
+    flex-direction: row;
+    align-items: inherit;
+  }
+}
+
+:local(.home-link) {
+  display: inline-block;
+
+  img {
+    height: 32px;
+  }
+}
+
+:local(.sign-in) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+  font-size: theme.$font-size-md;
+  font-weight: theme.$font-weight-bold;
   
-    @media(min-width: $breakpoint-lg) {
-      flex-direction: row;
-      justify-content: flex-end;
-      flex: 1;
-      padding-top: 0;
-    }
-  
-    a {
-      text-decoration: underline;
-    }
+  a {
+    margin-left: 8px;
+    color: theme.$link-color;
+  }
+
+  @media(min-width: theme.$breakpoint-lg) {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex: 1;
+    padding-top: 0;
   }
 }

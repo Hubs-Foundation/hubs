@@ -1,3 +1,4 @@
+@use "../../react-components/styles/theme.scss";
 @import 'shared';
 
 .loader-wrap {
@@ -26,7 +27,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: var(--loading-background-color);
+  background: theme.$loading-screen-background;
   width: 100%;
   height: 100%;
   display: flex;
@@ -47,14 +48,14 @@
   left: 12px;
   font-weight: normal;
   font-size: 0.8em;
-  color: var(--loading-text-color);
+  color: theme.$text1-color;
 
   @media (max-width: 768px), (max-height: 480px) {
     display: none;
   }
 
   a {
-    color: var(--loading-text-color);
+    color: theme.$text1-color;
   }
 }
 
@@ -65,7 +66,7 @@
 .loader-center,
 .loader:before,
 .loader:after {
-  background: var(--loading-spinner-color);
+  background: theme.$active-color;
   -webkit-animation: loader-animation 1s infinite ease-in-out;
   animation: loader-animation 1s infinite ease-in-out;
   width: 0.6em;
@@ -73,7 +74,7 @@
   border-radius: 5px;
 }
 .loader {
-  color: var(--loading-spinner-color);
+  color: theme.$active-color;
   text-indent: -9999em;
   margin-left: 4em;
   margin-top: 4em;
@@ -129,6 +130,6 @@
 :local(.loading-text) {
   font-weight: normal;
   font-size: 0.8em;
-  color: var(--loading-text-color);
+  color: theme.$text1-color;
   margin-top: 0;
 }

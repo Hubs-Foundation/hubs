@@ -1,0 +1,32 @@
+@use "../styles/theme.scss";
+
+:local(.error) {
+  color: theme.$error-color;
+}
+
+:local(.microphone-icon-container) {
+  display: flex;
+  width: 96px;
+  height: 96px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 96px;
+  border: 1px solid theme.$button-border-color;
+  
+  svg {
+    path {
+      stroke-width: 1;
+    }
+
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
+
+    width: 48px;
+    height: 48px;
+  }
+}

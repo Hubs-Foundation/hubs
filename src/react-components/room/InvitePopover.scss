@@ -1,0 +1,10 @@
+@use "../styles/theme.scss";
+
+:local(.invite-popover) {
+  width: 100%;
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    padding-top: 8px;
+    width: 272px;
+  }
+}

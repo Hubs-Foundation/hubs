@@ -1,0 +1,447 @@
+
+@use "./theme.scss";
+@import "~normalize.css";
+
+// Theme CSS Variables
+// Injected theme will overwrite these defaults
+:root {
+  --font-family-default: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-family-monospace: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+
+  --text1-color: #{theme.$black};
+  --text1-color-hover: #{theme.$black-hover};
+  --text1-color-pressed: #{theme.$black-pressed};
+  --text2-color: #{theme.$darkgrey};
+  --text2-color-hover: #{theme.$darkgrey-hover};
+  --text2-color-pressed: #{theme.$darkgrey-pressed};
+  --text3-color: #{theme.$grey};
+  --text3-color-hover: #{theme.$grey-hover};
+  --text3-color-pressed: #{theme.$grey-pressed};
+  --text4-color: #{theme.$darkgrey};
+  --text4-color-hover: var(--text4-color);
+  --text4-color-pressed: var(--text4-color);
+  --text5-color: #{theme.$white};
+  --text5-color-hover: var(--text5-color);
+  --text5-color-pressed: var(--text5-color);
+  --text6-color: #{theme.$black};
+  --text6-color-hover: var(--text6-color);
+  --text6-color-pressed: var(--text6-color);
+
+  --link-color: #{theme.$blue};
+  --link-color-hover: #{theme.$blue-hover};
+  --link-color-pressed: #{theme.$blue-pressed};
+
+  --accept-color: #{theme.$green};
+  --accept-color-hover: #{theme.$green-hover};
+  --accept-color-pressed: #{theme.$green-pressed};
+
+  --cancel-color: #{theme.$red};
+  --cancel-color-hover: #{theme.$red-hover};
+  --cancel-color-pressed: #{theme.$red-pressed};
+
+  --accent1-color: #{theme.$red};
+  --accent1-color-hover: #{theme.$red-hover};
+  --accent1-color-pressed: #{theme.$red-pressed};
+
+  --accent2-color: #{theme.$orange};
+  --accent2-color-hover: #{theme.$orange-hover};
+  --accent2-color-pressed: #{theme.$orange-pressed};
+
+  --accent3-color: #{theme.$green};
+  --accent3-color-hover: #{theme.$green-hover};
+  --accent3-color-pressed: #{theme.$green-pressed};
+
+  --accent4-color: #{theme.$blue};
+  --accent4-color-hover: #{theme.$blue-hover};
+  --accent4-color-pressed: #{theme.$blue-pressed};
+
+  --accent5-color: #{theme.$purple};
+  --accent5-color-hover: #{theme.$purple-hover};
+  --accent5-color-pressed: #{theme.$purple-pressed};
+
+  --primary-color: #{theme.$blue};
+  --primary-color-hover: #{theme.$blue-hover};
+  --primary-color-pressed: #{theme.$blue-pressed};
+
+  --secondary-color: #{theme.$lightgrey};
+  --secondary-color-hover: #{theme.$lightgrey-hover};
+  --secondary-color-pressed: #{theme.$lightgrey-pressed};
+
+  --background1-color: #{theme.$white};
+  --background2-color: #{theme.$recessed-bg};
+  --background3-color: #{theme.$lightgrey};
+  --background4-color: #{theme.$grey};
+
+  --loading-screen-background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%);
+
+  --border1-color: #{theme.$lightgrey};
+  --border2-color: #{theme.$grey};
+  --border3-color: #{theme.$darkgrey};
+
+  --outline-color: #{theme.$black};
+
+  --shadow-color: rgba(0, 0, 0, 0.2);
+
+  --basic-color: #{theme.$white};
+  --basic-color-hover: #{theme.$white-hover};
+  --basic-color-pressed: #{theme.$white-pressed};
+  --basic-border-color: var(--border1-color);
+
+  --disabled-text-color: var(--text4-color);
+  --disabled-bg-color:  var(--background3-color);
+  --disabled-icon-color: var(--text3-color);
+
+  --radio-border-color: var(--border1-color);
+  --radio-bg-color: var(--basic-color);
+  --radio-bg-color-hover: var(--basic-color-hover);
+  --radio-bg-color-pressed: var(--basic-color-pressed);
+
+  --toggle-button-color: var(--background4-color);
+
+  --input-bg-color: var(--background1-color);
+  --input-icon-color: var(--text2-color);
+  --input-border-color: var(--border3-color);
+  --input-border-color-hover: var(--primary-color-hover);
+  --input-outline-color: var(--primary-color);
+
+  --list-bg-color-hover: var(--basic-color-hover);
+  --list-bg-color-pressed: var(--basic-color-pressed);
+
+  --dropdown-bg-color: var(--background1-color);
+  --dropdown-border-color: var(--border1-color);
+  --dropdown-shadow-color: var(--shadow-color);
+
+  --button-text-color: var(--text1-color);
+  --button-border-color: var(--border1-color);
+  --button-bg-color: var(--basic-color);
+  --button-bg-color-hover: var(--basic-color-hover);
+  --button-bg-color-pressed: var(--basic-color-pressed);
+
+  --active-text-color: var(--text5-color);
+  --active-color: var(--primary-color);
+  --active-color-hover: var(--primary-color-hover);
+  --active-color-pressed: var(--primary-color-pressed);
+
+  --chat-bubble-bg-color-sent: var(--accent4-color);
+  --chat-bubble-text-color-sent: var(--text5-color);
+  --chat-bubble-link-color-sent-hover: var(--basic-color-hover);
+  --chat-bubble-link-color-sent-pressed: var(--basic-color-pressed);
+  --chat-bubble-bg-color-received: var(--background3-color);
+
+  --tip-text-color: var(--text5-color);
+  --tip-bg-color: var(--accent4-color);
+  --tip-button-color: var(--accent-4color-pressed);
+  --tip-button-color-hover: var(--accent4-color-hover);
+  --tip-button-color-pressed: var(--accent4-color-pressed);
+
+  --favorite-color: #{theme.$yellow};
+
+  --admin-color: var(--accent1-color);
+
+  --error-color: var(--cancel-color);
+  --error-color-hover: var(--cancel-color-hover);
+  --error-color-pressed: var(--cancel-color-pressed);
+
+  --status-unread-color: #{theme.$orange};
+  --status-recording-color: #{theme.$red};
+  --status-enabled-color: var(--accept-color);
+  --status-disabled-color: var(--cancel-color);
+
+  --overlay-bg-color: rgba(0, 0, 0, 0.5);
+  --overlay-text-color: #{theme.$white};
+  --overlay-border-color: #{theme.$grey};
+  --overlay-outline-color: #{theme.$white};
+
+  --toolbar-icon-color: var(--text5-color);
+  --toolbar-basic-icon-color: var(--text1-color);
+  --toolbar-basic-color: var(--secondary-color);
+  --toolbar-basic-color-hover: var(--secondary-color-hover);
+  --toolbar-basic-color-pressed: var(--secondary-color-pressed);
+
+  --tile-text-color: var(--text4-color);
+  --tile-bg-color: var(--secondary-color);
+  --tile-bg-color-hover: var(--secondary-color-hover);
+  --tile-bg-color-pressed: var(--secondary-color-pressed);
+  --tile-button-text-color: var(--text1-color);
+  --tile-button-bg-color: var(--basic-color);
+  --tile-button-bg-color-hover: var(--basic-color-hover);
+  --tile-button-bg-color-pressed: var(--basic-color-pressed);
+  --tile-button-border-color: var(--basic-border-color);
+}
+
+html {
+  height  : 100%;
+  overflow: hidden;
+}
+
+body {
+  height  : 100%;
+  overflow: auto;
+  overscroll-behavior-y: none;
+}
+
+/**
+ * https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/
+ */
+html {
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+/**
+ * Forked from Tailwind CSS
+ */
+
+/**
+ * Removes the default spacing and border for appropriate elements.
+ */
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+ol,
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/**
+ * https://css-tricks.com/snippets/css/system-font-stack/
+ */
+
+html {
+ font-family: theme.$font-family-default;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button,
+[role="button"] {
+  cursor: pointer;
+  user-select: none;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: theme.$font-weight-bold;
+}
+
+/**
+ * Reset links to optimize for opt-in styling instead of
+ * opt-out.
+ */
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/**
+ * Reset form element properties that are easy to forget to
+ * style explicitly so you don't inadvertently introduce
+ * styles that deviate from your design system. These styles
+ * supplement a partial reset that is already applied by
+ * normalize.css.
+ */
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  padding: 0;
+  line-height: inherit;
+  color: inherit;
+}
+
+/**
+ * Monospace font stack: https://css-tricks.com/snippets/css/font-stacks/
+ */
+
+pre,
+code,
+kbd,
+samp {
+ font-family: theme.$font-family-monospace;
+}
+
+/**
+ * Make replaced elements `display: block` by default as that's
+ * the behavior you want almost all of the time. Inspired by
+ * CSS Remedy, with `svg` added as well.
+ *
+ * https://github.com/mozdevs/cssremedy/issues/14
+ */
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  vertical-align: middle;
+}
+
+img:-moz-broken {
+  opacity: 0;
+}
+
+/**
+ * Constrain images and videos to the parent width and preserve
+ * their instrinsic aspect ratio.
+ *
+ * https://github.com/mozdevs/cssremedy/issues/14
+ */
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+label {
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-bold;
+}
+
+body :focus, [type="button"]:focus {
+  outline: none;
+}
+
+:global(.keyboard-user) :focus {
+  box-shadow: 0 0 0 3px theme.$outline-color;
+}
+
+/* We want svg icons to have title elements for screen readers, but we don't need to show their tooltips when they are inside buttons */
+button svg {
+  pointer-events: none;
+}
+
+/**
+ * Breakpoint definitions for use wuth react-use-css-breakpoints
+ * https://github.com/matthewhall/react-use-css-breakpoints
+ */
+body::before {
+  content: "sm";
+  display: none;
+}
+
+@media (min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
+  body::before {
+    content: "md";
+  }
+}
+
+@media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  body::before {
+    content: "lg";
+  }
+}
+
+@media (min-width: theme.$breakpoint-xl) and (min-height: theme.$breakpoint-vr) {
+  body::before {
+    content: "xl";
+  }
+}
+
+@media (min-width: theme.$breakpoint-xxl) and (min-height: theme.$breakpoint-vr) {
+  body::before {
+    content: "xxl";
+  }
+}
+
+// TODO: Add the rest of the base typography styles
+
+h5 {
+  font-size: theme.$font-size-sm;
+}
+
+label, small, strong {
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+}
+
+small {
+  color: theme.$text2-color;
+}
+
+p, small, strong {
+  line-height: 1.25;
+}
+
+a {
+  color: theme.$link-color;
+
+  &:hover {
+    color: theme.$link-color-hover;
+  }
+
+  &:active {
+    color: theme.$link-color-pressed;
+  }
+}
+
+hr {
+  position: relative;
+  width: 90%;
+  border: none;
+  border-bottom: 1px solid theme.$border2-color;
+  margin: 16px 0;
+
+  &:after {
+    background: theme.$background1-color;
+    content: attr(data-or-text);
+    padding: 0 4px;
+    position: relative;
+    color: theme.$text1-color;
+    font-size: theme.$font-size-sm;
+    font-weight: theme.$font-weight-bold;
+    position: absolute;
+    transform: translateY(-50%) translateX(-50%);
+  }
+}
+
+input::placeholder {
+  color: theme.$text2-color;
+}
+
+summary {
+  cursor: pointer;
+}

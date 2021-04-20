@@ -1,56 +1,23 @@
-@import 'shared';
-@import 'loader';
-
-body {
-  margin: 0;
-  padding: 0;
-  @extend %default-font;
-}
-
-html, body, #ui-root, .container {
-  height: 100%;
-}
-#ui-root > div {
-  display: flex;
-  flex-direction: column;
-}
-.container {
-  display: flex;
-  flex-direction: column;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.logo {
-  height: 3em;
-  margin-left: 1.5em;
-  vertical-align: middle;
-}
+@use "../../react-components/styles/theme.scss";
 
 .main {
-  background: linear-gradient(to bottom, #ecfaff 0, white 30em);
   display: flex;
   justify-content: center;
   flex: 1;
+
+  h1 {
+    font-size: theme.$font-size-xl;
+    text-align: center;
+    margin-bottom: 20px;
+  }
 }
 
 .content {
   padding: 1em;
-  width: 45em;
+  width: 100%;
+  max-width: 45em;
   display: flex;
   flex-direction: column;
-}
-
-.loader-wrap {
-  align-self: center;
-}
-
-h1 {
-  text-align: center;
 }
 
 .note-header { 
@@ -63,10 +30,11 @@ h1 {
   margin: 0;
 }
 .title a:link, .title a:active .title a:hover, .title a:visited {
-  color: var(--home-text-color);
+  color: theme.$text1-color;
 }
 .title {
   flex: 1;
+  margin-bottom: 16px;
   @media (max-width: 768px) {
     align-self: flex-start;
   }
@@ -82,8 +50,14 @@ h1 {
 
 .body {
   margin-left: 120px;
+
+  p {
+    margin-bottom: 16px;
+  }
+  
   @media (max-width: 768px) {
     margin-left: 0;
   }
+
   img { width: 100%; }
 }

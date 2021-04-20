@@ -1,69 +1,89 @@
-@import '../../assets/stylesheets/shared';
+@use "../styles/theme.scss";
 
 footer {
   display: block;
-  background-color: var(--home-footer-background-color);
+  background-color: theme.$background2-color;
+  font-size: theme.$font-size-md;
+  padding: 20px;
 
-  @media(min-width: $breakpoint-lg) {
-    display: flex;
-    flex-direction: row;
-    margin-top: auto;
-    justify-content: space-between;
-    padding: 1em 0;
-    align-items: center;
-    background-color: transparent;
-  }
-
-  :local(.powered-by) {
-    text-align: center;
-    align-self: flex-end;
-    color: var(--home-footer-text-color);
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
+  @media(min-width: theme.$breakpoint-lg) {
+    padding: 0;
   }
 
   nav {
-    margin-bottom: 20px;
+    display: flex;
 
-    @media(min-width: $breakpoint-lg) {
-      margin-bottom: 0;
+    @media(min-width: theme.$breakpoint-lg) {
+      flex: 1;
+      justify-content: flex-end;
     }
+
 
     ul {
       display: flex;
       margin: 0;
       padding: 0;
       list-style: none;
-      flex-direction: column;
       align-items: center;
+      flex-direction: column;
 
-      @media(min-width: $breakpoint-lg) {
-        justify-content: flex-end;
+      @media(min-width: theme.$breakpoint-lg) {
         flex-direction: row;
       }
     }
 
     a {
-      color: var(--home-footer-link-color);
+      color: theme.$text1-color;
       font-weight: bold;
     }
 
     li {
+      display: flex;
       padding-top: 20px;
+      align-items: center;
 
-      @media(min-width: $breakpoint-lg) {
+      @media(min-width: theme.$breakpoint-lg) {
         padding-top: 0;
         margin-right: 20px;
       }
     }
-
-    :local(.company-logo) {
-      height: 49px;
-
-      @media(min-width: $breakpoint-lg) {
-        margin-left: 18px;
-      }
-    }
   }
+}
+
+:local(.container) {
+  flex-direction: column;
+  align-items: center;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    height: 80px;
+    flex-direction: row;
+    align-items: inherit;
+  }
+}
+
+:local(.powered-by) {
+  text-align: center;
+  color: theme.$text1-color;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    margin-left: 20px;
+  }
+}
+
+:local(.company-logo) {
+  height: 49px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    margin-left: 18px;
+  }
+}
+
+:local(.discord-logo) {
+  height: 24px;
+  width: 24px;
+  display: inline;
+  margin-right: 4px;
 }

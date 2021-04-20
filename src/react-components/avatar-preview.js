@@ -364,7 +364,11 @@ class AvatarPreview extends Component {
                 srcSet="../assets/images/warning_icon@2x.png 2x"
                 className="error-icon"
               />
-              <FormattedMessage id="avatar-preview.loading-failed" />
+              <FormattedMessage
+                id="avatar-preview.loading-failed"
+                defaultMessage="Loading failed{linebreak}Please choose another avatar"
+                values={{ linebreak: <br /> }}
+              />
             </div>
           )}
         <canvas ref={c => (this.canvas = c)} />

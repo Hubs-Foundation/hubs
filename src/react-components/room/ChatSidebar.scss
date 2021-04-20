@@ -1,0 +1,124 @@
+@use "../styles/theme.scss";
+
+:local(.chat-input-container) {
+  padding: 0 16px 8px 16px;
+  background-color: theme.$input-bg-color;
+}
+
+:local(.message-list) {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  list-style: none;
+  padding: 0 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+:local(.message-group) {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 100%;
+  padding-top: 16px;
+
+  &:last-child {
+    padding-bottom: 16px;
+  }
+}
+
+:local(.message-group-label) {
+  color: theme.$text2-color;
+  font-size: theme.$font-size-xs;
+  display: flex;
+  margin: 2px;
+}
+
+:local(.message-group-messages) {
+  display: flex;
+  flex-direction: column;
+}
+
+:local(.message-bubble) {
+  background-color: theme.$chat-bubble-bg-color-received;
+  border-radius: 19px;
+  margin: 2px;
+  padding: 10px 16px;
+  max-width: 80%;
+  width: max-content;
+  font-size: theme.$font-size-md;
+  overflow-wrap: break-word;
+  line-height: 1.25;
+
+  img, video {
+    max-height: 240px;
+    border-radius: 18px;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+:local(.sent) {
+  :local(.message-group-label) {
+    align-self: flex-end;
+  }
+
+  :local(.message-bubble) {
+    background-color: theme.$chat-bubble-bg-color-sent;
+    color: theme.$chat-bubble-text-color-sent;
+    align-self: flex-end;
+
+    a {
+      color: theme.$chat-bubble-text-color-sent;
+
+      &:hover {
+        color: theme.$chat-bubble-link-color-sent-hover;
+      }
+
+      &:active {
+        color: theme.$chat-bubble-link-color-sent-pressed;
+      }
+    }
+  }
+}
+
+:local(.message-bubble):local(.emoji), :local(.message-bubble):local(.media) {
+  font-size: 32px;
+  background-color: theme.$transparent;
+  padding: 0;
+}
+
+:local(.message-bubble):local(.monospace) {
+  font-family: monospace;
+}
+
+:local(.system-message) :local(.message-group-label) {
+  display: inline;
+  vertical-align: bottom;
+
+  i {
+    font-size: theme.$font-size-xs;
+    color: theme.$text2-color;
+  }
+
+  span {
+    margin-left: 1ch;
+  }
+}
+
+:local(.chat-input-icon) {
+  cursor: pointer;
+  width: 24px;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$input-icon-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$input-icon-color;
+    }
+  }
+}

@@ -1,3 +1,4 @@
+@use "../../react-components/styles/theme.scss";
 @import 'shared';
 
 :local(.avatar-editor) {
@@ -6,8 +7,7 @@
   flex-direction: row;
   box-sizing: border-box;
   align-items: flex-start;
-  height: 100%;
-  color: var(--panel-text-color);
+  color: theme.$text1-color;
 
   @media (max-width: 768px) {
     padding: 0.5em;
@@ -24,7 +24,7 @@
   .info {
     text-align: center;
     width: 100%;
-    color: var(--panel-subtext-color);
+    color: theme.$text2-color;
     margin: 1em 0;
 
     p {
@@ -36,8 +36,7 @@
     }
 
     a {
-      color: var(--panel-subtext-link-color);
-      margin-left: 5px;
+      color: theme.$link-color;
     }
   }
 
@@ -95,14 +94,17 @@
         min-height: 50px;
         border-radius: 8px;
         margin-right: 5px;
-        background: var(--panel-action-button-secondary-background);
+        background: theme.$tile-bg-color;
         overflow: hidden;
-        color: var(--action-button-secondary-icon);
+        color: theme.$tile-text-color;
         position: relative;
         svg {
           position: absolute;
-          left: 15px;
-          top: 15px;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          width: 20px;
+          height: 20px;
         }
       }
       img {
@@ -110,7 +112,7 @@
       }
       a {
         margin-left: 10px;
-        color: var(--panel-subtext-link-color);
+        color: theme.$link-color;
       }
     }
 
@@ -152,19 +154,33 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        color: var(--panel-subtext-color);
+        color: theme.$text2-color;
         text-align: center;
         cursor: pointer;
         margin-bottom: 5px;
         width: calc(1 / 3 * 100% - (1 - 1 / 3) * 10px);
         position: relative;
 
-        &.selected{
-          background: var(--tile-selected-color);
+        &.selected {
+          background: theme.$tile-bg-color;
         }
+
+        &:hover {
+          background: theme.$tile-bg-color-hover;
+        }
+
+        &:active {
+          background: theme.$tile-bg-color-pressed;
+        }
+
         &.custom{
           width: 100%;
           height: 40px;
+
+          svg {
+            margin-right: 8px;
+            margin-top: -1px;
+          }
         }
         img {
           position: absolute;
@@ -191,31 +207,51 @@
       margin: 5px 0;
 
       .checkbox {
-        @extend %checkbox;
+        cursor: pointer;
+        appearance: none;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        width: 2em;
+        height: 2em;
+        border: 1px solid theme.$input-border-color;
+        background-color: theme.$input-bg-color;
+        border-radius: 6px;
+        vertical-align: sub;
+        margin: 0 0.7em;
         min-width: 2em;
         min-height: 2em;
       }
       .checkbox:checked {
-        @extend %checkbox-checked;
+        position: relative;
+        &::after {
+          content: ' ';
+          position: absolute;
+          background: theme.$active-color;
+          top: 0.3em;
+          left: 0.3em;
+          right: 0.3em;
+          bottom: 0.3em;
+          border-radius: 0.3em;
+        }
       }
     }
 
     .license {
       font-size: 8pt;
-      color: var(--panel-subtext-color);
+      color: theme.$text2-color;
       a {
-        color: var(--panel-subtext-link-color)
+        color: theme.$text2-color;
       }
     }
 
     hr {
       width: 100%;
       border: none;
-      border-bottom: 1px solid var(--panel-widget-color);
+      border-bottom: 1px solid theme.$border2-color;
     }
 
     a {
-      color: var(--panel-text-color);
+      color: theme.$text2-color;
     }
   }
 
@@ -229,12 +265,13 @@
   }
 
   .form-submit {
-    @extend %bottom-action-button;
+    @extend %action-button;
+    background: theme.$primary-color;
     margin: 0;
     margin-bottom: 0.5em;
   }
   .form-submit:disabled {
-    background-color: $action-color-disabled;
+    background-color: theme.$disabled-bg-color;
   }
 
   .split {
@@ -249,17 +286,23 @@
   }
 
   .delete-avatar {
-    color: var(--panel-subtext-color);
+    margin-top: 20px;
+    color: theme.$text2-color;
     a {
       cursor: pointer;
       text-decoration: underline;
-      color: $action-label-color;
+      color: theme.$cancel-color;
     }
   }
 
   .close-button {
-    @extend %panel-widget;
+    cursor: pointer;
+    color: theme.$text2-color;
+    outline-style: none;
+    background: none;
+    border: none;
 
+    margin-top: 16px;
     font-size: 1.6em;
     align-self: flex-start;
 

@@ -1,31 +1,288 @@
+@use '../styles/theme';
 
-@import '../../assets/stylesheets/root-vars';
-@import '../../assets/stylesheets/shared';
-
-:local(.primary-button) {
-  @extend %big-action-button;
-}
-
-:local(.cta-button) {
-  font-size: 14pt;
-  width: 19em;
-  margin-right: 1em;
-
-  @media (max-width: 380px) {
-    width: 18em;
-  }
-}
-
-:local(.secondary-button) {
-  @extend %action-button-secondary;
+:local(.button) {
+  height: 48px;
+  min-height: 48px;
+  width: min-content;
+  min-width: 156px;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 8px;
+  border-width: 0;
+  border-color: transparent;
+  transition: background-color 0.1s ease-in-out;
+  white-space: nowrap;
+  padding: 0 24px;
   display: flex;
-  flex-direction: row;
-  width: 250px;
-  margin-top: 18px;
-  margin-bottom: 18px;
-  padding-right: 20px;
+  align-items: center;
+  justify-content: center;
 
-  i {
-    margin-right: 16px;
+  svg {
+    flex-shrink: 0;
+    margin-right: 8px;
   }
+}
+
+:local(.basic), :local(.transparent) {
+  color: theme.$text4-color;
+  border: 1px solid theme.$basic-border-color;
+  background-color: theme.$basic-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text4-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text4-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text4-color-hover;
+    background-color: theme.$basic-color-hover;
+  }
+
+  &:active {
+    color: theme.$text4-color-pressed;
+    background-color: theme.$basic-color-pressed;
+  }
+}
+
+:local(.transparent) {
+  border-color: theme.$transparent;
+  background-color: theme.$transparent;
+}
+
+:local(.primary) {
+  color: theme.$text5-color;
+  background-color: theme.$primary-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$primary-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$primary-color-pressed;
+  }
+}
+
+:local(.accept) {
+  color: theme.$text5-color;
+  background-color: theme.$accept-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accept-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accept-color-pressed;
+  }
+}
+
+:local(.cancel) {
+  color: theme.$text5-color;
+  background-color: theme.$cancel-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$cancel-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$cancel-color-pressed;
+  }
+}
+
+:local(.accent1) {
+  color: theme.$text5-color;
+  background-color: theme.$accent1-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent1-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent1-color-pressed;
+  }
+}
+
+:local(.accent2) {
+  color: theme.$text5-color;
+  background-color: theme.$accent2-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent2-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent2-color-pressed;
+  }
+}
+
+:local(.accent3) {
+  color: theme.$text5-color;
+  background-color: theme.$accent3-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent3-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent3-color-pressed;
+  }
+}
+
+:local(.accent4) {
+  color: theme.$text5-color;
+  background-color: theme.$accent4-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent4-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent4-color-pressed;
+  }
+}
+
+:local(.accent5) {
+  color: theme.$text5-color;
+  background-color: theme.$accent5-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent5-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent5-color-pressed;
+  }
+}
+
+:local(.button):disabled {
+  border-color: transparent;
+  cursor: not-allowed;
+  color: theme.$disabled-text-color;
+  opacity: 0.7;
+  background-color: theme.$disabled-bg-color;
+}
+
+:global(.keyboard-user) :local(.button):focus {
+  border-color: transparent;
+}
+
+:local(.sm) {
+  height: 32px;
+  min-height: 32px;
+  min-width: 100px;
+  padding: 0 8px;
+}
+
+:local(.lg), :local(.xl) {
+  border-radius: 32px;
+  padding: 0 48px;
+  font-size: 16px;
+}
+
+:local(.lg) {
+  height: 48px;
+}
+
+:local(.xl) {
+  height: 64px;
 }

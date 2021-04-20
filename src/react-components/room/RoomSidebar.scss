@@ -1,0 +1,56 @@
+@use "../styles/theme.scss";
+
+:local(.section-title) {
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-bold;
+  color: theme.$text2-color;
+  margin-bottom: 16px;
+  margin-top: 16px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+:local(.scene-screenshot-container) {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+}
+
+:local(.scene-screenshot-image) {
+  background-color: theme.$tile-bg-color;
+  border-radius: 12px;
+}
+
+:local(.scene-info) {
+  margin-bottom: 16px;
+}
+
+:local(.scene-name) {
+  color: theme.$text2-color;
+}
+
+:local(.scene-creator) {
+  margin-top: 4px;
+  font-size: theme.$font-size-sm;
+  color: theme.$text2-color;
+}
+
+:local(.attribution) {
+  font-size: theme.$font-size-sm;
+  margin-top: 8px;
+  color: theme.$text2-color;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+:local(.attribution-name) {
+  font-weight: theme.$font-weight-bold;
+}
+
+:local(.attribution-author) {
+  margin-top: 4px;
+}
