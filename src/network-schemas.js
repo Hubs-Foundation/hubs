@@ -112,7 +112,8 @@ function registerNetworkSchemas() {
         component: "media-pdf",
         property: "index"
       },
-      "pinnable"
+      "pinnable",
+      "visible"
     ],
     nonAuthorizedComponents: [
       {

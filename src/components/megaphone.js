@@ -37,12 +37,12 @@ AFRAME.registerComponent('megaphone', {
         this.data.avatarAudioSource.data.refDistance = 1000;
         this.data.avatarAudioSource.data.positional = false;
       }
-      else if(this.el.components["audio-channel"].data.audioState == true)
+      else if(this.el.components["audio-channel"]?.data.audioState == true)
       {       
         this.data.avatarAudioSource.data.refDistance = this.data.defaultRef;
         this.data.avatarAudioSource.data.positional = true;
       }
-      else if(this.el.components["audio-channel"].data.audioState == false)
+      else if(this.el.components["audio-channel"]?.data.audioState == false)
       {       
         this.data.avatarAudioSource.data.refDistance = 0;
         this.data.avatarAudioSource.data.positional = true;
