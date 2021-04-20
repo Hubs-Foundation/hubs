@@ -41,6 +41,7 @@ function registerNetworkSchemas() {
       },
       "player-info",
       "networked-avatar",
+      "isMegaphone",
       {
         selector: ".camera",
         component: "position",

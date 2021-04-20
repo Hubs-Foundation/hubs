@@ -192,6 +192,8 @@ if (isEmbed && !qs.get("embed_token")) {
 
 THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
+import "./components/megaphone";
+
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
 import "./components/set-unowned-body-kinematic";

@@ -58,6 +58,18 @@ export default class MessageDispatch extends EventTarget {
     const captureSystem = this.scene.systems["capture-system"];
 
     switch (command) {
+      case "megaphone":     
+        console.log("/megaphone command called");  
+        const avatarHead = this.scene.querySelector("[id='avatar-rig'");
+        if(args[0]==="on")
+        {
+          avatarHead.setAttribute("isMegaphone", true);
+        }
+        else if(args[0]==="off")
+        {
+          avatarHead.setAttribute("isMegaphone", false);
+        }        
+      break;
       case "fly":
         if (this.scene.systems["hubs-systems"].characterController.fly) {
           this.scene.systems["hubs-systems"].characterController.enableFly(false);
