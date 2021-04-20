@@ -62,6 +62,11 @@ If you would like to add/update a localization translation for Hubs, please see 
 ### 🦆 General Help
 We believe in the power of community (that's why we're building this, after all!) and know that not all forms of support will come from something outlined here. Feel free to jump into our public [Discord server](https://discord.gg/dFJncWwHun) to chat with us and ask about how you can get involved!
 
+
+### ✅ Best Practices
+
+A guide for our frontend development best practices is availible [here](./doc/best-practices.md)
+
 ## Development Workflow
 
 Getting set up to work on the Hubs client main fork is a little different than working on a custom client for a Hubs Cloud deployment. If you're looking to set up your development environment for your own Hubs Cloud deployment see [this guide](https://hubs.mozilla.com/docs/hubs-cloud-custom-clients.html).

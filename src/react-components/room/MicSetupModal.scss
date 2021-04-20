@@ -1,0 +1,73 @@
+@use "../styles/theme.scss";
+
+:local(.content) {
+  p {
+    font-size: theme.$font-size-sm;
+    font-weight: theme.$font-weight-medium;
+    line-height: 1.2;
+  }
+}
+
+:local(.audio-check-container) {
+  display: flex;
+
+  svg path {
+    stroke-width: 1;
+  }
+
+  & > :first-child {
+    margin-right: 24px;
+  }
+}
+
+:local(.mic-button-container) {
+  // Transitions don't look right with clipping, so just disable it.
+  transition: none;
+
+  :not(:last-child) {
+    z-index: 1;
+  }
+
+  :local(.clipped-icon) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+  
+    path {
+      stroke: theme.$text5-color !important;
+      stroke-width: 1.25;
+    }
+  }
+}
+
+:local(.mic-level) {
+  color: theme.$primary-color;
+  position: absolute;
+  z-index: 0;
+}
+
+:local(.mic-level-icon) {
+  position: absolute;
+  z-index: 2;
+  width: 96px;
+  height: 96px;
+}
+
+:local(.mic-button) {
+  &:hover {
+    :local(.mic-level) {
+      color: theme.$primary-color-hover;
+    }
+  }
+
+  &:active {
+    :local(.mic-level) {
+      color: theme.$primary-color-pressed;
+    }
+  }
+}
+
+:local(.large-toolbar-button) {
+  width: 96px;
+}

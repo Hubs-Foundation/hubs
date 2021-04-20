@@ -35,3 +35,16 @@ export const DISPLAY_IMAGE = new Map([
   [SORT_ORDER_UNIDENTIFIED, faQuestion],
   [SORT_ORDER_MODEL, faCube]
 ]);
+
+const SORT_ORDER_TO_TYPE = {
+  [SORT_ORDER_VIDEO]: "video",
+  [SORT_ORDER_AUDIO]: "audio",
+  [SORT_ORDER_IMAGE]: "image",
+  [SORT_ORDER_PDF]: "pdf",
+  [SORT_ORDER_MODEL]: "model"
+};
+
+export function getMediaType(el) {
+  const order = mediaSortOrder(el);
+  return SORT_ORDER_TO_TYPE[order];
+}

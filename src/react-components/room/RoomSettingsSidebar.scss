@@ -1,0 +1,18 @@
+@use "../styles/theme.scss";
+
+:local(.room-permissions), :local(.permissions-group) {
+  margin-left: 20px;
+
+  & > * {
+    margin-top: 12px;
+  }
+
+  &:last-child {
+    margin-right: 0px;
+  }
+}
+
+:local(.confirm-revoke-button) {
+  display: inline;
+  color: theme.$link-color;
+}

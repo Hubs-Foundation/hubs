@@ -1,19 +1,22 @@
+@use "../../react-components/styles/theme.scss";
 @import 'shared.scss';
 
 $fontSize: 16px;
+$semi-bold: 600;
 
 %full-screen-panel {
   position: fixed;
   top: 0px;
   width: 100%;
   height: 100%;
-  background: var(--full-panel-background-color);
-  color: var(--panel-text-color);
+  background: theme.$background1-color;
+  color: theme.$text1-color;
 }
 
 :local(.preferences-panel) {
   @extend %full-screen-panel;
   z-index: 2;
+  pointer-events: auto;
   display: flex;
   flex-flow: column;
   align-items: center;
@@ -24,7 +27,11 @@ $fontSize: 16px;
 
   input[type=text],input[type=number] {
     cursor: pointer;
-    @extend %default-input-field;
+    @extend %rounded-border;
+    @extend %default-font;
+    color: theme.$text1-color;;
+    padding: 0px;
+    margin: 0px;
     background: transparent;
     line-height: 30px;
     font-size: $fontSize;
@@ -49,7 +56,7 @@ $fontSize: 16px;
 :local(.nav) {
   display: flex;
   justify-content: center;
-  border-bottom: 1px solid var(--panel-rule-color);
+  border-bottom: 1px solid theme.$border1-color;
   margin: 0px 16px;
   width: 100%;
 }
@@ -71,9 +78,9 @@ $fontSize: 16px;
   border-bottom: 3px solid transparent;
   &:local(.selected) {
     @extend %font-nav-item-selected;
-    border-bottom: 3px solid $action-color;
+    border-bottom: 3px solid theme.$active-color;
   }
-  color: var(--panel-text-color);
+  color: theme.$text1-color;
 }
 
 :local(.max-resolution-preference-item) {
@@ -132,14 +139,17 @@ $fontSize: 16px;
 }
 
 %warn-icon-size {
-  @extend %s36x36;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  min-height: 36px;
 }
 :local(.warn-icon-placeholder){
   @extend %warn-icon-size;
 }
 :local(.warn-icon){
   @extend %warn-icon-size;
-  color: menu-icon-color;
+  color: theme.$error-color;
 }
 
 :local(.horizontal) {
@@ -182,7 +192,11 @@ $fontSize: 16px;
 }
 
 :local(.close-button) {
-  @extend %panel-widget;
+  cursor: pointer;
+  color: theme.$text2-color;
+  outline-style: none;
+  background: none;
+  border: none;
   @extend %no-default-button-style;
   margin: 16px auto 16px 16px;
 }
@@ -201,7 +215,7 @@ $fontSize: 16px;
   flex-flow: column;
   align-items: center;
   border-radius: 16px 16px 0px 0px;
-  background-color: var(--tile-background-color);
+  background-color: theme.$tile-bg-color;
   &>* {
     margin: 16px 16px 0px 16px;
   }
@@ -211,19 +225,26 @@ $fontSize: 16px;
 }
 :local(.refresh-now-button){
   @extend %action-button;
-  @extend %action-row-button;
+  min-width: 120px;
+  width: 120px;
+  height: 44px;
   width: 180px;
   min-width: 180px;
 }
 %reset-to-default-button-size {
-  @extend %s30x30;
+  width: 30px !important;
+  height: 30px !important;
 }
 :local(.reset-to-default-button) {
   cursor: pointer;
   @extend %no-default-button-style;
   @extend %reset-to-default-button-size;
-  @extend %panel-widget-color;
-  @extend %action-label-color-on-hover;
+  color: theme.$text2-color;
+  @media(hover: hover){
+    &:hover {
+      color: theme.$primary-color;
+    }
+  }
 }
 :local(.reset-to-default-button-placeholder){
   @extend %reset-to-default-button-size;
@@ -232,7 +253,8 @@ $fontSize: 16px;
   display: flex;
 }
 :local(.icon){
-  @extend %s32x32;
+  width: 32px !important;
+  height: 32px !important;
 }
 
 :local(.content-container) {
@@ -244,7 +266,10 @@ $fontSize: 16px;
 }
 
 %checkbox-size {
-  @extend %s36x36;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  min-height: 36px;
 }
 
 :local(.checkbox-placeholder){
@@ -258,13 +283,30 @@ $fontSize: 16px;
 
   input[type=checkbox] {
     cursor: pointer;
-    @extend %default-checkbox;
+    cursor: pointer;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid theme.$input-border-color;
+    background-color: theme.$input-bg-color;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     @extend %checkbox-size;
   }
   input[type=checkbox]:checked {
-    @extend %default-checkbox-checked;
     &::after {
-      @extend %s24x24;
+      content: ' ';
+      position: absolute;
+      background: theme.$active-color;
+      border-radius: 6px;
+    }
+
+    &::after {
+      width: 24px !important;
+      height: 24px !important;
     }
   }
 }
@@ -277,20 +319,41 @@ $fontSize: 16px;
 }
 
 :local(.section-title){
-  @extend %subtitle-text;
+  @extend %default-font;
+  font-weight: normal;
+  text-transform: uppercase;
+  color: theme.$text2-color;
   margin: 0px 0px 16px 16px;
   font-size: $fontSize;
 }
 
 :local(.dropdown) {
-  @extend %dropdown;
+  position: relative;
+  display: flex;
+  align-items: center;
+  line-height: 20px;
+
   select {
     font-size: $fontSize;
-    @extend %dropdown-select;
+    @extend %rounded-border;
+    @extend %default-font;
+    font-family: theme.$font-family-default;
+    color: theme.$text1-color;
+    appearance: none;
+    background-color: theme.$input-bg-color;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid theme.$input-border-color;
+    padding: 6px;
+    font-weight: bold;
+    padding-right: 30px;
+    max-width: 170px;
   }
 }
 :local(.dropdown-arrow){
-  @extend %dropdown-arrow;
+  pointer-events: none;
+  position: absolute;
+  right: 7.5%;
 }
 
 :local(.number-with-range){
@@ -320,34 +383,28 @@ $fontSize: 16px;
 // Version 1.5.2
 // MIT License
 
-$track-color: var(--text-field-border-color) !default;
-$thumb-color: $action-color !default;
+$track-color: theme.$toggle-button-color !default;
+$thumb-color: theme.$primary-color !default;
 
 $thumb-radius: 10px !default;
 $thumb-height: 20px !default;
 $thumb-width: 20px !default;
 $thumb-shadow-size: 0px !default;
 $thumb-shadow-blur: 0px !default;
-$thumb-shadow-color: rgba(0, 0, 0, .2) !default;
 $thumb-border-width: 0px !default;
-$thumb-border-color: #eceff1 !default;
+$thumb-border-color: theme.$button-border-color !default;
 
 $track-width: 100% !default;
 $track-height: 8px !default;
 $track-shadow-size: 0px !default;
 $track-shadow-blur: 0px !default;
-$track-shadow-color: rgba(0, 0, 0, .2) !default;
 $track-border-width: 0px !default;
-$track-border-color: #cfd8dc !default;
+$track-border-color: theme.$button-border-color !default;
 
 $track-radius: 5px !default;
 $contrast: 5% !default;
 
 $ie-bottom-track-color: $track-color !default;
-
-@mixin shadow($shadow-size, $shadow-blur, $shadow-color) {
-  box-shadow: $shadow-size $shadow-size $shadow-blur $shadow-color, 0 0 $shadow-size lighten($shadow-color, 5%);
-}
 
 @mixin track {
   cursor: default;
@@ -357,7 +414,6 @@ $ie-bottom-track-color: $track-color !default;
 }
 
 @mixin thumb {
-  @include shadow($thumb-shadow-size, $thumb-shadow-blur, $thumb-shadow-color);
   background: $thumb-color;
   border: $thumb-border-width solid $thumb-border-color;
   border-radius: $thumb-radius;
@@ -396,7 +452,6 @@ $ie-bottom-track-color: $track-color !default;
 
   &::-webkit-slider-runnable-track {
     @include track;
-    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
     background: $track-color;
     border: $track-border-width solid $track-border-color;
     border-radius: $track-radius;
@@ -410,7 +465,6 @@ $ie-bottom-track-color: $track-color !default;
   }
 
   &::-moz-range-track {
-    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
     @include track;
     background: $track-color;
     border: $track-border-width solid $track-border-color;
@@ -432,14 +486,12 @@ $ie-bottom-track-color: $track-color !default;
   }
 
   &::-ms-fill-lower {
-    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
     background: $ie-bottom-track-color;
     border: $track-border-width solid $track-border-color;
     border-radius: ($track-radius * 2);
   }
 
   &::-ms-fill-upper {
-    @include shadow($track-shadow-size, $track-shadow-blur, $track-shadow-color);
     background: $track-color;
     border: $track-border-width solid $track-border-color;
     border-radius: ($track-radius * 2);

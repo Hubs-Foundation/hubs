@@ -1,3 +1,4 @@
+@use "../../react-components/styles/theme.scss";
 @import 'shared';
 
 :local(.ui) {
@@ -9,11 +10,11 @@
   left: 0;
   position: absolute;
   pointer-events: none;
-  color: var(--scene-text-color);
+  color: white;
 }
 
 :local(.whiteOverlay) {
-  background-color: var(--scene-loading-overlay-color);
+  background-color: rgba(255, 255, 255, 0.2);
   top: 0;
   left: 0;
   width: 100%;
@@ -41,7 +42,8 @@
 }
 
 :local(.logoTagline) {
-  @extend %background-agnostic;
+  color: black;
+  text-shadow: 0px 0px 10px #888;
   font-weight: bold;
   text-align: center;
   white-space: nowrap;
@@ -53,7 +55,7 @@
 
 :local(.tweetButton) {
   @extend %action-button;
-  background-color: var(--twitter-action-color);
+  background-color: theme.$twitter-primary-color;
   align-self: center;
   padding-right: 32px;
   display: flex;
@@ -78,7 +80,7 @@
 
 :local(.info) {
   position: absolute;
-  color: var(--scene-overlay-text-color);
+  color: black;
   text-shadow: 0px 0px 10px #888;
   bottom: 12px;
   left: 12px;
@@ -101,7 +103,7 @@
 
   a {
     font-size: 0.8em;
-    color: var(--scene-overlay-text-color);
+    color: black;
     pointer-events: auto;
   }
 }
@@ -144,7 +146,7 @@
   font-weight: bold;
 
   :local(.madeWith) {
-    color: var(--scene-overlay-text-color);
+    color: black;
     text-shadow: 0px 0px 4px #333;
     margin-left: 4px;
     position: absolute;
@@ -170,17 +172,8 @@
   flex: 1;
 }
 
-:local(.optionsButton) {
-  @extend %fa-icon-button;
-  @extend %fa-icon-big;
-  position: absolute;
-  right: 10px;
-  top: 2px;
-  color: $action-text-color;
-}
-
 :local(.unavailable) {
-  color: var(--post-session-splash-text-color);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -188,7 +181,8 @@
 }
 
 :local(.spokeButton) {
-  @extend %spoke-action-button;
+  @extend %action-button;
+  background-color: theme.$spoke-primary-color;
   display: flex;
   flex-direction: row;
   margin-bottom: 12px;
@@ -199,5 +193,15 @@
   svg {
     font-size: 24px;
     margin-right: 15px;
+  }
+}
+
+:local(.attribution) {
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
   }
 }

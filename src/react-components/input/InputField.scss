@@ -1,0 +1,30 @@
+@use "../styles/theme";
+
+:local(.label) {
+  margin-bottom: 8px;
+  color: theme.$text3-color;
+  align-self: flex-start;
+}
+
+:local(.input-field) {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+}
+
+:local(.fullWidth) {
+  max-width: 100%;
+}
+
+:local(.error) {
+  margin-top: 8px;
+  color: theme.$error-color;
+  align-self: flex-start;
+}
+
+:local(.info) {
+  margin-top: 8px;
+  color: theme.$text3-color;
+  align-self: flex-start;
+}

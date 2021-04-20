@@ -1,24 +1,4 @@
-@import 'colors';
-
-$default-action-color: #FF3464;
-$default-action-color-light: #FF74A4;
-$action-color: var(--action-color, $default-action-color);
-$action-label-color: var(--action-label-color, $default-action-color);
-$action-color-disabled: var(--action-color-disabled, $default-action-color-light);
-$action-color-highlight: var(--action-color-highlight, $default-action-color-light);
-$action-text-color: var(--action-text-color, white);
-$action-subtitle-color: var(--action-subtitle-color, $light-text);
-$notice-background-color: var(--notice-background-color, $bright-blue);
-$notice-text-color: var(--notice-text-color, white);
-$notice-widget-color: var(--notice-widget-color, $light-blue);
-$favorited-color: var(--favorited-color, $duck-yellow);
-
-// default below 576px (Portrait Phones)
-$breakpoint-sm: 576px; // Landscape Phones
-$breakpoint-md: 768px; // Tablets
-$breakpoint-lg: 992px; // Desktops
-$breakpoint-xl: 1200px; // Large Desktops
-$breakpoint-xxl: 1600px; // Extra Large Desktops
+@use "../../react-components/styles/theme.scss";
 
 %unselectable  {
   -moz-user-select: none;
@@ -28,45 +8,19 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
 }
 
 %default-font {
-  font-family: 'Open Sans', sans-serif;
-}
-
-%glass-text {
-  font-family: 'Open Sans', sans-serif;
-  color: var(--panel-text-color);
-}
-
-%glass-icon {
-  -webkit-filter: drop-shadow( 0px 0px 3px #606060 );
-  filter: drop-shadow( 0px 0px 3px #606060 );
+  font-family: theme.$font-family-default;
 }
 
 %rounded-border {
-  border: 1px solid var(--text-field-border-color);
+  border: 1px solid theme.$input-border-color;
   box-sizing: border-box;
   border-radius: 10px;
-}
-
-%centered-flex-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin: 0;
-}
-
-%default-input-field {
-  @extend %rounded-border;
-  @extend %default-font;
-  color: var(--text-field-text-color);
-  padding: 0px;
-  margin: 0px;
 }
 
 %input-field {
   @extend %rounded-border;
   @extend %default-font;
-  color: var(--text-field-text-color);
+  color: theme.$text1-color;
   font-size: 1.2em;
   background-color: transparent;
   line-height: 2.0em;
@@ -74,76 +28,6 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
   padding-right: 1.25em;
   margin: 0.5em 0;
   width: 100%;
-}
-
-%input-textarea {
-  @extend %input-field;
-  padding: 0.4em 1em;
-  line-height: 1.5em;
-}
-
-%big-action-button {
-  @extend %default-font;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  outline-style: none;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 32px;
-  border: 0;
-  width: 350px;
-  padding: 18px;
-  text-decoration: none;
-
-  @media (max-width: 768px) {
-    width: auto;
-    padding: 18px 48px;
-  }
-
-  background: $action-color;
-  color: $action-text-color;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 150px;
-  margin-right: 12px;
-  margin-left: 12px;
-  white-space: nowrap;
-}
-
-%bottom-button {
-  @extend %action-button;
-  margin: 16px 0;
-}
-
-%wide-button {
-  width: 350px;
-
-  @media (max-width: 768px) {
-    width: 327px;
-  }
-
-  @media (max-width: 375px) {
-    width: 300px;
-  }
-}
-
-%link-button {
-  text-decoration: underline;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  outline-style: none;
-  border: 0;
-  background: none;
-  font-size: 1.0em;
-  font-weight: bold;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-  pointer-events: auto;
 }
 
 %action-button {
@@ -159,9 +43,9 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
   border-radius: 28px;
   padding: 0px 18px;
 
-  background: $action-color;
+  background: theme.$primary-color;
   font-size: 1em;
-  color: $action-text-color;
+  color: theme.$text5-color;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -170,278 +54,17 @@ $breakpoint-xxl: 1600px; // Extra Large Desktops
   height: 48px;
 }
 
-%entry-action-button {
-  border-radius: 30px;
-  height: 60px;
-}
-
-%action-button-secondary {
-  @extend %action-button;
-  background-color: var(--action-button-secondary-background);
-  color: $action-label-color;
-}
-
-%action-button-secondary-modal {
-  @extend %action-button;
-  background-color: var(--panel-action-button-secondary-background);
-  color: $action-label-color;
-}
-
-%action-button-selected {
-  background: var(--action-button-secondary-background);
-  color: $action-label-color;
-}
-
-%bottom-action-button {
-  @extend %bottom-button;
-  background: $action-color;
-}
-
-%spoke-action-button {
-  @extend %action-button;
-  background-color: var(--spoke-action-color);
-}
-
-%discord-action-button {
-  @extend %action-button;
-  background-color: var(--discord-action-color);
-}
-
-%slack-action-button {
-  @extend %action-button;
-  background-color: var(--slack-action-color);
-}
-
-%twitter-action-button {
-  @extend %action-button;
-  background-color: var(--twitter-action-color);
-}
-
-%top-title {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: var(--panel-text-color);
-}
-
-%top-subtitle {
-  font-size: 1.0em;
-  padding-top: 4px;
-}
-
-%big-icon-button {
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: none;
-  font-size: 64pt;
-  outline-style: none;
-}
-
-%default-checkbox {
-  cursor: pointer;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  border: 1px solid var(--text-field-border-color);
-  background-color: var(--text-field-background-color);
-  border-radius: 6px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-%default-checkbox-checked{
-  &::after {
-    content: ' ';
-    position: absolute;
-    background: $action-color;
-    border-radius: 6px;
-  }
-}
-
-%checkbox {
-  cursor: pointer;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  width: 2em;
-  height: 2em;
-  border: 1px solid var(--text-field-border-color);
-  background-color: var(--text-field-background-color);
-  border-radius: 6px;
-  vertical-align: sub;
-  margin: 0 0.7em
-}
-
-%checkbox-checked {
-  position: relative;
-  &::after {
-    content: ' ';
-    position: absolute;
-    background: $action-color;
-    top: 0.3em;
-    left: 0.3em;
-    right: 0.3em;
-    bottom: 0.3em;
-    border-radius: 0.3em;
-  }
-}
-
-%radio {
-  @extend %checkbox;
-  border-radius: 1em;
-}
-
-%radio-checked {
-  @extend %checkbox-checked;
-  &::after {
-    content: ' ';
-    position: absolute;
-    background: $action-color;
-    top: 0.3em;
-    left: 0.3em;
-    right: 0.3em;
-    bottom: 0.3em;
-    border-radius: 1em;
-  }
-}
-
-%background-agnostic {
-  color: black;
-  text-shadow: 0px 0px 10px #888;
-}
-
-%fa-icon-button {
-  @extend %default-font;
-  padding: 0;
-  display: block;
-  background: none;
-  border: none;
-  color: var(--panel-text-color);
-  cursor: pointer;
-  font-size: 0.8em;
-  outline-style: none;
-}
-
-%fa-icon-big {
-  width: 40px !important;
-  height: 40px;
-  display: inline-block;
-  font-size: 22px;
-  vertical-align: sub;
-  line-height: 42px;
-  svg {
-    margin-left: 0px;
-  }
-}
-
-%panel-widget {
-  cursor: pointer;
-  color: var(--panel-widget-color);
-  outline-style: none;
-  background: none;
-  border: none;
-}
-
-%tip-bubble {
-  position: absolute;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  border-radius: 28px;
-  border: 0;
-  pointer-events: auto;
-  z-index: 2;
-  font-size: 0.8em;
-  color: $notice-text-color;
-  padding: 12px 24px;
-  background-color: $notice-background-color;
-  text-align: center;
-}
-
-%dropdown {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-%dropdown-select {
-  @extend %rounded-border;
-  @extend %default-font;
-  @extend %glass-text;
-  appearance: none;
-  background-color: var(--text-field-background-color);
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  border: 1px solid var(--text-field-border-color);
-  padding: 6px;
-  font-weight: bold;
-  padding-right: 30px;
-}
-%dropdown-arrow {
-  pointer-events: none;
-  position: absolute;
-  right: 7.5%;
-}
-%s24x24 {
-  width: 24px !important;
-  height: 24px !important;
-}
-%s30x30 {
-  width: 30px !important;
-  height: 30px !important;
-}
-%s32x32 {
-  width: 32px !important;
-  height: 32px !important;
-}
-%s36x36 {
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px;
-  min-height: 36px;
-}
-%s44x44 {
-  width: 44px !important;
-  height: 44px !important;
-}
 %no-default-button-style {
   padding: 0px;
   border-style: none;
   background-color: transparent;
   cursor: pointer;
+
   &:focus {
     outline: 0; // @a11y TODO: Provide user preference for showing outlines
   }
 }
+
 :local(.no-default-button-style){
   @extend %no-default-button-style;
-}
-%panel-widget-color {
-  color: var(--panel-widget-color);
-}
-%action-label-color {
-  color: $action-label-color;
-}
-%action-label-color-on-hover {
-  @media(hover: hover){
-    &:hover {
-      color: $action-label-color;
-    }
-  }
-}
-%subtitle-text {
-  @extend %default-font;
-  font-weight: normal;
-  text-transform: uppercase;
-  color: var(--panel-subtitle-color);
-}
-%action-row-button {
-  min-width: 120px;
-  width: 120px;
-  height: 44px;
 }

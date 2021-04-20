@@ -1,0 +1,32 @@
+@use "../styles/theme.scss";
+
+:local(.code-container) {
+  display: flex;
+
+  & > * {
+    margin-right: 4px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+:local(.short-url-container), :local(.code-letter) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  border-radius: 12px;
+  border: 1px solid theme.$input-border-color;
+  font-size: 32px;
+  font-weight: theme.$font-weight-regular;
+}
+
+:local(.short-url-container) {
+  width: 204px;
+}
+
+:local(.code-letter) {
+  width: 40px;
+}

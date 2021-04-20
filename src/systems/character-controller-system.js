@@ -125,8 +125,16 @@ export class CharacterControllerSystem {
         inPosition.setFromMatrixPosition(inMat4Copy);
         this.findPositionOnNavMesh(inPosition, inPosition, outPosition, true);
         finalPOV.setPosition(outPosition);
+        translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
+      } else {
+        // If we are not snapping to the nav mesh, align the user's
+        // perspective exactly to the robot eyes as they appear in the
+        // waypoint indicator. (1.6 meters up and 0.15 meters forward)
+        // This does _not_ require taking the player's height into account
+        // on this line because we are only interested in where the
+        // camera will end up.
+        translation.makeTranslation(0, 1.6, -0.15);
       }
-      translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
       finalPOV.multiply(translation);
       if (willMaintainInitialOrientation) {
         initialOrientation.extractRotation(this.avatarPOV.object3D.matrixWorld);

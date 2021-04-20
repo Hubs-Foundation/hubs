@@ -1,0 +1,37 @@
+@use "../styles/theme.scss";
+
+:local(.person) {
+  font-size: theme.$font-size-sm;
+
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  *[stroke=\#000] {
+    stroke: theme.$text1-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$text1-color;
+  }
+}
+
+:local(.moderator-icon) {
+  *[stroke=\#000] {
+    stroke: theme.$admin-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$admin-color;
+  }
+}
+
+:local(.presence) {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}

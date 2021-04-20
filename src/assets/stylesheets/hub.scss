@@ -1,16 +1,16 @@
-@import 'root-vars';
 @import 'shared';
 
-@import 'loader';
-@import 'ui-root';
-@import 'exited';
-@import 'profile';
-@import 'entry';
-@import 'audio';
-@import 'info-dialog';
+html, body {
+  height: 100%;
+}
 
-body {
-  background-color: var(--loading-background-color);
+#ui-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  pointer-events: none;
 }
 
 body.vr-mode-stretch {

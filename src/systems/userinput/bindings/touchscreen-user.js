@@ -157,11 +157,6 @@ export const touchscreenUserBindings = addSetsToBindings({
 
   [sets.inspecting]: [
     {
-      src: { value: paths.device.touchscreen.anything },
-      dest: { value: paths.actions.stopInspecting },
-      xform: xforms.rising
-    },
-    {
       src: { value: paths.device.touchscreen.pinch.delta },
       dest: { value: paths.actions.inspectZoom },
       xform: xforms.scale(0.025),

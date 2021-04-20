@@ -1,25 +1,96 @@
-import React from "react";
+import React, { forwardRef, memo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Button.scss";
+import textInputStyles from "./TextInput.scss";
+import { FormattedMessage } from "react-intl";
 
-export function Button({ primary, secondary, cta, children, ...rest }) {
-  const className = classNames({
-    [styles.primaryButton]: primary,
-    [styles.secondaryButton]: secondary,
-    [styles.ctaButton]: cta
-  });
+export const presets = [
+  "transparent",
+  "basic",
+  "primary",
+  "accept",
+  "cancel",
+  "accent1",
+  "accent2",
+  "accent3",
+  "accent4",
+  "accent5"
+];
 
+export const Button = memo(
+  forwardRef(({ as, sm, lg, xl, preset, className, children, ...rest }, ref) => {
+    const ButtonComponent = as;
+    const buttonProps = ButtonComponent === "button" ? { type: "button" } : {};
+
+    return (
+      <ButtonComponent
+        className={classNames(
+          styles.button,
+          textInputStyles.button,
+          styles[preset],
+          { [styles.sm]: sm, [styles.lg]: lg, [styles.xl]: xl },
+          className
+        )}
+        {...buttonProps}
+        {...rest}
+        ref={ref}
+      >
+        {children}
+      </ButtonComponent>
+    );
+  })
+);
+
+Button.propTypes = {
+  as: PropTypes.elementType,
+  preset: PropTypes.oneOf(presets),
+  className: PropTypes.string,
+  children: PropTypes.node,
+  sm: PropTypes.bool
+};
+
+Button.defaultProps = {
+  as: "button",
+  preset: "basic"
+};
+
+export function NextButton(props) {
   return (
-    <button className={className} {...rest}>
-      {children}
-    </button>
+    <Button preset="accept" {...props}>
+      <FormattedMessage id="button.next" defaultMessage="Next" />
+    </Button>
   );
 }
 
-Button.propTypes = {
-  primary: PropTypes.bool,
-  secondary: PropTypes.bool,
-  cta: PropTypes.bool,
-  children: PropTypes.node
-};
+export function CancelButton(props) {
+  return (
+    <Button preset="cancel" {...props}>
+      <FormattedMessage id="button.cancel" defaultMessage="Cancel" />
+    </Button>
+  );
+}
+
+export function ContinueButton(props) {
+  return (
+    <Button preset="accept" {...props}>
+      <FormattedMessage id="button.continue" defaultMessage="Continue" />
+    </Button>
+  );
+}
+
+export function AcceptButton(props) {
+  return (
+    <Button preset="accept" {...props}>
+      <FormattedMessage id="button.accept" defaultMessage="Accept" />
+    </Button>
+  );
+}
+
+export function ApplyButton(props) {
+  return (
+    <Button preset="accept" {...props}>
+      <FormattedMessage id="button.apply" defaultMessage="Apply" />
+    </Button>
+  );
+}

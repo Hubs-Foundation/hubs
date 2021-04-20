@@ -5,9 +5,21 @@ import { DataGraph } from "./DataGraph.js";
 import { Prop, CreatePropsFromData } from "./Prop.js";
 import styles from "./DataPanel.scss";
 
-export function DataPanel({ graphData, speed, width, height, data, xAxis, yAxis, title, children, color }) {
+export function DataPanel({
+  graphData,
+  speed,
+  width,
+  height,
+  data,
+  xAxis,
+  yAxis,
+  title,
+  children,
+  color,
+  backgroundColor
+}) {
   return (
-    <div className={classNames(styles.dataTile)}>
+    <div className={classNames(styles.dataTile)} style={{ backgroundColor: backgroundColor }}>
       <p className={classNames(styles.dataTileTitle)}>{title}</p>
       {graphData && (
         <div
@@ -43,9 +55,10 @@ DataPanel.propTypes = {
   data: PropTypes.object,
   xAxis: PropTypes.string,
   yAxis: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.node,
   children: PropTypes.node,
   width: PropTypes.string,
   height: PropTypes.string,
-  color: PropTypes.string
+  color: PropTypes.string,
+  backgroundColor: PropTypes.string
 };

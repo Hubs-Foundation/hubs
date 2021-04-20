@@ -1,0 +1,91 @@
+@use "../styles/theme.scss";
+
+$input-height: 40px;
+
+:local(.select-input) {
+  position: relative;
+}
+
+:local(.dropdown-button) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: $input-height;
+  border: 1px solid theme.$input-border-color;
+  border-radius: theme.$border-radius-regular;
+  color: theme.$text1-color;
+  background-color: theme.$input-bg-color;
+  width: 100%;
+  max-width: 300px;
+  padding: 0 8px;
+
+  span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    border-color: theme.$input-border-color-hover;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+  
+  &:focus-within  {
+    border-color: theme.$input-outline-color;
+    box-shadow: 0 0 0 2px theme.$input-outline-color;
+  }
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
+  }
+}
+
+:local(.dropdown) {
+  position: absolute;
+  top: $input-height + 4px;
+  display: none;
+  flex-direction: column;
+  background-color: theme.$dropdown-bg-color;
+  border-radius: 8px;
+  padding: 8px 0;
+  z-index: 99999;
+  left: 0;
+  right: 0;
+  box-shadow: -1px -1px 1px theme.$dropdown-border-color, 3px 3px 6px theme.$dropdown-shadow-color;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+:local(.open) {
+  :local(.dropdown-button) svg {
+    transform: rotate(180deg);
+  }
+
+  :local(.dropdown) {
+    display: flex;
+  }
+}
+
+:local(.dropdown-item) {
+  width: 100%;
+  padding: 8px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+:local(.highlighted-item) {
+  color: theme.$active-text-color;
+  background-color: theme.$active-color;
+}

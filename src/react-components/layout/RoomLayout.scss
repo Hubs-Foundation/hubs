@@ -1,0 +1,97 @@
+@use "../styles/theme.scss";
+
+:local(.room-layout) {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns:
+    [main] auto
+    [sidebar] minmax(0, min-content);
+  
+  grid-template-rows: 
+    [viewport] auto
+    [toolbar] min-content;
+
+  overflow: hidden;
+  position: relative;
+  pointer-events: none;
+}
+
+:local(.main) {
+  grid-column-start: main;
+}
+
+:local(.sidebar) {
+  grid-column-start: sidebar;
+  height: 100%;
+  overflow: hidden;
+  width: 450px;
+
+  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: 0;
+    width: 100%;
+    z-index: 9;
+  }
+}
+
+:local(.viewport) {
+  position: relative;
+  grid-row-start: viewport;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & > * {
+    pointer-events: auto;
+  }
+}
+
+:local(.toolbar) {
+  grid-row-start: toolbar;
+  grid-column-end: -1;
+  pointer-events: auto;
+  z-index: 0;
+}
+
+:local(.modal-container) {
+  grid-column: main;
+  grid-row: viewport;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+
+  & > * {
+    pointer-events: auto;
+  }
+}
+
+:local(.scene) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+:local(.object-focused) {
+  @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
+    :local(.toolbar) {
+      display: none;
+    }
+
+    :local(.sidebar) {
+      display: none;
+    }
+  }
+}
+
+:local(.streaming) {
+  box-shadow: inset 0 0 0 3px theme.$status-recording-color;
+}

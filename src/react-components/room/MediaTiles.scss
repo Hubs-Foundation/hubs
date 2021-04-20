@@ -1,0 +1,224 @@
+@use "../styles/theme.scss";
+
+:local(.media-tile) {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  height: max-content;
+  text-decoration: none;
+  background: transparent;
+}
+
+:local(.thumbnail-container) {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  background-color: theme.$tile-bg-color;
+  border-radius: 12px;
+
+  img, video, :local(.create-tile-content) {
+    border-radius: 12px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:hover {
+    background-color: theme.$tile-bg-color-hover;
+  }
+
+  &:active {
+    background-color: theme.$tile-bg-color-pressed;
+  }
+}
+
+:local(.tall) :local(.thumbnail-container), :local(.wide) :local(.thumbnail-container){
+  height: 0;
+
+  img, video, :local(.create-tile-content) {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
+
+:local(.wide) :local(.thumbnail-container) {
+  padding-top: 56.25%;
+}
+
+:local(.tall) :local(.thumbnail-container) {
+  padding-top: 177.78%;
+}
+
+:local(.thumbnail-link) {
+  display: flex;
+  width: 100%;
+}
+
+:local(.tile-actions) {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+:local(.tile-actions) > * {
+  margin-bottom: 4px;
+}
+
+:local(.tile-actions) > :last-child {
+  margin-bottom: 0;
+}
+
+:local(.tile-action), :local(.member-count) {
+  background: theme.$tile-button-bg-color;
+  color: theme.$tile-button-text-color;
+  height: 30px;
+  border-radius: 30px;
+  padding: 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid theme.$tile-button-border-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$tile-button-text-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$tile-button-text-color;
+    }
+  }
+}
+
+:local(.tile-action) {
+  &:hover {
+    background-color: theme.$tile-button-bg-color-hover;
+    color: white;
+  }
+
+  &:active {
+    background-color: theme.$tile-button-bg-color-pressed;
+  }
+}
+
+:local(.member-count) {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+
+  svg {
+    margin-right: 4px;
+  }
+}
+
+:local(.favorite-icon) {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+
+  *[stroke=\#000] {
+    stroke: theme.$favorite-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$favorite-color;
+  }
+}
+
+:local(.info) {
+  margin-top: 8px;
+  color: theme.$text1-color;
+
+  & > * {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: 0;
+    display: block;
+    padding-bottom: 4px;
+  }
+}
+
+:local(.description) {
+  display: flex;
+  justify-content: space-between;
+
+  & > * {
+    display: flex;
+    margin-right: 4px;
+  }
+
+  & > :last-child {
+    margin-right: 0;
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  a svg {
+    *[stroke=\#000] {
+      stroke: theme.$link-color;
+    }
+  
+    *[fill=\#000] {
+      fill: theme.$link-color;
+    }
+
+    &:hover {
+      *[stroke=\#000] {
+        stroke: theme.$link-color-hover;
+      }
+    
+      *[fill=\#000] {
+        fill: theme.$link-color-hover;
+      }
+    }
+
+    &:active {
+      *[stroke=\#000] {
+        stroke: theme.$link-color-pressed;
+      }
+    
+      *[fill=\#000] {
+        fill: theme.$link-color-pressed;
+      }
+    }
+  }
+}
+
+:local(.create-tile) {
+  height: 100%;
+}
+
+:local(.create-tile-content) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: theme.$tile-text-color;
+  font-weight: theme.$font-weight-bold;
+  border-radius: 12px;
+  flex: 1;
+
+  p {
+    font-size: theme.$font-size-sm;
+  }
+
+  svg {
+    margin-bottom: 16px;
+
+    *[stroke=\#000] {
+      stroke: theme.$tile-text-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$tile-text-color;
+    }
+  }
+}

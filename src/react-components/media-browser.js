@@ -1,24 +1,22 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { injectIntl, FormattedMessage } from "react-intl";
-import classNames from "classnames";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons/faAngleRight";
-import { faSearch } from "@fortawesome/free-solid-svg-icons/faSearch";
-import { faStar } from "@fortawesome/free-solid-svg-icons/faStar";
-import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
-import { faLink } from "@fortawesome/free-solid-svg-icons/faLink";
-import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import { injectIntl, FormattedMessage, defineMessages } from "react-intl";
 import configs from "../utils/configs";
-import IfFeature from "./if-feature";
-import styles from "../assets/stylesheets/media-browser.scss";
 import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
-import { handleTextFieldFocus, handleTextFieldBlur } from "../utils/focus-utils";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
-import MediaTiles from "./media-tiles";
-
+import { AvatarUrlModalContainer } from "./room/AvatarUrlModalContainer";
+import { SceneUrlModalContainer } from "./room/SceneUrlModalContainer";
+import { ObjectUrlModalContainer } from "./room/ObjectUrlModalContainer";
+import { MediaBrowser } from "./room/MediaBrowser";
+import { IconButton } from "./input/IconButton";
+import { ReactComponent as UploadIcon } from "./icons/Upload.svg";
+import { ReactComponent as LinkIcon } from "./icons/Link.svg";
+import { remixAvatar } from "../utils/avatar-utils";
+import { fetchReticulumAuthenticated, getReticulumFetchUrl } from "../utils/phoenix-utils";
+import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
+import { CreateTile, MediaTile } from "./room/MediaTiles";
+import { SignInMessages } from "./auth/SignInModal";
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
@@ -75,15 +73,92 @@ const DEFAULT_FACETS = {
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
 };
 
+const poweredByMessages = defineMessages({
+  images: {
+    id: "media-browser.powered_by.images",
+    defaultMessage: "Search by Bing"
+  },
+  videos: {
+    id: "media-browser.powered_by.videos",
+    defaultMessage: "Search by Bing"
+  },
+  youtube: {
+    id: "media-browser.powered_by.youtube",
+    defaultMessage: "Search by Google"
+  },
+  gifs: {
+    id: "media-browser.powered_by.gifs",
+    defaultMessage: "Search by Tenor"
+  },
+  sketchfab: {
+    id: "media-browser.powered_by.sketchfab",
+    defaultMessage: "Search by Sketchfab"
+  },
+  poly: {
+    id: "media-browser.powered_by.poly",
+    defaultMessage: "Search by Google"
+  },
+  twitch: {
+    id: "media-browser.powered_by.twitch",
+    defaultMessage: "Search by Twitch"
+  },
+  scenes: {
+    id: "media-browser.powered_by.scenes",
+    defaultMessage: "Made with {editorName}"
+  }
+});
+
+const customObjectMessages = defineMessages({
+  object: {
+    id: "media-browser.add_custom_object",
+    defaultMessage: "Custom URL or File"
+  },
+  scene: {
+    id: "media-browser.add_custom_scene",
+    defaultMessage: "Custom Scene"
+  },
+  avatar: {
+    id: "media-browser.add_custom_avatar",
+    defaultMessage: "Avatar GLB URL"
+  }
+});
+
+const searchPlaceholderMessages = defineMessages({
+  scenes: { id: "media-browser.search-placeholder.scenes", defaultMessage: "Search Scenes..." },
+  avatars: { id: "media-browser.search-placeholder.avatars", defaultMessage: "Search Avatars..." },
+  videos: { id: "media-browser.search-placeholder.videos", defaultMessage: "Search for Videos..." },
+  images: { id: "media-browser.search-placeholder.images", defaultMessage: "Search for Images..." },
+  youtube: { id: "media-browser.search-placeholder.youtube", defaultMessage: "Search for Youtube videos..." },
+  gifs: { id: "media-browser.search-placeholder.gifs", defaultMessage: "Search for GIFs..." },
+  twitch: { id: "media-browser.search-placeholder.twitch", defaultMessage: "Search for Twitch streams..." },
+  sketchfab: { id: "media-browser.search-placeholder.sketchfab", defaultMessage: "Search Sketchfab Models..." },
+  poly: { id: "media-browser.search-placeholder.poly", defaultMessage: "Search Google Poly Models..." },
+  default: { id: "media-browser.search-placeholder.default", defaultMessage: "Search..." }
+});
+
+const emptyMessages = defineMessages({
+  favorites: {
+    id: "media-browser.empty.favorites",
+    defaultMessage: "You don't have any favorites. Click a ⭐ to add to your favorites."
+  },
+  default: {
+    id: "media-browser.empty.default",
+    defaultMessage: "No results. Try entering a new search above."
+  }
+});
+
 // TODO: Migrate to use MediaGrid and media specific components like RoomTile
-class MediaBrowser extends Component {
+class MediaBrowserContainer extends Component {
   static propTypes = {
     mediaSearchStore: PropTypes.object,
     history: PropTypes.object,
     intl: PropTypes.object,
     hubChannel: PropTypes.object,
     onMediaSearchResultEntrySelected: PropTypes.func,
-    performConditionalSignIn: PropTypes.func
+    performConditionalSignIn: PropTypes.func,
+    showNonHistoriedDialog: PropTypes.func.isRequired,
+    scene: PropTypes.object.isRequired,
+    store: PropTypes.object.isRequired
   };
 
   state = { query: "", facets: [], showNav: true, selectNextResult: false, clearStashedQueryOnClose: false };
@@ -181,14 +256,6 @@ class MediaBrowser extends Component {
     }
   };
 
-  onCopyAvatar = () => {
-    this.handleFacetClicked({ params: { filter: "my-avatars" } });
-  };
-
-  onCopyScene = () => {
-    this.handleFacetClicked({ params: { filter: "my-scenes" } });
-  };
-
   onShowSimilar = (id, name) => {
     this.handleFacetClicked({ params: { similar_to: id, similar_name: name } });
   };
@@ -229,11 +296,17 @@ class MediaBrowser extends Component {
   };
 
   showCustomMediaDialog = source => {
-    const isSceneApiType = source === "scenes";
+    const { scene, store, hubChannel } = this.props;
     const isAvatarApiType = source === "avatars";
     this.pushExitMediaBrowserHistory(!isAvatarApiType);
-    const dialog = isSceneApiType ? "change_scene" : isAvatarApiType ? "avatar_url" : "create";
-    pushHistoryState(this.props.history, "modal", dialog);
+
+    if (source === "scenes") {
+      this.props.showNonHistoriedDialog(SceneUrlModalContainer, { hubChannel });
+    } else if (isAvatarApiType) {
+      this.props.showNonHistoriedDialog(AvatarUrlModalContainer, { scene, store });
+    } else {
+      this.props.showNonHistoriedDialog(ObjectUrlModalContainer, { scene });
+    }
   };
 
   close = () => {
@@ -251,8 +324,48 @@ class MediaBrowser extends Component {
     this.browserDiv.scrollTop = 0;
   };
 
+  handleCopyAvatar = (e, entry) => {
+    e.preventDefault();
+
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.signedIn,
+      async () => {
+        await remixAvatar(entry.id, entry.name);
+        this.handleFacetClicked({ params: { filter: "my-avatars" } });
+      },
+      SignInMessages.remixAvatar
+    );
+  };
+
+  handleCopyScene = async (e, entry) => {
+    e.preventDefault();
+
+    this.props.performConditionalSignIn(
+      () => this.props.hubChannel.signedIn,
+      async () => {
+        await fetchReticulumAuthenticated("/api/v1/scenes", "POST", {
+          parent_scene_id: entry.id
+        });
+        this.handleFacetClicked({ params: { filter: "my-scenes" } });
+      },
+      SignInMessages.remixScene
+    );
+  };
+
+  onCreateAvatar = () => {
+    window.dispatchEvent(new CustomEvent("action_create_avatar"));
+  };
+
+  processThumbnailUrl = (entry, thumbnailWidth, thumbnailHeight) => {
+    if (entry.images.preview.type === "mp4") {
+      return proxiedUrlFor(entry.images.preview.url);
+    } else {
+      return scaledThumbnailUrlFor(entry.images.preview.url, thumbnailWidth, thumbnailHeight);
+    }
+  };
+
   render() {
-    const { formatMessage } = this.props.intl;
+    const intl = this.props.intl;
     const searchParams = new URLSearchParams(this.props.history.location.search);
     const urlSource = this.getUrlSource(searchParams);
     const isSceneApiType = urlSource === "scenes";
@@ -263,7 +376,7 @@ class MediaBrowser extends Component {
     const hideSearch = urlSource === "favorites";
     const showEmptyStringOnNoResult = urlSource !== "avatars" && urlSource !== "scenes";
 
-    const facets = this.state.facets && this.state.facets.length > 0 && this.state.facets;
+    const facets = this.state.facets && this.state.facets.length > 0 ? this.state.facets : undefined;
 
     // Don't render anything if we just did a feeling lucky query and are waiting on result.
     if (this.state.selectNextResult) return <div />;
@@ -275,7 +388,7 @@ class MediaBrowser extends Component {
         this.props.performConditionalSignIn(
           () => !isSceneApiType || this.props.hubChannel.can("update_hub"),
           () => this.showCustomMediaDialog(urlSource),
-          "change-scene"
+          SignInMessages.changeScene
         );
       }
     };
@@ -285,189 +398,186 @@ class MediaBrowser extends Component {
 
     const meta = this.state.result && this.state.result.meta;
     const hasNext = !!(meta && meta.next_cursor);
-    const hasPrevious = searchParams.get("cursor");
-    const apiSource = (meta && meta.source) || null;
-    const isVariableWidth = ["bing_images", "tenor"].includes(apiSource);
+    const hasPrevious = !!searchParams.get("cursor");
+
+    const customObjectType =
+      this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
+
+    let searchDescription;
+
+    if (!hideSearch && urlSource !== "scenes" && urlSource !== "avatars" && urlSource !== "favorites") {
+      searchDescription = (
+        <>
+          {poweredByMessages[urlSource] ? intl.formatMessage(poweredByMessages[urlSource]) : ""}
+          {poweredByMessages[urlSource] && PRIVACY_POLICY_LINKS[urlSource] ? " | " : ""}
+          {PRIVACY_POLICY_LINKS[urlSource] && (
+            <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
+              <FormattedMessage id="media-browser.privacy_policy" defaultMessage="Privacy Policy" />
+            </a>
+          )}
+        </>
+      );
+    } else if (urlSource === "scenes") {
+      searchDescription = (
+        <>
+          {configs.feature("enable_spoke") && (
+            <>
+              {intl.formatMessage(poweredByMessages.scenes, {
+                editorName: (
+                  <a href="/spoke" target="_blank" rel="noreferrer noopener">
+                    {configs.translation("editor-name")}
+                  </a>
+                )
+              })}
+            </>
+          )}
+          {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && " | "}
+          {configs.feature("show_issue_report_link") && (
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
+            >
+              <FormattedMessage id="media-browser.report-issue" defaultMessage="Report Issue" />
+            </a>
+          )}
+        </>
+      );
+    }
 
     return (
-      <div className={styles.mediaBrowser} ref={browserDiv => (this.browserDiv = browserDiv)}>
-        <div className={classNames([styles.box, styles.darkened])}>
-          <div className={classNames(styles.header, { [styles.noSearch]: hideSearch })}>
-            <div className={styles.headerLeft}>
-              <button onClick={() => this.close()}>
-                <i>
-                  <FontAwesomeIcon icon={faTimes} />
-                </i>
-              </button>
-            </div>
-            <div className={styles.headerCenter}>
-              {urlSource === "favorites" && (
-                <div className={styles.favoritesHeader}>
-                  <i>
-                    <FontAwesomeIcon icon={faStar} />
-                  </i>
-                  <FormattedMessage id="media-browser.favorites-header" />
-                </div>
+      <MediaBrowser
+        browserRef={r => (this.browserDiv = r)}
+        onClose={this.close}
+        searchInputRef={r => (this.inputRef = r)}
+        autoFocusSearch={!isMobile && !isMobileVR}
+        query={this.state.query}
+        onChangeQuery={e => this.handleQueryUpdated(e.target.value)}
+        onSearchKeyDown={e => {
+          if (e.key === "Enter" && e.ctrlKey) {
+            if (entries.length > 0 && !this._sendQueryTimeout) {
+              this.handleEntryClicked(e, entries[0]);
+            } else if (this.state.query.trim() !== "") {
+              this.handleQueryUpdated(this.state.query, true);
+              this.setState({ selectNextResult: true });
+            } else {
+              this.close();
+            }
+          } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
+            e.target.blur();
+          }
+        }}
+        onClearSearch={() => this.handleQueryUpdated("", true)}
+        mediaSources={urlSource === "favorites" ? undefined : SOURCES}
+        selectedSource={urlSource}
+        onSelectSource={this.handleSourceClicked}
+        activeFilter={activeFilter}
+        facets={facets}
+        onSelectFacet={this.handleFacetClicked}
+        searchPlaceholder={
+          searchPlaceholderMessages[urlSource]
+            ? intl.formatMessage(searchPlaceholderMessages[urlSource])
+            : intl.formatMessage(searchPlaceholderMessages.default)
+        }
+        searchDescription={searchDescription}
+        headerRight={
+          showCustomOption && (
+            <IconButton lg onClick={() => handleCustomClicked(urlSource)}>
+              {["scenes", "avatars"].includes(urlSource) ? <LinkIcon /> : <UploadIcon />}
+              <p>{intl.formatMessage(customObjectMessages[customObjectType])}</p>
+            </IconButton>
+          )
+        }
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
+        onNextPage={() => this.handlePager(1)}
+        onPreviousPage={() => this.handlePager(-1)}
+        noResultsMessage={
+          emptyMessages[urlSource]
+            ? intl.formatMessage(emptyMessages[urlSource])
+            : intl.formatMessage(emptyMessages.default)
+        }
+      >
+        {this.props.mediaSearchStore.isFetching ||
+        this._sendQueryTimeout ||
+        entries.length > 0 ||
+        !showEmptyStringOnNoResult ? (
+          <>
+            {urlSource === "avatars" && (
+              <CreateTile
+                type="avatar"
+                onClick={this.onCreateAvatar}
+                label={<FormattedMessage id="media-browser.create-avatar" defaultMessage="Create Avatar" />}
+              />
+            )}
+            {urlSource === "scenes" &&
+              configs.feature("enable_spoke") && (
+                <CreateTile
+                  as="a"
+                  href="/spoke/new"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  type="scene"
+                  label={
+                    <FormattedMessage
+                      id="media-browser.create-scene"
+                      defaultMessage="Create Scene with {editorName}"
+                      values={{ editorName: configs.translation("editor-name") }}
+                    />
+                  }
+                />
               )}
-              {!hideSearch && (
-                <div className={styles.search}>
-                  <i className={styles.searchIcon}>
-                    <FontAwesomeIcon icon={faSearch} />
-                  </i>
-                  <input
-                    type="text"
-                    autoFocus={!isMobile && !isMobileVR}
-                    ref={r => (this.inputRef = r)}
-                    placeholder={formatMessage({
-                      id: `media-browser.search-placeholder.${urlSource}`
-                    })}
-                    onFocus={e => handleTextFieldFocus(e.target)}
-                    onBlur={() => handleTextFieldBlur()}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" && e.ctrlKey) {
-                        if (entries.length > 0 && !this._sendQueryTimeout) {
-                          this.handleEntryClicked(e, entries[0]);
-                        } else if (this.state.query.trim() !== "") {
-                          this.handleQueryUpdated(this.state.query, true);
-                          this.setState({ selectNextResult: true });
-                        } else {
-                          this.close();
-                        }
-                      } else if (e.key === "Escape" || (e.key === "Enter" && isMobile)) {
-                        e.target.blur();
-                      }
-                    }}
-                    value={this.state.query}
-                    onChange={e => this.handleQueryUpdated(e.target.value)}
-                  />
-                  <i className={styles.searchClear} onClick={() => this.handleQueryUpdated("", true)}>
-                    <FontAwesomeIcon icon={faTimes} />
-                  </i>
-                </div>
-              )}
-              <div className={styles.engineAttribution}>
-                {!hideSearch &&
-                  urlSource !== "scenes" &&
-                  urlSource !== "avatars" &&
-                  urlSource !== "favorites" && (
-                    <div className={styles.engineAttributionContents}>
-                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                      {PRIVACY_POLICY_LINKS[urlSource] && (
-                        <a href={PRIVACY_POLICY_LINKS[urlSource]} target="_blank" rel="noreferrer noopener">
-                          <FormattedMessage id="media-browser.privacy_policy" />
-                        </a>
-                      )}
-                    </div>
-                  )}
-                {urlSource === "scenes" && (
-                  <div className={styles.engineAttributionContents}>
-                    <IfFeature name="enable_spoke">
-                      <FormattedMessage id={`media-browser.powered_by.${urlSource}`} />
-                      <a href="/spoke" target="_blank" rel="noreferrer noopener">
-                        <FormattedMessage id="editor-name" />
-                      </a>
-                    </IfFeature>
-                    {configs.feature("enable_spoke") && configs.feature("show_issue_report_link") && "|"}
-                    <IfFeature name="show_issue_report_link">
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
-                      >
-                        <FormattedMessage id="media-browser.report_issue" />
-                      </a>
-                    </IfFeature>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className={styles.headerRight}>
-              {showCustomOption && (
-                <a onClick={() => handleCustomClicked(urlSource)} className={styles.createButton}>
-                  <i>
-                    <FontAwesomeIcon icon={["scenes", "avatars"].includes(urlSource) ? faLink : faCloudUploadAlt} />
-                  </i>
-                </a>
-              )}
-              {showCustomOption && (
-                <a onClick={() => handleCustomClicked(urlSource)} className={styles.createLink}>
-                  <FormattedMessage
-                    id={`media-browser.add_custom_${
-                      this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object"
-                    }`}
-                  />
-                </a>
-              )}
-            </div>
-          </div>
+            {entries.map((entry, idx) => {
+              const isAvatar = entry.type === "avatar" || entry.type === "avatar_listing";
+              const isScene = entry.type === "scene" || entry.type === "scene_listing";
+              const onShowSimilar =
+                entry.type === "avatar_listing"
+                  ? e => {
+                      e.preventDefault();
+                      this.onShowSimilar(entry.id, entry.name);
+                    }
+                  : undefined;
 
-          {this.state.showNav && (
-            <div className={styles.nav}>
-              {SOURCES.map(s => (
-                <a
-                  onClick={() => this.handleSourceClicked(s)}
-                  key={s}
-                  className={classNames({ [styles.navSource]: true, [styles.navSourceSelected]: urlSource === s })}
-                >
-                  <FormattedMessage id={`media-browser.nav_title.${s}`} />
-                </a>
-              ))}
-              <div className={styles.navRightPad}>&nbsp;</div>
-              <div className={styles.navScrollArrow}>
-                <FontAwesomeIcon icon={faAngleRight} />
-              </div>
-            </div>
-          )}
+              let onEdit;
 
-          {(facets || activeFilter === "similar") && (
-            <div className={styles.facets}>
-              {facets &&
-                facets.map((s, i) => (
-                  <a
-                    onClick={() => this.handleFacetClicked(s)}
-                    key={i}
-                    className={classNames(styles.facet, { selected: s.params.filter === activeFilter })}
-                  >
-                    {s.text}
-                  </a>
-                ))}
-              {activeFilter === "similar" && (
-                <a className={classNames(styles.facet, "selected")}>
-                  <FormattedMessage
-                    id="media-browser.similar-to-facet"
-                    values={{ name: searchParams.get("similar_name") }}
-                  />
-                </a>
-              )}
-            </div>
-          )}
+              if (entry.type === "avatar") {
+                onEdit = e => {
+                  e.preventDefault();
+                  pushHistoryState(this.props.history, "overlay", "avatar-editor", { avatarId: entry.id });
+                };
+              } else if (entry.type === "scene") {
+                onEdit = e => {
+                  e.preventDefault();
+                  const spokeProjectUrl = getReticulumFetchUrl(`/spoke/projects/${entry.project_id}`);
+                  window.open(spokeProjectUrl);
+                };
+              }
 
-          {this.props.mediaSearchStore.isFetching ||
-          this._sendQueryTimeout ||
-          entries.length > 0 ||
-          !showEmptyStringOnNoResult ? (
-            <MediaTiles
-              entries={entries}
-              hasNext={hasNext}
-              hasPrevious={hasPrevious}
-              isVariableWidth={isVariableWidth}
-              history={this.props.history}
-              urlSource={urlSource}
-              handleEntryClicked={this.handleEntryClicked}
-              onCopyAvatar={this.onCopyAvatar}
-              onCopyScene={this.onCopyScene}
-              onShowSimilar={this.onShowSimilar}
-              handlePager={this.handlePager}
-            />
-          ) : (
-            <div className={styles.emptyString}>
-              <FormattedMessage id={`media-browser.empty.${urlSource}`} />
-            </div>
-          )}
-        </div>
-      </div>
+              let onCopy;
+
+              if (isAvatar) {
+                onCopy = e => this.handleCopyAvatar(e, entry);
+              } else if (isScene) {
+                onCopy = e => this.handleCopyScene(e, entry);
+              }
+
+              return (
+                <MediaTile
+                  key={`${entry.id}_${idx}`}
+                  entry={entry}
+                  processThumbnailUrl={this.processThumbnailUrl}
+                  onClick={e => this.handleEntryClicked(e, entry)}
+                  onEdit={onEdit}
+                  onShowSimilar={onShowSimilar}
+                  onCopy={onCopy}
+                />
+              );
+            })}
+          </>
+        ) : null}
+      </MediaBrowser>
     );
   }
 }
 
-export default injectIntl(MediaBrowser);
+export default injectIntl(MediaBrowserContainer);
