@@ -34,7 +34,7 @@ header {
     a {
       margin: 0 16px;
       font-size: theme.$font-size-md;
-      color: theme.$black;
+      color: theme.$text1-color;
     }
 
     ul {
@@ -82,7 +82,7 @@ header {
   
   a {
     margin-left: 8px;
-    color: theme.$blue;
+    color: theme.$link-color;
   }
 
   @media(min-width: theme.$breakpoint-lg) {

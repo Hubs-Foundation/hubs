@@ -109,23 +109,21 @@ export function MicSetupModal({
           <ToolbarButton
             icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
             label={<FormattedMessage id="mic-setup-modal.test-audio" defaultMessage="Click to Test Audio" />}
-            preset={soundPlaying ? "blue" : "basic"}
+            preset={soundPlaying ? "primary" : "basic"}
             className={styles.largeToolbarButton}
             onClick={onPlaySound}
             large
           />
         </div>
-        {microphoneEnabled && (
-          <>
-            <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
-            <ToggleInput
-              label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle" defaultMessage="Mute My Microphone" />}
-              checked={microphoneMuted}
-              onChange={onChangeMicrophoneMuted}
-            />
-          </>
-        )}
-        <Button preset="green" onClick={onEnterRoom}>
+        <>
+          <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
+          <ToggleInput
+            label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle" defaultMessage="Mute My Microphone" />}
+            checked={microphoneMuted}
+            onChange={onChangeMicrophoneMuted}
+          />
+        </>
+        <Button preset="accept" onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
         </Button>
       </Column>

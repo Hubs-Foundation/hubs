@@ -1,4 +1,17 @@
 const path = require("path");
+const fs = require("fs");
+
+const themesPath = path.resolve(__dirname, "..", "themes.json");
+
+if (fs.existsSync(themesPath)) {
+  const appConfig = {};
+
+  const themesString = fs.readFileSync(themesPath).toString();
+  appConfig.theme = {};
+  appConfig.theme.themes = JSON.parse(themesString);
+
+  process.env.STORYBOOK_APP_CONFIG = JSON.stringify(appConfig);
+}
 
 module.exports = {
   stories: ["../src/react-components/**/*.stories.mdx", "../src/react-components/**/*.stories.js"],

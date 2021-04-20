@@ -31,7 +31,14 @@ const PC_PROPRIETARY_CONSTRAINTS = {
   optional: [{ googDscp: true }]
 };
 
-const INITIAL_ROOM_RECONNECTION_INTERVAL = 2000;
+const WEBCAM_SIMULCAST_ENCODINGS = [
+  { scaleResolutionDownBy: 4, maxBitrate: 500000 },
+  { scaleResolutionDownBy: 2, maxBitrate: 1000000 },
+  { scaleResolutionDownBy: 1, maxBitrate: 5000000 }
+];
+
+// Used for simulcast screen sharing.
+const SCREEN_SHARING_SIMULCAST_ENCODINGS = [{ dtx: true, maxBitrate: 1500000 }, { dtx: true, maxBitrate: 6000000 }];
 
 export default class DialogAdapter extends EventEmitter {
   constructor() {
@@ -40,7 +47,8 @@ export default class DialogAdapter extends EventEmitter {
     this._timeOffsets = [];
     this._occupants = {};
     this._micProducer = null;
-    this._videoProducer = null;
+    this._cameraProducer = null;
+    this._shareProducer = null;
     this._mediaStreams = {};
     this._localMediaStream = null;
     this._consumers = new Map();
@@ -57,13 +65,19 @@ export default class DialogAdapter extends EventEmitter {
     this._forceTcp = false;
     this._forceTurn = false;
     this._iceTransportPolicy = "all";
-    this._reconnectionDelay = INITIAL_ROOM_RECONNECTION_INTERVAL;
-    this._reconnectionTimeout = null;
-    this._reconnectionAttempts = 0;
-    this._lastSendConnectionState = null;
-    this._lastRecvConnectionState = null;
     this._closed = true;
     this.scene = document.querySelector("a-scene");
+    this._serverParams = {};
+    this._consumerStats = {};
+    this._isReconnect = false;
+  }
+
+  get consumerStats() {
+    return this._consumerStats;
+  }
+
+  get downlinkBwe() {
+    return this._downlinkBwe;
   }
 
   get serverUrl() {
@@ -85,6 +99,10 @@ export default class DialogAdapter extends EventEmitter {
     if (this._forceTurn || this._forceTcp) {
       this._iceTransportPolicy = "relay";
     }
+  }
+
+  setServerParams(params) {
+    this._serverParams = params;
   }
 
   getIceServers(host, port, turn) {
@@ -219,7 +237,7 @@ export default class DialogAdapter extends EventEmitter {
         await this.iceRestart(this._sendTransport);
       } else {
         // If the transport is closed but the signaling is connected, we try to recreate
-        const { host, port, turn } = await window.APP.hubChannel.getHost();
+        const { host, port, turn } = this._serverParams;
         const iceServers = this.getIceServers(host, port, turn);
         await this.recreateSendTransport(iceServers);
       }
@@ -238,8 +256,6 @@ export default class DialogAdapter extends EventEmitter {
     if (connectionState === "failed") {
       this.restartSendICE();
     }
-
-    this._lastSendConnectionState = connectionState;
   }
 
   async recreateRecvTransport(iceServers) {
@@ -264,7 +280,7 @@ export default class DialogAdapter extends EventEmitter {
         await this.iceRestart(this._recvTransport);
       } else {
         // If the transport is closed but the signaling is connected, we try to recreate
-        const { host, port, turn } = await window.APP.hubChannel.getHost();
+        const { host, port, turn } = this._serverParams;
         const iceServers = this.getIceServers(host, port, turn);
         await this.recreateRecvTransport(iceServers);
       }
@@ -283,8 +299,6 @@ export default class DialogAdapter extends EventEmitter {
     if (connectionState === "failed") {
       this.restartRecvICE();
     }
-
-    this._lastRecvConnectionState = connectionState;
   }
 
   async connect() {
@@ -295,23 +309,44 @@ export default class DialogAdapter extends EventEmitter {
     const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
     this._protoo = new protooClient.Peer(protooTransport);
 
-    await new Promise(res => {
-      this._protoo.on("open", async () => {
-        this.emitRTCEvent("info", "Signaling", () => `Open`);
-        this._closed = false;
-        await this._joinRoom();
-        res();
-      });
+    this._protoo.on("disconnected", () => {
+      this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
+      this.disconnect();
     });
 
-    this._protoo.on("disconnected", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Diconnected`);
-      this.disconnect();
+    this._protoo.on("failed", attempt => {
+      this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
+
+      if (this._isReconnect) {
+        this._reconnectingListener && this._reconnectingListener();
+      }
     });
 
     this._protoo.on("close", () => {
-      this.emitRTCEvent("info", "Signaling", () => `Close`);
+      this.emitRTCEvent("error", "Signaling", () => `Closed`);
       this.disconnect();
+    });
+
+    await new Promise((resolve, reject) => {
+      this._protoo.on("open", async () => {
+        this.emitRTCEvent("info", "Signaling", () => `Open`);
+        this._closed = false;
+
+        // We only need to call the reconnect callbacks if it's a reconnection.
+        if (this._isReconnect) {
+          this._reconnectedListener && this._reconnectedListener();
+        } else {
+          this._isReconnect = true;
+        }
+
+        try {
+          await this._joinRoom();
+          resolve();
+        } catch (err) {
+          this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
+          reject(err);
+        }
+      });
     });
 
     // eslint-disable-next-line no-unused-vars
@@ -346,6 +381,16 @@ export default class DialogAdapter extends EventEmitter {
               this.emitRTCEvent("error", "RTC", () => `Consumer transport closed`);
               this.removeConsumer(consumer.id);
             });
+
+            if (kind === "video") {
+              const { spatialLayers, temporalLayers } = mediasoupClient.parseScalabilityMode(
+                consumer.rtpParameters.encodings[0].scalabilityMode
+              );
+
+              this._consumerStats[consumer.id] = this._consumerStats[consumer.id] || {};
+              this._consumerStats[consumer.id]["spatialLayers"] = spatialLayers;
+              this._consumerStats[consumer.id]["temporalLayers"] = temporalLayers;
+            }
 
             // We are ready. Answer the protoo request so the server will
             // resume this Consumer (which was paused for now if video).
@@ -398,7 +443,10 @@ export default class DialogAdapter extends EventEmitter {
           const { consumerId } = notification.data;
           const consumer = this._consumers.get(consumerId);
 
-          if (!consumer) break;
+          if (!consumer) {
+            info(`consumerClosed event received without related consumer: ${consumerId}`);
+            break;
+          }
 
           consumer.close();
           this.removeConsumer(consumer.id);
@@ -418,6 +466,46 @@ export default class DialogAdapter extends EventEmitter {
           document.body.dispatchEvent(new CustomEvent("unblocked", { detail: { clientId: peerId } }));
 
           break;
+        }
+
+        case "downlinkBwe": {
+          this._downlinkBwe = notification.data;
+          break;
+        }
+
+        case "consumerLayersChanged": {
+          const { consumerId, spatialLayer, temporalLayer } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerLayersChanged event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
+          this._consumerStats[consumerId]["spatialLayer"] = spatialLayer;
+          this._consumerStats[consumerId]["temporalLayer"] = temporalLayer;
+
+          // TODO: If spatialLayer/temporalLayer are null, that's probably because the current downlink
+          // it's not enough forany spatial layer bitrate. In that case the server has paused the consumer.
+          // At this point we it would be nice to give the user some visual cue that this stream is paused.
+          // ie. A grey overlay with some icon or replacing the video stream por a generic person image.
+          break;
+        }
+
+        case "consumerScore": {
+          const { consumerId, score } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerScore event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
+          this._consumerStats[consumerId]["score"] = score;
         }
       }
     });
@@ -507,8 +595,12 @@ export default class DialogAdapter extends EventEmitter {
     if (this._clientId === clientId) {
       if (kind === "audio" && this._micProducer) {
         track = this._micProducer.track;
-      } else if (kind === "video" && this._videoProducer) {
-        track = this._videoProducer.track;
+      } else if (kind === "video") {
+        if (this._cameraProducer && !this._cameraProducer.closed) {
+          track = this._cameraProducer.track;
+        } else if (this._shareProducer && !this._shareProducer.closed) {
+          track = this._shareProducer.track;
+        }
       }
     } else {
       this._consumers.forEach(consumer => {
@@ -555,10 +647,9 @@ export default class DialogAdapter extends EventEmitter {
     this.reliableTransport(undefined, dataType, data);
   }
 
-  setReconnectionListeners(reconnectingListener, reconnectedListener, reconnectionErrorListener) {
+  setReconnectionListeners(reconnectingListener, reconnectedListener) {
     this._reconnectingListener = reconnectingListener;
     this._reconnectedListener = reconnectedListener;
-    this._reconnectionErrorListener = reconnectionErrorListener;
   }
 
   syncOccupants() {
@@ -646,21 +737,21 @@ export default class DialogAdapter extends EventEmitter {
   async closeSendTransport() {
     if (this._micProducer) {
       this._micProducer.close();
-      this._protoo.connected && this._protoo.request("closeProducer", { producerId: this._micProducer.id });
+      this._protoo?.connected && this._protoo?.request("closeProducer", { producerId: this._micProducer.id });
       this._micProducer = null;
     }
 
     if (this._videoProducer) {
       this._videoProducer.close();
-      this._protoo.connected && this._protoo.request("closeProducer", { producerId: this._videoProducer.id });
+      this._protoo?.connected && this._protoo?.request("closeProducer", { producerId: this._videoProducer.id });
       this._videoProducer = null;
     }
 
-    if (!this._sendTransport?._closed) {
+    if (this._sendTransport && !this._sendTransport._closed) {
       this._sendTransport.close();
     }
 
-    if (this._protoo.connected) {
+    if (this._protoo?.connected) {
       try {
         await this._protoo.request("closeWebRtcTransport", { transportId: this._sendTransport?.id });
       } catch (err) {
@@ -725,10 +816,10 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   async closeRecvTransport() {
-    if (!this._recvTransport?._closed) {
+    if (this._recvTransport && !this._recvTransport._closed) {
       this._recvTransport.close();
     }
-    if (this._protoo.connected) {
+    if (this._protoo?.connected) {
       try {
         await this._protoo.request("closeWebRtcTransport", { transportId: this._recvTransport?.id });
       } catch (err) {
@@ -744,53 +835,44 @@ export default class DialogAdapter extends EventEmitter {
   async _joinRoom() {
     debug("_joinRoom()");
 
-    try {
-      this._mediasoupDevice = new mediasoupClient.Device({});
+    this._mediasoupDevice = new mediasoupClient.Device({});
 
-      const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
+    const routerRtpCapabilities = await this._protoo.request("getRouterRtpCapabilities");
 
-      await this._mediasoupDevice.load({ routerRtpCapabilities });
+    await this._mediasoupDevice.load({ routerRtpCapabilities });
 
-      const { host, port, turn } = await window.APP.hubChannel.getHost();
-      const iceServers = this.getIceServers(host, port, turn);
+    const { host, port, turn } = this._serverParams;
+    const iceServers = this.getIceServers(host, port, turn);
 
-      await this.createSendTransport(iceServers);
-      await this.createRecvTransport(iceServers);
+    await this.createSendTransport(iceServers);
+    await this.createRecvTransport(iceServers);
 
-      const { peers } = await this._protoo.request("join", {
-        displayName: this._clientId,
-        device: this._device,
-        rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
-        sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
-        token: this._joinToken
-      });
+    const { peers } = await this._protoo.request("join", {
+      displayName: this._clientId,
+      device: this._device,
+      rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
+      sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
+      token: this._joinToken
+    });
 
-      const audioConsumerPromises = [];
-      this.occupants = {};
+    const audioConsumerPromises = [];
+    this.occupants = {};
 
-      // Create a promise that will be resolved once we attach to all the initial consumers.
-      // This will gate the connection flow until all voices will be heard.
-      for (let i = 0; i < peers.length; i++) {
-        const peerId = peers[i].id;
-        this._onOccupantConnected(peerId);
-        this.occupants[peerId] = peers[i];
-        if (!peers[i].hasProducers) continue;
-        audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
-      }
+    // Create a promise that will be resolved once we attach to all the initial consumers.
+    // This will gate the connection flow until all voices will be heard.
+    for (let i = 0; i < peers.length; i++) {
+      const peerId = peers[i].id;
+      this._onOccupantConnected(peerId);
+      this.occupants[peerId] = peers[i];
+      if (!peers[i].hasProducers) continue;
+      audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
+    }
 
-      this._connectSuccess(this._clientId);
-      this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
+    this._connectSuccess(this._clientId);
+    this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
 
-      if (this._onOccupantsChanged) {
-        this._onOccupantsChanged(this.occupants);
-      }
-    } catch (err) {
-      this.emitRTCEvent("error", "Adapter", () => `Join room failed: ${error}`);
-      error("_joinRoom() failed:%o", err);
-
-      if (!this._reconnectionTimeout) {
-        this._reconnectionTimeout = setTimeout(() => this.reconnect(), this._reconnectionDelay);
-      }
+    if (this._onOccupantsChanged) {
+      this._onOccupantsChanged(this.occupants);
     }
   }
 
@@ -820,19 +902,7 @@ export default class DialogAdapter extends EventEmitter {
             track.enabled = false;
           }
 
-          // stopTracks = false because otherwise the track will end during a temporary disconnect
-          this._micProducer = await this._sendTransport.produce({
-            track,
-            stopTracks: false,
-            zeroRtpOnPause: true,
-            disableTrackOnPause: true,
-            codecOptions: { opusStereo: false, opusDtx: true }
-          });
-
-          this._micProducer.on("transportclose", () => {
-            this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
-            this._micProducer = null;
-          });
+          await this.enabledMic(track);
 
           if (!this._micEnabled) {
             this._micProducer.pause();
@@ -842,27 +912,12 @@ export default class DialogAdapter extends EventEmitter {
       } else {
         sawVideo = true;
 
-        if (this._videoProducer) {
-          if (this._videoProducer.track !== track) {
-            this._videoProducer.track.stop();
-            this._videoProducer.replaceTrack(track);
-          }
-        } else {
-          // TODO simulcasting
-
-          // stopTracks = false because otherwise the track will end during a temporary disconnect
-          this._videoProducer = await this._sendTransport.produce({
-            track,
-            stopTracks: false,
-            zeroRtpOnPause: true,
-            disableTrackOnPause: true,
-            codecOptions: { videoGoogleStartBitrate: 1000 }
-          });
-
-          this._videoProducer.on("transportclose", () => {
-            this.emitRTCEvent("info", "RTC", () => `Video transport closed`);
-            this._videoProducer = null;
-          });
+        if (track._hubs_contentHint === "share") {
+          await this.disableCamera();
+          await this.enableShare(track);
+        } else if (track._hubs_contentHint === "camera") {
+          await this.disableShare();
+          await this.enableCamera(track);
         }
       }
 
@@ -875,13 +930,105 @@ export default class DialogAdapter extends EventEmitter {
       this._micProducer = null;
     }
 
-    if (!sawVideo && this._videoProducer) {
-      this._videoProducer.close();
-      this._protoo.request("closeProducer", { producerId: this._videoProducer.id });
-      this._videoProducer = null;
+    if (!sawVideo) {
+      this.disableCamera();
+      this.disableShare();
     }
 
     this._localMediaStream = stream;
+  }
+
+  async enabledMic(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._micProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { opusStereo: false, opusDtx: true },
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true
+    });
+
+    this._micProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
+      this._micProducer = null;
+    });
+  }
+
+  async enableCamera(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._cameraProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { videoGoogleStartBitrate: 1000 },
+      encodings: WEBCAM_SIMULCAST_ENCODINGS,
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true
+    });
+
+    this._cameraProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera transport closed`);
+      this.disableCamera();
+    });
+    this._cameraProducer.observer.on("trackended", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera track ended`);
+      this.disableCamera();
+    });
+  }
+
+  async disableCamera() {
+    if (!this._cameraProducer) return;
+
+    this._cameraProducer.close();
+
+    try {
+      if (!this._sendTransport.closed) {
+        await this._protoo.request("closeProducer", { producerId: this._cameraProducer.id });
+      }
+    } catch (error) {
+      console.error(`disableCamera(): ${error}`);
+    }
+
+    this._cameraProducer = null;
+  }
+
+  async enableShare(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._shareProducer = await this._sendTransport.produce({
+      track,
+      stopTracks: false,
+      codecOptions: { videoGoogleStartBitrate: 1000 },
+      encodings: SCREEN_SHARING_SIMULCAST_ENCODINGS,
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true,
+      appData: {
+        share: true
+      }
+    });
+
+    this._shareProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Desktop Share transport closed`);
+      this.disableShare();
+    });
+    this._shareProducer.observer.on("trackended", () => {
+      this.emitRTCEvent("info", "RTC", () => `Desktop Share transport track ended`);
+      this.disableShare();
+    });
+  }
+
+  async disableShare() {
+    if (!this._shareProducer) return;
+
+    this._shareProducer.close();
+
+    try {
+      if (!this._sendTransport.closed) {
+        await this._protoo.request("closeProducer", { producerId: this._shareProducer.id });
+      }
+    } catch (error) {
+      console.error(`disableShare(): ${error}`);
+    }
+
+    this._shareProducer = null;
   }
 
   enableMicrophone(enabled) {
@@ -930,58 +1077,28 @@ export default class DialogAdapter extends EventEmitter {
 
     debug("disconnect()");
 
+    // Close mediasoup Transports.
+    this.closeSendTransport();
+    this.closeRecvTransport();
+
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
     if (this._protoo && this._protoo.connected) {
       this._protoo.close();
       this.emitRTCEvent("info", "Signaling", () => `[close]`);
     }
-
-    // Close mediasoup Transports.
-    this.closeSendTransport();
-    this.closeRecvTransport();
-
-    this._lastRecvConnectionState = null;
-    this._lastSendConnectionState = null;
   }
 
-  reconnect() {
-    // Dispose of all networked entities and other resources tied to the session.
+  reconnect(timeout = 2000) {
+    // The Protoo WebSocketTransport server url cannot be updated after it's been created so we need to orce a diconnect/connect
+    // to make sure we are using the updated server url for the WSS if it has changed.
     this.disconnect();
-
-    this.connect()
-      .then(() => {
-        this._reconnectionDelay = INITIAL_ROOM_RECONNECTION_INTERVAL;
-        this._reconnectionAttempts = 0;
-
-        if (this._reconnectedListener) {
-          this._reconnectedListener();
-        }
-
-        clearInterval(this._reconnectionTimeout);
-        this._reconnectionTimeout = null;
-      })
-      .catch(error => {
-        this._reconnectionDelay += 1000;
-        this._reconnectionAttempts++;
-
-        if (this._reconnectionAttempts > this.max_reconnectionAttempts && this._reconnectionErrorListener) {
-          return this._reconnectionErrorListener(
-            new Error("Connection could not be reestablished, exceeded maximum number of reconnection attempts.")
-          );
-        }
-
-        this.emitRTCEvent("warn", "Adapter", () => `Error during reconnect, retrying: ${error}`);
-        console.warn("Error during reconnect, retrying.");
-        console.warn(error);
-
-        if (this._reconnectingListener) {
-          this._reconnectingListener(this._reconnectionDelay);
-        }
-
-        if (!this._reconnectionTimeout) {
-          this._reconnectionTimeout = setTimeout(() => this.reconnect(), this._reconnectionDelay);
-        }
-      });
+    if (this._protoo) {
+      this._protoo.removeAllListeners();
+      this._protoo.close();
+    }
+    setTimeout(() => {
+      this.connect();
+    }, timeout);
   }
 
   kick(clientId, permsToken) {

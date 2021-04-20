@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { EnterOnDeviceModal } from "./EnterOnDeviceModal";
 
 export default {
-  title: "EnterOnDeviceModal",
+  title: "Room/EnterOnDeviceModal",
   parameters: {
     layout: "fullscreen"
   }

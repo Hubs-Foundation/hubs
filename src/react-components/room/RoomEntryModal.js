@@ -46,7 +46,7 @@ export function RoomEntryModal({
         </div>
         <Column center className={styles.buttons}>
           {showJoinRoom && (
-            <Button preset="blue" onClick={onJoinRoom}>
+            <Button preset="accent4" onClick={onJoinRoom}>
               <EnterIcon />
               <span>
                 <FormattedMessage id="room-entry-modal.join-room-button" defaultMessage="Join Room" />
@@ -54,7 +54,7 @@ export function RoomEntryModal({
             </Button>
           )}
           {showEnterOnDevice && (
-            <Button preset="purple" onClick={onEnterOnDevice}>
+            <Button preset="accent5" onClick={onEnterOnDevice}>
               <VRIcon />
               <span>
                 <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device" />
@@ -62,7 +62,7 @@ export function RoomEntryModal({
             </Button>
           )}
           {showSpectate && (
-            <Button preset="orange" onClick={onSpectate}>
+            <Button preset="accent2" onClick={onSpectate}>
               <ShowIcon />
               <span>
                 <FormattedMessage id="room-entry-modal.spectate-button" defaultMessage="Spectate" />

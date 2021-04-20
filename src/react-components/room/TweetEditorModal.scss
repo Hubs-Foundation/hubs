@@ -2,22 +2,22 @@
 
 :local(.media), :local(.media) img, :local(.media) video {
   border-radius: theme.$border-radius-regular;
-  background-color: theme.$lightgrey;
+  background-color: theme.$tile-bg-color;
 }
 
 :local(.editor) {
   position: relative;
   display: flex;
   width: 100%;
-  border: 1px solid theme.$darkgrey;
+  border: 1px solid theme.$border3-color;
   border-radius: theme.$border-radius-regular;
-  color: theme.$black;
+  color: theme.$text1-color;
   min-height: 5em;
   padding: theme.$spacing-xs;
 
   &:focus-within  {
-    border-color: theme.$blue;
-    box-shadow: 0 0 0 2px theme.$blue;
+    border-color: theme.$input-outline-color;
+    box-shadow: 0 0 0 2px theme.$input-outline-color;
   }
 }
 
@@ -40,20 +40,37 @@
 
 // Emoji pop out button
 :local(.emoji-button) > div > button {
-  border: none;
   font-size: theme.$font-size-xl;
   width: 1.5em;
+  border: 1px solid theme.$basic-border-color;
+  background-color: theme.$basic-color;
+
+  &:hover {
+    background-color: theme.$basic-color-hover;
+  }
+
+  &:active {
+    background-color: theme.$basic-color-pressed;
+  }
 }
 
 // Emoji pop out menu
 :local(.emoji-button) > div > div {
   right: 0px;
   cursor: pointer;
+  background-color: theme.$background2-color;
+  border: 1px solid theme.$border2-color;
+  border-radius: 6px;
+  box-shadow: none;
+
+  h3 {
+    padding: 0;
+  }
 }
 
 :local(.counter) {
   position: absolute;
   bottom: theme.$spacing-xs;
   left: theme.$spacing-xs;
-  color: theme.$grey;
+  color: theme.$text3-color;
 }

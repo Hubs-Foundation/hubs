@@ -9,14 +9,14 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: theme.$white;
+  background-color: theme.$background1-color;
   z-index: 10;
 }
 
 :local(.header) {
   position: relative;
   height: 144px;
-  border-bottom: 1px solid theme.$lightgrey;
+  border-bottom: 1px solid theme.$border1-color;
 
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     height: 96px;
@@ -41,7 +41,7 @@
 
 :local(.header-center) {
   margin-top: 48px;
-  border-top: 1px solid theme.$lightgrey;
+  border-top: 1px solid theme.$border1-color;
   width: 100%;
   height: 96px;
   display: flex;

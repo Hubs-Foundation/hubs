@@ -17,6 +17,7 @@ const commonKnownContentTypes = {
   mp4: "video/mp4",
   mp3: "audio/mpeg",
   basis: "image/basis",
+  ktx2: "image/ktx2",
   m3u8: "application/vnd.apple.mpegurl",
   mpd: "application/dash+xml"
 };
@@ -98,7 +99,27 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
   return getAbsoluteUrl(baseUrl, relativeUrl).href;
 }
 
+// Note this file is configured in webpack.config.js to be handled with file-loader, so this will be a string containing the file path
+import basisJsUrl from "three/examples/js/libs/basis/basis_transcoder.js";
+import basisWasmUrl from "three/examples/js/libs/basis/basis_transcoder.wasm";
+
+export const rewriteBasisTranscoderUrls = function(url) {
+  if (url === "basis_transcoder.js") {
+    return basisJsUrl;
+  } else if (url === "basis_transcoder.wasm") {
+    return basisWasmUrl;
+  }
+  return url;
+};
+
 export const getCustomGLTFParserURLResolver = gltfUrl => url => {
+  // Intercept loading of basis transcoder with content hashed urls
+  if (url === "basis_transcoder.js") {
+    return basisJsUrl;
+  } else if (url === "basis_transcoder.wasm") {
+    return basisWasmUrl;
+  }
+
   if (typeof url !== "string" || url === "") return "";
   if (/^(https?:)?\/\//i.test(url)) return proxiedUrlFor(url);
   if (/^data:.*,.*$/i.test(url)) return url;

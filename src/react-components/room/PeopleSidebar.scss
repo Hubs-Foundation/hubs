@@ -10,15 +10,23 @@
       margin-right: 0;
     }
   }
+
+  *[stroke=\#000] {
+    stroke: theme.$text1-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$text1-color;
+  }
 }
 
 :local(.moderator-icon) {
   *[stroke=\#000] {
-    stroke: theme.$red;
+    stroke: theme.$admin-color;
   }
 
   *[fill=\#000] {
-    fill: theme.$red;
+    fill: theme.$admin-color;
   }
 }
 

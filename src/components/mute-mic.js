@@ -80,9 +80,9 @@ AFRAME.registerComponent("mute-mic", {
 
   onStoreUpdated: function() {
     const micMuted = this.store.state.settings["micMuted"];
-    const isMicSelected = window.APP.mediaDevicesManager?.isMicDeviceSelected;
+    const isMicShared = window.APP.mediaDevicesManager?.isMicShared;
     if (micMuted !== undefined) {
-      if (isMicSelected) {
+      if (isMicShared) {
         if (micMuted) {
           this.el.addState("muted");
         } else {

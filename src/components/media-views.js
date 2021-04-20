@@ -6,7 +6,7 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createImageTexture, createBasisTexture, createVideoOrAudioEl } from "../utils/media-utils";
+import { addAndArrangeMedia, createImageTexture, createVideoOrAudioEl } from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
@@ -48,6 +48,63 @@ for (let i = 0; i <= 20; i++) {
   }
   s += "]";
   VOLUME_LABELS[i] = s;
+}
+
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
+const loadingManager = new THREE.LoadingManager();
+loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
+
+let ktxLoader;
+
+export function createBasisTexture(url) {
+  if (!ktxLoader) {
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  }
+  return new Promise((resolve, reject) => {
+    ktxLoader.basisLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        // texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
+}
+
+export function createKTX2Texture(url) {
+  if (!ktxLoader) {
+    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  }
+  return new Promise((resolve, reject) => {
+    ktxLoader.load(
+      url,
+      function(texture) {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.onUpdate = function() {
+          // Delete texture data once it has been uploaded to the GPU
+          texture.mipmaps.length = 0;
+        };
+        texture.anisotropy = 4;
+        resolve(texture);
+      },
+      undefined,
+      function(error) {
+        console.error(error);
+        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
+      }
+    );
+  });
 }
 
 class GIFTexture extends THREE.Texture {
@@ -1039,6 +1096,8 @@ AFRAME.registerComponent("media-image", {
             promise = createGIFTexture(src);
           } else if (contentType.includes("image/basis")) {
             promise = createBasisTexture(src);
+          } else if (contentType.includes("image/ktx2")) {
+            promise = createKTX2Texture(src);
           } else if (contentType.startsWith("image/")) {
             promise = createImageTexture(src);
           } else {

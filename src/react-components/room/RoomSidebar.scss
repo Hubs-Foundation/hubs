@@ -3,7 +3,7 @@
 :local(.section-title) {
   font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-bold;
-  color: theme.$darkgrey;
+  color: theme.$text2-color;
   margin-bottom: 16px;
   margin-top: 16px;
 
@@ -19,7 +19,7 @@
 }
 
 :local(.scene-screenshot-image) {
-  background-color: theme.$lightgrey;
+  background-color: theme.$tile-bg-color;
   border-radius: 12px;
 }
 
@@ -28,19 +28,19 @@
 }
 
 :local(.scene-name) {
-  color: theme.$darkgrey;
+  color: theme.$text2-color;
 }
 
 :local(.scene-creator) {
   margin-top: 4px;
   font-size: theme.$font-size-sm;
-  color: theme.$darkgrey;
+  color: theme.$text2-color;
 }
 
 :local(.attribution) {
   font-size: theme.$font-size-sm;
   margin-top: 8px;
-  color: theme.$darkgrey;
+  color: theme.$text2-color;
 
   &:first-child {
     margin-top: 0;

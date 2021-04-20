@@ -10,7 +10,7 @@ import emoji6Particle from "../../assets/images/emojis/emoji_6.png";
 import { ReactionPopoverButton } from "./ReactionPopover";
 
 export default {
-  title: "ReactionPopover",
+  title: "Room/ReactionPopover",
   parameters: {
     layout: "fullscreen"
   }
