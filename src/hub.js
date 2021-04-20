@@ -194,6 +194,7 @@ THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 import "./components/megaphone";
 import "./components/trigger";
+import "./components/audio-channel";
 
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";

@@ -43,6 +43,10 @@ function registerNetworkSchemas() {
       "networked-avatar",
       "isMegaphone",
       {
+        component: "audio-channel",
+        property: "channel"
+      },
+      {
         selector: ".camera",
         component: "position",
         requiresNetworkUpdate: vectorRequiresUpdate(0.001)

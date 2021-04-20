@@ -150,9 +150,6 @@ AFRAME.registerComponent('trigger', {
               collisionMask = 4;
               break; 
             }
-
-        console.log("trigger collisionFilterMask", this.data.cMask);
-
         this.el.setAttribute("body-helper", {collisionFilterMask:collisionMask})
       } ,     
       CheckCollidingObjects: function() {
@@ -181,25 +178,35 @@ AFRAME.registerComponent('trigger', {
             const bodyData = this.data.physicsSystem.bodyUuidToData.get(collisions[i]);
             const mediaObjectEl = bodyData && bodyData.object3D && bodyData.object3D.el;
 
-            if(mediaObjectEl.object3D.uuid == element.object3D.uuid)
+            try
             {
-              elementFound = true;
-              break;
+              if(mediaObjectEl.object3D.uuid == element.object3D.uuid)
+              {
+                elementFound = true;
+                break;
+              }
             }
+            catch(e)
+            {
+              console.error(e);
+
+              this.data.elementsInTrigger.splice(i,1);
+            
+              this.onTriggerLeft(element); 
+            }
+
           }
 
           if(!elementFound)
           {
-            this.onTriggerLeft(element);
-            
             this.data.elementsInTrigger.splice(i,1);
+            
+            this.onTriggerLeft(element);            
           }
         }
       },
       onTriggerEnter: function(element)
       {
-        console.log("trigger onTriggerEnter");
-
         switch(this.data.triggerType)
         {
           case ACTIONS.TELEPORT:
@@ -224,8 +231,6 @@ AFRAME.registerComponent('trigger', {
       },
       onTriggerLeft: function(element)
       {
-        console.log("trigger onTriggerLeft");
-
         switch(this.data.triggerType)
         {
           case ACTIONS.TELEPORT:
@@ -267,12 +272,8 @@ AFRAME.registerComponent('trigger', {
       },
       switchVisibility: function(isVisible)
       {
-        console.log("trigger switchVisibility", this.data.targetName);
-
         let targetName = document.querySelector("."+this.data.targetName);
-        
-        console.log("trigger switchVisibility", isVisible);
-        
+               
         if(targetName)
         {
           targetName.setAttribute("visible", isVisible);
