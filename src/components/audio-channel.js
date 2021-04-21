@@ -60,7 +60,6 @@ AFRAME.registerComponent('audio-channel', {
       },
       setChannelAudio: function(audioState)
       {
-        this.initVariables();
         this.data.localChannel = this.data.channel;
         this.data.audioState = audioState;
 
@@ -69,6 +68,8 @@ AFRAME.registerComponent('audio-channel', {
           return;
         }
         
+        this.initVariables();
+
         if(audioState)
         {
           this.data.avatarAudioSource.data.refDistance = this.data.defaultRef;

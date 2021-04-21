@@ -1,3 +1,4 @@
+import { string } from "prop-types";
 import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 
 
@@ -121,9 +122,11 @@ AFRAME.registerComponent('trigger', {
       initVariables: function()
       {
         this.data.avatar = document.querySelector("#avatar-rig");
+        console.log("trigger initVariables this.data.avatar", this.data.avatar);
         this.data.physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
         this.data.uuid = this.el.components["body-helper"].uuid;
         this.data.elementsInTrigger = [];
+        this.data.targetName = this.data.targetName.replaceAll(" ", "_");
       },
       setupCollisionGroup: function()
       {
@@ -290,20 +293,27 @@ AFRAME.registerComponent('trigger', {
             return;
         }
 
+        const position = document.querySelector("."+targetClassName);
+
         if(element.className=="AvatarRoot" || element.className=="Head")
         {
           element = this.data.avatar;
+
+          this.el.sceneEl.systems["hubs-systems"].characterController.teleportTo(position.object3D.position);
+          element.object3D.rotation.copy(position.object3D.rotation);
+          element.object3D.matrixNeedsUpdate = true;
         }
-
-        const position = document.querySelector("."+targetClassName);
-        element.object3D.position.copy(position.object3D.position);
-        element.object3D.rotation.copy(position.object3D.rotation);
-        element.object3D.matrixNeedsUpdate = true;
-
-        if(element.components["floaty-object"])
+        else
         {
-          element.components["floaty-object"].setLocked(true); 
-        }
+          element.object3D.position.copy(position.object3D.position);
+          element.object3D.rotation.copy(position.object3D.rotation);
+          element.object3D.matrixNeedsUpdate = true;
+          
+          if(element.components["floaty-object"])
+          {
+            element.components["floaty-object"].setLocked(true); 
+          }
+        }   
       },
       changeVisibility: function(element, isVisible)
       {
