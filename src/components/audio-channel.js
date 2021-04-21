@@ -2,7 +2,7 @@ import { NearestFilter } from "three";
 
 AFRAME.registerComponent('audio-channel', {
   schema: {
-      channel: {type: "number", default: -1},
+      channel: {type: "number", default: 0},
       localChannel: {type: "number", default: -1},
       avatarAudioSource: {type: "asset", default: null},
       defaultRef: {type: "number", default: 2},
@@ -60,8 +60,8 @@ AFRAME.registerComponent('audio-channel', {
       },
       setChannelAudio: function(audioState)
       {
-        console.log("audio-channel setChannel", this.data.channel);
-        console.log("audio-channel element", this.el);
+        //console.log("audio-channel setChannel", this.data.channel);
+        //console.log("audio-channel element", this.el);
 
         this.data.localChannel = this.data.channel;
         this.data.audioState = audioState;
