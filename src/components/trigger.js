@@ -152,7 +152,7 @@ AFRAME.registerComponent('trigger', {
               collisionMask = 4;
               break; 
             }
-        this.el.setAttribute("body-helper", {collisionFilterMask:collisionMask})
+        this.el.setAttribute("body-helper", {collisionFilterMask:this.data.cMask})
       } ,     
       CheckCollidingObjects: function() {
         
@@ -161,8 +161,10 @@ AFRAME.registerComponent('trigger', {
         for (let i = 0; i < collisions.length; i++) {
           const bodyData = this.data.physicsSystem.bodyUuidToData.get(collisions[i]);
           const mediaObjectEl = bodyData && bodyData.object3D && bodyData.object3D.el;
-          
-          if(!this.listContainsElement(this.data.elementsInTrigger, mediaObjectEl))
+
+          if(mediaObjectEl.components["networked"] 
+          && mediaObjectEl.object3D 
+          && !this.listContainsElement(this.data.elementsInTrigger, mediaObjectEl))
           {
             this.data.elementsInTrigger.push(mediaObjectEl);
 
