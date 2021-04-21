@@ -299,9 +299,12 @@ AFRAME.registerComponent('trigger', {
         {
           element = this.data.avatar;
 
-          this.el.sceneEl.systems["hubs-systems"].characterController.teleportTo(position.object3D.position);
-          element.object3D.rotation.copy(position.object3D.rotation);
-          element.object3D.matrixNeedsUpdate = true;
+          //this.el.sceneEl.systems["hubs-systems"].characterController.teleportTo(position.object3D.position);
+          this.el.sceneEl.systems["hubs-systems"].characterController.enqueueWaypointTravelTo(
+            position.object3D.matrixWorld,
+            false,
+            {willDisableMotion: false}
+          );
         }
         else
         {
