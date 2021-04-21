@@ -18,7 +18,7 @@ AFRAME.registerComponent('audio-channel', {
       {
         try
         {
-          this.data.avatarAudioSource = this.el.querySelector("[avatar-audio-source]").components['avatar-audio-source'];
+          this.data.avatarAudioSource = this.el.querySelector("[avatar-audio-source]")?.components['avatar-audio-source'];
           this.data.defaultRef = this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.audioSettings.avatarRefDistance;
         }
         catch(e)

@@ -122,7 +122,6 @@ AFRAME.registerComponent('trigger', {
       initVariables: function()
       {
         this.data.avatar = document.querySelector("#avatar-rig");
-        console.log("trigger initVariables this.data.avatar", this.data.avatar);
         this.data.physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
         this.data.uuid = this.el.components["body-helper"].uuid;
         this.data.elementsInTrigger = [];
