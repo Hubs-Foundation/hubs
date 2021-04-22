@@ -6,7 +6,7 @@ AFRAME.registerComponent('megaphone', {
         defaultRef: {type: "number", default: 2},
       },
       init: function () {
-        this.data.isActive = this.el.getAttribute("isMegaphone")=="true";
+        this.data.isActive = this.el.getAttribute("ismegaphone")=="true";
         this.data.defaultRef = this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.audioSettings.avatarRefDistance;
 
         if(this.el.id == "avatar-rig")

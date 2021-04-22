@@ -225,7 +225,10 @@ AFRAME.registerComponent('trigger', {
             this.changeVisibility(element, false);
             break;
           case ACTIONS.MEGAPHONE:
-            this.changeMegaphone(true);
+            if(NAF.utils.isMine(element))
+            {
+              this.changeMegaphone(true);
+            }
             break;
           case ACTIONS.SWITCH:
             this.switchVisibility(this.data.switchActive);
@@ -250,7 +253,10 @@ AFRAME.registerComponent('trigger', {
               this.changeVisibility(element, true);
             break;
           case ACTIONS.MEGAPHONE:
-            this.changeMegaphone(false);
+            if(NAF.utils.isMine(element))
+            {
+              this.changeMegaphone(false);
+            }
             break;
           case ACTIONS.SWITCH:
             if(this.data.elementsInTrigger.length<=1)
@@ -299,7 +305,7 @@ AFRAME.registerComponent('trigger', {
       {
         console.log("trigger changeMegaphone", isActivated);
 
-        this.data.avatar.setAttribute("isMegaphone",isActivated);
+        this.data.avatar.setAttribute("ismegaphone",isActivated);
       },
       teleportElement: function(element, targetClassName)
       {

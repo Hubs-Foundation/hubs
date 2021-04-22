@@ -63,11 +63,11 @@ export default class MessageDispatch extends EventTarget {
         const avatarHead = this.scene.querySelector("[id='avatar-rig'");
         if(args[0]==="on")
         {
-          avatarHead.setAttribute("isMegaphone", true);
+          avatarHead.setAttribute("ismegaphone", true);
         }
         else if(args[0]==="off")
         {
-          avatarHead.setAttribute("isMegaphone", false);
+          avatarHead.setAttribute("ismegaphone", false);
         }        
       break;
       case "fov":
