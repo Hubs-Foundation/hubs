@@ -16,8 +16,8 @@ let turnRightKey = "E";
 if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
   window.navigator.keyboard.getLayoutMap().then(function(map) {
     moveKeys = `${map.get("KeyW")} ${map.get("KeyA")} ${map.get("KeyS")} ${map.get("KeyD")}`.toUpperCase();
-    turnLeftKey = map.get("KeyQ").toUpperCase();
-    turnRightKey = map.get("KeyE").toUpperCase();
+    turnLeftKey = map.get("KeyQ")?.toUpperCase();
+    turnRightKey = map.get("KeyE")?.toUpperCase();
   });
 }
 
