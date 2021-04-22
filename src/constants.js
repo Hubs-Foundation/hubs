@@ -3,11 +3,11 @@ const nextBit = () => 1 << bit++;
 const CL = {
   ALL: -1,
   NONE: 0,
-  INTERACTABLES: nextBit(),
-  ENVIRONMENT: nextBit(),
-  AVATAR: nextBit(),
-  HANDS: nextBit(),
-  MEDIA_FRAMES: nextBit()
+  INTERACTABLES: nextBit(),//1
+  ENVIRONMENT: nextBit(),//2
+  AVATAR: nextBit(),//4
+  HANDS: nextBit(),//8
+  MEDIA_FRAMES: nextBit()//16
 };
 
 // @TODO we should split these "sets" off into something other than COLLISION_LAYERS or at least name

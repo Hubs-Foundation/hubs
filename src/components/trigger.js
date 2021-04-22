@@ -5,7 +5,7 @@ import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 export const ACTIONS ={
   MEGAPHONE: "megaphone",
   TELEPORT: "teleport",
-  VISIBLE: "visible",
+  VISIBLE: "visibility",
   SWITCH: "switch active",  
   SNAP: "snap",
   AUDIOZONE: "audiozone",
@@ -23,7 +23,6 @@ AFRAME.registerComponent('trigger', {
     targetName: { default: "target" },
     triggerType: { default: "none" },
     elementsInTrigger: { default: []},
-
       },
       init: function () {
         this.initVariables();
@@ -102,6 +101,7 @@ AFRAME.registerComponent('trigger', {
       },
       initState: function()
       {
+        console.log("trigger initState", this.data.triggerType);
         switch(this.data.triggerType)
         {
           case ACTIONS.TELEPORT:
@@ -121,6 +121,9 @@ AFRAME.registerComponent('trigger', {
       },
       initVariables: function()
       {
+        console.log("trigger initVariables", this.data);
+
+
         this.data.avatar = document.querySelector("#avatar-rig");
         this.data.physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
         this.data.uuid = this.el.components["body-helper"].uuid;
@@ -129,6 +132,8 @@ AFRAME.registerComponent('trigger', {
       },
       setupCollisionGroup: function()
       {
+        console.log("trigger setupCollisionGroup", this.data.cMask);
+
         let collisionMask = 0;
 
           switch(this.data.triggerType)
@@ -162,9 +167,7 @@ AFRAME.registerComponent('trigger', {
           const bodyData = this.data.physicsSystem.bodyUuidToData.get(collisions[i]);
           const mediaObjectEl = bodyData && bodyData.object3D && bodyData.object3D.el;
 
-          if(mediaObjectEl.components["networked"] 
-          && mediaObjectEl.object3D 
-          && !this.listContainsElement(this.data.elementsInTrigger, mediaObjectEl))
+          if(mediaObjectEl != null && !this.listContainsElement(this.data.elementsInTrigger, mediaObjectEl))
           {
             this.data.elementsInTrigger.push(mediaObjectEl);
 
@@ -211,6 +214,8 @@ AFRAME.registerComponent('trigger', {
       },
       onTriggerEnter: function(element)
       {
+        console.log("trigger onTriggerEnter", element);
+
         switch(this.data.triggerType)
         {
           case ACTIONS.TELEPORT:
@@ -235,6 +240,8 @@ AFRAME.registerComponent('trigger', {
       },
       onTriggerLeft: function(element)
       {
+        console.log("trigger onTriggerLeft", element);
+
         switch(this.data.triggerType)
         {
           case ACTIONS.TELEPORT:
@@ -260,6 +267,9 @@ AFRAME.registerComponent('trigger', {
       },
       setAudioZone: function(element, channelNumber)
       {
+        console.log("trigger setAudioZone", element);
+        console.log("trigger channelNumber", channelNumber);
+
         if(!this.data.avatar.components["audio-channel"])
         {
           return;
@@ -276,6 +286,8 @@ AFRAME.registerComponent('trigger', {
       },
       switchVisibility: function(isVisible)
       {
+        console.log("trigger switchVisibility", isVisible);
+
         let targetName = document.querySelector("."+this.data.targetName);
                
         if(targetName)
@@ -285,10 +297,15 @@ AFRAME.registerComponent('trigger', {
       },
       changeMegaphone: function(isActivated)
       {
-          this.data.avatar.setAttribute("isMegaphone",isActivated);
+        console.log("trigger changeMegaphone", isActivated);
+
+        this.data.avatar.setAttribute("isMegaphone",isActivated);
       },
       teleportElement: function(element, targetClassName)
       {
+        console.log("trigger teleportElement", element);
+        console.log("trigger teleportElement", targetClassName);
+
         if(!NAF.utils.isMine(element))
         {
             return;
@@ -321,10 +338,15 @@ AFRAME.registerComponent('trigger', {
       },
       changeVisibility: function(element, isVisible)
       {
+        console.log("trigger changeVisibility", element);
+        console.log("trigger changeVisibility", isVisible);
+
         element.setAttribute("visible", isVisible);
       },
       snap: function(element)
       {
+        console.log("trigger snap", element);
+
         if(element.components["floaty-object"])
         {
           element.components["floaty-object"].setLocked(true); 
