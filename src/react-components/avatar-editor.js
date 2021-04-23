@@ -47,6 +47,53 @@ const fetchAvatar = async avatarId => {
   return avatars[0];
 };
 
+// GLTFLoader plugin for splitting glTF and bin from glb.
+class GLTFBinarySplitterPlugin {
+  constructor(parser, inputFiles) {
+    this.parser = parser;
+    this.inputFiles = inputFiles;
+  }
+
+  beforeRoot() {
+    const parser = this.parser;
+    const {body} = parser.extensions.KHR_binary_glTF;
+    const content = JSON.stringify(ensureAvatarMaterial(parser.json));
+
+    // Inject hubs components on upload. Used to create base avatar
+    // const gltf = parser.json;
+    // Object.assign(gltf.scenes[0], {
+    //   extensions: {
+    //     MOZ_hubs_components: {
+    //       "loop-animation": {
+    //         clip: "idle_eyes"
+    //       }
+    //     }
+    //   }
+    // });
+    // Object.assign(gltf.nodes.find(n => n.name === "Head"), {
+    //   extensions: {
+    //     MOZ_hubs_components: {
+    //       "scale-audio-feedback": ""
+    //     }
+    //   }
+    // });
+    // content = JSON.stringify(gltf);
+
+    this.inputFiles.gltf = new File([content], "file.gltf", {
+      type: "model/gltf"
+    });
+    this.inputFiles.bin = new File([body], "file.bin", {
+      type: "application/octet-stream"
+    });
+
+    // This plugin just wants to split gltf and bin from glb and
+    // doesn't want to start the parse. But glTF loader plugin API
+    // doesn't have an ability to cancel the parse. So overriding
+    // parser.json with very light glTF data as workaround.
+    parser.json = {asset: {version: "2.0"}};
+  }
+}
+
 class AvatarEditor extends Component {
   static propTypes = {
     avatarId: PropTypes.string,
@@ -113,42 +160,17 @@ class AvatarEditor extends Component {
     e.preventDefault();
 
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
-      const gltfLoader = new THREE.GLTFLoader();
+      const gltfLoader = new THREE.GLTFLoader()
+        .register(parser => new GLTFBinarySplitterPlugin(parser, this.inputFiles));
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
-      const parser = await new Promise((resolve, reject) =>
-        gltfLoader.createParser(gltfUrl, resolve, onProgress, reject)
-      );
+
+      await new Promise((resolve, reject) => {
+        // This GLTFBinarySplitterPlugin saves gltf and bin in inputFiles.gltf/bin
+        gltfLoader.load(gltfUrl, resolve, onProgress, reject);
+      });
+
       URL.revokeObjectURL(gltfUrl);
-
-      const { body } = parser.extensions.KHR_binary_glTF;
-      const content = JSON.stringify(ensureAvatarMaterial(parser.json));
-      // Inject hubs components on upload. Used to create base avatar
-      // const gltf = parser.json;
-      // Object.assign(gltf.scenes[0], {
-      //   extensions: {
-      //     MOZ_hubs_components: {
-      //       "loop-animation": {
-      //         clip: "idle_eyes"
-      //       }
-      //     }
-      //   }
-      // });
-      // Object.assign(gltf.nodes.find(n => n.name === "Head"), {
-      //   extensions: {
-      //     MOZ_hubs_components: {
-      //       "scale-audio-feedback": ""
-      //     }
-      //   }
-      // });
-      // content = JSON.stringify(gltf);
-
-      this.inputFiles.gltf = new File([content], "file.gltf", {
-        type: "model/gltf"
-      });
-      this.inputFiles.bin = new File([body], "file.bin", {
-        type: "application/octet-stream"
-      });
     }
 
     this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", {
