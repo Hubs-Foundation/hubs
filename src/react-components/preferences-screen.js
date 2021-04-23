@@ -517,14 +517,16 @@ class PreferenceListItem extends Component {
     const intl = this.props.intl;
     const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isSmallScreen = window.innerWidth < 600;
-    const onHelpIconClick = () => {
-      window.open(preferenceLabels[this.props.storeKey].helpLink, "_blank");
-    };
     const label = (
       <span className={styles.preferenceLabel}>
         {intl.formatMessage(preferenceLabels[this.props.storeKey])}
         {preferenceLabels[this.props.storeKey].helpLink !== undefined ? (
-          <IconButton onClick={onHelpIconClick}>
+          <IconButton
+            className={styles.helpButton}
+            as="a"
+            href={preferenceLabels[this.props.storeKey].helpLink}
+            target="_blank"
+          >
             <HelpIcon />
           </IconButton>
         ) : (
