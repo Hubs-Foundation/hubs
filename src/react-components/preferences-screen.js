@@ -394,7 +394,7 @@ const preferenceLabels = defineMessages({
   },
   automaticOutputGainControl: {
     id: "preferences-screen.preference.audio-automatic-output-gain-control",
-    defaultMessage: "[Experiment] Automatic Output Gain Control"
+    defaultMessage: "Automatic incoming voice volume control (experimental)"
   },
   snapRotationDegrees: {
     id: "preferences-screen.preference.snap-rotation-degrees",
