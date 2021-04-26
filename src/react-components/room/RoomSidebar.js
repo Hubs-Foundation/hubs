@@ -76,10 +76,11 @@ function SceneAttribution({ attribution }) {
 // To assist with content control, we avoid displaying scene links to users who are not the scene
 // creator, unless the scene is remixable or promotable.
 function allowDisplayOfSceneLink(accountId, scene) {
-  return (accountId && scene.account_id === accountId) || scene.allow_promotion || scene.allow_remixing;
+  return scene && ((accountId && scene.account_id === accountId) || scene.allow_promotion || scene.allow_remixing);
 }
 
 export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, onChangeScene }) {
+  if (!scene) return null;
   const showSceneLink = allowDisplayOfSceneLink(accountId, scene);
   const attributions = (scene.attributions && scene.attributions.content) || [];
   const creator = scene.attributions && scene.attributions.creator;
@@ -129,7 +130,7 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
           </InputField>
         )}
       {canChangeScene && (
-        <Button preset="blue" onClick={onChangeScene}>
+        <Button preset="primary" onClick={onChangeScene}>
           <FormattedMessage id="room-sidebar.scene-info.change-scene-button" defaultMessage="Change Scene" />
         </Button>
       )}

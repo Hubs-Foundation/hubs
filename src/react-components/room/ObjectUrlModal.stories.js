@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { ObjectUrlModal } from "./ObjectUrlModal";
 
 export default {
-  title: "ObjectUrlModal",
+  title: "Room/ObjectUrlModal",
   parameters: {
     layout: "fullscreen"
   }

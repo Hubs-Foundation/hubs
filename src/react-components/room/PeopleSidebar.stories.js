@@ -3,7 +3,10 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { PeopleSidebar } from "./PeopleSidebar";
 
 export default {
-  title: "PeopleSidebar"
+  title: "Room/PeopleSidebar",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 const people = [
@@ -61,7 +64,3 @@ const people = [
 ];
 
 export const Base = () => <RoomLayout sidebar={<PeopleSidebar people={people} />} />;
-
-Base.parameters = {
-  layout: "fullscreen"
-};

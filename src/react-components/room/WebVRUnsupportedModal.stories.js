@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { WebVRUnsupportedModal } from "./WebVRUnsupportedModal";
 
 export default {
-  title: "WebVRUnsupportedModal",
+  title: "Room/WebVRUnsupportedModal",
   parameters: {
     layout: "fullscreen"
   }

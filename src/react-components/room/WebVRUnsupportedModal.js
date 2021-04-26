@@ -21,7 +21,7 @@ export function WebVRUnsupportedModal({ onClose }) {
         </p>
         <Button
           as="a"
-          preset="orange"
+          preset="accent2"
           href="https://www.mozilla.org/firefox/"
           target="_blank"
           rel="noreferrer noopener"

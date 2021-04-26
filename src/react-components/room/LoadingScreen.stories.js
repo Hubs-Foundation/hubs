@@ -3,7 +3,10 @@ import { LoadingScreen } from "./LoadingScreen";
 import logoSrc from "../../assets/images/company-logo.png";
 
 export default {
-  title: "LoadingScreen"
+  title: "Room/LoadingScreen",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 const infoMessages = [
@@ -24,7 +27,3 @@ const infoMessages = [
 export const Base = () => (
   <LoadingScreen logoSrc={logoSrc} message="Loading objects 2/14" infoMessages={infoMessages} />
 );
-
-Base.parameters = {
-  layout: "fullscreen"
-};

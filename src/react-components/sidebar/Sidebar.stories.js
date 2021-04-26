@@ -5,7 +5,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { Sidebar } from "./Sidebar";
 
 export default {
-  title: "Sidebar"
+  title: "Sidebar/Sidebar"
 };
 
 export const Base = () => (

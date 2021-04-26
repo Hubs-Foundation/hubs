@@ -455,29 +455,27 @@ export async function createImageTexture(url, filter) {
   return texture;
 }
 
-import HubsBasisTextureLoader from "../loaders/HubsBasisTextureLoader";
-export const basisTextureLoader = new HubsBasisTextureLoader();
+const isIOS = AFRAME.utils.device.isIOS();
 
-export function createBasisTexture(url) {
-  return new Promise((resolve, reject) => {
-    basisTextureLoader.load(
-      url,
-      function(texture) {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.onUpdate = function() {
-          // Delete texture data once it has been uploaded to the GPU
-          texture.mipmaps.length = 0;
-        };
-        // texture.anisotropy = 4;
-        resolve(texture);
-      },
-      undefined,
-      function(error) {
-        console.error(error);
-        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
-      }
-    );
-  });
+/**
+ * Create video element to be used as a texture.
+ *
+ * @param {string} src - Url to a video file.
+ * @returns {Element} Video element.
+ */
+export function createVideoOrAudioEl(type) {
+  const el = document.createElement(type);
+  el.setAttribute("playsinline", "");
+  el.setAttribute("webkit-playsinline", "");
+  // iOS Safari requires the autoplay attribute, or it won't play the video at all.
+  el.autoplay = true;
+  // iOS Safari will not play videos without user interaction. We mute the video so that it can autoplay and then
+  // allow the user to unmute it with an interaction in the unmute-video-button component.
+  el.muted = isIOS;
+  el.preload = "auto";
+  el.crossOrigin = "anonymous";
+
+  return el;
 }
 
 export function addMeshScaleAnimation(mesh, initialScale, onComplete) {

@@ -39,7 +39,7 @@ function getCategoryDisplayName(category) {
     case "images":
       return "Images";
     case "theme":
-      return "Theme";
+      return "Themes";
     case "links":
       return "Links";
     case "auth":
@@ -149,7 +149,8 @@ const DESCRIPTOR_FIELDS = [
   "name",
   "description",
   "internal",
-  "source"
+  "source",
+  "deprecated"
 ];
 function isDescriptor(obj) {
   if (typeof obj !== "object") return false;

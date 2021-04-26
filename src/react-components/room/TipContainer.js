@@ -6,6 +6,21 @@ import { useEffect } from "react";
 import { discordBridgesForPresences, hasEmbedPresences } from "../../utils/phoenix-utils";
 import configs from "../../utils/configs";
 
+// These keys are hardcoded in the input system to be based on the physical location on the keyboard rather than character
+let moveKeys = "W A S D";
+let turnLeftKey = "Q";
+let turnRightKey = "E";
+
+// TODO The API to map from physical key to character is experimental. Depending on prospects of this getting wider
+// implimentation we may want to cook up our own polyfill based on observing key inputs
+if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
+  window.navigator.keyboard.getLayoutMap().then(function(map) {
+    moveKeys = `${map.get("KeyW")} ${map.get("KeyA")} ${map.get("KeyS")} ${map.get("KeyD")}`.toUpperCase();
+    turnLeftKey = map.get("KeyQ").toUpperCase();
+    turnRightKey = map.get("KeyE").toUpperCase();
+  });
+}
+
 const onboardingMessages = defineMessages({
   "tips.mobile.look": {
     id: "tips.mobile.look",
@@ -25,11 +40,11 @@ const onboardingMessages = defineMessages({
   },
   "tips.desktop.locomotion": {
     id: "tips.desktop.locomotion",
-    defaultMessage: "Use the W A S D keys to move. Hold shift to boost."
+    defaultMessage: "Use the {moveKeys} keys to move. Hold shift to boost."
   },
   "tips.desktop.turning": {
     id: "tips.desktop.turning",
-    defaultMessage: "Perfect. Use the Q and E keys to rotate."
+    defaultMessage: "Perfect. Use the {turnLeftKey} and {turnRightKey} keys to rotate."
   },
   "tips.desktop.invite": {
     id: "tips.desktop.invite",
@@ -106,7 +121,12 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
     if (onboardingTipId) {
       return (
         <Tip onDismiss={onSkipOnboarding} dismissLabel={<SkipDismissLabel />}>
-          {intl.formatMessage(onboardingMessages[onboardingTipId], { appName: configs.translation("app-name") })}
+          {intl.formatMessage(onboardingMessages[onboardingTipId], {
+            appName: configs.translation("app-name"),
+            moveKeys,
+            turnLeftKey,
+            turnRightKey
+          })}
         </Tip>
       );
     }

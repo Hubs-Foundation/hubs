@@ -38,7 +38,6 @@ const names = [
   "Harlequin",
   "Hartlaubs",
   "Hooded-Merganser",
-  "Hottentot-Teal",
   "Kelp-Goose",
   "King-Eider",
   "Lake-Duck",

@@ -3,7 +3,10 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { MicSetupModal } from "./MicSetupModal";
 
 export default {
-  title: "MicSetupModal"
+  title: "Room/MicSetupModal",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 const micOptions = ["Microphone 1", "Microphone 2", "Microphone 3"];
@@ -13,10 +16,6 @@ export const Base = () => (
     viewport={<MicSetupModal selectedMicrophone="Microphone 1" microphoneEnabled microphoneOptions={micOptions} />}
   />
 );
-
-Base.parameters = {
-  layout: "fullscreen"
-};
 
 export const TestMicrophone = () => (
   <RoomLayout
@@ -31,10 +30,6 @@ export const TestMicrophone = () => (
   />
 );
 
-TestMicrophone.parameters = {
-  layout: "fullscreen"
-};
-
 export const TestSound = () => (
   <RoomLayout
     viewport={
@@ -43,14 +38,6 @@ export const TestSound = () => (
   />
 );
 
-TestSound.parameters = {
-  layout: "fullscreen"
-};
-
 export const MicrophoneDisabled = () => (
   <RoomLayout viewport={<MicSetupModal selectedMicrophone="Microphone 1" microphoneOptions={micOptions} />} />
 );
-
-MicrophoneDisabled.parameters = {
-  layout: "fullscreen"
-};

@@ -6,6 +6,8 @@ import "@babel/polyfill";
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
 
+import "./react-components/styles/global.scss";
+import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
 import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
@@ -17,7 +19,6 @@ patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
-import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
@@ -116,6 +117,7 @@ import "./components/inspect-pivot-offset-from-camera";
 import "./components/optional-alternative-to-not-hide";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
+import "./components/video-texture-target";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -163,6 +165,7 @@ import "./gltf-component-mappings";
 
 import { App } from "./App";
 import MediaDevicesManager from "./utils/media-devices-manager";
+import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 window.APP = new App();
@@ -219,6 +222,7 @@ import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -267,6 +271,7 @@ function setupLobbyCamera() {
 }
 
 let uiProps = {};
+let connectionErrorTimeout = null;
 
 // Hub ID and slug are the basename
 let routerBaseName = document.location.pathname
@@ -292,30 +297,32 @@ function mountUI(props = {}) {
 
   ReactDOM.render(
     <WrappedIntlProvider>
-      <Router history={history}>
-        <Route
-          render={routeProps =>
-            props.showOAuthScreen ? (
-              <OAuthScreenContainer oauthInfo={props.oauthInfo} />
-            ) : props.roomUnavailableReason ? (
-              <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
-            ) : (
-              <UIRoot
-                {...{
-                  scene,
-                  isBotMode,
-                  disableAutoExitOnIdle,
-                  forcedVREntryType,
-                  store,
-                  mediaSearchStore,
-                  ...props,
-                  ...routeProps
-                }}
-              />
-            )
-          }
-        />
-      </Router>
+      <ThemeProvider store={store}>
+        <Router history={history}>
+          <Route
+            render={routeProps =>
+              props.showOAuthScreen ? (
+                <OAuthScreenContainer oauthInfo={props.oauthInfo} />
+              ) : props.roomUnavailableReason ? (
+                <ExitedRoomScreenContainer reason={props.roomUnavailableReason} />
+              ) : (
+                <UIRoot
+                  {...{
+                    scene,
+                    isBotMode,
+                    disableAutoExitOnIdle,
+                    forcedVREntryType,
+                    store,
+                    mediaSearchStore,
+                    ...props,
+                    ...routeProps
+                  }}
+                />
+              )
+            }
+          />
+        </Router>
+      </ThemeProvider>
     </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );
@@ -453,6 +460,14 @@ async function updateUIForHub(hub, hubChannel) {
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 
+function onConnectionError(entryManager, connectError) {
+  console.error("An error occurred while attempting to connect to networked scene:", connectError);
+  // hacky until we get return codes
+  const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
+  remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
+  entryManager.exitScene();
+}
+
 function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
@@ -487,7 +502,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     }
   }
 
-  console.log(`Janus host: ${hub.host}:${hub.port}`);
+  console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
   remountUI({
     messageDispatch: messageDispatch,
@@ -535,15 +550,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   // TODO Remove this once transition completed.
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
-    let adapter = "janus";
-
-    try {
-      // Meta endpoint exists only on dialog
-      await fetch(`https://${hub.host}:${hub.port}/meta`);
-      adapter = "dialog";
-    } catch (e) {
-      // Ignore, set to janus.
-    }
+    const adapter = "dialog";
 
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
@@ -555,30 +562,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
     scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
-      let newHostPollInterval = null;
-
-      // When reconnecting, update the server URL if necessary
-      adapter.setReconnectionListeners(
-        () => {
-          if (newHostPollInterval) return;
-
-          newHostPollInterval = setInterval(async () => {
-            const currentServerURL = scene.getAttribute("networked-scene").serverURL;
-            const newServerURL = adapter.serverURL;
-            if (currentServerURL !== newServerURL) {
-              console.log("Connecting to new Janus server " + newServerURL);
-              scene.setAttribute("networked-scene", { serverURL: newServerURL });
-              adapter.serverUrl = newServerURL;
-            }
-          }, 1000);
-        },
-        () => {
-          clearInterval(newHostPollInterval);
-          newHostPollInterval = null;
-        },
-        null
-      );
-
       const sendViaPhoenix = reliable => (clientId, dataType, data) => {
         const payload = { dataType, data };
 
@@ -622,31 +605,28 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
       adapter.unreliableTransport = sendViaPhoenix(false);
     });
 
-    const loadEnvironmentAndConnect = () => {
-      updateEnvironmentForHub(hub, entryManager);
-      function onConnectionError() {
-        console.error("Unknown error occurred while attempting to connect to networked scene.");
-        remountUI({ roomUnavailableReason: ExitReason.connectError });
-        entryManager.exitScene();
-      }
-
-      const connectionErrorTimeout = setTimeout(onConnectionError, 90000);
+    const connect = () => {
+      // Safety guard just in case Protoo doens't fail in some case so we don't get stuck in the loading screen forever.
+      connectionErrorTimeout = setTimeout(onConnectionError, 30000, entryManager, "Timeout connecting to the room");
       scene.components["networked-scene"]
         .connect()
         .then(() => {
           clearTimeout(connectionErrorTimeout);
+          connectionErrorTimeout = null;
+          console.log("Successfully connected to the networked scene.");
           scene.emit("didConnectToNetworkedScene");
         })
         .catch(connectError => {
           clearTimeout(connectionErrorTimeout);
-          // hacky until we get return codes
-          const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
-          console.error(connectError);
-          remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
-          entryManager.exitScene();
-
-          return;
+          connectionErrorTimeout = null;
+          adapter.disconnect();
+          onConnectionError(entryManager, connectError);
         });
+    };
+
+    const loadEnvironmentAndConnect = () => {
+      updateEnvironmentForHub(hub, entryManager);
+      connect();
     };
 
     window.APP.hub = hub;
@@ -681,7 +661,7 @@ async function runBotMode(scene, entryManager) {
   };
 
   while (!NAF.connection.isConnected()) await nextTick();
-  entryManager.enterSceneWhenLoaded(new MediaStream(), false);
+  entryManager.enterSceneWhenLoaded(false);
 }
 
 function checkForAccountRequired() {
@@ -784,10 +764,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
 
   window.APP.scene = scene;
-  window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store);
+  const audioSystem = scene.systems["hubs-systems"].audioSystem;
+  window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);
   window.APP.hubChannel = hubChannel;
 
-  const performConditionalSignIn = async (predicate, action, signInMessage, signInCompleteMessage, onFailure) => {
+  const performConditionalSignIn = async (predicate, action, signInMessage, onFailure) => {
     if (predicate()) return action();
 
     await handleExitTo2DInterstitial(true, () => remountUI({ showSignInDialog: false }));
@@ -795,7 +776,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({
       showSignInDialog: true,
       signInMessage,
-      signInCompleteMessage,
       onContinueAfterSignIn: async () => {
         remountUI({ showSignInDialog: false });
         let actionError = null;
@@ -988,7 +968,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   availableVREntryTypesPromise.then(async availableVREntryTypes => {
     if (isMobileVR) {
-      remountUI({ availableVREntryTypes, forcedVREntryType: "vr", checkingForDeviceAvailability: false });
+      remountUI({
+        availableVREntryTypes,
+        forcedVREntryType: qsVREntryType || "vr",
+        checkingForDeviceAvailability: false
+      });
 
       if (/Oculus/.test(navigator.userAgent) && "getVRDisplays" in navigator) {
         // HACK - The polyfill reports Cardboard as the primary VR display on startup out ahead of
@@ -1060,9 +1044,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  let retDeployReconnectInterval;
-  const retReconnectMaxDelayMs = 15000;
-
   // Reticulum global channel
   let retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
   retPhxChannel
@@ -1111,46 +1092,96 @@ document.addEventListener("DOMContentLoaded", async () => {
     return params;
   };
 
-  const migrateToNewReticulumServer = async deployNotification => {
-    // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
-    console.log(`Reticulum deploy detected v${deployNotification.ret_version} on ${deployNotification.ret_pool}`);
-    clearInterval(retDeployReconnectInterval);
-
-    setTimeout(() => {
-      const tryReconnect = async () => {
+  const tryGetMatchingMeta = async ({ ret_pool, ret_version }, shouldAbandonMigration) => {
+    const backoffMS = 5000;
+    const randomMS = 15000;
+    const maxAttempts = 10;
+    let didMatchMeta = false;
+    let attempt = 0;
+    while (!didMatchMeta && attempt < maxAttempts && !shouldAbandonMigration()) {
+      try {
+        // Add randomness to the first request avoid flooding reticulum.
+        const delayMS = attempt * backoffMS + (attempt === 0 ? Math.random() * randomMS : 0);
+        console.log(
+          `[reconnect] Getting reticulum meta in ${Math.ceil(delayMS / 1000)} seconds.${
+            attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""
+          }`
+        );
+        await sleep(delayMS);
         invalidateReticulumMeta();
-        const reticulumMeta = await getReticulumMeta();
+        console.log(
+          `[reconnect] Getting reticulum meta.${attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""}`
+        );
+        const { pool, version } = await getReticulumMeta();
+        didMatchMeta = ret_pool === pool && ret_version === version;
+      } catch {
+        didMatchMeta = false;
+      }
 
-        if (
-          reticulumMeta.pool === deployNotification.ret_pool &&
-          reticulumMeta.version === deployNotification.ret_version
-        ) {
-          console.log("Reticulum reconnecting.");
-          clearInterval(retDeployReconnectInterval);
-          const oldSocket = retPhxChannel.socket;
-          const socket = await connectToReticulum(isDebug, oldSocket.params());
-          retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
-          await hubChannel.migrateToSocket(socket, createHubChannelParams());
-          authChannel.setSocket(socket);
-          linkChannel.setSocket(socket);
-
-          // Disconnect old socket after a delay to ensure this user is always registered in presence.
-          setTimeout(() => {
-            console.log("Reconnection complete. Disconnecting old reticulum socket.");
-            oldSocket.teardown();
-          }, 10000);
-        }
-      };
-
-      retDeployReconnectInterval = setInterval(tryReconnect, 5000);
-      tryReconnect();
-    }, Math.floor(Math.random() * retReconnectMaxDelayMs));
+      attempt = attempt + 1;
+    }
+    return didMatchMeta;
   };
 
-  retPhxChannel.on("notice", async data => {
-    // On Reticulum deploys, reconnect after a random delay until pool + version match deployed version/pool
+  const migrateToNewReticulumServer = async ({ ret_version, ret_pool }, shouldAbandonMigration) => {
+    console.log(`[reconnect] Reticulum deploy detected v${ret_version} on ${ret_pool}.`);
+
+    const didMatchMeta = await tryGetMatchingMeta({ ret_version, ret_pool }, shouldAbandonMigration);
+    if (!didMatchMeta) {
+      console.error(`[reconnect] Failed to reconnect. Did not get meta for v${ret_version} on ${ret_pool}.`);
+      return;
+    }
+
+    console.log("[reconnect] Reconnect in progress. Updated reticulum meta.");
+    const oldSocket = retPhxChannel.socket;
+    const socket = await connectToReticulum(isDebug, oldSocket.params());
+    retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
+    await hubChannel.migrateToSocket(socket, createHubChannelParams());
+    authChannel.setSocket(socket);
+    linkChannel.setSocket(socket);
+
+    // Disconnect old socket after a delay to ensure this user is always registered in presence.
+    await sleep(10000);
+    oldSocket.teardown();
+    console.log("[reconnect] Reconnection successful.");
+  };
+
+  const onRetDeploy = (function() {
+    let pendingNotification = null;
+    const hasPendingNotification = function() {
+      return !!pendingNotification;
+    };
+
+    const handleNextMessage = (function() {
+      let isLocked = false;
+      return async function handleNextMessage() {
+        if (isLocked || !pendingNotification) return;
+
+        isLocked = true;
+        const currentNotification = Object.assign({}, pendingNotification);
+        pendingNotification = null;
+        try {
+          await migrateToNewReticulumServer(currentNotification, hasPendingNotification);
+        } catch {
+          console.error("Failed to migrate to new reticulum server after deploy.", currentNotification);
+        } finally {
+          isLocked = false;
+          handleNextMessage();
+        }
+      };
+    })();
+
+    return function onRetDeploy(deployNotification) {
+      // If for some reason we receive multiple deployNotifications, only the
+      // most recent one matters. The rest can be overwritten.
+      pendingNotification = deployNotification;
+      handleNextMessage();
+    };
+  })();
+
+  retPhxChannel.on("notice", data => {
     if (data.event === "ret-deploy") {
-      await migrateToNewReticulumServer(data);
+      onRetDeploy(data);
     }
   });
 
@@ -1346,64 +1377,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       hubChannel.setPermissionsFromToken(permsToken);
 
       scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
-        // HUGE HACK Safari does not like it if the first peer seen does not immediately
-        // send audio over its media stream. Otherwise, the stream doesn't work and stays
-        // silent. (Though subsequent peers work fine.) This only affects naf janus adapter
-        // not mediasoup.
-        //
-        // This hooks up a simple audio pipeline to push a short tone over the WebRTC
-        // media stream as its created to mitigate this Safari bug.
-        //
-        // Users will never hear this tone -- the outgoing media track is overwritten
-        // before we spawn our avatar, which is when other users will begin hearing
-        // the audio.
-        //
-        // This only covers the case where a Safari user is in the room and the first
-        // other user joins. If a user is in the room and Safari user joins,
-        // then Safari can fail to receive audio from a single peer (it does not seem
-        // to be related to silence, but may be a factor.)
-        let track, oscillator, stream;
-
-        // TODO remove after dialog
-        if (adapter.type !== "dialog") {
-          console.log("Using Janus SFU");
-          const ctx = THREE.AudioContext.getContext();
-          oscillator = ctx.createOscillator();
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0.01, ctx.currentTime);
-          const dest = ctx.createMediaStreamDestination();
-          oscillator.connect(gain);
-          gain.connect(dest);
-          oscillator.start();
-          const stream = dest.stream;
-          track = stream.getAudioTracks()[0];
-        }
-
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
+        adapter.setServerParams(await window.APP.hubChannel.getHost());
+        adapter.setReconnectionListeners(
+          async () => {
+            const { host, port } = await hubChannel.getHost();
+            const newServerURL = `wss://${host}:${port}`;
+            // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
+            if (adapter.serverUrl !== newServerURL) {
+              console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
+              scene.setAttribute("networked-scene", { serverURL: newServerURL });
+              adapter.setServerUrl(newServerURL);
+              adapter.setServerParams(await window.APP.hubChannel.getHost());
+              adapter.reconnect();
+            }
+            // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
+            if (!connectionErrorTimeout) {
+              connectionErrorTimeout = setTimeout(() => {
+                adapter.disconnect();
+                onConnectionError(entryManager, "Timeout trying to reconnect to the room");
+              }, 30000);
+            }
+          },
+          () => {
+            clearTimeout(connectionErrorTimeout);
+            connectionErrorTimeout = null;
+          }
+        );
+
         setupPeerConnectionConfig(adapter);
 
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
-
-        // Stop the tone after we've connected, which seems to mitigate the issue without actually
-        // having to keep this playing and using bandwidth.
-        scene.addEventListener(
-          "didConnectToNetworkedScene",
-          () => {
-            if (oscillator) {
-              oscillator.stop();
-            }
-
-            if (track) {
-              track.enabled = false;
-            }
-          },
-          { once: true }
-        );
-
-        if (stream) {
-          await adapter.setLocalMediaStream(stream);
-        }
       });
 
       subscriptions.setHubChannel(hubChannel);

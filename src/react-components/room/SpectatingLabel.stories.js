@@ -3,7 +3,7 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { SpectatingLabel } from "./SpectatingLabel";
 
 export default {
-  title: "SpectatingLabel",
+  title: "Room/SpectatingLabel",
   parameters: {
     layout: "fullscreen"
   }

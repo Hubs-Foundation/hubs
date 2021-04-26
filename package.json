@@ -66,6 +66,7 @@
     ]
   },
   "dependencies": {
+    "@braintree/sanitize-url": "^5.0.0",
     "@formatjs/intl-locale": "^2.4.13",
     "@formatjs/intl-pluralrules": "^4.0.3",
     "@formatjs/intl-relativetimeformat": "^8.0.1",
@@ -96,6 +97,7 @@
     "draft-js-hashtag-plugin": "^2.0.3",
     "draft-js-linkify-plugin": "^2.0.1",
     "draft-js-plugins-editor": "^2.1.1",
+    "emoji-mart": "^3.0.1",
     "event-target-shim": "^3.0.1",
     "form-data": "^3.0.0",
     "form-urlencoded": "^2.0.4",
@@ -109,7 +111,6 @@
     "linkify-it": "^2.0.3",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
-    "naf-janus-adapter": "^4.0.1",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
     "node-ensure": "0.0.0",
@@ -187,7 +188,7 @@
     "internal-ip": "^6.1.0",
     "jsdom": "^15.1.1",
     "localstorage-memory": "^1.0.3",
-    "mediasoup-client": "^3.6.21",
+    "mediasoup-client": "^3.6.29",
     "mini-css-extract-plugin": "^0.8.0",
     "ncp": "^2.0.0",
     "node-fetch": "^2.6.1",

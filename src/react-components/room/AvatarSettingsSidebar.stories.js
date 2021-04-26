@@ -3,11 +3,10 @@ import { RoomLayout } from "../layout/RoomLayout";
 import { AvatarSettingsSidebar } from "./AvatarSettingsSidebar";
 
 export default {
-  title: "AvatarSettingsSidebar"
+  title: "Room/AvatarSettingsSidebar",
+  parameters: {
+    layout: "fullscreen"
+  }
 };
 
 export const Base = () => <RoomLayout sidebar={<AvatarSettingsSidebar />} />;
-
-Base.parameters = {
-  layout: "fullscreen"
-};

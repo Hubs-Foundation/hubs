@@ -7,9 +7,12 @@ import { ReactComponent as WandIcon } from "../icons/Wand.svg";
 import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
 import { ReactComponent as SendIcon } from "../icons/Send.svg";
+import { ReactComponent as ReactionIcon } from "../icons/Reaction.svg";
 import { IconButton } from "../input/IconButton";
 import { TextAreaInput } from "../input/TextAreaInput";
 import { ToolbarButton } from "../input/ToolbarButton";
+import { Popover } from "../popover/Popover";
+import { EmojiPicker } from "./EmojiPicker";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
@@ -29,6 +32,36 @@ export function SendMessageButton(props) {
     </IconButton>
   );
 }
+
+export function EmojiPickerPopoverButton({ onSelectEmoji }) {
+  return (
+    <Popover
+      title=""
+      content={props => (
+        <EmojiPicker
+          onSelect={emoji => {
+            onSelectEmoji(emoji);
+            // eslint-disable-next-line react/prop-types
+            props.closePopover();
+          }}
+          {...props}
+        />
+      )}
+      placement="top"
+      offsetDistance={28}
+    >
+      {({ togglePopover, popoverVisible, triggerRef }) => (
+        <IconButton ref={triggerRef} className={styles.chatInputIcon} selected={popoverVisible} onClick={togglePopover}>
+          <ReactionIcon />
+        </IconButton>
+      )}
+    </Popover>
+  );
+}
+
+EmojiPickerPopoverButton.propTypes = {
+  onSelectEmoji: PropTypes.func.isRequired
+};
 
 export function MessageAttachmentButton(props) {
   return (
@@ -85,7 +118,9 @@ export const LogMessageType = {
   setAudioNormalizationFactor: "setAudioNormalizationFactor",
   audioNormalizationDisabled: "audioNormalizationDisabled",
   audioNormalizationNaN: "audioNormalizationNaN",
-  invalidAudioNormalizationRange: "invalidAudioNormalizationRange"
+  invalidAudioNormalizationRange: "invalidAudioNormalizationRange",
+  audioSuspended: "audioSuspended",
+  audioResumed: "audioResumed"
 };
 
 const logMessages = defineMessages({
@@ -157,6 +192,14 @@ const logMessages = defineMessages({
     id: "chat-sidebar.log-message.invalid-audio-normalization-range",
     defaultMessage:
       "audioNormalization command needs a base volume number between 0 [no normalization] and 255. Default is 0. The recommended value is 4, if you would like to enable normalization."
+  },
+  [LogMessageType.audioSuspended]: {
+    id: "chat-sidebar.log-message.audio-suspended",
+    defaultMessage: "Audio has been suspended, click somewhere in the room to resume the audio."
+  },
+  [LogMessageType.audioResumed]: {
+    id: "chat-sidebar.log-message.audio-resumed",
+    defaultMessage: "Audio has been resumed."
   }
 });
 
@@ -242,7 +285,7 @@ function MessageBubble({ media, monospace, emoji, children }) {
 MessageBubble.propTypes = {
   media: PropTypes.bool,
   monospace: PropTypes.bool,
-  emoji: PropTypes.bool,
+  emoji: PropTypes.oneOfType([PropTypes.bool, PropTypes.array]),
   children: PropTypes.node
 };
 
@@ -327,7 +370,7 @@ export function ChatToolbarButton(props) {
     <ToolbarButton
       {...props}
       icon={<ChatIcon />}
-      preset="blue"
+      preset="accent4"
       label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
     />
   );

@@ -91,7 +91,7 @@ export function EnterOnDeviceModal({
                     </small>
                     <Button
                       as="a"
-                      preset="orange"
+                      preset="accent2"
                       href="https://www.mozilla.org/firefox/"
                       target="_blank"
                       rel="noreferrer noopener"
@@ -112,7 +112,7 @@ export function EnterOnDeviceModal({
                         defaultMessage="You have a VR headset connected to this device."
                       />
                     </small>
-                    <Button preset="purple" onClick={onEnterOnConnectedHeadset}>
+                    <Button preset="accent5" onClick={onEnterOnConnectedHeadset}>
                       <VRIcon />
                       <span>
                         <FormattedMessage id="enter-on-device-modal.enter-in-vr-button" defaultMessage="Enter in VR" />

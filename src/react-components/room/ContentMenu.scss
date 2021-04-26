@@ -6,8 +6,8 @@
   right: 8px;
   display: flex;
   flex-direction: row;
-  background-color: theme.$white;
-  border: 1px solid theme.$lightgrey;
+  background-color: theme.$button-bg-color;
+  border: 1px solid theme.$button-border-color;
   border-radius: 12px;
   pointer-events: auto;
   padding: 4px;
@@ -38,31 +38,49 @@
   }
 
   &:hover {
-    background-color: theme.$lightgrey;
+    background-color: theme.$button-bg-color-hover;
+  }
+
+  &:active {
+    background-color: theme.$button-bg-color-pressed;
+  }
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
   }
 }
 
 :local(.active) {
-  color: theme.$white;
-  background-color: theme.$blue;
+  color: theme.$text5-color;
+  background-color: theme.$active-color;
 
   svg {
     *[stroke=\#000] {
-      stroke: theme.$white;
+      stroke: theme.$text5-color;
     }
 
     *[fill=\#000] {
-      fill: theme.$white;
+      fill: theme.$text5-color;
     }
   }
 
   &:hover {
-    background-color: theme.$blue-hover;
+    background-color: theme.$active-color-hover;
+  }
+
+  &:active {
+    background-color: theme.$active-color-pressed;
   }
 }
 
 :local(.separator) {
   width: 1px;
   margin: 0 8px;
-  background-color: theme.$lightgrey;
+  background-color: theme.$border1-color;
 }
