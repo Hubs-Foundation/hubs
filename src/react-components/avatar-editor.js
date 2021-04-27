@@ -56,7 +56,7 @@ class GLTFBinarySplitterPlugin {
 
   beforeRoot() {
     const parser = this.parser;
-    const {body} = parser.extensions.KHR_binary_glTF;
+    const { body } = parser.extensions.KHR_binary_glTF;
     const content = JSON.stringify(ensureAvatarMaterial(parser.json));
 
     // Inject hubs components on upload. Used to create base avatar
@@ -90,7 +90,7 @@ class GLTFBinarySplitterPlugin {
     // doesn't want to start the parse. But glTF loader plugin API
     // doesn't have an ability to cancel the parse. So overriding
     // parser.json with very light glTF data as workaround.
-    parser.json = {asset: {version: "2.0"}};
+    parser.json = { asset: { version: "2.0" } };
   }
 }
 
@@ -160,8 +160,9 @@ class AvatarEditor extends Component {
     e.preventDefault();
 
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
-      const gltfLoader = new THREE.GLTFLoader()
-        .register(parser => new GLTFBinarySplitterPlugin(parser, this.inputFiles));
+      const gltfLoader = new THREE.GLTFLoader().register(
+        parser => new GLTFBinarySplitterPlugin(parser, this.inputFiles)
+      );
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
 
