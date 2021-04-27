@@ -29,7 +29,7 @@ export function createToken({ scopes }) {
 
 export function revokeToken({ id }) {
     console.log("trying revoke...")
-  fetch(`${getReticulumFetchUrl(endpoint)}?id=${id}&revoke`, {
+  fetch(`${getReticulumFetchUrl(endpoint)}/${id}?revoke`, {
     headers: {
       "content-type": "application/json",
       authorization: `bearer ${window.APP.store.state.credentials.token}`
