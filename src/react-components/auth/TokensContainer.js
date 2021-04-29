@@ -4,12 +4,11 @@ import React, { useState, createContext, useContext, useEffect, Children, cloneE
 import PropTypes from "prop-types";
 import { TokensModal } from "./TokensModal";
 import { Token } from "./Token";
-import { fetchMyTokens, createToken, revokeToken } from "./credentials";
+import { fetchMyTokens, revokeToken } from "./credentials";
 
 export function TokensContainer() {
   const [tokens, setTokens] = useState([]);
   // Stages for create
-  const [createStage, setStage] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -25,10 +24,10 @@ export function TokensContainer() {
 
   return (
     <div>
-      {showModal && <TokensModal onCreateToken={createToken} onClose={onModalClose} />}
+      {showModal && <TokensModal onClose={onModalClose} />}
       <button
         onClick={() => {
-          setShowModal(true);
+          if (!showModal) setShowModal(true);
         }}
       >
         Create Token

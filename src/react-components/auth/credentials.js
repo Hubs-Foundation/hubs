@@ -17,47 +17,49 @@ function getHeaders() {
   };
 }
 
-export function createToken({ scopes, cb }) {
+export async function createToken({ scopes }) {
   console.log(scopes);
-  fetch(CREDENTIALS_ENDPOINT_URL, {
+  const res = await fetch(CREDENTIALS_ENDPOINT_URL, {
     headers: getHeaders(),
     method: "POST",
     body: JSON.stringify({
       scopes,
       subject_type: "account"
     })
-  }).then(async r => {
-    const result = await r.text();
-    return cb(JSON.parse(result));
   });
+  if (res.ok) {
+    return res.json();
+  } else {
+    console.log(res.status);
+    console.log(res.statusText);
+    throw new Error(res.statusText);
+  }
   // TODO handle error case
 }
 
-export function revokeToken({ id }) {
+export async function revokeToken({ id }) {
   console.log("trying revoke...");
-  fetch(`${CREDENTIALS_ENDPOINT_URL}/${id}?revoke`, {
+  const res = await fetch(`${CREDENTIALS_ENDPOINT_URL}/${id}?revoke`, {
     headers: getHeaders(),
     method: "PUT",
     body: JSON.stringify({
       id,
       revoke: true
     })
-  }).then(async r => {
-    const result = await r.text();
-    return JSON.parse(result);
   });
+  if (res.ok) {
+    return res.json();
+  } else {
+    console.log(res.status);
+    console.log(res.statusText);
+    throw new Error(res.statusText);
+  }
 }
 
 export function fetchAvailableScopes() {
   // TODO turn into a fetch
   // fetch(`${CREDENTIALS_ENDPOINT}/scopes`, {
   //   headers: getHeaders()
-  // }).then(async r => {
-  //   const result = await r.text();
-  //   return JSON.parse(result);
-  // }).catch(e => {
-  // todo fix
-  //   throw new Error("failed to fetch scopes")
-  // });;
+  // })
   return ["read_rooms", "write_rooms"];
 }

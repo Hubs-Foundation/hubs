@@ -6,24 +6,38 @@ import { Spinner } from "../misc/Spinner";
 import { Modal } from "../modal/Modal";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
-import { fetchAvailableScopes } from "./credentials";
+import { createToken, fetchAvailableScopes } from "./credentials";
 import { CloseButton } from "../input/CloseButton";
 
-export function TokensModal({ onCreateToken, children, onClose }) {
+export function TokensModal({ children, onClose }) {
   // 0 - select scopes, 1 - loading new api token, 2 - show api token once, 3 - error
   const [currentStep, setStep] = useState(0);
-  const [credentials, setCredentials] = useState("");
+  const [token, setToken] = useState("");
+  const [errorMsg, setError] = useState("");
+
+  const onCreateToken = async ({ scopes }) => {
+    setStep(1);
+    try {
+      const tokenInfoObj = await createToken({ scopes });
+      console.log(token);
+      const token = tokenInfoObj.credentials..token;
+      setToken(token);
+      setStep(2);
+    } catch (err) {
+      setError(err.message);
+      setStep(3);
+    }
+  };
 
   return (
     <Modal
       title={<FormattedMessage id="tokens-modal.title" defaultMessage="Tokens" />}
       afterTitle={<CloseButton onClick={onClose} />}
-      disableFullscreen
     >
-      {currentStep === 0 && <SelectScopesAndCreate onCreateToken={onCreateToken} setCredentials setStep />}
+      {currentStep === 0 && <SelectScopesAndCreate onCreateToken={onCreateToken} />}
       {currentStep === 1 && <Spinner />}
-      {currentStep === 2 && <ShowCredentialsOnce credentials setStep />}
-      {currentStep === 3 && <Error onClose />}
+      {currentStep === 2 && <ShowCredentialsOnce token={token} onClose={onClose} />}
+      {currentStep === 3 && <Error errorMsg={errorMsg} onClose={onClose} />}
     </Modal>
   );
 }
@@ -53,10 +67,6 @@ function SelectScopesAndCreate({ onCreateToken }) {
 
   const onSubmit = e => {
     e && e.preventDefault();
-
-    // this.props.store.update({
-    //   profile: { avatarId: this.state.avatar.avatar_id }
-    // });
   };
 
   return (
@@ -106,15 +116,26 @@ function ScopeCheckbox({ name, selectedScopes, toggleSelectedScopes }) {
   );
 }
 
-function Error() {
-  return <p>An Error occurred please try again later</p>;
+function Error({ errorMsg, onClose }) {
+  return (
+    <>
+      <p>An Error occurred please try again later</p>
+      <p>{errorMsg}</p>
+      <button onClick={onClose}>Ok</button>
+    </>
+  );
 }
 
-function ShowCredentialsOnce() {
-  return <p>I am showing credentials</p>;
+function ShowCredentialsOnce({ token, onClose }) {
+  return (
+    <div>
+      <p>Please save your API Token in a safe place. This will be shown only once.</p>
+      <p>{token}</p>
+      <button onClick={onClose}>Close</button>
+    </div>
+  );
 }
 
 TokensModal.propTypes = {
-  children: PropTypes.node,
-  onCreateToken: PropTypes.func
+  children: PropTypes.node
 };
