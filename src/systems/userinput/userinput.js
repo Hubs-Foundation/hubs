@@ -413,19 +413,15 @@ AFRAME.registerSystem("userinput", {
     }
 
     const retrieveXRGamepads = ({ added, removed }) => {
-      if (removed) {
-        for (const inputSource of removed) {
-          gamepadDisconnected(inputSource);
-        }
+      for (const inputSource of removed) {
+        gamepadDisconnected(inputSource);
       }
-      if (added) {
-        for (const inputSource of added) {
-          inputSource.gamepad.isWebXRGamepad = true;
-          inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
-          inputSource.gamepad.primaryProfile = inputSource.profiles[0];
-          inputSource.gamepad.hand = inputSource.handedness;
-          gamepadConnected(inputSource);
-        }
+      for (const inputSource of added) {
+        inputSource.gamepad.isWebXRGamepad = true;
+        inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
+        inputSource.gamepad.primaryProfile = inputSource.profiles[0];
+        inputSource.gamepad.hand = inputSource.handedness;
+        gamepadConnected(inputSource);
       }
     };
 
@@ -437,14 +433,8 @@ AFRAME.registerSystem("userinput", {
           this.xrReferenceSpace = referenceSpace;
         });
         xrSession.addEventListener("end", e => {
-          const xrDevices = this.activeDevices.items.filter(d => d.gamepad && d.gamepad.isWebXRGamepad);
-          for (const device of xrDevices) {
-            if (device.gamepad && device.gamepad.isWebXRGamepad) {
-              gamepadDisconnected(device);
-            }
-          }
+          this.activeDevices.items.filter(d => d.gamepad && d.gamepad.isWebXRGamepad).forEach(gamepadDisconnected);
         });
-        retrieveXRGamepads({ session: xrSession });
       }
       updateBindingsForVRMode();
     });
