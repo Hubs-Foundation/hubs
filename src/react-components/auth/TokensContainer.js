@@ -1,6 +1,6 @@
 // TODO ADD TRANSLATIONS
 /* eslint-disable @calm/react-intl/missing-formatted-message */
-import React, { useState, createContext, useContext, useEffect, Children, cloneElement } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { TokensModal } from "./TokensModal";
 import { Token } from "./Token";
@@ -9,7 +9,8 @@ import { fetchMyTokens, revokeToken } from "./credentials";
 export function TokensContainer() {
   const [tokens, setTokens] = useState([]);
   // Stages for create
-  const [showModal, setShowModal] = useState(false);
+  const [showCreateTokenModal, setShowCreateTokenModal] = useState(false);
+  const [showRevokeTokenModal, setShowRevokeTokenModal] = useState(false);
 
   useEffect(() => {
     async function updateTokens() {
@@ -18,16 +19,20 @@ export function TokensContainer() {
     updateTokens();
   }, []);
 
-  const onModalClose = () => {
-    setShowModal(false);
+  const onCreateTokenModalClose = () => {
+    setShowCreateTokenModal(false);
+  };
+
+  const onRevokeTokenClose = () => {
+    setShowRevokeTokenModal(false);
   };
 
   return (
     <div>
-      {showModal && <TokensModal onClose={onModalClose} />}
+      {showCreateTokenModal && <TokensModal onClose={onCreateTokenModalClose} />}
       <button
         onClick={() => {
-          if (!showModal) setShowModal(true);
+          if (!showCreateTokenModal) setShowCreateTokenModal(true);
         }}
       >
         Create Token

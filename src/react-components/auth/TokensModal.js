@@ -1,10 +1,9 @@
 // TODO ADD TRANSLATIONS
 /* eslint-disable @calm/react-intl/missing-formatted-message */
-import React, { useState, createContext, useContext, useEffect, Children, cloneElement } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Spinner } from "../misc/Spinner";
 import { Modal } from "../modal/Modal";
-import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
 import { createToken, fetchAvailableScopes } from "./credentials";
 import { CloseButton } from "../input/CloseButton";
@@ -19,8 +18,7 @@ export function TokensModal({ children, onClose }) {
     setStep(1);
     try {
       const tokenInfoObj = await createToken({ scopes });
-      console.log(token);
-      const token = tokenInfoObj.credentials..token;
+      const token = tokenInfoObj.credentials[0].token;
       setToken(token);
       setStep(2);
     } catch (err) {
@@ -33,6 +31,7 @@ export function TokensModal({ children, onClose }) {
     <Modal
       title={<FormattedMessage id="tokens-modal.title" defaultMessage="Tokens" />}
       afterTitle={<CloseButton onClick={onClose} />}
+      disableFullscreen={false}
     >
       {currentStep === 0 && <SelectScopesAndCreate onCreateToken={onCreateToken} />}
       {currentStep === 1 && <Spinner />}
