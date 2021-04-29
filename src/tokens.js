@@ -5,7 +5,7 @@ import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
-import { TokensModalContainer } from "./react-components/auth/TokensModalContainer";
+import { TokensContainer } from "./react-components/auth/TokensContainer";
 import "./assets/stylesheets/globals.scss";
 import { PageContainer } from "./react-components/layout/PageContainer";
 import { Container } from "./react-components/layout/Container";
@@ -23,7 +23,7 @@ function Root() {
         <PageContainer>
           {(true || configs.feature("public_api_access")) && (
             <Container>
-              <TokensModalContainer />
+              <TokensContainer />
             </Container>
           )}
         </PageContainer>

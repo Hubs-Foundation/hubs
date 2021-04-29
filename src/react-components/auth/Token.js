@@ -1,23 +1,37 @@
 import React, { useState, createContext, useContext, useEffect, Children, cloneElement } from "react";
 import PropTypes from "prop-types";
 
-export function Token({ onRevokeToken, account_id, id, inserted_at, is_revoked, scopes, subject_type, token, updated_at }) {
+export function Token({
+  onRevokeToken,
+  account_id,
+  id,
+  inserted_at,
+  is_revoked,
+  scopes,
+  subject_type,
+  token,
+  updated_at
+}) {
   return (
     <div key={id}>
-
       <button
         onClick={function() {
-          console.log(scopes)
+          console.log(scopes);
           onRevokeToken({ id });
         }}
-      >Revoke Token</button>
+      >
+        Revoke Token
+      </button>
       <p>Account ID: {account_id}</p>
       <p>ID: {id}</p>
       <p>Inserted at: {inserted_at}</p>
       <p>Revoked: {is_revoked.toString()}</p>
-      {scopes.map(function(s) {
-        return <p>Scope: {s}</p>;
-      })}
+      <p>Scopes:</p>
+      <ul>
+        {scopes.map(function(s) {
+          return <li>Scope: {s}</li>;
+        })}
+      </ul>
       <p>Subject Type: {subject_type}</p>
       <p>Token: {token || "(redacted)"}</p>
       <p>Updated At: {updated_at}</p>
