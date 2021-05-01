@@ -347,6 +347,18 @@ class GLTFHubsPlugin {
     this.parser = parser;
     this.jsonPreprocessor = jsonPreprocessor;
     this.fileMap = fileMap;
+
+    // The latest GLTFLoader doesn't use ImageBitmapLoader for Firefox
+    // because the latest ImageBitmapLoader passes an option parameter
+    // to createImageBitmap() but Firefox createImageBitmap() fails
+    // if an option parameter is passed (known bug and already reported to bugzilla).
+    // But our r111 based ImageBitmapLoader doesn't pass the option parameter yet
+    // so we can use ImageBitmapLoader even for Firefox.
+    // When we replace our Three.js fork with the latest official one
+    // we need to revisit this workaround.
+    if (!parser.textureLoader.isImageBitmapLoader && typeof createImageBitmap !== undefined) {
+      parser.textureLoader = new THREE.ImageBitmapLoader(parser.options.manager);
+    }
   }
 
   beforeRoot() {
