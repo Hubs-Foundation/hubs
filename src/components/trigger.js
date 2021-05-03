@@ -9,6 +9,7 @@ export const ACTIONS ={
   SWITCH: "switch active",  
   SNAP: "snap",
   AUDIOZONE: "audiozone",
+  CHANGE_ROOM: "change room",
 };
 
 AFRAME.registerComponent('trigger', {
@@ -22,6 +23,7 @@ AFRAME.registerComponent('trigger', {
     switchActive: { type: "boolean", default: true},
     targetName: { default: "target" },
     triggerType: { default: "none" },
+    newRoomUrl: { default: "" },
     elementsInTrigger: { default: []},
       },
       init: function () {
@@ -117,6 +119,8 @@ AFRAME.registerComponent('trigger', {
             break; 
           case ACTIONS.AUDIOZONE	:
             break; 
+          case ACTIONS.CHANGE_ROOM	:
+            break; 
           }
       },
       initVariables: function()
@@ -129,6 +133,7 @@ AFRAME.registerComponent('trigger', {
         this.data.uuid = this.el.components["body-helper"].uuid;
         this.data.elementsInTrigger = [];
         this.data.targetName = this.data.targetName.replaceAll(" ", "_");
+        this.data.newRoomUrl = this.data.newRoomUrl != "" ? this.data.newRoomUrl : window.location.href;
       },
       setupCollisionGroup: function()
       {
@@ -156,6 +161,9 @@ AFRAME.registerComponent('trigger', {
             case ACTIONS.AUDIOZONE	:
               collisionMask = 4;
               break; 
+            case ACTIONS.CHANGE_ROOM	:
+              collisionMask = 4;
+              break;             
             }
         this.el.setAttribute("body-helper", {collisionFilterMask:this.data.cMask})
       } ,     
@@ -233,12 +241,15 @@ AFRAME.registerComponent('trigger', {
           case ACTIONS.SWITCH:
             this.switchVisibility(this.data.switchActive);
             break;
-            case ACTIONS.SNAP:
-              this.snap(element);
-              break;          
-            case ACTIONS.AUDIOZONE:
-              this.setAudioZone(element, this.data.channel);
-              break;
+          case ACTIONS.SNAP:
+            this.snap(element);
+            break;          
+          case ACTIONS.AUDIOZONE:
+            this.setAudioZone(element, this.data.channel);
+            break;
+          case ACTIONS.CHANGE_ROOM:
+            this.enterNewRoom();
+            break;
         }
       },
       onTriggerLeft: function(element)
@@ -268,6 +279,9 @@ AFRAME.registerComponent('trigger', {
             break;
           case ACTIONS.AUDIOZONE:
             this.setAudioZone(element, 0);
+            break;
+          case ACTIONS.CHANGE_ROOM:
+            this.enterNewRoom();
             break;
         }
       },
@@ -360,6 +374,10 @@ AFRAME.registerComponent('trigger', {
         
         element.object3D.rotation.copy(this.el.object3D.rotation);
         element.object3D.matrixNeedsUpdate = true;        
+      },
+      enterNewRoom: function()
+      {
+        window.open(this.data.newRoomUrl,"_self");
       },
       isColliding: function(entityA, entityB) {
         const bodyAUUID = entityA.components["body-helper"].uuid;

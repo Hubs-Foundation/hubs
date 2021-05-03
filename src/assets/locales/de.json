@@ -562,5 +562,6 @@
   "webvr-unsupported-modal.message": "WebVR wird in diesem Browser nicht unterstützt, um mit Oculus oder SteamVR einzusteigen, verwenden Sie Firefox oder Google Chrom.",
   "webvr-unsupported-modal.title": "Betreten in VR",
   "webvr-unsupported-modal.webvr-rocks-link": "Eine Liste von Browsern mit experimenteller VR-Unterstützung finden Sie unter <a>WebVR Rocks</a>.",
-  "whats-new-page.title": "Was gibt es Neues"
+  "whats-new-page.title": "Was gibt es Neues",
+  "editor-name": "Szenen Editor"
 }
