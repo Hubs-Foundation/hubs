@@ -169,8 +169,9 @@ AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, compon
 });
 
 AFRAME.GLTFModelPlus.registerComponent("frame-trigger", "frame-trigger", (el, componentName, componentData, components) => {
+  console.log("GLTFModelPlus frame-trigger el", el);
   console.log("GLTFModelPlus frame-trigger componentData", componentData);
-  
+
   el.setAttribute("networked", {
     template: "#interactable-frame-trigger",
     owner: "scene",
