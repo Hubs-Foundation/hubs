@@ -117,7 +117,7 @@
                 </a-entity>
             </template>
             <template id="remote-avatar">
-                <a-entity tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info matrix-auto-update visible="false">
+                <a-entity megaphone ismegaphone="false" tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update>
                         <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                     </a-entity>
@@ -133,6 +133,8 @@
                                 hand-pose__left
                                 hand-pose__right
                                 networked-audio-analyser
+                                body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 17;"
+                                shape-helper="type: cylinder; fit: manual; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
                             ></a-entity>
                         </template>
 
@@ -142,16 +144,16 @@
                                     billboard
                                     class="nametag"
                                     text="side: double; align: center; color: #ddd"
-                                    position="0 1 0"
-                                    scale="6 6 6"
+                                    position="0 0.4 0"
+                                    scale="2 2 2"
                                 ></a-entity>
                                 <a-entity
                                     billboard
                                     class="identityName"
                                     text="side: double; align: center; color: #ddd"
                                     visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
-                                    position="0 0.8 0"
-                                    scale="3 3 3"
+                                    position="0 0.5 0"
+                                    scale="0 0 0"
                                 ></a-entity>
                                 <a-entity
                                     billboard
@@ -159,15 +161,15 @@
                                     class="recordingBadge"
                                     sprite="name: recording-badge.png"
                                     scale="0.10 0.10 0.10"
-                                    position="0 1.2 -0.02"
+                                    position="0 1.2 0"
                                 ></a-entity>
                                 <a-entity
                                     billboard
                                     is-not-remote-hover-target
                                     class="modBadge"
                                     sprite="name: mod-badge.png"
-                                    scale="0.10 0.10 0.10"
-                                    position="0 1.2 -0.02"
+                                    scale="0.1 0.1 0.1"
+                                    position="0 0.55 0"
                                 ></a-entity>
                             </a-entity>
                         </template>
@@ -221,10 +223,7 @@
                             <a-entity
                                 avatar-audio-source="rolloffFactor: 2.0;"
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
-                                bone-visibility
-                                body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
-                                shape-helper="type: cylinder; fit: manual; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
-                            ></a-entity>
+                                bone-visibility></a-entity>
                         </template>
 
                         <template data-name="LeftHand">
@@ -592,6 +591,17 @@
                 </a-entity>
             </template>
 
+            <template id="interactable-frame-trigger">
+                <!--
+                    note we intentionally don't setup the shape or media-frame here since they both don't support dynamic updates
+                    and so must be configured when creating the entity on each client. Since we only support media frames in scenes
+                    for now, this is acceptable, but TODO this will need to be handled if we want to dynamically spawn them.
+                -->
+                <a-entity  
+                body-helper="type: kinematic; collisionFilterGroup: 16; collisionFilterMask: 1; disableCollision: true;" >
+            </a-entity>
+
+            </template>
 
             <template id="linked-media">
                 <a-entity
@@ -1092,6 +1102,8 @@
 
         <!-- Avatar Rig -->
         <a-entity
+            ismegaphone="false"
+            audio-channel
             id="avatar-rig"
             ik-root
             player-info
@@ -1246,7 +1258,9 @@
                         hand-pose__right
                         hand-pose-controller__left="networkedAvatar:#avatar-rig;eventSrc:#player-left-controller"
                         hand-pose-controller__right="networkedAvatar:#avatar-rig;eventSrc:#player-right-controller"
-                    ></a-entity>
+                        body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 17;"
+                        shape-helper="type: cylinder; fit: manual; halfExtents: 0.11 0.10 0.11; offset: 0 0.06 0.04;"
+                              ></a-entity>
                 </template>
 
                 <template data-name="Neck">
@@ -1260,7 +1274,10 @@
                     </a-entity>
                 </template>
                 <template data-name="Head">
-                    <a-entity id="avatar-head" visible="false" bone-visibility="updateWhileInvisible: true;"></a-entity>
+                    <a-entity
+                     id="avatar-head" 
+                     visible="false" 
+                     bone-visibility="updateWhileInvisible: true;"></a-entity>
                 </template>
 
                 <template data-name="LeftHand">
