@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useReducer, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import { AuthContext } from "../auth/AuthContext";
-import { createToken, fetchAvailableScopes } from "./token-utils";
-import { Modal } from "../modal/Modal";
-import { FormattedMessage } from "react-intl";
-import { CloseButton } from "../input/CloseButton";
 import { Spinner } from "../misc/Spinner";
+import { CreateTokenModal, SelectScopesAndCreate, Error, ShowCredentialsOnce } from "./CreateTokenModal";
+import { createToken, fetchAvailableScopes } from "./token-utils";
 
 const CreateTokenActions = {
   submitCreateToken: "submitCreateToken",
@@ -28,81 +25,87 @@ const steps = {
 const initialCreateTokenState = {
   step: steps.selectScopes,
   scopes: [],
-  selectedScopes: new Set(),
+  selectedScopes: [],
   token: "",
   error: "",
   showNoScopesSelectedError: false
 };
 
 function createTokenReducer(state, action) {
+  console.log("inside reducer");
+  console.log(state);
+  console.log(action);
   switch (action.type) {
     case CreateTokenActions.submitCreateToken:
-      return { step: steps.pending, ...state };
+      return { ...state, step: steps.pending };
     case CreateTokenActions.createTokenSuccess:
-      return { step: steps.success, token: action.token, ...state };
+      return { ...state, step: steps.success, token: action.token };
     case CreateTokenActions.createTokenError:
-      return { step: steps.error, error: action.errorMsg, ...state };
+      return { ...state, step: steps.error, error: action.errorMsg };
     case CreateTokenActions.fetchingScopesSuccess:
-      return { scopes: action.scopes, ...state };
+      console.log("FETCHED SCOPES");
+      return { ...state, scopes: action.scopes };
     case CreateTokenActions.fetchingScopesError:
-      return { step: steps.error, error: "Error fetching scopes, please try again later.", ...state };
+      return { ...state, step: steps.error, error: "Error fetching scopes, please try again later." };
     case CreateTokenActions.showNoScopesError:
-      return { showNoScopesSelectedError: true, ...state };
+      return { ...state, showNoScopesSelectedError: true };
     case CreateTokenActions.toggleScopeChange: {
-      const updated = new Set(state.selectedScopes);
-      if (updated.has(action.scopeName)) updated.delete(action.scopeName);
-      else updated.add(action.scopeName);
-      return { selectedScopes: updated };
+      return {
+        ...state,
+        selectedScopes: state.selectedScopes.includes(action.scopeName)
+          ? state.selectedScopes.filter(name => name !== action.scopeName)
+          : [...state.selectedScopes, action.scopeName]
+      };
     }
+    default:
+      return state;
   }
 }
 
 function useCreateToken() {
-  const auth = useContext(AuthContext);
+  console.log(useReducer);
   const [state, dispatch] = useReducer(createTokenReducer, initialCreateTokenState);
+  console.log(state);
+  console.log(dispatch);
 
   const onCreateToken = async ({ scopes }) => {
     // TODO add no scopes error to the view
-    if (scopes.length === 0) dispatch({ action: CreateTokenActions.showNoScopesError });
+    if (scopes.length === 0) return dispatch({ type: CreateTokenActions.showNoScopesError });
 
-    dispatch({ action: CreateTokenActions.submitCreateToken });
+    dispatch({ type: CreateTokenActions.submitCreateToken });
 
     try {
       const tokenInfoObj = await createToken({ scopes });
       const token = tokenInfoObj.credentials[0].token;
-      dispatch({ action: CreateTokenActions.createTokenSuccess, token });
+      dispatch({ type: CreateTokenActions.createTokenSuccess, token });
     } catch (err) {
-      dispatch({ action: CreateTokenActions.createTokenError, errorMsg: err.message });
+      dispatch({ type: CreateTokenActions.createTokenError, errorMsg: err.message });
     }
   };
 
-  const fetchScopes = useCallback(async () => {
-    // TODO async fetch implement
-    try {
-      const scopes = await fetchAvailableScopes();
-      dispatch({ action: CreateTokenActions.fetchingScopesSuccess, scopes });
-    } catch (err) {
-      dispatch({ action: CreateTokenActions.fetchingScopesError, errorMsg: err.message });
-    }
-  }, []);
+  const fetchScopes = useCallback(
+    () => {
+      // TODO async fetch implement
+      try {
+        console.log("inside useCreateToken, fetchScopes() ");
+        const scopes = fetchAvailableScopes();
+        console.log(scopes);
+        dispatch({ type: CreateTokenActions.fetchingScopesSuccess, scopes });
+      } catch (err) {
+        dispatch({ type: CreateTokenActions.fetchingScopesError, errorMsg: err.message });
+      }
+    },
+    [state.scopes]
+  );
 
   const toggleSelectedScopes = scopeName => {
-    dispatch({ action: CreateTokenActions.toggleScopeChange, scopeName });
+    dispatch({ type: CreateTokenActions.toggleScopeChange, scopeName });
   };
-
-  // useEffect(
-  //   () => {
-  //     setAvailableScopes(fetchAvailableScopes());
-  //     console.log("fetchAvailableScopes() ret:");
-  //     console.log(fetchAvailableScopes());
-  //   },
-  //   [scopes[0]]
-  // );
 
   return {
     step: state.step,
     scopes: state.scopes,
-    selectedScopes: state.selectScopes,
+    selectedScopes: state.selectedScopes,
     token: state.token,
     error: state.error,
     showNoScopesSelectedError: state.showNoScopesSelectedError,
@@ -132,12 +135,14 @@ export function CreateTokenContainer({ onClose }) {
     [scopes[0]]
   );
 
+  console.log("step");
+  console.log(step);
+
+  console.log("selectedScopes");
+  console.log(selectedScopes);
+
   return (
-    <Modal
-      title={<FormattedMessage id="tokens-modal.title" defaultMessage="Tokens" />}
-      afterTitle={<CloseButton onClick={onClose} />}
-      disableFullscreen={false}
-    >
+    <CreateTokenModal onClose={onClose}>
       {step === steps.selectScopes && (
         <SelectScopesAndCreate
           showNoScopesError={showNoScopesSelectedError}
@@ -150,6 +155,10 @@ export function CreateTokenContainer({ onClose }) {
       {step === steps.pending && <Spinner />}
       {step === steps.success && <ShowCredentialsOnce token={token} onClose={onClose} />}
       {step === steps.error && <Error errorMsg={error} onClose={onClose} />}
-    </Modal>
+    </CreateTokenModal>
   );
 }
+
+CreateTokenContainer.propTypes = {
+  onClose: PropTypes.func
+};

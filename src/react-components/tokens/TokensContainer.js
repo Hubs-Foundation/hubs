@@ -7,6 +7,7 @@ import { Token } from "./Token";
 import { fetchMyTokens, revokeToken } from "./token-utils";
 import { FormattedMessage } from "react-intl";
 import styles from "./Token.scss";
+import { CreateTokenContainer } from "./CreateTokenContainer";
 
 export function TokensContainer() {
   const [tokens, setTokens] = useState([]);
@@ -32,11 +33,7 @@ export function TokensContainer() {
     <div>
       {showCreateTokenModal && (
         <div className={styles.tokenModalContainer}>
-          <TokensModal
-            startStep={0}
-            title={<FormattedMessage id="tokens-modal.create_token_title" defaultMessage="Create Token" />}
-            onClose={onCreateTokenModalClose}
-          />
+          <CreateTokenContainer onClose={onCreateTokenModalClose} />
         </div>
       )}
       {/* {showRevokeTokenModal && (
