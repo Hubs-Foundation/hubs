@@ -1,122 +1,155 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import { PathActions } from "three";
 import { AuthContext } from "../auth/AuthContext";
+import { createToken, fetchAvailableScopes } from "./token-utils";
+import { Modal } from "../modal/Modal";
+import { FormattedMessage } from "react-intl";
+import { CloseButton } from "../input/CloseButton";
+import { Spinner } from "../misc/Spinner";
 
 const CreateTokenActions = {
-    submitCreateToken: "submitCreateToken",
-    createTokenSuccess: "createTokenSuccess",
-    createTokenError: "createTokenError",
-    createTokenFetching: "createTokenFetching",
-    fetchingScopes: "fetchingScopes",
-    fetchingScopesSuccess: "fetchingScopesSuccess",
-    fetchingScopesError: "fetchingScopesError",
-    showNoScopesError: "showNoScopesError",
-    toggleScopeChange: "toggleScopeChange"
-}
+  submitCreateToken: "submitCreateToken",
+  createTokenSuccess: "createTokenSuccess",
+  createTokenError: "createTokenError",
+  fetchingScopes: "fetchingScopes",
+  fetchingScopesSuccess: "fetchingScopesSuccess",
+  fetchingScopesError: "fetchingScopesError",
+  showNoScopesError: "showNoScopesError",
+  toggleScopeChange: "toggleScopeChange"
+};
+
+const steps = {
+  selectScopes: "selectScopes",
+  success: "success",
+  pending: "pending",
+  error: "error"
+};
 
 const initialCreateTokenState = {
-    step: steps.selectScopes,
-    scopes: [],
-    selectedScopes: new Set(),
-    token: "",
-    error: "",
-    showNoScopesSelectedError: false,
-}
+  step: steps.selectScopes,
+  scopes: [],
+  selectedScopes: new Set(),
+  token: "",
+  error: "",
+  showNoScopesSelectedError: false
+};
 
 function createTokenReducer(state, action) {
-    switch (action.type) {
-        case CreateTokenActions.submitCreateToken:
-            return { step: steps.pending, ...state };
-        case CreateTokenActions.createTokenSuccess:
-            return { step: steps.success, token: action.token, ...state };
-        case CreateTokenActions.createTokenError:
-            return { step: steps.error, error: action.errorMsg, ...state };
-        case CreateTokenActions.fetchingScopesSuccess:
-            return { scopes: action.scopes, ...state };
-        case CreateTokenActions.fetchingScopesError:
-            return { step: steps.error, error: "Error fetching scopes, please try again later.", ...state };
-        case CreateTokenActions.fetchingScopesSuccess:
-            return { showNoScopesSelectedError: true, ...state };
-        case CreateTokenActions.toggleScopeChange:
-            return { selectedScopes: action.newSelectedScopes };
+  switch (action.type) {
+    case CreateTokenActions.submitCreateToken:
+      return { step: steps.pending, ...state };
+    case CreateTokenActions.createTokenSuccess:
+      return { step: steps.success, token: action.token, ...state };
+    case CreateTokenActions.createTokenError:
+      return { step: steps.error, error: action.errorMsg, ...state };
+    case CreateTokenActions.fetchingScopesSuccess:
+      return { scopes: action.scopes, ...state };
+    case CreateTokenActions.fetchingScopesError:
+      return { step: steps.error, error: "Error fetching scopes, please try again later.", ...state };
+    case CreateTokenActions.showNoScopesError:
+      return { showNoScopesSelectedError: true, ...state };
+    case CreateTokenActions.toggleScopeChange: {
+      const updated = new Set(state.selectedScopes);
+      if (updated.has(action.scopeName)) updated.delete(action.scopeName);
+      else updated.add(action.scopeName);
+      return { selectedScopes: updated };
     }
+  }
 }
 
 function useCreateToken() {
-    const auth = useContext(AuthContext);
-    const [state, dispatch] = useReducer()
+  const auth = useContext(AuthContext);
+  const [state, dispatch] = useReducer(createTokenReducer, initialCreateTokenState);
+
+  const onCreateToken = async ({ scopes }) => {
+    // TODO add no scopes error to the view
+    if (scopes.length === 0) dispatch({ action: CreateTokenActions.showNoScopesError });
+
+    dispatch({ action: CreateTokenActions.submitCreateToken });
+
+    try {
+      const tokenInfoObj = await createToken({ scopes });
+      const token = tokenInfoObj.credentials[0].token;
+      dispatch({ action: CreateTokenActions.createTokenSuccess, token });
+    } catch (err) {
+      dispatch({ action: CreateTokenActions.createTokenError, errorMsg: err.message });
+    }
+  };
+
+  const fetchScopes = useCallback(async () => {
+    // TODO async fetch implement
+    try {
+      const scopes = await fetchAvailableScopes();
+      dispatch({ action: CreateTokenActions.fetchingScopesSuccess, scopes });
+    } catch (err) {
+      dispatch({ action: CreateTokenActions.fetchingScopesError, errorMsg: err.message });
+    }
+  }, []);
+
+  const toggleSelectedScopes = scopeName => {
+    dispatch({ action: CreateTokenActions.toggleScopeChange, scopeName });
+  };
+
+  // useEffect(
+  //   () => {
+  //     setAvailableScopes(fetchAvailableScopes());
+  //     console.log("fetchAvailableScopes() ret:");
+  //     console.log(fetchAvailableScopes());
+  //   },
+  //   [scopes[0]]
+  // );
+
+  return {
+    step: state.step,
+    scopes: state.scopes,
+    selectedScopes: state.selectScopes,
+    token: state.token,
+    error: state.error,
+    showNoScopesSelectedError: state.showNoScopesSelectedError,
+    onCreateToken,
+    fetchScopes,
+    toggleSelectedScopes
+  };
 }
-
-const steps = {
-    selectScopes: "selectScopes",
-    success: "success",
-    pending: "pending",
-    error: "error"
-}
-
-
 
 export function CreateTokenContainer({ onClose }) {
-  // 0 - select scopes, 1 - loading new api token, 2 - show api token once, 3 - errors, 4 - revokeToken
-  const [currentStep, setStep] = useState(startStep);
-  const [scopes, setAvailableScopes] = useState([]);
-  const [selectedScopes, setSelectedScopes] = useState(new Set());
-  const [token, setToken] = useState("");
-  const [errorMsg, setError] = useState("");
+  const {
+    step,
+    scopes,
+    selectedScopes,
+    token,
+    error,
+    showNoScopesSelectedError,
+    onCreateToken,
+    fetchScopes,
+    toggleSelectedScopes
+  } = useCreateToken();
 
   useEffect(
     () => {
-      setAvailableScopes(fetchAvailableScopes());
-      console.log("fetchAvailableScopes() ret:");
-      console.log(fetchAvailableScopes());
+      fetchScopes();
     },
     [scopes[0]]
   );
 
-  const onCreateToken = async ({ scopes }) => {
-    if (scopes.length === 0) {
-        setError("Must select at least one scope")
-    }
-    setStep(1);
-    try {
-      const tokenInfoObj = await createToken({ scopes });
-      const token = tokenInfoObj.credentials[0].token;
-      setToken(token);
-      setStep(2);
-    } catch (err) {
-      setError(err.message);
-      setStep(3);
-    }
-  };
-
-  const toggleSelectedScopes = scopeName => {
-    const updated = new Set(selectedScopes);
-    if (updated.has(scopeName)) {
-      updated.delete(scopeName);
-    } else {
-      updated.add(scopeName);
-    }
-    setSelectedScopes(updated);
-  };
-
-  const onSubmit = e => {
-    e && e.preventDefault();
-  };
-
   return (
-      <>
-
-      </>
     <Modal
       title={<FormattedMessage id="tokens-modal.title" defaultMessage="Tokens" />}
       afterTitle={<CloseButton onClick={onClose} />}
       disableFullscreen={false}
     >
-      {currentStep === 0 && <SelectScopesAndCreate onCreateToken={onCreateToken} />}
-      {currentStep === 1 && <Spinner />}
-      {currentStep === 2 && <ShowCredentialsOnce token={token} onClose={onClose} />}
-      {currentStep === 3 && <Error errorMsg={errorMsg} onClose={onClose} />}
+      {step === steps.selectScopes && (
+        <SelectScopesAndCreate
+          showNoScopesError={showNoScopesSelectedError}
+          onCreateToken={onCreateToken}
+          selectedScopes={selectedScopes}
+          scopes={scopes}
+          toggleSelectedScopes={toggleSelectedScopes}
+        />
+      )}
+      {step === steps.pending && <Spinner />}
+      {step === steps.success && <ShowCredentialsOnce token={token} onClose={onClose} />}
+      {step === steps.error && <Error errorMsg={error} onClose={onClose} />}
     </Modal>
   );
 }

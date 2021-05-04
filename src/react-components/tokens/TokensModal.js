@@ -33,7 +33,7 @@ export function TokensModal({ type }) {
 
   return (
     <Modal
-      title={<FormattedMessage id="tokens-modal.title" defaultMessage="Tokens" />}
+      title={<FormattedMessage id="tokens-modal.create-token-title" defaultMessage="Tokens" />}
       afterTitle={<CloseButton onClick={onClose} />}
       disableFullscreen={false}
     >
