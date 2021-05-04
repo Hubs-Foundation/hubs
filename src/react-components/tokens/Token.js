@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
 import PropTypes from "prop-types";
 
@@ -29,7 +30,7 @@ export function Token({
       <p>Scopes:</p>
       <ul>
         {scopes.map(function(s) {
-          return <li>Scope: {s}</li>;
+          return <li key={s}>Scope: {s}</li>;
         })}
       </ul>
       <p>Subject Type: {subject_type}</p>

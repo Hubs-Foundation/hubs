@@ -5,11 +5,13 @@ import registerTelemetry from "./telemetry";
 import Store from "./storage/store";
 import "./utils/theme";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
-import { TokensContainer } from "./react-components/auth/TokensContainer";
+import { TokensContainer } from "./react-components/tokens/TokensContainer";
 import "./assets/stylesheets/globals.scss";
+import "./react-components/styles/global.scss";
 import { PageContainer } from "./react-components/layout/PageContainer";
 import { Container } from "./react-components/layout/Container";
 import configs from "./utils/configs";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 registerTelemetry("/tokens", "Backend API Tokens Page");
 
@@ -19,15 +21,17 @@ window.APP = { store };
 function Root() {
   return (
     <WrappedIntlProvider>
-      <AuthContextProvider store={store}>
-        <PageContainer>
-          {(true || configs.feature("public_api_access")) && (
-            <Container>
-              <TokensContainer />
-            </Container>
-          )}
-        </PageContainer>
-      </AuthContextProvider>
+      <ThemeProvider store={store}>
+        <AuthContextProvider store={store}>
+          <PageContainer>
+            {(true || configs.feature("public_api_access")) && (
+              <Container>
+                <TokensContainer />
+              </Container>
+            )}
+          </PageContainer>
+        </AuthContextProvider>
+      </ThemeProvider>
     </WrappedIntlProvider>
   );
 }

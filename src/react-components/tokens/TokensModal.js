@@ -5,12 +5,12 @@ import PropTypes from "prop-types";
 import { Spinner } from "../misc/Spinner";
 import { Modal } from "../modal/Modal";
 import { FormattedMessage } from "react-intl";
-import { createToken, fetchAvailableScopes } from "./credentials";
+import { createToken, fetchAvailableScopes, revokeToken } from "./token-utils";
 import { CloseButton } from "../input/CloseButton";
 
-export function TokensModal({ children, onClose }) {
-  // 0 - select scopes, 1 - loading new api token, 2 - show api token once, 3 - error
-  const [currentStep, setStep] = useState(0);
+export function TokensModal({ type }) {
+  // 0 - select scopes, 1 - loading new api token, 2 - show api token once, 3 - errors, 4 - revokeToken
+  const [currentStep, setStep] = useState(startStep);
   const [token, setToken] = useState("");
   const [errorMsg, setError] = useState("");
 
@@ -25,6 +25,10 @@ export function TokensModal({ children, onClose }) {
       setError(err.message);
       setStep(3);
     }
+  };
+
+  const onRevokeToken = async () => {
+    revokeToken;
   };
 
   return (
