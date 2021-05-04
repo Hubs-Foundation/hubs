@@ -58,6 +58,30 @@ export default class MessageDispatch extends EventTarget {
     const captureSystem = this.scene.systems["capture-system"];
 
     switch (command) {
+      case "megaphone":     
+        console.log("/megaphone command called");  
+        const avatarHead = this.scene.querySelector("[id='avatar-rig'");
+        if(args[0]==="on")
+        {
+          avatarHead.setAttribute("ismegaphone", true);
+        }
+        else if(args[0]==="off")
+        {
+          avatarHead.setAttribute("ismegaphone", false);
+        }        
+      break;
+      case "fov":
+        var customFOV = args[0];
+        console.log("fov customFOV", customFOV);
+        var viewingCamera = document.getElementById("viewing-camera");
+        if (viewingCamera?.components.camera) 
+        {
+          viewingCamera.setAttribute("camera", { fov: customFOV });
+        }
+        viewingCamera.object3DMap.camera.matrixNeedsUpdate = true;
+        viewingCamera.object3DMap.camera.updateMatrix();
+        viewingCamera.object3DMap.camera.updateMatrixWorld();
+      break;
       case "fly":
         if (this.scene.systems["hubs-systems"].characterController.fly) {
           this.scene.systems["hubs-systems"].characterController.enableFly(false);

@@ -41,6 +41,11 @@ function registerNetworkSchemas() {
       },
       "player-info",
       "networked-avatar",
+      "ismegaphone",
+      {
+        component: "audio-channel",
+        property: "channel"
+      },
       {
         selector: ".camera",
         component: "position",
@@ -111,7 +116,8 @@ function registerNetworkSchemas() {
         component: "media-pdf",
         property: "index"
       },
-      "pinnable"
+      "pinnable",
+      "visible"
     ],
     nonAuthorizedComponents: [
       {
