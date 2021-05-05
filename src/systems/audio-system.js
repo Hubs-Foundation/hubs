@@ -162,7 +162,9 @@ export class AudioSystem {
 
     setTimeout(() => {
       if (this.audioContext.state === "running") {
-        if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
+        const disableAEC = window.APP.store.state.preferences.disableEchoCancellation;
+        const enableAECHack = window.APP.store.state.preferences.enableAECHack;
+        if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent) && !disableAEC && enableAECHack) {
           enableChromeAEC(this._sceneEl.audioListener.gain);
         }
 
