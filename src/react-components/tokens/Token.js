@@ -3,7 +3,8 @@ import React from "react";
 import PropTypes from "prop-types";
 
 export function Token({
-  onRevokeToken,
+  // onRevokeToken,
+  showRevokeToken,
   account_id,
   id,
   inserted_at,
@@ -18,7 +19,7 @@ export function Token({
       <button
         onClick={function() {
           console.log(scopes);
-          onRevokeToken({ id });
+          showRevokeToken(id);
         }}
       >
         Revoke Token
@@ -39,8 +40,9 @@ export function Token({
     </div>
   );
 }
+
 Token.propTypes = {
-  onRevokeToken: PropTypes.func,
+  showRevokeToken: PropTypes.func,
   account_id: PropTypes.string,
   id: PropTypes.string,
   inserted_at: PropTypes.string,

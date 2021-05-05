@@ -142,7 +142,7 @@ export function CreateTokenContainer({ onClose }) {
   console.log(selectedScopes);
 
   return (
-    <CreateTokenModal onClose={onClose}>
+    <CreateTokenModal onClose={() => onClose({ createdNewToken: !!token })}>
       {step === steps.selectScopes && (
         <SelectScopesAndCreate
           showNoScopesError={showNoScopesSelectedError}
@@ -153,7 +153,9 @@ export function CreateTokenContainer({ onClose }) {
         />
       )}
       {step === steps.pending && <Spinner />}
-      {step === steps.success && <ShowCredentialsOnce token={token} onClose={onClose} />}
+      {step === steps.success && (
+        <ShowCredentialsOnce token={token} onClose={() => onClose({ createdNewToken: !!token })} />
+      )}
       {step === steps.error && <Error errorMsg={error} onClose={onClose} />}
     </CreateTokenModal>
   );

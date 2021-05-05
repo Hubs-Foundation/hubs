@@ -1,18 +1,18 @@
 // TODO ADD TRANSLATIONS
 /* eslint-disable @calm/react-intl/missing-formatted-message */
 import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import { TokensModal } from "./TokensModal";
 import { Token } from "./Token";
-import { fetchMyTokens, revokeToken } from "./token-utils";
+import { fetchMyTokens } from "./token-utils";
 import { FormattedMessage } from "react-intl";
 import styles from "./Token.scss";
 import { CreateTokenContainer } from "./CreateTokenContainer";
+import { RevokeTokenContainer } from "./RevokeTokenContainer";
 
 export function TokensContainer() {
   const [tokens, setTokens] = useState([]);
   const [showCreateTokenModal, setShowCreateTokenModal] = useState(false);
   const [showRevokeTokenModal, setShowRevokeTokenModal] = useState(false);
+  const [selectedRevokeId, setSelectedRevokeId] = useState();
 
   useEffect(() => {
     async function updateTokens() {
@@ -21,13 +21,18 @@ export function TokensContainer() {
     updateTokens();
   }, []);
 
-  const onCreateTokenModalClose = () => {
+  const onCreateTokenModalClose = async ({ createdNewToken }) => {
     setShowCreateTokenModal(false);
+    if (createdNewToken) {
+      setTokens(await fetchMyTokens());
+    }
   };
 
-  // const onRevokeTokenClose = () => {
-  //   setShowRevokeTokenModal(false);
-  // };
+  const onRevokeTokenClose = ({ removedTokenId }) => {
+    if (removedTokenId) setTokens(tokens.filter(token => token.id !== removedTokenId));
+    setShowRevokeTokenModal(false);
+    setSelectedRevokeId("");
+  };
 
   return (
     <div>
@@ -36,13 +41,11 @@ export function TokensContainer() {
           <CreateTokenContainer onClose={onCreateTokenModalClose} />
         </div>
       )}
-      {/* {showRevokeTokenModal && (
-        <TokensModal
-          startStep={4}
-          title={<FormattedMessage id="tokens-modal.create_token_title" defaultMessage="Revoke Token" />}
-          onClose={onRevokeTokenClose}
-        />
-      )} */}
+      {showRevokeTokenModal && (
+        <div className={styles.tokenModalContainer}>
+          <RevokeTokenContainer selectedId={selectedRevokeId} onClose={onRevokeTokenClose} />
+        </div>
+      )}
 
       <button
         as="a"
@@ -55,9 +58,19 @@ export function TokensContainer() {
       </button>
 
       {tokens.map(t => {
-        return <Token onRevokeToken={revokeToken} key={t.id} {...t} />;
+        return (
+          <Token
+            showRevokeToken={id => {
+              if (!showRevokeTokenModal) {
+                setSelectedRevokeId(id);
+                setShowRevokeTokenModal(true);
+              }
+            }}
+            key={t.id}
+            {...t}
+          />
+        );
       })}
-      {/* </TokensModal> */}
     </div>
   );
 }
