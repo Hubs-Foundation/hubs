@@ -63,10 +63,7 @@ function createTokenReducer(state, action) {
 }
 
 function useCreateToken() {
-  console.log(useReducer);
   const [state, dispatch] = useReducer(createTokenReducer, initialCreateTokenState);
-  console.log(state);
-  console.log(dispatch);
 
   const onCreateToken = async ({ scopes }) => {
     // TODO add no scopes error to the view
@@ -87,9 +84,7 @@ function useCreateToken() {
     () => {
       // TODO async fetch implement
       try {
-        console.log("inside useCreateToken, fetchScopes() ");
         const scopes = fetchAvailableScopes();
-        console.log(scopes);
         dispatch({ type: CreateTokenActions.fetchingScopesSuccess, scopes });
       } catch (err) {
         dispatch({ type: CreateTokenActions.fetchingScopesError, errorMsg: err.message });
@@ -134,12 +129,6 @@ export function CreateTokenContainer({ onClose }) {
     },
     [scopes[0]]
   );
-
-  console.log("step");
-  console.log(step);
-
-  console.log("selectedScopes");
-  console.log(selectedScopes);
 
   return (
     <CreateTokenModal onClose={() => onClose({ createdNewToken: !!token })}>

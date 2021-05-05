@@ -36,8 +36,17 @@ export function SelectScopesAndCreate({
 }) {
   return (
     <form>
-      <p>Scopes:</p>
-      {showNoScopesError && <p>Must select at least one scope!</p>}
+      <p>
+        <FormattedMessage id="tokens-modal.scopes" defaultMessage="Scopes" />:
+      </p>
+      {showNoScopesError && (
+        <p>
+          <FormattedMessage
+            id="tokens-modal.warning-at-least-one-scope"
+            defaultMessage="Must select at least one scope!"
+          />
+        </p>
+      )}
       {scopes.map(scopeName => (
         <div key={scopeName}>
           <label id={scopeName} htmlFor={`${scopeName}-cb`}>
@@ -60,7 +69,6 @@ export function SelectScopesAndCreate({
         preset="primary"
         onClick={function(e) {
           e && e.preventDefault();
-          console.log(selectedScopes);
           onCreateToken({ scopes: selectedScopes });
         }}
       >
