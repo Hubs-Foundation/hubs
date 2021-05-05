@@ -1,5 +1,3 @@
-// TODO ADD TRANSLATIONS
-/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React, { useState, useEffect } from "react";
 import { Token } from "./Token";
 import { fetchMyTokens } from "./token-utils";

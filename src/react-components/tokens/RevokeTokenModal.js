@@ -8,7 +8,7 @@ import { CloseButton } from "../input/CloseButton";
 import { Column } from "../layout/Column";
 import { Button } from "../input/Button";
 
-export function RevokeTokenModal({ id, onClose, children }) {
+export function RevokeTokenModal({ onClose, children }) {
   return (
     <Modal
       title={<FormattedMessage id="tokens-modal.revoke-token-title" defaultMessage="Revoke Tokens" />}

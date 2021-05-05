@@ -11,7 +11,7 @@ export default {
 export const SelectScopes = () => {
   return (
     <CreateTokenModal>
-      <SelectScopesAndCreate scopes={["read_rooms", "write_rooms"]} selectedScopes={new Set(["write_rooms"])} />
+      <SelectScopesAndCreate scopes={["read_rooms", "write_rooms"]} selectedScopes={["write_rooms"]} />
     </CreateTokenModal>
   );
 };
@@ -21,7 +21,7 @@ export const SelectScopesNoScopesSelected = () => {
     <CreateTokenModal>
       <SelectScopesAndCreate
         scopes={["read_rooms", "write_rooms"]}
-        selectedScopes={new Set(["write_rooms"])}
+        selectedScopes={["write_rooms"]}
         showNoScopesError
       />
     </CreateTokenModal>
