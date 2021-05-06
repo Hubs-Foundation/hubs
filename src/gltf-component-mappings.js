@@ -449,3 +449,5 @@ AFRAME.GLTFModelPlus.registerComponent(
 );
 
 AFRAME.GLTFModelPlus.registerComponent("video-texture-source", "video-texture-source");
+
+AFRAME.GLTFModelPlus.registerComponent("text", "text");
