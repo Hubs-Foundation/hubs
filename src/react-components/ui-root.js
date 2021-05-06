@@ -431,6 +431,7 @@ class UIRoot extends Component {
 
   onLoadingFinished = () => {
     this.setState({ noMoreLoadingUpdates: true });
+    this.props.scene.emit("loading_finished");
 
     if (this.props.onLoaded) {
       this.props.onLoaded();
