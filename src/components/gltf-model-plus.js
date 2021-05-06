@@ -343,10 +343,9 @@ function runMigration(version, json) {
 let ktxLoader;
 
 class GLTFHubsPlugin {
-  constructor(parser, jsonPreprocessor, fileMap) {
+  constructor(parser, jsonPreprocessor) {
     this.parser = parser;
     this.jsonPreprocessor = jsonPreprocessor;
-    this.fileMap = fileMap;
 
     // The latest GLTFLoader doesn't use ImageBitmapLoader for Firefox
     // because the latest ImageBitmapLoader passes an option parameter
@@ -444,12 +443,6 @@ class GLTFHubsPlugin {
     }
 
     //
-    if (this.fileMap) {
-      // The GLTF is now cached as a THREE object, we can get rid of the original blobs
-      Object.keys(this.fileMap).forEach(URL.revokeObjectURL);
-    }
-
-    //
     gltf.scene.animations = gltf.animations;
   }
 }
@@ -537,7 +530,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
   gltfLoader
-    .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor, fileMap))
+    .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
     .register(parser => new GLTFHubsLightMapExtension(parser))
     .register(parser => new GLTFHubsTextureBasisExtension(parser));
 
@@ -554,6 +547,11 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 
   return new Promise((resolve, reject) => {
     gltfLoader.load(gltfUrl, resolve, onProgress, reject);
+  }).finally(() => {
+    if (fileMap) {
+      // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+      Object.keys(fileMap).forEach(URL.revokeObjectURL);
+    }
   });
 }
 
