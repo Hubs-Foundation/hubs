@@ -59,26 +59,6 @@ class GLTFBinarySplitterPlugin {
     const { body } = parser.extensions.KHR_binary_glTF;
     const content = JSON.stringify(ensureAvatarMaterial(parser.json));
 
-    // Inject hubs components on upload. Used to create base avatar
-    // const gltf = parser.json;
-    // Object.assign(gltf.scenes[0], {
-    //   extensions: {
-    //     MOZ_hubs_components: {
-    //       "loop-animation": {
-    //         clip: "idle_eyes"
-    //       }
-    //     }
-    //   }
-    // });
-    // Object.assign(gltf.nodes.find(n => n.name === "Head"), {
-    //   extensions: {
-    //     MOZ_hubs_components: {
-    //       "scale-audio-feedback": ""
-    //     }
-    //   }
-    // });
-    // content = JSON.stringify(gltf);
-
     this.inputFiles.gltf = new File([content], "file.gltf", {
       type: "model/gltf"
     });
