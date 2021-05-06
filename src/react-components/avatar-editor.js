@@ -49,9 +49,10 @@ const fetchAvatar = async avatarId => {
 
 // GLTFLoader plugin for splitting glTF and bin from glb.
 class GLTFBinarySplitterPlugin {
-  constructor(parser, inputFiles) {
+  constructor(parser) {
     this.parser = parser;
-    this.inputFiles = inputFiles;
+    this.gltf = null;
+    this.bin = null;
   }
 
   beforeRoot() {
@@ -59,10 +60,10 @@ class GLTFBinarySplitterPlugin {
     const { body } = parser.extensions.KHR_binary_glTF;
     const content = JSON.stringify(ensureAvatarMaterial(parser.json));
 
-    this.inputFiles.gltf = new File([content], "file.gltf", {
+    this.gltf = new File([content], "file.gltf", {
       type: "model/gltf"
     });
-    this.inputFiles.bin = new File([body], "file.bin", {
+    this.bin = new File([body], "file.bin", {
       type: "application/octet-stream"
     });
 
@@ -71,6 +72,12 @@ class GLTFBinarySplitterPlugin {
     // doesn't have an ability to cancel the parse. So overriding
     // parser.json with very light glTF data as workaround.
     parser.json = { asset: { version: "2.0" } };
+  }
+
+  afterRoot(result) {
+    result.files = result.files || {};
+    result.files.gltf = this.gltf;
+    result.files.bin = this.bin;
   }
 }
 
@@ -141,14 +148,18 @@ class AvatarEditor extends Component {
 
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
       const gltfLoader = new THREE.GLTFLoader().register(
-        parser => new GLTFBinarySplitterPlugin(parser, this.inputFiles)
+        parser => new GLTFBinarySplitterPlugin(parser)
       );
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
 
       await new Promise((resolve, reject) => {
-        // This GLTFBinarySplitterPlugin saves gltf and bin in inputFiles.gltf/bin
-        gltfLoader.load(gltfUrl, resolve, onProgress, reject);
+        // GLTFBinarySplitterPlugin saves gltf and bin in gltf.files
+        gltfLoader.load(gltfUrl, result => {
+          this.inputFiles.gltf = result.files.gltf;
+          this.inputFiles.bin = result.files.bin;
+          resolve(result);
+        }, onProgress, reject);
       });
 
       URL.revokeObjectURL(gltfUrl);
