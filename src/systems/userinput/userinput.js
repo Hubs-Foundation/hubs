@@ -432,7 +432,7 @@ AFRAME.registerSystem("userinput", {
         xrSession.requestReferenceSpace("local-floor").then(referenceSpace => {
           this.xrReferenceSpace = referenceSpace;
         });
-        xrSession.addEventListener("end", e => {
+        xrSession.addEventListener("end", () => {
           this.activeDevices.items.filter(d => d.gamepad && d.gamepad.isWebXRGamepad).forEach(gamepadDisconnected);
         });
       }
