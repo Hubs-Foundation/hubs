@@ -467,7 +467,7 @@ AFRAME.GLTFModelPlus.registerComponent(
       }
     }
 
-    el.setAttribute(componentName, { srcEl });
+    el.setAttribute(componentName, { ...componentData, srcEl });
   }
 );
 AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
