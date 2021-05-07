@@ -147,19 +147,22 @@ class AvatarEditor extends Component {
     e.preventDefault();
 
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
-      const gltfLoader = new THREE.GLTFLoader().register(
-        parser => new GLTFBinarySplitterPlugin(parser)
-      );
+      const gltfLoader = new THREE.GLTFLoader().register(parser => new GLTFBinarySplitterPlugin(parser));
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
 
       await new Promise((resolve, reject) => {
         // GLTFBinarySplitterPlugin saves gltf and bin in gltf.files
-        gltfLoader.load(gltfUrl, result => {
-          this.inputFiles.gltf = result.files.gltf;
-          this.inputFiles.bin = result.files.bin;
-          resolve(result);
-        }, onProgress, reject);
+        gltfLoader.load(
+          gltfUrl,
+          result => {
+            this.inputFiles.gltf = result.files.gltf;
+            this.inputFiles.bin = result.files.bin;
+            resolve(result);
+          },
+          onProgress,
+          reject
+        );
       });
 
       URL.revokeObjectURL(gltfUrl);
