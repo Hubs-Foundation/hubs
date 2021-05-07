@@ -188,6 +188,19 @@ AFRAME.registerComponent("zone-audio-source", {
       this.whiteNoise = createWhiteNoise(ctx, 0.01);
       this.setInput(this.whiteNoise);
     }
+
+    // TODO this should probably be using bounds similar to media-frames and trigger-volume.
+    // Doing the simple thing for now since we only support avatar audio sources currently
+    this.el.object3D.updateMatrixWorld();
+    const radius = this.el.object3D.matrixWorld.getMaxScaleOnAxis();
+    this.boundingRadiusSquared = radius * radius;
+
+    if (this.data.debug) {
+      this.el.setObject3D(
+        "debug",
+        new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereBufferGeometry(1, 10, 10)))
+      );
+    }
   },
 
   setInput(newInput) {
@@ -207,10 +220,9 @@ AFRAME.registerComponent("zone-audio-source", {
   },
 
   tick() {
-    const radiusSquared = 4;
     if (this.trackingEl) {
       const distanceSquared = this.trackingEl.object3D.position.distanceToSquared(this.el.object3D.position);
-      if (distanceSquared > radiusSquared) {
+      if (distanceSquared > this.boundingRadiusSquared) {
         this.trackingEl = null;
         this.setInput(this.whiteNoise);
       }
@@ -223,7 +235,7 @@ AFRAME.registerComponent("zone-audio-source", {
         if (this.data.onlyMods && !playerInfo.isOwner) continue;
 
         const distanceSquared = avatar.object3D.position.distanceToSquared(this.el.object3D.position);
-        if (distanceSquared < radiusSquared) {
+        if (distanceSquared < this.boundingRadiusSquared) {
           this.trackingEl = avatar;
           if (this.data.muteSelf && this.trackingEl.id === "avatar-rig") {
             // Don't emit your own audio
