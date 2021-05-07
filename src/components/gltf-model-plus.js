@@ -370,7 +370,7 @@ class GLTFHubsPlugin {
       parser.json = jsonPreprocessor(parser.json);
     }
 
-    //
+    // Ideally Hubs components stuffs should be handled in MozHubsComponents plugin?
     let version = 0;
     if (
       parser.json.extensions &&
