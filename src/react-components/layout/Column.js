@@ -7,6 +7,7 @@ export const Column = forwardRef(
   ({ as: Component, className, gap, padding, center, centerMd, grow, overflow, children, ...rest }, ref) => {
     const gapClass = gap === true ? styles.mdGap : styles[`${gap}Gap`];
     const paddingClass = padding === true ? styles.lgPadding : styles[`${padding}Padding`];
+    console.log(className);
 
     return (
       <Component

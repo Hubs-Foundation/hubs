@@ -1,0 +1,9 @@
+@use "../styles/theme.scss";
+
+:local(.background-white) {
+    background-color: white;
+}
+
+:local(.background-gray) {
+    background-color: gray;
+}
