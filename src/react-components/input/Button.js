@@ -19,7 +19,7 @@ export const presets = [
 ];
 
 export const Button = memo(
-  forwardRef(({ as, sm, lg, xl, preset, className, children, ...rest }, ref) => {
+  forwardRef(({ as, sm, lg, xl, thin, preset, className, children, ...rest }, ref) => {
     const ButtonComponent = as;
     const buttonProps = ButtonComponent === "button" ? { type: "button" } : {};
 
@@ -29,7 +29,7 @@ export const Button = memo(
           styles.button,
           textInputStyles.button,
           styles[preset],
-          { [styles.sm]: sm, [styles.lg]: lg, [styles.xl]: xl },
+          { [styles.sm]: sm, [styles.lg]: lg, [styles.xl]: xl, [styles.thin]: thin },
           className
         )}
         {...buttonProps}
