@@ -288,7 +288,11 @@ AFRAME.registerComponent("audio-target", {
 
   init() {
     this.createAudio();
-    this.connectAudio();
+    // TODO this is to ensure targets and sources loaded at the same time don't have
+    // an order depndancy but this should be done in a more robust way
+    setTimeout(() => {
+      this.connectAudio();
+    }, 0);
   },
 
   remove: function() {
@@ -321,7 +325,7 @@ AFRAME.registerComponent("audio-target", {
 
   connectAudio() {
     const srcEl = this.data.srcEl;
-    const srcZone = srcEl.components["zone-audio-source"];
+    const srcZone = srcEl && srcEl.components["zone-audio-source"];
     const node = srcZone && srcZone.getAudioOutput();
     if (node) {
       this.audio.setNodeSource(node);
