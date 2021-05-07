@@ -1,9 +1,21 @@
 @use "../styles/theme.scss";
 
 :local(.background-white) {
-    background-color: white;
+  background-color: white;
 }
 
 :local(.background-gray) {
-    background-color: gray;
+  background-color: gray;
+}
+
+:local(.fullscreen) {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+}
+
+:local(.darken) {
+  background-color: rgba(0, 0, 0, 0.1);
 }

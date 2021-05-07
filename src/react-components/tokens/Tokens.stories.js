@@ -1,8 +1,12 @@
 import React from "react";
+import classNames from "classnames";
+import { FormattedMessage } from "react-intl";
 import { StorybookAuthContextProvider } from "../auth/AuthContext";
+import { Center } from "../layout/Center";
 import { Column } from "../layout/Column";
 import { Container } from "../layout/Container";
 import { PageContainer } from "../layout/PageContainer";
+import { Modal } from "../../react-components/modal/Modal";
 // import { TokensContainer } from "./TokensContainer";
 import styles from "./Tokens.scss";
 
@@ -12,13 +16,20 @@ export default {
 
 const dummyTokens = [{}, {}];
 
-export const TokenContainer = ({ className, children }) => (
+// export const TokenContainer = ({ className, children }) => (
+//   <StorybookAuthContextProvider>
+//     <PageContainer>
+//       <Container>
+//         <Column>{children}</Column>
+//       </Container>
+//     </PageContainer>
+//   </StorybookAuthContextProvider>
+// );
+
+//  try "Center" instead of "Container > Column"
+export const TokenContainer = ({ children }) => (
   <StorybookAuthContextProvider>
-    <PageContainer>
-      <Container>
-        <Column>{children}</Column>
-      </Container>
-    </PageContainer>
+    <PageContainer>{children}</PageContainer>
   </StorybookAuthContextProvider>
 );
 
@@ -58,11 +69,26 @@ export const EmptyTokenListPage = () => (
   </TokenContainer>
 );
 
-export const RevokeTokenModal = () => (
-  <TokenListPage>
-    <p>I AM REVOKE TOKEN MODAL</p>
-  </TokenListPage>
+export const RevokeTokenModalPage = () => (
+  <TokenContainer>
+    <div className={classNames(styles.fullscreen, styles.darken)}>
+      <Center>
+        <RevokeTokenModal />
+      </Center>
+    </div>
+    <Center>
+      <p>This is the whole page other than the modal and the header and such</p>
+    </Center>
+  </TokenContainer>
 );
+
+export function RevokeTokenModal({ children }) {
+  return (
+    <Modal title={<FormattedMessage id="revoke-token-modal.title" defaultMessage="Revoke token" />} disableFullscreen>
+      {children}
+    </Modal>
+  );
+}
 
 export const NewTokenSelectScopePage = ({ children }) => (
   <TokenContainer>
