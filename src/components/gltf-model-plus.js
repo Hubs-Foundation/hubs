@@ -356,7 +356,7 @@ class GLTFHubsPlugin {
     // When we replace our Three.js fork with the latest official one
     // we need to revisit this workaround.
     // GLTFLoader creates CanvasTexture from ImageBitmap if textureLoader is ImageBItmapLoader.
-    if (!parser.textureLoader.isImageBitmapLoader && typeof createImageBitmap !== undefined) {
+    if (!parser.textureLoader.isImageBitmapLoader && typeof createImageBitmap !== "undefined") {
       parser.textureLoader = new THREE.ImageBitmapLoader(parser.options.manager);
     }
   }
