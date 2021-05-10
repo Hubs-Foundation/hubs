@@ -484,6 +484,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.show-rtc-debug-panel",
     defaultMessage: "Show RTC Panel"
   },
+  showAudioDebugView: {
+    id: "preferences-screen.preference.show-audio-debug-view",
+    defaultMessage: "Show Audio Debug View"
+  },
   theme: {
     id: "preferences-screen.preference.theme",
     defaultMessage: "Theme"
@@ -1060,7 +1064,8 @@ class PreferencesScreen extends Component {
           { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
           { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          { key: "showAudioDebugView", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
         ]
       ]
     ]);

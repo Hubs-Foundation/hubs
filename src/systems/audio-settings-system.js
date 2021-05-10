@@ -16,7 +16,10 @@ function updateAvatarAudioSettings(avatarAudioSource, settings, positional) {
     distanceModel: settings.avatarDistanceModel,
     maxDistance: settings.avatarMaxDistance,
     refDistance: settings.avatarRefDistance,
-    rolloffFactor: settings.avatarRolloffFactor
+    rolloffFactor: settings.avatarRolloffFactor,
+    coneInnerAngle: settings.avatarConeInnerAngle,
+    coneOuterAngle: settings.avatarConeOuterAngle,
+    coneOuterGain: settings.avatarConeOuterGain
   });
 }
 
@@ -28,6 +31,9 @@ export class AudioSettingsSystem {
       avatarRolloffFactor: 2,
       avatarRefDistance: 1,
       avatarMaxDistance: 10000,
+      avatarConeInnerAngle: 180,
+      avatarConeOuterAngle: 360,
+      avatarConeOuterGain: 0,
       mediaVolume: 0.5,
       mediaDistanceModel: "inverse",
       mediaRolloffFactor: 1,
@@ -43,7 +49,10 @@ export class AudioSettingsSystem {
 
     this.sceneEl.addEventListener("reset_scene", this.onSceneReset);
 
-    if (window.APP.store.state.preferences.audioOutputMode === "audio") {
+    if (
+      !window.APP.store.state.preferences.audioOutputMode ||
+      window.APP.store.state.preferences.audioOutputMode === "audio"
+    ) {
       //hack to always reset to "panner"
       window.APP.store.update({
         preferences: { audioOutputMode: "panner" }
