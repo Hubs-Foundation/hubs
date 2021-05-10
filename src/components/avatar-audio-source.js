@@ -151,14 +151,14 @@ AFRAME.registerComponent("avatar-audio-source", {
 });
 
 function createWhiteNoise(audioContext, gain) {
-  var bufferSize = 2 * audioContext.sampleRate,
+  const bufferSize = 2 * audioContext.sampleRate,
     noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate),
     output = noiseBuffer.getChannelData(0);
-  for (var i = 0; i < bufferSize; i++) {
+  for (let i = 0; i < bufferSize; i++) {
     output[i] = (Math.random() * 2 - 1) * gain;
   }
 
-  var whiteNoise = audioContext.createBufferSource();
+  const whiteNoise = audioContext.createBufferSource();
   whiteNoise.buffer = noiseBuffer;
   whiteNoise.loop = true;
   whiteNoise.start(0);
