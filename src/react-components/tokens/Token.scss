@@ -1,0 +1,21 @@
+@use "../styles/theme.scss";
+
+:local(.border-grey) {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+:local(.background-gray) {
+  background-color: gray;
+}
+
+:local(.background-yellow) {
+  background-color: yellow;
+}
+
+:local(.scopes) {
+  padding-right: theme.$spacing-xl;
+}
+
+:local(.scope) {
+  padding-right: theme.$spacing-md;
+}

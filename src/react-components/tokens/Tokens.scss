@@ -8,6 +8,15 @@
   background-color: gray;
 }
 
+:local(.background-yellow) {
+  background-color: yellow;
+}
+
+:local(.revoke-warning) {
+  background-color: theme.$red-hover;
+  border: 2px solid theme.$red;
+}
+
 :local(.fullscreen) {
   position: absolute;
   width: 100%;
@@ -18,4 +27,18 @@
 
 :local(.darken) {
   background-color: rgba(0, 0, 0, 0.1);
+}
+
+:local(.center-padding-sides) {
+    width: 80%;
+    // height: 100%;
+    margin: 0 auto;
+}
+
+:local(.revoke-description) {
+  margin: theme.$spacing-xl 0;
+}
+
+:local(.margin-bottom-xs) {
+  margin-bottom: theme.$spacing-2xs;
 }
