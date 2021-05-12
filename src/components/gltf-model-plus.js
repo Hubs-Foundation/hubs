@@ -5,6 +5,7 @@ import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
@@ -347,18 +348,21 @@ class GLTFHubsPlugin {
     this.parser = parser;
     this.jsonPreprocessor = jsonPreprocessor;
 
-    // The latest GLTFLoader doesn't use ImageBitmapLoader for Firefox
-    // because the latest ImageBitmapLoader passes an option parameter
-    // to createImageBitmap() but Firefox createImageBitmap() fails
-    // if an option parameter is passed (known bug and already reported to bugzilla).
-    // But our r111 based ImageBitmapLoader doesn't pass the option parameter yet
-    // so we can use ImageBitmapLoader even for Firefox.
-    // When we replace our Three.js fork with the latest official one
-    // we need to revisit this workaround.
-    // GLTFLoader creates CanvasTexture from ImageBitmap if textureLoader is ImageBItmapLoader.
-    if (!parser.textureLoader.isImageBitmapLoader && typeof createImageBitmap !== "undefined") {
-      parser.textureLoader = new THREE.ImageBitmapLoader(parser.options.manager);
-    }
+    // We override glTF parser textureLoader with our HubsTextureLoader for
+    // 1. Clean up the texture image related resources after it is uploaded to WebGL texture
+    // 2. Use ImageBitmapLoader if it is available. The latest official Three.js (r128) glTF loader
+    //    attempts to use ImageBitmapLoader if it is avaiable except for Firefox.
+    //    But we want to use ImageBitmapLoader even for Firefox so we need this overriding hack.
+    // But overriding the textureLoader is hacky and it can cause future potential problems
+    // especially in upstraming Three.js. So ideally we should replace this hack
+    // with the one using more proper APIs like plugin system at some point.
+    // Note: Be careful when replacing our Three.js fork with the official upstraming one that
+    //       the latest ImageBitmapLoader passes the second argument to createImageBitmap()
+    //       but currently createImageBitmap() on Firefox fails if the second argument is defined.
+    //       https://bugzilla.mozilla.org/show_bug.cgi?id=1367251
+    //       and this is the reason why the official glTF loader doesn't use ImageBitmapLoader
+    //       for Firefox. We will need a workaround for that.
+    parser.textureLoader = new HubsTextureLoader(parser.options.manager);
   }
 
   beforeRoot() {
@@ -403,27 +407,6 @@ class GLTFHubsPlugin {
       object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
       const materialQuality = window.APP.store.materialQualitySetting;
       object.material = mapMaterials(object, material => convertStandardMaterial(material, materialQuality));
-    });
-
-    //
-    gltf.scene.traverse(object => {
-      if (!object.material) {
-        return;
-      }
-      const materials = Array.isArray(object.material) ? object.material : [object.material];
-      // @TODO: Handle more efficiently
-      for (const material of materials) {
-        for (const key in material) {
-          const prop = material[key];
-          if (prop && prop.isTexture && !prop.onUpdate) {
-            prop.onUpdate = () => {
-              // Delete texture data once it has been uploaded to the GPU
-              prop.image.close && prop.image.close();
-              delete prop.image;
-            };
-          }
-        }
-      }
     });
 
     // Replace animation target node name with the node uuid.
