@@ -10,13 +10,15 @@ function scaleForAspectFit(containerSize, itemSize) {
 
 const isCapturableByType = {
   [MediaType.ALL]: function(el) {
-    return !!(el && el.components["media-loader"]);
+    // Media can either come from media-loader or be explictly designated 'moveable'
+    return !!(el && (el.components["media-loader"] || el.components["moveable"]));
   },
   [MediaType.ALL_2D]: function(el) {
     return !!(el && (el.components["media-image"] || el.components["media-video"] || el.components["media-pdf"]));
   },
   [MediaType.MODEL]: function(el) {
-    return !!(el && el.components["gltf-model-plus"]);
+    // Interactable models were either loaded with gltf-model-plus or explictly designated 'moveable'
+    return !!(el && (el.components["gltf-model-plus"] || el.components["moveable"]));
   },
   [MediaType.IMAGE]: function(el) {
     return !!(el && el.components["media-image"]);
