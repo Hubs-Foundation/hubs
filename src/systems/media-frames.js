@@ -1,10 +1,11 @@
 import { MediaType } from "../utils/media-utils";
+import { computeObjectAABB } from "../utils/auto-box-collider";
 import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { applyPersistentSync } from "../utils/permissions-utils";
+import { THREE } from "aframe";
 
-// TODO better handling for 3d objects
 function scaleForAspectFit(containerSize, itemSize) {
-  return Math.min(containerSize.x / itemSize.x, containerSize.y / itemSize.y);
+  return Math.min(containerSize.x / itemSize.x, Math.min(containerSize.y / itemSize.y, containerSize.z / itemSize.z));
 }
 
 const isCapturableByType = {
@@ -40,6 +41,10 @@ export class MediaFramesSystem {
   }
 
   tick() {
+    // Has a frame captured anything so far?
+    let captureIsActive = false;
+    // Which element has been captured?
+    let activeCapturedElement;
     for (let i = 0; i < components.length; i++) {
       const frame = components[i];
 
@@ -57,20 +62,29 @@ export class MediaFramesSystem {
       if (frame.data.targetId === "empty") {
         // frame empty
         guideMesh.material.uniforms.color.value.set(EMPTY_COLOR);
-        const capturableEl = this.getCapturableEntityCollidingWithBody(frame.data.mediaType, bodyUUID);
-        if (capturableEl && NAF.utils.isMine(capturableEl)) {
-          // capturable object I own is colliding with an empty frame
-          if (this.interactionSystem.isHeld(capturableEl)) {
-            // held object I own colliding with an empty frame, show preview
-            guideMesh.material.uniforms.color.value.set(HOVER_COLOR);
-            frame.showPreview(capturableEl);
+        if(!captureIsActive) {
+          const capturableEl = this.getCapturableEntityCollidingWithBody(frame.data.mediaType, bodyUUID);
+          if (capturableEl && NAF.utils.isMine(capturableEl)) {
+            // capturable object I own is colliding with an empty frame
+            if (this.interactionSystem.isHeld(capturableEl)) {
+              // held object I own colliding with an empty frame, show preview
+              guideMesh.material.uniforms.color.value.set(HOVER_COLOR);
+              frame.showPreview(capturableEl);
+              captureIsActive = true;
+              activeCapturedElement = capturableEl;
+            } else {
+              // non-held object I own colliding with an empty frame, capture
+              frame.capture(capturableEl);
+              captureIsActive = true;
+              activeCapturedElement = capturableEl;
+            }
           } else {
-            // non-held object I own colliding with an empty frame, capture
-            frame.capture(capturableEl);
+            // no capturable object I own is colliding with this empty frame, hide preview
+            frame.hidePreview();
           }
         } else {
-          // no capturable object I own is colliding with this empty frame, hide preview
-          frame.hidePreview();
+            // a potential capture is already being shown for another frame, so hide preview for this one
+            frame.hidePreview();
         }
       } else {
         // frame full
@@ -80,12 +94,18 @@ export class MediaFramesSystem {
         if (capturedEl) {
           if (NAF.utils.isMine(capturedEl)) {
             if (this.interactionSystem.isHeld(capturedEl)) {
-              if (!this.isColliding(frame.el, capturedEl)) {
-                // holding the captured object and its no longer colliding, releasee it
+              // Has this specific element been captured by another frame?
+              if(captureIsActive && activeCapturedElement == capturedEl) {
                 frame.release();
               } else {
-                // holding within bounds
-                guideMesh.material.uniforms.color.value.set(HOVER_COLOR);
+                if (!this.isColliding(frame.el, capturedEl)) {
+                  // holding the captured object and its no longer colliding, release it
+                  frame.release();
+                } else {
+                  // holding within bounds
+                  guideMesh.material.uniforms.color.value.set(HOVER_COLOR);
+                  captureIsActive = true;
+                }
               }
             } else if (frame.data.snapToCenter && this.interactionSystem.wasReleasedThisFrame(capturedEl)) {
               // released in bounds, re-snap
@@ -105,7 +125,8 @@ export class MediaFramesSystem {
     for (let i = 0; i < collisions.length; i++) {
       const bodyData = this.physicsSystem.bodyUuidToData.get(collisions[i]);
       const mediaObjectEl = bodyData && bodyData.object3D && bodyData.object3D.el;
-      if (isCapturableByType[mediaType](mediaObjectEl)) {
+      // Is this the type of media that can be captured and is it not already captured by another frame?
+      if (isCapturableByType[mediaType](mediaObjectEl) && !mediaObjectEl.components["floaty-object"]?.locked) {
         return mediaObjectEl;
       }
     }
@@ -265,14 +286,20 @@ AFRAME.registerComponent("media-frame", {
       // TODO this assumes media frames are all in world space
       capturableEntity.object3D.position.copy(this.el.object3D.position);
       capturableEntity.object3D.rotation.copy(this.el.object3D.rotation);
-      capturableEntity.object3D.scale.setScalar(
-        scaleForAspectFit(this.data.bounds, capturableEntity.getObject3D("mesh").scale)
-      );
+
+      // Find exact size of object for a tight fit within the frame
+      const boundingBox = new THREE.Box3();
+      const boxSize = new THREE.Vector3();
+      // Using local AABB to ignore the impact of any local or parental rotations
+      computeObjectAABB(capturableEntity.getObject3D("mesh"), boundingBox);
+      boundingBox.getSize(boxSize);
+      capturableEntity.object3D.scale.setScalar(scaleForAspectFit(this.data.bounds, boxSize));
+
       capturableEntity.object3D.matrixNeedsUpdate = true;
       capturableEntity.components["floaty-object"].setLocked(true);
       this.hidePreview();
     } else {
-      // TODO what do we do about this state? should evenetually resolve itself as it will try again next frame...
+      // TODO what do we do about this state? should eventually resolve itself as it will try again next frame...
       console.error("failed to take ownership of media frame");
     }
   },
