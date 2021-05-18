@@ -127,7 +127,9 @@ export const SCHEMA = {
         enableAECHack: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
-        showAudioDebugView: { type: "bool" },
+        showAudioDebugPanel: { type: "bool" },
+        enableAudioClipping: { type: "bool" },
+        audioClippingThreshold: { type: "number" },
         theme: { type: "string" }
       }
     },

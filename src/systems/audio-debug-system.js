@@ -3,6 +3,9 @@ import { THREE } from "aframe";
 const MAX_DEBUG_SOURCES = 64;
 
 const CONE_VERTEX = `
+  precision highp float;
+  precision highp int;
+  
   varying vec2 vUv;
   varying vec3 vNormal;
   void main()
@@ -14,6 +17,9 @@ const CONE_VERTEX = `
 `;
 const CONE_FRAG = `
   // Based on: https://www.shadertoy.com/view/Mll3D4#
+  precision highp float;
+  precision highp int;
+
   varying vec2 vUv;
   varying vec3 vNormal;
   uniform float time;
@@ -25,9 +31,9 @@ const CONE_FRAG = `
   uniform vec3 colorInner;
   uniform vec3 colorOuter;
   uniform vec3 colorGain;
-  uniform int positionsNum;
-  uniform vec3 positions[${MAX_DEBUG_SOURCES}];
-  uniform vec3 orientations[${MAX_DEBUG_SOURCES}];
+  uniform int count;
+  uniform vec3 sourcePosition[${MAX_DEBUG_SOURCES}];
+  uniform vec3 sourceOrientation[${MAX_DEBUG_SOURCES}];
   uniform float maxDistance[${MAX_DEBUG_SOURCES}];
   uniform float refDistance[${MAX_DEBUG_SOURCES}];
   uniform float rolloffFactor[${MAX_DEBUG_SOURCES}];
@@ -109,27 +115,27 @@ const CONE_FRAG = `
     // Draw background
     vec4 background = vec4(1.0, 1.0, 1.0, 0.0);
 
-    for (int i=0; i<positionsNum; i++) {
-      vec2 center = positions[i].xz - vUv;
+    for (int i=0; i<count; i++) {
+      vec2 center = sourcePosition[i].xz - vUv;
 
       // Calculate distance to (0,0).
       float d = length( center );
 
       // Optional start Offset.
-      vec2 orientation = normalize(orientations[i].xz);
+      vec2 orientation = normalize(sourceOrientation[i].xz);
       float ang = atan(-orientation.x, orientation.y) * kInvPi * 0.5;
-      // Rotate to sart drawing facing front
+      // Rotate to start drawing facing front
       ang -= 0.5;
       float startOffset = mod(ang, 1.0);
 
-      // Draw inner circle
+      // Draw inner cone
       float innerAngle = coneInnerAngle[i] * kDegToRad * kInvPi * 0.5;
       float innerStartAngle = startOffset + innerAngle * 0.5;
       vec4 innerLayer = circle(center, d, innerAngle, 10000.0, 1.0, colorInner, innerStartAngle);
       innerLayer = att(d, innerLayer, maxDistance[i], refDistance[i], rolloffFactor[i], distanceModel[i]);
       background = mix(background, innerLayer, innerLayer.a);
 
-      // Draw outer circle
+      // Draw outer cone
       float outerAngle = coneOuterAngle[i] * kDegToRad * kInvPi * 0.5;
       float outerAngleDiffHalf = (outerAngle - innerAngle) * 0.5;
       vec4 outerLayer1 = circle(center, d, outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle + outerAngleDiffHalf);
@@ -137,18 +143,18 @@ const CONE_FRAG = `
       background = mix(background, outerLayer1, outerLayer1.a);
       vec4 outerLayer2 = circle(center, d, outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle - innerAngle);
       outerLayer2 = att(d, outerLayer2, maxDistance[i], refDistance[i], rolloffFactor[i], distanceModel[i]);
-      background = mix(background, outerLayer2, outerLayer2.a);
+      background = mix(background, outerLayer2, outerLayer2.a * (clipped[i] ? 0.0 : 1.0));
 
       // Draw base
-      vec4 baseLayer = circle(center, d, 1.0, refDistance[i], 0.1, vec3(0.5, 0.5, 0.5), 0.0);
+      vec4 baseLayer = circle(center, d, 1.0, 1.0, 0.1, vec3(0.5, 0.5, 0.5), 0.0);
       background = mix(background, baseLayer, baseLayer.a);
 
       // Draw gain
       float g = clamp(gain[i], 0.0, 1.0);
-      vec4 gainLayer = circle(center, d, g, refDistance[i], 0.5, colorGain, startOffset);
+      vec4 gainLayer = circle(center, d, g, 1.0, 0.5, colorGain, startOffset);
       background = mix(background, gainLayer, gainLayer.a);
       if (gain[i] > 1.0) {
-        vec4 overGainLayer = circle(center, d, gain[i] - g, refDistance[i], 0.5, vec3(1.0, 0.0, 0.0), startOffset);
+        vec4 overGainLayer = circle(center, d, gain[i] - g, 1.0, 0.5, vec3(1.0, 0.0, 0.0), startOffset);
         background = mix(background, overGainLayer, overGainLayer.a);
       }
     }
@@ -174,13 +180,13 @@ AFRAME.registerSystem("audio-debug", {
         colorInner: { value: new THREE.Color("#7AFF59") },
         colorOuter: { value: new THREE.Color("#FF6340") },
         colorGain: { value: new THREE.Color("#70DBFF") },
-        positionsNum: { value: 0 },
+        count: { value: 0 },
         maxDistance: { value: [] },
         refDistance: { value: [] },
         rolloffFactor: { value: [] },
         distanceModel: { value: [] },
-        positions: { value: [] },
-        orientations: { value: [] },
+        sourcePosition: { value: [] },
+        sourceOrientation: { value: [] },
         coneInnerAngle: { value: [] },
         coneOuterAngle: { value: [] },
         gain: { value: [] },
@@ -191,10 +197,10 @@ AFRAME.registerSystem("audio-debug", {
     });
     this.material.side = THREE.FrontSide;
     this.material.transparent = true;
-    this.material.uniforms.positionsNum.value = 0;
+    this.material.uniforms.count.value = 0;
 
-    this.sourcesPos = new Array(MAX_DEBUG_SOURCES);
-    this.orientations = new Array(MAX_DEBUG_SOURCES);
+    this.sourcePositions = new Array(MAX_DEBUG_SOURCES);
+    this.sourceOrientations = new Array(MAX_DEBUG_SOURCES);
     this.distanceModels = new Array(MAX_DEBUG_SOURCES);
     this.maxDistances = new Array(MAX_DEBUG_SOURCES);
     this.refDistances = new Array(MAX_DEBUG_SOURCES);
@@ -226,8 +232,8 @@ AFRAME.registerSystem("audio-debug", {
       return;
     }
 
-    this.sourcesPos.fill(new THREE.Vector3());
-    this.orientations.fill(new THREE.Vector3());
+    this.sourcePositions.fill(new THREE.Vector3());
+    this.sourceOrientations.fill(new THREE.Vector3());
     this.distanceModels.fill(0);
     this.maxDistances.fill(0.0);
     this.refDistances.fill(0.0);
@@ -241,8 +247,8 @@ AFRAME.registerSystem("audio-debug", {
     this.sources.forEach(source => {
       if (source.data.enabled) {
         if (sourceNum < MAX_DEBUG_SOURCES) {
-          this.sourcesPos[sourceNum] = source.data.position;
-          this.orientations[sourceNum] = source.data.orientation;
+          this.sourcePositions[sourceNum] = source.data.position;
+          this.sourceOrientations[sourceNum] = source.data.orientation;
           this.distanceModels[sourceNum] = 0;
           if (source.data.distanceModel === "linear") {
             this.distanceModels[sourceNum] = 0;
@@ -269,9 +275,9 @@ AFRAME.registerSystem("audio-debug", {
     this.material.uniforms.maxDistance.value = this.maxDistances;
     this.material.uniforms.refDistance.value = this.refDistances;
     this.material.uniforms.rolloffFactor.value = this.rolloffFactors;
-    this.material.uniforms.positions.value = this.sourcesPos;
-    this.material.uniforms.orientations.value = this.orientations;
-    this.material.uniforms.positionsNum.value = sourceNum;
+    this.material.uniforms.sourcePosition.value = this.sourcePositions;
+    this.material.uniforms.sourceOrientation.value = this.sourceOrientations;
+    this.material.uniforms.count.value = sourceNum;
     this.material.uniforms.coneInnerAngle.value = this.coneInnerAngles;
     this.material.uniforms.coneOuterAngle.value = this.coneOuterAngles;
     this.material.uniforms.gain.value = this.gains;
@@ -309,7 +315,7 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   updateState() {
-    const isEnabled = window.APP.store.state.preferences.showAudioDebugView;
+    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel;
     if (isEnabled !== undefined && isEnabled !== this.data.enabled) {
       this.enableDebugMode(isEnabled);
     }

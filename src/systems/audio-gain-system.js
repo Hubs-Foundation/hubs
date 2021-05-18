@@ -9,13 +9,11 @@ AFRAME.registerSystem("audio-gain", {
 
   init() {
     this.sources = [];
-    this.avatarRig = document.getElementById("avatar-rig");
     window.APP.store.addEventListener("statechanged", this.updatePrefs.bind(this));
   },
 
   remove() {
     this.sources = [];
-    this.avatarRig = null;
     window.APP.store.removeEventListener("statechanged", this.updatePrefs);
   },
 
@@ -37,31 +35,31 @@ AFRAME.registerSystem("audio-gain", {
     }
 
     this.sources.forEach(source => {
-      const audio = source.audio();
-      if (source.data.attenuation < source.data.clippingThreshold) {
-        if (audio.gain.gain.value > 0 && !source.data.isClipped) {
-          source.clipGain(CLIPPING_GAIN);
-          console.log(
-            `[audio-gain-system] Updating audio gain for ${source.el.id}. gain [${source.data.gain}]
-            }]`
-          );
+      if (source.data.clippingEnabled) {
+        const audio = source.audio();
+        if (source.data.attenuation < source.data.clippingThreshold) {
+          if (audio.gain.gain.value > 0 && !source.data.isClipped) {
+            source.clipGain(CLIPPING_GAIN);
+          }
+        } else if (source.data.isClipped) {
+          source.unclipGain();
+        } else {
+          // Update the non positional audio attenuation
+          if (this.audioOutputMode === "audio") {
+            this.updateSourceGain(source);
+          }
         }
-      } else if (source.data.isClipped) {
-        source.unclipGain();
-        console.log(`[audio-gain-system] Restoring audio gain for ${source.el.id}. gain [${source.data.gain}]
-          }]`);
       } else {
-        // Update the non positional audio attenuation
-        if (this.audioOutputMode === "audio") {
-          this.updateSourceGain(source);
-        }
+        source.unclipGain();
       }
     });
   },
 
   updatePrefs() {
+    const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
     this.sources.forEach(source => {
       this.updateSourceGain(source);
+      source.clippingUpdated({ clippingEnabled: enableAudioClipping, clippingThreshold: audioClippingThreshold });
     });
   },
 
@@ -74,6 +72,6 @@ AFRAME.registerSystem("audio-gain", {
         "avatar-volume-controls"
       ]?.data.volume;
     }
-    source.sourceVolumeChanged({ detail: volume });
+    source.volumeUpdated({ detail: volume });
   }
 });

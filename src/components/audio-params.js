@@ -1,5 +1,6 @@
 import { Vector3 } from "three";
 import { AudioNormalizer } from "../utils/audio-normalizer";
+import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
 
 export const SourceType = Object.freeze({ MEDIA_VIDEO: 0, AVATAR_AUDIO_SOURCE: 1, AVATAR_RIG: 2 });
 
@@ -16,7 +17,8 @@ AFRAME.registerComponent("audio-params", {
     rolloffFactor: { default: 3 },
     refDistance: { default: 1 },
     maxDistance: { default: 20 },
-    clippingThreshold: { default: 0.015 },
+    clippingEnabled: { default: CLIPPING_THRESHOLD_ENABLED },
+    clippingThreshold: { default: CLIPPING_THRESHOLD_DEFAULT },
     prevGain: { default: 1.0 },
     isClipped: { default: false },
     gain: { default: 1.0 },
@@ -35,18 +37,23 @@ AFRAME.registerComponent("audio-params", {
       this.el.sceneEl?.systems["audio-gain"].registerSource(this);
     }
 
+    const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
+    this.data.clippingEnabled = enableAudioClipping !== undefined ? enableAudioClipping : CLIPPING_THRESHOLD_ENABLED;
+    this.data.clippingThreshold =
+      audioClippingThreshold !== undefined ? audioClippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
+
     if (this.data.isLocal) {
       this.data.sourceType = SourceType.AVATAR_RIG;
     } else if (this.el.components["media-video"]) {
       this.data.sourceType = SourceType.MEDIA_VIDEO;
       this.data.gain = this.el.components["media-video"].data.volume;
-      this.el.addEventListener("media-volume-changed", this.sourceVolumeChanged.bind(this));
+      this.el.addEventListener("media-volume-changed", this.volumeUpdated.bind(this));
     } else if (this.el.components["avatar-audio-source"]) {
       this.data.sourceType = SourceType.AVATAR_AUDIO_SOURCE;
       this.data.gain =
-        this.el.parentEl.parentEl.querySelector("[avatar-volume-controls]").components["avatar-volume-controls"]?.data
+        this.el.parentEl?.parentEl?.querySelector("[avatar-volume-controls]").components["avatar-volume-controls"]?.data
           .volume || 1.0;
-      this.el.parentEl.parentEl.addEventListener("avatar-volume-changed", this.sourceVolumeChanged.bind(this));
+      this.el.parentEl?.parentEl?.addEventListener("avatar-volume-changed", this.volumeUpdated.bind(this));
     }
   },
 
@@ -58,9 +65,9 @@ AFRAME.registerComponent("audio-params", {
     }
 
     if (this.el.components["media-video"]) {
-      this.el.removeEventListener("media-volume-changed", this.sourceVolumeChanged);
+      this.el.removeEventListener("media-volume-changed", this.volumeUpdated);
     } else if (this.el.components["avatar-audio-source"]) {
-      this.el.parentEl.parentEl.removeEventListener("avatar-volume-changed", this.sourceVolumeChanged);
+      this.el.parentEl?.parentEl?.removeEventListener("avatar-volume-changed", this.volumeUpdated);
     }
   },
 
@@ -83,8 +90,10 @@ AFRAME.registerComponent("audio-params", {
       this.data.distanceModel = audio.panner.distanceModel;
       this.data.rolloffFactor = audio.panner.rolloffFactor;
       this.data.refDistance = audio.panner.refDistance;
+      this.data.maxDistance = audio.panner.maxDistance;
       this.data.coneInnerAngle = audio.panner.coneInnerAngle;
       this.data.coneOuterAngle = audio.panner.coneOuterAngle;
+      this.data.coneOuterGain = audio.panner.coneOuterGain;
       this.updateDistances();
       this.updateAttenuation();
     }
@@ -136,7 +145,8 @@ AFRAME.registerComponent("audio-params", {
           refDistance: audioParams.avatarRefDistance,
           rolloffFactor: audioParams.avatarRolloffFactor,
           coneInnerAngle: audioParams.avatarConeInnerAngle,
-          coneOuterAngle: audioParams.avatarConeOuterAngle
+          coneOuterAngle: audioParams.avatarConeOuterAngle,
+          coneOuterGain: audioParams.avatarConeOuterGain
         }
       };
     } else if (this.data.sourceType === SourceType.MEDIA_VIDEO) {
@@ -174,38 +184,33 @@ AFRAME.registerComponent("audio-params", {
 
   updateAttenuation() {
     if (this.data.distanceModel === "linear") {
-      this.data.attenuation =
-        1.0 -
-        this.data.rolloffFactor *
-          ((this.data.distance - this.data.refDistance) / (this.data.maxDistance - this.data.refDistance));
+      this.data.attenuation = this.att_linear();
     } else if (this.data.distanceModel === "inverse") {
-      this.data.attenuation =
-        this.data.refDistance /
-        (this.data.refDistance +
-          this.data.rolloffFactor * (Math.max(this.data.distance, this.data.refDistance) - this.data.refDistance));
+      this.data.attenuation = this.att_inverse();
     } else if (this.data.distanceModel === "exponential") {
-      this.data.attenuation = Math.pow(
-        Math.max(this.data.distance, this.data.refDistance) / this.data.refDistance,
-        -this.data.rolloffFactor
-      );
+      this.data.attenuation = this.att_exponential();
     }
   },
 
   clipGain(gain) {
-    const audio = this.audio();
-    this.data.isClipped = true;
-    this.data.prevGain = this.data.gain;
-    this.data.gain = gain;
-    this.data.gain = this.data.gain === 0 ? 0.001 : this.data.gain;
-    audio.gain.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
+    if (!this.data.isClipped) {
+      const audio = this.audio();
+      this.data.isClipped = true;
+      this.data.prevGain = this.data.gain;
+      this.data.gain = gain;
+      this.data.gain = this.data.gain === 0 ? 0.001 : this.data.gain;
+      audio.gain.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
+    }
   },
 
   unclipGain() {
-    const audio = this.audio();
-    this.data.isClipped = false;
-    this.data.gain = this.data.prevGain;
-    this.data.gain = this.data.gain === 0 ? 0.001 : this.data.gain;
-    audio?.gain?.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
+    if (this.data.isClipped) {
+      const audio = this.audio();
+      this.data.isClipped = false;
+      this.data.gain = this.data.prevGain;
+      this.data.gain = this.data.gain === 0 ? 0.001 : this.data.gain;
+      audio?.gain?.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
+    }
   },
 
   updateGain(newGain) {
@@ -220,7 +225,7 @@ AFRAME.registerComponent("audio-params", {
     audio?.gain?.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
   },
 
-  sourceVolumeChanged({ detail: volume }) {
+  volumeUpdated({ detail: volume }) {
     let globalVolume = 100;
     const { audioOutputMode, globalVoiceVolume, globalMediaVolume } = window.APP.store.state.preferences;
     if (this.data.sourceType === SourceType.MEDIA_VIDEO) {
@@ -234,5 +239,33 @@ AFRAME.registerComponent("audio-params", {
       newGain = this.data.gain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance));
     }
     this.updateGain(newGain);
+  },
+
+  clippingUpdated({ clippingEnabled, clippingThreshold }) {
+    this.data.clippingEnabled = clippingEnabled !== undefined ? clippingEnabled : CLIPPING_THRESHOLD_ENABLED;
+    this.data.clippingThreshold = clippingThreshold !== undefined ? clippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
+  },
+
+  att_linear() {
+    return (
+      1.0 -
+      this.data.rolloffFactor *
+        ((this.data.distance - this.data.refDistance) / (this.data.maxDistance - this.data.refDistance))
+    );
+  },
+
+  att_inverse() {
+    return (
+      this.data.refDistance /
+      (this.data.refDistance +
+        this.data.rolloffFactor * (Math.max(this.data.distance, this.data.refDistance) - this.data.refDistance))
+    );
+  },
+
+  att_exponential() {
+    return Math.pow(
+      Math.max(this.data.distance, this.data.refDistance) / this.data.refDistance,
+      -this.data.rolloffFactor
+    );
   }
 });

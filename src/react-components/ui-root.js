@@ -996,6 +996,7 @@ class UIRoot extends Component {
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
     const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
+    const showAudioDebugPanel = this.props.store.state.preferences["showAudioDebugPanel"];
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
@@ -1395,13 +1396,15 @@ class UIRoot extends Component {
                       scene={this.props.scene}
                       store={this.props.store}
                     />
-                    {showRtcDebugPanel && (
+                    {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
                         history={this.props.history}
                         store={window.APP.store}
                         scene={this.props.scene}
                         presences={this.props.presences}
                         sessionId={this.props.sessionId}
+                        showRtcDebug={showRtcDebugPanel}
+                        showAudioDebug={showAudioDebugPanel}
                       />
                     )}
                   </>

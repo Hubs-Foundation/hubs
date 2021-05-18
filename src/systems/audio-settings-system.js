@@ -17,9 +17,9 @@ function updateAvatarAudioSettings(avatarAudioSource, settings, positional) {
     maxDistance: settings.avatarMaxDistance,
     refDistance: settings.avatarRefDistance,
     rolloffFactor: settings.avatarRolloffFactor,
-    coneInnerAngle: settings.avatarConeInnerAngle,
-    coneOuterAngle: settings.avatarConeOuterAngle,
-    coneOuterGain: settings.avatarConeOuterGain
+    innerAngle: settings.avatarConeInnerAngle,
+    outerAngle: settings.avatarConeOuterAngle,
+    outerGain: settings.avatarConeOuterGain
   });
 }
 

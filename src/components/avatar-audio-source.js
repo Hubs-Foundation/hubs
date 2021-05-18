@@ -146,9 +146,9 @@ AFRAME.registerComponent("avatar-audio-source", {
     audio.setMaxDistance(settings.maxDistance);
     audio.setRefDistance(settings.refDistance);
     audio.setRolloffFactor(settings.rolloffFactor);
-    audio.panner.coneInnerAngle = settings.coneInnerAngle;
-    audio.panner.coneOuterAngle = settings.coneOuterAngle;
-    audio.panner.coneOuterGain = settings.coneOuterGain;
+    audio.panner.coneInnerAngle = settings.innerAngle;
+    audio.panner.coneOuterAngle = settings.outerAngle;
+    audio.panner.coneOuterGain = settings.outerGain;
   }
 });
 

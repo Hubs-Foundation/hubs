@@ -6,6 +6,7 @@ import { CollapsiblePanel } from "./CollapsiblePanel.js";
 import { Button } from "../input/Button.js";
 import styles from "./RtcDebugPanel.scss";
 import { FormattedMessage } from "react-intl";
+import { AudioDebugPanel } from "./AudioDebugPanel";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -220,7 +221,9 @@ export default class RtcDebugPanel extends Component {
     intl: PropTypes.object,
     presences: PropTypes.object,
     history: PropTypes.object,
-    sessionId: PropTypes.string
+    sessionId: PropTypes.string,
+    showRtcDebug: PropTypes.bool,
+    showAudioDebug: PropTypes.bool
   };
 
   constructor() {
@@ -228,7 +231,7 @@ export default class RtcDebugPanel extends Component {
 
     this.state = {
       log: [],
-      collapsed: { Local: false, Log: isMobile, Remote: true }
+      collapsed: { Local: false, Log: isMobile, Remote: true, Audio: false }
     };
   }
 
@@ -844,91 +847,103 @@ export default class RtcDebugPanel extends Component {
               maxHeight: isNarrow && !collapsed.Local && "80%"
             }}
           >
-            <CollapsiblePanel
-              title={<FormattedMessage id="rtc-debug-panel.local-panel-title" defaultMessage="Local" />}
-              isRoot
-              border
-              grow
-              collapsed={collapsed.Local}
-              onCollapse={this.onCollapse}
-            >
-              {deviceData && (
-                <CollapsiblePanel
-                  title={<FormattedMessage id="rtc-debug-panel.device-panel-title" defaultMessage="Device" />}
-                  border
-                  url={`${MEDIASOUP_DOC_BASE_URL}#Device`}
-                  data={deviceData}
-                />
-              )}
-              {signalingData && (
-                <SignalingPanel
-                  data={signalingData}
-                  onConnect={this.connectSignaling}
-                  onDisconnect={this.disconnectSignaling}
-                />
-              )}
-              <div style={{ display: "flex", flexFlow: "column" }}>
-                <TransportPanel
-                  title={
-                    <FormattedMessage id="rtc-debug-panel.send-transport-panel-title" defaultMessage="Send Transport" />
-                  }
-                  data={{
-                    id: transportsData?.[TransportType.SEND]?.id,
-                    opened: transportsData?.[TransportType.SEND]?.opened,
-                    state: transportsData?.[TransportType.SEND]?.state
-                  }}
-                  candidates={this.createCandidates(transportsData?.[TransportType.SEND]?.candidates)}
-                  producers={this.createProducers(transportsData?.[TransportType.SEND]?.producers, statsData)}
-                  onRestart={this.restartSendICE}
-                  isButtonEnabled={transportsData?.[TransportType.SEND]?.opened}
-                />
-              </div>
-              <div style={{ display: "flex", flexFlow: "column" }}>
-                <TransportPanel
-                  title={
-                    <FormattedMessage
-                      id="rtc-debug-panel.receive-transport-panel-title"
-                      defaultMessage="Receive Transport"
-                    />
-                  }
-                  data={{
-                    id: transportsData?.[TransportType.RECEIVE]?.id,
-                    opened: transportsData?.[TransportType.RECEIVE]?.opened,
-                    state: transportsData?.[TransportType.RECEIVE]?.state
-                  }}
-                  candidates={this.createCandidates(transportsData?.[TransportType.RECEIVE]?.candidates)}
-                  consumers={this.createConsumers(transportsData?.[TransportType.RECEIVE]?.consumers, statsData)}
-                  onRestart={this.restartRecvICE}
-                  isButtonEnabled={transportsData?.[TransportType.RECEIVE]?.opened}
-                />
-              </div>
-            </CollapsiblePanel>
+            {this.props.showRtcDebug && (
+              <CollapsiblePanel
+                title={<FormattedMessage id="rtc-debug-panel.local-panel-title" defaultMessage="Local" />}
+                isRoot
+                border
+                grow
+                collapsed={collapsed.Local}
+                onCollapse={this.onCollapse}
+              >
+                {deviceData && (
+                  <CollapsiblePanel
+                    title={<FormattedMessage id="rtc-debug-panel.device-panel-title" defaultMessage="Device" />}
+                    border
+                    url={`${MEDIASOUP_DOC_BASE_URL}#Device`}
+                    data={deviceData}
+                  />
+                )}
+                {signalingData && (
+                  <SignalingPanel
+                    data={signalingData}
+                    onConnect={this.connectSignaling}
+                    onDisconnect={this.disconnectSignaling}
+                  />
+                )}
+                <div style={{ display: "flex", flexFlow: "column" }}>
+                  <TransportPanel
+                    title={
+                      <FormattedMessage
+                        id="rtc-debug-panel.send-transport-panel-title"
+                        defaultMessage="Send Transport"
+                      />
+                    }
+                    data={{
+                      id: transportsData?.[TransportType.SEND]?.id,
+                      opened: transportsData?.[TransportType.SEND]?.opened,
+                      state: transportsData?.[TransportType.SEND]?.state
+                    }}
+                    candidates={this.createCandidates(transportsData?.[TransportType.SEND]?.candidates)}
+                    producers={this.createProducers(transportsData?.[TransportType.SEND]?.producers, statsData)}
+                    onRestart={this.restartSendICE}
+                    isButtonEnabled={transportsData?.[TransportType.SEND]?.opened}
+                  />
+                </div>
+                <div style={{ display: "flex", flexFlow: "column" }}>
+                  <TransportPanel
+                    title={
+                      <FormattedMessage
+                        id="rtc-debug-panel.receive-transport-panel-title"
+                        defaultMessage="Receive Transport"
+                      />
+                    }
+                    data={{
+                      id: transportsData?.[TransportType.RECEIVE]?.id,
+                      opened: transportsData?.[TransportType.RECEIVE]?.opened,
+                      state: transportsData?.[TransportType.RECEIVE]?.state
+                    }}
+                    candidates={this.createCandidates(transportsData?.[TransportType.RECEIVE]?.candidates)}
+                    consumers={this.createConsumers(transportsData?.[TransportType.RECEIVE]?.consumers, statsData)}
+                    onRestart={this.restartRecvICE}
+                    isButtonEnabled={transportsData?.[TransportType.RECEIVE]?.opened}
+                  />
+                </div>
+              </CollapsiblePanel>
+            )}
           </div>
-          <div
-            className={classNames(styles.rtcLogContainer)}
-            style={{
-              height: isNarrow && !collapsed.Log && "80%",
-              maxHeight: isNarrow && !collapsed.Log && "80%"
-            }}
-          >
-            <CollapsiblePanel
-              title={<FormattedMessage id="rtc-debug-panel.log-panel-title" defaultMessage="Log" />}
-              isRoot
-              border
-              grow
-              collapsed={collapsed.Log}
-              onCollapse={this.onCollapse}
-              clear={() => {
-                this.setState({
-                  log: []
-                });
-              }}
-              download={() => {
-                download("rtc_log.txt", this.createLog());
-              }}
-            >
-              <p className={classNames(styles.rtcLogMsgContainer)}>{this.createLogMsgs()}</p>
-            </CollapsiblePanel>
+          <div className={classNames(styles.statusContainerMiddle)}>
+            {this.props.showAudioDebug && (
+              <AudioDebugPanel isNarrow collapsed={collapsed.Audio} onCollapsed={this.onCollapse} />
+            )}
+            {this.props.showRtcDebug && (
+              <div
+                className={classNames(styles.rtcLogContainer)}
+                style={{
+                  height: isNarrow && !collapsed.Log && "80%",
+                  maxHeight: isNarrow && !collapsed.Log && "80%"
+                }}
+              >
+                <CollapsiblePanel
+                  title={<FormattedMessage id="rtc-debug-panel.log-panel-title" defaultMessage="Log" />}
+                  isRoot
+                  border
+                  grow
+                  collapsed={collapsed.Log}
+                  onCollapse={this.onCollapse}
+                  clear={() => {
+                    this.setState({
+                      log: []
+                    });
+                  }}
+                  download={() => {
+                    download("rtc_log.txt", this.createLog());
+                  }}
+                >
+                  <p className={classNames(styles.rtcLogMsgContainer)}>{this.createLogMsgs()}</p>
+                </CollapsiblePanel>
+              </div>
+            )}
           </div>
           <div
             className={classNames(styles.rtcStatusContainerRight)}
@@ -937,16 +952,18 @@ export default class RtcDebugPanel extends Component {
               maxHeight: isNarrow && !collapsed.Remote && "80%"
             }}
           >
-            <CollapsiblePanel
-              title={<FormattedMessage id="rtc-debug-panel.remote-panel-title" defaultMessage="Remote" />}
-              isRoot
-              border
-              grow
-              collapsed={collapsed.Remote}
-              onCollapse={this.onCollapse}
-            >
-              {this.createRemoteTransports(serverData)}
-            </CollapsiblePanel>
+            {this.props.showRtcDebug && (
+              <CollapsiblePanel
+                title={<FormattedMessage id="rtc-debug-panel.remote-panel-title" defaultMessage="Remote" />}
+                isRoot
+                border
+                grow
+                collapsed={collapsed.Remote}
+                onCollapse={this.onCollapse}
+              >
+                {this.createRemoteTransports(serverData)}
+              </CollapsiblePanel>
+            )}
           </div>
         </div>
       </div>

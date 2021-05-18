@@ -42,13 +42,14 @@
   display: flex;
   align-items: stretch;
   justify-content: center;
+  pointer-events: auto;
 }
 
 :local(.collapsible-content-root) {
   @extend :local(.collapsible-content);
   flex-flow: column nowrap;
   overflow-y: auto;
-  justify-content: flex-start;
+  justify-content: space-evenly;
 }
 
 :local(.collapsible-content).collapsed {
