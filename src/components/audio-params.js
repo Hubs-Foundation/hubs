@@ -49,7 +49,7 @@ AFRAME.registerComponent("audio-params", {
     this.normalizer = null;
     this.el.sceneEl?.systems["audio-debug"].registerSource(this);
     if (!this.data.isLocal) {
-      this.el.sceneEl?.systems["audio-gain"].registerSource(this);
+      this.el.sceneEl?.systems["hubs-systems"].gainSystem.registerSource(this);
     }
 
     const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
@@ -78,9 +78,8 @@ AFRAME.registerComponent("audio-params", {
     this.normalizer = null;
     this.el.sceneEl?.systems["audio-debug"].unregisterSource(this);
     if (!this.data.isLocal) {
-      this.el.sceneEl?.systems["audio-gain"].unregisterSource(this);
+      this.el.sceneEl?.systems["hubs-systems"].gainSystem.unregisterSource(this);
     }
-    this.el.sceneEl?.systems["audio-gain"].unregisterSource(this);
 
     this.el.removeEventListener("media-volume-changed", this.onVolumeUpdated);
     this.el.parentEl?.parentEl?.removeEventListener("avatar-volume-changed", this.onVolumeUpdated);

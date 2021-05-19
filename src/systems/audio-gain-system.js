@@ -2,24 +2,20 @@ import { SourceType } from "../components/audio-params";
 
 const CLIPPING_GAIN = 0.0001;
 
-AFRAME.registerSystem("audio-gain", {
-  schema: {
-    enabled: { default: true }
-  },
-
-  init() {
+export class GainSystem {
+  constructor() {
     this.sources = [];
     window.APP.store.addEventListener("statechanged", this.updatePrefs.bind(this));
-  },
+  }
 
   remove() {
     this.sources = [];
     window.APP.store.removeEventListener("statechanged", this.updatePrefs);
-  },
+  }
 
   registerSource(source) {
     this.sources.push(source);
-  },
+  }
 
   unregisterSource(source) {
     const index = this.sources.indexOf(source);
@@ -27,13 +23,9 @@ AFRAME.registerSystem("audio-gain", {
     if (index !== -1) {
       this.sources.splice(index, 1);
     }
-  },
+  }
 
   tick() {
-    if (!this.data.enabled) {
-      return;
-    }
-
     this.sources.forEach(source => {
       if (source.data.clippingEnabled) {
         const audio = source.audio();
@@ -53,7 +45,7 @@ AFRAME.registerSystem("audio-gain", {
         source.unclipGain();
       }
     });
-  },
+  }
 
   updatePrefs() {
     const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
@@ -61,7 +53,7 @@ AFRAME.registerSystem("audio-gain", {
       this.updateSourceGain(source);
       source.clippingUpdated({ clippingEnabled: enableAudioClipping, clippingThreshold: audioClippingThreshold });
     });
-  },
+  }
 
   updateSourceGain(source) {
     let volume = 1.0;
@@ -74,4 +66,4 @@ AFRAME.registerSystem("audio-gain", {
     }
     source.volumeUpdated({ detail: volume });
   }
-});
+}
