@@ -151,10 +151,10 @@ AFRAME.registerComponent("audio-params", {
       };
     } else if (this.data.sourceType === SourceType.MEDIA_VIDEO) {
       const audio = this.el.getObject3D("sound");
-      return audio instanceof THREE.PositionalAudio ? audio : null;
+      return audio.panner ? audio : null;
     } else if (this.data.sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
       const audio = this.el.getObject3D("avatar-audio-source");
-      return audio instanceof THREE.PositionalAudio ? audio : null;
+      return audio.panner ? audio : null;
     }
   },
 
