@@ -8,7 +8,6 @@ export const SourceType = Object.freeze({ MEDIA_VIDEO: 0, AVATAR_AUDIO_SOURCE: 1
 const MUTE_DELAY_SECS = 1;
 
 AFRAME.registerComponent("audio-params", {
-  dependencies: ["media-views", "avatar-audio-source"],
   schema: {
     enabled: { default: true },
     isLocal: { default: false },
