@@ -17,6 +17,7 @@ import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 import { detect } from "detect-browser";
 import semver from "semver";
+import { MediaAudioDefaults } from "../systems/audio-settings-system";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -255,17 +256,17 @@ AFRAME.registerComponent("media-video", {
     src: { type: "string" },
     audioSrc: { type: "string" },
     contentType: { type: "string" },
-    volume: { type: "number", default: 0.5 },
+    volume: { type: "number", default: MediaAudioDefaults.VOLUME },
     loop: { type: "boolean", default: true },
     audioType: { type: "string", default: "pannernode" },
     hidePlaybackControls: { type: "boolean", default: false },
-    distanceModel: { type: "string", default: "inverse" },
-    rolloffFactor: { type: "number", default: 1 },
-    refDistance: { type: "number", default: 1 },
-    maxDistance: { type: "number", default: 10000 },
-    coneInnerAngle: { type: "number", default: 360 },
-    coneOuterAngle: { type: "number", default: 0 },
-    coneOuterGain: { type: "number", default: 0 },
+    distanceModel: { type: "string", default: MediaAudioDefaults.DISTANCE_MODEL },
+    rolloffFactor: { type: "number", default: MediaAudioDefaults.ROLLOFF_FACTOR },
+    refDistance: { type: "number", default: MediaAudioDefaults.REF_DISTANCE },
+    maxDistance: { type: "number", default: MediaAudioDefaults.MAX_DISTANCE },
+    coneInnerAngle: { type: "number", default: MediaAudioDefaults.INNER_ANGLE },
+    coneOuterAngle: { type: "number", default: MediaAudioDefaults.OUTER_ANGLE },
+    coneOuterGain: { type: "number", default: MediaAudioDefaults.OUTER_GAIN },
     videoPaused: { type: "boolean" },
     projection: { type: "string", default: "flat" },
     time: { type: "number" },

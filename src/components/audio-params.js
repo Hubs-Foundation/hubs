@@ -1,6 +1,7 @@
 import { Vector3 } from "three";
 import { AudioNormalizer } from "../utils/audio-normalizer";
 import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
+import { AvatarAudioDefaults, DISTANCE_MODEL_OPTIONS } from "../systems/audio-settings-system";
 
 export const SourceType = Object.freeze({ MEDIA_VIDEO: 0, AVATAR_AUDIO_SOURCE: 1, AVATAR_RIG: 2 });
 
@@ -13,10 +14,10 @@ AFRAME.registerComponent("audio-params", {
     isLocal: { default: false },
     position: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
     orientation: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
-    distanceModel: { default: "inverse", oneOf: ["linear", "inverse", "exponential"] },
-    rolloffFactor: { default: 3 },
-    refDistance: { default: 1 },
-    maxDistance: { default: 20 },
+    distanceModel: { default: AvatarAudioDefaults.DISTANCE_MODEL, oneOf: [DISTANCE_MODEL_OPTIONS] },
+    rolloffFactor: { default: AvatarAudioDefaults.ROLLOFF_FACTOR },
+    refDistance: { default: AvatarAudioDefaults.REF_DISTANCE },
+    maxDistance: { default: AvatarAudioDefaults.MAX_DISTANCE },
     clippingEnabled: { default: CLIPPING_THRESHOLD_ENABLED },
     clippingThreshold: { default: CLIPPING_THRESHOLD_DEFAULT },
     prevGain: { default: 1.0 },

@@ -16,6 +16,7 @@ import {
   GLOBAL_VOLUME_DEFAULT
 } from "../../react-components/preferences-screen";
 import { SelectInputField } from "../input/SelectInputField";
+import { DISTANCE_MODEL_OPTIONS } from "../../systems/audio-settings-system";
 
 const ROLLOFF_MIN = 0.0;
 const ROLLOFF_MAX = 20.0;
@@ -32,7 +33,6 @@ const ANGLE_STEP = 1.0;
 const GAIN_MIN = 0.0;
 const GAIN_MAX = 1.0;
 const GAIN_STEP = 0.1;
-const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
 
 function SelectProperty({ defaultValue, options, onChange, children }) {
   const [value, setValue] = useState(defaultValue);
