@@ -45,6 +45,7 @@ AFRAME.registerComponent("audio-params", {
       audioClippingThreshold !== undefined ? audioClippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
 
     this.onVolumeUpdated = this.volumeUpdated.bind(this);
+    this.onSourceSetAdded = this.sourceSetAdded.bind(this);
     if (this.data.isLocal) {
       this.data.sourceType = SourceType.AVATAR_RIG;
     } else if (this.el.components["media-video"]) {
@@ -70,6 +71,10 @@ AFRAME.registerComponent("audio-params", {
 
     this.el.removeEventListener("media-volume-changed", this.onVolumeUpdated);
     this.el.parentEl?.parentEl?.removeEventListener("avatar-volume-changed", this.onVolumeUpdated);
+
+    if (this.data.sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
+      this.el.components["avatar-audio-source"].el.removeEventListener("sound-source-set", this.onSourceSetAdded);
+    }
   },
 
   tick() {
@@ -151,10 +156,10 @@ AFRAME.registerComponent("audio-params", {
       };
     } else if (this.data.sourceType === SourceType.MEDIA_VIDEO) {
       const audio = this.el.getObject3D("sound");
-      return audio.panner ? audio : null;
+      return audio?.panner ? audio : null;
     } else if (this.data.sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
       const audio = this.el.getObject3D("avatar-audio-source");
-      return audio.panner ? audio : null;
+      return audio?.panner ? audio : null;
     }
   },
 
@@ -164,14 +169,17 @@ AFRAME.registerComponent("audio-params", {
       const avatarAudioSource = this.el.components["avatar-audio-source"];
       if (avatarAudioSource) {
         this.normalizer = new AudioNormalizer(audio);
-        avatarAudioSource.el.addEventListener("sound-source-set", () => {
-          const audio = avatarAudioSource && avatarAudioSource.el.getObject3D(avatarAudioSource.attrName);
-          if (audio) {
-            this.normalizer = new AudioNormalizer(audio);
-            this.normalizer.apply();
-          }
-        });
+        avatarAudioSource.el.addEventListener("sound-source-set", this.onSourceSetAdded);
       }
+    }
+  },
+
+  sourceSetAdded() {
+    const avatarAudioSource = this.el.components["avatar-audio-source"];
+    const audio = avatarAudioSource && avatarAudioSource.el.getObject3D(avatarAudioSource.attrName);
+    if (audio) {
+      this.normalizer = new AudioNormalizer(audio);
+      this.normalizer.apply();
     }
   },
 
