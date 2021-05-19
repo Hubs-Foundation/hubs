@@ -42,6 +42,16 @@ async function getMediaStream(el) {
   return stream;
 }
 
+function setPositionalAudioProperties(audio, settings) {
+  audio.setDistanceModel(settings.distanceModel);
+  audio.setMaxDistance(settings.maxDistance);
+  audio.setRefDistance(settings.refDistance);
+  audio.setRolloffFactor(settings.rolloffFactor);
+  audio.panner.coneInnerAngle = settings.innerAngle;
+  audio.panner.coneOuterAngle = settings.outerAngle;
+  audio.panner.coneOuterGain = settings.outerGain;
+}
+
 AFRAME.registerComponent("avatar-audio-source", {
   schema: {
     positional: { default: true },
@@ -68,7 +78,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     const audioListener = this.el.sceneEl.audioListener;
     const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
     if (this.data.positional) {
-      this.setPositionalAudioProperties(audio, this.data);
+      setPositionalAudioProperties(audio, this.data);
     }
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
@@ -133,7 +143,7 @@ AFRAME.registerComponent("avatar-audio-source", {
       this.destroyAudio();
       this.createAudio();
     } else if (this.data.positional) {
-      this.setPositionalAudioProperties(audio, this.data);
+      setPositionalAudioProperties(audio, this.data);
     }
   },
 
@@ -141,16 +151,6 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
     NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
     this.destroyAudio();
-  },
-
-  setPositionalAudioProperties(audio, settings) {
-    audio.setDistanceModel(settings.distanceModel);
-    audio.setMaxDistance(settings.maxDistance);
-    audio.setRefDistance(settings.refDistance);
-    audio.setRolloffFactor(settings.rolloffFactor);
-    audio.panner.coneInnerAngle = settings.innerAngle;
-    audio.panner.coneOuterAngle = settings.outerAngle;
-    audio.panner.coneOuterGain = settings.outerGain;
   }
 });
 
@@ -308,7 +308,7 @@ AFRAME.registerComponent("audio-target", {
     const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
 
     if (this.data.debug && this.data.positional) {
-      this.setPositionalAudioProperties(audio, this.data);
+      setPositionalAudioProperties(audio, this.data);
       const helper = new THREE.PositionalAudioHelper(audio, this.data.refDistance, 16, 16);
       audio.add(helper);
     }
