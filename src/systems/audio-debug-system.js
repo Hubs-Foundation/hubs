@@ -200,15 +200,25 @@ AFRAME.registerSystem("audio-debug", {
     this.material.uniforms.count.value = 0;
 
     this.sourcePositions = new Array(MAX_DEBUG_SOURCES);
+    this.sourcePositions.fill(new THREE.Vector3());
     this.sourceOrientations = new Array(MAX_DEBUG_SOURCES);
+    this.sourceOrientations.fill(new THREE.Vector3());
     this.distanceModels = new Array(MAX_DEBUG_SOURCES);
+    this.distanceModels.fill(0);
     this.maxDistances = new Array(MAX_DEBUG_SOURCES);
+    this.maxDistances.fill(0.0);
     this.refDistances = new Array(MAX_DEBUG_SOURCES);
+    this.refDistances.fill(0.0);
     this.rolloffFactors = new Array(MAX_DEBUG_SOURCES);
+    this.rolloffFactors.fill(0.0);
     this.coneInnerAngles = new Array(MAX_DEBUG_SOURCES);
+    this.coneInnerAngles.fill(0.0);
     this.coneOuterAngles = new Array(MAX_DEBUG_SOURCES);
+    this.coneOuterAngles.fill(0.0);
     this.gains = new Array(MAX_DEBUG_SOURCES);
+    this.gains.fill(0.0);
     this.clipped = new Array(MAX_DEBUG_SOURCES);
+    this.clipped.fill(0.0);
   },
 
   remove() {
@@ -231,17 +241,6 @@ AFRAME.registerSystem("audio-debug", {
     if (!this.data.enabled) {
       return;
     }
-
-    this.sourcePositions.fill(new THREE.Vector3());
-    this.sourceOrientations.fill(new THREE.Vector3());
-    this.distanceModels.fill(0);
-    this.maxDistances.fill(0.0);
-    this.refDistances.fill(0.0);
-    this.rolloffFactors.fill(0.0);
-    this.coneInnerAngles.fill(0.0);
-    this.coneOuterAngles.fill(0.0);
-    this.gains.fill(0.0);
-    this.clipped.fill(0.0);
 
     let sourceNum = 0;
     this.sources.forEach(source => {
