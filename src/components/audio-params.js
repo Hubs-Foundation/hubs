@@ -31,6 +31,7 @@ AFRAME.registerComponent("audio-params", {
   init() {
     this.avatarRigPosition = new THREE.Vector3();
     this.avatarRigOrientation = new THREE.Vector3(0, 0, -1);
+    this.listenerPos = new THREE.Vector3();
     this.data.position = new Vector3(0.0, 0.0, 0.0);
     this.data.orientation = new Vector3(0.0, 0.0, 0.0);
     this.normalizer = null;
@@ -184,10 +185,9 @@ AFRAME.registerComponent("audio-params", {
   },
 
   updateDistances() {
-    const listenerPos = new THREE.Vector3();
-    this.el.sceneEl.audioListener.getWorldPosition(listenerPos);
-    this.data.distance = this.data.position.distanceTo(listenerPos);
-    this.data.squaredDistance = this.data.position.distanceToSquared(listenerPos);
+    this.el.sceneEl.audioListener.getWorldPosition(this.listenerPos);
+    this.data.distance = this.data.position.distanceTo(this.listenerPos);
+    this.data.squaredDistance = this.data.position.distanceToSquared(this.listenerPos);
   },
 
   updateAttenuation() {
