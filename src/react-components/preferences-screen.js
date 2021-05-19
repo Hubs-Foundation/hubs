@@ -11,7 +11,7 @@ import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
 
-export const CLIPPING_THRESHOLD_ENABLED = true;
+export const CLIPPING_THRESHOLD_ENABLED = false;
 export const CLIPPING_THRESHOLD_MIN = 0.0;
 export const CLIPPING_THRESHOLD_MAX = 0.1;
 export const CLIPPING_THRESHOLD_STEP = 0.001;
