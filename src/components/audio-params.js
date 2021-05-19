@@ -7,6 +7,18 @@ export const SourceType = Object.freeze({ MEDIA_VIDEO: 0, AVATAR_AUDIO_SOURCE: 1
 
 const MUTE_DELAY_SECS = 1;
 
+const distanceModels = {
+  linear: function(distance, rolloffFactor, refDistance, maxDistance) {
+    return 1.0 - rolloffFactor * ((distance - refDistance) / (maxDistance - refDistance));
+  },
+  inverse: function(distance, rolloffFactor, refDistance) {
+    return refDistance / (refDistance + rolloffFactor * (Math.max(distance, refDistance) - refDistance));
+  },
+  exponential: function(distance, rolloffFactor, refDistance) {
+    return Math.pow(Math.max(distance, refDistance) / refDistance, -rolloffFactor);
+  }
+};
+
 AFRAME.registerComponent("audio-params", {
   schema: {
     enabled: { default: true },
@@ -191,13 +203,12 @@ AFRAME.registerComponent("audio-params", {
   },
 
   updateAttenuation() {
-    if (this.data.distanceModel === "linear") {
-      this.data.attenuation = this.att_linear();
-    } else if (this.data.distanceModel === "inverse") {
-      this.data.attenuation = this.att_inverse();
-    } else if (this.data.distanceModel === "exponential") {
-      this.data.attenuation = this.att_exponential();
-    }
+    this.data.attenuation = distanceModels[this.data.distanceModel](
+      this.data.distance,
+      this.data.rolloffFactor,
+      this.data.refDistance,
+      this.data.maxDistance
+    );
   },
 
   clipGain(gain) {
@@ -252,28 +263,5 @@ AFRAME.registerComponent("audio-params", {
   clippingUpdated({ clippingEnabled, clippingThreshold }) {
     this.data.clippingEnabled = clippingEnabled !== undefined ? clippingEnabled : CLIPPING_THRESHOLD_ENABLED;
     this.data.clippingThreshold = clippingThreshold !== undefined ? clippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
-  },
-
-  att_linear() {
-    return (
-      1.0 -
-      this.data.rolloffFactor *
-        ((this.data.distance - this.data.refDistance) / (this.data.maxDistance - this.data.refDistance))
-    );
-  },
-
-  att_inverse() {
-    return (
-      this.data.refDistance /
-      (this.data.refDistance +
-        this.data.rolloffFactor * (Math.max(this.data.distance, this.data.refDistance) - this.data.refDistance))
-    );
-  },
-
-  att_exponential() {
-    return Math.pow(
-      Math.max(this.data.distance, this.data.refDistance) / this.data.refDistance,
-      -this.data.rolloffFactor
-    );
   }
 });
