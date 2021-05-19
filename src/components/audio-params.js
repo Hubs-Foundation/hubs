@@ -64,12 +64,10 @@ AFRAME.registerComponent("audio-params", {
     if (!this.data.isLocal) {
       this.el.sceneEl?.systems["audio-gain"].unregisterSource(this);
     }
+    this.el.sceneEl?.systems["audio-gain"].unregisterSource(this);
 
-    if (this.el.components["media-video"]) {
-      this.el.removeEventListener("media-volume-changed", this.onVolumeUpdated);
-    } else if (this.el.components["avatar-audio-source"]) {
-      this.el.parentEl?.parentEl?.removeEventListener("avatar-volume-changed", this.onVolumeUpdated);
-    }
+    this.el.removeEventListener("media-volume-changed", this.onVolumeUpdated);
+    this.el.parentEl?.parentEl?.removeEventListener("avatar-volume-changed", this.onVolumeUpdated);
   },
 
   tick() {
