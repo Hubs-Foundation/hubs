@@ -29,6 +29,8 @@ AFRAME.registerComponent("audio-params", {
   },
 
   init() {
+    this.avatarRigPosition = new THREE.Vector3();
+    this.avatarRigOrientation = new THREE.Vector3(0, 0, -1);
     this.data.position = new Vector3(0.0, 0.0, 0.0);
     this.data.orientation = new Vector3(0.0, 0.0, 0.0);
     this.normalizer = null;
@@ -113,31 +115,30 @@ AFRAME.registerComponent("audio-params", {
       const audioParams = this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.audioSettings;
       const avatarRigObj = document.getElementById("avatar-rig").querySelector(".camera").object3D;
       avatarRigObj.updateMatrixWorld(true);
-      const position = new THREE.Vector3();
-      avatarRigObj.getWorldPosition(position);
-      const direction = new THREE.Vector3(0, 0, -1);
+      avatarRigObj.getWorldPosition(this.avatarRigPosition);
+      this.avatarRigOrientation.set(0, 0, -1);
       const worldQuat = new THREE.Quaternion();
       avatarRigObj.getWorldQuaternion(worldQuat);
-      direction.applyQuaternion(worldQuat);
+      this.avatarRigOrientation.applyQuaternion(worldQuat);
       return {
         panner: {
           orientationX: {
-            value: direction.x
+            value: this.avatarRigOrientation.x
           },
           orientationY: {
-            value: direction.y
+            value: this.avatarRigOrientation.y
           },
           orientationZ: {
-            value: direction.z
+            value: this.avatarRigOrientation.z
           },
           positionX: {
-            value: position.x
+            value: this.avatarRigPosition.x
           },
           positionY: {
-            value: position.y
+            value: this.avatarRigPosition.y
           },
           positionZ: {
-            value: position.z
+            value: this.avatarRigPosition.z
           },
           distanceModel: audioParams.avatarDistanceModel,
           maxDistance: audioParams.avatarMaxDistance,
