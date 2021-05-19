@@ -42,18 +42,19 @@ AFRAME.registerComponent("audio-params", {
     this.data.clippingThreshold =
       audioClippingThreshold !== undefined ? audioClippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
 
+    this.onVolumeUpdated = this.volumeUpdated.bind(this);
     if (this.data.isLocal) {
       this.data.sourceType = SourceType.AVATAR_RIG;
     } else if (this.el.components["media-video"]) {
       this.data.sourceType = SourceType.MEDIA_VIDEO;
       this.data.gain = this.el.components["media-video"].data.volume;
-      this.el.addEventListener("media-volume-changed", this.volumeUpdated.bind(this));
+      this.el.addEventListener("media-volume-changed", this.onVolumeUpdated);
     } else if (this.el.components["avatar-audio-source"]) {
       this.data.sourceType = SourceType.AVATAR_AUDIO_SOURCE;
       this.data.gain =
         this.el.parentEl?.parentEl?.querySelector("[avatar-volume-controls]").components["avatar-volume-controls"]?.data
           .volume || 1.0;
-      this.el.parentEl?.parentEl?.addEventListener("avatar-volume-changed", this.volumeUpdated.bind(this));
+      this.el.parentEl?.parentEl?.addEventListener("avatar-volume-changed", this.onVolumeUpdated);
     }
   },
 
@@ -65,9 +66,9 @@ AFRAME.registerComponent("audio-params", {
     }
 
     if (this.el.components["media-video"]) {
-      this.el.removeEventListener("media-volume-changed", this.volumeUpdated);
+      this.el.removeEventListener("media-volume-changed", this.onVolumeUpdated);
     } else if (this.el.components["avatar-audio-source"]) {
-      this.el.parentEl?.parentEl?.removeEventListener("avatar-volume-changed", this.volumeUpdated);
+      this.el.parentEl?.parentEl?.removeEventListener("avatar-volume-changed", this.onVolumeUpdated);
     }
   },
 
