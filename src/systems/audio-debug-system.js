@@ -1,6 +1,6 @@
 import { THREE } from "aframe";
-import audioDebugVert from "./audio-debug-vert.glsl";
-import audioDebugFrag from "./audio-debug-frag.glsl";
+import audioDebugVert from "./audio-debug.vert";
+import audioDebugFrag from "./audio-debug.frag";
 
 const MAX_DEBUG_SOURCES = 64;
 

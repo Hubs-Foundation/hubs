@@ -76,7 +76,7 @@ vec4 circle(vec2 center, float d, float len, float radius, float holeRadius, vec
   return vec4( rgb, circle);
 }
 
-vec4 att(float d, vec4 circle, float maxDistance, float refDistance, float rolloffFactor, int distanceModel) {
+float att(float d, float maxDistance, float refDistance, float rolloffFactor, int distanceModel) {
   // Calculate attenuation
   float attenuation = 1.0;
   if (distanceModel == LINEAR) {
@@ -86,11 +86,13 @@ vec4 att(float d, vec4 circle, float maxDistance, float refDistance, float rollo
   } else if (distanceModel == EXPONENTIAL) {
     attenuation = att_exponential(d, rolloffFactor, refDistance);
   }
-  attenuation = clamp(attenuation, 0.0, 1.0);
+  return clamp(attenuation, 0.0, 1.0);
+}
 
+vec4 draw_att(float d, float attenuation, vec4 circle) {
   // Waves
   float v = sin((d * 2.0 * kPi) - (time * 0.005)) + 1.0;
-  float waves = circle.a * attenuation * v * vNormal.y;
+  float waves = circle.a * attenuation * v;
   
   // Output final color.
   return vec4( circle.rgb, waves );
@@ -113,21 +115,23 @@ void main() {
     ang -= 0.5;
     float startOffset = mod(ang, 1.0);
 
+    float attenuation = att(d, maxDistance[i], refDistance[i], rolloffFactor[i], distanceModel[i]);
+
     // Draw inner cone
     float innerAngle = coneInnerAngle[i] * kDegToRad * kInvPi * 0.5;
     float innerStartAngle = startOffset + innerAngle * 0.5;
     vec4 innerLayer = circle(center, d, innerAngle, 10000.0, 1.0, colorInner, innerStartAngle);
-    innerLayer = att(d, innerLayer, maxDistance[i], refDistance[i], rolloffFactor[i], distanceModel[i]);
+    innerLayer = draw_att(d, attenuation, innerLayer);
     background = mix(background, innerLayer, innerLayer.a);
 
     // Draw outer cone
     float outerAngle = coneOuterAngle[i] * kDegToRad * kInvPi * 0.5;
     float outerAngleDiffHalf = (outerAngle - innerAngle) * 0.5;
     vec4 outerLayer1 = circle(center, d, outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle + outerAngleDiffHalf);
-    outerLayer1 = att(d, outerLayer1, maxDistance[i], refDistance[i], rolloffFactor[i], distanceModel[i]);
+    outerLayer1 = draw_att(d, attenuation, outerLayer1);
     background = mix(background, outerLayer1, outerLayer1.a);
     vec4 outerLayer2 = circle(center, d, outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle - innerAngle);
-    outerLayer2 = att(d, outerLayer2, maxDistance[i], refDistance[i], rolloffFactor[i], distanceModel[i]);
+    outerLayer2 = draw_att(d, attenuation, outerLayer2);
     background = mix(background, outerLayer2, outerLayer2.a * (clipped[i] ? 0.0 : 1.0));
 
     // Draw base
