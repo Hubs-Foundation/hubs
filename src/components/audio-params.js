@@ -3,7 +3,7 @@ import { AudioNormalizer } from "../utils/audio-normalizer";
 import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
 import { AvatarAudioDefaults, DISTANCE_MODEL_OPTIONS } from "../systems/audio-settings-system";
 
-export const SourceType = Object.freeze({ MEDIA_VIDEO: 0, AVATAR_AUDIO_SOURCE: 1, AVATAR_RIG: 2 });
+export const SourceType = Object.freeze({ MEDIA_VIDEO: 0, AVATAR_AUDIO_SOURCE: 1, AVATAR_RIG: 2, AUDIO_TARGET: 3 });
 
 const MUTE_DELAY_SECS = 1;
 
@@ -71,6 +71,8 @@ AFRAME.registerComponent("audio-params", {
         this.el.parentEl?.parentEl?.querySelector("[avatar-volume-controls]").components["avatar-volume-controls"]?.data
           .volume || 1.0;
       this.el.parentEl?.parentEl?.addEventListener("avatar-volume-changed", this.onVolumeUpdated);
+    } else if (this.el.components["audio-target"]) {
+      this.data.sourceType = SourceType.AUDIO_TARGET;
     }
   },
 
@@ -171,6 +173,9 @@ AFRAME.registerComponent("audio-params", {
       return audio?.panner ? audio : null;
     } else if (this.data.sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
       const audio = this.el.getObject3D("avatar-audio-source");
+      return audio?.panner ? audio : null;
+    } else if (this.data.sourceType === SourceType.AUDIO_TARGET) {
+      const audio = this.el.getObject3D("audio-target");
       return audio?.panner ? audio : null;
     }
   },

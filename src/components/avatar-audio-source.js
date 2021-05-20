@@ -297,20 +297,20 @@ AFRAME.registerComponent("audio-target", {
     setTimeout(() => {
       this.connectAudio();
     }, 0);
+    this.el.setAttribute("audio-params", this.data);
   },
 
   remove: function() {
     this.destroyAudio();
+    this.el.removeAttribute("audio-params");
   },
 
   createAudio: function() {
     const audioListener = this.el.sceneEl.audioListener;
     const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
 
-    if (this.data.debug && this.data.positional) {
+    if (this.data.positional) {
       setPositionalAudioProperties(audio, this.data);
-      const helper = new THREE.PositionalAudioHelper(audio, this.data.refDistance, 16, 16);
-      audio.add(helper);
     }
 
     audio.setVolume(this.data.gain);
@@ -344,5 +344,11 @@ AFRAME.registerComponent("audio-target", {
 
     audio.disconnect();
     this.el.removeObject3D(this.attrName);
+  },
+
+  update() {
+    if (this.data.positional) {
+      setPositionalAudioProperties(this.audio, this.data);
+    }
   }
 });

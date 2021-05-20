@@ -472,6 +472,12 @@ export function AudioDebugPanel({ isNarrow, isCollapsed, onCollapsed }) {
                     distanceModel: value
                   });
                 });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    distanceModel: value
+                  });
+                });
                 if (value === "linear" && mediaRolloffFactor > 1.0) {
                   setMediaRolloffFactor(1.0);
                 }
@@ -497,6 +503,12 @@ export function AudioDebugPanel({ isNarrow, isCollapsed, onCollapsed }) {
                     rolloffFactor: value
                   });
                 });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    rolloffFactor: value
+                  });
+                });
                 updateAudioSettings({
                   mediaRolloffFactor: value
                 });
@@ -516,6 +528,12 @@ export function AudioDebugPanel({ isNarrow, isCollapsed, onCollapsed }) {
                 const mediaAudioSources = scene.current.querySelectorAll("[media-video]");
                 mediaAudioSources.forEach(source => {
                   source.setAttribute("media-video", {
+                    refDistance: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
                     refDistance: value
                   });
                 });
@@ -541,6 +559,12 @@ export function AudioDebugPanel({ isNarrow, isCollapsed, onCollapsed }) {
                     maxDistance: value
                   });
                 });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    maxDistance: value
+                  });
+                });
                 updateAudioSettings({
                   mediaMaxDistance: value
                 });
@@ -561,6 +585,12 @@ export function AudioDebugPanel({ isNarrow, isCollapsed, onCollapsed }) {
                 mediaAudioSources.forEach(source => {
                   source.setAttribute("media-video", {
                     coneInnerAngle: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    innerAngle: value
                   });
                 });
                 updateAudioSettings({
@@ -585,6 +615,12 @@ export function AudioDebugPanel({ isNarrow, isCollapsed, onCollapsed }) {
                     coneOuterAngle: value
                   });
                 });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    outerAngle: value
+                  });
+                });
                 updateAudioSettings({
                   mediaConeOuterAngle: value
                 });
@@ -605,6 +641,12 @@ export function AudioDebugPanel({ isNarrow, isCollapsed, onCollapsed }) {
                 mediaAudioSources.forEach(source => {
                   source.setAttribute("media-video", {
                     coneOuterGain: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    outerGain: value
                   });
                 });
                 updateAudioSettings({
