@@ -384,10 +384,6 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.disable-echo-cancellation",
     defaultMessage: "Disable microphone echo cancellation"
   },
-  enableAECHack: {
-    id: "preferences-screen.preference.enable-echo-cancellation-hack",
-    defaultMessage: "Enable aggressive echo cancellation (significantly reduces audio quality)"
-  },
   disableNoiseSuppression: {
     id: "preferences-screen.preference.disable-noise-suppression",
     defaultMessage: "Disable microphone noise supression"
@@ -979,13 +975,6 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
             defaultBool: false,
             promptForRefresh: true
-          },
-          {
-            key: "enableAECHack",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
-            promptForRefresh: true,
-            disableIfTrue: "disableEchoCancellation"
           },
           {
             key: "disableNoiseSuppression",

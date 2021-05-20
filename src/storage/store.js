@@ -89,7 +89,8 @@ export const SCHEMA = {
 
     preferences: {
       type: "object",
-      additionalProperties: false,
+      // Allow removed preferences to pass validation
+      additionalProperties: true,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
         preferredMic: { type: "string" },
@@ -124,7 +125,6 @@ export const SCHEMA = {
         disableEchoCancellation: { type: "bool" },
         disableNoiseSuppression: { type: "bool" },
         disableAutoGainControl: { type: "bool" },
-        enableAECHack: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
         theme: { type: "string" }
