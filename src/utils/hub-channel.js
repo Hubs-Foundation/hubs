@@ -24,9 +24,15 @@ const HUB_CREATOR_PERMISSIONS = [
   "mute_users",
   "kick_users"
 ];
-const VALID_PERMISSIONS =
-  HUB_CREATOR_PERMISSIONS +
-  ["tweet", "spawn_camera", "spawn_drawing", "spawn_and_move_media", "pin_objects", "spawn_emoji", "fly"];
+const VALID_PERMISSIONS = HUB_CREATOR_PERMISSIONS.concat([
+  "tweet",
+  "spawn_camera",
+  "spawn_drawing",
+  "spawn_and_move_media",
+  "pin_objects",
+  "spawn_emoji",
+  "fly"
+]);
 
 export default class HubChannel extends EventTarget {
   constructor(store, hubId) {
