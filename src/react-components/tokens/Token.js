@@ -7,21 +7,34 @@ import styles from "./Token.scss";
 
 export function Token({ tokenInfo, onRevokeToken }) {
   const { account_id, id, inserted_at, is_revoked, scopes, subject_type, token, updated_at } = tokenInfo;
+
   return (
     <div className={styles.borderGrey}>
-      <Row padding="xs" spaceBetween className={styles.backgroundWhite}>
-        <span>{inserted_at}</span>
+      <Row padding="sm" spaceBetween noWrap className={styles.backgroundWhite}>
+        <Row breakpointColumn="md" topMargin="md" childrenMarginR="xl">
+          <div>
+            <span>
+              <b>{subject_type.charAt(0).toUpperCase() + subject_type.slice(1)} Token</b>
+            </span>
+          </div>
+          <div>
+            <span>{account_id}</span>
+          </div>
+          <div>
+            <span>{inserted_at}</span>
+          </div>
+        </Row>
         <Button sm preset="cancel" onClick={onRevokeToken}>
           <FormattedMessage id="tokens.revoke-token" defaultMessage="Revoke" />
         </Button>
       </Row>
-      <Row padding="xs" spaceBetween className={styles.backgroundGrey}>
+      <Row padding="sm" className={styles.backgroundGrey}>
         <div className={styles.scopes}>
           <b>
             <FormattedMessage id="tokens.scopes" defaultMessage="Scopes" />
           </b>
         </div>
-        <Row>
+        <Row topMargin="md" childrenMarginR="md">
           {scopes.map(scopeName => {
             // TODO translation?
             return (
@@ -33,20 +46,6 @@ export function Token({ tokenInfo, onRevokeToken }) {
         </Row>
       </Row>
     </div>
-    // <p>Account ID: {account_id}</p>
-    // <p>ID: {id}</p>
-    // <p>Inserted at: {inserted_at}</p>
-    // <p>Revoked: {is_revoked.toString()}</p>
-    // <p>Scopes:</p>
-    // <ul>
-    //   {scopes.map(function(s) {
-    //     return <li key={s}>Scope: {s}</li>;
-    //   })}
-    // </ul>
-    // <p>Subject Type: {subject_type}</p>
-    // <p>Token: {token || "(redacted)"}</p>
-    // <p>Updated At: {updated_at}</p>
-    // </div>
   );
 }
 

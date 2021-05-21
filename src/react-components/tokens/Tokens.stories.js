@@ -21,6 +21,7 @@ import { CheckboxInput } from "../input/CheckboxInput";
 import { RadioInputField } from "../input/RadioInputField";
 import { RadioInputOption } from "../input/RadioInput";
 import { TextInputField } from "../input/TextInputField";
+import { ReactComponent as HubsDuckIcon } from "../../assets/images/footer-duck.svg";
 
 export default {
   title: "Token/Tokens"
@@ -52,7 +53,7 @@ const scopeInfo = {
 
 const dummyTokens = [
   {
-    account_id: "1",
+    account_id: "1234567890",
     id: "1",
     inserted_at: 1234,
     is_revoked: false,
@@ -62,7 +63,7 @@ const dummyTokens = [
     updated_at: 1234
   },
   {
-    account_id: "1",
+    account_id: "1123456789",
     id: "2",
     inserted_at: 1234,
     is_revoked: false,
@@ -72,7 +73,7 @@ const dummyTokens = [
     updated_at: 1234
   },
   {
-    account_id: "1",
+    account_id: "1234567890",
     id: "3",
     inserted_at: 1234,
     is_revoked: false,
@@ -95,15 +96,14 @@ export const TokenContainer = ({ children }) => (
 );
 
 export const NoAccessPage = () => {
-  console.log(styles.backgroundGray);
   // TODO add the duck
   return (
     <TokenContainer className={styles.backgroundGray}>
-      <Column padding="xl" className={styles.backgroundWhite}>
-        <Row>
+      <Column padding="xl" className={styles.noAccessContainer} lastChildMargin={false}>
+        <Row noWrap>
           <div className={styles.noAccessIcon}>
             <FontAwesomeIcon icon={faTimesCircle} />
-          </div>{" "}
+          </div>
           <h2>
             <FormattedMessage
               id="tokens.administrator-privileges-required"
@@ -111,18 +111,23 @@ export const NoAccessPage = () => {
             />
           </h2>
         </Row>
-        <p className={styleUtils.xsMarginBottom}>
-          <FormattedMessage
-            id="tokens.no-access-description1"
-            defaultMessage="You do not have sufficient privileges to create API tokens."
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            id="tokens.no-access-description2"
-            defaultMessage="If you believe you should have access to this page, please request privileges from your Hubs administrator."
-          />
-        </p>
+        <div className={styleUtils.mdMarginY}>
+          <p className={styleUtils.margin0}>
+            <FormattedMessage
+              id="tokens.no-access-description1"
+              defaultMessage="You do not have sufficient privileges to create API tokens."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="tokens.no-access-description2"
+              defaultMessage="If you believe you should have access to this page, please request privileges from your Hubs administrator."
+            />
+          </p>
+        </div>
+        <div className={styles.noAccessFooterDuckContainer}>
+          <HubsDuckIcon className={styles.noAccessFooterDuck} />
+        </div>
       </Column>
     </TokenContainer>
   );
@@ -164,7 +169,7 @@ const noop = () => {};
 const TokenList = ({ tokens }) => {
   return (
     <div>
-      <Row spaceBetween>
+      <Row spaceBetween breakpointColumn="sm" topMargin="lg">
         <h2>
           <FormattedMessage id="empty-token.title2" defaultMessage="Token List" />
         </h2>
@@ -329,7 +334,7 @@ const SelectScope = ({ scopeName, curScopeInfo, selected }) => {
       </Row>
       <Column className={styleUtils.flexBasis60}>
         <p>{curScopeInfo && curScopeInfo.description}</p>
-        <Row topMargin="sm">
+        <Row topMargin="sm" childrenMarginR="xs">
           {curScopeInfo &&
             curScopeInfo.tags.map(tag => (
               <div key={`${scopeName}-${tag}`} className={styles.tag}>
@@ -349,17 +354,30 @@ export const ModalSaveTokenPage = () => (
 );
 
 // eslint-disable-next-line react/prop-types
+const CloseModalButton = ({ onClose }) => {
+  return (
+    <div className={styles.closeModalButton}>
+      <FontAwesomeIcon icon={faTimes} onClick={onClose} />
+    </div>
+  );
+};
+
+// eslint-disable-next-line react/prop-types
 export const SaveAPITokenModal = ({ onClose }) => {
   return (
     <div className={classNames(styles.fullscreen, styles.darken)}>
       <Center>
         <Modal
-          title={<FormattedMessage id="save-api-token.title" defaultMessage="API Token" />}
-          afterTitle={<FontAwesomeIcon icon={faTimes} onClick={onClose} />}
+          titleNode={
+            <h2>
+              <FormattedMessage id="save-api-token.title" defaultMessage="API Token" />
+            </h2>
+          }
+          afterTitle={<CloseModalButton onClose={onClose} />}
           disableFullscreen
-          className={styles.maxWidth400}
+          className={classNames(styles.maxWidth400, styles.tokenModal)}
         >
-          <Column padding="sm" gap="lg" className={styleUtils.mdMarginY}>
+          <Column gap="xl" className={styleUtils.xlMarginTop}>
             <p>
               <b>
                 <FormattedMessage

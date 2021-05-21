@@ -26,6 +26,24 @@ $breakpoints: (
   }
 }
 
-:local(.row) > :last-child {
-  margin-bottom: 0;
+:local(.no-flex-wrap) {
+  flex-wrap: nowrap;
+}
+
+$spacing: (
+    "2xs": theme.$spacing-2xs,
+    "xs": theme.$spacing-xs,
+    "sm": theme.$spacing-sm,
+    "md": theme.$spacing-md,
+    "lg": theme.$spacing-lg,
+    "xl": theme.$spacing-xl
+);
+
+@each $size, $theme-spacing in $spacing {
+  :local(.#{$size}-children-margin-r) > * {
+    margin-right: $theme-spacing;
+  }
+  :local(.#{$size}-children-margin-r) > :last-child {
+    margin-right: 0
+  }
 }

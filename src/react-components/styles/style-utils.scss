@@ -32,14 +32,23 @@ $spacing: (
       margin-top: $theme-spacing;
     }
 
-    // .xs-margin-right // xsMarginRight
+    // .xs-margin-r // xsMarginR
     :local(.#{$size}-margin-r) {
       margin-right: $theme-spacing;
+    }
+
+    // .xs-margin-l // xsMarginL
+    :local(.#{$size}-margin-l) {
+      margin-left: $theme-spacing;
     }
 
     // .xs-margin-bottom // xsMarginBottom
     :local(.#{$size}-margin-bottom) {
       margin-bottom: $theme-spacing;
+    }
+    // .xs-margin-top // xsMarginTop
+    :local(.#{$size}-margin-top) {
+      margin-top: $theme-spacing;
     }
 
     // .xs-padding // xsPadding
@@ -65,3 +74,4 @@ $spacing: (
     flex-basis: $percent;
   }
 }
+
