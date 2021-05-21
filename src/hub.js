@@ -13,6 +13,13 @@ import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
+
+// A-Frame hardcodes THREE.Cache.enabled = true
+// But we don't want to use THREE.Cache because
+// web browser cache should work well.
+// So we disable it here.
+THREE.Cache.enabled = false;
+
 import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
