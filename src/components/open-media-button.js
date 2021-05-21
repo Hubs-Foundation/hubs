@@ -57,7 +57,8 @@ AFRAME.registerComponent("open-media-button", {
       } else if ((hubId = await isHubsRoomUrl(this.src))) {
         const url = new URL(this.src);
         if (url.hash && APP.hub.hub_id === hubId) {
-          location.hash = url.hash;
+          // move to waypoint w/o writing to history
+          window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
         } else {
           await exitImmersive();
           location.href = this.src;
