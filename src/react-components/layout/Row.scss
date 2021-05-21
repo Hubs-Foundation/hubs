@@ -1,52 +1,31 @@
 @use "../styles/theme.scss";
 
-:local(.flex-row-space-between) {
+:local(.flex-row) {
   flex-direction: row;
   display: flex;
   width: 100%;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 :local(.space-between) {
   justify-content: space-between;
 }
 
-:local(.xs-gap) > * {
-  margin-bottom: theme.$spacing-xs;
+$breakpoints: (
+  "sm": theme.$breakpoint-sm,
+  "md": theme.$breakpoint-md,
+);
+
+@each $size, $breakpoint in $breakpoints {
+  // .sm-breakpoint-column
+  :local(.#{$size}-breakpoint-column) {
+    @media(max-width: $breakpoint) {
+      display: block;
+    }
+  }
 }
 
-:local(.sm-gap) > * {
-  margin-bottom: theme.$spacing-sm;
-}
-
-:local(.md-gap) > * {
-  margin-bottom: theme.$spacing-md;
-}
-
-:local(.lg-gap) > * {
-  margin-bottom: theme.$spacing-lg;
-}
-
-:local(.xl-gap) > * {
-  margin-bottom: theme.$spacing-xl;
-}
-
-:local(.xs-padding) {
-  padding: theme.$spacing-xs;
-}
-
-:local(.sm-padding) {
-  padding: theme.$spacing-sm;
-}
-
-:local(.md-padding) {
-  padding: theme.$spacing-md;
-}
-
-:local(.lg-padding) {
-  padding: theme.$spacing-lg;
-}
-
-:local(.xl-padding) {
-  padding: theme.$spacing-xl;
+:local(.row) > :last-child {
+  margin-bottom: 0;
 }

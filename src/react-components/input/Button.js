@@ -15,7 +15,8 @@ export const presets = [
   "accent2",
   "accent3",
   "accent4",
-  "accent5"
+  "accent5",
+  "accent6"
 ];
 
 export const Button = memo(

@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Button } from "../input/Button";
-import { defineMessages, FormattedMessage } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { Row } from "../layout/Row";
 import styles from "./Token.scss";
 
@@ -9,13 +9,13 @@ export function Token({ tokenInfo, onRevokeToken }) {
   const { account_id, id, inserted_at, is_revoked, scopes, subject_type, token, updated_at } = tokenInfo;
   return (
     <div className={styles.borderGrey}>
-      <Row padding="xs" spaceBetween className={styles.backgroundGrey}>
+      <Row padding="xs" spaceBetween className={styles.backgroundWhite}>
         <span>{inserted_at}</span>
         <Button sm preset="cancel" onClick={onRevokeToken}>
-          <FormattedMessage id="tokens.revoke-token" defaultMessage="Revoke Token" />
+          <FormattedMessage id="tokens.revoke-token" defaultMessage="Revoke" />
         </Button>
       </Row>
-      <Row padding="xs" spaceBetween className={styles.backgroundYellow}>
+      <Row padding="xs" spaceBetween className={styles.backgroundGrey}>
         <div className={styles.scopes}>
           <b>
             <FormattedMessage id="tokens.scopes" defaultMessage="Scopes" />

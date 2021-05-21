@@ -4,12 +4,12 @@
   border: 2px solid rgba(0, 0, 0, 0.2);
 }
 
-:local(.background-gray) {
-  background-color: gray;
+:local(.background-grey) {
+  background-color: theme.$lightgrey;
 }
 
-:local(.background-yellow) {
-  background-color: yellow;
+:local(.background-white) {
+  background-color: theme.$white;
 }
 
 :local(.scopes) {

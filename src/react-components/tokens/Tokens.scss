@@ -1,15 +1,32 @@
 @use "../styles/theme.scss";
 
+h1 {
+  font-weight: 500;
+}
+
+h2 {
+  font-weight: 100;
+}
+
+:local(.token-container) {
+  background-color: theme.$lightgrey-hover;
+}
+
+:local(.white-container) {
+
+}
+
+:local(.no-access-icon) {
+  font-size: 1.5em;
+  padding-right: 10px;
+}
+
 :local(.background-white) {
   background-color: white;
 }
 
 :local(.background-gray) {
   background-color: gray;
-}
-
-:local(.background-yellow) {
-  background-color: yellow;
 }
 
 :local(.revoke-warning) {
@@ -26,12 +43,12 @@
 }
 
 :local(.darken) {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 :local(.center-padding-sides) {
     width: 80%;
-    // height: 100%;
+    max-width: 800px;
     margin: 0 auto;
 }
 
@@ -41,4 +58,85 @@
 
 :local(.margin-bottom-xs) {
   margin-bottom: theme.$spacing-2xs;
+}
+
+:local(.margin-bottom-xl) {
+  margin-bottom: theme.$spacing-xl;
+}
+
+$tag-top-margin: theme.$spacing-xs;
+:local(.tag) {
+  padding: 5px;
+  border-radius: 3px;
+  background-color: theme.$lightgrey;
+  margin-right: 8px;
+  margin-bottom: 0px;
+  // margin-top: $tag-top-margin;
+}
+
+// :local(.negative-top-margin) {
+//   margin-top: -$tag-top-margin;
+// }
+
+:local(.selected-border) {
+  border: 2px solid theme.$blue;
+}
+
+:local(.word-wrap) {
+  word-break: break-word;
+}
+
+// :local(.flex-basis-60) {
+//   flex-basis: 60%;
+// }
+
+// :local(.flex-basis-40) {
+//   flex-basis: 40%;
+// }
+
+:local(.flex-direction-row) {
+  flex-direction: row;
+}
+
+// :local(.margin-0) {
+//   margin: 0px;
+// }
+
+// :local(.flex-basis-50) {
+//   flex-basis: 50%;
+// }
+
+:local(.padding-Y-xl) {
+  padding-bottom: theme.$spacing-xl;
+  padding-top: theme.$spacing-xl;
+}
+
+:local(.background-dark-grey) {
+  background-color: theme.$darkgrey;
+}
+
+:local(.background-light-grey) {
+  background-color: theme.$lightgrey;
+}
+
+:local(.max-width-auto) {
+  max-width: none;
+}
+
+:local(.max-width-400) {
+  max-width: 400px;
+}
+
+:local(.text-white) {
+  color: theme.$white;
+}
+
+:local(.checkbox-label) {
+  color: theme.$text1-color !important;
+  margin-left: 5px;
+}
+
+:local(.radio-label) {
+  color: theme.$text1-color !important;
+  margin-left: 10px;
 }
