@@ -120,11 +120,15 @@ AFRAME.registerComponent("player-info", {
     this.updateDisplayNameFromPresenceMeta(e.detail);
   },
   updateDisplayNameFromPresenceMeta(presenceMeta) {
+    this.permissions = presenceMeta.permissions;
     this.displayName = presenceMeta.profile.displayName;
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.applyDisplayName();
+  },
+  can(perm) {
+    return !!this.permissiosn[perm];
   },
   applyDisplayName() {
     const store = window.APP.store;

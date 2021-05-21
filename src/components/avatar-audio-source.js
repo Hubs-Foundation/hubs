@@ -235,7 +235,7 @@ AFRAME.registerComponent("zone-audio-source", {
         const playerInfo = playerInfos[i];
         const avatar = playerInfo.el;
 
-        if (this.data.onlyMods && !playerInfo.isOwner) continue;
+        if (this.data.onlyMods && !playerInfo.can("amplify_audio")) continue;
 
         const distanceSquared = avatar.object3D.position.distanceToSquared(tmpWorldPos);
         if (distanceSquared < this.boundingRadiusSquared) {
