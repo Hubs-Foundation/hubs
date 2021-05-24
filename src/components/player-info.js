@@ -62,7 +62,7 @@ AFRAME.registerComponent("player-info", {
         this.playerSessionId = NAF.utils.getCreator(networkedEntity);
         const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
         if (playerPresence) {
-          this.updateDisplayNameFromPresenceMeta(playerPresence.metas[0]);
+          this.updateFromPresenceMeta(playerPresence.metas[0]);
         }
       });
     }
@@ -117,9 +117,9 @@ AFRAME.registerComponent("player-info", {
     if (!this.playerSessionId) return;
     if (this.playerSessionId !== e.detail.sessionId) return;
 
-    this.updateDisplayNameFromPresenceMeta(e.detail);
+    this.updateFromPresenceMeta(e.detail);
   },
-  updateDisplayNameFromPresenceMeta(presenceMeta) {
+  updateFromPresenceMeta(presenceMeta) {
     this.permissions = presenceMeta.permissions;
     this.displayName = presenceMeta.profile.displayName;
     this.identityName = presenceMeta.profile.identityName;
