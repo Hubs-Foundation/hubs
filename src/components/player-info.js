@@ -128,7 +128,7 @@ AFRAME.registerComponent("player-info", {
     this.applyDisplayName();
   },
   can(perm) {
-    return !!this.permissions && this.permissiosn[perm];
+    return !!this.permissions && this.permissions[perm];
   },
   applyDisplayName() {
     const store = window.APP.store;
