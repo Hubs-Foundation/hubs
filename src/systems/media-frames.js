@@ -135,6 +135,7 @@ AFRAME.registerComponent("media-frame", {
   },
 
   init() {
+    this.tmpWorldPosition = new THREE.Vector3();
     //TODO these visuals need work
     this.el.setObject3D(
       "guide",
@@ -249,12 +250,9 @@ AFRAME.registerComponent("media-frame", {
   },
 
   snapObject(capturedEl) {
-    // TODO this assumes media frames are all in world space
-    const worldPosition = new THREE.Vector3();
-    this.el.object3D.getWorldPosition(worldPosition);
-    capturedEl.object3D.position.copy(worldPosition);
+    this.el.object3D.getWorldPosition(this.tmpWorldPosition);
+    capturedEl.object3D.position.copy(this.tmpWorldPosition);
     const worldQuat = new THREE.Quaternion();
-    this.el.object3D.updateWorldMatrix(true);
     this.el.object3D.getWorldQuaternion(worldQuat);
     capturedEl.object3D.setRotationFromQuaternion(worldQuat);
     capturedEl.object3D.matrixNeedsUpdate = true;
