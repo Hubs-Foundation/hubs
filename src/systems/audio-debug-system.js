@@ -38,6 +38,7 @@ AFRAME.registerSystem("audio-debug", {
     this.material.side = THREE.FrontSide;
     this.material.transparent = true;
     this.material.uniforms.count.value = 0;
+    this.material.defines.MAX_DEBUG_SOURCES = MAX_DEBUG_SOURCES;
 
     this.sourcePositions = new Array(MAX_DEBUG_SOURCES);
     this.sourcePositions.fill(new THREE.Vector3());

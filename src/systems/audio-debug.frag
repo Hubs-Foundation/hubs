@@ -1,7 +1,5 @@
 // Based on: https://www.shadertoy.com/view/Mll3D4#
 
-#define MAX_DEBUG_SOURCES 64
-
 precision highp float;
 precision highp int;
 
