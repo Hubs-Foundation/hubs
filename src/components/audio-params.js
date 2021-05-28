@@ -42,6 +42,35 @@ AFRAME.registerComponent("audio-params", {
 
   init() {
     this.avatarRigPosition = new THREE.Vector3();
+    this.avatarAudio = {
+      panner: {
+        orientationX: {
+          value: 0
+        },
+        orientationY: {
+          value: 0
+        },
+        orientationZ: {
+          value: 0
+        },
+        positionX: {
+          value: 0
+        },
+        positionY: {
+          value: 0
+        },
+        positionZ: {
+          value: 0
+        },
+        distanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
+        maxDistance: AvatarAudioDefaults.MAX_DISTANCE,
+        refDistance: AvatarAudioDefaults.REF_DISTANCE,
+        rolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
+        coneInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
+        coneOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
+        coneOuterGain: AvatarAudioDefaults.OUTER_GAIN
+      }
+    };
     this.avatarRigOrientation = new THREE.Vector3(0, 0, -1);
     this.listenerPos = new THREE.Vector3();
     this.data.position = new Vector3(0.0, 0.0, 0.0);
@@ -139,35 +168,20 @@ AFRAME.registerComponent("audio-params", {
       const worldQuat = new THREE.Quaternion();
       avatarRigObj.getWorldQuaternion(worldQuat);
       this.avatarRigOrientation.applyQuaternion(worldQuat);
-      return {
-        panner: {
-          orientationX: {
-            value: this.avatarRigOrientation.x
-          },
-          orientationY: {
-            value: this.avatarRigOrientation.y
-          },
-          orientationZ: {
-            value: this.avatarRigOrientation.z
-          },
-          positionX: {
-            value: this.avatarRigPosition.x
-          },
-          positionY: {
-            value: this.avatarRigPosition.y
-          },
-          positionZ: {
-            value: this.avatarRigPosition.z
-          },
-          distanceModel: audioParams.avatarDistanceModel,
-          maxDistance: audioParams.avatarMaxDistance,
-          refDistance: audioParams.avatarRefDistance,
-          rolloffFactor: audioParams.avatarRolloffFactor,
-          coneInnerAngle: audioParams.avatarConeInnerAngle,
-          coneOuterAngle: audioParams.avatarConeOuterAngle,
-          coneOuterGain: audioParams.avatarConeOuterGain
-        }
-      };
+      this.avatarAudio.panner.orientationX.value = this.avatarRigOrientation.x;
+      this.avatarAudio.panner.orientationY.value = this.avatarRigOrientation.y;
+      this.avatarAudio.panner.orientationZ.value = this.avatarRigOrientation.z;
+      this.avatarAudio.panner.positionX.value = this.avatarRigPosition.x;
+      this.avatarAudio.panner.positionY.value = this.avatarRigPosition.y;
+      this.avatarAudio.panner.positionZ.value = this.avatarRigPosition.z;
+      this.avatarAudio.panner.distanceModel = audioParams.avatarDistanceModel;
+      this.avatarAudio.panner.maxDistance = audioParams.avatarMaxDistance;
+      this.avatarAudio.panner.refDistance = audioParams.avatarRefDistance;
+      this.avatarAudio.panner.rolloffFactor = audioParams.avatarRolloffFactor;
+      this.avatarAudio.panner.coneInnerAngle = audioParams.avatarConeInnerAngle;
+      this.avatarAudio.panner.coneOuterAngle = audioParams.avatarConeOuterAngle;
+      this.avatarAudio.panner.coneOuterGain = audioParams.avatarConeOuterGainain;
+      return this.avatarAudio;
     } else if (this.data.sourceType === SourceType.MEDIA_VIDEO) {
       const audio = this.el.getObject3D("sound");
       return audio?.panner ? audio : null;
