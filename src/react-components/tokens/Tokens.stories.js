@@ -22,6 +22,7 @@ import { RadioInputField } from "../input/RadioInputField";
 import { RadioInputOption } from "../input/RadioInput";
 import { TextInputField } from "../input/TextInputField";
 import { ReactComponent as HubsDuckIcon } from "../../assets/images/footer-duck.svg";
+import { TokenList } from "./TokenList";
 
 export default {
   title: "Token/Tokens"
@@ -50,6 +51,7 @@ const scopeInfo = {
     tags: ["myRooms", "favoriteRooms", "publicRooms"]
   }
 };
+
 
 const dummyTokens = [
   {
@@ -84,28 +86,16 @@ const dummyTokens = [
   }
 ];
 
-// eslint-disable-next-line react/prop-types
-export const TokenContainer = ({ children }) => (
-  <StorybookAuthContextProvider>
-    <PageContainer className={styles.tokenContainer}>
-      <Column gap="xl" className={classNames(styles.centerPaddingSides, styleUtils.xlPadding)}>
-        {children}
-      </Column>
-    </PageContainer>
-  </StorybookAuthContextProvider>
-);
-
 export const NoAccessPage = () => {
-  // TODO add the duck
   return (
-    <TokenContainer className={styles.backgroundGray}>
+    <TokenPageLayout className={styles.backgroundGray}>
       <Column padding="xl" className={styles.noAccessContainer} lastChildMargin={false}>
         <Row noWrap>
           <div className={styles.noAccessIcon}>
             <FontAwesomeIcon icon={faTimesCircle} />
           </div>
           <h2>
-            <FormattedMessage
+           <FormattedMessage
               id="tokens.administrator-privileges-required"
               defaultMessage="Administrator privileges required"
             />
@@ -129,24 +119,24 @@ export const NoAccessPage = () => {
           <HubsDuckIcon className={styles.noAccessFooterDuck} />
         </div>
       </Column>
-    </TokenContainer>
+    </TokenPageLayout>
   );
 };
 
 // eslint-disable-next-line react/prop-types
 export const TokenListPage = ({ children }) => (
-  <TokenContainer>
+  <TokenPageLayout>
     {children}
     <TokenMenuHeader />
     <TokenList tokens={dummyTokens} />
-  </TokenContainer>
+  </TokenPageLayout>
 );
 
 export const EmptyTokenListPage = () => (
-  <TokenContainer>
+  <TokenPageLayout>
     <TokenMenuHeader />
     <TokenList tokens={[]} />
-  </TokenContainer>
+  </TokenPageLayout>
 );
 
 const TokenMenuHeader = () => (
@@ -257,7 +247,7 @@ export function RevokeTokenModal({ onClose }) {
 const selectedScopes = ["read_rooms", "write_rooms"];
 // eslint-disable-next-line react/prop-types
 export const NewTokenSelectScopePage = ({ children }) => (
-  <TokenContainer>
+  <TokenPageLayout>
     {children}
     <h1>
       <FormattedMessage id="new-token.title" defaultMessage="New Token" />
@@ -317,7 +307,7 @@ export const NewTokenSelectScopePage = ({ children }) => (
         Generate
       </Button>
     </Row>
-  </TokenContainer>
+  </TokenPageLayout>
 );
 
 // eslint-disable-next-line react/prop-types
