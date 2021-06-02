@@ -13,7 +13,7 @@ import { Center } from "../layout/Center";
 import classNames from "classnames";
 import { TextInputField } from "../input/TextInputField";
 
-const noop = () => {}
+const noop = () => {};
 
 export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
   // TODO add copy token functionality
