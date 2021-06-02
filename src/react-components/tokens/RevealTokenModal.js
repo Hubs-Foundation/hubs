@@ -12,6 +12,7 @@ import { Column } from "../layout/Column";
 import { Row } from "../layout/Row";
 import { Center } from "../layout/Center";
 import classNames from "classnames";
+import { TextInputField } from "../input/TextInputField";
 
 export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
   // TODO add copy token functionality
@@ -47,7 +48,7 @@ export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
           value={token.token}
           description={<p>Copied!</p>}
           afterInput={
-            <Button preset="accent6" onClick={noop}>
+            <Button preset="accent6" onClick={() => {}}>
               <FormattedMessage id="save-api-token.copy" defaultMessage="Copy" />:
             </Button>
           }

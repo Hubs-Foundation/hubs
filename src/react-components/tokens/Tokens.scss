@@ -9,11 +9,7 @@ h2 {
 }
 
 :local(.token-container) {
-  background-color: theme.$lightgrey-hover;
-}
-
-:local(.white-container) {
-
+  background-color: theme.$background4-color;
 }
 
 :local(.no-access-icon) {
@@ -22,11 +18,11 @@ h2 {
 }
 
 :local(.background-white) {
-  background-color: white;
+  background-color: theme.$background1-color; 
 }
 
 :local(.background-gray) {
-  background-color: gray;
+  background-color: theme.$background2-color;
 }
 
 :local(.revoke-warning) {
@@ -56,7 +52,7 @@ $tag-top-margin: theme.$spacing-xs;
 :local(.tag) {
   padding: 5px;
   border-radius: 3px;
-  background-color: theme.$lightgrey;
+  background-color: theme.$background3-color;
   margin-bottom: 0px;
 }
 
@@ -68,25 +64,9 @@ $tag-top-margin: theme.$spacing-xs;
   word-break: break-word;
 }
 
-// :local(.flex-basis-60) {
-//   flex-basis: 60%;
-// }
-
-// :local(.flex-basis-40) {
-//   flex-basis: 40%;
-// }
-
 :local(.flex-direction-row) {
   flex-direction: row;
 }
-
-// :local(.margin-0) {
-//   margin: 0px;
-// }
-
-// :local(.flex-basis-50) {
-//   flex-basis: 50%;
-// }
 
 :local(.padding-Y-xl) {
   padding-bottom: theme.$spacing-xl;
@@ -98,7 +78,7 @@ $tag-top-margin: theme.$spacing-xs;
 }
 
 :local(.background-light-grey) {
-  background-color: theme.$lightgrey;
+  background-color: theme.$background3-color;
 }
 
 :local(.max-width-auto) {
@@ -125,7 +105,7 @@ $tag-top-margin: theme.$spacing-xs;
 
 :local(.no-access-container) {
   position: relative;
-  background-color: theme.$white;
+  background-color: theme.$background1-color;
 }
 
 :local(.token-modal) {
@@ -137,10 +117,6 @@ $tag-top-margin: theme.$spacing-xs;
   height: auto;
   border-bottom: none;
   max-height: 100%;
-}
-
-:local(.token-modal-container) {
-
 }
 
 :local(.no-access-footer-duck-container) {

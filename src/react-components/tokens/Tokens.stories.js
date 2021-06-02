@@ -3,10 +3,10 @@ import { CenteredModalWrapper } from "../layout/CenteredModalWrapper";
 import styles from "./Tokens.scss";
 import { TokenList } from "./TokenList";
 import { TokenPageLayout } from "./TokenPageLayout";
-import { NoAccess } from ",/NoAccess";
+import { NoAccess } from "./NoAccess";
 import { RevokeTokenModal } from "./RevokeTokenModal";
 import { RevealTokenModal } from "./RevealTokenModal";
-import CreateToken from "./CreateToken";
+import { CreateToken } from "./CreateToken";
 
 export default {
   title: "Token/Tokens"
@@ -117,7 +117,9 @@ export const CreateTokenPage = ({ children }) => (
 
 export const ModalSaveTokenPage = () => (
   <TokenPageLayout>
-    <RevealTokenModal onClose={noop} token={{ token: "abcd1234" }} selectedScopes={["write_rooms"]} />
+    <CenteredModalWrapper>
+      <RevealTokenModal onClose={noop} token={{ token: "abcd1234" }} selectedScopes={["write_rooms"]} />
+    </CenteredModalWrapper>
     <TokenList tokens={dummyTokens} onRevokeToken={noop} />
   </TokenPageLayout>
 );

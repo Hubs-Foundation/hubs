@@ -1,15 +1,15 @@
 @use "../styles/theme.scss";
 
 :local(.border-grey) {
-  border: 1px solid theme.$grey;
+  border: 1px solid theme.$border2-color;
 }
 
 :local(.background-grey) {
-  background-color: theme.$lightgrey;
+  background-color: theme.$background3-color;
 }
 
 :local(.background-white) {
-  background-color: theme.$white;
+  background-color: theme.$background1-color;
 }
 
 :local(.scopes) {

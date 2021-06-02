@@ -1,11 +1,12 @@
 import React from "react";
-import PropTypes from "prop-types"
+import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { Modal } from "../../react-components/modal/Modal";
 // import { TokensContainer } from "./TokensContainer";
 import styles from "./Tokens.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { Button } from "../input/Button";
+import { Row } from "../layout/Row";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
@@ -49,7 +50,7 @@ export function RevokeTokenModal({ onClose, revoke }) {
         </Row>
         <Row spaceBetween padding="sm">
           <Button preset="basic" sm onClick={onClose}>
-            <FormattedMessage id="revoke-token-modal.cancel" defaultMessage="Cancel"  />
+            <FormattedMessage id="revoke-token-modal.cancel" defaultMessage="Cancel" />
           </Button>
           <Button preset="accent1" sm onClick={revoke}>
             <FormattedMessage id="revoke-token-modal.revoke" defaultMessage="Revoke" />
