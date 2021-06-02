@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { Modal } from "../../react-components/modal/Modal";
-// import { TokensContainer } from "./TokensContainer";
 import styles from "./Tokens.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { Button } from "../input/Button";
@@ -13,6 +12,8 @@ import { Row } from "../layout/Row";
 import { Center } from "../layout/Center";
 import classNames from "classnames";
 import { TextInputField } from "../input/TextInputField";
+
+const noop = () => {}
 
 export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
   // TODO add copy token functionality
@@ -46,9 +47,9 @@ export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
           inputClassName={classNames(styles.backgroundDarkGrey, styles.textWhite)}
           label={<FormattedMessage id="save-api-token.copy-label" defaultMessage="API Token" />}
           value={token.token}
-          description={<p>Copied!</p>}
+          description={<p><FormattedMessage id="save-api-token.copied" defaultMessage="Copied" /></p>}
           afterInput={
-            <Button preset="accent6" onClick={() => {}}>
+            <Button preset="accent6" onClick={noop}>
               <FormattedMessage id="save-api-token.copy" defaultMessage="Copy" />:
             </Button>
           }

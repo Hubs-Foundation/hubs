@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { Modal } from "../../react-components/modal/Modal";
-// import { TokensContainer } from "./TokensContainer";
 import styles from "./Tokens.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { Button } from "../input/Button";

@@ -53,7 +53,6 @@ export const CreateToken = ({ scopes, scopeInfo, selectedScopes }) => (
     <Column>
       {scopes.map(scopeName => {
         const curScopeInfo = scopeInfo[scopeName];
-        console.log(curScopeInfo);
         return (
           <SelectScope
             key={scopeName}
