@@ -165,6 +165,8 @@ function createWhiteNoise(audioContext, gain) {
   return whiteNoise;
 }
 
+const tmpWorldPos = new THREE.Vector3();
+
 /**
  * @component zone-audio-source
  * This component looks for audio sources that get near it, keeping track
@@ -220,8 +222,9 @@ AFRAME.registerComponent("zone-audio-source", {
   },
 
   tick() {
+    this.el.object3D.getWorldPosition(tmpWorldPos);
     if (this.trackingEl) {
-      const distanceSquared = this.trackingEl.object3D.position.distanceToSquared(this.el.object3D.position);
+      const distanceSquared = this.trackingEl.object3D.position.distanceToSquared(tmpWorldPos);
       if (distanceSquared > this.boundingRadiusSquared) {
         this.trackingEl = null;
         this.setInput(this.whiteNoise);
@@ -232,9 +235,9 @@ AFRAME.registerComponent("zone-audio-source", {
         const playerInfo = playerInfos[i];
         const avatar = playerInfo.el;
 
-        if (this.data.onlyMods && !playerInfo.isOwner) continue;
+        if (this.data.onlyMods && !playerInfo.can("amplify_audio")) continue;
 
-        const distanceSquared = avatar.object3D.position.distanceToSquared(this.el.object3D.position);
+        const distanceSquared = avatar.object3D.position.distanceToSquared(tmpWorldPos);
         if (distanceSquared < this.boundingRadiusSquared) {
           this.trackingEl = avatar;
           if (this.data.muteSelf && this.trackingEl.id === "avatar-rig") {
