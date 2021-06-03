@@ -24,11 +24,11 @@ export class WrappedIntlProvider extends React.Component {
 
   componentDidMount() {
     this.updateLocale();
-    document.body.addEventListener("locale-updated", this.updateLocale);
+    window.addEventListener("locale-updated", this.updateLocale);
   }
 
   componentWillUnmount() {
-    document.body.removeEventListener("locale-updated", this.updateLocale);
+    window.removeEventListener("locale-updated", this.updateLocale);
   }
 
   render() {

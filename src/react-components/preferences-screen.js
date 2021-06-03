@@ -496,11 +496,11 @@ class PreferenceListItem extends Component {
   };
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    document.body.addEventListener("locale-updated", this.storeUpdated);
+    window.addEventListener("locale-updated", this.storeUpdated);
   }
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    document.body.removeEventListener("locale-updated", this.storeUpdated);
+    window.removeEventListener("locale-updated", this.storeUpdated);
   }
 
   storeUpdated = () => {
