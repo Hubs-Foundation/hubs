@@ -345,13 +345,13 @@ export default class Sky extends Object3D {
     skyScene.add(this.sky);
     cubeCamera.update(renderer, skyScene);
     this.add(this.sky);
-    const vrEnabled = renderer.vr.enabled;
-    renderer.vr.enabled = false;
+    const vrEnabled = renderer.xr.enabled;
+    renderer.xr.enabled = false;
     const pmremGenerator = new PMREMGenerator(cubeCamera.renderTarget.texture);
     pmremGenerator.update(renderer);
     const pmremCubeUVPacker = new PMREMCubeUVPacker(pmremGenerator.cubeLods);
     pmremCubeUVPacker.update(renderer);
-    renderer.vr.enabled = vrEnabled;
+    renderer.xr.enabled = vrEnabled;
     pmremGenerator.dispose();
     pmremCubeUVPacker.dispose();
     cubeCamera.renderTarget.dispose();
