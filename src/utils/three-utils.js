@@ -54,7 +54,7 @@ export function disposeNode(node) {
 const IDENTITY = new THREE.Matrix4().identity();
 export function setMatrixWorld(object3D, m) {
   if (!object3D.matrixIsModified) {
-    object3D.applyMatrix(IDENTITY); // hack around our matrix optimizations
+    object3D.applyMatrix4(IDENTITY); // hack around our matrix optimizations
   }
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {

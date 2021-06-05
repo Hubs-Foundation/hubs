@@ -126,7 +126,7 @@ AFRAME.registerSystem("nav", {
     }
     const geometry = fromBufferGeometry(new THREE.Geometry(), mesh.geometry);
     mesh.updateMatrices();
-    geometry.applyMatrix(mesh.matrixWorld);
+    geometry.applyMatrix4(mesh.matrixWorld);
     this.pathfinder.setZoneData(zone, Pathfinding.createZone(geometry));
     this.mesh = mesh;
     this.el.sceneEl.emit("nav-mesh-loaded");
