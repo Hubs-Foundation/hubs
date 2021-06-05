@@ -252,7 +252,7 @@ THREE.Object3D.prototype.lookAt = (function() {
     if (parent) {
       m1.extractRotation(parent.matrixWorld);
       q1.setFromRotationMatrix(m1);
-      this.quaternion.premultiply(q1.inverse());
+      this.quaternion.premultiply(q1.invert());
     }
     this.matrixNeedsUpdate = true;
   };

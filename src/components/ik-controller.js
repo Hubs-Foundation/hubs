@@ -257,7 +257,7 @@ AFRAME.registerComponent("ik-controller", {
 
       // Take the head orientation computed from the hmd, remove the Y rotation already applied to it by the hips,
       // and apply it to the head
-      invHipsQuaternion.copy(avatar.quaternion).inverse();
+      invHipsQuaternion.copy(avatar.quaternion).invert();
       head.quaternion.setFromRotationMatrix(headTransform).premultiply(invHipsQuaternion);
 
       avatar.updateMatrix();
