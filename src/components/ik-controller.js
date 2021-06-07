@@ -242,10 +242,9 @@ AFRAME.registerComponent("ik-controller", {
         if (yDelta > this.data.maxLerpAngle) {
           avatar.quaternion.copy(cameraYQuaternion);
         } else {
-          Quaternion.slerp(
+          avatar.quaternion.slerpQuaternions(
             avatar.quaternion,
             cameraYQuaternion,
-            avatar.quaternion,
             (this.data.rotationSpeed * dt) / 1000
           );
         }
