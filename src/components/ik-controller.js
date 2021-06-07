@@ -323,7 +323,7 @@ AFRAME.registerComponent("ik-controller", {
     const cameraWorld = new THREE.Vector3();
     const isInViewOfCamera = (screenCamera, pos) => {
       frustumMatrix.multiplyMatrices(screenCamera.projectionMatrix, screenCamera.matrixWorldInverse);
-      frustum.setFromMatrix(frustumMatrix);
+      frustum.setFromProjectionMatrix(frustumMatrix);
       return frustum.containsPoint(pos);
     };
 
