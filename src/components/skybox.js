@@ -3,18 +3,24 @@ import qsTruthy from "../utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 
 const {
-  Scene,
-  CubeCamera,
-  Object3D,
-  Vector3,
-  BoxBufferGeometry,
-  ShaderMaterial,
-  UniformsUtils,
+  AmbientLight,
   BackSide,
+  BoxBufferGeometry,
+  CubeCamera,
+  LightProbeGenerator,
+  LinearFilter,
   Mesh,
-  UniformsLib,
+  Object3D,
   PMREMGenerator,
-  PMREMCubeUVPacker
+  PMREMCubeUVPacker,
+  RGBAFormat,
+  Scene,
+  ShaderMaterial,
+  sRGBEncoding,
+  UniformsLib,
+  UniformsUtils,
+  Vector3,
+  WebGLCubeRenderTarget
 } = THREE;
 
 /**
@@ -369,7 +375,7 @@ export default class Sky extends Object3D {
     skyScene.add(this.sky);
     cubeCamera.update(renderer, skyScene);
     this.add(this.sky);
-    const lightProbe = THREE.LightProbeGenerator.fromRenderTargetCube(renderer, cubeCamera.renderTarget);
+    const lightProbe = LightProbeGenerator.fromCubeRenderTarget(renderer, cubeCamera.renderTarget);
     cubeCamera.renderTarget.dispose();
     return lightProbe;
   }
@@ -482,7 +488,7 @@ AFRAME.registerComponent("skybox", {
       // Without it, objects are significantly darker in brighter environments.
       // It's kept to a low value to not wash out objects in very dark environments.
       // This is a hack, but the results are much better than they are without it.
-      this.el.setObject3D("ambient-light", new THREE.AmbientLight(0xffffff, 0.3));
+      this.el.setObject3D("ambient-light", new AmbientLight(0xffffff, 0.3));
       this.el.setObject3D("light-probe", this.sky.generateLightProbe(renderer));
     }
   },
