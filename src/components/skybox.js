@@ -340,7 +340,7 @@ export default class Sky extends Object3D {
 
   generateEnvironmentMap(renderer) {
     const skyScene = new Scene();
-    const cubeCamera = new CubeCamera(1, 100000, 512);
+    const cubeCamera = new CubeCamera(1, 100000, new WebGLCubeRenderTarget(512));
     skyScene.add(cubeCamera);
     skyScene.add(this.sky);
     cubeCamera.update(renderer, skyScene);
@@ -362,12 +362,12 @@ export default class Sky extends Object3D {
     const skyScene = new Scene();
     skyScene.add(this.sky);
 
-    const cubeCamera = new THREE.CubeCamera(1, 100000, 512, {
-      format: THREE.RGBAFormat,
-      magFilter: THREE.LinearFilter,
-      minFilter: THREE.LinearFilter
-    });
-    cubeCamera.renderTarget.texture.encoding = THREE.sRGBEncoding;
+    const cubeCamera = new CubeCamera(1, 100000, new WebGLCubeRenderTarget(512, {
+      format: RGBAFormat,
+      magFilter: LinearFilter,
+      minFilter: LinearFilter,
+      encoding: sRGBEncoding
+    }));
     skyScene.add(cubeCamera);
     skyScene.add(this.sky);
     cubeCamera.update(renderer, skyScene);
