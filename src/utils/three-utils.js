@@ -357,3 +357,17 @@ export function traverseAnimationTargets(rootObject, animations, callback) {
     }
   }
 }
+
+export function createPlaneBufferGeometry(width, height, widthSegments, heightSegments, flipY = true) {
+  const geometry = new THREE.PlaneBufferGeometry(width, height, widthSegments, heightSegments);
+  // Three.js seems to assume texture flipY is true for all its built in geometry
+  // but we turn this off on our texture loader since createImageBitmap in Firefox
+  // does not support flipping. Then we flip the uv for flipY = false texture.
+  if (flipY === false) {
+    const uv = geometry.getAttribute('uv');
+    for (let i = 0; i < uv.count; i++) {
+      uv.setY(i, 1.0 - uv.getY(i));
+    }
+  }
+  return geometry;
+}

@@ -17,6 +17,7 @@ import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 import { detect } from "detect-browser";
 import semver from "semver";
+import { createPlaneBufferGeometry } from "../utils/three-utils";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -1163,7 +1164,7 @@ AFRAME.registerComponent("media-image", {
           }
         }
       } else {
-        geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+        geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
         material.side = THREE.DoubleSide;
       }
 
@@ -1304,7 +1305,7 @@ AFRAME.registerComponent("media-pdf", {
 
     if (!this.mesh) {
       const material = new THREE.MeshBasicMaterial();
-      const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+      const geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
       material.side = THREE.DoubleSide;
 
       this.mesh = new THREE.Mesh(geometry, material);
