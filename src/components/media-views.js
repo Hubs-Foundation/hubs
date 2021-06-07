@@ -18,6 +18,7 @@ import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-uti
 import { detect } from "detect-browser";
 import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -39,7 +40,7 @@ const TYPE_IMG_PNG = { type: "image/png" };
 const parseGIF = promisifyWorker(new GIFWorker());
 
 const isIOS = AFRAME.utils.device.isIOS();
-const audioIconTexture = new THREE.TextureLoader().load(audioIcon);
+const audioIconTexture = new HubsTextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {

@@ -1,5 +1,6 @@
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
 import waterNormalsUrl from "../assets/waternormals.jpg";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 const {
   Mesh,
@@ -7,7 +8,6 @@ const {
   MeshStandardMaterial,
   MeshPhongMaterial,
   Vector2,
-  TextureLoader,
   RepeatWrapping
 } = THREE;
 
@@ -287,7 +287,7 @@ AFRAME.registerComponent("simple-water", {
 
   init() {
     if (!waterNormalMap) {
-      waterNormalMap = new TextureLoader().load(waterNormalsUrl);
+      waterNormalMap = new HubsTextureLoader().load(waterNormalsUrl);
     }
 
     const usePhongShader = window.APP.store.materialQualitySetting !== "high";

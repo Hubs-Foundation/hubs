@@ -1,6 +1,7 @@
 import { Layers } from "./layers";
 import "../vendor/Water";
 import waterNormalMap from "../assets/waternormals.jpg";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 /**
  * @author jbouny / https://github.com/jbouny
@@ -141,7 +142,7 @@ MobileWater.prototype.constructor = THREE.Water;
 
 async function loadWaterNormals(url) {
   const texture = await new Promise((resolve, reject) =>
-    new THREE.TextureLoader().load(url, resolve, undefined, reject)
+    new HubsTextureLoader().load(url, resolve, undefined, reject)
   );
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   texture.needsUpdate = true;

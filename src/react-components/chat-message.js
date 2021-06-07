@@ -7,8 +7,9 @@ import html2canvas from "html2canvas";
 import { coerceToUrl } from "../utils/media-utils";
 import { formatMessageBody } from "../utils/chat-message";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
-const textureLoader = new THREE.TextureLoader();
+const textureLoader = new HubsTextureLoader();
 
 const CHAT_MESSAGE_TEXTURE_SIZE = 1024;
 
