@@ -160,7 +160,7 @@ AFRAME.registerComponent("ik-controller", {
     this.middleEyePosition.addVectors(this.leftEye.position, this.rightEye.position);
     this.middleEyePosition.divideScalar(2);
     this.middleEyeMatrix.makeTranslation(this.middleEyePosition.x, this.middleEyePosition.y, this.middleEyePosition.z);
-    this.invMiddleEyeToHead = this.middleEyeMatrix.getInverse(this.middleEyeMatrix);
+    this.invMiddleEyeToHead = this.middleEyeMatrix.copy(this.middleEyeMatrix).invert();
 
     this.invHipsToHeadVector
       .addVectors(this.chest.position, this.neck.position)
@@ -262,7 +262,7 @@ AFRAME.registerComponent("ik-controller", {
 
       avatar.updateMatrix();
       rootToChest.multiplyMatrices(avatar.matrix, chest.matrix);
-      invRootToChest.getInverse(rootToChest);
+      invRootToChest.copy(rootToChest).invert();
 
       root.matrixNeedsUpdate = true;
       neck.matrixNeedsUpdate = true;

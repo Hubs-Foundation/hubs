@@ -16,7 +16,7 @@ export const computeLocalBoundingBox = (function() {
   return function computeLocalBoundingBox(root, box, excludeInvisible) {
     box.makeEmpty();
     root.updateMatrices();
-    rootInverse.getInverse(root.matrixWorld);
+    rootInverse.copy(root.matrixWorld).invert();
     root.traverse(node => {
       if (excludeInvisible && !isVisibleUpToRoot(node, root)) {
         return;
