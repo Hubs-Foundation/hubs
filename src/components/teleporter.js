@@ -24,7 +24,6 @@ const RayCurve = function(numPoints, width) {
   });
 
   this.mesh = new THREE.Mesh(this.geometry, this.material);
-  this.mesh.drawMode = THREE.TriangleStripDrawMode;
 
   this.mesh.frustumCulled = false;
   this.mesh.vertices = this.vertices;
