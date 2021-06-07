@@ -2,7 +2,12 @@ function loadAsync(loader, url, onProgress) {
   return new Promise((resolve, reject) => loader.load(url, resolve, onProgress, reject));
 }
 
-const HAS_IMAGE_BITMAP = window.createImageBitmap !== undefined;
+// Disable ImageBitmap for Firefox so far because
+// createImageBitmap() with option fails on Firefox due to the bug.
+// Three.js ImageBitmapLoader passes {colorSpaceConversion: 'none'} option.
+// Without the option, the rendering result can be wrong if image file has ICC profiles.
+// See https://github.com/mrdoob/three.js/pull/21336
+const HAS_IMAGE_BITMAP = window.createImageBitmap !== undefined && /Firefox/.test(navigator.userAgent) === false;
 export const TEXTURES_FLIP_Y = !HAS_IMAGE_BITMAP;
 
 export default class HubsTextureLoader {
