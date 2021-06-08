@@ -64,16 +64,16 @@ export function setLocale(locale) {
   if (resolvedLocale === DEFAULT_LOCALE) {
     _locale = resolvedLocale;
     _localeData = defaultLocaleData;
-    document.body.dispatchEvent(new CustomEvent("locale-updated"));
+    window.dispatchEvent(new CustomEvent("locale-updated"));
   } else {
     if (cachedMessages.has(resolvedLocale)) {
       _locale = resolvedLocale;
-      document.body.dispatchEvent(new CustomEvent("locale-updated"));
+      window.dispatchEvent(new CustomEvent("locale-updated"));
     } else {
       import(`../assets/locales/${resolvedLocale}.json`).then(({ default: localeData }) => {
         _locale = resolvedLocale;
         _localeData = localeData;
-        document.body.dispatchEvent(new CustomEvent("locale-updated"));
+        window.dispatchEvent(new CustomEvent("locale-updated"));
       });
     }
   }

@@ -21,13 +21,14 @@ AFRAME.registerComponent("open-media-button", {
       if (visible) {
         let label = "open link";
         if (!this.data.onlyOpenLink) {
+          let hubId;
           if (await isLocalHubsAvatarUrl(src)) {
             label = "use avatar";
           } else if ((await isLocalHubsSceneUrl(src)) && mayChangeScene) {
             label = "use scene";
-          } else if (await isHubsRoomUrl(src)) {
-            const url = new URL(this.src);
-            if (url.hash && window.location.pathname === url.pathname) {
+          } else if ((hubId = await isHubsRoomUrl(src))) {
+            const url = new URL(src);
+            if (url.hash && APP.hub.hub_id === hubId) {
               label = "go to";
             } else {
               label = "visit room";
@@ -43,6 +44,7 @@ AFRAME.registerComponent("open-media-button", {
 
       const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);
 
+      let hubId;
       if (this.data.onlyOpenLink) {
         await exitImmersive();
         window.open(this.src);
@@ -52,9 +54,15 @@ AFRAME.registerComponent("open-media-button", {
         this.el.sceneEl.emit("avatar_updated");
       } else if ((await isLocalHubsSceneUrl(this.src)) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
-      } else if (await isHubsRoomUrl(this.src)) {
-        await exitImmersive();
-        location.href = this.src;
+      } else if ((hubId = await isHubsRoomUrl(this.src))) {
+        const url = new URL(this.src);
+        if (url.hash && APP.hub.hub_id === hubId) {
+          // move to waypoint w/o writing to history
+          window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
+        } else {
+          await exitImmersive();
+          location.href = this.src;
+        }
       } else {
         await exitImmersive();
         window.open(this.src);
