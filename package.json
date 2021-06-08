@@ -136,7 +136,7 @@
     "semver": "^7.3.2",
     "three": "^0.128.0",
     "three-ammo": "^1.0.12",
-    "three-bmfont-text": "github:mozillareality/three-bmfont-text#hubs/master",
+    "three-bmfont-text": "github:takahirox/three-bmfont-text#hubs/LatestThree",
     "three-mesh-bvh": "^0.3.7",
     "three-pathfinding": "github:takahirox/three-pathfinding#hubs/master3",
     "three-to-ammo": "github:takahirox/three-to-ammo#LatestThree",
