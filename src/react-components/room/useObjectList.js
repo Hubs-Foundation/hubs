@@ -26,9 +26,7 @@ function getDisplayString(el) {
   }
 
   const firstPart =
-    url.indexOf("poly.google") !== -1
-      ? "Google Poly"
-      : url.indexOf("sketchfab.com") !== -1
+      url.indexOf("sketchfab.com") !== -1
         ? "Sketchfab"
         : url.indexOf("youtube.com") !== -1
           ? "YouTube"

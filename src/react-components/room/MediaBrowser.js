@@ -23,7 +23,6 @@ const navTitleMessages = defineMessages({
   scenes: { id: "media-browser.nav_title.scenes", defaultMessage: "Scenes" },
   avatars: { id: "media-browser.nav_title.avatars", defaultMessage: "Avatars" },
   sketchfab: { id: "media-browser.nav_title.sketchfab", defaultMessage: "Sketchfab" },
-  poly: { id: "media-browser.nav_title.poly", defaultMessage: "Google Poly" },
   twitch: { id: "media-browser.nav_title.twitch", defaultMessage: "Twitch" }
 });
 

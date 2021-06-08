@@ -20,9 +20,7 @@ function SceneAttribution({ attribution }) {
   if (attribution.url) {
     const source = attribution.url.includes("sketchfab.com")
       ? "Sketchfab"
-      : attribution.url.includes("poly.google.com")
-        ? "Google Poly"
-        : null;
+      : null;
 
     return (
       <li className={styles.attribution}>
