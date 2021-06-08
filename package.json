@@ -139,7 +139,7 @@
     "three-bmfont-text": "github:mozillareality/three-bmfont-text#hubs/master",
     "three-mesh-bvh": "^0.3.7",
     "three-pathfinding": "github:takahirox/three-pathfinding#hubs/master3",
-    "three-to-ammo": "github:infinitelee/three-to-ammo",
+    "three-to-ammo": "github:takahirox/three-to-ammo#LatestThree",
     "use-clipboard-copy": "^0.1.2",
     "uuid": "^3.2.1",
     "webrtc-adapter": "^7.7.0",
