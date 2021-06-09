@@ -37,20 +37,25 @@ export default class HubsTextureLoader extends THREE.TextureLoader {
     loader.setCrossOrigin(this.crossOrigin);
     loader.setPath(this.path);
 
-    loader.load(url, bitmap => {
-      texture.image = bitmap;
-      texture.needsUpdate = true;
+    loader.load(
+      url,
+      bitmap => {
+        texture.image = bitmap;
+        texture.needsUpdate = true;
 
-      // We close the image bitmap when it's uploaded to texture.
-      // Closed image bitmap can't be reused so we remove the cache
-      // added in ImageBitmapLoader.
-      // You can remove this line once we entirely disable THREE.Cache.
-      THREE.Cache.remove(this.manager.resolveURL(url));
+        // We close the image bitmap when it's uploaded to texture.
+        // Closed image bitmap can't be reused so we remove the cache
+        // added in ImageBitmapLoader.
+        // You can remove this line once we entirely disable THREE.Cache.
+        THREE.Cache.remove(this.manager.resolveURL(url));
 
-      if (onLoad !== undefined) {
-        onLoad(texture);
-      }
-    }, onProgress, onError);
+        if (onLoad !== undefined) {
+          onLoad(texture);
+        }
+      },
+      onProgress,
+      onError
+    );
 
     texture.flipY = false;
     return texture;

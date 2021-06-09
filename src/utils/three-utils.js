@@ -59,7 +59,10 @@ export function setMatrixWorld(object3D, m) {
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {
     object3D.parent.updateMatrices();
-    object3D.matrix = object3D.matrix.copy(object3D.parent.matrixWorld).invert().multiply(object3D.matrixWorld);
+    object3D.matrix = object3D.matrix
+      .copy(object3D.parent.matrixWorld)
+      .invert()
+      .multiply(object3D.matrixWorld);
   } else {
     object3D.matrix.copy(object3D.matrixWorld);
   }
@@ -287,7 +290,10 @@ export const calculateCameraTransformForWaypoint = (function() {
   const detachFromWorldUp = new THREE.Matrix4();
   return function calculateCameraTransformForWaypoint(cameraTransform, waypointTransform, outMat4) {
     affixToWorldUp(cameraTransform, upAffixedCameraTransform);
-    detachFromWorldUp.copy(upAffixedCameraTransform).invert().multiply(cameraTransform);
+    detachFromWorldUp
+      .copy(upAffixedCameraTransform)
+      .invert()
+      .multiply(cameraTransform);
     affixToWorldUp(waypointTransform, upAffixedWaypointTransform);
     outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp);
   };
@@ -364,7 +370,7 @@ export function createPlaneBufferGeometry(width, height, widthSegments, heightSe
   // but we turn this off on our texture loader since createImageBitmap in Firefox
   // does not support flipping. Then we flip the uv for flipY = false texture.
   if (flipY === false) {
-    const uv = geometry.getAttribute('uv');
+    const uv = geometry.getAttribute("uv");
     for (let i = 0; i < uv.count; i++) {
       uv.setY(i, 1.0 - uv.getY(i));
     }

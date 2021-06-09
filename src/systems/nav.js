@@ -1,11 +1,6 @@
 const { Pathfinding } = require("three-pathfinding");
 import qsTruthy from "../utils/qs_truthy";
 
-const Vector3 = THREE.Vector3;
-const Vector2 = THREE.Vector2;
-const Face3 = THREE.Face3;
-const Color = THREE.Color;
-
 AFRAME.registerSystem("nav", {
   init: function() {
     this.pathfinder = new Pathfinding();

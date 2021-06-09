@@ -5,8 +5,7 @@
 // We may revert and update it when we will enable again.
 
 export class BatchManagerSystem {
-  constructor(scene, renderer) {
-  }
+  constructor(/*scene, renderer*/) {}
 
   get batchingEnabled() {
     return false;
@@ -16,15 +15,15 @@ export class BatchManagerSystem {
     // Ignore
   }
 
-  addObject(rootObject) {
+  addObject(/*rootObject*/) {
     return 0;
   }
 
-  removeObject(rootObject) {
+  removeObject(/*rootObject*/) {
     return;
   }
 
-  tick(time) {
+  tick(/*time*/) {
     return;
   }
 }

@@ -2,14 +2,7 @@ import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
 import waterNormalsUrl from "../assets/waternormals.jpg";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
-const {
-  Mesh,
-  PlaneBufferGeometry,
-  MeshStandardMaterial,
-  MeshPhongMaterial,
-  Vector2,
-  RepeatWrapping
-} = THREE;
+const { Mesh, PlaneBufferGeometry, MeshStandardMaterial, MeshPhongMaterial, Vector2, RepeatWrapping } = THREE;
 
 /**
  * SimpleWater

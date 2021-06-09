@@ -12,7 +12,6 @@ const {
   Mesh,
   Object3D,
   PMREMGenerator,
-  PMREMCubeUVPacker,
   RGBAFormat,
   Scene,
   ShaderMaterial,
@@ -365,12 +364,16 @@ export default class Sky extends Object3D {
     const skyScene = new Scene();
     skyScene.add(this.sky);
 
-    const cubeCamera = new CubeCamera(1, 100000, new WebGLCubeRenderTarget(512, {
-      format: RGBAFormat,
-      magFilter: LinearFilter,
-      minFilter: LinearFilter,
-      encoding: sRGBEncoding
-    }));
+    const cubeCamera = new CubeCamera(
+      1,
+      100000,
+      new WebGLCubeRenderTarget(512, {
+        format: RGBAFormat,
+        magFilter: LinearFilter,
+        minFilter: LinearFilter,
+        encoding: sRGBEncoding
+      })
+    );
     skyScene.add(cubeCamera);
     skyScene.add(this.sky);
     cubeCamera.update(renderer, skyScene);

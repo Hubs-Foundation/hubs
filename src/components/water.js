@@ -141,9 +141,7 @@ MobileWater.prototype = Object.create(THREE.Mesh.prototype);
 MobileWater.prototype.constructor = THREE.Water;
 
 async function loadWaterNormals(url) {
-  const texture = await new Promise((resolve, reject) =>
-    new HubsTextureLoader().load(url, resolve, undefined, reject)
-  );
+  const texture = await new Promise((resolve, reject) => new HubsTextureLoader().load(url, resolve, undefined, reject));
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   texture.needsUpdate = true;
   return texture;
