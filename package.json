@@ -135,7 +135,7 @@
     "screenfull": "^4.0.1",
     "semver": "^7.3.2",
     "three": "^0.128.0",
-    "three-ammo": "^1.0.12",
+    "three-ammo": "github:takahirox/three-ammo#LatestThree",
     "three-bmfont-text": "github:takahirox/three-bmfont-text#hubs/LatestThree",
     "three-mesh-bvh": "^0.3.7",
     "three-pathfinding": "github:takahirox/three-pathfinding#hubs/master3",
