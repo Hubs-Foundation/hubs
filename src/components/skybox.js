@@ -1,4 +1,8 @@
-import "three/examples/js/lights/LightProbeGenerator";
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/lights/LightProbeGenerator");
+
 import qsTruthy from "../utils/qs_truthy";
 const isBotMode = qsTruthy("bot");
 

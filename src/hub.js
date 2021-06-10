@@ -27,7 +27,11 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "three/examples/js/loaders/GLTFLoader";
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/loaders/GLTFLoader");
+
 import "networked-aframe/src/index";
 import "aframe-rounded";
 import "webrtc-adapter";
