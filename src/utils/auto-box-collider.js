@@ -32,7 +32,7 @@ export const computeLocalBoundingBox = (function() {
           }
         } else if (node.geometry.isBufferGeometry && node.geometry.attributes.position) {
           const array = node.geometry.attributes.position.array;
-          const itemSize = node.geometry.attributes.position._itemSize;
+          const itemSize = node.geometry.attributes.position.itemSize;
           for (let i = 0; i < node.geometry.attributes.position.count; i++) {
             if (itemSize === 2) {
               vertex.set(array[2 * i], array[2 * i + 1], 0);
