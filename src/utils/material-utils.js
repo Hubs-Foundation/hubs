@@ -108,19 +108,10 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
       "#include <envmap_fragment>",
       `#include <envmap_fragment>
 
-      #ifdef USE_EMISSIVEMAP
-        vec3 totalEmissiveRadiance = emissive;
+      vec3 totalEmissiveRadiance = emissive;
+      #include <emissivemap_fragment>
+      outgoingLight += totalEmissiveRadiance;
 
-        vec4 emissiveColor = vec4(0.0, 0.0, 0.0, 0.0);
-
-        #ifdef USE_UV
-          emissiveColor = texture2D( emissiveMap, vUv );
-        #endif
-
-        emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;
-        totalEmissiveRadiance *= emissiveColor.rgb;
-        outgoingLight += totalEmissiveRadiance;
-      #endif
       `
     );
   };
