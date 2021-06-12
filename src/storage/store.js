@@ -97,7 +97,7 @@ export const SCHEMA = {
         preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
-        audioNormalization: { type: "bool" },
+        audioNormalization: { type: "bool" }, // legacy
         invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
@@ -125,6 +125,7 @@ export const SCHEMA = {
         disableEchoCancellation: { type: "bool" },
         disableNoiseSuppression: { type: "bool" },
         disableAutoGainControl: { type: "bool" },
+        automaticOutputGainControl: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
         theme: { type: "string" }

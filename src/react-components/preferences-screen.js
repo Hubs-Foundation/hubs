@@ -392,6 +392,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.disable-auto-gain-control",
     defaultMessage: "Disable microphone automatic gain control"
   },
+  automaticOutputGainControl: {
+    id: "preferences-screen.preference.audio-automatic-output-gain-control",
+    defaultMessage: "Automatic incoming voice volume control (experimental)"
+  },
   snapRotationDegrees: {
     id: "preferences-screen.preference.snap-rotation-degrees",
     defaultMessage: "Rotation per snap (in degrees)"
@@ -987,6 +991,11 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
             defaultBool: false,
             promptForRefresh: true
+          },
+          {
+            key: "automaticOutputGainControl",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: false
           }
         ]
       ],

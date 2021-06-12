@@ -6,7 +6,7 @@ const BIG_STEP = (MAX_VOLUME - 1) / (VOLUME_LABELS.length / 2);
 // Inserts analyser and gain nodes after audio source.
 // Analyses audio source volume and adjusts gain value
 // to make it in a certain range.
-class AudioNormalizer {
+class AutomaticOutputGainController {
   constructor(audio) {
     this.audio = audio;
     this.analyser = audio.context.createAnalyser();
@@ -21,7 +21,7 @@ class AudioNormalizer {
   }
 
   apply() {
-    if (window.APP.store.state.preferences.audioNormalization) {
+    if (window.APP.store.state.preferences.automaticOutputGainControl) {
       if (!this.connected) {
         this.connect();
       }
@@ -41,7 +41,7 @@ class AudioNormalizer {
     this.analyser.getByteTimeDomainData(this.timeData);
     const squareSum = this.timeData.reduce((sum, num) => sum + Math.pow(num - 128, 2), 0);
     const volume = Math.sqrt(squareSum / this.analyser.frequencyBinCount);
-    const baseVolume = window.APP.store.state.preferences.audioNormalization;
+    const baseVolume = 4.0; // heuristic
 
     // Regards volume under certain threshold as "not speaking" and skips.
     // I'm not sure if 0.4 is an appropriate threshold.
@@ -108,7 +108,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
     this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
     this.update = this.update.bind(this);
-    this.normalizer = null;
+    this.gainController = null;
     window.APP.store.addEventListener("statechanged", this.update);
 
     this.updateVolumeLabel();
@@ -141,19 +141,19 @@ AFRAME.registerComponent("avatar-volume-controls", {
         return;
       }
 
-      if (!this.normalizer) {
-        this.normalizer = new AudioNormalizer(audio);
+      if (!this.gainController) {
+        this.gainController = new AutomaticOutputGainController(audio);
         this.avatarAudioSource.el.addEventListener("sound-source-set", () => {
           const audio =
             this.avatarAudioSource && this.avatarAudioSource.el.getObject3D(this.avatarAudioSource.attrName);
           if (audio) {
-            this.normalizer = new AudioNormalizer(audio);
-            this.normalizer.apply();
+            this.gainController = new AutomaticOutputGainController(audio);
+            this.gainController.apply();
           }
         });
       }
 
-      this.normalizer.apply();
+      this.gainController.apply();
 
       const { audioOutputMode, globalVoiceVolume } = window.APP.store.state.preferences;
       const volumeModifier = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;

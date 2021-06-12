@@ -160,28 +160,6 @@ export default class MessageDispatch extends EventTarget {
           );
         }
         break;
-      case "audioNormalization":
-        {
-          if (args.length === 1) {
-            const factor = Number(args[0]);
-            if (!isNaN(factor)) {
-              const effectiveFactor = Math.max(0.0, Math.min(255.0, factor));
-              window.APP.store.update({
-                preferences: { audioNormalization: effectiveFactor }
-              });
-              if (factor) {
-                this.log(LogMessageType.setAudioNormalizationFactor, { factor: effectiveFactor });
-              } else {
-                this.log(LogMessageType.audioNormalizationDisabled);
-              }
-            } else {
-              this.log(LogMessageType.audioNormalizationNaN);
-            }
-          } else {
-            this.log(LogMessageType.invalidAudioNormalizationRange);
-          }
-        }
-        break;
     }
   };
 }
