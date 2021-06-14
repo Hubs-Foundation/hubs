@@ -129,6 +129,8 @@ export default class MediaDevicesManager {
       console.log("No available audio tracks");
     }
 
+    await NAF.connection.adapter.setLocalMediaStream(this._mediaStream);
+
     NAF.connection.adapter.enableMicrophone(true);
 
     return result;

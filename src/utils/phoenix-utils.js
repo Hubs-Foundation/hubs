@@ -291,6 +291,34 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
   });
 }
 
+export function migrateToChannel(oldChannel, newChannel, params) {
+  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
+    const item = oldChannel.bindings[i];
+    newChannel.on(item.event, item.callback);
+  }
+
+  // for (let i = 0, l = oldChannel.pushBuffer.length; i < l; i++) {
+  //   const item = oldChannel.pushBuffer[i];
+  //   newChannel.push(item.event, item.payload, item.timeout);
+  // }
+
+  // const oldJoinPush = oldChannel.joinPush;
+  const joinPush = newChannel.join();
+
+  // for (let i = 0, l = oldJoinPush.recHooks.length; i < l; i++) {
+  //   const item = oldJoinPush.recHooks[i];
+  //   joinPush.receive(item.status, item.callback);
+  // }
+
+  return new Promise(resolve => {
+    joinPush.receive("ok", () => {
+      // Clear all event handlers first so no duplicate messages come in.
+      oldChannel.bindings = [];
+      resolve(newChannel);
+    });
+  });
+}
+
 export function discordBridgesForPresences(presences) {
   const channels = [];
   for (const p of Object.values(presences)) {

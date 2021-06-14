@@ -877,7 +877,7 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   setLocalMediaStream(stream) {
-    this.createMissingProducers(stream);
+    return this.createMissingProducers(stream);
   }
 
   createMissingProducers(stream) {
@@ -887,55 +887,58 @@ export default class DialogAdapter extends EventEmitter {
     let sawAudio = false;
     let sawVideo = false;
 
-    stream.getTracks().forEach(async track => {
-      if (track.kind === "audio") {
-        sawAudio = true;
+    console.log(stream);
+    return Promise.all(
+      stream.getTracks().map(async track => {
+        if (track.kind === "audio") {
+          sawAudio = true;
 
-        // TODO multiple audio tracks?
-        if (this._micProducer) {
-          if (this._micProducer.track !== track) {
-            this._micProducer.track.stop();
-            this._micProducer.replaceTrack(track);
+          // TODO multiple audio tracks?
+          if (this._micProducer) {
+            if (this._micProducer.track !== track) {
+              this._micProducer.track.stop();
+              this._micProducer.replaceTrack(track);
+            }
+          } else {
+            if (!this._micEnabled) {
+              track.enabled = false;
+            }
+
+            await this.enabledMic(track);
+
+            if (!this._micEnabled) {
+              this._micProducer.pause();
+              this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
+            }
           }
         } else {
-          if (!this._micEnabled) {
-            track.enabled = false;
-          }
+          sawVideo = true;
 
-          await this.enabledMic(track);
-
-          if (!this._micEnabled) {
-            this._micProducer.pause();
-            this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
+          if (track._hubs_contentHint === "share") {
+            await this.disableCamera();
+            await this.enableShare(track);
+          } else if (track._hubs_contentHint === "camera") {
+            await this.disableShare();
+            await this.enableCamera(track);
           }
         }
-      } else {
-        sawVideo = true;
 
-        if (track._hubs_contentHint === "share") {
-          await this.disableCamera();
-          await this.enableShare(track);
-        } else if (track._hubs_contentHint === "camera") {
-          await this.disableShare();
-          await this.enableCamera(track);
-        }
+        this.resolvePendingMediaRequestForTrack(this._clientId, track);
+      })
+    ).then(() => {
+      if (!sawAudio && this._micProducer) {
+        this._micProducer.close();
+        this._protoo.request("closeProducer", { producerId: this._micProducer.id });
+        this._micProducer = null;
       }
 
-      this.resolvePendingMediaRequestForTrack(this._clientId, track);
+      if (!sawVideo) {
+        this.disableCamera();
+        this.disableShare();
+      }
+
+      this._localMediaStream = stream;
     });
-
-    if (!sawAudio && this._micProducer) {
-      this._micProducer.close();
-      this._protoo.request("closeProducer", { producerId: this._micProducer.id });
-      this._micProducer = null;
-    }
-
-    if (!sawVideo) {
-      this.disableCamera();
-      this.disableShare();
-    }
-
-    this._localMediaStream = stream;
   }
 
   async enabledMic(track) {
@@ -1083,6 +1086,7 @@ export default class DialogAdapter extends EventEmitter {
 
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
     if (this._protoo && this._protoo.connected) {
+      this._protoo.removeAllListeners();
       this._protoo.close();
       this.emitRTCEvent("info", "Signaling", () => `[close]`);
     }

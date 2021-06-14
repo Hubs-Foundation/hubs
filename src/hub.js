@@ -1135,7 +1135,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("[reconnect] Reconnect in progress. Updated reticulum meta.");
     const oldSocket = retPhxChannel.socket;
     const socket = await connectToReticulum(isDebug, oldSocket.params());
-    retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
     await hubChannel.migrateToSocket(socket, createHubChannelParams());
     authChannel.setSocket(socket);
     linkChannel.setSocket(socket);
@@ -1186,6 +1185,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const hubPhxChannel = socket.channel(`hub:${hubId}`, createHubChannelParams(oauthFlowPermsToken));
+  window.makeChannel = function(hubId) {
+    return socket.channel(`hub:${hubId}`, createHubChannelParams(oauthFlowPermsToken));
+  };
 
   const presenceLogEntries = [];
   const addToPresenceLog = entry => {

@@ -145,7 +145,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   remove: function() {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
-    NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
+    // NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
     this.destroyAudio();
   }
 });
