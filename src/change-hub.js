@@ -17,9 +17,13 @@ function loadRoomObjects(hubId) {
 async function changeHub(hubId) {
   const data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
   const hub = data.hubs[0];
+  const scene = AFRAME.scenes[0];
   await APP.mediaDevicesManager.stopMicShare();
   await NAF.connection.disconnect();
-  AFRAME.scenes[0].setAttribute("networked-scene", "room", hubId);
+  scene.setAttribute("networked-scene", {
+    room: hub.hub_id,
+    serverURL: `wss://${hub.host}:${hub.port}`
+  });
 
   if (
     document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
@@ -35,6 +39,8 @@ async function changeHub(hubId) {
     APP.mediaDevicesManager.startMicShare();
     unloadRoomObjects();
     loadRoomObjects(hubId);
+
+    APP.hubChannel.sendEnteredEvent();
   });
 }
 window.changeHub = changeHub;

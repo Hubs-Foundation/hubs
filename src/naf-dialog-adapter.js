@@ -858,6 +858,9 @@ export default class DialogAdapter extends EventEmitter {
     const audioConsumerPromises = [];
     this.occupants = {};
 
+    // clientID needs to be set before calling onOccupantConnected
+    this._connectSuccess(this._clientId);
+
     // Create a promise that will be resolved once we attach to all the initial consumers.
     // This will gate the connection flow until all voices will be heard.
     for (let i = 0; i < peers.length; i++) {
@@ -868,7 +871,6 @@ export default class DialogAdapter extends EventEmitter {
       audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
     }
 
-    this._connectSuccess(this._clientId);
     this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
 
     if (this._onOccupantsChanged) {
