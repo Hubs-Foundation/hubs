@@ -96,14 +96,14 @@ export const EmptyTokenListPage = () => (
 export const RevokeTokenModalPage = () => (
   <TokenListPage>
     <CenteredModalWrapper>
-      <RevokeTokenModal onClose={noop} revoke={noop} />
+      <RevokeTokenModal onClose={noop} onRevoke={noop} />
     </CenteredModalWrapper>
   </TokenListPage>
 );
 
 // eslint-disable-next-line react/prop-types
 export function ModalRevokeToken() {
-  return <RevokeTokenModal onClose={noop} revoke={noop} />;
+  return <RevokeTokenModal onClose={noop} onRevoke={noop} />;
 }
 
 const selectedScopes = ["read_rooms", "write_rooms"];
