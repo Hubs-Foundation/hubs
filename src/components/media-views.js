@@ -378,6 +378,10 @@ AFRAME.registerComponent("media-video", {
     window.APP.store.addEventListener("statechanged", this.onPreferenceChanged);
   },
 
+  play() {
+    this.el.components["listed-media"] && this.el.sceneEl.emit("listed_media_changed");
+  },
+
   isMineOrLocal() {
     return !this.el.components.networked || (this.networkedEl && NAF.utils.isMine(this.networkedEl));
   },
@@ -1054,6 +1058,10 @@ AFRAME.registerComponent("media-image", {
     alphaCutoff: { type: "number" }
   },
 
+  play() {
+    this.el.components["listed-media"] && this.el.sceneEl.emit("listed_media_changed");
+  },
+
   remove() {
     if (this.data.batch && this.mesh) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
@@ -1233,6 +1241,10 @@ AFRAME.registerComponent("media-pdf", {
     this.texture.minFilter = THREE.LinearFilter;
 
     this.el.addEventListener("pager-snap-clicked", () => this.snap());
+  },
+
+  play() {
+    this.el.components["listed-media"] && this.el.sceneEl.emit("listed_media_changed");
   },
 
   async snap() {
