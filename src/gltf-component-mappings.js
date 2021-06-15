@@ -27,6 +27,7 @@ AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
   el.setAttribute("quack", { quackPercentage: 0.1 });
 });
+AFRAME.GLTFModelPlus.registerComponent("sphere-to-change-hub", "sphere-to-change-hub");
 AFRAME.GLTFModelPlus.registerComponent("quack", "quack");
 AFRAME.GLTFModelPlus.registerComponent("sound", "sound");
 AFRAME.GLTFModelPlus.registerComponent("css-class", "css-class");
@@ -118,7 +119,6 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
     willMaintainWorldUp: true
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;
   const zone = componentData.zone || "character";

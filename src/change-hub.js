@@ -17,6 +17,7 @@ function loadRoomObjects(hubId) {
 export async function changeHub(hubId) {
   const data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
   const hub = data.hubs[0];
+  APP.hubChannel.hubId = hub.hub_id;
   const scene = AFRAME.scenes[0];
   await APP.mediaDevicesManager.stopMicShare();
   await NAF.connection.disconnect();
@@ -35,7 +36,7 @@ export async function changeHub(hubId) {
     });
   }
 
-  AFRAME.scenes[0].components["networked-scene"].connect().then(async function() {
+  return AFRAME.scenes[0].components["networked-scene"].connect().then(async function() {
     APP.mediaDevicesManager.startMicShare();
     unloadRoomObjects();
     loadRoomObjects(hubId);
