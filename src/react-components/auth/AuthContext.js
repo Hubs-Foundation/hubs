@@ -46,6 +46,23 @@ async function checkIsAdmin(socket, store) {
   return isAdmin;
 }
 
+const noop = () => {};
+
+export function StorybookAuthContextProvider({ children }) {
+  const [context, setContext] = useState({
+    initialized: true,
+    isSignedIn: true,
+    isAdmin: true,
+    token: "abc123",
+    email: "foo@bar.baz",
+    userId: "00000000",
+    signIn: noop,
+    verify: noop,
+    signOut: noop
+  });
+  return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
+}
+
 export function AuthContextProvider({ children, store }) {
   const signIn = useCallback(
     async email => {

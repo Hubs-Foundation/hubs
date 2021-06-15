@@ -1,0 +1,89 @@
+@use "../styles/theme.scss";
+
+$checkbox-size: 20px;
+
+:local(.checkbox-input) {
+    display: flex;
+    height: $checkbox-size;
+    align-items: center;
+    position: relative;
+    padding-left: 35px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+:local(.checkbox-input) input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+:local(.checkmark) {
+    // custom checkbox
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: $checkbox-size;
+    width: $checkbox-size;
+    border-radius: 5px;
+    border: 2px solid theme.$lightgrey;
+    &:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+}
+
+:local(.disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+:local(.checkbox-input) input:checked ~ :local(.checkmark):after {
+  display: block;
+}
+
+:local(.checkbox-input):hover input ~ :local(.checkmark) {
+  background-color: #ccc;
+}
+
+:local(.checkbox-input) input:checked ~ :local(.checkmark) {
+    background-color: #2196F3;
+    border: 2px solid #2196F3;
+}
+
+:local(.checkbox-input) :local(.checkmark):after {
+  left: 6px;
+  top: 1px;
+  width: 5px;
+  height: 12px;
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+:local(.label-container) {
+  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  color: theme.$text2-color;
+}
+
+
+:local(.label) {
+  font-size: theme.$font-size-sm;
+}
+
+:local(.description) {
+  margin-top: 8px;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-regular;
+}
