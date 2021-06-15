@@ -350,7 +350,9 @@ function ListItem({ children, disabled, indent }) {
   return <div className={classNames(styles.listItem, { disabled, indent })}>{children}</div>;
 }
 ListItem.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
+  disabled: PropTypes.bool,
+  indent: PropTypes.bool
 };
 
 const preferenceLabels = defineMessages({
@@ -381,10 +383,6 @@ const preferenceLabels = defineMessages({
   disableEchoCancellation: {
     id: "preferences-screen.preference.disable-echo-cancellation",
     defaultMessage: "Disable microphone echo cancellation"
-  },
-  enableAECHack: {
-    id: "preferences-screen.preference.enable-echo-cancellation-hack",
-    defaultMessage: "Enable agressive echo cancellation (significantly reduces audio quality)"
   },
   disableNoiseSuppression: {
     id: "preferences-screen.preference.disable-noise-suppression",
@@ -498,11 +496,11 @@ class PreferenceListItem extends Component {
   };
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    document.body.addEventListener("locale-updated", this.storeUpdated);
+    window.addEventListener("locale-updated", this.storeUpdated);
   }
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    document.body.removeEventListener("locale-updated", this.storeUpdated);
+    window.removeEventListener("locale-updated", this.storeUpdated);
   }
 
   storeUpdated = () => {
@@ -977,13 +975,6 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
             defaultBool: false,
             promptForRefresh: true
-          },
-          {
-            key: "enableAECHack",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
-            promptForRefresh: true,
-            disableIfTrue: "disableEchoCancellation"
           },
           {
             key: "disableNoiseSuppression",

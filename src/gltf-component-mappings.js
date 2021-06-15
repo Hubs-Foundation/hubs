@@ -464,6 +464,27 @@ AFRAME.GLTFModelPlus.registerComponent("video-texture-source", "video-texture-so
 
 AFRAME.GLTFModelPlus.registerComponent("text", "text");
 
+AFRAME.GLTFModelPlus.registerComponent(
+  "audio-target",
+  "audio-target",
+  (el, componentName, componentData, _components, indexToEntityMap) => {
+    const { srcNode } = componentData;
+
+    let srcEl;
+    if (srcNode !== undefined) {
+      srcEl = indexToEntityMap[srcNode];
+      if (!srcEl) {
+        console.warn(
+          `Error inflating gltf component ${componentName}: Couldn't find srcEl entity with index ${srcNode}`
+        );
+      }
+    }
+
+    el.setAttribute(componentName, { ...componentData, srcEl });
+  }
+);
+AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
+
 const IDENTITY_MATRIX = new THREE.Matrix4().identity();
 
 AFRAME.GLTFModelPlus.registerComponent("moveable", "moveable", (el, componentName, componentData, components) => {
