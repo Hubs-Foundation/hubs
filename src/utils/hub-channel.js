@@ -120,7 +120,8 @@ export default class HubChannel extends EventTarget {
       this.presence.onSync(function() {});
     }
 
-    this.channel = await migrateToChannel(this.channel, newChannel, params);
+    const data = await migrateToChannel(this.channel, newChannel, params);
+    this.channel = newChannel;
     this.presence = new Presence(this.channel);
 
     if (presenceBindings) {
@@ -128,6 +129,7 @@ export default class HubChannel extends EventTarget {
       this.presence.onLeave(presenceBindings.onLeave);
       this.presence.onSync(presenceBindings.onSync);
     }
+    return data;
   }
 
   setPhoenixChannel = channel => {

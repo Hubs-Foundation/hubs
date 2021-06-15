@@ -38,6 +38,7 @@ import { addAnimationComponents } from "./utils/animation";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 import "./naf-dialog-adapter";
+import "./change-hub";
 
 import "./components/scene-components";
 import "./components/scale-in-screen-space";
@@ -339,18 +340,9 @@ function setupPeerConnectionConfig(adapter) {
   adapter.setTurnConfig(forceTcp, forceTurn);
 }
 
-async function updateEnvironmentForHub(hub, entryManager) {
+export async function getSceneUrlForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
-
-  const sceneErrorHandler = () => {
-    remountUI({ roomUnavailableReason: ExitReason.sceneError });
-    entryManager.exitScene();
-  };
-
-  const environmentScene = document.querySelector("#environment-scene");
-  const sceneEl = document.querySelector("a-scene");
-
   if (hub.scene) {
     isLegacyBundle = false;
     sceneUrl = hub.scene.model_url;
@@ -375,6 +367,19 @@ async function updateEnvironmentForHub(hub, entryManager) {
   } else {
     sceneUrl = proxiedUrlFor(sceneUrl);
   }
+  return sceneUrl;
+}
+
+export async function updateEnvironmentForHub(hub, entryManager) {
+  const sceneUrl = await getSceneUrlForHub(hub);
+
+  const sceneErrorHandler = () => {
+    remountUI({ roomUnavailableReason: ExitReason.sceneError });
+    entryManager.exitScene();
+  };
+
+  const environmentScene = document.querySelector("#environment-scene");
+  const sceneEl = document.querySelector("a-scene");
 
   console.log(`Scene URL: ${sceneUrl}`);
 
@@ -762,6 +767,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store, hubId);
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
+  window.APP.entryManager = entryManager;
 
   window.APP.scene = scene;
   const audioSystem = scene.systems["hubs-systems"].audioSystem;

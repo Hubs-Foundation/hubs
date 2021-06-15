@@ -297,24 +297,11 @@ export function migrateToChannel(oldChannel, newChannel, params) {
     newChannel.on(item.event, item.callback);
   }
 
-  // for (let i = 0, l = oldChannel.pushBuffer.length; i < l; i++) {
-  //   const item = oldChannel.pushBuffer[i];
-  //   newChannel.push(item.event, item.payload, item.timeout);
-  // }
-
-  // const oldJoinPush = oldChannel.joinPush;
-  const joinPush = newChannel.join();
-
-  // for (let i = 0, l = oldJoinPush.recHooks.length; i < l; i++) {
-  //   const item = oldJoinPush.recHooks[i];
-  //   joinPush.receive(item.status, item.callback);
-  // }
-
   return new Promise(resolve => {
-    joinPush.receive("ok", () => {
+    newChannel.join().receive("ok", data => {
       // Clear all event handlers first so no duplicate messages come in.
       oldChannel.bindings = [];
-      resolve(newChannel);
+      resolve(data);
     });
   });
 }
