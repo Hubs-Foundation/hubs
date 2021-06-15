@@ -14,7 +14,7 @@ function loadRoomObjects(hubId) {
   objectsScene.appendChild(objectsEl);
 }
 
-async function changeHub(hubId) {
+export async function changeHub(hubId) {
   const data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
   const hub = data.hubs[0];
   const scene = AFRAME.scenes[0];
