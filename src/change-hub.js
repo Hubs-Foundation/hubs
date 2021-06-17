@@ -1,4 +1,4 @@
-import { getReticulumFetchUrl } from "./utils/phoenix-utils";
+import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
 
 function unloadRoomObjects() {
@@ -17,11 +17,15 @@ function loadRoomObjects(hubId) {
   objectsScene.appendChild(objectsEl);
 }
 
-export async function changeHub(hubId) {
+export async function changeHub(hubId, addToHistory = true) {
   const scene = AFRAME.scenes[0];
 
   const data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
   const hub = data.hubs[0];
+
+  if (addToHistory) {
+    window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug));
+  }
 
   window.APP.hub = hub;
   updateUIForHub(hub, APP.hubChannel);

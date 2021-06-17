@@ -12,7 +12,7 @@ export function isLocalClient() {
   return hasReticulumServer() && document.location.host !== configs.RETICULUM_SERVER;
 }
 
-export function hubUrl(hubId, extraParams) {
+export function hubUrl(hubId, extraParams, slug) {
   if (!hubId) {
     if (isLocalClient()) {
       hubId = new URLSearchParams(location.search).get("hub_id");
@@ -26,7 +26,8 @@ export function hubUrl(hubId, extraParams) {
     url = new URL(`/hub.html`, location.href);
     url.searchParams.set("hub_id", hubId);
   } else {
-    url = new URL(`/${hubId}`, location.href);
+    const maybeSlug = slug ? `/${slug}` : "";
+    url = new URL(`/${hubId}${maybeSlug}`, location.href);
   }
 
   for (const key in extraParams) {
