@@ -7,6 +7,13 @@ function unloadRoomObjects() {
       el.parentNode.removeChild(el);
     }
   });
+
+  // Clean up empty object.gltf nodes
+  document.querySelectorAll("#objects-scene .Room_Objects").forEach(el => {
+    if (!el.children.length) {
+      el.parentNode.parentNode.removeChild(el.parentNode);
+    }
+  });
 }
 
 function loadRoomObjects(hubId) {
