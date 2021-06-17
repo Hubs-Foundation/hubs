@@ -75,6 +75,7 @@
     "@fortawesome/react-fontawesome": "^0.1.0",
     "@mozillareality/easing-functions": "^0.1.1",
     "@mozillareality/three-batch-manager": "github:mozillareality/three-batch-manager#master",
+    "@pixiv/three-vrm": "github:takahirox/three-vrm",
     "@popperjs/core": "^2.4.4",
     "aframe": "github:takahirox/aframe#hubs/LatestThreeWIP",
     "aframe-rounded": "^1.0.3",
