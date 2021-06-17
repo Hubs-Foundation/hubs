@@ -123,6 +123,10 @@ export default class HubChannel extends EventTarget {
     const data = await migrateToChannel(this.channel, newChannel, params);
     this.channel = newChannel;
     this.presence = new Presence(this.channel);
+    this.hubId = data.hubs[0].hub_id;
+
+    // TODO handle oauth token?
+    this.setPermissionsFromToken(data.perms_token);
 
     if (presenceBindings) {
       this.presence.onJoin(presenceBindings.onJoin);

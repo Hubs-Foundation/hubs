@@ -60,7 +60,7 @@ AFRAME.registerComponent("open-media-button", {
         if (url.hash && APP.hub.hub_id === hubId) {
           // move to waypoint w/o writing to history
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
-        } else if (isLocalHubsUrl(url)) {
+        } else if (isLocalHubsUrl(this.src)) {
           changeHub(hubId);
         } else {
           await exitImmersive();

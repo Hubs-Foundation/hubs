@@ -329,7 +329,7 @@ function mountUI(props = {}) {
   );
 }
 
-function remountUI(props) {
+export function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
 }
@@ -461,7 +461,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
   }
 }
 
-async function updateUIForHub(hub, hubChannel) {
+export async function updateUIForHub(hub, hubChannel) {
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 
@@ -720,6 +720,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const subscriptions = new Subscriptions(hubId);
+  APP.subscriptions = subscriptions;
 
   if (navigator.serviceWorker) {
     try {
@@ -924,8 +925,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     exitScene: reason => {
       entryManager.exitScene();
       remountUI({ roomUnavailableReason: reason || ExitReason.exited });
-    },
-    initialIsSubscribed: subscriptions.isSubscribed()
+    }
   });
 
   scene.addEventListener("action_focus_chat", () => {
@@ -1384,48 +1384,52 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
-      scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
-        adapter.setClientId(socket.params().session_id);
-        adapter.setJoinToken(data.perms_token);
-        adapter.setServerParams(await window.APP.hubChannel.getHost());
-        adapter.setReconnectionListeners(
-          async () => {
-            const { host, port } = await hubChannel.getHost();
-            const newServerURL = `wss://${host}:${port}`;
-            // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
-            if (adapter.serverUrl !== newServerURL) {
-              console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
-              scene.setAttribute("networked-scene", { serverURL: newServerURL });
-              adapter.setServerUrl(newServerURL);
-              adapter.setServerParams(await window.APP.hubChannel.getHost());
-              adapter.reconnect();
+      scene.addEventListener(
+        "adapter-ready",
+        async ({ detail: adapter }) => {
+          adapter.setClientId(socket.params().session_id);
+          // TODO does this need to look at oauth token? It isnt in prod
+          adapter.setJoinToken(data.perms_token);
+          adapter.setServerParams(await window.APP.hubChannel.getHost());
+          adapter.setReconnectionListeners(
+            async () => {
+              const { host, port } = await hubChannel.getHost();
+              const newServerURL = `wss://${host}:${port}`;
+              // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
+              if (adapter.serverUrl !== newServerURL) {
+                console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
+                scene.setAttribute("networked-scene", { serverURL: newServerURL });
+                adapter.setServerUrl(newServerURL);
+                adapter.setServerParams(await window.APP.hubChannel.getHost());
+                adapter.reconnect();
+              }
+              // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
+              if (!connectionErrorTimeout) {
+                connectionErrorTimeout = setTimeout(() => {
+                  adapter.disconnect();
+                  onConnectionError(entryManager, "Timeout trying to reconnect to the room");
+                }, 30000);
+              }
+            },
+            () => {
+              clearTimeout(connectionErrorTimeout);
+              connectionErrorTimeout = null;
             }
-            // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
-            if (!connectionErrorTimeout) {
-              connectionErrorTimeout = setTimeout(() => {
-                adapter.disconnect();
-                onConnectionError(entryManager, "Timeout trying to reconnect to the room");
-              }, 30000);
-            }
-          },
-          () => {
-            clearTimeout(connectionErrorTimeout);
-            connectionErrorTimeout = null;
-          }
-        );
+          );
 
-        setupPeerConnectionConfig(adapter);
+          setupPeerConnectionConfig(adapter);
 
-        hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
-      });
+          hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
+        },
+        { once: true }
+      );
 
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
 
       remountUI({
         hubIsBound: data.hub_requires_oauth,
-        initialIsFavorited: data.subscriptions.favorites,
-        initialIsSubscribed: subscriptions.isSubscribed()
+        initialIsFavorited: data.subscriptions.favorites
       });
 
       await presenceSync.promise;

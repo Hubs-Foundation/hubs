@@ -1,9 +1,12 @@
 import { getReticulumFetchUrl } from "./utils/phoenix-utils";
-import { updateEnvironmentForHub, getSceneUrlForHub } from "./hub";
+import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
 
 function unloadRoomObjects() {
-  const objectsScene = document.querySelector("#objects-scene");
-  objectsScene.removeChild(objectsScene.firstChild);
+  document.querySelectorAll("[pinnable]").forEach(el => {
+    if (el.components.pinnable.data.pinned) {
+      el.parentNode.removeChild(el);
+    }
+  });
 }
 
 function loadRoomObjects(hubId) {
@@ -15,16 +18,35 @@ function loadRoomObjects(hubId) {
 }
 
 export async function changeHub(hubId) {
+  const scene = AFRAME.scenes[0];
+
   const data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
   const hub = data.hubs[0];
-  APP.hubChannel.hubId = hub.hub_id;
-  const scene = AFRAME.scenes[0];
-  await APP.mediaDevicesManager.stopMicShare();
-  await NAF.connection.disconnect();
-  scene.setAttribute("networked-scene", {
-    room: hub.hub_id,
-    serverURL: `wss://${hub.host}:${hub.port}`
+
+  window.APP.hub = hub;
+  updateUIForHub(hub, APP.hubChannel);
+  scene.emit("hub_updated", { hub });
+
+  APP.subscriptions.setSubscribed(data.subscriptions.web_push);
+
+  remountUI({
+    hubIsBound: data.hub_requires_oauth,
+    initialIsFavorited: data.subscriptions.favorites
   });
+
+  await APP.mediaDevicesManager.stopMicShare();
+  NAF.entities.removeRemoteEntities();
+  await NAF.connection.adapter.disconnect();
+  unloadRoomObjects();
+  NAF.connection.connectedClients = {};
+  NAF.connection.activeDataChannels = {};
+
+  NAF.room = hub.hub_id;
+  NAF.connection.adapter.setServerUrl(`wss://${hub.host}:${hub.port}`);
+  NAF.connection.adapter.setRoom(hub.hub_id);
+  // TODO does this need to look at oauth token? It isnt in prod
+  NAF.connection.adapter.setJoinToken(data.perms_token);
+  NAF.connection.adapter.setServerParams(await window.APP.hubChannel.getHost());
 
   if (
     document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
@@ -36,9 +58,8 @@ export async function changeHub(hubId) {
     });
   }
 
-  return AFRAME.scenes[0].components["networked-scene"].connect().then(async function() {
+  NAF.connection.adapter.connect().then(async function() {
     APP.mediaDevicesManager.startMicShare();
-    unloadRoomObjects();
     loadRoomObjects(hubId);
 
     APP.hubChannel.sendEnteredEvent();

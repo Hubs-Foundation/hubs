@@ -1062,7 +1062,7 @@ export default class DialogAdapter extends EventEmitter {
     return !this._protoo.connected;
   }
 
-  disconnect() {
+  async disconnect() {
     if (this._closed) return;
 
     this._closed = true;
@@ -1083,8 +1083,8 @@ export default class DialogAdapter extends EventEmitter {
     debug("disconnect()");
 
     // Close mediasoup Transports.
-    this.closeSendTransport();
-    this.closeRecvTransport();
+    await this.closeSendTransport();
+    await this.closeRecvTransport();
 
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
     if (this._protoo && this._protoo.connected) {
