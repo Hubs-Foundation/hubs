@@ -69,6 +69,8 @@ export async function changeHub(hubId, addToHistory = true) {
     });
   }
 
+  APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
+
   NAF.connection.adapter.connect().then(async function() {
     APP.mediaDevicesManager.startMicShare();
     loadRoomObjects(hubId);

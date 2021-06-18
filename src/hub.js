@@ -1066,6 +1066,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       subscriptions.setVapidPublicKey(null);
       console.error(res);
     });
+  APP.retChannel = retPhxChannel;
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
 
