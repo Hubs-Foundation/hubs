@@ -117,7 +117,7 @@ export function MicSetupModal({
         </div>
         {!microphoneOptions.length && (
           <p className={styles.micNotFound}>
-            {" "}
+           
             <FormattedMessage id="mic-setup-modal.mic-not-found" defaultMessage="No audio device found" />
           </p>
         )}
