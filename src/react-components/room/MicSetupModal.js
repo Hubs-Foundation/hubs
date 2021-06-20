@@ -115,7 +115,12 @@ export function MicSetupModal({
             large
           />
         </div>
-        {!microphoneOptions.length && <p className={styles.micNotFound}>No audio device found</p>}
+        {!microphoneOptions.length && (
+          <p className={styles.micNotFound}>
+            {" "}
+            <FormattedMessage id="mic-setup-modal.mic-not-found" defaultMessage="No audio device found" />
+          </p>
+        )}
         <>
           <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
           <ToggleInput
