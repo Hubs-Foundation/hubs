@@ -1,3 +1,4 @@
+/* global APP*/
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
 
@@ -25,6 +26,7 @@ function loadRoomObjects(hubId) {
 }
 
 export async function changeHub(hubId, addToHistory = true) {
+  APP.suppressPresenceMessages = true;
   const scene = AFRAME.scenes[0];
 
   const data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
@@ -82,6 +84,7 @@ export async function changeHub(hubId, addToHistory = true) {
       hubName: hub.name,
       showLineBreak: true
     });
+    APP.suppressPresenceMessages = false;
   });
 }
 window.changeHub = changeHub;

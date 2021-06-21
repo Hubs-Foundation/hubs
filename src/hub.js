@@ -1321,6 +1321,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const currentMeta = current.metas[0];
 
                 if (
+                  !window.APP.suppressPresenceMessages &&
                   !isSelf &&
                   currentMeta.presence !== meta.presence &&
                   meta.presence === "room" &&
@@ -1348,7 +1349,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 // New presence
                 const meta = info.metas[0];
 
-                if (meta.presence && meta.profile.displayName) {
+                if (!window.APP.suppressPresenceMessages && meta.presence && meta.profile.displayName) {
                   messageDispatch.receive({
                     type: "join",
                     presence: meta.presence,
@@ -1378,7 +1379,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const meta = info.metas[0];
 
-            if (meta.profile.displayName) {
+            if (!window.APP.suppressPresenceMessages && meta.profile.displayName) {
               messageDispatch.receive({
                 type: "leave",
                 name: meta.profile.displayName
