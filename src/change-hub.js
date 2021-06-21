@@ -36,7 +36,7 @@ export async function changeHub(hubId, addToHistory = true) {
     window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug));
   }
 
-  window.APP.hub = hub;
+  APP.hub = hub;
   updateUIForHub(hub, APP.hubChannel);
   scene.emit("hub_updated", { hub });
 
@@ -59,7 +59,7 @@ export async function changeHub(hubId, addToHistory = true) {
   NAF.connection.adapter.setRoom(hub.hub_id);
   // TODO does this need to look at oauth token? It isnt in prod
   NAF.connection.adapter.setJoinToken(data.perms_token);
-  NAF.connection.adapter.setServerParams(await window.APP.hubChannel.getHost());
+  NAF.connection.adapter.setServerParams(await APP.hubChannel.getHost());
 
   if (
     document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
