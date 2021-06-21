@@ -76,6 +76,12 @@ export async function changeHub(hubId, addToHistory = true) {
     loadRoomObjects(hubId);
 
     APP.hubChannel.sendEnteredEvent();
+
+    APP.messageDispatch.receive({
+      type: "hub_changed",
+      hubName: hub.name,
+      showLineBreak: true
+    });
   });
 }
 window.changeHub = changeHub;

@@ -1233,6 +1233,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI,
     mediaSearchStore
   );
+  APP.messageDispatch = messageDispatch;
   document.getElementById("avatar-rig").messageDispatch = messageDispatch;
 
   let isInitialJoin = true;
