@@ -7,6 +7,7 @@ import ducky from "./assets/models/DuckyMesh.glb";
 import { EventTarget } from "event-target-shim";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
+import { MAX_MESSAGE_LENGTH } from "./utils/chat-message";
 
 let uiRoot;
 // Handles user-entered messages
@@ -36,7 +37,7 @@ export default class MessageDispatch extends EventTarget {
       this.dispatchCommand(commandParts[0], ...commandParts.slice(1));
       document.activeElement.blur(); // Commands should blur
     } else {
-      this.hubChannel.sendMessage(message);
+      this.hubChannel.sendMessage(message.substring(0, MAX_MESSAGE_LENGTH));
     }
   };
 

@@ -16,6 +16,7 @@ import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
 import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 import { useIntl } from "react-intl";
+import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 
@@ -176,7 +177,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
 
   const onSendMessage = useCallback(
     () => {
-      sendMessage(message);
+      sendMessage(message.substring(0, MAX_MESSAGE_LENGTH));
       setMessage("");
     },
     [message, sendMessage, setMessage]

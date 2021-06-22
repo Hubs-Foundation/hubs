@@ -14,7 +14,7 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { Popover } from "../popover/Popover";
 import { EmojiPicker } from "./EmojiPicker";
 import styles from "./ChatSidebar.scss";
-import { formatMessageBody } from "../../utils/chat-message";
+import { formatMessageBody, MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
 
 export function SpawnMessageButton(props) {
@@ -80,6 +80,7 @@ export function ChatInput(props) {
   return (
     <div className={styles.chatInputContainer}>
       <TextAreaInput
+        maxLength={MAX_MESSAGE_LENGTH}
         placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
         {...props}
       />
