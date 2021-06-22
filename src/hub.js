@@ -9,7 +9,6 @@ if (!("xr" in navigator) && "getVRDisplays" in navigator) {
 }
 
 import "./utils/debug-log";
-import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
