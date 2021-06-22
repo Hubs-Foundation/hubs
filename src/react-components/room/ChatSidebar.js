@@ -120,7 +120,8 @@ export const LogMessageType = {
   audioNormalizationNaN: "audioNormalizationNaN",
   invalidAudioNormalizationRange: "invalidAudioNormalizationRange",
   audioSuspended: "audioSuspended",
-  audioResumed: "audioResumed"
+  audioResumed: "audioResumed",
+  joinFailed: "joinFailed"
 };
 
 const logMessages = defineMessages({
@@ -200,6 +201,10 @@ const logMessages = defineMessages({
   [LogMessageType.audioResumed]: {
     id: "chat-sidebar.log-message.audio-resumed",
     defaultMessage: "Audio has been resumed."
+  },
+  [LogMessageType.joinFailed]: {
+    id: "chat-sidebar.log-message.join-failed",
+    defaultMessage: "Failed to join room: {message}"
   }
 });
 

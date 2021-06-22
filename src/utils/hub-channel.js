@@ -81,6 +81,8 @@ export default class HubChannel extends EventTarget {
   async migrateToSocket(socket, params) {
     let presenceBindings;
 
+    this.channel = await migrateChannelToSocket(this.channel, socket, params);
+
     // Unbind presence, and then set up bindings after reconnect
     if (this.presence) {
       presenceBindings = {
@@ -94,7 +96,6 @@ export default class HubChannel extends EventTarget {
       this.presence.onSync(function() {});
     }
 
-    this.channel = await migrateChannelToSocket(this.channel, socket, params);
     this.presence = new Presence(this.channel);
 
     if (presenceBindings) {

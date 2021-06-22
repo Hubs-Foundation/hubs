@@ -29,7 +29,16 @@ export async function changeHub(hubId, addToHistory = true) {
   APP.suppressPresenceMessages = true;
   const scene = AFRAME.scenes[0];
 
-  const data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
+  let data;
+  try {
+    data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
+  } catch (e) {
+    console.warn(`Failed to join hub ${hubId}: ${e.reason}|${e.message}`);
+    APP.suppressPresenceMessages = false;
+    APP.messageDispatch.log("joinFailed", { message: e.message });
+    return;
+  }
+
   const hub = data.hubs[0];
 
   if (addToHistory) {
