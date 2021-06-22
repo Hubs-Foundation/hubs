@@ -307,7 +307,6 @@ export function migrateToChannel(oldChannel, newChannel) {
         resolve(data);
       })
       .receive("error", data => {
-        console.log("error", data);
         newChannel.leave();
         reject(data);
       });
