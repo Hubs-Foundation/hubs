@@ -11,7 +11,7 @@ import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExcla
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { Column } from "../layout/Column";
 
-export function RevokeTokenModal({ onClose, revoke }) {
+export function RevokeTokenModal({ onClose, onRevoke }) {
   return (
     <Modal
       title={<FormattedMessage id="revoke-token-modal.title" defaultMessage="Revoke token" />}
@@ -51,7 +51,7 @@ export function RevokeTokenModal({ onClose, revoke }) {
           <Button preset="basic" sm onClick={onClose}>
             <FormattedMessage id="revoke-token-modal.cancel" defaultMessage="Cancel" />
           </Button>
-          <Button preset="accent1" sm onClick={revoke}>
+          <Button preset="accent1" sm onClick={onRevoke}>
             <FormattedMessage id="revoke-token-modal.revoke" defaultMessage="Revoke" />
           </Button>
         </Row>
@@ -62,5 +62,5 @@ export function RevokeTokenModal({ onClose, revoke }) {
 
 RevokeTokenModal.propTypes = {
   onClose: PropTypes.func.isRequired,
-  revoke: PropTypes.func.isRequired
+  onRevoke: PropTypes.func.isRequired
 };
