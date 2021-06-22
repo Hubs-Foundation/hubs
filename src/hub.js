@@ -40,10 +40,11 @@ import {
   migrateChannelToSocket
 } from "./utils/phoenix-utils";
 import { joinChannel, denoisePresence } from "./netcode";
-import { Socket } from "phoenix";
+import { Socket, Presence } from "phoenix";
 import { getReticulumSocketUrl } from "./utils/connect-to-reticulum-socket";
 import { emitter } from "./emitter";
 import { freeze } from "./freeze";
+import { presenceEventsForHub } from "./presence-events-for-hub";
 import "./phoenix-adapter";
 
 import nextTick from "./utils/next-tick";
@@ -630,23 +631,6 @@ function checkForAccountRequired() {
   )}`;
 }
 
-function presenceEventsForHub(hubId) {
-  const onJoin = (key, meta) => {
-    events.trigger(`hub:${hubId}:join`, { key, meta });
-  };
-  const onLeave = (key, meta) => {
-    events.trigger(`hub:${hubId}:leave`, { key, meta });
-  };
-  const onChange = (key, previous, current) => {
-    events.trigger(`hub:${hubId}:change`, { key, previous, current });
-  };
-  return {
-    onJoin,
-    onLeave,
-    onChange
-  };
-}
-
 document.addEventListener("DOMContentLoaded", async () => {
   if (isOAuthModal) {
     return;
@@ -1224,8 +1208,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isInitialJoin = true;
 
-  hubChannel.setPhoenixChannel(hubPhxChannel);
-  const { rawOnJoin, rawOnLeave } = denoisePresence(presenceEventsForHub(hubId));
+  hubChannel.channel = hubPhxChannel;
+  hubChannel.presence = new Presence(hubPhxChannel);
+  const { rawOnJoin, rawOnLeave } = denoisePresence(presenceEventsForHub(events, hubId));
   hubChannel.presence.onJoin(rawOnJoin);
   hubChannel.presence.onLeave(rawOnLeave);
   hubChannel.presence.onSync(() => {
@@ -1341,20 +1326,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     console.error(res);
   }
-
-  // const handleIncomingNAF = data => {
-  //   if (!NAF.connection.adapter) return;
-
-  //   NAF.connection.adapter.onData(authorizeOrSanitizeMessage(data), PHOENIX_RELIABLE_NAF);
-  // };
-
-  // hubPhxChannel.on("naf", data => handleIncomingNAF(data));
-  // hubPhxChannel.on("nafr", ({ from_session_id, naf: unparsedData }) => {
-  //   // Server optimization: server passes through unparsed NAF message, we must now parse it.
-  //   const data = JSON.parse(unparsedData);
-  //   data.from_session_id = from_session_id;
-  //   handleIncomingNAF(data);
-  // });
 
   hubPhxChannel.on("message", ({ session_id, type, body, from }) => {
     const getAuthor = () => {

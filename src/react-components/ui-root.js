@@ -571,7 +571,6 @@ class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    console.log(this.props.forcedVREntryType);
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
     if (skipAudioSetup) {

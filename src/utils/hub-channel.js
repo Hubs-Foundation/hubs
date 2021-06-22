@@ -136,11 +136,6 @@ export default class HubChannel extends EventTarget {
     return data;
   }
 
-  setPhoenixChannel = channel => {
-    this.channel = channel;
-    this.presence = new Presence(channel);
-  };
-
   setPermissionsFromToken = token => {
     // Note: token is not verified.
     this._permissions = jwtDecode(token);
