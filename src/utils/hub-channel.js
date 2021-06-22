@@ -110,7 +110,6 @@ export default class HubChannel extends EventTarget {
     const newChannel = this.channel.socket.channel(`hub:${hubId}`, APP.createHubChannelParams());
     const data = await migrateToChannel(this.channel, newChannel);
 
-    // Unbind presence, and then set up bindings after reconnect
     if (this.presence) {
       presenceBindings = {
         onJoin: this.presence.caller.onJoin,
