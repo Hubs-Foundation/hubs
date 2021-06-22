@@ -859,6 +859,7 @@ export default class DialogAdapter extends EventEmitter {
     this.occupants = {};
 
     // clientID needs to be set before calling onOccupantConnected
+    // so that we know which objects we own and flush their state.
     this._connectSuccess(this._clientId);
 
     // Create a promise that will be resolved once we attach to all the initial consumers.
