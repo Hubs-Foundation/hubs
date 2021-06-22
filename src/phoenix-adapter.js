@@ -46,11 +46,6 @@ const connectPromise = netcode({
 
 export default class PhoenixAdapter {
   constructor() {
-    this.serverUrl = null;
-    this.room = null;
-    this.openListener = null;
-    this.closedListener = null;
-    this.messageListener = null;
     this.occupants = []; // TODO: Remove
   }
   setServerUrl(url) {
