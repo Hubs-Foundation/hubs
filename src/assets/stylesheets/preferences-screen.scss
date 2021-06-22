@@ -105,6 +105,13 @@ $semi-bold: 600;
   &:last-child {
     margin: 0px 16px 0px 16px;
   }
+  &.disabled {
+    opacity: 20%;
+    pointer-events: none;
+  }
+  &.indent {
+    padding-left: 15px;
+  }
 }
 :local(.column){
   display: flex;

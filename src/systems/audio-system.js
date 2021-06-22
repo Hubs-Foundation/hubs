@@ -16,6 +16,8 @@ function performDelayedReconnect(gainNode) {
   }, 10000);
 }
 
+import * as sdpTransform from "sdp-transform";
+
 async function enableChromeAEC(gainNode) {
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
@@ -92,6 +94,16 @@ async function enableChromeAEC(gainNode) {
     await inboundPeerConnection.setRemoteDescription(offer);
 
     const answer = await inboundPeerConnection.createAnswer();
+
+    // Rewrite SDP to be stereo and (variable) max bitrate
+    const parsedSdp = sdpTransform.parse(answer.sdp);
+    for (let i = 0; i < parsedSdp.media.length; i++) {
+      for (let j = 0; j < parsedSdp.media[i].fmtp.length; j++) {
+        parsedSdp.media[i].fmtp[j].config += `;stereo=1;cbr=0;maxaveragebitrate=510000;`;
+      }
+    }
+    answer.sdp = sdpTransform.write(parsedSdp);
+
     inboundPeerConnection.setLocalDescription(answer);
     outboundPeerConnection.setRemoteDescription(answer);
 
@@ -162,7 +174,8 @@ export class AudioSystem {
 
     setTimeout(() => {
       if (this.audioContext.state === "running") {
-        if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
+        const disableAEC = window.APP.store.state.preferences.disableEchoCancellation;
+        if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent) && !disableAEC) {
           enableChromeAEC(this._sceneEl.audioListener.gain);
         }
 

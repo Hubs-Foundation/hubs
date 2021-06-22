@@ -346,11 +346,13 @@ export class MaxResolutionPreferenceItem extends Component {
     );
   }
 }
-function ListItem({ children }) {
-  return <div className={styles.listItem}>{children}</div>;
+function ListItem({ children, disabled, indent }) {
+  return <div className={classNames(styles.listItem, { disabled, indent })}>{children}</div>;
 }
 ListItem.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
+  disabled: PropTypes.bool,
+  indent: PropTypes.bool
 };
 
 const preferenceLabels = defineMessages({
@@ -494,11 +496,11 @@ class PreferenceListItem extends Component {
   };
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    document.body.addEventListener("locale-updated", this.storeUpdated);
+    window.addEventListener("locale-updated", this.storeUpdated);
   }
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    document.body.removeEventListener("locale-updated", this.storeUpdated);
+    window.removeEventListener("locale-updated", this.storeUpdated);
   }
 
   storeUpdated = () => {
@@ -539,9 +541,15 @@ class PreferenceListItem extends Component {
     ) : (
       <ResetToDefaultButtonPlaceholder />
     );
+
+    const disabled =
+      (this.props.itemProps.disableIfTrue && this.props.store.state.preferences[this.props.itemProps.disableIfTrue]) ||
+      (this.props.itemProps.disableIfFalse && !this.props.store.state.preferences[this.props.itemProps.disableIfFalse]);
+    const indent = this.props.itemProps.disableIfTrue || this.props.itemProps.disableIfFalse;
+
     if (isCheckbox) {
       return (
-        <ListItem>
+        <ListItem disabled={disabled} indent={indent}>
           <div className={styles.row}>
             <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
             {label}
@@ -551,7 +559,7 @@ class PreferenceListItem extends Component {
       );
     } else if (isSmallScreen) {
       return (
-        <ListItem>
+        <ListItem disabled={disabled} indent={indent}>
           <div className={styles.column}>
             <div className={styles.row}>
               {<CheckboxPlaceholder />}
@@ -568,7 +576,7 @@ class PreferenceListItem extends Component {
       );
     }
     return (
-      <ListItem>
+      <ListItem disabled={disabled} indent={indent}>
         <div className={styles.row}>
           {<CheckboxPlaceholder />}
           {label}

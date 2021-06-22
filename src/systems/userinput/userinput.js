@@ -412,8 +412,11 @@ AFRAME.registerSystem("userinput", {
       gamepad && gamepadConnected({ gamepad });
     }
 
-    const retrieveXRGamepads = ({ session }) => {
-      for (const inputSource of session.inputSources) {
+    const retrieveXRGamepads = ({ added, removed }) => {
+      for (const inputSource of removed) {
+        gamepadDisconnected(inputSource);
+      }
+      for (const inputSource of added) {
         inputSource.gamepad.isWebXRGamepad = true;
         inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
         inputSource.gamepad.primaryProfile = inputSource.profiles[0];
@@ -429,7 +432,9 @@ AFRAME.registerSystem("userinput", {
         xrSession.requestReferenceSpace("local-floor").then(referenceSpace => {
           this.xrReferenceSpace = referenceSpace;
         });
-        retrieveXRGamepads({ session: xrSession });
+        xrSession.addEventListener("end", () => {
+          this.activeDevices.items.filter(d => d.gamepad && d.gamepad.isWebXRGamepad).forEach(gamepadDisconnected);
+        });
       }
       updateBindingsForVRMode();
     });

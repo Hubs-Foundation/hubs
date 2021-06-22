@@ -89,7 +89,8 @@ export const SCHEMA = {
 
     preferences: {
       type: "object",
-      additionalProperties: false,
+      // Allow removed preferences to pass validation
+      additionalProperties: true,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
         preferredMic: { type: "string" },
