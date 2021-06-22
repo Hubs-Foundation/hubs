@@ -285,7 +285,6 @@ function setupLobbyCamera() {
 }
 
 let uiProps = {};
-let connectionErrorTimeout = null;
 
 // Hub ID and slug are the basename
 let routerBaseName = document.location.pathname
@@ -1238,12 +1237,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
   events.on(`hub:${hubId}:join`, ({ key, meta }) => {
-    // TODO: NOISY_OCCUPANT_COUNT
-    messageDispatch.receive({
-      type: "join",
-      presence: meta.presence,
-      name: meta.profile.displayName
-    });
+    if (key !== hubChannel.channel.socket.params().session_id) {
+      // TODO: NOISY_OCCUPANT_COUNT
+      messageDispatch.receive({
+        type: "join",
+        presence: meta.presence,
+        name: meta.profile.displayName
+      });
+    }
 
     scene.emit("presence_updated", {
       sessionId: key,
