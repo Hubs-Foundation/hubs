@@ -31,7 +31,7 @@ export async function changeHub(hubId, addToHistory = true) {
 
   let data;
   try {
-    data = await APP.hubChannel.migrateToChannel(makeChannel(hubId));
+    data = await APP.hubChannel.migrateToHub(hubId);
   } catch (e) {
     console.warn(`Failed to join hub ${hubId}: ${e.reason}|${e.message}`);
     APP.suppressPresenceMessages = false;

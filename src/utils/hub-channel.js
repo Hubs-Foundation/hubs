@@ -81,8 +81,6 @@ export default class HubChannel extends EventTarget {
   async migrateToSocket(socket, params) {
     let presenceBindings;
 
-    this.channel = await migrateChannelToSocket(this.channel, socket, params);
-
     // Unbind presence, and then set up bindings after reconnect
     if (this.presence) {
       presenceBindings = {
@@ -96,6 +94,7 @@ export default class HubChannel extends EventTarget {
       this.presence.onSync(function() {});
     }
 
+    this.channel = await migrateChannelToSocket(this.channel, socket, params);
     this.presence = new Presence(this.channel);
 
     if (presenceBindings) {
@@ -105,8 +104,11 @@ export default class HubChannel extends EventTarget {
     }
   }
 
-  async migrateToChannel(newChannel, params) {
+  async migrateToHub(hubId) {
     let presenceBindings;
+
+    const newChannel = this.channel.socket.channel(`hub:${hubId}`, APP.createHubChannelParams());
+    const data = await migrateToChannel(this.channel, newChannel);
 
     // Unbind presence, and then set up bindings after reconnect
     if (this.presence) {
@@ -121,12 +123,10 @@ export default class HubChannel extends EventTarget {
       this.presence.onSync(function() {});
     }
 
-    const data = await migrateToChannel(this.channel, newChannel, params);
     this.channel = newChannel;
     this.presence = new Presence(this.channel);
     this.hubId = data.hubs[0].hub_id;
 
-    // TODO handle oauth token?
     this.setPermissionsFromToken(data.perms_token);
 
     if (presenceBindings) {

@@ -292,7 +292,7 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
   });
 }
 
-export function migrateToChannel(oldChannel, newChannel, params) {
+export function migrateToChannel(oldChannel, newChannel) {
   for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
     const item = oldChannel.bindings[i];
     newChannel.on(item.event, item.callback);

@@ -1105,6 +1105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return params;
   };
+  APP.createHubChannelParams = createHubChannelParams;
 
   const tryGetMatchingMeta = async ({ ret_pool, ret_version }, shouldAbandonMigration) => {
     const backoffMS = 5000;
@@ -1398,8 +1399,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "adapter-ready",
         async ({ detail: adapter }) => {
           adapter.setClientId(socket.params().session_id);
-          // TODO does this need to look at oauth token? It isnt in prod
-          adapter.setJoinToken(data.perms_token);
+          adapter.setJoinToken(permsToken);
           adapter.setServerParams(await window.APP.hubChannel.getHost());
           adapter.setReconnectionListeners(
             async () => {
