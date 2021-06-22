@@ -97,7 +97,7 @@ export function AuthContextProvider({ children, store }) {
 
   const [context, setContext] = useState({
     initialized: false,
-    isSignedIn: !!store.state.credentials && store.state.credentials.token,
+    isSignedIn: !!store.state.credentials && !!store.state.credentials.token,
     isAdmin: configs.isAdmin(),
     email: store.state.credentials && store.state.credentials.email,
     userId: store.credentialsAccountId,
@@ -112,7 +112,7 @@ export function AuthContextProvider({ children, store }) {
       const onStoreChanged = () => {
         setContext(state => ({
           ...state,
-          isSignedIn: !!store.state.credentials && store.state.credentials.token,
+          isSignedIn: !!store.state.credentials && !!store.state.credentials.token,
           isAdmin: configs.isAdmin(),
           email: store.state.credentials && store.state.credentials.email,
           userId: store.credentialsAccountId
