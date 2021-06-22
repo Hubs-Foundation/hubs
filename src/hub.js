@@ -26,8 +26,6 @@ patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
-import { netcode, denoisePresence } from "./netcode"; // Has to go below networked-aframe import
-import { freeze } from "./freeze";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
@@ -1253,202 +1251,200 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel
     .join()
     .receive("ok", async data => {
+      socket.params().session_id = data.session_id;
+      socket.params().session_token = data.session_token;
+
+      const vrHudPresenceCount = document.querySelector("#hud-presence-count");
+
+      presenceSync.promise = new Promise(resolve => {
+        presenceSync.resolve = resolve;
+      });
+
+      if (isInitialJoin) {
+        store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
+
+        const requestedOccupants = [];
+
+        const requestOccupants = async (sessionIds, state) => {
+          requestedOccupants.length = 0;
+          for (let i = 0; i < sessionIds.length; i++) {
+            const sessionId = sessionIds[i];
+            if (sessionId !== NAF.clientId && state[sessionId].metas[0].presence === "room") {
+              requestedOccupants.push(sessionId);
+            }
+          }
+
+          while (!NAF.connection.isConnected()) await nextTick();
+          NAF.connection.adapter.syncOccupants(requestedOccupants);
+        };
+
+        hubChannel.presence.onSync(() => {
+          const presence = hubChannel.presence;
+
+          remountUI({
+            sessionId: socket.params().session_id,
+            presences: presence.state,
+            entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
+          });
+
+          const sessionIds = Object.getOwnPropertyNames(presence.state);
+          const occupantCount = sessionIds.length;
+          vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
+
+          if (occupantCount > 1) {
+            scene.addState("copresent");
+          } else {
+            scene.removeState("copresent");
+          }
+
+          requestOccupants(sessionIds, presence.state);
+
+          // HACK - Set a flag on the presence object indicating if the initial sync has completed,
+          // which is used to determine if we should fire join/leave messages into the presence log.
+          // This flag is required since we reuse these onJoin and onLeave handler functions on
+          // socket migrations.
+          presence.__hadInitialSync = true;
+
+          presenceSync.resolve();
+
+          presence.onJoin((sessionId, current, info) => {
+            // Ignore presence join/leaves if this Presence has not yet had its initial sync (o/w the user
+            // will see join messages for every user.)
+            if (!hubChannel.presence.__hadInitialSync) return;
+
+            const meta = info.metas[info.metas.length - 1];
+            const occupantCount = Object.entries(hubChannel.presence.state).length;
+
+            if (occupantCount <= NOISY_OCCUPANT_COUNT) {
+              if (current) {
+                // Change to existing presence
+                const isSelf = sessionId === socket.params().session_id;
+                const currentMeta = current.metas[0];
+
+                if (
+                  !window.APP.suppressPresenceMessages &&
+                  !isSelf &&
+                  currentMeta.presence !== meta.presence &&
+                  meta.presence === "room" &&
+                  meta.profile.displayName
+                ) {
+                  messageDispatch.receive({
+                    type: "entered",
+                    presence: meta.presence,
+                    name: meta.profile.displayName
+                  });
+                }
+
+                if (
+                  currentMeta.profile &&
+                  meta.profile &&
+                  currentMeta.profile.displayName !== meta.profile.displayName
+                ) {
+                  messageDispatch.receive({
+                    type: "display_name_changed",
+                    oldName: currentMeta.profile.displayName,
+                    newName: meta.profile.displayName
+                  });
+                }
+              } else if (info.metas.length === 1) {
+                // New presence
+                const meta = info.metas[0];
+
+                if (!window.APP.suppressPresenceMessages && meta.presence && meta.profile.displayName) {
+                  messageDispatch.receive({
+                    type: "join",
+                    presence: meta.presence,
+                    name: meta.profile.displayName
+                  });
+                }
+              }
+            }
+
+            scene.emit("presence_updated", {
+              sessionId,
+              profile: meta.profile,
+              roles: meta.roles,
+              permissions: meta.permissions,
+              streaming: meta.streaming,
+              recording: meta.recording
+            });
+          });
+
+          presence.onLeave((sessionId, current, info) => {
+            // Ignore presence join/leaves if this Presence has not yet had its initial sync
+            if (!hubChannel.presence.__hadInitialSync) return;
+
+            if (current && current.metas.length > 0) return;
+            const occupantCount = Object.entries(hubChannel.presence.state).length;
+            if (occupantCount > NOISY_OCCUPANT_COUNT) return;
+
+            const meta = info.metas[0];
+
+            if (!window.APP.suppressPresenceMessages && meta.profile.displayName) {
+              messageDispatch.receive({
+                type: "leave",
+                name: meta.profile.displayName
+              });
+            }
+          });
+        });
+      }
+
+      isInitialJoin = false;
+
+      const permsToken = oauthFlowPermsToken || data.perms_token;
+      hubChannel.setPermissionsFromToken(permsToken);
+
+      scene.addEventListener(
+        "adapter-ready",
+        async ({ detail: adapter }) => {
+          adapter.setClientId(socket.params().session_id);
+          adapter.setJoinToken(permsToken);
+          adapter.setServerParams(await window.APP.hubChannel.getHost());
+          adapter.setReconnectionListeners(
+            async () => {
+              const { host, port } = await hubChannel.getHost();
+              const newServerURL = `wss://${host}:${port}`;
+              // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
+              if (adapter.serverUrl !== newServerURL) {
+                console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
+                scene.setAttribute("networked-scene", { serverURL: newServerURL });
+                adapter.setServerUrl(newServerURL);
+                adapter.setServerParams(await window.APP.hubChannel.getHost());
+                adapter.reconnect();
+              }
+              // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
+              if (!connectionErrorTimeout) {
+                connectionErrorTimeout = setTimeout(() => {
+                  adapter.disconnect();
+                  onConnectionError(entryManager, "Timeout trying to reconnect to the room");
+                }, 30000);
+              }
+            },
+            () => {
+              clearTimeout(connectionErrorTimeout);
+              connectionErrorTimeout = null;
+            }
+          );
+
+          setupPeerConnectionConfig(adapter);
+
+          hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
+        },
+        { once: true }
+      );
+
+      subscriptions.setHubChannel(hubChannel);
+      subscriptions.setSubscribed(data.subscriptions.web_push);
+
+      remountUI({
+        hubIsBound: data.hub_requires_oauth,
+        initialIsFavorited: data.subscriptions.favorites
+      });
+
+      await presenceSync.promise;
+
       handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
-      return;
-      // socket.params().session_id = data.session_id;
-      // socket.params().session_token = data.session_token;
-
-      // const vrHudPresenceCount = document.querySelector("#hud-presence-count");
-
-      // presenceSync.promise = new Promise(resolve => {
-      //   presenceSync.resolve = resolve;
-      // });
-
-      // if (isInitialJoin) {
-      //   store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
-
-      //   const requestedOccupants = [];
-
-      //   const requestOccupants = async (sessionIds, state) => {
-      //     requestedOccupants.length = 0;
-      //     for (let i = 0; i < sessionIds.length; i++) {
-      //       const sessionId = sessionIds[i];
-      //       if (sessionId !== NAF.clientId && state[sessionId].metas[0].presence === "room") {
-      //         requestedOccupants.push(sessionId);
-      //       }
-      //     }
-
-      //     while (!NAF.connection.isConnected()) await nextTick();
-      //     NAF.connection.adapter.syncOccupants(requestedOccupants);
-      //   };
-
-      //   hubChannel.presence.onSync(() => {
-      //     const presence = hubChannel.presence;
-
-      //     remountUI({
-      //       sessionId: socket.params().session_id,
-      //       presences: presence.state,
-      //       entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
-      //     });
-
-      //     const sessionIds = Object.getOwnPropertyNames(presence.state);
-      //     const occupantCount = sessionIds.length;
-      //     vrHudPresenceCount.setAttribute("text", "value", occupantCount.toString());
-
-      //     if (occupantCount > 1) {
-      //       scene.addState("copresent");
-      //     } else {
-      //       scene.removeState("copresent");
-      //     }
-
-      //     requestOccupants(sessionIds, presence.state);
-
-      //     // HACK - Set a flag on the presence object indicating if the initial sync has completed,
-      //     // which is used to determine if we should fire join/leave messages into the presence log.
-      //     // This flag is required since we reuse these onJoin and onLeave handler functions on
-      //     // socket migrations.
-      //     presence.__hadInitialSync = true;
-
-      //     presenceSync.resolve();
-
-      //     presence.onJoin((sessionId, current, info) => {
-      //       // Ignore presence join/leaves if this Presence has not yet had its initial sync (o/w the user
-      //       // will see join messages for every user.)
-      //       if (!hubChannel.presence.__hadInitialSync) return;
-
-      //       const meta = info.metas[info.metas.length - 1];
-      //       const occupantCount = Object.entries(hubChannel.presence.state).length;
-
-      //       if (occupantCount <= NOISY_OCCUPANT_COUNT) {
-      //         if (current) {
-      //           // Change to existing presence
-      //           const isSelf = sessionId === socket.params().session_id;
-      //           const currentMeta = current.metas[0];
-
-      //           if (
-      //             !window.APP.suppressPresenceMessages &&
-      //             !isSelf &&
-      //             currentMeta.presence !== meta.presence &&
-      //             meta.presence === "room" &&
-      //             meta.profile.displayName
-      //           ) {
-      //             messageDispatch.receive({
-      //               type: "entered",
-      //               presence: meta.presence,
-      //               name: meta.profile.displayName
-      //             });
-      //           }
-
-      //           if (
-      //             currentMeta.profile &&
-      //             meta.profile &&
-      //             currentMeta.profile.displayName !== meta.profile.displayName
-      //           ) {
-      //             messageDispatch.receive({
-      //               type: "display_name_changed",
-      //               oldName: currentMeta.profile.displayName,
-      //               newName: meta.profile.displayName
-      //             });
-      //           }
-      //         } else if (info.metas.length === 1) {
-      //           // New presence
-      //           const meta = info.metas[0];
-
-      //           if (!window.APP.suppressPresenceMessages && meta.presence && meta.profile.displayName) {
-      //             messageDispatch.receive({
-      //               type: "join",
-      //               presence: meta.presence,
-      //               name: meta.profile.displayName
-      //             });
-      //           }
-      //         }
-      //       }
-
-      //       scene.emit("presence_updated", {
-      //         sessionId,
-      //         profile: meta.profile,
-      //         roles: meta.roles,
-      //         permissions: meta.permissions,
-      //         streaming: meta.streaming,
-      //         recording: meta.recording
-      //       });
-      //     });
-
-      //     presence.onLeave((sessionId, current, info) => {
-      //       // Ignore presence join/leaves if this Presence has not yet had its initial sync
-      //       if (!hubChannel.presence.__hadInitialSync) return;
-
-      //       if (current && current.metas.length > 0) return;
-      //       const occupantCount = Object.entries(hubChannel.presence.state).length;
-      //       if (occupantCount > NOISY_OCCUPANT_COUNT) return;
-
-      //       const meta = info.metas[0];
-
-      //       if (!window.APP.suppressPresenceMessages && meta.profile.displayName) {
-      //         messageDispatch.receive({
-      //           type: "leave",
-      //           name: meta.profile.displayName
-      //         });
-      //       }
-      //     });
-      //   });
-      // }
-
-      // isInitialJoin = false;
-
-      // const permsToken = oauthFlowPermsToken || data.perms_token;
-      // hubChannel.setPermissionsFromToken(permsToken);
-
-      // scene.addEventListener(
-      //   "adapter-ready",
-      //   async ({ detail: adapter }) => {
-      //     adapter.setClientId(socket.params().session_id);
-      //     adapter.setJoinToken(permsToken);
-      //     adapter.setServerParams(await window.APP.hubChannel.getHost());
-      //     adapter.setReconnectionListeners(
-      //       async () => {
-      //         const { host, port } = await hubChannel.getHost();
-      //         const newServerURL = `wss://${host}:${port}`;
-      //         // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
-      //         if (adapter.serverUrl !== newServerURL) {
-      //           console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
-      //           scene.setAttribute("networked-scene", { serverURL: newServerURL });
-      //           adapter.setServerUrl(newServerURL);
-      //           adapter.setServerParams(await window.APP.hubChannel.getHost());
-      //           adapter.reconnect();
-      //         }
-      //         // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
-      //         if (!connectionErrorTimeout) {
-      //           connectionErrorTimeout = setTimeout(() => {
-      //             adapter.disconnect();
-      //             onConnectionError(entryManager, "Timeout trying to reconnect to the room");
-      //           }, 30000);
-      //         }
-      //       },
-      //       () => {
-      //         clearTimeout(connectionErrorTimeout);
-      //         connectionErrorTimeout = null;
-      //       }
-      //     );
-
-      //     setupPeerConnectionConfig(adapter);
-
-      //     hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
-      //   },
-      //   { once: true }
-      // );
-
-      // subscriptions.setHubChannel(hubChannel);
-      // subscriptions.setSubscribed(data.subscriptions.web_push);
-
-      // remountUI({
-      //   hubIsBound: data.hub_requires_oauth,
-      //   initialIsFavorited: data.subscriptions.favorites
-      // });
-
-      // await presenceSync.promise;
-
-      // handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {

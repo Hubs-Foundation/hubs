@@ -1,15 +1,48 @@
 import { netcode, denoisePresence } from "./netcode";
 import { freeze } from "./freeze";
+import { emitter } from "./emitter";
+import { transportForChannel } from "./transport-for-channel";
 
-function transportForChannel(channel) {
-  return (clientId, dataType, data) => {
-    if (clientId) {
-      channel.push("naf", { clientId, dataType, data });
-    } else {
-      channel.push("naf", { dataType, data });
-    }
+const events = emitter();
+function presenceEventsForHub(hubId) {
+  const onJoin = (key, meta) => {
+    events.trigger(`hub:${hubId}:join`, { key, meta });
+  };
+  const onLeave = (key, meta) => {
+    events.trigger(`hub:${hubId}:leave`, { key, meta });
+  };
+  const onChange = (key, previous, current) => {
+    events.trigger(`hub:${hubId}:change`, { key, previous, current });
+  };
+  return {
+    onJoin,
+    onLeave,
+    onChange
   };
 }
+
+const hubId = "wiHRpou";
+const { rawOnJoin, rawOnLeave } = denoisePresence(presenceEventsForHub(hubId));
+const connectPromise = netcode({
+  protocol: "wss",
+  port: "443",
+  host: "gallant-dwarf.reticulum.io",
+  hubId,
+  hubChannelParams: {
+    profile: null,
+    push_subscription_endpoint: null,
+    auth_token: null,
+    perms_token: null,
+    context: {
+      mobile: false,
+      embed: null
+    },
+    hub_invite_id: null
+  }, // TODO: Insert real hub channel join params
+  onHubChannelPresenceSync: () => {},
+  onHubChannelPresenceJoin: rawOnJoin,
+  onHubChannelPresenceLeave: rawOnLeave
+});
 
 export default class PhoenixAdapter {
   constructor() {
@@ -41,51 +74,47 @@ export default class PhoenixAdapter {
   }
 
   async connect() {
+    let channels;
+    let sessionId;
+    let hubChannelPresence;
     try {
-      const onJoin = (key, meta) => {
-        console.log("Joined", key, freeze(meta));
-        this.occupants.push(key);
-        this.openListener(key);
-      };
-      const onLeave = (key, meta) => {
-        this.occupants.slice(this.occupants.indexOf(key), 1);
-        console.log("Left", key, freeze(meta));
-        this.closedListener(key);
-      };
-      const onChange = (key, previous, current) => {
-        console.log("Changed", key, freeze(previous), freeze(current));
-      };
-      const { rawOnJoin, rawOnLeave } = denoisePresence({ onJoin, onLeave, onChange });
-      const hubId = "wiHRpou";
-      const { channels, sessionId } = (window.net = await netcode({
-        protocol: "wss",
-        port: "443",
-        host: "gallant-dwarf.reticulum.io",
-        hubId,
-        hubChannelParams: APP.createHubChannelParams(), // TODO
-        onHubChannelPresenceSync: function() {},
-        onHubChannelPresenceJoin: rawOnJoin,
-        onHubChannelPresenceLeave: rawOnLeave
-      }));
-      const hubChannel = channels.get(`hub:${hubId}`);
-
-      this.sendViaHubChannel = transportForChannel(hubChannel);
-      const handleIncomingNAF = message => {
-        this.messageListener(null, message.dataType, message.data, "phx-reliable");
-      };
-
-      hubChannel.on("naf", handleIncomingNAF);
-      hubChannel.on("nafr", ({ from_session_id, naf: unparsedData }) => {
-        // Server optimization: server passes through unparsed NAF message, we must now parse it.
-        const data = JSON.parse(unparsedData);
-        data.from_session_id = from_session_id;
-        handleIncomingNAF(data);
-      });
-      this.successListener(sessionId);
+      const data = await connectPromise;
+      window.net = data; // TODO: Remove
+      channels = data.channels;
+      sessionId = data.sessionId;
+      hubChannelPresence = data.hubChannelPresence;
     } catch (e) {
       console.error("Failed to connect to phoenix", e);
       this.failureListener();
     }
+    const hubChannel = channels.get(`hub:${hubId}`);
+    this.sendViaHubChannel = transportForChannel(hubChannel);
+    const handleIncomingNAF = message => {
+      this.messageListener(null, message.dataType, message.data, "phx-reliable");
+    };
+    hubChannel.on("naf", handleIncomingNAF);
+    hubChannel.on("nafr", ({ from_session_id, naf: unparsedData }) => {
+      // Server optimization: server passes through unparsed NAF message, we must now parse it.
+      const data = JSON.parse(unparsedData);
+      data.from_session_id = from_session_id;
+      handleIncomingNAF(data);
+    });
+    this.successListener(sessionId);
+    hubChannelPresence.list().forEach((key, meta) => {
+      console.log("Adding existing occupant", { key }, key, freeze(meta));
+      this.occupants.push(key);
+      this.openListener(key);
+    });
+    events.on(`hub:${hubId}:join`, ({ key, meta }) => {
+      console.log("Occupant joined", key, freeze(meta));
+      this.occupants.push(key);
+      this.openListener(key);
+    });
+    events.on(`hub:${hubId}:leave`, ({ key, meta }) => {
+      console.log("Occupant left", key, freeze(meta));
+      this.occupants.slice(this.occupants.indexOf(key), 1);
+      this.closedListener(key);
+    });
   }
   shouldStartConnectionTo() {}
   startStreamConnection() {}
