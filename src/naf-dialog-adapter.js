@@ -882,14 +882,14 @@ export default class DialogAdapter extends EventEmitter {
     return this.createMissingProducers(stream);
   }
 
-  createMissingProducers(stream) {
+  async createMissingProducers(stream) {
     this.emitRTCEvent("info", "RTC", () => `Creating missing producers`);
 
     if (!this._sendTransport) return;
     let sawAudio = false;
     let sawVideo = false;
 
-    return Promise.all(
+    await Promise.all(
       stream.getTracks().map(async track => {
         if (track.kind === "audio") {
           sawAudio = true;
@@ -926,20 +926,18 @@ export default class DialogAdapter extends EventEmitter {
 
         this.resolvePendingMediaRequestForTrack(this._clientId, track);
       })
-    ).then(() => {
-      if (!sawAudio && this._micProducer) {
-        this._micProducer.close();
-        this._protoo.request("closeProducer", { producerId: this._micProducer.id });
-        this._micProducer = null;
-      }
+    );
 
-      if (!sawVideo) {
-        this.disableCamera();
-        this.disableShare();
-      }
-
-      this._localMediaStream = stream;
-    });
+    if (!sawAudio && this._micProducer) {
+      this._micProducer.close();
+      this._protoo.request("closeProducer", { producerId: this._micProducer.id });
+      this._micProducer = null;
+    }
+    if (!sawVideo) {
+      this.disableCamera();
+      this.disableShare();
+    }
+    this._localMediaStream = stream;
   }
 
   async enabledMic(track) {
