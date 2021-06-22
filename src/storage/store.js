@@ -127,6 +127,9 @@ export const SCHEMA = {
         disableAutoGainControl: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
+        showAudioDebugPanel: { type: "bool" },
+        enableAudioClipping: { type: "bool" },
+        audioClippingThreshold: { type: "number" },
         theme: { type: "string" }
       }
     },

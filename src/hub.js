@@ -118,6 +118,7 @@ import "./components/optional-alternative-to-not-hide";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
+import "./components/audio-params";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -160,6 +161,8 @@ import "./systems/capture-system";
 import "./systems/listed-media";
 import "./systems/linked-media";
 import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
+import "./systems/audio-debug-system";
+import "./systems/audio-gain-system";
 
 import "./gltf-component-mappings";
 
@@ -619,7 +622,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         .catch(connectError => {
           clearTimeout(connectionErrorTimeout);
           connectionErrorTimeout = null;
-          adapter.disconnect();
+          NAF.connection.adapter?.disconnect();
           onConnectionError(entryManager, connectError);
         });
     };

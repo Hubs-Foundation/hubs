@@ -1,3 +1,5 @@
+import { AvatarAudioDefaults, TargetAudioDefaults, DISTANCE_MODEL_OPTIONS } from "../systems/audio-settings-system";
+
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
@@ -45,23 +47,25 @@ function setPositionalAudioProperties(audio, settings) {
   audio.setMaxDistance(settings.maxDistance);
   audio.setRefDistance(settings.refDistance);
   audio.setRolloffFactor(settings.rolloffFactor);
-  audio.setDirectionalCone(settings.innerAngle, settings.outerAngle, settings.outerGain);
+  audio.panner.coneInnerAngle = settings.innerAngle;
+  audio.panner.coneOuterAngle = settings.outerAngle;
+  audio.panner.coneOuterGain = settings.outerGain;
 }
 
 AFRAME.registerComponent("avatar-audio-source", {
   schema: {
     positional: { default: true },
     distanceModel: {
-      default: "inverse",
-      oneOf: ["linear", "inverse", "exponential"]
+      default: AvatarAudioDefaults.DISTANCE_MODEL,
+      oneOf: [DISTANCE_MODEL_OPTIONS]
     },
-    maxDistance: { default: 10000 },
-    refDistance: { default: 1 },
-    rolloffFactor: { default: 1 },
+    maxDistance: { default: AvatarAudioDefaults.MAX_DISTANCE },
+    refDistance: { default: AvatarAudioDefaults.REF_DISTANCE },
+    rolloffFactor: { default: AvatarAudioDefaults.ROLLOFF_FACTOR },
 
-    innerAngle: { default: 360 },
-    outerAngle: { default: 0 },
-    outerGain: { default: 0 }
+    innerAngle: { default: AvatarAudioDefaults.INNER_ANGLE },
+    outerAngle: { default: AvatarAudioDefaults.OUTER_ANGLE },
+    outerGain: { default: AvatarAudioDefaults.OUTER_GAIN }
   },
 
   createAudio: async function() {
@@ -102,7 +106,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
-    NAF.connection.adapter.on("stream_updated", this._onStreamUpdated, this);
+    NAF.connection.adapter?.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
   },
 
@@ -269,20 +273,20 @@ AFRAME.registerComponent("audio-target", {
     positional: { default: true },
 
     distanceModel: {
-      default: "inverse",
-      oneOf: ["linear", "inverse", "exponential"]
+      default: TargetAudioDefaults.DISTANCE_MODEL,
+      oneOf: [DISTANCE_MODEL_OPTIONS]
     },
-    maxDistance: { default: 10000 },
-    refDistance: { default: 8 },
-    rolloffFactor: { default: 5 },
+    maxDistance: { default: TargetAudioDefaults.MAX_DISTANCE },
+    refDistance: { default: TargetAudioDefaults.REF_DISTANCE },
+    rolloffFactor: { default: TargetAudioDefaults.ROLLOFF_FACTOR },
 
-    innerAngle: { default: 170 },
-    outerAngle: { default: 300 },
-    outerGain: { default: 0.3 },
+    innerAngle: { default: TargetAudioDefaults.INNER_ANGLE },
+    outerAngle: { default: TargetAudioDefaults.OUTER_ANGLE },
+    outerGain: { default: TargetAudioDefaults.OUTER_GAIN },
 
     minDelay: { default: 0.01 },
     maxDelay: { default: 0.13 },
-    gain: { default: 1.0 },
+    gain: { default: TargetAudioDefaults.VOLUME },
 
     srcEl: { type: "selector" },
 
@@ -296,20 +300,20 @@ AFRAME.registerComponent("audio-target", {
     setTimeout(() => {
       this.connectAudio();
     }, 0);
+    this.el.setAttribute("audio-params", this.data);
   },
 
   remove: function() {
     this.destroyAudio();
+    this.el.removeAttribute("audio-params");
   },
 
   createAudio: function() {
     const audioListener = this.el.sceneEl.audioListener;
     const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
 
-    if (this.data.debug && this.data.positional) {
+    if (this.data.positional) {
       setPositionalAudioProperties(audio, this.data);
-      const helper = new THREE.PositionalAudioHelper(audio, this.data.refDistance, 16, 16);
-      audio.add(helper);
     }
 
     audio.setVolume(this.data.gain);
@@ -343,5 +347,11 @@ AFRAME.registerComponent("audio-target", {
 
     audio.disconnect();
     this.el.removeObject3D(this.attrName);
+  },
+
+  update() {
+    if (this.data.positional) {
+      setPositionalAudioProperties(this.audio, this.data);
+    }
   }
 });
