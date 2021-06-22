@@ -1058,15 +1058,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Reticulum global channel
-  let retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
-  retPhxChannel
+  APP.retChannel = socket.channel(`ret`, { hub_id: hubId });
+  APP.retChannel
     .join()
     .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
     .receive("error", res => {
       subscriptions.setVapidPublicKey(null);
       console.error(res);
     });
-  APP.retChannel = retPhxChannel;
 
   const pushSubscriptionEndpoint = await subscriptions.getCurrentEndpoint();
 
@@ -1148,8 +1147,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     console.log("[reconnect] Reconnect in progress. Updated reticulum meta.");
-    const oldSocket = retPhxChannel.socket;
+    const oldSocket = APP.retChannel.socket;
     const socket = await connectToReticulum(isDebug, oldSocket.params());
+    APP.retChannel = await migrateChannelToSocket(APP.retChannel, socket);
     await hubChannel.migrateToSocket(socket, createHubChannelParams());
     authChannel.setSocket(socket);
     linkChannel.setSocket(socket);
@@ -1193,16 +1193,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
   })();
 
-  retPhxChannel.on("notice", data => {
+  APP.retChannel.on("notice", data => {
     if (data.event === "ret-deploy") {
       onRetDeploy(data);
     }
   });
 
   const hubPhxChannel = socket.channel(`hub:${hubId}`, createHubChannelParams(oauthFlowPermsToken));
-  window.makeChannel = function(hubId) {
-    return socket.channel(`hub:${hubId}`, createHubChannelParams(oauthFlowPermsToken));
-  };
 
   const presenceLogEntries = [];
   const addToPresenceLog = entry => {
