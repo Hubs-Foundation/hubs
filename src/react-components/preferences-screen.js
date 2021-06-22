@@ -483,6 +483,10 @@ const preferenceLabels = defineMessages({
   theme: {
     id: "preferences-screen.preference.theme",
     defaultMessage: "Theme"
+  },
+  fastRoomSwitching: {
+    id: "preferences-screen.preference.fast-room-switching",
+    defaultMessage: "Enable Fast Room Switching"
   }
 });
 
@@ -1046,6 +1050,7 @@ class PreferencesScreen extends Component {
           { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          { key: "fastRoomSwitching", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
           { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },

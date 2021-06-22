@@ -107,6 +107,7 @@ export const SCHEMA = {
         showFPSCounter: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
+        fastRoomSwitching: { type: "bool" },
         preferMobileObjectInfoPanel: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
