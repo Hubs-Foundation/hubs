@@ -889,7 +889,6 @@ export default class DialogAdapter extends EventEmitter {
     let sawAudio = false;
     let sawVideo = false;
 
-    console.log(stream);
     return Promise.all(
       stream.getTracks().map(async track => {
         if (track.kind === "audio") {
