@@ -107,7 +107,7 @@
     "js-cookie": "^2.2.0",
     "jsonschema": "^1.2.2",
     "jwt-decode": "^2.2.0",
-    "lib-hubs": "github:mozillareality/lib-hubs#master",
+    "lib-hubs": "github:takahirox/lib-hubs#FlipYPlaneBufferGeometryBuild",
     "linkify-it": "^2.0.3",
     "markdown-it": "^8.4.2",
     "moving-average": "^1.0.0",
