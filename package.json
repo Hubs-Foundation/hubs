@@ -138,7 +138,7 @@
     "three-ammo": "github:takahirox/three-ammo#LatestThree",
     "three-bmfont-text": "github:takahirox/three-bmfont-text#hubs/LatestThree",
     "three-mesh-bvh": "^0.3.7",
-    "three-pathfinding": "github:takahirox/three-pathfinding#hubs/master3",
+    "three-pathfinding": "^0.14.1",
     "three-to-ammo": "github:takahirox/three-to-ammo#LatestThree",
     "use-clipboard-copy": "^0.1.2",
     "uuid": "^3.2.1",
