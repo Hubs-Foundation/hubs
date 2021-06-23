@@ -1306,5 +1306,3 @@ export default class DialogAdapter extends EventEmitter {
     this.scene.emit("rtc_event", { level, tag, time, msg: msgFunc() });
   }
 }
-
-NAF.adapters.register("dialog", DialogAdapter);

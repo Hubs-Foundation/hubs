@@ -50,7 +50,7 @@ import "./phoenix-adapter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import "./naf-dialog-adapter";
+import DialogAdapter from "./naf-dialog-adapter";
 import "./change-hub";
 
 import "./components/scene-components";
@@ -486,6 +486,7 @@ function onConnectionError(entryManager, connectError) {
 }
 
 // TODO: Find a home for this
+// TODO: Naming. Is this an "event bus"?
 const events = emitter();
 function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
@@ -558,6 +559,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   const objectsEl = document.createElement("a-entity");
 
   scene.addEventListener("adapter-ready", () => {
+    // TODO: We aren't actually connected yet when adapter-ready fires. Should we do this after we finish connecting to NAF?
     // Append objects once adapter is ready since ownership may be taken.
     objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
 
@@ -1213,10 +1215,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubChannel.presence.onJoin(rawOnJoin);
   hubChannel.presence.onLeave(rawOnLeave);
   hubChannel.presence.onSync(() => {
-    events.trigger(`hub:${hubId}:sync`, { presence: hubChannel.presence });
+    events.trigger(`hub:sync`, { presence: hubChannel.presence });
   });
 
-  events.on(`hub:${hubId}:sync`, ({ presence }) => {
+  events.on(`hub:sync`, ({ presence }) => {
     const vrHudPresenceCount = document.querySelector("#hud-presence-count");
 
     const sessionIds = Object.getOwnPropertyNames(presence.state);
@@ -1229,14 +1231,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       scene.removeState("copresent");
     }
   });
-  events.on(`hub:${hubId}:sync`, ({ presence }) => {
+  events.on(`hub:sync`, ({ presence }) => {
     remountUI({
       sessionId: socket.params().session_id,
       presences: presence.state,
       entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
     });
   });
-  events.on(`hub:${hubId}:join`, ({ key, meta }) => {
+  events.on(`hub:join`, ({ key, meta }) => {
     if (key !== hubChannel.channel.socket.params().session_id) {
       // TODO: NOISY_OCCUPANT_COUNT
       messageDispatch.receive({
@@ -1255,8 +1257,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       recording: meta.recording
     });
   });
-  events.on(`hub:${hubId}:change`, ({ key, previous, current }) => {
-    console.log({ key, previous: freeze(previous), current: freeze(current) });
+  events.on(`hub:change`, ({ key, previous, current }) => {
     if (previous.presence !== current.presence && current.presence === "room") {
       messageDispatch.receive({
         type: "entered",
@@ -1272,7 +1273,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
   });
-  events.on(`hub:${hubId}:leave`, ({ key, meta }) => {
+  events.on(`hub:leave`, ({ key, meta }) => {
     // TODO: NOISY_OCCUPANT_COUNT
     messageDispatch.receive({
       type: "leave",
@@ -1283,12 +1284,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const data = await joinChannel(hubPhxChannel);
 
+    const dialog = new DialogAdapter();
+    const noop = () => {};
+    dialog.setServerConnectListeners(noop, noop);
+    dialog.setRoomOccupantListener(noop);
+    dialog.setDataChannelListeners(noop, noop, noop);
+    const hub = data.hubs[0];
+    dialog.setServerUrl(`wss://${hub.host}:${hub.port}`);
+    dialog.setRoom(hub.hub_id);
+    const permsToken = oauthFlowPermsToken || data.perms_token;
+    dialog.setJoinToken(permsToken);
+    dialog.setServerParams(await hubChannel.getHost());
+    dialog.connect();
+
     socket.params().session_id = data.session_id;
     socket.params().session_token = data.session_token;
 
     scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
-      console.log("ADAPTER READY");
-      console.log(adapter);
       adapter.hubChannel = hubChannel;
       adapter.events = events;
       adapter.session_id = data.session_id;
@@ -1299,7 +1311,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     isInitialJoin = false;
 
-    const permsToken = oauthFlowPermsToken || data.perms_token;
     hubChannel.setPermissionsFromToken(permsToken);
 
     subscriptions.setHubChannel(hubChannel);

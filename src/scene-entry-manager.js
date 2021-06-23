@@ -97,7 +97,7 @@ export default class SceneEntryManager {
     }
 
     if (this.mediaDevicesManager.mediaStream) {
-      await NAF.connection.adapter.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
+      await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
     }
 
     this.scene.classList.remove("hand-cursor");
@@ -142,8 +142,8 @@ export default class SceneEntryManager {
 
   exitScene = () => {
     this.scene.exitVR();
-    if (NAF.connection.adapter && NAF.connection.adapter.localMediaStream) {
-      NAF.connection.adapter.localMediaStream.getTracks().forEach(t => t.stop());
+    if (APP.dialog && NAF.connection.adapter.localMediaStream) {
+      APP.dialog.localMediaStream.getTracks().forEach(t => t.stop());
     }
     if (this.hubChannel) {
       this.hubChannel.disconnect();
@@ -630,7 +630,7 @@ export default class SceneEntryManager {
       this.mediaDevicesManager.mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
     }
 
-    await NAF.connection.adapter.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
+    await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
     audioEl.play();
   };
 }

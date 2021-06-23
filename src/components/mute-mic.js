@@ -54,27 +54,27 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onToggle: function() {
-    if (!NAF.connection.adapter) return;
+    if (!APP.dialog) return;
     if (!this.el.sceneEl.is("entered")) return;
 
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
     if (this.el.is("muted")) {
-      NAF.connection.adapter.enableMicrophone(true);
+      APP.dialog.enableMicrophone(true);
     } else {
-      NAF.connection.adapter.enableMicrophone(false);
+      APP.dialog.enableMicrophone(false);
     }
   },
 
   onMute: function() {
-    if (!NAF.connection.adapter) return;
+    if (!APP.dialog) return;
     if (!this.el.is("muted")) {
-      NAF.connection.adapter.enableMicrophone(false);
+      APP.dialog.enableMicrophone(false);
     }
   },
 
   onUnmute: function() {
     if (this.el.is("muted")) {
-      NAF.connection.adapter.enableMicrophone(true);
+      APP.dialog.enableMicrophone(true);
     }
   },
 

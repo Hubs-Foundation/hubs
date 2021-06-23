@@ -8,7 +8,6 @@ async function fetchReticulumMeta() {
 export async function getReticulumSocketUrl() {
   const qs = new URLSearchParams(location.search);
   const meta = fetchReticulumMeta();
-  console.log(await meta);
   const host = qs.get("phx_host") || configs.RETICULUM_SOCKET_SERVER || (await meta).phx_host;
   const port =
     qs.get("phx_port") ||
