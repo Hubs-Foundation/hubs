@@ -140,7 +140,6 @@ class UIRoot extends Component {
     presences: PropTypes.object,
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
-    initialIsSubscribed: PropTypes.bool,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     signInMessage: PropTypes.string,

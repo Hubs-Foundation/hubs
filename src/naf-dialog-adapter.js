@@ -858,6 +858,10 @@ export default class DialogAdapter extends EventEmitter {
     const audioConsumerPromises = [];
     this.occupants = {};
 
+    // clientID needs to be set before calling onOccupantConnected
+    // so that we know which objects we own and flush their state.
+    this._connectSuccess(this._clientId);
+
     // Create a promise that will be resolved once we attach to all the initial consumers.
     // This will gate the connection flow until all voices will be heard.
     for (let i = 0; i < peers.length; i++) {
@@ -868,7 +872,6 @@ export default class DialogAdapter extends EventEmitter {
       audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
     }
 
-    this._connectSuccess(this._clientId);
     this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
 
     if (this._onOccupantsChanged) {
@@ -877,64 +880,64 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   setLocalMediaStream(stream) {
-    this.createMissingProducers(stream);
+    return this.createMissingProducers(stream);
   }
 
-  createMissingProducers(stream) {
+  async createMissingProducers(stream) {
     this.emitRTCEvent("info", "RTC", () => `Creating missing producers`);
 
     if (!this._sendTransport) return;
     let sawAudio = false;
     let sawVideo = false;
 
-    stream.getTracks().forEach(async track => {
-      if (track.kind === "audio") {
-        sawAudio = true;
+    await Promise.all(
+      stream.getTracks().map(async track => {
+        if (track.kind === "audio") {
+          sawAudio = true;
 
-        // TODO multiple audio tracks?
-        if (this._micProducer) {
-          if (this._micProducer.track !== track) {
-            this._micProducer.track.stop();
-            this._micProducer.replaceTrack(track);
+          // TODO multiple audio tracks?
+          if (this._micProducer) {
+            if (this._micProducer.track !== track) {
+              this._micProducer.track.stop();
+              this._micProducer.replaceTrack(track);
+            }
+          } else {
+            if (!this._micEnabled) {
+              track.enabled = false;
+            }
+
+            await this.enabledMic(track);
+
+            if (!this._micEnabled) {
+              this._micProducer.pause();
+              this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
+            }
           }
         } else {
-          if (!this._micEnabled) {
-            track.enabled = false;
-          }
+          sawVideo = true;
 
-          await this.enabledMic(track);
-
-          if (!this._micEnabled) {
-            this._micProducer.pause();
-            this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
+          if (track._hubs_contentHint === "share") {
+            await this.disableCamera();
+            await this.enableShare(track);
+          } else if (track._hubs_contentHint === "camera") {
+            await this.disableShare();
+            await this.enableCamera(track);
           }
         }
-      } else {
-        sawVideo = true;
 
-        if (track._hubs_contentHint === "share") {
-          await this.disableCamera();
-          await this.enableShare(track);
-        } else if (track._hubs_contentHint === "camera") {
-          await this.disableShare();
-          await this.enableCamera(track);
-        }
-      }
-
-      this.resolvePendingMediaRequestForTrack(this._clientId, track);
-    });
+        this.resolvePendingMediaRequestForTrack(this._clientId, track);
+      })
+    );
 
     if (!sawAudio && this._micProducer) {
       this._micProducer.close();
       this._protoo.request("closeProducer", { producerId: this._micProducer.id });
       this._micProducer = null;
     }
-
     if (!sawVideo) {
       this.disableCamera();
       this.disableShare();
     }
-
     this._localMediaStream = stream;
   }
 
@@ -1057,7 +1060,7 @@ export default class DialogAdapter extends EventEmitter {
     return !this._protoo.connected;
   }
 
-  disconnect() {
+  async disconnect() {
     if (this._closed) return;
 
     this._closed = true;
@@ -1078,11 +1081,11 @@ export default class DialogAdapter extends EventEmitter {
     debug("disconnect()");
 
     // Close mediasoup Transports.
-    this.closeSendTransport();
-    this.closeRecvTransport();
+    await Promise.all([this.closeSendTransport(), this.closeRecvTransport()]);
 
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
     if (this._protoo && this._protoo.connected) {
+      this._protoo.removeAllListeners();
       this._protoo.close();
       this.emitRTCEvent("info", "Signaling", () => `[close]`);
     }
