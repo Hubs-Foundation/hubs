@@ -346,11 +346,7 @@ export function remountUI(props) {
   mountUI(uiProps);
 }
 
-function setupPeerConnectionConfig(adapter) {
-  const forceTurn = qs.get("force_turn");
-  const forceTcp = qs.get("force_tcp");
-  adapter.setTurnConfig(forceTcp, forceTurn);
-}
+function setupPeerConnectionConfig(adapter) {}
 
 export async function getSceneUrlForHub(hub) {
   let sceneUrl;
@@ -1238,16 +1234,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
     });
   });
-  events.on(`hub:join`, ({ key, meta }) => {
-    if (key !== hubChannel.channel.socket.params().session_id) {
-      // TODO: NOISY_OCCUPANT_COUNT
+  const initialSyncRef = events.on(`hub:sync`, () => {
+    events.off(`hub:sync`, initialSyncRef);
+
+    events.on(`hub:join`, ({ key, meta }) => {
+      if (
+        !APP.suppressPresenceMessages ||
+        key === hubChannel.channel.socket.params().session_id ||
+        hubChannel.presence.list().length > NOISY_OCCUPANT_COUNT
+      ) {
+        return;
+      }
       messageDispatch.receive({
         type: "join",
         presence: meta.presence,
         name: meta.profile.displayName
       });
-    }
+    });
+    events.on(`hub:leave`, ({ key, meta }) => {
+      if (!APP.suppressPresenceMessages || hubChannel.presence.list().length > NOISY_OCCUPANT_COUNT) {
+        return;
+      }
+      messageDispatch.receive({
+        type: "leave",
+        name: meta.profile.displayName
+      });
+    });
+  });
 
+  events.on(`hub:join`, ({ key, meta }) => {
     scene.emit("presence_updated", {
       sessionId: key,
       profile: meta.profile,
@@ -1265,6 +1280,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         name: current.profile.displayName
       });
     }
+  });
+  events.on(`hub:change`, ({ key, previous, current }) => {
     if (previous.profile.displayName !== current.profile.displayName) {
       messageDispatch.receive({
         type: "display_name_changed",
@@ -1273,27 +1290,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
   });
-  events.on(`hub:leave`, ({ key, meta }) => {
-    // TODO: NOISY_OCCUPANT_COUNT
-    messageDispatch.receive({
-      type: "leave",
-      name: meta.profile.displayName
-    });
-  });
 
   try {
     const data = await joinChannel(hubPhxChannel);
 
-    const noop = () => {};
     const hub = data.hubs[0];
-    APP.dialog.setServerUrl(`wss://${hub.host}:${hub.port}`);
-    APP.dialog.setRoom(hub.hub_id);
     const permsToken = oauthFlowPermsToken || data.perms_token;
-    APP.dialog.setJoinToken(permsToken);
-    APP.dialog.setServerParams(await hubChannel.getHost());
     APP.dialog.setClientId(data.session_id);
-    APP.dialog.scene = scene;
-    await APP.dialog.connect();
+    APP.dialog.setTurnConfig(qs.get("force_turn"), qs.get("force_tcp"));
+    await APP.dialog.connect({
+      serverUrl: `wss://${hub.host}:${hub.port}`,
+      hubId: hub.hub_id,
+      joinToken: permsToken,
+      serverParams: await APP.hubChannel.getHost(),
+      scene
+    });
 
     socket.params().session_id = data.session_id;
     socket.params().session_token = data.session_token;

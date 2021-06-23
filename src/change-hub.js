@@ -66,11 +66,6 @@ export async function changeHub(hubId, addToHistory = true) {
 
   NAF.room = hub.hub_id;
 
-  APP.dialog.setServerUrl(`wss://${hub.host}:${hub.port}`);
-  APP.dialog.setRoom(hub.hub_id);
-  APP.dialog.setJoinToken(data.perms_token);
-  APP.dialog.setServerParams(await APP.hubChannel.getHost());
-
   if (
     document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
     (await getSceneUrlForHub(hub))
@@ -83,7 +78,16 @@ export async function changeHub(hubId, addToHistory = true) {
 
   APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
 
-  await Promise.all([APP.dialog.connect(), NAF.connection.adapter.connect()]);
+  await Promise.all([
+    APP.dialog.connect({
+      serverUrl: `wss://${hub.host}:${hub.port}`,
+      hubId: hub.hub_id,
+      joinToken: data.perms_token,
+      serverParams: await APP.hubChannel.getHost(),
+      scene
+    }),
+    NAF.connection.adapter.connect()
+  ]);
 
   APP.mediaDevicesManager.startMicShare();
   loadRoomObjects(hubId);

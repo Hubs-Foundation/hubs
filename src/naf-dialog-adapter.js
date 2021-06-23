@@ -69,18 +69,6 @@ export default class DialogAdapter extends EventEmitter {
     return this._downlinkBwe;
   }
 
-  get serverUrl() {
-    return this._serverUrl;
-  }
-
-  setServerUrl(url) {
-    this._serverUrl = url;
-  }
-
-  setJoinToken(joinToken) {
-    this._joinToken = joinToken;
-  }
-
   setTurnConfig(forceTcp, forceTurn) {
     this._forceTcp = forceTcp;
     this._forceTurn = forceTurn;
@@ -88,10 +76,6 @@ export default class DialogAdapter extends EventEmitter {
     if (this._forceTurn || this._forceTcp) {
       this._iceTransportPolicy = "relay";
     }
-  }
-
-  setServerParams(params) {
-    this._serverParams = params;
   }
 
   getIceServers(host, port, turn) {
@@ -122,10 +106,6 @@ export default class DialogAdapter extends EventEmitter {
     }
 
     return iceServers;
-  }
-
-  setRoom(roomId) {
-    this._roomId = roomId;
   }
 
   setClientId(clientId) {
@@ -273,7 +253,13 @@ export default class DialogAdapter extends EventEmitter {
     }
   }
 
-  async connect() {
+  async connect({ serverUrl, hubId, joinToken, serverParams, scene }) {
+    this._serverUrl = serverUrl;
+    this._roomId = hubId;
+    this._joinToken = joinToken;
+    this._serverParams = serverParams;
+    this.scene = scene;
+
     const urlWithParams = new URL(this._serverUrl);
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
