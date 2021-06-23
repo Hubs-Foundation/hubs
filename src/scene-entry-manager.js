@@ -96,10 +96,6 @@ export default class SceneEntryManager {
       return;
     }
 
-    if (this.mediaDevicesManager.mediaStream) {
-      await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
-    }
-
     this.scene.classList.remove("hand-cursor");
     this.scene.classList.add("no-cursor");
 
@@ -123,9 +119,7 @@ export default class SceneEntryManager {
 
     this.scene.addState("entered");
 
-    if (muteOnEntry) {
-      this.scene.emit("action_mute");
-    }
+    APP.dialog.enableMicrophone(!muteOnEntry);
   };
 
   whenSceneLoaded = callback => {
@@ -497,7 +491,6 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_end_mic_sharing", async () => {
       await this.mediaDevicesManager.stopMicShare();
-      this.scene.emit("action_mute");
     });
 
     this.scene.addEventListener("action_selected_media_result_entry", async e => {

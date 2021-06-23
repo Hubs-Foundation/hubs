@@ -43,7 +43,6 @@ import { joinChannel, denoisePresence } from "./netcode";
 import { Socket, Presence } from "phoenix";
 import { getReticulumSocketUrl } from "./utils/connect-to-reticulum-socket";
 import { emitter } from "./emitter";
-import { freeze } from "./freeze";
 import { presenceEventsForHub } from "./presence-events-for-hub";
 import "./phoenix-adapter";
 
@@ -183,6 +182,7 @@ import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 window.APP = new App();
+window.APP.dialog = new DialogAdapter();
 window.APP.RENDER_ORDER = {
   HUD_BACKGROUND: 1,
   HUD_ICONS: 2,
@@ -1284,18 +1284,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const data = await joinChannel(hubPhxChannel);
 
-    const dialog = new DialogAdapter();
     const noop = () => {};
-    dialog.setServerConnectListeners(noop, noop);
-    dialog.setRoomOccupantListener(noop);
-    dialog.setDataChannelListeners(noop, noop, noop);
     const hub = data.hubs[0];
-    dialog.setServerUrl(`wss://${hub.host}:${hub.port}`);
-    dialog.setRoom(hub.hub_id);
+    APP.dialog.setServerUrl(`wss://${hub.host}:${hub.port}`);
+    APP.dialog.setRoom(hub.hub_id);
     const permsToken = oauthFlowPermsToken || data.perms_token;
-    dialog.setJoinToken(permsToken);
-    dialog.setServerParams(await hubChannel.getHost());
-    dialog.connect();
+    APP.dialog.setJoinToken(permsToken);
+    APP.dialog.setServerParams(await hubChannel.getHost());
+    APP.dialog.setClientId(data.session_id);
+    APP.dialog.scene = scene;
+    await APP.dialog.connect();
 
     socket.params().session_id = data.session_id;
     socket.params().session_token = data.session_token;
@@ -1431,8 +1429,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());
 
   hubPhxChannel.on("mute", ({ session_id }) => {
-    if (session_id === NAF.clientId && !scene.is("muted")) {
-      scene.emit("action_mute");
+    if (session_id === NAF.clientId) {
+      APP.dialog.enableMicrophone(false);
     }
   });
 

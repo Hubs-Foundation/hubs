@@ -1,11 +1,9 @@
-import { freeze } from "./freeze";
 import { transportForChannel } from "./transport-for-channel";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 
 export default class PhoenixAdapter {
   constructor() {
     this.refs = new Map();
-    this.occupants = []; // TODO: Remove
     // TODO: Maybe keep frozen messages somewhere else.
     // TODO: ORRRRRR get rid of freezing
     this.frozenUpdates = new Map();
@@ -27,7 +25,12 @@ export default class PhoenixAdapter {
   }
   async connect() {
     if (!this.hubChannel || !this.session_id || !this.events) {
-      this.nafConnectFailed("Uh oh!");
+      this.nafConnectFailed(
+        "Tried to connect to networked aframe but was missing arguments",
+        this.hubChannel,
+        this.session_id,
+        this.events
+      );
       return;
     }
     this.refs.set("naf", this.hubChannel.channel.on("naf", this.handleIncomingNAF));
@@ -37,9 +40,9 @@ export default class PhoenixAdapter {
     this.reliableTransport = transportForChannel(this.hubChannel.channel, true);
     this.unreliableTransport = transportForChannel(this.hubChannel.channel, false);
 
-    this.hubChannel.presence.list().forEach(this.onOccupantJoin);
-    this.refs.set("hub:join", this.events.on(`hub:join`, this.onOccupantJoin));
-    this.refs.set("hub:leave", this.events.on(`hub:leave`, this.onOccupantLeft));
+    this.hubChannel.presence.list(key => key).forEach(this.nafOccupantJoined);
+    this.refs.set("hub:join", this.events.on(`hub:join`, ({ key }) => this.nafOccupantJoined(key)));
+    this.refs.set("hub:leave", this.events.on(`hub:leave`, ({ key }) => this.nafOccupantLeave(key)));
   }
   shouldStartConnectionTo() {}
   startStreamConnection() {}
@@ -69,6 +72,8 @@ export default class PhoenixAdapter {
   }
 
   disconnect() {
+    this.hubChannel.presence.list(key => key).forEach(this.nafOccupantLeave);
+
     this.events.off("naf", this.refs.get("naf"));
     this.events.off("nafr", this.refs.get("nafr"));
     this.events.off("hub:join", this.refs.get("hub:join"));
@@ -147,14 +152,6 @@ export default class PhoenixAdapter {
     this.handleIncomingNAF(data);
   };
 
-  onOccupantJoin = ({ key, meta }) => {
-    this.occupants.push(key);
-    this.nafOccupantJoined(key);
-  };
-  onOccupantLeft = ({ key, meta }) => {
-    this.occupants.slice(this.occupants.indexOf(key), 1);
-    this.nafOccupantLeave(key);
-  };
   storeMessage(message) {
     if (message.dataType === "um") {
       // UpdateMulti
@@ -216,40 +213,6 @@ export default class PhoenixAdapter {
     }
 
     return null;
-  }
-
-  onData() {
-    //TODO: Remove
-  }
-  setClientId() {
-    //TODO: Remove
-  }
-  setJoinToken() {
-    //TODO: Remove
-  }
-  setServerParams() {
-    //TODO: Remove
-  }
-  setReconnectionListeners() {
-    //TODO: Remove
-  }
-  setTurnConfig() {
-    //TODO: Remove
-  }
-  setLocalMediaStream() {
-    //TODO: Remove
-  }
-  enableMicrophone() {
-    //TODO: Remove
-  }
-  syncOccupants() {
-    //TODO: Remove
-  }
-  on() {
-    //TODO: Remove
-  }
-  off() {
-    //TODO: Remove
   }
 }
 

@@ -59,16 +59,17 @@ export async function changeHub(hubId, addToHistory = true) {
   await APP.mediaDevicesManager.stopMicShare();
   NAF.entities.removeRemoteEntities();
   await NAF.connection.adapter.disconnect();
+  await APP.dialog.disconnect();
   unloadRoomObjects();
   NAF.connection.connectedClients = {};
   NAF.connection.activeDataChannels = {};
 
   NAF.room = hub.hub_id;
-  NAF.connection.adapter.setServerUrl(`wss://${hub.host}:${hub.port}`);
-  NAF.connection.adapter.setRoom(hub.hub_id);
-  // TODO does this need to look at oauth token? It isnt in prod
-  NAF.connection.adapter.setJoinToken(data.perms_token);
-  NAF.connection.adapter.setServerParams(await APP.hubChannel.getHost());
+
+  APP.dialog.setServerUrl(`wss://${hub.host}:${hub.port}`);
+  APP.dialog.setRoom(hub.hub_id);
+  APP.dialog.setJoinToken(data.perms_token);
+  APP.dialog.setServerParams(await APP.hubChannel.getHost());
 
   if (
     document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
@@ -82,19 +83,19 @@ export async function changeHub(hubId, addToHistory = true) {
 
   APP.retChannel.push("change_hub", { hub_id: hub.hub_id });
 
-  NAF.connection.adapter.connect().then(async function() {
-    APP.mediaDevicesManager.startMicShare();
-    loadRoomObjects(hubId);
+  await Promise.all([APP.dialog.connect(), NAF.connection.adapter.connect()]);
 
-    APP.hubChannel.sendEnteredEvent();
+  APP.mediaDevicesManager.startMicShare();
+  loadRoomObjects(hubId);
 
-    APP.messageDispatch.receive({
-      type: "hub_changed",
-      hubName: hub.name,
-      showLineBreak: true
-    });
-    APP.suppressPresenceMessages = false;
+  APP.hubChannel.sendEnteredEvent();
+
+  APP.messageDispatch.receive({
+    type: "hub_changed",
+    hubName: hub.name,
+    showLineBreak: true
   });
+  APP.suppressPresenceMessages = false;
 }
 window.changeHub = changeHub;
 

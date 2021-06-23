@@ -174,13 +174,13 @@ export default class HubChannel extends EventTarget {
       }
     }
 
-    // This is fairly hacky, but gets the # of initial occupants
-    let initialOccupantCount = 0;
-    if (NAF.connection.adapter) {
-      // When I enter room as avatar, count number of people inside the room as avatars and lobby
-      // I enter room alone, no one in lobby, this is 0
-      initialOccupantCount = Object.keys(NAF.connection.adapter.occupants).length;
-    }
+    const initialOccupantCount = this.presence
+      .list((key, presence) => {
+        return { key, entryState: presence.metas[presence.metas.length - 1].presence };
+      })
+      .filter(({ key, entryState }) => {
+        return key !== NAF.clientId && entryState === "entered";
+      }).length;
 
     const entryTimingFlags = this.getEntryTimingFlags();
 

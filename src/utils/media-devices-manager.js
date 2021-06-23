@@ -130,7 +130,6 @@ export default class MediaDevicesManager {
     }
 
     await APP.dialog.setLocalMediaStream(this._mediaStream);
-    APP.dialog.enableMicrophone(this._scene.is("muted"));
 
     return result;
   }
