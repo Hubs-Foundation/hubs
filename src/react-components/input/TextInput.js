@@ -10,25 +10,11 @@ import { handleTextFieldFocus, handleTextFieldBlur } from "../../utils/focus-uti
 export const TextInput = memo(
   forwardRef(
     (
-      {
-        id,
-        disabled,
-        invalid,
-        className,
-        beforeInput,
-        afterInput,
-        onFocus,
-        onBlur,
-        as: InputElement,
-        onChange,
-        ...rest
-      },
+      { id, disabled, invalid, className, beforeInput, afterInput, onFocus, onBlur, as: InputElement, ...rest },
       ref
     ) => {
       // TODO: This is REALLY bad. We're overriding default behavior of text inputs to get a fullscreen behavior to work on Firefox.
       // It also selects the contents of the text input which is not always something you want to do. If we can remove this, we absolutely should.
-      console.log("onChange");
-      console.log(typeof onChange);
       const handleFocus = e => {
         handleTextFieldFocus(e.target);
 
@@ -63,7 +49,6 @@ export const TextInput = memo(
               disabled={disabled}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              onChange={onChange}
               {...rest}
               ref={ref}
             />
