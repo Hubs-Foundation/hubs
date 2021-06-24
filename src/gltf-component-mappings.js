@@ -118,7 +118,6 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
     willMaintainWorldUp: true
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;
   const zone = componentData.zone || "character";

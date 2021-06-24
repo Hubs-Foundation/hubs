@@ -89,7 +89,8 @@ export const SCHEMA = {
 
     preferences: {
       type: "object",
-      additionalProperties: false,
+      // Allow removed preferences to pass validation
+      additionalProperties: true,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
         preferredMic: { type: "string" },
@@ -106,6 +107,7 @@ export const SCHEMA = {
         showFPSCounter: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
+        fastRoomSwitching: { type: "bool" },
         preferMobileObjectInfoPanel: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
@@ -124,9 +126,11 @@ export const SCHEMA = {
         disableEchoCancellation: { type: "bool" },
         disableNoiseSuppression: { type: "bool" },
         disableAutoGainControl: { type: "bool" },
-        enableAECHack: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
+        showAudioDebugPanel: { type: "bool" },
+        enableAudioClipping: { type: "bool" },
+        audioClippingThreshold: { type: "number" },
         theme: { type: "string" }
       }
     },

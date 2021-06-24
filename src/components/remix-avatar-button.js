@@ -1,7 +1,7 @@
 import { idForAvatarUrl } from "../utils/media-url-utils";
 import { fetchAvatar, remixAvatar } from "../utils/avatar-utils";
 
-const REMIX_LABEL = "copy avatar";
+const REMIX_LABEL = "save avatar";
 AFRAME.registerComponent("remix-avatar-button", {
   init() {
     this.label = this.el.querySelector("[text]");
@@ -22,11 +22,11 @@ AFRAME.registerComponent("remix-avatar-button", {
 
       try {
         this.copying = true;
-        this.label.setAttribute("text", "value", "Copying...");
+        this.label.setAttribute("text", "value", "Saving...");
 
         await remixAvatar(this.avatar.avatar_id, this.avatar.name);
 
-        this.label.setAttribute("text", "value", "Copied!");
+        this.label.setAttribute("text", "value", "Saved!");
       } catch (e) {
         this.label.setAttribute("text", "value", "Error");
       }

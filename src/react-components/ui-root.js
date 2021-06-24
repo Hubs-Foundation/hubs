@@ -140,7 +140,6 @@ class UIRoot extends Component {
     presences: PropTypes.object,
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
-    initialIsSubscribed: PropTypes.bool,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     signInMessage: PropTypes.string,
@@ -823,7 +822,7 @@ class UIRoot extends Component {
           }}
           showEnterOnDevice={!this.state.waitingOnAudio && !this.props.entryDisallowed && !isMobileVR}
           onEnterOnDevice={() => this.attemptLink()}
-          showSpectate={!this.state.waitingOnAudio && !this.props.entryDisallowed}
+          showSpectate={!this.state.waitingOnAudio}
           onSpectate={() => this.setState({ watching: true })}
           showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
           onOptions={() => {
@@ -1010,6 +1009,7 @@ class UIRoot extends Component {
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
     const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
+    const showAudioDebugPanel = this.props.store.state.preferences["showAudioDebugPanel"];
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
@@ -1089,7 +1089,7 @@ class UIRoot extends Component {
 
     const renderEntryFlow = (!enteredOrWatching && this.props.hub) || this.isWaitingForAutoExit();
 
-    const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin;
+    const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin();
     const canCloseRoom = this.props.hubChannel && !!this.props.hubChannel.canOrWillIfCreator("close_hub");
     const isModerator = this.props.hubChannel && this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
 
@@ -1409,13 +1409,15 @@ class UIRoot extends Component {
                       scene={this.props.scene}
                       store={this.props.store}
                     />
-                    {showRtcDebugPanel && (
+                    {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
                         history={this.props.history}
                         store={window.APP.store}
                         scene={this.props.scene}
                         presences={this.props.presences}
                         sessionId={this.props.sessionId}
+                        showRtcDebug={showRtcDebugPanel}
+                        showAudioDebug={showAudioDebugPanel}
                       />
                     )}
                   </>

@@ -1,0 +1,6 @@
+@use "../styles/theme.scss";
+
+:local(.divider) {
+   border-top: 1px solid theme.$lightgrey;
+   width: 100%;
+}

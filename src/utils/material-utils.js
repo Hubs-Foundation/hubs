@@ -219,6 +219,10 @@ export function convertStandardMaterial(source, quality) {
 }
 
 export function disposeTexture(texture) {
+  if (texture.dash) {
+    texture.dash.reset();
+  }
+
   if (texture.image instanceof HTMLVideoElement) {
     const video = texture.image;
     video.pause();
@@ -231,10 +235,6 @@ export function disposeTexture(texture) {
     texture.hls.detachMedia();
     texture.hls.destroy();
     texture.hls = null;
-  }
-
-  if (texture.dash) {
-    texture.dash.reset();
   }
 
   texture.dispose();

@@ -39,7 +39,7 @@ In this Privacy Notice, we explain what data may be accessible to Mozilla or oth
   - Microsoft Bing Video & Image Search: https://privacy.microsoft.com/en-us/privacystatement
   - Tenor: https://tenor.com/legal-privacy
   - Sketchfab: https://sketchfab.com/privacy
-  - Google Poly & YouTube: https://policies.google.com/privacy
+  - YouTube: https://policies.google.com/privacy
   - Twitch: https://www.twitch.tv/p/legal/privacy-policy/
 
 <details open>

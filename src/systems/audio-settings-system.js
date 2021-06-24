@@ -1,3 +1,38 @@
+export const AvatarAudioDefaults = Object.freeze({
+  DISTANCE_MODEL: "inverse",
+  ROLLOFF_FACTOR: 2,
+  REF_DISTANCE: 1,
+  MAX_DISTANCE: 10000,
+  INNER_ANGLE: 180,
+  OUTER_ANGLE: 360,
+  OUTER_GAIN: 0,
+  VOLUME: 0.5
+});
+
+export const MediaAudioDefaults = Object.freeze({
+  DISTANCE_MODEL: "inverse",
+  ROLLOFF_FACTOR: 1,
+  REF_DISTANCE: 1,
+  MAX_DISTANCE: 10000,
+  INNER_ANGLE: 360,
+  OUTER_ANGLE: 0,
+  OUTER_GAIN: 0,
+  VOLUME: 0.5
+});
+
+export const TargetAudioDefaults = Object.freeze({
+  DISTANCE_MODEL: "inverse",
+  ROLLOFF_FACTOR: 5,
+  REF_DISTANCE: 8,
+  MAX_DISTANCE: 10000,
+  INNER_ANGLE: 170,
+  OUTER_ANGLE: 300,
+  OUTER_GAIN: 0.3,
+  VOLUME: 1.0
+});
+
+export const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
+
 function updateMediaAudioSettings(mediaVideo, settings) {
   mediaVideo.el.setAttribute("media-video", {
     distanceModel: settings.mediaDistanceModel,
@@ -16,7 +51,10 @@ function updateAvatarAudioSettings(avatarAudioSource, settings, positional) {
     distanceModel: settings.avatarDistanceModel,
     maxDistance: settings.avatarMaxDistance,
     refDistance: settings.avatarRefDistance,
-    rolloffFactor: settings.avatarRolloffFactor
+    rolloffFactor: settings.avatarRolloffFactor,
+    innerAngle: settings.avatarConeInnerAngle,
+    outerAngle: settings.avatarConeOuterAngle,
+    outerGain: settings.avatarConeOuterGain
   });
 }
 
@@ -24,18 +62,21 @@ export class AudioSettingsSystem {
   constructor(sceneEl) {
     this.sceneEl = sceneEl;
     this.defaultSettings = {
-      avatarDistanceModel: "inverse",
-      avatarRolloffFactor: 2,
-      avatarRefDistance: 1,
-      avatarMaxDistance: 10000,
-      mediaVolume: 0.5,
-      mediaDistanceModel: "inverse",
-      mediaRolloffFactor: 1,
-      mediaRefDistance: 1,
-      mediaMaxDistance: 10000,
-      mediaConeInnerAngle: 360,
-      mediaConeOuterAngle: 0,
-      mediaConeOuterGain: 0
+      avatarDistanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
+      avatarRolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
+      avatarRefDistance: AvatarAudioDefaults.REF_DISTANCE,
+      avatarMaxDistance: AvatarAudioDefaults.MAX_DISTANCE,
+      avatarConeInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
+      avatarConeOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
+      avatarConeOuterGain: AvatarAudioDefaults.OUTER_GAIN,
+      mediaVolume: MediaAudioDefaults.VOLUME,
+      mediaDistanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
+      mediaRolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
+      mediaRefDistance: AvatarAudioDefaults.REF_DISTANCE,
+      mediaMaxDistance: AvatarAudioDefaults.MAX_DISTANCE,
+      mediaConeInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
+      mediaConeOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
+      mediaConeOuterGain: AvatarAudioDefaults.OUTER_GAIN
     };
     this.audioSettings = this.defaultSettings;
     this.mediaVideos = [];
@@ -43,7 +84,10 @@ export class AudioSettingsSystem {
 
     this.sceneEl.addEventListener("reset_scene", this.onSceneReset);
 
-    if (window.APP.store.state.preferences.audioOutputMode === "audio") {
+    if (
+      !window.APP.store.state.preferences.audioOutputMode ||
+      window.APP.store.state.preferences.audioOutputMode === "audio"
+    ) {
       //hack to always reset to "panner"
       window.APP.store.update({
         preferences: { audioOutputMode: "panner" }

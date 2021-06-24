@@ -254,6 +254,32 @@
   }
 }
 
+
+:local(.accent6) {
+  color: theme.$text5-color;
+  background-color: theme.$accent6-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent6-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent6-color-pressed;
+  }
+}
+
 :local(.button):disabled {
   border-color: transparent;
   cursor: not-allowed;

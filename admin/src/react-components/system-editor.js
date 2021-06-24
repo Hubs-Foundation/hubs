@@ -312,7 +312,7 @@ class SystemEditorComponent extends Component {
               <ListItemText
                 primary={
                   <span>
-                    Add your API keys for Google Analytics, Sketchfab, Google Poly, Discord, etc. - &nbsp;
+                    Add your API keys for Google Analytics, Sketchfab, Discord, etc. - &nbsp;
                     <i>Server Settings menu &nbsp;&gt;&nbsp;API Keys tab</i>
                   </span>
                 }

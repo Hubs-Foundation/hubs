@@ -120,7 +120,8 @@ export const LogMessageType = {
   audioNormalizationNaN: "audioNormalizationNaN",
   invalidAudioNormalizationRange: "invalidAudioNormalizationRange",
   audioSuspended: "audioSuspended",
-  audioResumed: "audioResumed"
+  audioResumed: "audioResumed",
+  joinFailed: "joinFailed"
 };
 
 const logMessages = defineMessages({
@@ -200,6 +201,10 @@ const logMessages = defineMessages({
   [LogMessageType.audioResumed]: {
     id: "chat-sidebar.log-message.audio-resumed",
     defaultMessage: "Audio has been resumed."
+  },
+  [LogMessageType.joinFailed]: {
+    id: "chat-sidebar.log-message.join-failed",
+    defaultMessage: "Failed to join room: {message}"
   }
 });
 
@@ -242,6 +247,14 @@ export function formatSystemMessage(entry, intl) {
           values={{ name: <b>{entry.name}</b>, hubName: <b>{entry.hubName}</b> }}
         />
       );
+    case "hub_changed":
+      return (
+        <FormattedMessage
+          id="chat-sidebar.system-message.hub-change"
+          defaultMessage="You are now in {hubName}"
+          values={{ hubName: <b>{entry.hubName}</b> }}
+        />
+      );
     case "log":
       return intl.formatMessage(logMessages[entry.messageType], entry.props);
     default:
@@ -254,6 +267,7 @@ export function SystemMessage(props) {
 
   return (
     <li className={classNames(styles.messageGroup, styles.systemMessage)}>
+      {props.showLineBreak && <hr />}
       <p className={styles.messageGroupLabel}>
         <i>{formatSystemMessage(props, intl)}</i>
         <span>
@@ -265,7 +279,8 @@ export function SystemMessage(props) {
 }
 
 SystemMessage.propTypes = {
-  timestamp: PropTypes.any
+  timestamp: PropTypes.any,
+  showLineBreak: PropTypes.bool
 };
 
 function MessageBubble({ media, monospace, emoji, children }) {
