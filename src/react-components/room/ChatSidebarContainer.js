@@ -10,7 +10,8 @@ import {
   SpawnMessageButton,
   ChatToolbarButton,
   SendMessageButton,
-  EmojiPickerPopoverButton
+  EmojiPickerPopoverButton,
+  ChatLengthWarning
 } from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
@@ -251,6 +252,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   }
 
   const isMobile = AFRAME.utils.device.isMobile();
+  const isOverMaxLength = message.length > MAX_MESSAGE_LENGTH;
   return (
     <ChatSidebar onClose={onClose}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
@@ -268,6 +270,18 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         onChange={e => setMessage(e.target.value)}
         placeholder={placeholder}
         value={message}
+        isOverMaxLength={isOverMaxLength}
+        warning={
+          <>
+            {message.length + 50 > MAX_MESSAGE_LENGTH && (
+              <ChatLengthWarning
+                messageLength={message.length}
+                maxLength={MAX_MESSAGE_LENGTH}
+                isOverMaxLength={isOverMaxLength}
+              />
+            )}
+          </>
+        }
         afterInput={
           <>
             {!isMobile && (
@@ -276,7 +290,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
-              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0} />
+              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0 || isOverMaxLength} />
             )}
             {canSpawnMessages && <SpawnMessageButton disabled={message.length === 0} onClick={onSpawnMessage} />}
           </>

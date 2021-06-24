@@ -122,3 +122,15 @@
     }
   }
 }
+
+:local(.chat-input-warning) {
+  padding-top: theme.$spacing-2xs;
+}
+
+:local(.warning-border) {
+  border: 2px solid theme.$red !important;
+}
+
+:local(.warning-text-color) {
+  color: theme.$red;
+}

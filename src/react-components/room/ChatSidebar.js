@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { Sidebar } from "../sidebar/Sidebar";
@@ -14,7 +14,7 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { Popover } from "../popover/Popover";
 import { EmojiPicker } from "./EmojiPicker";
 import styles from "./ChatSidebar.scss";
-import { formatMessageBody, MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
+import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
 
 export function SpawnMessageButton(props) {
@@ -74,22 +74,40 @@ export function MessageAttachmentButton(props) {
   );
 }
 
-export function ChatInput(props) {
+export function ChatLengthWarning({ messageLength, maxLength, isOverMaxLength }) {
+  return (
+    <p className={classNames(styles.chatInputWarning, isOverMaxLength ? styles.warningTextColor : "")}>
+      <FormattedMessage id="chat-message-input.warning-max-characters" defaultMessage="Max characters" />
+      {` (${messageLength}/${maxLength})`}
+    </p>
+  );
+}
+
+ChatLengthWarning.propTypes = {
+  messageLength: PropTypes.number,
+  maxLength: PropTypes.number,
+  isOverMaxLength: PropTypes.bool
+};
+
+export function ChatInput({ warning, isOverMaxLength, ...props }) {
   const intl = useIntl();
 
   return (
     <div className={styles.chatInputContainer}>
       <TextAreaInput
-        maxLength={MAX_MESSAGE_LENGTH}
+        className={isOverMaxLength ? styles.warningBorder : ""}
         placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
         {...props}
       />
+      {warning}
     </div>
   );
 }
 
 ChatInput.propTypes = {
-  onSpawn: PropTypes.func
+  onSpawn: PropTypes.func,
+  warning: PropTypes.node,
+  isOverMaxLength: PropTypes.bool
 };
 
 const enteredMessages = defineMessages({
