@@ -136,7 +136,7 @@ export default class SceneEntryManager {
 
   exitScene = () => {
     this.scene.exitVR();
-    if (APP.dialog && NAF.connection.adapter.localMediaStream) {
+    if (APP.dialog && APP.dialog.localMediaStream) {
       APP.dialog.localMediaStream.getTracks().forEach(t => t.stop());
     }
     if (this.hubChannel) {
