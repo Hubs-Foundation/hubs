@@ -93,13 +93,15 @@ export function ChatInput({ warning, isOverMaxLength, ...props }) {
   const intl = useIntl();
 
   return (
-    <div className={styles.chatInputContainer}>
-      <TextAreaInput
-        className={isOverMaxLength ? styles.warningBorder : ""}
-        placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
-        {...props}
-      />
-      {warning}
+    <div className={classNames(styles.chatInputContainer, styles.overflowDivScrolledAtBottom)}>
+      <div>
+        <TextAreaInput
+          className={isOverMaxLength ? styles.warningBorder : ""}
+          placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
+          {...props}
+        />
+        {warning}
+      </div>
     </div>
   );
 }
@@ -370,6 +372,7 @@ export function ChatSidebar({ onClose, children, ...rest }) {
       title={<FormattedMessage id="chat-sidebar.title" defaultMessage="Chat" />}
       beforeTitle={<CloseButton onClick={onClose} />}
       contentClassName={styles.content}
+      disableOverflowScroll
       {...rest}
     >
       {children}
