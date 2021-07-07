@@ -6,12 +6,6 @@
   flex-basis: max-content;
 }
 
-:local(.overflow-div-scrolled-at-bottom) {
-  // To keep scrolled at the bottom, treat the bottom like the top
-  display: flex;
-  flex-direction: column-reverse;
-}
-
 :local(.message-list) {
   display: flex;
   flex-grow: 1;
@@ -30,7 +24,7 @@
   padding-top: 16px;
 
   &:last-child {
-    padding-bottom: 16px;
+    padding-bottom: 8px;
   }
 }
 
