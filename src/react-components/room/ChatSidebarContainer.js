@@ -294,7 +294,9 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             ) : (
               <SendMessageButton onClick={onSendMessage} disabled={message.length === 0 || isOverMaxLength} />
             )}
-            {canSpawnMessages && <SpawnMessageButton disabled={message.length === 0} onClick={onSpawnMessage} />}
+            {canSpawnMessages && (
+              <SpawnMessageButton disabled={message.length === 0 || isOverMaxLength} onClick={onSpawnMessage} />
+            )}
           </>
         }
       />
