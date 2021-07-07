@@ -93,15 +93,14 @@ export function ChatInput({ warning, isOverMaxLength, ...props }) {
   const intl = useIntl();
 
   return (
-    <div className={classNames(styles.chatInputContainer, styles.overflowDivScrolledAtBottom)}>
-      <div>
-        <TextAreaInput
-          className={isOverMaxLength ? styles.warningBorder : ""}
-          placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
-          {...props}
-        />
-        {warning}
-      </div>
+    <div className={styles.chatInputContainer}>
+      <TextAreaInput
+        textInputStyles={styles.chatInputTextAreaStyles}
+        className={isOverMaxLength ? styles.warningBorder : ""}
+        placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
+        {...props}
+      />
+      {warning}
     </div>
   );
 }

@@ -1,8 +1,9 @@
 @use "../styles/theme.scss";
 
 :local(.chat-input-container) {
-  padding: 0 16px 8px 16px;
+  padding: 8px 16px 8px 16px;
   background-color: theme.$input-bg-color;
+  flex-basis: max-content;
 }
 
 :local(.overflow-div-scrolled-at-bottom) {
@@ -43,10 +44,6 @@
 :local(.message-group-messages) {
   display: flex;
   flex-direction: column;
-}
-
-:local(.content) {
-  background-color: red;
 }
 
 :local(.message-bubble) {
@@ -143,4 +140,8 @@
 
 :local(.warning-text-color) {
   color: theme.$red;
+}
+
+:local(.chat-input-text-area-styles) {
+  max-height: 50vh;
 }
