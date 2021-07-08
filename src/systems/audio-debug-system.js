@@ -13,6 +13,7 @@ AFRAME.registerSystem("audio-debug", {
     window.APP.store.addEventListener("statechanged", this.updateState.bind(this));
 
     this.sources = [];
+    this.zones = [];
 
     this.material = new THREE.ShaderMaterial({
       uniforms: {
@@ -78,6 +79,18 @@ AFRAME.registerSystem("audio-debug", {
     }
   },
 
+  registerZone(zone) {
+    this.zones.push(zone);
+  },
+
+  unregisterZone(zone) {
+    const index = this.zones.indexOf(zone);
+
+    if (index !== -1) {
+      this.zones.splice(index, 1);
+    }
+  },
+
   tick(time) {
     if (!this.data.enabled) {
       return;
@@ -85,7 +98,7 @@ AFRAME.registerSystem("audio-debug", {
 
     let sourceNum = 0;
     this.sources.forEach(source => {
-      if (source.data.enabled) {
+      if (source.data.enabled && source.data.debuggable) {
         if (sourceNum < MAX_DEBUG_SOURCES) {
           this.sourcePositions[sourceNum] = source.data.position;
           this.sourceOrientations[sourceNum] = source.data.orientation;
@@ -126,6 +139,9 @@ AFRAME.registerSystem("audio-debug", {
 
   enableDebugMode(enabled) {
     if (enabled === undefined || enabled === this.data.enabled) return;
+    this.zones.forEach(zone => {
+      zone.el.setAttribute("audio-zone", "debuggable", enabled);
+    });
     const envRoot = document.getElementById("environment-root");
     const meshEl = envRoot.querySelector(".trimesh") || envRoot.querySelector(".navMesh");
     if (meshEl) {

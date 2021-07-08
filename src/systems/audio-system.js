@@ -137,11 +137,21 @@ export class AudioSystem {
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
     this.audioContextNeedsToBeResumed = false;
 
+    this.mediaNodes = [];
+    this.mediaGainNode = this.audioContext.createGain();
+    this.mediaGainNode.connect(this._sceneEl.audioListener.getInput());
+    this.voiceNodes = [];
+    this.voiceGainNode = this.audioContext.createGain();
+    this.voiceGainNode.connect(this._sceneEl.audioListener.getInput());
+
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
 
     document.body.addEventListener("touchend", this._resumeAudioContext, false);
     document.body.addEventListener("mouseup", this._resumeAudioContext, false);
+
+    this.onPrefsUpdated = this.updatePrefs.bind(this);
+    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -163,6 +173,51 @@ export class AudioSystem {
       nodes.gainNode.disconnect();
       this.audioNodes.delete(id);
     }
+  }
+
+  addAudioToMedia(audio) {
+    this.removeAudioFromMedia(audio);
+    this.mediaNodes.push(audio);
+    audio.getOutput().connect(this.mediaGainNode);
+  }
+
+  removeAudioFromMedia(audio) {
+    const index = this.mediaNodes.indexOf(audio);
+    if (index !== -1) {
+      this.mediaNodes.splice(index, 1);
+    }
+    audio.getOutput().disconnect();
+    audio.sourceType !== "empty" && audio.disconnect();
+  }
+
+  addAudioToVoice(audio) {
+    this.removeAudioFromVoice(audio);
+    this.voiceNodes.push(audio);
+    audio.getOutput().connect(this.voiceGainNode);
+  }
+
+  removeAudioFromVoice(audio) {
+    const index = this.voiceNodes.indexOf(audio);
+    if (index !== -1) {
+      this.voiceNodes.splice(index, 1);
+    }
+    audio.getOutput().disconnect();
+    audio.sourceType !== "empty" && audio.disconnect();
+  }
+
+  updatePrefs() {
+    const { globalVoiceVolume, globalMediaVolume } = window.APP.store.state.preferences;
+    let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
+    newGain = Math.max(0.001, newGain);
+    this.mediaGainNode.gain.exponentialRampToValueAtTime(newGain, this.audioContext.currentTime + 1);
+
+    newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
+    newGain = Math.max(0.001, newGain);
+    this.voiceGainNode.gain.exponentialRampToValueAtTime(newGain, this.audioContext.currentTime + 1);
+  }
+
+  getMediaGain() {
+    return this._sceneEl.mediaListener?.gain.gain.value;
   }
 
   /**
