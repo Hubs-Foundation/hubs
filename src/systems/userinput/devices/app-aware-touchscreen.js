@@ -41,10 +41,11 @@ function shouldMoveCursor(touch, raycaster) {
     return true;
   }
   const rawIntersections = [];
+  const canvas = document.querySelector(".a-canvas").getBoundingClientRect();
   raycaster.setFromCamera(
     {
-      x: (touch.clientX / window.innerWidth) * 2 - 1,
-      y: -(touch.clientY / window.innerHeight) * 2 + 1
+      x: ((touch.clientX - canvas.left) / canvas.width) * 2 - 1,
+      y: -((touch.clientY - canvas.top) / canvas.height) * 2 + 1
     },
     getPlayerCamera()
   );
