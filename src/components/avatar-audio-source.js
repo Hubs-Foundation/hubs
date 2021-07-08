@@ -1,4 +1,4 @@
-import { AvatarAudioDefaults, TargetAudioDefaults, DISTANCE_MODEL_OPTIONS } from "../systems/audio-settings-system";
+import { AvatarAudioDefaults, TargetAudioDefaults } from "../systems/audio-settings-system";
 import { SourceType } from "./audio-params";
 
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
