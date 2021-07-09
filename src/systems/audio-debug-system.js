@@ -1,6 +1,7 @@
 import { THREE } from "aframe";
 import audioDebugVert from "./audio-debug.vert";
 import audioDebugFrag from "./audio-debug.frag";
+import { DistanceModelType } from "../components/audio-params";
 
 const MAX_DEBUG_SOURCES = 64;
 
@@ -103,11 +104,11 @@ AFRAME.registerSystem("audio-debug", {
           this.sourcePositions[sourceNum] = source.data.position;
           this.sourceOrientations[sourceNum] = source.data.orientation;
           this.distanceModels[sourceNum] = 0;
-          if (source.data.distanceModel === "linear") {
+          if (source.data.distanceModel === DistanceModelType.Linear) {
             this.distanceModels[sourceNum] = 0;
-          } else if (source.data.distanceModel === "inverse") {
+          } else if (source.data.distanceModel === DistanceModelType.Inverse) {
             this.distanceModels[sourceNum] = 1;
-          } else if (source.data.distanceModel === "exponential") {
+          } else if (source.data.distanceModel === DistanceModelType.Exponential) {
             this.distanceModels[sourceNum] = 2;
           }
           this.maxDistances[sourceNum] = source.data.maxDistance;

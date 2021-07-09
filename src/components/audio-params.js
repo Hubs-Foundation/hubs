@@ -1,7 +1,8 @@
 import { Vector3 } from "three";
 import { AudioNormalizer } from "../utils/audio-normalizer";
 import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
-import { AvatarAudioDefaults, DISTANCE_MODEL_OPTIONS } from "../systems/audio-settings-system";
+
+export const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
 
 export const SourceType = Object.freeze({
   MEDIA_VIDEO: 0,
@@ -9,6 +10,50 @@ export const SourceType = Object.freeze({
   AVATAR_RIG: 2,
   AUDIO_TARGET: 3,
   AUDIO_ZONE: 4
+});
+
+export const AudioType = {
+  Stereo: "stereo",
+  PannerNode: "pannernode"
+};
+
+export const DistanceModelType = {
+  Linear: "linear",
+  Inverse: "inverse",
+  Exponential: "exponential"
+};
+
+export const AvatarAudioDefaults = Object.freeze({
+  DISTANCE_MODEL: DistanceModelType.Inverse,
+  ROLLOFF_FACTOR: 2,
+  REF_DISTANCE: 1,
+  MAX_DISTANCE: 10000,
+  INNER_ANGLE: 180,
+  OUTER_ANGLE: 360,
+  OUTER_GAIN: 0,
+  VOLUME: 1.0
+});
+
+export const MediaAudioDefaults = Object.freeze({
+  DISTANCE_MODEL: DistanceModelType.Inverse,
+  ROLLOFF_FACTOR: 1,
+  REF_DISTANCE: 1,
+  MAX_DISTANCE: 10000,
+  INNER_ANGLE: 360,
+  OUTER_ANGLE: 0,
+  OUTER_GAIN: 0,
+  VOLUME: 0.5
+});
+
+export const TargetAudioDefaults = Object.freeze({
+  DISTANCE_MODEL: DistanceModelType.Inverse,
+  ROLLOFF_FACTOR: 5,
+  REF_DISTANCE: 8,
+  MAX_DISTANCE: 10000,
+  INNER_ANGLE: 170,
+  OUTER_ANGLE: 300,
+  OUTER_GAIN: 0.3,
+  VOLUME: 1.0
 });
 
 const MUTE_DELAY_SECS = 1;
@@ -26,6 +71,7 @@ const distanceModels = {
 };
 
 AFRAME.registerComponent("audio-params", {
+  multiple: true,
   schema: {
     enabled: { default: true },
     debuggable: { default: true },
@@ -308,7 +354,6 @@ AFRAME.registerComponent("audio-params", {
       this.data.gain = this.data.gain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance));
     }
     gainFilter?.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
-    console.log(`gain updated: ${newGain}`);
   },
 
   updateClipping() {

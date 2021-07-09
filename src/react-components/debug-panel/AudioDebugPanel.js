@@ -16,7 +16,7 @@ import {
   GLOBAL_VOLUME_DEFAULT
 } from "../../react-components/preferences-screen";
 import { SelectInputField } from "../input/SelectInputField";
-import { DISTANCE_MODEL_OPTIONS } from "../../systems/audio-settings-system";
+import { DISTANCE_MODEL_OPTIONS, DistanceModelType } from "../../components/audio-params";
 
 const ROLLOFF_MIN = 0.0;
 const ROLLOFF_MAX = 20.0;
@@ -311,7 +311,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                     distanceModel: value
                   });
                 });
-                if (value === "linear" && avatarRolloffFactor > 1.0) {
+                if (value === DistanceModelType.Linear && avatarRolloffFactor > 1.0) {
                   setAvatarRolloffFactor(1.0);
                 }
                 updateAudioSettings({
@@ -325,9 +325,9 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
             </SelectProperty>
             <SliderProperty
               defaultValue={avatarRolloffFactor}
-              step={avatarDistanceModel === "linear" ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
-              min={avatarDistanceModel === "linear" ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
-              max={avatarDistanceModel === "linear" ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
+              step={avatarDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
+              min={avatarDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
+              max={avatarDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
               onChange={value => {
                 setAvatarRolloffFactor(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
@@ -472,7 +472,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                     distanceModel: value
                   });
                 });
-                if (value === "linear" && mediaRolloffFactor > 1.0) {
+                if (value === DistanceModelType.Linear && mediaRolloffFactor > 1.0) {
                   setMediaRolloffFactor(1.0);
                 }
                 updateAudioSettings({
@@ -486,9 +486,9 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
             </SelectProperty>
             <SliderProperty
               defaultValue={mediaRolloffFactor}
-              step={mediaDistanceModel === "linear" ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
-              min={mediaDistanceModel === "linear" ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
-              max={mediaDistanceModel === "linear" ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
+              step={mediaDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
+              min={mediaDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
+              max={mediaDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
               onChange={value => {
                 setMediaRolloffFactor(value);
                 const elements = scene.current.querySelectorAll("[media-video], [audio-target]");

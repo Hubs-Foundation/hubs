@@ -1,37 +1,4 @@
-export const AvatarAudioDefaults = Object.freeze({
-  DISTANCE_MODEL: "inverse",
-  ROLLOFF_FACTOR: 2,
-  REF_DISTANCE: 1,
-  MAX_DISTANCE: 10000,
-  INNER_ANGLE: 180,
-  OUTER_ANGLE: 360,
-  OUTER_GAIN: 0,
-  VOLUME: 1.0
-});
-
-export const MediaAudioDefaults = Object.freeze({
-  DISTANCE_MODEL: "inverse",
-  ROLLOFF_FACTOR: 1,
-  REF_DISTANCE: 1,
-  MAX_DISTANCE: 10000,
-  INNER_ANGLE: 360,
-  OUTER_ANGLE: 0,
-  OUTER_GAIN: 0,
-  VOLUME: 0.5
-});
-
-export const TargetAudioDefaults = Object.freeze({
-  DISTANCE_MODEL: "inverse",
-  ROLLOFF_FACTOR: 5,
-  REF_DISTANCE: 8,
-  MAX_DISTANCE: 10000,
-  INNER_ANGLE: 170,
-  OUTER_ANGLE: 300,
-  OUTER_GAIN: 0.3,
-  VOLUME: 1.0
-});
-
-export const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
+import { AvatarAudioDefaults, MediaAudioDefaults } from "../components/audio-params";
 
 function updateMediaAudioSettings(mediaVideo, settings) {
   mediaVideo.el.setAttribute("audio-params", {
