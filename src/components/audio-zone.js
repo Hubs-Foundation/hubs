@@ -27,11 +27,20 @@ AFRAME.registerComponent("audio-zone", {
     this.worldBoundingBox = new THREE.Box3();
     this.object3D = this.el.object3D;
 
+    const bbox = new THREE.Box3();
+    bbox.setFromObject(this.object3D);
+    const size = new THREE.Vector3();
+    bbox.getSize(size);
+    // Adjust the box scale to the bounding box size
+    if (size.length() > 0) {
+      this.object3D.scale.set(size.x, size.y, size.z);
+    }
+
     for (let i = this.object3D.children.length - 1; i >= 0; i--) {
       this.object3D.children[i].visible = false;
     }
 
-    const debugGeometry = new THREE.BoxBufferGeometry();
+    const debugGeometry = new THREE.BoxGeometry();
     this.debugMesh = new THREE.Mesh(debugGeometry, debugMaterial);
     this.debugMesh.el = this.object3D.el;
     const debugBBAA = new THREE.BoxHelper(this.debugMesh, DEBUG_BBAA_COLOR);
