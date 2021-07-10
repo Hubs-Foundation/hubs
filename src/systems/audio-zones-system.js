@@ -1,4 +1,4 @@
-// We apply the parameters that dim the audio the most
+// We apply the most restrictive audio parameters
 function paramsReducer(acc, curr) {
   if (acc === null) acc = curr;
   acc.gain = Math.min(acc.gain, curr.gain);
@@ -11,11 +11,16 @@ function paramsReducer(acc, curr) {
   return acc;
 }
 
-// This system updates the audio-zone-sources audio parameters based on the listener's position.
-// If several audio-zones are in between the audio-zone-listener and the audio-zone-source, the applied audio parameters is a reduction
-// of the auzio-zones most restrictive audio parameters.
-// i.e. If there are two audio-zones in between the listener and the source and the first one has gain == 0.1
-// and the other has gain == 1.0, gain == 0.1 is applied to the source.
+/**
+ * This system updates the audio-zone-sources audio-params based on the audio-zone-listener position.
+ * On every tick it computes the audio-zone-source and audio-zone-listener positions to check
+ * if the listener is inside/outside an audio-zone and applies the zone's audio parameters based.
+ * It only updates in case there has been any changes in the sources or listener's positions.
+ * If several audio-zones are in between the audio-zone-listener and the audio-zone-source, the applied
+ * audio parameters is a reduction of the audio-zones most restrictive audio parameters.
+ * i.e. If there are two audio-zones in between the listener and the source and the first one has gain == 0.1
+ * and the other has gain == 1.0, gain == 0.1 is applied to the source.
+ */
 export class AudioZonesSystem {
   constructor(scene) {
     this.scene = scene;
@@ -127,6 +132,7 @@ export class AudioZonesSystem {
     });
   }
 
+  // Updates zones states in case they have changed.
   _updateZones() {
     this.zones.forEach(zone => {
       if (!zone.isEnabled()) return;

@@ -7,12 +7,15 @@ const debugMaterial = new THREE.MeshBasicMaterial({
   side: THREE.DoubleSide
 });
 
-// Represents an 3D box area in the audio zones system that can contain audio-zone-entities.
-// It can be of inOut or/and outIn type.
-// - inOut: applies this zone's audio parameters to an audio-zone-source when the source is inside and listener is outside.
-//  i.e. You want to prevent audio to come out from a room containing audio sources.
-// - outIn: applies this zone's audio parameters to the an audio-zone-source when the listener is inside and the source is outside.
-//  i.e. You want to prevent audio to come into a room from audio sources outside.
+/**
+ * Represents an 3D box area in the audio-zones-system that can contain audio-zone-entities.
+ * I has an audio-params components which values are used to override the audio sources audio properties 
+ * based on the source's and listener's position. It can be of inOut or/and outIn types.
+    inOut: applies this zone's audio-params to an audio-zone-source when the source is inside and listener is outside.
+    i.e. You want to mute audio sources inside the audio zone when the listener is outside.
+    outIn: applies this zone's audio-params to the an audio-zone-source when the listener is inside and the source is outside.
+    i.e. You want to mute audio sources from outside the audio zone when the listener is inside.
+ */
 AFRAME.registerComponent("audio-zone", {
   schema: {
     enabled: { default: true },

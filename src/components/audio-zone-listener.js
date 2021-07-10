@@ -1,4 +1,6 @@
-// Represents the scene audio listener in the audio zones system.
+/**
+ * Represents the scene audio listener in the audio-zones-system.
+ */
 AFRAME.registerComponent("audio-zone-listener", {
   dependencies: ["audio-zone-entity"],
 
