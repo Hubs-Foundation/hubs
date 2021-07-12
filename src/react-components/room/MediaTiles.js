@@ -221,7 +221,7 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
               <PenIcon />
             </TileAction>
           )}
-        {entry.type === "avatar_listing" && (
+        {/* {entry.type === "avatar_listing" && (
           <TileAction
             title={intl.formatMessage({
               id: "media-tile.action.show-similar-avatars",
@@ -231,8 +231,8 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
           >
             <SearchIcon />
           </TileAction>
-        )}
-        {entry.type === "avatar_listing" &&
+        )} */}
+        {/* {entry.type === "avatar_listing" &&
           entry.allow_remixing && (
             <TileAction
               title={intl.formatMessage({
@@ -243,7 +243,7 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
             >
               <DuplicateIcon />
             </TileAction>
-          )}
+          )} */}
         {entry.type === "scene_listing" &&
           entry.allow_remixing && (
             <TileAction

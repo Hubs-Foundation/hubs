@@ -13,14 +13,24 @@ $transparent-pressed: rgba(0, 0, 0, 0.12);
 $white: #FFFFFF;
 $white-hover: #E7E7E7;
 $white-pressed: #DBDBDB;
+$active: #5D5FEF;
 
 $lightgrey: #E7E7E7;
 $lightgrey-hover: #F5F5F5;
 $lightgrey-pressed: #DBDBDB;
 
 $grey: #BBBBBB;
+$grey1: #2C2F3A;
+$grey2: #4D4853;
 $grey-hover: #C7C7C7;
 $grey-pressed: #ADADAD;
+$greyishwhite: #97929D;
+
+$custom: #1F1E26;
+$custom-hover: #5D5C65;
+$custom-pressed: #5D5C65;
+$custom-active: #5D5FEF;
+
 
 $darkgrey: #868686;
 $darkgrey-hover: #949494;
@@ -33,6 +43,8 @@ $black-pressed: #7A7A7A;
 $red: #F5325C;
 $red-hover: #F64B70;
 $red-pressed: #F41A49;
+
+$greycancel: #6C6E76;
 
 $orange: #FF8500;
 $orange-hover: #FF911A;
@@ -155,12 +167,14 @@ $background1-color: var(--background1-color);
 $background2-color: var(--background2-color);
 $background3-color: var(--background3-color);
 $background4-color: var(--background4-color);
+$background5-color: var(--background5-color);
 
 $loading-screen-background: var(--loading-screen-background);
 
 $border1-color: var(--border1-color);
 $border2-color: var(--border2-color);
 $border3-color: var(--border3-color);
+$border4-color: var(--border4-color);
 
 $outline-color: var(--outline-color);
 
@@ -252,3 +266,9 @@ $tile-button-bg-color-hover: var(--tile-button-bg-color-hover);
 $tile-button-bg-color-pressed: var(--tile-button-bg-color-pressed);
 $tile-button-border-color: var(--tile-button-border-color);
 
+$custom-color: var(--custom);
+$custom-hover-color: var(--custom-hover);
+$custom-pressed-color: var(--custom-pressed);
+$custom-active-color: var(--custom-active);
+
+$background-gradient: linear-gradient(76.93deg, #686A9C 0%, #716D82 52.92%, #876B8A 100%);

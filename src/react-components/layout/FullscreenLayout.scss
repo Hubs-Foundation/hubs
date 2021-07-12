@@ -9,7 +9,7 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: theme.$background1-color;
+  background-image: theme.$background-gradient;
   z-index: 10;
 }
 
@@ -47,7 +47,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  
+  color: theme.$text5-color;
+  font-family: Helvetica;
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     margin-top: 0;
     border-top: none;

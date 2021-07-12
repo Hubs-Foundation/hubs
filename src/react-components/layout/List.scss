@@ -25,11 +25,11 @@
   width: 100%;
 
   &:hover {
-    background-color: theme.$list-bg-color-hover;
+    background-color: theme.$active-color-hover;
   }
 
   &:active {
-    background-color: theme.$list-bg-color-pressed;
+    background-color: theme.$active-color-pressed;
   }
 
   :global(body.keyboard-user) &:focus {

@@ -28,7 +28,7 @@ export function EnterOnDeviceModal({
       className={className}
       {...rest}
     >
-      <Column center={loadingCode ? "both" : true} padding grow>
+      <Column center={loadingCode ? "both" : true} alignleft padding grow>
         {loadingCode ? (
           <b>
             <FormattedMessage id="enter-on-device-modal.generating-code" defaultMessage="Generating join code..." />
@@ -112,7 +112,7 @@ export function EnterOnDeviceModal({
                         defaultMessage="You have a VR headset connected to this device."
                       />
                     </small>
-                    <Button preset="accent5" onClick={onEnterOnConnectedHeadset}>
+                    <Button preset="accent5" sm onClick={onEnterOnConnectedHeadset}>
                       <VRIcon />
                       <span>
                         <FormattedMessage id="enter-on-device-modal.enter-in-vr-button" defaultMessage="Enter in VR" />

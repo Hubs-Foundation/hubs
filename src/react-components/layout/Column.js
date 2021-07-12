@@ -4,7 +4,10 @@ import classNames from "classnames";
 import styles from "./Column.scss";
 
 export const Column = forwardRef(
-  ({ as: Component, className, gap, padding, center, centerMd, grow, overflow, children, ...rest }, ref) => {
+  (
+    { as: Component, className, gap, padding, center, margin, alignleft, centerMd, grow, overflow, children, ...rest },
+    ref
+  ) => {
     const gapClass = gap === true ? styles.mdGap : styles[`${gap}Gap`];
     const paddingClass = padding === true ? styles.lgPadding : styles[`${padding}Padding`];
 
@@ -22,7 +25,9 @@ export const Column = forwardRef(
             [styles.centerMd]: centerMd === true || centerMd === "horizontal" || centerMd === "both",
             [styles.centerVerticalMd]: centerMd === "vertical" || centerMd === "both",
             [styles.grow]: grow,
-            [styles.overflow]: overflow
+            [styles.overflow]: overflow,
+            [styles.margins]: margin,
+            [styles.alignleft]: alignleft
           },
           className
         )}

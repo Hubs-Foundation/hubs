@@ -26,12 +26,12 @@ export function AvatarSettingsContent({
         spellCheck="false"
         required
         onChange={onChangeDisplayName}
-        description={
-          <FormattedMessage
-            id="avatar-settings-content.display-name-description"
-            defaultMessage="Alphanumerics, hyphens, underscores, and tildes. At least 3 characters, no more than 32"
-          />
-        }
+        // description={
+        //   <FormattedMessage
+        //     id="avatar-settings-content.display-name-description"
+        //     defaultMessage="Alphanumerics, hyphens, underscores, and tildes. At least 3 characters, no more than 32"
+        //   />
+        // }
         ref={displayNameInputRef}
       />
       <div className={styles.avatarPreviewContainer}>
@@ -40,7 +40,7 @@ export function AvatarSettingsContent({
           <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
         </Button>
       </div>
-      <AcceptButton preset="accept" type="submit" />
+      <AcceptButton preset="accent5" lg={true} type="submit" />
     </Column>
   );
 }

@@ -7,7 +7,7 @@
   flex-direction: row;
   box-sizing: border-box;
   align-items: flex-start;
-  color: theme.$text1-color;
+  color: theme.$text5-color;
 
   @media (max-width: 768px) {
     padding: 0.5em;
@@ -24,7 +24,7 @@
   .info {
     text-align: center;
     width: 100%;
-    color: theme.$text2-color;
+    color: theme.$text5-color;
     margin: 1em 0;
 
     p {
@@ -119,6 +119,7 @@
     .text-field {
       @extend %input-field;
       font-size: 16px;
+      color: theme.$text5-color;
     }
 
     .textarea {
@@ -213,7 +214,7 @@
         -webkit-appearance: none;
         width: 2em;
         height: 2em;
-        border: 1px solid theme.$input-border-color;
+        border: 1px solid theme.$text5-color;
         background-color: theme.$input-bg-color;
         border-radius: 6px;
         vertical-align: sub;
@@ -238,9 +239,9 @@
 
     .license {
       font-size: 8pt;
-      color: theme.$text2-color;
+      color: theme.$text5-color;
       a {
-        color: theme.$text2-color;
+        color: theme.$link-color;
       }
     }
 
@@ -251,7 +252,7 @@
     }
 
     a {
-      color: theme.$text2-color;
+      color: theme.$text5-color;
     }
   }
 
@@ -287,7 +288,7 @@
 
   .delete-avatar {
     margin-top: 20px;
-    color: theme.$text2-color;
+    color: theme.$text5-color;
     a {
       cursor: pointer;
       text-decoration: underline;
@@ -297,7 +298,7 @@
 
   .close-button {
     cursor: pointer;
-    color: theme.$text2-color;
+    color: theme.$text5-color;
     outline-style: none;
     background: none;
     border: none;

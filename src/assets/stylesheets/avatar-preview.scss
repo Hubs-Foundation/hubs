@@ -3,8 +3,8 @@
 :local(.preview) {
   position: relative;
   overflow: hidden;
-  background: theme.$tile-bg-color;
-  border-radius: 20px;
+  // background: theme.$tile-bg-color;
+  // border-radius: 20px;
 
   .loader {
     position: absolute;
@@ -29,4 +29,11 @@
     transform: translateY(2px);
     margin: 0 0.3em;
   }
+}
+:local(.Avatarcanvas) {
+  border-radius: 100px;
+  margin: auto;
+}
+:local(.editorpreview) {
+  border-radius: 20px;
 }

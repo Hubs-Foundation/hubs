@@ -29,6 +29,8 @@ import MediaBrowserContainer from "./media-browser";
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
+import EventsScreen from "./event-screen.js";
+import WorldsScreen from "./worlds-screen.js";
 import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
 import RTCDebugPanel from "./debug-panel/RtcDebugPanel.js";
@@ -69,13 +71,15 @@ import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { ReactComponent as EnterIcon } from "./icons/Enter.svg";
 import { ReactComponent as InviteIcon } from "./icons/Invite.svg";
+import { ReactComponent as WorldIcon } from "./icons/World.svg";
+import { ReactComponent as EventIcon } from "./icons/Event.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 import { ObjectListProvider } from "./room/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
 import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
-import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
-import { SharePopoverContainer } from "./room/SharePopoverContainer";
+// import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
+// import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
@@ -93,6 +97,7 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
+import { TeledildonicsPopoverContainer } from "./room/TeledildonicsPopoverContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -195,7 +200,10 @@ class UIRoot extends Component {
 
     objectInfo: null,
     objectSrc: "",
-    sidebarId: null
+    sidebarId: null,
+
+    showWorlds: false,
+    showEvents: false
   };
 
   constructor(props) {
@@ -783,7 +791,7 @@ class UIRoot extends Component {
       <>
         <RoomEntryModal
           appName={configs.translation("app-name")}
-          logoSrc={configs.image("logo")}
+          logoSrc={configs.image("company_logo")}
           roomName={this.props.hub.name}
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
@@ -984,6 +992,30 @@ class UIRoot extends Component {
       );
     }
 
+    if (this.state.showEvents) {
+      return (
+        <EventsScreen
+          onClose={() => {
+            this.setState({ showEvents: false });
+          }}
+          store={this.props.store}
+          scene={this.props.scene}
+        />
+      );
+    }
+
+    if (this.state.showWorlds) {
+      return (
+        <WorldsScreen
+          onClose={() => {
+            this.setState({ showWorlds: false });
+          }}
+          store={this.props.store}
+          scene={this.props.scene}
+        />
+      );
+    }
+
     if (this.props.showInterstitialPrompt) return this.renderInterstitialPrompt();
 
     const entered = this.state.entered;
@@ -1096,16 +1128,16 @@ class UIRoot extends Component {
                 icon: EnterIcon,
                 onClick: () => this.showContextualSignInDialog()
               },
-          canCreateRoom && {
-            id: "create-room",
-            label: <FormattedMessage id="more-menu.create-room" defaultMessage="Create Room" />,
-            icon: AddIcon,
-            onClick: () =>
-              this.showNonHistoriedDialog(LeaveRoomModal, {
-                destinationUrl: "/",
-                reason: LeaveReason.createRoom
-              })
-          },
+          // canCreateRoom && {
+          //   id: "create-room",
+          //   label: <FormattedMessage id="more-menu.create-room" defaultMessage="Create Room" />,
+          //   icon: AddIcon,
+          //   onClick: () =>
+          //     this.showNonHistoriedDialog(LeaveRoomModal, {
+          //       destinationUrl: "/",
+          //       reason: LeaveReason.createRoom
+          //     })
+          // },
           {
             id: "user-profile",
             label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar" />,
@@ -1131,6 +1163,18 @@ class UIRoot extends Component {
             label: "Preferences",
             icon: SettingsIcon,
             onClick: () => this.setState({ showPrefs: true })
+          },
+          {
+            id: "worlds",
+            label: <FormattedMessage id="more-menu.worlds" defaultMessage="Worlds" />,
+            icon: WorldIcon,
+            onClick: () => this.setState({ showWorlds: true })
+          },
+          {
+            id: "events",
+            label: <FormattedMessage id="more-menu.events" defaultMessage="Events" />,
+            icon: EventIcon,
+            onClick: () => this.setState({ showEvents: true })
           }
         ].filter(item => item)
       },
@@ -1507,13 +1551,13 @@ class UIRoot extends Component {
                         <ToolbarButton
                           icon={<EnterIcon />}
                           label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room" />}
-                          preset="accept"
+                          preset="custom"
                           onClick={() => this.setState({ watching: false })}
                         />
                         {enableSpectateVRButton && (
                           <ToolbarButton
                             icon={<VRIcon />}
-                            preset="accent5"
+                            preset="custom"
                             label={
                               <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
                             }
@@ -1528,14 +1572,19 @@ class UIRoot extends Component {
                           scene={this.props.scene}
                           microphoneEnabled={this.mediaDevicesManager.isMicShared}
                         />
-                        <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
-                        <PlacePopoverContainer
+                        {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> */}
+                        {/* <PlacePopoverContainer
                           scene={this.props.scene}
                           hubChannel={this.props.hubChannel}
                           mediaSearchStore={this.props.mediaSearchStore}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        /> */}
+                        <TeledildonicsPopoverContainer
+                          mySessionId={this.props.sessionId}
+                          presences={this.props.presences}
                         />
-                        {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
+                        <ReactionPopoverContainer />
+                        {/* {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />} */}
                       </>
                     )}
                     <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
@@ -1566,7 +1615,7 @@ class UIRoot extends Component {
                       <ToolbarButton
                         icon={<LeaveIcon />}
                         label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
-                        preset="cancel"
+                        preset="custom"
                         onClick={() => {
                           this.showNonHistoriedDialog(LeaveRoomModal, {
                             destinationUrl: "/",

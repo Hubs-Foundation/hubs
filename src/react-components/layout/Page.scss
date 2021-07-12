@@ -10,8 +10,8 @@ html, body, :global(#root), :global(#ui-root), :global(.home-root) {
 }
 
 body {
-  background: theme.$background1-color;
-  color: theme.$text1-color;
+  background: rgba(77, 72, 83, 1);
+  color: theme.$text5-color;
 }
 
 :global(#root), :global(#ui-root), :global(.home-root) {

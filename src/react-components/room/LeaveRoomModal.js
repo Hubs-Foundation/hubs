@@ -49,10 +49,11 @@ export function LeaveRoomModal({ reason, destinationUrl, onClose }) {
     <Modal
       title={<FormattedMessage id="leave-room-modal.title" defaultMessage="Leave Room" />}
       beforeTitle={<CloseButton onClick={onClose} />}
+      leave={true}
     >
       <Column padding center centerMd="both" grow>
         <p>{intl.formatMessage(reasonMessages[reason])}</p>
-        <Button as="a" preset="cancel" href={destinationUrl} rel="noopener noreferrer">
+        <Button as="a" preset="accent5" sm href={destinationUrl} rel="noopener noreferrer">
           {intl.formatMessage(confirmationMessages[reason])}
         </Button>
       </Column>

@@ -19,7 +19,7 @@ export const presets = [
 ];
 
 export const Button = memo(
-  forwardRef(({ as, sm, lg, xl, preset, className, children, ...rest }, ref) => {
+  forwardRef(({ as, sm, lg, xl, xxl, preset, className, children, ...rest }, ref) => {
     const ButtonComponent = as;
     const buttonProps = ButtonComponent === "button" ? { type: "button" } : {};
 
@@ -29,7 +29,7 @@ export const Button = memo(
           styles.button,
           textInputStyles.button,
           styles[preset],
-          { [styles.sm]: sm, [styles.lg]: lg, [styles.xl]: xl },
+          { [styles.sm]: sm, [styles.lg]: lg, [styles.xl]: xl, [styles.xxl]: xxl },
           className
         )}
         {...buttonProps}
@@ -57,7 +57,7 @@ Button.defaultProps = {
 
 export function NextButton(props) {
   return (
-    <Button preset="accept" {...props}>
+    <Button preset="accent5" {...props}>
       <FormattedMessage id="button.next" defaultMessage="Next" />
     </Button>
   );
@@ -73,7 +73,7 @@ export function CancelButton(props) {
 
 export function ContinueButton(props) {
   return (
-    <Button preset="accept" {...props}>
+    <Button preset="accent5" {...props}>
       <FormattedMessage id="button.continue" defaultMessage="Continue" />
     </Button>
   );
@@ -81,7 +81,7 @@ export function ContinueButton(props) {
 
 export function AcceptButton(props) {
   return (
-    <Button preset="accept" {...props}>
+    <Button preset="accent5" {...props}>
       <FormattedMessage id="button.accept" defaultMessage="Accept" />
     </Button>
   );
@@ -89,7 +89,7 @@ export function AcceptButton(props) {
 
 export function ApplyButton(props) {
   return (
-    <Button preset="accept" {...props}>
+    <Button preset="accent5" {...props}>
       <FormattedMessage id="button.apply" defaultMessage="Apply" />
     </Button>
   );

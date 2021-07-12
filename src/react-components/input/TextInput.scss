@@ -6,9 +6,9 @@ $input-height: 40px;
   display: flex;
   position: relative;
   height: $input-height;
-  border: 1px solid theme.$input-border-color;
+  border: 1px solid theme.$basic-color;
   border-radius: theme.$border-radius-regular;
-  color: theme.$text1-color;
+  color: theme.$text5-color;
   overflow: hidden;
 
   &:focus-within  {

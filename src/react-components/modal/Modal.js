@@ -3,14 +3,34 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Modal.scss";
 
-export function Modal({ title, beforeTitle, afterTitle, children, contentClassName, className, disableFullscreen }) {
+export function Modal({
+  title,
+  beforeTitle,
+  afterTitle,
+  children,
+  contentClassName,
+  className,
+  disableFullscreen,
+  leave,
+  verify
+}) {
   return (
-    <div className={classNames(styles.modal, { [styles.smFullscreen]: !disableFullscreen }, className)}>
+    <div
+      className={classNames(
+        styles.modal,
+        { [styles.smFullscreen]: !disableFullscreen },
+        { [styles.leave]: leave },
+        { [styles.verify]: verify },
+        className
+      )}
+    >
       {(title || beforeTitle || afterTitle) && (
-        <div className={styles.header}>
-          <div className={styles.beforeTitle}>{beforeTitle}</div>
+        <div className={classNames(styles.header, { [styles.leaveHeader]: leave }, className)}>
+          <div className={classNames(styles.beforeTitle, { [styles.beforeTitleLeave]: leave }, className)}>
+            {beforeTitle}
+          </div>
           <h5>{title}</h5>
-          <div className={styles.afterTitle}>{afterTitle}</div>
+          {/* <div className={styles.afterTitle}>{afterTitle}</div> */}
         </div>
       )}
       <div className={classNames(styles.content, contentClassName)}>{children}</div>
@@ -25,5 +45,7 @@ Modal.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
   contentClassName: PropTypes.string,
-  disableFullscreen: PropTypes.bool
+  disableFullscreen: PropTypes.bool,
+  leave: PropTypes.bool,
+  verify: PropTypes.bool
 };

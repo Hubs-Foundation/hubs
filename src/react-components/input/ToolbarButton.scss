@@ -10,7 +10,7 @@
 
   label {
     cursor: pointer;
-    color: theme.$text1-color;
+    color: theme.$text5-color;
     margin-top: 8px;
     margin-bottom: 3px;
   }
@@ -53,11 +53,11 @@
 
     svg {
       *[stroke=\#000] {
-        stroke: theme.$toolbar-basic-icon-color;
+        stroke: theme.$basic-color;
       }
   
       *[fill=\#000] {
-        fill: theme.$toolbar-basic-icon-color;
+        fill: theme.$basic-color;
       }
     }
   }  
@@ -65,6 +65,14 @@
   &:hover :local(.icon-container) {
     border-color: theme.$basic-color-hover;
     background-color: theme.$basic-color-hover;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$toolbar-basic-icon-color;
+      }
+      *[fill=\#000] {
+        fill: theme.$toolbar-basic-icon-color;
+      }
+    }
   }
 
   &:active :local(.icon-container) {
@@ -660,4 +668,59 @@
 
 :local(.status-recording) {
   background-color: theme.$status-recording-color;
+}
+
+:local(.custom), :local(.transparent) {
+  :local(.icon-container) {
+    border-color: theme.$custom-color;
+    background-color: theme.$custom-color;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$text5-color;
+      }
+      *[fill=\#000] {
+        fill: theme.$text5-color;
+      }
+    }
+  }
+
+  &:hover :local(.icon-container) {
+    border-color: theme.$custom-hover-color;
+    background-color: theme.$custom-hover-color;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$text5-color;
+      }
+      *[fill=\#000] {
+        fill: theme.$text5-color;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+    border-color: theme.$custom-pressed-color;
+    background-color: theme.$custom-pressed-color;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: transparent;
+      background-color: theme.$custom-active-color;
+    }
+
+    label {
+      color: theme.$text5-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        background-color: theme.$custom-active-color;
+      }
+    }
+    &:active {
+      :local(.icon-container) {
+        background-color: theme.$custom-pressed-color;
+      }
+    }
+  }
 }

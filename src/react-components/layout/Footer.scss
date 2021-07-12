@@ -2,7 +2,8 @@
 
 footer {
   display: block;
-  background-color: theme.$background2-color;
+  // background-color: theme.$background2-color;
+  background: rgba(77, 72, 83, 1);
   font-size: theme.$font-size-md;
   padding: 20px;
 
@@ -33,7 +34,7 @@ footer {
     }
 
     a {
-      color: theme.$text1-color;
+      color: theme.$text5-color;
       font-weight: bold;
     }
 
@@ -63,7 +64,7 @@ footer {
 
 :local(.powered-by) {
   text-align: center;
-  color: theme.$text1-color;
+  color: theme.$text5-color;
   display: flex;
   justify-content: center;
   flex-direction: column;

@@ -12,19 +12,35 @@
   flex-direction: column;
   position: relative;
   align-items: center;
+  // height: 100%;
+  // width: 100%;
+  // background: url("../../assets/images/Avatar-bg.png");
+  // background-repeat: no-repeat;
+  // background-size: cover;
+  // max-width: 298px;
+  // max-height: 280px;
 
   /* TODO: This styling into AvatarPreview */
   & > :first-child {
-    width: 168px;
-    height: 300px;
-    min-height: 300px;
-    border-radius: 8px;
-    background-color: theme.$tile-bg-color;
+    // width: 168px;
+    // height: 300px;
+    // min-height: 300px;
+    // border-radius: 8px;
+    background: url("../../assets/images/Avatar-bg.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 298px;
+    height: 280px;
+    min-height: 280px;
+    // background-color: theme.$tile-bg-color;
   }
 
   button {
     position: absolute;
     bottom: 0;
     margin-bottom: 8px;
+    width: 134px;
+    height: 40px;
+    border-radius: 50px;
   }
 }

@@ -50,6 +50,12 @@ export function LoadingScreenContainer({ onLoaded, scene }) {
     [intl]
   );
 
+  console.log("🚀 ~ file: LoadingScreenContainer.js ~ line 54 ~ LoadingScreenContainer ~ infoMessages", infoMessages);
+  console.log("🚀 ~ file: LoadingScreenContainer.js ~ line 54 ~ LoadingScreenContainer ~ message", message);
+  console.log(
+    "🚀 ~ file: LoadingScreenContainer.js ~ line 54 ~ LoadingScreenContainer ~ configs.image('logo')",
+    configs.image("logo")
+  );
   return <LoadingScreen logoSrc={configs.image("logo")} message={message} infoMessages={infoMessages} />;
 }
 

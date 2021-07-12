@@ -98,7 +98,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
   );
 
   return (
-    <Column center padding as="form" onSubmit={onSubmitForm}>
+    <Column center padding margin as="form" onSubmit={onSubmitForm}>
       <p>
         {message ? (
           intl.formatMessage(message)
@@ -138,7 +138,7 @@ SubmitEmail.propTypes = {
 
 export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
   return (
-    <Column center padding>
+    <Column center padding margin>
       <FormattedMessage
         id="sign-in-modal.wait-for-verification"
         defaultMessage="<p>Email sent to {email}!</p><p>To continue, click on the link in the email using your phone, tablet, or PC.</p><p>No email? You may not be able to create an account.</p>"
@@ -174,7 +174,7 @@ export function SignInComplete({ message, onContinue }) {
   const intl = useIntl();
 
   return (
-    <Column center padding>
+    <Column center padding margin>
       <p>
         <b>
           {message ? (

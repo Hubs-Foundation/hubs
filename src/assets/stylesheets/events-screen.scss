@@ -1,0 +1,163 @@
+@use "../../react-components/styles/theme.scss";
+@import 'shared.scss';
+
+$fontSize: 16px;
+$semi-bold: 600;
+
+%full-screen-panel {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background-image: theme.$background-gradient;
+  color: theme.$text5-color;
+}
+
+:local(.events-panel) {
+  @extend %full-screen-panel;
+  z-index: 2;
+  pointer-events: auto;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  font-family: Lekton;
+  font-style: normal;
+  font-weight: normal;
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+}
+
+:local(.nav-container) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+
+}
+
+:local(.nav) {
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid #97929D;
+  margin: 0px 16px;
+  width: 100%;
+}
+
+%font-nav-item {
+  font-weight: $semi-bold;
+  font-size: $fontSize;
+}
+%font-nav-item-selected {
+  font-weight: bold;
+}
+
+:local(.nav-item){
+  @extend %default-font;
+  @extend %font-nav-item;
+  @extend %no-default-button-style;
+  @extend %unselectable;
+  margin: 0px 24px;
+  border-bottom: 3px solid transparent;
+  &:local(.selected) {
+    @extend %font-nav-item-selected;
+    border-bottom: 3px solid theme.$text5-color;
+  }
+  color: theme.$text5-color;
+}
+
+ 
+  
+:local(.column){
+  display: flex;
+  flex-flow: column;
+}
+%row {
+  display: flex;
+  align-items: center;
+  &>*{
+    margin-right: 12px;
+  }
+  &>*:last-child {
+    margin-right: 0px;
+  }
+}
+%row-right {
+  justify-self: flex-end;
+  margin-left: auto;
+}
+%row-center {
+  justify-self: center;
+  margin-left: auto;
+}
+:local(.row) {
+  @extend %row;
+}
+:local(.row-right) {
+  @extend %row-right;
+}
+:local(.row-center){
+  @extend %row-center;
+}
+
+ 
+:local(.event-label){
+  @extend %default-font;
+  font-size: $fontSize;
+  font-weight: 600;
+  flex-grow: 1;
+}
+
+:local(.close-button) {
+  cursor: pointer;
+  color: theme.$text5-color;
+  outline-style: none;
+  background: none;
+  border: none;
+  @extend %no-default-button-style;
+  margin: 16px auto 16px 16px;
+}
+ 
+ 
+:local(.flex){
+  display: flex;
+}
+:local(.icon){
+  width: 32px !important;
+  height: 32px !important;
+}
+
+:local(.content-container) {
+  margin-top: 16px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
+
+ 
+:local(.scrolling-content) {
+  display: flex;
+  flex-flow: row;
+  width: 800px;
+  max-width: 100%;
+  justify-content:center;
+  -webkit-justify-content: center;
+  -moz-justify-content: center;   
+
+ p{
+  margin-left:2rem;
+  } 
+}
+ 
+:local(.scrolling-item) {
+  display:block;  
+  margin:10px;
+}
+ 

@@ -65,7 +65,7 @@ VerificationError.propTypes = {
 
 export function VerifyModal({ children }) {
   return (
-    <Modal title={<FormattedMessage id="verify-modal.title" defaultMessage="Verify" />} disableFullscreen>
+    <Modal title={<FormattedMessage id="verify-modal.title" defaultMessage="Verify" />} verify={true} disableFullscreen>
       {children}
     </Modal>
   );

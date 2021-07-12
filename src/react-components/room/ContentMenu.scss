@@ -6,11 +6,11 @@
   right: 8px;
   display: flex;
   flex-direction: row;
-  background-color: theme.$button-bg-color;
-  border: 1px solid theme.$button-border-color;
-  border-radius: 12px;
+  background-color: theme.$transparent;
+  // border: 1px solid theme.$background5-color;
+  // border-radius: 12px;
   pointer-events: auto;
-  padding: 4px;
+  // padding: 4px;
 
   @media(min-width: theme.$breakpoint-lg) {
     top: 24px;
@@ -23,9 +23,11 @@
   flex-direction: row;
   border: none;
   border-radius: 8px;
-  background-color: theme.$transparent;
+  background-color: theme.$background5-color;
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
+  color: theme.$text5-color;
+  border-radius: 10px;
   align-items: center;
   padding: 8px 10px;
 
@@ -38,20 +40,20 @@
   }
 
   &:hover {
-    background-color: theme.$button-bg-color-hover;
+    background-color: theme.$active-color-hover;
   }
 
   &:active {
-    background-color: theme.$button-bg-color-pressed;
+    background-color: theme.$active-color-pressed;
   }
 
   svg {
     *[stroke=\#000] {
-      stroke: theme.$text1-color;
+      stroke: theme.$text5-color;
     }
 
     *[fill=\#000] {
-      fill: theme.$text1-color;
+      fill: theme.$text5-color;
     }
   }
 }
@@ -82,5 +84,5 @@
 :local(.separator) {
   width: 1px;
   margin: 0 8px;
-  background-color: theme.$border1-color;
+  // background-color: theme.$border1-color;
 }

@@ -631,6 +631,7 @@ class AvatarEditor extends Component {
               </div>
               <AvatarPreview
                 className="preview"
+                editorpreview={true}
                 avatarGltfUrl={this.state.previewGltfUrl}
                 onGltfLoaded={this.handleGltfLoaded}
                 {...this.inputFiles}

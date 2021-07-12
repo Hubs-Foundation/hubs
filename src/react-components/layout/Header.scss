@@ -9,7 +9,7 @@ header {
   }
 
   a {
-    color: theme.$black;
+    color: theme.$text5-color;
     font-weight: bold;
     text-decoration: none;
     white-space: nowrap;
@@ -34,7 +34,7 @@ header {
     a {
       margin: 0 16px;
       font-size: theme.$font-size-md;
-      color: theme.$text1-color;
+      color: theme.$text5-color;
     }
 
     ul {

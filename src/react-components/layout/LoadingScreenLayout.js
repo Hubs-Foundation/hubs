@@ -8,13 +8,13 @@ export function LoadingScreenLayout({ center, bottom, logoSrc }) {
     <div className={styles.loadingScreenLayout}>
       <Column center padding gap="lg" className={styles.center}>
         <img className={styles.logo} src={logoSrc} />
-        {center}
+        <div className={styles.loader}>{center}</div>
       </Column>
-      {bottom && (
+      {/* {bottom && (
         <Column center className={styles.bottom}>
           {bottom}
         </Column>
-      )}
+      )} */}
     </div>
   );
 }

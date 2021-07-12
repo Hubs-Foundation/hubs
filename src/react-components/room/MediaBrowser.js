@@ -2,13 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./MediaBrowser.scss";
-import { ReactComponent as SearchIcon } from "../icons/Search.svg";
+// import { ReactComponent as SearchIcon } from "../icons/Search.svg";
 import { ReactComponent as StarIcon } from "../icons/Star.svg";
 import { ReactComponent as CloseIcon } from "../icons/Close.svg";
 import { ReactComponent as ArrowForwardIcon } from "../icons/ArrowForward.svg";
 import { ReactComponent as ArrowBackIcon } from "../icons/ArrowBack.svg";
 import { FormattedMessage, defineMessages, useIntl } from "react-intl";
-import { TextInputField } from "../input/TextInputField";
+// import { TextInputField } from "../input/TextInputField";
 import { IconButton } from "../input/IconButton";
 import { FullscreenLayout } from "../layout/FullscreenLayout";
 import { Button } from "../input/Button";
@@ -30,21 +30,21 @@ const navTitleMessages = defineMessages({
 export function MediaBrowser({
   onClose,
   browserRef,
-  searchInputRef,
-  autoFocusSearch,
-  searchPlaceholder,
-  searchDescription,
-  onSearchKeyDown,
-  onClearSearch,
+  // searchInputRef,
+  // autoFocusSearch,
+  // searchPlaceholder,
+  // searchDescription,
+  // onSearchKeyDown,
+  // onClearSearch,
   mediaSources,
   selectedSource,
   onSelectSource,
   activeFilter,
   facets,
   onSelectFacet,
-  query,
-  onChangeQuery,
-  headerRight,
+  // query,
+  // onChangeQuery,
+  // headerRight,
   hasNext,
   hasPrevious,
   onNextPage,
@@ -71,25 +71,30 @@ export function MediaBrowser({
               </h3>
             </>
           ) : (
-            <TextInputField
-              value={query}
-              onChange={onChangeQuery}
-              autoFocus={autoFocusSearch}
-              ref={searchInputRef}
-              placeholder={searchPlaceholder}
-              onKeyDown={onSearchKeyDown}
-              beforeInput={<SearchIcon className={styles.searchIcon} />}
-              afterInput={
-                <IconButton onClick={onClearSearch}>
-                  <CloseIcon height={16} width={16} />
-                </IconButton>
-              }
-              description={searchDescription}
-            />
+            // <TextInputField
+            //   value={query}
+            //   onChange={onChangeQuery}
+            //   autoFocus={autoFocusSearch}
+            //   ref={searchInputRef}
+            //   placeholder={searchPlaceholder}
+            //   onKeyDown={onSearchKeyDown}
+            //   beforeInput={<SearchIcon className={styles.searchIcon} />}
+            //   afterInput={
+            //     <IconButton onClick={onClearSearch}>
+            //       <CloseIcon height={16} width={16} />
+            //     </IconButton>
+            //   }
+            //   description={searchDescription}
+            // />
+            <>
+              <h3>
+                <FormattedMessage id="media-browser.choose-avatar" defaultMessage="Choose Avatar" />
+              </h3>
+            </>
           )}
         </>
       }
-      headerRight={headerRight}
+      // headerRight={headerRight}
     >
       {mediaSources && (
         <div className={styles.buttonNav}>

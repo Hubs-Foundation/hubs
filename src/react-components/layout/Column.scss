@@ -80,3 +80,10 @@
 :local(.column) > :last-child {
   margin-bottom: 0;
 }
+
+:local(.margins) {
+  margin-top: 15%;
+}
+:local(.alignleft) {
+  margin-right: 40px;
+}

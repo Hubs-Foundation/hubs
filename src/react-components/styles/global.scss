@@ -35,9 +35,9 @@
   --accept-color-hover: #{theme.$green-hover};
   --accept-color-pressed: #{theme.$green-pressed};
 
-  --cancel-color: #{theme.$red};
-  --cancel-color-hover: #{theme.$red-hover};
-  --cancel-color-pressed: #{theme.$red-pressed};
+  --cancel-color: #{theme.$greycancel};
+  --cancel-color-hover: #{theme.$greycancel};
+  --cancel-color-pressed: #{theme.$greycancel};
 
   --accent1-color: #{theme.$red};
   --accent1-color-hover: #{theme.$red-hover};
@@ -59,26 +59,33 @@
   --accent5-color-hover: #{theme.$purple-hover};
   --accent5-color-pressed: #{theme.$purple-pressed};
 
-  --primary-color: #{theme.$blue};
-  --primary-color-hover: #{theme.$blue-hover};
-  --primary-color-pressed: #{theme.$blue-pressed};
+  --primary-color: #{theme.$active};
+  --primary-color-hover: #{theme.$active};
+  --primary-color-pressed: #{theme.$active};
 
   --secondary-color: #{theme.$lightgrey};
   --secondary-color-hover: #{theme.$lightgrey-hover};
   --secondary-color-pressed: #{theme.$lightgrey-pressed};
 
-  --background1-color: #{theme.$white};
+  --background1-color: #{theme.$grey1};
   --background2-color: #{theme.$recessed-bg};
   --background3-color: #{theme.$lightgrey};
   --background4-color: #{theme.$grey};
+  --background5-color: #{theme.$grey2};
 
   --loading-screen-background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%);
 
   --border1-color: #{theme.$lightgrey};
   --border2-color: #{theme.$grey};
   --border3-color: #{theme.$darkgrey};
+  --border4-color: #{theme.$greyishwhite};
 
   --outline-color: #{theme.$black};
+
+  --custom: #{theme.$custom};
+  --custom-hover: #{theme.$custom-hover};
+  --custom-pressed: #{theme.$custom-pressed};
+  --custom-active: #{theme.$custom-active};
 
   --shadow-color: rgba(0, 0, 0, 0.2);
 

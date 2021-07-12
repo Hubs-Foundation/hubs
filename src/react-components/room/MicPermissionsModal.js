@@ -16,7 +16,7 @@ export function MicPermissionsModal({ className, error, onClickErrorButton, erro
       className={className}
       {...rest}
     >
-      <Column padding center className={styles.content}>
+      <Column padding center margin className={styles.content}>
         <b>
           <FormattedMessage
             id="mic-permissions-modal.grant-mic-permissions"

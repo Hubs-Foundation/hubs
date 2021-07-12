@@ -1,7 +1,7 @@
 import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
 import { RoomEntryModal } from "./RoomEntryModal";
-import logoSrc from "../../assets/images/app-logo.png";
+import logoSrc from "../../assets/images/company-logo.png";
 
 export default {
   title: "Room/RoomEntryModal",

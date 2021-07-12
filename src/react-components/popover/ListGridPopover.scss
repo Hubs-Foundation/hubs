@@ -1,0 +1,31 @@
+@use "../styles/theme.scss";
+
+
+:local(.list-grid-popover) {
+  // padding: 10px;
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+}
+:local(.list) {
+  justify-content: space-between;
+  display: flex;
+  padding-bottom: 5px;
+  font-family: Helvetica;
+  font-size: 13px;
+}
+// :local(.user-name) {
+//   padding-bottom: 5px;
+//   float: left;
+// }
+// :local(.add-button) {
+//   padding-bottom: 5px;
+//   float: right;
+// }
+

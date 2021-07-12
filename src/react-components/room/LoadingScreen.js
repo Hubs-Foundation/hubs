@@ -12,16 +12,16 @@ export function LoadingScreen({ logoSrc, message, infoMessages }) {
       logoSrc={logoSrc}
       center={
         <>
-          <Spinner />
+          {/* <Spinner /> */}
           <p>{message}</p>
         </>
       }
-      bottom={
-        <>
-          <h3>{infoMessage.heading}</h3>
-          <p>{infoMessage.message}</p>
-        </>
-      }
+      // bottom={
+      //   <>
+      //     <h3>{infoMessage.heading}</h3>
+      //     <p>{infoMessage.message}</p>
+      //   </>
+      // }
     />
   );
 }

@@ -11,9 +11,13 @@
   right: 0;
   bottom: 0;
   top: 0;
-  background: theme.$loading-screen-background;
+  // background: theme.$loading-screen-background;
+  background: theme.$black;
 
   font-size: theme.$font-size-sm;
+  // font-size: theme.$font-size-2xl;
+  font-weight: theme.$font-weight-bold;
+  color: theme.$white;
 
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     font-size: theme.$font-size-md;
@@ -28,8 +32,11 @@
   // Keep arbitrary-sized logos from making the page jump on load
   position: absolute;
   transform: translateY(calc(-100% - 20px));
-  max-width: 260px;
-  max-height: 140px;
+  // max-width: 260px;
+  max-width: 526px;
+  // max-height: 140px;
+  max-height: 343px;
+  margin-top: 255px;
 }
 
 :local(.bottom) {
@@ -37,4 +44,9 @@
   bottom: 10%;
   width: 100%;
   padding: 0 48px;
+}
+
+:local(.loader) {
+  margin-top: 255px;
+  font-size: theme.$font-size-2xl;
 }

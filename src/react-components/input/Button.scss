@@ -40,7 +40,7 @@
 
   &:hover {
     color: theme.$text4-color-hover;
-    background-color: theme.$basic-color-hover;
+    background-color: theme.$basic-color-pressed;
   }
 
   &:active {
@@ -284,5 +284,14 @@
 }
 
 :local(.xl) {
+  height: 64px;
+}
+
+:local(.xxl) {
+  border-radius: 80px;
+  font-family: 'Sunflower';
+  padding: 0px 24px;
+  font-size: 35px;
+  font-weight: 500;
   height: 64px;
 }

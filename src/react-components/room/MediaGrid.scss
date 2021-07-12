@@ -2,15 +2,20 @@
 
 :local(.media-grid) {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  // grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(298px, 5fr));
+  // grid-template-rows: repeat(auto-fill, minmax(280px, 1fr));
   place-items: start;
   width: 100%;
   padding: 8px;
   align-content: flex-start;
   flex: 1;
-
+  padding-left: 272px;
+  padding-right: 272px;
   @media(min-width: theme.$breakpoint-lg) {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    // grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(298px, 5fr));
+    // grid-template-rows: repeat(auto-fill, minmax(280px, 1fr));
   }
 
   & > * {
@@ -20,10 +25,13 @@
 }
 
 :local(.sm) {
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-
+  // grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(298px, 5fr));
+  // grid-template-rows: repeat(auto-fill, minmax(280px, 1fr));
   @media(min-width: theme.$breakpoint-lg) {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    // grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(298px, 5fr));
+    // grid-template-rows: repeat(auto-fill, minmax(280px, 1fr));
   }
 }
 
@@ -37,10 +45,10 @@
   flex-wrap: wrap;
 
   & > * {
-    min-width: 200px;
-    min-height: 200px;
-    max-height: 240px;
-    max-width: 320px;
+    min-width: 298px;
+    min-height: 280px;
+    max-height: 298px;
+    max-width: 280px;
     width: auto;
   }
 }

@@ -64,7 +64,8 @@ class AvatarPreview extends Component {
   static propTypes = {
     avatarGltfUrl: PropTypes.string,
     className: PropTypes.string,
-    onGltfLoaded: PropTypes.func
+    onGltfLoaded: PropTypes.func,
+    editorpreview: PropTypes.bool
   };
   constructor(props) {
     super(props);
@@ -120,8 +121,12 @@ class AvatarPreview extends Component {
   };
 
   resize = () => {
-    const width = this.canvas.parentElement.offsetWidth;
-    const height = this.canvas.parentElement.offsetHeight;
+    let width = this.canvas.parentElement.offsetWidth;
+    let height = this.canvas.parentElement.offsetHeight;
+    if (this.props.editorpreview != true) {
+      width -= 160;
+      height -= 28;
+    }
     this.previewRenderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
@@ -371,7 +376,10 @@ class AvatarPreview extends Component {
               />
             </div>
           )}
-        <canvas ref={c => (this.canvas = c)} />
+        <canvas
+          className={classNames(styles.Avatarcanvas, { [styles.editorpreview]: this.props.editorpreview })}
+          ref={c => (this.canvas = c)}
+        />
       </div>
     );
   }
