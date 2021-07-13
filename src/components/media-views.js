@@ -17,6 +17,7 @@ import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 import { detect } from "detect-browser";
 import semver from "semver";
+import { MixerType } from "../systems/audio-system";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -531,8 +532,8 @@ AFRAME.registerComponent("media-video", {
 
     this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
 
-    this.audioSystem.removeAudioFromMedia(this.audio);
-    this.audioSystem.addAudioToMedia(this.audio);
+    this.audioSystem.removeAudio(this.audio);
+    this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
 
     const filters = this.audio.getFilters();
     filters.push(this.gainFilter);
@@ -971,7 +972,7 @@ AFRAME.registerComponent("media-video", {
 
     if (this.audio) {
       this.el.removeObject3D("sound");
-      this.audioSystem.removeAudioFromMedia(this.audio);
+      this.audioSystem.removeAudio(this.audio);
       delete this.audio;
     }
 

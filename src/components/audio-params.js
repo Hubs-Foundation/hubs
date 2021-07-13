@@ -171,8 +171,8 @@ AFRAME.registerComponent("audio-params", {
     }
   },
 
-  update(oldData) {
-    if (this.data !== oldData && this.audioRef) {
+  update() {
+    if (this.audioRef) {
       this.audioRef.setDistanceModel(this.data.distanceModel);
       this.audioRef.setRolloffFactor(this.data.rolloffFactor);
       this.audioRef.setRefDistance(this.data.refDistance);
@@ -218,56 +218,59 @@ AFRAME.registerComponent("audio-params", {
     }
   },
 
-  getAudio() {
-    switch (this.data.sourceType) {
-      case SourceType.AVATAR_RIG: {
-        // Create fake parametes for the avatar rig as it doens't have an audio source.
-        const audioParams = this.audioSettings;
-        this.avatarRigObj.updateMatrixWorld(true);
-        this.avatarRigObj.getWorldPosition(this.avatarRigPosition);
-        this.avatarRigOrientation.set(0, 0, -1);
-        const worldQuat = new THREE.Quaternion();
-        this.avatarRigObj.getWorldQuaternion(worldQuat);
-        this.avatarRigOrientation.applyQuaternion(worldQuat);
-        return {
-          panner: {
-            orientationX: {
-              value: this.avatarRigOrientation.x
-            },
-            orientationY: {
-              value: this.avatarRigOrientation.y
-            },
-            orientationZ: {
-              value: this.avatarRigOrientation.z
-            },
-            positionX: {
-              value: this.avatarRigPosition.x
-            },
-            positionY: {
-              value: this.avatarRigPosition.y
-            },
-            positionZ: {
-              value: this.avatarRigPosition.z
-            },
-            distanceModel: audioParams.avatarDistanceModel,
-            maxDistance: audioParams.avatarMaxDistance,
-            refDistance: audioParams.avatarRefDistance,
-            rolloffFactor: audioParams.avatarRolloffFactor,
-            coneInnerAngle: audioParams.avatarConeInnerAngle,
-            coneOuterAngle: audioParams.avatarConeOuterAngle,
-            coneOuterGain: audioParams.avatarConeOuterGain
-          }
-        };
-      }
-      case SourceType.MEDIA_VIDEO:
-      case SourceType.AVATAR_AUDIO_SOURCE:
-      case SourceType.AUDIO_TARGET: {
-        return this.audioRef?.panner ? this.audioRef : null;
-      }
-    }
+  getAudio: (function() {
+    const worldQuat = new THREE.Quaternion();
 
-    return null;
-  },
+    return function() {
+      switch (this.data.sourceType) {
+        case SourceType.AVATAR_RIG: {
+          // Create fake parametes for the avatar rig as it doens't have an audio source.
+          const audioParams = this.audioSettings;
+          this.avatarRigObj.updateMatrixWorld(true);
+          this.avatarRigObj.getWorldPosition(this.avatarRigPosition);
+          this.avatarRigOrientation.set(0, 0, -1);
+          this.avatarRigObj.getWorldQuaternion(worldQuat);
+          this.avatarRigOrientation.applyQuaternion(worldQuat);
+          return {
+            panner: {
+              orientationX: {
+                value: this.avatarRigOrientation.x
+              },
+              orientationY: {
+                value: this.avatarRigOrientation.y
+              },
+              orientationZ: {
+                value: this.avatarRigOrientation.z
+              },
+              positionX: {
+                value: this.avatarRigPosition.x
+              },
+              positionY: {
+                value: this.avatarRigPosition.y
+              },
+              positionZ: {
+                value: this.avatarRigPosition.z
+              },
+              distanceModel: audioParams.avatarDistanceModel,
+              maxDistance: audioParams.avatarMaxDistance,
+              refDistance: audioParams.avatarRefDistance,
+              rolloffFactor: audioParams.avatarRolloffFactor,
+              coneInnerAngle: audioParams.avatarConeInnerAngle,
+              coneOuterAngle: audioParams.avatarConeOuterAngle,
+              coneOuterGain: audioParams.avatarConeOuterGain
+            }
+          };
+        }
+        case SourceType.MEDIA_VIDEO:
+        case SourceType.AVATAR_AUDIO_SOURCE:
+        case SourceType.AUDIO_TARGET: {
+          return this.audioRef?.panner ? this.audioRef : null;
+        }
+      }
+
+      return null;
+    };
+  })(),
 
   setAudio(audio) {
     this.audioRef = audio;

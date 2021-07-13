@@ -9,7 +9,7 @@ const debugMaterial = new THREE.MeshBasicMaterial({
 
 /**
  * Represents an 3D box area in the audio-zones-system that can contain audio-zone-entities.
- * I has an audio-params components which values are used to override the audio sources audio properties 
+ * It has an audio-params component whose values are used to override the audio source's audio properties.
  * based on the source's and listener's position. It can be of inOut or/and outIn types.
     inOut: applies this zone's audio-params to an audio-zone-source when the source is inside and listener is outside.
     i.e. You want to mute audio sources inside the audio zone when the listener is outside.
@@ -25,29 +25,24 @@ AFRAME.registerComponent("audio-zone", {
   },
 
   init() {
-    this.currentPos = new THREE.Vector3();
-    this.lastPosition = new THREE.Vector3();
-    this.worldBoundingBox = new THREE.Box3();
-    this.object3D = this.el.object3D;
-
     const bbox = new THREE.Box3();
-    bbox.setFromObject(this.object3D);
+    bbox.setFromObject(this.el.object3D);
     const size = new THREE.Vector3();
     bbox.getSize(size);
     // Adjust the box scale to the bounding box size
     if (size.length() > 0) {
-      this.object3D.scale.set(size.x, size.y, size.z);
+      this.el.object3D.scale.set(size.x, size.y, size.z);
     }
 
-    for (let i = this.object3D.children.length - 1; i >= 0; i--) {
-      this.object3D.children[i].visible = false;
+    for (let i = this.el.object3D.children.length - 1; i >= 0; i--) {
+      this.el.object3D.children[i].visible = false;
     }
 
     const debugGeometry = new THREE.BoxGeometry();
     this.debugMesh = new THREE.Mesh(debugGeometry, debugMaterial);
-    this.debugMesh.el = this.object3D.el;
+    this.debugMesh.el = this.el.object3D.el;
     const debugBBAA = new THREE.BoxHelper(this.debugMesh, DEBUG_BBAA_COLOR);
-    this.object3D.add(debugBBAA);
+    this.el.object3D.add(debugBBAA);
 
     this.el.sceneEl?.systems["audio-debug"].registerZone(this);
     this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.registerZone(this);
@@ -62,14 +57,6 @@ AFRAME.registerComponent("audio-zone", {
     this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.unregisterZone(this);
   },
 
-  tick() {
-    this.lastPosition = this.currentPos.clone();
-    this.object3D.getWorldPosition(this.currentPos);
-    if (this.data.enabled) {
-      this.worldBoundingBox.copy(this.debugMesh.geometry.boundingBox).applyMatrix4(this.object3D.matrixWorld);
-    }
-  },
-
   update() {
     this.enableDebug(this.data.debuggable && window.APP.store.state.preferences.showAudioDebugPanel);
   },
@@ -78,13 +65,16 @@ AFRAME.registerComponent("audio-zone", {
     return this.data.enabled;
   },
 
-  getBoundingBox() {
-    return this.worldBoundingBox;
-  },
+  getBoundingBox: (function() {
+    const bbaa = new THREE.Box3();
+    return function() {
+      return bbaa.copy(this.debugMesh.geometry.boundingBox).applyMatrix4(this.el.object3D.matrixWorld);
+    };
+  })(),
 
   enableDebug(debuggable) {
     this.data.debuggable = debuggable;
-    this.object3D.visible = debuggable;
+    this.el.object3D.visible = debuggable;
   },
 
   getAudioParams() {
@@ -101,6 +91,6 @@ AFRAME.registerComponent("audio-zone", {
   },
 
   contains(position) {
-    return this.worldBoundingBox.containsPoint(position);
+    return this.getBoundingBox().containsPoint(position);
   }
 });

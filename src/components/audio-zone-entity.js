@@ -1,7 +1,7 @@
 /**
  * Represents an entity in the audio-zones-system.
  * Records the audio zones where the entity is and returns current/past states.
- * This entity is used together with the audio-zone-listeneror audio-zone-sourcecomponents to composite actual entities.
+ * This entity is used together with the audio-zone-listeneror audio-zone-source components to composite actual entities.
  **/
 AFRAME.registerComponent("audio-zone-entity", {
   init() {
@@ -16,7 +16,10 @@ AFRAME.registerComponent("audio-zone-entity", {
 
   // Update the previous zones array.
   tock() {
-    this.prevZones = [...this.zones];
+    this.prevZones.length = this.zones.length;
+    for (let i = 0; i < this.zones.length; i++) {
+      this.prevZones[i] = this.zones[i];
+    }
   },
 
   // Adds a zone to the current zones array.

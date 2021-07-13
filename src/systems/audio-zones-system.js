@@ -28,10 +28,6 @@ export class AudioZonesSystem {
     this.sources = [];
     this.zones = [];
     this.initialized = false;
-    this.ray = new THREE.Ray();
-    this.rayDir = new THREE.Vector3();
-    this.normalizedRayDir = new THREE.Vector3();
-    this.intersectTarget = new THREE.Vector3();
   }
 
   remove() {
@@ -71,70 +67,78 @@ export class AudioZonesSystem {
     }
   }
 
-  tick() {
-    if (!this.scene.is("entered") || this.zones.length === 0) return;
+  tick = (function() {
+    const ray = new THREE.Ray();
+    const rayDir = new THREE.Vector3();
+    const normalizedRayDir = new THREE.Vector3();
+    const intersectTarget = new THREE.Vector3();
+    return function() {
+      if (!this.scene.is("entered") || this.zones.length === 0) return;
 
-    // Update zones
-    this._updateZones();
+      // Update zones
+      this._updateZones();
 
-    this.sources.forEach(source => {
-      // Only check whenever either the source or the listener have updated zones (moved)
-      if (source.entity.isUpdated() || this.listener.entity.isUpdated()) {
-        // Cast a ray from the listener to the source
-        this.rayDir = source
-          .getPosition()
-          .clone()
-          .sub(this.listener.getPosition());
-        this.normalizedRayDir = this.rayDir.clone().normalize();
-        this.ray.set(this.listener.getPosition(), this.normalizedRayDir);
+      for (let i = 0; i < this.sources.length; i++) {
+        const source = this.sources[i];
+        // Only check whenever either the source or the listener have updated zones (moved)
+        if (source.entity.isUpdated() || this.listener.entity.isUpdated()) {
+          // Cast a ray from the listener to the source
+          rayDir.copy(
+            source
+              .getPosition()
+              .clone()
+              .sub(this.listener.getPosition())
+          );
+          normalizedRayDir.copy(rayDir.clone().normalize());
+          ray.set(this.listener.getPosition(), normalizedRayDir);
 
-        // First we check the zones the source is contained in and we check the inOut property
-        // to modify the sources audio params when the listener is outside the source's zones
-        // We always apply the outmost active zone audio params, the zone that's closest to the listener
-        const inOutParams = source.entity
-          .getZones()
-          .filter(zone => {
-            const zoneBBAA = zone.getBoundingBox();
-            this.intersectTarget = new THREE.Vector3();
-            this.ray.intersectBox(zoneBBAA, this.intersectTarget);
-            return this.intersectTarget !== null && zone.data.inOut && !this.listener.entity.getZones().includes(zone);
-          })
-          .map(zone => zone.getAudioParams())
-          .reduce(paramsReducer, null);
+          // First we check the zones the source is contained in and we check the inOut property
+          // to modify the sources audio params when the listener is outside the source's zones
+          // We always apply the outmost active zone audio params, the zone that's closest to the listener
+          const inOutParams = source.entity
+            .getZones()
+            .filter(zone => {
+              const zoneBBAA = zone.getBoundingBox();
+              ray.intersectBox(zoneBBAA, intersectTarget);
+              return intersectTarget !== null && zone.data.inOut && !this.listener.entity.getZones().includes(zone);
+            })
+            .map(zone => zone.getAudioParams())
+            .reduce(paramsReducer, null);
 
-        // Then we check the zones the listener is contained in and we check the outIn property
-        // to modify the sources audio params when the source is outside the listener's zones
-        // We always apply the inmost active zone audio params, the zone that's closest to the listener
-        const outInParams = this.listener.entity
-          .getZones()
-          .filter(zone => {
-            const zoneBBAA = zone.getBoundingBox();
-            this.intersectTarget = new THREE.Vector3();
-            this.ray.intersectBox(zoneBBAA, this.intersectTarget);
-            return this.intersectTarget !== null && zone.data.outIn && !source.entity.getZones().includes(zone);
-          })
-          .map(zone => zone.getAudioParams())
-          .reduce(paramsReducer, null);
+          // Then we check the zones the listener is contained in and we check the outIn property
+          // to modify the sources audio params when the source is outside the listener's zones
+          // We always apply the inmost active zone audio params, the zone that's closest to the listener
+          const outInParams = this.listener.entity
+            .getZones()
+            .filter(zone => {
+              const zoneBBAA = zone.getBoundingBox();
+              ray.intersectBox(zoneBBAA, intersectTarget);
+              return intersectTarget !== null && zone.data.outIn && !source.entity.getZones().includes(zone);
+            })
+            .map(zone => zone.getAudioParams())
+            .reduce(paramsReducer, null);
 
-        // Resolve the zones
-        if (outInParams || inOutParams) {
-          const params = outInParams ? outInParams : inOutParams;
-          params.gain = outInParams && inOutParams ? Math.min(outInParams.gain, inOutParams.gain) : params.gain;
-          params.coneOuterGain =
-            outInParams && inOutParams
-              ? Math.min(outInParams.coneOuterGain, inOutParams.coneOuterGain)
-              : params.coneOuterGain;
-          source.apply(params);
-        } else {
-          source.restore();
+          // Resolve the zones
+          if (outInParams || inOutParams) {
+            const params = outInParams ? outInParams : inOutParams;
+            params.gain = outInParams && inOutParams ? Math.min(outInParams.gain, inOutParams.gain) : params.gain;
+            params.coneOuterGain =
+              outInParams && inOutParams
+                ? Math.min(outInParams.coneOuterGain, inOutParams.coneOuterGain)
+                : params.coneOuterGain;
+            source.apply(params);
+          } else {
+            source.restore();
+          }
         }
       }
-    });
-  }
+    };
+  })();
 
   // Updates zones states in case they have changed.
   _updateZones() {
-    this.zones.forEach(zone => {
+    for (let i = 0; i < this.zones.length; i++) {
+      const zone = this.zones[i];
       if (!zone.isEnabled()) return;
 
       const isListenerInZone = zone.contains(this.listener.getPosition());
@@ -156,6 +160,6 @@ export class AudioZonesSystem {
           source.entity.removeZone(zone);
         }
       });
-    });
+    }
   }
 }

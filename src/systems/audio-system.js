@@ -1,5 +1,10 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
 
+export const MixerType = Object.freeze({
+  AVATAR: 0,
+  MEDIA: 1
+});
+
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
   if (delayedReconnectTimeout) {
@@ -137,12 +142,12 @@ export class AudioSystem {
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
     this.audioContextNeedsToBeResumed = false;
 
-    this.mediaNodes = [];
-    this.mediaGainNode = this.audioContext.createGain();
-    this.mediaGainNode.connect(this._sceneEl.audioListener.getInput());
-    this.voiceNodes = [];
-    this.voiceGainNode = this.audioContext.createGain();
-    this.voiceGainNode.connect(this._sceneEl.audioListener.getInput());
+    this.mixer = {
+      [MixerType.AVATAR]: this.audioContext.createGain(),
+      [MixerType.MEDIA]: this.audioContext.createGain()
+    };
+    this.mixer[MixerType.MEDIA].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[MixerType.AVATAR].connect(this._sceneEl.audioListener.getInput());
 
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
@@ -175,49 +180,25 @@ export class AudioSystem {
     }
   }
 
-  addAudioToMedia(audio) {
-    this.removeAudioFromMedia(audio);
-    this.mediaNodes.push(audio);
-    audio.getOutput().connect(this.mediaGainNode);
+  addAudio(mixerTrack, audioNode) {
+    this.removeAudio(audioNode);
+    audioNode.getOutput().connect(this.mixer[mixerTrack]);
   }
 
-  removeAudioFromMedia(audio) {
-    const index = this.mediaNodes.indexOf(audio);
-    if (index !== -1) {
-      this.mediaNodes.splice(index, 1);
-    }
-    audio.getOutput().disconnect();
-    audio.sourceType !== "empty" && audio.disconnect();
-  }
-
-  addAudioToVoice(audio) {
-    this.removeAudioFromVoice(audio);
-    this.voiceNodes.push(audio);
-    audio.getOutput().connect(this.voiceGainNode);
-  }
-
-  removeAudioFromVoice(audio) {
-    const index = this.voiceNodes.indexOf(audio);
-    if (index !== -1) {
-      this.voiceNodes.splice(index, 1);
-    }
-    audio.getOutput().disconnect();
-    audio.sourceType !== "empty" && audio.disconnect();
+  removeAudio(audioNode) {
+    audioNode.getOutput().disconnect();
+    audioNode.sourceType !== "empty" && audioNode.disconnect();
   }
 
   updatePrefs() {
     const { globalVoiceVolume, globalMediaVolume } = window.APP.store.state.preferences;
     let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
     newGain = Math.max(0.001, newGain);
-    this.mediaGainNode.gain.exponentialRampToValueAtTime(newGain, this.audioContext.currentTime + 1);
+    this.mixer[MixerType.MEDIA].gain.exponentialRampToValueAtTime(newGain, this.audioContext.currentTime + 1);
 
     newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
     newGain = Math.max(0.001, newGain);
-    this.voiceGainNode.gain.exponentialRampToValueAtTime(newGain, this.audioContext.currentTime + 1);
-  }
-
-  getMediaGain() {
-    return this._sceneEl.mediaListener?.gain.gain.value;
+    this.mixer[MixerType.AVATAR].gain.exponentialRampToValueAtTime(newGain, this.audioContext.currentTime + 1);
   }
 
   /**
