@@ -9,7 +9,7 @@ import { Button } from "../input/Button";
 import styleUtils from "../styles/style-utils.scss";
 import styles from "./Tokens.scss";
 
-export const TokenList = ({ tokens, onRevokeToken }) => {
+export const TokenList = ({ tokens, onRevokeToken, onCreateToken }) => {
   return (
     <div>
       <TokenMenuHeader />

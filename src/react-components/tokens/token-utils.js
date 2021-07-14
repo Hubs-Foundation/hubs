@@ -1,9 +1,10 @@
 import { fetchReticulumAuthenticated, getReticulumFetchUrl } from "../../utils/phoenix-utils.js";
+import { defineMessages } from "react-intl";
 
 const ENDPOINT = "/api/v2_alpha/credentials";
 const CREDENTIALS_ENDPOINT_URL = getReticulumFetchUrl(ENDPOINT);
 
-export function fetchMyTokens() {
+export async function fetchMyTokens() {
   return fetchReticulumAuthenticated(ENDPOINT).then(function(tokens) {
     console.log(tokens);
     return tokens.credentials;

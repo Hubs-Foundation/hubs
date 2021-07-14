@@ -11,76 +11,96 @@ import { Row } from "../layout/Row";
 import { CheckboxInput } from "../input/CheckboxInput";
 import { RadioInputField } from "../input/RadioInputField";
 import { RadioInputOption } from "../input/RadioInput";
+import { defineMessages } from "react-intl";
 
-export const CreateToken = ({ scopes, scopeInfo, selectedScopes }) => (
+export const CreateToken = ({ scopes, selectedScopes, toggleSelectedScopes, error, showNoScopesSelectedError }) => (
   <div>
     <h1>
       <FormattedMessage id="new-token.title" defaultMessage="New Token" />
     </h1>
-    <Row gap="xl" breakpointColumn="md" topMargin="sm">
-      <h2 className={styleUtils.flexBasis40}>
-        <FormattedMessage id="new-token.token-type" defaultMessage="Token type" />
-      </h2>
-      <Row className={styleUtils.flexBasis60}>
-        <RadioInputField className={styles.flexDirectionRow} inputClassName={styles.flexDirectionRow}>
-          <RadioInputOption
-            className={classNames(styleUtils.flexBasis50, styleUtils.margin0)}
-            labelClassName={styles.radioLabel}
-            value={1}
-            label="Account"
-          />
-          <RadioInputOption
-            labelClassName={styles.radioLabel}
-            className={classNames(styleUtils.flexBasis50, styleUtils.margin0)}
-            value={2}
-            label="App"
-          />
-        </RadioInputField>
-      </Row>
-    </Row>
-    <Divider />
-    <Column gap="xl">
-      <h2>
-        <FormattedMessage id="new-token.select-scopes-title" defaultMessage="Select scopes" />
-      </h2>
-      <p>
-        <FormattedMessage
-          id="new-token.select-scopes-description"
-          defaultMessage="Set the level of access this token will have by choosing from the scopes list."
-        />
-      </p>
-    </Column>
-    <Column>
-      {scopes.map(scopeName => {
-        const curScopeInfo = scopeInfo[scopeName];
-        return (
-          <SelectScope
-            key={scopeName}
-            scopeName={scopeName}
-            curScopeInfo={curScopeInfo}
-            selected={selectedScopes.includes(scopeName)}
-          />
-        );
-      })}
-    </Column>
-    <Row spaceBetween className={styleUtils.xlMarginBottom}>
-      <Button sm preset="basic">
-        <FormattedMessage id="new-token.back" defaultMessage="Back" />
-      </Button>
-      <Button sm preset="primary">
-        <FormattedMessage id="new-token.generate" defaultMessage="Generate" />
-      </Button>
-    </Row>
+    {error ? (
+      <p>{`An Error occured: ${error}`}</p>
+    ) : (
+      <>
+        <Row gap="xl" breakpointColumn="md" topMargin="sm">
+          <h2 className={styleUtils.flexBasis40}>
+            <FormattedMessage id="new-token.token-type" defaultMessage="Token type" />
+          </h2>
+          <Row className={styleUtils.flexBasis60}>
+            <RadioInputField className={styles.flexDirectionRow} inputClassName={styles.flexDirectionRow}>
+              <RadioInputOption
+                className={classNames(styleUtils.flexBasis50, styleUtils.margin0)}
+                labelClassName={styles.radioLabel}
+                value={1}
+                label="Account"
+              />
+              <RadioInputOption
+                labelClassName={styles.radioLabel}
+                className={classNames(styleUtils.flexBasis50, styleUtils.margin0)}
+                value={2}
+                label="App"
+              />
+            </RadioInputField>
+          </Row>
+        </Row>
+        <Divider />
+        <Column gap="xl">
+          <h2>
+            <FormattedMessage id="new-token.select-scopes-title" defaultMessage="Select scopes" />
+          </h2>
+          <p>
+            <FormattedMessage
+              id="new-token.select-scopes-description"
+              defaultMessage="Set the level of access this token will have by choosing from the scopes list."
+            />
+          </p>
+        </Column>
+        <Column>
+          {scopes.map(scopeName => {
+            return <SelectScope key={scopeName} scopeName={scopeName} selected={selectedScopes.includes(scopeName)} />;
+          })}
+        </Column>
+        <Row spaceBetween className={styleUtils.xlMarginBottom}>
+          {showNoScopesSelectedError && <p>No scopes selected</p>}
+          <Button sm preset="basic">
+            <FormattedMessage id="new-token.back" defaultMessage="Back" />
+          </Button>
+          <Button sm preset="primary">
+            <FormattedMessage id="new-token.generate" defaultMessage="Generate" />
+          </Button>
+        </Row>
+      </>
+    )}
   </div>
 );
 
 CreateToken.propTypes = {
   scopes: PropTypes.array,
-  scopeInfo: PropTypes.object,
-  selectedScopes: PropTypes.selectedScopes
+  selectedScopes: PropTypes.selectedScopes,
+  toggleSelectedScopes: PropTypes.func,
+  error: PropTypes.string,
+  showNoScopesSelectedError: PropTypes.bool
 };
 
-const SelectScope = ({ scopeName, curScopeInfo: scopeInfo, selected }) => {
+// Ideally this would be fetched from the backend,
+// but to ensure translations, we're defining it here.
+const scopeInfo = {
+  write_rooms: defineMessages({
+    description: {
+      id: "new-token-scopes.write-rooms.description",
+      defaultMessage: "Write room data"
+    }
+  }),
+  read_rooms: defineMessages({
+    description: {
+      id: "new-token-scopes.read-rooms.description",
+      defaultMessage: "Read room data"
+    }
+  })
+};
+
+const SelectScope = ({ scopeName, selected }) => {
+  const { description } = scopeInfo[scopeName];
   return (
     <Row
       padding="sm"
@@ -92,7 +112,7 @@ const SelectScope = ({ scopeName, curScopeInfo: scopeInfo, selected }) => {
         <CheckboxInput label={scopeName} checked={selected} labelClassName={styles.checkboxLabel} />
       </Row>
       <Column className={styleUtils.flexBasis60}>
-        <p>{scopeInfo && scopeInfo.description}</p>
+        <p>{description && <FormattedMessage id="bah" defaultMessage="I am static message" />}</p>
         <Row topMargin="sm" childrenMarginR="xs">
           {scopeInfo &&
             scopeInfo.tags.map(tag => (
@@ -108,6 +128,5 @@ const SelectScope = ({ scopeName, curScopeInfo: scopeInfo, selected }) => {
 
 SelectScope.propTypes = {
   scopeName: PropTypes.string,
-  curScopeInfo: PropTypes.object,
   selected: PropTypes.bool
 };

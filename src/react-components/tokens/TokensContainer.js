@@ -9,20 +9,28 @@ import { TokenList } from "./TokenList";
 import { NoAccess } from "./NoAccess";
 import { CenteredModalWrapper } from "../layout/CenteredModalWrapper";
 import { AuthContext } from "../auth/AuthContext";
+import { BrowserRouter, Route } from "react-router-dom";
+import { CreateTokenContainer } from "./CreateTokenContainer";
+import { CreateToken } from "./CreateToken";
 
 export function TokensContainer() {
   const [tokens, setTokens] = useState([]);
-  //  const [showRevealTokenModal, setRevealTokenModal] = useState(false);
+  const [showRevealTokenModal, setRevealTokenModal] = useState(false);
   //  const [showRevokeTokenModal, setShowRevokeTokenModal] = useState(false);
   //  const [selectedRevokeId, setSelectedRevokeId] = useState();
   const auth = useContext(AuthContext); // Re-render when you log in/out.
+  console.log(auth);
+  console.log(NoAccess);
 
-  useEffect(() => {
-    // async function updateTokens() {
-    //   setTokens(await fetchMyTokens());
-    // }
-    // updateTokens();
-  }, []);
+  useEffect(
+    () => {
+      async function updateTokens() {
+        setTokens(await fetchMyTokens());
+      }
+      if (auth?.isAdmin) updateTokens();
+    },
+    [auth.isAdmin]
+  );
 
   const onRevealTokenModalClose = async ({ createdNewToken }) => {
     // setRevealTokenModal(false);
@@ -36,6 +44,8 @@ export function TokensContainer() {
     // setShowRevokeTokenModal(false);
     // setSelectedRevokeId("");
   };
+
+  console.log(auth);
 
   return (
     <div>
@@ -51,18 +61,18 @@ export function TokensContainer() {
         //     </CenteredModalWrapper>
         //   )}
       }
-
-      <button
-        as="a"
-        preset="primary"
-        onClick={() => {
-          //          if (!showRevealTokenModal) setRevealTokenModal(true);
-        }}
-      >
-        <FormattedMessage id="tokens.create-token" defaultMessage="Create Token" />
-      </button>
-      {auth?.isAdmin ? <TokenList /> : <NoAccess />}
-
+      {auth?.isAdmin ? (
+        <BrowserRouter>
+          <Route path="/asd">
+            <TokenList tokens={tokens} onRevokeToken={onRevokeTokenClose} />
+          </Route>
+          <Route path="/">
+            <CreateTokenContainer />
+          </Route>
+        </BrowserRouter>
+      ) : (
+        <NoAccess />
+      )}
       {tokens.map(t => {
         return (
           <Token
