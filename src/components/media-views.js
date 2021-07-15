@@ -663,7 +663,8 @@ AFRAME.registerComponent("media-video", {
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
       } else {
-        geometry = new THREE.PlaneBufferGeometry();
+        const flipY = texture.isVideoTexture ? texture.flipY : audioIconTexture.flipY;
+        geometry = createPlaneBufferGeometry(undefined, undefined, undefined, undefined, flipY);
         material.side = THREE.DoubleSide;
       }
 
