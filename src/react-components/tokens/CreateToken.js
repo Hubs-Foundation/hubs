@@ -30,7 +30,7 @@ export const CreateToken = ({
       <FormattedMessage id="new-token.title" defaultMessage="New Token" />
     </h1>
     {error && (
-      <Row>
+      <Row className>
         <p>{`An Error occured: ${error}`}</p>
       </Row>
     )}
@@ -78,8 +78,12 @@ export const CreateToken = ({
         );
       })}
     </Column>
+    {showNoScopesSelectedError && (
+      <Row>
+        <p>Please select at least one scope.</p>
+      </Row>
+    )}
     <Row spaceBetween className={styleUtils.xlMarginBottom}>
-      {showNoScopesSelectedError && <p>No scopes selected</p>}
       <Button sm preset="basic">
         <FormattedMessage id="new-token.back" defaultMessage="Back" />
       </Button>
@@ -91,7 +95,6 @@ export const CreateToken = ({
         <FormattedMessage id="new-token.generate" defaultMessage="Generate" />
       </Button>
     </Row>
-    )}
   </div>
 );
 

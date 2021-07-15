@@ -9,7 +9,7 @@ import { TokenList } from "./TokenList";
 import { NoAccess } from "./NoAccess";
 import { CenteredModalWrapper } from "../layout/CenteredModalWrapper";
 import { AuthContext } from "../auth/AuthContext";
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
 import { CreateTokenContainer } from "./CreateTokenContainer";
 import { CreateToken } from "./CreateToken";
 
@@ -63,30 +63,18 @@ export function TokensContainer() {
       }
       {auth?.isAdmin ? (
         <BrowserRouter>
-          <Route path="/asd">
-            <TokenList tokens={tokens} onRevokeToken={onRevokeTokenClose} />
-          </Route>
-          <Route path="/">
-            <CreateTokenContainer />
-          </Route>
+          <Switch>
+            <Route path="/tokens/create">
+              <CreateTokenContainer />
+            </Route>
+            <Route path="/">
+              <TokenList tokens={tokens} onRevokeToken={onRevokeTokenClose} />
+            </Route>
+          </Switch>
         </BrowserRouter>
       ) : (
         <NoAccess />
       )}
-      {tokens.map(t => {
-        return (
-          <Token
-            showRevokeToken={id => {
-              // if (!showRevokeTokenModal) {
-              //   setSelectedRevokeId(id);
-              //   setShowRevokeTokenModal(true);
-              // }
-            }}
-            key={t.id}
-            {...t}
-          />
-        );
-      })}
     </div>
   );
 }

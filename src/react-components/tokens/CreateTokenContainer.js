@@ -2,6 +2,7 @@ import React, { useReducer, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 // import { Spinner } from "../misc/Spinner";
 import { CreateToken } from "./CreateToken";
+import { RevealTokenModal } from "./RevealTokenModal";
 import { createToken, fetchAvailableScopes } from "./token-utils";
 
 const CreateTokenActions = {
@@ -30,7 +31,8 @@ const initialCreateTokenState = {
   selectedTokenType: "account",
   token: "",
   error: "",
-  showNoScopesSelectedError: false
+  showNoScopesSelectedError: false,
+  showRevealTokenModal: false
 };
 
 function createTokenReducer(state, action) {
@@ -41,9 +43,9 @@ function createTokenReducer(state, action) {
     case CreateTokenActions.submitCreateToken:
       return { ...state, step: steps.pending };
     case CreateTokenActions.createTokenSuccess:
-      return { ...state, step: steps.success, token: action.token };
+      return { ...state, showRevealTokenModal: true, token: action.token };
     case CreateTokenActions.createTokenError:
-      return { ...state, step: steps.error, error: action.errorMsg };
+      return { ...state, error: action.errorMsg };
     case CreateTokenActions.fetchingScopesSuccess:
       console.log("FETCHED SCOPES");
       return { ...state, scopes: action.scopes };
@@ -120,15 +122,16 @@ function useCreateToken() {
     fetchScopes,
     toggleSelectedScopes,
     toggleTokenType,
-    selectedTokenType: state.selectedTokenType
+    selectedTokenType: state.selectedTokenType,
+    showRevealTokenModal: state.showRevealTokenModal
   };
 }
 
-export const CreateTokenContainer = () => {
+export const CreateTokenContainer = ({ onClose }) => {
   const {
-    step,
     scopes,
     selectedScopes,
+    showRevealTokenModal,
     token,
     error,
     showNoScopesSelectedError,
@@ -147,36 +150,18 @@ export const CreateTokenContainer = () => {
   );
 
   return (
-    <CreateToken
-      showNoScopesSelectedError={showNoScopesSelectedError}
-      onCreateToken={onCreateToken}
-      selectedScopes={selectedScopes}
-      selectedTokenType={selectedTokenType}
-      scopes={scopes}
-      toggleSelectedScopes={toggleSelectedScopes}
-      toggleTokenType={toggleTokenType}
-      error={error}
-    />
+    <>
+      {showRevealTokenModal && <RevealTokenModal token={token} selectedScopes={selectedScopes} onClose={onClose} />}
+      <CreateToken
+        showNoScopesSelectedError={showNoScopesSelectedError}
+        onCreateToken={onCreateToken}
+        selectedScopes={selectedScopes}
+        selectedTokenType={selectedTokenType}
+        scopes={scopes}
+        toggleSelectedScopes={toggleSelectedScopes}
+        toggleTokenType={toggleTokenType}
+        error={error}
+      />
+    </>
   );
 };
-
-// CreateTokenContainer.propTypes = {
-//  onClose: PropTypes.func
-// };
-
-//  <CreateTokenModal onClose={() => onClose({ createdNewToken: !!token })}>
-//    {step === steps.selectScopes && (
-//      <SelectScopesAndCreate
-//        showNoScopesError={showNoScopesSelectedError}
-//        onCreateToken={onCreateToken}
-//        selectedScopes={selectedScopes}
-//        scopes={scopes}
-//        toggleSelectedScopes={toggleSelectedScopes}
-//      />
-//    )}
-//    {step === steps.pending && <Spinner />}
-//    {step === steps.success && (
-//      <ShowCredentialsOnce token={token} onClose={() => onClose({ createdNewToken: !!token })} />
-//    )}
-//    {step === steps.error && <Error errorMsg={error} onClose={onClose} />}
-//  </CreateTokenModal>

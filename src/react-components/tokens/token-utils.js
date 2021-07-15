@@ -19,12 +19,13 @@ function getHeaders() {
 
 export async function createToken({ tokenType, scopes }) {
   console.log(scopes);
+  console.log("tokenType " + tokenType);
   const res = await fetch(CREDENTIALS_ENDPOINT_URL, {
     headers: getHeaders(),
     method: "POST",
     body: JSON.stringify({
       scopes,
-      subjec_type: tokenType
+      subject_type: tokenType
     })
   });
   if (res.ok) {

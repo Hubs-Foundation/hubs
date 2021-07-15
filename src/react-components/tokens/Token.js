@@ -6,6 +6,7 @@ import { Row } from "../layout/Row";
 import styles from "./Token.scss";
 
 export function Token({ tokenInfo, onRevokeToken }) {
+  console.log(tokenInfo);
   const { account_id, id, inserted_at, is_revoked, scopes, subject_type, token, updated_at } = tokenInfo;
 
   return (

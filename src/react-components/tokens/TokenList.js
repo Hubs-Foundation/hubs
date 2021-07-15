@@ -8,6 +8,7 @@ import { FormattedMessage } from "react-intl";
 import { Button } from "../input/Button";
 import styleUtils from "../styles/style-utils.scss";
 import styles from "./Tokens.scss";
+import { Link } from "react-router-dom";
 
 export const TokenList = ({ tokens, onRevokeToken, onCreateToken }) => {
   return (
@@ -17,9 +18,11 @@ export const TokenList = ({ tokens, onRevokeToken, onCreateToken }) => {
         <h2>
           <FormattedMessage id="empty-token.title2" defaultMessage="Token List" />
         </h2>
-        <Button preset="primary" sm>
-          <FormattedMessage id="tokens.button-create-token" defaultMessage="Create token" />
-        </Button>
+        <Link to="/tokens/create">
+          <Button preset="primary" sm>
+            <FormattedMessage id="tokens.button-create-token" defaultMessage="Create token" />
+          </Button>
+        </Link>
       </Row>
       {tokens && tokens.length ? (
         <Column className={styleUtils.xlMarginY}>
