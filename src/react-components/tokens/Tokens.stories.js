@@ -14,28 +14,6 @@ export default {
 
 const scopes = ["read_rooms", "write_rooms", "another_long_scope_here"];
 
-const scopeInfo = {
-  ["read_rooms"]: {
-    description: "Read room data",
-    appTags: [],
-    accountTags: [],
-    tags: ["myRooms", "favoriteRooms", "publicRooms"]
-  },
-  ["write_rooms"]: {
-    description: "Write room data",
-    appTags: [],
-    accountTags: [],
-    tags: ["createRooms", "updateRoom"]
-  },
-  ["another_long_scope_here"]: {
-    description:
-      "This scope does a lot of interesting things and as such we're going to need a lot of room to write about it.",
-    appTags: [],
-    accountTags: [],
-    tags: ["myRooms", "favoriteRooms", "publicRooms"]
-  }
-};
-
 const dummyTokens = [
   {
     account_id: "1234567890",
@@ -120,7 +98,7 @@ const selectedScopes = ["read_rooms", "write_rooms"];
 export const CreateTokenPage = ({ children }) => (
   <StorybookWrapper>
     {children}
-    <CreateToken scopes={scopes} scopeInfo={scopeInfo} selectedScopes={selectedScopes} />
+    <CreateToken scopes={scopes} selectedScopes={selectedScopes} />
   </StorybookWrapper>
 );
 

@@ -12,7 +12,8 @@ const CreateTokenActions = {
   fetchingScopesSuccess: "fetchingScopesSuccess",
   fetchingScopesError: "fetchingScopesError",
   showNoScopesError: "showNoScopesError",
-  toggleScopeChange: "toggleScopeChange"
+  toggleScopeChange: "toggleScopeChange",
+  toggleTokenTypeChange: "toggleTokenTypeChange"
 };
 
 const steps = {
@@ -26,6 +27,7 @@ const initialCreateTokenState = {
   step: steps.selectScopes,
   scopes: [],
   selectedScopes: [],
+  selectedTokenType: "account",
   token: "",
   error: "",
   showNoScopesSelectedError: false
@@ -57,6 +59,12 @@ function createTokenReducer(state, action) {
           : [...state.selectedScopes, action.scopeName]
       };
     }
+    case CreateTokenActions.toggleTokenTypeChange: {
+      return {
+        ...state,
+        selectedTokenType: action.tokenTypeValue
+      };
+    }
     default:
       return state;
   }
@@ -65,14 +73,14 @@ function createTokenReducer(state, action) {
 function useCreateToken() {
   const [state, dispatch] = useReducer(createTokenReducer, initialCreateTokenState);
 
-  const onCreateToken = async ({ scopes }) => {
+  const onCreateToken = async ({ tokenType, scopes }) => {
     // TODO add no scopes error to the view
     if (scopes.length === 0) return dispatch({ type: CreateTokenActions.showNoScopesError });
 
     dispatch({ type: CreateTokenActions.submitCreateToken });
 
     try {
-      const tokenInfoObj = await createToken({ scopes });
+      const tokenInfoObj = await createToken({ tokenType, scopes });
       const token = tokenInfoObj.credentials[0].token;
       dispatch({ type: CreateTokenActions.createTokenSuccess, token });
     } catch (err) {
@@ -97,6 +105,10 @@ function useCreateToken() {
     dispatch({ type: CreateTokenActions.toggleScopeChange, scopeName });
   };
 
+  const toggleTokenType = tokenTypeValue => {
+    dispatch({ type: CreateTokenActions.toggleTokenTypeChange, tokenTypeValue });
+  };
+
   return {
     step: state.step,
     scopes: state.scopes,
@@ -106,7 +118,9 @@ function useCreateToken() {
     showNoScopesSelectedError: state.showNoScopesSelectedError,
     onCreateToken,
     fetchScopes,
-    toggleSelectedScopes
+    toggleSelectedScopes,
+    toggleTokenType,
+    selectedTokenType: state.selectedTokenType
   };
 }
 
@@ -120,7 +134,9 @@ export const CreateTokenContainer = () => {
     showNoScopesSelectedError,
     onCreateToken,
     fetchScopes,
-    toggleSelectedScopes
+    toggleSelectedScopes,
+    toggleTokenType,
+    selectedTokenType
   } = useCreateToken();
 
   useEffect(
@@ -135,8 +151,11 @@ export const CreateTokenContainer = () => {
       showNoScopesSelectedError={showNoScopesSelectedError}
       onCreateToken={onCreateToken}
       selectedScopes={selectedScopes}
+      selectedTokenType={selectedTokenType}
       scopes={scopes}
       toggleSelectedScopes={toggleSelectedScopes}
+      toggleTokenType={toggleTokenType}
+      error={error}
     />
   );
 };

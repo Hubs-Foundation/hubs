@@ -1,5 +1,4 @@
 import { fetchReticulumAuthenticated, getReticulumFetchUrl } from "../../utils/phoenix-utils.js";
-import { defineMessages } from "react-intl";
 
 const ENDPOINT = "/api/v2_alpha/credentials";
 const CREDENTIALS_ENDPOINT_URL = getReticulumFetchUrl(ENDPOINT);
@@ -18,14 +17,14 @@ function getHeaders() {
   };
 }
 
-export async function createToken({ scopes }) {
+export async function createToken({ tokenType, scopes }) {
   console.log(scopes);
   const res = await fetch(CREDENTIALS_ENDPOINT_URL, {
     headers: getHeaders(),
     method: "POST",
     body: JSON.stringify({
       scopes,
-      subjec_type: "account"
+      subjec_type: tokenType
     })
   });
   if (res.ok) {
@@ -33,7 +32,9 @@ export async function createToken({ scopes }) {
   } else {
     console.log(res.status);
     console.log(res.statusText);
-    throw new Error(res.statusText);
+    throw new Error(
+      res.statusText ? res.statusText : "Something went wrong with creating a new token. Please try again."
+    );
   }
   // TODO handle error case
 }
