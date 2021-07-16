@@ -587,7 +587,8 @@ export default class DialogAdapter extends EventEmitter {
       this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
       this._sendTransport.observer.on("close", () => {
         this.emitRTCEvent("info", "RTC", () => `Send transport [close]`);
-        !this._sendTransport?._closed && this._sendTransport.close();
+        // TODO uncomment without calling close() twice
+        // !this._sendTransport?._closed && this._sendTransport.close();
       });
       this._sendTransport.observer.on("newproducer", producer => {
         this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
@@ -633,9 +634,10 @@ export default class DialogAdapter extends EventEmitter {
       }
     });
 
-    if (this._localMediaStream) {
-      await this.setLocalMediaStream(this._localMediaStream);
-    }
+    // TODO: Can we remove this?
+    // if (this._localMediaStream) {
+    //   await this.setLocalMediaStream(this._localMediaStream);
+    // }
   }
 
   async closeSendTransport() {
@@ -651,13 +653,16 @@ export default class DialogAdapter extends EventEmitter {
       this._videoProducer = null;
     }
 
+    // TODO: If _sendTransport is falsey then return
+    const transportId = this._sendTransport?.id;
     if (this._sendTransport && !this._sendTransport._closed) {
       this._sendTransport.close();
+      this._sendTransport = null;
     }
 
     if (this._protoo?.connected) {
       try {
-        await this._protoo.request("closeWebRtcTransport", { transportId: this._sendTransport?.id });
+        await this._protoo.request("closeWebRtcTransport", { transportId });
       } catch (err) {
         error(err);
       }
@@ -690,7 +695,8 @@ export default class DialogAdapter extends EventEmitter {
       this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
       this._recvTransport.observer.on("close", () => {
         this.emitRTCEvent("info", "RTC", () => `Receive transport [close]`);
-        !this._recvTransport?._closed && this._recvTransport.close();
+        // TODO uncomment without calling close() twice
+        // !this._recvTransport?._closed && this._recvTransport.close();
       });
       this._recvTransport.observer.on("newproducer", producer => {
         this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
@@ -720,12 +726,14 @@ export default class DialogAdapter extends EventEmitter {
   }
 
   async closeRecvTransport() {
+    const transportId = this._recvTransport?.id;
     if (this._recvTransport && !this._recvTransport._closed) {
       this._recvTransport.close();
+      this._recvTransport = null;
     }
     if (this._protoo?.connected) {
       try {
-        await this._protoo.request("closeWebRtcTransport", { transportId: this._recvTransport?.id });
+        await this._protoo.request("closeWebRtcTransport", { transportId });
       } catch (err) {
         error(err);
       }
@@ -965,6 +973,7 @@ export default class DialogAdapter extends EventEmitter {
       this._protoo.close();
     }
     setTimeout(() => {
+      // TODO: Give connect the params it needs to be successful
       this.connect();
     }, timeout);
   }
