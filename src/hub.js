@@ -577,7 +577,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
 
   scene.setAttribute("networked-scene", {
     room: hub.hub_id,
-    serverURL: `wss://${hub.host}:${hub.port}`,
+    serverURL: `wss://${hub.host}:${hub.port}`, // TODO: This is confusing because this is the dialog host and port.
     debug: !!isDebug,
     adapter: "phoenix"
   });
