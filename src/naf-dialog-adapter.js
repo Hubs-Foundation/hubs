@@ -944,12 +944,12 @@ export class DialogAdapter extends EventEmitter {
     }
   }
 
-  kick(clientId, permsToken) {
+  kick(clientId) {
     return this._protoo
       .request("kick", {
         room_id: this.room,
         user_id: clientId,
-        token: permsToken
+        token: this._joinToken
       })
       .then(() => {
         document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
