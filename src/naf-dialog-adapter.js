@@ -633,11 +633,6 @@ export default class DialogAdapter extends EventEmitter {
         errback(error);
       }
     });
-
-    // TODO: Can we remove this?
-    // if (this._localMediaStream) {
-    //   await this.setLocalMediaStream(this._localMediaStream);
-    // }
   }
 
   async closeSendTransport() {
@@ -762,6 +757,11 @@ export default class DialogAdapter extends EventEmitter {
       sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
       token: this._joinToken
     });
+
+    if (this._localMediaStream) {
+      // TODO: Refactor to be "Create producers"
+      await this.setLocalMediaStream(this._localMediaStream);
+    }
 
     const audioConsumerPromises = [];
 

@@ -56,10 +56,8 @@ export async function changeHub(hubId, addToHistory = true) {
     initialIsFavorited: data.subscriptions.favorites
   });
 
-  await APP.mediaDevicesManager.stopMicShare();
   NAF.entities.removeRemoteEntities();
   await NAF.connection.adapter.disconnect();
-  const micState = APP.dialog.isMicEnabled;
   await APP.dialog.disconnect();
   unloadRoomObjects();
   NAF.connection.connectedClients = {};
@@ -90,8 +88,6 @@ export async function changeHub(hubId, addToHistory = true) {
     NAF.connection.adapter.connect()
   ]);
 
-  await APP.mediaDevicesManager.startMicShare();
-  APP.dialog.enableMicrophone(micState);
   loadRoomObjects(hubId);
 
   APP.hubChannel.sendEnteredEvent();
