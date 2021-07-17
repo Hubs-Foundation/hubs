@@ -13,6 +13,9 @@ AFRAME.registerSystem("audio-debug", {
   init() {
     window.APP.store.addEventListener("statechanged", this.updateState.bind(this));
 
+    this.onSceneLoaded = this.onSceneLoaded.bind(this);
+    this.el.sceneEl.addEventListener("environment-scene-loaded", this.onSceneLoaded);
+
     this.sources = [];
     this.zones = [];
 
@@ -66,6 +69,7 @@ AFRAME.registerSystem("audio-debug", {
 
   remove() {
     window.APP.store.removeEventListener("statechanged", this.updateState);
+    this.el.sceneEl.removeEventListener("environment-scene-loaded", this.onSceneLoaded);
   },
 
   registerSource(source) {
@@ -138,8 +142,8 @@ AFRAME.registerSystem("audio-debug", {
     this.material.uniforms.clipped.value = this.clipped;
   },
 
-  enableDebugMode(enabled) {
-    if (enabled === undefined || enabled === this.data.enabled) return;
+  enableDebugMode(enabled, force = false) {
+    if ((enabled === undefined || enabled === this.data.enabled) && !force) return;
     this.zones.forEach(zone => {
       zone.el.setAttribute("audio-zone", "debuggable", enabled);
     });
@@ -150,20 +154,20 @@ AFRAME.registerSystem("audio-debug", {
       const navMesh = meshEl.object3D;
       navMesh.visible = enabled;
       navMesh.traverse(obj => {
-        if (obj.material && obj instanceof THREE.Mesh) {
+        if (obj.isMesh) {
           obj.visible = enabled;
-          if (obj.material) {
-            if (enabled) {
-              obj._hubs_audio_debug_material = obj.material;
-              obj.material = this.material;
-            } else {
-              obj.material = obj._hubs_audio_debug_material;
-              obj._hubs_audio_debug_material = null;
-            }
-            obj.material.needsUpdate = true;
-            obj.geometry.computeFaceNormals();
-            obj.geometry.computeVertexNormals();
+          if (enabled) {
+            obj._hubs_audio_debug_material = obj.material;
+            obj.material = this.material;
+          } else {
+            obj.material = obj._hubs_audio_debug_material;
+            obj._hubs_audio_debug_material = null;
           }
+          if (obj.material) {
+            obj.material.needsUpdate = true;
+          }
+          obj.geometry.computeFaceNormals();
+          obj.geometry.computeVertexNormals();
         }
       });
     } else {
@@ -171,10 +175,14 @@ AFRAME.registerSystem("audio-debug", {
     }
   },
 
-  updateState() {
+  updateState(force = false) {
     const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel;
-    if (isEnabled !== undefined && isEnabled !== this.data.enabled) {
-      this.enableDebugMode(isEnabled);
+    if (force || (isEnabled !== undefined && isEnabled !== this.data.enabled)) {
+      this.enableDebugMode(isEnabled, force);
     }
+  },
+
+  onSceneLoaded() {
+    this.updateState(true);
   }
 });
