@@ -2,15 +2,13 @@ import React from "react";
 import styles from "./Tokens.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { Row } from "../layout/Row";
-import { ReactComponent as HubsDuckIcon } from "../../assets/images/footer-duck.svg";
+import { ReactComponent as HubsDuckIcon } from "../icons/footer-duck.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons/faTimesCircle";
 
 export const NoAccess = () => {
-  console.log("inside no access");
-  // console.log(HubsDuckIcon);
   return (
     <Column padding="xl" className={styles.noAccessContainer} lastChildMargin={false}>
       <Row noWrap>
@@ -38,9 +36,9 @@ export const NoAccess = () => {
           />
         </p>
       </div>
-      {/*<div className={styles.noAccessFooterDuckContainer}>
+      <div className={styles.noAccessFooterDuckContainer}>
         <HubsDuckIcon className={styles.noAccessFooterDuck} />
-      </div>*/}
+      </div>
     </Column>
   );
 };

@@ -30,9 +30,6 @@ const initialCreateTokenState = {
 };
 
 function createTokenReducer(state, action) {
-  console.log("inside reducer");
-  console.log(state);
-  console.log(action);
   switch (action.type) {
     case CreateTokenActions.submitCreateToken:
       return { ...state, isPending: true };
@@ -82,18 +79,15 @@ function useCreateToken() {
     }
   };
 
-  const fetchScopes = useCallback(
-    () => {
-      // TODO async fetch implement
-      try {
-        const scopes = fetchAvailableScopes();
-        dispatch({ type: CreateTokenActions.fetchingScopesSuccess, scopes });
-      } catch (err) {
-        dispatch({ type: CreateTokenActions.fetchingScopesError, errorMsg: err.message });
-      }
-    },
-    [state.scopes]
-  );
+  const fetchScopes = async () => {
+    try {
+      const fetchedScopes = await fetchAvailableScopes();
+      const scopes = fetchedScopes.scopes;
+      dispatch({ type: CreateTokenActions.fetchingScopesSuccess, scopes });
+    } catch (err) {
+      dispatch({ type: CreateTokenActions.fetchingScopesError, errorMsg: err.message });
+    }
+  };
 
   const toggleSelectedScopes = scopeName => {
     dispatch({ type: CreateTokenActions.toggleScopeChange, scopeName });
@@ -139,6 +133,7 @@ export const CreateTokenContainer = ({ onClose }) => {
     () => {
       fetchScopes();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [scopes[0]]
   );
 
