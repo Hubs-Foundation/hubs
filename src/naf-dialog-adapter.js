@@ -40,7 +40,6 @@ export default class DialogAdapter extends EventEmitter {
   constructor() {
     super();
 
-    this._timeOffsets = [];
     this._micShouldBeEnabled = false;
     this._micProducer = null;
     this._cameraProducer = null;
@@ -54,12 +53,11 @@ export default class DialogAdapter extends EventEmitter {
     this._blockedClients = new Map();
     this._forceTcp = false;
     this._forceTurn = false;
-    this._iceTransportPolicy = "all";
+    this._iceTransportPolicy = null;
     this._closed = true;
     this.scene = null;
     this._serverParams = {};
     this._consumerStats = {};
-    this._isReconnect = false;
   }
 
   get consumerStats() {
@@ -68,15 +66,6 @@ export default class DialogAdapter extends EventEmitter {
 
   get downlinkBwe() {
     return this._downlinkBwe;
-  }
-
-  setTurnConfig(forceTcp, forceTurn) {
-    this._forceTcp = forceTcp;
-    this._forceTurn = forceTurn;
-
-    if (this._forceTurn || this._forceTcp) {
-      this._iceTransportPolicy = "relay";
-    }
   }
 
   getIceServers(host, port, turn) {
@@ -107,10 +96,6 @@ export default class DialogAdapter extends EventEmitter {
     }
 
     return iceServers;
-  }
-
-  setClientId(clientId) {
-    this._clientId = clientId;
   }
 
   /**
@@ -254,12 +239,26 @@ export default class DialogAdapter extends EventEmitter {
     }
   }
 
-  async connect({ serverUrl, hubId, joinToken, serverParams, scene }) {
+  async connect({
+    serverUrl,
+    hubId,
+    joinToken,
+    serverParams,
+    scene,
+    clientId,
+    forceTcp,
+    forceTurn,
+    iceTransportPolicy
+  }) {
     this._serverUrl = serverUrl;
     this._roomId = hubId;
     this._joinToken = joinToken;
     this._serverParams = serverParams;
+    this._clientId = clientId;
     this.scene = scene;
+    this.forceTcp = forceTcp;
+    this.forceTurn = forceTurn;
+    this._iceTransportPolicy = iceTransportPolicy;
 
     const urlWithParams = new URL(this._serverUrl);
     urlWithParams.searchParams.append("roomId", this._roomId);
@@ -275,9 +274,6 @@ export default class DialogAdapter extends EventEmitter {
 
     this._protoo.on("failed", attempt => {
       this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
-      if (this._isReconnect) {
-        this._reconnectingListener && this._reconnectingListener();
-      }
     });
 
     this._protoo.on("close", () => {
@@ -289,12 +285,6 @@ export default class DialogAdapter extends EventEmitter {
       this._protoo.on("open", async () => {
         this.emitRTCEvent("info", "Signaling", () => `Open`);
         this._closed = false;
-        // We only need to call the reconnect callbacks if it's a reconnection.
-        if (this._isReconnect) {
-          this._reconnectedListener && this._reconnectedListener();
-        } else {
-          this._isReconnect = true;
-        }
 
         try {
           await this._joinRoom();
@@ -555,11 +545,6 @@ export default class DialogAdapter extends EventEmitter {
     }
   }
 
-  setReconnectionListeners(reconnectingListener, reconnectedListener) {
-    this._reconnectingListener = reconnectingListener;
-    this._reconnectedListener = reconnectedListener;
-  }
-
   async createSendTransport(iceServers) {
     // Create mediasoup Transport for sending (unless we don't want to produce).
     const sendTransportInfo = await this._protoo.request("createWebRtcTransport", {
@@ -587,8 +572,12 @@ export default class DialogAdapter extends EventEmitter {
       this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
       this._sendTransport.observer.on("close", () => {
         this.emitRTCEvent("info", "RTC", () => `Send transport [close]`);
-        // TODO uncomment without calling close() twice
-        // !this._sendTransport?._closed && this._sendTransport.close();
+        // TODO don't call close() twice
+        try {
+          !this._sendTransport?._closed && this._sendTransport.close();
+        } catch (e) {
+          console.error(e);
+        }
       });
       this._sendTransport.observer.on("newproducer", producer => {
         this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
@@ -691,7 +680,11 @@ export default class DialogAdapter extends EventEmitter {
       this._recvTransport.observer.on("close", () => {
         this.emitRTCEvent("info", "RTC", () => `Receive transport [close]`);
         // TODO uncomment without calling close() twice
-        // !this._recvTransport?._closed && this._recvTransport.close();
+        try {
+          !this._recvTransport?._closed && this._recvTransport.close();
+        } catch (e) {
+          console.error(e);
+        }
       });
       this._recvTransport.observer.on("newproducer", producer => {
         this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
@@ -946,7 +939,7 @@ export default class DialogAdapter extends EventEmitter {
     return this._micProducer && !this._micProducer.paused;
   }
 
-  async disconnect() {
+  disconnect() {
     if (this._closed) return;
 
     this._closed = true;
@@ -954,7 +947,8 @@ export default class DialogAdapter extends EventEmitter {
     debug("disconnect()");
 
     // Close mediasoup Transports.
-    await Promise.all([this.closeSendTransport(), this.closeRecvTransport()]);
+    this.closeSendTransport();
+    this.closeRecvTransport();
 
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
     if (this._protoo && this._protoo.connected) {
@@ -962,20 +956,6 @@ export default class DialogAdapter extends EventEmitter {
       this._protoo.close();
       this.emitRTCEvent("info", "Signaling", () => `[close]`);
     }
-  }
-
-  reconnect(timeout = 2000) {
-    // The Protoo WebSocketTransport server url cannot be updated after it's been created so we need to orce a diconnect/connect
-    // to make sure we are using the updated server url for the WSS if it has changed.
-    this.disconnect();
-    if (this._protoo) {
-      this._protoo.removeAllListeners();
-      this._protoo.close();
-    }
-    setTimeout(() => {
-      // TODO: Give connect the params it needs to be successful
-      this.connect();
-    }, timeout);
   }
 
   kick(clientId, permsToken) {
