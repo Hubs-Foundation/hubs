@@ -60,12 +60,16 @@ $tag-top-margin: theme.$spacing-xs;
   border: 2px solid theme.$blue;
 }
 
+:local(.unselected-border) {
+  border: 2px solid theme.$background1-color;
+}
+
 :local(.word-wrap) {
   word-break: break-word;
 }
 
 :local(.flex-direction-row) {
-  flex-direction: row;
+  flex-direction: row !important;
 }
 
 :local(.padding-Y-xl) {
@@ -82,7 +86,7 @@ $tag-top-margin: theme.$spacing-xs;
 }
 
 :local(.max-width-auto) {
-  max-width: none;
+  max-width: none !important;
 }
 
 :local(.max-width-400) {

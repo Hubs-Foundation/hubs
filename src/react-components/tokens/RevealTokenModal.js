@@ -14,7 +14,6 @@ import classNames from "classnames";
 import { CopyableTextInputField } from "../input/CopyableTextInputField";
 
 export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
-  // TODO add copy token functionality
   return (
     <Modal
       titleNode={

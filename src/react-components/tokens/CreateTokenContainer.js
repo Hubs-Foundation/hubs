@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { CreateToken } from "./CreateToken";
 import { RevealTokenModal } from "./RevealTokenModal";
 import { createToken, fetchAvailableScopes } from "./token-utils";
+import { CenteredModalWrapper } from "../layout/CenteredModalWrapper";
 
 const CreateTokenActions = {
   submitCreateToken: "submitCreateToken",
@@ -17,22 +18,15 @@ const CreateTokenActions = {
   toggleTokenTypeChange: "toggleTokenTypeChange"
 };
 
-const steps = {
-  selectScopes: "selectScopes",
-  success: "success",
-  pending: "pending",
-  error: "error"
-};
-
 const initialCreateTokenState = {
-  step: steps.selectScopes,
   scopes: [],
   selectedScopes: [],
   selectedTokenType: "account",
   token: "",
   error: "",
   showNoScopesSelectedError: false,
-  showRevealTokenModal: false
+  showRevealTokenModal: false,
+  isPending: false
 };
 
 function createTokenReducer(state, action) {
@@ -41,16 +35,15 @@ function createTokenReducer(state, action) {
   console.log(action);
   switch (action.type) {
     case CreateTokenActions.submitCreateToken:
-      return { ...state, step: steps.pending };
+      return { ...state, isPending: true };
     case CreateTokenActions.createTokenSuccess:
-      return { ...state, showRevealTokenModal: true, token: action.token };
+      return { ...state, isPending: false, showRevealTokenModal: true, token: action.token };
     case CreateTokenActions.createTokenError:
-      return { ...state, error: action.errorMsg };
+      return { ...state, isPending: false, error: action.errorMsg };
     case CreateTokenActions.fetchingScopesSuccess:
-      console.log("FETCHED SCOPES");
       return { ...state, scopes: action.scopes };
     case CreateTokenActions.fetchingScopesError:
-      return { ...state, step: steps.error, error: "Error fetching scopes, please try again later." };
+      return { ...state, error: "Error fetching scopes, please try again later." };
     case CreateTokenActions.showNoScopesError:
       return { ...state, showNoScopesSelectedError: true };
     case CreateTokenActions.toggleScopeChange: {
@@ -76,7 +69,6 @@ function useCreateToken() {
   const [state, dispatch] = useReducer(createTokenReducer, initialCreateTokenState);
 
   const onCreateToken = async ({ tokenType, scopes }) => {
-    // TODO add no scopes error to the view
     if (scopes.length === 0) return dispatch({ type: CreateTokenActions.showNoScopesError });
 
     dispatch({ type: CreateTokenActions.submitCreateToken });
@@ -112,7 +104,7 @@ function useCreateToken() {
   };
 
   return {
-    step: state.step,
+    isPending: state.isPending,
     scopes: state.scopes,
     selectedScopes: state.selectedScopes,
     token: state.token,
@@ -139,7 +131,8 @@ export const CreateTokenContainer = ({ onClose }) => {
     fetchScopes,
     toggleSelectedScopes,
     toggleTokenType,
-    selectedTokenType
+    selectedTokenType,
+    isPending
   } = useCreateToken();
 
   useEffect(
@@ -151,7 +144,15 @@ export const CreateTokenContainer = ({ onClose }) => {
 
   return (
     <>
-      {showRevealTokenModal && <RevealTokenModal token={token} selectedScopes={selectedScopes} onClose={onClose} />}
+      {showRevealTokenModal && (
+        <CenteredModalWrapper>
+          <RevealTokenModal
+            token={token}
+            selectedScopes={selectedScopes}
+            onClose={() => onClose({ createdNewToken: true })}
+          />
+        </CenteredModalWrapper>
+      )}
       <CreateToken
         showNoScopesSelectedError={showNoScopesSelectedError}
         onCreateToken={onCreateToken}
@@ -161,7 +162,13 @@ export const CreateTokenContainer = ({ onClose }) => {
         toggleSelectedScopes={toggleSelectedScopes}
         toggleTokenType={toggleTokenType}
         error={error}
+        onClose={onClose}
+        isPending={isPending}
       />
     </>
   );
+};
+
+CreateTokenContainer.propTypes = {
+  onClose: PropTypes.func
 };

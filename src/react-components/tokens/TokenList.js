@@ -3,14 +3,14 @@ import PropTypes from "prop-types";
 import { Token } from "./Token";
 import { Row } from "../layout/Row";
 import { Column } from "../layout/Column";
-import { Center } from "../layout/Center";
 import { FormattedMessage } from "react-intl";
 import { Button } from "../input/Button";
 import styleUtils from "../styles/style-utils.scss";
 import styles from "./Tokens.scss";
-import { Link } from "react-router-dom";
+import { SpinWhileTrue } from "../layout/SpinWhileTrue";
+import { Center } from "../layout/Center";
 
-export const TokenList = ({ tokens, onRevokeToken, onCreateToken }) => {
+export const TokenList = ({ tokens, onRevokeToken, showCreateToken, error, isFetching }) => {
   return (
     <div>
       <TokenMenuHeader />
@@ -18,35 +18,44 @@ export const TokenList = ({ tokens, onRevokeToken, onCreateToken }) => {
         <h2>
           <FormattedMessage id="empty-token.title2" defaultMessage="Token List" />
         </h2>
-        <Link to="/tokens/create">
-          <Button preset="primary" sm>
-            <FormattedMessage id="tokens.button-create-token" defaultMessage="Create token" />
-          </Button>
-        </Link>
+        <Button preset="primary" sm onClick={showCreateToken}>
+          <FormattedMessage id="tokens.button-create-token" defaultMessage="Create token" />
+        </Button>
       </Row>
-      {tokens && tokens.length ? (
-        <Column className={styleUtils.xlMarginY}>
-          {tokens.map(token => <Token key={token.id} tokenInfo={token} onRevokeToken={onRevokeToken} />)}
-        </Column>
-      ) : (
-        <div className={styleUtils.xlMarginY}>
-          <Row padding="md" className={styles.backgroundWhite}>
-            <Center>
-              <FormattedMessage id="tokens.no-tokens-created" defaultMessage="No tokens created." />
-            </Center>
+      <SpinWhileTrue isSpinning={isFetching}>
+        {error && (
+          <Row padding="sm" className={styles.revokeWarning}>
+            <p>{`An Error occured: ${error}`}</p>
           </Row>
-        </div>
-      )}
+        )}
+        {tokens && tokens.length ? (
+          <Column className={styleUtils.xlMarginY}>
+            {tokens.map(token => (
+              <Token key={token.id} tokenInfo={token} onRevokeToken={() => onRevokeToken({ revokeId: token.id })} />
+            ))}
+          </Column>
+        ) : (
+          <div className={styleUtils.xlMarginY}>
+            <Row padding="md" className={styles.backgroundWhite}>
+              <Center>
+                <FormattedMessage id="tokens.no-tokens-created" defaultMessage="No tokens created." />
+              </Center>
+            </Row>
+          </div>
+        )}
+      </SpinWhileTrue>
     </div>
   );
 };
 
 TokenList.propTypes = {
   tokens: PropTypes.array,
-  onRevokeToken: PropTypes.func
+  onRevokeToken: PropTypes.func,
+  showCreateToken: PropTypes.func,
+  error: PropTypes.string,
+  isFetching: PropTypes.bool
 };
 
-// TODO move to TokenContainer when defining token state
 const TokenMenuHeader = () => (
   <Column gap="xl">
     <h1>

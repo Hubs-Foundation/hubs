@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./Tokens.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { Row } from "../layout/Row";
-// import { ReactComponent as HubsDuckIcon } from "../../assets/images/footer-duck.svg";
+import { ReactComponent as HubsDuckIcon } from "../../assets/images/footer-duck.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
