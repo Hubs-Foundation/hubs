@@ -180,7 +180,7 @@ AFRAME.registerComponent("audio-params", {
       this.audioRef.panner.coneInnerAngle = this.data.coneInnerAngle;
       this.audioRef.panner.coneOuterAngle = this.data.coneOuterAngle;
       this.audioRef.panner.coneOuterGain = this.data.coneOuterGain;
-      this.data.gain && this.updateGain(this.data.gain);
+      this.data.gain !== undefined && this.updateGain(this.data.gain);
     }
   },
 
