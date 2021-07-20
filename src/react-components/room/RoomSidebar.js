@@ -18,7 +18,9 @@ function SceneAttribution({ attribution }) {
   const author = attribution.author || unknown;
 
   if (attribution.url) {
-    const source = attribution.url.includes("sketchfab.com") ? "Sketchfab" : null;
+    const source = attribution.url.includes("sketchfab.com")
+      ? "Sketchfab"
+      : null;
 
     return (
       <li className={styles.attribution}>
@@ -80,7 +82,7 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
     <Button preset="primary" onClick={onChangeScene}>
       <FormattedMessage id="room-sidebar.scene-info.change-scene-button" defaultMessage="Change Scene" />
     </Button>
-  );
+  )
   if (!scene) return changeSceneButton;
   const showSceneLink = allowDisplayOfSceneLink(accountId, scene);
   const attributions = (scene.attributions && scene.attributions.content) || [];

@@ -172,8 +172,6 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("media-pager");
     this.el.removeAttribute("media-video");
     this.el.removeAttribute("audio-params");
-    this.el.removeAttribute("audio-zone-source");
-    this.el.removeAttribute("audio-zone-entity");
     this.el.removeAttribute("media-pdf");
     this.el.setAttribute("media-image", { src: "error" });
     this.clearLoadingTimeout();
@@ -352,8 +350,6 @@ AFRAME.registerComponent("media-loader", {
       this.el.removeAttribute("media-pager");
       this.el.removeAttribute("media-video");
       this.el.removeAttribute("audio-params");
-      this.el.removeAttribute("audio-zone-source");
-      this.el.removeAttribute("audio-zone-entity");
       this.el.removeAttribute("media-pdf");
       this.el.removeAttribute("media-image");
     }
@@ -467,7 +463,6 @@ AFRAME.registerComponent("media-loader", {
           })
         );
         this.el.setAttribute("audio-params", {});
-        this.el.setAttribute("audio-zone-source", {});
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
@@ -478,8 +473,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.removeAttribute("audio-params");
-        this.el.removeAttribute("audio-zone-source");
-        this.el.removeAttribute("audio-zone-entity");
         this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
@@ -523,8 +516,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.removeAttribute("audio-params");
-        this.el.removeAttribute("audio-zone-source");
-        this.el.removeAttribute("audio-zone-entity");
         this.el.removeAttribute("media-image");
         this.el.setAttribute(
           "media-pdf",
@@ -559,8 +550,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("media-image");
         this.el.removeAttribute("media-video");
         this.el.removeAttribute("audio-params");
-        this.el.removeAttribute("audio-zone-source");
-        this.el.removeAttribute("audio-zone-entity");
         this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
@@ -595,8 +584,6 @@ AFRAME.registerComponent("media-loader", {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
         this.el.removeAttribute("audio-params");
-        this.el.removeAttribute("audio-zone-source");
-        this.el.removeAttribute("audio-zone-entity");
         this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(

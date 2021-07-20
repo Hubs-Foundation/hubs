@@ -26,7 +26,11 @@ function getDisplayString(el) {
   }
 
   const firstPart =
-    url.indexOf("sketchfab.com") !== -1 ? "Sketchfab" : url.indexOf("youtube.com") !== -1 ? "YouTube" : lessHost;
+      url.indexOf("sketchfab.com") !== -1
+        ? "Sketchfab"
+        : url.indexOf("youtube.com") !== -1
+          ? "YouTube"
+          : lessHost;
 
   return `${firstPart} ... ${resourceName.substr(0, 4)}`;
 }

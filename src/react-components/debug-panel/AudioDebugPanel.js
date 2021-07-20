@@ -16,7 +16,7 @@ import {
   GLOBAL_VOLUME_DEFAULT
 } from "../../react-components/preferences-screen";
 import { SelectInputField } from "../input/SelectInputField";
-import { DISTANCE_MODEL_OPTIONS, DistanceModelType } from "../../components/audio-params";
+import { DISTANCE_MODEL_OPTIONS } from "../../systems/audio-settings-system";
 
 const ROLLOFF_MIN = 0.0;
 const ROLLOFF_MAX = 20.0;
@@ -89,7 +89,7 @@ SliderProperty.propTypes = {
   children: PropTypes.node
 };
 
-export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
+export function AudioDebugPanel({ isNarrow, isCollapsed, onCollapsed }) {
   const scene = useRef(document.querySelector("a-scene"));
   const audioSettings = useRef(scene.current.systems["hubs-systems"].audioSettingsSystem);
   const store = useRef(window.APP.store);
@@ -211,15 +211,15 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
     <div
       className={classNames(styles.audioDebugContainer)}
       style={{
-        height: isNarrow && !collapsed && "80%",
-        maxHeight: isNarrow && !collapsed && "80%"
+        height: isNarrow && !isCollapsed && "80%",
+        maxHeight: isNarrow && !isCollapsed && "80%"
       }}
     >
       <CollapsiblePanel
         title={<FormattedMessage id="audio-debug-panel.audio-debug-title" defaultMessage="Audio Debug" />}
         isRoot
         border
-        collapsed={collapsed}
+        collapsed={isCollapsed}
         onCollapse={onCollapsed}
       >
         <CollapsiblePanel
@@ -307,11 +307,11 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                 setAvatarDistanceModel(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
                 avatarAudioSources.forEach(source => {
-                  source.setAttribute("audio-params", {
+                  source.setAttribute("avatar-audio-source", {
                     distanceModel: value
                   });
                 });
-                if (value === DistanceModelType.Linear && avatarRolloffFactor > 1.0) {
+                if (value === "linear" && avatarRolloffFactor > 1.0) {
                   setAvatarRolloffFactor(1.0);
                 }
                 updateAudioSettings({
@@ -325,14 +325,14 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
             </SelectProperty>
             <SliderProperty
               defaultValue={avatarRolloffFactor}
-              step={avatarDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
-              min={avatarDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
-              max={avatarDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
+              step={avatarDistanceModel === "linear" ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
+              min={avatarDistanceModel === "linear" ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
+              max={avatarDistanceModel === "linear" ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
               onChange={value => {
                 setAvatarRolloffFactor(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
                 avatarAudioSources.forEach(source => {
-                  source.setAttribute("audio-params", {
+                  source.setAttribute("avatar-audio-source", {
                     rolloffFactor: value
                   });
                 });
@@ -354,7 +354,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                 setAvatarRefDistance(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
                 avatarAudioSources.forEach(source => {
-                  source.setAttribute("audio-params", {
+                  source.setAttribute("avatar-audio-source", {
                     refDistance: value
                   });
                 });
@@ -376,7 +376,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                 setAvatarMaxDistance(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
                 avatarAudioSources.forEach(source => {
-                  source.setAttribute("audio-params", {
+                  source.setAttribute("avatar-audio-source", {
                     maxDistance: value
                   });
                 });
@@ -398,8 +398,8 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                 setAvatarConeInnerAngle(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
                 avatarAudioSources.forEach(source => {
-                  source.setAttribute("audio-params", {
-                    coneInnerAngle: value
+                  source.setAttribute("avatar-audio-source", {
+                    innerAngle: value
                   });
                 });
                 updateAudioSettings({
@@ -420,8 +420,8 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                 setAvatarConeOuterAngle(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
                 avatarAudioSources.forEach(source => {
-                  source.setAttribute("audio-params", {
-                    coneOuterAngle: value
+                  source.setAttribute("avatar-audio-source", {
+                    outerAngle: value
                   });
                 });
                 updateAudioSettings({
@@ -442,8 +442,8 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                 setAvatarConeOuterGain(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
                 avatarAudioSources.forEach(source => {
-                  source.setAttribute("audio-params", {
-                    coneOuterGain: value
+                  source.setAttribute("avatar-audio-source", {
+                    outerGain: value
                   });
                 });
                 updateAudioSettings({
@@ -466,13 +466,19 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               options={DISTANCE_MODEL_OPTIONS}
               onChange={value => {
                 setMediaDistanceModel(value);
-                const elements = scene.current.querySelectorAll("[media-video], [audio-target]");
-                elements.forEach(source => {
-                  source.setAttribute("audio-params", {
+                const mediaAudioSources = scene.current.querySelectorAll("[media-video]");
+                mediaAudioSources.forEach(source => {
+                  source.setAttribute("media-video", {
                     distanceModel: value
                   });
                 });
-                if (value === DistanceModelType.Linear && mediaRolloffFactor > 1.0) {
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    distanceModel: value
+                  });
+                });
+                if (value === "linear" && mediaRolloffFactor > 1.0) {
                   setMediaRolloffFactor(1.0);
                 }
                 updateAudioSettings({
@@ -486,14 +492,20 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
             </SelectProperty>
             <SliderProperty
               defaultValue={mediaRolloffFactor}
-              step={mediaDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
-              min={mediaDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
-              max={mediaDistanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
+              step={mediaDistanceModel === "linear" ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
+              min={mediaDistanceModel === "linear" ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
+              max={mediaDistanceModel === "linear" ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
               onChange={value => {
                 setMediaRolloffFactor(value);
-                const elements = scene.current.querySelectorAll("[media-video], [audio-target]");
-                elements.forEach(source => {
-                  source.setAttribute("audio-params", {
+                const mediaAudioSources = scene.current.querySelectorAll("[media-video]");
+                mediaAudioSources.forEach(source => {
+                  source.setAttribute("media-video", {
+                    rolloffFactor: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
                     rolloffFactor: value
                   });
                 });
@@ -513,9 +525,15 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               max={DISTANCE_MAX}
               onChange={value => {
                 setMediaRefDistance(value);
-                const elements = scene.current.querySelectorAll("[media-video], [audio-target]");
-                elements.forEach(source => {
-                  source.setAttribute("audio-params", {
+                const mediaAudioSources = scene.current.querySelectorAll("[media-video]");
+                mediaAudioSources.forEach(source => {
+                  source.setAttribute("media-video", {
+                    refDistance: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
                     refDistance: value
                   });
                 });
@@ -535,9 +553,15 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               max={DISTANCE_MAX}
               onChange={value => {
                 setMediaMaxDistance(value);
-                const elements = scene.current.querySelectorAll("[media-video], [audio-target]");
-                elements.forEach(source => {
-                  source.setAttribute("audio-params", {
+                const mediaAudioSources = scene.current.querySelectorAll("[media-video]");
+                mediaAudioSources.forEach(source => {
+                  source.setAttribute("media-video", {
+                    maxDistance: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
                     maxDistance: value
                   });
                 });
@@ -557,10 +581,16 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               max={ANGLE_MAX}
               onChange={value => {
                 setMediaConeInnerAngle(value);
-                const elements = scene.current.querySelectorAll("[media-video], [audio-target]");
-                elements.forEach(source => {
-                  source.setAttribute("audio-params", {
+                const mediaAudioSources = scene.current.querySelectorAll("[media-video]");
+                mediaAudioSources.forEach(source => {
+                  source.setAttribute("media-video", {
                     coneInnerAngle: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    innerAngle: value
                   });
                 });
                 updateAudioSettings({
@@ -579,10 +609,16 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               max={ANGLE_MAX}
               onChange={value => {
                 setMediaConeOuterAngle(value);
-                const elements = scene.current.querySelectorAll("[media-video], [audio-target]");
-                elements.forEach(source => {
-                  source.setAttribute("audio-params", {
+                const mediaAudioSources = scene.current.querySelectorAll("[media-video]");
+                mediaAudioSources.forEach(source => {
+                  source.setAttribute("media-video", {
                     coneOuterAngle: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    outerAngle: value
                   });
                 });
                 updateAudioSettings({
@@ -601,10 +637,16 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               max={GAIN_MAX}
               onChange={value => {
                 setMediaConeOuterGain(value);
-                const elements = scene.current.querySelectorAll("[media-video], [audio-target]");
-                elements.forEach(source => {
-                  source.setAttribute("audio-params", {
+                const mediaAudioSources = scene.current.querySelectorAll("[media-video]");
+                mediaAudioSources.forEach(source => {
+                  source.setAttribute("media-video", {
                     coneOuterGain: value
+                  });
+                });
+                const targetAudioSources = scene.current.querySelectorAll("[audio-target]");
+                targetAudioSources.forEach(source => {
+                  source.setAttribute("audio-target", {
+                    outerGain: value
                   });
                 });
                 updateAudioSettings({
@@ -625,7 +667,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
 
 AudioDebugPanel.propTypes = {
   isNarrow: PropTypes.bool,
-  collapsed: PropTypes.bool,
+  isCollapsed: PropTypes.bool,
   onCollapsed: PropTypes.func,
   children: PropTypes.node
 };
