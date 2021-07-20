@@ -159,11 +159,10 @@ AFRAME.registerSystem("audio-debug", {
           if (enabled) {
             obj._hubs_audio_debug_material = obj.material;
             obj.material = this.material;
-          } else {
+            obj.material.needsUpdate = true;
+          } else if (obj._hubs_audio_debug_material) {
             obj.material = obj._hubs_audio_debug_material;
             obj._hubs_audio_debug_material = null;
-          }
-          if (obj.material) {
             obj.material.needsUpdate = true;
           }
           obj.geometry.computeFaceNormals();
