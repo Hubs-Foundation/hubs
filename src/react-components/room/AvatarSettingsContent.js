@@ -40,7 +40,7 @@ export function AvatarSettingsContent({
           <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
         </Button>
       </div>
-      <AcceptButton preset="accent5" lg={true} type="submit" />
+      <AcceptButton preset="custom1" lg={true} type="submit" />
     </Column>
   );
 }

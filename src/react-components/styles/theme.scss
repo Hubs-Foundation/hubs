@@ -31,6 +31,16 @@ $custom-hover: #5D5C65;
 $custom-pressed: #5D5C65;
 $custom-active: #5D5FEF;
 
+$accent:#1F1E26;
+$accent-hover: #FFFFFF;
+$accent-pressed: #5D5FEF;
+$accent-active: #5D5FEF;
+
+$custom1:#5D5FEF;
+$custom1-hover: #5D5FEF;
+$custom1-pressed: #5D5FEF;
+$custom1-hover: #5D5FEF;
+$custom1-active: #5D5FEF;
 
 $darkgrey: #868686;
 $darkgrey-hover: #949494;
@@ -122,6 +132,10 @@ $text4-color-pressed: var(--text4-color-pressed);
 $text5-color: var(--text5-color);
 $text5-color-hover: var(--text5-color-hover);
 $text5-color-pressed: var(--text5-color-pressed);
+
+$text6-color: var(--text6-color);
+$text6-color-hover: var(--text6-color-hover);
+$text6-color-pressed: var(--text6-color-pressed);
 
 $link-color: var(--link-color);
 $link-color-hover: var(--link-color-hover);
@@ -271,4 +285,18 @@ $custom-hover-color: var(--custom-hover);
 $custom-pressed-color: var(--custom-pressed);
 $custom-active-color: var(--custom-active);
 
+
+$custom1-color: var(--custom1);
+$custom1-color-hover: var(--custom1-hover);
+$custom1-color-pressed: var(--custom1-pressed);
+$custom1-color-active: var(--custom1-active);
+
+
+$accent-color: var(--accent);
+$accent-color-hover: var(--accent-hover);
+$accent-color-pressed: var(--accent-pressed);
+$accent-color-active: var(--accent-active);
+
 $background-gradient: linear-gradient(76.93deg, #686A9C 0%, #716D82 52.92%, #876B8A 100%);
+
+$bg-gradient-color :  radial-gradient(70.31% 70.31% at 50% 50%, #5D5FEF 0%, rgba(93, 95, 239, 0) 100%);

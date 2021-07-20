@@ -61,6 +61,10 @@ import { ReactComponent as FavoritesIcon } from "./icons/Favorites.svg";
 import { ReactComponent as StarOutlineIcon } from "./icons/StarOutline.svg";
 import { ReactComponent as StarIcon } from "./icons/Star.svg";
 import { ReactComponent as SettingsIcon } from "./icons/Settings.svg";
+
+import { ReactComponent as Settingicon } from "./icons/SettingIcon.svg";
+import { ReactComponent as PeopleIcon } from "./icons/People.svg";
+
 import { ReactComponent as WarningCircleIcon } from "./icons/WarningCircle.svg";
 import { ReactComponent as HomeIcon } from "./icons/Home.svg";
 import { ReactComponent as TextDocumentIcon } from "./icons/TextDocument.svg";
@@ -98,6 +102,10 @@ import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { TeledildonicsPopoverContainer } from "./room/TeledildonicsPopoverContainer";
+import { CanvasMenu } from "./room/CanvasMenu";
+import { SettingContainer, Setting } from "./room/Settings";
+import { MiscSetting } from "./room/MiscSetting";
+import { ParticipantContainer } from "./room/ParticipantContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -203,7 +211,10 @@ class UIRoot extends Component {
     sidebarId: null,
 
     showWorlds: false,
-    showEvents: false
+    showEvents: false,
+
+    showSocial: false,
+    openSetting: false
   };
 
   constructor(props) {
@@ -649,6 +660,7 @@ class UIRoot extends Component {
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
+    ChatToolbarButtonContainer;
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
@@ -752,6 +764,7 @@ class UIRoot extends Component {
       return {
         sidebarId: nextSidebarId,
         selectedUserId: null,
+
         ...otherState
       };
     });
@@ -1381,7 +1394,7 @@ class UIRoot extends Component {
                 viewport={
                   <>
                     {!this.state.dialog && renderEntryFlow ? entryDialog : undefined}
-                    {!this.props.selectedObject && <CompactMoreMenuButton />}
+                    {/* {!this.props.selectedObject && <CompactMoreMenuButton />} */}
                     {(!this.props.selectedObject ||
                       (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
                       <ContentMenu>
@@ -1410,6 +1423,8 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
+                    {this.state.openSetting && <Setting {...this.props} />}
+
                     {this.state.sidebarId !== "chat" &&
                       this.props.hub && (
                         <PresenceLog
@@ -1537,15 +1552,23 @@ class UIRoot extends Component {
                   )
                 }
                 modal={this.state.dialog}
-                toolbarLeft={
+                /*toolbarLeft={
                   <InvitePopoverContainer
                     hub={this.props.hub}
                     hubChannel={this.props.hubChannel}
                     scene={this.props.scene}
                   />
-                }
+                }*/
+
                 toolbarCenter={
                   <>
+                    <CanvasMenu
+                      onClick={() => {
+                        // console.log("Calling");
+                        this.setState({ showSocial: !this.state.showSocial });
+                      }}
+                    />
+
                     {watching && (
                       <>
                         <ToolbarButton
@@ -1566,28 +1589,50 @@ class UIRoot extends Component {
                         )}
                       </>
                     )}
-                    {entered && (
-                      <>
-                        <VoiceButtonContainer
-                          scene={this.props.scene}
-                          microphoneEnabled={this.mediaDevicesManager.isMicShared}
-                        />
-                        {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> */}
-                        {/* <PlacePopoverContainer
+                    {this.state.showSocial && <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />}
+                    {this.state.showSocial &&
+                      entered && (
+                        <>
+                          <VoiceButtonContainer
+                            scene={this.props.scene}
+                            microphoneEnabled={this.mediaDevicesManager.isMicShared}
+                          />
+                          {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> */}
+                          {/* <PlacePopoverContainer
                           scene={this.props.scene}
                           hubChannel={this.props.hubChannel}
                           mediaSearchStore={this.props.mediaSearchStore}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                         /> */}
-                        <TeledildonicsPopoverContainer
-                          mySessionId={this.props.sessionId}
-                          presences={this.props.presences}
-                        />
-                        <ReactionPopoverContainer />
-                        {/* {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />} */}
-                      </>
-                    )}
-                    <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
+                          <TeledildonicsPopoverContainer
+                            mySessionId={this.props.sessionId}
+                            presences={this.props.presences}
+                          />
+                          <ReactionPopoverContainer />
+                          {/* {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />} */}
+
+                          {/* {this.state.sidebarId === "room-settings" && (
+                          <RoomSettingsSidebarContainer
+
+                            room={this.props.hub}
+                            accountId={this.props.sessionId}
+                            hubChannel={this.props.hubChannel}
+                            onClose={() => this.setSidebar(null)}
+                            onChangeScene={this.onChangeScene}
+                          />
+                        )}
+                       */}
+                          <SettingContainer
+                            icon={<Settingicon />}
+                            onClick={() => this.setState({ openSetting: !this.openSetting })}
+                          />
+
+                          <ParticipantContainer icon={<PeopleIcon />} />
+
+                          <MoreMenuPopoverButton menu={moreMenu} />
+                        </>
+                      )}
+
                     {entered &&
                       isMobileVR && (
                         <ToolbarButton
@@ -1611,8 +1656,8 @@ class UIRoot extends Component {
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
-                    {entered && (
-                      <ToolbarButton
+                    {/* {entered && (
+                     <ToolbarButton
                         icon={<LeaveIcon />}
                         label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
                         preset="custom"
@@ -1624,7 +1669,7 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    <MoreMenuPopoverButton menu={moreMenu} />
+                      <MoreMenuPopoverButton menu={moreMenu} /> */}
                   </>
                 }
               />

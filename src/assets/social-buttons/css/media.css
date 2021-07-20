@@ -1,0 +1,42 @@
+@media screen and (max-width: 767px) {
+   .sign-inUp-wrap {
+        padding: 30px 0px;
+    }
+}
+@media screen and (max-width: 567px) {
+    .signinUp-box {
+        min-width: 290px;
+        min-height: 335px;
+        max-width: 300px;
+        padding: 25px 20px 20px;
+    }
+    .btn-next {
+        left: 20px;
+    }
+    .btn-close {
+        right: 50px;
+    }
+    .form-head {
+        padding: 0px 35px 0px 40px;
+    }
+    .owl-thumb-item.active {
+        transform: scale(1.2);
+    }
+    .owl-thumb-item {
+        margin-right: 5px;
+    }
+    .owl-thumb-item {
+        width: 30px;
+        height: 32px;
+    }
+    .avatar-slider .owl-next {
+        right: 5px !important;
+    }
+    .avatar-slider .owl-prev, .avatar-slider .owl-next {
+        font-size: 10px !important;
+    }
+    .owl-thumb-item > span {
+        max-width: 20px;
+        max-height: 15px;
+    }
+}

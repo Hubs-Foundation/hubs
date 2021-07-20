@@ -29,7 +29,7 @@ export function Modal({
           <div className={classNames(styles.beforeTitle, { [styles.beforeTitleLeave]: leave }, className)}>
             {beforeTitle}
           </div>
-          <h5>{title}</h5>
+          <h3>{title}</h3>
           {/* <div className={styles.afterTitle}>{afterTitle}</div> */}
         </div>
       )}

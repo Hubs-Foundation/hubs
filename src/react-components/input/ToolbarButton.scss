@@ -3,10 +3,8 @@
 :local(.toolbar-button) {
   border: none;
   background-color: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 48px;
+  
+  width: 45px;
 
   label {
     cursor: pointer;
@@ -19,8 +17,8 @@
 :local(.icon-container) {
   position: relative;
   border-radius: 9999px;
-  width: 48px;
-  height: 48px;
+  width: 45px;
+  height: 45px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -311,6 +309,8 @@
 }
 
 :local(.accent1) {
+
+
   :local(.icon-container) {
     background-color: theme.$accent1-color;
   }  
@@ -527,7 +527,7 @@
   &:local(.selected) {
     :local(.icon-container) {
       border-color: theme.$accent4-color;
-      background-color: transparent;
+      background-color: transparent ;
 
       svg {
         *[stroke=\#000] {
@@ -723,4 +723,913 @@
       }
     }
   }
+}
+
+
+:local(.custom1){
+  :local(.icon-container) {
+    border-color: theme.$custom1-color;
+    background-color: theme.$custom1-color;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$text6-color;
+      }
+      *[fill=\#000] {
+        fill: theme.$text6-color;
+      }
+    }
+  }
+
+  &:hover :local(.icon-container) {
+    border-color: theme.$custom1-color-hover;
+    background-color: theme.$custom1-color-hover;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$text5-color;
+      }
+      *[fill=\#000] {
+        fill: theme.$text5-color;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+    border-color: theme.$custom1-color-pressed;
+    background-color: theme.$custom1-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: transparent;
+      background-color: theme.$custom1-color-active;
+    }
+
+    label {
+      color: theme.$text5-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        background-color: theme.$custom1-color-active;
+      }
+    }
+    &:active {
+      :local(.icon-container) {
+        background-color: theme.$custom1-color-pressed;
+      }
+    }
+  }
+}
+
+
+
+:local(.accent) {
+  display: block;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 30px;
+  padding: 15px 30px;
+  text-align: center;
+  letter-spacing: -0.02em;
+  font-family: 'Sunflower', sans-serif;
+  border-radius: 80px 0px 80px 0px;
+  
+  :local(.icon-container) {
+    background-color: theme.$accent-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent-color-pressed;
+ 
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$accent-color-hover;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$accent4-color-hover;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+   
+    background-color: theme.$accent-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent-color-pressed;
+      background-color:theme.$accent-color-pressed;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent-color-hover;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent-color-hover;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent-color-hover;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$transparent;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent-color-pressed;
+        background-color: theme.$accent-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+:local(.more) {
+ 
+  transform: rotate(-8deg) translate(8em) rotate(8deg);
+  -webkit-transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+  transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);  
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -2.2em;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  transition: all .5s;
+  -webkit-transition: all .5s;
+
+  :local(.icon-container) {
+    background-color: theme.$accent-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent-color-hover;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$accent-color;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$accent-color;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent-color;
+      background-color:theme.$accent-color-pressed;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent-color-hover;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent-color-hover;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$transparent;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent-color-pressed;
+        background-color: theme.$accent-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+:local(.setting) {
+
+  transform: rotate(40deg) translate(7.5em) rotate(-40deg);
+  -webkit-transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+  transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -2.2em;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  transition: all .5s;
+  -webkit-transition: all .5s;
+ 
+  :local(.icon-container) {
+    background-color: theme.$accent-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent-color-hover;
+    // svg {
+    //   *[stroke=\#000] {
+    //     stroke:theme.$accent-color;
+    //   }
+  
+    //   *[fill=\#000] {
+    //     fill: theme.$accent-color;
+    //   }
+    // }
+  }
+
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent-color;
+      background-color:theme.$accent-color-pressed;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent-color-hover;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent-color-hover;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$transparent;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent-color-pressed;
+        background-color: theme.$accent-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+:local(.chat) {
+
+  transform: rotate(90deg) translate(8em) rotate(-90deg);
+  -webkit-transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+  transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -2.2em;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  transition: all .5s;
+  -webkit-transition: all .5s;
+
+  :local(.icon-container) {
+    background-color: theme.$accent-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent-color-hover;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$accent-color;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$accent-color;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent-color;
+      background-color:theme.$accent-color-pressed;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent-color-hover;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent-color-hover;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$transparent;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent-color-pressed;
+        background-color: theme.$accent-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+:local(.user) {
+  
+  transform: rotate(142deg) translate(7.5em) rotate(-142deg);
+  -webkit-transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+  transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -2.2em;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  transition: all .5s;
+  -webkit-transition: all .5s;
+  -moz-transition: all .5s;
+
+  :local(.icon-container) {
+    background-color: theme.$accent-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent-color-hover;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$accent-color;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$accent-color;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent-color;
+      background-color:theme.$accent-color-pressed;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent-color-hover;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent-color-hover;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$transparent;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent-color-pressed;
+        background-color: theme.$accent-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+:local(.tele) {
+
+  transform: rotate(188deg) translate(8em) rotate(-188deg);
+  -webkit-transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+  transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -2.2em;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  transition: all .5s;
+  -webkit-transition: all .5s;
+  -moz-transition: all .5s;
+
+  :local(.icon-container) {
+    background-color: theme.$accent-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent-color-hover;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$accent-color;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$accent-color;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent-color;
+      background-color:theme.$accent-color-pressed;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent-color-hover;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent-color-hover;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$transparent;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent-color-pressed;
+        background-color: theme.$accent-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+:local(.voice) {
+
+  transform: rotate(240deg) translate(6.5em) rotate(-240deg);
+  -webkit-transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+  transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -2.2em;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  transition: all .5s;
+  -webkit-transition: all .5s;
+  -moz-transition: all .5s;
+
+
+  :local(.icon-container) {
+    background-color: theme.$accent-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent-color-hover;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$accent-color;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$accent-color;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent-color;
+      background-color:theme.$accent-color-pressed;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent-color-hover;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent-color-hover;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$transparent;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent-color-pressed;
+        background-color: theme.$accent-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-pressed;
+          }
+        }
+      }
+    }
+  }
+
+}
+:local(.react) {
+  transform: rotate(300deg) translate(6.5em) rotate(-300deg);
+  -webkit-transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+  transition: all 0.3s cubic-bezier(0.87, -0.3, 0.19, 1.44);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -2.2em;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  transition: all .5s;
+  -webkit-transition: all .5s;
+  -moz-transition: all .5s;
+
+  :local(.icon-container) {
+    background-color: theme.$accent-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$accent-color-hover;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$accent-color;
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$accent-color;
+      }
+    }
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$accent-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$accent-color;
+      background-color:theme.$accent-color-pressed;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$accent-color-hover;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$accent-color-hover;
+        }
+      }
+    }
+
+    label {
+      color: theme.$accent-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$transparent;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$accent-color-pressed;
+        background-color: theme.$accent-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$accent-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$accent-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+ 
+// :local(.setting){
+//   position: relative;
+//   top:70% !important;
+// }
+
+:local(.toggle) {
+ 
+  width: 32px;
+  height: 32px;
+  background-color: #fff;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  position:absolute;
+  background: theme.$bg-gradient-color;
+  z-index: 9;
+  transform: translate(-100%, -50%);
+  box-shadow: none;
+  cursor: pointer;
 }

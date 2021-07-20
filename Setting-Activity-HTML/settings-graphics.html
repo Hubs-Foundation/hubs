@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+	<head>
+	<!-- Meta Tags -->
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, user-scalable=no"/>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<!-- Page Title -->
+	<title>Settings</title>
+
+	<!-- Style sheet -->
+	<link href="css/style.css" rel="stylesheet" type="text/css">
+	<link href="css/media.css" rel="stylesheet" type="text/css">
+	<link  href="css/anurag-css.css" rel="stylesheet" type="text/css">
+
+	<!--[if lt IE 9]>
+	 <script src="/js/html5shiv.js" type="text/javascript"></script>
+	 <script src="/js/respond.min.js" type="text/javascript"></script>
+	<![endif]-->
+	
+	</head>
+
+<body>
+     <main class="setting-inUp-wrap d-flex flex-wrap align-items-center justify-content-center">
+     	 <div class="container">
+     	 	 <div class="signinUp-box d-flex flex-wrap justify-content-center">
+     	 	 	<div class="side-menu">
+	     	 	 	<ul class="sidebar-menu">
+	     	 	 		<li><a href="#"><img src="images/profile.png"></a></li>
+	     	 	 		<li><a href="#"><img src="images/Sound-w.png"></a></li>
+	     	 	 		<li><a href="#"><img src="images/graphics-h.png"></a></li>
+	     	 	 		<li><a href="#"><img src="images/movement.png"></a></li>
+	     	 	 		<li><a href="#"><img src="images/hem-menu.png"></a></li>
+	     	 	 	</ul>
+	     	 	 </div>
+     	 	 	<div class="seeting-audio">
+     	 	 	 <span class="btn-next circle-btn"><img src="images/arrow-icon.png"></span>
+     	 	 	  <span class="btn-close circle-btn"><img src="images/close-icon.png"></span>
+     	 	 	 <form class="theme-form">
+     	 	 	 	 <div class="form-head">
+     	 	 	 	 	<h6>Settings</h6>
+     	 	 	 	 	<h5>Graphics</h5>
+     	 	 	 	 </div>
+     	 	 	 	 <div class="form-body">
+     	 	 	 	 	<ul class="nav nav-tabs graphics-tabs">
+						    <li><a data-toggle="tab" href="#Resolution" class="active">Resolution</a></li>
+						    <li><a data-toggle="tab" href="#Material" >Material</a></li>
+						    <li><a data-toggle="tab" href="#Shadows">Shadows</a></li>
+						    <li><a data-toggle="tab" href="#Views">Views</a></li>
+						  </ul>
+
+						  <div class="tab-content">
+						    <div id="Resolution" class="tab-pane  in active">
+							    <div class="velume d-flex align-items-center flex-wrap">
+							      	<h2>Resolution: </h2>
+							      	<span class="velume-img">
+							      		<span class="defult-sec">
+							      			<label class="radio-container">
+										  		<input type="radio" name="radio">
+										  		<span class="checkmark"></span>
+											</label>Default
+										</span>
+							      	</span>
+							    </div>
+
+							    <div class="velume-checkbox d-flex align-items-center flex-wrap">
+							      	<div class="d-flex align-items-center w-100">
+							      		<div class="checkbox-sec">
+							      			<label class="checkbox-container">
+											  <input type="checkbox" checked="checked">
+											  <span class="checkmark"></span>
+											</label>
+											<span class="text-checkbox">{Insert Size}</span>
+							      		</div>
+
+										<div class="checkbox-sec">
+							      			<label class="checkbox-container">
+											  <input type="checkbox">
+											  <span class="checkmark"></span>
+											</label>
+											<span class="text-checkbox">{Insert Size}</span>
+							      		</div>
+
+							      		<div class="checkbox-sec">
+							      			<label class="checkbox-container">
+											  <input type="checkbox">
+											  <span class="checkmark"></span>
+											</label>
+											<span class="text-checkbox">{Insert Size}</span>
+							      		</div>
+							      	</div>
+							    </div>
+
+							    <div class="velume mt-3 d-flex align-items-center flex-wrap">
+							      	<h2>Brightness: </h2>
+							      	<span class="velume-img">
+							      		<div class="btn-com d-flex align-items-center justify-content-between">
+							      			<button class="left-btn active"><img src="images/britness-l-b.png"></button>
+							      			<button class="right-btn"><img src="images/britness-r-w.png"></button>
+							      		</div>
+							      	</span>
+							    </div>
+							</div>
+
+						    <div id="Material" class="tab-pane fade">
+						      	<div class="velume d-flex align-items-center">
+						      		<h2>Material Quality: </h2>
+						      		<span class="velume-img">
+				 	 	        		<div class="wrap-drop" id="noble-gases">
+										    <span>Low</span>
+										    <ul class="drop">
+										        <li><a>Low</a></li>
+										        <li><a>Medium</a></li>
+										        <li><a>High</a></li>
+										    </ul>
+										</div>
+
+						      		</span>
+						     	</div>
+						    </div>
+
+						    <div id="Shadows" class="tab-pane fade">
+								<div class="velume d-flex align-items-center">
+						      		<h2>Enable Dynamic Shadows </h2>
+						      		<span class="velume-img">
+										<div class="form-sec">
+				 	 	        	        <label class="switch-field">
+										  	<input type="checkbox" checked="">
+										  	<span class="switch-slider round"></span>
+									    	</label>
+					 	 	          	</div>
+						      		</span>
+						      	</div>
+						    </div>
+						    <div id="Views" class="tab-pane fade">
+						    	
+						    </div>
+						  </div>
+						</div>
+     	 	 	 	</form>
+     	 	 	</div>
+     	 	 </div>
+     	 </div>
+     </main>
+
+	<!--        External Java Scripts
+	======================================= -->
+
+	<script src="js/jquery-3.3.1.min.js"></script>
+	<script src="js/popper.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+
+	<script type="text/javascript">
+		$('.speaker').click(function(e) {
+		  e.preventDefault();
+
+			$(this).toggleClass('mute');
+		});
+	</script>
+
+	<script type="text/javascript">
+		
+		function DropDown(el) {
+		    this.dd = el;
+		    this.placeholder = this.dd.children('span');
+		    this.opts = this.dd.find('ul.drop li');
+		    this.val = '';
+		    this.index = -1;
+		    this.initEvents();
+		}
+
+		DropDown.prototype = {
+		    initEvents: function () {
+		        var obj = this;
+		        obj.dd.on('click', function (e) {
+		            e.preventDefault();
+		            e.stopPropagation();
+		            $(this).toggleClass('active');
+		        });
+		        obj.opts.on('click', function () {
+		            var opt = $(this);
+		            obj.val = opt.text();
+		            obj.index = opt.index();
+		            obj.placeholder.text(obj.val);
+		            opt.siblings().removeClass('selected');
+		            opt.filter(':contains("' + obj.val + '")').addClass('selected');
+		        }).change();
+		    },
+		    getValue: function () {
+		        return this.val;
+		    },
+		    getIndex: function () {
+		        return this.index;
+		    }
+		};
+
+		$(function () {
+		    // create new variable for each menu
+		    var dd1 = new DropDown($('#noble-gases'));
+		    // var dd2 = new DropDown($('#other-gases'));
+		    $(document).click(function () {
+		        // close menu on document click
+		        $('.wrap-drop').removeClass('active');
+		    });
+		});
+	</script>
+
+</body>
+</html>
+

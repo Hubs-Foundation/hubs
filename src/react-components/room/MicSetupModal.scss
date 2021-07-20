@@ -1,15 +1,74 @@
 @use "../styles/theme.scss";
 
-:local(.content) {
-  p {
-    font-size: theme.$font-size-sm;
-    font-weight: theme.$font-weight-medium;
-    line-height: 1.2;
+:local(.mic-modal){
+  position: relative;
+//   // display: flex;
+//   // flex-direction: column;
+//   // height: max-content;
+//   // height: 100%;
+ 
+//   // border: 1px solid theme.$border1-color;
+//   // border-radius: theme.$border-radius-regular;
+//   // margin: 24px;
+//   // z-index: 1;
+//   // width: 100%;
+//   // background-repeat: no-repeat;
+//   // background-size: cover;
+//   // max-width: 533px;
+//   // max-height: 578px;
+//    color: theme.$text5-color;
+
+//   min-width: 395px;
+//   margin: 0px auto;
+//   padding: 45px 30px 20px;
+ 
+//   width: auto;
+  
+//   max-width: 500px ;  //395px;          
+
+  @media screen and (min-width: theme.$breakpoint-sm){
+    max-width: 395px; //400px;
+    max-height: 500px;
+    // max-width: 295px;
+    // padding: 25px 20px 20px;
   }
+
+  @media screen and (min-width: theme.$breakpoint-md){
+    max-width: 495px;
+    max-height: 550px;
+    // min-width: 550px;
+    // min-height: 335px;
+    // max-width: 395px;
+    // padding: 40px 20px 20px;
+  }
+  @media screen and (max-width: theme.$breakpoint-md){
+    max-width: 495px;
+    max-height: 550px;
+    // min-width: 550px;
+    // min-height: 335px;
+    // max-width: 395px;
+    // padding: 40px 20px 20px;
+  }
+
+
+// :local(.content) {
+//   p {
+//     font-size: theme.$font-size-sm;
+//     font-weight: theme.$font-weight-medium;
+//     line-height: 1.2;
+//   }
+//   @media screen and  (min-width:theme.$breakpoint-md){
+//     margin-right: 0;
+//     margin-top: 10px;
+//   }
+
 }
 
 :local(.audio-check-container) {
   display: flex;
+  
+  // margin: 0px auto;
+  // text-align: center;
 
   svg path {
     stroke-width: 1;
@@ -18,11 +77,37 @@
   & > :first-child {
     margin-right: 100px;
   }
+
+  @media screen and (min-width: theme.$breakpoint-sm){
+    min-width: 200px;
+    max-width: 300px;
+    padding: 25px 20px 20px;
+    margin-top: 0%;
+  }
+
+  @media screen and (max-width: theme.$breakpoint-md){
+    // max-width: 260px;
+    margin: 5%;
+    text-align: center;
+    min-width: 200px;
+ 
+    max-width: 300px;
+    margin-top: 5%;
+  }
 }
 
 :local(.mic-button-container) {
   // Transitions don't look right with clipping, so just disable it.
   transition: none;
+
+  // display: block;
+  // color: #fff;
+  // font-weight: 500;
+  // font-size: 12px;
+  // line-height: 14px;
+  // font-family: 'Sunflower', sans-serif;
+  // max-width: 110px;
+  // margin: 10px auto 0px;
 
   :not(:last-child) {
     z-index: 1;
@@ -66,6 +151,9 @@
       color: theme.$primary-color-pressed;
     }
   }
+  // @media screen and (max-width:theme.$breakpoint-md){
+  //   padding: 0px 35px 0px 15px;
+  // }
 }
 
 :local(.large-toolbar-button) {

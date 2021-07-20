@@ -87,6 +87,16 @@
   --custom-pressed: #{theme.$custom-pressed};
   --custom-active: #{theme.$custom-active};
 
+  --accent: #{theme.$accent};
+  --accent-hover: #{theme.$accent-hover};
+  --accent-pressed: #{theme.$accent-pressed};
+  --accent-active: #{theme.$accent-hover};
+
+  --custom1: #{theme.$custom1};
+  --custom1-hover: #{theme.$custom1-hover};
+  --custom1-pressed: #{theme.$custom1-pressed};
+  --custom1-active: #{theme.$custom1-active};
+
   --shadow-color: rgba(0, 0, 0, 0.2);
 
   --basic-color: #{theme.$white};
@@ -323,7 +333,7 @@ iframe,
 embed,
 object {
   display: block;
-  vertical-align: middle;
+  //vertical-align: middle;
 }
 
 img:-moz-broken {

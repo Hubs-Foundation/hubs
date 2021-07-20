@@ -28,8 +28,9 @@ export function ReactionPopoverButton({ items }) {
           icon={<ReactionIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label={title}
-          preset="custom"
+          preset="react"
+          //label={title}
+          className="react"
         />
       )}
     </Popover>

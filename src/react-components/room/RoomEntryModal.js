@@ -6,9 +6,9 @@ import { Button } from "../input/Button";
 import { ReactComponent as EnterIcon } from "../icons/Enter.svg";
 import { ReactComponent as VRIcon } from "../icons/VR.svg";
 import { ReactComponent as BroadcastIcon } from "../icons/Broadcast.svg";
-// import { ReactComponent as SettingsIcon } from "../icons/Settings.svg";
+import { ReactComponent as SettingsIcon } from "../icons/Settings.svg";
 import styles from "./RoomEntryModal.scss";
-// import styleUtils from "../styles/style-utils.scss";
+import styleUtils from "../styles/style-utils.scss";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
@@ -24,8 +24,8 @@ export function RoomEntryModal({
   onEnterOnDevice,
   showSpectate,
   onSpectate,
-  // showOptions,
-  // onOptions,
+  showOptions,
+  onOptions,
   ...rest
 }) {
   const breakpoint = useCssBreakpoints();
@@ -46,41 +46,42 @@ export function RoomEntryModal({
         </div> */}
         <Column center className={styles.buttons}>
           {showJoinRoom && (
-            <Button preset="accent5" xxl={true} onClick={onJoinRoom}>
-              <EnterIcon />
+            <Button preset="accent" xxl={true} onClick={onJoinRoom}>
+              {/* <EnterIcon /> */}
               <span>
                 <FormattedMessage id="room-entry-modal.join-room-button" defaultMessage="Join" />
               </span>
             </Button>
           )}
           {showEnterOnDevice && (
-            <Button preset="accent5" xxl={true} onClick={onEnterOnDevice}>
-              <VRIcon />
+            <Button preset="accent" xxl={true} onClick={onEnterOnDevice}>
+              {/* <VRIcon /> */}
               <span>
                 <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On VR" />
               </span>
             </Button>
           )}
           {showSpectate && (
-            <Button preset="accent5" xxl={true} onClick={onSpectate}>
-              <BroadcastIcon />
+            <Button preset="accent" xxl={true} onClick={onSpectate}>
+              {/* <BroadcastIcon /> */}
               <span>
                 <FormattedMessage id="room-entry-modal.spectate-button" defaultMessage="Streamer" />
               </span>
             </Button>
           )}
-          {/* {showOptions &&
+          {showOptions &&
             breakpoint !== "sm" && (
               <>
-                <hr className={styleUtils.showLg} />
-                <Button preset="transparent" className={styleUtils.showLg} onClick={onOptions}>
-                  <SettingsIcon />
+                {/* <hr className={styleUtils.showLg} /> */}
+                <Button preset="basic-accent" onClick={onOptions}>
+                  {/* className={styleUtils.showLg} */}
+                  {/* <SettingsIcon /> */}
                   <span>
                     <FormattedMessage id="room-entry-modal.options-button" defaultMessage="Options" />
                   </span>
                 </Button>
               </>
-            )} */}
+            )}
         </Column>
       </Column>
     </Modal>

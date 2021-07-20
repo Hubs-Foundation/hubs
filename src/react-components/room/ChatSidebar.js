@@ -370,8 +370,8 @@ export function ChatToolbarButton(props) {
     <ToolbarButton
       {...props}
       icon={<ChatIcon />}
-      preset="custom"
-      label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
+      preset="chat"
+      // label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
     />
   );
 }

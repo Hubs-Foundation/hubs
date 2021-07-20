@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+	<head>
+	<!-- Meta Tags -->
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, user-scalable=no"/>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<!-- Page Title -->
+	<title>User View</title>
+
+	<!-- Style sheet -->
+	<link href="css/style.css" rel="stylesheet" type="text/css">
+	<link href="css/media.css" rel="stylesheet" type="text/css">
+
+	<!--[if lt IE 9]>
+	 <script src="/js/html5shiv.js" type="text/javascript"></script>
+	 <script src="/js/respond.min.js" type="text/javascript"></script>
+	<![endif]-->
+
+	</head>
+
+<body>
+     <main class="user-view-sec bg-graphic d-flex flex-wrap align-items-center justify-content-center">
+     	<div class="container">
+     		<div class="signinUp-box d-flex flex-wrap  justify-content-center">
+     	 	 	<div class="microphone-wrap">
+	     	 	 	 <form class="theme-form">
+		 	 	 	 <div class="form-head text-center">
+		 	 	 	 	<h5 class="mb-md-4 mb-2">Microphone Setup</h5>
+		 	 	 	 	<p>Check your microphone and audio before entering.</p>
+		 	 	 	 </div>
+		 	 	 	 <div class="form-body w-100">
+		 	 	 	 	<div class="microph-form">
+				 	 	        <div class="form-group">
+				 	 	        	<div class="micro-audio d-flex justify-content-between">
+				 	 	        	  <div class="microphone mic-aud-box">
+				 	 	        	  	<a href="#"><img src="images/mute-icon.png" alt=""></a>
+				 	 	        	  	<span>Microphone Disabled</span>
+				 	 	        	  </div>
+				 	 	        	   <div class="audio-set mic-aud-box">
+				 	 	        	  	<a href="#"><img src="images/speaker-icon.png" alt=""></a>
+				 	 	        	  	<span>Test Audio</span>
+				 	 	        	  </div>
+				 	 	        	</div>
+				 	 	        </div>
+				 	 	        <div class="form-group">
+				 	 	        	     <select class="form-control select-mic">
+				 	 	        	   	  <option>Select</option>
+				 	 	        	   	  <option>Option 1</option>
+				 	 	        	   	  <option>Option 2</option>
+				 	 	        	   	  <option>Option 3</option>
+				 	 	        	     </select>
+				 	 	        </div>
+				 	 	        <div class="form-group">
+				 	 	        	<div class="switch-field-cntrl mt-3 mb-4">
+				 	 	        	   <label class="switch-field">
+									  <input type="checkbox" checked="">
+									  <span class="switch-slider round"></span>
+								    </label>
+								    <span>Mute My Microphone</span>
+								</div>
+				 	 	        </div>
+				 	 	        <div class="form-submit text-center mt-2">
+		     	 	 	 	    	   <button class="btn btn-form btn-blue">Enter Room</button>
+		     	 	 	 	   </div>
+				 	 	</div>
+		     	 	</div>
+		     	</form>
+     	 </div>
+     </div>
+     	</div>
+     </main>
+
+	<!--        External Java Scripts
+	======================================= -->
+
+	<script src="js/jquery-3.3.1.min.js"></script>
+	<script src="js/popper.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		$('#share').click( function () {
+		   $('.social-crcl').toggleClass("crcl-hide");
+		});
+	</script>
+</body>
+</html>
+

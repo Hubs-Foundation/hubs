@@ -36,17 +36,17 @@ export function MicSetupModal({
   return (
     <Modal
       title={<FormattedMessage id="mic-setup-modal.title" defaultMessage="Microphone Setup" />}
-      beforeTitle={<BackButton onClick={onBack} />}
-      className={className}
+      // beforeTitle={<BackButton onClick={onBack} />}
+      className={classNames(styles.micModal, className)}
       {...rest}
     >
       <Column center padding margin className={styles.content}>
-        {/* <p>
+        <p>
           <FormattedMessage
             id="mic-setup-modal.check-mic"
             defaultMessage="Check your microphone and audio before entering."
           />
-        </p> */}
+        </p>
         <div className={styles.audioCheckContainer}>
           <ToolbarButton
             icon={
@@ -125,7 +125,7 @@ export function MicSetupModal({
             />
           </>
         )}
-        <Button preset="accent5" lg={true} onClick={onEnterRoom}>
+        <Button preset="custom1" lg={true} onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
         </Button>
       </Column>

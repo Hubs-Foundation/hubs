@@ -9,7 +9,7 @@
   border: 1px solid theme.$background1-color;
   min-width: 160px;
   z-index: 10;
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 40vh);
 
   :local(.content) {
     overflow-y: auto;

@@ -1,0 +1,50 @@
+@use "../styles/theme.scss";
+
+:local(.content) {
+  margin-top: 10px;
+  padding: 0px 0px 24px 0px;
+  button {
+    width: 156px;
+  }
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    padding: 0px 0px 24px 0px;
+  }
+}
+
+
+:local(.side-menu){
+   ul {
+    transform: rotate(6deg);
+    padding: 0;
+  }
+}
+
+:local(.side-menu){ 
+    ul li:nth-child(2) {
+    margin: 16px 0 0 -31px;
+  }
+}
+:local(.side-menu){
+    ul li:nth-child(3) {
+    margin: 16px 0 0 -40px;
+  }
+}
+:local(.side-menu){ 
+    ul li:nth-child(4) {
+    margin: 16px 0 0 -38px;
+  }
+}
+
+:local(.side-menu){ 
+   ul li:nth-child(5) {
+   margin: 16px 0 0 -28px;
+ }
+}
+:local(.side-menu){ 
+  ul li a {
+  line-height: 0;
+  display: block;
+}
+
+} 

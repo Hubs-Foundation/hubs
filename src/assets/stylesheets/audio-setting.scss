@@ -1,0 +1,522 @@
+@use "../../react-components/styles/theme.scss";
+@import 'shared.scss';
+
+$fontSize: 16px;
+$semi-bold: 600;
+
+%full-screen-panel {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background: theme.$background-gradient;
+  color: theme.$text5-color;
+}
+
+:local(.preferences-panel) {
+ .setting-inUp-wrap { min-height: 100vh; padding: 50px 0px; }
+ .setting-inUp-wrap .container { position: relative; max-width: 430px; }
+ .setting-inUp-wrap  .signinUp-box, .bg-arc { min-width: 330px; max-width: 330px; min-height: 375px; padding: 55px 30px 20px; background-image: url(../images/tabs-bg.svg); margin: 0px auto; }
+
+  z-index: 2;
+  pointer-events: auto;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+
+  input[type='number'] {
+    -moz-appearance:textfield;
+  }
+
+  input[type=text],input[type=number] {
+    cursor: pointer;
+    @extend %rounded-border;
+    @extend %default-font;
+    color: theme.$text5-color;;
+    padding: 0px;
+    margin: 0px;
+    background: transparent;
+    line-height: 30px;
+    font-size: $fontSize;
+    text-align: center;
+    width: 60px;
+    height: 38px;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+}
+
+:local(.nav-container) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+:local(.nav) {
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid theme.$text5-color;
+  margin: 0px 16px;
+  width: 100%;
+}
+
+%font-nav-item {
+  font-weight: $semi-bold;
+  font-size: $fontSize;
+}
+%font-nav-item-selected {
+  font-weight: bold;
+}
+
+:local(.nav-item){
+  @extend %default-font;
+  @extend %font-nav-item;
+  @extend %no-default-button-style;
+  @extend %unselectable;
+  margin: 0px 24px;
+  border-bottom: 3px solid transparent;
+  &:local(.selected) {
+    @extend %font-nav-item-selected;
+    border-bottom: 3px solid theme.$active-color;
+  }
+  color: theme.$text5-color;
+}
+
+:local(.max-resolution-preference-item) {
+  @extend %default-font;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: center;
+}
+
+%preference-list-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
+  &:last-child {
+    margin-bottom: 0px;
+  }
+}
+:local(.list-item) {
+  margin: 0px 16px 16px 16px;
+  &:last-child {
+    margin: 0px 16px 0px 16px;
+  }
+}
+:local(.column){
+  display: flex;
+  flex-flow: column;
+}
+%row {
+  display: flex;
+  align-items: center;
+  &>*{
+    margin-right: 12px;
+  }
+  &>*:last-child {
+    margin-right: 0px;
+  }
+}
+%row-right {
+  justify-self: flex-end;
+  margin-left: auto;
+}
+%row-center {
+  justify-self: center;
+  margin-left: auto;
+}
+:local(.row) {
+  @extend %row;
+}
+:local(.row-right) {
+  @extend %row-right;
+}
+:local(.row-center){
+  @extend %row-center;
+}
+
+%warn-icon-size {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  min-height: 36px;
+}
+:local(.warn-icon-placeholder){
+  @extend %warn-icon-size;
+}
+:local(.warn-icon){
+  @extend %warn-icon-size;
+  color: theme.$error-color;
+}
+
+:local(.horizontal) {
+  @extend %preference-list-item;
+  justify-content: space-between;
+  &>*:first-child {
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+  }
+  &>* {
+    margin-right: 16px !important;
+  }
+}
+:local(.vertical) {
+  @extend %preference-list-item;
+  flex-flow: column;
+  justify-content: center;
+  &>*{
+    margin: 0px 16px !important;
+  }
+}
+:local(.control-with-default) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-right: 0px;
+  &>*:first-child {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+  &>* {
+    margin-right: 16px;
+  }
+}
+:local(.preference-label){
+  @extend %default-font;
+  font-size: $fontSize;
+  font-weight: 600;
+  flex-grow: 1;
+}
+
+:local(.close-button) {
+  cursor: pointer;
+  color: theme.$text5-color;
+  outline-style: none;
+  background: none;
+  border: none;
+  @extend %no-default-button-style;
+  margin: 16px auto 16px 16px;
+}
+:local(.refresh-prompt) {
+  @extend %default-font;
+  font-size: $fontSize;
+  text-align: center;
+}
+:local(.toast){
+  width: 100%;
+  max-width: 600px;
+  z-index: 10;
+  position: absolute;
+  bottom: 0px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  border-radius: 16px 16px 0px 0px;
+  background-color: theme.$text5-color;
+  &>* {
+    margin: 16px 16px 0px 16px;
+  }
+  &>*:last-child {
+    margin: 16px;
+  }
+}
+:local(.refresh-now-button){
+  @extend %action-button;
+  min-width: 120px;
+  width: 120px;
+  height: 44px;
+  width: 180px;
+  min-width: 180px;
+}
+%reset-to-default-button-size {
+  width: 30px !important;
+  height: 30px !important;
+}
+:local(.reset-to-default-button) {
+  cursor: pointer;
+  @extend %no-default-button-style;
+  @extend %reset-to-default-button-size;
+  color: theme.$text5-color;
+  @media(hover: hover){
+    &:hover {
+      color: theme.$primary-color;
+    }
+  }
+}
+:local(.reset-to-default-button-placeholder){
+  @extend %reset-to-default-button-size;
+}
+:local(.flex){
+  display: flex;
+}
+:local(.icon){
+  width: 32px !important;
+  height: 32px !important;
+}
+
+:local(.content-container) {
+  margin-top: 16px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
+
+%checkbox-size {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+:local(.checkbox-placeholder){
+  @extend %checkbox-size;
+}
+:local(.scrolling-content) {
+  display: flex;
+  flex-flow: column;
+  width: 800px;
+  max-width: 100%;
+
+  input[type=checkbox] {
+    cursor: pointer;
+    cursor: pointer;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid theme.$text5-color;
+    // background-color: theme.$input-bg-color;
+    background: transparent;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    @extend %checkbox-size;
+  }
+  input[type=checkbox]:checked {
+    &::after {
+      content: ' ';
+      position: absolute;
+      background: theme.$active-text-color;
+      border-radius: 6px;
+    }
+
+    &::after {
+      width: 24px !important;
+      height: 24px !important;
+    }
+  }
+}
+
+:local(.section) {
+  margin: 0px 0px 16px 0px;
+  &:last-child {
+    margin: 0px;
+  }
+}
+
+:local(.section-title){
+  @extend %default-font;
+  font-weight: normal;
+  text-transform: uppercase;
+  color: theme.$text5-color;
+  margin: 0px 0px 16px 16px;
+  font-size: $fontSize;
+}
+
+:local(.dropdown) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  line-height: 20px;
+
+  select {
+    font-size: $fontSize;
+    @extend %rounded-border;
+    @extend %default-font;
+    font-family: theme.$font-family-default;
+    color: theme.$text5-color;
+    appearance: none;
+    // background-color: theme.$input-bg-color;
+    background: transparent;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid theme.$text5-color;
+    padding: 6px;
+    font-weight: bold;
+    padding-right: 30px;
+    max-width: 170px;
+  }
+}
+:local(.dropdown-arrow){
+  pointer-events: none;
+  position: absolute;
+  right: 7.5%;
+}
+
+:local(.number-with-range){
+  display: flex;
+  flex-flow: row;
+  justify-content: flex-start;
+  align-items: center;
+
+  :local(.number-in-number-with-range) {
+    display:flex;
+    justify-content: center;
+    cursor: pointer;
+
+  }
+  :local(.range-slider) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 2.5rem;
+    padding: 0px 0px 0px 12px;
+  }
+}
+
+// Styling Cross-Browser Compatible Range Inputs with Sass
+// Github: https://github.com/darlanrod/input-range-sass
+// Author: Darlan Rod https://github.com/darlanrod
+// Version 1.5.2
+// MIT License
+
+$track-color: theme.$toggle-button-color !default;
+$thumb-color: theme.$primary-color !default;
+
+$thumb-radius: 10px !default;
+$thumb-height: 20px !default;
+$thumb-width: 20px !default;
+$thumb-shadow-size: 0px !default;
+$thumb-shadow-blur: 0px !default;
+$thumb-border-width: 0px !default;
+$thumb-border-color: theme.$button-border-color !default;
+
+$track-width: 100% !default;
+$track-height: 8px !default;
+$track-shadow-size: 0px !default;
+$track-shadow-blur: 0px !default;
+$track-border-width: 0px !default;
+$track-border-color: theme.$button-border-color !default;
+
+$track-radius: 5px !default;
+$contrast: 5% !default;
+
+$ie-bottom-track-color: $track-color !default;
+
+@mixin track {
+  cursor: default;
+  height: $track-height;
+  transition: all .2s ease;
+  width: $track-width;
+}
+
+@mixin thumb {
+  background: $thumb-color;
+  border: $thumb-border-width solid $thumb-border-color;
+  border-radius: $thumb-radius;
+  box-sizing: border-box;
+  cursor: default;
+  height: $thumb-height;
+  width: $thumb-width;
+}
+
+[type='range'] {
+  -webkit-appearance: none;
+  background: transparent;
+  margin: $thumb-height / 2 0;
+  width: $track-width;
+  cursor: pointer;
+
+  &::-moz-focus-outer {
+    border: 0;
+  }
+
+  &:focus {
+    outline: 0;
+
+    &::-webkit-slider-runnable-track {
+      background: $track-color;
+    }
+
+    &::-ms-fill-lower {
+      background: $track-color;
+    }
+
+    &::-ms-fill-upper {
+      background: $track-color;
+    }
+  }
+
+  &::-webkit-slider-runnable-track {
+    @include track;
+    background: $track-color;
+    border: $track-border-width solid $track-border-color;
+    border-radius: $track-radius;
+  }
+
+  &::-webkit-slider-thumb {
+    @include thumb;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: ((-$track-border-width * 2 + $track-height) / 2 - $thumb-height / 2);
+  }
+
+  &::-moz-range-track {
+    @include track;
+    background: $track-color;
+    border: $track-border-width solid $track-border-color;
+    border-radius: $track-radius;
+    height: $track-height / 2;
+  }
+
+  &::-moz-range-thumb {
+    @include thumb;
+    cursor: pointer;
+  }
+
+  &::-ms-track {
+    @include track;
+    background: transparent;
+    border-color: transparent;
+    border-width: ($thumb-height / 2) 0;
+    color: transparent;
+  }
+
+  &::-ms-fill-lower {
+    background: $ie-bottom-track-color;
+    border: $track-border-width solid $track-border-color;
+    border-radius: ($track-radius * 2);
+  }
+
+  &::-ms-fill-upper {
+    background: $track-color;
+    border: $track-border-width solid $track-border-color;
+    border-radius: ($track-radius * 2);
+  }
+
+  &::-ms-thumb {
+    @include thumb;
+    cursor: pointer;
+    margin-top: $track-height / 4;
+  }
+
+  &:disabled {
+    &::-webkit-slider-thumb,
+    &::-moz-range-thumb,
+    &::-ms-thumb,
+    &::-webkit-slider-runnable-track,
+    &::-ms-fill-lower,
+    &::-ms-fill-upper {
+      cursor: not-allowed;
+    }
+  }
+}
+

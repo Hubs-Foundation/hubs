@@ -1086,7 +1086,7 @@ class PreferencesScreen extends Component {
             }}
           />
         )}
-        <CloseButton onClick={this.props.onClose} />
+        {/* <CloseButton onClick={this.props.onClose} /> */}
         <Nav selected={this.state.category}>
           {TOP_LEVEL_CATEGORIES.map(category => (
             <NavItem
@@ -1126,3 +1126,48 @@ class PreferencesScreen extends Component {
 }
 
 export default injectIntl(PreferencesScreen);
+
+// <div className={classNames(styles.preferencesPanel)}>
+// {shouldPromptForRefresh && (
+//   <RefreshPrompt
+//     reportHeight={toastHeight => {
+//       this.setState({ toastHeight });
+//     }}
+//   />
+// )}
+// {/* <CloseButton onClick={this.props.onClose} /> */}
+// <Nav selected={this.state.category}>
+//   {TOP_LEVEL_CATEGORIES.map(category => (
+//     <NavItem
+//       key={`category-${category}-header`}
+//       title={intl.formatMessage(categoryNames[category])}
+//       onClick={() => {
+//         this.setState({ category });
+//       }}
+//       ariaLabel={intl.formatMessage(
+//         { id: "preferences-screen.select-category ", defaultMessage: "Select category {categoryName}" },
+//         {
+//           categoryName: intl.formatMessage(categoryNames[category])
+//         }
+//       )}
+//       selected={category === this.state.category}
+//     />
+//   ))}
+// </Nav>
+// <div className={styles.contentContainer}>
+//   <div className={styles.scrollingContent}>
+//     {this.createSections()
+//       .get(this.state.category)
+//       .map(Section)}
+//     {shouldPromptForRefresh && (
+//       <div
+//         style={{
+//           width: "100%",
+//           minHeight: `${this.state.toastHeight}`
+//         }}
+//       />
+//     )}
+//   </div>
+// </div>
+// </div>
+// );

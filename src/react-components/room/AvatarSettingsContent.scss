@@ -1,5 +1,49 @@
 @use "../styles/theme.scss";
 
+
+
+:local(.avatar-modal){
+  margin: 0px auto;
+  position: relative;
+//   // display: flex;
+//   // flex-direction: column;
+//   // height: max-content;
+//   // height: 100%;
+
+//   min-width: 395px;
+//   margin: 0px auto;
+//   padding: 45px 30px 20px;
+ 
+//   width: auto;
+  
+//   max-width: 500px ;  //395px;          
+
+  @media screen and (min-width: theme.$breakpoint-sm){
+    min-width: 330px;
+    max-height: 330px;
+    // max-width: 295px;
+    // padding: 25px 20px 20px;
+  }
+
+  @media screen and (min-width: theme.$breakpoint-md){
+    max-width: 500px;
+    max-height: 550px;
+    // min-width: 550px;
+    // min-height: 335px;
+    // max-width: 395px;
+    // padding: 40px 20px 20px;
+  }
+  @media screen and (max-width: theme.$breakpoint-md){
+    max-width: 500px;
+    max-height: 550px;
+    // min-width: 550px;
+    // min-height: 335px;
+    // max-width: 395px;
+    // padding: 40px 20px 20px;
+  }
+
+}
+
 :local(.content) {
   align-items: center;
   padding: 24px;

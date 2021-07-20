@@ -1,6 +1,7 @@
 @use "../styles/theme.scss";
 
 :local(.content) {
+  margin-top: 10px;
   padding: 0px 0px 24px 0px;
   button {
     width: 156px;
@@ -40,14 +41,13 @@
 }
 
 :local(.buttons) {
-  width: 100%;
-  padding: 0px 60px 0px 60px;
+ 
   button {
     margin-left: 16px;
     margin-right: 16px;
     background: transparent;
     width: 100%;
-    margin-top: 20px;
+  
     
     @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
       margin-left: 8px;

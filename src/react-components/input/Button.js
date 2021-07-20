@@ -8,9 +8,13 @@ import { FormattedMessage } from "react-intl";
 export const presets = [
   "transparent",
   "basic",
+  "accent",
   "primary",
+  "basic-accent",
   "accept",
   "cancel",
+  "custom1",
+  "accent",
   "accent1",
   "accent2",
   "accent3",

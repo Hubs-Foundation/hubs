@@ -110,8 +110,9 @@ export function MoreMenuPopoverButton({ menu }) {
           ref={triggerRef}
           icon={<MoreIcon />}
           selected={popoverVisible}
+          preset="more"
           onClick={togglePopover}
-          label={title}
+          //label={title}
         />
       )}
     </Popover>

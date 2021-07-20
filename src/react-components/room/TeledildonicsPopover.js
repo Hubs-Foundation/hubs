@@ -28,8 +28,9 @@ export function TeledildonicsPopoverButton({ items }) {
           icon={<TeledildonicsIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label={title}
-          preset="custom"
+          //label={title}
+          preset="tele"
+          className="tele"
         />
       )}
     </Popover>

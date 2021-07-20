@@ -3,12 +3,12 @@
 :local(.button) {
   height: 48px;
   min-height: 48px;
-  width: min-content;
+  width:100%;
   min-width: 156px;
   font-weight: 700;
   font-size: 12px;
-  border-radius: 8px;
-  border-width: 0;
+//  border-radius: 8px;
+//  border-width: 0;
   border-color: transparent;
   transition: background-color 0.1s ease-in-out;
   white-space: nowrap;
@@ -20,7 +20,8 @@
   svg {
     flex-shrink: 0;
     margin-right: 8px;
-  }
+  } 
+
 }
 
 :local(.basic), :local(.transparent) {
@@ -254,6 +255,142 @@
   }
 }
 
+
+:local(.custom1) {
+  color: theme.$text5-color;
+  background-color: theme.$custom1-color;
+  width:50%;
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$custom1-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$custom1-color-pressed;
+  }
+}
+
+
+:local(.accent) {
+  color: theme.$text5-color;
+  background-color: theme.$transparent;
+
+  width: 100%;
+  padding: 10px 70px 10px 70px;
+  display: block;
+  font-weight: 500;
+  font-size: 26px;
+  border: 1px solid transparent;
+  text-align: center;
+ 
+  border-radius: 80px 0px 80px 0px;
+  margin-left: 16px;
+  margin-right: 16px;
+ 
+ 
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent-color-pressed;
+    border-radius: 80px 0px 80px 0px;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent-color-pressed;
+     border-radius: 80px 0px 80px 0px;
+  }
+  @media screen and (max-width: theme.$breakpoint-md){
+    font-size: 18px;
+    padding: 10px 20px;
+    margin:0px;
+    width :min-content;
+  }
+  @media screen and (max-width: theme.$breakpoint-sm){
+    font-size: 18px;
+    padding: 10px 20px;
+    margin:0px;
+    width:100px;
+  }
+}
+
+
+ 
+:local(.basic-accent) {
+  color: theme.$text5-color;
+  background-color: theme.$transparent;
+
+  width: 100%;
+  padding: 10px 70px 10px 70px;
+  display: block;
+  font-weight: 500;
+  font-size: 20px;
+  border: 1px solid transparent;
+  text-align: center;
+ 
+  border-radius: 80px 0px 80px 0px;
+  margin-left: 16px;
+  margin-right: 16px;
+ 
+ 
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent-color-pressed;
+    border-radius: 80px 0px 80px 0px;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent-color-pressed;
+     border-radius: 80px 0px 80px 0px;
+  }
+  @media screen and (max-width: theme.$breakpoint-md){
+    font-size: 18px;
+    padding: 10px 20px;
+    margin:0px;
+    width :min-content;
+  }
+  @media screen and (max-width: theme.$breakpoint-sm){
+    font-size: 18px;
+    padding: 10px 20px;
+    margin:0px;
+    width:100px;
+  }
+}
+
+
 :local(.button):disabled {
   border-color: transparent;
   cursor: not-allowed;
@@ -289,7 +426,6 @@
 
 :local(.xxl) {
   border-radius: 80px;
-  font-family: 'Sunflower';
   padding: 0px 24px;
   font-size: 35px;
   font-weight: 500;

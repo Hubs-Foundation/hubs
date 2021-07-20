@@ -1,23 +1,45 @@
 @use '../styles/theme';
 
 :local(.toolbar) {
-  height: 96px;
-  display: flex;
-  padding: 12px;
-  background-color: theme.$background1-color;
-  border-top: 1px solid theme.$background1-color;
+  // height: 195px;
+  // width: 205px;
+   display: flex;
+  // padding: 12px;
+  position:absolute;
+  max-width: 220px;
+  left:10%;
+  top: 80%;
+  transform: translateY(-50%);
+  pointer-events: auto;
+   
+  @media (max-width: theme.$breakpoint-lg) {
+    left:40%;
+    top:15%;
+    padding: 12px 24px;
+    justify-content: space-between;
+  }
+  @media (max-width: theme.$breakpoint-sm) {
+    top:15%;
+    left:30%;
+    padding: 12px 24px;
+    justify-content: space-between;
+  } justify-content: space-between;
 
-  @media (min-width: theme.$breakpoint-lg) {
+  @media (max-width: theme.$breakpoint-md) {
+    left:40%;
+    top:20%;
     padding: 12px 24px;
     justify-content: space-between;
   }
 }
 
 :local(.content) {
-  display: flex;
-  flex: 1;
-  justify-content: space-around;
-
+  position: relative;
+  width: 200px;
+  height: 180px;
+  padding: 0;
+  left: 0;
+  top: 0;
   @media (min-width: theme.$breakpoint-lg) {
     flex: 0;
 
@@ -30,3 +52,4 @@
     }
   }
 }
+ 
