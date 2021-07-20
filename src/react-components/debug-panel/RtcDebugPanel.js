@@ -385,7 +385,7 @@ export default class RtcDebugPanel extends Component {
   }
 
   getSignalingData() {
-    return { connected: !APP.dialog._closed };
+    return { connected: APP.dialog._protoo && APP.dialog._protoo.connected };
   }
 
   async getServerData() {

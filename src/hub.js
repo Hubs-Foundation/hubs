@@ -55,7 +55,7 @@ import "./phoenix-adapter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import DialogAdapter from "./naf-dialog-adapter";
+import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL } from "./naf-dialog-adapter";
 import "./change-hub";
 
 import "./components/scene-components";
@@ -731,6 +731,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;
+
+  APP.dialog.on(DIALOG_CONNECTION_ERROR_FATAL, () => {
+    // TODO: Change the wording of the connect error to match dialog connection error
+    // TODO: Tell the user that dialog is broken, but don't completely end the experience
+    remountUI({ roomUnavailableReason: ExitReason.connectError });
+    APP.entryManager.exitScene();
+  });
 
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
   window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);

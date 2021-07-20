@@ -36,7 +36,9 @@ const WEBCAM_SIMULCAST_ENCODINGS = [
 // Used for simulcast screen sharing.
 const SCREEN_SHARING_SIMULCAST_ENCODINGS = [{ dtx: true, maxBitrate: 1500000 }, { dtx: true, maxBitrate: 6000000 }];
 
-export default class DialogAdapter extends EventEmitter {
+export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
+
+export class DialogAdapter extends EventEmitter {
   constructor() {
     super();
 
@@ -53,7 +55,6 @@ export default class DialogAdapter extends EventEmitter {
     this._forceTcp = false;
     this._forceTurn = false;
     this._iceTransportPolicy = null;
-    this._closed = true;
     this.scene = null;
     this._serverParams = {};
     this._consumerStats = {};
@@ -164,8 +165,8 @@ export default class DialogAdapter extends EventEmitter {
    * Restart ICE in the underlying send peerconnection.
    */
   async restartSendICE() {
-    // Do not restart ICE if Signaling is disconnected. We are not in the meeting room if that's the case.
-    if (this._closed) {
+    // Do not restart ICE if Signaling is disconnected.
+    if (!this._protoo || !this._protoo.connected) {
       return;
     }
 
@@ -207,8 +208,7 @@ export default class DialogAdapter extends EventEmitter {
    * @param {boolean} force Forces the execution of the reconnect.
    */
   async restartRecvICE() {
-    // Do not restart ICE if Signaling is disconnected. We are not in the meeting room if that's the case.
-    if (this._closed) {
+    if (!this._protoo || !this._protoo.connected) {
       return;
     }
 
@@ -263,21 +263,27 @@ export default class DialogAdapter extends EventEmitter {
     urlWithParams.searchParams.append("roomId", this._roomId);
     urlWithParams.searchParams.append("peerId", this._clientId);
 
-    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString());
+    // TODO: Establishing connection could take a very long time.
+    //       Inform the user if we are stuck here.
+    const protooTransport = new protooClient.WebSocketTransport(urlWithParams.toString(), {
+      retry: { retries: 2 }
+    });
     this._protoo = new protooClient.Peer(protooTransport);
 
     this._protoo.on("disconnected", () => {
       this.emitRTCEvent("info", "Signaling", () => `Disconnected`);
-      this.disconnect();
+      this.cleanUpLocalState();
     });
 
     this._protoo.on("failed", attempt => {
       this.emitRTCEvent("error", "Signaling", () => `Failed: ${attempt}, retrying...`);
     });
 
-    this._protoo.on("close", () => {
+    this._protoo.on("close", async () => {
+      // We explicitly disconnect event handlers when closing the socket ourselves,
+      // so if we get into here, we were not the ones closing the connection.
       this.emitRTCEvent("error", "Signaling", () => `Closed`);
-      this.disconnect();
+      this._retryConnectWithNewHost();
     });
 
     // eslint-disable-next-line no-unused-vars
@@ -441,7 +447,6 @@ export default class DialogAdapter extends EventEmitter {
     await new Promise((resolve, reject) => {
       this._protoo.on("open", async () => {
         this.emitRTCEvent("info", "Signaling", () => `Open`);
-        this._closed = false;
 
         try {
           await this._joinRoom();
@@ -454,6 +459,31 @@ export default class DialogAdapter extends EventEmitter {
     });
 
     await Promise.all([this._initialAudioConsumerPromise]);
+  }
+
+  async _retryConnectWithNewHost() {
+    this.cleanUpLocalState();
+    this._protoo.removeAllListeners();
+    const serverParams = await APP.hubChannel.getHost();
+    const { host, port } = serverParams;
+    const newServerUrl = `wss://${host}:${port}`;
+    if (this._serverUrl === newServerUrl) {
+      console.error("Reconnect to dialog failed.");
+      this.emit(DIALOG_CONNECTION_ERROR_FATAL);
+      return;
+    }
+    console.log(`The Dialog server has changed to ${newServerUrl}, reconnecting with the new server...`);
+    await this.connect({
+      serverUrl: newServerUrl,
+      roomId: this._roomId,
+      joinToken: this._joinToken,
+      serverParams,
+      scene: this.scene,
+      clientId: this._clientId,
+      forceTcp: this._forceTcp,
+      forceTurn: this._forceTurn,
+      iceTransportPolicy: this._iceTransportPolicy
+    });
   }
 
   closePeer(peerId) {
@@ -926,11 +956,7 @@ export default class DialogAdapter extends EventEmitter {
     return this._micProducer && !this._micProducer.paused;
   }
 
-  disconnect() {
-    if (this._closed) return;
-    this._closed = true;
-    debug("disconnect()");
-    // We don't need to notify protoo about this because we are about to close() the peer
+  cleanUpLocalState() {
     this._sendTransport && this._sendTransport.close();
     this._sendTransport = null;
     this._recvTransport && this._recvTransport.close();
@@ -938,12 +964,17 @@ export default class DialogAdapter extends EventEmitter {
     this._micProducer = null;
     this._shareProducer = null;
     this._cameraProducer = null;
-    // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
-    // Check if connected because we don't want to remove event listeners and close the peer on the "disconnected" event
-    if (this._protoo && this._protoo.connected) {
+  }
+
+  disconnect() {
+    debug("disconnect()");
+    this.cleanUpLocalState();
+    if (this._protoo) {
       this._protoo.removeAllListeners();
-      this._protoo.close();
-      this.emitRTCEvent("info", "Signaling", () => `[close]`);
+      if (this._protoo.connected) {
+        this._protoo.close();
+        this.emitRTCEvent("info", "Signaling", () => `[close]`);
+      }
     }
   }
 
