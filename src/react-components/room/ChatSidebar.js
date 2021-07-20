@@ -74,9 +74,13 @@ export function MessageAttachmentButton(props) {
   );
 }
 
-export function ChatLengthWarning({ messageLength, maxLength, isOverMaxLength }) {
+export function ChatLengthWarning({ messageLength, maxLength }) {
   return (
-    <p className={classNames(styles.chatInputWarning, isOverMaxLength ? styles.warningTextColor : "")}>
+    <p
+      className={classNames(styles.chatInputWarning, {
+        [styles.warningTextColor]: messageLength > maxLength
+      })}
+    >
       <FormattedMessage id="chat-message-input.warning-max-characters" defaultMessage="Max characters" />
       {` (${messageLength}/${maxLength})`}
     </p>
@@ -85,8 +89,7 @@ export function ChatLengthWarning({ messageLength, maxLength, isOverMaxLength })
 
 ChatLengthWarning.propTypes = {
   messageLength: PropTypes.number,
-  maxLength: PropTypes.number,
-  isOverMaxLength: PropTypes.bool
+  maxLength: PropTypes.number
 };
 
 export function ChatInput({ warning, isOverMaxLength, ...props }) {
@@ -96,7 +99,7 @@ export function ChatInput({ warning, isOverMaxLength, ...props }) {
     <div className={styles.chatInputContainer}>
       <TextAreaInput
         textInputStyles={styles.chatInputTextAreaStyles}
-        className={isOverMaxLength ? styles.warningBorder : ""}
+        className={classNames({ [styles.warningBorder]: isOverMaxLength })}
         placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
         {...props}
       />

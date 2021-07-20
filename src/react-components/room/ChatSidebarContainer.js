@@ -276,11 +276,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         warning={
           <>
             {message.length + 50 > MAX_MESSAGE_LENGTH && (
-              <ChatLengthWarning
-                messageLength={message.length}
-                maxLength={MAX_MESSAGE_LENGTH}
-                isOverMaxLength={isOverMaxLength}
-              />
+              <ChatLengthWarning messageLength={message.length} maxLength={MAX_MESSAGE_LENGTH} />
             )}
           </>
         }

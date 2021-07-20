@@ -8,11 +8,13 @@ import styleUtils from "../styles/style-utils.scss";
 import styles from "./Tokens.scss";
 
 export const TokenPageLayout = ({ children }) => (
-  <PageContainer className={styles.tokenContainer}>
-    <Column gap="xl" className={classNames(styles.centerPaddingSides, styleUtils.xlPadding)}>
-      {children}
-    </Column>
-  </PageContainer>
+  <StorybookAuthContextProvider>
+    <PageContainer className={styles.tokenContainer}>
+      <Column gap="xl" className={classNames(styles.centerPaddingSides, styleUtils.xlPadding)}>
+        {children}
+      </Column>
+    </PageContainer>
+  </StorybookAuthContextProvider>
 );
 
 TokenPageLayout.propTypes = {
