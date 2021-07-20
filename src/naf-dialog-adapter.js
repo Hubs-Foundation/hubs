@@ -939,6 +939,7 @@ export default class DialogAdapter extends EventEmitter {
     this._shareProducer = null;
     this._cameraProducer = null;
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
+    // Check if connected because we don't want to remove event listeners and close the peer on the "disconnected" event
     if (this._protoo && this._protoo.connected) {
       this._protoo.removeAllListeners();
       this._protoo.close();
