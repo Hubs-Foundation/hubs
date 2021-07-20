@@ -220,9 +220,8 @@
 
                         <template data-name="Head">
                             <a-entity
-                                avatar-audio-source
+                                avatar-audio-source="rolloffFactor: 2.0;"
                                 audio-params
-                                audio-zone-source
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
@@ -1199,7 +1198,6 @@
                 class="camera"
                 personal-space-bubble="radius: 0.4;"
                 audio-params="isLocal: true"
-                audio-zone-listener
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order

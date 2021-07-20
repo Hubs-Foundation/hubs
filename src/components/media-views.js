@@ -17,7 +17,7 @@ import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 import { detect } from "detect-browser";
 import semver from "semver";
-import { MixerType } from "../systems/audio-system";
+import { MediaAudioDefaults } from "../systems/audio-settings-system";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -256,9 +256,17 @@ AFRAME.registerComponent("media-video", {
     src: { type: "string" },
     audioSrc: { type: "string" },
     contentType: { type: "string" },
+    volume: { type: "number", default: MediaAudioDefaults.VOLUME },
     loop: { type: "boolean", default: true },
     audioType: { type: "string", default: "pannernode" },
     hidePlaybackControls: { type: "boolean", default: false },
+    distanceModel: { type: "string", default: MediaAudioDefaults.DISTANCE_MODEL },
+    rolloffFactor: { type: "number", default: MediaAudioDefaults.ROLLOFF_FACTOR },
+    refDistance: { type: "number", default: MediaAudioDefaults.REF_DISTANCE },
+    maxDistance: { type: "number", default: MediaAudioDefaults.MAX_DISTANCE },
+    coneInnerAngle: { type: "number", default: MediaAudioDefaults.INNER_ANGLE },
+    coneOuterAngle: { type: "number", default: MediaAudioDefaults.OUTER_ANGLE },
+    coneOuterGain: { type: "number", default: MediaAudioDefaults.OUTER_GAIN },
     videoPaused: { type: "boolean" },
     projection: { type: "string", default: "flat" },
     time: { type: "number" },
@@ -281,9 +289,6 @@ AFRAME.registerComponent("media-video", {
     this.snap = this.snap.bind(this);
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
-
-    this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
-    this.gainFilter = THREE.AudioContext.getContext().createGain();
 
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
@@ -398,9 +403,9 @@ AFRAME.registerComponent("media-video", {
   },
 
   changeVolumeBy(v) {
-    const gain = this.el.components["audio-params"].data.gain;
-    const vol = THREE.Math.clamp(gain + v, 0, 1);
-    this.el.setAttribute("audio-params", "gain", vol);
+    const vol = THREE.Math.clamp(this.data.volume + v, 0, 1);
+    this.el.setAttribute("media-video", "volume", vol);
+    this.el.emit("media-volume-changed", vol);
     this.updateVolumeLabel();
   },
 
@@ -461,7 +466,7 @@ AFRAME.registerComponent("media-video", {
     if (this._ignorePauseStateChanges) return;
 
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
-    this.el.setAttribute("audio-params", "enabled", !this.video.paused);
+    this.el.setAttribute("audio-params", { enabled: !this.video.paused });
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
       this.el.emit("owned-video-state-changed");
@@ -522,6 +527,14 @@ AFRAME.registerComponent("media-video", {
       this.setupAudio();
       return;
     }
+
+    const disablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
+    const shouldSetPositionalAudioProperties =
+      this.audio && this.data.audioType === "pannernode" && !disablePositionalAudio;
+    if (shouldSetPositionalAudioProperties) {
+      this.setPositionalAudioProperties();
+      return;
+    }
   },
 
   setupAudio() {
@@ -530,18 +543,16 @@ AFRAME.registerComponent("media-video", {
       this.el.removeObject3D("sound");
     }
 
-    this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-
-    this.audioSystem.removeAudio(this.audio);
-    this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
-
-    const filters = this.audio.getFilters();
-    filters.push(this.gainFilter);
-    this.audio.setFilters(filters);
+    const disablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
+    if (!disablePositionalAudio && this.data.audioType === "pannernode") {
+      this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+      this.setPositionalAudioProperties();
+    } else {
+      this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+    }
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
-    this.el.components["audio-params"].setAudio(this.audio);
 
     // Make sure that the audio is initialized to the right place.
     // Its matrix may not update if this element is not visible.
@@ -549,8 +560,14 @@ AFRAME.registerComponent("media-video", {
     this.audio.updateMatrixWorld();
   },
 
-  getGainFilter() {
-    return this.gainFilter;
+  setPositionalAudioProperties() {
+    this.audio.setDistanceModel(this.data.distanceModel);
+    this.audio.setRolloffFactor(this.data.rolloffFactor);
+    this.audio.setRefDistance(this.data.refDistance);
+    this.audio.setMaxDistance(this.data.maxDistance);
+    this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
+    this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
+    this.audio.panner.coneOuterGain = this.data.coneOuterGain;
   },
 
   async updateSrc(oldData) {
@@ -901,8 +918,11 @@ AFRAME.registerComponent("media-video", {
   },
 
   updateVolumeLabel() {
-    const volume = this.el.components["audio-params"].data.gain;
-    this.volumeLabel.setAttribute("text", "value", volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(volume / 0.05)]);
+    this.volumeLabel.setAttribute(
+      "text",
+      "value",
+      this.data.volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(this.data.volume / 0.05)]
+    );
   },
 
   tick: (() => {
@@ -972,7 +992,7 @@ AFRAME.registerComponent("media-video", {
 
     if (this.audio) {
       this.el.removeObject3D("sound");
-      this.audioSystem.removeAudio(this.audio);
+      this.audio.disconnect();
       delete this.audio;
     }
 
