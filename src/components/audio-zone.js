@@ -30,6 +30,7 @@ AFRAME.registerComponent("audio-zone", {
     this.debugMesh.el = this.el.object3D.el;
     const debugBBAA = new THREE.BoxHelper(this.debugMesh, DEBUG_BBAA_COLOR);
     this.el.object3D.add(debugBBAA);
+    this.el.object3D.updateMatrixWorld(true);
 
     this.el.sceneEl?.systems["audio-debug"].registerZone(this);
     this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.registerZone(this);
