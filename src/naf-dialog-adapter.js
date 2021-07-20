@@ -49,7 +49,6 @@ export default class DialogAdapter extends EventEmitter {
     this._pendingMediaRequests = new Map();
     this._initialAudioConsumerPromise = null;
     this._initialAudioConsumerResolvers = new Map();
-    this._serverTimeRequests = 0;
     this._blockedClients = new Map();
     this._forceTcp = false;
     this._forceTurn = false;
@@ -256,8 +255,8 @@ export default class DialogAdapter extends EventEmitter {
     this._serverParams = serverParams;
     this._clientId = clientId;
     this.scene = scene;
-    this.forceTcp = forceTcp;
-    this.forceTurn = forceTurn;
+    this._forceTcp = forceTcp;
+    this._forceTurn = forceTurn;
     this._iceTransportPolicy = iceTransportPolicy;
 
     const urlWithParams = new URL(this._serverUrl);
@@ -810,8 +809,8 @@ export default class DialogAdapter extends EventEmitter {
     );
 
     if (!sawAudio && this._micProducer) {
-      this._micProducer.close();
       this._protoo.request("closeProducer", { producerId: this._micProducer.id });
+      this._micProducer.close();
       this._micProducer = null;
     }
     if (!sawVideo) {
@@ -929,15 +928,16 @@ export default class DialogAdapter extends EventEmitter {
 
   disconnect() {
     if (this._closed) return;
-
     this._closed = true;
-
     debug("disconnect()");
-
-    // Close mediasoup Transports.
-    this.closeSendTransport();
-    this.closeRecvTransport();
-
+    // We don't need to notify protoo about this because we are about to close() the peer
+    this._sendTransport && this._sendTransport.close();
+    this._sendTransport = null;
+    this._recvTransport && this._recvTransport.close();
+    this._recvTransport = null;
+    this._micProducer = null;
+    this._shareProducer = null;
+    this._cameraProducer = null;
     // Close protoo Peer, though may already be closed if this is happening due to websocket breakdown
     if (this._protoo && this._protoo.connected) {
       this._protoo.removeAllListeners();
