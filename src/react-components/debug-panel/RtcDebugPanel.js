@@ -563,7 +563,17 @@ export default class RtcDebugPanel extends Component {
   };
 
   connectSignaling = () => {
-    APP.dialog.connect();
+    APP.dialog.connect({
+      serverUrl: APP.dialog._serverUrl,
+      roomId: APP.dialog._roomId,
+      joinToken: APP.dialog._joinToken,
+      serverParams: APP.dialog._serverParams,
+      scene: APP.dialog.scene,
+      clientId: APP.dialog._clientId,
+      forceTcp: APP.dialog._forceTcp,
+      forceTurn: APP.dialog._forceTurn,
+      iceTransportPolicy: APP.dialog._iceTransportPolicy
+    });
   };
 
   disconnectSignaling = () => {

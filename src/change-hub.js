@@ -80,11 +80,16 @@ export async function changeHub(hubId, addToHistory = true) {
   await Promise.all([
     APP.dialog.connect({
       serverUrl: `wss://${hub.host}:${hub.port}`,
-      hubId: hub.hub_id,
+      roomId: hub.hub_id,
       joinToken: data.perms_token,
       serverParams: { host: hub.host, port: hub.port, turn: hub.turn },
-      scene
+      scene,
+      clientId: APP.dialog._clientId,
+      forceTcp: APP.dialog._forceTcp,
+      forceTurn: APP.dialog._forceTurn,
+      iceTransportPolicy: APP.dialog._iceTransportPolicy
     }),
+
     NAF.connection.adapter.connect()
   ]);
 

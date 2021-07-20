@@ -592,7 +592,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
       APP.dialog.disconnect();
       APP.dialog.connect({
         serverUrl: `wss://${hub.host}:${hub.port}`,
-        hubId: hub.hub_id,
+        roomId: hub.hub_id,
         joinToken: permsToken,
         serverParams: { host: hub.host, port: hub.port, turn: hub.turn },
         scene,

@@ -240,7 +240,7 @@ export default class DialogAdapter extends EventEmitter {
 
   async connect({
     serverUrl,
-    hubId,
+    roomId,
     joinToken,
     serverParams,
     scene,
@@ -250,7 +250,7 @@ export default class DialogAdapter extends EventEmitter {
     iceTransportPolicy
   }) {
     this._serverUrl = serverUrl;
-    this._roomId = hubId;
+    this._roomId = roomId;
     this._joinToken = joinToken;
     this._serverParams = serverParams;
     this._clientId = clientId;
@@ -278,21 +278,6 @@ export default class DialogAdapter extends EventEmitter {
     this._protoo.on("close", () => {
       this.emitRTCEvent("error", "Signaling", () => `Closed`);
       this.disconnect();
-    });
-
-    await new Promise((resolve, reject) => {
-      this._protoo.on("open", async () => {
-        this.emitRTCEvent("info", "Signaling", () => `Open`);
-        this._closed = false;
-
-        try {
-          await this._joinRoom();
-          resolve();
-        } catch (err) {
-          this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
-          reject(err);
-        }
-      });
     });
 
     // eslint-disable-next-line no-unused-vars
@@ -451,6 +436,21 @@ export default class DialogAdapter extends EventEmitter {
           this._consumerStats[consumerId]["score"] = score;
         }
       }
+    });
+
+    await new Promise((resolve, reject) => {
+      this._protoo.on("open", async () => {
+        this.emitRTCEvent("info", "Signaling", () => `Open`);
+        this._closed = false;
+
+        try {
+          await this._joinRoom();
+          resolve();
+        } catch (err) {
+          this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
+          reject(err);
+        }
+      });
     });
 
     await Promise.all([this._initialAudioConsumerPromise]);
