@@ -588,6 +588,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     const loadEnvironmentAndConnect = () => {
       updateEnvironmentForHub(hub, entryManager);
 
+      // Disconnect in case this is a re-entry
+      APP.dialog.disconnect();
       APP.dialog.connect({
         serverUrl: `wss://${hub.host}:${hub.port}`,
         hubId: hub.hub_id,
