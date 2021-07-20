@@ -104,9 +104,8 @@ export default class PhoenixAdapter {
 
   disconnect() {
     this.hubChannel.presence.list(key => key).forEach(this.nafOccupantLeave);
-
-    this.events.off("naf", this.refs.get("naf"));
-    this.events.off("nafr", this.refs.get("nafr"));
+    this.hubChannel.channel.off("naf", this.refs.get("naf"));
+    this.hubChannel.channel.off("nafr", this.refs.get("nafr"));
     this.events.off("hub:join", this.refs.get("hub:join"));
     this.events.off("hub:leave", this.refs.get("hub:leave"));
     this.refs.delete("naf");

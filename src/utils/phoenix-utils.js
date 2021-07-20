@@ -258,6 +258,20 @@ export function getPresenceProfileForSession(presences, sessionId) {
   return (getPresenceEntryForSession(presences, sessionId) || {}).profile || {};
 }
 
+function migrateBindings(oldChannel, newChannel) {
+  const doNotDuplicate = ["phx_close", "phx_error", "phx_reply", "presence_state", "presence_diff"];
+  const shouldDuplicate = event => {
+    !event.startsWith("chan_reply_") && !doNotDuplicate.includes(event);
+  };
+  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
+    const item = oldChannel.bindings[i];
+    if (shouldDuplicate(item.event)) {
+      newChannel.bindings.push(item);
+    }
+  }
+  newChannel.bindingRef = oldChannel.bindingRef;
+}
+
 // Takes the given channel, and creates a new channel with the same bindings
 // with the given socket, joins it, and leaves the old channel after joining.
 //
@@ -266,10 +280,7 @@ export function getPresenceProfileForSession(presences, sessionId) {
 export function migrateChannelToSocket(oldChannel, socket, params) {
   const channel = socket.channel(oldChannel.topic, params || oldChannel.params);
 
-  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
-    const item = oldChannel.bindings[i];
-    channel.on(item.event, item.callback);
-  }
+  migrateBindings(oldChannel, channel);
 
   for (let i = 0, l = oldChannel.pushBuffer.length; i < l; i++) {
     const item = oldChannel.pushBuffer[i];
@@ -294,10 +305,7 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
 }
 
 export function migrateToChannel(oldChannel, newChannel) {
-  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
-    const item = oldChannel.bindings[i];
-    newChannel.on(item.event, item.callback);
-  }
+  migrateBindings(oldChannel, newChannel);
 
   return new Promise((resolve, reject) => {
     newChannel

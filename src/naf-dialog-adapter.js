@@ -572,12 +572,6 @@ export default class DialogAdapter extends EventEmitter {
       this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
       this._sendTransport.observer.on("close", () => {
         this.emitRTCEvent("info", "RTC", () => `Send transport [close]`);
-        // TODO don't call close() twice
-        try {
-          !this._sendTransport?._closed && this._sendTransport.close();
-        } catch (e) {
-          console.error(e);
-        }
       });
       this._sendTransport.observer.on("newproducer", producer => {
         this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
@@ -679,12 +673,6 @@ export default class DialogAdapter extends EventEmitter {
       this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
       this._recvTransport.observer.on("close", () => {
         this.emitRTCEvent("info", "RTC", () => `Receive transport [close]`);
-        // TODO uncomment without calling close() twice
-        try {
-          !this._recvTransport?._closed && this._recvTransport.close();
-        } catch (e) {
-          console.error(e);
-        }
       });
       this._recvTransport.observer.on("newproducer", producer => {
         this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
