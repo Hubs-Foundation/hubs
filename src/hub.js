@@ -728,7 +728,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hubChannel = new HubChannel(store, hubId);
   window.APP.hubChannel = hubChannel;
 
-  store.addEventListener("profilechanged", hubChannel.sendProfileUpdate.bind(hubChannel));
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;
 

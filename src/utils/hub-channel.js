@@ -43,6 +43,8 @@ export default class HubChannel extends EventTarget {
     this._signedIn = !!this.store.state.credentials.token;
     this._permissions = {};
     this._blockedSessionIds = new Set();
+
+    store.addEventListener("profilechanged", this.sendProfileUpdate.bind(this));
   }
 
   get signedIn() {
