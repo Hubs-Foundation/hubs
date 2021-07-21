@@ -184,7 +184,6 @@ AFRAME.registerComponent("player-info", {
         el.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
     }
-
     this.el.querySelector("[audio-params]")?.setAttribute("audio-params", { enabled: !this.data.muted });
   },
   handleModelError() {
