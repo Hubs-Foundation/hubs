@@ -14,6 +14,7 @@ export const presets = [
   "accept",
   "cancel",
   "custom1",
+  "custom2",
   "accent",
   "accent1",
   "accent2",

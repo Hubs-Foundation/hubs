@@ -3,9 +3,11 @@
 :local(.section-title) {
   font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-bold;
-  color: theme.$text2-color;
+ 
   margin-bottom: 16px;
   margin-top: 16px;
+  color: #ABABAB;
+
 
   &:first-child {
     margin-top: 0;

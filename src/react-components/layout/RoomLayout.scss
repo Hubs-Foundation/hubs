@@ -51,12 +51,29 @@
   }
 }
 
-// :local(.toolbar) {
-//   grid-row-start: toolbar;
-//   grid-column-end: -1;
-//   pointer-events: auto;
-//   z-index: 0;
-// }
+:local(.toolbar) {
+  grid-row-start: toolbar;
+  grid-column-end: -1;
+  pointer-events: auto;
+  z-index: 0;
+  right:1%;
+  top: 95% !important;
+  width:160px;
+  display: flex;
+  flex-flow: column;
+}
+:local(.extratoolbar){
+ 
+  display: flex;
+  // padding: 12px;
+  position:absolute;
+  max-width: 220px;
+  right:15%;
+  top: 95%;
+  transform: translateY(-50%);
+  pointer-events: auto;
+   
+}
 
 :local(.modal-container) {
   grid-column: main;

@@ -20,15 +20,16 @@
 
   min-width: 395px;
   margin: 0px auto;
-  padding: 45px 30px 20px;
+  // padding: 45px 30px 20px;
+  padding: 50px 100px 20px;
   min-height: 415px;
   width: auto;
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  max-width:  395px; //500px;         
+  max-width: 500px; //500px;         
 
   @media screen and (max-width: theme.$breakpoint-sm){
-    min-width: 290px;
+    
     min-height: 335px;
     max-width: 300px;
     padding: 25px 20px 20px;

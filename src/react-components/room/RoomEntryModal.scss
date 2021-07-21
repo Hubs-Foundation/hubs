@@ -2,7 +2,8 @@
 
 :local(.content) {
   margin-top: 10px;
-  padding: 0px 0px 24px 0px;
+  padding-left: 20px;
+  //padding: 0px 0px 24px 0px;
   button {
     width: 156px;
   }
@@ -15,8 +16,18 @@
 :local(.logo-container) {
   padding: 0 16px;
   margin-top: 32px;
-  margin-bottom: 32px;
+  margin-bottom: 30px;
   margin-right: 50px;
+  margin-left: 20px;
+
+  @media screen and (max-width: theme.$breakpoint-sm){
+    width:100px;
+    margin-top: 0px;
+  }
+  @media screen and (max-width: theme.$breakpoint-md){
+    width:150px;
+    margin-top: 15px;
+  }
 }
 
 :local(.room-name) {

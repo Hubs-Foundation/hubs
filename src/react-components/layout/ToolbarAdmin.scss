@@ -1,0 +1,37 @@
+@use '../styles/theme';
+
+ 
+:local(.content) {
+  position: relative;
+  width: 200px;
+  height: 180px;
+  padding: 0;
+  left: 0;
+  top: 0;
+  @media (min-width: theme.$breakpoint-lg) {
+    flex: 0;
+
+    & > * {
+      margin-right: 24px;
+    }
+
+    &:last-child {
+      margin-right: 0px;
+    }
+  }
+}
+ 
+:local(.rightadminContent){
+  display: flex;
+  // padding: 12px;
+  position:absolute;
+  max-width: 220px;
+  left:80%;
+  top: 85%;
+  transform: translateY(-50%);
+  pointer-events: auto;
+   
+}
+:local(.head){
+  z-index:99999999;
+}

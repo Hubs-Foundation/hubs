@@ -7,8 +7,8 @@
   // padding: 12px;
   position:absolute;
   max-width: 220px;
-  left:10%;
-  top: 80%;
+  left:5%;
+  top: 85%;
   transform: translateY(-50%);
   pointer-events: auto;
    
@@ -19,8 +19,8 @@
     justify-content: space-between;
   }
   @media (max-width: theme.$breakpoint-sm) {
-    top:15%;
-    left:30%;
+    top:10%;
+    left:10%;
     padding: 12px 24px;
     justify-content: space-between;
   } justify-content: space-between;
@@ -53,3 +53,17 @@
   }
 }
  
+:local(.rightadminContent){
+  display: flex;
+  // padding: 12px;
+  position:absolute;
+  max-width: 220px;
+  left:80%;
+  top: 85%;
+  transform: translateY(-50%);
+  pointer-events: auto;
+   
+}
+:local(.head){
+  z-index:99999999;
+}

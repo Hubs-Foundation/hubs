@@ -130,7 +130,7 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
           </InputField>
         )}
       {canChangeScene && (
-        <Button preset="primary" onClick={onChangeScene}>
+        <Button preset="custom2" className="btn btn-sm" onClick={onChangeScene}>
           <FormattedMessage id="room-sidebar.scene-info.change-scene-button" defaultMessage="Change Scene" />
         </Button>
       )}

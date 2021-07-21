@@ -2,9 +2,8 @@ import classNames from "classnames";
 import React, { useState } from "react";
 
 import { MOVEMENT_TABS } from "../utils";
-import { MovementFlyModeSettings } from "./MovementFlyMode";
-import { MovementTeleportSettings } from "./MovementTeleport";
-import { TabContent } from "../AudioSettings/index";
+import { MovementFlyModeSettings } from "./MovementFlyModeSetting";
+import { MovementTeleportSettings } from "./MovementTeleportSetting";
 
 import "./MovementSetting.scss";
 
@@ -51,3 +50,9 @@ export const MovementSetting = () => {
     </form>
   </div>;
 };
+
+const TabContent = props => (
+  <div className="tab-content">
+    <div id={props.active}>{props.children.filter(child => child.props.name && child.props.name === props.active)}</div>
+  </div>
+);

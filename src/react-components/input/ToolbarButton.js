@@ -6,6 +6,9 @@ import styles from "./ToolbarButton.scss";
 export const presets = [
   "basic",
   "custom",
+  "custom2",
+  "custom1",
+  "custom3",
   "toggle",
   "transparent",
   "react",

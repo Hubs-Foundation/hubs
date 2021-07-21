@@ -36,7 +36,7 @@ export function MicSetupModal({
   return (
     <Modal
       title={<FormattedMessage id="mic-setup-modal.title" defaultMessage="Microphone Setup" />}
-      // beforeTitle={<BackButton onClick={onBack} />}
+      beforeTitle={<BackButton onClick={onBack} />}
       className={classNames(styles.micModal, className)}
       {...rest}
     >

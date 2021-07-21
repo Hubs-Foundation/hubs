@@ -16,6 +16,8 @@ import { BackButton } from "../input/BackButton";
 import { SceneInfo } from "./RoomSidebar";
 import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
+import classNames from "classnames";
+import { Button } from "../input/Button";
 
 export function RoomSettingsSidebar({
   showBackButton,
@@ -53,6 +55,7 @@ export function RoomSettingsSidebar({
     <Sidebar
       title={<FormattedMessage id="room-settings-sidebar.title" defaultMessage="Room Settings" />}
       beforeTitle={showBackButton ? <BackButton onClick={onClose} /> : <CloseButton onClick={onClose} />}
+      className={classNames(styles.roomSetting)}
     >
       <Column padding as="form" onSubmit={handleSubmit(onSubmit)}>
         <SceneInfo
@@ -76,6 +79,7 @@ export function RoomSettingsSidebar({
           ref={register}
           error={errors.name}
           fullWidth
+          className={classNames(styles.head)}
         />
         <TextAreaInputField
           name="description"
@@ -197,7 +201,10 @@ export function RoomSettingsSidebar({
             />
           </div>
         </InputField>
-        <ApplyButton type="submit" />
+        {/* <ApplyButton type="submit" /> */}
+        <Button preset="custom2" className="btn btn-sm  " onClick={onChangeScene} type="submit">
+          <FormattedMessage id="room-sidebar.scene-info.change-scene-button" defaultMessage="Apply" />
+        </Button>
       </Column>
     </Sidebar>
   );

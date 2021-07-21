@@ -82,8 +82,8 @@ import { ObjectListProvider } from "./room/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
 import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
-// import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
-// import { SharePopoverContainer } from "./room/SharePopoverContainer";
+import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
+import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
@@ -106,6 +106,7 @@ import { CanvasMenu } from "./room/CanvasMenu";
 import { SettingContainer, Setting } from "./room/Settings";
 import { MiscSetting } from "./room/MiscSetting";
 import { ParticipantContainer } from "./room/ParticipantContainer";
+import StrippedMediaBrowser from "./room/Profile/StrippedMediaBrowser";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -214,7 +215,9 @@ class UIRoot extends Component {
     showEvents: false,
 
     showSocial: false,
-    openSetting: false
+    openSetting: false,
+
+    openChat: false
   };
 
   constructor(props) {
@@ -1088,6 +1091,27 @@ class UIRoot extends Component {
                 store={this.props.store}
                 mediaSearchStore={this.props.mediaSearchStore}
                 avatarId={props.location.state.detail && props.location.state.detail.avatarId}
+                mediaBrowser={
+                  <StrippedMediaBrowser
+                    history={this.props.history}
+                    mediaSearchStore={this.props.mediaSearchStore}
+                    hubChannel={this.props.hubChannel}
+                    onMediaSearchResultEntrySelected={(entry, selectAction) => {
+                      if (entry.type === "room") {
+                        this.showNonHistoriedDialog(LeaveRoomModal, {
+                          destinationUrl: entry.url,
+                          reason: LeaveReason.joinRoom
+                        });
+                      } else {
+                        this.props.onMediaSearchResultEntrySelected(entry, selectAction);
+                      }
+                    }}
+                    performConditionalSignIn={this.props.performConditionalSignIn}
+                    showNonHistoriedDialog={this.showNonHistoriedDialog}
+                    store={this.props.store}
+                    scene={this.props.scene}
+                  />
+                }
               />
             )}
           />
@@ -1564,7 +1588,7 @@ class UIRoot extends Component {
                   <>
                     <CanvasMenu
                       onClick={() => {
-                        // console.log("Calling");
+                        console.log("Calling");
                         this.setState({ showSocial: !this.state.showSocial });
                       }}
                     />
@@ -1589,7 +1613,12 @@ class UIRoot extends Component {
                         )}
                       </>
                     )}
-                    {this.state.showSocial && <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />}
+                    {this.state.showSocial && (
+                      <ChatToolbarButtonContainer
+                        selected={this.state.sidebarId === "chat"}
+                        onClick={() => this.toggleSidebar("chat")}
+                      />
+                    )}
                     {this.state.showSocial &&
                       entered && (
                         <>
@@ -1597,8 +1626,8 @@ class UIRoot extends Component {
                             scene={this.props.scene}
                             microphoneEnabled={this.mediaDevicesManager.isMicShared}
                           />
-                          {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> */}
-                          {/* <PlacePopoverContainer
+                          {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> 
+                           <PlacePopoverContainer
                           scene={this.props.scene}
                           hubChannel={this.props.hubChannel}
                           mediaSearchStore={this.props.mediaSearchStore}
@@ -1670,6 +1699,30 @@ class UIRoot extends Component {
                       />
                     )}
                       <MoreMenuPopoverButton menu={moreMenu} /> */}
+                    {/* {entered && <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />}
+                    {entered && (
+                      <PlacePopoverContainer
+                        scene={this.props.scene}
+                        hubChannel={this.props.hubChannel}
+                        mediaSearchStore={this.props.mediaSearchStore}
+                        showNonHistoriedDialog={this.showNonHistoriedDialog}
+                      />
+                    )} */}
+                  </>
+                }
+                toolbarAdmin={
+                  <>
+                    {configs.isAdmin &&
+                      entered && <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />}
+                    {configs.isAdmin &&
+                      entered && (
+                        <PlacePopoverContainer
+                          scene={this.props.scene}
+                          hubChannel={this.props.hubChannel}
+                          mediaSearchStore={this.props.mediaSearchStore}
+                          showNonHistoriedDialog={this.showNonHistoriedDialog}
+                        />
+                      )}
                   </>
                 }
               />

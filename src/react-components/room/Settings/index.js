@@ -8,10 +8,16 @@ import arrowIcon from "../../../assets/images/arrow-icon.png";
 import closeIcon from "../../../assets/images/close-icon.png";
 //import MiscSetting from "..;
 import { MiscSetting } from "./MiscSettings/MiscSetting";
-import { MovementSetting } from "./MovementSettings/MovementSetting";
+import { MovementSetting } from "./MovementSettings";
 
 export const SettingContainer = ({ icon, onClick }) => {
-  return <ToolbarButton icon={icon} preset="setting" onClick={onClick} className="setting" />;
+  return (
+    <ToolbarButton
+      icon={icon}
+      preset="setting"
+      //onClick={onClick}
+    />
+  );
 };
 
 export function Setting(props) {

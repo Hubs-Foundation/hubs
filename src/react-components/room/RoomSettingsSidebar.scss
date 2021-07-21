@@ -1,10 +1,27 @@
 @use "../styles/theme.scss";
 
+:local(.room-setting){
+  font-family: Roboto;
+  &:h5{
+    font-size: 18px;
+    font-weight: 800;
+  }
+}
+ 
+a{
+  color: theme.$custom2-color !important;
+}
+
+
+
 :local(.room-permissions), :local(.permissions-group) {
   margin-left: 20px;
 
   & > * {
     margin-top: 12px;
+  }
+  p{
+    margin-top: 15px;
   }
 
   &:last-child {

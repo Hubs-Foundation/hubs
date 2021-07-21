@@ -3,8 +3,9 @@
 
 
 :local(.avatar-modal){
-  margin: 0px auto;
+  margin: auto;
   position: relative;
+  min-width: 490px;
 //   // display: flex;
 //   // flex-direction: column;
 //   // height: max-content;
@@ -20,7 +21,7 @@
 
   @media screen and (min-width: theme.$breakpoint-sm){
     min-width: 330px;
-    max-height: 330px;
+    max-height: 600px;
     // max-width: 295px;
     // padding: 25px 20px 20px;
   }
@@ -28,7 +29,7 @@
   @media screen and (min-width: theme.$breakpoint-md){
     max-width: 500px;
     max-height: 550px;
-    // min-width: 550px;
+     min-width: 490px;
     // min-height: 335px;
     // max-width: 395px;
     // padding: 40px 20px 20px;
@@ -48,6 +49,25 @@
   align-items: center;
   padding: 24px;
   text-align: center;
+}
+
+:local(.form-head){ 
+  margin-bottom: 20px;
+  float: left; 
+  padding: 0px 35px 0px 55px; 
+  h5 { 
+    font-weight: bold; 
+    font-size: 20px; 
+    line-height: 24px; 
+    color: #fff; 
+    letter-spacing: -0.02em; 
+  }
+}
+:local(.form-head)> h6 { 
+  font-size: 13px; 
+  color: #fff; 
+  margin-bottom: 5px; 
+ 
 }
 
 

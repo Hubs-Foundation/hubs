@@ -1008,15 +1008,15 @@
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent-color-hover;
-    // svg {
-    //   *[stroke=\#000] {
-    //     stroke:theme.$accent-color;
-    //   }
+    svg {
+      *[stroke=\#000] {
+        stroke:theme.$accent-color;
+      }
   
-    //   *[fill=\#000] {
-    //     fill: theme.$accent-color;
-    //   }
-    // }
+      *[fill=\#000] {
+        fill: theme.$accent-color;
+      }
+    }
   }
 
 
@@ -1109,18 +1109,27 @@
   -webkit-transition: all .5s;
 
   :local(.icon-container) {
-    background-color: theme.$accent-color;
-  }  
-
-  &:hover :local(.icon-container) {
-    background-color: theme.$accent-color-hover;
+    background-color: #fff;
     svg {
       *[stroke=\#000] {
-        stroke: theme.$accent-color;
+        stroke: #111;
       }
   
       *[fill=\#000] {
-        fill: theme.$accent-color;
+        fill: #111;
+      }
+    }
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: #111;
+    svg {
+      *[stroke=\#000] {
+        stroke: #fff;
+      }
+  
+      *[fill=\#000] {
+        fill: #fff;
       }
     }
   }
@@ -1131,16 +1140,15 @@
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$accent-color;
-      background-color:theme.$accent-color-pressed;
+      background-color:purple;
 
       svg {
         *[stroke=\#000] {
-          stroke: theme.$accent-color-hover;
+          stroke: #fff;
         }
     
         *[fill=\#000] {
-          fill: theme.$accent-color-hover;
+          fill: #fff;
         }
       }
     }
@@ -1155,11 +1163,11 @@
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$accent-color;
+            stroke: #fff;
           }
       
           *[fill=\#000] {
-            fill: theme.$accent-color;
+            fill: #fff;
           }
         }
       }
@@ -1238,7 +1246,7 @@
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$accent-color;
+    
       background-color:theme.$accent-color-pressed;
 
       svg {
@@ -1345,7 +1353,7 @@
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$accent-color;
+     
       background-color:theme.$accent-color-pressed;
 
       svg {
@@ -1431,7 +1439,7 @@
 
 
   :local(.icon-container) {
-    background-color: theme.$accent-color;
+    background-color: theme.$accent-color-pressed;
   }  
 
   &:hover :local(.icon-container) {
@@ -1452,8 +1460,7 @@
   }
 
   &:local(.selected) {
-    :local(.icon-container) {
-      border-color: theme.$accent-color;
+    :local(.icon-container) { 
       background-color:theme.$accent-color-pressed;
 
       svg {
@@ -1535,7 +1542,7 @@
   -moz-transition: all .5s;
 
   :local(.icon-container) {
-    background-color: theme.$accent-color;
+    background-color: theme.$accent-color-pressed;
   }  
 
   &:hover :local(.icon-container) {
@@ -1593,7 +1600,6 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$accent-color-pressed;
         background-color: theme.$accent-color-pressed;
 
         svg {
@@ -1612,6 +1618,72 @@
 
 
 
+:local(.custom2) {
+  :local(.icon-container) {
+    background-color: theme.$custom2-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$custom2-color-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$custom2-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      border-color: theme.$custom2-color;
+      background-color: transparent;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$custom2-color;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$custom2-color;
+        }
+      }
+    }
+
+    label {
+      color: theme.$custom2-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$custom2-color-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$custom2-color-hover;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$custom2-color-hover;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$custom2-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$custom2-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$custom2-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
  
 // :local(.setting){
 //   position: relative;
@@ -1629,7 +1701,7 @@
   position:absolute;
   background: theme.$bg-gradient-color;
   z-index: 9;
-  transform: translate(-100%, -50%);
+  transform: translate(-50%, -50%);
   box-shadow: none;
   cursor: pointer;
 }

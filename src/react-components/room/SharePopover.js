@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { ButtonGridPopover } from "../popover/ButtonGridPopover";
 import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
-import { ReactComponent as ShareIcon } from "../icons/Share.svg";
+import { ReactComponent as ShareIcon } from "../icons/ShareIcon.svg";
 import { defineMessage, useIntl } from "react-intl";
 
 const sharePopoverTitle = defineMessage({
@@ -57,8 +57,8 @@ export function SharePopoverButton({ items }) {
           icon={<ShareIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label={title}
-          preset="custom"
+          //label={title}
+          preset="custom3"
         />
       )}
     </Popover>

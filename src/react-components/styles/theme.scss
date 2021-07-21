@@ -297,6 +297,17 @@ $accent-color-hover: var(--accent-hover);
 $accent-color-pressed: var(--accent-pressed);
 $accent-color-active: var(--accent-active);
 
+$custom2-color: var(--custom1);
+$custom2-color-hover: var(--accent-hover);
+$custom2-color-pressed:var(--custom1);
+$custom2-color-active:var(--custom1);
+
+
+$custom3-color: var(--accent);
+$custom3-color-hover: var(--accent-pressed);
+$custom3-color-pressed:var(--accent);
+$custom3-color-active:var(--accent-pressed);
+
 $background-gradient: linear-gradient(76.93deg, #686A9C 0%, #716D82 52.92%, #876B8A 100%);
 
 $bg-gradient-color :  radial-gradient(70.31% 70.31% at 50% 50%, #5D5FEF 0%, rgba(93, 95, 239, 0) 100%);

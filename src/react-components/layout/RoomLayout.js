@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./RoomLayout.scss";
 import { Toolbar } from "./Toolbar";
+import { ToolbarAdmin } from "./ToolbarAdmin";
 import { CanvasMenu } from "../room/CanvasMenu";
 
 export function RoomLayout({
@@ -19,6 +20,7 @@ export function RoomLayout({
   objectFocused,
   streaming,
   viewportRef,
+  toolbarAdmin,
   ...rest
 }) {
   return (
@@ -27,13 +29,16 @@ export function RoomLayout({
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       {(toolbarLeft || toolbarCenter || toolbarRight) && (
         <Toolbar
-          className={classNames(styles.main, styles.toolbar, toolbarClassName)}
+          className={classNames(styles.main, toolbarClassName)}
           left={toolbarLeft}
           center={toolbarCenter}
           right={toolbarRight}
         />
       )}
-  
+
+      {toolbarAdmin && (
+        <ToolbarAdmin rightadmin={toolbarAdmin} className={classNames(styles.extratoolbar, styles.main)} />
+      )}
       <div
         className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}
         ref={viewportRef}
@@ -59,11 +64,6 @@ RoomLayout.propTypes = {
   streaming: PropTypes.bool,
   viewportRef: PropTypes.any
 };
-
-
-
-
-
 
 /**
  * import React from "react";

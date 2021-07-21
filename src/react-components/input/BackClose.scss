@@ -1,0 +1,31 @@
+@use "../styles/theme.scss";
+
+
+
+
+:local(.circle-btn){
+    
+    width: 16px; 
+    height: 16px; 
+    display: inline-block; 
+    position: absolute; 
+    border-radius: 50px; 
+    text-align: center; 
+    padding: 2px; 
+    line-height: 11px; 
+    background: rgba(56, 58, 68, 0.5); 
+    transform: matrix(1, 0, 0, -1, 0, 0); 
+    top: 15px; 
+    cursor: pointer; 
+ 
+    &:hover { 
+        background: rgba(56, 58, 68, 0.8); 
+    }
+}
+:local(.btn-next) { 
+    left: 30px;
+    float: left; 
+}
+:local(.btn-close) { 
+    right: 80px; 
+}

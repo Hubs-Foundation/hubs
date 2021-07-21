@@ -287,13 +287,13 @@
   background-color: theme.$transparent;
 
   width: 100%;
-  padding: 10px 70px 10px 70px;
+  padding: 0px;
   display: block;
   font-weight: 500;
-  font-size: 26px;
+  font-size: 30px;
   border: 1px solid transparent;
   text-align: center;
- 
+  margin-top: 20px;
   border-radius: 80px 0px 80px 0px;
   margin-left: 16px;
   margin-right: 16px;
@@ -322,13 +322,13 @@
      border-radius: 80px 0px 80px 0px;
   }
   @media screen and (max-width: theme.$breakpoint-md){
-    font-size: 18px;
+    font-size: 25px;
     padding: 10px 20px;
     margin:0px;
     width :min-content;
   }
   @media screen and (max-width: theme.$breakpoint-sm){
-    font-size: 18px;
+    font-size: 20px;
     padding: 10px 20px;
     margin:0px;
     width:100px;
@@ -345,7 +345,7 @@
   padding: 10px 70px 10px 70px;
   display: block;
   font-weight: 500;
-  font-size: 20px;
+  font-size: 18px;
   border: 1px solid transparent;
   text-align: center;
  
@@ -390,6 +390,41 @@
   }
 }
 
+
+:local(.custom2) {
+  color: theme.$text5-color !important; 
+  background-color: theme.$custom2-color !important;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25) !important;
+  // border-radius: 60px;
+  // width: 20px;
+  // padding: 0px 0px 0px 0px;
+  min-height: unset !important;
+  max-width: 30px !important;
+  height: unset !important;
+  border-radius: 60px !important;
+  font-size: 12px !important;
+  border: theme.$transparent;
+  min-width: 100px !important;
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text1-color-hover !important;
+    background-color: theme.$custom2-color-hover !important;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed !important;
+    background-color: theme.$custom2-color-pressed !important;
+  }
+}
 
 :local(.button):disabled {
   border-color: transparent;
