@@ -261,7 +261,7 @@ export function getPresenceProfileForSession(presences, sessionId) {
 function migrateBindings(oldChannel, newChannel) {
   const doNotDuplicate = ["phx_close", "phx_error", "phx_reply", "presence_state", "presence_diff"];
   const shouldDuplicate = event => {
-    !event.startsWith("chan_reply_") && !doNotDuplicate.includes(event);
+    return !event.startsWith("chan_reply_") && !doNotDuplicate.includes(event);
   };
   for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
     const item = oldChannel.bindings[i];
