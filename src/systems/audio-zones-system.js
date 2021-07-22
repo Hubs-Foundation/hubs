@@ -66,6 +66,7 @@ export class AudioZonesSystem {
     this.zones.push(zone);
   }
   unregisterZone(zone) {
+    // TODO: Remove this zone from all the entities (sources and listenerEntity)
     this.zones.splice(this.zones.indexOf(zone), 1);
   }
 
