@@ -476,7 +476,7 @@ export class DialogAdapter extends EventEmitter {
     await this.connect({
       serverUrl: newServerUrl,
       roomId: this._roomId,
-      joinToken: this._joinToken,
+      joinToken: APP.hubChannel.token,
       serverParams,
       scene: this.scene,
       clientId: this._clientId,

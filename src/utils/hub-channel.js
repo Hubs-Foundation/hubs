@@ -140,6 +140,7 @@ export default class HubChannel extends EventTarget {
 
   setPermissionsFromToken = token => {
     // Note: token is not verified.
+    this.token = token;
     this._permissions = jwtDecode(token);
     configs.setIsAdmin(this._permissions.postgrest_role === "ret_admin");
     this.dispatchEvent(new CustomEvent("permissions_updated"));
