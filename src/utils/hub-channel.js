@@ -147,7 +147,10 @@ export default class HubChannel extends EventTarget {
 
     // Refresh the token 1 minute before it expires.
     const nextRefresh = new Date(this._permissions.exp * 1000 - 60 * 1000) - new Date();
-    setTimeout(async () => {
+    if (this.fetchPermissionsTimeout) {
+      clearTimeout(this.fetchPermissionsTimeout);
+    }
+    this.fetchPermissionsTimeout = setTimeout(async () => {
       const result = await this.fetchPermissions();
       this.dispatchEvent(new CustomEvent("permissions-refreshed", { detail: result }));
     }, nextRefresh);
