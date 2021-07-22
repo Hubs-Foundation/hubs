@@ -12,7 +12,7 @@ function paramsReducer(acc, curr) {
 }
 
 function addOrRemoveZone(position, entity, zone) {
-  const isInZone = zone.contains(position);
+  const isInZone = zone.isEnabled() && zone.contains(position);
   const wasInZone = entity.isInZone(zone);
   if (isInZone && !wasInZone) {
     entity.addZone(zone);
@@ -23,7 +23,6 @@ function addOrRemoveZone(position, entity, zone) {
 
 function updateZonesForSources(sources, zones) {
   zones.forEach(zone => {
-    if (!zone.isEnabled()) return;
     sources.forEach(source => {
       addOrRemoveZone(source.getPosition(), source.entity, zone);
     });
@@ -31,7 +30,6 @@ function updateZonesForSources(sources, zones) {
 }
 function updateZonesForListener(listenerPosition, listenerEntity, zones) {
   zones.forEach(zone => {
-    if (!zone.isEnabled()) return;
     addOrRemoveZone(listenerPosition, listenerEntity, zone);
   });
 }
