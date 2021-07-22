@@ -5,8 +5,7 @@ AFRAME.registerComponent("audio-zone-listener", {
   dependencies: ["audio-zone-entity"],
 
   init() {
-    this.listener = this.el.sceneEl?.audioListener;
-    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listener = this;
+    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listener = this.el.sceneEl.audioListener;
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listenerEntity = this.el.components["audio-zone-entity"];
   },
 
