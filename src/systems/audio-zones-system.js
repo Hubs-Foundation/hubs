@@ -62,11 +62,12 @@ export class AudioZonesSystem {
     const rayDir = new THREE.Vector3();
     const normalizedRayDir = new THREE.Vector3();
     const intersectTarget = new THREE.Vector3();
+    const listenerPosition = new THREE.Vector3();
     return function() {
       if (!this.scene.is("entered") || this.zones.length === 0) return;
+      this.listener.listener.getWorldPosition(listenerPosition);
 
-      // Update zones
-      this._updateZones();
+      this._updateZones(listenerPosition);
 
       for (let i = 0; i < this.sources.length; i++) {
         const source = this.sources[i];
@@ -77,10 +78,10 @@ export class AudioZonesSystem {
             source
               .getPosition()
               .clone()
-              .sub(this.listener.getPosition())
+              .sub(listenerPosition)
           );
           normalizedRayDir.copy(rayDir.clone().normalize());
-          ray.set(this.listener.getPosition(), normalizedRayDir);
+          ray.set(listenerPosition, normalizedRayDir);
 
           // First we check the zones the source is contained in and we check the inOut property
           // to modify the sources audio params when the listener is outside the source's zones
@@ -126,12 +127,12 @@ export class AudioZonesSystem {
   })();
 
   // Updates zones states in case they have changed.
-  _updateZones() {
+  _updateZones(listenerPosition) {
     for (let i = 0; i < this.zones.length; i++) {
       const zone = this.zones[i];
       if (!zone.isEnabled()) return;
 
-      const isListenerInZone = zone.contains(this.listener.getPosition());
+      const isListenerInZone = zone.contains(listenerPosition);
       const wasListenerInZone = this.listener.entity.isInZone(zone);
       // Update audio zone listener status
       if (isListenerInZone && !wasListenerInZone) {
