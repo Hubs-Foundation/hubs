@@ -30,6 +30,13 @@ function updateZones(sources, listenerPosition, listenerEntity, zones) {
   });
 }
 
+const castRay = (function() {
+  const direction = new THREE.Vector3();
+  return function castRay(ray, from, to) {
+    ray.set(from, direction.subVectors(to, from).normalize());
+  };
+})();
+
 /**
  * This system updates the audio-zone-sources audio-params based on the audio-zone-listener position.
  * On every tick it computes the audio-zone-source and audio-zone-listener positions to check
@@ -64,8 +71,6 @@ export class AudioZonesSystem {
 
   tick = (function() {
     const ray = new THREE.Ray();
-    const rayDir = new THREE.Vector3();
-    const normalizedRayDir = new THREE.Vector3();
     const intersectTarget = new THREE.Vector3();
     const listenerPosition = new THREE.Vector3();
     return function() {
@@ -77,16 +82,7 @@ export class AudioZonesSystem {
 
       this.sources.forEach(source => {
         if (!source.entity.isUpdated() && !this.listenerEntity.isUpdated()) return;
-
-        // Cast a ray from the listener to the source
-        rayDir.copy(
-          source
-            .getPosition()
-            .clone()
-            .sub(listenerPosition)
-        );
-        normalizedRayDir.copy(rayDir.clone().normalize());
-        ray.set(listenerPosition, normalizedRayDir);
+        castRay(ray, listenerPosition, source.getPosition());
 
         // First we check the zones the source is contained in and we check the inOut property
         // to modify the sources audio params when the listener is outside the source's zones
