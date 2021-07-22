@@ -25,6 +25,7 @@ export class AudioZonesSystem {
   constructor(scene) {
     this.scene = scene;
     this.listener = null;
+    this.listenerEntity = null;
     this.sources = [];
     this.zones = [];
   }
@@ -64,7 +65,7 @@ export class AudioZonesSystem {
       for (let i = 0; i < this.sources.length; i++) {
         const source = this.sources[i];
         // Only check whenever either the source or the listener have updated zones (moved)
-        if (source.entity.isUpdated() || this.listener.entity.isUpdated()) {
+        if (source.entity.isUpdated() || this.listenerEntity.isUpdated()) {
           // Cast a ray from the listener to the source
           rayDir.copy(
             source
@@ -83,7 +84,7 @@ export class AudioZonesSystem {
             .filter(zone => {
               const zoneBBAA = zone.getBoundingBox();
               ray.intersectBox(zoneBBAA, intersectTarget);
-              return intersectTarget !== null && zone.data.inOut && !this.listener.entity.getZones().includes(zone);
+              return intersectTarget !== null && zone.data.inOut && !this.listenerEntity.getZones().includes(zone);
             })
             .map(zone => zone.getAudioParams())
             .reduce(paramsReducer, null);
@@ -91,7 +92,7 @@ export class AudioZonesSystem {
           // Then we check the zones the listener is contained in and we check the outIn property
           // to modify the sources audio params when the source is outside the listener's zones
           // We always apply the inmost active zone audio params, the zone that's closest to the listener
-          const outInParams = this.listener.entity
+          const outInParams = this.listenerEntity
             .getZones()
             .filter(zone => {
               const zoneBBAA = zone.getBoundingBox();
@@ -125,12 +126,12 @@ export class AudioZonesSystem {
       if (!zone.isEnabled()) return;
 
       const isListenerInZone = zone.contains(listenerPosition);
-      const wasListenerInZone = this.listener.entity.isInZone(zone);
+      const wasListenerInZone = this.listenerEntity.isInZone(zone);
       // Update audio zone listener status
       if (isListenerInZone && !wasListenerInZone) {
-        this.listener.entity.addZone(zone);
+        this.listenerEntity.addZone(zone);
       } else if (!isListenerInZone && wasListenerInZone) {
-        this.listener.entity.removeZone(zone);
+        this.listenerEntity.removeZone(zone);
       }
       // Update audio zone source status
       this.sources.forEach(source => {
