@@ -27,17 +27,6 @@ export class AudioZonesSystem {
     this.listener = null;
     this.sources = [];
     this.zones = [];
-    this.forceUpdate = false;
-  }
-
-  init() {
-    this.el.sceneEl.addEventListener("environment-scene-loaded", this.onSceneLoaded);
-  }
-
-  remove() {
-    this.sources = [];
-    this.zones = [];
-    this.el.sceneEl.removeEventListener("environment-scene-loaded", this.onSceneLoaded);
   }
 
   setListener(listener) {
@@ -86,8 +75,7 @@ export class AudioZonesSystem {
       for (let i = 0; i < this.sources.length; i++) {
         const source = this.sources[i];
         // Only check whenever either the source or the listener have updated zones (moved)
-        if (source.entity.isUpdated() || this.listener.entity.isUpdated() || this.forceUpdate) {
-          this.forceUpdate = false;
+        if (source.entity.isUpdated() || this.listener.entity.isUpdated()) {
           // Cast a ray from the listener to the source
           rayDir.copy(
             source
@@ -168,8 +156,4 @@ export class AudioZonesSystem {
       });
     }
   }
-
-  onSceneLoaded = () => {
-    this.forceUpdate = true;
-  };
 }
