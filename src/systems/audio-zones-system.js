@@ -35,11 +35,7 @@ export class AudioZonesSystem {
   }
 
   unregisterSource(source) {
-    const index = this.sources.indexOf(source);
-
-    if (index !== -1) {
-      this.sources.splice(index, 1);
-    }
+    this.sources.splice(this.sources.indexOf(source), 1);
   }
 
   registerZone(zone) {
