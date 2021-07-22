@@ -75,9 +75,8 @@ export class AudioZonesSystem {
 
       updateZones(this.sources, listenerPosition, this.listenerEntity, this.zones);
 
-      for (let i = 0; i < this.sources.length; i++) {
-        const source = this.sources[i];
-        if (!source.entity.isUpdated() && !this.listenerEntity.isUpdated()) continue;
+      this.sources.forEach(source => {
+        if (!source.entity.isUpdated() && !this.listenerEntity.isUpdated()) return;
 
         // Cast a ray from the listener to the source
         rayDir.copy(
@@ -127,7 +126,7 @@ export class AudioZonesSystem {
         } else {
           source.restore();
         }
-      }
+      });
     };
   })();
 }
