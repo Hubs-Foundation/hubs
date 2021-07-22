@@ -28,7 +28,6 @@ export class AudioZonesSystem {
     this.sources = [];
     this.zones = [];
     this.forceUpdate = false;
-    this.initialized = false;
   }
 
   init() {
