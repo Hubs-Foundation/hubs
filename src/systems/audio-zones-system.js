@@ -11,30 +11,28 @@ function paramsReducer(acc, curr) {
   return acc;
 }
 
+function addOrRemoveZone(position, entity, zone) {
+  const isInZone = zone.contains(position);
+  const wasInZone = entity.isInZone(zone);
+  if (isInZone && !wasInZone) {
+    entity.addZone(zone);
+  } else if (!isInZone && wasInZone) {
+    entity.removeZone(zone);
+  }
+}
+
 function updateZonesForSources(sources, zones) {
   zones.forEach(zone => {
     if (!zone.isEnabled()) return;
     sources.forEach(source => {
-      const isSourceInZone = zone.contains(source.getPosition());
-      const wasSourceInZone = source.entity.isInZone(zone);
-      if (isSourceInZone && !wasSourceInZone) {
-        source.entity.addZone(zone);
-      } else if (!isSourceInZone && wasSourceInZone) {
-        source.entity.removeZone(zone);
-      }
+      addOrRemoveZone(source.getPosition(), source.entity, zone);
     });
   });
 }
 function updateZonesForListener(listenerPosition, listenerEntity, zones) {
   zones.forEach(zone => {
     if (!zone.isEnabled()) return;
-    const isListenerInZone = zone.contains(listenerPosition);
-    const wasListenerInZone = listenerEntity.isInZone(zone);
-    if (isListenerInZone && !wasListenerInZone) {
-      listenerEntity.addZone(zone);
-    } else if (!isListenerInZone && wasListenerInZone) {
-      listenerEntity.removeZone(zone);
-    }
+    addOrRemoveZone(listenerPosition, listenerEntity, zone);
   });
 }
 
