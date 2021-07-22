@@ -117,7 +117,7 @@ export class AudioZonesSystem {
   _updateZones(listenerPosition) {
     for (let i = 0; i < this.zones.length; i++) {
       const zone = this.zones[i];
-      if (!zone.isEnabled()) return;
+      if (!zone.isEnabled()) continue;
 
       const isListenerInZone = zone.contains(listenerPosition);
       const wasListenerInZone = this.listenerEntity.isInZone(zone);
