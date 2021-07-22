@@ -7,10 +7,10 @@ AFRAME.registerComponent("audio-zone-listener", {
   init() {
     this.listener = this.el.sceneEl?.audioListener;
     this.entity = this.el.components["audio-zone-entity"];
-    this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.setListener(this);
+    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listener = this;
   },
 
   remove() {
-    this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.unsetListener();
+    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listener = null;
   }
 });

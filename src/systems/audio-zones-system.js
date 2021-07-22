@@ -29,14 +29,6 @@ export class AudioZonesSystem {
     this.zones = [];
   }
 
-  setListener(listener) {
-    this.listener = listener;
-  }
-
-  unsetListener() {
-    this.listener = null;
-  }
-
   registerSource(source) {
     this.sources.push(source);
   }
