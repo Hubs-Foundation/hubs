@@ -50,7 +50,8 @@ export class AudioZonesSystem {
     const intersectTarget = new THREE.Vector3();
     const listenerPosition = new THREE.Vector3();
     return function() {
-      if (!this.scene.is("entered") || this.zones.length === 0) return;
+      if (!this.scene.is("entered")) return;
+
       this.listener.getWorldPosition(listenerPosition);
 
       this._updateZones(listenerPosition);
