@@ -54,11 +54,7 @@ export class AudioZonesSystem {
   }
 
   unregisterZone(zone) {
-    const index = this.zones.indexOf(zone);
-
-    if (index !== -1) {
-      this.zones.splice(index, 1);
-    }
+    this.zones.splice(this.zones.indexOf(zone), 1);
   }
 
   tick = (function() {
