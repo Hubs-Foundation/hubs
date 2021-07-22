@@ -4,9 +4,14 @@ import classNames from "classnames";
 import { ToolbarButton } from "../input/ToolbarButton";
 import styles from "./ButtonGridPopover.scss";
 
-export function ButtonGridPopover({ fullscreen, items, closePopover }) {
+export function ButtonGridPopover({ fullscreen, items, closePopover, place }) {
   return (
-    <div className={classNames(styles.buttonGridPopover, { [styles.fullscreen]: fullscreen })}>
+    <div
+      className={classNames(styles.buttonGridPopover, {
+        [styles.fullscreen]: fullscreen,
+        [styles.placegrid]: place == "place"
+      })}
+    >
       {items.map(item => {
         const Icon = item.icon;
         return (

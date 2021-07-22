@@ -305,8 +305,13 @@ $custom2-color-active:var(--custom1);
 
 $custom3-color: var(--accent);
 $custom3-color-hover: var(--accent-pressed);
-$custom3-color-pressed:var(--accent);
+$custom3-color-pressed:var(--accent-hover);
 $custom3-color-active:var(--accent-pressed);
+
+$custom4-color: $transparent;
+$custom4-color-hover: var(--accent-pressed);
+$custom4-color-pressed:var(--accent-hover);
+$custom4-color-active:var(--accent-pressed);
 
 $background-gradient: linear-gradient(76.93deg, #686A9C 0%, #716D82 52.92%, #876B8A 100%);
 

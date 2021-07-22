@@ -1618,50 +1618,50 @@
 
 
 
-:local(.custom2) {
+:local(.custom3) {
+  margin-left: 10px;
   :local(.icon-container) {
-    background-color: theme.$custom2-color;
+    background-color: theme.$custom3-color;
   }  
 
   &:hover :local(.icon-container) {
-    background-color: theme.$custom2-color-hover;
+    background-color: theme.$custom3-color-hover;
   }
 
   &:active :local(.icon-container) {
-    background-color: theme.$custom2-color-pressed;
+    background-color: theme.$custom3-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$custom2-color;
-      background-color: transparent;
+      background-color: theme.$custom3-color-active;
 
       svg {
         *[stroke=\#000] {
-          stroke: theme.$custom2-color;
+          stroke: theme.$custom3-color-pressed;
         }
     
         *[fill=\#000] {
-          fill: theme.$custom2-color;
+          fill: theme.$custom3-color-pressed;
         }
       }
     }
 
     label {
-      color: theme.$custom2-color;
+      color: theme.$custom3-color;
     }
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$custom2-color-hover;
+        border-color: theme.$custom3-color-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$custom2-color-hover;
+            stroke: theme.$white;
           }
       
           *[fill=\#000] {
-            fill: theme.$custom2-color-hover;
+            fill: theme.$white;
           }
         }
       }
@@ -1669,15 +1669,15 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$custom2-color-pressed;
+        border-color: theme.$custom3-color-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$custom2-color-pressed;
+            stroke: theme.$custom3-color-pressed;
           }
       
           *[fill=\#000] {
-            fill: theme.$custom2-color-pressed;
+            fill: theme.$custom3-color-pressed;
           }
         }
       }
@@ -1685,6 +1685,80 @@
   }
 }
  
+
+:local(.custom4) {
+  margin-left: 10px;
+  :local(.icon-container) {
+    background-color: theme.$custom4-color;
+  }  
+
+  &:hover :local(.icon-container) {
+    background-color: theme.$custom4-color-hover;
+  }
+
+  &:active :local(.icon-container) {
+    background-color: theme.$custom4-color-pressed;
+  }
+
+  &:local(.selected) {
+    :local(.icon-container) {
+      background-color: theme.$custom4-color-active;
+
+      svg {
+        *[stroke=\#000] {
+          stroke: theme.$custom4-color-pressed;
+        }
+    
+        *[fill=\#000] {
+          fill: theme.$custom4-color-pressed;
+        }
+      }
+    }
+
+    label {
+      color: theme.$custom4-color;
+    }
+
+    &:hover {
+      :local(.icon-container) {
+        border-color: theme.$custom4-color-hover;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$white;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$white;
+          }
+        }
+      }
+    }
+  
+    &:active {
+      :local(.icon-container) {
+        border-color: theme.$custom4-color-pressed;
+
+        svg {
+          *[stroke=\#000] {
+            stroke: theme.$custom4-color-pressed;
+          }
+      
+          *[fill=\#000] {
+            fill: theme.$custom4-color-pressed;
+          }
+        }
+      }
+    }
+  }
+}
+ 
+
+
+
+
+
+
 // :local(.setting){
 //   position: relative;
 //   top:70% !important;

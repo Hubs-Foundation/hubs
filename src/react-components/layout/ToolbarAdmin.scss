@@ -9,6 +9,7 @@
   left: 0;
   top: 0;
   @media (min-width: theme.$breakpoint-lg) {
+    left:85%;
     flex: 0;
 
     & > * {
@@ -26,10 +27,25 @@
   // padding: 12px;
   position:absolute;
   max-width: 220px;
-  left:80%;
-  top: 85%;
+  // left:80%;
+  // top: 85%;
+  left:88%;
+  top: 95%;
   transform: translateY(-50%);
   pointer-events: auto;
+
+  @media screen and (max-width: theme.$breakpoint-sm){
+    right:10%;
+    top:95%;
+  }
+
+  @media screen and (max-width: theme.$breakpoint-md){
+    right:10%;
+    top:95%;
+  }
+
+
+
    
 }
 :local(.head){

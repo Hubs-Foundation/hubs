@@ -36,9 +36,7 @@ export function RoomLayout({
         />
       )}
 
-      {toolbarAdmin && (
-        <ToolbarAdmin rightadmin={toolbarAdmin} className={classNames(styles.extratoolbar, styles.main)} />
-      )}
+      {toolbarAdmin && <ToolbarAdmin rightadmin={toolbarAdmin} className={classNames()} />}
       <div
         className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}
         ref={viewportRef}

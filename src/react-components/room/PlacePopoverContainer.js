@@ -27,7 +27,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
           hubChannel.can("spawn_drawing") && {
             id: "pen",
             icon: PenIcon,
-            color: "custom3",
+            color: "custom4",
             label: <FormattedMessage id="place-popover.item-type.pen" defaultMessage="Pen" />,
             onSelect: () => scene.emit("penButtonPressed"),
             selected: hasActivePen
@@ -35,7 +35,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
           hubChannel.can("spawn_camera") && {
             id: "camera",
             icon: CameraIcon,
-            color: "custom3",
+            color: "custom4",
             label: <FormattedMessage id="place-popover.item-type.camera" defaultMessage="Camera" />,
             onSelect: () => scene.emit("action_toggle_camera"),
             selected: hasActiveCamera
@@ -51,28 +51,28 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
             configs.integration("tenor") && {
               id: "gif",
               icon: GIFIcon,
-              color: "custom3",
+              color: "custom4",
               label: <FormattedMessage id="place-popover.item-type.gif" defaultMessage="GIF" />,
               onSelect: () => mediaSearchStore.sourceNavigate("gifs")
             },
             (configs.integration("poly") || configs.integration("sketchfab")) && {
               id: "model",
               icon: ObjectIcon,
-              color: "custom3",
+              color: "custom4",
               label: <FormattedMessage id="place-popover.item-type.model" defaultMessage="3D Model" />,
               onSelect: () => mediaSearchStore.sourceNavigate(configs.integration("poly") ? "poly" : "sketchfab")
             },
             {
               id: "avatar",
               icon: AvatarIcon,
-              color: "custom3",
+              color: "custom4",
               label: <FormattedMessage id="place-popover.item-type.avatar" defaultMessage="Avatar" />,
               onSelect: () => mediaSearchStore.sourceNavigate("avatars")
             },
             {
               id: "scene",
               icon: SceneIcon,
-              color: "custom3",
+              color: "custom4",
               label: <FormattedMessage id="place-popover.item-type.scene" defaultMessage="Scene" />,
               onSelect: () => mediaSearchStore.sourceNavigate("scenes")
             },
@@ -80,7 +80,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
             {
               id: "upload",
               icon: UploadIcon,
-              color: "custom3",
+              color: "custom4",
               label: <FormattedMessage id="place-popover.item-type.upload" defaultMessage="Upload" />,
               onSelect: () => showNonHistoriedDialog(ObjectUrlModalContainer, { scene })
             }

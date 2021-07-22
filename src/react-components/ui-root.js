@@ -1588,7 +1588,7 @@ class UIRoot extends Component {
                   <>
                     <CanvasMenu
                       onClick={() => {
-                        console.log("Calling");
+                        // console.log(configs.isAdmin);
                         this.setState({ showSocial: !this.state.showSocial });
                       }}
                     />

@@ -36,8 +36,8 @@ export function SharePopoverButton({ items }) {
             item.onSelect(item);
           }
         }}
-        label={title}
-        preset="accent5"
+        // label={title}
+        preset="custom3"
         statusColor={activeItem && "recording"}
       />
     );

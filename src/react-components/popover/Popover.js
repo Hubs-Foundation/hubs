@@ -7,7 +7,7 @@ import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import classNames from "classnames";
-import { CloseButton } from "../input/CloseButton";
+import { Close } from "../input/BackClose";
 
 function PopoverArrow() {
   return (
@@ -37,7 +37,8 @@ export function Popover({
   disableFullscreen,
   isVisible,
   onChangeVisible,
-  popoverApiRef
+  popoverApiRef,
+  place
 }) {
   const [_visible, _setVisible] = useState(initiallyVisible);
   const visible = isVisible === undefined ? _visible : isVisible;
@@ -132,28 +133,38 @@ export function Popover({
       })}
       {visible &&
         createPortal(
-          <div
-            ref={setPopperElement}
-            className={classNames(styles.popover, { [styles.fullscreen]: fullscreen })}
-            style={fullscreen ? undefined : popperStyles}
-            {...attributes.popper}
-          >
-            <div className={styles.header}>
-              <CloseButton onClick={closePopover} />
-              <h5>{title}</h5>
-            </div>
-            <div className={styles.content}>
-              {typeof Content === "function" ? (
-                <Content fullscreen={fullscreen} closePopover={closePopover} />
-              ) : (
-                Content
-              )}
-            </div>
-            {!fullscreen && (
+          <div className={classNames({ [styles.placeContainer]: place == "place" })}>
+            <Close onClick={closePopover} className={classNames({ [styles.placeClose]: place == "place" })} />
+            <div
+              ref={setPopperElement}
+              className={classNames(styles.popover, {
+                [styles.fullscreen]: fullscreen,
+                [styles.placepopover]: place == "place"
+              })}
+              style={fullscreen ? undefined : popperStyles}
+              {...attributes.popper}
+            >
+              {/* <div className={styles.header}>
+              <Close onClick={closePopover} className={classNames({ [styles.placeClose]: place == "place" })} />
+               <h5>{title}</h5> 
+            </div> */}
+              <div
+                className={classNames(styles.content, {
+                  [styles.placeContent]: place == "place"
+                })}
+              >
+                {typeof Content === "function" ? (
+                  <Content fullscreen={fullscreen} closePopover={closePopover} />
+                ) : (
+                  Content
+                )}
+              </div>
+              {/* {!fullscreen && (
               <div ref={setArrowElement} className={styles.arrow} style={arrowStyles}>
                 <PopoverArrow />
               </div>
-            )}
+            )} */}
+            </div>
           </div>,
           document.body
         )}

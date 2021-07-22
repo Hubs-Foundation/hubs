@@ -9,6 +9,7 @@ export const presets = [
   "custom2",
   "custom1",
   "custom3",
+  "custom4",
   "toggle",
   "transparent",
   "react",

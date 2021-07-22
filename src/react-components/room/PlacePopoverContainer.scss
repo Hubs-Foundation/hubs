@@ -1,0 +1,14 @@
+@use '../styles/theme';
+
+:local(.place-container){
+    background: url(../../assets/images/PlaceBg.png);
+    min-width: 500px;
+    margin: 0px auto;
+    // padding: 45px 30px 20px;
+    padding: 50px 100px 20px;
+    min-height: 415px;
+    width: auto;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    max-width: 500px; //500px;         
+}

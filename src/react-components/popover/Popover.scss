@@ -139,3 +139,39 @@
 :local(.fullscreen-body) {
   overflow: hidden;
 }
+
+
+:local(.placepopover){
+  
+    background: url(../../assets/images/PlaceBg.png);
+    margin: 0px auto;
+    width: auto;
+    background-repeat: no-repeat;
+    min-height: 100px;
+    max-height: 400px;
+    width: 490px;
+    background-repeat: no-repeat;
+    background-size: 100% 80%;
+    padding: 20px;
+    border:none;
+   
+
+}
+
+
+:local(.place-content){
+  overflow-y: auto;
+  margin-top: -10px;
+  //margin-left: 10px; 
+ 
+}
+
+:local(.place-close){
+  right:2% !important;
+  top:70% !important;
+}
+
+
+:local(.place-container){
+  right:10%;
+}

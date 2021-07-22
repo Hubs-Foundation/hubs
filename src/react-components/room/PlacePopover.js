@@ -5,6 +5,8 @@ import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
 import { defineMessage, useIntl } from "react-intl";
+import styles from "./PlacePopoverContainer.scss";
+import { PlacePopoverContainer } from "./PlacePopoverContainer";
 
 const placePopoverTitle = defineMessage({
   id: "place-popover.title",
@@ -24,10 +26,12 @@ export function PlacePopoverButton({ items }) {
 
   return (
     <Popover
-      title={title}
-      content={props => <ButtonGridPopover items={filteredItems} {...props} />}
+      // title={title}
+      content={props => <ButtonGridPopover items={filteredItems} {...props} place="place" />}
       placement="top"
       offsetDistance={28}
+      className={styles.placeContainer}
+      place="place"
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
         <ToolbarButton
