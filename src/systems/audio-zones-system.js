@@ -11,6 +11,33 @@ function paramsReducer(acc, curr) {
   return acc;
 }
 
+function updateZonesForSources(sources, zones) {
+  zones.forEach(zone => {
+    if (!zone.isEnabled()) return;
+    sources.forEach(source => {
+      const isSourceInZone = zone.contains(source.getPosition());
+      const wasSourceInZone = source.entity.isInZone(zone);
+      if (isSourceInZone && !wasSourceInZone) {
+        source.entity.addZone(zone);
+      } else if (!isSourceInZone && wasSourceInZone) {
+        source.entity.removeZone(zone);
+      }
+    });
+  });
+}
+function updateZonesForListener(listenerPosition, listenerEntity, zones) {
+  zones.forEach(zone => {
+    if (!zone.isEnabled()) return;
+    const isListenerInZone = zone.contains(listenerPosition);
+    const wasListenerInZone = listenerEntity.isInZone(zone);
+    if (isListenerInZone && !wasListenerInZone) {
+      listenerEntity.addZone(zone);
+    } else if (!isListenerInZone && wasListenerInZone) {
+      listenerEntity.removeZone(zone);
+    }
+  });
+}
+
 /**
  * This system updates the audio-zone-sources audio-params based on the audio-zone-listener position.
  * On every tick it computes the audio-zone-source and audio-zone-listener positions to check
@@ -54,7 +81,8 @@ export class AudioZonesSystem {
 
       this.listener.getWorldPosition(listenerPosition);
 
-      this._updateZones(listenerPosition);
+      updateZonesForListener(listenerPosition);
+      updateZonesForSources(this.sources, this.zones);
 
       for (let i = 0; i < this.sources.length; i++) {
         const source = this.sources[i];
@@ -112,32 +140,4 @@ export class AudioZonesSystem {
       }
     };
   })();
-
-  // Updates zones states in case they have changed.
-  _updateZones(listenerPosition) {
-    for (let i = 0; i < this.zones.length; i++) {
-      const zone = this.zones[i];
-      if (!zone.isEnabled()) continue;
-
-      const isListenerInZone = zone.contains(listenerPosition);
-      const wasListenerInZone = this.listenerEntity.isInZone(zone);
-      // Update audio zone listener status
-      if (isListenerInZone && !wasListenerInZone) {
-        this.listenerEntity.addZone(zone);
-      } else if (!isListenerInZone && wasListenerInZone) {
-        this.listenerEntity.removeZone(zone);
-      }
-      // Update audio zone source status
-      this.sources.forEach(source => {
-        const isSourceInZone = zone.contains(source.getPosition());
-        const wasSourceInZone = source.entity.isInZone(zone);
-        // Check if the audio source is in the audio zone
-        if (isSourceInZone && !wasSourceInZone) {
-          source.entity.addZone(zone);
-        } else if (!isSourceInZone && wasSourceInZone) {
-          source.entity.removeZone(zone);
-        }
-      });
-    }
-  }
 }
