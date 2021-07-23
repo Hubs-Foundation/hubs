@@ -57,9 +57,7 @@ const updateSource = (function() {
   return function updateSource(source, sourcePosition, sourceZones, listenerPosition, listenerZones) {
     setRay(ray, listenerPosition, sourcePosition);
 
-    // First we check the zones the source is contained in and we check the inOut property
-    // to modify the sources audio params when the listener is outside the source's zones
-    // We always apply the outmost active zone audio params, the zone that's closest to the listener
+    // TODO: Reimplement the desired sorting of zones
     const inOutParams = sourceZones
       .filter(zone => zone.data.inOut)
       .filter(exclude(listenerZones))
@@ -67,9 +65,7 @@ const updateSource = (function() {
       .map(zone => zone.getAudioParams())
       .reduce(paramsReducer, null);
 
-    // Then we check the zones the listener is contained in and we check the outIn property
-    // to modify the sources audio params when the source is outside the listener's zones
-    // We always apply the inmost active zone audio params, the zone that's closest to the listener
+    // TODO: Reimplement the desired sorting of zones
     const outInParams = listenerZones
       .filter(zone => zone.data.outIn)
       .filter(exclude(sourceZones))
