@@ -11,30 +11,30 @@ function any(set, predicate) {
  **/
 AFRAME.registerComponent("audio-zone-entity", {
   init() {
-    this.zones = new Set();
+    this.currZones = new Set();
     this.prevZones = new Set();
   },
 
   remove() {
-    this.zones.clear();
+    this.currZones.clear();
     this.prevZones.clear();
   },
 
   tock() {
     this.prevZones.clear();
-    this.zones.forEach(zone => this.prevZones.add(zone));
+    this.currZones.forEach(zone => this.prevZones.add(zone));
   },
 
   addZone(zone) {
-    this.zones.add(zone);
+    this.currZones.add(zone);
   },
 
   removeZone(zone) {
-    this.zones.delete(zone);
+    this.currZones.delete(zone);
   },
 
   isInZone(zone) {
-    return this.zones.has(zone);
+    return this.currZones.has(zone);
   },
 
   wasInZone(zone) {
@@ -42,6 +42,6 @@ AFRAME.registerComponent("audio-zone-entity", {
   },
 
   isUpdated() {
-    return this.zones.size !== this.prevZones.size || any(this.zones, zone => !this.prevZones.has(zone));
+    return this.currZones.size !== this.prevZones.size || any(this.currZones, zone => !this.prevZones.has(zone));
   }
 });
