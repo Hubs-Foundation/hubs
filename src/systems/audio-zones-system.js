@@ -114,9 +114,11 @@ export class AudioZonesSystem {
 
   registerSource(source) {
     this.sources.push(source);
+    this.registerEntity(source);
   }
   unregisterSource(source) {
     this.sources.splice(this.sources.indexOf(source), 1);
+    this.unregisterEntity(source);
   }
   registerZone(zone) {
     this.zones.push(zone);
@@ -141,27 +143,26 @@ export class AudioZonesSystem {
     return function(scene) {
       if (!scene.is("entered")) return;
       const currListenerZones = this.currZones.get(this.listenerEntity);
-      const prevListenerZones = this.prevZones.get(this.listenerEntity);
       this.listener.getWorldPosition(listenerPosition);
       this.zones.forEach(zone => {
         addOrRemoveZone(listenerPosition, currListenerZones, zone);
         this.sources.forEach(source => {
-          const currSourceZones = this.currZones.get(source.entity);
+          const currSourceZones = this.currZones.get(source);
           addOrRemoveZone(source.getPosition(), currSourceZones, zone);
         });
       });
-
+      const prevListenerZones = this.prevZones.get(this.listenerEntity);
+      const isListenerUpdated = isUpdated(currListenerZones, prevListenerZones);
       this.sources
         .filter(source => {
-          const currSourceZones = this.currZones.get(source.entity);
-          const prevSourceZones = this.prevZones.get(source.entity);
-          return isUpdated(currListenerZones, prevListenerZones) || isUpdated(currSourceZones, prevSourceZones);
+          const currSourceZones = this.currZones.get(source);
+          const prevSourceZones = this.prevZones.get(source);
+          return isListenerUpdated || isUpdated(currSourceZones, prevSourceZones);
         })
         .forEach(source => {
-          const currSourceZones = this.currZones.get(source.entity);
+          const currSourceZones = this.currZones.get(source);
           updateSource(source, source.getPosition(), currSourceZones, listenerPosition, currListenerZones);
         });
-
       this.entities.forEach(entity => {
         const currZones = this.currZones.get(entity);
         const prevZones = this.prevZones.get(entity);

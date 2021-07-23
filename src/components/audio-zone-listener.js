@@ -2,15 +2,17 @@
  * Represents the scene audio listener in the audio-zones-system.
  */
 AFRAME.registerComponent("audio-zone-listener", {
-  dependencies: ["audio-zone-entity"],
-
   init() {
-    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listener = this.el.sceneEl.audioListener;
-    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listenerEntity = this.el.components["audio-zone-entity"];
+    const system = this.el.sceneEl.systems["hubs-systems"].audioZonesSystem;
+    system.listener = this.el.sceneEl.audioListener;
+    system.listenerEntity = this;
+    system.registerEntity(this);
   },
 
   remove() {
-    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listener = null;
-    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.listenerEntity = null;
+    const system = this.el.sceneEl.systems["hubs-systems"].audioZonesSystem;
+    system.listener = null;
+    system.listenerEntity = null;
+    system.unregisterEntity(this);
   }
 });

@@ -29,6 +29,5 @@ import "./trigger-volume";
 import "./video-pause-state";
 import "./particle-emitter";
 import "./audio-zone";
-import "./audio-zone-entity";
 import "./audio-zone-source";
 import "./audio-zone-listener";

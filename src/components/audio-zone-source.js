@@ -2,16 +2,9 @@ import { THREE } from "aframe";
 
 const zero = new THREE.Vector3(0, 0, 0);
 
-/**
- * Represents an audio-zone-entity that has an audio component in the audio-zones-system.
- * Expects an audio-params component. It can be an audio, video, avatar or an audio target.
- */
 AFRAME.registerComponent("audio-zone-source", {
-  dependencies: ["audio-zone-entity"],
-
   init() {
     this.originalAudioParamsData = null;
-    this.entity = this.el.components["audio-zone-entity"];
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerSource(this);
   },
 
