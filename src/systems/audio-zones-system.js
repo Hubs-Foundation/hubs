@@ -50,6 +50,46 @@ function hasIntersection(ray) {
     return intersectTarget !== null;
   };
 }
+const updateSource = (function() {
+  const ray = new THREE.Ray();
+  return function updateSource(source, listenerPosition, listenerZones) {
+    castRay(ray, listenerPosition, source.getPosition());
+
+    // First we check the zones the source is contained in and we check the inOut property
+    // to modify the sources audio params when the listener is outside the source's zones
+    // We always apply the outmost active zone audio params, the zone that's closest to the listener
+    const inOutParams = source.entity
+      .getZones()
+      .filter(zone => zone.data.inOut)
+      .filter(exclude(listenerZones))
+      .filter(hasIntersection(ray))
+      .map(zone => zone.getAudioParams())
+      .reduce(paramsReducer, null);
+
+    // Then we check the zones the listener is contained in and we check the outIn property
+    // to modify the sources audio params when the source is outside the listener's zones
+    // We always apply the inmost active zone audio params, the zone that's closest to the listener
+    const outInParams = listenerZones
+      .filter(zone => zone.data.outIn)
+      .filter(exclude(source.entity.getZones()))
+      .filter(hasIntersection(ray))
+      .map(zone => zone.getAudioParams())
+      .reduce(paramsReducer, null);
+
+    if (!outInParams && !inOutParams) {
+      source.restore();
+    } else if (outInParams && !inOutParams) {
+      source.apply(outInParams);
+    } else if (!outInParams && inOutParams) {
+      source.apply(inOutParams);
+    } else {
+      const params = outInParams;
+      params.gain = Math.min(outInParams.gain, inOutParams.gain);
+      params.coneOuterAngle = Math.min(outInParams.coneOuterAngle, inOutParams.coneOuterAngle);
+      source.apply(params);
+    }
+  };
+})();
 /**
  * This system updates the audio-zone-sources audio-params based on the audio-zone-listener position.
  * On every tick it computes the audio-zone-source and audio-zone-listener positions to check
@@ -61,8 +101,7 @@ function hasIntersection(ray) {
  * and the other has gain == 1.0, gain == 0.1 is applied to the source.
  */
 export class AudioZonesSystem {
-  constructor(scene) {
-    this.scene = scene;
+  constructor() {
     this.listener = null;
     this.listenerEntity = null;
     this.sources = [];
@@ -84,54 +123,14 @@ export class AudioZonesSystem {
   }
 
   tick = (function() {
-    const ray = new THREE.Ray();
     const listenerPosition = new THREE.Vector3();
-    return function() {
-      if (!this.scene.is("entered")) return;
-
+    return function(scene) {
+      if (!scene.is("entered")) return;
       this.listener.getWorldPosition(listenerPosition);
-
       updateZones(this.sources, listenerPosition, this.listenerEntity, this.zones);
-
-      this.sources.forEach(source => {
-        if (!source.entity.isUpdated() && !this.listenerEntity.isUpdated()) return;
-        castRay(ray, listenerPosition, source.getPosition());
-
-        // First we check the zones the source is contained in and we check the inOut property
-        // to modify the sources audio params when the listener is outside the source's zones
-        // We always apply the outmost active zone audio params, the zone that's closest to the listener
-        const inOutParams = source.entity
-          .getZones()
-          .filter(zone => zone.data.inOut)
-          .filter(exclude(this.listenerEntity.getZones()))
-          .filter(hasIntersection(ray))
-          .map(zone => zone.getAudioParams())
-          .reduce(paramsReducer, null);
-
-        // Then we check the zones the listener is contained in and we check the outIn property
-        // to modify the sources audio params when the source is outside the listener's zones
-        // We always apply the inmost active zone audio params, the zone that's closest to the listener
-        const outInParams = this.listenerEntity
-          .getZones()
-          .filter(zone => zone.data.outIn)
-          .filter(exclude(source.entity.getZones()))
-          .filter(hasIntersection(ray))
-          .map(zone => zone.getAudioParams())
-          .reduce(paramsReducer, null);
-
-        if (!outInParams && !inOutParams) {
-          source.restore();
-        } else if (outInParams && !inOutParams) {
-          source.apply(outInParams);
-        } else if (!outInParams && inOutParams) {
-          source.apply(inOutParams);
-        } else {
-          const params = outInParams;
-          params.gain = Math.min(outInParams.gain, inOutParams.gain);
-          params.coneOuterAngle = Math.min(outInParams.coneOuterAngle, inOutParams.coneOuterAngle);
-          source.apply(params);
-        }
-      });
+      this.sources
+        .filter(source => source.entity.isUpdated() || this.listenerEntity.isUpdated())
+        .forEach(source => updateSource(source, listenerPosition, this.listenerEntity.getZones()));
     };
   })();
 }
