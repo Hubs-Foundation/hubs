@@ -158,7 +158,7 @@ export class AudioZonesSystem {
       this.sources
         .filter(source => {
           const sourceZones = this.entityZones.get(source.entity);
-          return isUpdated(sourceZones) || isUpdated(listenerZones);
+          return isUpdated(listenerZones) || isUpdated(sourceZones);
         })
         .forEach(source => {
           const sourceZones = this.entityZones.get(source.entity);
