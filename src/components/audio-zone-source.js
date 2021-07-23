@@ -27,7 +27,6 @@ AFRAME.registerComponent("audio-zone-source", {
 
   // Updates the audio-params component with new audio parameters.
   apply(params) {
-    if (!params) return;
     if (this.audioParamsComp) {
       if (this.prevAudioParamsData === null) {
         this.prevAudioParamsData = {
