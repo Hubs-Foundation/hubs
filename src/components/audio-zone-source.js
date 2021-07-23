@@ -11,7 +11,6 @@ AFRAME.registerComponent("audio-zone-source", {
 
   init() {
     this.originalAudioParamsData = null;
-    this.audioParamsComp = this.el.components["audio-params"];
     this.entity = this.el.components["audio-zone-entity"];
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerSource(this);
   },
@@ -22,21 +21,22 @@ AFRAME.registerComponent("audio-zone-source", {
 
   // Returns the audio source world position.
   getPosition() {
-    return this.audioParamsComp.data.position || zero;
+    return this.el.components["audio-params"].data.position || zero;
   },
 
   // Updates the audio-params component with new audio parameters.
   apply(params) {
     if (!this.originalAudioParamsData) {
+      const data = this.el.components["audio-params"].data;
       this.originalAudioParamsData = {
-        distanceModel: this.audioParamsComp.data.distanceModel,
-        maxDistance: this.audioParamsComp.data.maxDistance,
-        refDistance: this.audioParamsComp.data.refDistance,
-        rolloffFactor: this.audioParamsComp.data.rolloffFactor,
-        coneInnerAngle: this.audioParamsComp.data.coneInnerAngle,
-        coneOuterAngle: this.audioParamsComp.data.coneOuterAngle,
-        coneOuterGain: this.audioParamsComp.data.coneOuterGain,
-        gain: this.audioParamsComp.data.gain
+        distanceModel: data.distanceModel,
+        maxDistance: data.maxDistance,
+        refDistance: data.refDistance,
+        rolloffFactor: data.rolloffFactor,
+        coneInnerAngle: data.coneInnerAngle,
+        coneOuterAngle: data.coneOuterAngle,
+        coneOuterGain: data.coneOuterGain,
+        gain: data.gain
       };
     }
     this.el.setAttribute("audio-params", params);
