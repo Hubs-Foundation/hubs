@@ -11,13 +11,13 @@ function paramsReducer(acc, curr) {
   return acc;
 }
 
-function addOrRemoveZone(position, currZones, zone) {
+function addOrRemoveZone(zones, zone, position) {
   const isInZone = zone.isEnabled() && zone.contains(position);
-  const wasInZone = currZones.has(zone);
+  const wasInZone = zones.has(zone);
   if (isInZone && !wasInZone) {
-    currZones.add(zone);
+    zones.add(zone);
   } else if (!isInZone && wasInZone) {
-    currZones.delete(zone);
+    zones.delete(zone);
   }
 }
 
@@ -103,22 +103,12 @@ const updateSource = (function() {
  */
 export class AudioZonesSystem {
   constructor() {
-    this.listener = null;
-    this.listenerEntity = null;
-    this.sources = [];
     this.zones = [];
+    this.listener = null;
+    this.sources = [];
     this.entities = [];
     this.currZones = new Map();
     this.prevZones = new Map();
-  }
-
-  registerSource(source) {
-    this.sources.push(source);
-    this.registerEntity(source);
-  }
-  unregisterSource(source) {
-    this.sources.splice(this.sources.indexOf(source), 1);
-    this.unregisterEntity(source);
   }
   registerZone(zone) {
     this.zones.push(zone);
@@ -126,6 +116,22 @@ export class AudioZonesSystem {
   unregisterZone(zone) {
     // TODO: Remove this zone from all the entities (sources and listenerEntity)
     this.zones.splice(this.zones.indexOf(zone), 1);
+  }
+  registerListener(listener) {
+    this.listener = listener;
+    this.registerEntity(listener);
+  }
+  clearListener(listener) {
+    this.listener = null;
+    this.unregisterEntity(listener);
+  }
+  registerSource(source) {
+    this.sources.push(source);
+    this.registerEntity(source);
+  }
+  unregisterSource(source) {
+    this.sources.splice(this.sources.indexOf(source), 1);
+    this.unregisterEntity(source);
   }
   registerEntity(entity) {
     this.entities.push(entity);
@@ -142,32 +148,29 @@ export class AudioZonesSystem {
     const listenerPosition = new THREE.Vector3();
     return function(scene) {
       if (!scene.is("entered")) return;
-      const currListenerZones = this.currZones.get(this.listenerEntity);
+
+      const currListenerZones = this.currZones.get(this.listener);
       this.listener.getWorldPosition(listenerPosition);
       this.zones.forEach(zone => {
-        addOrRemoveZone(listenerPosition, currListenerZones, zone);
+        addOrRemoveZone(currListenerZones, zone, listenerPosition);
         this.sources.forEach(source => {
-          const currSourceZones = this.currZones.get(source);
-          addOrRemoveZone(source.getPosition(), currSourceZones, zone);
+          addOrRemoveZone(this.currZones.get(source), zone, source.getPosition());
         });
       });
-      const prevListenerZones = this.prevZones.get(this.listenerEntity);
+      const prevListenerZones = this.prevZones.get(this.listener);
       const isListenerUpdated = isUpdated(currListenerZones, prevListenerZones);
       this.sources
         .filter(source => {
-          const currSourceZones = this.currZones.get(source);
-          const prevSourceZones = this.prevZones.get(source);
-          return isListenerUpdated || isUpdated(currSourceZones, prevSourceZones);
+          return isListenerUpdated || isUpdated(this.currZones.get(source), this.prevZones.get(source));
         })
         .forEach(source => {
-          const currSourceZones = this.currZones.get(source);
-          updateSource(source, source.getPosition(), currSourceZones, listenerPosition, currListenerZones);
+          updateSource(source, source.getPosition(), this.currZones.get(source), listenerPosition, currListenerZones);
         });
+
       this.entities.forEach(entity => {
-        const currZones = this.currZones.get(entity);
         const prevZones = this.prevZones.get(entity);
         prevZones.clear();
-        currZones.forEach(zone => prevZones.add(zone));
+        this.currZones.get(entity).forEach(zone => prevZones.add(zone));
       });
     };
   })();
