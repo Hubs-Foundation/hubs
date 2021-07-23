@@ -11,13 +11,21 @@ function paramsReducer(acc, curr) {
   return acc;
 }
 
+function addZone(entity, zone) {
+  entity.currZones.add(zone);
+}
+
+function removeZone(entity, zone) {
+  entity.currZones.delete(zone);
+}
+
 function addOrRemoveZone(position, entity, zone) {
   const isInZone = zone.isEnabled() && zone.contains(position);
   const wasInZone = entity.isInZone(zone);
   if (isInZone && !wasInZone) {
-    entity.addZone(zone);
+    addZone(entity, zone);
   } else if (!isInZone && wasInZone) {
-    entity.removeZone(zone);
+    removeZone(entity, zone);
   }
 }
 

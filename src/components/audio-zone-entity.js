@@ -25,14 +25,6 @@ AFRAME.registerComponent("audio-zone-entity", {
     this.currZones.forEach(zone => this.prevZones.add(zone));
   },
 
-  addZone(zone) {
-    this.currZones.add(zone);
-  },
-
-  removeZone(zone) {
-    this.currZones.delete(zone);
-  },
-
   isInZone(zone) {
     return this.currZones.has(zone);
   },
