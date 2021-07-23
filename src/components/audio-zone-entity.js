@@ -1,3 +1,9 @@
+function any(set, predicate) {
+  for (const item of set) {
+    if (predicate(item)) return true;
+  }
+  return false;
+}
 /**
  * Represents an entity in the audio-zones-system.
  * Records the audio zones where the entity is and returns current/past states.
@@ -5,53 +11,41 @@
  **/
 AFRAME.registerComponent("audio-zone-entity", {
   init() {
-    this.zones = [];
-    this.prevZones = [];
+    this.zones = new Set();
+    this.prevZones = new Set();
   },
 
   remove() {
-    this.zones.length = 0;
-    this.prevZones.length = 0;
+    this.zones.clear();
+    this.prevZones.clear();
   },
 
-  // Update the previous zones array.
   tock() {
-    this.prevZones.length = this.zones.length;
-    for (let i = 0; i < this.zones.length; i++) {
-      this.prevZones[i] = this.zones[i];
-    }
+    this.prevZones.clear();
+    this.zones.forEach(zone => this.prevZones.add(zone));
   },
 
-  // Adds a zone to the current zones array.
   addZone(zone) {
-    const index = this.zones.indexOf(zone);
-    if (index < 0) {
-      this.zones.push(zone);
-    }
+    this.zones.add(zone);
   },
 
   // Removes a zone from the current zones array.
   removeZone(zone) {
-    const index = this.zones.indexOf(zone);
-    if (index !== -1) {
-      this.zones.splice(index, 1);
-    }
+    this.zones.delete(zone);
   },
 
   // Returns true if this entity is inside a zone.
   isInZone(zone) {
-    return this.zones.includes(zone);
+    return this.zones.has(zone);
   },
 
   // Returns true if this entity was inside the zone in the previous tick.
   wasInZone(zone) {
-    return this.prevZones.includes(zone);
+    return this.prevZones.has(zone);
   },
 
   // Returns true if the entity has change zones (a zone has been added or removes in the last tick).
   isUpdated() {
-    return !(
-      this.zones.length === this.prevZones.length && this.zones.every((value, index) => value === this.prevZones[index])
-    );
+    return this.zones.size !== this.prevZones.size || any(this.zones, zone => !this.prevZones.has(zone));
   }
 });
