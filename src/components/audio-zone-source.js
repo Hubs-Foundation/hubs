@@ -22,26 +22,24 @@ AFRAME.registerComponent("audio-zone-source", {
 
   // Returns the audio source world position.
   getPosition() {
-    return this.audioParamsComp?.data.position || zero;
+    return this.audioParamsComp.data.position || zero;
   },
 
   // Updates the audio-params component with new audio parameters.
   apply(params) {
-    if (this.audioParamsComp) {
-      if (this.prevAudioParamsData === null) {
-        this.prevAudioParamsData = {
-          distanceModel: this.audioParamsComp.data.distanceModel,
-          maxDistance: this.audioParamsComp.data.maxDistance,
-          refDistance: this.audioParamsComp.data.refDistance,
-          rolloffFactor: this.audioParamsComp.data.rolloffFactor,
-          coneInnerAngle: this.audioParamsComp.data.coneInnerAngle,
-          coneOuterAngle: this.audioParamsComp.data.coneOuterAngle,
-          coneOuterGain: this.audioParamsComp.data.coneOuterGain,
-          gain: this.audioParamsComp.data.gain
-        };
-      }
-      this.el.setAttribute("audio-params", params);
+    if (this.prevAudioParamsData === null) {
+      this.prevAudioParamsData = {
+        distanceModel: this.audioParamsComp.data.distanceModel,
+        maxDistance: this.audioParamsComp.data.maxDistance,
+        refDistance: this.audioParamsComp.data.refDistance,
+        rolloffFactor: this.audioParamsComp.data.rolloffFactor,
+        coneInnerAngle: this.audioParamsComp.data.coneInnerAngle,
+        coneOuterAngle: this.audioParamsComp.data.coneOuterAngle,
+        coneOuterGain: this.audioParamsComp.data.coneOuterGain,
+        gain: this.audioParamsComp.data.gain
+      };
     }
+    this.el.setAttribute("audio-params", params);
   },
 
   // Restores the original audio parameters.
