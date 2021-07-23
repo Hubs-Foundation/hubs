@@ -969,7 +969,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   getReticulumMeta().then(reticulumMeta => {
-    console.log(`Reticulum @ ${reticulumMeta.phx_host}: v${reticulumMeta.version} on ${reticulumMeta.pool}`);
+    console.log(`Reticulum at ${reticulumMeta.phx_host}: v${reticulumMeta.version} on ${reticulumMeta.pool}`);
 
     if (
       qs.get("required_ret_version") &&
