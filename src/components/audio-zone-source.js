@@ -13,11 +13,11 @@ AFRAME.registerComponent("audio-zone-source", {
     this.prevAudioParamsData = null;
     this.audioParamsComp = this.el.components["audio-params"];
     this.entity = this.el.components["audio-zone-entity"];
-    this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.registerSource(this);
+    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerSource(this);
   },
 
   remove() {
-    this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.unregisterSource(this);
+    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterSource(this);
   },
 
   // Returns the audio source world position.
