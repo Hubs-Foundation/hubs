@@ -32,9 +32,9 @@ function isUpdated(currZones, prevZones) {
   return currZones.size !== prevZones.size || any(currZones, zone => !prevZones.has(zone));
 }
 
-const castRay = (function() {
+const setRay = (function() {
   const direction = new THREE.Vector3();
-  return function castRay(ray, from, to) {
+  return function setRay(ray, from, to) {
     ray.set(from, direction.subVectors(to, from).normalize());
   };
 })();
@@ -55,7 +55,7 @@ function hasIntersection(ray) {
 const updateSource = (function() {
   const ray = new THREE.Ray();
   return function updateSource(source, sourcePosition, sourceZones, listenerPosition, listenerZones) {
-    castRay(ray, listenerPosition, sourcePosition);
+    setRay(ray, listenerPosition, sourcePosition);
 
     // First we check the zones the source is contained in and we check the inOut property
     // to modify the sources audio params when the listener is outside the source's zones
