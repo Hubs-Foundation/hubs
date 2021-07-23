@@ -29,15 +29,6 @@ function addOrRemoveZone(position, entity, zone) {
   }
 }
 
-function updateZones(sources, listenerPosition, listenerEntity, zones) {
-  zones.forEach(zone => {
-    addOrRemoveZone(listenerPosition, listenerEntity, zone);
-    sources.forEach(source => {
-      addOrRemoveZone(source.getPosition(), source.entity, zone);
-    });
-  });
-}
-
 function any(set, predicate) {
   for (const item of set) {
     if (predicate(item)) return true;
@@ -71,13 +62,13 @@ function hasIntersection(ray) {
 }
 const updateSource = (function() {
   const ray = new THREE.Ray();
-  return function updateSource(source, listenerPosition, listenerZones) {
-    castRay(ray, listenerPosition, source.getPosition());
+  return function updateSource(source, sourcePosition, sourceZones, listenerPosition, listenerZones) {
+    castRay(ray, listenerPosition, sourcePosition);
 
     // First we check the zones the source is contained in and we check the inOut property
     // to modify the sources audio params when the listener is outside the source's zones
     // We always apply the outmost active zone audio params, the zone that's closest to the listener
-    const inOutParams = source.entity.currZones
+    const inOutParams = sourceZones.currZones
       .filter(zone => zone.data.inOut)
       .filter(exclude(listenerZones))
       .filter(hasIntersection(ray))
@@ -89,7 +80,7 @@ const updateSource = (function() {
     // We always apply the inmost active zone audio params, the zone that's closest to the listener
     const outInParams = listenerZones
       .filter(zone => zone.data.outIn)
-      .filter(exclude(source.entity.currZones))
+      .filter(exclude(sourceZones.currZones))
       .filter(hasIntersection(ray))
       .map(zone => zone.getAudioParams())
       .reduce(paramsReducer, null);
@@ -125,6 +116,7 @@ export class AudioZonesSystem {
     this.sources = [];
     this.zones = [];
     this.entities = [];
+    this.entityZones = new Map();
   }
 
   registerSource(source) {
@@ -142,21 +134,37 @@ export class AudioZonesSystem {
   }
   registerEntity(entity) {
     this.entities.push(entity);
+    this.entityZones.set(entity, { currZones: new Set(), prevZones: new Set() });
   }
   unregisterEntity(entity) {
     this.entities.splice(this.entities.indexOf(entity), 1);
+    this.entityZones.delete(entity);
   }
 
   tick = (function() {
     const listenerPosition = new THREE.Vector3();
     return function(scene) {
       if (!scene.is("entered")) return;
+      const listenerZones = this.entityZones.get(this.listenerEntity);
       this.listener.getWorldPosition(listenerPosition);
-      updateZones(this.sources, listenerPosition, this.listenerEntity, this.zones);
+      this.zones.forEach(zone => {
+        addOrRemoveZone(listenerPosition, listenerZones, zone);
+        this.sources.forEach(source => {
+          const sourceZones = this.entityZones.get(source.entity);
+          addOrRemoveZone(source.getPosition(), sourceZones, zone);
+        });
+      });
+
       this.sources
-        .filter(source => isUpdated(source.entity) || isUpdated(this.listenerEntity))
-        .forEach(source => updateSource(source, listenerPosition, this.listenerEntity.currZones));
-      this.entities.forEach(entity => {
+        .filter(source => {
+          const sourceZones = this.entityZones.get(source.entity);
+          return isUpdated(sourceZones) || isUpdated(listenerZones);
+        })
+        .forEach(source => {
+          const sourceZones = this.entityZones.get(source.entity);
+          updateSource(source, source.getPosition(), sourceZones, listenerPosition, listenerZones.currZones);
+        });
+      this.entityZones.forEach(entity => {
         entity.prevZones.clear();
         entity.currZones.forEach(zone => entity.prevZones.add(zone));
       });
