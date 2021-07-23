@@ -197,13 +197,6 @@ AFRAME.registerComponent("audio-params", {
         audio.panner.orientationY.value,
         audio.panner.orientationZ.value
       );
-      this.data.distanceModel = audio.panner.distanceModel;
-      this.data.rolloffFactor = audio.panner.rolloffFactor;
-      this.data.refDistance = audio.panner.refDistance;
-      this.data.maxDistance = audio.panner.maxDistance;
-      this.data.coneInnerAngle = audio.panner.coneInnerAngle;
-      this.data.coneOuterAngle = audio.panner.coneOuterAngle;
-      this.data.coneOuterGain = audio.panner.coneOuterGain;
       this.updateDistances();
       this.updateAttenuation();
     }
