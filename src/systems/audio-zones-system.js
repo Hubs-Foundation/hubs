@@ -155,8 +155,7 @@ export class AudioZonesSystem {
         });
       });
 
-      const prevListenerZones = this.prevZones.get(scene.audioListener);
-      const isListenerUpdated = isUpdated(currListenerZones, prevListenerZones);
+      const isListenerUpdated = isUpdated(currListenerZones, this.prevZones.get(scene.audioListener));
       this.sources
         .filter(source => {
           return isListenerUpdated || isUpdated(this.currZones.get(source), this.prevZones.get(source));
