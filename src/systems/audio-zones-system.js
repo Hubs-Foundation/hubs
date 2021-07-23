@@ -37,6 +37,19 @@ const castRay = (function() {
   };
 })();
 
+function exclude(zones) {
+  return zone => {
+    return !zones.includes(zone);
+  };
+}
+
+function hasIntersection(ray) {
+  const intersectTarget = new THREE.Vector3();
+  return zone => {
+    ray.intersectBox(zone.getBoundingBox(), intersectTarget);
+    return intersectTarget !== null;
+  };
+}
 /**
  * This system updates the audio-zone-sources audio-params based on the audio-zone-listener position.
  * On every tick it computes the audio-zone-source and audio-zone-listener positions to check
@@ -72,7 +85,6 @@ export class AudioZonesSystem {
 
   tick = (function() {
     const ray = new THREE.Ray();
-    const intersectTarget = new THREE.Vector3();
     const listenerPosition = new THREE.Vector3();
     return function() {
       if (!this.scene.is("entered")) return;
@@ -90,11 +102,9 @@ export class AudioZonesSystem {
         // We always apply the outmost active zone audio params, the zone that's closest to the listener
         const inOutParams = source.entity
           .getZones()
-          .filter(zone => {
-            const zoneBBAA = zone.getBoundingBox();
-            ray.intersectBox(zoneBBAA, intersectTarget);
-            return intersectTarget !== null && zone.data.inOut && !this.listenerEntity.getZones().includes(zone);
-          })
+          .filter(zone => zone.data.inOut)
+          .filter(exclude(this.listenerEntity.getZones()))
+          .filter(hasIntersection(ray))
           .map(zone => zone.getAudioParams())
           .reduce(paramsReducer, null);
 
@@ -103,11 +113,9 @@ export class AudioZonesSystem {
         // We always apply the inmost active zone audio params, the zone that's closest to the listener
         const outInParams = this.listenerEntity
           .getZones()
-          .filter(zone => {
-            const zoneBBAA = zone.getBoundingBox();
-            ray.intersectBox(zoneBBAA, intersectTarget);
-            return intersectTarget !== null && zone.data.outIn && !source.entity.getZones().includes(zone);
-          })
+          .filter(zone => zone.data.outIn)
+          .filter(exclude(source.entity.getZones()))
+          .filter(hasIntersection(ray))
           .map(zone => zone.getAudioParams())
           .reduce(paramsReducer, null);
 
