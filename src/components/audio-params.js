@@ -24,6 +24,7 @@ export const DistanceModelType = {
 };
 
 export const AvatarAudioDefaults = Object.freeze({
+  AUDIO_TYPE: AudioType.PannerNode,
   DISTANCE_MODEL: DistanceModelType.Inverse,
   ROLLOFF_FACTOR: 2,
   REF_DISTANCE: 1,
@@ -35,6 +36,7 @@ export const AvatarAudioDefaults = Object.freeze({
 });
 
 export const MediaAudioDefaults = Object.freeze({
+  AUDIO_TYPE: AudioType.PannerNode,
   DISTANCE_MODEL: DistanceModelType.Inverse,
   ROLLOFF_FACTOR: 1,
   REF_DISTANCE: 1,
@@ -46,6 +48,7 @@ export const MediaAudioDefaults = Object.freeze({
 });
 
 export const TargetAudioDefaults = Object.freeze({
+  AUDIO_TYPE: AudioType.PannerNode,
   DISTANCE_MODEL: DistanceModelType.Inverse,
   ROLLOFF_FACTOR: 5,
   REF_DISTANCE: 8,
@@ -78,6 +81,7 @@ AFRAME.registerComponent("audio-params", {
     isLocal: { default: false },
     position: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
     orientation: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
+    audioType: { default: AvatarAudioDefaults.AUDIO_TYPE },
     distanceModel: { default: AvatarAudioDefaults.DISTANCE_MODEL, oneOf: [DISTANCE_MODEL_OPTIONS] },
     rolloffFactor: { default: AvatarAudioDefaults.ROLLOFF_FACTOR },
     refDistance: { default: AvatarAudioDefaults.REF_DISTANCE },
@@ -173,13 +177,15 @@ AFRAME.registerComponent("audio-params", {
 
   update() {
     if (this.audioRef) {
-      this.audioRef.setDistanceModel(this.data.distanceModel);
-      this.audioRef.setRolloffFactor(this.data.rolloffFactor);
-      this.audioRef.setRefDistance(this.data.refDistance);
-      this.audioRef.setMaxDistance(this.data.maxDistance);
-      this.audioRef.panner.coneInnerAngle = this.data.coneInnerAngle;
-      this.audioRef.panner.coneOuterAngle = this.data.coneOuterAngle;
-      this.audioRef.panner.coneOuterGain = this.data.coneOuterGain;
+      if (this.data.audioType === AudioType.PannerNode) {
+        this.audioRef.setDistanceModel(this.data.distanceModel);
+        this.audioRef.setRolloffFactor(this.data.rolloffFactor);
+        this.audioRef.setRefDistance(this.data.refDistance);
+        this.audioRef.setMaxDistance(this.data.maxDistance);
+        this.audioRef.panner.coneInnerAngle = this.data.coneInnerAngle;
+        this.audioRef.panner.coneOuterAngle = this.data.coneOuterAngle;
+        this.audioRef.panner.coneOuterGain = this.data.coneOuterGain;
+      }
       this.data.gain !== undefined && this.updateGain(this.data.gain);
     }
   },
@@ -187,18 +193,24 @@ AFRAME.registerComponent("audio-params", {
   tick() {
     const audio = this.getAudio();
     if (audio) {
-      this.data.position = new THREE.Vector3(
-        audio.panner.positionX.value,
-        audio.panner.positionY.value,
-        audio.panner.positionZ.value
-      );
-      this.data.orientation = new THREE.Vector3(
-        audio.panner.orientationX.value,
-        audio.panner.orientationY.value,
-        audio.panner.orientationZ.value
-      );
+      if (audio.panner) {
+        this.data.position = new THREE.Vector3(
+          audio.panner.positionX.value,
+          audio.panner.positionY.value,
+          audio.panner.positionZ.value
+        );
+        this.data.orientation = new THREE.Vector3(
+          audio.panner.orientationX.value,
+          audio.panner.orientationY.value,
+          audio.panner.orientationZ.value
+        );
+        this.updateAttenuation();
+      } else {
+        this.el.object3D.getWorldDirection(this.data.orientation);
+        this.el.object3D.getWorldPosition(this.data.position);
+        this.data.rolloffFactor = 0;
+      }
       this.updateDistances();
-      this.updateAttenuation();
     }
 
     if (this.normalizer !== null) {
@@ -257,7 +269,7 @@ AFRAME.registerComponent("audio-params", {
         case SourceType.MEDIA_VIDEO:
         case SourceType.AVATAR_AUDIO_SOURCE:
         case SourceType.AUDIO_TARGET: {
-          return this.audioRef?.panner ? this.audioRef : null;
+          return this.audioRef;
         }
       }
 

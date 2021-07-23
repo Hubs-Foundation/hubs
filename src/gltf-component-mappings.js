@@ -241,11 +241,11 @@ async function mediaInflator(el, componentName, componentData, components) {
   if (componentName === "video" || componentName === "audio") {
     mediaOptions.videoPaused = !componentData.autoPlay;
     mediaOptions.loop = componentData.loop;
-    mediaOptions.audioType = componentData.audioType;
     mediaOptions.hidePlaybackControls = !isControlled;
 
-    if (componentData.audioType && componentData.audioType === "pannernode") {
+    if (componentData.audioType) {
       el.setAttribute("audio-params", {
+        audioType: componentData.audioType,
         sourceType: SourceType.MEDIA_VIDEO,
         distanceModel: componentData.distanceModel,
         rolloffFactor: componentData.rolloffFactor,
