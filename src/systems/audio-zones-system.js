@@ -11,21 +11,13 @@ function paramsReducer(acc, curr) {
   return acc;
 }
 
-function addZone(entity, zone) {
-  entity.currZones.add(zone);
-}
-
-function removeZone(entity, zone) {
-  entity.currZones.delete(zone);
-}
-
-function addOrRemoveZone(position, entity, zone) {
+function addOrRemoveZone(position, currZones, zone) {
   const isInZone = zone.isEnabled() && zone.contains(position);
-  const wasInZone = entity.currZones.has(zone);
+  const wasInZone = currZones.has(zone);
   if (isInZone && !wasInZone) {
-    addZone(entity, zone);
+    currZones.add(zone);
   } else if (!isInZone && wasInZone) {
-    removeZone(entity, zone);
+    currZones.delete(zone);
   }
 }
 
@@ -36,8 +28,8 @@ function any(set, predicate) {
   return false;
 }
 
-function isUpdated(entity) {
-  return entity.currZones.size !== entity.prevZones.size || any(entity.currZones, zone => !entity.prevZones.has(zone));
+function isUpdated(currZones, prevZones) {
+  return currZones.size !== prevZones.size || any(currZones, zone => !prevZones.has(zone));
 }
 
 const castRay = (function() {
@@ -68,7 +60,7 @@ const updateSource = (function() {
     // First we check the zones the source is contained in and we check the inOut property
     // to modify the sources audio params when the listener is outside the source's zones
     // We always apply the outmost active zone audio params, the zone that's closest to the listener
-    const inOutParams = sourceZones.currZones
+    const inOutParams = sourceZones
       .filter(zone => zone.data.inOut)
       .filter(exclude(listenerZones))
       .filter(hasIntersection(ray))
@@ -80,7 +72,7 @@ const updateSource = (function() {
     // We always apply the inmost active zone audio params, the zone that's closest to the listener
     const outInParams = listenerZones
       .filter(zone => zone.data.outIn)
-      .filter(exclude(sourceZones.currZones))
+      .filter(exclude(sourceZones))
       .filter(hasIntersection(ray))
       .map(zone => zone.getAudioParams())
       .reduce(paramsReducer, null);
@@ -116,7 +108,8 @@ export class AudioZonesSystem {
     this.sources = [];
     this.zones = [];
     this.entities = [];
-    this.entityZones = new Map();
+    this.currZones = new Map();
+    this.prevZones = new Map();
   }
 
   registerSource(source) {
@@ -134,39 +127,46 @@ export class AudioZonesSystem {
   }
   registerEntity(entity) {
     this.entities.push(entity);
-    this.entityZones.set(entity, { currZones: new Set(), prevZones: new Set() });
+    this.currZones.set(entity, new Set());
+    this.prevZones.set(entity, new Set());
   }
   unregisterEntity(entity) {
     this.entities.splice(this.entities.indexOf(entity), 1);
-    this.entityZones.delete(entity);
+    this.currZones.delete(entity);
+    this.prevZones.delete(entity);
   }
 
   tick = (function() {
     const listenerPosition = new THREE.Vector3();
     return function(scene) {
       if (!scene.is("entered")) return;
-      const listenerZones = this.entityZones.get(this.listenerEntity);
+      const currListenerZones = this.currZones.get(this.listenerEntity);
+      const prevListenerZones = this.prevZones.get(this.listenerEntity);
       this.listener.getWorldPosition(listenerPosition);
       this.zones.forEach(zone => {
-        addOrRemoveZone(listenerPosition, listenerZones, zone);
+        addOrRemoveZone(listenerPosition, currListenerZones, zone);
         this.sources.forEach(source => {
-          const sourceZones = this.entityZones.get(source.entity);
-          addOrRemoveZone(source.getPosition(), sourceZones, zone);
+          const currSourceZones = this.currZones.get(source.entity);
+          addOrRemoveZone(source.getPosition(), currSourceZones, zone);
         });
       });
 
       this.sources
         .filter(source => {
-          const sourceZones = this.entityZones.get(source.entity);
-          return isUpdated(listenerZones) || isUpdated(sourceZones);
+          const currSourceZones = this.currZones.get(source.entity);
+          const prevSourceZones = this.prevZones.get(source.entity);
+          return isUpdated(currListenerZones, prevListenerZones) || isUpdated(currSourceZones, prevSourceZones);
         })
         .forEach(source => {
-          const sourceZones = this.entityZones.get(source.entity);
-          updateSource(source, source.getPosition(), sourceZones, listenerPosition, listenerZones.currZones);
+          const currSourceZones = this.currZones.get(source.entity);
+          updateSource(source, source.getPosition(), currSourceZones, listenerPosition, currListenerZones);
         });
-      this.entityZones.forEach(entity => {
-        entity.prevZones.clear();
-        entity.currZones.forEach(zone => entity.prevZones.add(zone));
+
+      this.entities.forEach(entity => {
+        const currZones = this.currZones.get(entity);
+        const prevZones = this.prevZones.get(entity);
+        prevZones.clear();
+        currZones.forEach(zone => prevZones.add(zone));
       });
     };
   })();
