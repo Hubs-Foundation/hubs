@@ -257,17 +257,6 @@ AFRAME.registerComponent("audio-target", {
 
   init() {
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
-    this.el.setAttribute("audio-params", {
-      sourceType: SourceType.AUDIO_TARGET,
-      distanceModel: TargetAudioDefaults.DISTANCE_MODEL,
-      rolloffFactor: TargetAudioDefaults.ROLLOFF_FACTOR,
-      refDistance: TargetAudioDefaults.REF_DISTANCE,
-      maxDistance: TargetAudioDefaults.MAX_DISTANCE,
-      coneInnerAngle: TargetAudioDefaults.INNER_ANGLE,
-      coneOuterAngle: TargetAudioDefaults.OUTER_ANGLE,
-      coneOuterGain: TargetAudioDefaults.OUTER_GAIN,
-      gain: TargetAudioDefaults.VOLUME
-    });
     this.createAudio();
     // TODO this is to ensure targets and sources loaded at the same time don't have
     // an order depndancy but this should be done in a more robust way

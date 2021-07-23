@@ -470,7 +470,26 @@ AFRAME.GLTFModelPlus.registerComponent(
       }
     }
 
-    el.setAttribute(componentName, { ...componentData, srcEl });
+    // Migrate audio-target component that still has builting audio params
+    if (componentData.positional !== undefined) {
+      el.setAttribute("audio-params", {
+        sourceType: SourceType.AUDIO_TARGET,
+        distanceModel: componentData.distanceModel,
+        rolloffFactor: componentData.rolloffFactor,
+        refDistance: componentData.refDistance,
+        maxDistance: componentData.maxDistance,
+        coneInnerAngle: componentData.coneInnerAngle,
+        coneOuterAngle: componentData.coneOuterAngle,
+        coneOuterGain: componentData.coneOuterGain,
+        gain: componentData.gain
+      });
+    }
+    el.setAttribute(componentName, {
+      minDelay: componentData.minDelay,
+      maxDelay: componentData.maxDelay,
+      debug: componentData.debug,
+      srcEl
+    });
   }
 );
 AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
