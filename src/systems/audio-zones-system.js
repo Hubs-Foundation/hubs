@@ -21,7 +21,7 @@ function removeZone(entity, zone) {
 
 function addOrRemoveZone(position, entity, zone) {
   const isInZone = zone.isEnabled() && zone.contains(position);
-  const wasInZone = entity.isInZone(zone);
+  const wasInZone = entity.currZones.has(zone);
   if (isInZone && !wasInZone) {
     addZone(entity, zone);
   } else if (!isInZone && wasInZone) {
