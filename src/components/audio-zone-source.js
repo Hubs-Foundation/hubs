@@ -10,7 +10,7 @@ AFRAME.registerComponent("audio-zone-source", {
   dependencies: ["audio-zone-entity"],
 
   init() {
-    this.prevAudioParamsData = null;
+    this.originalAudioParamsData = null;
     this.audioParamsComp = this.el.components["audio-params"];
     this.entity = this.el.components["audio-zone-entity"];
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerSource(this);
@@ -27,8 +27,8 @@ AFRAME.registerComponent("audio-zone-source", {
 
   // Updates the audio-params component with new audio parameters.
   apply(params) {
-    if (this.prevAudioParamsData === null) {
-      this.prevAudioParamsData = {
+    if (!this.originalAudioParamsData) {
+      this.originalAudioParamsData = {
         distanceModel: this.audioParamsComp.data.distanceModel,
         maxDistance: this.audioParamsComp.data.maxDistance,
         refDistance: this.audioParamsComp.data.refDistance,
@@ -42,11 +42,9 @@ AFRAME.registerComponent("audio-zone-source", {
     this.el.setAttribute("audio-params", params);
   },
 
-  // Restores the original audio parameters.
   restore() {
-    if (this.prevAudioParamsData) {
-      this.el.setAttribute("audio-params", this.prevAudioParamsData);
+    if (this.originalAudioParamsData) {
+      this.el.setAttribute("audio-params", this.originalAudioParamsData);
     }
-    this.prevAudioParamsData = null;
   }
 });
