@@ -5,6 +5,7 @@ const zero = new THREE.Vector3(0, 0, 0);
 AFRAME.registerComponent("audio-zone-source", {
   init() {
     this.originalAudioParamsData = null;
+    this.isModified = false;
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerSource(this);
   },
 
@@ -31,11 +32,13 @@ AFRAME.registerComponent("audio-zone-source", {
       };
     }
     this.el.setAttribute("audio-params", params);
+    this.isModified = true;
   },
 
   restore() {
-    if (this.originalAudioParamsData) {
+    if (this.isModified && this.originalAudioParamsData) {
       this.el.setAttribute("audio-params", this.originalAudioParamsData);
+      this.isModified = false;
     }
   }
 });
