@@ -29,10 +29,6 @@ AFRAME.registerComponent("audio-zone-entity", {
     return this.currZones.has(zone);
   },
 
-  wasInZone(zone) {
-    return this.prevZones.has(zone);
-  },
-
   isUpdated() {
     return this.currZones.size !== this.prevZones.size || any(this.currZones, zone => !this.prevZones.has(zone));
   }
