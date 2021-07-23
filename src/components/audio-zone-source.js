@@ -19,12 +19,10 @@ AFRAME.registerComponent("audio-zone-source", {
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterSource(this);
   },
 
-  // Returns the audio source world position.
   getPosition() {
     return this.el.components["audio-params"].data.position || zero;
   },
 
-  // Updates the audio-params component with new audio parameters.
   apply(params) {
     if (!this.originalAudioParamsData) {
       const data = this.el.components["audio-params"].data;
