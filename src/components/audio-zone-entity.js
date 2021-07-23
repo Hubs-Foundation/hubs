@@ -13,16 +13,13 @@ AFRAME.registerComponent("audio-zone-entity", {
   init() {
     this.currZones = new Set();
     this.prevZones = new Set();
+    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerEntity(this);
   },
 
   remove() {
     this.currZones.clear();
     this.prevZones.clear();
-  },
-
-  tock() {
-    this.prevZones.clear();
-    this.currZones.forEach(zone => this.prevZones.add(zone));
+    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterEntity(this);
   },
 
   isUpdated() {

@@ -113,6 +113,7 @@ export class AudioZonesSystem {
     this.listenerEntity = null;
     this.sources = [];
     this.zones = [];
+    this.entities = [];
   }
 
   registerSource(source) {
@@ -128,6 +129,12 @@ export class AudioZonesSystem {
     // TODO: Remove this zone from all the entities (sources and listenerEntity)
     this.zones.splice(this.zones.indexOf(zone), 1);
   }
+  registerEntity(entity) {
+    this.entities.push(entity);
+  }
+  unregisterEntity(entity) {
+    this.entities.splice(this.entities.indexOf(entity), 1);
+  }
 
   tick = (function() {
     const listenerPosition = new THREE.Vector3();
@@ -138,6 +145,10 @@ export class AudioZonesSystem {
       this.sources
         .filter(source => source.entity.isUpdated() || this.listenerEntity.isUpdated())
         .forEach(source => updateSource(source, listenerPosition, this.listenerEntity.currZones));
+      this.entities.forEach(entity => {
+        entity.prevZones.clear();
+        entity.currZones.forEach(zone => entity.prevZones.add(zone));
+      });
     };
   })();
 }
