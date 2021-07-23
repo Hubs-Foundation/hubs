@@ -58,8 +58,7 @@ const updateSource = (function() {
     // First we check the zones the source is contained in and we check the inOut property
     // to modify the sources audio params when the listener is outside the source's zones
     // We always apply the outmost active zone audio params, the zone that's closest to the listener
-    const inOutParams = source.entity
-      .getZones()
+    const inOutParams = source.entity.zones
       .filter(zone => zone.data.inOut)
       .filter(exclude(listenerZones))
       .filter(hasIntersection(ray))
@@ -71,7 +70,7 @@ const updateSource = (function() {
     // We always apply the inmost active zone audio params, the zone that's closest to the listener
     const outInParams = listenerZones
       .filter(zone => zone.data.outIn)
-      .filter(exclude(source.entity.getZones()))
+      .filter(exclude(source.entity.zones))
       .filter(hasIntersection(ray))
       .map(zone => zone.getAudioParams())
       .reduce(paramsReducer, null);
@@ -130,7 +129,7 @@ export class AudioZonesSystem {
       updateZones(this.sources, listenerPosition, this.listenerEntity, this.zones);
       this.sources
         .filter(source => source.entity.isUpdated() || this.listenerEntity.isUpdated())
-        .forEach(source => updateSource(source, listenerPosition, this.listenerEntity.getZones()));
+        .forEach(source => updateSource(source, listenerPosition, this.listenerEntity.zones));
     };
   })();
 }

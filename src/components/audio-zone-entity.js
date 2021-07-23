@@ -53,10 +53,5 @@ AFRAME.registerComponent("audio-zone-entity", {
     return !(
       this.zones.length === this.prevZones.length && this.zones.every((value, index) => value === this.prevZones[index])
     );
-  },
-
-  // Return the array of zones the entity is currently inside of.
-  getZones() {
-    return this.zones;
   }
 });
