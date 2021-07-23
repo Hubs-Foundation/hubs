@@ -119,17 +119,17 @@ export class AudioZonesSystem {
           .map(zone => zone.getAudioParams())
           .reduce(paramsReducer, null);
 
-        // Resolve the zones
-        if (outInParams || inOutParams) {
-          const params = outInParams ? outInParams : inOutParams;
-          params.gain = outInParams && inOutParams ? Math.min(outInParams.gain, inOutParams.gain) : params.gain;
-          params.coneOuterGain =
-            outInParams && inOutParams
-              ? Math.min(outInParams.coneOuterGain, inOutParams.coneOuterGain)
-              : params.coneOuterGain;
-          source.apply(params);
-        } else {
+        if (!outInParams && !inOutParams) {
           source.restore();
+        } else if (outInParams && !inOutParams) {
+          source.apply(outInParams);
+        } else if (!outInParams && inOutParams) {
+          source.apply(inOutParams);
+        } else {
+          const params = outInParams;
+          params.gain = Math.min(outInParams.gain, inOutParams.gain);
+          params.coneOuterAngle = Math.min(outInParams.coneOuterAngle, inOutParams.coneOuterAngle);
+          source.apply(params);
         }
       });
     };
