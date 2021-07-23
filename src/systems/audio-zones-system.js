@@ -114,8 +114,10 @@ export class AudioZonesSystem {
     this.zones.push(zone);
   }
   unregisterZone(zone) {
-    // TODO: Remove this zone from all the entities (sources and listenerEntity)
     this.zones.splice(this.zones.indexOf(zone), 1);
+    this.entities.forEach(entity => {
+      this.currZones.get(entity).delete(zone);
+    });
   }
   registerSource(source) {
     this.sources.push(source);
