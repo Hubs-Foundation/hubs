@@ -104,11 +104,11 @@ const updateSource = (function() {
 export class AudioZonesSystem {
   constructor() {
     this.zones = [];
-    this.listener = null;
     this.sources = [];
     this.entities = [];
     this.currZones = new Map();
     this.prevZones = new Map();
+    this.didRegisterAudioListener = false;
   }
   registerZone(zone) {
     this.zones.push(zone);
@@ -140,20 +140,22 @@ export class AudioZonesSystem {
     const listenerPosition = new THREE.Vector3();
     return function(scene) {
       if (!scene.is("entered")) return;
-      if (!this.listener) {
-        this.listener = scene.audioListener;
-        this.registerEntity(this.listener);
+
+      if (!this.didRegisterAudioListener) {
+        this.didRegisterAudioListener = true;
+        this.registerEntity(scene.audioListener);
       }
 
-      const currListenerZones = this.currZones.get(this.listener);
-      this.listener.getWorldPosition(listenerPosition);
+      const currListenerZones = this.currZones.get(scene.audioListener);
+      scene.audioListener.getWorldPosition(listenerPosition);
       this.zones.forEach(zone => {
         addOrRemoveZone(currListenerZones, zone, listenerPosition);
         this.sources.forEach(source => {
           addOrRemoveZone(this.currZones.get(source), zone, source.getPosition());
         });
       });
-      const prevListenerZones = this.prevZones.get(this.listener);
+
+      const prevListenerZones = this.prevZones.get(scene.audioListener);
       const isListenerUpdated = isUpdated(currListenerZones, prevListenerZones);
       this.sources
         .filter(source => {
