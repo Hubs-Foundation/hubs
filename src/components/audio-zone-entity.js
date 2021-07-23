@@ -29,22 +29,18 @@ AFRAME.registerComponent("audio-zone-entity", {
     this.zones.add(zone);
   },
 
-  // Removes a zone from the current zones array.
   removeZone(zone) {
     this.zones.delete(zone);
   },
 
-  // Returns true if this entity is inside a zone.
   isInZone(zone) {
     return this.zones.has(zone);
   },
 
-  // Returns true if this entity was inside the zone in the previous tick.
   wasInZone(zone) {
     return this.prevZones.has(zone);
   },
 
-  // Returns true if the entity has change zones (a zone has been added or removes in the last tick).
   isUpdated() {
     return this.zones.size !== this.prevZones.size || any(this.zones, zone => !this.prevZones.has(zone));
   }
