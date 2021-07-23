@@ -20,9 +20,5 @@ AFRAME.registerComponent("audio-zone-entity", {
     this.currZones.clear();
     this.prevZones.clear();
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterEntity(this);
-  },
-
-  isUpdated() {
-    return this.currZones.size !== this.prevZones.size || any(this.currZones, zone => !this.prevZones.has(zone));
   }
 });

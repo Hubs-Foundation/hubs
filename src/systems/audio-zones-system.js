@@ -38,6 +38,17 @@ function updateZones(sources, listenerPosition, listenerEntity, zones) {
   });
 }
 
+function any(set, predicate) {
+  for (const item of set) {
+    if (predicate(item)) return true;
+  }
+  return false;
+}
+
+function isUpdated(entity) {
+  return entity.currZones.size !== entity.prevZones.size || any(entity.currZones, zone => !entity.prevZones.has(zone));
+}
+
 const castRay = (function() {
   const direction = new THREE.Vector3();
   return function castRay(ray, from, to) {
@@ -143,7 +154,7 @@ export class AudioZonesSystem {
       this.listener.getWorldPosition(listenerPosition);
       updateZones(this.sources, listenerPosition, this.listenerEntity, this.zones);
       this.sources
-        .filter(source => source.entity.isUpdated() || this.listenerEntity.isUpdated())
+        .filter(source => isUpdated(source.entity) || isUpdated(this.listenerEntity))
         .forEach(source => updateSource(source, listenerPosition, this.listenerEntity.currZones));
       this.entities.forEach(entity => {
         entity.prevZones.clear();
