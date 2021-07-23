@@ -92,11 +92,11 @@ const updateSource = (function() {
   };
 })();
 /**
- * This system updates the audio-zone-sources audio-params based on the audio-zone-listener position.
- * On every tick it computes the audio-zone-source and audio-zone-listener positions to check
- * if the listener is inside/outside an audio-zone and applies the zone's audio parameters based.
- * It only updates in case there has been any changes in the sources or listener's positions.
- * If several audio-zones are in between the audio-zone-listener and the audio-zone-source, the applied
+ * This system updates audio-zone-sources audio-params based on the audioListener position.
+ * On every tick it computes the audio-zone-source and audioListeners positions to check
+ * if the listener is inside/outside an audio-zone and applies the zone's audio parameters.
+ * It only updates when a source or the listener has changed which zones they are in.
+ * If several audio-zones are in between the audioListener and the audio-zone-source, the applied
  * audio parameters is a reduction of the audio-zones most restrictive audio parameters.
  * i.e. If there are two audio-zones in between the listener and the source and the first one has gain == 0.1
  * and the other has gain == 1.0, gain == 0.1 is applied to the source.
@@ -116,14 +116,6 @@ export class AudioZonesSystem {
   unregisterZone(zone) {
     // TODO: Remove this zone from all the entities (sources and listenerEntity)
     this.zones.splice(this.zones.indexOf(zone), 1);
-  }
-  registerListener(listener) {
-    this.listener = listener;
-    this.registerEntity(listener);
-  }
-  clearListener(listener) {
-    this.listener = null;
-    this.unregisterEntity(listener);
   }
   registerSource(source) {
     this.sources.push(source);
@@ -148,6 +140,10 @@ export class AudioZonesSystem {
     const listenerPosition = new THREE.Vector3();
     return function(scene) {
       if (!scene.is("entered")) return;
+      if (!this.listener) {
+        this.listener = scene.audioListener;
+        this.registerEntity(this.listener);
+      }
 
       const currListenerZones = this.currZones.get(this.listener);
       this.listener.getWorldPosition(listenerPosition);
