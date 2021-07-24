@@ -862,6 +862,8 @@ AFRAME.registerComponent("media-video", {
         videoEl.onerror = failLoad;
 
         if (this.data.audioSrc) {
+          videoEl.muted = true;
+
           // If there's an audio src, create an audio element to play it that we keep in sync
           // with the video while this component is active.
           audioEl = createVideoOrAudioEl("audio");
