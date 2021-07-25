@@ -55,6 +55,7 @@ import {
 import { Presence } from "phoenix";
 import { emitter } from "./emitter";
 import "./phoenix-adapter";
+import { Jeejah } from "./jeejah";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
@@ -998,6 +999,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.addEventListener("beforeunload", () => (isReloading = true));
 
   const socket = await connectToReticulum(isDebug);
+  APP.jeejah = new Jeejah({ socket, roomId: "foo" });
+  document.dispatchEvent(new Event("jeejah")); // TODO: cleanup
 
   socket.onClose(e => {
     // We don't currently have an easy way to distinguish between being kicked (server closes socket)

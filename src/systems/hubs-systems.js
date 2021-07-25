@@ -33,6 +33,13 @@ import { EmojiSystem } from "./emoji-system";
 import { AudioZonesSystem } from "./audio-zones-system";
 import { GainSystem } from "./audio-gain-system";
 
+// Test these
+import { networkedEntities, ownedEntities } from "./data";
+import { BoxSystem } from "./box-system";
+import { SphereSystem } from "./sphere-system";
+import { ColorSystem } from "./color-system";
+import "./test-systems";
+
 AFRAME.registerSystem("hubs-systems", {
   init() {
     waitForDOMContentLoaded().then(() => {
@@ -73,10 +80,19 @@ AFRAME.registerSystem("hubs-systems", {
     this.emojiSystem = new EmojiSystem(this.el);
     this.audioZonesSystem = new AudioZonesSystem();
     this.gainSystem = new GainSystem();
+    this.networkedEntitiesSystem = networkedEntities;
+    this.entityOwnershipSystem = ownedEntities;
+
+    this.boxSystem = new BoxSystem();
+    this.sphereSystem = new SphereSystem();
+    this.colorSystem = new ColorSystem();
   },
 
   tick(t, dt) {
     if (!this.DOMContentDidLoad) return;
+    this.networkedEntitiesSystem.tick();
+    this.entityOwnershipSystem.tick();
+
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
     systems.interaction.tick2();
@@ -122,6 +138,10 @@ AFRAME.registerSystem("hubs-systems", {
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();
+
+    this.boxSystem.tick();
+    this.sphereSystem.tick();
+    this.colorSystem.tick();
   },
 
   remove() {
