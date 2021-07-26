@@ -1,3 +1,5 @@
+import { isSafari } from "../utils/detect-safari";
+
 function updateMediaAudioSettings(mediaVideo, settings) {
   mediaVideo.el.setAttribute("media-video", {
     distanceModel: settings.mediaDistanceModel,
@@ -43,7 +45,9 @@ export class AudioSettingsSystem {
 
     this.sceneEl.addEventListener("reset_scene", this.onSceneReset);
 
-    if (window.APP.store.state.preferences.audioOutputMode === "audio") {
+    // Do not force panner audio in Safari as a temporary fix for distorted audio.
+    // See https://github.com/mozilla/hubs/issues/4411
+    if (!isSafari() && window.APP.store.state.preferences.audioOutputMode === "audio") {
       //hack to always reset to "panner"
       window.APP.store.update({
         preferences: { audioOutputMode: "panner" }

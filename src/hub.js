@@ -25,7 +25,7 @@ import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
-import { detectOS, detect } from "detect-browser";
+import { isSafari } from "./utils/detect-safari";
 import {
   getReticulumFetchUrl,
   getReticulumMeta,
@@ -687,11 +687,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const detectedOS = detectOS(navigator.userAgent);
-  const browser = detect();
   // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
   // safari when initializing it later.
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+  if (isSafari()) {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
