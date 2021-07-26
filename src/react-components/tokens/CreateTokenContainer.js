@@ -1,6 +1,5 @@
-import React, { useReducer, useEffect, useCallback } from "react";
+import React, { useReducer, useEffect } from "react";
 import PropTypes from "prop-types";
-// import { Spinner } from "../misc/Spinner";
 import { CreateToken } from "./CreateToken";
 import { RevealTokenModal } from "./RevealTokenModal";
 import { createToken, fetchAvailableScopes } from "./token-utils";
@@ -113,7 +112,7 @@ function useCreateToken() {
   };
 }
 
-export const CreateTokenContainer = ({ onClose }) => {
+export const CreateTokenContainer = ({ onCreateTokenCreated, onCreateTokenCancelled }) => {
   const {
     scopes,
     selectedScopes,
@@ -141,11 +140,7 @@ export const CreateTokenContainer = ({ onClose }) => {
     <>
       {showRevealTokenModal && (
         <CenteredModalWrapper>
-          <RevealTokenModal
-            token={token}
-            selectedScopes={selectedScopes}
-            onClose={() => onClose({ createdNewToken: true })}
-          />
+          <RevealTokenModal token={token} selectedScopes={selectedScopes} onClose={onCreateTokenCreated} />
         </CenteredModalWrapper>
       )}
       <CreateToken
@@ -157,7 +152,7 @@ export const CreateTokenContainer = ({ onClose }) => {
         toggleSelectedScopes={toggleSelectedScopes}
         toggleTokenType={toggleTokenType}
         error={error}
-        onClose={onClose}
+        onCreateTokenCancelled={onCreateTokenCancelled}
         isPending={isPending}
       />
     </>

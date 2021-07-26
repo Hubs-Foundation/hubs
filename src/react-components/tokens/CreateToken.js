@@ -25,7 +25,7 @@ export const CreateToken = ({
   error,
   showNoScopesSelectedError,
   onCreateToken,
-  onClose,
+  onCreateTokenCancelled,
   isPending
 }) => (
   <div>
@@ -84,11 +84,16 @@ export const CreateToken = ({
       </Column>
       {showNoScopesSelectedError && (
         <Row className={styleUtils.mdMarginY}>
-          <p className={styleUtils.textError}>Please select at least one scope.</p>
+          <p className={styleUtils.textError}>
+            <FormattedMessage
+              id="new-token.warning-at-least-one-scope"
+              defaultMessage="Please select at least one scope."
+            />
+          </p>
         </Row>
       )}
       <Row spaceBetween className={styleUtils.xlMarginBottom}>
-        <Button sm preset="basic" onClick={() => onClose({ createdNewToken: false })}>
+        <Button sm preset="basic" onClick={onCreateTokenCancelled}>
           <FormattedMessage id="new-token.back" defaultMessage="Back" />
         </Button>
         <Button
@@ -112,7 +117,7 @@ CreateToken.propTypes = {
   toggleTokenType: PropTypes.func,
   selectedTokenType: PropTypes.string,
   onCreateToken: PropTypes.func,
-  onClose: PropTypes.func,
+  onCreateTokenCancelled: PropTypes.func,
   isPending: PropTypes.bool
 };
 

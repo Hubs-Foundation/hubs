@@ -10,7 +10,7 @@ import styles from "./Tokens.scss";
 import { SpinWhileTrue } from "../layout/SpinWhileTrue";
 import { Center } from "../layout/Center";
 
-export const TokenList = ({ tokens, onRevokeToken, showCreateToken, error, isFetching }) => {
+export const TokenList = ({ tokens, onRevokeToken, onShowCreateToken, error, isFetching }) => {
   return (
     <div>
       <TokenMenuHeader />
@@ -18,7 +18,7 @@ export const TokenList = ({ tokens, onRevokeToken, showCreateToken, error, isFet
         <h2>
           <FormattedMessage id="empty-token.title2" defaultMessage="Token List" />
         </h2>
-        <Button preset="primary" sm onClick={showCreateToken}>
+        <Button preset="primary" sm onClick={onShowCreateToken}>
           <FormattedMessage id="tokens.button-create-token" defaultMessage="Create token" />
         </Button>
       </Row>
@@ -51,7 +51,7 @@ export const TokenList = ({ tokens, onRevokeToken, showCreateToken, error, isFet
 TokenList.propTypes = {
   tokens: PropTypes.array,
   onRevokeToken: PropTypes.func,
-  showCreateToken: PropTypes.func,
+  onShowCreateToken: PropTypes.func,
   error: PropTypes.string,
   isFetching: PropTypes.bool
 };

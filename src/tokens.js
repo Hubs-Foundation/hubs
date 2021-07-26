@@ -22,7 +22,7 @@ function Root() {
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
         <AuthContextProvider store={store}>
-          <TokenPageLayout>{(true || configs.feature("public_api_access")) && <TokensContainer />}</TokenPageLayout>
+          <TokenPageLayout>{configs.feature("public_api_access") && <TokensContainer />}</TokenPageLayout>
         </AuthContextProvider>
       </ThemeProvider>
     </WrappedIntlProvider>

@@ -31,9 +31,13 @@ h2 {
 }
 
 :local(.center-padding-sides) {
-  width: 80%;
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
+
+  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
 }
 
 :local(.revoke-description) {

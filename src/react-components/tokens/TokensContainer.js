@@ -14,33 +14,34 @@ export function TokensContainer() {
   const [showRevokeTokenModal, setShowRevokeTokenModal] = useState(false);
   const [selectedRevokeId, setSelectedRevokeId] = useState();
 
-  const auth = useContext(AuthContext); // Re-render when you log in/out.
+  const auth = useContext(AuthContext);
 
   const fetchTokens = async () => {
     try {
       setIsFetching(true);
       setTokens(await fetchMyTokens());
-      setIsFetching(false);
     } catch (err) {
       setError("Error fetching tokens: " + err.message);
-      setIsFetching(false);
       return null;
+    } finally {
+      setIsFetching(false);
     }
   };
 
   useEffect(
     () => {
-      async function updateTokens() {
-        await fetchTokens();
-      }
-      if (auth?.isAdmin) updateTokens();
+      if (auth?.isAdmin) fetchTokens();
     },
     [auth.isAdmin]
   );
 
-  const onCreateTokenClose = async ({ createdNewToken }) => {
+  const onCreateTokenCreated = async () => {
     setShowCreateToken(false);
-    if (createdNewToken) await fetchTokens();
+    await fetchTokens();
+  };
+
+  const onCreateTokenCancelled = () => {
+    setShowCreateToken(false);
   };
 
   const onRevokeToken = ({ revokeId }) => {
@@ -59,14 +60,17 @@ export function TokensContainer() {
       {showRevokeTokenModal && <RevokeTokenContainer tokenId={selectedRevokeId} onClose={onRevokeTokenClose} />}
       {auth?.isAdmin ? (
         showCreateToken ? (
-          <CreateTokenContainer onClose={onCreateTokenClose} />
+          <CreateTokenContainer
+            onCreateTokenCancelled={onCreateTokenCancelled}
+            onCreateTokenCreated={onCreateTokenCreated}
+          />
         ) : (
           <TokenList
             error={error}
             isFetching={isFetching}
             tokens={tokens}
             onRevokeToken={onRevokeToken}
-            showCreateToken={() => {
+            onShowCreateToken={() => {
               setShowCreateToken(true);
             }}
           />
