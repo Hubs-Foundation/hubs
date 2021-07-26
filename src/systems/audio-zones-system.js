@@ -41,7 +41,7 @@ const setRay = (function() {
 
 function exclude(zones) {
   return zone => {
-    return !zones.includes(zone);
+    return !zones.has(zone);
   };
 }
 
@@ -58,7 +58,7 @@ const updateSource = (function() {
     setRay(ray, listenerPosition, sourcePosition);
 
     // TODO: Reimplement the desired sorting of zones
-    const inOutParams = sourceZones
+    const inOutParams = Array.from(sourceZones)
       .filter(zone => zone.data.inOut)
       .filter(exclude(listenerZones))
       .filter(hasIntersection(ray))
@@ -66,7 +66,7 @@ const updateSource = (function() {
       .reduce(paramsReducer, null);
 
     // TODO: Reimplement the desired sorting of zones
-    const outInParams = listenerZones
+    const outInParams = Array.from(listenerZones)
       .filter(zone => zone.data.outIn)
       .filter(exclude(sourceZones))
       .filter(hasIntersection(ray))
