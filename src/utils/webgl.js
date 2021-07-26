@@ -34,3 +34,8 @@ export function patchWebGLRenderingContext() {
     };
   }
 }
+
+export function getWebGLVersion(renderer) {
+  const gl = renderer.getContext("webgl") || renderer.getContext("experimental-webgl");
+  return gl.getParameter(gl.VERSION).split(" ")[1];
+}

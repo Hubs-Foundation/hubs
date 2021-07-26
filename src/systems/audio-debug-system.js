@@ -2,6 +2,7 @@ import { THREE } from "aframe";
 import audioDebugVert from "./audio-debug.vert";
 import audioDebugFrag from "./audio-debug.frag";
 import { DistanceModelType } from "../components/audio-params";
+import { getWebGLVersion } from "../utils/webgl";
 
 const MAX_DEBUG_SOURCES = 64;
 
@@ -11,6 +12,12 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   init() {
+    this.unsupported = false;
+    const webGLVersion = getWebGLVersion(this.el.sceneEl.renderer);
+    if (webGLVersion < "2.0") {
+      this.unsupported = true;
+    }
+
     window.APP.store.addEventListener("statechanged", this.updateState.bind(this));
 
     this.onSceneLoaded = this.onSceneLoaded.bind(this);
@@ -143,7 +150,7 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   enableDebugMode(enabled, force = false) {
-    if ((enabled === undefined || enabled === this.data.enabled) && !force) return;
+    if (((enabled === undefined || enabled === this.data.enabled) && !force) ||   this.unsupported) return;
     this.zones.forEach(zone => {
       zone.el.setAttribute("audio-zone", "debuggable", enabled);
     });
