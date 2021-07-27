@@ -738,7 +738,7 @@ export class DialogAdapter extends EventEmitter {
     await this.createSendTransport(iceServers);
     await this.createRecvTransport(iceServers);
 
-    const { peers } = await this._protoo.request("join", {
+    await this._protoo.request("join", {
       displayName: this._clientId,
       device: this._device,
       rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
