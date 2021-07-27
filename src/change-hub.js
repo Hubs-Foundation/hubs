@@ -110,7 +110,7 @@ export async function changeHub(hubId, addToHistory = true) {
 window.changeHub = changeHub;
 
 // TODO see if there is a better way to do this with react router
-window.addEventListener("popstate", function(e) {
+window.addEventListener("popstate", function() {
   if (!APP.store.state.preferences.fastRoomSwitching) return;
   const qs = new URLSearchParams(location.search);
   const newHubId = qs.get("hub_id") || document.location.pathname.substring(1).split("/")[0];
