@@ -130,7 +130,7 @@ export default class MediaDevicesManager {
     }
 
     await NAF.connection.adapter.setLocalMediaStream(this._mediaStream);
-    NAF.connection.adapter.enableMicrophone(this._scene.is("muted"));
+    NAF.connection.adapter.enableMicrophone(!this._scene.is("muted"));
 
     return result;
   }
