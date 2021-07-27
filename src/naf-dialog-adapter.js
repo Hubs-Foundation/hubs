@@ -49,8 +49,6 @@ export class DialogAdapter extends EventEmitter {
     this._localMediaStream = null;
     this._consumers = new Map();
     this._pendingMediaRequests = new Map();
-    this._initialAudioConsumerPromise = null;
-    this._initialAudioConsumerResolvers = new Map();
     this._blockedClients = new Map();
     this._forceTcp = false;
     this._forceTurn = false;
@@ -335,15 +333,6 @@ export class DialogAdapter extends EventEmitter {
 
             this.resolvePendingMediaRequestForTrack(peerId, consumer.track);
 
-            if (kind === "audio") {
-              const initialAudioResolver = this._initialAudioConsumerResolvers.get(peerId);
-
-              if (initialAudioResolver) {
-                initialAudioResolver();
-                this._initialAudioConsumerResolvers.delete(peerId);
-              }
-            }
-
             // Notify of an stream update event
             this.emit("stream_updated", peerId, kind);
           } catch (err) {
@@ -444,7 +433,7 @@ export class DialogAdapter extends EventEmitter {
       }
     });
 
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this._protoo.on("open", async () => {
         this.emitRTCEvent("info", "Signaling", () => `Open`);
 
@@ -457,8 +446,6 @@ export class DialogAdapter extends EventEmitter {
         }
       });
     });
-
-    await Promise.all([this._initialAudioConsumerPromise]);
   }
 
   async _retryConnectWithNewHost() {
@@ -502,15 +489,6 @@ export class DialogAdapter extends EventEmitter {
       }
 
       this._pendingMediaRequests.delete(peerId);
-    }
-
-    // Resolve initial audio resolver since this person left.
-    const initialAudioResolver = this._initialAudioConsumerResolvers.get(peerId);
-
-    if (initialAudioResolver) {
-      initialAudioResolver();
-
-      this._initialAudioConsumerResolvers.delete(peerId);
     }
   }
 
@@ -772,18 +750,6 @@ export class DialogAdapter extends EventEmitter {
       // TODO: Refactor to be "Create producers"
       await this.setLocalMediaStream(this._localMediaStream);
     }
-
-    const audioConsumerPromises = [];
-
-    // Create a promise that will be resolved once we attach to all the initial consumers.
-    // This will gate the connection flow until all voices will be heard.
-    for (let i = 0; i < peers.length; i++) {
-      const peerId = peers[i].id;
-      if (!peers[i].hasProducers) continue;
-      audioConsumerPromises.push(new Promise(res => this._initialAudioConsumerResolvers.set(peerId, res)));
-    }
-
-    this._initialAudioConsumerPromise = Promise.all(audioConsumerPromises);
   }
 
   async setLocalMediaStream(stream) {
