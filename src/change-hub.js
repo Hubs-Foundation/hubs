@@ -26,6 +26,10 @@ function loadRoomObjects(hubId) {
 }
 
 export async function changeHub(hubId, addToHistory = true) {
+  if (hubId === APP.hub.hub_id) {
+    console.log("Change hub called with the current hub id. This is a noop.");
+    return;
+  }
   // Suppress on-screen join and leave messages until we receive a sync.
   APP.hideHubPresenceEvents = true;
   const scene = AFRAME.scenes[0];
