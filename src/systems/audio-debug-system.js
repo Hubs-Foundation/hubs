@@ -150,7 +150,7 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   enableDebugMode(enabled, force = false) {
-    if (((enabled === undefined || enabled === this.data.enabled) && !force) ||   this.unsupported) return;
+    if (((enabled === undefined || enabled === this.data.enabled) && !force) || this.unsupported) return;
     this.zones.forEach(zone => {
       zone.el.setAttribute("audio-zone", "debuggable", enabled);
     });
