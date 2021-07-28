@@ -270,7 +270,7 @@ module.exports = async (env, argv) => {
       signin: path.join(__dirname, "src", "signin.js"),
       verify: path.join(__dirname, "src", "verify.js"),
       tokens: path.join(__dirname, "src", "tokens.js"),
-      "whats-new": path.join(__dirname, "src", "whats-new.js")
+      "whats-new": path.join(__dirname, "src", "whats-new.js"),
       "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
     },
     output: {

@@ -19,7 +19,6 @@ import { detect } from "detect-browser";
 import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
-import { MediaAudioDefaults } from "../systems/audio-settings-system";
 import { MixerType } from "../systems/audio-system";
 
 import qsTruthy from "../utils/qs_truthy";

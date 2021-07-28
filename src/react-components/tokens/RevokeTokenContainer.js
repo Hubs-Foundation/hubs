@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Spinner } from "../misc/Spinner";
 import { CenteredModalWrapper } from "../layout/CenteredModalWrapper";
 import { RevokeTokenModal } from "./RevokeTokenModal";
 import { revokeToken } from "./token-utils";
