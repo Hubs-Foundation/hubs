@@ -33,7 +33,7 @@ h2 {
 :local(.center-padding-sides) {
   width: 100%;
 
-  @media(min-width: theme.$breakpoint-md) and (min-height: theme.$breakpoint-vr) {
+  @media(min-width: theme.$breakpoint-md) {
     width: 80%;
     max-width: 800px;
     margin: 0 auto;
