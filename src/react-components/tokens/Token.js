@@ -25,6 +25,12 @@ export function Token({ tokenInfo, onRevokeToken }) {
   const { account_id, inserted_at, scopes, subject_type } = tokenInfo;
   const intl = useIntl();
   const { type = null } = tokenTypes[subject_type];
+  if (type === null) {
+    console.warn(
+      "WARNING: Token type translation was undefined. Meaning the frontend is missing the token type translation for: " +
+        subject_type
+    );
+  }
 
   return (
     <div className={styles.borderGrey}>
