@@ -271,6 +271,7 @@ module.exports = async (env, argv) => {
       verify: path.join(__dirname, "src", "verify.js"),
       tokens: path.join(__dirname, "src", "tokens.js"),
       "whats-new": path.join(__dirname, "src", "whats-new.js")
+      "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
@@ -525,7 +526,7 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["support", "hub"],
+        chunks: ["webxr-polyfill", "support", "hub"],
         chunksSortMode: "manual",
         inject: "head",
         minify: {

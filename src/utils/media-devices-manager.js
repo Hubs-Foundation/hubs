@@ -129,7 +129,8 @@ export default class MediaDevicesManager {
       console.log("No available audio tracks");
     }
 
-    NAF.connection.adapter.enableMicrophone(true);
+    await NAF.connection.adapter.setLocalMediaStream(this._mediaStream);
+    NAF.connection.adapter.enableMicrophone(!this._scene.is("muted"));
 
     return result;
   }
@@ -208,10 +209,8 @@ export default class MediaDevicesManager {
     this.audioTrack?.stop();
     this.audioTrack = null;
 
-    this._scene.emit("action_mute");
-
-    NAF.connection.adapter.enableMicrophone(false);
     await NAF.connection.adapter.setLocalMediaStream(this._mediaStream);
+    NAF.connection.adapter.enableMicrophone(false);
   }
 
   async startVideoShare(constraints, isDisplayMedia, target, success, error) {

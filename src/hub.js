@@ -1,5 +1,4 @@
 import "./utils/debug-log";
-import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
@@ -13,17 +12,29 @@ import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
+
+// A-Frame hardcodes THREE.Cache.enabled = true
+// But we don't want to use THREE.Cache because
+// web browser cache should work well.
+// So we disable it here.
+THREE.Cache.enabled = false;
+
 import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "three/examples/js/loaders/GLTFLoader";
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/loaders/GLTFLoader");
+
 import "networked-aframe/src/index";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
+import "./utils/threejs-raycast-patches";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {
@@ -38,6 +49,7 @@ import { addAnimationComponents } from "./utils/animation";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
 import Cookies from "js-cookie";
 import "./naf-dialog-adapter";
+import "./change-hub";
 
 import "./components/scene-components";
 import "./components/scale-in-screen-space";
@@ -118,6 +130,7 @@ import "./components/optional-alternative-to-not-hide";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
+import "./components/audio-params";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -160,6 +173,8 @@ import "./systems/capture-system";
 import "./systems/listed-media";
 import "./systems/linked-media";
 import { SOUND_CHAT_MESSAGE } from "./systems/sound-effects-system";
+import "./systems/audio-debug-system";
+import "./systems/audio-gain-system";
 
 import "./gltf-component-mappings";
 
@@ -328,7 +343,7 @@ function mountUI(props = {}) {
   );
 }
 
-function remountUI(props) {
+export function remountUI(props) {
   uiProps = { ...uiProps, ...props };
   mountUI(uiProps);
 }
@@ -339,18 +354,9 @@ function setupPeerConnectionConfig(adapter) {
   adapter.setTurnConfig(forceTcp, forceTurn);
 }
 
-async function updateEnvironmentForHub(hub, entryManager) {
+export async function getSceneUrlForHub(hub) {
   let sceneUrl;
   let isLegacyBundle; // Deprecated
-
-  const sceneErrorHandler = () => {
-    remountUI({ roomUnavailableReason: ExitReason.sceneError });
-    entryManager.exitScene();
-  };
-
-  const environmentScene = document.querySelector("#environment-scene");
-  const sceneEl = document.querySelector("a-scene");
-
   if (hub.scene) {
     isLegacyBundle = false;
     sceneUrl = hub.scene.model_url;
@@ -375,6 +381,19 @@ async function updateEnvironmentForHub(hub, entryManager) {
   } else {
     sceneUrl = proxiedUrlFor(sceneUrl);
   }
+  return sceneUrl;
+}
+
+export async function updateEnvironmentForHub(hub, entryManager) {
+  const sceneUrl = await getSceneUrlForHub(hub);
+
+  const sceneErrorHandler = () => {
+    remountUI({ roomUnavailableReason: ExitReason.sceneError });
+    entryManager.exitScene();
+  };
+
+  const environmentScene = document.querySelector("#environment-scene");
+  const sceneEl = document.querySelector("a-scene");
 
   console.log(`Scene URL: ${sceneUrl}`);
 
@@ -456,7 +475,7 @@ async function updateEnvironmentForHub(hub, entryManager) {
   }
 }
 
-async function updateUIForHub(hub, hubChannel) {
+export async function updateUIForHub(hub, hubChannel) {
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 
@@ -619,7 +638,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         .catch(connectError => {
           clearTimeout(connectionErrorTimeout);
           connectionErrorTimeout = null;
-          adapter.disconnect();
+          NAF.connection.adapter?.disconnect();
           onConnectionError(entryManager, connectError);
         });
     };
@@ -715,6 +734,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const subscriptions = new Subscriptions(hubId);
+  APP.subscriptions = subscriptions;
 
   if (navigator.serviceWorker) {
     try {
@@ -762,6 +782,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store, hubId);
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
+  window.APP.entryManager = entryManager;
 
   window.APP.scene = scene;
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
@@ -918,8 +939,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     exitScene: reason => {
       entryManager.exitScene();
       remountUI({ roomUnavailableReason: reason || ExitReason.exited });
-    },
-    initialIsSubscribed: subscriptions.isSubscribed()
+    }
   });
 
   scene.addEventListener("action_focus_chat", () => {
@@ -1045,8 +1065,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Reticulum global channel
-  let retPhxChannel = socket.channel(`ret`, { hub_id: hubId });
-  retPhxChannel
+  APP.retChannel = socket.channel(`ret`, { hub_id: hubId });
+  APP.retChannel
     .join()
     .receive("ok", async data => subscriptions.setVapidPublicKey(data.vapid_public_key))
     .receive("error", res => {
@@ -1091,6 +1111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return params;
   };
+  APP.createHubChannelParams = createHubChannelParams;
 
   const tryGetMatchingMeta = async ({ ret_pool, ret_version }, shouldAbandonMigration) => {
     const backoffMS = 5000;
@@ -1133,9 +1154,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     console.log("[reconnect] Reconnect in progress. Updated reticulum meta.");
-    const oldSocket = retPhxChannel.socket;
+    const oldSocket = APP.retChannel.socket;
     const socket = await connectToReticulum(isDebug, oldSocket.params());
-    retPhxChannel = await migrateChannelToSocket(retPhxChannel, socket);
+    APP.retChannel = await migrateChannelToSocket(APP.retChannel, socket);
     await hubChannel.migrateToSocket(socket, createHubChannelParams());
     authChannel.setSocket(socket);
     linkChannel.setSocket(socket);
@@ -1179,7 +1200,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
   })();
 
-  retPhxChannel.on("notice", data => {
+  APP.retChannel.on("notice", data => {
     if (data.event === "ret-deploy") {
       onRetDeploy(data);
     }
@@ -1217,6 +1238,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI,
     mediaSearchStore
   );
+  APP.messageDispatch = messageDispatch;
   document.getElementById("avatar-rig").messageDispatch = messageDispatch;
 
   let isInitialJoin = true;
@@ -1304,6 +1326,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const currentMeta = current.metas[0];
 
                 if (
+                  !window.APP.suppressPresenceMessages &&
                   !isSelf &&
                   currentMeta.presence !== meta.presence &&
                   meta.presence === "room" &&
@@ -1331,7 +1354,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 // New presence
                 const meta = info.metas[0];
 
-                if (meta.presence && meta.profile.displayName) {
+                if (!window.APP.suppressPresenceMessages && meta.presence && meta.profile.displayName) {
                   messageDispatch.receive({
                     type: "join",
                     presence: meta.presence,
@@ -1361,7 +1384,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const meta = info.metas[0];
 
-            if (meta.profile.displayName) {
+            if (!window.APP.suppressPresenceMessages && meta.profile.displayName) {
               messageDispatch.receive({
                 type: "leave",
                 name: meta.profile.displayName
@@ -1376,48 +1399,51 @@ document.addEventListener("DOMContentLoaded", async () => {
       const permsToken = oauthFlowPermsToken || data.perms_token;
       hubChannel.setPermissionsFromToken(permsToken);
 
-      scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
-        adapter.setClientId(socket.params().session_id);
-        adapter.setJoinToken(data.perms_token);
-        adapter.setServerParams(await window.APP.hubChannel.getHost());
-        adapter.setReconnectionListeners(
-          async () => {
-            const { host, port } = await hubChannel.getHost();
-            const newServerURL = `wss://${host}:${port}`;
-            // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
-            if (adapter.serverUrl !== newServerURL) {
-              console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
-              scene.setAttribute("networked-scene", { serverURL: newServerURL });
-              adapter.setServerUrl(newServerURL);
-              adapter.setServerParams(await window.APP.hubChannel.getHost());
-              adapter.reconnect();
+      scene.addEventListener(
+        "adapter-ready",
+        async ({ detail: adapter }) => {
+          adapter.setClientId(socket.params().session_id);
+          adapter.setJoinToken(permsToken);
+          adapter.setServerParams(await window.APP.hubChannel.getHost());
+          adapter.setReconnectionListeners(
+            async () => {
+              const { host, port } = await hubChannel.getHost();
+              const newServerURL = `wss://${host}:${port}`;
+              // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
+              if (adapter.serverUrl !== newServerURL) {
+                console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
+                scene.setAttribute("networked-scene", { serverURL: newServerURL });
+                adapter.setServerUrl(newServerURL);
+                adapter.setServerParams(await window.APP.hubChannel.getHost());
+                adapter.reconnect();
+              }
+              // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
+              if (!connectionErrorTimeout) {
+                connectionErrorTimeout = setTimeout(() => {
+                  adapter.disconnect();
+                  onConnectionError(entryManager, "Timeout trying to reconnect to the room");
+                }, 30000);
+              }
+            },
+            () => {
+              clearTimeout(connectionErrorTimeout);
+              connectionErrorTimeout = null;
             }
-            // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
-            if (!connectionErrorTimeout) {
-              connectionErrorTimeout = setTimeout(() => {
-                adapter.disconnect();
-                onConnectionError(entryManager, "Timeout trying to reconnect to the room");
-              }, 30000);
-            }
-          },
-          () => {
-            clearTimeout(connectionErrorTimeout);
-            connectionErrorTimeout = null;
-          }
-        );
+          );
 
-        setupPeerConnectionConfig(adapter);
+          setupPeerConnectionConfig(adapter);
 
-        hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
-      });
+          hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
+        },
+        { once: true }
+      );
 
       subscriptions.setHubChannel(hubChannel);
       subscriptions.setSubscribed(data.subscriptions.web_push);
 
       remountUI({
         hubIsBound: data.hub_requires_oauth,
-        initialIsFavorited: data.subscriptions.favorites,
-        initialIsSubscribed: subscriptions.isSubscribed()
+        initialIsFavorited: data.subscriptions.favorites
       });
 
       await presenceSync.promise;

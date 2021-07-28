@@ -1,22 +1,27 @@
+import { AvatarAudioDefaults, MediaAudioDefaults } from "../components/audio-params";
+
 function updateMediaAudioSettings(mediaVideo, settings) {
-  mediaVideo.el.setAttribute("media-video", {
+  mediaVideo.el.setAttribute("audio-params", {
     distanceModel: settings.mediaDistanceModel,
     rolloffFactor: settings.mediaRolloffFactor,
     refDistance: settings.mediaRefDistance,
     maxDistance: settings.mediaMaxDistance,
     coneInnerAngle: settings.mediaConeInnerAngle,
     coneOuterAngle: settings.mediaConeOuterAngle,
-    coneOuterGain: settings.mediaConeOuterGain
+    coneOuterGain: settings.mediaConeOuterGain,
+    gain: settings.mediaVolume
   });
 }
 
-function updateAvatarAudioSettings(avatarAudioSource, settings, positional) {
-  avatarAudioSource.el.setAttribute("avatar-audio-source", {
-    positional,
+function updateAvatarAudioSettings(avatarAudioSource, settings) {
+  avatarAudioSource.el.setAttribute("audio-params", {
     distanceModel: settings.avatarDistanceModel,
     maxDistance: settings.avatarMaxDistance,
     refDistance: settings.avatarRefDistance,
-    rolloffFactor: settings.avatarRolloffFactor
+    rolloffFactor: settings.avatarRolloffFactor,
+    coneInnerAngle: settings.avatarConeInnerAngle,
+    coneOuterAngle: settings.avatarConeOuterAngle,
+    coneOuterGain: settings.avatarConeOuterGain
   });
 }
 
@@ -24,18 +29,21 @@ export class AudioSettingsSystem {
   constructor(sceneEl) {
     this.sceneEl = sceneEl;
     this.defaultSettings = {
-      avatarDistanceModel: "inverse",
-      avatarRolloffFactor: 2,
-      avatarRefDistance: 1,
-      avatarMaxDistance: 10000,
-      mediaVolume: 0.5,
-      mediaDistanceModel: "inverse",
-      mediaRolloffFactor: 1,
-      mediaRefDistance: 1,
-      mediaMaxDistance: 10000,
-      mediaConeInnerAngle: 360,
-      mediaConeOuterAngle: 0,
-      mediaConeOuterGain: 0
+      avatarDistanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
+      avatarRolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
+      avatarRefDistance: AvatarAudioDefaults.REF_DISTANCE,
+      avatarMaxDistance: AvatarAudioDefaults.MAX_DISTANCE,
+      avatarConeInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
+      avatarConeOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
+      avatarConeOuterGain: AvatarAudioDefaults.OUTER_GAIN,
+      mediaVolume: MediaAudioDefaults.VOLUME,
+      mediaDistanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
+      mediaRolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
+      mediaRefDistance: AvatarAudioDefaults.REF_DISTANCE,
+      mediaMaxDistance: AvatarAudioDefaults.MAX_DISTANCE,
+      mediaConeInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
+      mediaConeOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
+      mediaConeOuterGain: AvatarAudioDefaults.OUTER_GAIN
     };
     this.audioSettings = this.defaultSettings;
     this.mediaVideos = [];
@@ -43,7 +51,10 @@ export class AudioSettingsSystem {
 
     this.sceneEl.addEventListener("reset_scene", this.onSceneReset);
 
-    if (window.APP.store.state.preferences.audioOutputMode === "audio") {
+    if (
+      !window.APP.store.state.preferences.audioOutputMode ||
+      window.APP.store.state.preferences.audioOutputMode === "audio"
+    ) {
       //hack to always reset to "panner"
       window.APP.store.update({
         preferences: { audioOutputMode: "panner" }
@@ -85,8 +96,7 @@ export class AudioSettingsSystem {
     if (index === -1) {
       this.avatarAudioSources.push(avatarAudioSource);
     }
-    const positional = window.APP.store.state.preferences.audioOutputMode !== "audio";
-    updateAvatarAudioSettings(avatarAudioSource, this.audioSettings, positional);
+    updateAvatarAudioSettings(avatarAudioSource, this.audioSettings);
   }
 
   unregisterAvatarAudioSource(avatarAudioSource) {
@@ -103,9 +113,8 @@ export class AudioSettingsSystem {
       updateMediaAudioSettings(mediaVideo, settings);
     }
 
-    const positional = window.APP.store.state.preferences.audioOutputMode !== "audio";
     for (const avatarAudioSource of this.avatarAudioSources) {
-      updateAvatarAudioSettings(avatarAudioSource, settings, positional);
+      updateAvatarAudioSettings(avatarAudioSource, settings);
     }
   }
 
