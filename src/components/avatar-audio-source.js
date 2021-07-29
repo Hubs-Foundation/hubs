@@ -33,7 +33,7 @@ async function getMediaStream(el) {
     console.error(INFO_INIT_FAILED, INFO_NO_OWNER);
     return null;
   }
-  const stream = await NAF.connection.adapter.getMediaStream(peerId).catch(e => {
+  const stream = await APP.dialog.getMediaStream(peerId).catch(e => {
     console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
   });
   if (!stream) {
@@ -96,7 +96,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
-    NAF.connection.adapter?.on("stream_updated", this._onStreamUpdated, this);
+    APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
   },
 
@@ -109,7 +109,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     getOwnerId(this.el).then(async ownerId => {
       if (ownerId === peerId && kind === "audio") {
         // The audio stream for this peer has been updated
-        const newStream = await NAF.connection.adapter.getMediaStream(peerId, "audio").catch(e => {
+        const newStream = await APP.dialog.getMediaStream(peerId, "audio").catch(e => {
           console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
         });
 
@@ -124,7 +124,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   remove: function() {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
-    NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
+    APP.dialog.off("stream_updated", this._onStreamUpdated);
     this.destroyAudio();
   },
 

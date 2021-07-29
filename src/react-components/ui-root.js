@@ -468,7 +468,7 @@ class UIRoot extends Component {
   };
 
   toggleMute = () => {
-    this.props.scene.emit("action_mute");
+    APP.dialog.toggleMicrophone();
   };
 
   shareVideo = mediaSource => {
@@ -585,7 +585,6 @@ class UIRoot extends Component {
   };
 
   beginOrSkipAudioSetup = () => {
-    console.log(this.props.forcedVREntryType);
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
 
     if (skipAudioSetup) {
@@ -614,9 +613,6 @@ class UIRoot extends Component {
     clearHistoryState(this.props.history);
 
     const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
-    this.props.store.update({
-      settings: { micMuted: false }
-    });
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
@@ -1370,7 +1366,7 @@ class UIRoot extends Component {
                         <PeopleMenuButton
                           active={this.state.sidebarId === "people"}
                           onClick={() => this.toggleSidebar("people")}
-                          presenceCount={this.state.presenceCount}
+                          presencecount={this.state.presenceCount}
                         />
                       </ContentMenu>
                     )}
