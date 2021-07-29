@@ -11,166 +11,162 @@ function paramsReducer(acc, curr) {
   return acc;
 }
 
+function addOrRemoveZone(zones, zone, position) {
+  const isInZone = zone.isEnabled() && zone.contains(position);
+  const wasInZone = zones.has(zone);
+  if (isInZone && !wasInZone) {
+    zones.add(zone);
+  } else if (!isInZone && wasInZone) {
+    zones.delete(zone);
+  }
+}
+
+function any(set, predicate) {
+  for (const item of set) {
+    if (predicate(item)) return true;
+  }
+  return false;
+}
+
+function isUpdated(currZones, prevZones) {
+  return currZones.size !== prevZones.size || any(currZones, zone => !prevZones.has(zone));
+}
+
+const setRay = (function() {
+  const direction = new THREE.Vector3();
+  return function setRay(ray, from, to) {
+    ray.set(from, direction.subVectors(to, from).normalize());
+  };
+})();
+
+function exclude(zones) {
+  return zone => {
+    return !zones.has(zone);
+  };
+}
+
+function hasIntersection(ray) {
+  const intersectTarget = new THREE.Vector3();
+  return zone => {
+    ray.intersectBox(zone.getBoundingBox(), intersectTarget);
+    return intersectTarget !== null;
+  };
+}
+const updateSource = (function() {
+  const ray = new THREE.Ray();
+  return function updateSource(source, sourcePosition, sourceZones, listenerPosition, listenerZones) {
+    setRay(ray, listenerPosition, sourcePosition);
+
+    // TODO: Reimplement the desired sorting of zones
+    const inOutParams = Array.from(sourceZones)
+      .filter(zone => zone.data.inOut)
+      .filter(exclude(listenerZones))
+      .filter(hasIntersection(ray))
+      .map(zone => zone.getAudioParams())
+      .reduce(paramsReducer, null);
+
+    // TODO: Reimplement the desired sorting of zones
+    const outInParams = Array.from(listenerZones)
+      .filter(zone => zone.data.outIn)
+      .filter(exclude(sourceZones))
+      .filter(hasIntersection(ray))
+      .map(zone => zone.getAudioParams())
+      .reduce(paramsReducer, null);
+
+    if (!outInParams && !inOutParams) {
+      source.restore();
+    } else if (outInParams && !inOutParams) {
+      source.apply(outInParams);
+    } else if (!outInParams && inOutParams) {
+      source.apply(inOutParams);
+    } else {
+      const params = outInParams;
+      params.gain = Math.min(outInParams.gain, inOutParams.gain);
+      params.coneOuterAngle = Math.min(outInParams.coneOuterAngle, inOutParams.coneOuterAngle);
+      source.apply(params);
+    }
+  };
+})();
 /**
- * This system updates the audio-zone-sources audio-params based on the audio-zone-listener position.
- * On every tick it computes the audio-zone-source and audio-zone-listener positions to check
- * if the listener is inside/outside an audio-zone and applies the zone's audio parameters based.
- * It only updates in case there has been any changes in the sources or listener's positions.
- * If several audio-zones are in between the audio-zone-listener and the audio-zone-source, the applied
+ * This system updates audio-zone-sources audio-params based on the audioListener position.
+ * On every tick it computes the audio-zone-source and audioListeners positions to check
+ * if the listener is inside/outside an audio-zone and applies the zone's audio parameters.
+ * It only updates when a source or the listener has changed which zones they are in.
+ * If several audio-zones are in between the audioListener and the audio-zone-source, the applied
  * audio parameters is a reduction of the audio-zones most restrictive audio parameters.
  * i.e. If there are two audio-zones in between the listener and the source and the first one has gain == 0.1
  * and the other has gain == 1.0, gain == 0.1 is applied to the source.
  */
 export class AudioZonesSystem {
-  constructor(scene) {
-    this.scene = scene;
-    this.listener = null;
-    this.sources = [];
+  constructor() {
     this.zones = [];
-    this.forceUpdate = false;
-    this.initialized = false;
-  }
-
-  init() {
-    this.el.sceneEl.addEventListener("environment-scene-loaded", this.onSceneLoaded);
-  }
-
-  remove() {
     this.sources = [];
-    this.zones = [];
-    this.el.sceneEl.removeEventListener("environment-scene-loaded", this.onSceneLoaded);
+    this.entities = [];
+    this.currZones = new Map();
+    this.prevZones = new Map();
+    this.didRegisterAudioListener = false;
   }
-
-  setListener(listener) {
-    this.listener = listener;
-  }
-
-  unsetListener() {
-    this.listener = null;
-  }
-
-  registerSource(source) {
-    this.sources.push(source);
-  }
-
-  unregisterSource(source) {
-    const index = this.sources.indexOf(source);
-
-    if (index !== -1) {
-      this.sources.splice(index, 1);
-    }
-  }
-
   registerZone(zone) {
     this.zones.push(zone);
   }
-
   unregisterZone(zone) {
-    const index = this.zones.indexOf(zone);
-
-    if (index !== -1) {
-      this.zones.splice(index, 1);
-    }
+    this.zones.splice(this.zones.indexOf(zone), 1);
+    this.entities.forEach(entity => {
+      this.currZones.get(entity).delete(zone);
+    });
+  }
+  registerSource(source) {
+    this.sources.push(source);
+    this.registerEntity(source);
+  }
+  unregisterSource(source) {
+    this.sources.splice(this.sources.indexOf(source), 1);
+    this.unregisterEntity(source);
+  }
+  registerEntity(entity) {
+    this.entities.push(entity);
+    this.currZones.set(entity, new Set());
+    this.prevZones.set(entity, new Set());
+  }
+  unregisterEntity(entity) {
+    this.entities.splice(this.entities.indexOf(entity), 1);
+    this.currZones.delete(entity);
+    this.prevZones.delete(entity);
   }
 
   tick = (function() {
-    const ray = new THREE.Ray();
-    const rayDir = new THREE.Vector3();
-    const normalizedRayDir = new THREE.Vector3();
-    const intersectTarget = new THREE.Vector3();
-    return function() {
-      if (!this.scene.is("entered") || this.zones.length === 0) return;
+    const listenerPosition = new THREE.Vector3();
+    return function(scene) {
+      if (!scene.is("entered")) return;
 
-      // Update zones
-      this._updateZones();
-
-      for (let i = 0; i < this.sources.length; i++) {
-        const source = this.sources[i];
-        // Only check whenever either the source or the listener have updated zones (moved)
-        if (source.entity.isUpdated() || this.listener.entity.isUpdated() || this.forceUpdate) {
-          this.forceUpdate = false;
-          // Cast a ray from the listener to the source
-          rayDir.copy(
-            source
-              .getPosition()
-              .clone()
-              .sub(this.listener.getPosition())
-          );
-          normalizedRayDir.copy(rayDir.clone().normalize());
-          ray.set(this.listener.getPosition(), normalizedRayDir);
-
-          // First we check the zones the source is contained in and we check the inOut property
-          // to modify the sources audio params when the listener is outside the source's zones
-          // We always apply the outmost active zone audio params, the zone that's closest to the listener
-          const inOutParams = source.entity
-            .getZones()
-            .filter(zone => {
-              const zoneBBAA = zone.getBoundingBox();
-              ray.intersectBox(zoneBBAA, intersectTarget);
-              return intersectTarget !== null && zone.data.inOut && !this.listener.entity.getZones().includes(zone);
-            })
-            .map(zone => zone.getAudioParams())
-            .reduce(paramsReducer, null);
-
-          // Then we check the zones the listener is contained in and we check the outIn property
-          // to modify the sources audio params when the source is outside the listener's zones
-          // We always apply the inmost active zone audio params, the zone that's closest to the listener
-          const outInParams = this.listener.entity
-            .getZones()
-            .filter(zone => {
-              const zoneBBAA = zone.getBoundingBox();
-              ray.intersectBox(zoneBBAA, intersectTarget);
-              return intersectTarget !== null && zone.data.outIn && !source.entity.getZones().includes(zone);
-            })
-            .map(zone => zone.getAudioParams())
-            .reduce(paramsReducer, null);
-
-          // Resolve the zones
-          if (outInParams || inOutParams) {
-            const params = outInParams ? outInParams : inOutParams;
-            params.gain = outInParams && inOutParams ? Math.min(outInParams.gain, inOutParams.gain) : params.gain;
-            params.coneOuterGain =
-              outInParams && inOutParams
-                ? Math.min(outInParams.coneOuterGain, inOutParams.coneOuterGain)
-                : params.coneOuterGain;
-            source.apply(params);
-          } else {
-            source.restore();
-          }
-        }
+      if (!this.didRegisterAudioListener) {
+        this.didRegisterAudioListener = true;
+        this.registerEntity(scene.audioListener);
       }
+
+      const currListenerZones = this.currZones.get(scene.audioListener);
+      scene.audioListener.getWorldPosition(listenerPosition);
+      this.zones.forEach(zone => {
+        addOrRemoveZone(currListenerZones, zone, listenerPosition);
+        this.sources.forEach(source => {
+          addOrRemoveZone(this.currZones.get(source), zone, source.getPosition());
+        });
+      });
+
+      const isListenerUpdated = isUpdated(currListenerZones, this.prevZones.get(scene.audioListener));
+      this.sources
+        .filter(source => {
+          return isListenerUpdated || isUpdated(this.currZones.get(source), this.prevZones.get(source));
+        })
+        .forEach(source => {
+          updateSource(source, source.getPosition(), this.currZones.get(source), listenerPosition, currListenerZones);
+        });
+
+      this.entities.forEach(entity => {
+        const prevZones = this.prevZones.get(entity);
+        prevZones.clear();
+        this.currZones.get(entity).forEach(zone => prevZones.add(zone));
+      });
     };
   })();
-
-  // Updates zones states in case they have changed.
-  _updateZones() {
-    for (let i = 0; i < this.zones.length; i++) {
-      const zone = this.zones[i];
-      if (!zone.isEnabled()) return;
-
-      const isListenerInZone = zone.contains(this.listener.getPosition());
-      const wasListenerInZone = this.listener.entity.isInZone(zone);
-      // Update audio zone listener status
-      if (isListenerInZone && !wasListenerInZone) {
-        this.listener.entity.addZone(zone);
-      } else if (!isListenerInZone && wasListenerInZone) {
-        this.listener.entity.removeZone(zone);
-      }
-      // Update audio zone source status
-      this.sources.forEach(source => {
-        const isSourceInZone = zone.contains(source.getPosition());
-        const wasSourceInZone = source.entity.isInZone(zone);
-        // Check if the audio source is in the audio zone
-        if (isSourceInZone && !wasSourceInZone) {
-          source.entity.addZone(zone);
-        } else if (!isSourceInZone && wasSourceInZone) {
-          source.entity.removeZone(zone);
-        }
-      });
-    }
-  }
-
-  onSceneLoaded = () => {
-    this.forceUpdate = true;
-  };
 }
