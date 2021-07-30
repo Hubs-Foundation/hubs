@@ -52,18 +52,6 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     const audioListener = this.el.sceneEl.audioListener;
     const audio = new THREE.PositionalAudio(audioListener);
-    this.el.setAttribute("audio-params", {
-      audioType: AvatarAudioDefaults.AUDIO_TYPE,
-      sourceType: SourceType.AVATAR_AUDIO_SOURCE,
-      distanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
-      rolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTORROLLOFF_FACTOR,
-      refDistance: AvatarAudioDefaults.REF_DISTANCE,
-      maxDistance: AvatarAudioDefaults.MAX_DISTANCE,
-      coneInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
-      coneOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
-      coneOuterGain: AvatarAudioDefaults.OUTER_GAIN,
-      gain: AvatarAudioDefaults.VOLUME
-    });
     this.el.components["audio-params"].setAudio(audio);
 
     this.audioSystem.removeAudio(audio);

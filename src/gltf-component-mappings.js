@@ -3,7 +3,7 @@ import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
-import { SourceType } from "./components/audio-params";
+import { AudioType, SourceType } from "./components/audio-params";
 
 function registerRootSceneComponent(componentName) {
   AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
@@ -470,7 +470,28 @@ AFRAME.GLTFModelPlus.registerComponent(
       }
     }
 
-    el.setAttribute(componentName, { ...componentData, srcEl });
+    // Migrate audio-target component that has built-in audio params
+    if (componentData.positional) {
+      el.setAttribute("audio-params", {
+        audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
+        sourceType: SourceType.MEDIA_VIDEO,
+        distanceModel: componentData.distanceModel,
+        rolloffFactor: componentData.rolloffFactor,
+        refDistance: componentData.refDistance,
+        maxDistance: componentData.maxDistance,
+        coneInnerAngle: componentData.coneInnerAngle,
+        coneOuterAngle: componentData.coneOuterAngle,
+        coneOuterGain: componentData.coneOuterGain,
+        gain: componentData.volume
+      });
+    }
+
+    el.setAttribute(componentName, {
+      minDelay: componentData.minDelay,
+      maxDelay: componentData.maxDelay,
+      debug: componentData.debug,
+      srcEl
+    });
   }
 );
 AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
