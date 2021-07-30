@@ -181,7 +181,7 @@ AFRAME.registerComponent("water", {
         this.water = new MobileWater(waterGeometry, waterConfig);
       } else {
         this.water = new THREE.Water(waterGeometry, waterConfig);
-        this.water.mirrorCamera.layers.set(Layers.reflection);
+        this.water.mirrorCamera.layers.set(Layers.CAMERA_LAYER_REFLECTION);
       }
 
       this.el.setObject3D("water", this.water);

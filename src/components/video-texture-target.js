@@ -1,6 +1,7 @@
 import { disposeTexture } from "../utils/material-utils";
 import { createVideoOrAudioEl } from "../utils/media-utils";
 import { findNode } from "../utils/three-utils";
+import { Layers } from "./layers";
 
 /**
  * @component video-texture-source
@@ -106,6 +107,12 @@ AFRAME.registerComponent("video-texture-target", {
   },
 
   init() {
+    // Make video-texture-target objects inivisible before rendering to the frame buffer
+    // Chromium checks for loops when drawing to a framebuffer so if we don't exclude the objects
+    // that are using that rendertarget's texture we get an error. Firefox does not check.
+    // https://chromium.googlesource.com/chromium/src/+/460cac969e2e9ac38a2611be1a32db0361d88bfb/gpu/command_buffer/service/gles2_cmd_decoder.cc#9516
+    this.el.object3D.traverse(o => o.layers.set(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET));
+
     const material = this.getMaterial();
 
     if (!material) {
