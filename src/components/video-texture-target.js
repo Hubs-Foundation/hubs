@@ -111,7 +111,10 @@ AFRAME.registerComponent("video-texture-target", {
     // Chromium checks for loops when drawing to a framebuffer so if we don't exclude the objects
     // that are using that rendertarget's texture we get an error. Firefox does not check.
     // https://chromium.googlesource.com/chromium/src/+/460cac969e2e9ac38a2611be1a32db0361d88bfb/gpu/command_buffer/service/gles2_cmd_decoder.cc#9516
-    this.el.object3D.traverse(o => o.layers.set(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET));
+    this.el.object3D.traverse(o => {
+      o.layers.mask1 = o.layers.mask;
+      o.layers.set(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+    });
 
     const material = this.getMaterial();
 
@@ -215,6 +218,13 @@ AFRAME.registerComponent("video-texture-target", {
   },
 
   remove() {
+    this.el.object3D.traverse(o => {
+      if (o.layers.mask1) {
+        o.layers.mask = o.layers.mask1;
+        delete o.layers.mask1;
+      }
+    });
+
     // element sources can be shared and are expected to manage their own resources
     if (this.data.src === "el") return;
 
