@@ -6,14 +6,6 @@ export const Layers = {
   CAMERA_LAYER_VIDEO_TEXTURE_TARGET: 6
 };
 
-export const LayerMasks = {
-  // Layers 0 - 2 reserverd by ThreeJS and AFrame.
-  CAMERA_LAYER_REFLECTION_MASK: 1 << Layers.CAMERA_LAYER_REFLECTION,
-  CAMERA_LAYER_INSPECT_MASK: 1 << Layers.CAMERA_LAYER_INSPECT,
-  CAMERA_LAYER_BATCH_INSPECT_MASK: 1 << Layers.CAMERA_LAYER_BATCH_INSPECT,
-  CAMERA_LAYER_VIDEO_TEXTURE_TARGET_MASK: 1 << Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET
-};
-
 /**
  * Sets layer flags on the underlying Object3D
  * @namespace environment

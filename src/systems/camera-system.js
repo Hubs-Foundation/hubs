@@ -7,7 +7,7 @@ import { isTagged } from "../components/tags";
 import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
-import { Layers, LayerMasks } from "../components/layers";
+import { Layers } from "../components/layers";
 
 function getInspectableInHierarchy(el) {
   let inspectable = el;
@@ -205,7 +205,7 @@ export class CameraSystem {
     this.snapshot = { audioTransform: new THREE.Matrix4(), matrixWorld: new THREE.Matrix4() };
     this.audioSourceTargetTransform = new THREE.Matrix4();
     scene.addEventListener("cameraready", ({ detail: { cameraEl } }) => {
-      cameraEl.getObject3D("camera").layers.mask |= LayerMasks.CAMERA_LAYER_VIDEO_TEXTURE_TARGET_MASK;
+      cameraEl.getObject3D("camera").layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
     });
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
