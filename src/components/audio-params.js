@@ -194,21 +194,25 @@ AFRAME.registerComponent("audio-params", {
     const audio = this.getAudio();
     if (audio) {
       if (audio.panner) {
-        this.data.position = new THREE.Vector3(
-          audio.panner.positionX.value,
-          audio.panner.positionY.value,
-          audio.panner.positionZ.value
-        );
-        this.data.orientation = new THREE.Vector3(
-          audio.panner.orientationX.value,
-          audio.panner.orientationY.value,
-          audio.panner.orientationZ.value
-        );
+        this.el.setAttribute("audio-params", {
+          position: new THREE.Vector3(
+            audio.panner.positionX.value,
+            audio.panner.positionY.value,
+            audio.panner.positionZ.value
+          ),
+          orientation: new THREE.Vector3(
+            audio.panner.orientationX.value,
+            audio.panner.orientationY.value,
+            audio.panner.orientationZ.value
+          )
+        });
         this.updateAttenuation();
       } else {
         this.el.object3D.getWorldDirection(this.data.orientation);
         this.el.object3D.getWorldPosition(this.data.position);
-        this.data.rolloffFactor = 0;
+        this.el.setAttribute("audio-params", {
+          rolloffFactor: 0
+        });
       }
       this.updateDistances();
     }
@@ -303,26 +307,31 @@ AFRAME.registerComponent("audio-params", {
 
   updateDistances() {
     this.el.sceneEl.audioListener.getWorldPosition(this.listenerPos);
-    this.data.distance = this.data.position.distanceTo(this.listenerPos);
-    this.data.squaredDistance = this.data.position.distanceToSquared(this.listenerPos);
+    this.el.setAttribute("audio-params", {
+      distance: this.data.position.distanceTo(this.listenerPos),
+      squaredDistance: this.data.position.distanceToSquared(this.listenerPos)
+    });
   },
 
   updateAttenuation() {
-    this.data.attenuation = distanceModels[this.data.distanceModel](
-      this.data.distance,
-      this.data.rolloffFactor,
-      this.data.refDistance,
-      this.data.maxDistance
-    );
+    this.el.setAttribute("audio-params", {
+      attenuation: distanceModels[this.data.distanceModel](
+        this.data.distance,
+        this.data.rolloffFactor,
+        this.data.refDistance,
+        this.data.maxDistance
+      )
+    });
   },
 
   clipGain(gain) {
     if (!this.data.isClipped) {
       const audio = this.getAudio();
-      this.data.isClipped = true;
-      this.data.preClipGain = this.data.gain;
-      this.data.gain = gain;
-      this.data.gain = Math.max(0.001, this.data.gain);
+      this.el.setAttribute("audio-params", {
+        isClipped: true,
+        preClipGain: this.data.gain,
+        gain: Math.max(0.001, gain)
+      });
       audio.gain.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
     }
   },
@@ -330,9 +339,10 @@ AFRAME.registerComponent("audio-params", {
   unclipGain() {
     if (this.data.isClipped) {
       const audio = this.getAudio();
-      this.data.isClipped = false;
-      this.data.gain = this.data.preClipGain;
-      this.data.gain = Math.max(0.001, this.data.gain);
+      this.el.setAttribute("audio-params", {
+        isClipped: false,
+        gain: Math.max(0.001, this.data.preClipGain)
+      });
       audio?.gain?.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
     }
   },
@@ -366,7 +376,9 @@ AFRAME.registerComponent("audio-params", {
 
   updateClipping() {
     const { clippingEnabled, clippingThreshold } = window.APP.store.state.preferences;
-    this.data.clippingEnabled = clippingEnabled !== undefined ? clippingEnabled : CLIPPING_THRESHOLD_ENABLED;
-    this.data.clippingThreshold = clippingThreshold !== undefined ? clippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
+    this.el.setAttribute("audio-params", {
+      clippingEnabled: clippingEnabled !== undefined ? clippingEnabled : CLIPPING_THRESHOLD_ENABLED,
+      clippingThreshold: clippingThreshold !== undefined ? clippingThreshold : CLIPPING_THRESHOLD_DEFAULT
+    });
   }
 });
