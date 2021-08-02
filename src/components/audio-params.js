@@ -59,7 +59,7 @@ export const TargetAudioDefaults = Object.freeze({
   VOLUME: 1.0
 });
 
-const MUTE_DELAY_SECS = 1;
+export const GAIN_TIME_CONST = 0.2;
 
 const distanceModels = {
   linear: function(distance, rolloffFactor, refDistance, maxDistance) {
@@ -371,7 +371,7 @@ AFRAME.registerComponent("audio-params", {
     if (audioOutputMode === "audio") {
       this.data.gain = this.data.gain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance));
     }
-    gainFilter?.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
+    gainFilter?.gain.setTargetAtTime(this.data.gain, audio.context.currentTime, GAIN_TIME_CONST);
   },
 
   updateClipping() {
