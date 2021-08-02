@@ -1,4 +1,3 @@
-import { Vector3 } from "three";
 import { AudioNormalizer } from "../utils/audio-normalizer";
 import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
 
@@ -134,8 +133,6 @@ AFRAME.registerComponent("audio-params", {
     };
     this.avatarRigOrientation = new THREE.Vector3(0, 0, -1);
     this.listenerPos = new THREE.Vector3();
-    this.data.position = new Vector3(0.0, 0.0, 0.0);
-    this.data.orientation = new Vector3(0.0, 0.0, 0.0);
     this.normalizer = null;
     this.el.sceneEl?.systems["audio-debug"].registerSource(this);
     if (!this.data.isLocal) {
@@ -143,24 +140,33 @@ AFRAME.registerComponent("audio-params", {
     }
 
     const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
-    this.data.clippingEnabled = enableAudioClipping !== undefined ? enableAudioClipping : CLIPPING_THRESHOLD_ENABLED;
-    this.data.clippingThreshold =
+    const clippingEnabled = enableAudioClipping !== undefined ? enableAudioClipping : CLIPPING_THRESHOLD_ENABLED;
+    const clippingThreshold =
       audioClippingThreshold !== undefined ? audioClippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
 
     this.onSourceSetAdded = this.sourceSetAdded.bind(this);
+    let sourceType;
     if (this.data.isLocal) {
-      this.data.sourceType = SourceType.AVATAR_RIG;
+      sourceType = SourceType.AVATAR_RIG;
     } else if (this.el.components["media-video"]) {
-      this.data.sourceType = SourceType.MEDIA_VIDEO;
+      sourceType = SourceType.MEDIA_VIDEO;
     } else if (this.el.components["avatar-audio-source"]) {
-      this.data.sourceType = SourceType.AVATAR_AUDIO_SOURCE;
+      sourceType = SourceType.AVATAR_AUDIO_SOURCE;
     } else if (this.el.components["audio-target"]) {
-      this.data.sourceType = SourceType.AUDIO_TARGET;
+      sourceType = SourceType.AUDIO_TARGET;
     } else if (this.el.components["audio-zone"]) {
-      this.data.sourceType = SourceType.AUDIO_ZONE;
+      sourceType = SourceType.AUDIO_ZONE;
     }
     this.audioSettings = this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.audioSettings;
     this.avatarRigObj = document.getElementById("avatar-rig").querySelector(".camera").object3D;
+
+    this.el.setAttribute("audio-params", {
+      position: new THREE.Vector3(0.0, 0.0, 0.0),
+      orientation: new THREE.Vector3(0.0, 0.0, 0.0),
+      sourceType,
+      clippingEnabled,
+      clippingThreshold
+    });
   },
 
   remove() {
@@ -326,24 +332,20 @@ AFRAME.registerComponent("audio-params", {
 
   clipGain(gain) {
     if (!this.data.isClipped) {
-      const audio = this.getAudio();
       this.el.setAttribute("audio-params", {
         isClipped: true,
         preClipGain: this.data.gain,
-        gain: Math.max(0.001, gain)
+        gain
       });
-      audio.gain.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
     }
   },
 
   unclipGain() {
     if (this.data.isClipped) {
-      const audio = this.getAudio();
       this.el.setAttribute("audio-params", {
         isClipped: false,
-        gain: Math.max(0.001, this.data.preClipGain)
+        gain: this.data.preClipGain
       });
-      audio?.gain?.gain.exponentialRampToValueAtTime(this.data.gain, audio.context.currentTime + MUTE_DELAY_SECS);
     }
   },
 
@@ -351,7 +353,6 @@ AFRAME.registerComponent("audio-params", {
     const audio = this.getAudio();
     if (!audio) return;
 
-    this.data.gain = Math.max(0.001, newGain);
     let gainFilter;
     switch (this.data.sourceType) {
       case SourceType.MEDIA_VIDEO: {
@@ -369,7 +370,7 @@ AFRAME.registerComponent("audio-params", {
     }
     const { audioOutputMode } = window.APP.store.state.preferences;
     if (audioOutputMode === "audio") {
-      this.data.gain = this.data.gain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance));
+      this.data.gain = newGain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance));
     }
     gainFilter?.gain.setTargetAtTime(this.data.gain, audio.context.currentTime, GAIN_TIME_CONST);
   },
