@@ -1,4 +1,4 @@
-import { SourceType, AvatarAudioDefaults, TargetAudioDefaults, AudioType } from "./audio-params";
+import { SourceType, TargetAudioDefaults, AudioType } from "./audio-params";
 import { MixerType } from "../systems/audio-system";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
