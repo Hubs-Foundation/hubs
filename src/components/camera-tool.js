@@ -39,8 +39,9 @@ const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
 const hasWebGL2 = !!document.createElement("canvas").getContext("webgl2");
 const allowVideo = !!videoMimeType && hasWebGL2;
 
-const CAPTURE_WIDTH = isMobileVR ? 640 : 1280;
-const CAPTURE_HEIGHT = isMobileVR ? 360 : 720;
+const isOculusBrowser = navigator.userAgent.match(/Oculus/);
+const CAPTURE_WIDTH = isMobileVR && !isOculusBrowser ? 640 : 1280;
+const CAPTURE_HEIGHT = isMobileVR && !isOculusBrowser ? 360 : 720;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = [3, 7, 15, 30, 60, Infinity];
@@ -689,29 +690,36 @@ AFRAME.registerComponent("camera-tool", {
         this.lastUpdate = now;
 
         if (this.videoRecorder) {
-          // This blit operation will (if necessary) scale/resample the view finder render target and, importantly,
-          // flip the texture on Y
-          blitFramebuffer(
-            renderer,
-            this.renderTarget,
-            0,
-            0,
-            RENDER_WIDTH,
-            RENDER_HEIGHT,
-            this.videoRenderTarget,
-            0,
-            CAPTURE_HEIGHT,
-            CAPTURE_WIDTH,
-            0
-          );
+          // https://chromium.googlesource.com/chromium/src/gpu/+/master/command_buffer/service/gles2_cmd_decoder.cc#8899
+          // We avoid using blitting and flip the render target pixels for OB.
+          if (!isOculusBrowser) {
+            // This blit operation will (if necessary) scale/resample the view finder render target and, importantly,
+            // flip the texture on Y
+            blitFramebuffer(
+              renderer,
+              this.renderTarget,
+              0,
+              0,
+              RENDER_WIDTH,
+              RENDER_HEIGHT,
+              this.videoRenderTarget,
+              0,
+              CAPTURE_HEIGHT,
+              CAPTURE_WIDTH,
+              0
+            );
+          }
           renderer.readRenderTargetPixels(
-            this.videoRenderTarget,
+            !isOculusBrowser ? this.videoRenderTarget : this.renderTarget,
             0,
             0,
             CAPTURE_WIDTH,
             CAPTURE_HEIGHT,
             this.videoPixels
           );
+          if (isOculusBrowser) {
+            this.flipPixelsY(this.videoPixels, CAPTURE_WIDTH, CAPTURE_HEIGHT);
+          }
           this.videoImageData.data.set(this.videoPixels);
           this.videoContext.putImageData(this.videoImageData, 0, 0);
         }
@@ -745,6 +753,20 @@ AFRAME.registerComponent("camera-tool", {
       }
     };
   })(),
+
+  flipPixelsY(pixels, width, height) {
+    const halfHeight = (height / 2) | 0;
+    const bytesPerRow = width * 4;
+
+    const temp = new Uint8Array(width * 4);
+    for (let y = 0; y < halfHeight; ++y) {
+      const topOffset = y * bytesPerRow;
+      const bottomOffset = (height - y - 1) * bytesPerRow;
+      temp.set(pixels.subarray(topOffset, topOffset + bytesPerRow));
+      pixels.copyWithin(topOffset, bottomOffset, bottomOffset + bytesPerRow);
+      pixels.set(temp, bottomOffset);
+    }
+  },
 
   isHoldingSnapshotTrigger: function() {
     const interaction = AFRAME.scenes[0].systems.interaction;
