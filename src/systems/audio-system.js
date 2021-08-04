@@ -1,4 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
+import { GAIN_TIME_CONST } from "../components/audio-params";
 
 export const MixerType = Object.freeze({
   AVATAR: 0,
@@ -193,12 +194,10 @@ export class AudioSystem {
   updatePrefs() {
     const { globalVoiceVolume, globalMediaVolume } = window.APP.store.state.preferences;
     let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
-    newGain = Math.max(0.001, newGain);
-    this.mixer[MixerType.MEDIA].gain.exponentialRampToValueAtTime(newGain, this.audioContext.currentTime + 1);
+    this.mixer[MixerType.MEDIA].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
 
     newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
-    newGain = Math.max(0.001, newGain);
-    this.mixer[MixerType.AVATAR].gain.exponentialRampToValueAtTime(newGain, this.audioContext.currentTime + 1);
+    this.mixer[MixerType.AVATAR].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
   }
 
   /**

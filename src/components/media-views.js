@@ -55,6 +55,7 @@ for (let i = 0; i <= 20; i++) {
 
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
+import { AudioType } from "./audio-params";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 
@@ -259,7 +260,6 @@ AFRAME.registerComponent("media-video", {
     audioSrc: { type: "string" },
     contentType: { type: "string" },
     loop: { type: "boolean", default: true },
-    audioType: { type: "string", default: "pannernode" },
     hidePlaybackControls: { type: "boolean", default: false },
     videoPaused: { type: "boolean" },
     projection: { type: "string", default: "flat" },
@@ -518,8 +518,9 @@ AFRAME.registerComponent("media-video", {
       this.updateSrc(oldData);
       return;
     }
+
     const shouldRecreateAudio =
-      !shouldUpdateSrc && this.mediaElementAudioSource && oldData.audioType !== this.data.audioType;
+      !shouldUpdateSrc && this.mediaElementAudioSource && this.audio?.panner?.audioType !== this.data.audioType;
     if (shouldRecreateAudio) {
       this.setupAudio();
       return;
@@ -532,7 +533,12 @@ AFRAME.registerComponent("media-video", {
       this.el.removeObject3D("sound");
     }
 
-    this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+    const audioListener = this.el.sceneEl.audioListener;
+    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+      this.audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      this.audio = new THREE.Audio(audioListener);
+    }
 
     this.audioSystem.removeAudio(this.audio);
     this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
