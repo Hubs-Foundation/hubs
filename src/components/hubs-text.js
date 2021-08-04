@@ -109,6 +109,7 @@ AFRAME.registerComponent("text", {
     // `negate` must be true for fonts generated with older versions of msdfgen (white background).
     negate: { type: "boolean", default: true },
     opacity: { type: "number", default: 1.0 },
+    renderOrder: { type: "number", default: 0.0 },
     side: { default: "front", oneOf: ["front", "back", "double"] },
     tabSize: { default: 4 },
     transparent: { default: true },
@@ -136,6 +137,7 @@ AFRAME.registerComponent("text", {
     this.shaderObject.material.side = shaderData.side;
     this.geometry = createTextGeometry();
     this.mesh = new THREE.Mesh(this.geometry, this.shaderObject.material);
+    this.mesh.renderOrder = shaderData.renderOrder;
     this.el.setObject3D(this.attrName, this.mesh);
   },
 
@@ -145,6 +147,7 @@ AFRAME.registerComponent("text", {
     this.shaderObject.update(shaderData);
     this.shaderObject.material.transparent = shaderData.transparent; // Apparently, was not set on `init` nor `update`.
     this.shaderObject.material.side = shaderData.side;
+    this.mesh.renderOrder = shaderData.renderOrder;
 
     // New font. `updateFont` will later change data and layout.
     if (oldData.font !== data.font) {
@@ -179,6 +182,7 @@ AFRAME.registerComponent("text", {
       shaderData.side = parseSide(data.side);
       shaderData.transparent = data.transparent;
       shaderData.negate = data.negate;
+      shaderData.renderOrder = data.renderOrder;
       return shaderData;
     };
   })(),
