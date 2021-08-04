@@ -16,6 +16,8 @@ import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
 import { Column } from "../layout/Column";
 import { Button } from "../input/Button";
 import { Container } from "../layout/Container";
+import { SocialBar } from "../home/SocialBar";
+import { SignInButton } from "./SignInButton";
 
 export function HomePage() {
   const auth = useContext(AuthContext);
@@ -52,6 +54,7 @@ export function HomePage() {
     <PageContainer className={styles.homePage}>
       <Container>
         <div className={styles.hero}>
+          <SignInButton mobile />
           <div className={styles.logoContainer}>
             <img alt={configs.translation("app-name")} src={configs.image("logo")} />
           </div>
@@ -84,7 +87,10 @@ export function HomePage() {
             <p>
               <FormattedMessage
                 id="home-page.rooms-blurb"
-                defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs, you’ll have a private virtual meeting space that you can instantly share - no downloads or VR headset necessary."
+                defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs, you’ll have a private virtual meeting space that you can instantly share <b>- no downloads or VR headset necessary.</b>"
+                values={{
+                  b: chunk => <b>{chunk}</b>
+                }}
               />
             </p>
           </Column>
@@ -159,12 +165,16 @@ export function HomePage() {
         </Container>
       )}
       <Container>
-        <Column padding center grow>
-          <Button lg preset="primary" as="a" href="/link">
+        <Column center grow>
+          <Button thin preset="landing" as="a" href="/link">
             <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
           </Button>
         </Column>
       </Container>
+
+      <Column center>
+        <SocialBar />
+      </Column>
     </PageContainer>
   );
 }

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import "./Page.scss";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { MobileNav } from "./MobileNav";
 
 export function Page({
   appLogo,
@@ -28,6 +29,7 @@ export function Page({
   companyLogoUrl,
   showDiscordBotLink,
   appName,
+  isHmc,
   children,
   ...rest
 }) {
@@ -48,8 +50,12 @@ export function Page({
         isSignedIn={isSignedIn}
         email={email}
         onSignOut={onSignOut}
+        isHmc
       />
-      <main {...rest}>{children}</main>
+      <main {...rest}>
+        <MobileNav enableSpoke showDocsLink showSourceLink showCommunityLink isHmc />
+        {children}
+      </main>
       <Footer
         hidePoweredBy={hidePoweredBy}
         showWhatsNewLink={showWhatsNewLink}
@@ -61,6 +67,8 @@ export function Page({
         companyLogoUrl={companyLogoUrl}
         showDiscordBotLink={showDiscordBotLink}
         appName={appName}
+        showCloud={showCloud}
+        isHmc
       />
     </>
   );
@@ -90,5 +98,6 @@ Page.propTypes = {
   companyLogoUrl: PropTypes.string,
   showDiscordBotLink: PropTypes.bool,
   appName: PropTypes.string,
+  isHmc: PropTypes.bool,
   children: PropTypes.node
 };

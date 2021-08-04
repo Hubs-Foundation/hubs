@@ -1,0 +1,80 @@
+import React, { useState } from "react";
+import PropTypes from "prop-types";
+import { FormattedMessage } from "react-intl";
+import styles from "./Header.scss";
+import { ReactComponent as Hamburger } from "../icons/Hamburger.svg";
+
+export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCommunityLink, communityUrl }) {
+  const [navOpen, setNav] = useState(false);
+  const toggleNav = () => {
+    setNav(!navOpen);
+  };
+  return (
+    <>
+      <div className={styles.navContainer}>
+        <div className={styles.mobileNavWrapper}>
+          <Hamburger className={styles.hamburger} onClick={toggleNav} />
+          <header className={`${navOpen ? "is-active" : "hide"}`}>
+            <nav role="navigation" aria-label="mobile navigation">
+              <ul>
+                {isHmc && (
+                  <li>
+                    <a href="/spoke">
+                      <FormattedMessage id="header.spoke" defaultMessage="Spoke" />
+                    </a>
+                  </li>
+                )}
+                {showDocsLink && (
+                  <li>
+                    <a href={docsUrl}>
+                      <FormattedMessage id="header.docs" defaultMessage="Guides" />
+                    </a>
+                  </li>
+                )}
+                {showSourceLink && (
+                  <li>
+                    <a href="https://github.com/mozilla/hubs">
+                      <FormattedMessage id="header.source" defaultMessage="Developers" />
+                    </a>
+                  </li>
+                )}
+                {showCommunityLink && (
+                  <li>
+                    <a href={communityUrl}>
+                      <FormattedMessage id="header.community" defaultMessage="Community" />
+                    </a>
+                  </li>
+                )}
+                {isHmc && (
+                  <li>
+                    <a href="/cloud">
+                      <FormattedMessage id="header.cloud" defaultMessage="Hubs Cloud" />
+                    </a>
+                  </li>
+                )}
+              </ul>
+            </nav>
+          </header>
+        </div>
+      </div>
+    </>
+  );
+}
+
+MobileNav.propTypes = {
+  appName: PropTypes.string,
+  appLogo: PropTypes.string,
+  showCloud: PropTypes.bool,
+  enableSpoke: PropTypes.bool,
+  editorName: PropTypes.string,
+  showDocsLink: PropTypes.bool,
+  docsUrl: PropTypes.string,
+  showSourceLink: PropTypes.bool,
+  showCommunityLink: PropTypes.bool,
+  communityUrl: PropTypes.string,
+  isAdmin: PropTypes.bool,
+  isSignedIn: PropTypes.bool,
+  email: PropTypes.string,
+  onSignOut: PropTypes.func,
+  isHmc: PropTypes.bool
+};
