@@ -35,7 +35,7 @@ export function PageContainer({ children, ...rest }) {
       companyLogoUrl={configs.image("company_logo")}
       showDiscordBotLink={configs.feature("show_discord_bot_link")}
       appName={configs.translation("app-name")}
-      isHmc
+      isHmc={isHmc}
       {...rest}
     >
       {children}

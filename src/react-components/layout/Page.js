@@ -50,7 +50,7 @@ export function Page({
         isSignedIn={isSignedIn}
         email={email}
         onSignOut={onSignOut}
-        isHmc
+        isHmc={isHmc}
       />
       <main {...rest}>
         <MobileNav enableSpoke showDocsLink showSourceLink showCommunityLink isHmc />
@@ -68,7 +68,7 @@ export function Page({
         showDiscordBotLink={showDiscordBotLink}
         appName={appName}
         showCloud={showCloud}
-        isHmc
+        isHmc={isHmc}
       />
     </>
   );

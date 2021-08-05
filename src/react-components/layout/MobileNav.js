@@ -15,7 +15,7 @@ export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCo
         <div className={styles.mobileNavWrapper}>
           <Hamburger className={styles.hamburger} onClick={toggleNav} />
           <header className={`${navOpen ? "is-active" : "hide"}`}>
-            <nav role="navigation" aria-label="mobile navigation">
+            <nav role="navigation">
               <ul>
                 {isHmc && (
                   <li>

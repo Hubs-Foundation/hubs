@@ -28,7 +28,7 @@ export function HomePage() {
 
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
   const sortedPublicRooms = Array.from(publicRooms).sort((a, b) => b.member_count - a.member_count);
-
+  const wrapInBold = chunk => <b>{chunk}</b>;
   useEffect(() => {
     const qs = new URLSearchParams(location.search);
 
@@ -88,9 +88,7 @@ export function HomePage() {
               <FormattedMessage
                 id="home-page.rooms-blurb"
                 defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs, you’ll have a private virtual meeting space that you can instantly share <b>- no downloads or VR headset necessary.</b>"
-                values={{
-                  b: chunk => <b>{chunk}</b>
-                }}
+                values={{ b: wrapInBold }}
               />
             </p>
           </Column>
