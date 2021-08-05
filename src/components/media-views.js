@@ -1004,6 +1004,7 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
+      this.snapButton.object3D.removeEventListener("interact", this.snap);
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
