@@ -60,25 +60,11 @@ export const TargetAudioDefaults = Object.freeze({
 
 export const GAIN_TIME_CONST = 0.2;
 
-const distanceModels = {
-  linear: function(distance, rolloffFactor, refDistance, maxDistance) {
-    return 1.0 - rolloffFactor * ((distance - refDistance) / (maxDistance - refDistance));
-  },
-  inverse: function(distance, rolloffFactor, refDistance) {
-    return refDistance / (refDistance + rolloffFactor * (Math.max(distance, refDistance) - refDistance));
-  },
-  exponential: function(distance, rolloffFactor, refDistance) {
-    return Math.pow(Math.max(distance, refDistance) / refDistance, -rolloffFactor);
-  }
-};
-
 AFRAME.registerComponent("audio-params", {
   multiple: true,
   schema: {
     enabled: { default: true },
     debuggable: { default: true },
-    position: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
-    orientation: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
     audioType: { default: AvatarAudioDefaults.AUDIO_TYPE },
     distanceModel: { default: AvatarAudioDefaults.DISTANCE_MODEL, oneOf: [DISTANCE_MODEL_OPTIONS] },
     rolloffFactor: { default: AvatarAudioDefaults.ROLLOFF_FACTOR },
@@ -92,10 +78,7 @@ AFRAME.registerComponent("audio-params", {
     preClipGain: { default: 1.0 },
     isClipped: { default: false },
     gain: { default: 1.0 },
-    sourceType: { default: -1 },
-    attenuation: { default: 1.0 },
-    distance: { default: 0.0 },
-    squaredDistance: { default: 0.0 }
+    sourceType: { default: -1 }
   },
 
   init() {
@@ -126,8 +109,6 @@ AFRAME.registerComponent("audio-params", {
     this.audioSettings = this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.audioSettings;
 
     this.el.setAttribute("audio-params", {
-      position: new THREE.Vector3(0.0, 0.0, 0.0),
-      orientation: new THREE.Vector3(0.0, 0.0, 0.0),
       sourceType,
       clippingEnabled,
       clippingThreshold
@@ -163,24 +144,9 @@ AFRAME.registerComponent("audio-params", {
 
   tick() {
     if (this.audioRef) {
-      if (this.audioRef.panner) {
-        this.data.position = new THREE.Vector3(
-          this.audioRef.panner.positionX.value,
-          this.audioRef.panner.positionY.value,
-          this.audioRef.panner.positionZ.value
-        );
-        this.data.orientation = new THREE.Vector3(
-          this.audioRef.panner.orientationX.value,
-          this.audioRef.panner.orientationY.value,
-          this.audioRef.panner.orientationZ.value
-        );
-        this.updateAttenuation();
-      } else {
-        this.el.object3D.getWorldDirection(this.data.orientation);
-        this.el.object3D.getWorldPosition(this.data.position);
+      if (!this.audioRef.panner) {
         this.data.rolloffFactor = 0;
       }
-      this.updateDistances();
     }
 
     if (this.normalizer !== null) {
@@ -214,21 +180,6 @@ AFRAME.registerComponent("audio-params", {
       this.normalizer = new AudioNormalizer(audio);
       this.normalizer.apply();
     }
-  },
-
-  updateDistances() {
-    this.el.sceneEl.audioListener.getWorldPosition(this.listenerPos);
-    this.data.distance = this.data.position.distanceTo(this.listenerPos);
-    this.data.squaredDistance = this.data.position.distanceToSquared(this.listenerPos);
-  },
-
-  updateAttenuation() {
-    this.data.attenuation = distanceModels[this.data.distanceModel](
-      this.data.distance,
-      this.data.rolloffFactor,
-      this.data.refDistance,
-      this.data.maxDistance
-    );
   },
 
   clipGain(gain) {
@@ -270,7 +221,12 @@ AFRAME.registerComponent("audio-params", {
     }
     const { audioOutputMode } = window.APP.store.state.preferences;
     if (audioOutputMode === "audio") {
-      this.data.gain = newGain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance));
+      const sourcePos = new THREE.Vector3();
+      const listenerPos = new THREE.Vector3();
+      this.audioRef.getWorldPosition(sourcePos);
+      this.el.sceneEl.audioListener.getWorldPosition(listenerPos);
+      const squaredDistance = sourcePos.distanceToSquared(listenerPos);
+      this.data.gain = newGain * Math.min(1, 10 / Math.max(1, squaredDistance));
     }
     gainFilter?.gain.setTargetAtTime(this.data.gain, this.audioRef.context.currentTime, GAIN_TIME_CONST);
   },

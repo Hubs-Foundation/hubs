@@ -105,51 +105,57 @@ AFRAME.registerSystem("audio-debug", {
     }
   },
 
-  tick(time) {
-    if (!this.data.enabled) {
-      return;
-    }
-
-    let sourceNum = 0;
-    this.sources.forEach(source => {
-      if (source.data.enabled && source.data.debuggable) {
-        if (sourceNum < MAX_DEBUG_SOURCES) {
-          this.sourcePositions[sourceNum] = this.navMeshObject.worldToLocal(source.data.position);
-          this.sourceOrientations[sourceNum] = source.data.orientation;
-          this.distanceModels[sourceNum] = 0;
-          if (source.data.distanceModel === DistanceModelType.Linear) {
-            this.distanceModels[sourceNum] = 0;
-          } else if (source.data.distanceModel === DistanceModelType.Inverse) {
-            this.distanceModels[sourceNum] = 1;
-          } else if (source.data.distanceModel === DistanceModelType.Exponential) {
-            this.distanceModels[sourceNum] = 2;
-          }
-          this.maxDistances[sourceNum] = source.data.maxDistance;
-          this.refDistances[sourceNum] = source.data.refDistance;
-          this.rolloffFactors[sourceNum] = source.data.rolloffFactor;
-          this.coneInnerAngles[sourceNum] = source.data.coneInnerAngle;
-          this.coneOuterAngles[sourceNum] = source.data.coneOuterAngle;
-          this.gains[sourceNum] = source.data.gain;
-          this.clipped[sourceNum] = source.data.isClipped;
-          sourceNum++;
-        }
+  tick: (() => {
+    const sourcePos = new THREE.Vector3();
+    const sourceDir = new THREE.Vector3();
+    return function(time) {
+      if (!this.data.enabled) {
+        return;
       }
-    });
 
-    // Update material uniforms
-    this.material.uniforms.time.value = time;
-    this.material.uniforms.distanceModel.value = this.distanceModels;
-    this.material.uniforms.maxDistance.value = this.maxDistances;
-    this.material.uniforms.refDistance.value = this.refDistances;
-    this.material.uniforms.rolloffFactor.value = this.rolloffFactors;
-    this.material.uniforms.sourcePosition.value = this.sourcePositions;
-    this.material.uniforms.sourceOrientation.value = this.sourceOrientations;
-    this.material.uniforms.count.value = sourceNum;
-    this.material.uniforms.coneInnerAngle.value = this.coneInnerAngles;
-    this.material.uniforms.coneOuterAngle.value = this.coneOuterAngles;
-    this.material.uniforms.gain.value = this.gains;
-    this.material.uniforms.clipped.value = this.clipped;
-  },
+      let sourceNum = 0;
+      this.sources.forEach(source => {
+        if (source.data.enabled && source.data.debuggable && source.audioRef) {
+          if (sourceNum < MAX_DEBUG_SOURCES) {
+            source.audioRef.getWorldPosition(sourcePos);
+            source.audioRef.getWorldDirection(sourceDir);
+            this.sourcePositions[sourceNum] = sourcePos.clone();
+            this.sourceOrientations[sourceNum] = sourceDir.clone();
+            this.distanceModels[sourceNum] = 0;
+            if (source.data.distanceModel === DistanceModelType.Linear) {
+              this.distanceModels[sourceNum] = 0;
+            } else if (source.data.distanceModel === DistanceModelType.Inverse) {
+              this.distanceModels[sourceNum] = 1;
+            } else if (source.data.distanceModel === DistanceModelType.Exponential) {
+              this.distanceModels[sourceNum] = 2;
+            }
+            this.maxDistances[sourceNum] = source.data.maxDistance;
+            this.refDistances[sourceNum] = source.data.refDistance;
+            this.rolloffFactors[sourceNum] = source.data.rolloffFactor;
+            this.coneInnerAngles[sourceNum] = source.data.coneInnerAngle;
+            this.coneOuterAngles[sourceNum] = source.data.coneOuterAngle;
+            this.gains[sourceNum] = source.data.gain;
+            this.clipped[sourceNum] = source.data.isClipped;
+            sourceNum++;
+          }
+        }
+      });
+
+      // Update material uniforms
+      this.material.uniforms.time.value = time;
+      this.material.uniforms.distanceModel.value = this.distanceModels;
+      this.material.uniforms.maxDistance.value = this.maxDistances;
+      this.material.uniforms.refDistance.value = this.refDistances;
+      this.material.uniforms.rolloffFactor.value = this.rolloffFactors;
+      this.material.uniforms.sourcePosition.value = this.sourcePositions;
+      this.material.uniforms.sourceOrientation.value = this.sourceOrientations;
+      this.material.uniforms.count.value = sourceNum;
+      this.material.uniforms.coneInnerAngle.value = this.coneInnerAngles;
+      this.material.uniforms.coneOuterAngle.value = this.coneOuterAngles;
+      this.material.uniforms.gain.value = this.gains;
+      this.material.uniforms.clipped.value = this.clipped;
+    };
+  })(),
 
   enableDebugMode(enabled, force = false) {
     if (((enabled === undefined || enabled === this.data.enabled) && !force) || this.unsupported) return;

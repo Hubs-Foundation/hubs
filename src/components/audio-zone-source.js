@@ -1,7 +1,5 @@
 import { THREE } from "aframe";
 
-const zero = new THREE.Vector3(0, 0, 0);
-
 AFRAME.registerComponent("audio-zone-source", {
   init() {
     this.originalAudioParamsData = null;
@@ -13,8 +11,15 @@ AFRAME.registerComponent("audio-zone-source", {
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterSource(this);
   },
 
-  getPosition() {
-    return this.el.components["audio-params"].data.position || zero;
+  getPosition: () => {
+    const sourcePos = new THREE.Vector3();
+    return () => {
+      if (this.el.components["audio-params"].audioRef) {
+        this.el.components["audio-params"].audioRef.getWorldPosition(sourcePos);
+        return sourcePos.clone();
+      }
+      return new THREE.Vector3(0, 0, 0);
+    };
   },
 
   apply(params) {
