@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import LaunchIcon from "@material-ui/icons/Launch";
-import { getReticulumFetchUrl } from "hubs/src/utils/phoenix-utils";
+import { getReticulumFetchUrl, getAssetFetchUrl } from "hubs/src/utils/phoenix-utils";
 import { ReferenceField } from "react-admin";
 
 const styles = {
@@ -39,11 +39,15 @@ ConditionalReferenceField.propTypes = {
 };
 
 const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect = "wide", classes }) => {
-  const src = getReticulumFetchUrl(`/files/${record.owned_file_uuid}`);
+  const src = getAssetFetchUrl(`/files/${record.owned_file_uuid}`);
   return <img src={src} className={classes[`ownedFileImageAspect_${aspect}`]} />;
 });
 
 export const OwnedFileImage = withStyles(styles)(({ basePath, record, source, aspect, classes, defaultImage }) => {
+  console.log(basePath);
+  console.log(source);
+  console.log(defaultImage);
+
   return (
     <ConditionalReferenceField
       basePath={basePath}

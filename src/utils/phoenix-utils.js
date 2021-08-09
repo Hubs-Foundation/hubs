@@ -45,8 +45,21 @@ let reticulumMeta = null;
 let invalidatedReticulumMetaThisSession = false;
 
 export function getReticulumFetchUrl(path, absolute = false, host = null, port = null) {
+  console.log(configs);
+
   if (host || hasReticulumServer()) {
     return `https://${host || configs.RETICULUM_SERVER}${port ? `:${port}` : ""}${path}`;
+  } else if (absolute) {
+    resolverLink.href = path;
+    return resolverLink.href;
+  } else {
+    return path;
+  }
+}
+
+export function getAssetFetchUrl(path, absolute = false, host = null, port = null) {
+  if (host || hasReticulumServer()) {
+    return `https://${host || configs.BASE_ASSETS_PATH}${port ? `:${port}` : ""}${path}`;
   } else if (absolute) {
     resolverLink.href = path;
     return resolverLink.href;
