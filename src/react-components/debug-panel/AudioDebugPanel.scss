@@ -1,0 +1,46 @@
+
+@use "../styles/theme.scss";
+
+:local(.audio-debug-container) {
+  pointer-events: none;
+  width: 100%;
+  overflow-y: auto;
+  align-self: flex-start;
+  flex: 0 1 auto;
+  justify-content: center;
+
+  @media(max-width: 500px) {
+    width: 100%;
+    align-self: baseline;
+    flex: 0 1 auto;
+    justify-content: left;
+  }
+}
+
+:local(.audio-debug-row) {
+  display: flex;
+  align-items: center;
+  &>*{
+    margin-right: 12px;
+  }
+  &>*:last-child {
+    margin-right: 0px;
+  }
+}
+
+:local(.prop-text) {
+  color: theme.$white;
+  font-size: theme.$font-size-xs;
+  display: block;
+  margin: 0;
+  text-align: center;
+  overflow-wrap: break-word;
+  width: 80px
+}
+
+:local(.value-text) {
+  font-size: theme.$font-size-xs;
+  margin: 0;
+  color: theme.$yellow;
+  width: 40px;
+}

@@ -1,40 +1,18 @@
 import React from "react";
 import { CenteredModalWrapper } from "../layout/CenteredModalWrapper";
-import styles from "./Tokens.scss";
 import { TokenList } from "./TokenList";
 import { TokenPageLayout } from "./TokenPageLayout";
 import { NoAccess } from "./NoAccess";
 import { RevokeTokenModal } from "./RevokeTokenModal";
 import { RevealTokenModal } from "./RevealTokenModal";
 import { CreateToken } from "./CreateToken";
+import { StorybookAuthContextProvider } from "../auth/AuthContext";
 
 export default {
   title: "Token/Tokens"
 };
 
 const scopes = ["read_rooms", "write_rooms", "another_long_scope_here"];
-
-const scopeInfo = {
-  ["read_rooms"]: {
-    description: "Read room data",
-    appTags: [],
-    accountTags: [],
-    tags: ["myRooms", "favoriteRooms", "publicRooms"]
-  },
-  ["write_rooms"]: {
-    description: "Write room data",
-    appTags: [],
-    accountTags: [],
-    tags: ["createRooms", "updateRoom"]
-  },
-  ["another_long_scope_here"]: {
-    description:
-      "This scope does a lot of interesting things and as such we're going to need a lot of room to write about it.",
-    appTags: [],
-    accountTags: [],
-    tags: ["myRooms", "favoriteRooms", "publicRooms"]
-  }
-};
 
 const dummyTokens = [
   {
@@ -71,26 +49,35 @@ const dummyTokens = [
 
 const noop = () => {};
 
+// eslint-disable-next-line react/prop-types
+const StorybookWrapper = ({ children }) => {
+  return (
+    <StorybookAuthContextProvider>
+      <TokenPageLayout>{children}</TokenPageLayout>
+    </StorybookAuthContextProvider>
+  );
+};
+
 export const NoAccessPage = () => {
   return (
-    <TokenPageLayout className={styles.backgroundGray}>
+    <StorybookWrapper>
       <NoAccess />
-    </TokenPageLayout>
+    </StorybookWrapper>
   );
 };
 
 // eslint-disable-next-line react/prop-types
 export const TokenListPage = ({ children }) => (
-  <TokenPageLayout>
+  <StorybookWrapper>
     {children}
     <TokenList tokens={dummyTokens} onRevokeToken={noop} />
-  </TokenPageLayout>
+  </StorybookWrapper>
 );
 
 export const EmptyTokenListPage = () => (
-  <TokenPageLayout>
+  <StorybookWrapper>
     <TokenList tokens={[]} onRevokeToken={noop} />
-  </TokenPageLayout>
+  </StorybookWrapper>
 );
 
 export const RevokeTokenModalPage = () => (
@@ -109,17 +96,17 @@ export function ModalRevokeToken() {
 const selectedScopes = ["read_rooms", "write_rooms"];
 // eslint-disable-next-line react/prop-types
 export const CreateTokenPage = ({ children }) => (
-  <TokenPageLayout>
+  <StorybookWrapper>
     {children}
-    <CreateToken scopes={scopes} scopeInfo={scopeInfo} selectedScopes={selectedScopes} />
-  </TokenPageLayout>
+    <CreateToken scopes={scopes} selectedScopes={selectedScopes} />
+  </StorybookWrapper>
 );
 
 export const ModalSaveTokenPage = () => (
-  <TokenPageLayout>
+  <StorybookWrapper>
     <CenteredModalWrapper>
       <RevealTokenModal onClose={noop} token={{ token: "abcd1234" }} selectedScopes={["write_rooms"]} />
     </CenteredModalWrapper>
     <TokenList tokens={dummyTokens} onRevokeToken={noop} />
-  </TokenPageLayout>
+  </StorybookWrapper>
 );

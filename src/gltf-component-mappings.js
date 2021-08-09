@@ -7,6 +7,7 @@ import { getBox } from "./utils/auto-box-collider";
 import { injectCustomShaderChunks } from "./utils/media-utils";
 
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
+import { AudioType, SourceType } from "./components/audio-params";
 
 import { Object3D } from "three";
 
@@ -124,7 +125,6 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
     willMaintainWorldUp: true
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("sticky-zone", "sticky-zone");
 AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
   const nav = AFRAME.scenes[0].systems.nav;
   const zone = componentData.zone || "character";
@@ -252,19 +252,22 @@ async function mediaInflator(el, componentName, componentData, components) {
 
   if (componentName === "video" || componentName === "audio") {
     mediaOptions.videoPaused = !componentData.autoPlay;
-    mediaOptions.volume = componentData.volume;
     mediaOptions.loop = componentData.loop;
-    mediaOptions.audioType = componentData.audioType;
     mediaOptions.hidePlaybackControls = !isControlled;
 
-    if (componentData.audioType === "pannernode") {
-      mediaOptions.distanceModel = componentData.distanceModel;
-      mediaOptions.rolloffFactor = componentData.rolloffFactor;
-      mediaOptions.refDistance = componentData.refDistance;
-      mediaOptions.maxDistance = componentData.maxDistance;
-      mediaOptions.coneInnerAngle = componentData.coneInnerAngle;
-      mediaOptions.coneOuterAngle = componentData.coneOuterAngle;
-      mediaOptions.coneOuterGain = componentData.coneOuterGain;
+    if (componentData.audioType) {
+      el.setAttribute("audio-params", {
+        audioType: componentData.audioType,
+        sourceType: SourceType.MEDIA_VIDEO,
+        distanceModel: componentData.distanceModel,
+        rolloffFactor: componentData.rolloffFactor,
+        refDistance: componentData.refDistance,
+        maxDistance: componentData.maxDistance,
+        coneInnerAngle: componentData.coneInnerAngle,
+        coneOuterAngle: componentData.coneOuterAngle,
+        coneOuterGain: componentData.coneOuterGain,
+        gain: componentData.volume
+      });
     }
 
     el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
@@ -480,7 +483,28 @@ AFRAME.GLTFModelPlus.registerComponent(
       }
     }
 
-    el.setAttribute(componentName, { ...componentData, srcEl });
+    // Migrate audio-target component that has built-in audio params
+    if (componentData.positional) {
+      el.setAttribute("audio-params", {
+        audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
+        sourceType: SourceType.MEDIA_VIDEO,
+        distanceModel: componentData.distanceModel,
+        rolloffFactor: componentData.rolloffFactor,
+        refDistance: componentData.refDistance,
+        maxDistance: componentData.maxDistance,
+        coneInnerAngle: componentData.coneInnerAngle,
+        coneOuterAngle: componentData.coneOuterAngle,
+        coneOuterGain: componentData.coneOuterGain,
+        gain: componentData.volume
+      });
+    }
+
+    el.setAttribute(componentName, {
+      minDelay: componentData.minDelay,
+      maxDelay: componentData.maxDelay,
+      debug: componentData.debug,
+      srcEl
+    });
   }
 );
 AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
@@ -553,4 +577,23 @@ AFRAME.GLTFModelPlus.registerComponent("moveable", "moveable", (el, componentNam
   } else {
     el.setAttribute("moveable", { });
   }
+});
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "audio-params",
+  "audio-params",
+  (el, componentName, componentData, components) => {
+    if (components["audio"] || components["video"]) {
+      componentData["sourceType"] = SourceType.MEDIA_VIDEO;
+    } else if (components["audio-target"]) {
+      componentData["sourceType"] = SourceType.AUDIO_TARGET;
+    } else if (components["audio-zone"]) {
+      componentData["sourceType"] = SourceType.AUDIO_ZONE;
+    }
+    el.setAttribute(componentName, { ...componentData });
+  }
+);
+
+AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
+  el.setAttribute(componentName, { ...componentData });
 });

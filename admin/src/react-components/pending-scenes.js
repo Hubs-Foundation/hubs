@@ -3,10 +3,17 @@ import { SceneLink, OwnedFileImage, OwnedFileSizeField, ConditionalReferenceFiel
 import { ApproveSceneButton } from "./approve-buttons";
 import { DenySceneButton } from "./deny-buttons";
 
-import { List, Datagrid, TextField, DateField } from "react-admin";
+import { List, TextInput, Datagrid, TextField, DateField, Filter } from "react-admin";
+
+const SceneFilter = props => (
+  <Filter {...props}>
+    <TextInput label="Search Name" source="name" alwaysOn />
+    <TextInput label="Search SID" source="scene_sid" alwaysOn />
+  </Filter>
+);
 
 export const PendingSceneList = props => (
-  <List {...props}>
+  <List {...props} filters={<SceneFilter />}>
     <Datagrid>
       <OwnedFileImage source="screenshot_owned_file_id" />
       <OwnedFileSizeField label="Model size" source="model_owned_file_id" />

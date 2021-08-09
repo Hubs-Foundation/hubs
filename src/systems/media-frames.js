@@ -3,6 +3,7 @@ import { computeObjectAABB } from "../utils/auto-box-collider";
 import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { THREE } from "aframe";
+import { createPlaneBufferGeometry } from "../utils/three-utils";
 
 function scaleForAspectFit(containerSize, itemSize) {
   return Math.min(containerSize.x / itemSize.x, Math.min(containerSize.y / itemSize.y, containerSize.z / itemSize.z));
@@ -205,7 +206,7 @@ AFRAME.registerComponent("media-frame", {
     previewMaterial.transparent = true;
     previewMaterial.opacity = 0.5;
 
-    const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
+    const geometry = createPlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
     const previewMesh = new THREE.Mesh(geometry, previewMaterial);
     previewMesh.visible = false;
     this.el.setObject3D("preview", previewMesh);
