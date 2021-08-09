@@ -77,7 +77,6 @@ AFRAME.registerComponent("audio-params", {
   schema: {
     enabled: { default: true },
     debuggable: { default: true },
-    isLocal: { default: false },
     position: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
     orientation: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
     audioType: { default: AvatarAudioDefaults.AUDIO_TYPE },
@@ -101,37 +100,6 @@ AFRAME.registerComponent("audio-params", {
 
   init() {
     this.audioRef = null;
-    this.avatarRigPosition = new THREE.Vector3();
-    this.avatarAudio = {
-      panner: {
-        orientationX: {
-          value: 0
-        },
-        orientationY: {
-          value: 0
-        },
-        orientationZ: {
-          value: 0
-        },
-        positionX: {
-          value: 0
-        },
-        positionY: {
-          value: 0
-        },
-        positionZ: {
-          value: 0
-        },
-        distanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
-        maxDistance: AvatarAudioDefaults.MAX_DISTANCE,
-        refDistance: AvatarAudioDefaults.REF_DISTANCE,
-        rolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
-        coneInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
-        coneOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
-        coneOuterGain: AvatarAudioDefaults.OUTER_GAIN
-      }
-    };
-    this.avatarRigOrientation = new THREE.Vector3(0, 0, -1);
     this.listenerPos = new THREE.Vector3();
     this.normalizer = null;
     this.el.sceneEl?.systems["audio-debug"].registerSource(this);
@@ -146,9 +114,7 @@ AFRAME.registerComponent("audio-params", {
 
     this.onSourceSetAdded = this.sourceSetAdded.bind(this);
     let sourceType;
-    if (this.data.isLocal) {
-      sourceType = SourceType.AVATAR_RIG;
-    } else if (this.el.components["media-video"]) {
+    if (this.el.components["media-video"]) {
       sourceType = SourceType.MEDIA_VIDEO;
     } else if (this.el.components["avatar-audio-source"]) {
       sourceType = SourceType.AVATAR_AUDIO_SOURCE;
@@ -158,7 +124,6 @@ AFRAME.registerComponent("audio-params", {
       sourceType = SourceType.AUDIO_ZONE;
     }
     this.audioSettings = this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.audioSettings;
-    this.avatarRigObj = document.getElementById("avatar-rig").querySelector(".camera").object3D;
 
     this.el.setAttribute("audio-params", {
       position: new THREE.Vector3(0.0, 0.0, 0.0),
@@ -197,18 +162,17 @@ AFRAME.registerComponent("audio-params", {
   },
 
   tick() {
-    const audio = this.getAudio();
-    if (audio) {
-      if (audio.panner) {
+    if (this.audioRef) {
+      if (this.audioRef.panner) {
         this.data.position = new THREE.Vector3(
-          audio.panner.positionX.value,
-          audio.panner.positionY.value,
-          audio.panner.positionZ.value
+          this.audioRef.panner.positionX.value,
+          this.audioRef.panner.positionY.value,
+          this.audioRef.panner.positionZ.value
         );
         this.data.orientation = new THREE.Vector3(
-          audio.panner.orientationX.value,
-          audio.panner.orientationY.value,
-          audio.panner.orientationZ.value
+          this.audioRef.panner.orientationX.value,
+          this.audioRef.panner.orientationY.value,
+          this.audioRef.panner.orientationZ.value
         );
         this.updateAttenuation();
       } else {
@@ -229,70 +193,15 @@ AFRAME.registerComponent("audio-params", {
     }
   },
 
-  getAudio: (function() {
-    const worldQuat = new THREE.Quaternion();
-
-    return function() {
-      switch (this.data.sourceType) {
-        case SourceType.AVATAR_RIG: {
-          // Create fake parametes for the avatar rig as it doens't have an audio source.
-          const audioParams = this.audioSettings;
-          this.avatarRigObj.updateMatrixWorld(true);
-          this.avatarRigObj.getWorldPosition(this.avatarRigPosition);
-          this.avatarRigOrientation.set(0, 0, -1);
-          this.avatarRigObj.getWorldQuaternion(worldQuat);
-          this.avatarRigOrientation.applyQuaternion(worldQuat);
-          return {
-            panner: {
-              orientationX: {
-                value: this.avatarRigOrientation.x
-              },
-              orientationY: {
-                value: this.avatarRigOrientation.y
-              },
-              orientationZ: {
-                value: this.avatarRigOrientation.z
-              },
-              positionX: {
-                value: this.avatarRigPosition.x
-              },
-              positionY: {
-                value: this.avatarRigPosition.y
-              },
-              positionZ: {
-                value: this.avatarRigPosition.z
-              },
-              distanceModel: audioParams.avatarDistanceModel,
-              maxDistance: audioParams.avatarMaxDistance,
-              refDistance: audioParams.avatarRefDistance,
-              rolloffFactor: audioParams.avatarRolloffFactor,
-              coneInnerAngle: audioParams.avatarConeInnerAngle,
-              coneOuterAngle: audioParams.avatarConeOuterAngle,
-              coneOuterGain: audioParams.avatarConeOuterGain
-            }
-          };
-        }
-        case SourceType.MEDIA_VIDEO:
-        case SourceType.AVATAR_AUDIO_SOURCE:
-        case SourceType.AUDIO_TARGET: {
-          return this.audioRef;
-        }
-      }
-
-      return null;
-    };
-  })(),
-
   setAudio(audio) {
     this.audioRef = audio;
   },
 
   enableNormalizer() {
-    const audio = this.getAudio();
-    if (audio) {
+    if (this.audioRef) {
       const avatarAudioSource = this.el.components["avatar-audio-source"];
       if (avatarAudioSource) {
-        this.normalizer = new AudioNormalizer(audio);
+        this.normalizer = new AudioNormalizer(this.audioRef);
         avatarAudioSource.el.addEventListener("sound-source-set", this.onSourceSetAdded);
       }
     }
@@ -342,8 +251,7 @@ AFRAME.registerComponent("audio-params", {
   },
 
   updateGain(newGain) {
-    const audio = this.getAudio();
-    if (!audio) return;
+    if (!this.audioRef) return;
 
     let gainFilter;
     switch (this.data.sourceType) {
@@ -364,7 +272,7 @@ AFRAME.registerComponent("audio-params", {
     if (audioOutputMode === "audio") {
       this.data.gain = newGain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance));
     }
-    gainFilter?.gain.setTargetAtTime(this.data.gain, audio.context.currentTime, GAIN_TIME_CONST);
+    gainFilter?.gain.setTargetAtTime(this.data.gain, this.audioRef.context.currentTime, GAIN_TIME_CONST);
   },
 
   updateClipping() {

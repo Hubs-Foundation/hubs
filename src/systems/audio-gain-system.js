@@ -27,7 +27,7 @@ export class GainSystem {
   tick() {
     this.sources.forEach(source => {
       if (source.data.clippingEnabled) {
-        const audio = source.getAudio();
+        const audio = source.audioRef;
         if (source.data.attenuation < source.data.clippingThreshold) {
           if (audio.gain.gain.value > 0 && !source.data.isClipped) {
             source.clipGain(CLIPPING_GAIN);
