@@ -1,4 +1,10 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
+import { GAIN_TIME_CONST } from "../components/audio-params";
+
+export const MixerType = Object.freeze({
+  AVATAR: 0,
+  MEDIA: 1
+});
 
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
@@ -137,11 +143,21 @@ export class AudioSystem {
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
     this.audioContextNeedsToBeResumed = false;
 
+    this.mixer = {
+      [MixerType.AVATAR]: this.audioContext.createGain(),
+      [MixerType.MEDIA]: this.audioContext.createGain()
+    };
+    this.mixer[MixerType.MEDIA].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[MixerType.AVATAR].connect(this._sceneEl.audioListener.getInput());
+
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
 
     document.body.addEventListener("touchend", this._resumeAudioContext, false);
     document.body.addEventListener("mouseup", this._resumeAudioContext, false);
+
+    this.onPrefsUpdated = this.updatePrefs.bind(this);
+    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -163,6 +179,25 @@ export class AudioSystem {
       nodes.gainNode.disconnect();
       this.audioNodes.delete(id);
     }
+  }
+
+  addAudio(mixerTrack, audioNode) {
+    this.removeAudio(audioNode);
+    audioNode.getOutput().connect(this.mixer[mixerTrack]);
+  }
+
+  removeAudio(audioNode) {
+    audioNode.getOutput().disconnect();
+    audioNode.sourceType !== "empty" && audioNode.disconnect();
+  }
+
+  updatePrefs() {
+    const { globalVoiceVolume, globalMediaVolume } = window.APP.store.state.preferences;
+    let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
+    this.mixer[MixerType.MEDIA].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+
+    newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
+    this.mixer[MixerType.AVATAR].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
   }
 
   /**

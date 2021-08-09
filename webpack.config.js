@@ -269,7 +269,9 @@ module.exports = async (env, argv) => {
       cloud: path.join(__dirname, "src", "cloud.js"),
       signin: path.join(__dirname, "src", "signin.js"),
       verify: path.join(__dirname, "src", "verify.js"),
-      "whats-new": path.join(__dirname, "src", "whats-new.js")
+      tokens: path.join(__dirname, "src", "tokens.js"),
+      "whats-new": path.join(__dirname, "src", "whats-new.js"),
+      "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
@@ -293,6 +295,7 @@ module.exports = async (env, argv) => {
           { from: /^\/discord/, to: "/discord.html" },
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
+          { from: /^\/tokens/, to: "/tokens.html" },
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
       },
@@ -523,7 +526,7 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["support", "hub"],
+        chunks: ["webxr-polyfill", "support", "hub"],
         chunksSortMode: "manual",
         inject: "head",
         minify: {
@@ -597,6 +600,14 @@ module.exports = async (env, argv) => {
         filename: "verify.html",
         template: path.join(__dirname, "src", "verify.html"),
         chunks: ["verify"],
+        minify: {
+          removeComments: false
+        }
+      }),
+      new HTMLWebpackPlugin({
+        filename: "tokens.html",
+        template: path.join(__dirname, "src", "tokens.html"),
+        chunks: ["tokens"],
         minify: {
           removeComments: false
         }
