@@ -16,6 +16,10 @@
   margin: 0px !important;
 }
 
+:local(.textError) {
+  color: theme.$red
+}
+
 $spacing: (
     "2xs": theme.$spacing-2xs,
     "xs": theme.$spacing-xs,

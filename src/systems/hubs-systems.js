@@ -71,7 +71,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
     this.inspectYourselfSystem = new InspectYourselfSystem();
     this.emojiSystem = new EmojiSystem(this.el);
-    this.audioZonesSystem = new AudioZonesSystem(this.el);
+    this.audioZonesSystem = new AudioZonesSystem();
     this.gainSystem = new GainSystem();
   },
 
@@ -117,7 +117,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
     this.mediaFramesSystem.tick();
-    this.audioZonesSystem.tick();
+    this.audioZonesSystem.tick(this.el);
     this.gainSystem.tick();
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object

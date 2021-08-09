@@ -17,6 +17,8 @@ import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 import { detect } from "detect-browser";
 import semver from "semver";
+import { createPlaneBufferGeometry } from "../utils/three-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { MixerType } from "../systems/audio-system";
 
 import qsTruthy from "../utils/qs_truthy";
@@ -39,7 +41,7 @@ const TYPE_IMG_PNG = { type: "image/png" };
 const parseGIF = promisifyWorker(new GIFWorker());
 
 const isIOS = AFRAME.utils.device.isIOS();
-const audioIconTexture = new THREE.TextureLoader().load(audioIcon);
+const audioIconTexture = new HubsTextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -53,6 +55,7 @@ for (let i = 0; i <= 20; i++) {
 
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
+import { AudioType } from "./audio-params";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 
@@ -257,7 +260,6 @@ AFRAME.registerComponent("media-video", {
     audioSrc: { type: "string" },
     contentType: { type: "string" },
     loop: { type: "boolean", default: true },
-    audioType: { type: "string", default: "pannernode" },
     hidePlaybackControls: { type: "boolean", default: false },
     videoPaused: { type: "boolean" },
     projection: { type: "string", default: "flat" },
@@ -516,8 +518,9 @@ AFRAME.registerComponent("media-video", {
       this.updateSrc(oldData);
       return;
     }
+
     const shouldRecreateAudio =
-      !shouldUpdateSrc && this.mediaElementAudioSource && oldData.audioType !== this.data.audioType;
+      !shouldUpdateSrc && this.mediaElementAudioSource && this.audio?.panner?.audioType !== this.data.audioType;
     if (shouldRecreateAudio) {
       this.setupAudio();
       return;
@@ -530,7 +533,12 @@ AFRAME.registerComponent("media-video", {
       this.el.removeObject3D("sound");
     }
 
-    this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
+    const audioListener = this.el.sceneEl.audioListener;
+    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+      this.audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      this.audio = new THREE.Audio(audioListener);
+    }
 
     this.audioSystem.removeAudio(this.audio);
     this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
@@ -644,7 +652,8 @@ AFRAME.registerComponent("media-video", {
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
       } else {
-        geometry = new THREE.PlaneBufferGeometry();
+        const flipY = texture.isVideoTexture ? texture.flipY : audioIconTexture.flipY;
+        geometry = createPlaneBufferGeometry(undefined, undefined, undefined, undefined, flipY);
         material.side = THREE.DoubleSide;
       }
 
@@ -995,6 +1004,7 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
+      this.snapButton.object3D.removeEventListener("interact", this.snap);
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
@@ -1121,7 +1131,7 @@ AFRAME.registerComponent("media-image", {
           }
         }
       } else {
-        geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+        geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
         material.side = THREE.DoubleSide;
       }
 
@@ -1262,7 +1272,7 @@ AFRAME.registerComponent("media-pdf", {
 
     if (!this.mesh) {
       const material = new THREE.MeshBasicMaterial();
-      const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+      const geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
       material.side = THREE.DoubleSide;
 
       this.mesh = new THREE.Mesh(geometry, material);

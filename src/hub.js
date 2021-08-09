@@ -5,7 +5,6 @@ import {
   createHubChannelParams
 } from "./utils/hub-utils";
 import "./utils/debug-log";
-import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
@@ -30,13 +29,18 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-import "three/examples/js/loaders/GLTFLoader";
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/loaders/GLTFLoader");
+
 import "networked-aframe/src/index";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
+import "./utils/threejs-raycast-patches";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {

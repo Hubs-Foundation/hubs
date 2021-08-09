@@ -37,13 +37,13 @@ export class AudioSettingsSystem {
       avatarConeOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
       avatarConeOuterGain: AvatarAudioDefaults.OUTER_GAIN,
       mediaVolume: MediaAudioDefaults.VOLUME,
-      mediaDistanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
-      mediaRolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
-      mediaRefDistance: AvatarAudioDefaults.REF_DISTANCE,
-      mediaMaxDistance: AvatarAudioDefaults.MAX_DISTANCE,
-      mediaConeInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
-      mediaConeOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
-      mediaConeOuterGain: AvatarAudioDefaults.OUTER_GAIN
+      mediaDistanceModel: MediaAudioDefaults.DISTANCE_MODEL,
+      mediaRolloffFactor: MediaAudioDefaults.ROLLOFF_FACTOR,
+      mediaRefDistance: MediaAudioDefaults.REF_DISTANCE,
+      mediaMaxDistance: MediaAudioDefaults.MAX_DISTANCE,
+      mediaConeInnerAngle: MediaAudioDefaults.INNER_ANGLE,
+      mediaConeOuterAngle: MediaAudioDefaults.OUTER_ANGLE,
+      mediaConeOuterGain: MediaAudioDefaults.OUTER_GAIN
     };
     this.audioSettings = this.defaultSettings;
     this.mediaVideos = [];
