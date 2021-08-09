@@ -25,7 +25,6 @@ AFRAME.registerComponent("avatar-volume-controls", {
 
   changeVolumeBy(v) {
     const vol = THREE.Math.clamp(this.audioParamsComp.data.gain + v, 0, MAX_VOLUME);
-    this.el.setAttribute("avatar-volume-controls", "volume", vol);
     this.audioParamsComp.el.setAttribute("audio-params", "gain", vol);
     this.updateVolumeLabel();
   },

@@ -1,4 +1,4 @@
-import { SourceType, AvatarAudioDefaults, TargetAudioDefaults } from "./audio-params";
+import { SourceType, TargetAudioDefaults, AudioType } from "./audio-params";
 import { MixerType } from "../systems/audio-system";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
@@ -52,17 +52,6 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     const audioListener = this.el.sceneEl.audioListener;
     const audio = new THREE.PositionalAudio(audioListener);
-    this.el.setAttribute("audio-params", {
-      sourceType: SourceType.AVATAR_AUDIO_SOURCE,
-      distanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
-      rolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTORROLLOFF_FACTOR,
-      refDistance: AvatarAudioDefaults.REF_DISTANCE,
-      maxDistance: AvatarAudioDefaults.MAX_DISTANCE,
-      coneInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
-      coneOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
-      coneOuterGain: AvatarAudioDefaults.OUTER_GAIN,
-      gain: AvatarAudioDefaults.VOLUME
-    });
     this.el.components["audio-params"].setAudio(audio);
 
     this.audioSystem.removeAudio(audio);
@@ -285,7 +274,13 @@ AFRAME.registerComponent("audio-target", {
 
   createAudio: function() {
     const audioListener = this.el.sceneEl.audioListener;
-    const audio = new THREE.PositionalAudio(audioListener);
+
+    let audio = null;
+    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+      audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      audio = new THREE.Audio(audioListener);
+    }
 
     if (this.data.maxDelay > 0) {
       const delayNode = audio.context.createDelay(this.data.maxDelay);
