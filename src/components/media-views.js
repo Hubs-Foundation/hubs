@@ -294,17 +294,19 @@ AFRAME.registerComponent("media-video", {
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
 
-    this.el.setAttribute("audio-params", {
-      audioType: MediaAudioDefaults.AUDIO_TYPE,
-      distanceModel: MediaAudioDefaults.DISTANCE_MODEL,
-      rolloffFactor: MediaAudioDefaults.ROLLOFF_FACTOR,
-      refDistance: MediaAudioDefaults.REF_DISTANCE,
-      maxDistance: MediaAudioDefaults.MAX_DISTANCE,
-      coneInnerAngle: MediaAudioDefaults.INNER_ANGLE,
-      coneOuterAngle: MediaAudioDefaults.OUTER_ANGLE,
-      coneOuterGain: MediaAudioDefaults.OUTER_GAIN,
-      gain: MediaAudioDefaults.VOLUME
-    });
+    if (!this.el.components["audio-params"]) {
+      this.el.setAttribute("audio-params", {
+        audioType: MediaAudioDefaults.AUDIO_TYPE,
+        distanceModel: MediaAudioDefaults.DISTANCE_MODEL,
+        rolloffFactor: MediaAudioDefaults.ROLLOFF_FACTOR,
+        refDistance: MediaAudioDefaults.REF_DISTANCE,
+        maxDistance: MediaAudioDefaults.MAX_DISTANCE,
+        coneInnerAngle: MediaAudioDefaults.INNER_ANGLE,
+        coneOuterAngle: MediaAudioDefaults.OUTER_ANGLE,
+        coneOuterGain: MediaAudioDefaults.OUTER_GAIN,
+        gain: MediaAudioDefaults.VOLUME
+      });
+    }
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
