@@ -29,6 +29,7 @@ export function HomePage() {
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
   const sortedPublicRooms = Array.from(publicRooms).sort((a, b) => b.member_count - a.member_count);
   const wrapInBold = chunk => <b>{chunk}</b>;
+  const isHmc = configs.feature("show_cloud");
   useEffect(() => {
     const qs = new URLSearchParams(location.search);
 
@@ -169,10 +170,11 @@ export function HomePage() {
           </Button>
         </Column>
       </Container>
-
-      <Column center>
-        <SocialBar />
-      </Column>
+      {isHmc ? (
+        <Column center>
+          <SocialBar />
+        </Column>
+      ) : null}
     </PageContainer>
   );
 }

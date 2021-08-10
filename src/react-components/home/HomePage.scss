@@ -21,22 +21,16 @@
   display: flex;
   justify-content: center;
   padding: 20px;
-  width: 250px;
-
+  width: 150px;
+  
   img {
-    height: 83px;
-    width: 124px;
+    width: 100%;
     align-self: flex-start;
   }
 
   @media (min-width: theme.$breakpoint-lg) {
     display: none;
   }
-}
-
-:local(.hamburger) {
-  pointer-events: auto;
-  cursor: pointer;
 }
 
 :local(.sign-in-container) {

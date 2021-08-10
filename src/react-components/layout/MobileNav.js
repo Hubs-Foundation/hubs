@@ -3,18 +3,21 @@ import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import styles from "./Header.scss";
 import { ReactComponent as Hamburger } from "../icons/Hamburger.svg";
-
-export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCommunityLink, communityUrl }) {
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
+export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCommunityLink, communityUrl, isAdmin }) {
   const [navOpen, setNav] = useState(false);
   const toggleNav = () => {
     setNav(!navOpen);
   };
+  const cloud = isHmc ? null : "cloud";
+
   return (
     <>
       <div className={styles.navContainer}>
         <div className={styles.mobileNavWrapper}>
-          <Hamburger className={styles.hamburger} onClick={toggleNav} />
-          <header className={`${navOpen ? "is-active" : "hide"}`}>
+          <Hamburger onClick={toggleNav} />
+          <header className={`${navOpen ? `is-active ${cloud}` : "hide"}`}>
             <nav role="navigation">
               <ul>
                 {isHmc && (
@@ -49,6 +52,17 @@ export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCo
                   <li>
                     <a href="/cloud">
                       <FormattedMessage id="header.cloud" defaultMessage="Hubs Cloud" />
+                    </a>
+                  </li>
+                )}
+                {isAdmin && (
+                  <li>
+                    <a href="/admin" rel="noreferrer noopener">
+                      <i>
+                        <FontAwesomeIcon icon={faCog} />
+                      </i>
+                      &nbsp;
+                      <FormattedMessage id="header.admin" defaultMessage="Admin" />
                     </a>
                   </li>
                 )}

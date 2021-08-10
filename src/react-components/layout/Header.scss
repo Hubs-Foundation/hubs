@@ -25,11 +25,11 @@ header {
 
     li {
       &:first-child {
-        padding-top: 0px;
+        padding-top: 20px;
         @media(min-width: theme.$breakpoint-lg) {
           img {
-            width: 115px;
-            height: 67px;
+            width: 100%;
+            height: 100%;
           }
         }
       }
@@ -76,8 +76,8 @@ header {
 
 :local(.home-link) {
   display: inline-block;
-  width: 96px;
-  height: 64px;
+  width: 124px;
+  height: 83px;
   @media(min-width: theme.$breakpoint-lg) {
    img {
     height: 32px;
@@ -162,6 +162,13 @@ header {
     ul {
       height:230px;
       justify-content: space-between;
+    }
+  }
+  header.cloud {
+    height:230px;
+    ul {
+      height:200px;
+      justify-content: center;
     }
   }
 }
