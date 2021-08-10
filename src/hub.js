@@ -199,6 +199,15 @@ window.APP.RENDER_ORDER = {
   HUD_ICONS: 2,
   CURSOR: 3
 };
+
+// TODO: Remove comments
+// TODO: Rename or reconfigure these as needed
+APP.audios = new Map(); //                     el -> (THREE.Audio || THREE.PositionalAudio)
+APP.sourceType = new Map(); //                 el -> SourceType
+APP.audioOverrides = new Map(); //             el -> AudioSettings
+APP.zoneOverrides = new Map(); //              el -> AudioSettings
+APP.sceneAudioDefaults = new Map(); // SourceType -> AudioSettings
+
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;

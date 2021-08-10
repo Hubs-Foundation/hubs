@@ -1,5 +1,6 @@
 import { SourceType, TargetAudioDefaults, AudioType } from "./audio-params";
 import { MixerType } from "../systems/audio-system";
+import { updateAudioSettings } from "../update-audio-settings";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
@@ -70,6 +71,10 @@ AFRAME.registerComponent("avatar-audio-source", {
     audio.setNodeSource(destinationSource);
     this.el.setObject3D(this.attrName, audio);
     this.el.emit("sound-source-set", { soundSource: destinationSource });
+
+    APP.audios.set(this.el, audio);
+    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
+    updateAudioSettings(this.el, audio);
   },
 
   destroyAudio() {
@@ -248,13 +253,6 @@ AFRAME.registerComponent("audio-target", {
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
     this.el.setAttribute("audio-params", {
       sourceType: SourceType.AUDIO_TARGET,
-      distanceModel: TargetAudioDefaults.DISTANCE_MODEL,
-      rolloffFactor: TargetAudioDefaults.ROLLOFF_FACTOR,
-      refDistance: TargetAudioDefaults.REF_DISTANCE,
-      maxDistance: TargetAudioDefaults.MAX_DISTANCE,
-      coneInnerAngle: TargetAudioDefaults.INNER_ANGLE,
-      coneOuterAngle: TargetAudioDefaults.OUTER_ANGLE,
-      coneOuterGain: TargetAudioDefaults.OUTER_GAIN,
       gain: TargetAudioDefaults.VOLUME
     });
     this.createAudio();
@@ -305,6 +303,9 @@ AFRAME.registerComponent("audio-target", {
     this.el.components["audio-params"].setAudio(audio);
 
     this.audio.updateMatrixWorld();
+    APP.audios.set(this.el, audio);
+    APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
+    updateAudioSettings(this.el, audio);
   },
 
   connectAudio() {

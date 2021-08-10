@@ -1,13 +1,14 @@
 import { THREE } from "aframe";
+import { updateAudioSettings } from "../update-audio-settings";
 
 AFRAME.registerComponent("audio-zone-source", {
   init() {
     this.originalAudioParamsData = null;
-    this.isModified = false;
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerSource(this);
   },
 
   remove() {
+    APP.zoneOverrides.delete(this.el);
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterSource(this);
   },
 
@@ -23,27 +24,24 @@ AFRAME.registerComponent("audio-zone-source", {
   },
 
   apply(params) {
-    if (!this.originalAudioParamsData) {
-      const data = this.el.components["audio-params"].data;
-      this.originalAudioParamsData = {
-        distanceModel: data.distanceModel,
-        maxDistance: data.maxDistance,
-        refDistance: data.refDistance,
-        rolloffFactor: data.rolloffFactor,
-        coneInnerAngle: data.coneInnerAngle,
-        coneOuterAngle: data.coneOuterAngle,
-        coneOuterGain: data.coneOuterGain,
-        gain: data.gain
-      };
+    APP.zoneOverrides.set(this.el, params);
+    const audio = APP.audios.get(this.el);
+    if (audio) {
+      updateAudioSettings(this.el, audio);
     }
+
+    //TODO: remove
     this.el.setAttribute("audio-params", params);
-    this.isModified = true;
   },
 
   restore() {
-    if (this.isModified && this.originalAudioParamsData) {
-      this.el.setAttribute("audio-params", this.originalAudioParamsData);
-      this.isModified = false;
+    APP.zoneOverrides.delete(this.el);
+    const audio = APP.audios.get(this.el);
+    if (audio) {
+      updateAudioSettings(this.el, audio);
     }
+
+    // TODO: remove
+    this.el.setAttribute("audio-params", this.originalAudioParamsData);
   }
 });

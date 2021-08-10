@@ -307,6 +307,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
                 setAvatarDistanceModel(value);
                 const avatarAudioSources = scene.current.querySelectorAll("[avatar-audio-source]");
                 avatarAudioSources.forEach(source => {
+                  // TODO: Add a layer to the audio settings that partially applies these values while the debug panel is open
                   source.setAttribute("audio-params", {
                     distanceModel: value
                   });

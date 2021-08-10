@@ -1,49 +1,26 @@
-import { AvatarAudioDefaults, MediaAudioDefaults } from "../components/audio-params";
-
-function updateMediaAudioSettings(mediaVideo, settings) {
-  mediaVideo.el.setAttribute("audio-params", {
-    distanceModel: settings.mediaDistanceModel,
-    rolloffFactor: settings.mediaRolloffFactor,
-    refDistance: settings.mediaRefDistance,
-    maxDistance: settings.mediaMaxDistance,
-    coneInnerAngle: settings.mediaConeInnerAngle,
-    coneOuterAngle: settings.mediaConeOuterAngle,
-    coneOuterGain: settings.mediaConeOuterGain,
-    gain: settings.mediaVolume
-  });
-}
-
-function updateAvatarAudioSettings(avatarAudioSource, settings) {
-  avatarAudioSource.el.setAttribute("audio-params", {
-    distanceModel: settings.avatarDistanceModel,
-    maxDistance: settings.avatarMaxDistance,
-    refDistance: settings.avatarRefDistance,
-    rolloffFactor: settings.avatarRolloffFactor,
-    coneInnerAngle: settings.avatarConeInnerAngle,
-    coneOuterAngle: settings.avatarConeOuterAngle,
-    coneOuterGain: settings.avatarConeOuterGain
-  });
-}
+import { SourceType, AvatarAudioDefaults, MediaAudioDefaults } from "../components/audio-params";
+import { updateAudioSettings } from "../update-audio-settings";
 
 export class AudioSettingsSystem {
   constructor(sceneEl) {
     this.sceneEl = sceneEl;
+    // TODO: Clean this up
     this.defaultSettings = {
-      avatarDistanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
-      avatarRolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTOR,
-      avatarRefDistance: AvatarAudioDefaults.REF_DISTANCE,
-      avatarMaxDistance: AvatarAudioDefaults.MAX_DISTANCE,
-      avatarConeInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
-      avatarConeOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
-      avatarConeOuterGain: AvatarAudioDefaults.OUTER_GAIN,
+      avatarDistanceModel: AvatarAudioDefaults.distanceModel,
+      avatarRolloffFactor: AvatarAudioDefaults.rolloffFactor,
+      avatarRefDistance: AvatarAudioDefaults.refDistance,
+      avatarMaxDistance: AvatarAudioDefaults.maxDistance,
+      avatarConeInnerAngle: AvatarAudioDefaults.coneInnerAngle,
+      avatarConeOuterAngle: AvatarAudioDefaults.coneOuterAngle,
+      avatarConeOuterGain: AvatarAudioDefaults.coneOuterGain,
       mediaVolume: MediaAudioDefaults.VOLUME,
-      mediaDistanceModel: MediaAudioDefaults.DISTANCE_MODEL,
-      mediaRolloffFactor: MediaAudioDefaults.ROLLOFF_FACTOR,
-      mediaRefDistance: MediaAudioDefaults.REF_DISTANCE,
-      mediaMaxDistance: MediaAudioDefaults.MAX_DISTANCE,
-      mediaConeInnerAngle: MediaAudioDefaults.INNER_ANGLE,
-      mediaConeOuterAngle: MediaAudioDefaults.OUTER_ANGLE,
-      mediaConeOuterGain: MediaAudioDefaults.OUTER_GAIN
+      mediaDistanceModel: MediaAudioDefaults.distanceModel,
+      mediaRolloffFactor: MediaAudioDefaults.rolloffFactor,
+      mediaRefDistance: MediaAudioDefaults.refDistance,
+      mediaMaxDistance: MediaAudioDefaults.maxDistance,
+      mediaConeInnerAngle: MediaAudioDefaults.coneInnerAngle,
+      mediaConeOuterAngle: MediaAudioDefaults.coneOuterAngle,
+      mediaConeOuterGain: MediaAudioDefaults.coneOuterGain
     };
     this.audioSettings = this.defaultSettings;
     this.mediaVideos = [];
@@ -84,7 +61,6 @@ export class AudioSettingsSystem {
     if (index === -1) {
       this.mediaVideos.push(mediaVideo);
     }
-    updateMediaAudioSettings(mediaVideo, this.audioSettings);
   }
 
   unregisterMediaAudioSource(mediaVideo) {
@@ -96,7 +72,6 @@ export class AudioSettingsSystem {
     if (index === -1) {
       this.avatarAudioSources.push(avatarAudioSource);
     }
-    updateAvatarAudioSettings(avatarAudioSource, this.audioSettings);
   }
 
   unregisterAvatarAudioSource(avatarAudioSource) {
@@ -107,19 +82,68 @@ export class AudioSettingsSystem {
   }
 
   updateAudioSettings(settings) {
+    APP.sceneAudioDefaults.set(SourceType.MEDIA_VIDEO, {
+      distanceModel: settings.mediaDistanceModel,
+      rolloffFactor: settings.mediaRolloffFactor,
+      refDistance: settings.mediaRefDistance,
+      maxDistance: settings.mediaMaxDistance,
+      coneInnerAngle: settings.mediaConeInnerAngle,
+      coneOuterAngle: settings.mediaConeOuterAngle,
+      coneOuterGain: settings.mediaConeOuterGain,
+      VOLUME: settings.mediaVolume
+    });
+    APP.sceneAudioDefaults.set(SourceType.AVATAR_AUDIO_SOURCE, {
+      distanceModel: settings.avatarDistanceModel,
+      rolloffFactor: settings.avatarRolloffFactor,
+      refDistance: settings.avatarRefDistance,
+      maxDistance: settings.avatarMaxDistance,
+      coneInnerAngle: settings.avatarConeInnerAngle,
+      coneOuterAngle: settings.avatarConeOuterAngle,
+      coneOuterGain: settings.avatarConeOuterGain,
+      VOLUME: settings.avatarVolume
+    });
+
+    // TODO: Clean this up. Should not need it anymore
     this.audioSettings = Object.assign({}, this.defaultSettings, settings);
 
+    // TODO: Loop over all the audios in the scene. It's simpler and we can remove this
+    // book keeping code
     for (const mediaVideo of this.mediaVideos) {
-      updateMediaAudioSettings(mediaVideo, settings);
+      // TODO: Rename this function. Very confusing. This is NOT the member function it's in.
+      const audio = APP.audios.get(mediaVideo.el);
+      if (audio) {
+        updateAudioSettings(mediaVideo.el, audio);
+      }
     }
 
     for (const avatarAudioSource of this.avatarAudioSources) {
-      updateAvatarAudioSettings(avatarAudioSource, settings);
+      // TODO: Rename this function. Very confusing. This is NOT the member function it's in.
+      const audio = APP.audios.get(avatarAudioSource.el);
+      if (audio) {
+        updateAudioSettings(avatarAudioSource.el, audio);
+      }
     }
   }
 
   onSceneReset = () => {
-    this.updateAudioSettings(this.defaultSettings);
+    APP.sceneAudioDefaults.delete(SourceType.AVATAR_AUDIO_SOURCE);
+    APP.sceneAudioDefaults.delete(SourceType.MEDIA_VIDEO);
+    // TODO: update all the audios in the app
+    for (const mediaVideo of this.mediaVideos) {
+      // TODO: Rename this function. Very confusing. This is NOT the member function it's in.
+      const audio = APP.audios.get(mediaVideo.el);
+      if (audio) {
+        updateAudioSettings(mediaVideo.el, audio);
+      }
+    }
+
+    for (const avatarAudioSource of this.avatarAudioSources) {
+      // TODO: Rename this function. Very confusing. This is NOT the member function it's in.
+      const audio = APP.audios.get(avatarAudioSource.el);
+      if (audio) {
+        updateAudioSettings(avatarAudioSource.el, audio);
+      }
+    }
   };
 }
 

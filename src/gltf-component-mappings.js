@@ -4,6 +4,7 @@ import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 import { AudioType, SourceType } from "./components/audio-params";
+import { updateAudioSettings } from "./update-audio-settings";
 
 function registerRootSceneComponent(componentName) {
   AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
@@ -244,9 +245,8 @@ async function mediaInflator(el, componentName, componentData, components) {
     mediaOptions.hidePlaybackControls = !isControlled;
 
     if (componentData.audioType) {
-      el.setAttribute("audio-params", {
+      APP.audioOverrides.set(el, {
         audioType: componentData.audioType,
-        sourceType: SourceType.MEDIA_VIDEO,
         distanceModel: componentData.distanceModel,
         rolloffFactor: componentData.rolloffFactor,
         refDistance: componentData.refDistance,
@@ -254,6 +254,20 @@ async function mediaInflator(el, componentName, componentData, components) {
         coneInnerAngle: componentData.coneInnerAngle,
         coneOuterAngle: componentData.coneOuterAngle,
         coneOuterGain: componentData.coneOuterGain,
+        gain: componentData.volume
+      });
+
+      // TODO: This feels very weird.
+      // Is it likely or possible that we have an audio by now?
+      const audio = APP.audios.get(el);
+      if (audio) {
+        updateAudioSettings(el, audio);
+      }
+
+      // TODO: Remove the line below
+      el.setAttribute("audio-params", {
+        audioType: componentData.audioType,
+        sourceType: SourceType.MEDIA_VIDEO,
         gain: componentData.volume
       });
     }
@@ -471,10 +485,9 @@ AFRAME.GLTFModelPlus.registerComponent(
     }
 
     // Migrate audio-target component that has built-in audio params
-    if (componentData.positional) {
-      el.setAttribute("audio-params", {
+    if (componentData.positional !== undefined) {
+      APP.audioOverrides.set(el, {
         audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
-        sourceType: SourceType.MEDIA_VIDEO,
         distanceModel: componentData.distanceModel,
         rolloffFactor: componentData.rolloffFactor,
         refDistance: componentData.refDistance,
@@ -482,6 +495,19 @@ AFRAME.GLTFModelPlus.registerComponent(
         coneInnerAngle: componentData.coneInnerAngle,
         coneOuterAngle: componentData.coneOuterAngle,
         coneOuterGain: componentData.coneOuterGain,
+        gain: componentData.volume
+      });
+
+      // TODO: This feels very weird.
+      // Is it likely or possible that we have an audio by now?
+      const audio = APP.audios.get(el);
+      if (audio) {
+        updateAudioSettings(this.el, audio);
+      }
+
+      // TODO: Remove
+      el.setAttribute("audio-params", {
+        audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
         gain: componentData.volume
       });
     }
@@ -500,6 +526,13 @@ AFRAME.GLTFModelPlus.registerComponent(
   "audio-params",
   "audio-params",
   (el, componentName, componentData, components) => {
+    APP.audioOverrides.set(el, componentData);
+    const audio = APP.audios.get(el);
+    if (audio) {
+      updateAudioSettings(el, audio);
+    }
+
+    // TODO: Remove
     if (components["audio"] || components["video"]) {
       componentData["sourceType"] = SourceType.MEDIA_VIDEO;
     } else if (components["audio-target"]) {

@@ -20,6 +20,8 @@ import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { MixerType } from "../systems/audio-system";
+import { updateAudioSettings } from "../update-audio-settings";
+import { SourceType } from "./audio-params";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -572,6 +574,10 @@ AFRAME.registerComponent("media-video", {
     // Its matrix may not update if this element is not visible.
     // See https://github.com/mozilla/hubs/issues/2855
     this.audio.updateMatrixWorld();
+
+    APP.audios.set(this.el, this.audio);
+    APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
+    updateAudioSettings(this.el, this.audio);
   },
 
   getGainFilter() {

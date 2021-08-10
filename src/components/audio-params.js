@@ -6,7 +6,7 @@ export const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
 export const SourceType = Object.freeze({
   MEDIA_VIDEO: 0,
   AVATAR_AUDIO_SOURCE: 1,
-  AVATAR_RIG: 2,
+  // TODO: Fill in missing value (2)
   AUDIO_TARGET: 3,
   AUDIO_ZONE: 4
 });
@@ -24,37 +24,37 @@ export const DistanceModelType = {
 
 export const AvatarAudioDefaults = Object.freeze({
   AUDIO_TYPE: AudioType.PannerNode,
-  DISTANCE_MODEL: DistanceModelType.Inverse,
-  ROLLOFF_FACTOR: 2,
-  REF_DISTANCE: 1,
-  MAX_DISTANCE: 10000,
-  INNER_ANGLE: 180,
-  OUTER_ANGLE: 360,
-  OUTER_GAIN: 0,
+  distanceModel: DistanceModelType.Inverse,
+  rolloffFactor: 2,
+  refDistance: 1,
+  maxDistance: 10000,
+  coneInnerAngle: 180,
+  coneOuterAngle: 360,
+  coneOuterGain: 0,
   VOLUME: 1.0
 });
 
 export const MediaAudioDefaults = Object.freeze({
   AUDIO_TYPE: AudioType.PannerNode,
-  DISTANCE_MODEL: DistanceModelType.Inverse,
-  ROLLOFF_FACTOR: 1,
-  REF_DISTANCE: 1,
-  MAX_DISTANCE: 10000,
-  INNER_ANGLE: 360,
-  OUTER_ANGLE: 0,
-  OUTER_GAIN: 0,
+  distanceModel: DistanceModelType.Inverse,
+  rolloffFactor: 1,
+  refDistance: 1,
+  maxDistance: 10000,
+  coneInnerAngle: 360,
+  coneOuterAngle: 0,
+  coneOuterGain: 0,
   VOLUME: 0.5
 });
 
 export const TargetAudioDefaults = Object.freeze({
   AUDIO_TYPE: AudioType.PannerNode,
-  DISTANCE_MODEL: DistanceModelType.Inverse,
-  ROLLOFF_FACTOR: 5,
-  REF_DISTANCE: 8,
-  MAX_DISTANCE: 10000,
-  INNER_ANGLE: 170,
-  OUTER_ANGLE: 300,
-  OUTER_GAIN: 0.3,
+  distanceModel: DistanceModelType.Inverse,
+  rolloffFactor: 5,
+  refDistance: 8,
+  maxDistance: 10000,
+  coneInnerAngle: 170,
+  coneOuterAngle: 300,
+  coneOuterGain: 0.3,
   VOLUME: 1.0
 });
 
@@ -66,13 +66,6 @@ AFRAME.registerComponent("audio-params", {
     enabled: { default: true },
     debuggable: { default: true },
     audioType: { default: AvatarAudioDefaults.AUDIO_TYPE },
-    distanceModel: { default: AvatarAudioDefaults.DISTANCE_MODEL, oneOf: [DISTANCE_MODEL_OPTIONS] },
-    rolloffFactor: { default: AvatarAudioDefaults.ROLLOFF_FACTOR },
-    refDistance: { default: AvatarAudioDefaults.REF_DISTANCE },
-    maxDistance: { default: AvatarAudioDefaults.MAX_DISTANCE },
-    coneInnerAngle: { default: AvatarAudioDefaults.INNER_ANGLE },
-    coneOuterAngle: { default: AvatarAudioDefaults.OUTER_ANGLE },
-    coneOuterGain: { default: AvatarAudioDefaults.OUTER_GAIN },
     clippingEnabled: { default: CLIPPING_THRESHOLD_ENABLED },
     clippingThreshold: { default: CLIPPING_THRESHOLD_DEFAULT },
     preClipGain: { default: 1.0 },
@@ -106,7 +99,6 @@ AFRAME.registerComponent("audio-params", {
     } else if (this.el.components["audio-zone"]) {
       sourceType = SourceType.AUDIO_ZONE;
     }
-    this.audioSettings = this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.audioSettings;
 
     this.el.setAttribute("audio-params", {
       sourceType,
@@ -129,26 +121,12 @@ AFRAME.registerComponent("audio-params", {
 
   update() {
     if (this.audioRef) {
-      if (this.data.audioType === AudioType.PannerNode) {
-        this.audioRef.setDistanceModel(this.data.distanceModel);
-        this.audioRef.setRolloffFactor(this.data.rolloffFactor);
-        this.audioRef.setRefDistance(this.data.refDistance);
-        this.audioRef.setMaxDistance(this.data.maxDistance);
-        this.audioRef.panner.coneInnerAngle = this.data.coneInnerAngle;
-        this.audioRef.panner.coneOuterAngle = this.data.coneOuterAngle;
-        this.audioRef.panner.coneOuterGain = this.data.coneOuterGain;
-      }
+      // TODO: Move the gain stuff to update-audio-settings
       this.data.gain !== undefined && this.updateGain(this.data.gain);
     }
   },
 
   tick() {
-    if (this.audioRef) {
-      if (!this.audioRef.panner) {
-        this.data.rolloffFactor = 0;
-      }
-    }
-
     if (this.normalizer !== null) {
       this.normalizer.apply();
     } else {

@@ -117,23 +117,39 @@ AFRAME.registerSystem("audio-debug", {
       this.sources.forEach(source => {
         if (source.data.enabled && source.data.debuggable && source.audioRef) {
           if (sourceNum < MAX_DEBUG_SOURCES) {
-            source.audioRef.getWorldPosition(sourcePos);
-            source.audioRef.getWorldDirection(sourceDir);
+            const audio = APP.audios.get(source.el);
+            if (!audio) {
+              return;
+            }
+            audio.getWorldPosition(sourcePos);
+            audio.getWorldDirection(sourceDir);
             this.sourcePositions[sourceNum] = sourcePos.clone();
             this.sourceOrientations[sourceNum] = sourceDir.clone();
+
+            const panner = audio.panner || {
+              distanceModel: DistanceModelType.Inverse,
+              maxDistance: 0,
+              refDistance: 0,
+              rolloffFactor: 0,
+              coneInnerAngle: 0,
+              coneOuterAngle: 0
+            };
+
             this.distanceModels[sourceNum] = 0;
-            if (source.data.distanceModel === DistanceModelType.Linear) {
+            if (panner.distanceModel === DistanceModelType.Linear) {
               this.distanceModels[sourceNum] = 0;
-            } else if (source.data.distanceModel === DistanceModelType.Inverse) {
+            } else if (panner.distanceModel === DistanceModelType.Inverse) {
               this.distanceModels[sourceNum] = 1;
-            } else if (source.data.distanceModel === DistanceModelType.Exponential) {
+            } else if (panner.distanceModel === DistanceModelType.Exponential) {
               this.distanceModels[sourceNum] = 2;
             }
-            this.maxDistances[sourceNum] = source.data.maxDistance;
-            this.refDistances[sourceNum] = source.data.refDistance;
-            this.rolloffFactors[sourceNum] = source.data.rolloffFactor;
-            this.coneInnerAngles[sourceNum] = source.data.coneInnerAngle;
-            this.coneOuterAngles[sourceNum] = source.data.coneOuterAngle;
+            this.maxDistances[sourceNum] = panner.maxDistance;
+            this.refDistances[sourceNum] = panner.refDistance;
+            this.rolloffFactors[sourceNum] = panner.rolloffFactor;
+            this.coneInnerAngles[sourceNum] = panner.coneInnerAngle;
+            this.coneOuterAngles[sourceNum] = panner.coneOuterAngle;
+
+            // TODO: Gain
             this.gains[sourceNum] = source.data.gain;
             this.clipped[sourceNum] = source.data.isClipped;
             sourceNum++;

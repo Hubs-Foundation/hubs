@@ -66,16 +66,7 @@ AFRAME.registerComponent("audio-zone", {
   },
 
   getAudioParams() {
-    return {
-      distanceModel: this.audioParamsComp.data.distanceModel,
-      maxDistance: this.audioParamsComp.data.maxDistance,
-      refDistance: this.audioParamsComp.data.refDistance,
-      rolloffFactor: this.audioParamsComp.data.rolloffFactor,
-      coneInnerAngle: this.audioParamsComp.data.coneInnerAngle,
-      coneOuterAngle: this.audioParamsComp.data.coneOuterAngle,
-      coneOuterGain: this.audioParamsComp.data.coneOuterGain,
-      gain: this.audioParamsComp.data.gain
-    };
+    return APP.audioOverrides.get(this.el);
   },
 
   contains(position) {
