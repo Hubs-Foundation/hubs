@@ -256,6 +256,8 @@ function timeFmt(t) {
   return h === "00" ? `${m}:${s}` : `${h}:${m}:${s}`;
 }
 
+const MAX_MULTIPLIER = 2;
+
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
@@ -274,6 +276,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   init() {
+    APP.gainMultipliers.set(this.el, 1);
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.updateHoverMenu = this.updateHoverMenu.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
@@ -290,7 +293,6 @@ AFRAME.registerComponent("media-video", {
     this.togglePlaying = this.togglePlaying.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
-    this.gainFilter = THREE.AudioContext.getContext().createGain();
 
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
@@ -381,6 +383,7 @@ AFRAME.registerComponent("media-video", {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
+    // TODO Probably we will get rid of this at some point
     this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
     this.onPreferenceChanged = () => {
       const newPref = window.APP.store.state.preferences.audioOutputMode;
@@ -419,18 +422,22 @@ AFRAME.registerComponent("media-video", {
   },
 
   changeVolumeBy(v) {
-    const gain = this.el.components["audio-params"].data.gain;
-    const vol = THREE.Math.clamp(gain + v, 0, 1);
-    this.el.setAttribute("audio-params", "gain", vol);
+    let gainMultiplier = APP.gainMultipliers.get(this.el);
+    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_MULTIPLIER);
+    APP.gainMultipliers.set(this.el, gainMultiplier);
     this.updateVolumeLabel();
+    const audio = APP.audios.get(this.el);
+    if (audio) {
+      updateAudioSettings(this.el, audio);
+    }
   },
 
   volumeUp() {
-    this.changeVolumeBy(0.1);
+    this.changeVolumeBy(0.2);
   },
 
   volumeDown() {
-    this.changeVolumeBy(-0.1);
+    this.changeVolumeBy(-0.2);
   },
 
   async snap() {
@@ -537,13 +544,6 @@ AFRAME.registerComponent("media-video", {
       this.updateSrc(oldData);
       return;
     }
-
-    const shouldRecreateAudio =
-      !shouldUpdateSrc && this.mediaElementAudioSource && this.audio?.panner?.audioType !== this.data.audioType;
-    if (shouldRecreateAudio) {
-      this.setupAudio();
-      return;
-    }
   },
 
   setupAudio() {
@@ -562,10 +562,6 @@ AFRAME.registerComponent("media-video", {
     this.audioSystem.removeAudio(this.audio);
     this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
 
-    const filters = this.audio.getFilters();
-    filters.push(this.gainFilter);
-    this.audio.setFilters(filters);
-
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
     this.el.components["audio-params"].setAudio(this.audio);
@@ -578,10 +574,6 @@ AFRAME.registerComponent("media-video", {
     APP.audios.set(this.el, this.audio);
     APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
     updateAudioSettings(this.el, this.audio);
-  },
-
-  getGainFilter() {
-    return this.gainFilter;
   },
 
   async updateSrc(oldData) {
@@ -933,8 +925,12 @@ AFRAME.registerComponent("media-video", {
   },
 
   updateVolumeLabel() {
-    const volume = this.el.components["audio-params"].data.gain;
-    this.volumeLabel.setAttribute("text", "value", volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(volume / 0.05)]);
+    const gainMultiplier = APP.gainMultipliers.get(this.el);
+    this.volumeLabel.setAttribute(
+      "text",
+      "value",
+      gainMultiplier === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(gainMultiplier / (MAX_MULTIPLIER / 20))]
+    );
   },
 
   tick: (() => {
@@ -1003,6 +999,10 @@ AFRAME.registerComponent("media-video", {
       clearInterval(this._audioSyncInterval);
       this._audioSyncInterval = null;
     }
+
+    APP.gainMultipliers.delete(this.el);
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
 
     if (this.audio) {
       this.el.removeObject3D("sound");

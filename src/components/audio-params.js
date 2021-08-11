@@ -30,7 +30,7 @@ export const AvatarAudioDefaults = Object.freeze({
   coneInnerAngle: 180,
   coneOuterAngle: 360,
   coneOuterGain: 0,
-  VOLUME: 1.0
+  gain: 1.0
 });
 
 export const MediaAudioDefaults = Object.freeze({
@@ -42,7 +42,7 @@ export const MediaAudioDefaults = Object.freeze({
   coneInnerAngle: 360,
   coneOuterAngle: 0,
   coneOuterGain: 0,
-  VOLUME: 0.5
+  gain: 0.5
 });
 
 export const TargetAudioDefaults = Object.freeze({
@@ -54,7 +54,7 @@ export const TargetAudioDefaults = Object.freeze({
   coneInnerAngle: 170,
   coneOuterAngle: 300,
   coneOuterGain: 0.3,
-  VOLUME: 1.0
+  gain: 1.0
 });
 
 export const GAIN_TIME_CONST = 0.2;
@@ -65,7 +65,6 @@ AFRAME.registerComponent("audio-params", {
     enabled: { default: true },
     debuggable: { default: true },
     audioType: { default: AvatarAudioDefaults.AUDIO_TYPE },
-    gain: { default: 1.0 },
     sourceType: { default: -1 }
   },
 
@@ -107,13 +106,6 @@ AFRAME.registerComponent("audio-params", {
     }
   },
 
-  update() {
-    if (this.audioRef) {
-      // TODO: Move the gain stuff to update-audio-settings
-      this.data.gain !== undefined && this.updateGain(this.data.gain);
-    }
-  },
-
   tick() {
     if (this.normalizer !== null) {
       this.normalizer.apply();
@@ -146,35 +138,5 @@ AFRAME.registerComponent("audio-params", {
       this.normalizer = new AudioNormalizer(audio);
       this.normalizer.apply();
     }
-  },
-
-  updateGain(newGain) {
-    if (!this.audioRef) return;
-
-    let gainFilter;
-    switch (this.data.sourceType) {
-      case SourceType.MEDIA_VIDEO: {
-        gainFilter = this.el.components["media-video"].getGainFilter();
-        break;
-      }
-      case SourceType.AVATAR_AUDIO_SOURCE: {
-        gainFilter = this.el.components["avatar-audio-source"].getGainFilter();
-        break;
-      }
-      case SourceType.AUDIO_TARGET: {
-        gainFilter = this.el.components["audio-target"].getGainFilter();
-        break;
-      }
-    }
-    const { audioOutputMode } = window.APP.store.state.preferences;
-    if (audioOutputMode === "audio") {
-      const sourcePos = new THREE.Vector3();
-      const listenerPos = new THREE.Vector3();
-      this.audioRef.getWorldPosition(sourcePos);
-      this.el.sceneEl.audioListener.getWorldPosition(listenerPos);
-      const squaredDistance = sourcePos.distanceToSquared(listenerPos);
-      this.data.gain = newGain * Math.min(1, 10 / Math.max(1, squaredDistance));
-    }
-    gainFilter?.gain.setTargetAtTime(this.data.gain, this.audioRef.context.currentTime, GAIN_TIME_CONST);
   }
 });

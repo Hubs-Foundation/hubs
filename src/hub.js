@@ -208,6 +208,8 @@ APP.audioOverrides = new Map(); //             el -> AudioSettings
 APP.zoneOverrides = new Map(); //              el -> AudioSettings
 APP.sceneAudioDefaults = new Map(); // SourceType -> AudioSettings
 APP.clippingState = new Set();
+APP.gainMultipliers = new Map();
+APP.linkedMutedState = new Set();
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen

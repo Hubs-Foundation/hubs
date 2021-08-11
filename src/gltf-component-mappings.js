@@ -267,8 +267,7 @@ async function mediaInflator(el, componentName, componentData, components) {
       // TODO: Remove the line below
       el.setAttribute("audio-params", {
         audioType: componentData.audioType,
-        sourceType: SourceType.MEDIA_VIDEO,
-        gain: componentData.volume
+        sourceType: SourceType.MEDIA_VIDEO
       });
     }
 
@@ -507,8 +506,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 
       // TODO: Remove
       el.setAttribute("audio-params", {
-        audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
-        gain: componentData.volume
+        audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo
       });
     }
 

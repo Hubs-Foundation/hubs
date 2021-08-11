@@ -64,10 +64,8 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     this.destination = audio.context.createMediaStreamDestination();
     this.mediaStreamSource = audio.context.createMediaStreamSource(stream);
-    this.gainFilter = audio.context.createGain();
     const destinationSource = audio.context.createMediaStreamSource(this.destination.stream);
-    this.mediaStreamSource.connect(this.gainFilter);
-    this.gainFilter.connect(this.destination);
+    this.mediaStreamSource.connect(this.destination);
     audio.setNodeSource(destinationSource);
     this.el.setObject3D(this.attrName, audio);
     this.el.emit("sound-source-set", { soundSource: destinationSource });
@@ -83,6 +81,9 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     this.audioSystem.removeAudio(audio);
     this.el.removeObject3D(this.attrName);
+
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
   },
 
   init() {
@@ -120,10 +121,6 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
     APP.dialog.off("stream_updated", this._onStreamUpdated);
     this.destroyAudio();
-  },
-
-  getGainFilter() {
-    return this.gainFilter;
   }
 });
 
@@ -252,8 +249,7 @@ AFRAME.registerComponent("audio-target", {
   init() {
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
     this.el.setAttribute("audio-params", {
-      sourceType: SourceType.AUDIO_TARGET,
-      gain: TargetAudioDefaults.VOLUME
+      sourceType: SourceType.AUDIO_TARGET
     });
     this.createAudio();
     // TODO this is to ensure targets and sources loaded at the same time don't have
@@ -286,8 +282,6 @@ AFRAME.registerComponent("audio-target", {
       audio.setFilters([delayNode]);
     }
 
-    this.gainFilter = THREE.AudioContext.getContext().createGain();
-
     this.el.setObject3D(this.attrName, audio);
     audio.matrixNeedsUpdate = true;
     audio.updateMatrixWorld();
@@ -295,10 +289,6 @@ AFRAME.registerComponent("audio-target", {
 
     this.audioSystem.removeAudio(this.audio);
     this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
-
-    const filters = this.audio.getFilters();
-    filters.push(this.gainFilter);
-    this.audio.setFilters(filters);
 
     this.el.components["audio-params"].setAudio(audio);
 
@@ -325,9 +315,8 @@ AFRAME.registerComponent("audio-target", {
 
     this.audioSystem.removeAudio(this.audio);
     this.el.removeObject3D(this.attrName);
-  },
 
-  getGainFilter() {
-    return this.gainFilter;
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
   }
 });

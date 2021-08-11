@@ -149,8 +149,7 @@ AFRAME.registerSystem("audio-debug", {
             this.coneInnerAngles[sourceNum] = panner.coneInnerAngle;
             this.coneOuterAngles[sourceNum] = panner.coneOuterAngle;
 
-            // TODO: Gain
-            this.gains[sourceNum] = source.data.gain;
+            this.gains[sourceNum] = audio.gain.gain.value;
             this.clipped[sourceNum] = APP.clippingState.has(source.el);
             sourceNum++;
           }

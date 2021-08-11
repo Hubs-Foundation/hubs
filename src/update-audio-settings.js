@@ -1,5 +1,7 @@
 import { SourceType, MediaAudioDefaults, AvatarAudioDefaults, TargetAudioDefaults } from "./components/audio-params";
 
+export const GAIN_TIME_CONST = 0.2;
+
 function applySettings(el, audio, settings) {
   if (audio.panner) {
     audio.setDistanceModel(settings.distanceModel);
@@ -11,12 +13,11 @@ function applySettings(el, audio, settings) {
     audio.panner.coneOuterGain = settings.coneOuterGain;
   }
 
-  // TODO: Apply gain
-  if (APP.clippingState.has(el)) {
-    // Apply zero gain
-  } else {
-    // Apply settings gain
-  }
+  // We don't deal with the audioOutputMode here anymore, we just apply the gain.
+  // TODO Remove audioOutputMode from the rest of the app.
+  const gainMultiplier = APP.gainMultipliers.has(el) ? APP.gainMultipliers.get(el) : 1;
+  const gain = APP.clippingState.has(el) || APP.linkedMutedState.has(el) ? 0 : gainMultiplier * settings.gain;
+  audio.gain.gain.setTargetAtTime(gain, audio.context.currentTime, GAIN_TIME_CONST);
 }
 
 const defaultSettingsForSourceType = new Map([

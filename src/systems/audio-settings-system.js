@@ -6,6 +6,7 @@ export class AudioSettingsSystem {
     this.sceneEl = sceneEl;
     // TODO: Clean this up
     this.defaultSettings = {
+      avatarVolume: AvatarAudioDefaults.gain,
       avatarDistanceModel: AvatarAudioDefaults.distanceModel,
       avatarRolloffFactor: AvatarAudioDefaults.rolloffFactor,
       avatarRefDistance: AvatarAudioDefaults.refDistance,
@@ -13,7 +14,7 @@ export class AudioSettingsSystem {
       avatarConeInnerAngle: AvatarAudioDefaults.coneInnerAngle,
       avatarConeOuterAngle: AvatarAudioDefaults.coneOuterAngle,
       avatarConeOuterGain: AvatarAudioDefaults.coneOuterGain,
-      mediaVolume: MediaAudioDefaults.VOLUME,
+      mediaVolume: MediaAudioDefaults.gain,
       mediaDistanceModel: MediaAudioDefaults.distanceModel,
       mediaRolloffFactor: MediaAudioDefaults.rolloffFactor,
       mediaRefDistance: MediaAudioDefaults.refDistance,
@@ -91,7 +92,7 @@ export class AudioSettingsSystem {
       coneInnerAngle: settings.mediaConeInnerAngle,
       coneOuterAngle: settings.mediaConeOuterAngle,
       coneOuterGain: settings.mediaConeOuterGain,
-      VOLUME: settings.mediaVolume
+      gain: settings.mediaVolume
     });
     APP.sceneAudioDefaults.set(SourceType.AVATAR_AUDIO_SOURCE, {
       distanceModel: settings.avatarDistanceModel,
@@ -101,7 +102,8 @@ export class AudioSettingsSystem {
       coneInnerAngle: settings.avatarConeInnerAngle,
       coneOuterAngle: settings.avatarConeOuterAngle,
       coneOuterGain: settings.avatarConeOuterGain,
-      VOLUME: settings.avatarVolume
+      // audio-settings component doesn't have a avatarVolume property so we need to handle that case
+      gain: settings.avatarVolume === undefined ? AvatarAudioDefaults.gain : settings.avatarVolume
     });
 
     // TODO: Clean this up. Should not need it anymore
