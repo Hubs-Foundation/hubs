@@ -193,15 +193,15 @@ AFRAME.registerSystem("audio-debug", {
     }
   },
 
-  updateState(force = false) {
-    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel;
-    if (force || (isEnabled !== undefined && isEnabled !== this.data.enabled)) {
+  updateState({ force }) {
+    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel || false;
+    if (force || isEnabled !== this.data.enabled) {
       this.enableDebugMode(isEnabled, force);
     }
   },
 
   onSceneLoaded() {
     this.navMeshObject = null;
-    this.updateState(true);
+    this.updateState({ force: true });
   }
 });
