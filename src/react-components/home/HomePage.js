@@ -96,7 +96,7 @@ export function HomePage() {
           <Column padding gap="xl" className={styles.card}>
             <img src={configs.image("landing_communicate_thumb")} />
             <h3>
-              <FormattedMessage id="home-page.communicate-title" defaultMessage="Communicate naturally" />
+              <FormattedMessage id="home-page.communicate-title" defaultMessage="Communicate and Collaborate" />
             </h3>
             <p>
               <FormattedMessage
