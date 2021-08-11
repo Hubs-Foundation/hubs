@@ -55,7 +55,7 @@ for (let i = 0; i <= 20; i++) {
 
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
-import { AudioType } from "./audio-params";
+import { AudioType, MediaAudioDefaults } from "./audio-params";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 
@@ -293,6 +293,20 @@ AFRAME.registerComponent("media-video", {
     this.isSnapping = false;
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
+
+    if (!this.el.components["audio-params"]) {
+      this.el.setAttribute("audio-params", {
+        audioType: MediaAudioDefaults.AUDIO_TYPE,
+        distanceModel: MediaAudioDefaults.DISTANCE_MODEL,
+        rolloffFactor: MediaAudioDefaults.ROLLOFF_FACTOR,
+        refDistance: MediaAudioDefaults.REF_DISTANCE,
+        maxDistance: MediaAudioDefaults.MAX_DISTANCE,
+        coneInnerAngle: MediaAudioDefaults.INNER_ANGLE,
+        coneOuterAngle: MediaAudioDefaults.OUTER_ANGLE,
+        coneOuterGain: MediaAudioDefaults.OUTER_GAIN,
+        gain: MediaAudioDefaults.VOLUME
+      });
+    }
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -970,6 +984,8 @@ AFRAME.registerComponent("media-video", {
   remove() {
     this.cleanUp();
 
+    this.el.removeAttribute("audio-params");
+
     if (this.mesh) {
       this.el.removeObject3D("mesh");
     }
@@ -1004,6 +1020,7 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
+      this.snapButton.object3D.removeEventListener("interact", this.snap);
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
