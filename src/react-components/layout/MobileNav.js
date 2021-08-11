@@ -56,8 +56,8 @@ export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCo
                   </li>
                 )}
                 {isAdmin && (
-                  <li style={{ marginLeft: 0 }}>
-                    <a href="/admin" rel="noreferrer noopener">
+                  <li>
+                    <a style={{ marginLeft: 0 }} href="/admin" rel="noreferrer noopener">
                       <i>
                         <FontAwesomeIcon icon={faCog} />
                       </i>
