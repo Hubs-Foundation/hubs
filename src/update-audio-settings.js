@@ -1,6 +1,6 @@
 import { SourceType, MediaAudioDefaults, AvatarAudioDefaults, TargetAudioDefaults } from "./components/audio-params";
 
-function applySettings(audio, settings) {
+function applySettings(el, audio, settings) {
   if (audio.panner) {
     audio.setDistanceModel(settings.distanceModel);
     audio.setRolloffFactor(settings.rolloffFactor);
@@ -12,6 +12,11 @@ function applySettings(audio, settings) {
   }
 
   // TODO: Apply gain
+  if (APP.clippingState.has(el)) {
+    // Apply zero gain
+  } else {
+    // Apply settings gain
+  }
 }
 
 const defaultSettingsForSourceType = new Map([
@@ -67,7 +72,7 @@ export function updateAudioSettings(el, audio) {
   // - If you audio settings change, call this function.
   const settings = getCurrentAudioSettings(el);
   if (settings) {
-    applySettings(audio, settings);
+    applySettings(el, audio, settings);
     return;
   }
 

@@ -155,20 +155,10 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
         globalVoiceVolume,
         globalMediaVolume
       } = store.current.state.preferences;
-      const clippingEnabled = enableAudioClipping !== undefined ? enableAudioClipping : CLIPPING_THRESHOLD_DEFAULT;
-      const clippingThreshold =
-        audioClippingThreshold !== undefined ? audioClippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
       setClippingEnabled(enableAudioClipping);
-      setClippingThreshold(clippingThreshold);
+      setClippingThreshold(audioClippingThreshold);
       setVoiceVolume(globalVoiceVolume);
       setMediaVolume(globalMediaVolume);
-      const audioParams = scene.current.querySelectorAll("[audio-params]");
-      audioParams.forEach(source => {
-        source.setAttribute("audio-params", {
-          clippingThreshold,
-          clippingEnabled
-        });
-      });
     },
     [setClippingEnabled, setClippingThreshold, setVoiceVolume, setMediaVolume]
   );

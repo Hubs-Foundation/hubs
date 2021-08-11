@@ -50,6 +50,7 @@ export class AudioSettingsSystem {
       const shouldUpdateAudioSettings = this.audioOutputMode !== newPref;
       this.audioOutputMode = newPref;
       if (shouldUpdateAudioSettings) {
+        // MM Here we are updating the settings in case we changed global output mode but we are not reacting to that specific change anywhere
         this.updateAudioSettings(this.audioSettings);
       }
     };

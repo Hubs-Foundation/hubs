@@ -1,5 +1,4 @@
 import { AudioNormalizer } from "../utils/audio-normalizer";
-import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
 
 export const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
 
@@ -66,10 +65,6 @@ AFRAME.registerComponent("audio-params", {
     enabled: { default: true },
     debuggable: { default: true },
     audioType: { default: AvatarAudioDefaults.AUDIO_TYPE },
-    clippingEnabled: { default: CLIPPING_THRESHOLD_ENABLED },
-    clippingThreshold: { default: CLIPPING_THRESHOLD_DEFAULT },
-    preClipGain: { default: 1.0 },
-    isClipped: { default: false },
     gain: { default: 1.0 },
     sourceType: { default: -1 }
   },
@@ -82,11 +77,6 @@ AFRAME.registerComponent("audio-params", {
     if (!this.data.isLocal) {
       this.el.sceneEl?.systems["hubs-systems"].gainSystem.registerSource(this);
     }
-
-    const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
-    const clippingEnabled = enableAudioClipping !== undefined ? enableAudioClipping : CLIPPING_THRESHOLD_ENABLED;
-    const clippingThreshold =
-      audioClippingThreshold !== undefined ? audioClippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
 
     this.onSourceSetAdded = this.sourceSetAdded.bind(this);
     let sourceType;
@@ -101,9 +91,7 @@ AFRAME.registerComponent("audio-params", {
     }
 
     this.el.setAttribute("audio-params", {
-      sourceType,
-      clippingEnabled,
-      clippingThreshold
+      sourceType
     });
   },
 
@@ -160,25 +148,6 @@ AFRAME.registerComponent("audio-params", {
     }
   },
 
-  clipGain(gain) {
-    if (!this.data.isClipped) {
-      this.el.setAttribute("audio-params", {
-        isClipped: true,
-        preClipGain: this.data.gain,
-        gain
-      });
-    }
-  },
-
-  unclipGain() {
-    if (this.data.isClipped) {
-      this.el.setAttribute("audio-params", {
-        isClipped: false,
-        gain: this.data.preClipGain
-      });
-    }
-  },
-
   updateGain(newGain) {
     if (!this.audioRef) return;
 
@@ -207,13 +176,5 @@ AFRAME.registerComponent("audio-params", {
       this.data.gain = newGain * Math.min(1, 10 / Math.max(1, squaredDistance));
     }
     gainFilter?.gain.setTargetAtTime(this.data.gain, this.audioRef.context.currentTime, GAIN_TIME_CONST);
-  },
-
-  updateClipping() {
-    const { clippingEnabled, clippingThreshold } = window.APP.store.state.preferences;
-    this.el.setAttribute("audio-params", {
-      clippingEnabled: clippingEnabled !== undefined ? clippingEnabled : CLIPPING_THRESHOLD_ENABLED,
-      clippingThreshold: clippingThreshold !== undefined ? clippingThreshold : CLIPPING_THRESHOLD_DEFAULT
-    });
   }
 });

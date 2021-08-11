@@ -1,4 +1,15 @@
-const CLIPPING_GAIN = 0.0001;
+import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
+import { updateAudioSettings } from "../update-audio-settings";
+
+function isClippingEnabled() {
+  const { enableAudioClipping } = window.APP.store.state.preferences;
+  return enableAudioClipping !== undefined ? enableAudioClipping : CLIPPING_THRESHOLD_ENABLED;
+}
+
+function getClippingThreshold() {
+  const { audioClippingThreshold } = window.APP.store.state.preferences;
+  return audioClippingThreshold !== undefined ? audioClippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
+}
 
 const distanceModels = {
   linear: function(distance, rolloffFactor, refDistance, maxDistance) {
@@ -35,13 +46,10 @@ const updateAttenuation = (() => {
 export class GainSystem {
   constructor() {
     this.sources = [];
-    this.onPrefsUpdated = this.updatePrefs.bind(this);
-    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
   remove() {
     this.sources = [];
-    window.APP.store.removeEventListener("statechanged", this.onPrefsUpdated);
   }
 
   registerSource(source) {
@@ -57,25 +65,25 @@ export class GainSystem {
   }
 
   tick() {
+    const clippingEnabled = isClippingEnabled();
+    const clippingThreshold = getClippingThreshold();
     this.sources.forEach(source => {
-      if (source.audioRef && source.data.clippingEnabled) {
+      const isClipped = APP.clippingState.has(source.el);
+      if (source.audioRef && clippingEnabled) {
         const att = updateAttenuation(source);
-        if (att < source.data.clippingThreshold) {
-          if (source.audioRef.gain.gain.value > 0 && !source.data.isClipped) {
-            source.clipGain(CLIPPING_GAIN);
+        if (att < clippingThreshold) {
+          if (!isClipped) {
+            APP.clippingState.add(source.el);
+            updateAudioSettings(source.el, source.audioRef);
           }
-        } else if (source.data.isClipped) {
-          source.unclipGain();
+        } else if (isClipped) {
+          APP.clippingState.delete(source.el);
+          updateAudioSettings(source.el, source.audioRef);
         }
-      } else if (source.data.isClipped) {
-        source.unclipGain();
+      } else if (isClipped) {
+        APP.clippingState.delete(source.el);
+        updateAudioSettings(source.el, source.audioRef);
       }
-    });
-  }
-
-  updatePrefs() {
-    this.sources.forEach(source => {
-      source.updateClipping();
     });
   }
 }

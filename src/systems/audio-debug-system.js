@@ -151,7 +151,7 @@ AFRAME.registerSystem("audio-debug", {
 
             // TODO: Gain
             this.gains[sourceNum] = source.data.gain;
-            this.clipped[sourceNum] = source.data.isClipped;
+            this.clipped[sourceNum] = APP.clippingState.has(source.el);
             sourceNum++;
           }
         }

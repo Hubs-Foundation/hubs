@@ -37,6 +37,7 @@ AFRAME.registerComponent("audio-zone", {
 
     this.enableDebug(window.APP.store.state.preferences.showAudioDebugPanel);
     this.el.setAttribute("audio-params", "debuggable", false);
+    // TODO Remove this
     this.audioParamsComp = this.el.components["audio-params"];
   },
 

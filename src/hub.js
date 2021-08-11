@@ -207,6 +207,7 @@ APP.sourceType = new Map(); //                 el -> SourceType
 APP.audioOverrides = new Map(); //             el -> AudioSettings
 APP.zoneOverrides = new Map(); //              el -> AudioSettings
 APP.sceneAudioDefaults = new Map(); // SourceType -> AudioSettings
+APP.clippingState = new Set();
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
