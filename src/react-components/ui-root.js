@@ -32,6 +32,7 @@ import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
 import RTCDebugPanel from "./debug-panel/RtcDebugPanel.js";
+import DownloadLogs from "../utils/debug-log.js";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { handleExitTo2DInterstitial, exit2DInterstitialAndEnterVR, isIn2DInterstitial } from "../utils/vr-interstitial";
 import maskEmail from "../utils/mask-email";
@@ -1582,6 +1583,11 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
+                    <ToolbarButton
+                      icon={<SupportIcon />}
+                      label={<FormattedMessage id="toolbar.help-button" defaultMessage="Help" />}
+                      onClick={() => { DownloadLogs(); }}
+                    />
                     <MoreMenuPopoverButton menu={moreMenu} />
                   </>
                 }
