@@ -18,3 +18,29 @@ export const All = () => (
     <Button>Really Really Long Button Name</Button>
   </Column>
 );
+
+export const Sizes = () => (
+  <Column padding>
+    <Button preset="primary" sm>
+      Small
+    </Button>
+    <Button preset="primary" lg>
+      Large? (lg)
+    </Button>
+    <Button preset="primary" xl>
+      xlarge
+    </Button>
+    <Button disabled>Disabled</Button>
+  </Column>
+);
+
+export const Tokens = () => (
+  <Column padding>
+    <Button preset="primary" sm thin>
+      Create Token
+    </Button>
+    <Button disabled sm thin>
+      Revoke all
+    </Button>
+  </Column>
+);
