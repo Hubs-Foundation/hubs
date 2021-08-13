@@ -157,10 +157,10 @@ AFRAME.registerSystem("audio-debug", {
       zone.el.setAttribute("audio-zone", "debuggable", enabled);
     });
 
-    const collisionEntities = [].slice.call(this.el.sceneEl.querySelectorAll("[nav-mesh]"));
+    const collisionEntities = Array.from(this.el.sceneEl.querySelectorAll("[nav-mesh]"));
     const meshes = getMeshes(collisionEntities);
 
-    if (meshes) {
+    if (meshes.length) {
       this.data.enabled = enabled;
       meshes.forEach(obj => {
         if (obj.isMesh) {
