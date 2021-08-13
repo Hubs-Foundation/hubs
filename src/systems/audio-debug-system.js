@@ -3,7 +3,7 @@ import audioDebugVert from "./audio-debug.vert";
 import audioDebugFrag from "./audio-debug.frag";
 import { DistanceModelType } from "../components/audio-params";
 import { getWebGLVersion } from "../utils/webgl";
-import { getMeshes } from "../components/teleporter";
+import { getMeshes } from "../utils/aframe-utils";
 
 const MAX_DEBUG_SOURCES = 64;
 
