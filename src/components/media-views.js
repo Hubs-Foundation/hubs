@@ -547,6 +547,13 @@ AFRAME.registerComponent("media-video", {
       this.el.removeObject3D("sound");
     }
 
+    const ouputMode = window.APP.store.state.preferences.audioOutputMode;
+    if (ouputMode === "audio") {
+      this.el.setAttribute("audio-params", {
+        audioType: AudioType.Stereo
+      });
+    }
+
     const audioListener = this.el.sceneEl.audioListener;
     if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
       this.audio = new THREE.PositionalAudio(audioListener);

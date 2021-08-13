@@ -50,8 +50,20 @@ AFRAME.registerComponent("avatar-audio-source", {
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
+    const ouputMode = window.APP.store.state.preferences.audioOutputMode;
+    if (ouputMode === "audio") {
+      this.el.setAttribute("audio-params", {
+        audioType: AudioType.Stereo
+      });
+    }
+
+    let audio = null;
     const audioListener = this.el.sceneEl.audioListener;
-    const audio = new THREE.PositionalAudio(audioListener);
+    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+      audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      audio = new THREE.Audio(audioListener);
+    }
     this.el.components["audio-params"].setAudio(audio);
 
     this.audioSystem.removeAudio(audio);
@@ -271,11 +283,16 @@ AFRAME.registerComponent("audio-target", {
     this.el.removeAttribute("audio-params");
     this.el.removeAttribute("audio-zone-source");
   },
-
   createAudio: function() {
-    const audioListener = this.el.sceneEl.audioListener;
+    const ouputMode = window.APP.store.state.preferences.audioOutputMode;
+    if (ouputMode === "audio") {
+      this.el.setAttribute("audio-params", {
+        audioType: AudioType.Stereo
+      });
+    }
 
     let audio = null;
+    const audioListener = this.el.sceneEl.audioListener;
     if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
       audio = new THREE.PositionalAudio(audioListener);
     } else {
