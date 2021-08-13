@@ -210,13 +210,22 @@ AFRAME.registerComponent("audio-params", {
           audio.panner.orientationY.value,
           audio.panner.orientationZ.value
         );
-        this.updateAttenuation();
       } else {
         this.el.object3D.getWorldDirection(this.data.orientation);
         this.el.object3D.getWorldPosition(this.data.position);
         this.data.rolloffFactor = 0;
       }
+
       this.updateDistances();
+
+      if (audio.panner) {
+        this.updateAttenuation();
+      } else {
+        const { audioOutputMode } = window.APP.store.state.preferences;
+        if (audioOutputMode === "audio") {
+          this.updateGain(this.data.gain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance)));
+        }
+      }
     }
 
     if (this.normalizer !== null) {
@@ -360,11 +369,7 @@ AFRAME.registerComponent("audio-params", {
         break;
       }
     }
-    const { audioOutputMode } = window.APP.store.state.preferences;
-    if (audioOutputMode === "audio") {
-      this.data.gain = newGain * Math.min(1, 10 / Math.max(1, this.data.squaredDistance));
-    }
-    gainFilter?.gain.setTargetAtTime(this.data.gain, audio.context.currentTime, GAIN_TIME_CONST);
+    gainFilter?.gain.setTargetAtTime(newGain, audio.context.currentTime, GAIN_TIME_CONST);
   },
 
   updateClipping() {
