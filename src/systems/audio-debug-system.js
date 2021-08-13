@@ -164,12 +164,12 @@ AFRAME.registerSystem("audio-debug", {
         if (obj.isMesh) {
           if (obj.material) {
             if (enabled) {
-              obj._hubs_audio_debug_material = obj.material;
+              !obj._hubs_audio_debug_prev_material && (obj._hubs_audio_debug_prev_material = obj.material);
               obj.material = this.material;
               obj.material.needsUpdate = true;
-            } else if (obj._hubs_audio_debug_material) {
-              obj.material = obj._hubs_audio_debug_material;
-              obj._hubs_audio_debug_material = null;
+            } else if (obj._hubs_audio_debug_prev_material) {
+              obj.material = obj._hubs_audio_debug_prev_material;
+              obj._hubs_audio_debug_prev_material = null;
               obj.material.needsUpdate = true;
             }
             obj.geometry.computeFaceNormals();
