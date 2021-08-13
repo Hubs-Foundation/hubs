@@ -19,7 +19,6 @@ import { detect } from "detect-browser";
 import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
-import { MixerType } from "../systems/audio-system";
 import { updateAudioSettings } from "../update-audio-settings";
 import { SourceType } from "./audio-params";
 
@@ -560,7 +559,7 @@ AFRAME.registerComponent("media-video", {
     }
 
     this.audioSystem.removeAudio(this.audio);
-    this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
+    this.audioSystem.addAudio(SourceType.MEDIA_VIDEO, this.audio);
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);

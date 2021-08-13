@@ -1,5 +1,4 @@
-import { SourceType, TargetAudioDefaults, AudioType } from "./audio-params";
-import { MixerType } from "../systems/audio-system";
+import { SourceType, AudioType } from "./audio-params";
 import { updateAudioSettings } from "../update-audio-settings";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
@@ -56,7 +55,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.components["audio-params"].setAudio(audio);
 
     this.audioSystem.removeAudio(audio);
-    this.audioSystem.addAudio(MixerType.AVATAR, audio);
+    this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, audio);
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
       createSilentAudioEl(stream); // TODO: Do the audio els need to get cleaned up?
@@ -288,7 +287,7 @@ AFRAME.registerComponent("audio-target", {
     this.audio = audio;
 
     this.audioSystem.removeAudio(this.audio);
-    this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
+    this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, this.audio);
 
     this.el.components["audio-params"].setAudio(audio);
 

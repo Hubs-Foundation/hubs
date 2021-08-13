@@ -1,10 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
-import { GAIN_TIME_CONST } from "../components/audio-params";
-
-export const MixerType = Object.freeze({
-  AVATAR: 0,
-  MEDIA: 1
-});
+import { GAIN_TIME_CONST, SourceType } from "../components/audio-params";
 
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
@@ -144,11 +139,11 @@ export class AudioSystem {
     this.audioContextNeedsToBeResumed = false;
 
     this.mixer = {
-      [MixerType.AVATAR]: this.audioContext.createGain(),
-      [MixerType.MEDIA]: this.audioContext.createGain()
+      [SourceType.AVATAR_AUDIO_SOURCE]: this.audioContext.createGain(),
+      [SourceType.MEDIA_VIDEO]: this.audioContext.createGain()
     };
-    this.mixer[MixerType.MEDIA].connect(this._sceneEl.audioListener.getInput());
-    this.mixer[MixerType.AVATAR].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this._sceneEl.audioListener.getInput());
 
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
@@ -194,10 +189,14 @@ export class AudioSystem {
   updatePrefs() {
     const { globalVoiceVolume, globalMediaVolume } = window.APP.store.state.preferences;
     let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
-    this.mixer[MixerType.MEDIA].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+    this.mixer[SourceType.MEDIA_VIDEO].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
 
     newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
-    this.mixer[MixerType.AVATAR].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].gain.setTargetAtTime(
+      newGain,
+      this.audioContext.currentTime,
+      GAIN_TIME_CONST
+    );
   }
 
   /**
