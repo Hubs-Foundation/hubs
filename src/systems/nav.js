@@ -14,7 +14,7 @@ AFRAME.registerSystem("nav", {
       console.error("tried to load multiple nav meshes");
       this.removeNavMeshData();
     }
-    const geometry = mesh.geometry;
+    const geometry = mesh.geometry.clone();
     mesh.updateMatrices();
     geometry.applyMatrix4(mesh.matrixWorld);
     this.pathfinder.setZoneData(zone, Pathfinding.createZone(geometry));
