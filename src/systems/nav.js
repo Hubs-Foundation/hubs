@@ -29,9 +29,15 @@ AFRAME.registerSystem("nav", {
 
   removeNavMeshData() {
     if (this.mesh && this.mesh.geometry && this.mesh.geometry.dispose) {
-      this.mesh.geometry.dispose();
+      // If it's using the debug view material, restore the original material so it can be disposed.
+      if (this.mesh._hubs_audio_debug_prev_material) {
+        this.mesh.material = this.mesh._hubs_audio_debug_prev_material;
+        this.mesh._hubs_audio_debug_prev_material = null;
+      }
     }
     if (this.helperMesh) {
+      this.helperMesh.material?.dispose();
+      this.helperMesh.geometry?.dispose();
       this.helperMesh.parent.remove(this.helperMesh);
       this.helperMesh = null;
     }
