@@ -1,5 +1,6 @@
 import { CYLINDER_TEXTURE } from "./cylinder-texture";
 import { SOUND_TELEPORT_START, SOUND_TELEPORT_END } from "../systems/sound-effects-system";
+import { getMeshes } from "../utils/aframe-utils";
 
 function easeIn(t) {
   return t * t;
@@ -136,16 +137,6 @@ const checkLineIntersection = (function() {
     return false;
   };
 })();
-
-function getMeshes(collisionEntities) {
-  return collisionEntities
-    .map(function(entity) {
-      return entity.getObject3D("mesh");
-    })
-    .filter(function(n) {
-      return n;
-    });
-}
 
 const MISS_OPACITY = 0.1;
 const HIT_OPACITY = 0.3;
