@@ -1,5 +1,14 @@
 // Shadow the console log for saving to disk
 
+// Export cached log to file
+export default function DownloadLogs() {
+  if(consoleHistory) {
+    consoleHistory.download();
+  } else {
+    console.error("Unexpected call when debug log is disabled");
+  }
+}
+
 class ConsoleHistory {
   constructor(maximumEntries) {
     this.entries = new Array();
@@ -15,8 +24,9 @@ class ConsoleHistory {
     if(error) {
       entry["stack"] = error.stack;
     }
+    const json = JSON.stringify(entry);
     // Add the new entry and ensure the list doesn't grow too long
-    if(this.entries.push(JSON.stringify(entry)) > this.maximumEntries) {
+    if(this.entries.push(json) > this.maximumEntries) {
       this.entries.shift();
     }
   }
@@ -65,17 +75,34 @@ console.error = function() {
   consoleHistory.record("error", Array.from(arguments), new Error());
 };
 
+const origConsoleDebug = console.debug;
+console.debug = function() {
+  origConsoleDebug.apply(null, arguments);
+  consoleHistory.record("debug", Array.from(arguments));
+};
+
 // Additional top-level error handlers
 
 window.onunhandledrejection = e => consoleHistory.record("error", [e]);
 window.onerror = (msg, file, line, col, error) => consoleHistory.record("error", [msg], error);
 
-// Initials export of cached log file
-export default function DownloadLogs() {
-  if(consoleHistory) {
-    consoleHistory.download();
-  } else {
-    console.error("Unexpected call when debug log is disabled");
-  }
+// Listen for browser deprecations and interventions. Ref https://developers.google.com/web/updates/2018/07/reportingobserver
+
+if ('ReportingObserver' in window) {
+  const observer = new ReportingObserver((reports, observer) => {
+    for (const report of reports) {
+      console.warn("[ReportingObserver]", report.type, report.url, report.body);
+    }
+  }, {buffered: true});
+  observer.observe();
 }
 
+// Listen for CSP violations https://developer.mozilla.org/en-US/docs/Web/API/SecurityPolicyViolationEvent
+
+document.addEventListener("securitypolicyviolation", (e) => {
+  console.warn("[CSP]", e.blockedURI, e.violatedDirective, e.originalPolicy);
+});
+
+// Not captured in shadow log:
+// - Mixed Content https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content
+// - Chrome performance violations of the form [Violation] 'X' handler took Yms
