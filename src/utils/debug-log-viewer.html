@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>JSON Log Reader</title>
+        <script>
+            function onloadhandler() {
+                window.addEventListener("dragover", ondragover, false);
+                window.addEventListener("dragleave", ondragleave, false);
+                window.addEventListener("drop", ondrop, false);
+            }
+
+            function ondragover(e) {
+                e = e || event;
+                e.preventDefault();
+                document.body.classList.add("dragging");
+            }
+
+            function ondragleave(e) {
+                e = e || event;
+                e.preventDefault();
+                document.body.classList.remove("dragging");
+            }
+
+            function ondrop(e) {
+                e = e || event;
+                e.preventDefault();
+                document.body.classList.remove("dragging");
+                loadjson(e.dataTransfer.files);
+            }
+
+            function loadjson(files) {
+                Array.prototype.forEach.call(files, function (file) {
+                    console.log(`Reading ${file.name}`);
+                    const fr = new FileReader();
+                    fr.readAsText(file, "UTF-8");
+                    fr.onload = function () {
+                        renderlog(JSON.parse(fr.result));
+                    };
+                });
+            }
+
+            function renderlog(log) {
+                // console.log(log);
+                const logtarget = document.getElementById("logtarget");
+                logtarget.innerHTML = "";
+
+                const addHeaderCell = function (tr, text) {
+                    const td = document.createElement("th");
+                    tr.appendChild(td);
+                    td.innerText = text;
+                };
+
+                // Log table
+                const logtable = document.createElement("table");
+                logtarget.className = "logtable";
+                logtarget.appendChild(logtable);
+
+                // Log table header
+                const logheader = document.createElement("tr");
+                logtable.appendChild(logheader);
+                addHeaderCell(logheader, "Timestamp");
+                addHeaderCell(logheader, "Message");
+
+                const addTextCell = function (tr, text) {
+                    const td = document.createElement("td");
+                    tr.appendChild(td);
+                    td.innerText = text;
+                    return td;
+                };
+
+                log.forEach((logentry) => {
+                    const tr = document.createElement("tr");
+                    logtable.appendChild(tr);
+                    tr.className = logentry.level;
+
+                    // Timestamp
+
+                    const timestamp = new Date(logentry.time);
+                    const timestampCell = document.createElement("td");
+                    timestampCell.innerText =
+                        timestamp.getUTCHours().toString().padStart(2, "0") +
+                        ":" +
+                        timestamp.getUTCMinutes().toString().padStart(2, "0") +
+                        ":" +
+                        timestamp.getUTCSeconds().toString().padStart(2, "0") +
+                        "." +
+                        timestamp.getUTCMilliseconds().toString().padStart(3, "0");
+                    timestampCell.title = logentry.time;
+                    tr.appendChild(timestampCell);
+
+                    // Message
+
+                    const messageCell = document.createElement("td");
+                    tr.appendChild(messageCell);
+                    const messageElement = document.createElement("span");
+
+                    // Message may be formatted with substitutions (only %c is properly currently supported) https://developer.mozilla.org/en-US/docs/Web/API/console
+                    const messageText = logentry.args.shift();
+
+                    var messageFragment = document.createElement("span");
+                    messageElement.appendChild(messageFragment);
+
+                    var lastIndex = 0;
+                    const interpolationRegEx = /%%|%c|%s|%i|%d|%f|%o|%O/g;
+                    while ((regExMatch = interpolationRegEx.exec(messageText)) !== null) {
+                        // Add in the text up to this point
+                        messageFragment.textContent += messageText.substring(lastIndex, regExMatch.index);
+                        lastIndex = interpolationRegEx.lastIndex;
+                        switch (regExMatch[0]) {
+                            // Just escape out the character
+                            case "%%":
+                                messageFragment.textContent += "%";
+                                break;
+                            // Start a new span with the specified style
+                            case "%c":
+                                // Are there any directives left?
+                                if (logentry.args.length) {
+                                    var messageFragment = document.createElement("span");
+                                    messageFragment.style.cssText = logentry.args.shift();
+                                    messageElement.appendChild(messageFragment);
+                                } else {
+                                    console.warn("Ran out of log parameters");
+                                }
+                                break;
+                            // Incomplete implementation
+                            case "%s":
+                            case "%i":
+                            case "%d":
+                            case "%f":
+                            case "%o":
+                            case "%O":
+                                if (logentry.args.length) {
+                                    messageFragment.textContent += logentry.args.shift();
+                                } else {
+                                    console.warn("Ran out of log parameters");
+                                }
+                                break;
+                        }
+                    }
+                    // Append remaining text
+                    messageFragment.textContent += messageText.substring(lastIndex);
+
+                    // Any remaining arguments should not be styled (appears to be default console behaviour)
+                    while(messageEntry = logentry.args.shift()) {
+                        messageElement.textContent += " " + messageEntry;
+                    }
+
+
+                    if (logentry.stack) {
+                        const detailElement = document.createElement("details");
+                        messageCell.appendChild(detailElement);
+                        const summaryElement = document.createElement("summary");
+                        detailElement.appendChild(summaryElement);
+                        summaryElement.appendChild(messageElement);
+                        // Stack
+                        const stack = document.createElement("div");
+                        stack.className = "stack";
+                        stack.innerText = logentry.stack;
+                        detailElement.appendChild(stack);
+                    } else {
+                        messageCell.appendChild(messageElement);
+                    }
+                });
+            }
+        </script>
+        <style>
+            /* Style reference Chromeium inspectorCommon.css */
+            body {
+                font-family: menlo, consolas, monospace;
+                color: rgb(48, 57, 66);
+                font-size: 11px;
+                cursor: default;
+            }
+            .dragging {
+                background-color: #f6fff6;
+            }
+            .logplaceholder {
+                height: 256px;
+                width: 100%;
+                font-size: 200%;
+                padding-top: 128px;
+                text-align: center;
+            }
+            tr {
+                border-bottom: 1px solid rgb(240, 240, 240);
+            }
+            tr.warn {
+                background-color: #ffe;
+            }
+            tr.error {
+                background-color: #fee;
+            }
+            table {
+                border-collapse: collapse;
+            }
+            th,
+            td {
+                text-align: left;
+                vertical-align: top;
+                padding: 4px 8px;
+            }
+        </style>
+    </head>
+    <body onload="onloadhandler()">
+        <div id="logtarget">
+            <div class="logplaceholder">drag-and-drop JSON logfiles</div>
+        </div>
+    </body>
+</html>
