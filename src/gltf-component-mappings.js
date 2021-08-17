@@ -373,7 +373,12 @@ AFRAME.GLTFModelPlus.registerComponent(
       enterComponentMapping = getSanitizedComponentMapping(enterComponent, enterProperty, publicComponents);
       leaveComponentMapping = getSanitizedComponentMapping(leaveComponent, leaveProperty, publicComponents);
 
-      targetEntity = indexToEntityMap[target];
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof target === "number") {
+        targetEntity = indexToEntityMap[target];
+      } else {
+        targetEntity = target?.el;
+      }
 
       if (!targetEntity) {
         throw new Error(`Couldn't find target entity with index: ${target}.`);
@@ -434,7 +439,12 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     let srcEl;
     if (srcNode !== undefined) {
-      srcEl = indexToEntityMap[srcNode];
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof srcNode === "number") {
+        srcEl = indexToEntityMap[srcNode];
+      } else {
+        srcEl = srcNode?.el;
+      }
       if (!srcEl) {
         console.warn(
           `Error inflating gltf component "video-texture-srcEl": Couldn't find srcEl entity with index ${srcNode}`
@@ -462,7 +472,12 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     let srcEl;
     if (srcNode !== undefined) {
-      srcEl = indexToEntityMap[srcNode];
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof srcNode === "number") {
+        srcEl = indexToEntityMap[srcNode];
+      } else {
+        srcEl = srcNode?.el;
+      }
       if (!srcEl) {
         console.warn(
           `Error inflating gltf component ${componentName}: Couldn't find srcEl entity with index ${srcNode}`

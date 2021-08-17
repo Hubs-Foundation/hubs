@@ -398,6 +398,21 @@ class GLTFHubsPlugin {
         node.extras.gltfIndex = i;
       }
     }
+
+    function hookDef(defType, hookName) {
+      return Promise.all(
+        parser.json[defType].map((_def, idx) => {
+          return Promise.all(
+            parser._invokeAll(function(ext) {
+              return ext[hookName] && ext[hookName](idx);
+            })
+          );
+        })
+      );
+    }
+
+    // TODO decide if thse should get put into the GLTF loader itself
+    return Promise.all([hookDef("scenes", "extendScene"), hookDef("nodes", "extendNode")]);
   }
 
   afterRoot(gltf) {
@@ -428,6 +443,59 @@ class GLTFHubsPlugin {
 
     //
     gltf.scene.animations = gltf.animations;
+  }
+}
+
+class GLTFHubsComponentsExtension {
+  constructor(parser) {
+    this.parser = parser;
+    this.name = "MOZ_hubs_components";
+  }
+
+  _markDefs() {
+    // TODO hack to keep hubs component data in userData. Remove once we handle all component stuff in a plugin
+    delete this.parser.extensions.MOZ_hubs_components;
+  }
+
+  extendScene(sceneIdx) {
+    const ext = this.parser.json.scenes[sceneIdx]?.extensions?.MOZ_hubs_components;
+    console.log("extendceneParams", ext, sceneIdx, this.parser.json.scenes[sceneIdx]);
+    if (ext) return this.resolveComponentLinks(ext);
+  }
+
+  extendNode(nodeIdx) {
+    const ext = this.parser.json.nodes[nodeIdx]?.extensions?.MOZ_hubs_components;
+    if (ext) return this.resolveComponentLinks(ext);
+  }
+
+  resolveComponentLinks(ext) {
+    console.log("resolveComponentLinks", ext);
+
+    const deps = [];
+
+    for (const componentName in ext) {
+      const props = ext[componentName];
+      for (const propName in props) {
+        const value = props[propName];
+        const type = value?.__mhc_link_type;
+        if (type && value.index !== undefined) {
+          console.log("Loading link", value);
+          deps.push(
+            this.parser.getDependency(type, value.index).then(loadedDep => {
+              console.log(`${type} loaded`, loadedDep);
+              props[propName] = loadedDep;
+              // TODO figure out if this is sane
+              if (type === "texture") {
+                loadedDep.flipY = true;
+              }
+              console.log(props);
+            })
+          );
+        }
+      }
+    }
+
+    return Promise.all(deps);
   }
 }
 
@@ -514,6 +582,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
   gltfLoader
+    .register(parser => new GLTFHubsComponentsExtension(parser))
     .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
     .register(parser => new GLTFHubsLightMapExtension(parser))
     .register(parser => new GLTFHubsTextureBasisExtension(parser));
