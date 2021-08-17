@@ -265,7 +265,10 @@ AFRAME.registerComponent("media-video", {
     projection: { type: "string", default: "flat" },
     time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
-    syncTolerance: { default: 2 }
+    syncTolerance: { default: 2 },
+    linkedVideoTexture: { default: null },
+    linkedAudioSource: { default: null },
+    linkedMediaElementAudioSource: { default: null }
   },
 
   init() {
