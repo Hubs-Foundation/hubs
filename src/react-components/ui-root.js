@@ -1240,6 +1240,12 @@ class UIRoot extends Component {
             icon: WarningCircleIcon,
             href: configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")
           },
+          qsTruthy("record_log") && {
+            id: "save-console-logs",
+            label: <FormattedMessage id="more-menu.save-console-logs" defaultMessage="Save Logs" />,
+            icon: SupportIcon,
+            onClick: () => SaveConsoleLog()
+          },
           entered && {
             id: "start-tour",
             label: <FormattedMessage id="more-menu.start-tour" defaultMessage="Start Tour" />,
@@ -1416,7 +1422,7 @@ class UIRoot extends Component {
                         showRtcDebug={showRtcDebugPanel}
                         showAudioDebug={showAudioDebugPanel}
                       />
-                    )}
+                    )}                    
                   </>
                 }
                 sidebar={
@@ -1595,11 +1601,6 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    <ToolbarButton
-                      icon={<SupportIcon />}
-                      label={<FormattedMessage id="toolbar.help-button" defaultMessage="Save Log" />}
-                      onClick={() => { SaveConsoleLog(); }}
-                    />
                     <MoreMenuPopoverButton menu={moreMenu} />
                   </>
                 }
