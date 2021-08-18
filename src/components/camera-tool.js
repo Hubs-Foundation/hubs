@@ -184,11 +184,6 @@ AFRAME.registerComponent("camera-tool", {
       const width = 0.28;
       const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
 
-      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-      if (environmentMapComponent) {
-        environmentMapComponent.applyEnvironmentMap(this.el.object3D);
-      }
-
       this.screen = new THREE.Mesh(geometry, material);
       this.screen.rotation.set(0, Math.PI, 0);
       this.screen.position.set(0, 0, -0.042);

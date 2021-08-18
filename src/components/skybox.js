@@ -430,12 +430,6 @@ AFRAME.registerComponent("skybox", {
   init() {
     this.sky = new Sky();
     this.el.setObject3D("mesh", this.sky);
-
-    this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
-    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
-    // This is likely due to the custom elements attached callback being synchronous on Chrome but not Firefox.
-    // Added timeout due to additional case where texture is black in Firefox.
-    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap));
   },
 
   update(oldData) {
@@ -478,7 +472,8 @@ AFRAME.registerComponent("skybox", {
       this.sky.matrixNeedsUpdate = true;
     }
 
-    this.updateEnvironmentMap();
+    // TODO do we care about updating enviornment map after scene load?
+    // this.updateEnvironmentMap();
   },
 
   updateEnvironmentMap() {
@@ -491,6 +486,7 @@ AFRAME.registerComponent("skybox", {
       const envMap = this.sky.generateEnvironmentMap(renderer);
       environmentMapComponent.updateEnvironmentMap(envMap);
     } else if (quality === "medium") {
+      // TODO this still needs to be accounted for
       // This extra ambient light is here to normalize lighting with the MeshStandardMaterial.
       // Without it, objects are significantly darker in brighter environments.
       // It's kept to a low value to not wash out objects in very dark environments.

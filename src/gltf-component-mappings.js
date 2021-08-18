@@ -529,3 +529,15 @@ AFRAME.GLTFModelPlus.registerComponent(
 AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
   el.setAttribute(componentName, { ...componentData });
 });
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "environment-settings",
+  "environment-settings",
+  (el, componentName, componentData) => {
+    // TODO a bit silly to be storing this as an aframe component. Use a glboal store of some sort
+    el.setAttribute(componentName, {
+      ...componentData,
+      backgroundColor: new THREE.Color(componentData.backgroundColor)
+    });
+  }
+);

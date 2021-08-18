@@ -770,12 +770,6 @@ AFRAME.registerComponent("gltf-model-plus", {
         if (el) rewires.push(() => (o.el = el));
       });
 
-      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-
-      if (environmentMapComponent) {
-        environmentMapComponent.applyEnvironmentMap(object3DToSet);
-      }
-
       if (lastSrc) {
         gltfCache.release(lastSrc);
       }
