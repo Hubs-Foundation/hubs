@@ -7,6 +7,7 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -569,6 +570,36 @@ class GLTFHubsTextureBasisExtension {
   }
 }
 
+class GLTFMozTextureRGBE {
+  constructor(parser, loader) {
+    this.parser = parser;
+    this.loader = loader;
+    this.name = "MOZ_texture_rgbe";
+  }
+
+  loadTexture(textureIndex) {
+    const parser = this.parser;
+    const json = parser.json;
+    const textureDef = json.textures[textureIndex];
+
+    if (!textureDef.extensions || !textureDef.extensions[this.name]) {
+      return null;
+    }
+
+    const extensionDef = textureDef.extensions[this.name];
+    const source = json.images[extensionDef.source];
+    return parser.loadTextureImage(textureIndex, source, this.loader).then(t => {
+      // TODO pretty severe artifacting when using mipmaps, disable for now
+      if (t.minFilter == THREE.NearestMipmapNearestFilter || t.minFilter == THREE.NearestMipmapLinearFilter) {
+        t.minFilter = THREE.NearestFilter;
+      } else if (t.minFilter == THREE.LinearMipmapNearestFilter || t.minFilter == THREE.LinearMipmapLinearFilter) {
+        t.minFilter = THREE.LinearFilter;
+      }
+      return t;
+    });
+  }
+}
+
 export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
@@ -585,7 +616,8 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     .register(parser => new GLTFHubsComponentsExtension(parser))
     .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
     .register(parser => new GLTFHubsLightMapExtension(parser))
-    .register(parser => new GLTFHubsTextureBasisExtension(parser));
+    .register(parser => new GLTFHubsTextureBasisExtension(parser))
+    .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)));
 
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
   // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of
