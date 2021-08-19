@@ -200,16 +200,12 @@ AFRAME.registerComponent("audio-params", {
     const audio = this.getAudio();
     if (audio) {
       if (audio.panner) {
-        this.data.position = new THREE.Vector3(
-          audio.panner.positionX.value,
-          audio.panner.positionY.value,
-          audio.panner.positionZ.value
-        );
-        this.data.orientation = new THREE.Vector3(
-          audio.panner.orientationX.value,
-          audio.panner.orientationY.value,
-          audio.panner.orientationZ.value
-        );
+        this.data.position.x = audio.panner.positionX.value;
+        this.data.position.y = audio.panner.positionY.value;
+        this.data.position.z = audio.panner.positionZ.value;
+        this.data.orientation.x = audio.panner.orientationX.value;
+        this.data.orientation.y = audio.panner.orientationY.value;
+        this.data.orientation.z = audio.panner.orientationZ.value;
         this.updateAttenuation();
       } else {
         this.el.object3D.getWorldDirection(this.data.orientation);
