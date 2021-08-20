@@ -5,6 +5,7 @@ const selfsigned = require("selfsigned");
 const webpack = require("webpack");
 const cors = require("cors");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
+const HTMLWebpackInjectAttributesPlugin = require("html-webpack-inject-attributes-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
@@ -275,7 +276,9 @@ module.exports = async (env, argv) => {
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
-      publicPath: process.env.BASE_ASSETS_PATH || ""
+      publicPath: process.env.BASE_ASSETS_PATH || "",
+      // May be required for dynamically loaded scripts
+      crossOriginLoading: "anonymous"
     },
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
@@ -627,7 +630,12 @@ module.exports = async (env, argv) => {
       // Extract required css and add a content hash.
       new MiniCssExtractPlugin({
         filename: "assets/stylesheets/[name]-[contenthash].css",
-        disable: argv.mode !== "production"
+        disable: argv.mode !== "production",
+        attributes: {
+          // May be required for dynamically loaded stylesheets
+          "crossorigin": "anonymous"
+        },
+  
       }),
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
@@ -645,7 +653,12 @@ module.exports = async (env, argv) => {
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
           APP_CONFIG: appConfig
         })
+      }),
+      // Add crossorigin attribute to static <script> and <style> tags
+      new HTMLWebpackInjectAttributesPlugin({
+        crossorigin: "anonymous"
       })
+
     ]
   };
 };
