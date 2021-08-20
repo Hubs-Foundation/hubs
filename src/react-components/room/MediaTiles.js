@@ -193,7 +193,7 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
             height={thumbnailHeight}
           />
         ) : (
-          <img src={thumbnailUrl} alt={entry.name} width={thumbnailWidth} height={thumbnailHeight} />
+          <img crossOrigin="anonymous" src={thumbnailUrl} alt={entry.name} width={thumbnailWidth} height={thumbnailHeight} />
         )}
       </a>
       {entry.favorited && <StarIcon className={styles.favoriteIcon} />}

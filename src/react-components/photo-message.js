@@ -49,7 +49,7 @@ export default function PhotoMessage({ name, body: { src: url }, className, mayS
         />
       </div>
       <a href={landingPageUrl} target="_blank" rel="noopener noreferrer">
-        <img src={url} />
+        <img crossOrigin="anonymous" src={url} />
       </a>
     </div>
   );

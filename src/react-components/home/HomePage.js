@@ -53,7 +53,7 @@ export function HomePage() {
       <Container>
         <div className={styles.hero}>
           <div className={styles.logoContainer}>
-            <img alt={configs.translation("app-name")} src={configs.image("logo")} />
+            <img crossOrigin="anonymous" alt={configs.translation("app-name")} src={configs.image("logo")} />
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
@@ -62,6 +62,7 @@ export function HomePage() {
           </div>
           <div className={styles.heroImageContainer}>
             <img
+              crossOrigin="anonymous"
               alt={intl.formatMessage(
                 {
                   id: "home-page.hero-image-alt",
@@ -77,7 +78,7 @@ export function HomePage() {
       {configs.feature("show_feature_panels") && (
         <Container className={classNames(styles.features, styles.colLg, styles.centerLg)}>
           <Column padding gap="xl" className={styles.card}>
-            <img src={configs.image("landing_rooms_thumb")} />
+            <img crossOrigin="anonymous" src={configs.image("landing_rooms_thumb")} />
             <h3>
               <FormattedMessage id="home-page.rooms-title" defaultMessage="Instantly create rooms" />
             </h3>
@@ -89,7 +90,7 @@ export function HomePage() {
             </p>
           </Column>
           <Column padding gap="xl" className={styles.card}>
-            <img src={configs.image("landing_communicate_thumb")} />
+            <img crossOrigin="anonymous" src={configs.image("landing_communicate_thumb")} />
             <h3>
               <FormattedMessage id="home-page.communicate-title" defaultMessage="Communicate naturally" />
             </h3>
@@ -101,7 +102,7 @@ export function HomePage() {
             </p>
           </Column>
           <Column padding gap="xl" className={styles.card}>
-            <img src={configs.image("landing_media_thumb")} />
+            <img crossOrigin="anonymous" src={configs.image("landing_media_thumb")} />
             <h3>
               <FormattedMessage id="home-page.media-title" defaultMessage="An easier way to share media" />
             </h3>
