@@ -55,6 +55,17 @@ export function getReticulumFetchUrl(path, absolute = false, host = null, port =
   }
 }
 
+export function getAssetsFetchUrl(path, absolute = false, host = null, port = null) {
+  if (configs.UPLOADS_HOST || host || hasReticulumServer()) {
+    return `https://${configs.UPLOADS_HOST || host}${port ? `:${port}` : ""}${path}`;
+  } else if (absolute) {
+    resolverLink.href = path;
+    return resolverLink.href;
+  } else {
+    return path;
+  }
+}
+
 export async function getReticulumMeta() {
   if (!reticulumMeta) {
     // Initially look up version based upon page, avoiding round-trip, otherwise fetch.
