@@ -21,9 +21,9 @@ We need certain information to operate Hubs and Spoke. For example, we need info
 
 **Chat**: If you send messages in Hubs, Hubs shares it with the other users in the room. Mozilla does not store chats; we only receive it temporarily to transmit it to others in the room.
 
-Photos and Videos You Take, and Photos, Videos, and Objects You Upload: If you take photos and video in a Hubs room or upload photos, videos, or objects to a room, Mozilla stores them so you can share them within the room. They are deleted within 72 hours unless you pin them. If you pin them they will be stored until you remove them from the room and they will be viewable by anyone who can access the room.
+**Photos and Videos You Take, and Photos, Videos, and Objects You Upload**: If you take photos and video in a Hubs room or upload photos, videos, or objects to a room, Mozilla stores them so you can share them within the room. They are deleted within 72 hours unless you pin them. If you pin them they will be stored until you remove them from the room and they will be viewable by anyone who can access the room.
 
-You can learn more by looking at the code itself: [Hubs](https://github.com/mozilla/hubs) (Hub’s front-end source code) [Dialog](https://github.com/mozilla/dialog/) (Hub’s service to transmit voice data), [Reticulum](https://github.com/mozilla/reticulum) (Hubs’s backend server), [Hubs-Ops](https://github.com/mozilla/hubs-ops) (Hubs’ infrastructure code), [Discord Bot](https://github.com/MozillaReality/hubs-discord-bot) (enabled users to connect their Discord community to Hubs).
+You can learn more by looking at the code itself: [Hubs](https://github.com/mozilla/hubs) (the front-end) [Dialog](https://github.com/mozilla/dialog/) (the webRTC server), [Reticulum](https://github.com/mozilla/reticulum) (the backend web server), [Hubs-Ops](https://github.com/mozilla/hubs-ops) (the infrastructure code), [Discord Bot](https://github.com/MozillaReality/hubs-discord-bot) (enables users to connect their Discord community to Hubs).
 
 ### Other Information We Receive
 
@@ -52,9 +52,9 @@ You can learn more by looking at the [code itself](https://github.com/mozilla/sp
 
 ## Who Hubs May Disclose Information To
 
-Amazon Web Services (AWS): Hubs and Spoke use Amazon’s cloud storage service to store the information collected through Hubs and Spoke. You can read [AWS’s Privacy Notice](https://aws.amazon.com/privacy/) for more information.
+**Amazon Web Services (AWS)**: Hubs and Spoke use Amazon’s cloud storage service to store the information collected through Hubs and Spoke. You can read [AWS’s Privacy Notice](https://aws.amazon.com/privacy/) for more information.
 
-Search providers: You can search for images, GIFs, and 3D Models to share in Hubs. When you search, we will send your searches to supported third parties to fulfill the search. Mozilla does not store your search queries or the search results. We support the following providers:
+**Search providers**: You can search for images, GIFs, and 3D Models to share in Hubs. When you search, we will send your searches to supported third parties to fulfill the search. Mozilla does not store your search queries or the search results. We support the following providers:
 
 -   [Tenor](https://tenor.com/legal-privacy)
     
