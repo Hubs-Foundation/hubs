@@ -44,6 +44,10 @@ const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect = "wide
 });
 
 export const OwnedFileImage = withStyles(styles)(({ basePath, record, source, aspect, classes, defaultImage }) => {
+  console.log(basePath);
+  console.log(source);
+  console.log(defaultImage);
+
   return (
     <ConditionalReferenceField
       basePath={basePath}
@@ -67,7 +71,7 @@ function OwnedFileDownloadFieldInternal({ fileName, record, source }) {
   return (
     <a
       download={fileName || true}
-      href={getReticulumFetchUrl(`/files/${record[source]}`)}
+      href={getAssetsFetchUrl(`/files/${record[source]}`)}
       target="_blank"
       rel="noopener noreferrer"
     >
