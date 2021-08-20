@@ -46,7 +46,7 @@ let invalidatedReticulumMetaThisSession = false;
 
 export function getReticulumFetchUrl(path, absolute = false, host = null, port = null) {
   console.log(configs);
-
+  console.log("Inside getReticulumFetchUrl()");
   if (host || hasReticulumServer()) {
     return `https://${host || configs.RETICULUM_SERVER}${port ? `:${port}` : ""}${path}`;
   } else if (absolute) {
@@ -58,12 +58,18 @@ export function getReticulumFetchUrl(path, absolute = false, host = null, port =
 }
 
 export function getAssetsFetchUrl(path, absolute = false, host = null, port = null) {
+  console.log("Inside getAssetsFetchUrl()");
+  console.log("UPLOADS_HOST");
+  console.log(configs.UPLOADS_HOST);
   if (configs.UPLOADS_HOST || host || hasReticulumServer()) {
-    return `https://${configs.UPLOADS_HOST || host}${port ? `:${port}` : ""}${path}`;
+    console.log("getAssetsFetchUrl 1");
+    return `https://${configs.UPLOADS_HOST}${port ? `:${port}` : ""}${path}`;
   } else if (absolute) {
+    console.log("getAssetsFetchUrl 2");
     resolverLink.href = path;
     return resolverLink.href;
   } else {
+    console.log("getAssetsFetchUrl 3");
     return path;
   }
 }
