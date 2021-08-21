@@ -507,27 +507,13 @@ AFRAME.GLTFModelPlus.registerComponent(
 );
 AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "audio-params",
-  "audio-params",
-  (el, componentName, componentData, components) => {
-    APP.audioOverrides.set(el, componentData);
-    const audio = APP.audios.get(el);
-    if (audio) {
-      updateAudioSettings(el, audio);
-    }
-
-    // TODO: Remove
-    if (components["audio"] || components["video"]) {
-      componentData["sourceType"] = SourceType.MEDIA_VIDEO;
-    } else if (components["audio-target"]) {
-      componentData["sourceType"] = SourceType.AUDIO_TARGET;
-    } else if (components["audio-zone"]) {
-      componentData["sourceType"] = SourceType.AUDIO_ZONE;
-    }
-    el.setAttribute(componentName, { ...componentData });
+AFRAME.GLTFModelPlus.registerComponent("audio-params", "audio-params", (el, componentName, componentData) => {
+  APP.audioOverrides.set(el, componentData);
+  const audio = APP.audios.get(el);
+  if (audio) {
+    updateAudioSettings(el, audio);
   }
-);
+});
 
 AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
   el.setAttribute(componentName, { ...componentData });

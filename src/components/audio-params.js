@@ -59,83 +59,26 @@ export const TargetAudioDefaults = Object.freeze({
 
 export const GAIN_TIME_CONST = 0.2;
 
+// TODO: Reintroduce audio normalization
 AFRAME.registerComponent("audio-params", {
   multiple: true,
   schema: {
     enabled: { default: true },
-    debuggable: { default: true },
-    sourceType: { default: -1 }
+    debuggable: { default: true }
   },
 
   init() {
     this.audioRef = null;
-    this.listenerPos = new THREE.Vector3();
-    this.normalizer = null;
     this.el.sceneEl?.systems["audio-debug"].registerSource(this);
-    if (!this.data.isLocal) {
-      this.el.sceneEl?.systems["hubs-systems"].gainSystem.registerSource(this);
-    }
-
-    this.onSourceSetAdded = this.sourceSetAdded.bind(this);
-    let sourceType;
-    if (this.el.components["media-video"]) {
-      sourceType = SourceType.MEDIA_VIDEO;
-    } else if (this.el.components["avatar-audio-source"]) {
-      sourceType = SourceType.AVATAR_AUDIO_SOURCE;
-    } else if (this.el.components["audio-target"]) {
-      sourceType = SourceType.AUDIO_TARGET;
-    } else if (this.el.components["audio-zone"]) {
-      sourceType = SourceType.AUDIO_ZONE;
-    }
-
-    this.el.setAttribute("audio-params", {
-      sourceType
-    });
+    this.el.sceneEl?.systems["hubs-systems"].gainSystem.registerSource(this);
   },
 
   remove() {
-    this.normalizer = null;
     this.el.sceneEl?.systems["audio-debug"].unregisterSource(this);
-    if (!this.data.isLocal) {
-      this.el.sceneEl?.systems["hubs-systems"].gainSystem.unregisterSource(this);
-    }
-
-    if (this.data.sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
-      this.el.components["avatar-audio-source"].el.removeEventListener("sound-source-set", this.onSourceSetAdded);
-    }
-  },
-
-  tick() {
-    if (this.normalizer !== null) {
-      this.normalizer.apply();
-    } else {
-      // We one only enable the Normalizer for avatar-audio-source components
-      if (this.data.sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
-        this.enableNormalizer();
-      }
-    }
+    this.el.sceneEl?.systems["hubs-systems"].gainSystem.unregisterSource(this);
   },
 
   setAudio(audio) {
     this.audioRef = audio;
-  },
-
-  enableNormalizer() {
-    if (this.audioRef) {
-      const avatarAudioSource = this.el.components["avatar-audio-source"];
-      if (avatarAudioSource) {
-        this.normalizer = new AudioNormalizer(this.audioRef);
-        avatarAudioSource.el.addEventListener("sound-source-set", this.onSourceSetAdded);
-      }
-    }
-  },
-
-  sourceSetAdded() {
-    const avatarAudioSource = this.el.components["avatar-audio-source"];
-    const audio = avatarAudioSource && avatarAudioSource.el.getObject3D(avatarAudioSource.attrName);
-    if (audio) {
-      this.normalizer = new AudioNormalizer(audio);
-      this.normalizer.apply();
-    }
   }
 });

@@ -247,9 +247,6 @@ AFRAME.registerComponent("audio-target", {
 
   init() {
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
-    this.el.setAttribute("audio-params", {
-      sourceType: SourceType.AUDIO_TARGET
-    });
     this.createAudio();
     // TODO this is to ensure targets and sources loaded at the same time don't have
     // an order depndancy but this should be done in a more robust way
