@@ -15,11 +15,13 @@ AFRAME.registerComponent("audio-zone-source", {
   getPosition: () => {
     const sourcePos = new THREE.Vector3();
     return () => {
-      if (this.el.components["audio-params"].audioRef) {
-        this.el.components["audio-params"].audioRef.getWorldPosition(sourcePos);
-        return sourcePos.clone();
+      const audio = APP.audios.get(this.el);
+      if (audio) {
+        audio.getWorldPosition(sourcePos);
+      } else {
+        sourcePos.set(0, 0, 0);
       }
-      return new THREE.Vector3(0, 0, 0);
+      return sourcePos;
     };
   },
 

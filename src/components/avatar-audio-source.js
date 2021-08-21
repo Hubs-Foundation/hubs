@@ -52,7 +52,6 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     const audioListener = this.el.sceneEl.audioListener;
     const audio = new THREE.PositionalAudio(audioListener);
-    this.el.components["audio-params"].setAudio(audio);
 
     this.audioSystem.removeAudio(audio);
     this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, audio);
@@ -286,8 +285,6 @@ AFRAME.registerComponent("audio-target", {
 
     this.audioSystem.removeAudio(this.audio);
     this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, this.audio);
-
-    this.el.components["audio-params"].setAudio(audio);
 
     this.audio.updateMatrixWorld();
     APP.audios.set(this.el, audio);

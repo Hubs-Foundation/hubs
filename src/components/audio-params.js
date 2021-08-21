@@ -62,15 +62,10 @@ export const GAIN_TIME_CONST = 0.2;
 // TODO: Reintroduce audio normalization
 AFRAME.registerComponent("audio-params", {
   init() {
-    this.audioRef = null;
     this.el.sceneEl?.systems["hubs-systems"].gainSystem.registerSource(this);
   },
 
   remove() {
     this.el.sceneEl?.systems["hubs-systems"].gainSystem.unregisterSource(this);
-  },
-
-  setAudio(audio) {
-    this.audioRef = audio;
   }
 });

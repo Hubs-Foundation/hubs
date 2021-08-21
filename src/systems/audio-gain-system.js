@@ -28,14 +28,15 @@ const updateAttenuation = (() => {
   const sourcePos = new THREE.Vector3();
   return source => {
     source.el.sceneEl.audioListener.getWorldPosition(listenerPos);
-    source.audioRef.getWorldPosition(sourcePos);
+    const audio = APP.audios.get(source.el);
+    audio.getWorldPosition(sourcePos);
     const distance = sourcePos.distanceTo(listenerPos);
-    if (source.audioRef.panner) {
-      return distanceModels[source.audioRef.panner.distanceModel](
+    if (audio.panner) {
+      return distanceModels[audio.panner.distanceModel](
         distance,
-        source.audioRef.panner.rolloffFactor,
-        source.audioRef.panner.refDistance,
-        source.audioRef.panner.maxDistance
+        audio.panner.rolloffFactor,
+        audio.panner.refDistance,
+        audio.panner.maxDistance
       );
     } else {
       return 1.0;
@@ -69,20 +70,21 @@ export class GainSystem {
     const clippingThreshold = getClippingThreshold();
     this.sources.forEach(source => {
       const isClipped = APP.clippingState.has(source.el);
-      if (source.audioRef && clippingEnabled) {
+      const audio = APP.audios.get(source.el);
+      if (audio && clippingEnabled) {
         const att = updateAttenuation(source);
         if (att < clippingThreshold) {
           if (!isClipped) {
             APP.clippingState.add(source.el);
-            updateAudioSettings(source.el, source.audioRef);
+            updateAudioSettings(source.el, audio);
           }
         } else if (isClipped) {
           APP.clippingState.delete(source.el);
-          updateAudioSettings(source.el, source.audioRef);
+          updateAudioSettings(source.el, audio);
         }
       } else if (isClipped) {
         APP.clippingState.delete(source.el);
-        updateAudioSettings(source.el, source.audioRef);
+        updateAudioSettings(source.el, audio);
       }
     });
   }
