@@ -23,7 +23,7 @@ const distanceModels = {
   }
 };
 
-const updateAttenuation = (() => {
+const calculateAttenuation = (() => {
   const listenerPos = new THREE.Vector3();
   const sourcePos = new THREE.Vector3();
   return (el, audio) => {
@@ -49,19 +49,13 @@ export class GainSystem {
     const clippingThreshold = getClippingThreshold();
     for (const [el, audio] of APP.audios.entries()) {
       const isClipped = APP.clippingState.has(el);
-      if (audio && clippingEnabled) {
-        const att = updateAttenuation(el, audio);
-        if (att < clippingThreshold) {
-          if (!isClipped) {
-            APP.clippingState.add(el);
-            updateAudioSettings(el, audio);
-          }
-        } else if (isClipped) {
+      const shouldBeClipped = clippingEnabled && calculateAttenuation(el, audio) < clippingThreshold;
+      if (isClipped !== shouldBeClipped) {
+        if (shouldBeClipped) {
+          APP.clippingState.add(el);
+        } else {
           APP.clippingState.delete(el);
-          updateAudioSettings(el, audio);
         }
-      } else if (isClipped) {
-        APP.clippingState.delete(el);
         updateAudioSettings(el, audio);
       }
     }
