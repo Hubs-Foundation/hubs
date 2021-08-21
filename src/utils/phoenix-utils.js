@@ -61,17 +61,10 @@ export function getAssetsFetchUrl(path, absolute = false, host = null, port = nu
   console.log("Inside getAssetsFetchUrl()");
   console.log("UPLOADS_HOST");
   console.log(configs.UPLOADS_HOST);
-  if (configs.UPLOADS_HOST || host || hasReticulumServer()) {
-    console.log("getAssetsFetchUrl 1");
-    return `https://${configs.UPLOADS_HOST}${port ? `:${port}` : ""}${path}`;
-  } else if (absolute) {
-    console.log("getAssetsFetchUrl 2");
-    resolverLink.href = path;
-    return resolverLink.href;
-  } else {
-    console.log("getAssetsFetchUrl 3");
-    return path;
-  }
+  console.log(typeof configs.UPLOADS_HOST);
+  return configs.UPLOADS_HOST
+    ? `https://${configs.UPLOADS_HOST}${port ? `:${port}` : ""}${path}`
+    : getReticulumFetchUrl(path, absolute, host, port);
 }
 
 export async function getReticulumMeta() {
