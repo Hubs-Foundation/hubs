@@ -115,7 +115,7 @@ AFRAME.registerSystem("audio-debug", {
 
       let sourceNum = 0;
       this.sources.forEach(source => {
-        if (source.data.enabled && source.data.debuggable && source.audioRef) {
+        if (source.data.enabled && source.audioRef) {
           if (sourceNum < MAX_DEBUG_SOURCES) {
             const audio = APP.audios.get(source.el);
             if (!audio) {
