@@ -26,9 +26,8 @@ const distanceModels = {
 const updateAttenuation = (() => {
   const listenerPos = new THREE.Vector3();
   const sourcePos = new THREE.Vector3();
-  return source => {
-    source.el.sceneEl.audioListener.getWorldPosition(listenerPos);
-    const audio = APP.audios.get(source.el);
+  return (el, audio) => {
+    el.sceneEl.audioListener.getWorldPosition(listenerPos);
     audio.getWorldPosition(sourcePos);
     const distance = sourcePos.distanceTo(listenerPos);
     if (audio.panner) {
@@ -45,47 +44,26 @@ const updateAttenuation = (() => {
 })();
 
 export class GainSystem {
-  constructor() {
-    this.sources = [];
-  }
-
-  remove() {
-    this.sources = [];
-  }
-
-  registerSource(source) {
-    this.sources.push(source);
-  }
-
-  unregisterSource(source) {
-    const index = this.sources.indexOf(source);
-
-    if (index !== -1) {
-      this.sources.splice(index, 1);
-    }
-  }
-
   tick() {
     const clippingEnabled = isClippingEnabled();
     const clippingThreshold = getClippingThreshold();
-    this.sources.forEach(source => {
-      const isClipped = APP.clippingState.has(source.el);
-      const audio = APP.audios.get(source.el);
+    for (const [el, audio] of APP.audios.entries) {
+      const isClipped = APP.clippingState.has(el);
       if (audio && clippingEnabled) {
-        const att = updateAttenuation(source);
+        const att = updateAttenuation(el, audio);
         if (att < clippingThreshold) {
           if (!isClipped) {
-            APP.clippingState.add(source.el);
-            updateAudioSettings(source.el, audio);
+            APP.clippingState.add(el);
+            updateAudioSettings(el, audio);
           }
         } else if (isClipped) {
-          APP.clippingState.delete(source.el);
-          updateAudioSettings(source.el, audio);
+          APP.clippingState.delete(el);
+          updateAudioSettings(el, audio);
         }
       } else if (isClipped) {
-        APP.clippingState.delete(source.el);
-        updateAudioSettings(source.el, audio);
+        APP.clippingState.delete(el);
+        updateAudioSettings(el, audio);
       }
-    });
+    }
   }
 }
