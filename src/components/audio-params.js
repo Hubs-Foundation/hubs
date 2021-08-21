@@ -61,7 +61,6 @@ export const GAIN_TIME_CONST = 0.2;
 
 // TODO: Reintroduce audio normalization
 AFRAME.registerComponent("audio-params", {
-  multiple: true,
   schema: {
     enabled: { default: true },
     debuggable: { default: true }
