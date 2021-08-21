@@ -25,7 +25,6 @@ AFRAME.registerSystem("audio-debug", {
     this.el.sceneEl.addEventListener("environment-scene-loaded", this.onSceneLoaded);
 
     this.navMeshObject = null;
-    this.sources = [];
     this.zones = [];
 
     this.material = new THREE.ShaderMaterial({
@@ -81,18 +80,6 @@ AFRAME.registerSystem("audio-debug", {
     this.el.sceneEl.removeEventListener("environment-scene-loaded", this.onSceneLoaded);
   },
 
-  registerSource(source) {
-    this.sources.push(source);
-  },
-
-  unregisterSource(source) {
-    const index = this.sources.indexOf(source);
-
-    if (index !== -1) {
-      this.sources.splice(index, 1);
-    }
-  },
-
   registerZone(zone) {
     this.zones.push(zone);
   },
@@ -114,47 +101,41 @@ AFRAME.registerSystem("audio-debug", {
       }
 
       let sourceNum = 0;
-      this.sources.forEach(source => {
-        if (source.audioRef) {
-          if (sourceNum < MAX_DEBUG_SOURCES) {
-            const audio = APP.audios.get(source.el);
-            if (!audio) {
-              return;
-            }
-            audio.getWorldPosition(sourcePos);
-            audio.getWorldDirection(sourceDir);
-            this.sourcePositions[sourceNum] = sourcePos.clone();
-            this.sourceOrientations[sourceNum] = sourceDir.clone();
+      for (const [el, audio] of APP.audios.entries()) {
+        if (sourceNum >= MAX_DEBUG_SOURCES) continue;
 
-            const panner = audio.panner || {
-              distanceModel: DistanceModelType.Inverse,
-              maxDistance: 0,
-              refDistance: 0,
-              rolloffFactor: 0,
-              coneInnerAngle: 0,
-              coneOuterAngle: 0
-            };
+        audio.getWorldPosition(sourcePos);
+        audio.getWorldDirection(sourceDir);
+        this.sourcePositions[sourceNum] = sourcePos.clone(); // TODO: Use Vector3 pool
+        this.sourceOrientations[sourceNum] = sourceDir.clone();
 
-            this.distanceModels[sourceNum] = 0;
-            if (panner.distanceModel === DistanceModelType.Linear) {
-              this.distanceModels[sourceNum] = 0;
-            } else if (panner.distanceModel === DistanceModelType.Inverse) {
-              this.distanceModels[sourceNum] = 1;
-            } else if (panner.distanceModel === DistanceModelType.Exponential) {
-              this.distanceModels[sourceNum] = 2;
-            }
-            this.maxDistances[sourceNum] = panner.maxDistance;
-            this.refDistances[sourceNum] = panner.refDistance;
-            this.rolloffFactors[sourceNum] = panner.rolloffFactor;
-            this.coneInnerAngles[sourceNum] = panner.coneInnerAngle;
-            this.coneOuterAngles[sourceNum] = panner.coneOuterAngle;
+        const panner = audio.panner || {
+          distanceModel: DistanceModelType.Inverse,
+          maxDistance: 0,
+          refDistance: 0,
+          rolloffFactor: 0,
+          coneInnerAngle: 0,
+          coneOuterAngle: 0
+        };
 
-            this.gains[sourceNum] = audio.gain.gain.value;
-            this.clipped[sourceNum] = APP.clippingState.has(source.el);
-            sourceNum++;
-          }
+        this.distanceModels[sourceNum] = 0;
+        if (panner.distanceModel === DistanceModelType.Linear) {
+          this.distanceModels[sourceNum] = 0;
+        } else if (panner.distanceModel === DistanceModelType.Inverse) {
+          this.distanceModels[sourceNum] = 1;
+        } else if (panner.distanceModel === DistanceModelType.Exponential) {
+          this.distanceModels[sourceNum] = 2;
         }
-      });
+        this.maxDistances[sourceNum] = panner.maxDistance;
+        this.refDistances[sourceNum] = panner.refDistance;
+        this.rolloffFactors[sourceNum] = panner.rolloffFactor;
+        this.coneInnerAngles[sourceNum] = panner.coneInnerAngle;
+        this.coneOuterAngles[sourceNum] = panner.coneOuterAngle;
+
+        this.gains[sourceNum] = audio.gain.gain.value;
+        this.clipped[sourceNum] = APP.clippingState.has(el);
+        sourceNum++;
+      }
 
       // Update material uniforms
       this.material.uniforms.time.value = time;

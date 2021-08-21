@@ -63,12 +63,10 @@ export const GAIN_TIME_CONST = 0.2;
 AFRAME.registerComponent("audio-params", {
   init() {
     this.audioRef = null;
-    this.el.sceneEl?.systems["audio-debug"].registerSource(this);
     this.el.sceneEl?.systems["hubs-systems"].gainSystem.registerSource(this);
   },
 
   remove() {
-    this.el.sceneEl?.systems["audio-debug"].unregisterSource(this);
     this.el.sceneEl?.systems["hubs-systems"].gainSystem.unregisterSource(this);
   },
 
