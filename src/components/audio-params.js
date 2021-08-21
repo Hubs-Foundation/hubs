@@ -1,4 +1,5 @@
-import { AudioNormalizer } from "../utils/audio-normalizer";
+// TODO: Reintroduce audio normalization
+// import { AudioNormalizer } from "../utils/audio-normalizer";
 
 export const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
 
@@ -58,5 +59,3 @@ export const TargetAudioDefaults = Object.freeze({
 });
 
 export const GAIN_TIME_CONST = 0.2;
-
-// TODO: Reintroduce audio normalization
