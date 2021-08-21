@@ -43,6 +43,6 @@ export function getCurrentAudioSettings(el) {
 export function updateAudioSettings(el, audio) {
   // Follow these rules and you'll have a good time:
   // - If a THREE.Audio or THREE.PositionalAudio is created, call this function.
-  // - If you audio settings change, call this function.
+  // - If audio settings change, call this function.
   applySettings(audio, getCurrentAudioSettings(el));
 }
