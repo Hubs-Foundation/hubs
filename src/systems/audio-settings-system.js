@@ -92,7 +92,7 @@ export class AudioSettingsSystem {
       coneInnerAngle: settings.mediaConeInnerAngle,
       coneOuterAngle: settings.mediaConeOuterAngle,
       coneOuterGain: settings.mediaConeOuterGain,
-      gain: settings.mediaVolume
+      gain: settings.mediaVolume === undefined ? MediaAudioDefaults.gain : settings.mediaVolume
     });
     APP.sceneAudioDefaults.set(SourceType.AVATAR_AUDIO_SOURCE, {
       distanceModel: settings.avatarDistanceModel,
