@@ -1,5 +1,5 @@
 import { SourceType, AudioType } from "./audio-params";
-import { updateAudioSettings } from "../update-audio-settings";
+import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
@@ -266,10 +266,11 @@ AFRAME.registerComponent("audio-target", {
   },
 
   createAudio: function() {
+    APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const audioListener = this.el.sceneEl.audioListener;
-
     let audio = null;
-    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+    const { audioType } = getCurrentAudioSettings(this.el);
+    if (audioType === AudioType.PannerNode) {
       audio = new THREE.PositionalAudio(audioListener);
     } else {
       audio = new THREE.Audio(audioListener);
@@ -293,7 +294,6 @@ AFRAME.registerComponent("audio-target", {
 
     this.audio.updateMatrixWorld();
     APP.audios.set(this.el, audio);
-    APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     updateAudioSettings(this.el, audio);
   },
 

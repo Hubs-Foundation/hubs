@@ -64,7 +64,6 @@ AFRAME.registerComponent("audio-params", {
   schema: {
     enabled: { default: true },
     debuggable: { default: true },
-    audioType: { default: AvatarAudioDefaults.AUDIO_TYPE },
     sourceType: { default: -1 }
   },
 

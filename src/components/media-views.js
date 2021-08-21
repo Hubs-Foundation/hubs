@@ -19,7 +19,7 @@ import { detect } from "detect-browser";
 import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
-import { updateAudioSettings } from "../update-audio-settings";
+import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { SourceType } from "./audio-params";
 
 import qsTruthy from "../utils/qs_truthy";
@@ -550,9 +550,11 @@ AFRAME.registerComponent("media-video", {
       this.audio.disconnect();
       this.el.removeObject3D("sound");
     }
+    APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
+    const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
-    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+    if (audioType === AudioType.PannerNode) {
       this.audio = new THREE.PositionalAudio(audioListener);
     } else {
       this.audio = new THREE.Audio(audioListener);
@@ -571,7 +573,6 @@ AFRAME.registerComponent("media-video", {
     this.audio.updateMatrixWorld();
 
     APP.audios.set(this.el, this.audio);
-    APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
     updateAudioSettings(this.el, this.audio);
   },
 

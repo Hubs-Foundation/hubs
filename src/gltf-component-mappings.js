@@ -256,19 +256,12 @@ async function mediaInflator(el, componentName, componentData, components) {
         coneOuterGain: componentData.coneOuterGain,
         gain: componentData.volume
       });
+      APP.sourceType.set(el, SourceType.MEDIA_VIDEO);
 
-      // TODO: This feels very weird.
-      // Is it likely or possible that we have an audio by now?
       const audio = APP.audios.get(el);
       if (audio) {
         updateAudioSettings(el, audio);
       }
-
-      // TODO: Remove the line below
-      el.setAttribute("audio-params", {
-        audioType: componentData.audioType,
-        sourceType: SourceType.MEDIA_VIDEO
-      });
     }
 
     el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
@@ -496,18 +489,12 @@ AFRAME.GLTFModelPlus.registerComponent(
         coneOuterGain: componentData.coneOuterGain,
         gain: componentData.volume
       });
+      APP.sourceType.set(el, SourceType.AUDIO_TARGET);
 
-      // TODO: This feels very weird.
-      // Is it likely or possible that we have an audio by now?
       const audio = APP.audios.get(el);
       if (audio) {
-        updateAudioSettings(this.el, audio);
+        updateAudioSettings(el, audio);
       }
-
-      // TODO: Remove
-      el.setAttribute("audio-params", {
-        audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo
-      });
     }
 
     el.setAttribute(componentName, {
