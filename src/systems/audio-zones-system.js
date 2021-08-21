@@ -87,16 +87,7 @@ const updateSource = (function() {
     }
   };
 })();
-/**
- * This system updates audio-zone-sources audio-params based on the audioListener position.
- * On every tick it computes the audio-zone-source and audioListeners positions to check
- * if the listener is inside/outside an audio-zone and applies the zone's audio parameters.
- * It only updates when a source or the listener has changed which zones they are in.
- * If several audio-zones are in between the audioListener and the audio-zone-source, the applied
- * audio parameters is a reduction of the audio-zones most restrictive audio parameters.
- * i.e. If there are two audio-zones in between the listener and the source and the first one has gain == 0.1
- * and the other has gain == 1.0, gain == 0.1 is applied to the source.
- */
+
 export class AudioZonesSystem {
   constructor() {
     this.zones = [];

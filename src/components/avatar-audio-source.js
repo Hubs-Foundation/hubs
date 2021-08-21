@@ -257,7 +257,6 @@ AFRAME.registerComponent("audio-target", {
 
   remove: function() {
     this.destroyAudio();
-    this.el.removeAttribute("audio-params");
     this.el.removeAttribute("audio-zone-source");
   },
 

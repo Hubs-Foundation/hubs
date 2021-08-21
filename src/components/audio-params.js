@@ -60,4 +60,3 @@ export const TargetAudioDefaults = Object.freeze({
 export const GAIN_TIME_CONST = 0.2;
 
 // TODO: Reintroduce audio normalization
-AFRAME.registerComponent("audio-params", {});

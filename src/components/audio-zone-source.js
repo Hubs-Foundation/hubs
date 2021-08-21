@@ -31,9 +31,6 @@ AFRAME.registerComponent("audio-zone-source", {
     if (audio) {
       updateAudioSettings(this.el, audio);
     }
-
-    //TODO: remove
-    this.el.setAttribute("audio-params", params);
   },
 
   restore() {
@@ -42,8 +39,5 @@ AFRAME.registerComponent("audio-zone-source", {
     if (audio) {
       updateAudioSettings(this.el, audio);
     }
-
-    // TODO: remove
-    this.el.setAttribute("audio-params", this.originalAudioParamsData);
   }
 });

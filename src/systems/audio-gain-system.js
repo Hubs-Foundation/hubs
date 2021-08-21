@@ -47,7 +47,7 @@ export class GainSystem {
   tick() {
     const clippingEnabled = isClippingEnabled();
     const clippingThreshold = getClippingThreshold();
-    for (const [el, audio] of APP.audios.entries) {
+    for (const [el, audio] of APP.audios.entries()) {
       const isClipped = APP.clippingState.has(el);
       if (audio && clippingEnabled) {
         const att = updateAttenuation(el, audio);
