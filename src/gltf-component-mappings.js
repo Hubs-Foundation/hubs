@@ -3,7 +3,7 @@ import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
-import { AudioType, SourceType } from "./components/audio-params";
+import { AudioType, AvatarAudioDefaults, MediaAudioDefaults, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
 
 function registerRootSceneComponent(componentName) {
@@ -429,7 +429,46 @@ AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
 AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-drawing-buffer");
 
 AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, _componentName, componentData) => {
-  el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
+  const removeUndefined = obj => {
+    return Object.entries(obj).reduce((result, [key, value]) => {
+      if (value !== undefined) {
+        result[key] = value;
+      }
+      return result;
+    }, {});
+  };
+  // TODO: This component should only overwrite the scene audio defaults if this
+  //       component is on the scene node. If this component is on some other node
+  //       we don't care about it and should ignore it.
+  APP.sceneAudioDefaults.set(
+    SourceType.MEDIA_VIDEO,
+    removeUndefined({
+      distanceModel: componentData.mediaDistanceModel,
+      rolloffFactor: componentData.mediaRolloffFactor,
+      refDistance: componentData.mediaRefDistance,
+      maxDistance: componentData.mediaMaxDistance,
+      coneInnerAngle: componentData.mediaConeInnerAngle,
+      coneOuterAngle: componentData.mediaConeOuterAngle,
+      coneOuterGain: componentData.mediaConeOuterGain,
+      gain: componentData.mediaVolume
+    })
+  );
+  APP.sceneAudioDefaults.set(
+    SourceType.AVATAR_AUDIO_SOURCE,
+    removeUndefined({
+      distanceModel: componentData.avatarDistanceModel,
+      rolloffFactor: componentData.avatarRolloffFactor,
+      refDistance: componentData.avatarRefDistance,
+      maxDistance: componentData.avatarMaxDistance,
+      coneInnerAngle: componentData.avatarConeInnerAngle,
+      coneOuterAngle: componentData.avatarConeOuterAngle,
+      coneOuterGain: componentData.avatarConeOuterGain,
+      gain: componentData.avatarVolume
+    })
+  );
+  for (const [el, audio] of APP.audios.entries()) {
+    updateAudioSettings(el, audio);
+  }
 });
 
 AFRAME.GLTFModelPlus.registerComponent(

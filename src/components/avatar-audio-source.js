@@ -86,7 +86,6 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   init() {
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
-    this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
@@ -116,7 +115,6 @@ AFRAME.registerComponent("avatar-audio-source", {
   },
 
   remove: function() {
-    this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
     APP.dialog.off("stream_updated", this._onStreamUpdated);
     this.destroyAudio();
   }

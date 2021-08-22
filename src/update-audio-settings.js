@@ -22,13 +22,13 @@ function applySettings(audio, settings) {
 }
 
 export function getCurrentAudioSettings(el) {
-  // TODO: Add the DEBUG PANEL settings.
   const sourceType = APP.sourceType.get(el);
   const defaults = defaultSettingsForSourceType.get(sourceType);
   const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
   const audioOverrides = APP.audioOverrides.get(el);
   const zoneSettings = APP.zoneOverrides.get(el);
-  const settings = Object.assign({}, defaults, sceneOverrides, audioOverrides, zoneSettings);
+  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
+  const settings = Object.assign({}, defaults, sceneOverrides, audioDebugPanelOverrides, audioOverrides, zoneSettings);
 
   if (APP.clippingState.has(el) || APP.linkedMutedState.has(el)) {
     settings.gain = 0;
@@ -37,6 +37,13 @@ export function getCurrentAudioSettings(el) {
   }
 
   return settings;
+}
+
+export function getCurrentAudioSettingsForSourceType(sourceType) {
+  const defaults = defaultSettingsForSourceType.get(sourceType);
+  const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
+  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
+  return Object.assign({}, defaults, sceneOverrides, audioDebugPanelOverrides);
 }
 
 // TODO: Change this name or the name of the function on audio-settings-system

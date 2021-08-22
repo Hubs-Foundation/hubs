@@ -201,13 +201,14 @@ window.APP.RENDER_ORDER = {
 
 // TODO: Remove comments
 // TODO: Rename or reconfigure these as needed
-APP.audios = new Map(); //                     el -> (THREE.Audio || THREE.PositionalAudio)
-APP.sourceType = new Map(); //                 el -> SourceType
-APP.audioOverrides = new Map(); //             el -> AudioSettings
-APP.zoneOverrides = new Map(); //              el -> AudioSettings
-APP.sceneAudioDefaults = new Map(); // SourceType -> AudioSettings
+APP.audios = new Map(); //                           el -> (THREE.Audio || THREE.PositionalAudio)
+APP.sourceType = new Map(); //                       el -> SourceType
+APP.audioOverrides = new Map(); //                   el -> AudioSettings
+APP.zoneOverrides = new Map(); //                    el -> AudioSettings
+APP.audioDebugPanelOverrides = new Map(); // SourceType -> AudioSettings
+APP.sceneAudioDefaults = new Map(); //       SourceType -> AudioSettings
+APP.gainMultipliers = new Map(); //                  el -> Number
 APP.clippingState = new Set();
-APP.gainMultipliers = new Map();
 APP.linkedMutedState = new Set();
 
 const store = window.APP.store;
