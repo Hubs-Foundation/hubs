@@ -25,9 +25,9 @@ export function getCurrentAudioSettings(el) {
   const sourceType = APP.sourceType.get(el);
   const defaults = defaultSettingsForSourceType.get(sourceType);
   const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
+  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
   const audioOverrides = APP.audioOverrides.get(el);
   const zoneSettings = APP.zoneOverrides.get(el);
-  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
   const settings = Object.assign({}, defaults, sceneOverrides, audioDebugPanelOverrides, audioOverrides, zoneSettings);
 
   if (APP.clippingState.has(el) || APP.linkedMutedState.has(el)) {
