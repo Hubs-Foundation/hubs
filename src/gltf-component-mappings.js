@@ -3,7 +3,7 @@ import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
-import { AudioType, AvatarAudioDefaults, MediaAudioDefaults, SourceType } from "./components/audio-params";
+import { AudioType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
 
 function registerRootSceneComponent(componentName) {
