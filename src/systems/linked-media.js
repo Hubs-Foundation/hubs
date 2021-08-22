@@ -50,7 +50,7 @@ AFRAME.registerSystem("linked-media", {
     elA.setAttribute("linked-media", "");
     elB.setAttribute("linked-media", "");
 
-    // As a convenience, if elA is a video, we turn its volume off so we don't hear it twice
+    // As a convenience, if elA has audio, we turn its volume off so we don't hear it twice
     APP.linkedMutedState.add(elA);
     const audio = APP.audios.get(elA);
     if (audio) {
@@ -68,7 +68,6 @@ AFRAME.registerSystem("linked-media", {
         elB.removeEventListener("componentchanged", handlerB);
       }
 
-      // As a convenience, if elA is a video, we restore its volume to 50% since we muted it upon link.
       APP.linkedMutedState.delete(elA);
       const audio = APP.audios.get(elA);
       if (audio) {
