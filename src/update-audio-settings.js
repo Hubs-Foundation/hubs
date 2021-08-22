@@ -46,7 +46,6 @@ export function getCurrentAudioSettingsForSourceType(sourceType) {
   return Object.assign({}, defaults, sceneOverrides, audioDebugPanelOverrides);
 }
 
-// TODO: Change this name or the name of the function on audio-settings-system
 export function updateAudioSettings(el, audio) {
   // Follow these rules and you'll have a good time:
   // - If a THREE.Audio or THREE.PositionalAudio is created, call this function.
