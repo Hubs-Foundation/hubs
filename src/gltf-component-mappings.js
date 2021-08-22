@@ -245,6 +245,17 @@ async function mediaInflator(el, componentName, componentData, components) {
     mediaOptions.hidePlaybackControls = !isControlled;
 
     if (componentData.audioType) {
+      // This is an old version of this component, which had built-in audio parameters.
+      // The way we are handling it is wrong. If a user created a scene with this old version
+      // of the component, all of these parameters will be present whether the user explicitly set
+      // the values for them or not. But really, they should only count as "overrides" if the user
+      // meant for them to take precendence over the app and scene defaults.
+      // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
+      //       but simplifying the handling. Another option is to compare the component data here with
+      //       the "defaults" and only save the values that are different from the defaults. However,
+      //       this loses information if the user changed the scene settings but wanted this specific
+      //       node to use the "defaults".
+      //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
       APP.audioOverrides.set(el, {
         audioType: componentData.audioType,
         distanceModel: componentData.distanceModel,
@@ -515,8 +526,18 @@ AFRAME.GLTFModelPlus.registerComponent(
       }
     }
 
-    // Migrate audio-target component that has built-in audio params
     if (componentData.positional !== undefined) {
+      // This is an old version of the audio-target component, which had built-in audio parameters.
+      // The way we are handling it is wrong. If a user created a scene in spoke with this old version
+      // of this component, all of these parameters will be present whether the user explicitly set
+      // the values for them or not. But really, they should only count as "overrides" if the user
+      // meant for them to take precendence over the app and scene defaults.
+      // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
+      //       but simplifying the handling. Another option is to compare the component data here with
+      //       the "defaults" and only save the values that are different from the defaults. However,
+      //       this loses information if the user changed the scene settings but wanted this specific
+      //       node to use the "defaults".
+      //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
       APP.audioOverrides.set(el, {
         audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
         distanceModel: componentData.distanceModel,
