@@ -44,10 +44,6 @@ const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect = "wide
 });
 
 export const OwnedFileImage = withStyles(styles)(({ basePath, record, source, aspect, classes, defaultImage }) => {
-  console.log(basePath);
-  console.log(source);
-  console.log(defaultImage);
-
   return (
     <ConditionalReferenceField
       basePath={basePath}
@@ -68,7 +64,6 @@ OwnedFileImage.propTypes = {
 };
 
 function OwnedFileDownloadFieldInternal({ fileName, record, source }) {
-  console.log("OwnedFileDownloadFieldInternal()");
   return (
     <a
       download={fileName || true}

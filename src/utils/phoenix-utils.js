@@ -45,8 +45,6 @@ let reticulumMeta = null;
 let invalidatedReticulumMetaThisSession = false;
 
 export function getReticulumFetchUrl(path, absolute = false, host = null, port = null) {
-  console.log(configs);
-  console.log("Inside getReticulumFetchUrl()");
   if (host || hasReticulumServer()) {
     return `https://${host || configs.RETICULUM_SERVER}${port ? `:${port}` : ""}${path}`;
   } else if (absolute) {
@@ -58,10 +56,6 @@ export function getReticulumFetchUrl(path, absolute = false, host = null, port =
 }
 
 export function getAssetsFetchUrl(path, absolute = false, host = null, port = null) {
-  console.log("Inside getAssetsFetchUrl()");
-  console.log("UPLOADS_HOST");
-  console.log(configs.UPLOADS_HOST);
-  console.log(typeof configs.UPLOADS_HOST);
   return configs.UPLOADS_HOST
     ? `https://${configs.UPLOADS_HOST}${port ? `:${port}` : ""}${path}`
     : getReticulumFetchUrl(path, absolute, host, port);
