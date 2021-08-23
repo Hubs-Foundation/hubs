@@ -229,7 +229,8 @@ module.exports = async (env, argv) => {
         BASE_ASSETS_PATH: "https://hubs.local:8080/",
         RETICULUM_SERVER: "hubs.local:4000",
         POSTGREST_SERVER: "",
-        ITA_SERVER: ""
+        ITA_SERVER: "",
+        UPLOADS_HOST: "https://hubs.local:4000"
       });
     }
   }
@@ -643,6 +644,7 @@ module.exports = async (env, argv) => {
           SENTRY_DSN: process.env.SENTRY_DSN,
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
+          UPLOADS_HOST: process.env.UPLOADS_HOST,
           APP_CONFIG: appConfig
         })
       })

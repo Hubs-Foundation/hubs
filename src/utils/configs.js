@@ -16,7 +16,8 @@ let isAdmin = false;
   "SENTRY_DSN",
   "GA_TRACKING_ID",
   "SHORTLINK_DOMAIN",
-  "BASE_ASSETS_PATH"
+  "BASE_ASSETS_PATH",
+  "UPLOADS_HOST"
 ].forEach(x => {
   const el = document.querySelector(`meta[name='env:${x.toLowerCase()}']`);
   configs[x] = el ? el.getAttribute("content") : process.env[x];
