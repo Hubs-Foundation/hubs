@@ -112,11 +112,9 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
     const settings = Object.assign({}, APP.audioDebugPanelOverrides.get(sourceType), newSetting);
     APP.audioDebugPanelOverrides.set(sourceType, settings);
     if (sourceType === SourceType.MEDIA_VIDEO) {
-      // We use the spread operator here because React comparisons are shallow, which means
-      // we must create a new object whenever we want mediaSettings or avatarSettings to update.
-      setMediaSettings({ ...getCurrentAudioSettingsForSourceType(SourceType.MEDIA_VIDEO) });
+      setMediaSettings(getCurrentAudioSettingsForSourceType(SourceType.MEDIA_VIDEO));
     } else {
-      setAvatarSettings({ ...getCurrentAudioSettingsForSourceType(SourceType.AVATAR_AUDIO_SOURCE) });
+      setAvatarSettings(getCurrentAudioSettingsForSourceType(SourceType.AVATAR_AUDIO_SOURCE));
     }
     for (const [el, audio] of APP.audios.entries()) {
       updateAudioSettings(el, audio);
