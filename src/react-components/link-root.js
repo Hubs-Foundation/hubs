@@ -171,6 +171,7 @@ class LinkRoot extends Component {
           <div className={styles.linkContents}>
             <a className={styles.logo} href="/">
               <img
+                crossOrigin="anonymous"
                 src={configs.image("logo")}
                 alt={<FormattedMessage id="link-page.logo-alt" defaultMessage="Logo" />}
               />
