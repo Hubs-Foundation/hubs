@@ -73,10 +73,9 @@ export function usePinObject(hubChannel, scene, object) {
       function onPinStateChanged() {
         setIsPinned(getPinnedState(el));
       }
-
       el.addEventListener("pinned", onPinStateChanged);
       el.addEventListener("unpinned", onPinStateChanged);
-
+      setIsPinned(getPinnedState(el));
       return () => {
         el.removeEventListener("pinned", onPinStateChanged);
         el.removeEventListener("unpinned", onPinStateChanged);
