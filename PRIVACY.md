@@ -1,7 +1,7 @@
 
 # Hubs and Spoke Privacy Notice
 
-Aug 20, 2021
+Aug 24, 2021
 
 In this Privacy Notice, we explain what data [Hubs](https://hubs.mozilla.com) and [Spoke](https://hubs.mozilla.com/spoke) collect and share, and why. We also adhere to the practices outlined in the Mozilla [Privacy Policy](https://www.mozilla.org/en-US/privacy/) for how we receive, handle, and share information.
 
