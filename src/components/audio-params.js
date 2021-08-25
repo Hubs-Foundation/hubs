@@ -23,7 +23,7 @@ export const DistanceModelType = {
 };
 
 export const AvatarAudioDefaults = Object.freeze({
-  AUDIO_TYPE: AudioType.PannerNode,
+  audioType: AudioType.PannerNode,
   distanceModel: DistanceModelType.Inverse,
   rolloffFactor: 2,
   refDistance: 1,
@@ -35,7 +35,7 @@ export const AvatarAudioDefaults = Object.freeze({
 });
 
 export const MediaAudioDefaults = Object.freeze({
-  AUDIO_TYPE: AudioType.PannerNode,
+  audioType: AudioType.PannerNode,
   distanceModel: DistanceModelType.Inverse,
   rolloffFactor: 1,
   refDistance: 1,
@@ -47,7 +47,7 @@ export const MediaAudioDefaults = Object.freeze({
 });
 
 export const TargetAudioDefaults = Object.freeze({
-  AUDIO_TYPE: AudioType.PannerNode,
+  audioType: AudioType.PannerNode,
   distanceModel: DistanceModelType.Inverse,
   rolloffFactor: 5,
   refDistance: 8,
