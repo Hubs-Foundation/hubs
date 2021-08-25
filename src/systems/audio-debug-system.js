@@ -103,6 +103,7 @@ AFRAME.registerSystem("audio-debug", {
       let sourceNum = 0;
       for (const [el, audio] of APP.audios.entries()) {
         if (sourceNum >= MAX_DEBUG_SOURCES) continue;
+        if (APP.isAudioPaused.has(el)) continue;
 
         audio.getWorldPosition(sourcePos);
         audio.getWorldDirection(sourceDir);

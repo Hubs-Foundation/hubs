@@ -210,6 +210,7 @@ APP.sceneAudioDefaults = new Map(); //       SourceType -> AudioSettings
 APP.gainMultipliers = new Map(); //                  el -> Number
 APP.clippingState = new Set();
 APP.linkedMutedState = new Set();
+APP.isAudioPaused = new Set();
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen

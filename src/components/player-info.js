@@ -68,6 +68,7 @@ AFRAME.registerComponent("player-info", {
     registerComponentInstance(this, "player-info");
   },
   remove() {
+    APP.isAudioPaused.delete(this.el);
     deregisterComponentInstance(this, "player-info");
   },
   play() {
@@ -183,6 +184,12 @@ AFRAME.registerComponent("player-info", {
       if (this.isLocalPlayerInfo) {
         el.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
+    }
+
+    if (this.data.muted) {
+      APP.isAudioPaused.add(this.el);
+    } else {
+      APP.isAudioPaused.delete(this.el);
     }
   },
   handleModelError() {

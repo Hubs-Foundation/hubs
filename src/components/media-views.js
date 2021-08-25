@@ -473,6 +473,11 @@ AFRAME.registerComponent("media-video", {
     if (this._ignorePauseStateChanges) return;
 
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
+    if (this.video.paused) {
+      APP.isAudioPaused.add(this.el);
+    } else {
+      APP.isAudioPaused.delete(this.el);
+    }
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
       this.el.emit("owned-video-state-changed");
@@ -971,6 +976,8 @@ AFRAME.registerComponent("media-video", {
 
   remove() {
     this.cleanUp();
+
+    APP.isAudioPaused.delete(this.el);
 
     if (this.mesh) {
       this.el.removeObject3D("mesh");
