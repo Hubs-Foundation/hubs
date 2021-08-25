@@ -12,9 +12,9 @@ AFRAME.registerComponent("audio-zone-source", {
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterSource(this);
   },
 
-  getPosition: () => {
+  getPosition: (() => {
     const sourcePos = new THREE.Vector3();
-    return () => {
+    return function() {
       const audio = APP.audios.get(this.el);
       if (audio) {
         audio.getWorldPosition(sourcePos);
@@ -23,7 +23,7 @@ AFRAME.registerComponent("audio-zone-source", {
       }
       return sourcePos;
     };
-  },
+  })(),
 
   apply(params) {
     APP.zoneOverrides.set(this.el, params);
