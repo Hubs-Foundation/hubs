@@ -11,12 +11,9 @@ import { Column } from "../layout/Column";
 import { Row } from "../layout/Row";
 import { Center } from "../layout/Center";
 import classNames from "classnames";
-import { TextInputField } from "../input/TextInputField";
-
-const noop = () => {};
+import { CopyableTextInputField } from "../input/CopyableTextInputField";
 
 export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
-  // TODO add copy token functionality
   return (
     <Modal
       titleNode={
@@ -42,20 +39,16 @@ export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
             defaultMessage="You will not be able to see it again once you have closed this window."
           />
         </p>
-        <TextInputField
+        <CopyableTextInputField
+          buttonPreset="accent6"
           className={styles.maxWidthAuto}
           inputClassName={classNames(styles.backgroundDarkGrey, styles.textWhite)}
           label={<FormattedMessage id="save-api-token.copy-label" defaultMessage="API Token" />}
-          value={token.token}
+          value={token}
           description={
             <p>
               <FormattedMessage id="save-api-token.copied" defaultMessage="Copied" />
             </p>
-          }
-          afterInput={
-            <Button preset="accent6" onClick={noop}>
-              <FormattedMessage id="save-api-token.copy" defaultMessage="Copy" />:
-            </Button>
           }
         />
         <Row padding="sm" className={styles.backgroundLightGrey}>
@@ -68,7 +61,7 @@ export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
           </p>
         </Row>
         <Center>
-          <Button preset="primary" sm>
+          <Button preset="primary" sm onClick={onClose}>
             <FormattedMessage id="save-api-token.revoke" defaultMessage="Confirm and close" />
           </Button>
         </Center>
@@ -79,7 +72,7 @@ export const RevealTokenModal = ({ token, selectedScopes, onClose }) => {
 
 RevealTokenModal.propTypes = {
   onClose: PropTypes.func.isRequired,
-  token: PropTypes.object.isRequired,
+  token: PropTypes.string.isRequired,
   selectedScopes: PropTypes.array.isRequired
 };
 

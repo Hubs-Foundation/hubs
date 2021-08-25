@@ -2,6 +2,8 @@ import { THREE } from "aframe";
 import audioDebugVert from "./audio-debug.vert";
 import audioDebugFrag from "./audio-debug.frag";
 import { DistanceModelType } from "../components/audio-params";
+import { getWebGLVersion } from "../utils/webgl";
+import { getMeshes } from "../utils/aframe-utils";
 
 const MAX_DEBUG_SOURCES = 64;
 
@@ -11,11 +13,18 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   init() {
+    this.unsupported = false;
+    const webGLVersion = getWebGLVersion(this.el.sceneEl.renderer);
+    if (webGLVersion < "2.0") {
+      this.unsupported = true;
+    }
+
     window.APP.store.addEventListener("statechanged", this.updateState.bind(this));
 
     this.onSceneLoaded = this.onSceneLoaded.bind(this);
     this.el.sceneEl.addEventListener("environment-scene-loaded", this.onSceneLoaded);
 
+    this.navMeshObject = null;
     this.sources = [];
     this.zones = [];
 
@@ -105,7 +114,7 @@ AFRAME.registerSystem("audio-debug", {
     this.sources.forEach(source => {
       if (source.data.enabled && source.data.debuggable) {
         if (sourceNum < MAX_DEBUG_SOURCES) {
-          this.sourcePositions[sourceNum] = source.data.position;
+          this.sourcePositions[sourceNum] = this.navMeshObject.worldToLocal(source.data.position);
           this.sourceOrientations[sourceNum] = source.data.orientation;
           this.distanceModels[sourceNum] = 0;
           if (source.data.distanceModel === DistanceModelType.Linear) {
@@ -143,27 +152,28 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   enableDebugMode(enabled, force = false) {
-    if ((enabled === undefined || enabled === this.data.enabled) && !force) return;
+    if (((enabled === undefined || enabled === this.data.enabled) && !force) || this.unsupported) return;
     this.zones.forEach(zone => {
       zone.el.setAttribute("audio-zone", "debuggable", enabled);
     });
-    const envRoot = document.getElementById("environment-root");
-    const meshEl = envRoot.querySelector(".trimesh") || envRoot.querySelector(".navMesh");
-    if (meshEl) {
+
+    const collisionEntities = Array.from(this.el.sceneEl.querySelectorAll("[nav-mesh]"));
+    const meshes = getMeshes(collisionEntities);
+
+    if (meshes.length) {
       this.data.enabled = enabled;
-      const navMesh = meshEl.object3D;
-      navMesh.visible = enabled;
-      navMesh.traverse(obj => {
+      meshes.forEach(obj => {
         if (obj.isMesh) {
-          obj.visible = enabled;
+          this.navMeshObject = obj;
+          obj.parent.visible = enabled;
           if (obj.material) {
             if (enabled) {
-              obj._hubs_audio_debug_material = obj.material;
+              !obj._hubs_audio_debug_prev_material && (obj._hubs_audio_debug_prev_material = obj.material);
               obj.material = this.material;
               obj.material.needsUpdate = true;
-            } else if (obj._hubs_audio_debug_material) {
-              obj.material = obj._hubs_audio_debug_material;
-              obj._hubs_audio_debug_material = null;
+            } else if (obj._hubs_audio_debug_prev_material) {
+              obj.material = obj._hubs_audio_debug_prev_material;
+              obj._hubs_audio_debug_prev_material = null;
               obj.material.needsUpdate = true;
             }
             obj.geometry.computeFaceNormals();
@@ -171,7 +181,9 @@ AFRAME.registerSystem("audio-debug", {
           }
         }
       });
-    } else {
+    }
+
+    if (!this.navMeshObject) {
       this.data.enabled = false;
     }
   },
@@ -184,6 +196,7 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   onSceneLoaded() {
+    this.navMeshObject = null;
     this.updateState(true);
   }
 });

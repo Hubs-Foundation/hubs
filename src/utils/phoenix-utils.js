@@ -1,6 +1,7 @@
 import { Socket } from "phoenix";
 import { generateHubName } from "../utils/name-generation";
 import configs from "../utils/configs";
+import { sleep } from "../utils/async-utils";
 
 import Store from "../storage/store";
 
@@ -257,6 +258,20 @@ export function getPresenceProfileForSession(presences, sessionId) {
   return (getPresenceEntryForSession(presences, sessionId) || {}).profile || {};
 }
 
+function migrateBindings(oldChannel, newChannel) {
+  const doNotDuplicate = ["phx_close", "phx_error", "phx_reply", "presence_state", "presence_diff"];
+  const shouldDuplicate = event => {
+    return !event.startsWith("chan_reply_") && !doNotDuplicate.includes(event);
+  };
+  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
+    const item = oldChannel.bindings[i];
+    if (shouldDuplicate(item.event)) {
+      newChannel.bindings.push(item);
+    }
+  }
+  newChannel.bindingRef = oldChannel.bindingRef;
+}
+
 // Takes the given channel, and creates a new channel with the same bindings
 // with the given socket, joins it, and leaves the old channel after joining.
 //
@@ -265,10 +280,7 @@ export function getPresenceProfileForSession(presences, sessionId) {
 export function migrateChannelToSocket(oldChannel, socket, params) {
   const channel = socket.channel(oldChannel.topic, params || oldChannel.params);
 
-  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
-    const item = oldChannel.bindings[i];
-    channel.on(item.event, item.callback);
-  }
+  migrateBindings(oldChannel, channel);
 
   for (let i = 0, l = oldChannel.pushBuffer.length; i < l; i++) {
     const item = oldChannel.pushBuffer[i];
@@ -293,10 +305,7 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
 }
 
 export function migrateToChannel(oldChannel, newChannel) {
-  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
-    const item = oldChannel.bindings[i];
-    newChannel.on(item.event, item.callback);
-  }
+  migrateBindings(oldChannel, newChannel);
 
   return new Promise((resolve, reject) => {
     newChannel
@@ -336,3 +345,66 @@ export function hasEmbedPresences(presences) {
 
   return false;
 }
+
+export function denoisePresence({ onJoin, onLeave, onChange }) {
+  return {
+    rawOnJoin: (key, beforeJoin, afterJoin) => {
+      if (beforeJoin === undefined) {
+        onJoin(key, afterJoin.metas[0]);
+      }
+    },
+    rawOnLeave: (key, remaining, removed) => {
+      if (remaining.metas.length === 0) {
+        onLeave(key, removed.metas[0]);
+      } else {
+        onChange(key, removed.metas[removed.metas.length - 1], remaining.metas[remaining.metas.length - 1]);
+      }
+    }
+  };
+}
+
+export function presenceEventsForHub(events) {
+  const onJoin = (key, meta) => {
+    events.trigger(`hub:join`, { key, meta });
+  };
+  const onLeave = (key, meta) => {
+    events.trigger(`hub:leave`, { key, meta });
+  };
+  const onChange = (key, previous, current) => {
+    events.trigger(`hub:change`, { key, previous, current });
+  };
+  return {
+    onJoin,
+    onLeave,
+    onChange
+  };
+}
+
+export const tryGetMatchingMeta = async ({ ret_pool, ret_version }, shouldAbandonMigration) => {
+  const backoffMS = 5000;
+  const randomMS = 15000;
+  const maxAttempts = 10;
+  let didMatchMeta = false;
+  let attempt = 0;
+  while (!didMatchMeta && attempt < maxAttempts && !shouldAbandonMigration()) {
+    try {
+      // Add randomness to the first request avoid flooding reticulum.
+      const delayMS = attempt * backoffMS + (attempt === 0 ? Math.random() * randomMS : 0);
+      console.log(
+        `[reconnect] Getting reticulum meta in ${Math.ceil(delayMS / 1000)} seconds.${
+          attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""
+        }`
+      );
+      await sleep(delayMS);
+      invalidateReticulumMeta();
+      console.log(`[reconnect] Getting reticulum meta.${attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""}`);
+      const { pool, version } = await getReticulumMeta();
+      didMatchMeta = ret_pool === pool && ret_version === version;
+    } catch {
+      didMatchMeta = false;
+    }
+
+    attempt = attempt + 1;
+  }
+  return didMatchMeta;
+};

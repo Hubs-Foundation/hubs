@@ -1,4 +1,4 @@
-import { SourceType, AvatarAudioDefaults, TargetAudioDefaults } from "./audio-params";
+import { SourceType, TargetAudioDefaults, AudioType } from "./audio-params";
 import { MixerType } from "../systems/audio-system";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
@@ -33,7 +33,7 @@ async function getMediaStream(el) {
     console.error(INFO_INIT_FAILED, INFO_NO_OWNER);
     return null;
   }
-  const stream = await NAF.connection.adapter.getMediaStream(peerId).catch(e => {
+  const stream = await APP.dialog.getMediaStream(peerId).catch(e => {
     console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
   });
   if (!stream) {
@@ -52,17 +52,6 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     const audioListener = this.el.sceneEl.audioListener;
     const audio = new THREE.PositionalAudio(audioListener);
-    this.el.setAttribute("audio-params", {
-      sourceType: SourceType.AVATAR_AUDIO_SOURCE,
-      distanceModel: AvatarAudioDefaults.DISTANCE_MODEL,
-      rolloffFactor: AvatarAudioDefaults.ROLLOFF_FACTORROLLOFF_FACTOR,
-      refDistance: AvatarAudioDefaults.REF_DISTANCE,
-      maxDistance: AvatarAudioDefaults.MAX_DISTANCE,
-      coneInnerAngle: AvatarAudioDefaults.INNER_ANGLE,
-      coneOuterAngle: AvatarAudioDefaults.OUTER_ANGLE,
-      coneOuterGain: AvatarAudioDefaults.OUTER_GAIN,
-      gain: AvatarAudioDefaults.VOLUME
-    });
     this.el.components["audio-params"].setAudio(audio);
 
     this.audioSystem.removeAudio(audio);
@@ -96,7 +85,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
-    NAF.connection.adapter?.on("stream_updated", this._onStreamUpdated, this);
+    APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
   },
 
@@ -109,7 +98,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     getOwnerId(this.el).then(async ownerId => {
       if (ownerId === peerId && kind === "audio") {
         // The audio stream for this peer has been updated
-        const newStream = await NAF.connection.adapter.getMediaStream(peerId, "audio").catch(e => {
+        const newStream = await APP.dialog.getMediaStream(peerId, "audio").catch(e => {
           console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
         });
 
@@ -124,7 +113,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   remove: function() {
     this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
-    NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
+    APP.dialog.off("stream_updated", this._onStreamUpdated);
     this.destroyAudio();
   },
 
@@ -281,12 +270,17 @@ AFRAME.registerComponent("audio-target", {
     this.destroyAudio();
     this.el.removeAttribute("audio-params");
     this.el.removeAttribute("audio-zone-source");
-    this.el.removeAttribute("audio-zone-entity");
   },
 
   createAudio: function() {
     const audioListener = this.el.sceneEl.audioListener;
-    const audio = new THREE.PositionalAudio(audioListener);
+
+    let audio = null;
+    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+      audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      audio = new THREE.Audio(audioListener);
+    }
 
     if (this.data.maxDelay > 0) {
       const delayNode = audio.context.createDelay(this.data.maxDelay);
