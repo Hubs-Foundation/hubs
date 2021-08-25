@@ -68,6 +68,7 @@ AFRAME.registerComponent("player-info", {
     registerComponentInstance(this, "player-info");
   },
   remove() {
+    APP.isAudioPaused.delete(this.el);
     deregisterComponentInstance(this, "player-info");
   },
   play() {
@@ -184,7 +185,12 @@ AFRAME.registerComponent("player-info", {
         el.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
     }
-    this.el.querySelector("[audio-params]")?.setAttribute("audio-params", { enabled: !this.data.muted });
+
+    if (this.data.muted) {
+      APP.isAudioPaused.add(this.el);
+    } else {
+      APP.isAudioPaused.delete(this.el);
+    }
   },
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();

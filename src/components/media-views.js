@@ -19,7 +19,8 @@ import { detect } from "detect-browser";
 import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
-import { MixerType } from "../systems/audio-system";
+import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
+import { SourceType, AudioType } from "./audio-params";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -55,7 +56,6 @@ for (let i = 0; i <= 20; i++) {
 
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
-import { AudioType, MediaAudioDefaults } from "./audio-params";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 
@@ -254,6 +254,8 @@ function timeFmt(t) {
   return h === "00" ? `${m}:${s}` : `${h}:${m}:${s}`;
 }
 
+const MAX_MULTIPLIER = 2;
+
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
@@ -272,6 +274,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   init() {
+    APP.gainMultipliers.set(this.el, 1);
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.updateHoverMenu = this.updateHoverMenu.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
@@ -288,7 +291,6 @@ AFRAME.registerComponent("media-video", {
     this.togglePlaying = this.togglePlaying.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
-    this.gainFilter = THREE.AudioContext.getContext().createGain();
 
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
@@ -296,20 +298,6 @@ AFRAME.registerComponent("media-video", {
     this.isSnapping = false;
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
-
-    if (!this.el.components["audio-params"]) {
-      this.el.setAttribute("audio-params", {
-        audioType: MediaAudioDefaults.AUDIO_TYPE,
-        distanceModel: MediaAudioDefaults.DISTANCE_MODEL,
-        rolloffFactor: MediaAudioDefaults.ROLLOFF_FACTOR,
-        refDistance: MediaAudioDefaults.REF_DISTANCE,
-        maxDistance: MediaAudioDefaults.MAX_DISTANCE,
-        coneInnerAngle: MediaAudioDefaults.INNER_ANGLE,
-        coneOuterAngle: MediaAudioDefaults.OUTER_ANGLE,
-        coneOuterGain: MediaAudioDefaults.OUTER_GAIN,
-        gain: MediaAudioDefaults.VOLUME
-      });
-    }
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -379,6 +367,7 @@ AFRAME.registerComponent("media-video", {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
+    // TODO Probably we will get rid of this at some point
     this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
     this.onPreferenceChanged = () => {
       const newPref = window.APP.store.state.preferences.audioOutputMode;
@@ -417,18 +406,22 @@ AFRAME.registerComponent("media-video", {
   },
 
   changeVolumeBy(v) {
-    const gain = this.el.components["audio-params"].data.gain;
-    const vol = THREE.Math.clamp(gain + v, 0, 1);
-    this.el.setAttribute("audio-params", "gain", vol);
+    let gainMultiplier = APP.gainMultipliers.get(this.el);
+    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_MULTIPLIER);
+    APP.gainMultipliers.set(this.el, gainMultiplier);
     this.updateVolumeLabel();
+    const audio = APP.audios.get(this.el);
+    if (audio) {
+      updateAudioSettings(this.el, audio);
+    }
   },
 
   volumeUp() {
-    this.changeVolumeBy(0.1);
+    this.changeVolumeBy(0.2);
   },
 
   volumeDown() {
-    this.changeVolumeBy(-0.1);
+    this.changeVolumeBy(-0.2);
   },
 
   async snap() {
@@ -480,7 +473,11 @@ AFRAME.registerComponent("media-video", {
     if (this._ignorePauseStateChanges) return;
 
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
-    this.el.setAttribute("audio-params", "enabled", !this.video.paused);
+    if (this.video.paused) {
+      APP.isAudioPaused.add(this.el);
+    } else {
+      APP.isAudioPaused.delete(this.el);
+    }
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
       this.el.emit("owned-video-state-changed");
@@ -535,13 +532,6 @@ AFRAME.registerComponent("media-video", {
       this.updateSrc(oldData);
       return;
     }
-
-    const shouldRecreateAudio =
-      !shouldUpdateSrc && this.mediaElementAudioSource && this.audio?.panner?.audioType !== this.data.audioType;
-    if (shouldRecreateAudio) {
-      this.setupAudio();
-      return;
-    }
   },
 
   setupAudio() {
@@ -549,33 +539,29 @@ AFRAME.registerComponent("media-video", {
       this.audio.disconnect();
       this.el.removeObject3D("sound");
     }
+    APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
+    const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
-    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+    if (audioType === AudioType.PannerNode) {
       this.audio = new THREE.PositionalAudio(audioListener);
     } else {
       this.audio = new THREE.Audio(audioListener);
     }
 
     this.audioSystem.removeAudio(this.audio);
-    this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
-
-    const filters = this.audio.getFilters();
-    filters.push(this.gainFilter);
-    this.audio.setFilters(filters);
+    this.audioSystem.addAudio(SourceType.MEDIA_VIDEO, this.audio);
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
-    this.el.components["audio-params"].setAudio(this.audio);
 
     // Make sure that the audio is initialized to the right place.
     // Its matrix may not update if this element is not visible.
     // See https://github.com/mozilla/hubs/issues/2855
     this.audio.updateMatrixWorld();
-  },
 
-  getGainFilter() {
-    return this.gainFilter;
+    APP.audios.set(this.el, this.audio);
+    updateAudioSettings(this.el, this.audio);
   },
 
   async updateSrc(oldData) {
@@ -927,8 +913,12 @@ AFRAME.registerComponent("media-video", {
   },
 
   updateVolumeLabel() {
-    const volume = this.el.components["audio-params"].data.gain;
-    this.volumeLabel.setAttribute("text", "value", volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(volume / 0.05)]);
+    const gainMultiplier = APP.gainMultipliers.get(this.el);
+    this.volumeLabel.setAttribute(
+      "text",
+      "value",
+      gainMultiplier === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(gainMultiplier / (MAX_MULTIPLIER / 20))]
+    );
   },
 
   tick: (() => {
@@ -987,7 +977,7 @@ AFRAME.registerComponent("media-video", {
   remove() {
     this.cleanUp();
 
-    this.el.removeAttribute("audio-params");
+    APP.isAudioPaused.delete(this.el);
 
     if (this.mesh) {
       this.el.removeObject3D("mesh");
@@ -997,6 +987,10 @@ AFRAME.registerComponent("media-video", {
       clearInterval(this._audioSyncInterval);
       this._audioSyncInterval = null;
     }
+
+    APP.gainMultipliers.delete(this.el);
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
 
     if (this.audio) {
       this.el.removeObject3D("sound");

@@ -4,6 +4,7 @@ import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 import { AudioType, SourceType } from "./components/audio-params";
+import { updateAudioSettings } from "./update-audio-settings";
 
 function registerRootSceneComponent(componentName) {
   AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
@@ -244,9 +245,19 @@ async function mediaInflator(el, componentName, componentData, components) {
     mediaOptions.hidePlaybackControls = !isControlled;
 
     if (componentData.audioType) {
-      el.setAttribute("audio-params", {
+      // This is an old version of this component, which had built-in audio parameters.
+      // The way we are handling it is wrong. If a user created a scene with this old version
+      // of the component, all of these parameters will be present whether the user explicitly set
+      // the values for them or not. But really, they should only count as "overrides" if the user
+      // meant for them to take precendence over the app and scene defaults.
+      // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
+      //       but simplifying the handling. Another option is to compare the component data here with
+      //       the "defaults" and only save the values that are different from the defaults. However,
+      //       this loses information if the user changed the scene settings but wanted this specific
+      //       node to use the "defaults".
+      //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
+      APP.audioOverrides.set(el, {
         audioType: componentData.audioType,
-        sourceType: SourceType.MEDIA_VIDEO,
         distanceModel: componentData.distanceModel,
         rolloffFactor: componentData.rolloffFactor,
         refDistance: componentData.refDistance,
@@ -256,6 +267,12 @@ async function mediaInflator(el, componentName, componentData, components) {
         coneOuterGain: componentData.coneOuterGain,
         gain: componentData.volume
       });
+      APP.sourceType.set(el, SourceType.MEDIA_VIDEO);
+
+      const audio = APP.audios.get(el);
+      if (audio) {
+        updateAudioSettings(el, audio);
+      }
     }
 
     el.setAttribute("video-pause-state", { paused: mediaOptions.videoPaused });
@@ -423,7 +440,46 @@ AFRAME.GLTFModelPlus.registerComponent("particle-emitter", "particle-emitter");
 AFRAME.GLTFModelPlus.registerComponent("networked-drawing-buffer", "networked-drawing-buffer");
 
 AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, _componentName, componentData) => {
-  el.sceneEl.systems["hubs-systems"].audioSettingsSystem.updateAudioSettings(componentData);
+  const removeUndefined = obj => {
+    return Object.entries(obj).reduce((result, [key, value]) => {
+      if (value !== undefined) {
+        result[key] = value;
+      }
+      return result;
+    }, {});
+  };
+  // TODO: This component should only overwrite the scene audio defaults if this
+  //       component is on the scene node. If this component is on some other node
+  //       we don't care about it and should ignore it.
+  APP.sceneAudioDefaults.set(
+    SourceType.MEDIA_VIDEO,
+    removeUndefined({
+      distanceModel: componentData.mediaDistanceModel,
+      rolloffFactor: componentData.mediaRolloffFactor,
+      refDistance: componentData.mediaRefDistance,
+      maxDistance: componentData.mediaMaxDistance,
+      coneInnerAngle: componentData.mediaConeInnerAngle,
+      coneOuterAngle: componentData.mediaConeOuterAngle,
+      coneOuterGain: componentData.mediaConeOuterGain,
+      gain: componentData.mediaVolume
+    })
+  );
+  APP.sceneAudioDefaults.set(
+    SourceType.AVATAR_AUDIO_SOURCE,
+    removeUndefined({
+      distanceModel: componentData.avatarDistanceModel,
+      rolloffFactor: componentData.avatarRolloffFactor,
+      refDistance: componentData.avatarRefDistance,
+      maxDistance: componentData.avatarMaxDistance,
+      coneInnerAngle: componentData.avatarConeInnerAngle,
+      coneOuterAngle: componentData.avatarConeOuterAngle,
+      coneOuterGain: componentData.avatarConeOuterGain,
+      gain: componentData.avatarVolume
+    })
+  );
+  for (const [el, audio] of APP.audios.entries()) {
+    updateAudioSettings(el, audio);
+  }
 });
 
 AFRAME.GLTFModelPlus.registerComponent(
@@ -470,11 +526,20 @@ AFRAME.GLTFModelPlus.registerComponent(
       }
     }
 
-    // Migrate audio-target component that has built-in audio params
-    if (componentData.positional) {
-      el.setAttribute("audio-params", {
+    if (componentData.positional !== undefined) {
+      // This is an old version of the audio-target component, which had built-in audio parameters.
+      // The way we are handling it is wrong. If a user created a scene in spoke with this old version
+      // of this component, all of these parameters will be present whether the user explicitly set
+      // the values for them or not. But really, they should only count as "overrides" if the user
+      // meant for them to take precendence over the app and scene defaults.
+      // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
+      //       but simplifying the handling. Another option is to compare the component data here with
+      //       the "defaults" and only save the values that are different from the defaults. However,
+      //       this loses information if the user changed the scene settings but wanted this specific
+      //       node to use the "defaults".
+      //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
+      APP.audioOverrides.set(el, {
         audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
-        sourceType: SourceType.MEDIA_VIDEO,
         distanceModel: componentData.distanceModel,
         rolloffFactor: componentData.rolloffFactor,
         refDistance: componentData.refDistance,
@@ -482,8 +547,14 @@ AFRAME.GLTFModelPlus.registerComponent(
         coneInnerAngle: componentData.coneInnerAngle,
         coneOuterAngle: componentData.coneOuterAngle,
         coneOuterGain: componentData.coneOuterGain,
-        gain: componentData.volume
+        gain: componentData.gain
       });
+      APP.sourceType.set(el, SourceType.AUDIO_TARGET);
+
+      const audio = APP.audios.get(el);
+      if (audio) {
+        updateAudioSettings(el, audio);
+      }
     }
 
     el.setAttribute(componentName, {
@@ -496,20 +567,13 @@ AFRAME.GLTFModelPlus.registerComponent(
 );
 AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "audio-params",
-  "audio-params",
-  (el, componentName, componentData, components) => {
-    if (components["audio"] || components["video"]) {
-      componentData["sourceType"] = SourceType.MEDIA_VIDEO;
-    } else if (components["audio-target"]) {
-      componentData["sourceType"] = SourceType.AUDIO_TARGET;
-    } else if (components["audio-zone"]) {
-      componentData["sourceType"] = SourceType.AUDIO_ZONE;
-    }
-    el.setAttribute(componentName, { ...componentData });
+AFRAME.GLTFModelPlus.registerComponent("audio-params", "audio-params", (el, componentName, componentData) => {
+  APP.audioOverrides.set(el, componentData);
+  const audio = APP.audios.get(el);
+  if (audio) {
+    updateAudioSettings(el, audio);
   }
-);
+});
 
 AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
   el.setAttribute(componentName, { ...componentData });
