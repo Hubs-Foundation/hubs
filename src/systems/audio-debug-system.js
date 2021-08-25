@@ -7,6 +7,15 @@ import { getMeshes } from "../utils/aframe-utils";
 
 const MAX_DEBUG_SOURCES = 64;
 
+const fakePanner = {
+  distanceModel: DistanceModelType.Inverse,
+  maxDistance: 0,
+  refDistance: 0,
+  rolloffFactor: 0,
+  coneInnerAngle: 0,
+  coneOuterAngle: 0
+};
+
 AFRAME.registerSystem("audio-debug", {
   schema: {
     enabled: { default: false }
@@ -110,14 +119,7 @@ AFRAME.registerSystem("audio-debug", {
         this.sourcePositions[sourceNum] = sourcePos.clone(); // TODO: Use Vector3 pool
         this.sourceOrientations[sourceNum] = sourceDir.clone();
 
-        const panner = audio.panner || {
-          distanceModel: DistanceModelType.Inverse,
-          maxDistance: 0,
-          refDistance: 0,
-          rolloffFactor: 0,
-          coneInnerAngle: 0,
-          coneOuterAngle: 0
-        };
+        const panner = audio.panner || fakePanner;
 
         this.distanceModels[sourceNum] = 0;
         if (panner.distanceModel === DistanceModelType.Linear) {
