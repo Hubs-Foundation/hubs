@@ -540,6 +540,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
+  console.log(`Loading model ${src}`);
   if (useCache) {
     if (gltfCache.has(src)) {
       gltfCache.retain(src);

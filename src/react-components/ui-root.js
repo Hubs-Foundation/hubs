@@ -361,6 +361,7 @@ class UIRoot extends Component {
       this.props.scene.addEventListener(
         "loading_finished",
         () => {
+          console.log("Loading has finished. Checking for forced room entry")
           setTimeout(() => this.handleForceEntry(), 1000);
         },
         { once: true }
@@ -443,6 +444,7 @@ class UIRoot extends Component {
   };
 
   onLoadingFinished = () => {
+    console.log("UI root loading has finished");
     this.setState({ noMoreLoadingUpdates: true });
     this.props.scene.emit("loading_finished");
 
@@ -452,6 +454,7 @@ class UIRoot extends Component {
   };
 
   onSceneLoaded = () => {
+    console.log("UI root scene has loaded");
     this.setState({ sceneLoaded: true });
   };
 
@@ -491,6 +494,8 @@ class UIRoot extends Component {
   };
 
   handleForceEntry = () => {
+    console.log("Forced entry type: " + this.props.forcedVREntryType);
+
     if (!this.props.forcedVREntryType) return;
 
     if (this.props.forcedVREntryType.startsWith("daydream")) {
@@ -559,10 +564,12 @@ class UIRoot extends Component {
   };
 
   enter2D = async () => {
+    console.log("Entering in 2D mode");
     await this.performDirectEntryFlow(false);
   };
 
   enterVR = async () => {
+    console.log("Entering in VR mode");
     if (this.props.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
@@ -571,6 +578,7 @@ class UIRoot extends Component {
   };
 
   enterDaydream = async () => {
+    console.log("Entering in Daydream mode");
     await this.performDirectEntryFlow(true);
   };
 
@@ -579,6 +587,7 @@ class UIRoot extends Component {
   };
 
   onRequestMicPermission = async () => {
+    console.log("Microphone permission requested");
     // TODO: Show an error state if getting the microphone permissions fails
     await this.mediaDevicesManager.startLastUsedMicShare();
     this.beginOrSkipAudioSetup();
@@ -586,10 +595,11 @@ class UIRoot extends Component {
 
   beginOrSkipAudioSetup = () => {
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
-
     if (skipAudioSetup) {
+      console.log(`Skipping audio setup (forcedVREntryType = ${this.props.forcedVREntryType})`);
       this.onAudioReadyButton();
     } else {
+      console.log(`Starting audio setup`);
       this.pushHistoryState("entry_step", "audio");
     }
   };
