@@ -547,7 +547,7 @@ AFRAME.GLTFModelPlus.registerComponent(
         coneInnerAngle: componentData.coneInnerAngle,
         coneOuterAngle: componentData.coneOuterAngle,
         coneOuterGain: componentData.coneOuterGain,
-        gain: componentData.volume
+        gain: componentData.gain
       });
       APP.sourceType.set(el, SourceType.AUDIO_TARGET);
 
