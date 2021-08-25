@@ -365,7 +365,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       let canonicalUrl = src;
-      let canonicalAudioUrl = src;
+      let canonicalAudioUrl = null;
       let accessibleUrl = src;
       let contentType = this.data.contentType;
       let thumbnail;
