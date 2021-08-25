@@ -365,7 +365,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       let canonicalUrl = src;
-      let canonicalAudioUrl = null;
+      let canonicalAudioUrl = null; // set non-null only if audio track is separated from video track (eg. 360 video)
       let accessibleUrl = src;
       let contentType = this.data.contentType;
       let thumbnail;

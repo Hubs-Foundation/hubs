@@ -259,7 +259,7 @@ const MAX_MULTIPLIER = 2;
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
-    audioSrc: { type: "string" },
+    audioSrc: { type: "string" }, // set only if audio track is separated from video track (eg. 360 video)
     contentType: { type: "string" },
     loop: { type: "boolean", default: true },
     hidePlaybackControls: { type: "boolean", default: false },
@@ -848,7 +848,9 @@ AFRAME.registerComponent("media-video", {
         videoEl.src = url;
         videoEl.onerror = failLoad;
 
+        // audioSrc is non-empty only if audio track is separated from video track (eg. 360 video)
         if (this.data.audioSrc) {
+          // Mute video track just in case
           videoEl.muted = true;
 
           // If there's an audio src, create an audio element to play it that we keep in sync
