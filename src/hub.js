@@ -95,7 +95,7 @@ import "./components/hide-when-pinned-and-forbidden";
 import "./components/visibility-while-frozen";
 import "./components/stats-plus";
 import "./components/networked-avatar";
-import "./components/media-views";
+import "./components/media-video";
 import "./components/media-pdf";
 import "./components/media-image";
 import "./components/avatar-volume-controls";
