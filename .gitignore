@@ -62,7 +62,7 @@ dist/
 
 .DS_Store
 
-certs/
+#certs/
 results/
 .ret.credentials
 src/assets/locales/en.json
