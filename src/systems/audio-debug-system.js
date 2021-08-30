@@ -116,8 +116,8 @@ AFRAME.registerSystem("audio-debug", {
 
         audio.getWorldPosition(sourcePos);
         audio.getWorldDirection(sourceDir);
-        this.sourcePositions[sourceNum] = sourcePos.clone(); // TODO: Use Vector3 pool
-        this.sourceOrientations[sourceNum] = sourceDir.clone();
+        this.sourcePositions[sourceNum] = this.navMeshObject.worldToLocal(sourcePos).clone(); // TODO: Use Vector3 pool
+        this.sourceOrientations[sourceNum] = this.navMeshObject.worldToLocal(sourcePos).clone();
 
         const panner = audio.panner || fakePanner;
 
