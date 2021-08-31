@@ -50,8 +50,15 @@ AFRAME.registerComponent("avatar-audio-source", {
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
+    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
+    const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
-    const audio = new THREE.PositionalAudio(audioListener);
+    let audio;
+    if (audioType === AudioType.PannerNode) {
+      audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      audio = new THREE.Audio(audioListener);
+    }
 
     this.audioSystem.removeAudio(audio);
     this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, audio);
@@ -69,7 +76,6 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.emit("sound-source-set", { soundSource: destinationSource });
 
     APP.audios.set(this.el, audio);
-    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
     updateAudioSettings(this.el, audio);
   },
 
