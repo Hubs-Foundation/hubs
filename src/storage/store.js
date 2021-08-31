@@ -3,6 +3,7 @@ import merge from "deepmerge";
 import Cookies from "js-cookie";
 import jwtDecode from "jwt-decode";
 import { qsGet } from "../utils/qs_truthy.js";
+import { isSafari } from "../utils/detect-safari";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
@@ -89,7 +90,8 @@ export const SCHEMA = {
 
     preferences: {
       type: "object",
-      additionalProperties: false,
+      // Allow removed preferences to pass validation
+      additionalProperties: true,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
         preferredMic: { type: "string" },
@@ -237,6 +239,12 @@ export default class Store extends EventTarget {
       onLoadActions: [],
       preferences: {}
     });
+
+    // Temporary fix for distorted audio in Safari.
+    // See https://github.com/mozilla/hubs/issues/4411
+    if (isSafari()) {
+      this.update({ preferences: { audioOutputMode: "audio" } });
+    }
 
     this._shouldResetAvatarOnInit = false;
 

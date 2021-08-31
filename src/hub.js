@@ -19,14 +19,13 @@ patchWebGLRenderingContext();
 
 import "three/examples/js/loaders/GLTFLoader";
 import "networked-aframe/src/index";
-import "naf-janus-adapter";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
-import { detectOS, detect } from "detect-browser";
+import { isSafari } from "./utils/detect-safari";
 import {
   getReticulumFetchUrl,
   getReticulumMeta,
@@ -272,6 +271,7 @@ function setupLobbyCamera() {
 }
 
 let uiProps = {};
+let connectionErrorTimeout = null;
 
 // Hub ID and slug are the basename
 let routerBaseName = document.location.pathname
@@ -460,6 +460,14 @@ async function updateUIForHub(hub, hubChannel) {
   remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub) });
 }
 
+function onConnectionError(entryManager, connectError) {
+  console.error("An error occurred while attempting to connect to networked scene:", connectError);
+  // hacky until we get return codes
+  const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
+  remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
+  entryManager.exitScene();
+}
+
 function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
@@ -494,7 +502,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     }
   }
 
-  console.log(`Janus host: ${hub.host}:${hub.port}`);
+  console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
   remountUI({
     messageDispatch: messageDispatch,
@@ -542,15 +550,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   // TODO Remove this once transition completed.
   // Wait for scene objects to load before connecting, so there is no race condition on network state.
   const connectToScene = async () => {
-    let adapter = "janus";
-
-    try {
-      // Meta endpoint exists only on dialog
-      await fetch(`https://${hub.host}:${hub.port}/meta`);
-      adapter = "dialog";
-    } catch (e) {
-      // Ignore, set to janus.
-    }
+    const adapter = "dialog";
 
     scene.setAttribute("networked-scene", {
       room: hub.hub_id,
@@ -562,30 +562,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     while (!scene.components["networked-scene"] || !scene.components["networked-scene"].data) await nextTick();
 
     scene.addEventListener("adapter-ready", ({ detail: adapter }) => {
-      let newHostPollInterval = null;
-
-      // When reconnecting, update the server URL if necessary
-      adapter.setReconnectionListeners(
-        () => {
-          if (newHostPollInterval) return;
-
-          newHostPollInterval = setInterval(async () => {
-            const currentServerURL = scene.getAttribute("networked-scene").serverURL;
-            const newServerURL = adapter.serverURL;
-            if (currentServerURL !== newServerURL) {
-              console.log("Connecting to new Janus server " + newServerURL);
-              scene.setAttribute("networked-scene", { serverURL: newServerURL });
-              adapter.serverUrl = newServerURL;
-            }
-          }, 1000);
-        },
-        () => {
-          clearInterval(newHostPollInterval);
-          newHostPollInterval = null;
-        },
-        null
-      );
-
       const sendViaPhoenix = reliable => (clientId, dataType, data) => {
         const payload = { dataType, data };
 
@@ -629,31 +605,28 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
       adapter.unreliableTransport = sendViaPhoenix(false);
     });
 
-    const loadEnvironmentAndConnect = () => {
-      updateEnvironmentForHub(hub, entryManager);
-      function onConnectionError() {
-        console.error("Unknown error occurred while attempting to connect to networked scene.");
-        remountUI({ roomUnavailableReason: ExitReason.connectError });
-        entryManager.exitScene();
-      }
-
-      const connectionErrorTimeout = setTimeout(onConnectionError, 90000);
+    const connect = () => {
+      // Safety guard just in case Protoo doens't fail in some case so we don't get stuck in the loading screen forever.
+      connectionErrorTimeout = setTimeout(onConnectionError, 30000, entryManager, "Timeout connecting to the room");
       scene.components["networked-scene"]
         .connect()
         .then(() => {
           clearTimeout(connectionErrorTimeout);
+          connectionErrorTimeout = null;
+          console.log("Successfully connected to the networked scene.");
           scene.emit("didConnectToNetworkedScene");
         })
         .catch(connectError => {
           clearTimeout(connectionErrorTimeout);
-          // hacky until we get return codes
-          const isFull = connectError.msg && connectError.msg.match(/\bfull\b/i);
-          console.error(connectError);
-          remountUI({ roomUnavailableReason: isFull ? ExitReason.full : ExitReason.connectError });
-          entryManager.exitScene();
-
-          return;
+          connectionErrorTimeout = null;
+          adapter.disconnect();
+          onConnectionError(entryManager, connectError);
         });
+    };
+
+    const loadEnvironmentAndConnect = () => {
+      updateEnvironmentForHub(hub, entryManager);
+      connect();
     };
 
     window.APP.hub = hub;
@@ -714,11 +687,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const detectedOS = detectOS(navigator.userAgent);
-  const browser = detect();
   // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
   // safari when initializing it later.
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+  if (isSafari()) {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
@@ -1404,64 +1375,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       hubChannel.setPermissionsFromToken(permsToken);
 
       scene.addEventListener("adapter-ready", async ({ detail: adapter }) => {
-        // HUGE HACK Safari does not like it if the first peer seen does not immediately
-        // send audio over its media stream. Otherwise, the stream doesn't work and stays
-        // silent. (Though subsequent peers work fine.) This only affects naf janus adapter
-        // not mediasoup.
-        //
-        // This hooks up a simple audio pipeline to push a short tone over the WebRTC
-        // media stream as its created to mitigate this Safari bug.
-        //
-        // Users will never hear this tone -- the outgoing media track is overwritten
-        // before we spawn our avatar, which is when other users will begin hearing
-        // the audio.
-        //
-        // This only covers the case where a Safari user is in the room and the first
-        // other user joins. If a user is in the room and Safari user joins,
-        // then Safari can fail to receive audio from a single peer (it does not seem
-        // to be related to silence, but may be a factor.)
-        let track, oscillator, stream;
-
-        // TODO remove after dialog
-        if (adapter.type !== "dialog") {
-          console.log("Using Janus SFU");
-          const ctx = THREE.AudioContext.getContext();
-          oscillator = ctx.createOscillator();
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0.01, ctx.currentTime);
-          const dest = ctx.createMediaStreamDestination();
-          oscillator.connect(gain);
-          gain.connect(dest);
-          oscillator.start();
-          const stream = dest.stream;
-          track = stream.getAudioTracks()[0];
-        }
-
         adapter.setClientId(socket.params().session_id);
         adapter.setJoinToken(data.perms_token);
+        adapter.setServerParams(await window.APP.hubChannel.getHost());
+        adapter.setReconnectionListeners(
+          async () => {
+            const { host, port } = await hubChannel.getHost();
+            const newServerURL = `wss://${host}:${port}`;
+            // If the Dialog server url has changed, the server has rolled over and we need to reconnect using an updated server URL.
+            if (adapter.serverUrl !== newServerURL) {
+              console.error(`The Dialog server has changed to ${newServerURL}, reconnecting with the new server...`);
+              scene.setAttribute("networked-scene", { serverURL: newServerURL });
+              adapter.setServerUrl(newServerURL);
+              adapter.setServerParams(await window.APP.hubChannel.getHost());
+              adapter.reconnect();
+            }
+            // Safety guard to show the connection error screen in case we can't reconnect after 30 seconds
+            if (!connectionErrorTimeout) {
+              connectionErrorTimeout = setTimeout(() => {
+                adapter.disconnect();
+                onConnectionError(entryManager, "Timeout trying to reconnect to the room");
+              }, 30000);
+            }
+          },
+          () => {
+            clearTimeout(connectionErrorTimeout);
+            connectionErrorTimeout = null;
+          }
+        );
+
         setupPeerConnectionConfig(adapter);
 
         hubChannel.addEventListener("permissions-refreshed", e => adapter.setJoinToken(e.detail.permsToken));
-
-        // Stop the tone after we've connected, which seems to mitigate the issue without actually
-        // having to keep this playing and using bandwidth.
-        scene.addEventListener(
-          "didConnectToNetworkedScene",
-          () => {
-            if (oscillator) {
-              oscillator.stop();
-            }
-
-            if (track) {
-              track.enabled = false;
-            }
-          },
-          { once: true }
-        );
-
-        if (stream) {
-          await adapter.setLocalMediaStream(stream);
-        }
       });
 
       subscriptions.setHubChannel(hubChannel);

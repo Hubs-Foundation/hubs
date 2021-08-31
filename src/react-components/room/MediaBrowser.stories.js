@@ -35,18 +35,6 @@ const FACETS = {
     { text: "Sports", params: { filter: "sports-fitness" } },
     { text: "Weapons", params: { filter: "weapons-military" } }
   ],
-  poly: [
-    { text: "Featured", params: { filter: "" } },
-    { text: "Animals", params: { filter: "animals" } },
-    { text: "Architecture", params: { filter: "architecture" } },
-    { text: "Art", params: { filter: "art" } },
-    { text: "Food", params: { filter: "food" } },
-    { text: "Nature", params: { filter: "nature" } },
-    { text: "Objects", params: { filter: "objects" } },
-    { text: "People", params: { filter: "people" } },
-    { text: "Scenes", params: { filter: "scenes" } },
-    { text: "Transport", params: { filter: "transport" } }
-  ],
   avatars: [
     { text: "Featured", params: { filter: "featured" } },
     { text: "My Avatars", params: { filter: "my-avatars" } },
@@ -250,7 +238,7 @@ const gif = {
   url: "https://media.tenor.com/videos/004424225acc15896c846f6ab3740ad0/mp4"
 };
 
-const mediaSources = ["poly", "sketchfab", "videos", "scenes", "avatars", "gifs", "images"];
+const mediaSources = ["sketchfab", "videos", "scenes", "avatars", "gifs", "images"];
 
 export const Favorites = () => (
   <MediaBrowser selectedSource={"favorites"}>

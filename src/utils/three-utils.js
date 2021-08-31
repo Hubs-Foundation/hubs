@@ -166,6 +166,10 @@ export function cloneObject3D(source, preserveUUIDs) {
       clonedNode.geometry.boundsTree = sourceNode.geometry.boundsTree;
     }
 
+    if ((clonedNode.isDirectionalLight || clonedNode.isSpotLight) && sourceNode.target) {
+      clonedNode.target = cloneLookup.get(sourceNode.target);
+    }
+
     if (!sourceNode.isSkinnedMesh) return;
 
     const sourceBones = sourceNode.skeleton.bones;
