@@ -26,6 +26,7 @@ export default class PreloadOverlay extends Component {
         </div>
         <a href="/" target="_blank" rel="noopener noreferrer" className={styles.logo}>
           <img
+            crossOrigin="anonymous"
             src={configs.image("logo")}
             alt={<FormattedMessage id="preload-overlay.logo-alt" defaultMessage="Logo" />}
           />

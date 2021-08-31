@@ -33,7 +33,7 @@ export function Header({
           <ul>
             <li>
               <a href="/" className={styles.homeLink}>
-                <img alt={appName} src={appLogo} />
+                <img crossOrigin="anonymous" alt={appName} src={appLogo} />
               </a>
             </li>
             {enableSpoke && (

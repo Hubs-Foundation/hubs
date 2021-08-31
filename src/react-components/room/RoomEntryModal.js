@@ -35,7 +35,7 @@ export function RoomEntryModal({
         {breakpoint !== "sm" &&
           breakpoint !== "md" && (
             <div className={styles.logoContainer}>
-              <img src={logoSrc} alt={appName} />
+              <img crossOrigin="anonymous" src={logoSrc} alt={appName} />
             </div>
           )}
         <div className={styles.roomName}>

@@ -185,6 +185,7 @@
     "file-loader": "^1.1.10",
     "glob": "^7.1.6",
     "html-loader": "^0.5.5",
+    "html-webpack-inject-attributes-plugin": "^1.0.6",
     "html-webpack-plugin": "^4.2.0",
     "htmlhint": "^0.11.0",
     "internal-ip": "^6.1.0",

@@ -263,7 +263,7 @@ class AvatarEditor extends Component {
       <label htmlFor={`avatar-file_${name}`}>
         <div className="img-box">
           {this.state.avatar.files[name] ? (
-            <img src={this.state.avatar.files[name]} />
+            <img crossOrigin="anonymous" src={this.state.avatar.files[name]} />
           ) : (
             <FontAwesomeIcon icon={faCloudUploadAlt} />
           )}
@@ -387,7 +387,7 @@ class AvatarEditor extends Component {
             className={classNames("item", { selected: a.id === this.state.avatar[propName] })}
             style={{ paddingBottom: `${(a.images.preview.width / a.images.preview.height) * 100}%` }}
           >
-            <img src={a.images.preview.url} />
+            <img crossOrigin="anonymous" src={a.images.preview.url} />
           </div>
         ))}
       </div>

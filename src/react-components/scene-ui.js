@@ -211,14 +211,15 @@ class SceneUI extends Component {
             [styles.screenshotHidden]: this.props.sceneLoaded
           })}
         >
-          {this.state.showScreenshot && <img src={this.props.sceneScreenshotURL} />}
+          {this.state.showScreenshot && <img crossOrigin="anonymous" src={this.props.sceneScreenshotURL} />}
         </div>
         <div className={styles.whiteOverlay} />
         <div className={styles.grid}>
           <div className={styles.mainPanel}>
             <a href="/" className={styles.logo}>
               <img
-                src={configs.image("logo")}
+                 crossOrigin="anonymous"
+                 src={configs.image("logo")}
                 alt={<FormattedMessage id="scene-page.logo-alt" defaultMessage="Logo" />}
               />
             </a>
@@ -264,7 +265,7 @@ class SceneUI extends Component {
               )}
             </IfFeature>
             <a href={tweetLink} rel="noopener noreferrer" target="_blank" className={styles.tweetButton}>
-              <img src="../assets/images/twitter.svg" />
+              <img crossOrigin="anonymous" src="../assets/images/twitter.svg" />
               <div>
                 <FormattedMessage id="scene-page.tweet-button" defaultMessage="Share on Twitter" />
               </div>
@@ -284,7 +285,7 @@ class SceneUI extends Component {
                 values={{
                   a: () => (
                     <a href="/spoke">
-                      <img src={configs.image("editor_logo")} />
+                      <img crossOrigin="anonymous" src={configs.image("editor_logo")} />
                     </a>
                   )
                 }}

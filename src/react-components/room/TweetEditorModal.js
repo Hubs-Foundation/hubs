@@ -47,7 +47,7 @@ export function TweetEditorModal({
           {contentSubtype && contentSubtype.startsWith("video") ? (
             <video src={mediaThumbnailUrl} width={450} height={255} controls />
           ) : (
-            <img src={mediaThumbnailUrl} width={450} height={255} />
+            <img crossOrigin="anonymous" src={mediaThumbnailUrl} width={450} height={255} />
           )}
         </div>
         <div className={styles.editor}>

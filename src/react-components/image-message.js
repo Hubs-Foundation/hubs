@@ -16,7 +16,7 @@ export default function ImageMessage({ name, body: { src: url }, className, mayS
       )}
       <div className={styles.mediaBody}>{name && <div className={styles.messageSource}>{name}:</div>}</div>
       <a href={url} target="_blank" rel="noopener noreferrer">
-        <img src={proxiedUrlFor(url)} />
+        <img crossOrigin="anonymous" src={proxiedUrlFor(url)} />
       </a>
     </div>
   );
