@@ -116,8 +116,8 @@ AFRAME.registerSystem("audio-debug", {
 
         audio.getWorldPosition(sourcePos);
         audio.getWorldDirection(sourceDir);
-        this.sourcePositions[sourceNum] = sourcePos.clone(); // TODO: Use Vector3 pool
-        this.sourceOrientations[sourceNum] = sourceDir.clone();
+        this.sourcePositions[sourceNum] = this.navMeshObject.worldToLocal(sourcePos).clone(); // TODO: Use Vector3 pool
+        this.sourceOrientations[sourceNum] = this.navMeshObject.worldToLocal(sourcePos).clone();
 
         const panner = audio.panner || fakePanner;
 
@@ -193,15 +193,15 @@ AFRAME.registerSystem("audio-debug", {
     }
   },
 
-  updateState(force = false) {
-    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel;
-    if (force || (isEnabled !== undefined && isEnabled !== this.data.enabled)) {
+  updateState({ force }) {
+    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel || false;
+    if (force || isEnabled !== this.data.enabled) {
       this.enableDebugMode(isEnabled, force);
     }
   },
 
   onSceneLoaded() {
     this.navMeshObject = null;
-    this.updateState(true);
+    this.updateState({ force: true });
   }
 });
