@@ -96,6 +96,17 @@ AFRAME.registerComponent("avatar-audio-source", {
     // This could happen in case there is an ICE failure that requires a transport recreation.
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
+
+    let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
+    this.onPreferenceChanged = () => {
+      const newPref = APP.store.state.preferences.audioOutputMode;
+      const shouldRecreateAudio = audioOutputModePref !== newPref;
+      audioOutputModePref = newPref;
+      if (shouldRecreateAudio) {
+        this.createAudio();
+      }
+    };
+    APP.store.addEventListener("statechanged", this.onPreferenceChanged);
   },
 
   async _onStreamUpdated(peerId, kind) {
