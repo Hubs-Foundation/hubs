@@ -1,5 +1,5 @@
 import { updateAudioSettings } from "../update-audio-settings";
-import { VOLUME_LABELS } from "./media-views";
+import { VOLUME_LABELS } from "./media-video";
 const MAX_MULTIPLIER = 8;
 const SMALL_STEP = 1 / (VOLUME_LABELS.length / 2);
 const BIG_STEP = (MAX_MULTIPLIER - 1) / (VOLUME_LABELS.length / 2);
