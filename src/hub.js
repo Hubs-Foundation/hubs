@@ -10,6 +10,7 @@ import "./utils/theme";
 import "@babel/polyfill";
 
 console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
+console.log(`is custom client ${process.env.IS_CUSTOM_CLIENT}`);
 
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
