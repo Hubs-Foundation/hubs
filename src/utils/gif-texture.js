@@ -1,4 +1,8 @@
-export class GIFTexture extends THREE.Texture {
+import { promisifyWorker } from "../utils/promisify-worker.js";
+
+import GIFWorker from "../workers/gifparsing.worker.js";
+
+class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
     super(document.createElement("canvas"));
     this.image.width = frames[0].width;
@@ -31,4 +35,34 @@ export class GIFTexture extends THREE.Texture {
       this.needsUpdate = true;
     }
   }
+}
+
+const parseGIF = promisifyWorker(new GIFWorker());
+
+export async function createGIFTexture(url) {
+  return new Promise((resolve, reject) => {
+    fetch(url, { mode: "cors" })
+      .then(r => r.arrayBuffer())
+      .then(rawImageData => parseGIF(rawImageData, [rawImageData]))
+      .then(result => {
+        const { frames, delayTimes, disposals } = result;
+        let loadCnt = 0;
+        for (let i = 0; i < frames.length; i++) {
+          const img = new Image();
+          img.onload = e => {
+            loadCnt++;
+            frames[i] = e.target;
+            if (loadCnt === frames.length) {
+              const texture = new GIFTexture(frames, delayTimes, disposals);
+              texture.image.src = url;
+              texture.encoding = THREE.sRGBEncoding;
+              texture.minFilter = THREE.LinearFilter;
+              resolve(texture);
+            }
+          };
+          img.src = frames[i];
+        }
+      })
+      .catch(reject);
+  });
 }

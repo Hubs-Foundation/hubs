@@ -1,47 +1,15 @@
 import { createImageTexture } from "../utils/media-utils";
 import { createBasisTexture, createKTX2Texture } from "../utils/create-basis-texture";
 import { TextureCache } from "../utils/texture-cache";
-import { GIFTexture } from "../utils/gif-texture";
 import { errorTexture } from "../utils/error-texture";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
-import { promisifyWorker } from "../utils/promisify-worker.js";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
-import GIFWorker from "../workers/gifparsing.worker.js";
-
-const parseGIF = promisifyWorker(new GIFWorker());
+import { createGIFTexture } from "../utils/gif-texture";
 
 const textureCache = new TextureCache();
 const inflightTextures = new Map();
 
 const errorCacheItem = { texture: errorTexture, ratio: 1400 / 1200 };
-
-async function createGIFTexture(url) {
-  return new Promise((resolve, reject) => {
-    fetch(url, { mode: "cors" })
-      .then(r => r.arrayBuffer())
-      .then(rawImageData => parseGIF(rawImageData, [rawImageData]))
-      .then(result => {
-        const { frames, delayTimes, disposals } = result;
-        let loadCnt = 0;
-        for (let i = 0; i < frames.length; i++) {
-          const img = new Image();
-          img.onload = e => {
-            loadCnt++;
-            frames[i] = e.target;
-            if (loadCnt === frames.length) {
-              const texture = new GIFTexture(frames, delayTimes, disposals);
-              texture.image.src = url;
-              texture.encoding = THREE.sRGBEncoding;
-              texture.minFilter = THREE.LinearFilter;
-              resolve(texture);
-            }
-          };
-          img.src = frames[i];
-        }
-      })
-      .catch(reject);
-  });
-}
 
 AFRAME.registerComponent("media-image", {
   schema: {
