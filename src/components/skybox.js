@@ -3,9 +3,6 @@
 // in webpack production mode.
 require("three/examples/js/lights/LightProbeGenerator");
 
-import qsTruthy from "../utils/qs_truthy";
-const isBotMode = qsTruthy("bot");
-
 const {
   AmbientLight,
   BackSide,
@@ -479,7 +476,7 @@ AFRAME.registerComponent("skybox", {
       // It's kept to a low value to not wash out objects in very dark environments.
       // This is a hack, but the results are much better than they are without it.
       this.el.setObject3D("ambient-light", new AmbientLight(0xffffff, 0.3));
-      this.el.setObject3D("light-probe", this.sky.generateLightProbe(renderer));
+      this.el.setObject3D("light-probe", this.sky.generateLightProbe(this.el.sceneEl.renderer));
     }
 
     // TODO if we care about dynamic skybox changes we should also update the enviornment map here
