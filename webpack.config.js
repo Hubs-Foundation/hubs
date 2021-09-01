@@ -137,7 +137,7 @@ function createDefaultAppConfig() {
   if (fs.existsSync(themesPath)) {
     const themesString = fs.readFileSync(themesPath).toString();
     const themes = JSON.parse(themesString);
-    appConfig.themes = themes;
+    appConfig.theme.themes = themes;
   }
 
   return appConfig;
