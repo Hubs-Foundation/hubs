@@ -1,5 +1,5 @@
 import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
-import { updateAudioSettings } from "../update-audio-settings";
+import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 
 function isClippingEnabled() {
   const { enableAudioClipping } = window.APP.store.state.preferences;
@@ -36,20 +36,32 @@ const calculateAttenuation = (() => {
         audio.panner.rolloffFactor,
         audio.panner.refDistance,
         audio.panner.maxDistance
+        // TODO: Why are coneInnerAngle, coneOuterAngle and coneOuterGain not used?
       );
     } else {
-      return 1.0;
+      const { distanceModel, rolloffFactor, refDistance, maxDistance } = getCurrentAudioSettings(el);
+      return distanceModels[distanceModel](distance, rolloffFactor, refDistance, maxDistance);
     }
   };
 })();
 
+// TODO: Rename "GainSystem" because the name is suspicious
 export class GainSystem {
   tick() {
     const clippingEnabled = isClippingEnabled();
     const clippingThreshold = getClippingThreshold();
     for (const [el, audio] of APP.audios.entries()) {
+      const attenuation = calculateAttenuation(el, audio);
+
+      if (!audio.panner) {
+        // For Audios that are not PositionalAudios, we reintroduce
+        // distance-based attenuation manually.
+        APP.supplementaryAttenuation.set(el, attenuation);
+        updateAudioSettings(el, audio);
+      }
+
       const isClipped = APP.clippingState.has(el);
-      const shouldBeClipped = clippingEnabled && calculateAttenuation(el, audio) < clippingThreshold;
+      const shouldBeClipped = clippingEnabled && attenuation < clippingThreshold;
       if (isClipped !== shouldBeClipped) {
         if (shouldBeClipped) {
           APP.clippingState.add(el);

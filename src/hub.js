@@ -210,6 +210,7 @@ APP.zoneOverrides = new Map(); //                    el -> AudioSettings
 APP.audioDebugPanelOverrides = new Map(); // SourceType -> AudioSettings
 APP.sceneAudioDefaults = new Map(); //       SourceType -> AudioSettings
 APP.gainMultipliers = new Map(); //                  el -> Number
+APP.supplementaryAttenuation = new Map(); //         el -> Number
 APP.clippingState = new Set();
 APP.linkedMutedState = new Set();
 APP.isAudioPaused = new Set();

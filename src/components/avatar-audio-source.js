@@ -44,14 +44,23 @@ async function getMediaStream(el) {
 
 AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function() {
+    APP.supplementaryAttenuation.delete(this.el);
+
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
     this.isCreatingAudio = false;
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
+    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
+    const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
-    const audio = new THREE.PositionalAudio(audioListener);
+    let audio;
+    if (audioType === AudioType.PannerNode) {
+      audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      audio = new THREE.Audio(audioListener);
+    }
 
     this.audioSystem.removeAudio(audio);
     this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, audio);
@@ -69,7 +78,6 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.emit("sound-source-set", { soundSource: destinationSource });
 
     APP.audios.set(this.el, audio);
-    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
     updateAudioSettings(this.el, audio);
   },
 
@@ -82,6 +90,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
+    APP.supplementaryAttenuation.delete(this.el);
   },
 
   init() {
@@ -90,6 +99,17 @@ AFRAME.registerComponent("avatar-audio-source", {
     // This could happen in case there is an ICE failure that requires a transport recreation.
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
+
+    let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
+    this.onPreferenceChanged = () => {
+      const newPref = APP.store.state.preferences.audioOutputMode;
+      const shouldRecreateAudio = audioOutputModePref !== newPref && !this.isCreatingAudio;
+      audioOutputModePref = newPref;
+      if (shouldRecreateAudio) {
+        this.createAudio();
+      }
+    };
+    APP.store.addEventListener("statechanged", this.onPreferenceChanged);
   },
 
   async _onStreamUpdated(peerId, kind) {
@@ -259,6 +279,7 @@ AFRAME.registerComponent("audio-target", {
   },
 
   createAudio: function() {
+    APP.supplementaryAttenuation.delete(this.el);
     APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const audioListener = this.el.sceneEl.audioListener;
     let audio = null;
@@ -306,6 +327,7 @@ AFRAME.registerComponent("audio-target", {
     this.audioSystem.removeAudio(this.audio);
     this.el.removeObject3D(this.attrName);
 
+    APP.supplementaryAttenuation.delete(this.el);
     APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
   }

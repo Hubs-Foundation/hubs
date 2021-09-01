@@ -163,17 +163,16 @@ AFRAME.registerComponent("media-video", {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    // TODO Probably we will get rid of this at some point
-    this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
+    let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
     this.onPreferenceChanged = () => {
-      const newPref = window.APP.store.state.preferences.audioOutputMode;
-      const shouldRecreateAudio = this.audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
-      this.audioOutputModePref = newPref;
+      const newPref = APP.store.state.preferences.audioOutputMode;
+      const shouldRecreateAudio = audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
+      audioOutputModePref = newPref;
       if (shouldRecreateAudio) {
         this.setupAudio();
       }
     };
-    window.APP.store.addEventListener("statechanged", this.onPreferenceChanged);
+    APP.store.addEventListener("statechanged", this.onPreferenceChanged);
   },
 
   isMineOrLocal() {
@@ -789,6 +788,7 @@ AFRAME.registerComponent("media-video", {
     APP.gainMultipliers.delete(this.el);
     APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
+    APP.supplementaryAttenuation.delete(this.el);
 
     if (this.audio) {
       this.el.removeObject3D("sound");

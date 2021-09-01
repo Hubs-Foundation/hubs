@@ -1,4 +1,11 @@
-import { SourceType, MediaAudioDefaults, AvatarAudioDefaults, TargetAudioDefaults } from "./components/audio-params";
+import {
+  AudioType,
+  SourceType,
+  MediaAudioDefaults,
+  AvatarAudioDefaults,
+  TargetAudioDefaults
+} from "./components/audio-params";
+import { isSafari } from "./utils/detect-safari";
 
 const defaultSettingsForSourceType = Object.freeze(
   new Map([
@@ -28,12 +35,28 @@ export function getCurrentAudioSettings(el) {
   const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
   const audioOverrides = APP.audioOverrides.get(el);
   const zoneSettings = APP.zoneOverrides.get(el);
-  const settings = Object.assign({}, defaults, sceneOverrides, audioDebugPanelOverrides, audioOverrides, zoneSettings);
+  const preferencesOverrides =
+    APP.store.state.preferences.audioOutputMode === "audio" ? { audioType: AudioType.Stereo } : {};
+  const safariOverrides = isSafari() ? { audioType: AudioType.Stereo } : {};
+  const settings = Object.assign(
+    {},
+    defaults,
+    sceneOverrides,
+    audioDebugPanelOverrides,
+    audioOverrides,
+    zoneSettings,
+    preferencesOverrides,
+    safariOverrides
+  );
 
   if (APP.clippingState.has(el) || APP.linkedMutedState.has(el)) {
     settings.gain = 0;
   } else if (APP.gainMultipliers.has(el)) {
     settings.gain = settings.gain * APP.gainMultipliers.get(el);
+  }
+
+  if (APP.supplementaryAttenuation.has(el)) {
+    settings.gain = settings.gain * APP.supplementaryAttenuation.get(el);
   }
 
   return settings;
