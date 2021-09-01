@@ -33,6 +33,11 @@ function useDarkMode() {
 
     setDarkMode(darkmodeQuery.matches);
 
+    // This is a workaround for old Safari.
+    // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use
+    // addListener() and removeListener() to observe media query lists.
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
+    // We may remove this workaround when no one will use Safari 13 or before.
     if (darkmodeQuery.addEventListener) {
       darkmodeQuery.addEventListener("change", event => {
         setDarkMode(event.matches);
