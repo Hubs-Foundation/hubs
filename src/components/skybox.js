@@ -472,21 +472,8 @@ AFRAME.registerComponent("skybox", {
       this.sky.matrixNeedsUpdate = true;
     }
 
-    // TODO do we care about updating enviornment map after scene load?
-    // this.updateEnvironmentMap();
-  },
-
-  updateEnvironmentMap() {
-    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-    const renderer = this.el.sceneEl.renderer;
-
-    const quality = window.APP.store.materialQualitySetting;
-
-    if (environmentMapComponent && !isBotMode && quality === "high") {
-      const envMap = this.sky.generateEnvironmentMap(renderer);
-      environmentMapComponent.updateEnvironmentMap(envMap);
-    } else if (quality === "medium") {
-      // TODO this still needs to be accounted for
+    // TODO Remove or rework medium quality mode
+    if (window.APP.store.materialQualitySetting === "medium") {
       // This extra ambient light is here to normalize lighting with the MeshStandardMaterial.
       // Without it, objects are significantly darker in brighter environments.
       // It's kept to a low value to not wash out objects in very dark environments.
@@ -494,6 +481,9 @@ AFRAME.registerComponent("skybox", {
       this.el.setObject3D("ambient-light", new AmbientLight(0xffffff, 0.3));
       this.el.setObject3D("light-probe", this.sky.generateLightProbe(renderer));
     }
+
+    // TODO if we care about dynamic skybox changes we should also update the enviornment map here
+    //
   },
 
   remove() {
