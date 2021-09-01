@@ -460,7 +460,6 @@ class GLTFHubsComponentsExtension {
 
   extendScene(sceneIdx) {
     const ext = this.parser.json.scenes[sceneIdx]?.extensions?.MOZ_hubs_components;
-    console.log("extendceneParams", ext, sceneIdx, this.parser.json.scenes[sceneIdx]);
     if (ext) return this.resolveComponentLinks(ext);
   }
 
@@ -470,8 +469,6 @@ class GLTFHubsComponentsExtension {
   }
 
   resolveComponentLinks(ext) {
-    console.log("resolveComponentLinks", ext);
-
     const deps = [];
 
     for (const componentName in ext) {
@@ -480,16 +477,9 @@ class GLTFHubsComponentsExtension {
         const value = props[propName];
         const type = value?.__mhc_link_type;
         if (type && value.index !== undefined) {
-          console.log("Loading link", value);
           deps.push(
             this.parser.getDependency(type, value.index).then(loadedDep => {
-              console.log(`${type} loaded`, loadedDep);
               props[propName] = loadedDep;
-              // TODO figure out if this is sane
-              if (type === "texture") {
-                loadedDep.flipY = true;
-              }
-              console.log(props);
             })
           );
         }

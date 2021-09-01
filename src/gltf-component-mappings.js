@@ -534,6 +534,13 @@ AFRAME.GLTFModelPlus.registerComponent(
   "environment-settings",
   "environment-settings",
   (el, componentName, componentData) => {
+    if (componentData.envMapTexture) {
+      // assume equirect for now
+      componentData.envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
+      // TODO do we always want to flip for enviornmetn map?
+      componentData.envMapTexture.flipY = true;
+    }
+
     // TODO a bit silly to be storing this as an aframe component. Use a glboal store of some sort
     el.setAttribute(componentName, {
       ...componentData,

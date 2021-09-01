@@ -65,6 +65,7 @@ export class EnvironmentSystem {
 
     this.debugGui = gui;
     this.debugSettings = debugSettings;
+    this.debugMode = true;
 
     window.$E = this;
   }
@@ -72,7 +73,6 @@ export class EnvironmentSystem {
   updateEnvironment(envEl) {
     const envSettingsEl = envEl.querySelector("[environment-settings]");
     const skyboxEl = envEl.querySelector("[skybox]");
-    console.log(skyboxEl);
     const envSettings = {
       ...defaultEnvSettings,
       skybox: skyboxEl?.components["skybox"]
@@ -92,7 +92,7 @@ export class EnvironmentSystem {
 
     let materialsNeedUpdate = false;
 
-    console.log("Applying environment settings", settings);
+    if (this.debugMode) console.log("Applying environment settings", settings);
 
     if (this.renderer.physicallyCorrectLights !== settings.physicallyCorrectLights) {
       this.renderer.physicallyCorrectLights = settings.physicallyCorrectLights;
@@ -117,27 +117,22 @@ export class EnvironmentSystem {
     }
 
     if (settings.envMapTexture) {
-      settings.envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
-      // TODO don't regenerate this every time
-      const pmrem = this.pmremGenerator.fromEquirectangular(settings.envMapTexture);
-      this.scene.environment = pmrem.texture;
-      // this.scene.environment = null;
-
-      // var cube = new THREE.WebGLCubeRenderTarget(512);
-      // cube.fromEquirectangularTexture(this.renderer, settings.envMapTexture);
-      // console.log("cube", cube);
-      // window.lp = LightProbeGenerator.fromCubeRenderTarget(this.renderer, cube);
-      // this.scene.add(window.lp);
-      // this.scene.background = cube.texture;
+      if (this.prevEnvMapTextureUUID !== settings.envMapTexture.uuid) {
+        this.prevEnvMapTextureUUID = settings.envMapTexture.uuid;
+        this.scene.environment = this.pmremGenerator.fromEquirectangular(settings.envMapTexture).texture;
+      }
     } else if (settings.skybox) {
-      const envMap = settings.skybox.sky.generateEnvironmentMap(this.renderer);
-      this.scene.environment = envMap;
+      if (this.prevEnvMapTextureUUID !== settings.skybox.uuid) {
+        this.prevEnvMapTextureUUID = settings.skybox.uuid;
+        this.scene.environment = settings.skybox.sky.generateEnvironmentMap(this.renderer);
+      }
     } else {
       this.scene.environment = null;
+      this.prevEnvMapTextureUUID = null;
     }
 
     if (materialsNeedUpdate) {
-      console.log("materials need updating");
+      if (this.debugMode) console.log("materials need updating");
       this.scene.traverse(o => {
         if (o.material) o.material.needsUpdate = true;
       });
