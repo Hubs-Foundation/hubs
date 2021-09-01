@@ -44,6 +44,8 @@ async function getMediaStream(el) {
 
 AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function() {
+    APP.supplementaryAttenuation.delete(this.el);
+
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
     this.isCreatingAudio = false;
@@ -88,6 +90,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
+    APP.supplementaryAttenuation.delete(this.el);
   },
 
   init() {
@@ -100,7 +103,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
     this.onPreferenceChanged = () => {
       const newPref = APP.store.state.preferences.audioOutputMode;
-      const shouldRecreateAudio = audioOutputModePref !== newPref;
+      const shouldRecreateAudio = audioOutputModePref !== newPref && !this.isCreatingAudio;
       audioOutputModePref = newPref;
       if (shouldRecreateAudio) {
         this.createAudio();
@@ -276,6 +279,7 @@ AFRAME.registerComponent("audio-target", {
   },
 
   createAudio: function() {
+    APP.supplementaryAttenuation.delete(this.el);
     APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const audioListener = this.el.sceneEl.audioListener;
     let audio = null;
@@ -323,6 +327,7 @@ AFRAME.registerComponent("audio-target", {
     this.audioSystem.removeAudio(this.audio);
     this.el.removeObject3D(this.attrName);
 
+    APP.supplementaryAttenuation.delete(this.el);
     APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
   }

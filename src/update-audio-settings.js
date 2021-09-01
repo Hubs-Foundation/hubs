@@ -55,6 +55,10 @@ export function getCurrentAudioSettings(el) {
     settings.gain = settings.gain * APP.gainMultipliers.get(el);
   }
 
+  if (APP.supplementaryAttenuation.has(el)) {
+    settings.gain = settings.gain * APP.supplementaryAttenuation.get(el);
+  }
+
   return settings;
 }
 
