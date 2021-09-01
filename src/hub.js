@@ -9,8 +9,19 @@ import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
 
-console.log(`App version: ${process.env.BUILD_VERSION || "?"}`);
-console.log(`is custom client ${process.env.IS_CUSTOM_CLIENT}`);
+console.log(
+  `App version: ${
+    document.querySelector(`meta[name='env:THUMBNAIL_SERVER']`)
+      ? process.env.BUILD_VERSION || "?"
+      : "Custom client or local client"
+  }`
+);
+console.log(
+  `returned from : ${
+    document.querySelector(`meta[name='env:THUMBNAIL_SERVER']`) ? process.env.BUILD_VERSION || "?" : "custom client"
+  }`
+);
+console.log(process.env.BUILD_VERSION);
 
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
