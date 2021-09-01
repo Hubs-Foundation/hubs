@@ -315,7 +315,7 @@ AFRAME.registerComponent("mic-button", {
     const active = this.data.active;
     const hovering = this.hovering;
     const spriteNames =
-      SPRITE_NAMES[!active ? (hovering ? "MIC_HOVER" : "MIC") : hovering ? "MIC_OFF_HOVER" : "MIC_OFF"];
+      SPRITE_NAMES[active ? (hovering ? "MIC_HOVER" : "MIC") : hovering ? "MIC_OFF_HOVER" : "MIC_OFF"];
     const level = micLevelForVolume(audioAnalyser.volume);
     const spriteName = spriteNames[level];
     if (spriteName !== this.prevSpriteName) {

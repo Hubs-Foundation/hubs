@@ -17,6 +17,9 @@ import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 import { detect } from "detect-browser";
 import semver from "semver";
+import { createPlaneBufferGeometry } from "../utils/three-utils";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
+import { MixerType } from "../systems/audio-system";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -38,7 +41,7 @@ const TYPE_IMG_PNG = { type: "image/png" };
 const parseGIF = promisifyWorker(new GIFWorker());
 
 const isIOS = AFRAME.utils.device.isIOS();
-const audioIconTexture = new THREE.TextureLoader().load(audioIcon);
+const audioIconTexture = new HubsTextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
 for (let i = 0; i <= 20; i++) {
@@ -52,6 +55,7 @@ for (let i = 0; i <= 20; i++) {
 
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
+import { AudioType, MediaAudioDefaults } from "./audio-params";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 
@@ -255,22 +259,16 @@ AFRAME.registerComponent("media-video", {
     src: { type: "string" },
     audioSrc: { type: "string" },
     contentType: { type: "string" },
-    volume: { type: "number", default: 0.5 },
     loop: { type: "boolean", default: true },
-    audioType: { type: "string", default: "pannernode" },
     hidePlaybackControls: { type: "boolean", default: false },
-    distanceModel: { type: "string", default: "inverse" },
-    rolloffFactor: { type: "number", default: 1 },
-    refDistance: { type: "number", default: 1 },
-    maxDistance: { type: "number", default: 10000 },
-    coneInnerAngle: { type: "number", default: 360 },
-    coneOuterAngle: { type: "number", default: 0 },
-    coneOuterGain: { type: "number", default: 0 },
     videoPaused: { type: "boolean" },
     projection: { type: "string", default: "flat" },
     time: { type: "number" },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
-    syncTolerance: { default: 2 }
+    syncTolerance: { default: 2 },
+    linkedVideoTexture: { default: null },
+    linkedAudioSource: { default: null },
+    linkedMediaElementAudioSource: { default: null }
   },
 
   init() {
@@ -289,7 +287,8 @@ AFRAME.registerComponent("media-video", {
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
 
-    this.distanceBasedAttenuation = 1;
+    this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
+    this.gainFilter = THREE.AudioContext.getContext().createGain();
 
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
@@ -297,6 +296,20 @@ AFRAME.registerComponent("media-video", {
     this.isSnapping = false;
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
+
+    if (!this.el.components["audio-params"]) {
+      this.el.setAttribute("audio-params", {
+        audioType: MediaAudioDefaults.AUDIO_TYPE,
+        distanceModel: MediaAudioDefaults.DISTANCE_MODEL,
+        rolloffFactor: MediaAudioDefaults.ROLLOFF_FACTOR,
+        refDistance: MediaAudioDefaults.REF_DISTANCE,
+        maxDistance: MediaAudioDefaults.MAX_DISTANCE,
+        coneInnerAngle: MediaAudioDefaults.INNER_ANGLE,
+        coneOuterAngle: MediaAudioDefaults.OUTER_ANGLE,
+        coneOuterGain: MediaAudioDefaults.OUTER_GAIN,
+        gain: MediaAudioDefaults.VOLUME
+      });
+    }
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -404,7 +417,9 @@ AFRAME.registerComponent("media-video", {
   },
 
   changeVolumeBy(v) {
-    this.el.setAttribute("media-video", "volume", THREE.Math.clamp(this.data.volume + v, 0, 1));
+    const gain = this.el.components["audio-params"].data.gain;
+    const vol = THREE.Math.clamp(gain + v, 0, 1);
+    this.el.setAttribute("audio-params", "gain", vol);
     this.updateVolumeLabel();
   },
 
@@ -465,6 +480,7 @@ AFRAME.registerComponent("media-video", {
     if (this._ignorePauseStateChanges) return;
 
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
+    this.el.setAttribute("audio-params", "enabled", !this.video.paused);
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
       this.el.emit("owned-video-state-changed");
@@ -481,15 +497,6 @@ AFRAME.registerComponent("media-video", {
       } else {
         this.tryUpdateVideoPlaybackState(this.data.videoPaused);
       }
-    }
-
-    // Volume is local, always update it
-    if (this.audio && window.APP.store.state.preferences.audioOutputMode !== "audio") {
-      const globalMediaVolume =
-        window.APP.store.state.preferences.globalMediaVolume !== undefined
-          ? window.APP.store.state.preferences.globalMediaVolume
-          : 100;
-      this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume;
     }
   },
 
@@ -528,18 +535,11 @@ AFRAME.registerComponent("media-video", {
       this.updateSrc(oldData);
       return;
     }
+
     const shouldRecreateAudio =
-      !shouldUpdateSrc && this.mediaElementAudioSource && oldData.audioType !== this.data.audioType;
+      !shouldUpdateSrc && this.mediaElementAudioSource && this.audio?.panner?.audioType !== this.data.audioType;
     if (shouldRecreateAudio) {
       this.setupAudio();
-      return;
-    }
-
-    const disablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
-    const shouldSetPositionalAudioProperties =
-      this.audio && this.data.audioType === "pannernode" && !disablePositionalAudio;
-    if (shouldSetPositionalAudioProperties) {
-      this.setPositionalAudioProperties();
       return;
     }
   },
@@ -550,17 +550,23 @@ AFRAME.registerComponent("media-video", {
       this.el.removeObject3D("sound");
     }
 
-    const disablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
-    if (!disablePositionalAudio && this.data.audioType === "pannernode") {
-      this.audio = new THREE.PositionalAudio(this.el.sceneEl.audioListener);
-      this.setPositionalAudioProperties();
-      this.distanceBasedAttenuation = 1;
+    const audioListener = this.el.sceneEl.audioListener;
+    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+      this.audio = new THREE.PositionalAudio(audioListener);
     } else {
-      this.audio = new THREE.Audio(this.el.sceneEl.audioListener);
+      this.audio = new THREE.Audio(audioListener);
     }
+
+    this.audioSystem.removeAudio(this.audio);
+    this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
+
+    const filters = this.audio.getFilters();
+    filters.push(this.gainFilter);
+    this.audio.setFilters(filters);
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
+    this.el.components["audio-params"].setAudio(this.audio);
 
     // Make sure that the audio is initialized to the right place.
     // Its matrix may not update if this element is not visible.
@@ -568,14 +574,8 @@ AFRAME.registerComponent("media-video", {
     this.audio.updateMatrixWorld();
   },
 
-  setPositionalAudioProperties() {
-    this.audio.setDistanceModel(this.data.distanceModel);
-    this.audio.setRolloffFactor(this.data.rolloffFactor);
-    this.audio.setRefDistance(this.data.refDistance);
-    this.audio.setMaxDistance(this.data.maxDistance);
-    this.audio.panner.coneInnerAngle = this.data.coneInnerAngle;
-    this.audio.panner.coneOuterAngle = this.data.coneOuterAngle;
-    this.audio.panner.coneOuterGain = this.data.coneOuterGain;
+  getGainFilter() {
+    return this.gainFilter;
   },
 
   async updateSrc(oldData) {
@@ -669,7 +669,8 @@ AFRAME.registerComponent("media-video", {
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
       } else {
-        geometry = new THREE.PlaneBufferGeometry();
+        const flipY = texture.isVideoTexture ? texture.flipY : audioIconTexture.flipY;
+        geometry = createPlaneBufferGeometry(undefined, undefined, undefined, undefined, flipY);
         material.side = THREE.DoubleSide;
       }
 
@@ -760,16 +761,16 @@ AFRAME.registerComponent("media-video", {
       // Set src on video to begin loading.
       if (url.startsWith("hubs://")) {
         const streamClientId = url.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
-        const stream = await NAF.connection.adapter.getMediaStream(streamClientId, "video");
+        const stream = await APP.dialog.getMediaStream(streamClientId, "video");
         // We subscribe to video stream notifications for this peer to update the video element
         // This could happen in case there is an ICE failure that requires a transport recreation.
         if (this._onStreamUpdated) {
-          NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
+          APP.dialog.off("stream_updated", this._onStreamUpdated);
         }
         this._onStreamUpdated = async (peerId, kind) => {
           if (peerId === streamClientId && kind === "video") {
             // The video stream for this peer has been updated
-            const stream = await NAF.connection.adapter.getMediaStream(peerId, "video").catch(e => {
+            const stream = await APP.dialog.getMediaStream(peerId, "video").catch(e => {
               console.error(`Error getting video stream for ${peerId}`, e);
             });
             if (stream) {
@@ -777,7 +778,7 @@ AFRAME.registerComponent("media-video", {
             }
           }
         };
-        NAF.connection.adapter.on("stream_updated", this._onStreamUpdated, this);
+        APP.dialog.on("stream_updated", this._onStreamUpdated, this);
         videoEl.srcObject = new MediaStream(stream.getVideoTracks());
         // If hls.js is supported we always use it as it gives us better events
       } else if (contentType.startsWith("application/dash")) {
@@ -862,6 +863,8 @@ AFRAME.registerComponent("media-video", {
         videoEl.onerror = failLoad;
 
         if (this.data.audioSrc) {
+          videoEl.muted = true;
+
           // If there's an audio src, create an audio element to play it that we keep in sync
           // with the video while this component is active.
           audioEl = createVideoOrAudioEl("audio");
@@ -924,16 +927,11 @@ AFRAME.registerComponent("media-video", {
   },
 
   updateVolumeLabel() {
-    this.volumeLabel.setAttribute(
-      "text",
-      "value",
-      this.data.volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(this.data.volume / 0.05)]
-    );
+    const volume = this.el.components["audio-params"].data.gain;
+    this.volumeLabel.setAttribute("text", "value", volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(volume / 0.05)]);
   },
 
   tick: (() => {
-    const positionA = new THREE.Vector3();
-    const positionB = new THREE.Vector3();
     return function() {
       if (!this.video) return;
 
@@ -977,20 +975,6 @@ AFRAME.registerComponent("media-video", {
           this.lastUpdate = now;
         }
       }
-
-      if (this.audio) {
-        if (window.APP.store.state.preferences.audioOutputMode === "audio") {
-          this.el.object3D.getWorldPosition(positionA);
-          this.el.sceneEl.audioListener.getWorldPosition(positionB);
-          const distance = positionA.distanceTo(positionB);
-          this.distanceBasedAttenuation = Math.min(1, 10 / Math.max(1, distance * distance));
-          const globalMediaVolume =
-            window.APP.store.state.preferences.globalMediaVolume !== undefined
-              ? window.APP.store.state.preferences.globalMediaVolume
-              : 100;
-          this.audio.gain.gain.value = (globalMediaVolume / 100) * this.data.volume * this.distanceBasedAttenuation;
-        }
-      }
     };
   })(),
 
@@ -1003,6 +987,8 @@ AFRAME.registerComponent("media-video", {
   remove() {
     this.cleanUp();
 
+    this.el.removeAttribute("audio-params");
+
     if (this.mesh) {
       this.el.removeObject3D("mesh");
     }
@@ -1014,7 +1000,7 @@ AFRAME.registerComponent("media-video", {
 
     if (this.audio) {
       this.el.removeObject3D("sound");
-      this.audio.disconnect();
+      this.audioSystem.removeAudio(this.audio);
       delete this.audio;
     }
 
@@ -1028,7 +1014,7 @@ AFRAME.registerComponent("media-video", {
     if (this.video) {
       this.video.removeEventListener("pause", this.onPauseStateChange);
       this.video.removeEventListener("play", this.onPauseStateChange);
-      NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
+      APP.dialog.off("stream_updated", this._onStreamUpdated);
     }
 
     if (this.hoverMenu) {
@@ -1037,6 +1023,7 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton.object3D.removeEventListener("interact", this.volumeDown);
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
+      this.snapButton.object3D.removeEventListener("interact", this.snap);
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
@@ -1163,7 +1150,7 @@ AFRAME.registerComponent("media-image", {
           }
         }
       } else {
-        geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+        geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
         material.side = THREE.DoubleSide;
       }
 
@@ -1304,7 +1291,7 @@ AFRAME.registerComponent("media-pdf", {
 
     if (!this.mesh) {
       const material = new THREE.MeshBasicMaterial();
-      const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+      const geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
       material.side = THREE.DoubleSide;
 
       this.mesh = new THREE.Mesh(geometry, material);
