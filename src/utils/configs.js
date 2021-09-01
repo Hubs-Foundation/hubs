@@ -27,6 +27,8 @@ let isAdmin = false;
   }
 });
 
+configs.IS_LOCAL_OR_CUSTOM_CLIENT = document.querySelector("meta[name='env:thumbnail_server']") ? false : true;
+
 // Also include configs that reticulum injects as a script in the page head.
 
 configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS || {};
