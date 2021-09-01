@@ -185,7 +185,7 @@ export default class HubChannel extends EventTarget {
         return { key, entryState: presence.metas[presence.metas.length - 1].presence };
       })
       .filter(({ key, entryState }) => {
-        return key !== NAF.clientId && entryState === "entered";
+        return key !== NAF.clientId && entryState === "room";
       }).length;
 
     const entryTimingFlags = this.getEntryTimingFlags();
