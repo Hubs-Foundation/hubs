@@ -3,9 +3,6 @@
 // in webpack production mode.
 require("three/examples/js/lights/LightProbeGenerator");
 
-import qsTruthy from "../utils/qs_truthy";
-const isBotMode = qsTruthy("bot");
-
 const {
   AmbientLight,
   BackSide,
@@ -430,12 +427,6 @@ AFRAME.registerComponent("skybox", {
   init() {
     this.sky = new Sky();
     this.el.setObject3D("mesh", this.sky);
-
-    this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
-    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
-    // This is likely due to the custom elements attached callback being synchronous on Chrome but not Firefox.
-    // Added timeout due to additional case where texture is black in Firefox.
-    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap));
   },
 
   update(oldData) {
@@ -478,26 +469,18 @@ AFRAME.registerComponent("skybox", {
       this.sky.matrixNeedsUpdate = true;
     }
 
-    this.updateEnvironmentMap();
-  },
-
-  updateEnvironmentMap() {
-    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-    const renderer = this.el.sceneEl.renderer;
-
-    const quality = window.APP.store.materialQualitySetting;
-
-    if (environmentMapComponent && !isBotMode && quality === "high") {
-      const envMap = this.sky.generateEnvironmentMap(renderer);
-      environmentMapComponent.updateEnvironmentMap(envMap);
-    } else if (quality === "medium") {
+    // TODO Remove or rework medium quality mode
+    if (window.APP.store.materialQualitySetting === "medium") {
       // This extra ambient light is here to normalize lighting with the MeshStandardMaterial.
       // Without it, objects are significantly darker in brighter environments.
       // It's kept to a low value to not wash out objects in very dark environments.
       // This is a hack, but the results are much better than they are without it.
       this.el.setObject3D("ambient-light", new AmbientLight(0xffffff, 0.3));
-      this.el.setObject3D("light-probe", this.sky.generateLightProbe(renderer));
+      this.el.setObject3D("light-probe", this.sky.generateLightProbe(this.el.sceneEl.renderer));
     }
+
+    // TODO if we care about dynamic skybox changes we should also update the enviornment map here
+    //
   },
 
   remove() {

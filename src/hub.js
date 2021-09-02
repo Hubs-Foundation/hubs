@@ -414,6 +414,8 @@ export async function updateEnvironmentForHub(hub, entryManager) {
   const environmentScene = document.querySelector("#environment-scene");
   const sceneEl = document.querySelector("a-scene");
 
+  const envSystem = sceneEl.systems["hubs-systems"].environmentSystem;
+
   console.log(`Scene URL: ${sceneUrl}`);
 
   let environmentEl = null;
@@ -430,6 +432,8 @@ export async function updateEnvironmentForHub(hub, entryManager) {
         document.querySelector(".a-canvas").classList.remove("a-hidden");
 
         sceneEl.addState("visible");
+
+        envSystem.updateEnvironment(environmentEl);
 
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
@@ -457,6 +461,8 @@ export async function updateEnvironmentForHub(hub, entryManager) {
           "model-loaded",
           () => {
             environmentEl.removeEventListener("model-error", sceneErrorHandler);
+
+            envSystem.updateEnvironment(environmentEl);
             traverseMeshesAndAddShapes(environmentEl);
 
             // We've already entered, so move to new spawn point once new environment is loaded

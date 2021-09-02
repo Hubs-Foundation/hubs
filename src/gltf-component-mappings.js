@@ -390,7 +390,12 @@ AFRAME.GLTFModelPlus.registerComponent(
       enterComponentMapping = getSanitizedComponentMapping(enterComponent, enterProperty, publicComponents);
       leaveComponentMapping = getSanitizedComponentMapping(leaveComponent, leaveProperty, publicComponents);
 
-      targetEntity = indexToEntityMap[target];
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof target === "number") {
+        targetEntity = indexToEntityMap[target];
+      } else {
+        targetEntity = target?.el;
+      }
 
       if (!targetEntity) {
         throw new Error(`Couldn't find target entity with index: ${target}.`);
@@ -490,7 +495,12 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     let srcEl;
     if (srcNode !== undefined) {
-      srcEl = indexToEntityMap[srcNode];
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof srcNode === "number") {
+        srcEl = indexToEntityMap[srcNode];
+      } else {
+        srcEl = srcNode?.el;
+      }
       if (!srcEl) {
         console.warn(
           `Error inflating gltf component "video-texture-srcEl": Couldn't find srcEl entity with index ${srcNode}`
@@ -518,7 +528,12 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     let srcEl;
     if (srcNode !== undefined) {
-      srcEl = indexToEntityMap[srcNode];
+      // indexToEntityMap should be considered depredcated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof srcNode === "number") {
+        srcEl = indexToEntityMap[srcNode];
+      } else {
+        srcEl = srcNode?.el;
+      }
       if (!srcEl) {
         console.warn(
           `Error inflating gltf component ${componentName}: Couldn't find srcEl entity with index ${srcNode}`
@@ -578,3 +593,22 @@ AFRAME.GLTFModelPlus.registerComponent("audio-params", "audio-params", (el, comp
 AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
   el.setAttribute(componentName, { ...componentData });
 });
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "environment-settings",
+  "environment-settings",
+  (el, componentName, componentData) => {
+    if (componentData.envMapTexture) {
+      // assume equirect for now
+      componentData.envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
+      // TODO do we always want to flip for enviornmetn map?
+      componentData.envMapTexture.flipY = true;
+    }
+
+    // TODO a bit silly to be storing this as an aframe component. Use a glboal store of some sort
+    el.setAttribute(componentName, {
+      ...componentData,
+      backgroundColor: new THREE.Color(componentData.backgroundColor)
+    });
+  }
+);

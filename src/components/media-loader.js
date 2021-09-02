@@ -25,7 +25,6 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
 
-let loadingObjectEnvMap;
 let loadingObject;
 
 waitForDOMContentLoaded().then(() => {
@@ -192,15 +191,6 @@ AFRAME.registerComponent("media-loader", {
     this.updateScale(true, false);
 
     if (useFancyLoader) {
-      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-      if (environmentMapComponent) {
-        const currentEnivronmentMap = environmentMapComponent.environmentMap;
-        if (loadingObjectEnvMap !== currentEnivronmentMap) {
-          environmentMapComponent.applyEnvironmentMap(mesh);
-          loadingObjectEnvMap = currentEnivronmentMap;
-        }
-      }
-
       this.loaderMixer = new THREE.AnimationMixer(mesh);
 
       this.loadingClip = this.loaderMixer.clipAction(mesh.animations[0]);

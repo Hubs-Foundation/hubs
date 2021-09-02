@@ -90,11 +90,6 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.el.setObject3D("mesh", this.drawing);
 
-    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-    if (environmentMapComponent) {
-      environmentMapComponent.applyEnvironmentMap(this.drawing);
-    }
-
     this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
     this.idx = Object.assign({}, this.sharedBuffer.idx);
     this.vertexCount = 0; //number of vertices added for current line (used for line deletion).
