@@ -7,6 +7,7 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -398,6 +399,21 @@ class GLTFHubsPlugin {
         node.extras.gltfIndex = i;
       }
     }
+
+    function hookDef(defType, hookName) {
+      return Promise.all(
+        parser.json[defType].map((_def, idx) => {
+          return Promise.all(
+            parser._invokeAll(function(ext) {
+              return ext[hookName] && ext[hookName](idx);
+            })
+          );
+        })
+      );
+    }
+
+    // TODO decide if thse should get put into the GLTF loader itself
+    return Promise.all([hookDef("scenes", "extendScene"), hookDef("nodes", "extendNode")]);
   }
 
   afterRoot(gltf) {
@@ -428,6 +444,49 @@ class GLTFHubsPlugin {
 
     //
     gltf.scene.animations = gltf.animations;
+  }
+}
+
+class GLTFHubsComponentsExtension {
+  constructor(parser) {
+    this.parser = parser;
+    this.name = "MOZ_hubs_components";
+  }
+
+  _markDefs() {
+    // TODO hack to keep hubs component data in userData. Remove once we handle all component stuff in a plugin
+    delete this.parser.extensions.MOZ_hubs_components;
+  }
+
+  extendScene(sceneIdx) {
+    const ext = this.parser.json.scenes[sceneIdx]?.extensions?.MOZ_hubs_components;
+    if (ext) return this.resolveComponentLinks(ext);
+  }
+
+  extendNode(nodeIdx) {
+    const ext = this.parser.json.nodes[nodeIdx]?.extensions?.MOZ_hubs_components;
+    if (ext) return this.resolveComponentLinks(ext);
+  }
+
+  resolveComponentLinks(ext) {
+    const deps = [];
+
+    for (const componentName in ext) {
+      const props = ext[componentName];
+      for (const propName in props) {
+        const value = props[propName];
+        const type = value?.__mhc_link_type;
+        if (type && value.index !== undefined) {
+          deps.push(
+            this.parser.getDependency(type, value.index).then(loadedDep => {
+              props[propName] = loadedDep;
+            })
+          );
+        }
+      }
+    }
+
+    return Promise.all(deps);
   }
 }
 
@@ -501,6 +560,36 @@ class GLTFHubsTextureBasisExtension {
   }
 }
 
+class GLTFMozTextureRGBE {
+  constructor(parser, loader) {
+    this.parser = parser;
+    this.loader = loader;
+    this.name = "MOZ_texture_rgbe";
+  }
+
+  loadTexture(textureIndex) {
+    const parser = this.parser;
+    const json = parser.json;
+    const textureDef = json.textures[textureIndex];
+
+    if (!textureDef.extensions || !textureDef.extensions[this.name]) {
+      return null;
+    }
+
+    const extensionDef = textureDef.extensions[this.name];
+    const source = json.images[extensionDef.source];
+    return parser.loadTextureImage(textureIndex, source, this.loader).then(t => {
+      // TODO pretty severe artifacting when using mipmaps, disable for now
+      if (t.minFilter == THREE.NearestMipmapNearestFilter || t.minFilter == THREE.NearestMipmapLinearFilter) {
+        t.minFilter = THREE.NearestFilter;
+      } else if (t.minFilter == THREE.LinearMipmapNearestFilter || t.minFilter == THREE.LinearMipmapLinearFilter) {
+        t.minFilter = THREE.LinearFilter;
+      }
+      return t;
+    });
+  }
+}
+
 export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
@@ -514,9 +603,11 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
   gltfLoader
+    .register(parser => new GLTFHubsComponentsExtension(parser))
     .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
     .register(parser => new GLTFHubsLightMapExtension(parser))
-    .register(parser => new GLTFHubsTextureBasisExtension(parser));
+    .register(parser => new GLTFHubsTextureBasisExtension(parser))
+    .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)));
 
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
   // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of
@@ -540,6 +631,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
+  console.log(`Loading model ${src}`);
   if (useCache) {
     if (gltfCache.has(src)) {
       gltfCache.retain(src);
@@ -700,12 +792,6 @@ AFRAME.registerComponent("gltf-model-plus", {
         const el = o.el;
         if (el) rewires.push(() => (o.el = el));
       });
-
-      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-
-      if (environmentMapComponent) {
-        environmentMapComponent.applyEnvironmentMap(object3DToSet);
-      }
 
       if (lastSrc) {
         gltfCache.release(lastSrc);

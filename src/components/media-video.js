@@ -1,44 +1,29 @@
 /* global performance THREE AFRAME NAF MediaStream setTimeout */
 import configs from "../utils/configs";
-import GIFWorker from "../workers/gifparsing.worker.js";
-import errorImageSrc from "!!url-loader!../assets/images/media-error.png";
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createImageTexture, createVideoOrAudioEl } from "../utils/media-utils";
+import { addAndArrangeMedia, createVideoOrAudioEl } from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
-import { promisifyWorker } from "../utils/promisify-worker.js";
-import pdfjs from "pdfjs-dist";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 import { detect } from "detect-browser";
 import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
-import { MixerType } from "../systems/audio-system";
+import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
+import { SourceType, AudioType } from "./audio-params";
+import { errorTexture } from "../utils/error-texture";
+import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 
 import qsTruthy from "../utils/qs_truthy";
 
-/**
- * Warning! This require statement is fragile!
- *
- * How it works:
- * require -> require the file after all import statements have been called, particularly the configs.js import which modifies __webpack_public_path__
- * !! -> don't run any other loaders
- * file-loader -> make webpack move the file into the dist directory and return the file path
- * outputPath -> where to put the file
- * name -> how to name the file
- * Then the path to the worker script
- */
-pdfjs.GlobalWorkerOptions.workerSrc = require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js");
-
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
-const parseGIF = promisifyWorker(new GIFWorker());
 
 const isIOS = AFRAME.utils.device.isIOS();
 const audioIconTexture = new HubsTextureLoader().load(audioIcon);
@@ -53,195 +38,6 @@ for (let i = 0; i <= 20; i++) {
   VOLUME_LABELS[i] = s;
 }
 
-import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
-import { rewriteBasisTranscoderUrls } from "../utils/media-url-utils";
-import { AudioType, MediaAudioDefaults } from "./audio-params";
-const loadingManager = new THREE.LoadingManager();
-loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
-
-let ktxLoader;
-
-export function createBasisTexture(url) {
-  if (!ktxLoader) {
-    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
-  }
-  return new Promise((resolve, reject) => {
-    ktxLoader.basisLoader.load(
-      url,
-      function(texture) {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.onUpdate = function() {
-          // Delete texture data once it has been uploaded to the GPU
-          texture.mipmaps.length = 0;
-        };
-        // texture.anisotropy = 4;
-        resolve(texture);
-      },
-      undefined,
-      function(error) {
-        console.error(error);
-        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
-      }
-    );
-  });
-}
-
-export function createKTX2Texture(url) {
-  if (!ktxLoader) {
-    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
-  }
-  return new Promise((resolve, reject) => {
-    ktxLoader.load(
-      url,
-      function(texture) {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.onUpdate = function() {
-          // Delete texture data once it has been uploaded to the GPU
-          texture.mipmaps.length = 0;
-        };
-        texture.anisotropy = 4;
-        resolve(texture);
-      },
-      undefined,
-      function(error) {
-        console.error(error);
-        reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
-      }
-    );
-  });
-}
-
-class GIFTexture extends THREE.Texture {
-  constructor(frames, delays, disposals) {
-    super(document.createElement("canvas"));
-    this.image.width = frames[0].width;
-    this.image.height = frames[0].height;
-
-    this._ctx = this.image.getContext("2d");
-
-    this.generateMipmaps = false;
-    this.isVideoTexture = true;
-    this.minFilter = THREE.NearestFilter;
-
-    this.frames = frames;
-    this.delays = delays;
-    this.disposals = disposals;
-
-    this.frame = 0;
-    this.frameStartTime = Date.now();
-  }
-
-  update() {
-    if (!this.frames || !this.delays || !this.disposals) return;
-    const now = Date.now();
-    if (now - this.frameStartTime > this.delays[this.frame]) {
-      if (this.disposals[this.frame] === 2) {
-        this._ctx.clearRect(0, 0, this.image.width, this.image.width);
-      }
-      this.frame = (this.frame + 1) % this.frames.length;
-      this.frameStartTime = now;
-      this._ctx.drawImage(this.frames[this.frame], 0, 0, this.image.width, this.image.height);
-      this.needsUpdate = true;
-    }
-  }
-}
-
-async function createGIFTexture(url) {
-  return new Promise((resolve, reject) => {
-    fetch(url, { mode: "cors" })
-      .then(r => r.arrayBuffer())
-      .then(rawImageData => parseGIF(rawImageData, [rawImageData]))
-      .then(result => {
-        const { frames, delayTimes, disposals } = result;
-        let loadCnt = 0;
-        for (let i = 0; i < frames.length; i++) {
-          const img = new Image();
-          img.onload = e => {
-            loadCnt++;
-            frames[i] = e.target;
-            if (loadCnt === frames.length) {
-              const texture = new GIFTexture(frames, delayTimes, disposals);
-              texture.image.src = url;
-              texture.encoding = THREE.sRGBEncoding;
-              texture.minFilter = THREE.LinearFilter;
-              resolve(texture);
-            }
-          };
-          img.src = frames[i];
-        }
-      })
-      .catch(reject);
-  });
-}
-
-function scaleToAspectRatio(el, ratio) {
-  const width = Math.min(1.0, 1.0 / ratio);
-  const height = Math.min(1.0, ratio);
-  el.object3DMap.mesh.scale.set(width, height, 1);
-  el.object3DMap.mesh.matrixNeedsUpdate = true;
-}
-
-class TextureCache {
-  cache = new Map();
-
-  key(src, version) {
-    return `${src}_${version}`;
-  }
-
-  set(src, version, texture) {
-    const image = texture.image;
-    this.cache.set(this.key(src, version), {
-      texture,
-      ratio: (image.videoHeight || image.height) / (image.videoWidth || image.width),
-      count: 0
-    });
-    return this.retain(src, version);
-  }
-
-  has(src, version) {
-    return this.cache.has(this.key(src, version));
-  }
-
-  get(src, version) {
-    return this.cache.get(this.key(src, version));
-  }
-
-  retain(src, version) {
-    const cacheItem = this.cache.get(this.key(src, version));
-    cacheItem.count++;
-    // console.log("retain", src, cacheItem.count);
-    return cacheItem;
-  }
-
-  release(src, version) {
-    const cacheItem = this.cache.get(this.key(src, version));
-
-    if (!cacheItem) {
-      console.error(`Releasing uncached texture src ${src}`);
-      return;
-    }
-
-    cacheItem.count--;
-    // console.log("release", src, cacheItem.count);
-    if (cacheItem.count <= 0) {
-      // Unload the video element to prevent it from continuing to play in the background
-      disposeTexture(cacheItem.texture);
-      this.cache.delete(this.key(src, version));
-    }
-  }
-}
-
-const textureCache = new TextureCache();
-const inflightTextures = new Map();
-
-const errorImage = new Image();
-errorImage.src = errorImageSrc;
-const errorTexture = new THREE.Texture(errorImage);
-errorImage.onload = () => {
-  errorTexture.needsUpdate = true;
-};
-const errorCacheItem = { texture: errorTexture, ratio: 1400 / 1200 };
-
 function timeFmt(t) {
   let s = Math.floor(t),
     h = Math.floor(s / 3600);
@@ -254,10 +50,12 @@ function timeFmt(t) {
   return h === "00" ? `${m}:${s}` : `${h}:${m}:${s}`;
 }
 
+const MAX_MULTIPLIER = 2;
+
 AFRAME.registerComponent("media-video", {
   schema: {
     src: { type: "string" },
-    audioSrc: { type: "string" },
+    audioSrc: { type: "string" }, // set only if audio track is separated from video track (eg. 360 video)
     contentType: { type: "string" },
     loop: { type: "boolean", default: true },
     hidePlaybackControls: { type: "boolean", default: false },
@@ -272,6 +70,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   init() {
+    APP.gainMultipliers.set(this.el, 1);
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.updateHoverMenu = this.updateHoverMenu.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);
@@ -288,7 +87,6 @@ AFRAME.registerComponent("media-video", {
     this.togglePlaying = this.togglePlaying.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
-    this.gainFilter = THREE.AudioContext.getContext().createGain();
 
     this.lastUpdate = 0;
     this.videoMutedAt = 0;
@@ -296,20 +94,6 @@ AFRAME.registerComponent("media-video", {
     this.isSnapping = false;
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
-
-    if (!this.el.components["audio-params"]) {
-      this.el.setAttribute("audio-params", {
-        audioType: MediaAudioDefaults.AUDIO_TYPE,
-        distanceModel: MediaAudioDefaults.DISTANCE_MODEL,
-        rolloffFactor: MediaAudioDefaults.ROLLOFF_FACTOR,
-        refDistance: MediaAudioDefaults.REF_DISTANCE,
-        maxDistance: MediaAudioDefaults.MAX_DISTANCE,
-        coneInnerAngle: MediaAudioDefaults.INNER_ANGLE,
-        coneOuterAngle: MediaAudioDefaults.OUTER_ANGLE,
-        coneOuterGain: MediaAudioDefaults.OUTER_GAIN,
-        gain: MediaAudioDefaults.VOLUME
-      });
-    }
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -379,16 +163,16 @@ AFRAME.registerComponent("media-video", {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    this.audioOutputModePref = window.APP.store.state.preferences.audioOutputMode;
+    let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
     this.onPreferenceChanged = () => {
-      const newPref = window.APP.store.state.preferences.audioOutputMode;
-      const shouldRecreateAudio = this.audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
-      this.audioOutputModePref = newPref;
+      const newPref = APP.store.state.preferences.audioOutputMode;
+      const shouldRecreateAudio = audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
+      audioOutputModePref = newPref;
       if (shouldRecreateAudio) {
         this.setupAudio();
       }
     };
-    window.APP.store.addEventListener("statechanged", this.onPreferenceChanged);
+    APP.store.addEventListener("statechanged", this.onPreferenceChanged);
   },
 
   isMineOrLocal() {
@@ -417,18 +201,22 @@ AFRAME.registerComponent("media-video", {
   },
 
   changeVolumeBy(v) {
-    const gain = this.el.components["audio-params"].data.gain;
-    const vol = THREE.Math.clamp(gain + v, 0, 1);
-    this.el.setAttribute("audio-params", "gain", vol);
+    let gainMultiplier = APP.gainMultipliers.get(this.el);
+    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_MULTIPLIER);
+    APP.gainMultipliers.set(this.el, gainMultiplier);
     this.updateVolumeLabel();
+    const audio = APP.audios.get(this.el);
+    if (audio) {
+      updateAudioSettings(this.el, audio);
+    }
   },
 
   volumeUp() {
-    this.changeVolumeBy(0.1);
+    this.changeVolumeBy(0.2);
   },
 
   volumeDown() {
-    this.changeVolumeBy(-0.1);
+    this.changeVolumeBy(-0.2);
   },
 
   async snap() {
@@ -480,7 +268,11 @@ AFRAME.registerComponent("media-video", {
     if (this._ignorePauseStateChanges) return;
 
     this.el.setAttribute("media-video", "videoPaused", this.video.paused);
-    this.el.setAttribute("audio-params", "enabled", !this.video.paused);
+    if (this.video.paused) {
+      APP.isAudioPaused.add(this.el);
+    } else {
+      APP.isAudioPaused.delete(this.el);
+    }
 
     if (this.networkedEl && NAF.utils.isMine(this.networkedEl)) {
       this.el.emit("owned-video-state-changed");
@@ -535,13 +327,6 @@ AFRAME.registerComponent("media-video", {
       this.updateSrc(oldData);
       return;
     }
-
-    const shouldRecreateAudio =
-      !shouldUpdateSrc && this.mediaElementAudioSource && this.audio?.panner?.audioType !== this.data.audioType;
-    if (shouldRecreateAudio) {
-      this.setupAudio();
-      return;
-    }
   },
 
   setupAudio() {
@@ -549,33 +334,29 @@ AFRAME.registerComponent("media-video", {
       this.audio.disconnect();
       this.el.removeObject3D("sound");
     }
+    APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
+    const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
-    if (this.el.components["audio-params"].data.audioType === AudioType.PannerNode) {
+    if (audioType === AudioType.PannerNode) {
       this.audio = new THREE.PositionalAudio(audioListener);
     } else {
       this.audio = new THREE.Audio(audioListener);
     }
 
     this.audioSystem.removeAudio(this.audio);
-    this.audioSystem.addAudio(MixerType.MEDIA, this.audio);
-
-    const filters = this.audio.getFilters();
-    filters.push(this.gainFilter);
-    this.audio.setFilters(filters);
+    this.audioSystem.addAudio(SourceType.MEDIA_VIDEO, this.audio);
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
-    this.el.components["audio-params"].setAudio(this.audio);
 
     // Make sure that the audio is initialized to the right place.
     // Its matrix may not update if this element is not visible.
     // See https://github.com/mozilla/hubs/issues/2855
     this.audio.updateMatrixWorld();
-  },
 
-  getGainFilter() {
-    return this.gainFilter;
+    APP.audios.set(this.el, this.audio);
+    updateAudioSettings(this.el, this.audio);
   },
 
   async updateSrc(oldData) {
@@ -862,7 +643,9 @@ AFRAME.registerComponent("media-video", {
         videoEl.src = url;
         videoEl.onerror = failLoad;
 
+        // audioSrc is non-empty only if audio track is separated from video track (eg. 360 video)
         if (this.data.audioSrc) {
+          // Mute video track just in case
           videoEl.muted = true;
 
           // If there's an audio src, create an audio element to play it that we keep in sync
@@ -927,8 +710,12 @@ AFRAME.registerComponent("media-video", {
   },
 
   updateVolumeLabel() {
-    const volume = this.el.components["audio-params"].data.gain;
-    this.volumeLabel.setAttribute("text", "value", volume === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(volume / 0.05)]);
+    const gainMultiplier = APP.gainMultipliers.get(this.el);
+    this.volumeLabel.setAttribute(
+      "text",
+      "value",
+      gainMultiplier === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(gainMultiplier / (MAX_MULTIPLIER / 20))]
+    );
   },
 
   tick: (() => {
@@ -987,7 +774,7 @@ AFRAME.registerComponent("media-video", {
   remove() {
     this.cleanUp();
 
-    this.el.removeAttribute("audio-params");
+    APP.isAudioPaused.delete(this.el);
 
     if (this.mesh) {
       this.el.removeObject3D("mesh");
@@ -997,6 +784,11 @@ AFRAME.registerComponent("media-video", {
       clearInterval(this._audioSyncInterval);
       this._audioSyncInterval = null;
     }
+
+    APP.gainMultipliers.delete(this.el);
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
+    APP.supplementaryAttenuation.delete(this.el);
 
     if (this.audio) {
       this.el.removeObject3D("sound");
@@ -1027,292 +819,5 @@ AFRAME.registerComponent("media-video", {
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
-  }
-});
-
-AFRAME.registerComponent("media-image", {
-  schema: {
-    src: { type: "string" },
-    version: { type: "number" },
-    projection: { type: "string", default: "flat" },
-    contentType: { type: "string" },
-    batch: { default: false },
-    alphaMode: { type: "string", default: undefined },
-    alphaCutoff: { type: "number" }
-  },
-
-  remove() {
-    if (this.data.batch && this.mesh) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
-    }
-    if (this.currentSrcIsRetained) {
-      textureCache.release(this.data.src, this.data.version);
-      this.currentSrcIsRetained = false;
-    }
-  },
-
-  async update(oldData) {
-    let texture;
-    let ratio = 1;
-
-    const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
-
-    try {
-      const { src, version, contentType } = this.data;
-      if (!src) return;
-
-      this.el.emit("image-loading");
-
-      if (this.mesh && this.mesh.material.map && (src !== oldData.src || version !== oldData.version)) {
-        this.mesh.material.map = null;
-        this.mesh.material.needsUpdate = true;
-        if (this.mesh.material.map !== errorTexture) {
-          textureCache.release(oldData.src, oldData.version);
-          this.currentSrcIsRetained = false;
-        }
-      }
-
-      let cacheItem;
-      if (textureCache.has(src, version)) {
-        if (this.currentSrcIsRetained) {
-          cacheItem = textureCache.get(src, version);
-        } else {
-          cacheItem = textureCache.retain(src, version);
-        }
-      } else {
-        const inflightKey = textureCache.key(src, version);
-
-        if (src === "error") {
-          cacheItem = errorCacheItem;
-        } else if (inflightTextures.has(inflightKey)) {
-          await inflightTextures.get(inflightKey);
-          cacheItem = textureCache.retain(src, version);
-        } else {
-          let promise;
-          if (contentType.includes("image/gif")) {
-            promise = createGIFTexture(src);
-          } else if (contentType.includes("image/basis")) {
-            promise = createBasisTexture(src);
-          } else if (contentType.includes("image/ktx2")) {
-            promise = createKTX2Texture(src);
-          } else if (contentType.startsWith("image/")) {
-            promise = createImageTexture(src);
-          } else {
-            throw new Error(`Unknown image content type: ${contentType}`);
-          }
-          inflightTextures.set(inflightKey, promise);
-          texture = await promise;
-          inflightTextures.delete(inflightKey);
-          cacheItem = textureCache.set(src, version, texture);
-        }
-
-        // No way to cancel promises, so if src has changed or this entity was removed while we were creating the texture just throw it away.
-        if (this.data.src !== src || this.data.version !== version || !this.el.parentNode) {
-          textureCache.release(src, version);
-          return;
-        }
-      }
-
-      texture = cacheItem.texture;
-      ratio = cacheItem.ratio;
-
-      this.currentSrcIsRetained = true;
-    } catch (e) {
-      console.error("Error loading image", this.data.src, e);
-      texture = errorTexture;
-      this.currentSrcIsRetained = false;
-    }
-
-    const projection = this.data.projection;
-
-    if (this.mesh && this.data.batch) {
-      // This is a no-op if the mesh was just created.
-      // Otherwise we want to ensure the texture gets updated.
-      batchManagerSystem.removeObject(this.mesh);
-    }
-
-    if (!this.mesh || projection !== oldData.projection) {
-      const material = new THREE.MeshBasicMaterial();
-
-      let geometry;
-
-      if (projection === "360-equirectangular") {
-        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
-        // invert the geometry on the x-axis so that all of the faces point inward
-        geometry.scale(-1, 1, 1);
-
-        // Flip uvs on the geometry
-        if (!texture.flipY) {
-          const uvs = geometry.attributes.uv.array;
-
-          for (let i = 1; i < uvs.length; i += 2) {
-            uvs[i] = 1 - uvs[i];
-          }
-        }
-      } else {
-        geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
-        material.side = THREE.DoubleSide;
-      }
-
-      this.mesh = new THREE.Mesh(geometry, material);
-      this.el.setObject3D("mesh", this.mesh);
-    }
-
-    if (texture == errorTexture) {
-      this.mesh.material.transparent = true;
-    } else {
-      // if transparency setting isnt explicitly defined, default to on for all non batched things, gifs, and basis textures with alpha
-      switch (this.data.alphaMode) {
-        case "opaque":
-          this.mesh.material.transparent = false;
-          break;
-        case "blend":
-          this.mesh.material.transparent = true;
-          this.mesh.material.alphaTest = 0;
-          break;
-        case "mask":
-          this.mesh.material.transparent = false;
-          this.mesh.material.alphaTest = this.data.alphaCutoff;
-          break;
-        default:
-          this.mesh.material.transparent =
-            !this.data.batch ||
-            this.data.contentType.includes("image/gif") ||
-            !!(texture.image && texture.image.hasAlpha);
-          this.mesh.material.alphaTest = 0;
-      }
-    }
-
-    this.mesh.material.map = texture;
-    this.mesh.material.needsUpdate = true;
-
-    if (projection === "flat") {
-      scaleToAspectRatio(this.el, ratio);
-    }
-
-    if (texture !== errorTexture && this.data.batch && !texture.isCompressedTexture) {
-      batchManagerSystem.addObject(this.mesh);
-    }
-
-    this.el.emit("image-loaded", { src: this.data.src, projection: projection });
-  }
-});
-
-AFRAME.registerComponent("media-pdf", {
-  schema: {
-    src: { type: "string" },
-    projection: { type: "string", default: "flat" },
-    contentType: { type: "string" },
-    index: { default: 0 },
-    batch: { default: false }
-  },
-
-  init() {
-    this.snap = this.snap.bind(this);
-    this.canvas = document.createElement("canvas");
-    this.canvasContext = this.canvas.getContext("2d");
-    this.localSnapCount = 0;
-    this.isSnapping = false;
-    this.onSnapImageLoaded = () => (this.isSnapping = false);
-    this.texture = new THREE.CanvasTexture(this.canvas);
-
-    this.texture.encoding = THREE.sRGBEncoding;
-    this.texture.minFilter = THREE.LinearFilter;
-
-    this.el.addEventListener("pager-snap-clicked", () => this.snap());
-  },
-
-  async snap() {
-    if (this.isSnapping) return;
-    this.isSnapping = true;
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
-
-    const blob = await new Promise(resolve => this.canvas.toBlob(resolve));
-    const file = new File([blob], "snap.png", TYPE_IMG_PNG);
-
-    this.localSnapCount++;
-    const { entity } = addAndArrangeMedia(this.el, file, "photo-snapshot", this.localSnapCount, false, 1);
-    entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
-  },
-
-  remove() {
-    if (this.data.batch && this.mesh) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
-    }
-  },
-
-  async update(oldData) {
-    let texture;
-    let ratio = 1;
-
-    try {
-      const { src, index } = this.data;
-      if (!src) return;
-
-      if (this.renderTask) {
-        await this.renderTask.promise;
-        if (src !== this.data.src || index !== this.data.index) return;
-      }
-
-      this.el.emit("pdf-loading");
-
-      if (src !== oldData.src) {
-        const loadingSrc = this.data.src;
-        const pdf = await pdfjs.getDocument(src);
-        if (loadingSrc !== this.data.src) return;
-
-        this.pdf = pdf;
-        this.el.setAttribute("media-pager", { maxIndex: this.pdf.numPages - 1 });
-      }
-
-      const page = await this.pdf.getPage(index + 1);
-      if (src !== this.data.src || index !== this.data.index) return;
-
-      const viewport = page.getViewport({ scale: 3 });
-      const pw = viewport.width;
-      const ph = viewport.height;
-      texture = this.texture;
-      ratio = ph / pw;
-
-      this.canvas.width = pw;
-      this.canvas.height = ph;
-
-      this.renderTask = page.render({ canvasContext: this.canvasContext, viewport });
-
-      await this.renderTask.promise;
-
-      this.renderTask = null;
-
-      if (src !== this.data.src || index !== this.data.index) return;
-    } catch (e) {
-      console.error("Error loading PDF", this.data.src, e);
-      texture = errorTexture;
-    }
-
-    if (!this.mesh) {
-      const material = new THREE.MeshBasicMaterial();
-      const geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
-      material.side = THREE.DoubleSide;
-
-      this.mesh = new THREE.Mesh(geometry, material);
-      this.el.setObject3D("mesh", this.mesh);
-    }
-
-    this.mesh.material.transparent = texture == errorTexture;
-    this.mesh.material.map = texture;
-    this.mesh.material.map.needsUpdate = true;
-    this.mesh.material.needsUpdate = true;
-
-    scaleToAspectRatio(this.el, ratio);
-
-    if (texture !== errorTexture && this.data.batch) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
-    }
-
-    if (this.el.components["media-pager"] && this.el.components["media-pager"].data.index !== this.data.index) {
-      this.el.setAttribute("media-pager", { index: this.data.index });
-    }
-
-    this.el.emit("pdf-loaded", { src: this.data.src });
   }
 });

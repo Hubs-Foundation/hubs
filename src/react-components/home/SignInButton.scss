@@ -1,0 +1,15 @@
+@use "../styles/theme.scss";
+
+:local(.sign-in-button) {
+    display: none;
+    @media(min-width: theme.$breakpoint-lg) {
+        display: flex;
+      }
+}
+
+:local(.mobile-sign-in) {
+    display: flex;
+    @media(min-width: theme.$breakpoint-lg) {
+        display: none;
+      }
+}

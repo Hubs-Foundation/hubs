@@ -79,7 +79,6 @@
         freeze-controller
         personal-space-bubble="debug: false;"
         rotate-selected-object
-        environment-map
         light="defaultLightsEnabled: false"
     >
         <a-assets>
@@ -221,7 +220,6 @@
                         <template data-name="Head">
                             <a-entity
                                 avatar-audio-source
-                                audio-params
                                 audio-zone-source
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
@@ -320,7 +318,6 @@
                     position-at-border__freeze="target:.freeze-menu"
                     position-at-border__freeze-unprivileged="target:.freeze-unprivileged-menu"
                     listed-media
-                    use-audio-system-settings
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
@@ -1203,7 +1200,6 @@
                 id="avatar-pov-node"
                 class="camera"
                 personal-space-bubble="radius: 0.4;"
-                audio-params="isLocal: true"
                 rotation
                 pitch-yaw-rotator
                 set-yxz-order

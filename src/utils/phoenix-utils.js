@@ -55,6 +55,12 @@ export function getReticulumFetchUrl(path, absolute = false, host = null, port =
   }
 }
 
+export function getUploadsUrl(path, absolute = false, host = null, port = null) {
+  return configs.UPLOADS_HOST
+    ? `https://${configs.UPLOADS_HOST}${port ? `:${port}` : ""}${path}`
+    : getReticulumFetchUrl(path, absolute, host, port);
+}
+
 export async function getReticulumMeta() {
   if (!reticulumMeta) {
     // Initially look up version based upon page, avoiding round-trip, otherwise fetch.

@@ -63,6 +63,8 @@ function mountUI(scene, props = {}) {
 }
 
 const onReady = async () => {
+  console.log("Scene is ready");
+
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
 
@@ -108,9 +110,12 @@ const onReady = async () => {
     const previewCamera = gltfEl.object3D.getObjectByName("scene-preview-camera");
 
     if (previewCamera) {
+      console.log("Setting up preview camera");
       camera.object3D.position.copy(previewCamera.position);
       camera.object3D.rotation.copy(previewCamera.rotation);
       camera.object3D.matrixNeedsUpdate = true;
+    } else {
+      console.warn("No preview camera found");
     }
 
     camera.setAttribute("scene-preview-camera", "");

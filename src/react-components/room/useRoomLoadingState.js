@@ -108,6 +108,7 @@ export function useRoomLoadingState(sceneEl) {
       // Once the scene has loaded the dependencies to this hook will change,
       // the event listeners will be removed, and we can prevent adding them again.
       if (loading) {
+        console.log("Attaching room state event listeners");
         sceneEl.addEventListener("model-loading", onObjectLoading);
         sceneEl.addEventListener("image-loading", onObjectLoading);
         sceneEl.addEventListener("pdf-loading", onObjectLoading);
@@ -120,6 +121,7 @@ export function useRoomLoadingState(sceneEl) {
       }
 
       return () => {
+        console.log("Removing room state event listeners");
         sceneEl.removeEventListener("model-loading", onObjectLoading);
         sceneEl.removeEventListener("image-loading", onObjectLoading);
         sceneEl.removeEventListener("pdf-loading", onObjectLoading);

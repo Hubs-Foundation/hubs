@@ -30,6 +30,9 @@ export const Sizes = () => (
     <Button preset="primary" xl>
       xlarge
     </Button>
+    <Button preset="primary" thin>
+      thin
+    </Button>
     <Button disabled>Disabled</Button>
   </Column>
 );
@@ -41,6 +44,20 @@ export const Tokens = () => (
     </Button>
     <Button disabled sm thin>
       Revoke all
+    </Button>
+  </Column>
+);
+
+export const Landing = () => (
+  <Column padding>
+    <Button preset="signin" thick>
+      sign in/sign up
+    </Button>
+    <Button preset="landing" thick>
+      Get Started
+    </Button>
+    <Button preset="landing" thin>
+      Have a room code?
     </Button>
   </Column>
 );

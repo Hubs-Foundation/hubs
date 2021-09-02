@@ -1,44 +1,43 @@
 import { THREE } from "aframe";
-
-const zero = new THREE.Vector3(0, 0, 0);
+import { updateAudioSettings } from "../update-audio-settings";
 
 AFRAME.registerComponent("audio-zone-source", {
   init() {
     this.originalAudioParamsData = null;
-    this.isModified = false;
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerSource(this);
   },
 
   remove() {
+    APP.zoneOverrides.delete(this.el);
     this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterSource(this);
   },
 
-  getPosition() {
-    return this.el.components["audio-params"].data.position || zero;
-  },
+  getPosition: (() => {
+    const sourcePos = new THREE.Vector3();
+    return function() {
+      const audio = APP.audios.get(this.el);
+      if (audio) {
+        audio.getWorldPosition(sourcePos);
+      } else {
+        sourcePos.set(0, 0, 0);
+      }
+      return sourcePos;
+    };
+  })(),
 
   apply(params) {
-    if (!this.originalAudioParamsData) {
-      const data = this.el.components["audio-params"].data;
-      this.originalAudioParamsData = {
-        distanceModel: data.distanceModel,
-        maxDistance: data.maxDistance,
-        refDistance: data.refDistance,
-        rolloffFactor: data.rolloffFactor,
-        coneInnerAngle: data.coneInnerAngle,
-        coneOuterAngle: data.coneOuterAngle,
-        coneOuterGain: data.coneOuterGain,
-        gain: data.gain
-      };
+    APP.zoneOverrides.set(this.el, params);
+    const audio = APP.audios.get(this.el);
+    if (audio) {
+      updateAudioSettings(this.el, audio);
     }
-    this.el.setAttribute("audio-params", params);
-    this.isModified = true;
   },
 
   restore() {
-    if (this.isModified && this.originalAudioParamsData) {
-      this.el.setAttribute("audio-params", this.originalAudioParamsData);
-      this.isModified = false;
+    APP.zoneOverrides.delete(this.el);
+    const audio = APP.audios.get(this.el);
+    if (audio) {
+      updateAudioSettings(this.el, audio);
     }
   }
 });
