@@ -28,7 +28,21 @@ if ('URLSearchParams' in window && new URLSearchParams(window.location.search).h
       if(error) {
         entry["stack"] = error.stack;
       }
-      const json = JSON.stringify(entry);
+      // Circular references can crash JSON.stringify
+      // Ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value
+      const getCircularReplacer = () => {
+        const seen = new WeakSet();
+        return (key, value) => {
+          if (typeof value === "object" && value !== null) {
+            if (seen.has(value)) {
+              return "∞";
+            }
+            seen.add(value);
+          }
+          return value;
+        };
+      };      
+      const json = JSON.stringify(entry, getCircularReplacer());
       // Add the new entry and ensure the list doesn't grow too long
       if(this.entries.push(json) > this.maximumEntries) {
         this.entries.shift();
