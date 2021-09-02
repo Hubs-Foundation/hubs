@@ -14,8 +14,6 @@ console.log(
     configs.IS_LOCAL_OR_CUSTOM_CLIENT ? "Custom client or local client" : process.env.BUILD_VERSION || "?"
   }`
 );
-console.log(`returned from : ${document.querySelector("meta[name='env:thumbnail_server']")}`);
-console.log(process.env.BUILD_VERSION);
 
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";

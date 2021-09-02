@@ -339,13 +339,22 @@ class SystemEditorComponent extends Component {
           <Title title="Hubs Cloud" />
           <CardContent className={this.props.classes.info}>
             <Typography variant="title" gutterBottom>
-              Your hub versions:
+              Your hub version:
             </Typography>
-            <Typography variant="body1" gutterBottom>
-              {`App Client: ${
-                configs.IS_LOCAL_OR_CUSTOM_CLIENT ? "Custom client or local client" : process.env.BUILD_VERSION || "?"
-              }`}
-            </Typography>
+            {configs.IS_LOCAL_OR_CUSTOM_CLIENT ? (
+              <>
+                <Typography variant="body1" gutterBottom>
+                  {`App client: Custom client`}
+                </Typography>
+                <Typography variant="body1" fontStyle="italic" gutterBottom>
+                  {`(Undeploy custom client to run build v${process.env.BUILD_VERSION || "?"})`}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="body1" gutterBottom>
+                {`App client: ${process.env.BUILD_VERSION || "?"}`}
+              </Typography>
+            )}
           </CardContent>
         </Card>
       </>
