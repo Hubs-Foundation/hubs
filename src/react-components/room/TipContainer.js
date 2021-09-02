@@ -19,6 +19,9 @@ if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayo
       "D"}`.toUpperCase();
     turnLeftKey = map.get("KeyQ")?.toUpperCase();
     turnRightKey = map.get("KeyE")?.toUpperCase();
+  }).catch(function(e) {
+    // This occurs on Chrome 93 when the Hubs page is in an iframe
+    console.warn(`Unable to remap keyboard: ${e}`);
   });
 }
 
