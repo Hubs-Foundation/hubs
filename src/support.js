@@ -4,6 +4,7 @@ that we do not support. Avoid adding imports to libraries or other modules from 
 that might break the support UI in legacy browsers.
 */
 
+import "./utils/record-log"; // included to capture earliest log entries
 import React from "react";
 import ReactDOM from "react-dom";
 import copy from "copy-to-clipboard";

@@ -1,4 +1,3 @@
-import "./utils/record-log"; // included to capture earliest log entries
 import {
   getCurrentHubId,
   updateVRHudPresenceCount,
