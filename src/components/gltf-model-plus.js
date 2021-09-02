@@ -631,7 +631,16 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
-  console.log(`Loading model ${src}`);
+  console.log(`Loading model %c${src}`, "font-style:italic");
+  const startTime = performance.now();
+  const downloadProgressMonitor = progressEvent => {
+    if(progressEvent.total && progressEvent.loaded >= progressEvent.total) {
+      const delta = performance.now() - startTime;
+      const totalKB = progressEvent.total / 1000;
+      const rateMbps = delta > 0 ? 8 * totalKB / delta : 0;
+      console.log(`Downloaded ${totalKB.toFixed(2)}kB in ${Math.round(delta)}ms (${rateMbps.toFixed(2)}Mbps) for model %c${src}`, "font-style:italic");      
+    }
+  }
   if (useCache) {
     if (gltfCache.has(src)) {
       gltfCache.retain(src);
@@ -642,7 +651,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
         gltfCache.retain(src);
         return cloneGltf(gltf);
       } else {
-        const promise = loadGLTF(src, contentType, null, jsonPreprocessor);
+        const promise = loadGLTF(src, contentType, downloadProgressMonitor, jsonPreprocessor);
         inflightGltfs.set(src, promise);
         const gltf = await promise;
         inflightGltfs.delete(src);
@@ -651,7 +660,7 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
       }
     }
   } else {
-    return loadGLTF(src, contentType, null, jsonPreprocessor);
+    return loadGLTF(src, contentType, downloadProgressMonitor, jsonPreprocessor);
   }
 }
 
