@@ -27,7 +27,9 @@ let isAdmin = false;
   }
 });
 
-configs.IS_LOCAL_OR_CUSTOM_CLIENT = document.querySelector("meta[name='env:thumbnail_server']") ? false : true;
+// Custom clients do not use <meta> tags for passing data, so if thumbnail_server meta tag exists, it is not a custom client
+const hasThumbnailServerMetaTag = !!document.querySelector("meta[name='env:thumbnail_server']");
+configs.IS_LOCAL_OR_CUSTOM_CLIENT = !hasThumbnailServerMetaTag;
 
 // Also include configs that reticulum injects as a script in the page head.
 

@@ -344,10 +344,13 @@ class SystemEditorComponent extends Component {
             {configs.IS_LOCAL_OR_CUSTOM_CLIENT ? (
               <>
                 <Typography variant="body1" gutterBottom>
-                  {`App client: Custom client`}
+                  App client: Custom client
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  {`(Undeploy custom client to run build v${process.env.BUILD_VERSION || "?"})`}
+                  {`(Undeploy custom client to run build ${process.env.BUILD_VERSION || "?"})`}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {`(Remember to regularly pull in upstream changes from the "hubs-cloud" branch: https://github.com/mozilla/hubs)`}
                 </Typography>
               </>
             ) : (
