@@ -346,7 +346,7 @@ class SystemEditorComponent extends Component {
                 <Typography variant="body1" gutterBottom>
                   {`App client: Custom client`}
                 </Typography>
-                <Typography variant="body1" fontStyle="italic" gutterBottom>
+                <Typography variant="body1" gutterBottom>
                   {`(Undeploy custom client to run build v${process.env.BUILD_VERSION || "?"})`}
                 </Typography>
               </>
