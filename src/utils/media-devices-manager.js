@@ -94,6 +94,7 @@ export default class MediaDevicesManager {
   };
 
   async fetchMediaDevices() {
+    console.log("Fetching media devices");
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
         this.micDevices = mediaDevices
@@ -108,6 +109,7 @@ export default class MediaDevicesManager {
   }
 
   async startMicShare(deviceId) {
+    console.log("Starting microphone sharing");
     let constraints = { audio: {} };
     if (deviceId) {
       constraints = { audio: { deviceId: { exact: [deviceId] } } };
@@ -165,6 +167,7 @@ export default class MediaDevicesManager {
     }
 
     try {
+      console.log("Adding microphone media stream");
       const newStream = await navigator.mediaDevices.getUserMedia(constraints);
       this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
       this.audioTrack = newStream.getAudioTracks()[0];

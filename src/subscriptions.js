@@ -29,14 +29,14 @@ export default class Subscriptions {
           .then(() => {
             navigator.serviceWorker.ready
               .then(registration => this.setRegistration(registration))
-              .catch(() => this.setRegistrationFailed());
+              .catch((e) => this.setRegistrationFailed(e));
           })
-          .catch(() => this.setRegistrationFailed());
+          .catch((e) => this.setRegistrationFailed(e));
       } catch (e) {
-        this.setRegistrationFailed();
+        this.setRegistrationFailed(e);
       }
     } else {
-      this.setRegistrationFailed();
+      this.setRegistrationFailed("Not supported");
     }
   }
 
@@ -45,10 +45,12 @@ export default class Subscriptions {
   };
 
   setRegistration = registration => {
+    console.log("Service worker registered");
     this.registration = registration;
   };
 
-  setRegistrationFailed = () => {
+  setRegistrationFailed = (e) => {
+    console.error("Service worker registration failed", e);
     this.registration = null;
   };
 
