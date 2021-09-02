@@ -20,6 +20,7 @@ import Info from "@material-ui/icons/Info";
 import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import withCommonStyles from "../utils/with-common-styles";
 import { getAdminInfo, getEditableConfig } from "../utils/ita";
+import configs from "../utils/configs";
 
 // Send quota to use as heuristic for checking if in SES sandbox
 // https://forums.aws.amazon.com/thread.jspa?threadID=61090
@@ -333,6 +334,19 @@ class SystemEditorComponent extends Component {
               />
             </ListItem>
           </List>
+        </Card>
+        <Card className={this.props.classes.container}>
+          <Title title="Hubs Cloud" />
+          <CardContent className={this.props.classes.info}>
+            <Typography variant="title" gutterBottom>
+              Your hub versions:
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              {`App Client: ${
+                configs.IS_LOCAL_OR_CUSTOM_CLIENT ? "Custom client or local client" : process.env.BUILD_VERSION || "?"
+              }`}
+            </Typography>
+          </CardContent>
         </Card>
       </>
     );

@@ -6,4 +6,6 @@ const configs = {};
   configs[x] = el ? el.getAttribute("content") : process.env[x];
 });
 
+configs.IS_LOCAL_OR_CUSTOM_CLIENT = document.querySelector("meta[name='env:reticulum_server']") ? false : true;
+
 export default configs;
