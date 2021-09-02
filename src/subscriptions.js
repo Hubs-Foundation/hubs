@@ -29,9 +29,9 @@ export default class Subscriptions {
           .then(() => {
             navigator.serviceWorker.ready
               .then(registration => this.setRegistration(registration))
-              .catch((e) => this.setRegistrationFailed(e));
+              .catch(e => this.setRegistrationFailed(e));
           })
-          .catch((e) => this.setRegistrationFailed(e));
+          .catch(e => this.setRegistrationFailed(e));
       } catch (e) {
         this.setRegistrationFailed(e);
       }
@@ -49,7 +49,7 @@ export default class Subscriptions {
     this.registration = registration;
   };
 
-  setRegistrationFailed = (e) => {
+  setRegistrationFailed = e => {
     console.error("Service worker registration failed", e);
     this.registration = null;
   };

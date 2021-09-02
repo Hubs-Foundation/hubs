@@ -361,7 +361,7 @@ class UIRoot extends Component {
       this.props.scene.addEventListener(
         "loading_finished",
         () => {
-          console.log("Loading has finished. Checking for forced room entry")
+          console.log("Loading has finished. Checking for forced room entry");
           setTimeout(() => this.handleForceEntry(), 1000);
         },
         { once: true }

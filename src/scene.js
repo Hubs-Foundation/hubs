@@ -63,7 +63,6 @@ function mountUI(scene, props = {}) {
 }
 
 const onReady = async () => {
-
   console.log("Scene is ready");
 
   const scene = document.querySelector("a-scene");
