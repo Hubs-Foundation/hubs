@@ -230,8 +230,7 @@ module.exports = async (env, argv) => {
         RETICULUM_SERVER: "hubs.local:4000",
         POSTGREST_SERVER: "",
         ITA_SERVER: "",
-        UPLOADS_HOST: "https://hubs.local:4000",
-        IS_CUSTOM_CLIENT: false
+        UPLOADS_HOST: "https://hubs.local:4000"
       });
     }
   }
@@ -646,7 +645,6 @@ module.exports = async (env, argv) => {
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
           UPLOADS_HOST: process.env.UPLOADS_HOST,
-          IS_CUSTOM_CLIENT: process.env.IS_CUSTOM_CLIENT,
           APP_CONFIG: appConfig
         })
       })
