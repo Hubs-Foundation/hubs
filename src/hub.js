@@ -11,7 +11,9 @@ import "@babel/polyfill";
 
 console.log(
   `App version: ${
-    configs.IS_LOCAL_OR_CUSTOM_CLIENT ? "Custom client or local client" : process.env.BUILD_VERSION || "?"
+    configs.IS_LOCAL_OR_CUSTOM_CLIENT
+      ? `Custom client or local client (undeploy custom client to run build v${process.env.BUILD_VERSION})`
+      : process.env.BUILD_VERSION || "?"
   }`
 );
 
