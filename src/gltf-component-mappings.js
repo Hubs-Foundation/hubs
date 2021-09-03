@@ -3,7 +3,7 @@ import "./components/gltf-model-plus";
 import { getSanitizedComponentMapping } from "./utils/component-mappings";
 import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
-import { AudioType, SourceType } from "./components/audio-params";
+import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
 
 function registerRootSceneComponent(componentName) {
@@ -256,10 +256,15 @@ async function mediaInflator(el, componentName, componentData, components) {
       //       this loses information if the user changed the scene settings but wanted this specific
       //       node to use the "defaults".
       //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
+      //
+      // For legacy components we don't want artificial distance based attenuation to be applied to stereo audios
+      // so we set the distanceModel and rolloffFactor so the attenuation is always 1. The artificial distance based
+      // attenuation is calculated in the gain system for stereo audios.
       APP.audioOverrides.set(el, {
         audioType: componentData.audioType,
-        distanceModel: componentData.distanceModel,
-        rolloffFactor: componentData.rolloffFactor,
+        distanceModel:
+          componentData.audioType === AudioType.Stereo ? DistanceModelType.Linear : componentData.distanceModel,
+        rolloffFactor: componentData.audioType === AudioType.Stereo ? 0 : componentData.rolloffFactor,
         refDistance: componentData.refDistance,
         maxDistance: componentData.maxDistance,
         coneInnerAngle: componentData.coneInnerAngle,
