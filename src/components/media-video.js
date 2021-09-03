@@ -175,6 +175,10 @@ AFRAME.registerComponent("media-video", {
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
   },
 
+  play() {
+    this.el.components["listed-media"] && this.el.sceneEl.emit("listed_media_changed");
+  },
+
   isMineOrLocal() {
     return !this.el.components.networked || (this.networkedEl && NAF.utils.isMine(this.networkedEl));
   },
