@@ -44,6 +44,10 @@ AFRAME.registerComponent("media-pdf", {
     this.el.addEventListener("pager-snap-clicked", () => this.snap());
   },
 
+  play() {
+    this.el.components["listed-media"] && this.el.sceneEl.emit("listed_media_changed");
+  },
+
   async snap() {
     if (this.isSnapping) return;
     this.isSnapping = true;
