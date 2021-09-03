@@ -1,5 +1,9 @@
 import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
-import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
+import {
+  getCurrentAudioSettings,
+  shouldAddSupplementalAttenuation,
+  updateAudioSettings
+} from "../update-audio-settings";
 
 function isClippingEnabled() {
   const { enableAudioClipping } = window.APP.store.state.preferences;
@@ -53,10 +57,11 @@ export class GainSystem {
     for (const [el, audio] of APP.audios.entries()) {
       const attenuation = calculateAttenuation(el, audio);
 
-      if (!audio.panner) {
-        // For Audios that are not PositionalAudios, we reintroduce
-        // distance-based attenuation manually.
+      if (shouldAddSupplementalAttenuation(el, audio)) {
         APP.supplementaryAttenuation.set(el, attenuation);
+        updateAudioSettings(el, audio);
+      } else if (APP.supplementaryAttenuation.has(el)) {
+        APP.supplementaryAttenuation.delete(el);
         updateAudioSettings(el, audio);
       }
 

@@ -75,3 +75,40 @@ export function updateAudioSettings(el, audio) {
   // - If audio settings change, call this function.
   applySettings(audio, getCurrentAudioSettings(el));
 }
+
+export function shouldAddSupplementalAttenuation(el, audio) {
+  // Never add supplemental attenuation to audios that have a panner node;
+  // The panner node already adds attenuation.
+  if (audio.panner) return false;
+
+  // This function must distinguish between audios that are "incidentally"
+  // non-positional from audios that are "purposefully" non-positional:
+  // - An audio is "incidentally" non-positional if it was made non-positional
+  //     because the audioOutputMode pref is set to "audio", or
+  //     because panner nodes are broken on a particular platform, or
+  //     because of something else like that.
+  // - An audio is "purposefully" non-positional if it was authored to be
+  //     that way "on purpose".
+  //
+  // Authoring tools like Spoke create components where "audioType : stereo"
+  // is used to indicate that audio should play in the background without
+  // left/right panning and without distance-based spatialization.
+  //
+  // Those components also include properties like distanceModel, rolloffFactor, etc,
+  // but these properties were assumed to be ignored by the client.
+  // Thus we cannot simply apply the attenuation values we would get if we calculated
+  // attenuation with the provided distanceModel, rolloffFactor, etc.
+  //
+  // Instead, we determine what the audioType would be if it were not for the
+  // "incidental" factors. In particular, we check if the audioType would have
+  // been Panner if we ignored the overrides due to audioOutputMode and platform
+  // problems (isSafari).
+  const sourceType = APP.sourceType.get(el);
+  const defaults = defaultSettingsForSourceType.get(sourceType);
+  const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
+  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
+  const audioOverrides = APP.audioOverrides.get(el);
+  const zoneSettings = APP.zoneOverrides.get(el);
+  const settings = Object.assign({}, defaults, sceneOverrides, audioDebugPanelOverrides, audioOverrides, zoneSettings);
+  return settings.audioType === AudioType.PannerNode;
+}
