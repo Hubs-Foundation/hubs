@@ -76,7 +76,7 @@ export function updateAudioSettings(el, audio) {
   applySettings(audio, getCurrentAudioSettings(el));
 }
 
-export function shouldAddSupplementalAttenuation(el, audio) {
+export function shouldAddSupplementaryAttenuation(el, audio) {
   // Never add supplemental attenuation to audios that have a panner node;
   // The panner node already adds attenuation.
   if (audio.panner) return false;
@@ -101,8 +101,9 @@ export function shouldAddSupplementalAttenuation(el, audio) {
   //
   // Instead, we determine what the audioType would be if it were not for the
   // "incidental" factors. In particular, we check if the audioType would have
-  // been Panner if we ignored the overrides due to audioOutputMode and platform
-  // problems (isSafari).
+  // been PannerNode if we ignored the overrides due to audioOutputMode and platform
+  // problems (isSafari). If the audioType would have been PannerNode, that means
+  // we should apply our "fake", "supplementary" attenuation.
   const sourceType = APP.sourceType.get(el);
   const defaults = defaultSettingsForSourceType.get(sourceType);
   const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);

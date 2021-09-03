@@ -1,7 +1,7 @@
 import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
 import {
   getCurrentAudioSettings,
-  shouldAddSupplementalAttenuation,
+  shouldAddSupplementaryAttenuation,
   updateAudioSettings
 } from "../update-audio-settings";
 
@@ -57,7 +57,7 @@ export class GainSystem {
     for (const [el, audio] of APP.audios.entries()) {
       const attenuation = calculateAttenuation(el, audio);
 
-      if (shouldAddSupplementalAttenuation(el, audio)) {
+      if (shouldAddSupplementaryAttenuation(el, audio)) {
         APP.supplementaryAttenuation.set(el, attenuation);
         updateAudioSettings(el, audio);
       } else if (APP.supplementaryAttenuation.has(el)) {
