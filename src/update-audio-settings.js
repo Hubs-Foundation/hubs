@@ -78,21 +78,21 @@ export function updateAudioSettings(el, audio) {
 
 export function shouldAddSupplementaryAttenuation(el, audio) {
   // Never add supplemental attenuation to audios that have a panner node;
-  // The panner node already adds attenuation.
+  // The panner node adds its own attenuation.
   if (audio.panner) return false;
 
-  // This function must distinguish between audios that are "incidentally"
-  // non-positional from audios that are "purposefully" non-positional:
-  // - An audio is "incidentally" non-positional if it was made non-positional
+  // This function must distinguish between Audios that are "incidentally"
+  // not PositionalAudios from Audios that are "purposefully" not PositionalAudios:
+  // - An audio is "incidentally" non-positional if it only non-positional
   //     because the audioOutputMode pref is set to "audio", or
   //     because panner nodes are broken on a particular platform, or
   //     because of something else like that.
   // - An audio is "purposefully" non-positional if it was authored to be
-  //     that way "on purpose".
+  //     a "background sound" or otherwise made that way "on purpose".
   //
   // Authoring tools like Spoke create components where "audioType : stereo"
   // is used to indicate that audio should play in the background without
-  // left/right panning and without distance-based spatialization.
+  // left/right panning and without distance-based attenuation.
   //
   // Those components also include properties like distanceModel, rolloffFactor, etc,
   // but these properties were assumed to be ignored by the client.
@@ -102,8 +102,11 @@ export function shouldAddSupplementaryAttenuation(el, audio) {
   // Instead, we determine what the audioType would be if it were not for the
   // "incidental" factors. In particular, we check if the audioType would have
   // been PannerNode if we ignored the overrides due to audioOutputMode and platform
-  // problems (isSafari). If the audioType would have been PannerNode, that means
-  // we should apply our "fake", "supplementary" attenuation.
+  // problems (e.g. Safari).
+  //
+  // If the audioType would have been PannerNode, then we should apply "fake",
+  // "supplementary" attenuation. Otherwise, the audio is purposefully a
+  // "background sound" and we should not apply supplementary attenuation.
   const sourceType = APP.sourceType.get(el);
   const defaults = defaultSettingsForSourceType.get(sourceType);
   const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
