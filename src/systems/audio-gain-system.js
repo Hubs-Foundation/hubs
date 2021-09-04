@@ -44,6 +44,16 @@ const calculateAttenuation = (() => {
       );
     } else {
       const { distanceModel, rolloffFactor, refDistance, maxDistance } = getCurrentAudioSettings(el);
+      if (!distanceModel) {
+        // Apparently, it is valid to give null as your distanceModel
+        return 1.0;
+      }
+      if (!distanceModels[distanceModel]) {
+        // TODO: Validate properties earlier in the process.
+        console.error("Unrecognized distance model.");
+        return 1.0;
+      }
+
       return distanceModels[distanceModel](distance, rolloffFactor, refDistance, maxDistance);
     }
   };
