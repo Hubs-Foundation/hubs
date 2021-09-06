@@ -1,5 +1,9 @@
 import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
-import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
+import {
+  getCurrentAudioSettings,
+  shouldAddSupplementaryAttenuation,
+  updateAudioSettings
+} from "../update-audio-settings";
 
 function isClippingEnabled() {
   const { enableAudioClipping } = window.APP.store.state.preferences;
@@ -40,6 +44,16 @@ const calculateAttenuation = (() => {
       );
     } else {
       const { distanceModel, rolloffFactor, refDistance, maxDistance } = getCurrentAudioSettings(el);
+      if (!distanceModel) {
+        // Apparently, it is valid to give null as your distanceModel
+        return 1.0;
+      }
+      if (!distanceModels[distanceModel]) {
+        // TODO: Validate properties earlier in the process.
+        console.error("Unrecognized distance model.");
+        return 1.0;
+      }
+
       return distanceModels[distanceModel](distance, rolloffFactor, refDistance, maxDistance);
     }
   };
@@ -53,10 +67,11 @@ export class GainSystem {
     for (const [el, audio] of APP.audios.entries()) {
       const attenuation = calculateAttenuation(el, audio);
 
-      if (!audio.panner) {
-        // For Audios that are not PositionalAudios, we reintroduce
-        // distance-based attenuation manually.
+      if (shouldAddSupplementaryAttenuation(el, audio)) {
         APP.supplementaryAttenuation.set(el, attenuation);
+        updateAudioSettings(el, audio);
+      } else if (APP.supplementaryAttenuation.has(el)) {
+        APP.supplementaryAttenuation.delete(el);
         updateAudioSettings(el, audio);
       }
 

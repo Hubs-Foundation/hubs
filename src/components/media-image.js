@@ -22,6 +22,10 @@ AFRAME.registerComponent("media-image", {
     alphaCutoff: { type: "number" }
   },
 
+  play() {
+    this.el.components["listed-media"] && this.el.sceneEl.emit("listed_media_changed");
+  },
+
   remove() {
     if (this.data.batch && this.mesh) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
