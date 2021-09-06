@@ -9,6 +9,7 @@ import { loadModel } from "./gltf-model-plus";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
 import anime from "animejs";
+import { Layers } from "./layers";
 
 const cameraModelPromise = waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
 
@@ -110,6 +111,7 @@ AFRAME.registerComponent("camera-tool", {
     });
 
     this.camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
+    this.camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
     this.camera.rotation.set(0, Math.PI, 0);
     this.camera.position.set(0, 0, 0.05);
     this.camera.matrixNeedsUpdate = true;
