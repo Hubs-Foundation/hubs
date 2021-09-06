@@ -4,6 +4,7 @@ import {
   updateSceneCopresentState,
   createHubChannelParams
 } from "./utils/hub-utils";
+import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
 import "@babel/polyfill";
