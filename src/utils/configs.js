@@ -7,7 +7,6 @@ import { getLocale, getMessage } from "./i18n";
 // Read configs from global variable if available, otherwise use the process.env injected from build.
 const configs = {};
 let isAdmin = false;
-
 [
   "RETICULUM_SERVER",
   "THUMBNAIL_SERVER",
@@ -16,7 +15,8 @@ let isAdmin = false;
   "SENTRY_DSN",
   "GA_TRACKING_ID",
   "SHORTLINK_DOMAIN",
-  "BASE_ASSETS_PATH"
+  "BASE_ASSETS_PATH",
+  "UPLOADS_HOST"
 ].forEach(x => {
   const el = document.querySelector(`meta[name='env:${x.toLowerCase()}']`);
   configs[x] = el ? el.getAttribute("content") : process.env[x];
@@ -26,6 +26,10 @@ let isAdmin = false;
     __webpack_public_path__ = configs[x];
   }
 });
+
+// Custom clients do not use <meta> tags for passing data, so if thumbnail_server meta tag exists, it is not a custom client
+const hasThumbnailServerMetaTag = !!document.querySelector("meta[name='env:thumbnail_server']");
+configs.IS_LOCAL_OR_CUSTOM_CLIENT = !hasThumbnailServerMetaTag;
 
 // Also include configs that reticulum injects as a script in the page head.
 

@@ -74,21 +74,44 @@ export function MessageAttachmentButton(props) {
   );
 }
 
-export function ChatInput(props) {
+export function ChatLengthWarning({ messageLength, maxLength }) {
+  return (
+    <p
+      className={classNames(styles.chatInputWarning, {
+        [styles.warningTextColor]: messageLength > maxLength
+      })}
+    >
+      <FormattedMessage id="chat-message-input.warning-max-characters" defaultMessage="Max characters" />
+      {` (${messageLength}/${maxLength})`}
+    </p>
+  );
+}
+
+ChatLengthWarning.propTypes = {
+  messageLength: PropTypes.number,
+  maxLength: PropTypes.number
+};
+
+export function ChatInput({ warning, isOverMaxLength, ...props }) {
   const intl = useIntl();
 
   return (
     <div className={styles.chatInputContainer}>
       <TextAreaInput
+        textInputStyles={styles.chatInputTextAreaStyles}
+        className={classNames({ [styles.warningBorder]: isOverMaxLength })}
         placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
         {...props}
       />
+      {warning}
     </div>
   );
 }
 
 ChatInput.propTypes = {
-  onSpawn: PropTypes.func
+  onSpawn: PropTypes.func,
+  warning: PropTypes.node,
+  isOverMaxLength: PropTypes.bool
 };
 
 const enteredMessages = defineMessages({
@@ -366,6 +389,7 @@ export function ChatSidebar({ onClose, children, ...rest }) {
       title={<FormattedMessage id="chat-sidebar.title" defaultMessage="Chat" />}
       beforeTitle={<CloseButton onClick={onClose} />}
       contentClassName={styles.content}
+      disableOverflowScroll
       {...rest}
     >
       {children}

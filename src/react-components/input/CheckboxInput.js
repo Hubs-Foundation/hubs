@@ -4,10 +4,10 @@ import classNames from "classnames";
 import styles from "./CheckboxInput.scss";
 
 export const CheckboxInput = memo(
-  forwardRef(({ className, labelClassName, label, description, disabled, ...rest }, ref) => {
+  forwardRef(({ className, labelClassName, label, description, disabled, checked, ...rest }, ref) => {
     return (
       <label className={classNames(styles.checkboxInput, { [styles.disabled]: disabled }, className)}>
-        <input type="checkbox" disabled={disabled} ref={ref} {...rest} />
+        <input type="checkbox" disabled={disabled} checked={checked} ref={ref} {...rest} />
         <div className={classNames(styles.checkmark)} />
         {label && (
           <div className={classNames(styles.labelContainer, labelClassName)}>

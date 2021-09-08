@@ -1,5 +1,6 @@
 import { BatchRawUniformGroup } from "@mozillareality/three-batch-manager";
-import { CAMERA_MODE_INSPECT, CAMERA_LAYER_BATCH_INSPECT } from "../camera-system";
+import { Layers } from "../../components/layers";
+import { CAMERA_MODE_INSPECT } from "../camera-system";
 
 const tempVec3 = new Array(3);
 const tempVec4 = new Array(4);
@@ -20,7 +21,7 @@ export function sizeofInstances(instanceCount) {
 }
 
 const inspectLayer = new THREE.Layers();
-inspectLayer.set(CAMERA_LAYER_BATCH_INSPECT);
+inspectLayer.set(Layers.CAMERA_LAYER_BATCH_INSPECT);
 
 export default class HubsBatchRawUniformGroup extends BatchRawUniformGroup {
   constructor(maxInstances, meshToEl) {

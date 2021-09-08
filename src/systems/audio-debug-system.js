@@ -1,8 +1,20 @@
 import { THREE } from "aframe";
 import audioDebugVert from "./audio-debug.vert";
 import audioDebugFrag from "./audio-debug.frag";
+import { DistanceModelType } from "../components/audio-params";
+import { getWebGLVersion } from "../utils/webgl";
+import { getMeshes } from "../utils/aframe-utils";
 
 const MAX_DEBUG_SOURCES = 64;
+
+const fakePanner = {
+  distanceModel: DistanceModelType.Inverse,
+  maxDistance: 0,
+  refDistance: 0,
+  rolloffFactor: 0,
+  coneInnerAngle: 0,
+  coneOuterAngle: 0
+};
 
 AFRAME.registerSystem("audio-debug", {
   schema: {
@@ -10,9 +22,19 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   init() {
+    this.unsupported = false;
+    const webGLVersion = getWebGLVersion(this.el.sceneEl.renderer);
+    if (webGLVersion < "2.0") {
+      this.unsupported = true;
+    }
+
     window.APP.store.addEventListener("statechanged", this.updateState.bind(this));
 
-    this.sources = [];
+    this.onSceneLoaded = this.onSceneLoaded.bind(this);
+    this.el.sceneEl.addEventListener("environment-scene-loaded", this.onSceneLoaded);
+
+    this.navMeshObject = null;
+    this.zones = [];
 
     this.material = new THREE.ShaderMaterial({
       uniforms: {
@@ -64,100 +86,122 @@ AFRAME.registerSystem("audio-debug", {
 
   remove() {
     window.APP.store.removeEventListener("statechanged", this.updateState);
+    this.el.sceneEl.removeEventListener("environment-scene-loaded", this.onSceneLoaded);
   },
 
-  registerSource(source) {
-    this.sources.push(source);
+  registerZone(zone) {
+    this.zones.push(zone);
   },
 
-  unregisterSource(source) {
-    const index = this.sources.indexOf(source);
+  unregisterZone(zone) {
+    const index = this.zones.indexOf(zone);
 
     if (index !== -1) {
-      this.sources.splice(index, 1);
+      this.zones.splice(index, 1);
     }
   },
 
-  tick(time) {
-    if (!this.data.enabled) {
-      return;
-    }
-
-    let sourceNum = 0;
-    this.sources.forEach(source => {
-      if (source.data.enabled) {
-        if (sourceNum < MAX_DEBUG_SOURCES) {
-          this.sourcePositions[sourceNum] = source.data.position;
-          this.sourceOrientations[sourceNum] = source.data.orientation;
-          this.distanceModels[sourceNum] = 0;
-          if (source.data.distanceModel === "linear") {
-            this.distanceModels[sourceNum] = 0;
-          } else if (source.data.distanceModel === "inverse") {
-            this.distanceModels[sourceNum] = 1;
-          } else if (source.data.distanceModel === "exponential") {
-            this.distanceModels[sourceNum] = 2;
-          }
-          this.maxDistances[sourceNum] = source.data.maxDistance;
-          this.refDistances[sourceNum] = source.data.refDistance;
-          this.rolloffFactors[sourceNum] = source.data.rolloffFactor;
-          this.coneInnerAngles[sourceNum] = source.data.coneInnerAngle;
-          this.coneOuterAngles[sourceNum] = source.data.coneOuterAngle;
-          this.gains[sourceNum] = source.data.gain;
-          this.clipped[sourceNum] = source.data.isClipped;
-          sourceNum++;
-        }
+  tick: (() => {
+    const sourcePos = new THREE.Vector3();
+    const sourceDir = new THREE.Vector3();
+    return function(time) {
+      if (!this.data.enabled) {
+        return;
       }
+
+      let sourceNum = 0;
+      for (const [el, audio] of APP.audios.entries()) {
+        if (sourceNum >= MAX_DEBUG_SOURCES) continue;
+        if (APP.isAudioPaused.has(el)) continue;
+
+        audio.getWorldPosition(sourcePos);
+        audio.getWorldDirection(sourceDir);
+        this.sourcePositions[sourceNum] = this.navMeshObject.worldToLocal(sourcePos).clone(); // TODO: Use Vector3 pool
+        this.sourceOrientations[sourceNum] = this.navMeshObject.worldToLocal(sourcePos).clone();
+
+        const panner = audio.panner || fakePanner;
+
+        this.distanceModels[sourceNum] = 0;
+        if (panner.distanceModel === DistanceModelType.Linear) {
+          this.distanceModels[sourceNum] = 0;
+        } else if (panner.distanceModel === DistanceModelType.Inverse) {
+          this.distanceModels[sourceNum] = 1;
+        } else if (panner.distanceModel === DistanceModelType.Exponential) {
+          this.distanceModels[sourceNum] = 2;
+        }
+        this.maxDistances[sourceNum] = panner.maxDistance;
+        this.refDistances[sourceNum] = panner.refDistance;
+        this.rolloffFactors[sourceNum] = panner.rolloffFactor;
+        this.coneInnerAngles[sourceNum] = panner.coneInnerAngle;
+        this.coneOuterAngles[sourceNum] = panner.coneOuterAngle;
+
+        this.gains[sourceNum] = audio.gain.gain.value;
+        this.clipped[sourceNum] = APP.clippingState.has(el);
+        sourceNum++;
+      }
+
+      // Update material uniforms
+      this.material.uniforms.time.value = time;
+      this.material.uniforms.distanceModel.value = this.distanceModels;
+      this.material.uniforms.maxDistance.value = this.maxDistances;
+      this.material.uniforms.refDistance.value = this.refDistances;
+      this.material.uniforms.rolloffFactor.value = this.rolloffFactors;
+      this.material.uniforms.sourcePosition.value = this.sourcePositions;
+      this.material.uniforms.sourceOrientation.value = this.sourceOrientations;
+      this.material.uniforms.count.value = sourceNum;
+      this.material.uniforms.coneInnerAngle.value = this.coneInnerAngles;
+      this.material.uniforms.coneOuterAngle.value = this.coneOuterAngles;
+      this.material.uniforms.gain.value = this.gains;
+      this.material.uniforms.clipped.value = this.clipped;
+    };
+  })(),
+
+  enableDebugMode(enabled, force = false) {
+    if (((enabled === undefined || enabled === this.data.enabled) && !force) || this.unsupported) return;
+    this.zones.forEach(zone => {
+      zone.el.setAttribute("audio-zone", "debuggable", enabled);
     });
 
-    // Update material uniforms
-    this.material.uniforms.time.value = time;
-    this.material.uniforms.distanceModel.value = this.distanceModels;
-    this.material.uniforms.maxDistance.value = this.maxDistances;
-    this.material.uniforms.refDistance.value = this.refDistances;
-    this.material.uniforms.rolloffFactor.value = this.rolloffFactors;
-    this.material.uniforms.sourcePosition.value = this.sourcePositions;
-    this.material.uniforms.sourceOrientation.value = this.sourceOrientations;
-    this.material.uniforms.count.value = sourceNum;
-    this.material.uniforms.coneInnerAngle.value = this.coneInnerAngles;
-    this.material.uniforms.coneOuterAngle.value = this.coneOuterAngles;
-    this.material.uniforms.gain.value = this.gains;
-    this.material.uniforms.clipped.value = this.clipped;
-  },
+    const collisionEntities = Array.from(this.el.sceneEl.querySelectorAll("[nav-mesh]"));
+    const meshes = getMeshes(collisionEntities);
 
-  enableDebugMode(enabled) {
-    if (enabled === undefined || enabled === this.data.enabled) return;
-    const envRoot = document.getElementById("environment-root");
-    const meshEl = envRoot.querySelector(".trimesh") || envRoot.querySelector(".navMesh");
-    if (meshEl) {
+    if (meshes.length) {
       this.data.enabled = enabled;
-      const navMesh = meshEl.object3D;
-      navMesh.visible = enabled;
-      navMesh.traverse(obj => {
-        if (obj.material && obj instanceof THREE.Mesh) {
-          obj.visible = enabled;
+      meshes.forEach(obj => {
+        if (obj.isMesh) {
+          this.navMeshObject = obj;
+          obj.parent.visible = enabled;
           if (obj.material) {
             if (enabled) {
-              obj._hubs_audio_debug_material = obj.material;
+              !obj._hubs_audio_debug_prev_material && (obj._hubs_audio_debug_prev_material = obj.material);
               obj.material = this.material;
-            } else {
-              obj.material = obj._hubs_audio_debug_material;
-              obj._hubs_audio_debug_material = null;
+              obj.material.needsUpdate = true;
+            } else if (obj._hubs_audio_debug_prev_material) {
+              obj.material = obj._hubs_audio_debug_prev_material;
+              obj._hubs_audio_debug_prev_material = null;
+              obj.material.needsUpdate = true;
             }
-            obj.material.needsUpdate = true;
             obj.geometry.computeFaceNormals();
             obj.geometry.computeVertexNormals();
           }
         }
       });
-    } else {
+    }
+
+    if (!this.navMeshObject) {
       this.data.enabled = false;
     }
   },
 
-  updateState() {
-    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel;
-    if (isEnabled !== undefined && isEnabled !== this.data.enabled) {
-      this.enableDebugMode(isEnabled);
+  updateState({ force }) {
+    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel || false;
+    if (force || isEnabled !== this.data.enabled) {
+      this.enableDebugMode(isEnabled, force);
     }
+  },
+
+  onSceneLoaded() {
+    this.navMeshObject = null;
+    this.updateState({ force: true });
   }
 });

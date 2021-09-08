@@ -12,6 +12,7 @@ export GA_TRACKING_ID=$9
 export BUILD_NUMBER=${10}
 export GIT_COMMIT=${11}
 export DISABLE_DEPLOY=${12}
+export UPLOADS_HOST=${13}
 export BUILD_VERSION="${BUILD_NUMBER} (${GIT_COMMIT})"
 
 # Build the package, upload it, and start the service so we deploy to staging target.
@@ -53,6 +54,7 @@ cors_proxy_server = $CORS_PROXY_SERVER
 non_cors_proxy_domains = $NON_CORS_PROXY_DOMAINS
 sentry_dsn = $SENTRY_DSN
 ga_tracking_id = $GA_TRACKING_ID
+uploads_host = $UPLOADS_HOST
 
 [deploy]
 type = "$DEPLOY_TYPE"
