@@ -23,15 +23,15 @@ AFRAME.registerComponent("audio-zone", {
     this.el.object3D.add(debugBBAA);
     this.el.object3D.updateMatrixWorld(true);
 
-    this.el.sceneEl?.systems["audio-debug"].registerZone(this);
-    this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.registerZone(this);
+    this.el.sceneEl.systems["audio-debug"]?.registerZone(this);
+    this.el.sceneEl.systems["hubs-systems"]?.audioZonesSystem.registerZone(this);
 
     this.enableDebug(window.APP.store.state.preferences.showAudioDebugPanel);
   },
 
   remove() {
-    this.el.sceneEl?.systems["audio-debug"].unregisterZone(this);
-    this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.unregisterZone(this);
+    this.el.sceneEl.systems["audio-debug"]?.unregisterZone(this);
+    this.el.sceneEl.systems["hubs-systems"]?.audioZonesSystem.unregisterZone(this);
   },
 
   update() {

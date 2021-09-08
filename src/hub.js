@@ -207,20 +207,6 @@ window.APP.RENDER_ORDER = {
   CURSOR: 3
 };
 
-// TODO: Remove comments
-// TODO: Rename or reconfigure these as needed
-APP.audios = new Map(); //                           el -> (THREE.Audio || THREE.PositionalAudio)
-APP.sourceType = new Map(); //                       el -> SourceType
-APP.audioOverrides = new Map(); //                   el -> AudioSettings
-APP.zoneOverrides = new Map(); //                    el -> AudioSettings
-APP.audioDebugPanelOverrides = new Map(); // SourceType -> AudioSettings
-APP.sceneAudioDefaults = new Map(); //       SourceType -> AudioSettings
-APP.gainMultipliers = new Map(); //                  el -> Number
-APP.supplementaryAttenuation = new Map(); //         el -> Number
-APP.clippingState = new Set();
-APP.linkedMutedState = new Set();
-APP.isAudioPaused = new Set();
-
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
