@@ -16,9 +16,12 @@
 
   /* TODO: This styling into AvatarPreview */
   & > :first-child {
+    /*
+    We need to set dimensions explicitly here, since AvatarPreview
+    resizes itself to its container's dimensions.
+    */
     width: 168px;
     height: 250px;
-    min-height: 250px;
     border-radius: 8px;
     background-color: theme.$tile-bg-color;
   }
