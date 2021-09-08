@@ -65,7 +65,7 @@ import "./phoenix-adapter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL } from "./naf-dialog-adapter";
+import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECTED } from "./naf-dialog-adapter";
 import "./change-hub";
 
 import "./components/scene-components";
@@ -657,7 +657,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
       scene.components["networked-scene"]
         .connect()
         .then(() => {
-          scene.emit("didConnectToNetworkedScene");
+          console.log("Networked scene connected");
         })
         .catch(connectError => {
           onConnectionError(entryManager, connectError);
@@ -779,6 +779,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;
 
+  APP.dialog.on(DIALOG_CONNECTION_CONNECTED, () => {
+    scene.emit("didConnectToNetworkedScene");
+  });
   APP.dialog.on(DIALOG_CONNECTION_ERROR_FATAL, () => {
     // TODO: Change the wording of the connect error to match dialog connection error
     // TODO: Tell the user that dialog is broken, but don't completely end the experience
