@@ -11,7 +11,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
   if (fs.existsSync(path.join(__dirname, "certs"))) {
-    const key = fs.readFileSync(path.join(__dirname, "certs", "key.pem"));
+    const key = fs.readFileSync(path.join(__dirname, "certs", "cert.key"));
     const cert = fs.readFileSync(path.join(__dirname, "certs", "cert.pem"));
 
     return { key, cert };
@@ -46,7 +46,7 @@ function createHTTPSConfig() {
 
     fs.mkdirSync(path.join(__dirname, "certs"));
     fs.writeFileSync(path.join(__dirname, "certs", "cert.pem"), pems.cert);
-    fs.writeFileSync(path.join(__dirname, "certs", "key.pem"), pems.private);
+    fs.writeFileSync(path.join(__dirname, "certs", "cert.key"), pems.private);
 
     return {
       key: pems.private,
