@@ -340,6 +340,12 @@ AFRAME.registerComponent("media-video", {
     }
     APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
+    if (this.data.videoPaused) {
+      APP.isAudioPaused.add(this.el);
+    } else {
+      APP.isAudioPaused.delete(this.el);
+    }
+
     const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
     if (audioType === AudioType.PannerNode) {
