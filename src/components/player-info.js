@@ -68,7 +68,8 @@ AFRAME.registerComponent("player-info", {
     registerComponentInstance(this, "player-info");
   },
   remove() {
-    APP.isAudioPaused.delete(this.el);
+    const avatarEl = this.el.querySelector("[avatar-audio-source]");
+    APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
   },
   play() {
@@ -186,10 +187,11 @@ AFRAME.registerComponent("player-info", {
       }
     }
 
+    const avatarEl = this.el.querySelector("[avatar-audio-source]");
     if (this.data.muted) {
-      APP.isAudioPaused.add(this.el);
+      APP.isAudioPaused.add(avatarEl);
     } else {
-      APP.isAudioPaused.delete(this.el);
+      APP.isAudioPaused.delete(avatarEl);
     }
   },
   handleModelError() {
