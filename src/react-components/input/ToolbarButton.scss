@@ -506,7 +506,8 @@
 :local(.accent4) {
   :local(.icon-container) {
     background-color: theme.$accent4-color;
-  }  
+    border-color: theme.$accent4-border-color; // TODO: Fix border color for selected, hovered, and active
+  }
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent4-color-hover;

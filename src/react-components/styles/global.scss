@@ -54,6 +54,7 @@
   --accent4-color: #{theme.$blue};
   --accent4-color-hover: #{theme.$blue-hover};
   --accent4-color-pressed: #{theme.$blue-pressed};
+  --accent4-border-color: var(--accent4-color);
 
   --accent5-color: #{theme.$purple};
   --accent5-color-hover: #{theme.$purple-hover};
