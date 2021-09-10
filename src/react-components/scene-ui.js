@@ -9,7 +9,7 @@ import { createAndRedirectToNewHub, getReticulumFetchUrl } from "../utils/phoeni
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
-import hmcLogo from "../../src/assets/images/hmc-logo.png";
+import { ReactComponent as HmcLogo } from "./icons/HmcLogo.svg";
 
 class SceneUI extends Component {
   static propTypes = {
@@ -217,7 +217,7 @@ class SceneUI extends Component {
           <div className={styles.mainPanel}>
             <a href="/" className={styles.logo}>
               <img
-                src={isHmc ? hmcLogo : configs.image("logo")}
+                src={isHmc ? <HmcLogo /> : configs.image("logo")}
                 alt={<FormattedMessage id="scene-page.logo-alt" defaultMessage="Logo" />}
               />
             </a>
