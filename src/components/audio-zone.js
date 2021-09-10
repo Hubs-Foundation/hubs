@@ -23,15 +23,19 @@ AFRAME.registerComponent("audio-zone", {
     this.el.object3D.add(debugBBAA);
     this.el.object3D.updateMatrixWorld(true);
 
-    this.el.sceneEl?.systems["audio-debug"].registerZone(this);
-    this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.registerZone(this);
+    // In some cases (ie. the scene page) these systems might not exist
+    // so we need to check if the do before registering.
+    this.el.sceneEl.systems["audio-debug"]?.registerZone(this);
+    this.el.sceneEl.systems["hubs-systems"]?.audioZonesSystem.registerZone(this);
 
     this.enableDebug(window.APP.store.state.preferences.showAudioDebugPanel);
   },
 
   remove() {
-    this.el.sceneEl?.systems["audio-debug"].unregisterZone(this);
-    this.el.sceneEl?.systems["hubs-systems"].audioZonesSystem.unregisterZone(this);
+    // In some cases (ie. the scene page) these systems might not exist
+    // so we need to check if the do before unregistering.
+    this.el.sceneEl.systems["audio-debug"]?.unregisterZone(this);
+    this.el.sceneEl.systems["hubs-systems"]?.audioZonesSystem.unregisterZone(this);
   },
 
   update() {
