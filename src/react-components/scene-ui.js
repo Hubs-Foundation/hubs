@@ -216,10 +216,14 @@ class SceneUI extends Component {
         <div className={styles.grid}>
           <div className={styles.mainPanel}>
             <a href="/" className={styles.logo}>
-              <img
-                src={isHmc ? <HmcLogo /> : configs.image("logo")}
-                alt={<FormattedMessage id="scene-page.logo-alt" defaultMessage="Logo" />}
-              />
+              {isHmc ? (
+                <HmcLogo />
+              ) : (
+                <img
+                  src={configs.image("logo")}
+                  alt={<FormattedMessage id="scene-page.logo-alt" defaultMessage="Logo" />}
+                />
+              )}
             </a>
             <div className={styles.logoTagline}>{configs.translation("app-tagline")}</div>
             {this.props.showCreateRoom && (
