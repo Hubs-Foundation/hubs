@@ -77,6 +77,10 @@
   img {
     width: 100%;
   }
+  svg {
+    width: 100%;
+    min-height: 210px;
+  }
 }
 
 :local(.info) {
