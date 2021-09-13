@@ -19,6 +19,7 @@ import { Container } from "../layout/Container";
 import { SocialBar } from "../home/SocialBar";
 import { SignInButton } from "./SignInButton";
 import maskEmail from "../../utils/mask-email";
+import { ReactComponent as HmcLogo } from "../icons/HmcLogo.svg";
 
 export function HomePage() {
   const auth = useContext(AuthContext);
@@ -73,7 +74,7 @@ export function HomePage() {
             <SignInButton mobile />
           )}
           <div className={styles.logoContainer}>
-            <img alt={configs.translation("app-name")} src={configs.image("logo")} />
+            {isHmc ? <HmcLogo /> : <img alt={configs.translation("app-name")} src={configs.image("logo")} />}
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
