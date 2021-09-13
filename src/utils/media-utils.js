@@ -544,3 +544,17 @@ export function closeExistingMediaMirror() {
     });
   }
 }
+
+export function hasAudioTracks(el) {
+  if (!el) return false;
+  // At some point browsers will implement the audioTracks property
+  if (el.audioTracks !== undefined) {
+    return el.audioTracks.length > 0;
+  } else if (el.webkitAudioDecodedByteCount !== undefined) {
+    return el.webkitAudioDecodedByteCount > 0;
+  } else if (el.mozHasAudio !== undefined) {
+    return el.mozHasAudio;
+  } else {
+    return false;
+  }
+}
