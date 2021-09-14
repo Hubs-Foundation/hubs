@@ -1,6 +1,5 @@
 import { useEffect, useReducer, useRef, useCallback } from "react";
 import { useIntl, defineMessages } from "react-intl";
-import configs from "../../utils/configs";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -70,7 +69,7 @@ const messages = defineMessages({
 export function useRoomLoadingState(sceneEl) {
   // Holds the id of the current
   const loadingTimeoutRef = useRef();
-  const lazyLoadMedia = useRef(configs.feature("lazy_load_media"));
+  const lazyLoadMedia = useRef(!!APP.store.state.preferences.lazyLoadSceneMedia);
 
   const [{ loading, messageKey, objectCount, loadedCount }, dispatch] = useReducer(reducer, {
     loading: !sceneEl.is("loaded"),

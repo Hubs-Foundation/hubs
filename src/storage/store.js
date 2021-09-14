@@ -108,6 +108,7 @@ export const SCHEMA = {
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
         fastRoomSwitching: { type: "bool" },
+        lazyLoadSceneMedia: { type: "bool" },
         preferMobileObjectInfoPanel: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },

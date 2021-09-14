@@ -319,7 +319,7 @@ function setupLobbyCamera() {
 }
 
 let uiProps = {};
-const lazyLoadSceneMedia = configs.feature("lazy_load_media");
+const lazyLoadSceneMedia = !!APP.store.state.preferences.lazyLoadSceneMedia;
 
 // Hub ID and slug are the basename
 let routerBaseName = document.location.pathname
