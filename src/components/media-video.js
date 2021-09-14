@@ -684,6 +684,7 @@ AFRAME.registerComponent("media-video", {
         }
       };
 
+      this.el.emit("video-loading");
       poll();
     });
   },

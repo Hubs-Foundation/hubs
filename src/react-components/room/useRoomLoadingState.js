@@ -143,9 +143,11 @@ export function useRoomLoadingState(sceneEl) {
           sceneEl.addEventListener("model-loading", onObjectLoading);
           sceneEl.addEventListener("image-loading", onObjectLoading);
           sceneEl.addEventListener("pdf-loading", onObjectLoading);
+          sceneEl.addEventListener("video-loading", onObjectLoading);
           sceneEl.addEventListener("model-loaded", onObjectLoaded);
           sceneEl.addEventListener("image-loaded", onObjectLoaded);
           sceneEl.addEventListener("pdf-loaded", onObjectLoaded);
+          sceneEl.addEventListener("video-loaded", onObjectLoaded);
           sceneEl.addEventListener("model-error", onObjectLoaded);
         }
         sceneEl.addEventListener("environment-scene-loaded", onEnvironmentLoaded);
@@ -160,9 +162,11 @@ export function useRoomLoadingState(sceneEl) {
           sceneEl.removeEventListener("model-loading", onObjectLoading);
           sceneEl.removeEventListener("image-loading", onObjectLoading);
           sceneEl.removeEventListener("pdf-loading", onObjectLoading);
+          sceneEl.removeEventListener("video-loading", onObjectLoading);
           sceneEl.removeEventListener("model-loaded", onObjectLoaded);
           sceneEl.removeEventListener("image-loaded", onObjectLoaded);
           sceneEl.removeEventListener("pdf-loaded", onObjectLoaded);
+          sceneEl.removeEventListener("video-loaded", onObjectLoaded);
           sceneEl.removeEventListener("model-error", onObjectLoaded);
         }
         sceneEl.removeEventListener("environment-scene-loaded", onEnvironmentLoaded);
