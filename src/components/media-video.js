@@ -19,6 +19,7 @@ import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-se
 import { SourceType, AudioType } from "./audio-params";
 import { errorTexture } from "../utils/error-texture";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
+import { isSafari } from "../utils/detect-safari";
 
 import qsTruthy from "../utils/qs_truthy";
 
@@ -651,7 +652,30 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         videoEl.src = url;
-        videoEl.onerror = failLoad;
+
+        // Workaround for Safari.
+        // Safari seems to have a bug that it doesn't transfer range property in HTTP request header
+        // for redirects if crossOrigin is set (while other major browsers do).
+        // So Safari can fail to load video if the server responds redirect because
+        // it expects 206 HTTP status code but gets 200.
+        // If we fail to load video on Safari we retry with fetch() and videoEl.srcObject
+        // which may avoid the problem.
+        // Refer to #4516 for the details.
+        if (isSafari()) {
+          // There seems no way to detect whether the error is caused by the problem mentioned above.
+          // So always retrying.
+          videoEl.onerror = async () => {
+            videoEl.onerror = failLoad;
+            try {
+              const res = await fetch(url);
+              videoEl.srcObject = await res.blob();
+            } catch (e) {
+              failLoad(e);
+            }
+          };
+        } else {
+          videoEl.onerror = failLoad;
+        }
 
         // audioSrc is non-empty only if audio track is separated from video track (eg. 360 video)
         if (this.data.audioSrc) {
