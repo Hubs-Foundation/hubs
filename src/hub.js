@@ -1207,6 +1207,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
   });
+  events.on(`hub:change`, ({ key, current }) => {
+    scene.emit("presence_updated", {
+      sessionId: key,
+      profile: current.profile,
+      roles: current.roles,
+      permissions: current.permissions,
+      streaming: current.streaming,
+      recording: current.recording
+    });
+  });
 
   // We need to be able to wait for initial presence syncs across reconnects and socket migrations,
   // so we create this object in the outer scope and assign it a new promise on channel join.
