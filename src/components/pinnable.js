@@ -10,17 +10,19 @@ AFRAME.registerComponent("pinnable", {
     this.el.addEventListener("media_refreshed", this._fireEventsAndAnimate);
 
     // Fire pinned events when page changes so we can persist the page.
-    this.el.addEventListener("owned-pager-page-changed", this._fireEventsAndAnimate);
+    this.el.addEventListener("owned-pager-page-changed", () => {
+      this._fireEventsAndAnimate({ animate: false });
+    });
 
     // Fire pinned events when video state changes so we can persist the page.
     this.el.addEventListener("owned-video-state-changed", this._fireEventsAndAnimate);
   },
 
   update(oldData) {
-    this._fireEventsAndAnimate(oldData);
+    this._fireEventsAndAnimate({ oldData });
   },
 
-  _fireEventsAndAnimate(oldData, force) {
+  _fireEventsAndAnimate({ oldData = {}, force = false, animate = true }) {
     // We need to guard against _fireEventsAndAnimate being called during entity initialization,
     // when the networked component isn't initialized yet.
     if (!this.el.components.networked || !this.el.components.networked.data) return;
@@ -35,7 +37,11 @@ AFRAME.registerComponent("pinnable", {
         this.el.emit("pinned", { el: this.el });
       }
 
-      if (isMine) {
+      const isAnimationRunning =
+        this.el.components["animation__pin-start"]?.animationIsPlaying ||
+        this.el.components["animation__pin-end"]?.animationIsPlaying;
+
+      if (isMine && animate && !isAnimationRunning) {
         this.el.removeAttribute("animation__pin-start");
         this.el.removeAttribute("animation__pin-end");
         const currentScale = this.el.object3D.scale;
@@ -80,7 +86,7 @@ AFRAME.registerComponent("pinnable", {
     let didFireThisFrame = false;
     if (!held && this.wasHeld && isMine) {
       didFireThisFrame = true;
-      this._fireEventsAndAnimate(this.data, true);
+      this._fireEventsAndAnimate({ data: this.data, force: true });
     }
 
     this.wasHeld = held;
@@ -88,7 +94,7 @@ AFRAME.registerComponent("pinnable", {
     this.transformObjectSystem = this.transformObjectSystem || AFRAME.scenes[0].systems["transform-selected-object"];
     const transforming = this.transformObjectSystem.transforming && this.transformObjectSystem.target.el === this.el;
     if (!didFireThisFrame && !transforming && this.wasTransforming && isMine) {
-      this._fireEventsAndAnimate(this.data, true);
+      this._fireEventsAndAnimate({ data: this.data, force: true });
     }
     this.wasTransforming = transforming;
   }
