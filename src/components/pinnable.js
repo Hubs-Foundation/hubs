@@ -86,7 +86,7 @@ AFRAME.registerComponent("pinnable", {
     let didFireThisFrame = false;
     if (!held && this.wasHeld && isMine) {
       didFireThisFrame = true;
-      this._fireEventsAndAnimate({ data: this.data, force: true });
+      this._fireEventsAndAnimate({ oldData: this.data, force: true });
     }
 
     this.wasHeld = held;
@@ -94,7 +94,7 @@ AFRAME.registerComponent("pinnable", {
     this.transformObjectSystem = this.transformObjectSystem || AFRAME.scenes[0].systems["transform-selected-object"];
     const transforming = this.transformObjectSystem.transforming && this.transformObjectSystem.target.el === this.el;
     if (!didFireThisFrame && !transforming && this.wasTransforming && isMine) {
-      this._fireEventsAndAnimate({ data: this.data, force: true });
+      this._fireEventsAndAnimate({ oldData: this.data, force: true });
     }
     this.wasTransforming = transforming;
   }
