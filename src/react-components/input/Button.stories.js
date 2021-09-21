@@ -51,7 +51,7 @@ export const Tokens = () => (
 export const Landing = () => (
   <Column padding>
     <Button preset="signin" thick>
-      sign in/sign up
+      Sign in/Sign up
     </Button>
     <Button preset="landing" thick>
       Get Started
