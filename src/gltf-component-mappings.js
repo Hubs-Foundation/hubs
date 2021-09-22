@@ -23,7 +23,6 @@ function registerRootSceneComponent(componentName) {
 }
 
 registerRootSceneComponent("fog");
-registerRootSceneComponent("background");
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
@@ -597,6 +596,14 @@ AFRAME.GLTFModelPlus.registerComponent("audio-params", "audio-params", (el, comp
 
 AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
   el.setAttribute(componentName, { ...componentData });
+});
+
+AFRAME.GLTFModelPlus.registerComponent("background", "background", (el, _componentName, componentData) => {
+  console.warn(
+    "The `background` component is deprecated, use `backgroundColor` on the `environment-settings` component instead."
+  );
+  // This assumes the background component is on the root entity, which it is for spoke, the only thing using this component
+  el.setAttribute("environment-settings", { backgroundColor: new THREE.Color(componentData.color) });
 });
 
 AFRAME.GLTFModelPlus.registerComponent(
