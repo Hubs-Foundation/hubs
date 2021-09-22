@@ -58,7 +58,8 @@ const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
 function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
-    throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
+    console.warn(`Inflator failed. "${componentName}" component does not exist.`);
+    return;
   }
   if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
     for (let i = 0; i < componentData.length; i++) {
