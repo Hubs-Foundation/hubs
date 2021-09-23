@@ -63,6 +63,26 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
   camera.lookAt(center);
 }
 
+function getThemeBackground() {
+  let currentTheme = APP.store.state.preferences.theme;
+  let themes = APP_CONFIG.theme.themes;
+  let defaultColor = 0xeaeaea;
+  if (currentTheme === "hubs-default") {
+    return defaultColor;
+  }
+  for (let i = 0; i < themes.length; i++) {
+    if (themes[i].id === currentTheme) {
+      let bgHex = themes[i].variables["background1-color"];
+      bgHex = `0x${bgHex.substring(1)}`;
+      if (bgHex.length !== 8) {
+        return defaultColor;
+      }
+      bgHex = parseInt(bgHex, 16);
+      return bgHex;
+    }
+  }
+}
+
 class AvatarPreview extends Component {
   static propTypes = {
     avatarGltfUrl: PropTypes.string,
@@ -112,7 +132,7 @@ class AvatarPreview extends Component {
     this.snapshotRenderer.setClearAlpha(0);
 
     this.previewRenderer = createRenderer(this.canvas);
-    this.previewRenderer.setClearColor(0xeaeaea);
+    this.previewRenderer.setClearColor(getThemeBackground());
     this.previewRenderer.setAnimationLoop(() => {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);
