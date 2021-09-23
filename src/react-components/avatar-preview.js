@@ -64,9 +64,9 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
 }
 
 function getThemeBackground() {
-  let currentTheme = APP.store.state.preferences.theme;
-  let themes = APP_CONFIG.theme.themes;
-  let defaultColor = 0xeaeaea;
+  const currentTheme = APP.store.state.preferences.theme;
+  const themes = window.APP_CONFIG?.theme.themes;
+  const defaultColor = 0xeaeaea;
   if (currentTheme === "hubs-default") {
     return defaultColor;
   }
