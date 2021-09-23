@@ -72,7 +72,7 @@ function getThemeBackground() {
   }
   for (let i = 0; i < themes.length; i++) {
     if (themes[i].id === currentTheme) {
-      let bgHex = themes[i].variables["background1-color"];
+      let bgHex = themes[i].variables["background3-color"];
       bgHex = `0x${bgHex.substring(1)}`;
       if (bgHex.length !== 8) {
         return defaultColor;
