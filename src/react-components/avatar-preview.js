@@ -64,23 +64,11 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
 }
 
 function getThemeBackground() {
-  const currentTheme = APP.store.state.preferences.theme;
-  const themes = window.APP_CONFIG?.theme.themes;
-  const defaultColor = 0xeaeaea;
-  if (currentTheme === "hubs-default") {
-    return defaultColor;
-  }
-  for (let i = 0; i < themes.length; i++) {
-    if (themes[i].id === currentTheme) {
-      let bgHex = themes[i].variables["background3-color"];
-      bgHex = `0x${bgHex.substring(1)}`;
-      if (bgHex.length !== 8) {
-        return defaultColor;
-      }
-      bgHex = parseInt(bgHex, 16);
-      return bgHex;
-    }
-  }
+  const currentTheme = APP?.store?.state?.preferences?.theme;
+  const themes = window.APP_CONFIG?.theme?.themes;
+  const currentThemeObject = themes?.find(t => t.id === currentTheme);
+  const previewBackgroundColor = new THREE.Color(currentThemeObject?.variables["background3-color"] || 0xeaeaea);
+  return previewBackgroundColor;
 }
 
 class AvatarPreview extends Component {
