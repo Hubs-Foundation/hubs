@@ -1,6 +1,7 @@
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
+const isIOS = AFRAME.utils.device.isIOS();
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -162,6 +163,17 @@ export default class MediaDevicesManager {
           disableEchoCancellation: !constraints.audio.echoCancellation,
           disableNoiseSuppression: !constraints.audio.noiseSuppression,
           disableAutoGainControl: !constraints.audio.autoGainControl
+        }
+      });
+    }
+
+    if (isIOS) {
+      // echoCancellation seems to cause crackle noise on iOS so force to disable it
+      // Refer to https://github.com/mozilla/hubs/issues/4411#issuecomment-924490968 for the details
+      constraints.audio.echoCancellation = false;
+      this._store.update({
+        preferences: {
+          disableEchoCancellation: !constraints.audio.echoCancellation
         }
       });
     }
