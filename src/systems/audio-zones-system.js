@@ -1,13 +1,28 @@
 // We apply the most restrictive audio parameters
 function paramsReducer(acc, curr) {
+  if (!curr) return;
   if (acc === null) acc = curr;
-  acc.gain = Math.min(acc.gain, curr.gain);
-  acc.maxDistance = Math.min(acc.maxDistance, curr.maxDistance);
-  acc.refDistance = Math.min(acc.refDistance, curr.refDistance);
-  acc.rolloffFactor = Math.max(acc.rolloffFactor, curr.rolloffFactor);
-  acc.coneInnerAngle = Math.min(acc.coneInnerAngle, curr.coneInnerAngle);
-  acc.coneOuterAngle = Math.min(acc.coneOuterAngle, curr.coneOuterAngle);
-  acc.coneOuterGain = Math.min(acc.coneOuterGain, curr.coneOuterGain);
+  if (curr.gain !== undefined) {
+    acc.gain = Math.min(acc.gain, curr.gain);
+  }
+  if (curr.maxDistance !== undefined) {
+    acc.maxDistance = Math.min(acc.maxDistance, curr.maxDistance);
+  }
+  if (curr.refDistance !== undefined) {
+    acc.refDistance = Math.min(acc.refDistance, curr.refDistance);
+  }
+  if (curr.rolloffFactor !== undefined) {
+    acc.rolloffFactor = Math.max(acc.rolloffFactor, curr.rolloffFactor);
+  }
+  if (curr.coneInnerAngle !== undefined) {
+    acc.coneInnerAngle = Math.min(acc.coneInnerAngle, curr.coneInnerAngle);
+  }
+  if (curr.coneOuterAngle !== undefined) {
+    acc.coneOuterAngle = Math.min(acc.coneOuterAngle, curr.coneOuterAngle);
+  }
+  if (curr.coneOuterGain !== undefined) {
+    acc.coneOuterGain = Math.min(acc.coneOuterGain, curr.coneOuterGain);
+  }
   return acc;
 }
 
@@ -81,8 +96,20 @@ const updateSource = (function() {
       source.apply(inOutParams);
     } else {
       const params = outInParams;
-      params.gain = Math.min(outInParams.gain, inOutParams.gain);
-      params.coneOuterAngle = Math.min(outInParams.coneOuterAngle, inOutParams.coneOuterAngle);
+      if (outInParams.gain !== undefined && inOutParams.gain !== undefined) {
+        params.gain = Math.min(outInParams.gain, inOutParams.gain);
+      } else if (outInParams.gain === undefined && inOutParams.gain !== undefined) {
+        params.gain = inOutParams.gain;
+      } else if (outInParams.gain !== undefined && inOutParams.gain === undefined) {
+        params.gain = outInParams.gain;
+      }
+      if (outInParams.coneOuterAngle !== undefined && inOutParams.coneOuterAngle !== undefined) {
+        params.coneOuterAngle = Math.min(outInParams.coneOuterAngle, inOutParams.coneOuterAngle);
+      } else if (outInParams.coneOuterAngle === undefined && inOutParams.coneOuterAngle !== undefined) {
+        params.coneOuterAngle = inOutParams.coneOuterAngle;
+      } else if (outInParams.coneOuterAngle !== undefined && inOutParams.coneOuterAngle === undefined) {
+        params.coneOuterAngle = outInParams.coneOuterAngle;
+      }
       source.apply(params);
     }
   };
