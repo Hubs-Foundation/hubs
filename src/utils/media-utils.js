@@ -547,13 +547,18 @@ export function closeExistingMediaMirror() {
 
 export function hasAudioTracks(el) {
   if (!el) return false;
-  // At some point browsers will implement the audioTracks property
+
+  // `audioTracks` is the "correct" way to check this but is not implemented by most browsers
   if (el.audioTracks !== undefined) {
     return el.audioTracks.length > 0;
-  } else if (el.webkitAudioDecodedByteCount !== undefined) {
-    return el.webkitAudioDecodedByteCount > 0;
   } else if (el.mozHasAudio !== undefined) {
     return el.mozHasAudio;
+  } else if (el.videoWidth === 0 && el.videoHeight === 0) {
+    return true;
+  } else if (el.webkitAudioDecodedByteCount !== undefined) {
+    // This is definitely a bit of a race condition. In practice we wait for the first
+    // frame of video so we should have some audio data by then as well.
+    return el.webkitAudioDecodedByteCount > 0;
   } else {
     return false;
   }
