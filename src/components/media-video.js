@@ -4,7 +4,7 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createVideoOrAudioEl } from "../utils/media-utils";
+import { addAndArrangeMedia, createVideoOrAudioEl, hasAudioTracks } from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
@@ -95,6 +95,7 @@ AFRAME.registerComponent("media-video", {
     this.isSnapping = false;
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
+    this.hasAudioTracks = false;
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -391,6 +392,8 @@ AFRAME.registerComponent("media-video", {
         }
       }
 
+      this.hasAudioTracks = hasAudioTracks(audioSourceEl);
+
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
         disposeTexture(texture);
@@ -406,7 +409,7 @@ AFRAME.registerComponent("media-video", {
             linkedMediaElementAudioSource ||
             this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
 
-          this.setupAudio();
+          this.hasAudioTracks && this.setupAudio();
         }
       }
 
@@ -726,6 +729,8 @@ AFRAME.registerComponent("media-video", {
     const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
     this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
     this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
+    this.volumeLabel.object3D.visible = this.volumeUpButton.object3D.visible = this.volumeDownButton.object3D.visible =
+      this.hasAudioTracks && !this.data.hidePlaybackControls && !!this.video;
 
     this.snapButton.object3D.visible =
       !!this.video && !this.data.contentType.startsWith("audio/") && window.APP.hubChannel.can("spawn_and_move_media");
