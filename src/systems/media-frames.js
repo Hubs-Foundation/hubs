@@ -3,7 +3,6 @@ import { applyPersistentSync } from "../utils/permissions-utils";
 import { cloneObject3D, disposeNode } from "../utils/three-utils";
 import qsTruthy from "../utils/qs_truthy";
 
-// TODO better handling for 3d objects
 function scaleForAspectFit(containerSize, itemSize) {
   return Math.min(containerSize.x / itemSize.x, containerSize.y / itemSize.y, containerSize.z / itemSize.z);
 }
@@ -251,8 +250,6 @@ AFRAME.registerComponent("media-frame", {
       // Reset offsets
       clonedMesh.position.set(0, 0, 0);
       clonedMesh.quaternion.identity();
-      clonedMesh.matrixNeedsUpdate = true;
-      clonedMesh.updateMatrixWorld(true);
       let aabb = new THREE.Box3().setFromObject(clonedMesh);
       const size = new THREE.Vector3();
       aabb.getSize(size);
@@ -261,7 +258,6 @@ AFRAME.registerComponent("media-frame", {
       clonedMesh.position.copy(center);
       clonedMesh.position.multiplyScalar(-1);
       clonedMesh.matrixNeedsUpdate = true;
-      clonedMesh.updateMatrixWorld(true);
       this.preview = new THREE.Object3D();
       this.el.sceneEl.object3D.add(this.preview);
       this.preview.add(clonedMesh);
@@ -276,7 +272,6 @@ AFRAME.registerComponent("media-frame", {
       this.preview.scale.multiplyScalar(scaleForAspectFit(this.data.bounds, size));
       this.preview.setRotationFromQuaternion(worldQuat);
       this.preview.matrixNeedsUpdate = true;
-      this.preview.updateMatrixWorld(true);
 
       if (DEBUG) {
         const quat = this.preview.quaternion.clone();
@@ -323,7 +318,6 @@ AFRAME.registerComponent("media-frame", {
     this.el.object3D.getWorldPosition(this.tmpWorldPosition);
     capturedEl.object3D.position.copy(this.tmpWorldPosition);
     const worldQuat = new THREE.Quaternion();
-    this.el.object3D.updateWorldMatrix(true);
     this.el.object3D.getWorldQuaternion(worldQuat);
     capturedEl.object3D.setRotationFromQuaternion(worldQuat);
     capturedEl.object3D.matrixNeedsUpdate = true;
@@ -339,7 +333,8 @@ AFRAME.registerComponent("media-frame", {
         });
 
         capturableEntity.object3D.scale.set(1, 1, 1);
-        capturableEntity.object3D.quaternion.set(0, 0, 0, 1);
+        capturableEntity.object3D.quaternion.identity();
+        capturableEntity.object3D.matrixNeedsUpdate = true;
         capturableEntity.object3D.updateMatrixWorld();
         const srcMesh = capturableEntity.getObject3D("mesh");
         const size = new THREE.Vector3();
