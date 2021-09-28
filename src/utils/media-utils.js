@@ -549,15 +549,16 @@ export function hasAudioTracks(el) {
   if (!el) return false;
 
   // `audioTracks` is the "correct" way to check this but is not implemented by most browsers
+  // The rest of the checks are a bit of a race condition, but when loading videos we wait for
+  // the first frame to load, so audio should exist by then. We special case audio-only by checkin
+  // for a 0 size video. Not great...
   if (el.audioTracks !== undefined) {
     return el.audioTracks.length > 0;
-  } else if (el.mozHasAudio !== undefined) {
-    return el.mozHasAudio;
   } else if (el.videoWidth === 0 && el.videoHeight === 0) {
     return true;
+  } else if (el.mozHasAudio !== undefined) {
+    return el.mozHasAudio;
   } else if (el.webkitAudioDecodedByteCount !== undefined) {
-    // This is definitely a bit of a race condition. In practice we wait for the first
-    // frame of video so we should have some audio data by then as well.
     return el.webkitAudioDecodedByteCount > 0;
   } else {
     return false;
