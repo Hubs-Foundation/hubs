@@ -66,6 +66,9 @@ export class MouseDevice {
     // This works with the current sidebar and toolbar layout.
     this.coords[0] = (event.clientX / this.canvas.clientWidth) * 2 - 1;
     this.coords[1] = -(event.clientY / this.canvas.clientHeight) * 2 + 1;
+    if (window.APP.store.state.preferences.invertCursorY && this.buttonLeft) {
+      this.coords[1] = +(event.clientY / this.canvas.clientHeight) * 2 - 1;
+    }
     this.movementXY[0] += event.movementX;
     this.movementXY[1] += event.movementY;
     if (event.type === "mousedown" && left) {

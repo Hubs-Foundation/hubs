@@ -442,6 +442,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.invert-touchscreen-camera-move",
     defaultMessage: "Invert direction of camera movement for touchscreens"
   },
+  invertCursorY: {
+    id: "preferences-screen.preference.invert-cursor-y",
+    defaultMessage: "Invert cursor Y-axis"
+  },
   locale: {
     id: "preferences-screen.preference.locale",
     defaultMessage: "Language"
@@ -969,7 +973,8 @@ class PreferencesScreen extends Component {
             step: 0.1,
             digits: 1,
             defaultNumber: 1
-          }
+          },
+          { key: "invertCursorY", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
         ]
       ],
       [
