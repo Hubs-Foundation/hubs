@@ -319,7 +319,6 @@ function setupLobbyCamera() {
 }
 
 let uiProps = {};
-const lazyLoadSceneMedia = !!APP.store.state.preferences.lazyLoadSceneMedia;
 
 // Hub ID and slug are the basename
 let routerBaseName = document.location.pathname
@@ -456,7 +455,6 @@ export async function updateEnvironmentForHub(hub, entryManager) {
     environmentEl.addEventListener("model-error", sceneErrorHandler, { once: true });
 
     environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl, useCache: false, inflate: true });
-    lazyLoadSceneMedia && sceneEl.emit("environment-scene-loading");
     environmentScene.appendChild(environmentEl);
   } else {
     // Change environment
@@ -500,7 +498,6 @@ export async function updateEnvironmentForHub(hub, entryManager) {
           environmentEl.setAttribute("gltf-model-plus", { src: "" });
         }
         environmentEl.setAttribute("gltf-model-plus", { src: sceneUrl });
-        lazyLoadSceneMedia && sceneEl.emit("environment-scene-loading");
       },
       { once: true }
     );

@@ -14,24 +14,21 @@ function reducer(state, action) {
         loading: !(state.environmentLoaded && state.networkConnected),
         messageKey: state.environmentLoaded ? "enteringRoom" : "loadingObjects"
       };
-    case "environment-loading":
-      return {
-        ...state,
-        environmentLoaded: false
-      };
-    case "environment-loaded":
+    case "environment-loaded": {
+      const loaded = state.lazyLoadMedia ? state.networkConnected : state.allObjectsLoaded && state.networkConnected;
       return {
         ...state,
         environmentLoaded: true,
-        loading: state.lazyLoadMedia ? !state.networkConnected : !(state.allObjectsLoaded && state.networkConnected),
+        loading: !loaded,
         messageKey: state.lazyLoadMedia
-          ? state.networkConnected
+          ? loaded
             ? "enteringRoom"
             : "connectingScene"
-          : state.allObjectsLoaded
+          : loaded
             ? "enteringRoom"
             : "loadingObjects"
       };
+    }
     case "network-connected":
       return {
         ...state,
@@ -107,13 +104,6 @@ export function useRoomLoadingState(sceneEl) {
     [dispatch]
   );
 
-  const onEnvironmentLoading = useCallback(
-    () => {
-      dispatch({ type: "environment-loading" });
-    },
-    [dispatch]
-  );
-
   const onEnvironmentLoaded = useCallback(
     () => {
       dispatch({ type: "environment-loaded" });
@@ -133,9 +123,7 @@ export function useRoomLoadingState(sceneEl) {
       // Once the scene has loaded the dependencies to this hook will change,
       // the event listeners will be removed, and we can prevent adding them again.
       if (loading) {
-        if (lazyLoadMedia) {
-          sceneEl.addEventListener("environment-scene-loading", onEnvironmentLoading);
-        } else {
+        if (!lazyLoadMedia) {
           sceneEl.addEventListener("model-loading", onObjectLoading);
           sceneEl.addEventListener("image-loading", onObjectLoading);
           sceneEl.addEventListener("pdf-loading", onObjectLoading);
@@ -151,9 +139,7 @@ export function useRoomLoadingState(sceneEl) {
       }
 
       return () => {
-        if (lazyLoadMedia) {
-          sceneEl.removeEventListener("environment-scene-loading", onEnvironmentLoading);
-        } else {
+        if (!lazyLoadMedia) {
           sceneEl.removeEventListener("model-loading", onObjectLoading);
           sceneEl.removeEventListener("image-loading", onObjectLoading);
           sceneEl.removeEventListener("pdf-loading", onObjectLoading);
@@ -168,16 +154,7 @@ export function useRoomLoadingState(sceneEl) {
         sceneEl.removeEventListener("didConnectToNetworkedScene", onNetworkConnected);
       };
     },
-    [
-      sceneEl,
-      loading,
-      onObjectLoaded,
-      onObjectLoading,
-      onEnvironmentLoading,
-      onEnvironmentLoaded,
-      onNetworkConnected,
-      lazyLoadMedia
-    ]
+    [sceneEl, loading, onObjectLoaded, onObjectLoading, onEnvironmentLoaded, onNetworkConnected, lazyLoadMedia]
   );
 
   const intl = useIntl();
