@@ -32,8 +32,8 @@ export function getCurrentAudioSettings(el) {
   const sourceType = APP.sourceType.get(el);
   const defaults = defaultSettingsForSourceType.get(sourceType);
   const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
-  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
   const audioOverrides = APP.audioOverrides.get(el);
+  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
   const zoneSettings = APP.zoneOverrides.get(el);
   const preferencesOverrides =
     APP.store.state.preferences.audioOutputMode === "audio" ? { audioType: AudioType.Stereo } : {};
@@ -42,8 +42,8 @@ export function getCurrentAudioSettings(el) {
     {},
     defaults,
     sceneOverrides,
-    audioDebugPanelOverrides,
     audioOverrides,
+    audioDebugPanelOverrides,
     zoneSettings,
     preferencesOverrides,
     safariOverrides
