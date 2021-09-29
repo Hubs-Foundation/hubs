@@ -654,7 +654,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
       scene.components["networked-scene"]
         .connect()
         .then(() => {
-          console.log("Networked scene connected");
+          scene.emit("didConnectToNetworkedScene");
         })
         .catch(connectError => {
           onConnectionError(entryManager, connectError);
@@ -777,7 +777,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.APP.entryManager = entryManager;
 
   APP.dialog.on(DIALOG_CONNECTION_CONNECTED, () => {
-    scene.emit("didConnectToNetworkedScene");
+    scene.emit("didConnectToDialog");
   });
   APP.dialog.on(DIALOG_CONNECTION_ERROR_FATAL, () => {
     // TODO: Change the wording of the connect error to match dialog connection error

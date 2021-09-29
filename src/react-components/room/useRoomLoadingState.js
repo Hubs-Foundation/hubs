@@ -15,7 +15,9 @@ function reducer(state, action) {
         messageKey: state.environmentLoaded ? "enteringRoom" : "loadingObjects"
       };
     case "environment-loaded": {
-      const loaded = state.lazyLoadMedia ? state.networkConnected : state.allObjectsLoaded && state.networkConnected;
+      const loaded = state.lazyLoadMedia
+        ? state.networkConnected && state.dialogConnected
+        : state.allObjectsLoaded && state.networkConnected && state.dialogConnected;
       return {
         ...state,
         environmentLoaded: true,
@@ -33,7 +35,17 @@ function reducer(state, action) {
       return {
         ...state,
         networkConnected: true,
-        loading: state.lazyLoadMedia ? !state.environmentLoaded : !(state.environmentLoaded && state.allObjectsLoaded)
+        loading: state.lazyLoadMedia
+          ? !(state.environmentLoaded && state.dialogConnected)
+          : !(state.environmentLoaded && state.allObjectsLoaded && state.dialogConnected)
+      };
+    case "dialog-connected":
+      return {
+        ...state,
+        dialogConnected: true,
+        loading: state.lazyLoadMedia
+          ? !(state.environmentLoaded && state.networkConnected)
+          : !(state.environmentLoaded && state.allObjectsLoaded && state.networkConnected)
       };
   }
 }
@@ -76,6 +88,7 @@ export function useRoomLoadingState(sceneEl) {
     allObjectsLoaded: false,
     environmentLoaded: false,
     networkConnected: false,
+    dialogConnected: false,
     lazyLoadMedia
   });
 
@@ -118,6 +131,13 @@ export function useRoomLoadingState(sceneEl) {
     [dispatch]
   );
 
+  const onDialogConnected = useCallback(
+    () => {
+      dispatch({ type: "dialog-connected" });
+    },
+    [dispatch]
+  );
+
   useEffect(
     () => {
       // Once the scene has loaded the dependencies to this hook will change,
@@ -136,6 +156,7 @@ export function useRoomLoadingState(sceneEl) {
         }
         sceneEl.addEventListener("environment-scene-loaded", onEnvironmentLoaded);
         sceneEl.addEventListener("didConnectToNetworkedScene", onNetworkConnected);
+        sceneEl.addEventListener("didConnectToDialog", onDialogConnected);
       }
 
       return () => {
@@ -152,9 +173,19 @@ export function useRoomLoadingState(sceneEl) {
         }
         sceneEl.removeEventListener("environment-scene-loaded", onEnvironmentLoaded);
         sceneEl.removeEventListener("didConnectToNetworkedScene", onNetworkConnected);
+        sceneEl.removeEventListener("didConnectToDialog", onDialogConnected);
       };
     },
-    [sceneEl, loading, onObjectLoaded, onObjectLoading, onEnvironmentLoaded, onNetworkConnected, lazyLoadMedia]
+    [
+      sceneEl,
+      loading,
+      onObjectLoaded,
+      onObjectLoading,
+      onEnvironmentLoaded,
+      onNetworkConnected,
+      onDialogConnected,
+      lazyLoadMedia
+    ]
   );
 
   const intl = useIntl();
