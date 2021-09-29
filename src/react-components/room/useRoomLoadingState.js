@@ -136,7 +136,6 @@ export function useRoomLoadingState(sceneEl) {
         if (lazyLoadMedia) {
           sceneEl.addEventListener("environment-scene-loading", onEnvironmentLoading);
         } else {
-          console.log("Attaching room state event listeners");
           sceneEl.addEventListener("model-loading", onObjectLoading);
           sceneEl.addEventListener("image-loading", onObjectLoading);
           sceneEl.addEventListener("pdf-loading", onObjectLoading);
@@ -155,7 +154,6 @@ export function useRoomLoadingState(sceneEl) {
         if (lazyLoadMedia) {
           sceneEl.removeEventListener("environment-scene-loading", onEnvironmentLoading);
         } else {
-          console.log("Removing room state event listeners");
           sceneEl.removeEventListener("model-loading", onObjectLoading);
           sceneEl.removeEventListener("image-loading", onObjectLoading);
           sceneEl.removeEventListener("pdf-loading", onObjectLoading);
