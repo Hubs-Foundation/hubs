@@ -69,7 +69,7 @@ const messages = defineMessages({
 export function useRoomLoadingState(sceneEl) {
   // Holds the id of the current
   const loadingTimeoutRef = useRef();
-  const lazyLoadMedia = useRef(!!APP.store.state.preferences.lazyLoadSceneMedia);
+  const lazyLoadMedia = APP.store.state.preferences.lazyLoadSceneMedia;
 
   const [{ loading, messageKey, objectCount, loadedCount }, dispatch] = useReducer(reducer, {
     loading: !sceneEl.is("loaded"),
@@ -79,7 +79,7 @@ export function useRoomLoadingState(sceneEl) {
     allObjectsLoaded: false,
     environmentLoaded: false,
     networkConnected: false,
-    lazyLoadMedia: lazyLoadMedia.current
+    lazyLoadMedia
   });
 
   const onObjectLoading = useCallback(
@@ -130,14 +130,11 @@ export function useRoomLoadingState(sceneEl) {
 
   useEffect(
     () => {
-      let lazyLoadMediaRefValue = null;
-
       // Once the scene has loaded the dependencies to this hook will change,
       // the event listeners will be removed, and we can prevent adding them again.
       if (loading) {
-        if (lazyLoadMedia.current) {
+        if (lazyLoadMedia) {
           sceneEl.addEventListener("environment-scene-loading", onEnvironmentLoading);
-          lazyLoadMediaRefValue = lazyLoadMedia.current;
         } else {
           console.log("Attaching room state event listeners");
           sceneEl.addEventListener("model-loading", onObjectLoading);
@@ -155,7 +152,7 @@ export function useRoomLoadingState(sceneEl) {
       }
 
       return () => {
-        if (lazyLoadMediaRefValue) {
+        if (lazyLoadMedia) {
           sceneEl.removeEventListener("environment-scene-loading", onEnvironmentLoading);
         } else {
           console.log("Removing room state event listeners");
@@ -173,7 +170,16 @@ export function useRoomLoadingState(sceneEl) {
         sceneEl.removeEventListener("didConnectToNetworkedScene", onNetworkConnected);
       };
     },
-    [sceneEl, loading, onObjectLoaded, onObjectLoading, onEnvironmentLoading, onEnvironmentLoaded, onNetworkConnected]
+    [
+      sceneEl,
+      loading,
+      onObjectLoaded,
+      onObjectLoading,
+      onEnvironmentLoading,
+      onEnvironmentLoaded,
+      onNetworkConnected,
+      lazyLoadMedia
+    ]
   );
 
   const intl = useIntl();
