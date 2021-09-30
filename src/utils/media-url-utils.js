@@ -7,6 +7,9 @@ if (configs.CORS_PROXY_SERVER) {
 }
 nonCorsProxyDomains.push(document.location.hostname);
 
+// TODO need to do this to expose local asset server, not sure about opening this up in CSP
+nonCorsProxyDomains.push("localhost");
+
 const commonKnownContentTypes = {
   gltf: "model/gltf",
   glb: "model/gltf-binary",

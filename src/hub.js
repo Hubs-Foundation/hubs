@@ -934,6 +934,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // TODO security implications of connecting to a local socket are a bit iffy since we would have to open it up in the CSP
+  if (qsTruthy("debugSocket")) {
+    try {
+      const debugWS = new WebSocket("wss://localhost:7777");
+      debugWS.addEventListener("message", function(event) {
+        console.log("Message from debug socket", event.data);
+        if (event.data === "reloadScene") {
+          updateEnvironmentForHub(window.APP.hub, entryManager);
+        }
+      });
+    } catch (e) {
+      console.warn("Didn't find debug websocket, skipping");
+    }
+  }
+
   scene.addEventListener("leave_room_requested", () => {
     entryManager.exitScene();
     remountUI({ roomUnavailableReason: ExitReason.left });
