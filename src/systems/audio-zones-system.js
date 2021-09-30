@@ -101,13 +101,6 @@ const updateSource = (function() {
       } else if (outInParams.gain !== undefined && inOutParams.gain === undefined) {
         params.gain = outInParams.gain;
       }
-      if (outInParams.coneOuterAngle !== undefined && inOutParams.coneOuterAngle !== undefined) {
-        params.coneOuterAngle = Math.min(outInParams.coneOuterAngle, inOutParams.coneOuterAngle);
-      } else if (outInParams.coneOuterAngle === undefined && inOutParams.coneOuterAngle !== undefined) {
-        params.coneOuterAngle = inOutParams.coneOuterAngle;
-      } else if (outInParams.coneOuterAngle !== undefined && inOutParams.coneOuterAngle === undefined) {
-        params.coneOuterAngle = outInParams.coneOuterAngle;
-      }
       source.apply(params);
     }
   };
