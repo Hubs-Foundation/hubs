@@ -1,29 +1,27 @@
 // We apply the most restrictive audio parameters
 function paramsReducer(acc, curr) {
-  if (!curr) return;
-  if (acc === null) acc = curr;
-  if (curr.gain !== undefined) {
-    acc.gain = Math.min(acc.gain, curr.gain);
-  }
-  if (curr.maxDistance !== undefined) {
-    acc.maxDistance = Math.min(acc.maxDistance, curr.maxDistance);
-  }
-  if (curr.refDistance !== undefined) {
-    acc.refDistance = Math.min(acc.refDistance, curr.refDistance);
-  }
-  if (curr.rolloffFactor !== undefined) {
-    acc.rolloffFactor = Math.max(acc.rolloffFactor, curr.rolloffFactor);
-  }
-  if (curr.coneInnerAngle !== undefined) {
-    acc.coneInnerAngle = Math.min(acc.coneInnerAngle, curr.coneInnerAngle);
-  }
-  if (curr.coneOuterAngle !== undefined) {
-    acc.coneOuterAngle = Math.min(acc.coneOuterAngle, curr.coneOuterAngle);
-  }
-  if (curr.coneOuterGain !== undefined) {
-    acc.coneOuterGain = Math.min(acc.coneOuterGain, curr.coneOuterGain);
-  }
-  return acc;
+  if (!curr && !acc) return {};
+  else if (curr && !acc) return curr;
+  else if (!curr && acc) return acc;
+  else
+    return [
+      "gain",
+      "maxDistance",
+      "refDistance",
+      "rolloffFactor",
+      "coneInnerAngle",
+      "coneOuterAngle",
+      "coneOuterGain"
+    ].reduce((result, key) => {
+      if (curr[key] && acc[key]) {
+        result[key] = Math.min(acc[key], curr[key]);
+      } else if (curr[key] && !acc[key]) {
+        result[key] = curr[key];
+      } else if (!curr[key] && acc[key]) {
+        result[key] = acc[key];
+      }
+      return result;
+    }, {});
 }
 
 function addOrRemoveZone(zones, zone, position) {
