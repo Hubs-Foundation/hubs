@@ -6,6 +6,7 @@ import { mapMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
 import { proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
+import { isIOS as detectIOS } from "./is-mobile";
 import Linkify from "linkify-it";
 import tlds from "tlds";
 
@@ -453,7 +454,7 @@ export async function createImageTexture(url, filter) {
   return texture;
 }
 
-const isIOS = AFRAME.utils.device.isIOS();
+const isIOS = detectIOS();
 
 /**
  * Create video element to be used as a texture.

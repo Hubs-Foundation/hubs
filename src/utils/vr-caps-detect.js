@@ -1,3 +1,5 @@
+import { isIOS } from "./is-mobile";
+
 const { detect } = require("detect-browser");
 
 const browser = detect();
@@ -53,7 +55,7 @@ export async function getAvailableVREntryTypes() {
   const isWebXRCapableBrowser = window.hasNativeWebXRImplementation;
 
   const isDaydreamCapableBrowser = !!(isWebVRCapableBrowser && browser.name === "chrome" && !isSamsungBrowser);
-  const isIDevice = AFRAME.utils.device.isIOS();
+  const isIDevice = isIOS();
   const isFirefoxBrowser = browser.name === "firefox";
   const isUIWebView = typeof navigator.mediaDevices === "undefined";
 
