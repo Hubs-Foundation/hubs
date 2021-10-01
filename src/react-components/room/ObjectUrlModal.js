@@ -111,7 +111,11 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           afterInput={
             <>
               {showCloseButton && <CloseButton onClick={onClear} />}
-              <IconButton as="label" className={classNames({ [styles.hidden]: showCloseButton })} htmlFor="file">
+              <IconButton
+                as="label"
+                className={classNames({ [styles.hidden]: showCloseButton }, styles.urlInput)}
+                htmlFor="file"
+              >
                 <AttachIcon />
                 <input id="file" className={styles.hidden} name="file" type="file" ref={register} />
               </IconButton>
