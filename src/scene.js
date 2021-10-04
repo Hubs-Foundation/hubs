@@ -31,6 +31,7 @@ import { disableiOSZoom } from "./utils/disable-ios-zoom";
 
 import "./systems/scene-systems";
 import "./gltf-component-mappings";
+import { EnvironmentSystem } from "./systems/environment-system";
 
 import { App } from "./App";
 
@@ -105,6 +106,8 @@ const onReady = async () => {
     });
   });
 
+  const envSystem = new EnvironmentSystem(scene);
+
   sceneModelEntity.addEventListener("environment-scene-loaded", () => {
     remountUI({ sceneLoaded: true });
     const previewCamera = gltfEl.object3D.getObjectByName("scene-preview-camera");
@@ -119,6 +122,9 @@ const onReady = async () => {
     }
 
     camera.setAttribute("scene-preview-camera", "");
+
+    const environmentEl = sceneModelEntity.childNodes[0];
+    envSystem.updateEnvironment(environmentEl);
   });
 
   const res = await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneId}`);
