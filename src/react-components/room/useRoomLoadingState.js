@@ -111,10 +111,13 @@ export function useRoomLoadingState(sceneEl) {
       // TODO: Determine a better way to ensure the object dependency chain has resolved, or switch to a
       // progressive loading model where all objects don't have to be loaded to enter the room.
       loadingTimeoutRef.current = setTimeout(() => {
-        dispatch({ type: "all-objects-loaded" });
+        // Send the objects loaded event if there are no new objects loading after 1.5secs
+        if (objectCount === loadedCount + 1) {
+          dispatch({ type: "all-objects-loaded" });
+        }
       }, 1500);
     },
-    [dispatch]
+    [dispatch, objectCount, loadedCount]
   );
 
   const onEnvironmentLoaded = useCallback(
