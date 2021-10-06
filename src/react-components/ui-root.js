@@ -22,6 +22,7 @@ import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, hubUrl } from "../utils/phoenix-utils";
 import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
+import { isIOS } from "../utils/is-mobile";
 
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowserContainer from "./media-browser";
@@ -606,12 +607,7 @@ class UIRoot extends Component {
 
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
-    return (
-      (isMobile || AFRAME.utils.device.isMobileVR()) &&
-      !AFRAME.utils.device.isIOS() &&
-      !this.state.enterInVR &&
-      screenfull.enabled
-    );
+    return (isMobile || AFRAME.utils.device.isMobileVR()) && !isIOS() && !this.state.enterInVR && screenfull.enabled;
   };
 
   onAudioReadyButton = async () => {

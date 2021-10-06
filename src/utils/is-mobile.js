@@ -1,8 +1,13 @@
 import { hackyMobileSafariTest } from "./detect-touchscreen";
 
+// from https://stackoverflow.com/questions/57776001/how-to-detect-ipad-pro-as-ipad-using-javascript
+function isIpadOS() {
+  return window.navigator.maxTouchPoints && window.navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform);
+}
+
 // lifted from https://github.com/aframevr/aframe/blob/master/src/utils/device.js to ensure consistency
-function isIOS() {
-  return /iPad|iPhone|iPod/.test(window.navigator.platform);
+export function isIOS() {
+  return /iPad|iPhone|iPod/.test(window.navigator.platform) || isIpadOS();
 }
 
 function isTablet(mockUserAgent) {

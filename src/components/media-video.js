@@ -20,13 +20,14 @@ import { SourceType, AudioType } from "./audio-params";
 import { errorTexture } from "../utils/error-texture";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { isSafari } from "../utils/detect-safari";
+import { isIOS as detectIOS } from "../utils/is-mobile";
 
 import qsTruthy from "../utils/qs_truthy";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
 
-const isIOS = AFRAME.utils.device.isIOS();
+const isIOS = detectIOS();
 const audioIconTexture = new HubsTextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
