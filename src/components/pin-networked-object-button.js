@@ -42,7 +42,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
       const wasPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
-      this.targetEl.setAttribute("pinnable", "pinned", !wasPinned);
+      window.APP.pinningHelper.setPinned(this.targetEl, !wasPinned);
       if (!wasPinned) {
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIN);
       }

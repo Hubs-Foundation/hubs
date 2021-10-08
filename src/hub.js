@@ -196,6 +196,7 @@ import "./gltf-component-mappings";
 
 import { App } from "./App";
 import MediaDevicesManager from "./utils/media-devices-manager";
+import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
@@ -798,6 +799,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   };
+
+  window.APP.pinningHelper = new PinningHelper(hubChannel, authChannel, store, performConditionalSignIn);
 
   window.addEventListener("action_create_avatar", () => {
     performConditionalSignIn(
