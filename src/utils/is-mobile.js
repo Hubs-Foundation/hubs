@@ -22,6 +22,18 @@ function isR7() {
   return /R7 Build/.test(window.navigator.userAgent);
 }
 
+function isOculusBrowser() {
+  return /(OculusBrowser)/i.test(window.navigator.userAgent);
+}
+
+function isFirefoxReality() {
+  return /(Mobile VR)/i.test(window.navigator.userAgent);
+}
+
+function isMobileVR() {
+  return isOculusBrowser() || isFirefoxReality();
+}
+
 const isMobile = (function() {
   let _isMobile = false;
   (function(a) {
@@ -35,7 +47,7 @@ const isMobile = (function() {
     if (hackyMobileSafariTest()) {
       _isMobile = true;
     }
-    if (AFRAME.utils.device.isMobileVR()) {
+    if (isMobileVR()) {
       _isMobile = false;
     }
   })(window.navigator.userAgent || window.navigator.vendor || window.opera);
