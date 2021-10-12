@@ -165,10 +165,16 @@
   --toolbar-icon-color: var(--text5-color);
   --toolbar-icon-selected-bg: var(--transparent); 
   --toolbar-basic-icon-color: var(--text1-color);
+  --toolbar-basic-selected-icon-color: var(--text1-color);
   --toolbar-basic-color: var(--secondary-color);
   --toolbar-basic-color-hover: var(--secondary-color-hover);
   --toolbar-basic-color-pressed: var(--secondary-color-pressed);
   --toolbar-basic-border-color: var(--basic-border-color);
+  --toolbar-label-accent1: var(--accent1-color);
+  --toolbar-label-accent2: var(--accent2-color);
+  --toolbar-label-accent3: var(--accent3-color);
+  --toolbar-label-accent4: var(--accent4-color);
+  --toolbar-label-accent5: var(--accent5-color);
 
   --tile-text-color: var(--text4-color);
   --tile-bg-color: var(--secondary-color);
