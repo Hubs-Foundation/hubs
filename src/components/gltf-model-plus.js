@@ -403,7 +403,7 @@ class GLTFHubsPlugin {
 
     function hookDef(defType, hookName) {
       return Promise.all(
-        parser.json[defType].map((_def, idx) => {
+        (parser.json[defType] || []).map((_def, idx) => {
           return Promise.all(
             parser._invokeAll(function(ext) {
               return ext[hookName] && ext[hookName](idx);
