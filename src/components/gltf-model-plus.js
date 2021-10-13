@@ -414,7 +414,11 @@ class GLTFHubsPlugin {
     }
 
     // TODO decide if thse should get put into the GLTF loader itself
-    return Promise.all([hookDef("scenes", "extendScene"), hookDef("nodes", "extendNode")]);
+    return Promise.all([
+      hookDef("scenes", "extendScene"),
+      hookDef("nodes", "extendNode"),
+      hookDef("materials", "extendMaterial")
+    ]);
   }
 
   afterRoot(gltf) {
@@ -466,6 +470,11 @@ class GLTFHubsComponentsExtension {
 
   extendNode(nodeIdx) {
     const ext = this.parser.json.nodes[nodeIdx]?.extensions?.MOZ_hubs_components;
+    if (ext) return this.resolveComponentLinks(ext);
+  }
+
+  extendMaterial(materialIdx) {
+    const ext = this.parser.json.materials[materialIdx]?.extensions?.MOZ_hubs_components;
     if (ext) return this.resolveComponentLinks(ext);
   }
 
