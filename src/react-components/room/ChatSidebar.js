@@ -144,7 +144,8 @@ export const LogMessageType = {
   invalidAudioNormalizationRange: "invalidAudioNormalizationRange",
   audioSuspended: "audioSuspended",
   audioResumed: "audioResumed",
-  joinFailed: "joinFailed"
+  joinFailed: "joinFailed",
+  avatarChanged: "avatarChanged"
 };
 
 const logMessages = defineMessages({
@@ -228,6 +229,10 @@ const logMessages = defineMessages({
   [LogMessageType.joinFailed]: {
     id: "chat-sidebar.log-message.join-failed",
     defaultMessage: "Failed to join room: {message}"
+  },
+  [LogMessageType.avatarChanged]: {
+    id: "chat-sidebar.log-message.avatar-changed",
+    defaultMessage: "Your avatar has been changed."
   }
 });
 

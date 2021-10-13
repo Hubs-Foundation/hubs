@@ -256,6 +256,7 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
+import { LogMessageType } from "./react-components/room/ChatSidebar";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -1208,6 +1209,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         oldName: previous.profile.displayName,
         newName: current.profile.displayName
       });
+    }
+  });
+  events.on(`hub:change`, ({ key, previous, current }) => {
+    if (
+      key === hubChannel.channel.socket.params().session_id &&
+      previous.profile.avatarId !== current.profile.avatarId
+    ) {
+      messageDispatch.log(LogMessageType.avatarChanged);
     }
   });
   events.on(`hub:change`, ({ key, current }) => {
