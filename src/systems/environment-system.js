@@ -110,6 +110,7 @@ export class EnvironmentSystem {
     this.scene.remove(window.lp);
 
     if (settings.backgroundTexture) {
+      // Assume texture is always an equirect for now
       settings.backgroundTexture.mapping = THREE.EquirectangularReflectionMapping;
       this.scene.background = settings.backgroundTexture;
     } else {
@@ -119,6 +120,9 @@ export class EnvironmentSystem {
     if (settings.envMapTexture) {
       if (this.prevEnvMapTextureUUID !== settings.envMapTexture.uuid) {
         this.prevEnvMapTextureUUID = settings.envMapTexture.uuid;
+        // TODO PMREMGenerator should be fixed to not assume this
+        settings.envMapTexture.flipY = true;
+        // Assume texture is always an equirect for now
         this.scene.environment = this.pmremGenerator.fromEquirectangular(settings.envMapTexture).texture;
       }
     } else if (settings.skybox) {

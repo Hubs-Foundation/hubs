@@ -1,6 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
+import { isIOS as detectIOS } from "./utils/is-mobile";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 
 const isBotMode = qsTruthy("bot");
@@ -21,7 +22,7 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 
-const isIOS = AFRAME.utils.device.isIOS();
+const isIOS = detectIOS();
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {

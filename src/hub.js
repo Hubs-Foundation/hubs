@@ -24,6 +24,7 @@ import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
+import "./utils/aframe-overrides";
 
 // A-Frame hardcodes THREE.Cache.enabled = true
 // But we don't want to use THREE.Cache because
@@ -46,7 +47,7 @@ import "webrtc-adapter";
 import "aframe-slice9-component";
 import "./utils/threejs-positional-audio-updatematrixworld";
 import "./utils/threejs-world-update";
-import "./utils/threejs-raycast-patches";
+import "./utils/threejs-patches";
 import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {
@@ -65,7 +66,7 @@ import "./phoenix-adapter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL } from "./naf-dialog-adapter";
+import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECTED } from "./naf-dialog-adapter";
 import "./change-hub";
 
 import "./components/scene-components";
@@ -257,6 +258,7 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
+import { LogMessageType } from "./react-components/room/ChatSidebar";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -763,6 +765,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;
 
+  APP.dialog.on(DIALOG_CONNECTION_CONNECTED, () => {
+    scene.emit("didConnectToDialog");
+  });
   APP.dialog.on(DIALOG_CONNECTION_ERROR_FATAL, () => {
     // TODO: Change the wording of the connect error to match dialog connection error
     // TODO: Tell the user that dialog is broken, but don't completely end the experience
@@ -1208,6 +1213,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         oldName: previous.profile.displayName,
         newName: current.profile.displayName
       });
+    }
+  });
+  events.on(`hub:change`, ({ key, previous, current }) => {
+    if (
+      key === hubChannel.channel.socket.params().session_id &&
+      previous.profile.avatarId !== current.profile.avatarId
+    ) {
+      messageDispatch.log(LogMessageType.avatarChanged);
     }
   });
   events.on(`hub:change`, ({ key, current }) => {
