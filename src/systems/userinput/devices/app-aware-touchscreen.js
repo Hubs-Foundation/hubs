@@ -36,6 +36,10 @@ const getPlayerCamera = (() => {
   };
 })();
 
+function isSingleActionButton(el) {
+  return el.components.tags && el.components.tags.data.singleActionButton;
+}
+
 function shouldMoveCursor(touch, rect, raycaster) {
   const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.state.rightRemote.held;
   if (isCursorGrabbing) {
@@ -74,7 +78,7 @@ function shouldMoveCursor(touch, rect, raycaster) {
     (isFrozen || !isPinned) &&
     !isStaticControlledMedia &&
     !isStaticMedia &&
-    (remoteHoverTarget && canMove(remoteHoverTarget))
+    (remoteHoverTarget && (canMove(remoteHoverTarget) || isSingleActionButton(remoteHoverTarget)))
   );
 }
 
