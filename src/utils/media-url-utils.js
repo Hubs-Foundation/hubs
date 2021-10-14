@@ -159,7 +159,7 @@ export const guessContentType = url => {
 };
 
 const originIsHubsServer = new Map();
-export async function isHubsServer(url) {
+async function isHubsServer(url) {
   if (!url) return false;
   if (!url.startsWith("http")) {
     url = "https://" + url;
@@ -202,7 +202,7 @@ export const isLocalHubsSceneUrl = url => isLocalHubsUrl(url) && hubsSceneRegex.
 export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
 export const isLocalHubsAvatarUrl = url => isLocalHubsUrl(url) && hubsAvatarRegex.test(url);
 
-export const getHubsRoomUrl = async url =>
+export const getHubsRoomIdFromUrl = async url =>
   (await isHubsServer(url)) &&
   !hubsAvatarRegex.test(url) &&
   !hubsSceneRegex.test(url) &&

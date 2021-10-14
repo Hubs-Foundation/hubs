@@ -1,4 +1,9 @@
-import { isLocalHubsUrl, isLocalHubsSceneUrl, getHubsRoomUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
+import {
+  isLocalHubsUrl,
+  isLocalHubsSceneUrl,
+  getHubsRoomIdFromUrl,
+  isLocalHubsAvatarUrl
+} from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
@@ -27,7 +32,7 @@ AFRAME.registerComponent("open-media-button", {
             label = "use avatar";
           } else if (isLocalHubsSceneUrl(src) && mayChangeScene) {
             label = "use scene";
-          } else if ((hubId = await getHubsRoomUrl(src))) {
+          } else if ((hubId = await getHubsRoomIdFromUrl(src))) {
             const url = new URL(src);
             if (url.hash && window.APP.hub.hub_id === hubId) {
               label = "go to";
@@ -55,7 +60,7 @@ AFRAME.registerComponent("open-media-button", {
         this.el.sceneEl.emit("avatar_updated");
       } else if (isLocalHubsSceneUrl(this.src) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
-      } else if ((hubId = await getHubsRoomUrl(this.src))) {
+      } else if ((hubId = await getHubsRoomIdFromUrl(this.src))) {
         const url = new URL(this.src);
         if (url.hash && window.APP.hub.hub_id === hubId) {
           // move to waypoint w/o writing to history
