@@ -1,4 +1,4 @@
-import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
+import { isLocalHubsUrl, isLocalHubsSceneUrl, getHubsRoomUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
@@ -23,11 +23,11 @@ AFRAME.registerComponent("open-media-button", {
         let label = "open link";
         if (!this.data.onlyOpenLink) {
           let hubId;
-          if (await isLocalHubsAvatarUrl(src)) {
+          if (isLocalHubsAvatarUrl(src)) {
             label = "use avatar";
-          } else if ((await isLocalHubsSceneUrl(src)) && mayChangeScene) {
+          } else if (isLocalHubsSceneUrl(src) && mayChangeScene) {
             label = "use scene";
-          } else if ((hubId = await isHubsRoomUrl(src))) {
+          } else if ((hubId = await getHubsRoomUrl(src))) {
             const url = new URL(src);
             if (url.hash && window.APP.hub.hub_id === hubId) {
               label = "go to";
@@ -49,13 +49,13 @@ AFRAME.registerComponent("open-media-button", {
       if (this.data.onlyOpenLink) {
         await exitImmersive();
         window.open(this.src);
-      } else if (await isLocalHubsAvatarUrl(this.src)) {
+      } else if (isLocalHubsAvatarUrl(this.src)) {
         const avatarId = new URL(this.src).pathname.split("/").pop();
         window.APP.store.update({ profile: { avatarId } });
         this.el.sceneEl.emit("avatar_updated");
-      } else if ((await isLocalHubsSceneUrl(this.src)) && mayChangeScene) {
+      } else if (isLocalHubsSceneUrl(this.src) && mayChangeScene) {
         this.el.sceneEl.emit("scene_media_selected", this.src);
-      } else if ((hubId = await isHubsRoomUrl(this.src))) {
+      } else if ((hubId = await getHubsRoomUrl(this.src))) {
         const url = new URL(this.src);
         if (url.hash && window.APP.hub.hub_id === hubId) {
           // move to waypoint w/o writing to history

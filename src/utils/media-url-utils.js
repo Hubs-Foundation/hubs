@@ -159,45 +159,56 @@ export const guessContentType = url => {
 };
 
 const originIsHubsServer = new Map();
-async function isHubsServer(url) {
+export async function isHubsServer(url) {
   if (!url) return false;
   if (!url.startsWith("http")) {
     url = "https://" + url;
   }
   const { origin } = new URL(url);
 
-  if (originIsHubsServer.has(origin)) {
-    return originIsHubsServer.get(origin);
+  let ob = originIsHubsServer.get(origin);
+  if (ob) {
+    if (ob.hasOwnProperty("fetchPromise")) {
+      await ob.fetchPromise;
+    }
+  } else {
+    ob = {
+      fetchPromise: (async () => {
+        let isHubsServer;
+        try {
+          isHubsServer = (await fetch(proxiedUrlFor(origin), { method: "HEAD" })).headers.has("hub-name");
+        } catch (e) {
+          isHubsServer = false;
+        }
+        return isHubsServer;
+      })()
+    };
+    originIsHubsServer.set(origin, ob);
+    ob.isHubsServer = await ob.fetchPromise;
+    delete ob.fetchPromise;
   }
-
-  let isHubsServer;
-  try {
-    isHubsServer = (await fetch(proxiedUrlFor(origin), { method: "HEAD" })).headers.has("hub-name");
-  } catch (e) {
-    isHubsServer = false;
-  }
-  originIsHubsServer.set(origin, isHubsServer);
-  return isHubsServer;
+  return ob.isHubsServer;
 }
 
-const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/[a-zA-Z0-9]{7}(?:\/|$)/;
-const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
-const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
+const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/[a-zA-Z0-9]{7}(?:\/|#|$)/;
+const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>[a-zA-Z0-9]{7})(?:\/|#|$)/;
+const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?<id>[a-zA-Z0-9]{7})(?:\/|#|$)/;
 
-export const isLocalHubsUrl = async url =>
-  (await isHubsServer(url)) && new URL(url).origin === document.location.origin;
+export const isLocalHubsUrl = url => new URL(url).host === (configs.RETICULUM_SERVER || document.location.host);
 
 export const isHubsSceneUrl = async url => (await isHubsServer(url)) && hubsSceneRegex.test(url);
-export const isLocalHubsSceneUrl = async url => (await isHubsSceneUrl(url)) && (await isLocalHubsUrl(url));
+export const isLocalHubsSceneUrl = url => isLocalHubsUrl(url) && hubsSceneRegex.test(url);
 
 export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
-export const isLocalHubsAvatarUrl = async url => (await isHubsAvatarUrl(url)) && (await isLocalHubsUrl(url));
+export const isLocalHubsAvatarUrl = url => isLocalHubsUrl(url) && hubsAvatarRegex.test(url);
 
-export const isHubsRoomUrl = async url =>
+export const getHubsRoomUrl = async url =>
   (await isHubsServer(url)) &&
-  !(await isHubsAvatarUrl(url)) &&
-  !(await isHubsSceneUrl(url)) &&
+  !hubsAvatarRegex.test(url) &&
+  !hubsSceneRegex.test(url) &&
   url.match(hubsRoomRegex)?.groups.id;
+export const isHubsRoomUrl = async url =>
+  (await isHubsServer(url)) && hubsRoomRegex.test(url) && !hubsAvatarRegex.test(url) && !hubsSceneRegex.test(url);
 
 export const isHubsDestinationUrl = async url =>
   (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));
