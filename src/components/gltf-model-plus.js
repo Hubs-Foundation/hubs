@@ -637,12 +637,26 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 
   return new Promise((resolve, reject) => {
     gltfLoader.load(gltfUrl, resolve, onProgress, reject);
-  }).finally(() => {
-    if (fileMap) {
-      // The GLTF is now cached as a THREE object, we can get rid of the original blobs
-      Object.keys(fileMap).forEach(URL.revokeObjectURL);
-    }
-  });
+  })
+    .then(gltf => {
+      gltf.cache = true;
+
+      // Don't cache glTFs with Audio/Positional audio components because they can't be cloned properly.
+      if (
+        gltf.parser.plugins["OMI_audio_emitter"] &&
+        gltf.parser.plugins["OMI_audio_emitter"].audioEmitters.length > 0
+      ) {
+        gltf.cache = false;
+      }
+
+      return gltf;
+    })
+    .finally(() => {
+      if (fileMap) {
+        // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+        Object.keys(fileMap).forEach(URL.revokeObjectURL);
+      }
+    });
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
@@ -654,6 +668,11 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
     } else {
       if (inflightGltfs.has(src)) {
         const gltf = await inflightGltfs.get(src);
+
+        if (!gltf.cache) {
+          return loadGLTF(src, contentType, null, jsonPreprocessor);
+        }
+
         gltfCache.retain(src);
         return cloneGltf(gltf);
       } else {
@@ -661,6 +680,11 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
         inflightGltfs.set(src, promise);
         const gltf = await promise;
         inflightGltfs.delete(src);
+
+        if (!gltf.cache) {
+          return gltf;
+        }
+
         gltfCache.set(src, gltf);
         return cloneGltf(gltf);
       }
@@ -717,8 +741,10 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
     }
     const src = resolveAsset(this.data.src);
-    if (src) {
+    if (src && gltfCache.has(src)) {
       gltfCache.release(src);
+    } else {
+      this.el.object3DMap.mesh.traverse(disposeNode);
     }
   },
 
