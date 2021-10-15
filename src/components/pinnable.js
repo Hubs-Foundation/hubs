@@ -66,23 +66,17 @@ AFRAME.registerComponent("pinnable", {
     }
   },
 
-  _isHeld() {
-    const el = this.el;
-    const { leftHand, rightHand, rightRemote } = el.sceneEl.systems.interaction.state;
-    return leftHand.held === el || rightHand.held === el || rightRemote.held === el;
-  },
-
   tick() {
-    const held = this._isHeld();
+    const isHeld = this.el.sceneEl.systems.interaction.isHeld(this.el);
     const isMine = this._isMine();
 
     let didFireThisFrame = false;
-    if (!held && this.wasHeld && isMine) {
+    if (!isHeld && this.wasHeld && isMine) {
       didFireThisFrame = true;
       this._persistAndAnimate();
     }
 
-    this.wasHeld = held;
+    this.wasHeld = isHeld;
 
     this.transformObjectSystem = this.transformObjectSystem || AFRAME.scenes[0].systems["transform-selected-object"];
     const transforming = this.transformObjectSystem.transforming && this.transformObjectSystem.target.el === this.el;
