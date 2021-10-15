@@ -131,3 +131,64 @@ THREE.WebGLCubeRenderTarget.prototype.fromEquirectangularTexture = function(rend
 
   return this;
 };
+
+// Audio and PositionalAudio do not implement clone/copy. This results in calls to cloneObject3D failing.
+// The following patch implements clone and copy with the limitation that filters and audio source nodes
+// will not be cloned. They will reference the original object.
+THREE.Audio.prototype.clone = function(recursive) {
+  return new this.constructor(this.listener).copy(this, recursive);
+};
+
+THREE.Audio.prototype.copy = function(source, recursive) {
+  THREE.Object3D.prototype.copy.call(this, source, recursive);
+
+  this.buffer = source.buffer;
+  this.detune = source.detune;
+  this.loop = source.loop;
+  this.loopStart = source.loopStart;
+  this.loopEnd = source.loopEnd;
+  this.offset = source.offset;
+  this.duration = source.duration;
+  this.playbackRate = source.playbackRate;
+  this.hasPlaybackControl = source.hasPlaybackControl;
+  this.source = source.source;
+  this.sourceType = source.sourceType;
+  this.gain.gain.value = source.gain.gain.value;
+
+  if (source.filters.length > 0) {
+    console.warn("Cloning Audio filters is not supported");
+  }
+
+  this.filters = source.filters.slice();
+
+  if (this.source) {
+    this.source.detune.value = source.source.detune.value;
+    this.source.playbackRate.value = source.source.playbackRate.value;
+    this.source.loop = source.source.loop;
+    this.connect();
+  }
+
+  if (source.isPlaying) {
+    this.play();
+  }
+
+  return this;
+};
+
+THREE.PositionalAudio.prototype.clone = function(recursive) {
+  return new this.constructor(this.listener).copy(this, recursive);
+};
+
+THREE.PositionalAudio.prototype.copy = function(source, recursive) {
+  this.panner.refDistance = source.panner.refDistance;
+  this.panner.rolloffFactor = source.panner.rolloffFactor;
+  this.panner.distanceModel = source.panner.distanceModel;
+  this.panner.maxDistance = source.panner.maxDistance;
+  this.panner.coneInnerAngle = source.panner.coneInnerAngle;
+  this.panner.coneOuterAngle = source.panner.coneOuterAngle;
+  this.panner.coneOuterGain = source.panner.coneOuterGain;
+
+  THREE.Audio.prototype.copy.call(this, source, recursive);
+
+  return this;
+};

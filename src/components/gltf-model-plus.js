@@ -8,6 +8,7 @@ import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import { GLTFAudioEmitterExtension } from "three-omi";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -622,8 +623,12 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
   // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of
   // "taking control of the render loop" which is something we want to tackle for many reasons.
-  if (!ktxLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
-    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  if (AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
+    if (!ktxLoader) {
+      ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+    }
+
+    gltfLoader.register(parser => new GLTFAudioEmitterExtension(parser, AFRAME.scenes[0].sceneEl.audioListener));
   }
 
   if (ktxLoader) {
