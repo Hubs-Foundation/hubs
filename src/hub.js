@@ -804,7 +804,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (visible) {
           remountUI({ showSignInDialog: true });
         } else {
-          remountUI({ showSignInDialog: false });
+          remountUI({ showSignInDialog: false, onContinueAfterSignIn: null });
         }
       }
     });
