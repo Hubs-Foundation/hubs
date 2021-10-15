@@ -54,6 +54,13 @@ export default class PinningHelper {
 
     try {
       await this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
+
+      // If we lost ownership of the entity while waiting for the pin to go through,
+      // try to regain ownership before setting the "pinned" state.
+      if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) {
+        console.warn("PinningHelper: Pinning succeeded, but ownership was lost in the mean time");
+      }
+
       el.setAttribute("pinnable", "pinned", true);
       el.emit("pinned", { el });
       this.store.update({ activity: { hasPinned: true } });
@@ -62,7 +69,7 @@ export default class PinningHelper {
         await this.authChannel.signOut(this.hubChannel);
         this._signInAndPinOrUnpinElement(el);
       } else {
-        console.warn("Pin failed for unknown reason", e);
+        console.warn("PinningHelper: Pin failed for unknown reason", e);
       }
     }
   }
