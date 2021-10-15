@@ -145,6 +145,7 @@ class UIRoot extends Component {
     showSignInDialog: PropTypes.bool,
     signInMessage: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
+    onSignInDialogVisibilityChanged: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     onAvatarSaved: PropTypes.func,
@@ -654,6 +655,9 @@ class UIRoot extends Component {
       this.props.history.goBack();
     }
 
+    const { onSignInDialogVisibilityChanged } = this.props;
+    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(false);
+
     if (isIn2DInterstitial()) {
       exit2DInterstitialAndEnterVR();
     } else {
@@ -662,6 +666,8 @@ class UIRoot extends Component {
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
+    const { onSignInDialogVisibilityChanged } = this.props;
+    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(true);
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });

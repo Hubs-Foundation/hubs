@@ -799,6 +799,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (actionError && onFailure) onFailure(actionError);
         exit2DInterstitialAndEnterVR();
+      },
+      onSignInDialogVisibilityChanged: visible => {
+        if (visible) {
+          remountUI({ showSignInDialog: true });
+        } else {
+          remountUI({ showSignInDialog: false });
+        }
       }
     });
   };
