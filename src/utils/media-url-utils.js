@@ -166,28 +166,17 @@ async function isHubsServer(url) {
   }
   const { origin } = new URL(url);
 
-  let ob = originIsHubsServer.get(origin);
-  if (ob) {
-    if (ob.hasOwnProperty("fetchPromise")) {
-      await ob.fetchPromise;
-    }
-  } else {
-    ob = {
-      fetchPromise: (async () => {
-        let isHubsServer;
-        try {
-          isHubsServer = (await fetch(proxiedUrlFor(origin), { method: "HEAD" })).headers.has("hub-name");
-        } catch (e) {
-          isHubsServer = false;
-        }
-        return isHubsServer;
-      })()
-    };
-    originIsHubsServer.set(origin, ob);
-    ob.isHubsServer = await ob.fetchPromise;
-    delete ob.fetchPromise;
+  let p = originIsHubsServer.get(origin);
+  if (!p) {
+    p = fetch(proxiedUrlFor(origin), { method: "HEAD" })
+      .then(r => r.headers.has("hub-name"))
+      .catch(e => {
+        console.warn(`Failed to fetch ${origin}`, e);
+        return false;
+      });
+    originIsHubsServer.set(origin, p);
   }
-  return ob.isHubsServer;
+  return p;
 }
 
 const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/[a-zA-Z0-9]{7}(?:\/|#|$)/;
