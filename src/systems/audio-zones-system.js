@@ -93,15 +93,23 @@ const updateSource = (function() {
     } else if (!outInParams && inOutParams) {
       source.apply(inOutParams);
     } else {
-      const params = outInParams;
-      if (outInParams.gain !== undefined && inOutParams.gain !== undefined) {
-        params.gain = Math.min(outInParams.gain, inOutParams.gain);
-      } else if (outInParams.gain === undefined && inOutParams.gain !== undefined) {
-        params.gain = inOutParams.gain;
-      } else if (outInParams.gain !== undefined && inOutParams.gain === undefined) {
-        params.gain = outInParams.gain;
-      }
-      source.apply(params);
+      // In this case two zones ar acting over the same source simultaneously.
+      // We apply the closest zone params with the lowest gain
+      source.apply(
+        Object.assign(
+          {},
+          inOutParams,
+          outInParams,
+          paramsReducer(
+            {
+              gain: outInParams.gain
+            },
+            {
+              gain: inOutParams.gain
+            }
+          )
+        )
+      );
     }
   };
 })();
