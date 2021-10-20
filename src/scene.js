@@ -8,7 +8,6 @@ import "./assets/stylesheets/scene.scss";
 
 import "aframe";
 import "./utils/logging";
-import "./utils/threejs-world-update";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 

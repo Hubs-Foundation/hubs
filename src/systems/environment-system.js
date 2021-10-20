@@ -1,14 +1,6 @@
 import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
 import qsTruthy from "../utils/qs_truthy";
 
-// This disabled lighting contribution from the environment map for things that have a lightmap
-// TODO do this in a less hacky way, maybe make it configurable
-THREE.ShaderChunk.lights_fragment_maps = THREE.ShaderChunk.lights_fragment_maps.replace(
-  "iblIrradiance += getLightProbeIndirectIrradiance( geometry, maxMipLevel );",
-  `#ifndef USE_LIGHTMAP
-     iblIrradiance += getLightProbeIndirectIrradiance( geometry, maxMipLevel );
-   #endif`
-);
 
 const toneMappingOptions = {
   None: "NoToneMapping",
