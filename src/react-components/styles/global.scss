@@ -463,3 +463,9 @@ input::placeholder {
 summary {
   cursor: pointer;
 }
+
+.hmc-logo {
+  [fill] {
+    fill: theme.$text1-color;
+  }
+}

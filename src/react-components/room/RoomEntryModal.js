@@ -37,7 +37,9 @@ export function RoomEntryModal({
       <Column center className={styles.content}>
         {breakpoint !== "sm" &&
           breakpoint !== "md" && (
-            <div className={styles.logoContainer}>{isHmc ? <HmcLogo /> : <img src={logoSrc} alt={appName} />}</div>
+            <div className={styles.logoContainer}>
+              {isHmc ? <HmcLogo className="hmc-logo" /> : <img src={logoSrc} alt={appName} />}
+            </div>
           )}
         <div className={styles.roomName}>
           <h5>

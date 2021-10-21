@@ -217,7 +217,7 @@ class SceneUI extends Component {
           <div className={styles.mainPanel}>
             <a href="/" className={styles.logo}>
               {isHmc ? (
-                <HmcLogo />
+                <HmcLogo className="hmc-logo" />
               ) : (
                 <img
                   src={configs.image("logo")}

@@ -10,7 +10,7 @@ export function LoadingScreenLayout({ center, bottom, logoSrc }) {
   return (
     <div className={styles.loadingScreenLayout}>
       <Column center padding gap="lg" className={styles.center}>
-        {isHmc ? <HmcLogo /> : <img className={styles.logo} src={logoSrc} />}
+        {isHmc ? <HmcLogo className="hmc-logo" /> : <img className={styles.logo} src={logoSrc} />}
         {center}
       </Column>
       {bottom && (
