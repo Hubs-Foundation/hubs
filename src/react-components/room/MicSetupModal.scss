@@ -19,9 +19,6 @@
     margin-right: 24px;
   }
 }
-:local(.mic-not-found) {
-  color: red;
-}
 
 :local(.mic-button-container) {
   // Transitions don't look right with clipping, so just disable it.
