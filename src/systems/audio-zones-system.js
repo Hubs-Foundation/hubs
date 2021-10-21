@@ -13,11 +13,11 @@ function paramsReducer(acc, curr) {
       "coneOuterAngle",
       "coneOuterGain"
     ].reduce((result, key) => {
-      if (curr[key] && acc[key]) {
+      if (curr[key] !== undefined && acc[key] !== undefined) {
         result[key] = Math.min(acc[key], curr[key]);
-      } else if (curr[key] && !acc[key]) {
+      } else if (curr[key] !== undefined && acc[key] === undefined) {
         result[key] = curr[key];
-      } else if (!curr[key] && acc[key]) {
+      } else if (curr[key] === undefined && acc[key] !== undefined) {
         result[key] = acc[key];
       }
       return result;
