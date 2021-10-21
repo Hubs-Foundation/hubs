@@ -8,7 +8,8 @@ import { useAccessibleOutlineStyle } from "../input/useAccessibleOutlineStyle";
 export function PageContainer({ children, ...rest }) {
   const auth = useContext(AuthContext);
   useAccessibleOutlineStyle();
-
+  //using show cloud as a proxy for if we are on hmc
+  const isHmc = configs.feature("show_cloud");
   return (
     <Page
       appLogo={configs.image("logo")}
@@ -34,6 +35,7 @@ export function PageContainer({ children, ...rest }) {
       companyLogoUrl={configs.image("company_logo")}
       showDiscordBotLink={configs.feature("show_discord_bot_link")}
       appName={configs.translation("app-name")}
+      isHmc={isHmc}
       {...rest}
     >
       {children}

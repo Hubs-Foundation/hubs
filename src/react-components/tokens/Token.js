@@ -4,9 +4,33 @@ import { Button } from "../input/Button";
 import { FormattedMessage } from "react-intl";
 import { Row } from "../layout/Row";
 import styles from "./Token.scss";
+import { useIntl, defineMessages } from "react-intl";
+
+const tokenTypes = {
+  account: defineMessages({
+    type: {
+      id: "token-type.account-token",
+      defaultMessage: "Account Token"
+    }
+  }),
+  app: defineMessages({
+    type: {
+      id: "token-type.app-token",
+      defaultMessage: "App Token"
+    }
+  })
+};
 
 export function Token({ tokenInfo, onRevokeToken }) {
-  const { account_id, id, inserted_at, is_revoked, scopes, subject_type, token, updated_at } = tokenInfo;
+  const { account_id, inserted_at, scopes, subject_type } = tokenInfo;
+  const intl = useIntl();
+  const { type = null } = tokenTypes[subject_type];
+  if (type === null) {
+    console.warn(
+      "WARNING: Token type translation was undefined. Meaning the frontend is missing the token type translation for: " +
+        subject_type
+    );
+  }
 
   return (
     <div className={styles.borderGrey}>
@@ -14,7 +38,7 @@ export function Token({ tokenInfo, onRevokeToken }) {
         <Row breakpointColumn="md" topMargin="md" childrenMarginR="xl">
           <div>
             <span>
-              <b>{subject_type.charAt(0).toUpperCase() + subject_type.slice(1)} Token</b>
+              <b>{type && intl.formatMessage(type)}</b>
             </span>
           </div>
           <div>
@@ -50,8 +74,8 @@ export function Token({ tokenInfo, onRevokeToken }) {
 }
 
 Token.propTypes = {
-  token: PropTypes.shape({
-    account_id: PropTypes.string,
+  tokenInfo: PropTypes.shape({
+    account_id: PropTypes.number,
     id: PropTypes.string,
     inserted_at: PropTypes.string,
     is_revoked: PropTypes.bool,

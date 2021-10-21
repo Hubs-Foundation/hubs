@@ -107,6 +107,8 @@ export const SCHEMA = {
         showFPSCounter: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
+        fastRoomSwitching: { type: "bool" },
+        lazyLoadSceneMedia: { type: "bool" },
         preferMobileObjectInfoPanel: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
@@ -127,6 +129,9 @@ export const SCHEMA = {
         disableAutoGainControl: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
+        showAudioDebugPanel: { type: "bool" },
+        enableAudioClipping: { type: "bool" },
+        audioClippingThreshold: { type: "number" },
         theme: { type: "string" }
       }
     },

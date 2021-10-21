@@ -10,7 +10,7 @@
   .emoji-mart {
     font-size: 16px;
     display: inline-block;
-    color: #222427;
+    color: theme.$text1-color;
     --tab-highlight-color: #{theme.$blue};
     @media (max-width: theme.$breakpoint-md) {
       width: 95% !important; /* leave room for scrollbar */
@@ -112,8 +112,13 @@
     width: 100%;
     padding: 5px 25px 6px 10px;
     border-radius: 5px;
-    border: 1px solid #d9d9d9;
+    border: 1px solid theme.$input-border-color;
     outline: 0;
+    background-color: theme.$background1-color;
+    :focus {
+      border-color: theme.$input-outline-color;
+      box-shadow: 0 0 0 2px theme.$input-outline-color;
+    }
   }
 
   .emoji-mart-search input,
@@ -168,8 +173,8 @@
     width: 100%;
     font-weight: 500;
     padding: 5px 6px;
-    background-color: #fff;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: theme.$background1-color;
+    
   }
 
   .emoji-mart-category-list {

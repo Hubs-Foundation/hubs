@@ -39,8 +39,7 @@ export function usePinObject(hubChannel, scene, object) {
     () => {
       const el = object.el;
       if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) return;
-      el.setAttribute("pinnable", "pinned", true);
-      el.emit("pinned", { el });
+      window.APP.pinningHelper.setPinned(el, true);
     },
     [object]
   );
@@ -49,8 +48,7 @@ export function usePinObject(hubChannel, scene, object) {
     () => {
       const el = object.el;
       if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) return;
-      el.setAttribute("pinnable", "pinned", false);
-      el.emit("unpinned", { el });
+      window.APP.pinningHelper.setPinned(el, false);
     },
     [object]
   );
@@ -73,10 +71,9 @@ export function usePinObject(hubChannel, scene, object) {
       function onPinStateChanged() {
         setIsPinned(getPinnedState(el));
       }
-
       el.addEventListener("pinned", onPinStateChanged);
       el.addEventListener("unpinned", onPinStateChanged);
-
+      setIsPinned(getPinnedState(el));
       return () => {
         el.removeEventListener("pinned", onPinStateChanged);
         el.removeEventListener("unpinned", onPinStateChanged);

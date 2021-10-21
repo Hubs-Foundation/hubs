@@ -16,11 +16,13 @@ export const presets = [
   "accent3",
   "accent4",
   "accent5",
-  "accent6"
+  "accent6",
+  "landing",
+  "signin"
 ];
 
 export const Button = memo(
-  forwardRef(({ as, sm, lg, xl, thin, preset, className, children, ...rest }, ref) => {
+  forwardRef(({ as, sm, lg, xl, thin, thick, preset, className, children, ...rest }, ref) => {
     const ButtonComponent = as;
     const buttonProps = ButtonComponent === "button" ? { type: "button" } : {};
 
@@ -30,7 +32,13 @@ export const Button = memo(
           styles.button,
           textInputStyles.button,
           styles[preset],
-          { [styles.sm]: sm, [styles.lg]: lg, [styles.xl]: xl, [styles.thin]: thin },
+          {
+            [styles.sm]: sm,
+            [styles.lg]: lg,
+            [styles.xl]: xl,
+            [styles.thin]: thin,
+            [styles.thick]: thick
+          },
           className
         )}
         {...buttonProps}

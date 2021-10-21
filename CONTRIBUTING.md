@@ -65,7 +65,7 @@ We believe in the power of community (that's why we're building this, after all!
 
 ### ✅ Best Practices
 
-A guide for our frontend development best practices is availible [here](./doc/best-practices.md)
+A guide for general best practices can be found [here](./doc/best-practices.md) and for React UI specifically [here](./doc/ui-best-practices.md)
 
 ## Development Workflow
 
