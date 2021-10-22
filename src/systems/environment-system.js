@@ -133,6 +133,7 @@ export class EnvironmentSystem {
             this.renderer.tonemappingLUT = t;
           })
           .catch(function(e) {
+            console.error("Error loading Blender LUT", e);
             blenderLUTPromise = null;
           });
       } else {
