@@ -130,13 +130,13 @@ export class EnvironmentSystem {
 
         blenderLUTPromise
           .then(t => {
-            this.scene.tonemappingLUT = t;
+            this.renderer.tonemappingLUT = t;
           })
           .catch(function(e) {
             blenderLUTPromise = null;
           });
       } else {
-        this.scene.tonemappingLUT = null;
+        this.renderer.tonemappingLUT = null;
       }
     }
 
