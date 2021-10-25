@@ -165,7 +165,8 @@ export class EnvironmentSystem {
         // TODO PMREMGenerator should be fixed to not assume this
         settings.envMapTexture.flipY = true;
         // Assume texture is always an equirect for now
-        this.scene.environment = this.pmremGenerator.fromEquirectangular(settings.envMapTexture).texture;
+        settings.envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
+        this.scene.environment = settings.envMapTexture;
       }
     } else if (settings.skybox) {
       if (this.prevEnvMapTextureUUID !== settings.skybox.uuid) {
