@@ -9,11 +9,15 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
   const onConnect = useCallback(
     async () => {
       try {
+        console.log("1");
         if (popupRef.current) {
+          console.log("2");
           popupRef.current.close();
         }
 
         const url = await hubChannel.getTwitterOAuthURL();
+
+        console.log("3 : " + url);
 
         const width = 600;
         const height = 760;

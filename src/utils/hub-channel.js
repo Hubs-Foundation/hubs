@@ -358,9 +358,15 @@ export default class HubChannel extends EventTarget {
       this.channel
         .push("oauth", { type: "twitter" })
         .receive("ok", res => {
+          console.log("Okay in hub-channel get twitterOAuthURL");
+          console.log(res);
           resolve(res.oauth_url);
         })
-        .receive("error", reject);
+        .receive("error", res => {
+          console.log("Error in hub-channel get twitterOAuthURL");
+          console.log(res);
+          reject(res);
+        });
     });
   };
 
