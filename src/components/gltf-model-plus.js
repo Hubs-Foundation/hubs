@@ -490,6 +490,11 @@ class GLTFHubsComponentsExtension {
           deps.push(
             this.parser.getDependency(type, value.index).then(loadedDep => {
               props[propName] = loadedDep;
+              if (type === "texture" && !this.parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
+                // For now assume all non HDR textures linked in hubs components are sRGB.
+                // We can allow this to be overriden later if needed
+                loadedDep.encoding = THREE.sRGBEncoding;
+              }
             })
           );
         }
