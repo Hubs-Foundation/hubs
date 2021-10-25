@@ -181,7 +181,6 @@ AFRAME.registerSystem("audio-debug", {
               obj._hubs_audio_debug_prev_material = null;
               obj.material.needsUpdate = true;
             }
-            obj.geometry.computeFaceNormals();
             obj.geometry.computeVertexNormals();
           }
         }

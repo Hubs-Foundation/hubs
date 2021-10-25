@@ -38,7 +38,7 @@ AFRAME.registerSystem("nav", {
     if (this.helperMesh) {
       this.helperMesh.material?.dispose();
       this.helperMesh.geometry?.dispose();
-      this.helperMesh.parent.remove(this.helperMesh);
+      this.helperMesh.removeFromParent();
       this.helperMesh = null;
     }
     this.mesh = null;
