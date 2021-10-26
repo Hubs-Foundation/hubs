@@ -56,7 +56,7 @@ export function RoomEntryModal({
               </span>
             </Button>
           )}
-          {showEnterOnDevice && (
+          {/* {showEnterOnDevice && (
             <Button preset="accent5" onClick={onEnterOnDevice}>
               <VRIcon />
               <span>
@@ -71,7 +71,7 @@ export function RoomEntryModal({
                 <FormattedMessage id="room-entry-modal.spectate-button" defaultMessage="Spectate" />
               </span>
             </Button>
-          )}
+          )} */}
           {showOptions &&
             breakpoint !== "sm" && (
               <>

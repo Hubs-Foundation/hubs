@@ -386,22 +386,22 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.global-media-volume",
     defaultMessage: "Media Volume"
   },
-  disableSoundEffects: {
-    id: "preferences-screen.preference.disable-sound-effects",
-    defaultMessage: "Disable Sound Effects"
-  },
-  disableEchoCancellation: {
-    id: "preferences-screen.preference.disable-echo-cancellation",
-    defaultMessage: "Disable microphone echo cancellation"
-  },
-  disableNoiseSuppression: {
-    id: "preferences-screen.preference.disable-noise-suppression",
-    defaultMessage: "Disable microphone noise supression"
-  },
-  disableAutoGainControl: {
-    id: "preferences-screen.preference.disable-auto-gain-control",
-    defaultMessage: "Disable microphone automatic gain control"
-  },
+  // disableSoundEffects: {
+  //   id: "preferences-screen.preference.disable-sound-effects",
+  //   defaultMessage: "Disable Sound Effects"
+  // },
+  // disableEchoCancellation: {
+  //   id: "preferences-screen.preference.disable-echo-cancellation",
+  //   defaultMessage: "Disable microphone echo cancellation"
+  // },
+  // disableNoiseSuppression: {
+  //   id: "preferences-screen.preference.disable-noise-suppression",
+  //   defaultMessage: "Disable microphone noise supression"
+  // },
+  // disableAutoGainControl: {
+  //   id: "preferences-screen.preference.disable-auto-gain-control",
+  //   defaultMessage: "Disable microphone automatic gain control"
+  // },
   snapRotationDegrees: {
     id: "preferences-screen.preference.snap-rotation-degrees",
     defaultMessage: "Rotation per snap (in degrees)"
@@ -450,14 +450,14 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.only-show-nametags-in-freeze",
     defaultMessage: "Only show nametags while frozen"
   },
-  animateWaypointTransitions: {
-    id: "preferences-screen.preference.animate-waypoint-transitions",
-    defaultMessage: "Animate waypoint transitions"
-  },
-  showFPSCounter: {
-    id: "preferences-screen.preference.show-fps-counter",
-    defaultMessage: "Show FPS Counter"
-  },
+  // animateWaypointTransitions: {
+  //   id: "preferences-screen.preference.animate-waypoint-transitions",
+  //   defaultMessage: "Animate waypoint transitions"
+  // },
+  // showFPSCounter: {
+  //   id: "preferences-screen.preference.show-fps-counter",
+  //   defaultMessage: "Show FPS Counter"
+  // },
   maxResolution: {
     id: "preferences-screen.preference.max-resolution",
     defaultMessage: "Max Resolution"
@@ -466,50 +466,50 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.material-quality-setting",
     defaultMessage: "Material quality"
   },
-  enableDynamicShadows: {
-    id: "preferences-screen.preference.enable-dynamic-shadows",
-    defaultMessage: "Enable Dynamic Shadows"
-  },
-  disableAutoPixelRatio: {
-    id: "preferences-screen.preference.disable-auto-pixel-ratio",
-    defaultMessage: "Disable automatic pixel ratio adjustments"
-  },
-  allowMultipleHubsInstances: {
-    id: "preferences-screen.preference.allow-multiple-hubs-instances",
-    defaultMessage: "Disable auto-exit when multiple hubs instances are open"
-  },
-  disableIdleDetection: {
-    id: "preferences-screen.preference.disable-idle-detection",
-    defaultMessage: "Disable auto-exit when idle or backgrounded"
-  },
-  preferMobileObjectInfoPanel: {
-    id: "preferences-screen.preference.prefer-mobile-object-info-panel",
-    defaultMessage: "Prefer Mobile Object Info Panel"
-  },
-  showRtcDebugPanel: {
-    id: "preferences-screen.preference.show-rtc-debug-panel",
-    defaultMessage: "Show RTC Panel"
-  },
-  showAudioDebugPanel: {
-    id: "preferences-screen.preference.show-audio-debug-panel",
-    defaultMessage: "Show Audio Debug Panel"
-  },
-  enableAudioClipping: {
-    id: "preferences-screen.preference.enable-audio-clipping",
-    defaultMessage: "Enable Audio Clipping"
-  },
-  audioClippingThreshold: {
-    id: "preferences-screen.preference.audio-clipping-threshold",
-    defaultMessage: "Audio Clipping Threshold"
-  },
+  // enableDynamicShadows: {
+  //   id: "preferences-screen.preference.enable-dynamic-shadows",
+  //   defaultMessage: "Enable Dynamic Shadows"
+  // },
+  // disableAutoPixelRatio: {
+  //   id: "preferences-screen.preference.disable-auto-pixel-ratio",
+  //   defaultMessage: "Disable automatic pixel ratio adjustments"
+  // },
+  // allowMultipleHubsInstances: {
+  //   id: "preferences-screen.preference.allow-multiple-hubs-instances",
+  //   defaultMessage: "Disable auto-exit when multiple hubs instances are open"
+  // },
+  // disableIdleDetection: {
+  //   id: "preferences-screen.preference.disable-idle-detection",
+  //   defaultMessage: "Disable auto-exit when idle or backgrounded"
+  // },
+  // preferMobileObjectInfoPanel: {
+  //   id: "preferences-screen.preference.prefer-mobile-object-info-panel",
+  //   defaultMessage: "Prefer Mobile Object Info Panel"
+  // },
+  // showRtcDebugPanel: {
+  //   id: "preferences-screen.preference.show-rtc-debug-panel",
+  //   defaultMessage: "Show RTC Panel"
+  // },
+  // showAudioDebugPanel: {
+  //   id: "preferences-screen.preference.show-audio-debug-panel",
+  //   defaultMessage: "Show Audio Debug Panel"
+  // },
+  // enableAudioClipping: {
+  //   id: "preferences-screen.preference.enable-audio-clipping",
+  //   defaultMessage: "Enable Audio Clipping"
+  // },
+  // audioClippingThreshold: {
+  //   id: "preferences-screen.preference.audio-clipping-threshold",
+  //   defaultMessage: "Audio Clipping Threshold"
+  // },
   theme: {
     id: "preferences-screen.preference.theme",
     defaultMessage: "Theme"
   },
-  fastRoomSwitching: {
-    id: "preferences-screen.preference.fast-room-switching",
-    defaultMessage: "Enable Fast Room Switching"
-  }
+  // fastRoomSwitching: {
+  //   id: "preferences-screen.preference.fast-room-switching",
+  //   defaultMessage: "Enable Fast Room Switching"
+  // }
 });
 
 class PreferenceListItem extends Component {
@@ -619,14 +619,14 @@ class PreferenceListItem extends Component {
 const IntlPreferenceListItem = injectIntl(PreferenceListItem);
 
 const CATEGORY_AUDIO = 0;
-const CATEGORY_CONTROLS = 1;
+// const CATEGORY_CONTROLS = 1;
 const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
-const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
+const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_MISC];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
-  [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
+  // [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
   [CATEGORY_MISC]: { id: "preferences-screen.category.misc", defaultMessage: "Misc" },
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
   [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" }
@@ -995,41 +995,41 @@ class PreferencesScreen extends Component {
             digits: 0,
             defaultNumber: 100
           },
-          { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          {
-            key: "disableEchoCancellation",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
-            promptForRefresh: true
-          },
-          {
-            key: "disableNoiseSuppression",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
-            promptForRefresh: true
-          },
-          {
-            key: "disableAutoGainControl",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
-            promptForRefresh: true
-          },
-          {
-            key: "enableAudioClipping",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: CLIPPING_THRESHOLD_ENABLED,
-            promptForRefresh: false
-          },
-          {
-            key: "audioClippingThreshold",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-            min: CLIPPING_THRESHOLD_MIN,
-            max: CLIPPING_THRESHOLD_MAX,
-            step: CLIPPING_THRESHOLD_STEP,
-            digits: 3,
-            defaultNumber: 0.015
-          },
-          { key: "showAudioDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+          // { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          // {
+          //   key: "disableEchoCancellation",
+          //   prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+          //   defaultBool: false,
+          //   promptForRefresh: true
+          // },
+          // {
+          //   key: "disableNoiseSuppression",
+          //   prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+          //   defaultBool: false,
+          //   promptForRefresh: true
+          // },
+          // {
+          //   key: "disableAutoGainControl",
+          //   prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+          //   defaultBool: false,
+          //   promptForRefresh: true
+          // },
+          // {
+          //   key: "enableAudioClipping",
+          //   prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+          //   defaultBool: CLIPPING_THRESHOLD_ENABLED,
+          //   promptForRefresh: false
+          // },
+          // {
+          //   key: "audioClippingThreshold",
+          //   prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+          //   min: CLIPPING_THRESHOLD_MIN,
+          //   max: CLIPPING_THRESHOLD_MAX,
+          //   step: CLIPPING_THRESHOLD_STEP,
+          //   digits: 3,
+          //   defaultNumber: 0.015
+          // },
+          // { key: "showAudioDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
         ]
       ],
       [
@@ -1079,20 +1079,20 @@ class PreferencesScreen extends Component {
             defaultString: defaultMaterialQualitySetting,
             promptForRefresh: true
           },
-          {
-            key: "enableDynamicShadows",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
-            promptForRefresh: true
-          },
-          { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "fastRoomSwitching", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
-          { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+          // {
+          //   key: "enableDynamicShadows",
+          //   prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+          //   defaultBool: false,
+          //   promptForRefresh: true
+          // },
+          // { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          // { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          // { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          // { key: "fastRoomSwitching", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          // { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          // { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
+          // { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          // { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
         ]
       ]
     ]);
@@ -1107,19 +1107,19 @@ class PreferencesScreen extends Component {
 
     return new Map([
       [CATEGORY_AUDIO, [{ items: items.get(CATEGORY_AUDIO) }]],
-      [
-        CATEGORY_CONTROLS,
-        [
-          {
-            name: intl.formatMessage(categoryNames[CATEGORY_MOVEMENT]),
-            items: items.get(CATEGORY_MOVEMENT)
-          },
-          {
-            name: intl.formatMessage(categoryNames[CATEGORY_TOUCHSCREEN]),
-            items: items.get(CATEGORY_TOUCHSCREEN)
-          }
-        ]
-      ],
+      // [
+      //   CATEGORY_CONTROLS,
+      //   [
+      //     {
+      //       name: intl.formatMessage(categoryNames[CATEGORY_MOVEMENT]),
+      //       items: items.get(CATEGORY_MOVEMENT)
+      //     },
+      //     {
+      //       name: intl.formatMessage(categoryNames[CATEGORY_TOUCHSCREEN]),
+      //       items: items.get(CATEGORY_TOUCHSCREEN)
+      //     }
+      //   ]
+      // ],
       [CATEGORY_MISC, [{ items: items.get(CATEGORY_MISC) }]]
     ]);
   }
