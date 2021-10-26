@@ -265,18 +265,23 @@ export default class Store extends EventTarget {
   };
 
   initProfile = async () => {
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const avatarId = params.get('avatarId');
+    const displayName = params.get('displayName');
+
     if (this._shouldResetAvatarOnInit) {
       await this.resetToRandomDefaultAvatar();
     } else {
       this.update({
-        profile: { avatarId: await fetchRandomDefaultAvatarId(), ...(this.state.profile || {}) }
+        profile: { avatarId: avatarId, displayName:displayName }
       });
     }
 
     // Regenerate name to encourage users to change it.
-    if (!this.state.activity.hasChangedName) {
-      this.update({ profile: { displayName: generateRandomName() } });
-    }
+    //if (!this.state.activity.hasChangedName) {
+    //  this.update({ profile: { displayName: generateRandomName() } });
+    //}
   };
 
   resetToRandomDefaultAvatar = async () => {
