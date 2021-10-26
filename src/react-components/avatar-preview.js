@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
+import { getColorSchemePref } from "../utils/get-color-scheme-pref";
 import classNames from "classnames";
 
 // It seems we need to use require to import modules
@@ -66,7 +67,7 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
 function getThemeBackground() {
   const currentTheme = APP?.store?.state?.preferences?.theme;
   const themes = window.APP_CONFIG?.theme?.themes;
-  const currentThemeObject = themes?.find(t => t.id === currentTheme);
+  const currentThemeObject = themes?.find(t => t.id === currentTheme) || getColorSchemePref();
   const previewBackgroundColor = new THREE.Color(currentThemeObject?.variables["background3-color"] || 0xeaeaea);
   return previewBackgroundColor;
 }
