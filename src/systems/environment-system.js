@@ -1,31 +1,43 @@
 import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
 import qsTruthy from "../utils/qs_truthy";
 
-// This disabled lighting contribution from the environment map for things that have a lightmap
-// TODO do this in a less hacky way, maybe make it configurable
-THREE.ShaderChunk.lights_fragment_maps = THREE.ShaderChunk.lights_fragment_maps.replace(
-  "iblIrradiance += getLightProbeIndirectIrradiance( geometry, maxMipLevel );",
-  `#ifndef USE_LIGHTMAP
-     iblIrradiance += getLightProbeIndirectIrradiance( geometry, maxMipLevel );
-   #endif`
-);
+import { LUTCubeLoader } from "three/examples/jsm/loaders/LUTCubeLoader";
+import blenderLutPath from "../assets/blender-lut.cube";
 
 const toneMappingOptions = {
   None: "NoToneMapping",
   Linear: "LinearToneMapping",
   Reinhard: "ReinhardToneMapping",
   Cineon: "CineonToneMapping",
-  ACESFilmic: "ACESFilmicToneMapping"
+  ACESFilmic: "ACESFilmicToneMapping",
+  CustomToneMapping: "CustomToneMapping",
+  LUTToneMapping: "LUTToneMapping"
+};
+
+const outputEncodingOptions = {
+  LinearEncoding: "LinearEncoding",
+  sRGBEncoding: "sRGBEncoding",
+  GammaEncoding: "GammaEncoding",
+  GBEEncoding: "GBEEncoding",
+  LogLuvEncoding: "LogLuvEncoding",
+  GBM7Encoding: "GBM7Encoding",
+  RGBM16Encoding: "RGBM16Encoding",
+  GBDEncoding: "GBDEncoding",
+  BasicDepthPacking: "BasicDepthPacking",
+  GBADepthPacking: "GBADepthPackig"
 };
 
 const defaultEnvSettings = {
   toneMapping: toneMappingOptions.Linear,
+  outputEncoding: outputEncodingOptions.sRGBEncoding,
   toneMappingExposure: 1,
   physicallyCorrectLights: true,
   envMapTexture: null,
   backgroundTexture: null,
   backgroundColor: new THREE.Color("#000000")
 };
+
+let blenderLUTPromise; // lazy loaded
 
 export class EnvironmentSystem {
   constructor(sceneEl) {
@@ -55,6 +67,10 @@ export class EnvironmentSystem {
       .listen();
     gui
       .add(debugSettings, "toneMappingExposure", 0, 4, 0.01)
+      .onChange(updateDebug)
+      .listen();
+    gui
+      .add(debugSettings, "outputEncoding", Object.values(outputEncodingOptions))
       .onChange(updateDebug)
       .listen();
     gui
@@ -103,9 +119,35 @@ export class EnvironmentSystem {
     if (this.renderer.toneMapping !== newToneMapping) {
       this.renderer.toneMapping = newToneMapping;
       materialsNeedUpdate = true;
+
+      // TODO clean up async behavior
+      if (newToneMapping === THREE.LUTToneMapping) {
+        if (!blenderLUTPromise) {
+          blenderLUTPromise = new Promise(function(resolve, reject) {
+            new LUTCubeLoader().load(blenderLutPath, ({ texture3D }) => resolve(texture3D), null, reject);
+          });
+        }
+
+        blenderLUTPromise
+          .then(t => {
+            this.renderer.tonemappingLUT = t;
+          })
+          .catch(function(e) {
+            console.error("Error loading Blender LUT", e);
+            blenderLUTPromise = null;
+          });
+      } else {
+        this.renderer.tonemappingLUT = null;
+      }
     }
 
     this.renderer.toneMappingExposure = settings.toneMappingExposure;
+
+    const newOutputEncoding = THREE[settings.outputEncoding];
+    if (this.renderer.outputEncoding !== newOutputEncoding) {
+      this.renderer.outputEncoding = newOutputEncoding;
+      materialsNeedUpdate = true;
+    }
 
     this.scene.remove(window.lp);
 
