@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Page } from "./Page";
 import { AuthContext } from "../auth/AuthContext";
 import configs from "../../utils/configs";
+import { getAppLogo } from "../../utils/get-app-logo";
 import { useAccessibleOutlineStyle } from "../input/useAccessibleOutlineStyle";
 
 export function PageContainer({ children, ...rest }) {
@@ -12,7 +13,7 @@ export function PageContainer({ children, ...rest }) {
   const isHmc = configs.feature("show_cloud");
   return (
     <Page
-      appLogo={configs.image("logo")}
+      appLogo={getAppLogo()}
       showCloud={configs.feature("show_cloud")}
       enableSpoke={configs.feature("enable_spoke")}
       editorName={configs.translation("editor-name")}

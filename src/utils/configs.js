@@ -78,6 +78,7 @@ let localDevImages = {};
 if (isLocalDevelopment) {
   localDevImages = {
     logo: appLogo,
+    logo_dark: homeHeroBackground, // TODO: Replace with an appropriate image
     company_logo: companyLogo,
     editor_logo: sceneEditorLogo,
     home_background: homeHeroBackground
