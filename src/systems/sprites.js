@@ -260,6 +260,28 @@ export class SpriteSystem {
         );
       }
     });
+
+    async function regenerateImageTextures() {
+      for (const [spritesheetPng, type] of [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]]) {
+        if (this.meshes[type]) {
+          const newTexture = await createImageTexture(spritesheetPng, getThemeColorShifter(type));
+
+          this.meshes[type].material.uniforms.u_spritesheet.value = newTexture;
+          this.meshes[type].material.uniformsNeedUpdate = true;
+        }
+      }
+    }
+    const onStoreChanged = (function() {
+      let themeId;
+      return function onStoreChanged() {
+        const newThemeId = window.APP?.store?.state?.preferences?.theme;
+        if (themeId !== newThemeId) {
+          themeId = newThemeId;
+          regenerateImageTextures();
+        }
+      };
+    })();
+    APP.store.addEventListener("statechanged", onStoreChanged);
   }
 
   tick(t) {
