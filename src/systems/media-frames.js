@@ -367,20 +367,23 @@ AFRAME.registerComponent("media-frame", {
   },
 
   release() {
-    if (NAF.utils.isMine(this.el) || NAF.utils.takeOwnership(this.el)) {
-      const capturedEl = document.getElementById(this.data.targetId);
-
+    const capturedEl = document.getElementById(this.data.targetId);
+    if (NAF.utils.isMine(this.el)) {
+      //Free media-frame globaly
       this.el.setAttribute("media-frame", {
         targetId: "empty"
       });
-
-      if (capturedEl) {
-        capturedEl.object3D.scale.copy(this.data.originalTargetScale);
-        capturedEl.object3D.matrixNeedsUpdate = true;
-        capturedEl.components["floaty-object"].setLocked(false);
-      }
     } else {
-      console.error("failed to take ownership of media frame");
+      //Free media-frame only localy
+      this.data.targetId = "empty";
+      this.data.originalTargetScale = new THREE.Vector3(1, 1, 1);
+      return;
+    }
+
+    if (capturedEl) {
+      capturedEl.object3D.scale.copy(this.data.originalTargetScale);
+      capturedEl.object3D.matrixNeedsUpdate = true;
+      capturedEl.components["floaty-object"].setLocked(false);
     }
   }
 });
