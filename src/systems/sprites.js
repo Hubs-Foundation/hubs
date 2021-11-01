@@ -267,15 +267,12 @@ export class SpriteSystem {
     APP.store.addEventListener("themechanged", async () => {
       for (const [spritesheetPng, type] of pngs) {
         if (this.meshes[type]) {
+          const newTexture = await createImageTexture(spritesheetPng, getThemeColorShifter(type));
           const oldTexture = this.meshes[type].material.uniforms.u_spritesheet.value;
           if (oldTexture) {
             disposeTexture(oldTexture);
           }
-
-          this.meshes[type].material.uniforms.u_spritesheet.value = await createImageTexture(
-            spritesheetPng,
-            getThemeColorShifter(type)
-          );
+          this.meshes[type].material.uniforms.u_spritesheet.value = newTexture;
           this.meshes[type].material.uniformsNeedUpdate = true;
         }
       }
