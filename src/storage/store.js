@@ -254,6 +254,18 @@ export default class Store extends EventTarget {
     }
 
     this._signOutOnExpiredAuthToken();
+
+    const maybeDispatchThemeChanged = (() => {
+      let previous;
+      return () => {
+        const current = this.state.preferences.theme;
+        if ((previous || current) && previous !== current) {
+          this.dispatchEvent(new CustomEvent("themechanged", { detail: { current, previous } }));
+        }
+        previous = current;
+      };
+    })();
+    this.addEventListener("statechanged", maybeDispatchThemeChanged);
   }
 
   _signOutOnExpiredAuthToken = () => {
