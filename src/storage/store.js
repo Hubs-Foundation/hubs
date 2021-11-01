@@ -34,6 +34,18 @@ export const defaultMaterialQualitySetting = (function() {
   return "high";
 })();
 
+function isInvalidOrExpired(token) {
+  try {
+    const expiry = jwtDecode(token).exp * 1000;
+    if (expiry <= Date.now()) {
+      return true;
+    }
+  } catch (e) {
+    return true; // If decoding throws an error, could be a malformed token. (e.name === "InvalidTokenError")
+  }
+  return false;
+}
+
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
 export const SCHEMA = {
@@ -253,17 +265,23 @@ export default class Store extends EventTarget {
       Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
     }
 
-    this._signOutOnExpiredAuthToken();
+    const signOutOnInvalidAuthToken = (() => {
+      let previousToken;
+      return () => {
+        const currentToken = this.state.credentials.token;
+        const tokenDidChange = currentToken !== previousToken;
+        previousToken = currentToken;
+        if (currentToken && tokenDidChange && isInvalidOrExpired(currentToken)) {
+          if (isInvalidOrExpired(currentToken)) {
+            console.warn("Auth token is invalid or expired. Signing out now.");
+            this.update({ credentials: { token: null, email: null } });
+          }
+        }
+      };
+    })();
+    signOutOnInvalidAuthToken();
+    this.addEventListener("statechanged", signOutOnInvalidAuthToken);
   }
-
-  _signOutOnExpiredAuthToken = () => {
-    if (!this.state.credentials.token) return;
-
-    const expiry = jwtDecode(this.state.credentials.token).exp * 1000;
-    if (expiry <= Date.now()) {
-      this.update({ credentials: { token: null, email: null } });
-    }
-  };
 
   initProfile = async () => {
     if (this._shouldResetAvatarOnInit) {

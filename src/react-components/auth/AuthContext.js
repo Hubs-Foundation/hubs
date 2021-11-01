@@ -33,6 +33,10 @@ async function checkIsAdmin(socket, store) {
       })
       .receive("error", error => {
         console.error("Error joining Phoenix Channel", error);
+        if (error.reason === "invalid_token") {
+          console.error("Token is invalid. Signing out.");
+          store.update({ credentials: { token: null, email: null } });
+        }
       })
       .receive("timeout", () => {
         console.error("Phoenix Channel join timed out");
