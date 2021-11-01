@@ -8,6 +8,7 @@
   {   
     "name": "Hubs Dark Mode",
     "id": "hubs-dark-mode",
+    "darkModeDefault": true,
     "variables": {
       "loading-screen-background": "radial-gradient(50% 50% at 50% 50%, #15171B 0%, #282C31 100%)",
       "accept-color-pressed": "#21242C",
