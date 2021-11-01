@@ -47,6 +47,8 @@ AFRAME.registerComponent("pin-networked-object-button", {
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIN);
       }
     };
+
+    APP.store.addEventListener("themechanged", this._updateUI);
   },
 
   play() {
