@@ -47,9 +47,6 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
     material.wireframeLinecap = source.wireframeLinecap;
     material.wireframeLinejoin = source.wireframeLinejoin;
 
-    material.skinning = source.skinning;
-    material.morphTargets = source.morphTargets;
-
     return material;
   }
 
@@ -157,10 +154,6 @@ class HubsMeshPhongMaterial extends THREE.MeshPhongMaterial {
     material.wireframeLinewidth = source.wireframeLinewidth;
     material.wireframeLinecap = source.wireframeLinecap;
     material.wireframeLinejoin = source.wireframeLinejoin;
-
-    material.skinning = source.skinning;
-    material.morphTargets = source.morphTargets;
-    material.morphNormals = source.morphNormals;
 
     return material;
   }

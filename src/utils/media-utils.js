@@ -261,9 +261,6 @@ export const cloneMedia = (sourceEl, template, src = null, networked = true, lin
 };
 
 export function injectCustomShaderChunks(obj) {
-  const vertexRegex = /\bskinning_vertex\b/;
-  const fragRegex = /\bgl_FragColor\b/;
-
   const shaderUniforms = [];
   const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
 
@@ -295,7 +292,7 @@ export function injectCustomShaderChunks(obj) {
       const newMaterial = material.clone();
       // This will not run if the object is never rendered unbatched, since its unbatched shader will never be compiled
       newMaterial.onBeforeCompile = (shader, renderer) => {
-        if (!vertexRegex.test(shader.vertexShader)) return;
+        if (shader.vertexShader.indexOf("#include <skinning_vertex>") == -1) return;
 
         if (material.onBeforeCompile) {
           material.onBeforeCompile(shader, renderer);
@@ -310,37 +307,40 @@ export function injectCustomShaderChunks(obj) {
         shader.uniforms.hubs_HighlightInteractorTwo = { value: false };
         shader.uniforms.hubs_Time = { value: 0 };
 
-        const vchunk = `
-        if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
-          vec4 wt = modelMatrix * vec4(transformed, 1);
+        shader.vertexShader =
+          [
+            "varying vec3 hubs_WorldPosition;",
+            "uniform bool hubs_IsFrozen;",
+            "uniform bool hubs_HighlightInteractorOne;",
+            "uniform bool hubs_HighlightInteractorTwo;\n"
+          ].join("\n") +
+          shader.vertexShader.replace(
+            "#include <skinning_vertex>",
+            `#include <skinning_vertex>
+             if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen) {
+              vec4 wt = modelMatrix * vec4(transformed, 1);
 
-          // Used in the fragment shader below.
-          hubs_WorldPosition = wt.xyz;
-        }
-        `;
+              // Used in the fragment shader below.
+              hubs_WorldPosition = wt.xyz;
+            }`
+          );
 
-        const vlines = shader.vertexShader.split("\n");
-        const vindex = vlines.findIndex(line => vertexRegex.test(line));
-        vlines.splice(vindex + 1, 0, vchunk);
-        vlines.unshift("varying vec3 hubs_WorldPosition;");
-        vlines.unshift("uniform bool hubs_IsFrozen;");
-        vlines.unshift("uniform bool hubs_HighlightInteractorOne;");
-        vlines.unshift("uniform bool hubs_HighlightInteractorTwo;");
-        shader.vertexShader = vlines.join("\n");
-
-        const flines = shader.fragmentShader.split("\n");
-        const findex = flines.findIndex(line => fragRegex.test(line));
-        flines.splice(findex + 1, 0, mediaHighlightFrag);
-        flines.unshift("varying vec3 hubs_WorldPosition;");
-        flines.unshift("uniform bool hubs_IsFrozen;");
-        flines.unshift("uniform bool hubs_EnableSweepingEffect;");
-        flines.unshift("uniform vec2 hubs_SweepParams;");
-        flines.unshift("uniform bool hubs_HighlightInteractorOne;");
-        flines.unshift("uniform vec3 hubs_InteractorOnePos;");
-        flines.unshift("uniform bool hubs_HighlightInteractorTwo;");
-        flines.unshift("uniform vec3 hubs_InteractorTwoPos;");
-        flines.unshift("uniform float hubs_Time;");
-        shader.fragmentShader = flines.join("\n");
+        shader.fragmentShader =
+          [
+            "varying vec3 hubs_WorldPosition;",
+            "uniform bool hubs_IsFrozen;",
+            "uniform bool hubs_EnableSweepingEffect;",
+            "uniform vec2 hubs_SweepParams;",
+            "uniform bool hubs_HighlightInteractorOne;",
+            "uniform vec3 hubs_InteractorOnePos;",
+            "uniform bool hubs_HighlightInteractorTwo;",
+            "uniform vec3 hubs_InteractorTwoPos;",
+            "uniform float hubs_Time;\n"
+          ].join("\n") +
+          shader.fragmentShader.replace(
+            "#include <output_fragment>",
+            "#include <output_fragment>\n" + mediaHighlightFrag
+          );
 
         shaderUniforms.push(shader.uniforms);
       };
