@@ -8,6 +8,7 @@ import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -549,6 +550,7 @@ class GLTFHubsTextureBasisExtension {
   constructor(parser) {
     this.parser = parser;
     this.name = "MOZ_HUBS_texture_basis";
+    this.basisLoader = new BasisTextureLoader(parser.options.manager).detectSupport(AFRAME.scenes[0].renderer);
   }
 
   loadTexture(textureIndex) {
@@ -560,7 +562,7 @@ class GLTFHubsTextureBasisExtension {
       return null;
     }
 
-    if (!parser.options.ktx2Loader) {
+    if (!this.basisLoader) {
       // @TODO: Display warning (only if the extension is in extensionsRequired)?
       return null;
     }
@@ -569,9 +571,8 @@ class GLTFHubsTextureBasisExtension {
 
     const extensionDef = textureDef.extensions[this.name];
     const source = json.images[extensionDef.source];
-    const loader = parser.options.ktx2Loader.basisLoader;
 
-    return parser.loadTextureImage(textureIndex, source, loader);
+    return parser.loadTextureImage(textureIndex, source, this.basisLoader);
   }
 }
 
