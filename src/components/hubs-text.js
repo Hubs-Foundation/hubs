@@ -1,4 +1,6 @@
 import createTextGeometry from "three-bmfont-text";
+import fontJSON from '../fonts/font.json';
+import fontPNG from '../fonts/font.png';
 
 // 1 to match other A-Frame default widths.
 const DEFAULT_WIDTH = 1;
@@ -50,24 +52,18 @@ function computeFontWidthFactor(font) {
 }
 
 function loadFont(src) {
-  return fetch(src)
-    .then(resp => resp.json())
-    .then(font => {
-      // Fix negative Y offsets for Roboto MSDF font from tool. Experimentally determined.
-      if (src.indexOf("/Roboto-msdf.json") >= 0) {
-        for (const ch of font.chars) {
-          ch.yoffset += 30;
-        }
-      }
-      font.widthFactor = computeFontWidthFactor(font);
-      return font;
-    });
+  const font = { ...fontJSON };
+  for (const ch of font.chars) {
+    ch.yoffset += 30;
+  }
+  font.widthFactor = computeFontWidthFactor(font);
+  return font;
 }
 
 function loadTexture(src) {
   return new Promise((resolve, reject) => {
     new THREE.ImageLoader().load(
-      src,
+      fontPNG,
       image => {
         const texture = new THREE.Texture();
         texture.image = image;
@@ -84,10 +80,13 @@ function loadTexture(src) {
   });
 }
 
+
 const FONTS = {
   roboto: {
-    json: loadFont("https://cdn.aframe.io/fonts/Roboto-msdf.json"),
-    texture: loadTexture("https://cdn.aframe.io/fonts/Roboto-msdf.png")
+    // json: loadFont("https://cdn.aframe.io/fonts/Roboto-msdf.json"),
+    // texture: loadTexture("https://cdn.aframe.io/fonts/Roboto-msdf.png")
+    json: loadFont("../fonts/font.json"),
+    texture: loadTexture("../fonts/font.png")
   }
 };
 

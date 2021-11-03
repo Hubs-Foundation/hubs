@@ -1,5 +1,8 @@
 :local(.support-main) {
+  // font-family: 'Nanum Gothic', sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  // font-family: 'Nanum Gothic', sans-serif;
   z-index: 10000;
   position: absolute;
   width: 100%;
@@ -13,7 +16,7 @@
   padding-top: 5em;
 }
 
-:local(.support-content) {
+:local(.support-content) {  
   display: flex;
   flex-direction: column;
   align-items: center;

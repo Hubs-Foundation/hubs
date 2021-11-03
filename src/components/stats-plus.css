@@ -11,7 +11,8 @@
 }
 
 :global(.rs-fps-counter) {
-  font-family: monospace;
+  /* font-family: monospace; */
+  font-family: 'Nanum Gothic', sans-serif;
   cursor: pointer;
   position: absolute;
   bottom: 96px;

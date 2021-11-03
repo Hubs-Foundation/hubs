@@ -69,9 +69,10 @@ AFRAME.registerSystem("userinput-debug", {
           left: 0; bottom: 0;
           background: white;
           white-space: pre;
-          font-family: monospace;
+          font-family: 'Nanum Gothic', sans-serif;
           font-size: 8pt;
-        `;
+          `;
+          // font-family: monospace;
         document.body.append(this.userinputFrameStatus);
       }
 

@@ -1522,13 +1522,14 @@ class UIRoot extends Component {
                   )
                 }
                 modal={this.state.dialog}
-                toolbarLeft={
-                  <InvitePopoverContainer
-                    hub={this.props.hub}
-                    hubChannel={this.props.hubChannel}
-                    scene={this.props.scene}
-                  />
-                }
+                // invite Delate --
+                // toolbarLeft={
+                //   <InvitePopoverContainer
+                //     hub={this.props.hub}
+                //     hubChannel={this.props.hubChannel}
+                //     scene={this.props.scene}
+                //   />
+                // }
                 toolbarCenter={
                   <>
                     {watching && (
@@ -1553,18 +1554,29 @@ class UIRoot extends Component {
                     )}
                     {entered && (
                       <>
-                        <VoiceButtonContainer
-                          scene={this.props.scene}
-                          microphoneEnabled={this.mediaDevicesManager.isMicShared}
+                        <ToolbarButton
+                          icon={<LeaveIcon />}
+                          label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
+                          preset="cancel"
+                          onClick={() => {
+                            this.showNonHistoriedDialog(LeaveRoomModal, {
+                              destinationUrl: "/",
+                              reason: LeaveReason.leaveRoom
+                            });
+                          }}
                         />
+                          <VoiceButtonContainer
+                            scene={this.props.scene}
+                            microphoneEnabled={this.mediaDevicesManager.isMicShared}
+                          />
                         {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> */}
-                        <PlacePopoverContainer
+                        {/* <PlacePopoverContainer
                           scene={this.props.scene}
                           hubChannel={this.props.hubChannel}
                           mediaSearchStore={this.props.mediaSearchStore}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
-                        />
-                        {/* {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />} */}
+                        /> */}
+                        {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
                       </>
                     )}
                     <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
@@ -1604,7 +1616,7 @@ class UIRoot extends Component {
                         }}
                       />
                     )} */}
-                    <MoreMenuPopoverButton menu={moreMenu} />
+                    {/* <MoreMenuPopoverButton menu={moreMenu} /> */}
                   </>
                 }
               />

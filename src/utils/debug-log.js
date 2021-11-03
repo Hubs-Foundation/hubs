@@ -4,6 +4,7 @@ const showLog = qsTruthy("debug_log");
 
 if (showLog) {
   const template = document.createElement("template");
+  // font-family: monospace;
   template.innerHTML = `
     <style>
       #debug-log {
@@ -14,7 +15,7 @@ if (showLog) {
         z-index: 1000;
       }
       #debug-log, #debug-log-input {
-        font-family: monospace;
+        font-family: 'Nanum Gothic', sans-serif;
         font-size: 11px;
         width: 100%;
       }
