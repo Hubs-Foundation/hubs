@@ -6,7 +6,6 @@ AFRAME.registerComponent("billboard", {
     onlyY: { type: "boolean" }
   },
   init: function() {
-    this.target = new THREE.Vector3();
     this._updateBillboard = this._updateBillboard.bind(this);
     this._updateIsInView = this._updateIsInView.bind(this);
 
@@ -80,22 +79,27 @@ AFRAME.registerComponent("billboard", {
     };
   })(),
 
-  _updateBillboard: function() {
-    if (!this.el.object3D.visible) return;
+  _updateBillboard: (function() {
+    const targetPos = new THREE.Vector3();
+    const worldPos = new THREE.Vector3();
+    return function() {
+      if (!this.el.object3D.visible) return;
 
-    const camera = this.el.sceneEl.camera;
-    const object3D = this.el.object3D;
+      const camera = this.el.sceneEl.camera;
+      const object3D = this.el.object3D;
 
-    if (camera) {
-      // Set the camera world position as the target.
-      this.target.setFromMatrixPosition(camera.matrixWorld);
-      object3D.lookAt(this.target);
+      if (camera) {
+        // Set the camera world position as the target.
+        targetPos.setFromMatrixPosition(camera.matrixWorld);
 
-      if (this.data.onlyY) {
-        object3D.rotation.x = 0;
+        if (this.data.onlyY) {
+          object3D.getWorldPosition(worldPos);
+          targetPos.y = worldPos.y;
+        }
+        object3D.lookAt(targetPos);
+
+        object3D.matrixNeedsUpdate = true;
       }
-
-      object3D.matrixNeedsUpdate = true;
-    }
-  }
+    };
+  })()
 });
