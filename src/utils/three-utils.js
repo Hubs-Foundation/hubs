@@ -30,6 +30,11 @@ export function disposeMaterial(mtrl) {
 }
 
 export function disposeNode(node) {
+  if (node.type === "Audio") {
+    node.stop();
+    node.disconnect();
+  }
+
   if (!(node instanceof THREE.Mesh)) return;
 
   if (node.geometry) {

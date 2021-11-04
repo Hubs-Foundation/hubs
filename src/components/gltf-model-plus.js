@@ -8,6 +8,7 @@ import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import { GLTFAudioEmitterExtension } from "three-omi";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -627,8 +628,12 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
   // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of
   // "taking control of the render loop" which is something we want to tackle for many reasons.
-  if (!ktxLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
-    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  if (AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
+    if (!ktxLoader) {
+      ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+    }
+
+    gltfLoader.register(parser => new GLTFAudioEmitterExtension(parser, AFRAME.scenes[0].sceneEl.audioListener));
   }
 
   if (ktxLoader) {
@@ -637,12 +642,26 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 
   return new Promise((resolve, reject) => {
     gltfLoader.load(gltfUrl, resolve, onProgress, reject);
-  }).finally(() => {
-    if (fileMap) {
-      // The GLTF is now cached as a THREE object, we can get rid of the original blobs
-      Object.keys(fileMap).forEach(URL.revokeObjectURL);
-    }
-  });
+  })
+    .then(gltf => {
+      gltf.cache = true;
+
+      // Don't cache glTFs with Audio/Positional audio components because they can't be cloned properly.
+      if (
+        gltf.parser.plugins["OMI_audio_emitter"] &&
+        gltf.parser.plugins["OMI_audio_emitter"].audioEmitters.length > 0
+      ) {
+        gltf.cache = false;
+      }
+
+      return gltf;
+    })
+    .finally(() => {
+      if (fileMap) {
+        // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+        Object.keys(fileMap).forEach(URL.revokeObjectURL);
+      }
+    });
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
@@ -654,6 +673,11 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
     } else {
       if (inflightGltfs.has(src)) {
         const gltf = await inflightGltfs.get(src);
+
+        if (!gltf.cache) {
+          return loadGLTF(src, contentType, null, jsonPreprocessor);
+        }
+
         gltfCache.retain(src);
         return cloneGltf(gltf);
       } else {
@@ -661,6 +685,11 @@ export async function loadModel(src, contentType = null, useCache = false, jsonP
         inflightGltfs.set(src, promise);
         const gltf = await promise;
         inflightGltfs.delete(src);
+
+        if (!gltf.cache) {
+          return gltf;
+        }
+
         gltfCache.set(src, gltf);
         return cloneGltf(gltf);
       }
@@ -717,8 +746,10 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
     }
     const src = resolveAsset(this.data.src);
-    if (src) {
+    if (src && gltfCache.has(src)) {
       gltfCache.release(src);
+    } else {
+      this.el.object3DMap.mesh.traverse(disposeNode);
     }
   },
 
