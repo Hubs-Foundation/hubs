@@ -254,7 +254,10 @@ AFRAME.registerComponent("personal-space-invader", {
           if (!material.userData.originalProps) {
             originalProps = material.userData.originalProps = {
               opacity: material.opacity,
-              transparent: material.transparent
+              transparent: material.transparent,
+              format: material.format,
+              blending: material.blending,
+              side: material.side
             };
           }
 
@@ -263,6 +266,9 @@ AFRAME.registerComponent("personal-space-invader", {
           // not across avatars in the room.
           material.opacity = invading ? this.data.invadingOpacity : originalProps.opacity;
           material.transparent = invading || originalProps.transparent;
+          material.format = invading ? THREE.RGBAFormat : originalProps.format;
+          material.blending = invading ? THREE.NormalBlending : originalProps.blending;
+          material.side = invading ? THREE.DoubleSide : originalProps.side;
         });
       });
     } else {
