@@ -266,6 +266,9 @@ AFRAME.registerComponent("personal-space-invader", {
           // not across avatars in the room.
           material.opacity = invading ? this.data.invadingOpacity : originalProps.opacity;
           material.transparent = invading || originalProps.transparent;
+
+          // Note: Since 0.132 the default format for GLTF imported opaque materials is RGBFormat
+          // so we need to switch before enabling transparency.
           material.format = invading ? THREE.RGBAFormat : originalProps.format;
           material.blending = invading ? THREE.NormalBlending : originalProps.blending;
           material.side = invading ? THREE.DoubleSide : originalProps.side;
