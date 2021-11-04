@@ -1,6 +1,6 @@
 import createTextGeometry from "three-bmfont-text";
-import fontJSON from '../fonts/font.json';
-import fontPNG from '../fonts/font.png';
+import fontJSON from '../fonts/SpoqaHanSansNeo-Regular.json';
+import fontPNG from '../fonts/SpoqaHanSansNeo-Regular.png';
 
 // 1 to match other A-Frame default widths.
 const DEFAULT_WIDTH = 1;
@@ -85,8 +85,8 @@ const FONTS = {
   roboto: {
     // json: loadFont("https://cdn.aframe.io/fonts/Roboto-msdf.json"),
     // texture: loadTexture("https://cdn.aframe.io/fonts/Roboto-msdf.png")
-    json: loadFont("../fonts/font.json"),
-    texture: loadTexture("../fonts/font.png")
+    json: loadFont("../fonts/SpoqaHanSansNeo-Regular.json"),
+    texture: loadTexture("../fonts/SpoqaHanSansNeo-Regular.png")
   }
 };
 
