@@ -550,7 +550,7 @@ class GLTFHubsTextureBasisExtension {
   constructor(parser) {
     this.parser = parser;
     this.name = "MOZ_HUBS_texture_basis";
-    this.basisLoader = new BasisTextureLoader(parser.options.manager).detectSupport(AFRAME.scenes[0].renderer);
+    this.basisLoader = null;
   }
 
   loadTexture(textureIndex) {
@@ -560,6 +560,10 @@ class GLTFHubsTextureBasisExtension {
 
     if (!textureDef.extensions || !textureDef.extensions[this.name]) {
       return null;
+    }
+
+    if (this.basisLoader === null) {
+      this.basisLoader = new BasisTextureLoader(parser.options.manager).detectSupport(AFRAME.scenes[0].renderer);
     }
 
     if (!this.basisLoader) {
