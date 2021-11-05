@@ -32,6 +32,11 @@ let isAdmin = false;
 const hasThumbnailServerMetaTag = !!document.querySelector("meta[name='env:thumbnail_server']");
 configs.IS_LOCAL_OR_CUSTOM_CLIENT = !hasThumbnailServerMetaTag;
 
+// For features not available on Hubs Cloud, use configs.IS_HMC to check
+const baseAssetsPathMetaTag = !!document.querySelector("meta[name='env:base_assets_path']");
+const isHMC = baseAssetsPathMetaTag.includes(".reticulum.io");
+configs.IS_HMC = isHMC;
+
 // Also include configs that reticulum injects as a script in the page head.
 
 configs.AVAILABLE_INTEGRATIONS = window.AVAILABLE_INTEGRATIONS || {};
