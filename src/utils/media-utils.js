@@ -2,7 +2,7 @@ import { objectTypeForOriginAndContentType } from "../object-types";
 import { getReticulumFetchUrl, getDirectReticulumFetchUrl } from "./phoenix-utils";
 import { ObjectContentOrigins } from "../object-types";
 import mediaHighlightFrag from "./media-highlight-frag.glsl";
-import { mapMaterials } from "./material-utils";
+import { updateMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
 import { proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
@@ -267,7 +267,7 @@ export function injectCustomShaderChunks(obj) {
   obj.traverse(object => {
     if (!object.material) return;
 
-    object.material = mapMaterials(object, material => {
+    updateMaterials(object, material => {
       if (material.hubs_InjectedCustomShaderChunks) return material;
       if (!validMaterials.includes(material.type)) {
         return material;

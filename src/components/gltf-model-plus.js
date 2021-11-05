@@ -1,5 +1,5 @@
 import nextTick from "../utils/next-tick";
-import { mapMaterials, convertStandardMaterial } from "../utils/material-utils";
+import { updateMaterials, mapMaterials, convertStandardMaterial } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
@@ -401,25 +401,6 @@ class GLTFHubsPlugin {
         node.extras.gltfIndex = i;
       }
     }
-
-    function hookDef(defType, hookName) {
-      return Promise.all(
-        (parser.json[defType] || []).map((_def, idx) => {
-          return Promise.all(
-            parser._invokeAll(function(ext) {
-              return ext[hookName] && ext[hookName](idx);
-            })
-          );
-        })
-      );
-    }
-
-    // TODO decide if thse should get put into the GLTF loader itself
-    return Promise.all([
-      hookDef("scenes", "extendScene"),
-      hookDef("nodes", "extendNode"),
-      hookDef("materials", "extendMaterial")
-    ]);
   }
 
   afterRoot(gltf) {
@@ -428,7 +409,7 @@ class GLTFHubsPlugin {
       // @TODO: Should this be fixed in the gltf loader?
       object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
       const materialQuality = window.APP.store.materialQualitySetting;
-      object.material = mapMaterials(object, material => convertStandardMaterial(material, materialQuality));
+      updateMaterials(object, material => convertStandardMaterial(material, materialQuality));
     });
 
     // Replace animation target node name with the node uuid.
@@ -459,47 +440,50 @@ class GLTFHubsComponentsExtension {
     this.name = "MOZ_hubs_components";
   }
 
-  _markDefs() {
-    // TODO hack to keep hubs component data in userData. Remove once we handle all component stuff in a plugin
-    delete this.parser.extensions.MOZ_hubs_components;
-  }
-
-  extendScene(sceneIdx) {
-    const ext = this.parser.json.scenes[sceneIdx]?.extensions?.MOZ_hubs_components;
-    if (ext) return this.resolveComponentLinks(ext);
-  }
-
-  extendNode(nodeIdx) {
-    const ext = this.parser.json.nodes[nodeIdx]?.extensions?.MOZ_hubs_components;
-    if (ext) return this.resolveComponentLinks(ext);
-  }
-
-  extendMaterial(materialIdx) {
-    const ext = this.parser.json.materials[materialIdx]?.extensions?.MOZ_hubs_components;
-    if (ext) return this.resolveComponentLinks(ext);
-  }
-
-  resolveComponentLinks(ext) {
+  afterRoot({ scenes, parser }) {
     const deps = [];
 
-    for (const componentName in ext) {
-      const props = ext[componentName];
-      for (const propName in props) {
-        const value = props[propName];
-        const type = value?.__mhc_link_type;
-        if (type && value.index !== undefined) {
-          deps.push(
-            this.parser.getDependency(type, value.index).then(loadedDep => {
-              props[propName] = loadedDep;
-              if (type === "texture" && !this.parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
-                // For now assume all non HDR textures linked in hubs components are sRGB.
-                // We can allow this to be overriden later if needed
-                loadedDep.encoding = THREE.sRGBEncoding;
-              }
-            })
-          );
+    const resolveComponents = (gltfRootType, obj) => {
+      const idx = parser.associations.get(obj)?.[gltfRootType];
+      if (idx === undefined) return;
+      const ext = parser.json[gltfRootType][idx].extensions?.[this.name];
+      if (!ext) return;
+
+      // TODO putting this into userData is a bit silly, we should just inflate here, but entities need to be inflated first...
+      obj.userData.gltfExtensions = Object.assign(obj.userData.gltfExtensions || {}, {
+        MOZ_hubs_components: ext
+      });
+
+      for (const componentName in ext) {
+        const props = ext[componentName];
+        for (const propName in props) {
+          const value = props[propName];
+          const type = value?.__mhc_link_type;
+          if (type && value.index !== undefined) {
+            deps.push(
+              parser.getDependency(type, value.index).then(loadedDep => {
+                props[propName] = loadedDep;
+                if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
+                  // For now assume all non HDR textures linked in hubs components are sRGB.
+                  // We can allow this to be overriden later if needed
+                  loadedDep.encoding = THREE.sRGBEncoding;
+                }
+                return loadedDep;
+              })
+            );
+          }
         }
       }
+    };
+
+    for (let i = 0; i < scenes.length; i++) {
+      // TODO this should be done by GLTLoader
+      parser.associations.set(scenes[i], { scenes: i });
+      scenes[i].traverse(obj => {
+        resolveComponents("scenes", obj);
+        resolveComponents("nodes", obj);
+        mapMaterials(obj, resolveComponents.bind(this, "materials"));
+      });
     }
 
     return Promise.all(deps);
