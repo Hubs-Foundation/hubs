@@ -1556,7 +1556,8 @@ class UIRoot extends Component {
                       <>
                         <ToolbarButton
                           icon={<LeaveIcon />}
-                          label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
+                          label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="ㅤㅤ홈ㅤㅤ(나가기)" />}
+                          className="leaveBtn"
                           preset="cancel"
                           onClick={() => {
                             this.showNonHistoriedDialog(LeaveRoomModal, {
