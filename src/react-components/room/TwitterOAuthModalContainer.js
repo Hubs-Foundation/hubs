@@ -4,16 +4,22 @@ import { TwitterOAuthModal } from "./TwitterOAuthModal";
 import configs from "../../utils/configs";
 
 export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose }) {
+  console.log("TwitterOAuthModalContainer");
   const popupRef = useRef();
+  console.log("popupRef");
+  console.log(popupRef);
 
   const onConnect = useCallback(
     async () => {
       try {
         if (popupRef.current) {
+          console.log("popupRef.current");
           popupRef.current.close();
         }
 
         const url = await hubChannel.getTwitterOAuthURL();
+        console.log("Inside connect TwitterOAuthModalContainer hubChannel.getTwitterOAuthURL()");
+        console.log(url);
 
         const width = 600;
         const height = 760;
