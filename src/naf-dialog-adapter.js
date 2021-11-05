@@ -782,7 +782,7 @@ export class DialogAdapter extends EventEmitter {
               track,
               stopTracks: false,
               codecOptions: { opusStereo: false, opusDtx: true },
-              zeroRtpOnPause: true,
+              zeroRtpOnPause: false,
               disableTrackOnPause: true
             });
 
