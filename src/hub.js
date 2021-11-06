@@ -266,6 +266,7 @@ let isOAuthModal = false;
 // TODO: Replace with a new oauth callback route that has this postMessage script.
 if (window.opener && window.opener.doingTwitterOAuth) {
   window.opener.postMessage("oauth-successful");
+  window.close();
   isOAuthModal = true;
 }
 
