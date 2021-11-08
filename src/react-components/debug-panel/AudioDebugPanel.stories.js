@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import styles from "./AudioDebugPanel.scss";
@@ -16,8 +16,7 @@ import {
   GLOBAL_VOLUME_DEFAULT
 } from "../../react-components/preferences-screen";
 import { SelectInputField } from "../input/SelectInputField";
-import { DISTANCE_MODEL_OPTIONS, DistanceModelType, SourceType } from "../../components/audio-params";
-import { getCurrentAudioSettingsForSourceType, updateAudioSettings } from "../../update-audio-settings";
+import { DISTANCE_MODEL_OPTIONS, DistanceModelType } from "../../components/audio-params";
 
 const ROLLOFF_MIN = 0.0;
 const ROLLOFF_MAX = 20.0;
@@ -34,6 +33,26 @@ const ANGLE_STEP = 1.0;
 const GAIN_MIN = 0.0;
 const GAIN_MAX = 1.0;
 const GAIN_STEP = 0.1;
+
+export default {
+  title: "AudioDebugger/AudioDebugPanel",
+  parameters: {
+    layout: "fullscreen"
+  }
+};
+
+const MockAppObject = {
+  store: {
+    state: {
+      preferences: {
+        enableAudioClipping: undefined,
+        audioClippingThreshold: undefined,
+        globalVoiceVolume: undefined,
+        globalMediaVolume: undefined
+      }
+    }
+  }
+};
 
 function SelectProperty({ defaultValue, options, onChange, children }) {
   const [value, setValue] = useState(defaultValue);
@@ -87,62 +106,46 @@ SliderProperty.propTypes = {
   onChange: PropTypes.func,
   children: PropTypes.node
 };
-
+//we can edit this function later if we need to adjust values in storybook.
 function getPrefs() {
   const prefs = {
-    enableAudioClipping: APP.store.state.preferences.enableAudioClipping,
-    audioClippingThreshold: APP.store.state.preferences.audioClippingThreshold,
-    globalVoiceVolume: APP.store.state.preferences.globalVoiceVolume,
-    globalMediaVolume: APP.store.state.preferences.globalMediaVolume
+    enableAudioClipping: MockAppObject.store.state.preferences.enableAudioClipping,
+    audioClippingThreshold: MockAppObject.store.state.preferences.audioClippingThreshold,
+    globalVoiceVolume: MockAppObject.store.state.preferences.globalVoiceVolume,
+    globalMediaVolume: MockAppObject.store.state.preferences.globalMediaVolume
   };
   if (prefs.enableAudioClipping === undefined) prefs.enableAudioClipping = CLIPPING_THRESHOLD_ENABLED;
   if (prefs.audioClippingThreshold === undefined) prefs.audioClippingThreshol = CLIPPING_THRESHOLD_DEFAULT;
   if (prefs.globalVoiceVolume === undefined) prefs.globalVoiceVolume = GLOBAL_VOLUME_DEFAULT;
   if (prefs.globalMediaVolume === undefined) prefs.globalMediaVolume = GLOBAL_VOLUME_DEFAULT;
+
   return prefs;
 }
 
 export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
-  const [mediaSettings, setMediaSettings] = useState(getCurrentAudioSettingsForSourceType(SourceType.MEDIA_VIDEO));
-  const [avatarSettings, setAvatarSettings] = useState(
-    getCurrentAudioSettingsForSourceType(SourceType.AVATAR_AUDIO_SOURCE)
-  );
-  const onSettingChange = (sourceType, newSetting) => {
-    const settings = Object.assign({}, APP.audioDebugPanelOverrides.get(sourceType), newSetting);
-    APP.audioDebugPanelOverrides.set(sourceType, settings);
-    if (sourceType === SourceType.MEDIA_VIDEO) {
-      setMediaSettings(getCurrentAudioSettingsForSourceType(SourceType.MEDIA_VIDEO));
-    } else {
-      setAvatarSettings(getCurrentAudioSettingsForSourceType(SourceType.AVATAR_AUDIO_SOURCE));
-    }
-    for (const [el, audio] of APP.audios.entries()) {
-      updateAudioSettings(el, audio);
-    }
-  };
-
   const [preferences, setPreferences] = useState(getPrefs());
-  const onPreferencesUpdated = useCallback(
-    () => {
-      setPreferences(getPrefs());
-    },
-    [setPreferences]
-  );
-  useEffect(
-    () => {
-      onPreferencesUpdated();
-      APP.store.addEventListener("statechanged", onPreferencesUpdated);
-      return () => {
-        APP.store.removeEventListener("statechanged", onPreferencesUpdated);
-        APP.audioDebugPanelOverrides.delete(SourceType.MEDIA_VIDEO);
-        APP.audioDebugPanelOverrides.delete(SourceType.AVATAR_AUDIO_SOURCE);
-        for (const [el, audio] of APP.audios.entries()) {
-          updateAudioSettings(el, audio);
-        }
-      };
-    },
-    [onPreferencesUpdated]
-  );
-
+  const [MockAvatarSettings, setMockAvatarSettings] = useState({
+    audioType: "pannernode",
+    distanceModel: "inverse",
+    rolloffFactor: 5,
+    refDistance: 5,
+    maxDistance: 10000,
+    coneInnerAngle: 180,
+    coneOuterAngle: 360,
+    coneOuterGain: 0.9,
+    gain: 1
+  });
+  const [MockMediaSettings, setMockMediaSettings] = useState({
+    audioType: "pannernode",
+    distanceModel: "inverse",
+    rolloffFactor: 5,
+    refDistance: 5,
+    maxDistance: 10000,
+    coneInnerAngle: 360,
+    coneOuterAngle: 0,
+    coneOuterGain: 0.9,
+    gain: 0.5
+  });
   return (
     <div
       className={classNames(styles.audioDebugContainer)}
@@ -169,7 +172,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               type="checkbox"
               checked={preferences.enableAudioClipping}
               onChange={() => {
-                APP.store.update({
+                MockAppObject.store.update({
                   preferences: {
                     enableAudioClipping: !preferences.enableAudioClipping
                   }
@@ -183,7 +186,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               min={CLIPPING_THRESHOLD_MIN}
               max={CLIPPING_THRESHOLD_MAX}
               onChange={value => {
-                APP.store.update({
+                MockAppObject.store.update({
                   preferences: {
                     audioClippingThreshold: value
                   }
@@ -201,7 +204,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
             min={GLOBAL_VOLUME_MIN}
             max={GLOBAL_VOLUME_MAX}
             onChange={value => {
-              APP.store.update({
+              MockAppObject.store.update({
                 preferences: {
                   globalVoiceVolume: value
                 }
@@ -218,7 +221,7 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
             min={GLOBAL_VOLUME_MIN}
             max={GLOBAL_VOLUME_MAX}
             onChange={value => {
-              APP.store.update({
+              MockAppObject.store.update({
                 preferences: {
                   globalMediaVolume: value
                 }
@@ -237,14 +240,20 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
             grow
           >
             <SelectProperty
-              defaultValue={avatarSettings.distanceModel}
+              defaultValue={MockAvatarSettings.distanceModel}
               options={DISTANCE_MODEL_OPTIONS}
               onChange={value => {
-                const newSetting = { distanceModel: value };
-                if (value === DistanceModelType.Linear && avatarSettings.rolloffFactor > 1.0) {
-                  newSetting.rolloffFactor = 1.0;
-                }
-                onSettingChange(SourceType.AVATAR_AUDIO_SOURCE, newSetting);
+                setMockAvatarSettings({
+                  audioType: "pannernode",
+                  distanceModel: value,
+                  rolloffFactor: 5,
+                  refDistance: 5,
+                  maxDistance: 10000,
+                  coneInnerAngle: 180,
+                  coneOuterAngle: 360,
+                  coneOuterGain: 0.9,
+                  gain: 1
+                });
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -252,12 +261,12 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </p>
             </SelectProperty>
             <SliderProperty
-              defaultValue={avatarSettings.rolloffFactor}
-              step={avatarSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
-              min={avatarSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
-              max={avatarSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
+              defaultValue={MockAvatarSettings.rolloffFactor}
+              step={MockAvatarSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
+              min={MockAvatarSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
+              max={MockAvatarSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
               onChange={value => {
-                onSettingChange(SourceType.AVATAR_AUDIO_SOURCE, { rolloffFactor: value });
+                setPreferences(getPrefs(value));
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -265,26 +274,26 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </p>
             </SliderProperty>
             <SliderProperty
-              defaultValue={avatarSettings.refDistance}
+              defaultValue={MockAvatarSettings.refDistance}
               step={DISTANCE_STEP}
               min={DISTANCE_MIN}
               max={DISTANCE_MAX}
               onChange={value => {
-                onSettingChange(SourceType.AVATAR_AUDIO_SOURCE, { refDistance: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
                 <FormattedMessage id="audio-debug-view.avatar.refDistance" defaultMessage="Ref Distance" />
               </p>
             </SliderProperty>
-            {avatarSettings.distanceModel === "linear" ? (
+            {MockAvatarSettings.distanceModel === "linear" ? (
               <SliderProperty
-                defaultValue={avatarSettings.maxDistance}
+                defaultValue={MockAvatarSettings.maxDistance}
                 step={DISTANCE_STEP}
                 min={DISTANCE_MIN}
                 max={DISTANCE_MAX}
                 onChange={value => {
-                  onSettingChange(SourceType.AVATAR_AUDIO_SOURCE, { maxDistance: value });
+                  getPrefs(value);
                 }}
               >
                 <p className={classNames(styles.propText)}>
@@ -293,12 +302,12 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </SliderProperty>
             ) : null}
             <SliderProperty
-              defaultValue={avatarSettings.coneInnerAngle}
+              defaultValue={MockAvatarSettings.coneInnerAngle}
               step={ANGLE_STEP}
               min={ANGLE_MIN}
               max={ANGLE_MAX}
               onChange={value => {
-                onSettingChange(SourceType.AVATAR_AUDIO_SOURCE, { coneInnerAngle: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -306,12 +315,12 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </p>
             </SliderProperty>
             <SliderProperty
-              defaultValue={avatarSettings.coneOuterAngle}
+              defaultValue={MockAvatarSettings.coneOuterAngle}
               step={ANGLE_STEP}
               min={ANGLE_MIN}
               max={ANGLE_MAX}
               onChange={value => {
-                onSettingChange(SourceType.AVATAR_AUDIO_SOURCE, { coneOuterAngle: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -319,12 +328,12 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </p>
             </SliderProperty>
             <SliderProperty
-              defaultValue={avatarSettings.coneOuterGain}
+              defaultValue={MockAvatarSettings.coneOuterGain}
               step={GAIN_STEP}
               min={GAIN_MIN}
               max={GAIN_MAX}
               onChange={value => {
-                onSettingChange(SourceType.AVATAR_AUDIO_SOURCE, { coneOuterGain: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -338,14 +347,20 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
             grow
           >
             <SelectProperty
-              defaultValue={mediaSettings.distanceModel}
+              defaultValue={MockMediaSettings.distanceModel}
               options={DISTANCE_MODEL_OPTIONS}
               onChange={value => {
-                const newSetting = { distanceModel: value };
-                if (value === DistanceModelType.Linear && mediaSettings.rolloffFactor > 1.0) {
-                  newSetting.rolloffFactor = 1.0;
-                }
-                onSettingChange(SourceType.MEDIA_VIDEO, newSetting);
+                setMockMediaSettings({
+                  audioType: value,
+                  distanceModel: value,
+                  rolloffFactor: 5,
+                  refDistance: 5,
+                  maxDistance: 10000,
+                  coneInnerAngle: 180,
+                  coneOuterAngle: 360,
+                  coneOuterGain: 0.9,
+                  gain: 1
+                });
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -353,12 +368,12 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </p>
             </SelectProperty>
             <SliderProperty
-              defaultValue={mediaSettings.rolloffFactor}
-              step={mediaSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
-              min={mediaSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
-              max={mediaSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
+              defaultValue={MockMediaSettings.rolloffFactor}
+              step={MockMediaSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_STEP : ROLLOFF_STEP}
+              min={MockMediaSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MIN : ROLLOFF_MIN}
+              max={MockMediaSettings.distanceModel === DistanceModelType.Linear ? ROLLOFF_LIN_MAX : ROLLOFF_MAX}
               onChange={value => {
-                onSettingChange(SourceType.MEDIA_VIDEO, { rolloffFactor: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -366,26 +381,26 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </p>
             </SliderProperty>
             <SliderProperty
-              defaultValue={mediaSettings.refDistance}
+              defaultValue={MockMediaSettings.refDistance}
               step={DISTANCE_STEP}
               min={DISTANCE_MIN}
               max={DISTANCE_MAX}
               onChange={value => {
-                onSettingChange(SourceType.MEDIA_VIDEO, { refDistance: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
                 <FormattedMessage id="audio-debug-view.media.refDistance" defaultMessage="Ref Distance" />
               </p>
             </SliderProperty>
-            {mediaSettings.distanceModel === "linear" ? (
+            {MockMediaSettings.distanceModel === "linear" ? (
               <SliderProperty
-                defaultValue={mediaSettings.maxDistance}
+                defaultValue={MockMediaSettings.maxDistance}
                 step={DISTANCE_STEP}
                 min={DISTANCE_MIN}
                 max={DISTANCE_MAX}
                 onChange={value => {
-                  onSettingChange(SourceType.MEDIA_VIDEO, { maxDistance: value });
+                  getPrefs(value);
                 }}
               >
                 <p className={classNames(styles.propText)}>
@@ -394,12 +409,12 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </SliderProperty>
             ) : null}
             <SliderProperty
-              defaultValue={mediaSettings.coneInnerAngle}
+              defaultValue={MockMediaSettings.coneInnerAngle}
               step={ANGLE_STEP}
               min={ANGLE_MIN}
               max={ANGLE_MAX}
               onChange={value => {
-                onSettingChange(SourceType.MEDIA_VIDEO, { coneInnerAngle: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -407,12 +422,12 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </p>
             </SliderProperty>
             <SliderProperty
-              defaultValue={mediaSettings.coneOuterAngle}
+              defaultValue={MockMediaSettings.coneOuterAngle}
               step={ANGLE_STEP}
               min={ANGLE_MIN}
               max={ANGLE_MAX}
               onChange={value => {
-                onSettingChange(SourceType.MEDIA_VIDEO, { coneOuterAngle: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
@@ -420,12 +435,12 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
               </p>
             </SliderProperty>
             <SliderProperty
-              defaultValue={mediaSettings.coneOuterGain}
+              defaultValue={MockMediaSettings.coneOuterGain}
               step={GAIN_STEP}
               min={GAIN_MIN}
               max={GAIN_MAX}
               onChange={value => {
-                onSettingChange(SourceType.MEDIA_VIDEO, { coneOuterGain: value });
+                getPrefs(value);
               }}
             >
               <p className={classNames(styles.propText)}>
