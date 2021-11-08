@@ -248,11 +248,33 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
     const entityComponents = getHubsComponents(object3D);
     const el = object3D.el;
 
+    function resolveNodeRefs(componentData) {
+      for (const propName in componentData) {
+        const value = componentData[propName];
+        const type = value?.__mhc_link_type;
+        if (type === "node" && value.index !== undefined) {
+          if (indexToEntityMap[value.index]) {
+            componentData[propName] = indexToEntityMap[value.index].object3D;
+          } else {
+            console.warn("inflateComponents: invalid node reference", propName);
+            componentData[propName] = null;
+          }
+        }
+      }
+      return componentData;
+    }
+
     if (entityComponents && el) {
       for (const prop in entityComponents) {
         if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          await inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+          await inflator(
+            el,
+            componentName,
+            resolveNodeRefs(entityComponents[prop]),
+            entityComponents,
+            indexToEntityMap
+          );
         }
       }
     }
@@ -263,7 +285,13 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
       for (const prop in materialComponents) {
         if (materialComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          await inflator(el, componentName, materialComponents[prop], materialComponents, indexToEntityMap);
+          await inflator(
+            el,
+            componentName,
+            resolveNodeRefs(materialComponents[prop]),
+            materialComponents,
+            indexToEntityMap
+          );
         }
       }
     }
@@ -462,12 +490,19 @@ class GLTFHubsComponentsExtension {
           if (type && value.index !== undefined) {
             deps.push(
               parser.getDependency(type, value.index).then(loadedDep => {
-                props[propName] = loadedDep;
+                // TODO similar to above, this logic being spread out in multiple places is not great...
+                // Node refences are assumed to always be in the scene graph. These referneces are late-resolved in inflateComponents
+                // otherwise they will need to be updated when cloning (which happens as part of caching). Handled in inflateComponents.
+                if (type === "node") return;
+
                 if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
                   // For now assume all non HDR textures linked in hubs components are sRGB.
                   // We can allow this to be overriden later if needed
                   loadedDep.encoding = THREE.sRGBEncoding;
                 }
+
+                props[propName] = loadedDep;
+
                 return loadedDep;
               })
             );
