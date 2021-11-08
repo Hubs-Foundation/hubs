@@ -492,7 +492,7 @@ class GLTFHubsComponentsExtension {
               parser.getDependency(type, value.index).then(loadedDep => {
                 // TODO similar to above, this logic being spread out in multiple places is not great...
                 // Node refences are assumed to always be in the scene graph. These referneces are late-resolved in inflateComponents
-                // otherwise they will need to be updated when cloning (which happens as part of caching). Handled in inflateComponents.
+                // otherwise they will need to be updated when cloning (which happens as part of caching).
                 if (type === "node") return;
 
                 if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
