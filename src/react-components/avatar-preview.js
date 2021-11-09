@@ -65,9 +65,10 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
 }
 
 function getThemeBackground() {
-  const currentTheme = APP?.store?.state?.preferences?.theme;
+  const currentTheme = APP?.store?.state?.preferences?.theme || "hubs-default";
   const themes = window.APP_CONFIG?.theme?.themes;
   const currentThemeObject = themes?.find(t => t.id === currentTheme) || getColorSchemePref();
+  console.log(currentTheme);
   const previewBackgroundColor = new THREE.Color(currentThemeObject?.variables["background3-color"] || 0xeaeaea);
   return previewBackgroundColor;
 }
