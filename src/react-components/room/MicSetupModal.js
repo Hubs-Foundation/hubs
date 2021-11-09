@@ -58,7 +58,7 @@ export function MicSetupModal({
             }
             label={
               microphoneEnabled ? (
-                <FormattedMessage id="mic-setup-modal.test-mic" defaultMessage="마이크 작동 테스트 동작" />
+                <FormattedMessage id="mic-setup-modal.test-mic" defaultMessage="Talk to Test Microphone" />
               ) : (
                 <FormattedMessage id="mic-setup-modal.mic-disabled" defaultMessage="Microphone Disabled" />
               )
@@ -108,7 +108,7 @@ export function MicSetupModal({
           </ToolbarButton>
           <ToolbarButton
             icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
-            label={<FormattedMessage id="mic-setup-modal.test-audio" defaultMessage="오디오 점검용 소리 재생" />}
+            label={<FormattedMessage id="mic-setup-modal.test-audio" defaultMessage="Click to Test Audio" />}
             preset={soundPlaying ? "primary" : "basic"}
             className={styles.largeToolbarButton}
             onClick={onPlaySound}

@@ -1557,7 +1557,7 @@ class UIRoot extends Component {
                       <>
                         <ToolbarButton
                           icon={<LeaveIcon />}
-                          label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="ㅤㅤ홈ㅤㅤ(나가기)" />}
+                          label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
                           className="leaveBtn"
                           preset="cancel"
                           onClick={() => {

@@ -8,7 +8,7 @@ import { defineMessage, useIntl } from "react-intl";
 
 const reactionPopoverTitle = defineMessage({
   id: "reaction-popover.title",
-  defaultMessage: "액션"
+  defaultMessage: "React"
 });
 
 export function ReactionPopoverButton({ items }) {

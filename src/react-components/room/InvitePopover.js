@@ -60,7 +60,7 @@ InvitePopoverContent.propTypes = {
 
 const invitePopoverTitle = defineMessage({
   id: "invite-popover.title",
-  defaultMessage: "초대"
+  defaultMessage: "Invite"
 });
 
 export function InvitePopoverButton({
