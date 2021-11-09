@@ -1190,17 +1190,18 @@ class UIRoot extends Component {
       //           icon: StarOutlineIcon,
       //           onClick: () => this.toggleFavorited()
       //         },
-      //      isModerator &&
-      //        entered && {
-      //          id: "streamer-mode",
-      //          label: streaming ? (
-      //            <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode" />
-      //          ) : (
-      //            <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode" />
-      //          ),
-      //          icon: CameraIcon,
-      //          onClick: () => this.toggleStreamerMode()
-      //        },
+      // 스트리머 모드
+          //  isModerator &&
+          //    entered && {
+          //      id: "streamer-mode",
+          //      label: streaming ? (
+          //        <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode" />
+          //      ) : (
+          //        <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode" />
+          //      ),
+          //      icon: CameraIcon,
+          //      onClick: () => this.toggleStreamerMode()
+          //    },
       //     (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
       //       entered && {
       //         id: "leave-room",
@@ -1571,6 +1572,7 @@ class UIRoot extends Component {
                             microphoneEnabled={this.mediaDevicesManager.isMicShared}
                           />
                         {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> */}
+                        {/* 스트리머 모드 */}
                         {/* <PlacePopoverContainer
                           scene={this.props.scene}
                           hubChannel={this.props.hubChannel}
