@@ -267,6 +267,7 @@ let isOAuthModal = false;
 if (window.opener && window.opener.doingTwitterOAuth) {
   window.opener.postMessage("oauth-successful");
   isOAuthModal = true;
+  window.close();
 }
 
 const isBotMode = qsTruthy("bot");
