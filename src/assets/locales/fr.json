@@ -322,7 +322,7 @@
   "people-sidebar.presence.entering": "Entrée dans la salle",
   "people-sidebar.presence.in-lobby": "Dans le hall d'attente",
   "people-sidebar.presence.in-room": "Dans la Salle",
-  "people-sidebar.title": "({numPeople} personnes)",
+  "people-sidebar.title": "Personnes ({numPeople})",
   "people-sidebar.voice-label.muted": "Micro coupé",
   "people-sidebar.voice-label.not-talking": "Ne pas parler",
   "people-sidebar.voice-label.talking": "Parler",
