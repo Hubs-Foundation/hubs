@@ -6,10 +6,10 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { useMicrophone } from "./useMicrophone";
 import { FormattedMessage } from "react-intl";
 
-export function VoiceButtonContainer({ scene, microphoneEnabled }) {
+export function VoiceButtonContainer({ scene }) {
   const buttonRef = useRef();
 
-  const { isMuted, volume, toggleMute } = useMicrophone(scene);
+  const { isMicMuted, volume, toggleMute, isMicEnabled } = useMicrophone(scene);
 
   useEffect(
     () => {
@@ -25,22 +25,21 @@ export function VoiceButtonContainer({ scene, microphoneEnabled }) {
         rect.setAttribute("height", 8);
       }
     },
-    [volume, isMuted]
+    [volume, isMicMuted]
   );
 
   return (
     <ToolbarButton
       ref={buttonRef}
-      icon={isMuted || !microphoneEnabled ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
+      icon={isMicMuted || !isMicEnabled ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
       label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}
       preset="basic"
       onClick={toggleMute}
-      statusColor={isMuted || !microphoneEnabled ? "disabled" : "enabled"}
+      statusColor={isMicMuted || !isMicEnabled ? "disabled" : "enabled"}
     />
   );
 }
 
 VoiceButtonContainer.propTypes = {
-  scene: PropTypes.object.isRequired,
-  microphoneEnabled: PropTypes.bool
+  scene: PropTypes.object.isRequired
 };
