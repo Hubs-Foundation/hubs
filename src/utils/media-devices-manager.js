@@ -27,6 +27,10 @@ export default class MediaDevicesManager {
     navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
   }
 
+  static get isAudioOutputSelectEnabled() {
+    return audioOutputSelectEnabled;
+  }
+
   get deviceId() {
     return this._deviceId;
   }
@@ -65,10 +69,6 @@ export default class MediaDevicesManager {
 
   get outputDevices() {
     return this._outputDevices;
-  }
-
-  get isAudioOutputSelectEnabled() {
-    return audioOutputSelectEnabled;
   }
 
   get mediaStream() {
@@ -125,7 +125,7 @@ export default class MediaDevicesManager {
         this.videoDevices = mediaDevices
           .filter(d => d.kind === "videoinput")
           .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substr(0, 9)})` }));
-        if (this.isAudioOutputSelectEnabled) {
+        if (MediaDevicesManager.isAudioOutputSelectEnabled) {
           this.outputDevices = mediaDevices
             .filter(d => d.kind === "audiooutput")
             .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substr(0, 9)})` }));
@@ -143,7 +143,6 @@ export default class MediaDevicesManager {
     }
     this._store.update({ settings: { lastUsedOutputDeviceId: audioOutputDeviceId } });
     console.log(`Selected output device: ${this.outputLabelForDeviceId(audioOutputDeviceId)}`);
-    // TODO: actually update the output device
   }
 
   async startMicShare(deviceId) {

@@ -18,6 +18,7 @@ function performDelayedReconnect(gainNode) {
 }
 
 import * as sdpTransform from "sdp-transform";
+import MediaDevicesManager from "../utils/media-devices-manager";
 
 async function enableChromeAEC(gainNode) {
   /**
@@ -128,7 +129,8 @@ export class AudioSystem {
 
     this.audioContext = THREE.AudioContext.getContext();
     this.audioNodes = new Map();
-    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination();
+    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination(); // Avatar webrtc streams (voice, camera, screenshare)
+    this.audioDestination = this.audioContext.createMediaStreamDestination(); // Audio/video media elements
     this.outboundStream = this.mediaStreamDestinationNode.stream;
     this.outboundGainNode = this.audioContext.createGain();
     this.outboundAnalyser = this.audioContext.createAnalyser();
@@ -142,8 +144,15 @@ export class AudioSystem {
       [SourceType.AVATAR_AUDIO_SOURCE]: this.audioContext.createGain(),
       [SourceType.MEDIA_VIDEO]: this.audioContext.createGain()
     };
-    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this._sceneEl.audioListener.getInput());
-    this.mixer[SourceType.MEDIA_VIDEO].connect(this._sceneEl.audioListener.getInput());
+
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mediaStreamDestinationNode);
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this.audioDestination);
+
+    if (MediaDevicesManager.isAudioOutputSelectEnabled) {
+      this.outputMediaAudio = new Audio();
+      this.outputMediaAudio.srcObject = this.audioDestination.stream;
+      this.outputMediaAudio.play();
+    }
 
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
@@ -197,6 +206,8 @@ export class AudioSystem {
       this.audioContext.currentTime,
       GAIN_TIME_CONST
     );
+
+    this.outputMediaAudio?.setSinkId(window.APP.mediaDevicesManager?.selectedOutputDeviceId);
   }
 
   /**
