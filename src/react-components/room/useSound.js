@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import MovingAverage from "moving-average";
+import MediaDevicesManager from "../../utils/media-devices-manager";
 
 export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavSrc }) {
   const soundTimeoutRef = useRef();
@@ -8,7 +9,7 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
   const outputAudioElRef = useRef();
   const [soundPlaying, setSoundPlaying] = useState(false);
   const [soundVolume, setSoundVolume] = useState(0);
-  const isAudioOutputSelectionEnabled = window.APP.mediaDevicesManager.isAudioOutputSelectEnabled;
+  const isAudioOutputSelectionEnabled = MediaDevicesManager.isAudioOutputSelectEnabled;
 
   useEffect(
     () => {
@@ -87,7 +88,7 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
         }
       };
     },
-    [setSoundVolume, scene, updateRate, webmSrc, mp3Src, oggSrc, wavSrc]
+    [setSoundVolume, scene, updateRate, webmSrc, mp3Src, oggSrc, wavSrc, isAudioOutputSelectionEnabled]
   );
 
   const playSound = useCallback(
