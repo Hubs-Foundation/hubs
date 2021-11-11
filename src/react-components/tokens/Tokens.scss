@@ -1,0 +1,143 @@
+@use "../styles/theme.scss";
+
+h1 {
+  font-weight: 500;
+}
+
+h2 {
+  font-weight: 100;
+}
+
+:local(.token-container) {
+  background-color: theme.$background4-color;
+}
+
+:local(.no-access-icon) {
+  font-size: 2em;
+  padding-right: 12px;
+}
+
+:local(.background-white) {
+  background-color: theme.$background1-color; 
+}
+
+:local(.background-gray) {
+  background-color: theme.$background2-color;
+}
+
+:local(.revoke-warning) {
+  background-color: theme.$red-hover;
+  border: 2px solid theme.$red;
+}
+
+:local(.center-padding-sides) {
+  width: 100%;
+
+  @media(min-width: theme.$breakpoint-md) {
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
+
+:local(.revoke-description) {
+  margin: theme.$spacing-xl 0;
+}
+
+:local(.margin-bottom-xs) {
+  margin-bottom: theme.$spacing-2xs;
+}
+
+:local(.margin-bottom-xl) {
+  margin-bottom: theme.$spacing-xl;
+}
+
+$tag-top-margin: theme.$spacing-xs;
+:local(.tag) {
+  padding: 5px;
+  border-radius: 3px;
+  background-color: theme.$background3-color;
+  margin-bottom: 0px;
+}
+
+:local(.selected-border) {
+  border: 2px solid theme.$blue;
+}
+
+:local(.unselected-border) {
+  border: 2px solid theme.$background1-color;
+}
+
+:local(.word-wrap) {
+  word-break: break-word;
+}
+
+:local(.flex-direction-row) {
+  flex-direction: row !important;
+}
+
+:local(.padding-Y-xl) {
+  padding-bottom: theme.$spacing-xl;
+  padding-top: theme.$spacing-xl;
+}
+
+:local(.background-dark-grey) {
+  background-color: theme.$darkgrey;
+}
+
+:local(.background-light-grey) {
+  background-color: theme.$background3-color;
+}
+
+:local(.max-width-auto) {
+  max-width: none !important;
+}
+
+:local(.max-width-400) {
+  max-width: 400px;
+}
+
+:local(.text-white) {
+  color: theme.$white;
+}
+
+:local(.checkbox-label) {
+  color: theme.$text1-color !important;
+  margin-left: 5px;
+}
+
+:local(.radio-label) {
+  color: theme.$text1-color !important;
+  margin-left: 10px;
+}
+
+:local(.no-access-container) {
+  position: relative;
+  background-color: theme.$background1-color;
+}
+
+:local(.token-modal) {
+  padding: theme.$spacing-md;
+}
+
+:local(.token-modal) > * {
+  justify-content: left ;
+  height: auto;
+  border-bottom: none;
+  max-height: 100%;
+}
+
+:local(.no-access-footer-duck-container) {
+  height: 45px;
+}
+
+:local(.no-access-footer-duck) {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+:local(.close-modal-button) {
+  font-size: 1.5em;
+  cursor: pointer;
+}

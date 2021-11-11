@@ -14,30 +14,19 @@ THREE.Water = function(geometry, options) {
 
   options = options || {};
 
-  const textureWidth =
-    options.textureWidth !== undefined ? options.textureWidth : 512;
-  const textureHeight =
-    options.textureHeight !== undefined ? options.textureHeight : 512;
+  const textureWidth = options.textureWidth !== undefined ? options.textureWidth : 512;
+  const textureHeight = options.textureHeight !== undefined ? options.textureHeight : 512;
 
   const clipBias = options.clipBias !== undefined ? options.clipBias : 0.0;
   const alpha = options.alpha !== undefined ? options.alpha : 1.0;
   const time = options.time !== undefined ? options.time : 0.0;
-  const normalSampler =
-    options.waterNormals !== undefined ? options.waterNormals : null;
+  const normalSampler = options.waterNormals !== undefined ? options.waterNormals : null;
   const sunDirection =
-    options.sunDirection !== undefined
-      ? options.sunDirection
-      : new THREE.Vector3(0.70707, 0.70707, 0.0);
-  const sunColor = new THREE.Color(
-    options.sunColor !== undefined ? options.sunColor : 0xffffff
-  );
-  const waterColor = new THREE.Color(
-    options.waterColor !== undefined ? options.waterColor : 0x7f7f7f
-  );
-  const eye =
-    options.eye !== undefined ? options.eye : new THREE.Vector3(0, 0, 0);
-  const distortionScale =
-    options.distortionScale !== undefined ? options.distortionScale : 20.0;
+    options.sunDirection !== undefined ? options.sunDirection : new THREE.Vector3(0.70707, 0.70707, 0.0);
+  const sunColor = new THREE.Color(options.sunColor !== undefined ? options.sunColor : 0xffffff);
+  const waterColor = new THREE.Color(options.waterColor !== undefined ? options.waterColor : 0x7f7f7f);
+  const eye = options.eye !== undefined ? options.eye : new THREE.Vector3(0, 0, 0);
+  const distortionScale = options.distortionScale !== undefined ? options.distortionScale : 20.0;
   const side = options.side !== undefined ? options.side : THREE.FrontSide;
   const fog = options.fog !== undefined ? options.fog : false;
 
@@ -66,16 +55,9 @@ THREE.Water = function(geometry, options) {
     stencilBuffer: false
   };
 
-  const renderTarget = new THREE.WebGLRenderTarget(
-    textureWidth,
-    textureHeight,
-    parameters
-  );
+  const renderTarget = new THREE.WebGLRenderTarget(textureWidth, textureHeight, parameters);
 
-  if (
-    !THREE.Math.isPowerOfTwo(textureWidth) ||
-    !THREE.Math.isPowerOfTwo(textureHeight)
-  ) {
+  if (!THREE.Math.isPowerOfTwo(textureWidth) || !THREE.Math.isPowerOfTwo(textureHeight)) {
     renderTarget.texture.generateMipmaps = false;
   }
 
@@ -260,24 +242,7 @@ THREE.Water = function(geometry, options) {
     mirrorCamera.projectionMatrix.copy(camera.projectionMatrix);
 
     // Update the texture matrix
-    textureMatrix.set(
-      0.5,
-      0.0,
-      0.0,
-      0.5,
-      0.0,
-      0.5,
-      0.0,
-      0.5,
-      0.0,
-      0.0,
-      0.5,
-      0.5,
-      0.0,
-      0.0,
-      0.0,
-      1.0
-    );
+    textureMatrix.set(0.5, 0.0, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 1.0);
     textureMatrix.multiply(mirrorCamera.projectionMatrix);
     textureMatrix.multiply(mirrorCamera.matrixWorldInverse);
 
@@ -286,21 +251,12 @@ THREE.Water = function(geometry, options) {
     mirrorPlane.setFromNormalAndCoplanarPoint(normal, mirrorWorldPosition);
     mirrorPlane.applyMatrix4(mirrorCamera.matrixWorldInverse);
 
-    clipPlane.set(
-      mirrorPlane.normal.x,
-      mirrorPlane.normal.y,
-      mirrorPlane.normal.z,
-      mirrorPlane.constant
-    );
+    clipPlane.set(mirrorPlane.normal.x, mirrorPlane.normal.y, mirrorPlane.normal.z, mirrorPlane.constant);
 
     const projectionMatrix = mirrorCamera.projectionMatrix;
 
-    q.x =
-      (Math.sign(clipPlane.x) + projectionMatrix.elements[8]) /
-      projectionMatrix.elements[0];
-    q.y =
-      (Math.sign(clipPlane.y) + projectionMatrix.elements[9]) /
-      projectionMatrix.elements[5];
+    q.x = (Math.sign(clipPlane.x) + projectionMatrix.elements[8]) / projectionMatrix.elements[0];
+    q.y = (Math.sign(clipPlane.y) + projectionMatrix.elements[9]) / projectionMatrix.elements[5];
     q.z = -1.0;
     q.w = (1.0 + projectionMatrix.elements[10]) / projectionMatrix.elements[14];
 
@@ -319,19 +275,21 @@ THREE.Water = function(geometry, options) {
 
     const currentRenderTarget = renderer.getRenderTarget();
 
-    const currentVrEnabled = renderer.vr.enabled;
+    const currentXrEnabled = renderer.xr.enabled;
     const currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
 
     scope.visible = false;
 
-    renderer.vr.enabled = false; // Avoid camera modification and recursion
+    renderer.xr.enabled = false; // Avoid camera modification and recursion
     renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 
-    renderer.render(scene, mirrorCamera, renderTarget, true);
+    renderer.setRenderTarget(renderTarget);
+    renderer.render(scene, mirrorCamera);
+    renderer.setRenderTarget(null);
 
     scope.visible = true;
 
-    renderer.vr.enabled = currentVrEnabled;
+    renderer.xr.enabled = currentXrEnabled;
     renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
     renderer.setRenderTarget(currentRenderTarget);

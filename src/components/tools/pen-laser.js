@@ -30,12 +30,6 @@ AFRAME.registerComponent("pen-laser", {
     this.laserTip.scale.setScalar(0.01);
     this.laserTip.matrixNeedsUpdate = true;
 
-    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-    if (environmentMapComponent) {
-      environmentMapComponent.applyEnvironmentMap(this.laser);
-      environmentMapComponent.applyEnvironmentMap(this.laserTip);
-    }
-
     //prevents the line from being a raycast target for the cursor
     this.laser.raycast = function() {};
 

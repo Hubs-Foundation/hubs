@@ -41,7 +41,6 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
       function onMessage({ data }) {
         if (data === "oauth-successful") {
           onConnected();
-          popupRef.current.close();
           popupRef.current = null;
           delete window.doingTwitterOAuth;
           window.removeEventListener("message", onMessage);

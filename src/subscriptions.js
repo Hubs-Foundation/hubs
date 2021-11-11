@@ -21,15 +21,36 @@ export default class Subscriptions {
     this.hubId = hubId;
   }
 
+  register() {
+    if (navigator.serviceWorker) {
+      try {
+        navigator.serviceWorker
+          .register("/hub.service.js")
+          .then(() => {
+            navigator.serviceWorker.ready
+              .then(registration => this.setRegistration(registration))
+              .catch(e => this.setRegistrationFailed(e));
+          })
+          .catch(e => this.setRegistrationFailed(e));
+      } catch (e) {
+        this.setRegistrationFailed(e);
+      }
+    } else {
+      this.setRegistrationFailed("Not supported");
+    }
+  }
+
   setHubChannel = hubChannel => {
     this.hubChannel = hubChannel;
   };
 
   setRegistration = registration => {
+    console.log("Service worker registered");
     this.registration = registration;
   };
 
-  setRegistrationFailed = () => {
+  setRegistrationFailed = e => {
+    console.error("Service worker registration failed", e);
     this.registration = null;
   };
 

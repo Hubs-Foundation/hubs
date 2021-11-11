@@ -1,8 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
+import { getColorSchemePref } from "../utils/get-color-scheme-pref";
 import classNames from "classnames";
-import "three/examples/js/controls/OrbitControls";
+
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/controls/OrbitControls");
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
@@ -34,8 +39,7 @@ function createRenderer(canvas, alpha = false, useDevicePixelRatio = true) {
   });
 
   const renderer = new THREE.WebGLRenderer({ alpha, canvas, context, forceWebVR: true });
-  renderer.gammaOutput = true;
-  renderer.gammaFactor = 2.2;
+  renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.physicallyCorrectLights = true;
   if (useDevicePixelRatio) {
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -58,6 +62,14 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
   camera.position.applyEuler(ORBIT_ANGLE);
   camera.position.add(center);
   camera.lookAt(center);
+}
+
+function getThemeBackground() {
+  const currentTheme = APP?.store?.state?.preferences?.theme;
+  const themes = window.APP_CONFIG?.theme?.themes;
+  const currentThemeObject = themes?.find(t => t.id === currentTheme) || getColorSchemePref();
+  const previewBackgroundColor = new THREE.Color(currentThemeObject?.variables["background3-color"] || 0xeaeaea);
+  return previewBackgroundColor;
 }
 
 class AvatarPreview extends Component {
@@ -109,7 +121,7 @@ class AvatarPreview extends Component {
     this.snapshotRenderer.setClearAlpha(0);
 
     this.previewRenderer = createRenderer(this.canvas);
-    this.previewRenderer.setClearColor(0xeaeaea);
+    this.previewRenderer.setClearColor(getThemeBackground());
     this.previewRenderer.setAnimationLoop(() => {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);

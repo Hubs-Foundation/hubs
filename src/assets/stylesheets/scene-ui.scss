@@ -72,9 +72,14 @@
   width: 100%;
   display: block;
   filter: drop-shadow(0 0 4px #888);
+  padding-bottom: 1em;
 
   img {
     width: 100%;
+  }
+  svg {
+    width: 100%;
+    min-height: 210px;
   }
 }
 

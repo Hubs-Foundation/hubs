@@ -29,7 +29,7 @@ features.public_rooms = { category = "features", type = "boolean", name = "Publi
 features.default_room_id = { category = "features", type = "string", name = "Homepage Room ID", description = "Use the specified room in place of the homepage."}
 features.enable_spoke = { category = "features", type = "boolean", name = "Enable Scene Editor", description = "Enable Scene Editor for all visitors."}
 features.enable_lobby_ghosts = { category = "features", type = "boolean", name = "Enable Lobby Ghosts", description = "Allow people in the lobby to explore the room while remaining invisible and inaudible." }
-features.public_api_access = { category = "features", type = "boolean", name = "Public API Access", description = "Enables a publicly-accessible API for managing backend resources programmatically.", internal = "true" }
+features.public_api_access = { category = "features", type = "boolean", name = "Public API Access", description = "Enables a publicly-accessible API for managing backend resources programmatically.", internal = "false" }
 
 features.permissive_rooms = { category = "rooms", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
 features.disable_room_creation = { category = "rooms", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }
@@ -48,6 +48,7 @@ features.show_cloud = { category = "features", type = "boolean", internal = "tru
 features.show_newsletter_signup = { category = "features", type = "boolean", internal = "true" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
+images.logo_dark = { category = "images", type = "file", name = "App Logo Dark", description = "Logo used across the app in dark mode." }
 images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }
 images.app_icon = { category = "images", type = "file", name = "App Icon", description = "Icon for the app." }
 images.app_thumbnail = { category = "images", type = "file", name = "App Thumbnail", description = "Thumbnail for app." }

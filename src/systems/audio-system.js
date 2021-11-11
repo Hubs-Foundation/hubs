@@ -1,4 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
+import { GAIN_TIME_CONST, SourceType } from "../components/audio-params";
 
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
@@ -137,11 +138,21 @@ export class AudioSystem {
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
     this.audioContextNeedsToBeResumed = false;
 
+    this.mixer = {
+      [SourceType.AVATAR_AUDIO_SOURCE]: this.audioContext.createGain(),
+      [SourceType.MEDIA_VIDEO]: this.audioContext.createGain()
+    };
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this._sceneEl.audioListener.getInput());
+
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
 
     document.body.addEventListener("touchend", this._resumeAudioContext, false);
     document.body.addEventListener("mouseup", this._resumeAudioContext, false);
+
+    this.onPrefsUpdated = this.updatePrefs.bind(this);
+    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -163,6 +174,29 @@ export class AudioSystem {
       nodes.gainNode.disconnect();
       this.audioNodes.delete(id);
     }
+  }
+
+  addAudio(mixerTrack, audioNode) {
+    this.removeAudio(audioNode);
+    audioNode.gain.connect(this.mixer[mixerTrack]);
+  }
+
+  removeAudio(audioNode) {
+    audioNode.gain.disconnect();
+    audioNode.sourceType !== "empty" && audioNode.disconnect();
+  }
+
+  updatePrefs() {
+    const { globalVoiceVolume, globalMediaVolume } = window.APP.store.state.preferences;
+    let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
+    this.mixer[SourceType.MEDIA_VIDEO].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+
+    newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].gain.setTargetAtTime(
+      newGain,
+      this.audioContext.currentTime,
+      GAIN_TIME_CONST
+    );
   }
 
   /**
