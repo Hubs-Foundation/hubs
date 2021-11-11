@@ -10,6 +10,7 @@ import styles from "../assets/stylesheets/preferences-screen.scss";
 import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
+import MediaDevicesManager from "../utils/media-devices-manager";
 
 export const CLIPPING_THRESHOLD_ENABLED = false;
 export const CLIPPING_THRESHOLD_MIN = 0.0;
@@ -373,6 +374,10 @@ const preferenceLabels = defineMessages({
   preferredMic: {
     id: "preferences-screen.preference.preferred-mic",
     defaultMessage: "Preferred mic"
+  },
+  preferredSpeakers: {
+    id: "preferences-screen.preference.preferred-speakers",
+    defaultMessage: "Preferred speakers"
   },
   muteMicOnEntry: {
     id: "preferences-screen.preference.mute-mic-on-entry",
@@ -819,7 +824,16 @@ class PreferencesScreen extends Component {
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "none", text: "None" }],
         defaultString: "none"
-      }
+      },
+      ...(MediaDevicesManager.isAudioOutputSelectEnabled && {
+        preferredSpeakers: {
+          key: "preferredSpeakers",
+          prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+          options: [{ value: "default", text: "Default" }],
+          defaultString: "Default",
+          onChanged: this.onSpeakersSelectionChanged
+        }
+      })
     };
   }
 
@@ -829,6 +843,10 @@ class PreferencesScreen extends Component {
     } else {
       this.mediaDevicesManager.startMicShare(deviceId).then(this.updateMediaDevices);
     }
+  };
+
+  onSpeakersSelectionChanged = deviceId => {
+    this.mediaDevicesManager.changeAudioOutput(deviceId);
   };
 
   onMediaDevicesUpdated = () => {
@@ -852,7 +870,25 @@ class PreferencesScreen extends Component {
       }
     ];
     preferredMic.options.push(...micOptions);
-    this.props.store.update({ preferences: { ["preferredMic"]: this.mediaDevicesManager.selectedMicDeviceId } });
+
+    const speakersOptions = this.mediaDevicesManager.outputDevices.map(device => ({
+      value: device.value,
+      text: device.label
+    }));
+    const preferredSpeakers = { ...this.state.preferredSpeakers };
+    speakersOptions.options = [
+      {
+        value: "default",
+        text: this.props.intl.formatMessage({
+          id: "preferences-screen.preferred-speakers.default",
+          defaultMessage: "Default"
+        })
+      }
+    ];
+    preferredSpeakers.options.push(...speakersOptions);
+    this.props.store.update({
+      preferences: { ["preferredSpeakers"]: this.mediaDevicesManager.selectedOutputDeviceId }
+    });
 
     // Video devices update
     const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
@@ -886,7 +922,7 @@ class PreferencesScreen extends Component {
     preferredCamera.options.push(...videoOptions);
 
     // Update media devices state
-    this.setState({ preferredMic, preferredCamera });
+    this.setState({ preferredMic, preferredSpeakers, preferredCamera });
   };
 
   storeUpdated = () => {
@@ -986,6 +1022,7 @@ class PreferencesScreen extends Component {
         CATEGORY_AUDIO,
         [
           this.state.preferredMic,
+          this.state.preferredSpeakers,
           { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {
             key: "globalVoiceVolume",
