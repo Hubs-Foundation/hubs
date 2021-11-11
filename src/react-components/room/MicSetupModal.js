@@ -6,29 +6,33 @@ import { Button } from "../input/Button";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
 import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
-import { ReactComponent as VolumeOffIcon } from "../icons/VolumeOff.svg";
+import { ReactComponent as HelpIcon } from "../icons/Help.svg";
 import styles from "./MicSetupModal.scss";
 import { BackButton } from "../input/BackButton";
 import { SelectInputField } from "../input/SelectInputField";
 import { ToggleInput } from "../input/ToggleInput";
-import { ToolbarButton } from "../input/ToolbarButton";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
-
-const micButtonDiameter = 96;
+import { LevelBar } from "../misc/LevelBar";
+import { Popover } from "../popover/Popover";
+import { Icon } from "../misc/Icon";
 
 export function MicSetupModal({
   className,
-  onPromptMicrophone,
   selectedMicrophone,
   microphoneOptions,
   onChangeMicrophone,
+  selectedSpeaker,
+  speakerOptions,
+  onChangeSpeaker,
   microphoneEnabled,
   micLevel,
+  speakerLevel,
   soundPlaying,
   onPlaySound,
   microphoneMuted,
   onChangeMicrophoneMuted,
+  onEnableMicrophone,
   onEnterRoom,
   onBack,
   ...rest
@@ -48,82 +52,95 @@ export function MicSetupModal({
           />
         </p>
         <div className={styles.audioCheckContainer}>
-          <ToolbarButton
-            icon={
-              microphoneEnabled && !microphoneMuted ? (
-                <MicrophoneIcon width={48} height={48} />
-              ) : (
-                <MicrophoneMutedIcon width={48} height={48} />
-              )
-            }
-            label={
-              microphoneEnabled ? (
-                <FormattedMessage id="mic-setup-modal.test-mic" defaultMessage="Talk to Test Microphone" />
-              ) : (
-                <FormattedMessage id="mic-setup-modal.mic-disabled" defaultMessage="Microphone Disabled" />
-              )
-            }
-            className={classNames(styles.largeToolbarButton, styles.micButton)}
-            iconContainerClassName={styles.micButtonContainer}
-            onClick={onPromptMicrophone}
-            disabled={microphoneEnabled}
-            large
-          >
+          <div className={styles.audioIoContainer}>
             <div
-              className={styles.micLevelIcon}
-              style={{
-                clip: `rect(${micButtonDiameter -
-                  Math.floor(micLevel * micButtonDiameter)}px, ${micButtonDiameter}px, ${micButtonDiameter}px, 0px)`
-              }}
+              className={classNames(styles.iconContainer, microphoneEnabled ? styles.iconEnabled : styles.iconDisabled)}
             >
-              {microphoneEnabled && !microphoneMuted ? (
-                <MicrophoneIcon className={styles.clippedIcon} width={48} height={48} />
+              {microphoneEnabled && !microphoneMuted ? <MicrophoneIcon /> : <MicrophoneMutedIcon />}
+              <LevelBar width={48} height={48} level={!microphoneEnabled || microphoneMuted ? 0 : micLevel} />
+            </div>
+            <div className={styles.actionContainer}>
+              {microphoneEnabled ? (
+                <>
+                  <ToggleInput
+                    label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle-v2" defaultMessage="Mute" />}
+                    checked={microphoneMuted}
+                    onChange={onChangeMicrophoneMuted}
+                  />
+                  <Popover
+                    title="Info"
+                    content={
+                      <Column className={styles.popoverContent}>
+                        <FormattedMessage
+                          id="mic-setup-modal.mute-mic-info"
+                          defaultMessage="You can mute anytime after you enter the room"
+                        />
+                      </Column>
+                    }
+                    placement="top"
+                    showHeader={false}
+                    disableFullscreen
+                    popoverClass={styles.popover}
+                    arrowClass={styles.popoverArrow}
+                  >
+                    {({ openPopover, closePopover, triggerRef }) => (
+                      <Icon
+                        ref={triggerRef}
+                        icon={<HelpIcon />}
+                        onMouseEnter={openPopover}
+                        onMouseLeave={closePopover}
+                      />
+                    )}
+                  </Popover>
+                </>
               ) : (
-                <MicrophoneMutedIcon className={styles.clippedIcon} width={48} height={48} />
+                <Button preset="primary" onClick={onEnableMicrophone} sm>
+                  <FormattedMessage id="mic-setup-modal.enable-mic-button" defaultMessage="Enable Microphone" />
+                </Button>
               )}
             </div>
-            <div
-              className={styles.micLevel}
-              style={{
-                clip: `rect(${micButtonDiameter -
-                  Math.floor(micLevel * micButtonDiameter)}px, ${micButtonDiameter}px, ${micButtonDiameter}px, 0px)`
-              }}
-            >
-              <svg
-                width={micButtonDiameter}
-                height={micButtonDiameter}
-                viewBox={`0 0 ${micButtonDiameter} ${micButtonDiameter}`}
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx={micButtonDiameter / 2}
-                  cy={micButtonDiameter / 2}
-                  r={micButtonDiameter / 2}
-                  fill="currentColor"
-                  fillOpacity="0.8"
+            {microphoneEnabled && (
+              <div className={styles.selectionContainer}>
+                <p style={{ alignSelf: "start" }}>
+                  <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
+                </p>
+                <SelectInputField
+                  className={styles.selectionInput}
+                  buttonClassName={styles.selectionInput}
+                  value={selectedMicrophone}
+                  options={microphoneOptions}
+                  onChange={onChangeMicrophone}
                 />
-              </svg>
+              </div>
+            )}
+          </div>
+          <div className={styles.audioIoContainer}>
+            <div className={classNames(styles.iconContainer, styles.iconEnabled)}>
+              <VolumeHighIcon style={{ marginRight: "5px" }} />
+              <LevelBar width={48} height={48} level={soundPlaying ? speakerLevel : 0} />
             </div>
-          </ToolbarButton>
-          <ToolbarButton
-            icon={soundPlaying ? <VolumeHighIcon width={48} height={48} /> : <VolumeOffIcon width={48} height={48} />}
-            label={<FormattedMessage id="mic-setup-modal.test-audio" defaultMessage="Click to Test Audio" />}
-            preset={soundPlaying ? "primary" : "basic"}
-            className={styles.largeToolbarButton}
-            onClick={onPlaySound}
-            large
-          />
+            <div className={styles.actionContainer}>
+              <Button preset="basic" onClick={onPlaySound} sm>
+                <FormattedMessage id="mic-setup-modal.test-audio-button" defaultMessage="Test Audio" />
+              </Button>
+            </div>
+            {speakerOptions.length > 0 && (
+              <div className={styles.selectionContainer}>
+                <p style={{ alignSelf: "start" }}>
+                  <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
+                </p>
+                <SelectInputField
+                  value={selectedSpeaker}
+                  options={speakerOptions}
+                  onChange={onChangeSpeaker}
+                  className={styles.selectionInput}
+                  buttonClassName={styles.selectionInput}
+                />
+              </div>
+            )}
+          </div>
         </div>
-        <>
-          <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
-          <ToggleInput
-            label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle" defaultMessage="Mute My Microphone" />}
-            checked={microphoneMuted}
-            onChange={onChangeMicrophoneMuted}
-          />
-        </>
-        <Button preset="accept" onClick={onEnterRoom}>
+        <Button preset="primary" onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
         </Button>
       </Column>
@@ -136,17 +153,22 @@ MicSetupModal.propTypes = {
   soundPlaying: PropTypes.bool,
   onPlaySound: PropTypes.func,
   micLevel: PropTypes.number,
+  speakerLevel: PropTypes.number,
   microphoneEnabled: PropTypes.bool,
   microphoneMuted: PropTypes.bool,
   onChangeMicrophoneMuted: PropTypes.func,
   selectedMicrophone: PropTypes.string,
   microphoneOptions: PropTypes.array,
   onChangeMicrophone: PropTypes.func,
-  onPromptMicrophone: PropTypes.func,
+  onEnableMicrophone: PropTypes.func,
+  selectedSpeaker: PropTypes.string,
+  speakerOptions: PropTypes.array,
+  onChangeSpeaker: PropTypes.func,
   onEnterRoom: PropTypes.func,
   onBack: PropTypes.func
 };
 
 MicSetupModal.defaultProps = {
-  micLevel: 0
+  micLevel: 0,
+  speakerLevel: 0
 };

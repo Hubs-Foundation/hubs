@@ -9,9 +9,22 @@ import oggSrc from "../../assets/sfx/tone.ogg";
 import wavSrc from "../../assets/sfx/tone.wav";
 
 export function MicSetupModalContainer({ scene, ...rest }) {
-  const { volume } = useMicrophone(scene);
-  const [soundPlaying, playSound] = useSound({ webmSrc, mp3Src, oggSrc, wavSrc });
-  return <MicSetupModal micLevel={volume} soundPlaying={soundPlaying} onPlaySound={playSound} {...rest} />;
+  const { micMutedOnEntry } = rest;
+  const { micVolume, isMicEnabled, isMicMuted, onEnableMicrophone } = useMicrophone(scene);
+  const [soundPlaying, playSound, soundVolume] = useSound({ scene, webmSrc, mp3Src, oggSrc, wavSrc });
+
+  return (
+    <MicSetupModal
+      micLevel={micVolume}
+      speakerLevel={soundVolume}
+      soundPlaying={soundPlaying}
+      onPlaySound={playSound}
+      microphoneEnabled={isMicEnabled}
+      microphoneMuted={micMutedOnEntry || isMicMuted}
+      onEnableMicrophone={onEnableMicrophone}
+      {...rest}
+    />
+  );
 }
 
 MicSetupModalContainer.propTypes = {

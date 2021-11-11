@@ -3,8 +3,9 @@ import MovingAverage from "moving-average";
 
 export function useMicrophone(scene, updateRate = 50) {
   const movingAvgRef = useRef();
-  const [isMuted, setIsMuted] = useState(!APP.dialog.isMicEnabled);
-  const [volume, setVolume] = useState(0);
+  const [isMicMuted, setIsMicMuted] = useState(!APP.dialog.isMicEnabled);
+  const [isMicEnabled, setIsMicEnabled] = useState(window.APP.mediaDevicesManager.isMicShared);
+  const [micVolume, setMicVolume] = useState(0);
 
   useEffect(
     () => {
@@ -23,29 +24,45 @@ export function useMicrophone(scene, updateRate = 50) {
         movingAvgRef.current.push(Date.now(), analyser.volume);
         const average = movingAvgRef.current.movingAverage();
         const nextVolume = max === 0 ? 0 : average / max;
-        setVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
+        setMicVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
         timeout = setTimeout(updateMicVolume, updateRate);
       };
 
       updateMicVolume();
 
-      const onMicStateChanged = ({ enabled }) => {
-        setIsMuted(!enabled);
+      const onMicMutedStateChanged = ({ enabled }) => {
+        setIsMicMuted(!enabled);
       };
 
-      APP.dialog.on("mic-state-changed", onMicStateChanged);
+      APP.dialog.on("mic-state-changed", onMicMutedStateChanged);
+
+      const onMicEnabled = () => {
+        setIsMicEnabled(true);
+      };
+      const onMicDisabled = () => {
+        setIsMicEnabled(false);
+      };
+
+      scene.addEventListener("action_end_mic_sharing", onMicDisabled);
+      scene.addEventListener("local-media-stream-created", onMicEnabled);
 
       return () => {
         clearTimeout(timeout);
-        APP.dialog.off("mic-state-changed", onMicStateChanged);
+        APP.dialog.off("mic-state-changed", onMicMutedStateChanged);
+        scene.removeEventListener("action_end_mic_sharing", onMicDisabled);
+        scene.removeEventListener("local-media-stream-created", onMicEnabled);
       };
     },
-    [setVolume, scene, updateRate]
+    [setMicVolume, scene, updateRate]
   );
 
   const toggleMute = useCallback(() => {
     APP.dialog.toggleMicrophone();
   }, []);
 
-  return { isMuted, volume, toggleMute };
+  const onEnableMicrophone = useCallback(() => {
+    window.APP.mediaDevicesManager.startMicShare(window.APP.mediaDevicesManager.lastUsedMicDeviceId);
+  }, []);
+
+  return { isMicMuted, micVolume, toggleMute, isMicEnabled, onEnableMicrophone };
 }
