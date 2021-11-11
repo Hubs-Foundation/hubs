@@ -11,13 +11,14 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 // Note that this doesn't have to be exhaustive: if no devices match any regex
 // then we rely upon the user to select the proper mic.
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
-
+const audioOutputSelectEnabled = "sinkId" in HTMLMediaElement.prototype;
 export default class MediaDevicesManager {
   constructor(scene, store, audioSystem) {
     this._scene = scene;
     this._store = store;
     this._micDevices = [];
     this._videoDevices = [];
+    this._outputDevices = [];
     this._deviceId = null;
     this._audioTrack = null;
     this.audioSystem = audioSystem;
@@ -58,6 +59,18 @@ export default class MediaDevicesManager {
     this._videoDevices = videoDevices;
   }
 
+  set outputDevices(outputDevices) {
+    this._outputDevices = outputDevices;
+  }
+
+  get outputDevices() {
+    return this._outputDevices;
+  }
+
+  get isAudioOutputSelectEnabled() {
+    return audioOutputSelectEnabled;
+  }
+
   get mediaStream() {
     return this._mediaStream;
   }
@@ -71,12 +84,21 @@ export default class MediaDevicesManager {
   }
 
   get selectedMicDeviceId() {
-    return this.micDeviceIdForMicLabel(this.selectedMicLabel);
+    return this.deviceIdForMicDeviceLabel(this.selectedMicLabel);
+  }
+
+  get selectedOutputDeviceId() {
+    return this.lastUsedOutputDeviceId;
   }
 
   get lastUsedMicDeviceId() {
     const { lastUsedMicDeviceId } = this._store.state.settings;
     return lastUsedMicDeviceId;
+  }
+
+  get lastUsedOutputDeviceId() {
+    const { lastUsedOutputDeviceId } = this._store.state.settings;
+    return lastUsedOutputDeviceId;
   }
 
   get isMicShared() {
@@ -103,9 +125,25 @@ export default class MediaDevicesManager {
         this.videoDevices = mediaDevices
           .filter(d => d.kind === "videoinput")
           .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substr(0, 9)})` }));
+        if (this.isAudioOutputSelectEnabled) {
+          this.outputDevices = mediaDevices
+            .filter(d => d.kind === "audiooutput")
+            .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substr(0, 9)})` }));
+          this.changeAudioOutput(this.lastUsedOutputDeviceId);
+        }
         resolve();
       });
     });
+  }
+
+  changeAudioOutput(deviceId) {
+    let audioOutputDeviceId = deviceId;
+    if (!audioOutputDeviceId) {
+      audioOutputDeviceId = this.outputDevices[0].value;
+    }
+    this._store.update({ settings: { lastUsedOutputDeviceId: audioOutputDeviceId } });
+    console.log(`Selected output device: ${this.outputLabelForDeviceId(audioOutputDeviceId)}`);
+    // TODO: actually update the output device
   }
 
   async startMicShare(deviceId) {
@@ -121,7 +159,7 @@ export default class MediaDevicesManager {
 
     // we should definitely have an audioTrack at this point unless they denied mic access
     if (this.audioTrack) {
-      const micDeviceId = this.micDeviceIdForMicLabel(this.micLabelForAudioTrack(this.audioTrack));
+      const micDeviceId = this.deviceIdForMicDeviceLabel(this.micLabelForAudioTrack(this.audioTrack));
       if (micDeviceId) {
         this._store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
         console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
@@ -279,12 +317,20 @@ export default class MediaDevicesManager {
     return (audioTrack && audioTrack.label) || "";
   }
 
-  micDeviceIdForMicLabel(label) {
+  deviceIdForMicDeviceLabel(label) {
     return this.micDevices.filter(d => d.label === label).map(d => d.value)[0];
+  }
+
+  deviceIdForOutputDeviceLabel(label) {
+    return this.outputDevices.filter(d => d.label === label).map(d => d.value)[0];
   }
 
   micLabelForDeviceId(deviceId) {
     return this.micDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
+  }
+
+  outputLabelForDeviceId(deviceId) {
+    return this.outputDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
   }
 
   hasHmdMicrophone() {

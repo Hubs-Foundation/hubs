@@ -591,6 +591,10 @@ class UIRoot extends Component {
     this.mediaDevicesManager.startMicShare(deviceId);
   };
 
+  speakerDeviceChanged = async deviceId => {
+    this.mediaDevicesManager.changeAudioOutput(deviceId);
+  };
+
   onRequestMicPermission = async () => {
     console.log("Microphone permission requested");
     // TODO: Show an error state if getting the microphone permissions fails
@@ -894,10 +898,12 @@ class UIRoot extends Component {
       <MicSetupModalContainer
         scene={this.props.scene}
         selectedMicrophone={this.mediaDevicesManager.selectedMicDeviceId}
+        selectedSpeaker={this.mediaDevicesManager.selectedOutputDeviceId}
         microphoneOptions={this.mediaDevicesManager.micDevices}
+        speakerOptions={this.mediaDevicesManager.outputDevices}
         onChangeMicrophone={this.micDeviceChanged}
-        microphoneEnabled={this.mediaDevicesManager.isMicShared}
-        microphoneMuted={muteOnEntry}
+        onChangeSpeaker={this.speakerDeviceChanged}
+        micMutedOnEntry={muteOnEntry}
         onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onEnterRoom={this.onAudioReadyButton}
         onBack={() => this.props.history.goBack()}

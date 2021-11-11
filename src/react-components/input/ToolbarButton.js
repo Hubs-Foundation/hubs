@@ -38,7 +38,7 @@ export const ToolbarButton = forwardRef(
           {statusColor && <div className={classNames(styles.statusIndicator, styles["status-" + statusColor])} />}
           {children}
         </div>
-        <label>{label}</label>
+        {label && <label>{label}</label>}
       </button>
     );
   }
