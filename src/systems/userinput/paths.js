@@ -176,7 +176,8 @@ paths.device.keyboard = {
     if (path) {
       return path;
     }
-    path = `/device/keyboard/${k === " " ? "space" : k.toLowerCase()}`;
+    path = `/device/keyboard/${k === " " ? "" : k.toLowerCase()}`;
+    // path = `/device/keyboard/${k === " " ? "space" : k.toLowerCase()}`;
     this.map.set(k, path);
     return path;
   }

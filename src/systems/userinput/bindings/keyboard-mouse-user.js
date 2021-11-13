@@ -864,8 +864,10 @@ export const keyboardMouseUserBindings = addSetsToBindings({
   ],
   [sets.inspecting]: [
     {
-      src: { value: paths.device.keyboard.key("space") },
-      dest: { value: k("space-rising") },
+      src: { value: paths.device.keyboard.key("") },
+      // src: { value: paths.device.keyboard.key("space") },
+      dest: { value: k("") },
+      // dest: { value: k("space-rising") },
       xform: xforms.rising
     },
     {
@@ -877,7 +879,8 @@ export const keyboardMouseUserBindings = addSetsToBindings({
         paths.device.keyboard.key("d"),
         paths.device.keyboard.key("q"),
         paths.device.keyboard.key("e"),
-        k("space-rising")
+        k("")
+        // k("space-rising")
       ],
       dest: { value: stopInspectingViaKeyboard },
       xform: xforms.any
