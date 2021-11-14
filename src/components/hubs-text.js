@@ -1,6 +1,4 @@
 import createTextGeometry from "three-bmfont-text";
-import fontJSON from '../fonts/SpoqaHanSansNeo-Regular.json';
-import fontPNG from '../fonts/SpoqaHanSansNeo-Regular.png';
 
 // 1 to match other A-Frame default widths.
 const DEFAULT_WIDTH = 1;
@@ -52,18 +50,24 @@ function computeFontWidthFactor(font) {
 }
 
 function loadFont(src) {
-  const font = { ...fontJSON };
-  for (const ch of font.chars) {
-    ch.yoffset += 30;
-  }
-  font.widthFactor = computeFontWidthFactor(font);
-  return font;
+  return fetch(src)
+    .then(resp => resp.json())
+    .then(font => {
+      // Fix negative Y offsets for Roboto MSDF font from tool. Experimentally determined.
+      if (src.indexOf(".json") >= 0) {
+        for (const ch of font.chars) {
+          ch.yoffset += 30;
+        }
+      }
+      font.widthFactor = computeFontWidthFactor(font);
+      return font;
+    });
 }
 
 function loadTexture(src) {
   return new Promise((resolve, reject) => {
     new THREE.ImageLoader().load(
-      fontPNG,
+      src,
       image => {
         const texture = new THREE.Texture();
         texture.image = image;
@@ -80,11 +84,10 @@ function loadTexture(src) {
   });
 }
 
-
 const FONTS = {
   roboto: {
-    json: loadFont("../fonts/SpoqaHanSansNeo-Regular.json"),
-    texture: loadTexture("../fonts/SpoqaHanSansNeo-Regular.png")
+    json: loadFont("https://hubs-1-assets.hubs.belivvr.com/assets/fonts/SpoqaHanSansNeo-Regular.json"),
+    texture: loadTexture("https://hubs-1-assets.hubs.belivvr.com/assets/fonts/SpoqaHanSansNeo-Regular.png")
   }
 };
 
