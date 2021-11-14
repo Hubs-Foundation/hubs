@@ -1561,6 +1561,7 @@ class UIRoot extends Component {
                           className="leaveBtn"
                           preset="cancel"
                           onClick={() => {
+                            window.close();
                             this.showNonHistoriedDialog(LeaveRoomModal, {
                               destinationUrl: "/",
                               reason: LeaveReason.leaveRoom
