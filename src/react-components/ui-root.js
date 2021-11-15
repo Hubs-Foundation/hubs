@@ -898,7 +898,7 @@ class UIRoot extends Component {
       <MicSetupModalContainer
         scene={this.props.scene}
         selectedMicrophone={this.mediaDevicesManager.selectedMicDeviceId}
-        selectedSpeaker={this.mediaDevicesManager.selectedOutputDeviceId}
+        selectedSpeaker={this.mediaDevicesManager.selectedSpeakersDeviceId}
         microphoneOptions={this.mediaDevicesManager.micDevices}
         speakerOptions={this.mediaDevicesManager.outputDevices}
         onChangeMicrophone={this.micDeviceChanged}

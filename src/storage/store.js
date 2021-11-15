@@ -83,7 +83,6 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         lastUsedMicDeviceId: { type: "string" },
-        lastUsedOutputDeviceId: { type: "string" },
         micMuted: { type: "bool" }
       }
     },
@@ -95,6 +94,7 @@ export const SCHEMA = {
       properties: {
         shouldPromptForRefresh: { type: "bool" },
         preferredMic: { type: "string" },
+        preferredSpeakers: { type: "string" },
         preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
         audioOutputMode: { type: "string" },
@@ -115,6 +115,7 @@ export const SCHEMA = {
         maxResolutionHeight: { type: "number" },
         globalVoiceVolume: { type: "number" },
         globalMediaVolume: { type: "number" },
+        globalSFXVolume: { type: "number" },
         snapRotationDegrees: { type: "number" },
         materialQualitySetting: { type: "string" },
         enableDynamicShadows: { type: "bool" },
