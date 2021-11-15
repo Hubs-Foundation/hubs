@@ -124,7 +124,7 @@ export function MicSetupModal({
                 <FormattedMessage id="mic-setup-modal.test-audio-button" defaultMessage="Test Audio" />
               </Button>
             </div>
-            {speakerOptions.length > 0 && (
+            {speakerOptions?.length > 0 && (
               <div className={styles.selectionContainer}>
                 <p style={{ alignSelf: "start" }}>
                   <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
