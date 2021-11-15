@@ -1,14 +1,13 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import MovingAverage from "moving-average";
 import { SourceType } from "../../components/audio-params";
+import { useVolumeMeter } from "../misc/useVolumeMeter";
 
 export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavSrc }) {
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
   const soundTimeoutRef = useRef();
-  const movingAvgRef = useRef();
   const audioElRef = useRef();
   const [soundPlaying, setSoundPlaying] = useState(false);
-  const [soundVolume, setSoundVolume] = useState(0);
+  const { soundVolume, onAttachSource, onDettachSource } = useVolumeMeter({ updateRate });
 
   useEffect(
     () => {
@@ -28,39 +27,17 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
       const source = audioCtx.createMediaElementSource(audio);
       audioSystem.addAudio({ sourceType: SourceType.SFX, node: source });
 
-      scene.emit("sound-created", source);
-
+      onAttachSource(source);
       audioElRef.current = audio;
-
-      if (!movingAvgRef.current) {
-        movingAvgRef.current = MovingAverage(updateRate * 2);
-      }
-
-      let max = 0;
-      let timeout;
-
-      const updateSoundVolume = () => {
-        const analyser = scene.systems["sound-audio-analyser"];
-        max = Math.max(analyser.volume, max);
-        // We use a moving average to smooth out the visual animation or else it would twitch too fast for
-        // the css renderer to keep up.
-        movingAvgRef.current.push(Date.now(), analyser.volume);
-        const average = movingAvgRef.current.movingAverage();
-        const nextVolume = max === 0 ? 0 : average / max;
-        setSoundVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
-        timeout = setTimeout(updateSoundVolume, updateRate);
-      };
-
-      updateSoundVolume();
 
       return () => {
         audioElRef.current.pause();
         audioElRef.current.currentTime = 0;
         clearTimeout(soundTimeoutRef.current);
-        clearTimeout(timeout);
+        onDettachSource();
       };
     },
-    [audioSystem, setSoundVolume, scene, updateRate, webmSrc, mp3Src, oggSrc, wavSrc]
+    [audioSystem, onAttachSource, onDettachSource, scene, webmSrc, mp3Src, oggSrc, wavSrc]
   );
 
   const playSound = useCallback(
