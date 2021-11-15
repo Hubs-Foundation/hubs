@@ -149,30 +149,6 @@ AFRAME.registerSystem("local-audio-analyser", {
 });
 
 /**
- * Calculates volume of the mic setup modal sound output.
- */
-AFRAME.registerSystem("sound-audio-analyser", {
-  init() {
-    this.volume = 0;
-    this.prevVolume = 0;
-
-    this.el.addEventListener("sound-created", ev => {
-      const ctx = THREE.AudioContext.getContext();
-      const node = ev.detail;
-      this.analyser = ctx.createAnalyser();
-      this.analyser.fftSize = 32;
-      this.levels = new Uint8Array(this.analyser.fftSize);
-      node.connect(this.analyser);
-    });
-  },
-
-  tick: function() {
-    if (!this.analyser) return;
-    updateVolume(this);
-  }
-});
-
-/**
  * Sets an entity's scale base on the volume of an audio-analyser in a parent entity.
  * @namespace avatar
  * @component scale-audio-feedback
