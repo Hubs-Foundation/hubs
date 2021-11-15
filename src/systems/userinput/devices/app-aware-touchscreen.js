@@ -3,7 +3,6 @@ import { Pose } from "../pose";
 import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouch } from "./touchscreen/assignments";
 import { findRemoteHoverTarget } from "../../interactions";
 import { canMove } from "../../../utils/permissions-utils";
-import ResizeObserver from "resize-observer-polyfill";
 
 const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
@@ -36,11 +35,7 @@ const getPlayerCamera = (() => {
   };
 })();
 
-function isSingleActionButton(el) {
-  return el.components.tags && el.components.tags.data.singleActionButton;
-}
-
-function shouldMoveCursor(touch, rect, raycaster) {
+function shouldMoveCursor(touch, raycaster) {
   const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.state.rightRemote.held;
   if (isCursorGrabbing) {
     return true;
@@ -48,8 +43,8 @@ function shouldMoveCursor(touch, rect, raycaster) {
   const rawIntersections = [];
   raycaster.setFromCamera(
     {
-      x: ((touch.clientX - rect.left) / rect.width) * 2 - 1,
-      y: -((touch.clientY - rect.top) / rect.height) * 2 + 1
+      x: (touch.clientX / window.innerWidth) * 2 - 1,
+      y: -(touch.clientY / window.innerHeight) * 2 + 1
     },
     getPlayerCamera()
   );
@@ -78,7 +73,7 @@ function shouldMoveCursor(touch, rect, raycaster) {
     (isFrozen || !isPinned) &&
     !isStaticControlledMedia &&
     !isStaticMedia &&
-    (remoteHoverTarget && (canMove(remoteHoverTarget) || isSingleActionButton(remoteHoverTarget)))
+    (remoteHoverTarget && canMove(remoteHoverTarget))
   );
 }
 
@@ -98,8 +93,6 @@ export class AppAwareTouchscreenDevice {
     ["touchstart", "touchend", "touchmove", "touchcancel"].map(x =>
       this.canvas.addEventListener(x, this.events.push.bind(this.events))
     );
-    this.canvasRect = this.canvas.getBoundingClientRect();
-    new ResizeObserver(() => (this.canvasRect = this.canvas.getBoundingClientRect())).observe(this.canvas);
   }
 
   end(touch) {
@@ -178,14 +171,11 @@ export class AppAwareTouchscreenDevice {
     const assignment = findByTouch(touch, this.assignments);
     switch (assignment.job) {
       case MOVE_CURSOR_JOB:
-        // Don't move the cursor until after the grab so that the grab happens at the touch's initial position
-        if (assignment.framesUntilGrab < 0) {
-          assignment.cursorPose.fromCameraProjection(
-            getPlayerCamera(),
-            ((touch.clientX - this.canvasRect.left) / this.canvasRect.width) * 2 - 1,
-            -((touch.clientY - this.canvasRect.top) / this.canvasRect.height) * 2 + 1
-          );
-        }
+        assignment.cursorPose.fromCameraProjection(
+          getPlayerCamera(),
+          (touch.clientX / this.canvas.clientWidth) * 2 - 1,
+          -(touch.clientY / this.canvas.clientHeight) * 2 + 1
+        );
         break;
       case MOVE_CAMERA_JOB:
         assignment.delta[0] += touch.clientX - assignment.clientX;
@@ -224,13 +214,13 @@ export class AppAwareTouchscreenDevice {
       let assignment;
 
       // First touch or third touch and other two fingers were pinching
-      if (shouldMoveCursor(touch, this.canvasRect, this.raycaster)) {
+      if (shouldMoveCursor(touch, this.raycaster)) {
         assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
 
         // Grabbing objects is delayed by several frames:
         // - We don't want the physics constraint to be applied too early, which results in crazy velocities
         // - We don't want to mis-trigger grabs if the user is about to put down a second finger.
-        assignment.framesUntilGrab = 8;
+        assignment.framesUntilGrab = 2;
       } else {
         assignment = assign(touch, MOVE_CAMERA_JOB, this.assignments);
         assignment.delta = [0, 0];
@@ -243,8 +233,8 @@ export class AppAwareTouchscreenDevice {
       // the touch will then track the cursor (instead of the camera)
       assignment.cursorPose = new Pose().fromCameraProjection(
         getPlayerCamera(),
-        ((touch.clientX - this.canvasRect.left) / this.canvasRect.width) * 2 - 1,
-        -((touch.clientY - this.canvasRect.top) / this.canvasRect.height) * 2 + 1
+        (touch.clientX / this.canvas.clientWidth) * 2 - 1,
+        -(touch.clientY / this.canvas.clientHeight) * 2 + 1
       );
     } else if (isSecondTouch || isThirdTouch) {
       const cursorJob = findByJob(MOVE_CURSOR_JOB, this.assignments);

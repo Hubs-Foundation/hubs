@@ -1,26 +1,22 @@
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/lights/LightProbeGenerator");
+import "three/examples/js/pmrem/PMREMGenerator";
+import "three/examples/js/pmrem/PMREMCubeUVPacker";
+import "three/examples/js/lights/LightProbeGenerator";
+import qsTruthy from "../utils/qs_truthy";
+const isBotMode = qsTruthy("bot");
 
 const {
-  AmbientLight,
-  BackSide,
-  BoxBufferGeometry,
-  CubeCamera,
-  LightProbeGenerator,
-  LinearFilter,
-  Mesh,
-  Object3D,
-  PMREMGenerator,
-  RGBAFormat,
   Scene,
-  ShaderMaterial,
-  sRGBEncoding,
-  UniformsLib,
-  UniformsUtils,
+  CubeCamera,
+  Object3D,
   Vector3,
-  WebGLCubeRenderTarget
+  BoxBufferGeometry,
+  ShaderMaterial,
+  UniformsUtils,
+  BackSide,
+  Mesh,
+  UniformsLib,
+  PMREMGenerator,
+  PMREMCubeUVPacker
 } = THREE;
 
 /**
@@ -346,40 +342,39 @@ export default class Sky extends Object3D {
 
   generateEnvironmentMap(renderer) {
     const skyScene = new Scene();
-    const cubeCamera = new CubeCamera(1, 100000, new WebGLCubeRenderTarget(512));
+    const cubeCamera = new CubeCamera(1, 100000, 512);
     skyScene.add(cubeCamera);
     skyScene.add(this.sky);
     cubeCamera.update(renderer, skyScene);
     this.add(this.sky);
-    const vrEnabled = renderer.xr.enabled;
-    renderer.xr.enabled = false;
-    const pmremGenerator = new PMREMGenerator(renderer);
-    const envMap = pmremGenerator.fromCubemap(cubeCamera.renderTarget.texture).texture;
-    renderer.xr.enabled = vrEnabled;
+    const vrEnabled = renderer.vr.enabled;
+    renderer.vr.enabled = false;
+    const pmremGenerator = new PMREMGenerator(cubeCamera.renderTarget.texture);
+    pmremGenerator.update(renderer);
+    const pmremCubeUVPacker = new PMREMCubeUVPacker(pmremGenerator.cubeLods);
+    pmremCubeUVPacker.update(renderer);
+    renderer.vr.enabled = vrEnabled;
     pmremGenerator.dispose();
+    pmremCubeUVPacker.dispose();
     cubeCamera.renderTarget.dispose();
-    return envMap;
+    return pmremCubeUVPacker.CubeUVRenderTarget.texture;
   }
 
   generateLightProbe(renderer) {
     const skyScene = new Scene();
     skyScene.add(this.sky);
 
-    const cubeCamera = new CubeCamera(
-      1,
-      100000,
-      new WebGLCubeRenderTarget(512, {
-        format: RGBAFormat,
-        magFilter: LinearFilter,
-        minFilter: LinearFilter,
-        encoding: sRGBEncoding
-      })
-    );
+    const cubeCamera = new THREE.CubeCamera(1, 100000, 512, {
+      format: THREE.RGBAFormat,
+      magFilter: THREE.LinearFilter,
+      minFilter: THREE.LinearFilter
+    });
+    cubeCamera.renderTarget.texture.encoding = THREE.sRGBEncoding;
     skyScene.add(cubeCamera);
     skyScene.add(this.sky);
     cubeCamera.update(renderer, skyScene);
     this.add(this.sky);
-    const lightProbe = LightProbeGenerator.fromCubeRenderTarget(renderer, cubeCamera.renderTarget);
+    const lightProbe = THREE.LightProbeGenerator.fromRenderTargetCube(renderer, cubeCamera.renderTarget);
     cubeCamera.renderTarget.dispose();
     return lightProbe;
   }
@@ -427,6 +422,12 @@ AFRAME.registerComponent("skybox", {
   init() {
     this.sky = new Sky();
     this.el.setObject3D("mesh", this.sky);
+
+    this.updateEnvironmentMap = this.updateEnvironmentMap.bind(this);
+    // HACK: Render environment map on next frame to avoid bug where the render target texture is black.
+    // This is likely due to the custom elements attached callback being synchronous on Chrome but not Firefox.
+    // Added timeout due to additional case where texture is black in Firefox.
+    requestAnimationFrame(() => setTimeout(this.updateEnvironmentMap));
   },
 
   update(oldData) {
@@ -469,18 +470,26 @@ AFRAME.registerComponent("skybox", {
       this.sky.matrixNeedsUpdate = true;
     }
 
-    // TODO Remove or rework medium quality mode
-    if (window.APP.store.materialQualitySetting === "medium") {
+    this.updateEnvironmentMap();
+  },
+
+  updateEnvironmentMap() {
+    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+    const renderer = this.el.sceneEl.renderer;
+
+    const quality = window.APP.store.materialQualitySetting;
+
+    if (environmentMapComponent && !isBotMode && quality === "high") {
+      const envMap = this.sky.generateEnvironmentMap(renderer);
+      environmentMapComponent.updateEnvironmentMap(envMap);
+    } else if (quality === "medium") {
       // This extra ambient light is here to normalize lighting with the MeshStandardMaterial.
       // Without it, objects are significantly darker in brighter environments.
       // It's kept to a low value to not wash out objects in very dark environments.
       // This is a hack, but the results are much better than they are without it.
-      this.el.setObject3D("ambient-light", new AmbientLight(0xffffff, 0.3));
-      this.el.setObject3D("light-probe", this.sky.generateLightProbe(this.el.sceneEl.renderer));
+      this.el.setObject3D("ambient-light", new THREE.AmbientLight(0xffffff, 0.3));
+      this.el.setObject3D("light-probe", this.sky.generateLightProbe(renderer));
     }
-
-    // TODO if we care about dynamic skybox changes we should also update the enviornment map here
-    //
   },
 
   remove() {

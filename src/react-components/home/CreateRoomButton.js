@@ -9,9 +9,9 @@ export function CreateRoomButton() {
 
   return (
     <Button
-      thick={breakpoint === "sm" || breakpoint === "md"}
+      lg={breakpoint === "sm" || breakpoint === "md"}
       xl={breakpoint !== "sm" && breakpoint !== "md"}
-      preset="landing"
+      preset="primary"
       onClick={e => {
         e.preventDefault();
         createAndRedirectToNewHub(null, null, false);

@@ -7,8 +7,7 @@
   height: 100%;
   background-color: theme.$background1-color;
   pointer-events: auto;
-  overflow-wrap: break-word;
-  
+
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     border-left: 1px solid theme.$border1-color;
   }
@@ -44,8 +43,5 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-}
-
-:local(.overflow-y) {
   overflow-y: auto;
 }

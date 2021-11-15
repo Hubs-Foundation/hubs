@@ -6,8 +6,6 @@ import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
 import { Container } from "./Container";
-import { SocialBar } from "../home/SocialBar";
-import { SignInButton } from "../home/SignInButton";
 
 export function Header({
   appName,
@@ -23,8 +21,7 @@ export function Header({
   isAdmin,
   isSignedIn,
   email,
-  onSignOut,
-  isHmc
+  onSignOut
 }) {
   return (
     <header>
@@ -36,24 +33,29 @@ export function Header({
                 <img alt={appName} src={appLogo} />
               </a>
             </li>
+            {showCloud && (
+              <li>
+                <a href="/cloud">
+                  <FormattedMessage id="header.cloud" defaultMessage="Hubs Cloud" />
+                </a>
+              </li>
+            )}
             {enableSpoke && (
               <li>
-                <a href="/spoke">
-                  {isHmc ? <FormattedMessage id="header.spoke" defaultMessage="Spoke" /> : editorName}
-                </a>
+                <a href="/spoke">{editorName}</a>
               </li>
             )}
             {showDocsLink && (
               <li>
                 <a href={docsUrl}>
-                  <FormattedMessage id="header.docs" defaultMessage="Guides" />
+                  <FormattedMessage id="header.docs" defaultMessage="Docs" />
                 </a>
               </li>
             )}
             {showSourceLink && (
               <li>
                 <a href="https://github.com/mozilla/hubs">
-                  <FormattedMessage id="header.source" defaultMessage="Developers" />
+                  <FormattedMessage id="header.source" defaultMessage="Source" />
                 </a>
               </li>
             )}
@@ -61,13 +63,6 @@ export function Header({
               <li>
                 <a href={communityUrl}>
                   <FormattedMessage id="header.community" defaultMessage="Community" />
-                </a>
-              </li>
-            )}
-            {showCloud && (
-              <li>
-                <a href="/cloud">
-                  <FormattedMessage id="header.cloud" defaultMessage="Hubs Cloud" />
                 </a>
               </li>
             )}
@@ -93,16 +88,17 @@ export function Header({
                   defaultMessage="Signed in as {email}"
                   values={{ email: maskEmail(email) }}
                 />
-              </span>
+              </span>{" "}
               <a href="#" onClick={onSignOut}>
                 <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
               </a>
             </div>
           ) : (
-            <SignInButton />
+            <a href="/signin" rel="noreferrer noopener">
+              <FormattedMessage id="header.sign-in" defaultMessage="Sign In" />
+            </a>
           )}
         </div>
-        {isHmc ? <SocialBar mobile /> : null}
       </Container>
     </header>
   );
@@ -122,6 +118,5 @@ Header.propTypes = {
   isAdmin: PropTypes.bool,
   isSignedIn: PropTypes.bool,
   email: PropTypes.string,
-  onSignOut: PropTypes.func,
-  isHmc: PropTypes.bool
+  onSignOut: PropTypes.func
 };

@@ -74,44 +74,21 @@ export function MessageAttachmentButton(props) {
   );
 }
 
-export function ChatLengthWarning({ messageLength, maxLength }) {
-  return (
-    <p
-      className={classNames(styles.chatInputWarning, {
-        [styles.warningTextColor]: messageLength > maxLength
-      })}
-    >
-      <FormattedMessage id="chat-message-input.warning-max-characters" defaultMessage="Max characters" />
-      {` (${messageLength}/${maxLength})`}
-    </p>
-  );
-}
-
-ChatLengthWarning.propTypes = {
-  messageLength: PropTypes.number,
-  maxLength: PropTypes.number
-};
-
-export function ChatInput({ warning, isOverMaxLength, ...props }) {
+export function ChatInput(props) {
   const intl = useIntl();
 
   return (
     <div className={styles.chatInputContainer}>
       <TextAreaInput
-        textInputStyles={styles.chatInputTextAreaStyles}
-        className={classNames({ [styles.warningBorder]: isOverMaxLength })}
         placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
         {...props}
       />
-      {warning}
     </div>
   );
 }
 
 ChatInput.propTypes = {
-  onSpawn: PropTypes.func,
-  warning: PropTypes.node,
-  isOverMaxLength: PropTypes.bool
+  onSpawn: PropTypes.func
 };
 
 const enteredMessages = defineMessages({
@@ -143,9 +120,7 @@ export const LogMessageType = {
   audioNormalizationNaN: "audioNormalizationNaN",
   invalidAudioNormalizationRange: "invalidAudioNormalizationRange",
   audioSuspended: "audioSuspended",
-  audioResumed: "audioResumed",
-  joinFailed: "joinFailed",
-  avatarChanged: "avatarChanged"
+  audioResumed: "audioResumed"
 };
 
 const logMessages = defineMessages({
@@ -225,14 +200,6 @@ const logMessages = defineMessages({
   [LogMessageType.audioResumed]: {
     id: "chat-sidebar.log-message.audio-resumed",
     defaultMessage: "Audio has been resumed."
-  },
-  [LogMessageType.joinFailed]: {
-    id: "chat-sidebar.log-message.join-failed",
-    defaultMessage: "Failed to join room: {message}"
-  },
-  [LogMessageType.avatarChanged]: {
-    id: "chat-sidebar.log-message.avatar-changed",
-    defaultMessage: "Your avatar has been changed."
   }
 });
 
@@ -275,14 +242,6 @@ export function formatSystemMessage(entry, intl) {
           values={{ name: <b>{entry.name}</b>, hubName: <b>{entry.hubName}</b> }}
         />
       );
-    case "hub_changed":
-      return (
-        <FormattedMessage
-          id="chat-sidebar.system-message.hub-change"
-          defaultMessage="You are now in {hubName}"
-          values={{ hubName: <b>{entry.hubName}</b> }}
-        />
-      );
     case "log":
       return intl.formatMessage(logMessages[entry.messageType], entry.props);
     default:
@@ -295,7 +254,6 @@ export function SystemMessage(props) {
 
   return (
     <li className={classNames(styles.messageGroup, styles.systemMessage)}>
-      {props.showLineBreak && <hr />}
       <p className={styles.messageGroupLabel}>
         <i>{formatSystemMessage(props, intl)}</i>
         <span>
@@ -307,8 +265,7 @@ export function SystemMessage(props) {
 }
 
 SystemMessage.propTypes = {
-  timestamp: PropTypes.any,
-  showLineBreak: PropTypes.bool
+  timestamp: PropTypes.any
 };
 
 function MessageBubble({ media, monospace, emoji, children }) {
@@ -394,7 +351,6 @@ export function ChatSidebar({ onClose, children, ...rest }) {
       title={<FormattedMessage id="chat-sidebar.title" defaultMessage="Chat" />}
       beforeTitle={<CloseButton onClick={onClose} />}
       contentClassName={styles.content}
-      disableOverflowScroll
       {...rest}
     >
       {children}

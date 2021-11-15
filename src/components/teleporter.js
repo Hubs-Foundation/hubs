@@ -1,6 +1,5 @@
 import { CYLINDER_TEXTURE } from "./cylinder-texture";
 import { SOUND_TELEPORT_START, SOUND_TELEPORT_END } from "../systems/sound-effects-system";
-import { getMeshes } from "../utils/aframe-utils";
 
 function easeIn(t) {
   return t * t;
@@ -13,7 +12,8 @@ function easeOutIn(t) {
 
 const RayCurve = function(numPoints, width) {
   this.geometry = new THREE.BufferGeometry();
-  this.vertices = new Float32Array(numPoints * 3 * 6);
+  this.vertices = new Float32Array(numPoints * 3 * 2);
+  this.uvs = new Float32Array(numPoints * 2 * 2);
   this.width = width;
 
   this.geometry.setAttribute("position", new THREE.BufferAttribute(this.vertices, 3).setUsage(THREE.DynamicDrawUsage));
@@ -24,6 +24,7 @@ const RayCurve = function(numPoints, width) {
   });
 
   this.mesh = new THREE.Mesh(this.geometry, this.material);
+  this.mesh.drawMode = THREE.TriangleStripDrawMode;
 
   this.mesh.frustumCulled = false;
   this.mesh.vertices = this.vertices;
@@ -32,9 +33,9 @@ const RayCurve = function(numPoints, width) {
   this.numPoints = numPoints;
 };
 
-const UP = new THREE.Vector3(0, 1, 0);
 RayCurve.prototype = {
   setDirection: function(direction) {
+    const UP = new THREE.Vector3(0, 1, 0);
     this.direction
       .copy(direction)
       .cross(UP)
@@ -47,63 +48,21 @@ RayCurve.prototype = {
   },
 
   setPoint: (function() {
-    const A = new THREE.Vector3();
-    const B = new THREE.Vector3();
-    const C = new THREE.Vector3();
-    const D = new THREE.Vector3();
+    const posA = new THREE.Vector3();
+    const posB = new THREE.Vector3();
 
-    return function(i, P) {
-      let idx = 3 * 6 * i;
+    return function(i, point) {
+      posA.copy(point).add(this.direction);
+      posB.copy(point).sub(this.direction);
 
-      A.copy(P).add(this.direction);
-      B.copy(P).sub(this.direction);
-      C.set(
-        // Previous A
-        i === 0 ? A.x : this.vertices[idx - 3],
-        i === 0 ? A.y : this.vertices[idx - 2],
-        i === 0 ? A.z : this.vertices[idx - 1]
-      );
-      D.set(
-        // Previous B
-        i === 0 ? B.x : this.vertices[idx - 6],
-        i === 0 ? B.y : this.vertices[idx - 5],
-        i === 0 ? B.z : this.vertices[idx - 4]
-      );
+      let idx = 2 * 3 * i;
+      this.vertices[idx++] = posA.x;
+      this.vertices[idx++] = posA.y;
+      this.vertices[idx++] = posA.z;
 
-      //   A---P---B
-      //   | \     |
-      //   |  \    |
-      //   |   \   |
-      //   |    \  |
-      //   |     \ |
-      //   |      \|
-      //   C-------D
-      //   A'--P'--B' Previous P
-      //   | \     |
-
-      this.vertices[idx++] = A.x;
-      this.vertices[idx++] = A.y;
-      this.vertices[idx++] = A.z;
-
-      this.vertices[idx++] = C.x;
-      this.vertices[idx++] = C.y;
-      this.vertices[idx++] = C.z;
-
-      this.vertices[idx++] = D.x;
-      this.vertices[idx++] = D.y;
-      this.vertices[idx++] = D.z;
-
-      this.vertices[idx++] = D.x;
-      this.vertices[idx++] = D.y;
-      this.vertices[idx++] = D.z;
-
-      this.vertices[idx++] = B.x;
-      this.vertices[idx++] = B.y;
-      this.vertices[idx++] = B.z;
-
-      this.vertices[idx++] = A.x;
-      this.vertices[idx++] = A.y;
-      this.vertices[idx++] = A.z;
+      this.vertices[idx++] = posB.x;
+      this.vertices[idx++] = posB.y;
+      this.vertices[idx++] = posB.z;
 
       this.geometry.attributes.position.needsUpdate = true;
     };
@@ -137,6 +96,16 @@ const checkLineIntersection = (function() {
     return false;
   };
 })();
+
+function getMeshes(collisionEntities) {
+  return collisionEntities
+    .map(function(entity) {
+      return entity.getObject3D("mesh");
+    })
+    .filter(function(n) {
+      return n;
+    });
+}
 
 const MISS_OPACITY = 0.1;
 const HIT_OPACITY = 0.3;

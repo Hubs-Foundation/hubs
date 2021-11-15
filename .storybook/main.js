@@ -60,12 +60,6 @@ module.exports = {
       ]
     });
 
-    config.module.rules.push({
-      test: /\.(glb|gltf)$/,
-      use: ["file-loader"],
-      include: path.resolve(__dirname, "../")
-    });
-
     return config;
   }
 };

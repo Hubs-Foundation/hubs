@@ -22,7 +22,6 @@ import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, hubUrl } from "../utils/phoenix-utils";
 import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
-import { isIOS } from "../utils/is-mobile";
 
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowserContainer from "./media-browser";
@@ -141,11 +140,11 @@ class UIRoot extends Component {
     presences: PropTypes.object,
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
+    initialIsSubscribed: PropTypes.bool,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     signInMessage: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
-    onSignInDialogVisibilityChanged: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     onAvatarSaved: PropTypes.func,
@@ -233,22 +232,8 @@ class UIRoot extends Component {
         window.setTimeout(() => {
           if (!this.props.isBotMode) {
             try {
-              this.props.scene.renderer.compile(this.props.scene.object3D, this.props.scene.camera);
-              this.props.scene.object3D.traverse(obj => {
-                if (!obj.material) {
-                  return;
-                }
-                const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-                for (const material of materials) {
-                  for (const prop in material) {
-                    if (material[prop] && material[prop].isTexture) {
-                      this.props.scene.renderer.initTexture(material[prop]);
-                    }
-                  }
-                }
-              });
-            } catch (e) {
-              console.error(e);
+              this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
+            } catch {
               this.props.exitScene(ExitReason.sceneError); // https://github.com/mozilla/hubs/issues/1950
             }
           }
@@ -363,7 +348,6 @@ class UIRoot extends Component {
       this.props.scene.addEventListener(
         "loading_finished",
         () => {
-          console.log("Loading has finished. Checking for forced room entry");
           setTimeout(() => this.handleForceEntry(), 1000);
         },
         { once: true }
@@ -397,11 +381,8 @@ class UIRoot extends Component {
   };
 
   showContextualSignInDialog = () => {
-    const { signInMessage, authChannel } = this.props;
-    const onCallback = () => {
-      const { onContinueAfterSignIn } = this.props;
-      (onContinueAfterSignIn && onContinueAfterSignIn()) || this.closeDialog();
-    };
+    const { signInMessage, authChannel, onContinueAfterSignIn } = this.props;
+
     this.showNonHistoriedDialog(RoomSignInModalContainer, {
       step: SignInStep.submit,
       message: signInMessage,
@@ -410,7 +391,7 @@ class UIRoot extends Component {
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
-          onClose: onCallback
+          onClose: onContinueAfterSignIn || this.closeDialog
         });
 
         await authComplete;
@@ -418,11 +399,11 @@ class UIRoot extends Component {
         this.setState({ signedIn: true });
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
-          onClose: onCallback,
-          onContinue: onCallback
+          onClose: onContinueAfterSignIn || this.closeDialog,
+          onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
-      onClose: onCallback
+      onClose: onContinueAfterSignIn || this.closeDialog
     });
   };
 
@@ -449,7 +430,6 @@ class UIRoot extends Component {
   };
 
   onLoadingFinished = () => {
-    console.log("UI root loading has finished");
     this.setState({ noMoreLoadingUpdates: true });
     this.props.scene.emit("loading_finished");
 
@@ -459,7 +439,6 @@ class UIRoot extends Component {
   };
 
   onSceneLoaded = () => {
-    console.log("UI root scene has loaded");
     this.setState({ sceneLoaded: true });
   };
 
@@ -476,7 +455,7 @@ class UIRoot extends Component {
   };
 
   toggleMute = () => {
-    APP.dialog.toggleMicrophone();
+    this.props.scene.emit("action_mute");
   };
 
   shareVideo = mediaSource => {
@@ -499,8 +478,6 @@ class UIRoot extends Component {
   };
 
   handleForceEntry = () => {
-    console.log("Forced entry type: " + this.props.forcedVREntryType);
-
     if (!this.props.forcedVREntryType) return;
 
     if (this.props.forcedVREntryType.startsWith("daydream")) {
@@ -569,12 +546,10 @@ class UIRoot extends Component {
   };
 
   enter2D = async () => {
-    console.log("Entering in 2D mode");
     await this.performDirectEntryFlow(false);
   };
 
   enterVR = async () => {
-    console.log("Entering in VR mode");
     if (this.props.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
@@ -583,7 +558,6 @@ class UIRoot extends Component {
   };
 
   enterDaydream = async () => {
-    console.log("Entering in Daydream mode");
     await this.performDirectEntryFlow(true);
   };
 
@@ -592,26 +566,30 @@ class UIRoot extends Component {
   };
 
   onRequestMicPermission = async () => {
-    console.log("Microphone permission requested");
     // TODO: Show an error state if getting the microphone permissions fails
     await this.mediaDevicesManager.startLastUsedMicShare();
     this.beginOrSkipAudioSetup();
   };
 
   beginOrSkipAudioSetup = () => {
+    console.log(this.props.forcedVREntryType);
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
+
     if (skipAudioSetup) {
-      console.log(`Skipping audio setup (forcedVREntryType = ${this.props.forcedVREntryType})`);
       this.onAudioReadyButton();
     } else {
-      console.log(`Starting audio setup`);
       this.pushHistoryState("entry_step", "audio");
     }
   };
 
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
-    return (isMobile || AFRAME.utils.device.isMobileVR()) && !isIOS() && !this.state.enterInVR && screenfull.enabled;
+    return (
+      (isMobile || AFRAME.utils.device.isMobileVR()) &&
+      !AFRAME.utils.device.isIOS() &&
+      !this.state.enterInVR &&
+      screenfull.enabled
+    );
   };
 
   onAudioReadyButton = async () => {
@@ -623,6 +601,9 @@ class UIRoot extends Component {
     clearHistoryState(this.props.history);
 
     const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    this.props.store.update({
+      settings: { micMuted: false }
+    });
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
@@ -654,10 +635,9 @@ class UIRoot extends Component {
   closeDialog = () => {
     if (this.state.dialog) {
       this.setState({ dialog: null });
+    } else {
+      this.props.history.goBack();
     }
-
-    const { onSignInDialogVisibilityChanged } = this.props;
-    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(false);
 
     if (isIn2DInterstitial()) {
       exit2DInterstitialAndEnterVR();
@@ -667,8 +647,6 @@ class UIRoot extends Component {
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
-    const { onSignInDialogVisibilityChanged } = this.props;
-    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(true);
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
@@ -1018,7 +996,6 @@ class UIRoot extends Component {
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
     const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
-    const showAudioDebugPanel = this.props.store.state.preferences["showAudioDebugPanel"];
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
@@ -1379,7 +1356,7 @@ class UIRoot extends Component {
                         <PeopleMenuButton
                           active={this.state.sidebarId === "people"}
                           onClick={() => this.toggleSidebar("people")}
-                          presencecount={this.state.presenceCount}
+                          presenceCount={this.state.presenceCount}
                         />
                       </ContentMenu>
                     )}
@@ -1418,15 +1395,13 @@ class UIRoot extends Component {
                       scene={this.props.scene}
                       store={this.props.store}
                     />
-                    {(showRtcDebugPanel || showAudioDebugPanel) && (
+                    {showRtcDebugPanel && (
                       <RTCDebugPanel
                         history={this.props.history}
                         store={window.APP.store}
                         scene={this.props.scene}
                         presences={this.props.presences}
                         sessionId={this.props.sessionId}
-                        showRtcDebug={showRtcDebugPanel}
-                        showAudioDebug={showAudioDebugPanel}
                       />
                     )}
                   </>

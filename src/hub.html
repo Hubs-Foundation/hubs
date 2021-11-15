@@ -79,6 +79,7 @@
         freeze-controller
         personal-space-bubble="debug: false;"
         rotate-selected-object
+        environment-map
         light="defaultLightsEnabled: false"
     >
         <a-assets>
@@ -219,8 +220,7 @@
 
                         <template data-name="Head">
                             <a-entity
-                                avatar-audio-source
-                                audio-zone-source
+                                avatar-audio-source="rolloffFactor: 2.0;"
                                 personal-space-invader="radius: 0.15; useMaterial: true;"
                                 bone-visibility
                                 body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 1;"
@@ -318,6 +318,7 @@
                     position-at-border__freeze="target:.freeze-menu"
                     position-at-border__freeze-unprivileged="target:.freeze-unprivileged-menu"
                     listed-media
+                    use-audio-system-settings
                 >
                     <a-entity class="ui interactable-ui">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
@@ -969,8 +970,7 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    transparent: false;
-                    alphaTest: 0.1;
+                    opacity: 1.0;
                     src: #button"
             ></a-mixin>
 
@@ -982,8 +982,7 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    transparent: false;
-                    alphaTest: 0.1;
+                    opacity: 1.0;
                     src: #button"
             ></a-mixin>
 
@@ -995,8 +994,7 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    transparent: false;
-                    alphaTest: 0.1;
+                    opacity: 1.0;
                     src: #action-button"
             ></a-mixin>
 
@@ -1008,8 +1006,7 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    transparent: false;
-                    alphaTest: 0.1;
+                    opacity: 1.0;
                     src: #action-button"
             ></a-mixin>
 
@@ -1027,8 +1024,7 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    transparent: false;
-                    alphaTest: 0.1;
+                    opacity: 1.0;
                     src: #button"
             ></a-mixin>
         </a-assets>

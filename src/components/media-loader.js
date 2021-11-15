@@ -25,6 +25,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
 
+let loadingObjectEnvMap;
 let loadingObject;
 
 waitForDOMContentLoaded().then(() => {
@@ -170,7 +171,6 @@ AFRAME.registerComponent("media-loader", {
     this.el.removeAttribute("gltf-model-plus");
     this.el.removeAttribute("media-pager");
     this.el.removeAttribute("media-video");
-    this.el.removeAttribute("audio-zone-source");
     this.el.removeAttribute("media-pdf");
     this.el.setAttribute("media-image", { src: "error" });
     this.clearLoadingTimeout();
@@ -191,6 +191,15 @@ AFRAME.registerComponent("media-loader", {
     this.updateScale(true, false);
 
     if (useFancyLoader) {
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+      if (environmentMapComponent) {
+        const currentEnivronmentMap = environmentMapComponent.environmentMap;
+        if (loadingObjectEnvMap !== currentEnivronmentMap) {
+          environmentMapComponent.applyEnvironmentMap(mesh);
+          loadingObjectEnvMap = currentEnivronmentMap;
+        }
+      }
+
       this.loaderMixer = new THREE.AnimationMixer(mesh);
 
       this.loadingClip = this.loaderMixer.clipAction(mesh.animations[0]);
@@ -339,7 +348,6 @@ AFRAME.registerComponent("media-loader", {
       this.el.removeAttribute("gltf-model-plus");
       this.el.removeAttribute("media-pager");
       this.el.removeAttribute("media-video");
-      this.el.removeAttribute("audio-zone-source");
       this.el.removeAttribute("media-pdf");
       this.el.removeAttribute("media-image");
     }
@@ -355,7 +363,7 @@ AFRAME.registerComponent("media-loader", {
       }
 
       let canonicalUrl = src;
-      let canonicalAudioUrl = null; // set non-null only if audio track is separated from video track (eg. 360 video)
+      let canonicalAudioUrl = src;
       let accessibleUrl = src;
       let contentType = this.data.contentType;
       let thumbnail;
@@ -452,7 +460,6 @@ AFRAME.registerComponent("media-loader", {
             linkedMediaElementAudioSource
           })
         );
-        this.el.setAttribute("audio-zone-source", {});
         if (this.el.components["position-at-border__freeze"]) {
           this.el.setAttribute("position-at-border__freeze", { isFlat: true });
         }
@@ -462,7 +469,6 @@ AFRAME.registerComponent("media-loader", {
       } else if (contentType.startsWith("image/")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        this.el.removeAttribute("audio-zone-source");
         this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
@@ -505,7 +511,6 @@ AFRAME.registerComponent("media-loader", {
       } else if (contentType.startsWith("application/pdf")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        this.el.removeAttribute("audio-zone-source");
         this.el.removeAttribute("media-image");
         this.el.setAttribute(
           "media-pdf",
@@ -539,7 +544,6 @@ AFRAME.registerComponent("media-loader", {
       ) {
         this.el.removeAttribute("media-image");
         this.el.removeAttribute("media-video");
-        this.el.removeAttribute("audio-zone-source");
         this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(
@@ -573,7 +577,6 @@ AFRAME.registerComponent("media-loader", {
       } else if (contentType.startsWith("text/html")) {
         this.el.removeAttribute("gltf-model-plus");
         this.el.removeAttribute("media-video");
-        this.el.removeAttribute("audio-zone-source");
         this.el.removeAttribute("media-pdf");
         this.el.removeAttribute("media-pager");
         this.el.addEventListener(

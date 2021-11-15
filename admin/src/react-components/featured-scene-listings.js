@@ -12,19 +12,11 @@ import {
   NumberInput,
   Datagrid,
   TextField,
-  ReferenceField,
-  Filter
+  ReferenceField
 } from "react-admin";
 
-const SceneFilter = props => (
-  <Filter {...props}>
-    <TextInput label="Search Name" source="name" alwaysOn />
-    <TextInput label="Search SID" source="scene_sid" alwaysOn />
-  </Filter>
-);
-
 export const FeaturedSceneListingList = props => (
-  <List {...props} filters={<SceneFilter />} sort={{ field: "order", order: "ASC" }}>
+  <List {...props} sort={{ field: "order", order: "ASC" }}>
     <Datagrid>
       <OwnedFileImage source="screenshot_owned_file_id" />
       <OwnedFileSizeField label="Model size" source="model_owned_file_id" />

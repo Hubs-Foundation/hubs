@@ -9,8 +9,7 @@ module.exports = {
   globals: {
     THREE: true,
     AFRAME: true,
-    NAF: true,
-    APP: true
+    NAF: true
   },
   plugins: ["prettier", "react", "react-hooks", "@calm/react-intl"],
 

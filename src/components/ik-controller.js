@@ -160,7 +160,7 @@ AFRAME.registerComponent("ik-controller", {
     this.middleEyePosition.addVectors(this.leftEye.position, this.rightEye.position);
     this.middleEyePosition.divideScalar(2);
     this.middleEyeMatrix.makeTranslation(this.middleEyePosition.x, this.middleEyePosition.y, this.middleEyePosition.z);
-    this.invMiddleEyeToHead = this.middleEyeMatrix.copy(this.middleEyeMatrix).invert();
+    this.invMiddleEyeToHead = this.middleEyeMatrix.getInverse(this.middleEyeMatrix);
 
     this.invHipsToHeadVector
       .addVectors(this.chest.position, this.neck.position)
@@ -242,9 +242,10 @@ AFRAME.registerComponent("ik-controller", {
         if (yDelta > this.data.maxLerpAngle) {
           avatar.quaternion.copy(cameraYQuaternion);
         } else {
-          avatar.quaternion.slerpQuaternions(
+          Quaternion.slerp(
             avatar.quaternion,
             cameraYQuaternion,
+            avatar.quaternion,
             (this.data.rotationSpeed * dt) / 1000
           );
         }
@@ -256,12 +257,12 @@ AFRAME.registerComponent("ik-controller", {
 
       // Take the head orientation computed from the hmd, remove the Y rotation already applied to it by the hips,
       // and apply it to the head
-      invHipsQuaternion.copy(avatar.quaternion).invert();
+      invHipsQuaternion.copy(avatar.quaternion).inverse();
       head.quaternion.setFromRotationMatrix(headTransform).premultiply(invHipsQuaternion);
 
       avatar.updateMatrix();
       rootToChest.multiplyMatrices(avatar.matrix, chest.matrix);
-      invRootToChest.copy(rootToChest).invert();
+      invRootToChest.getInverse(rootToChest);
 
       root.matrixNeedsUpdate = true;
       neck.matrixNeedsUpdate = true;
@@ -323,7 +324,7 @@ AFRAME.registerComponent("ik-controller", {
     const cameraWorld = new THREE.Vector3();
     const isInViewOfCamera = (screenCamera, pos) => {
       frustumMatrix.multiplyMatrices(screenCamera.projectionMatrix, screenCamera.matrixWorldInverse);
-      frustum.setFromProjectionMatrix(frustumMatrix);
+      frustum.setFromMatrix(frustumMatrix);
       return frustum.containsPoint(pos);
     };
 

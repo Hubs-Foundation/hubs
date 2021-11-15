@@ -15,8 +15,7 @@ export function Footer({
   showCompanyLogo,
   companyLogoUrl,
   showDiscordBotLink,
-  appName,
-  isHmc
+  appName
 }) {
   return (
     <footer>
@@ -60,20 +59,6 @@ export function Footer({
                 </a>
               </li>
             )}
-            {isHmc && (
-              <li>
-                <a target="_blank" rel="noopener noreferrer" href={"https://shop.spreadshirt.com/mozillaMR/"}>
-                  <FormattedMessage id="footer.hubs-merch" defaultMessage="Hubs Merch" />
-                </a>
-              </li>
-            )}
-            {isHmc && (
-              <li>
-                <a target="_blank" rel="noopener noreferrer" href={"https://hubs.mozilla.com/docs/hubs-faq.html"}>
-                  <FormattedMessage id="footer.FAQ" defaultMessage="FAQ" />
-                </a>
-              </li>
-            )}
             {showTerms && (
               <li>
                 <a target="_blank" rel="noopener noreferrer" href={termsUrl}>
@@ -114,6 +99,5 @@ Footer.propTypes = {
   showCompanyLogo: PropTypes.bool,
   companyLogoUrl: PropTypes.string,
   showDiscordBotLink: PropTypes.bool,
-  appName: PropTypes.string,
-  isHmc: PropTypes.bool
+  appName: PropTypes.string
 };

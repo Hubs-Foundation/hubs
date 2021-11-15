@@ -3,7 +3,7 @@
 :local(.home-page) {
   flex: 1;
   background-size: cover;
-  padding: 0;
+  padding: 1.5em;
   flex-direction: column;
   align-items: center;
 
@@ -21,8 +21,8 @@
   display: flex;
   justify-content: center;
   padding: 20px;
-  width: 150px;
-  
+  width: 250px;
+
   img {
     width: 100%;
     align-self: flex-start;
@@ -31,20 +31,6 @@
   @media (min-width: theme.$breakpoint-lg) {
     display: none;
   }
-}
-
-:local(.sign-in-container) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  @media(min-width: theme.$breakpoint-lg) {
-    display: none;
-  }
-}
-
-:local(.mobile-sign-out) {
-  padding: 0.5rem;
 }
 
 :local(.hero) {
@@ -59,11 +45,8 @@
 }
 
 :local(.hero-image-container) {
-
   img {
-    @media (min-width: theme.$breakpoint-lg) {
-      border-radius: 16px;
-    }
+    border-radius: 16px;
   }
 }
 
@@ -96,7 +79,7 @@
   font-size: theme.$font-size-lg;
   font-weight: theme.$font-weight-medium;
   text-align: center;
-  margin: 0 24px 20px 24px;
+  margin: 0 48px 20px 48px;
   line-height: 1.25;
 
   @media (min-width: theme.$breakpoint-lg) {

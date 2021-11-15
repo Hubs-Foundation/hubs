@@ -12,7 +12,6 @@
   flex-flow: column;
   flex: 0 1 auto;
   background-color: theme.$overlay-bg-color;
-  pointer-events: auto;
 
   @media not all and (min-resolution:.001dpcm){ @supports (-webkit-appearance:none) { height: 100%; }}
 }
@@ -79,29 +78,14 @@
   }
 }
 
-:local(.status-container-middle) {
-  @extend :local(.rtc-status-container);
-  width: 50%;
-  height: 100%;
-  flex: 1 0 auto;
-  flex-flow: column;
-  overflow-y: hidden;
-  pointer-events: none;
-
-  @media(max-width: 500px) {
-    justify-content: start;
-    width: 100%;
-  }
-}
-
 :local(.rtc-log-container) {
   pointer-events: auto;
-  width: 100%;
+  width: 50%;
   overflow-y: auto;
   display: flex;
   align-self: flex-end;
   max-height: 33%;
-  flex: 0 1 auto;
+  flex: 1 0 auto;
   justify-content: center;
 
   @media(max-width: 500px) {

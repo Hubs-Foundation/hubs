@@ -1,3 +1,4 @@
+import "./webxr-bypass-hacks";
 import "./utils/theme";
 import "./utils/configs";
 
@@ -8,13 +9,11 @@ import "./assets/stylesheets/scene.scss";
 
 import "aframe";
 import "./utils/logging";
+import "./utils/threejs-world-update";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/loaders/GLTFLoader");
+import "three/examples/js/loaders/GLTFLoader";
 
 import "./components/scene-components";
 import "./components/debug";
@@ -30,7 +29,6 @@ import { disableiOSZoom } from "./utils/disable-ios-zoom";
 
 import "./systems/scene-systems";
 import "./gltf-component-mappings";
-import { EnvironmentSystem } from "./systems/environment-system";
 
 import { App } from "./App";
 
@@ -63,8 +61,6 @@ function mountUI(scene, props = {}) {
 }
 
 const onReady = async () => {
-  console.log("Scene is ready");
-
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
 
@@ -105,25 +101,17 @@ const onReady = async () => {
     });
   });
 
-  const envSystem = new EnvironmentSystem(scene);
-
   sceneModelEntity.addEventListener("environment-scene-loaded", () => {
     remountUI({ sceneLoaded: true });
     const previewCamera = gltfEl.object3D.getObjectByName("scene-preview-camera");
 
     if (previewCamera) {
-      console.log("Setting up preview camera");
       camera.object3D.position.copy(previewCamera.position);
       camera.object3D.rotation.copy(previewCamera.rotation);
       camera.object3D.matrixNeedsUpdate = true;
-    } else {
-      console.warn("No preview camera found");
     }
 
     camera.setAttribute("scene-preview-camera", "");
-
-    const environmentEl = sceneModelEntity.childNodes[0];
-    envSystem.updateEnvironment(environmentEl);
   });
 
   const res = await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneId}`);

@@ -10,19 +10,7 @@ import { handleTextFieldFocus, handleTextFieldBlur } from "../../utils/focus-uti
 export const TextInput = memo(
   forwardRef(
     (
-      {
-        id,
-        disabled,
-        invalid,
-        className,
-        beforeInput,
-        afterInput,
-        onFocus,
-        onBlur,
-        textInputStyles,
-        as: InputElement,
-        ...rest
-      },
+      { id, disabled, invalid, className, beforeInput, afterInput, onFocus, onBlur, as: InputElement, ...rest },
       ref
     ) => {
       // TODO: This is REALLY bad. We're overriding default behavior of text inputs to get a fullscreen behavior to work on Firefox.
@@ -57,7 +45,7 @@ export const TextInput = memo(
           <div className={styles.inputWrapper}>
             <InputElement
               id={id}
-              className={classNames(styles.textInput, textInputStyles)}
+              className={styles.textInput}
               disabled={disabled}
               onFocus={handleFocus}
               onBlur={handleBlur}
@@ -85,7 +73,6 @@ TextInput.propTypes = {
   afterInput: PropTypes.node,
   onFocus: PropTypes.func,
   onBlur: PropTypes.func,
-  textInputStyles: PropTypes.string,
   as: PropTypes.elementType
 };
 

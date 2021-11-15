@@ -137,7 +137,7 @@ function createDefaultAppConfig() {
   if (fs.existsSync(themesPath)) {
     const themesString = fs.readFileSync(themesPath).toString();
     const themes = JSON.parse(themesString);
-    appConfig.theme.themes = themes;
+    appConfig.themes = themes;
   }
 
   return appConfig;
@@ -229,8 +229,7 @@ module.exports = async (env, argv) => {
         BASE_ASSETS_PATH: "https://hubs.local:8080/",
         RETICULUM_SERVER: "hubs.local:4000",
         POSTGREST_SERVER: "",
-        ITA_SERVER: "",
-        UPLOADS_HOST: "https://hubs.local:4000"
+        ITA_SERVER: ""
       });
     }
   }
@@ -270,9 +269,7 @@ module.exports = async (env, argv) => {
       cloud: path.join(__dirname, "src", "cloud.js"),
       signin: path.join(__dirname, "src", "signin.js"),
       verify: path.join(__dirname, "src", "verify.js"),
-      tokens: path.join(__dirname, "src", "tokens.js"),
-      "whats-new": path.join(__dirname, "src", "whats-new.js"),
-      "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
+      "whats-new": path.join(__dirname, "src", "whats-new.js")
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
@@ -296,7 +293,6 @@ module.exports = async (env, argv) => {
           { from: /^\/discord/, to: "/discord.html" },
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
-          { from: /^\/tokens/, to: "/tokens.html" },
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
       },
@@ -438,7 +434,7 @@ module.exports = async (env, argv) => {
           ]
         },
         {
-          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm|3dl|cube)$/,
+          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
           use: {
             loader: "file-loader",
             options: {
@@ -527,7 +523,7 @@ module.exports = async (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["webxr-polyfill", "support", "hub"],
+        chunks: ["support", "hub"],
         chunksSortMode: "manual",
         inject: "head",
         minify: {
@@ -605,14 +601,6 @@ module.exports = async (env, argv) => {
           removeComments: false
         }
       }),
-      new HTMLWebpackPlugin({
-        filename: "tokens.html",
-        template: path.join(__dirname, "src", "tokens.html"),
-        chunks: ["tokens"],
-        minify: {
-          removeComments: false
-        }
-      }),
       new CopyWebpackPlugin([
         {
           from: "src/hub.service.js",
@@ -644,7 +632,6 @@ module.exports = async (env, argv) => {
           SENTRY_DSN: process.env.SENTRY_DSN,
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
-          UPLOADS_HOST: process.env.UPLOADS_HOST,
           APP_CONFIG: appConfig
         })
       })

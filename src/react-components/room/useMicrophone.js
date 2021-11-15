@@ -3,7 +3,7 @@ import MovingAverage from "moving-average";
 
 export function useMicrophone(scene, updateRate = 50) {
   const movingAvgRef = useRef();
-  const [isMuted, setIsMuted] = useState(!APP.dialog.isMicEnabled);
+  const [isMuted, setIsMuted] = useState(scene.is("muted"));
   const [volume, setVolume] = useState(0);
 
   useEffect(
@@ -29,23 +29,30 @@ export function useMicrophone(scene, updateRate = 50) {
 
       updateMicVolume();
 
-      const onMicStateChanged = ({ enabled }) => {
-        setIsMuted(!enabled);
-      };
+      function onSceneStateChange(event) {
+        if (event.detail === "muted") {
+          setIsMuted(scene.is("muted"));
+        }
+      }
 
-      APP.dialog.on("mic-state-changed", onMicStateChanged);
+      scene.addEventListener("stateadded", onSceneStateChange);
+      scene.addEventListener("stateremoved", onSceneStateChange);
 
       return () => {
         clearTimeout(timeout);
-        APP.dialog.off("mic-state-changed", onMicStateChanged);
+        scene.removeEventListener("stateadded", onSceneStateChange);
+        scene.removeEventListener("stateremoved", onSceneStateChange);
       };
     },
     [setVolume, scene, updateRate]
   );
 
-  const toggleMute = useCallback(() => {
-    APP.dialog.toggleMicrophone();
-  }, []);
+  const toggleMute = useCallback(
+    () => {
+      scene.emit("action_mute");
+    },
+    [scene]
+  );
 
   return { isMuted, volume, toggleMute };
 }

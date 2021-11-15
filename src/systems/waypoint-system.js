@@ -298,9 +298,6 @@ export class WaypointSystem {
         this.nextMoveToSpawnResolve = resolve;
       });
     }
-    // Reset system state to allow for waypoint selection based on URL fragments
-    this.previousWaypointHash = null;
-    this.initialSpawnHappened = false;
     return this.nextMoveToSpawn;
   }
   moveToWaypoint(waypointComponent, instant) {

@@ -16,7 +16,7 @@ export const computeLocalBoundingBox = (function() {
   return function computeLocalBoundingBox(root, box, excludeInvisible) {
     box.makeEmpty();
     root.updateMatrices();
-    rootInverse.copy(root.matrixWorld).invert();
+    rootInverse.getInverse(root.matrixWorld);
     root.traverse(node => {
       if (excludeInvisible && !isVisibleUpToRoot(node, root)) {
         return;
@@ -32,7 +32,7 @@ export const computeLocalBoundingBox = (function() {
           }
         } else if (node.geometry.isBufferGeometry && node.geometry.attributes.position) {
           const array = node.geometry.attributes.position.array;
-          const itemSize = node.geometry.attributes.position.itemSize;
+          const itemSize = node.geometry.attributes.position._itemSize;
           for (let i = 0; i < node.geometry.attributes.position.count; i++) {
             if (itemSize === 2) {
               vertex.set(array[2 * i], array[2 * i + 1], 0);

@@ -34,7 +34,6 @@ pipeline {
           def disableDeploy = env.DISABLE_DEPLOY
           def showQAPromoteCommand = env.SHOW_QA_PROMOTE_COMMAND
           def qaBuildsSlackChannel = env.QA_BUILDS_SLACK_CHANNEL
-          def uploadsHost = env.UPLOADS_HOST
 
           def habCommand = (
             "/bin/bash scripts/hab-build-and-push.sh "
@@ -50,7 +49,6 @@ pipeline {
             + "\\\"${buildNumber}\\\" "
             + "\\\"${gitCommit}\\\" "
             + "\\\"${disableDeploy}\\\" "
-            + "\\\"${uploadsHost}\\\" "
           )
           runCommand(habCommand)
 

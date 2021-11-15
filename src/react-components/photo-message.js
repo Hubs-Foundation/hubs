@@ -19,7 +19,7 @@ export default function PhotoMessage({ name, body: { src: url }, className, mayS
     title: intl.formatMessage(
       {
         id: "photo-message.default-tweet",
-        defaultMessage: "Taken in {shareHashtag}"
+        defaultMessage: "Taken in {shareHashtag}, join me at {url}"
       },
       {
         shareHashtag: configs.translation("share-hashtag"),

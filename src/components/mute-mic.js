@@ -35,6 +35,8 @@ AFRAME.registerComponent("mute-mic", {
     this.onToggle = this.onToggle.bind(this);
     this.onMute = this.onMute.bind(this);
     this.onUnmute = this.onUnmute.bind(this);
+    this.store = window.APP.store;
+    this.store.addEventListener("statechanged", this.onStoreUpdated.bind(this));
   },
 
   play: function() {
@@ -52,16 +54,43 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onToggle: function() {
-    APP.dialog.toggleMicrophone();
+    if (!NAF.connection.adapter) return;
     if (!this.el.sceneEl.is("entered")) return;
+
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
+    if (this.el.is("muted")) {
+      NAF.connection.adapter.enableMicrophone(true);
+    } else {
+      NAF.connection.adapter.enableMicrophone(false);
+    }
   },
 
   onMute: function() {
-    APP.dialog.enableMicrophone(false);
+    if (!NAF.connection.adapter) return;
+    if (!this.el.is("muted")) {
+      NAF.connection.adapter.enableMicrophone(false);
+    }
   },
 
   onUnmute: function() {
-    APP.dialog.enableMicrophone(true);
+    if (this.el.is("muted")) {
+      NAF.connection.adapter.enableMicrophone(true);
+    }
+  },
+
+  onStoreUpdated: function() {
+    const micMuted = this.store.state.settings["micMuted"];
+    const isMicShared = window.APP.mediaDevicesManager?.isMicShared;
+    if (micMuted !== undefined) {
+      if (isMicShared) {
+        if (micMuted) {
+          this.el.addState("muted");
+        } else {
+          this.el.removeState("muted");
+        }
+      } else {
+        this.el.addState("muted");
+      }
+    }
   }
 });

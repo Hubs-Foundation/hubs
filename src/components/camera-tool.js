@@ -9,7 +9,6 @@ import { loadModel } from "./gltf-model-plus";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
 import anime from "animejs";
-import { Layers } from "./layers";
 
 const cameraModelPromise = waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
 
@@ -111,7 +110,6 @@ AFRAME.registerComponent("camera-tool", {
     });
 
     this.camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
-    this.camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
     this.camera.rotation.set(0, Math.PI, 0);
     this.camera.position.set(0, 0, 0.05);
     this.camera.matrixNeedsUpdate = true;
@@ -185,6 +183,11 @@ AFRAME.registerComponent("camera-tool", {
 
       const width = 0.28;
       const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
+
+      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+      if (environmentMapComponent) {
+        environmentMapComponent.applyEnvironmentMap(this.el.object3D);
+      }
 
       this.screen = new THREE.Mesh(geometry, material);
       this.screen.rotation.set(0, Math.PI, 0);
@@ -386,7 +389,7 @@ AFRAME.registerComponent("camera-tool", {
     };
 
     if (this.data.captureAudio) {
-      const selfAudio = await APP.dialog.getMediaStream(NAF.clientId, "audio");
+      const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
 
       // NOTE: if we don't have a self audio track, we can end up generating an empty video (browser bug?)
       // if no audio comes through on the listener source. (Eg the room is otherwise silent.)
@@ -487,7 +490,6 @@ AFRAME.registerComponent("camera-tool", {
       if (cancel) {
         this.videoRecorder.onstop = () => {};
         this.videoRecorder._free();
-        this.el.sceneEl.emit("action_camera_recording_ended");
       }
 
       this.videoRecorder.stop();
@@ -500,8 +502,8 @@ AFRAME.registerComponent("camera-tool", {
     clearInterval(this.videoCountdownInterval);
 
     this.videoCountdownInterval = null;
-
-    this.el.setAttribute("camera-tool", { label: " ", isRecording: false, isSnapping: false });
+    this.el.setAttribute("camera-tool", "label", "");
+    this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
   },
 
   tick() {
@@ -633,10 +635,10 @@ AFRAME.registerComponent("camera-tool", {
           boneVisibilitySystem.tick();
         }
 
-        const tmpVRFlag = renderer.xr.enabled;
+        const tmpVRFlag = renderer.vr.enabled;
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
         delete sceneEl.object3D.onAfterRender;
-        renderer.xr.enabled = false;
+        renderer.vr.enabled = false;
 
         if (allowVideo && this.videoRecorder && !this.videoRenderTarget) {
           // Create a separate render target for video becuase we need to flip and (sometimes) downscale it before
@@ -658,7 +660,7 @@ AFRAME.registerComponent("camera-tool", {
         renderer.render(sceneEl.object3D, this.camera);
         renderer.setRenderTarget(null);
 
-        renderer.xr.enabled = tmpVRFlag;
+        renderer.vr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (playerHead) {
           playerHead.visible = false;

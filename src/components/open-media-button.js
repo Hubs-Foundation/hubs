@@ -1,7 +1,6 @@
-import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
+import { isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUrl } from "../utils/media-url-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
-import { changeHub } from "../change-hub";
 
 AFRAME.registerComponent("open-media-button", {
   schema: {
@@ -29,7 +28,7 @@ AFRAME.registerComponent("open-media-button", {
             label = "use scene";
           } else if ((hubId = await isHubsRoomUrl(src))) {
             const url = new URL(src);
-            if (url.hash && window.APP.hub.hub_id === hubId) {
+            if (url.hash && APP.hub.hub_id === hubId) {
               label = "go to";
             } else {
               label = "visit room";
@@ -57,12 +56,9 @@ AFRAME.registerComponent("open-media-button", {
         this.el.sceneEl.emit("scene_media_selected", this.src);
       } else if ((hubId = await isHubsRoomUrl(this.src))) {
         const url = new URL(this.src);
-        if (url.hash && window.APP.hub.hub_id === hubId) {
+        if (url.hash && APP.hub.hub_id === hubId) {
           // move to waypoint w/o writing to history
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
-        } else if (APP.store.state.preferences.fastRoomSwitching && isLocalHubsUrl(this.src)) {
-          // move to new room without page load or entry flow
-          changeHub(hubId);
         } else {
           await exitImmersive();
           location.href = this.src;

@@ -8,7 +8,6 @@ footer {
 
   @media(min-width: theme.$breakpoint-lg) {
     padding: 0;
-    display: flex;
   }
 
   nav {
@@ -79,7 +78,6 @@ footer {
 
   @media(min-width: theme.$breakpoint-lg) {
     margin-left: 18px;
-    height: 41px;
   }
 }
 

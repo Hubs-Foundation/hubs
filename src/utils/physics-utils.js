@@ -22,9 +22,6 @@ function exceedsDensityThreshold(count, subtree) {
 }
 
 function isHighDensity(subtree) {
-  if (subtree.continueGeneration) {
-    subtree.continueGeneration();
-  }
   if (subtree.count) {
     const result = exceedsDensityThreshold(subtree.count, subtree);
     return result === true ? true : subtree.count;

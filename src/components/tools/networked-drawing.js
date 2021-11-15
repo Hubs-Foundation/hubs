@@ -90,6 +90,11 @@ AFRAME.registerComponent("networked-drawing", {
 
     this.el.setObject3D("mesh", this.drawing);
 
+    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
+    if (environmentMapComponent) {
+      environmentMapComponent.applyEnvironmentMap(this.drawing);
+    }
+
     this.prevIdx = Object.assign({}, this.sharedBuffer.idx);
     this.idx = Object.assign({}, this.sharedBuffer.idx);
     this.vertexCount = 0; //number of vertices added for current line (used for line deletion).
@@ -764,7 +769,7 @@ AFRAME.registerComponent("deserialize-drawing-button", {
         addMeshScaleAnimation(drawingManager.drawing.el.object3DMap.mesh, { x: 0.001, y: 0.001, z: 0.001 });
 
         if (this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned) {
-          window.APP.pinningHelper.setPinned(this.targetEl, false);
+          this.targetEl.setAttribute("pinnable", "pinned", false);
         }
         this.targetEl.parentEl.removeChild(this.targetEl);
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PEN_START_DRAW);

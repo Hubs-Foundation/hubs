@@ -77,6 +77,6 @@
   overflow-y: auto;
 }
 
-:local(.margin-0-last-child) > :last-child {
+:local(.column) > :last-child {
   margin-bottom: 0;
 }
