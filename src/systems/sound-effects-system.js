@@ -17,6 +17,7 @@ import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
 import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
 import { setMatrixWorld } from "../utils/three-utils";
 import { isSafari } from "../utils/detect-safari";
+import { SourceType } from "../components/audio-params";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;
@@ -127,7 +128,7 @@ export class SoundEffectsSystem {
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
     const source = this.audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    source.connect(this.audioContext.destination);
+    this.scene.systems["hubs-systems"].audioSystem.addAudio({ sourceType: SourceType.SFX, node: source });
     source.loop = loop;
     this.pendingAudioSourceNodes.push(source);
     return source;
@@ -145,6 +146,10 @@ export class SoundEffectsSystem {
     positionalAudio.setBuffer(audioBuffer);
     positionalAudio.loop = loop;
     this.pendingPositionalAudios.push(positionalAudio);
+    this.scene.systems["hubs-systems"].audioSystem.addAudio({
+      sourceType: SourceType.SFX,
+      node: positionalAudio
+    });
     return positionalAudio;
   }
 
@@ -180,7 +185,7 @@ export class SoundEffectsSystem {
     const gain = this.audioContext.createGain();
     source.buffer = audioBuffer;
     source.connect(gain);
-    gain.connect(this.audioContext.destination);
+    this.scene.systems["hubs-systems"].audioSystem.addAudio({ sourceType: SourceType.SFX, node: gain });
     source.loop = true;
     this.pendingAudioSourceNodes.push(source);
     return { gain, source };
@@ -192,6 +197,7 @@ export class SoundEffectsSystem {
       this.pendingAudioSourceNodes.splice(index, 1);
     } else {
       node.stop();
+      this.scene.systems["hubs-systems"].audioSystem.removeAudio({ node });
     }
   }
 
@@ -213,6 +219,7 @@ export class SoundEffectsSystem {
     this.positionalAudiosFollowingObject3Ds = this.positionalAudiosFollowingObject3Ds.filter(
       ({ positionalAudio }) => positionalAudio !== inPositionalAudio
     );
+    this.scene.systems["hubs-systems"].audioSystem.removeAudio({ node: inPositionalAudio });
   }
 
   stopAllPositionalAudios() {

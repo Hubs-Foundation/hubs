@@ -391,6 +391,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.global-media-volume",
     defaultMessage: "Media Volume"
   },
+  globalSFXVolume: {
+    id: "preferences-screen.preference.global-sfx-volume",
+    defaultMessage: "SFX Volume"
+  },
   disableSoundEffects: {
     id: "preferences-screen.preference.disable-sound-effects",
     defaultMessage: "Disable Sound Effects"
@@ -830,7 +834,7 @@ class PreferencesScreen extends Component {
           key: "preferredSpeakers",
           prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
           options: [{ value: "default", text: "Default" }],
-          defaultString: "Default",
+          defaultString: "default",
           onChanged: this.onSpeakersSelectionChanged
         }
       })
@@ -876,7 +880,7 @@ class PreferencesScreen extends Component {
       text: device.label
     }));
     const preferredSpeakers = { ...this.state.preferredSpeakers };
-    speakersOptions.options = [
+    preferredSpeakers.options = [
       {
         value: "default",
         text: this.props.intl.formatMessage({
@@ -886,9 +890,6 @@ class PreferencesScreen extends Component {
       }
     ];
     preferredSpeakers.options.push(...speakersOptions);
-    this.props.store.update({
-      preferences: { ["preferredSpeakers"]: this.mediaDevicesManager.selectedOutputDeviceId }
-    });
 
     // Video devices update
     const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
@@ -922,7 +923,11 @@ class PreferencesScreen extends Component {
     preferredCamera.options.push(...videoOptions);
 
     // Update media devices state
-    this.setState({ preferredMic, preferredSpeakers, preferredCamera });
+    this.setState({
+      preferredMic,
+      preferredSpeakers,
+      preferredCamera
+    });
   };
 
   storeUpdated = () => {
@@ -1022,7 +1027,7 @@ class PreferencesScreen extends Component {
         CATEGORY_AUDIO,
         [
           this.state.preferredMic,
-          this.state.preferredSpeakers,
+          ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {
             key: "globalVoiceVolume",
@@ -1035,6 +1040,15 @@ class PreferencesScreen extends Component {
           },
           {
             key: "globalMediaVolume",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 0,
+            max: 200,
+            step: 5,
+            digits: 0,
+            defaultNumber: 100
+          },
+          {
+            key: "globalSFXVolume",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 0,
             max: 200,

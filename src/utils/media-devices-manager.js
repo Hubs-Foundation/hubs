@@ -87,18 +87,14 @@ export default class MediaDevicesManager {
     return this.deviceIdForMicDeviceLabel(this.selectedMicLabel);
   }
 
-  get selectedOutputDeviceId() {
-    return this.lastUsedOutputDeviceId;
+  get selectedSpeakersDeviceId() {
+    const { preferredSpeakers } = this._store.state.preferences;
+    return preferredSpeakers || "default";
   }
 
   get lastUsedMicDeviceId() {
-    const { lastUsedMicDeviceId } = this._store.state.settings;
+    const { lastUsedMicDeviceId } = this._store.state.preferences;
     return lastUsedMicDeviceId;
-  }
-
-  get lastUsedOutputDeviceId() {
-    const { lastUsedOutputDeviceId } = this._store.state.settings;
-    return lastUsedOutputDeviceId;
   }
 
   get isMicShared() {
@@ -129,7 +125,7 @@ export default class MediaDevicesManager {
           this.outputDevices = mediaDevices
             .filter(d => d.kind === "audiooutput")
             .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substr(0, 9)})` }));
-          this.changeAudioOutput(this.lastUsedOutputDeviceId);
+          this.changeAudioOutput(this.selectedSpeakersDeviceId);
         }
         resolve();
       });
@@ -137,12 +133,12 @@ export default class MediaDevicesManager {
   }
 
   changeAudioOutput(deviceId) {
-    let audioOutputDeviceId = deviceId;
-    if (!audioOutputDeviceId) {
-      audioOutputDeviceId = this.outputDevices[0].value;
+    let speakersDeviceId = deviceId;
+    if (!speakersDeviceId) {
+      speakersDeviceId = this.outputDevices[0].value;
     }
-    this._store.update({ settings: { lastUsedOutputDeviceId: audioOutputDeviceId } });
-    console.log(`Selected output device: ${this.outputLabelForDeviceId(audioOutputDeviceId)}`);
+    this._store.update({ preferences: { preferredSpeakers: speakersDeviceId } });
+    console.log(`Selected output device: ${this.speakersLabelForDeviceId(speakersDeviceId)}`);
   }
 
   async startMicShare(deviceId) {
@@ -320,7 +316,7 @@ export default class MediaDevicesManager {
     return this.micDevices.filter(d => d.label === label).map(d => d.value)[0];
   }
 
-  deviceIdForOutputDeviceLabel(label) {
+  deviceIdForSpeakersDeviceLabel(label) {
     return this.outputDevices.filter(d => d.label === label).map(d => d.value)[0];
   }
 
@@ -328,7 +324,7 @@ export default class MediaDevicesManager {
     return this.micDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
   }
 
-  outputLabelForDeviceId(deviceId) {
+  speakersLabelForDeviceId(deviceId) {
     return this.outputDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
   }
 
