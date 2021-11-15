@@ -44,8 +44,17 @@ Primary.args = {
   microphoneOptions: micOptions,
   micLevel: 0.5,
   selectedSpeaker: speakerOptions[0],
-  speakersEnabled: true,
   speakerOptions: speakerOptions,
   speakerLevel: 0.5,
+  microphoneMuted: false
+};
+
+export const NoSpeakers = Template.bind({});
+
+NoSpeakers.args = {
+  selectedMicrophone: micOptions[0],
+  microphoneEnabled: true,
+  microphoneOptions: micOptions,
+  micLevel: 0.5,
   microphoneMuted: false
 };
