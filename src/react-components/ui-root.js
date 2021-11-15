@@ -1159,7 +1159,7 @@ class UIRoot extends Component {
             onClick: () => this.setState({ showPrefs: true })
           }
         ].filter(item => item)
-      },
+      }
       // {
       //   id: "room",
       //   label: <FormattedMessage id="more-menu.room" defaultMessage="Room" />,
@@ -1191,17 +1191,17 @@ class UIRoot extends Component {
       //           onClick: () => this.toggleFavorited()
       //         },
       // 스트리머 모드
-          //  isModerator &&
-          //    entered && {
-          //      id: "streamer-mode",
-          //      label: streaming ? (
-          //        <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode" />
-          //      ) : (
-          //        <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode" />
-          //      ),
-          //      icon: CameraIcon,
-          //      onClick: () => this.toggleStreamerMode()
-          //    },
+      //  isModerator &&
+      //    entered && {
+      //      id: "streamer-mode",
+      //      label: streaming ? (
+      //        <FormattedMessage id="more-menu.exit-streamer-mode" defaultMessage="Exit Streamer Mode" />
+      //      ) : (
+      //        <FormattedMessage id="more-menu.enter-streamer-mode" defaultMessage="Enter Streamer Mode" />
+      //      ),
+      //      icon: CameraIcon,
+      //      onClick: () => this.toggleStreamerMode()
+      //    },
       //     (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
       //       entered && {
       //         id: "leave-room",
@@ -1561,17 +1561,28 @@ class UIRoot extends Component {
                           className="leaveBtn"
                           preset="cancel"
                           onClick={() => {
-                            window.close();
-                            this.showNonHistoriedDialog(LeaveRoomModal, {
-                              destinationUrl: "/",
-                              reason: LeaveReason.leaveRoom
-                            });
+                            try {
+                              self.opener = self;
+                              window.close();
+                              open(location, "_self").close();
+                              setTimeout(window.close, 100);
+                            } catch (e) {
+                              this.showNonHistoriedDialog(LeaveRoomModal, {
+                                destinationUrl: "https://comingm.io",
+                                reason: LeaveReason.leaveRoom
+                              });
+                            } finally {
+                              this.showNonHistoriedDialog(LeaveRoomModal, {
+                                destinationUrl: "https://comingm.io",
+                                reason: LeaveReason.leaveRoom
+                              });
+                            }
                           }}
                         />
-                          <VoiceButtonContainer
-                            scene={this.props.scene}
-                            microphoneEnabled={this.mediaDevicesManager.isMicShared}
-                          />
+                        <VoiceButtonContainer
+                          scene={this.props.scene}
+                          microphoneEnabled={this.mediaDevicesManager.isMicShared}
+                        />
                         {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> */}
                         {/* 스트리머 모드 */}
                         {/* <PlacePopoverContainer
