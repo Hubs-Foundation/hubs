@@ -158,12 +158,11 @@ AFRAME.registerSystem("sound-audio-analyser", {
 
     this.el.addEventListener("sound-created", ev => {
       const ctx = THREE.AudioContext.getContext();
-      const source = ctx.createMediaElementSource(ev.detail);
+      const node = ev.detail;
       this.analyser = ctx.createAnalyser();
       this.analyser.fftSize = 32;
       this.levels = new Uint8Array(this.analyser.fftSize);
-      source.connect(this.analyser);
-      source.connect(ctx.destination);
+      node.connect(this.analyser);
     });
   },
 
