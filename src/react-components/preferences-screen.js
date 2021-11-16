@@ -513,6 +513,10 @@ const preferenceLabels = defineMessages({
   lazyLoadSceneMedia: {
     id: "preferences-screen.preference.lazy-load-scene-media",
     defaultMessage: "Enable Scene Media Lazy Loading"
+  },
+  disableLeftRightPanning: {
+    id: "preferences-screen.preference.disable-panning",
+    defaultMessage: "Disable audio left/right panning"
   }
 });
 
@@ -627,13 +631,15 @@ const CATEGORY_CONTROLS = 1;
 const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
+const CATEGORY_ACCESSIBILITY = 5;
 const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
   [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
   [CATEGORY_MISC]: { id: "preferences-screen.category.misc", defaultMessage: "Misc" },
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
-  [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" }
+  [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" },
+  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" }
 });
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -1099,6 +1105,16 @@ class PreferencesScreen extends Component {
           { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
         ]
+      ],
+      [
+        CATEGORY_ACCESSIBILITY,
+        [
+          {
+            key: "disableLeftRightPanning",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: false
+          }
+        ]
       ]
     ]);
 
@@ -1111,7 +1127,16 @@ class PreferencesScreen extends Component {
     }
 
     return new Map([
-      [CATEGORY_AUDIO, [{ items: items.get(CATEGORY_AUDIO) }]],
+      [
+        CATEGORY_AUDIO,
+        [
+          { items: items.get(CATEGORY_AUDIO) },
+          {
+            name: intl.formatMessage(categoryNames[CATEGORY_ACCESSIBILITY]),
+            items: items.get(CATEGORY_ACCESSIBILITY)
+          }
+        ]
+      ],
       [
         CATEGORY_CONTROLS,
         [

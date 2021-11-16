@@ -174,20 +174,9 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "audiomode":
         {
-          const shouldEnablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
           window.APP.store.update({
-            // TODO: This should probably just be a boolean to disable panner node settings
-            // and even if it's not, "audio" is a weird name for the "audioOutputMode" that means
-            // "stereo" / "not panner".
-            preferences: { audioOutputMode: shouldEnablePositionalAudio ? "panner" : "audio" }
+            preferences: { disableLeftRightPanning: args[0] === "panner" ? false : true }
           });
-          // TODO: The user message here is a little suspicious. We might be ignoring the
-          // user preference (e.g. if panner nodes are broken in safari, then we never create
-          // panner nodes, regardless of user preference.)
-          // Warning: This comment may be out of date when you read it.
-          this.log(
-            shouldEnablePositionalAudio ? LogMessageType.positionalAudioEnabled : LogMessageType.positionalAudioDisabled
-          );
         }
         break;
       case "audioNormalization":

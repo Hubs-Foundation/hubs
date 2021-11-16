@@ -96,7 +96,6 @@ export const SCHEMA = {
         preferredMic: { type: "string" },
         preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
-        audioOutputMode: { type: "string" },
         audioNormalization: { type: "bool" },
         invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
