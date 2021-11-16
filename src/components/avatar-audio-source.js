@@ -44,7 +44,7 @@ async function getMediaStream(el) {
 
 AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function() {
-    APP.supplementaryAttenuation.delete(this.el);
+    this.removeAudio();
 
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
@@ -64,6 +64,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     } else {
       audio = new THREE.Audio(audioListener);
     }
+
     this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, audio);
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
@@ -82,16 +83,12 @@ AFRAME.registerComponent("avatar-audio-source", {
     updateAudioSettings(this.el, audio);
   },
 
-  destroyAudio() {
+  removeAudio() {
     const audio = this.el.getObject3D(this.attrName);
-    if (!audio) return;
-
-    this.audioSystem.removeAudio(audio);
-    this.el.removeObject3D(this.attrName);
-
-    APP.audios.delete(this.el);
-    APP.sourceType.delete(this.el);
-    APP.supplementaryAttenuation.delete(this.el);
+    if (audio) {
+      this.audioSystem.removeAudio(audio);
+      this.el.removeObject3D(this.attrName);
+    }
   },
 
   init() {
@@ -136,8 +133,13 @@ AFRAME.registerComponent("avatar-audio-source", {
   },
 
   remove: function() {
-    APP.dialog.off("stream_updated", this._onStreamUpdated, this);
-    this.destroyAudio();
+    APP.dialog.off("stream_updated", this._onStreamUpdated);
+
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
+    APP.supplementaryAttenuation.delete(this.el);
+
+    this.removeAudio();
   }
 });
 
@@ -275,12 +277,18 @@ AFRAME.registerComponent("audio-target", {
   },
 
   remove: function() {
-    this.destroyAudio();
+    APP.supplementaryAttenuation.delete(this.el);
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
+
+    this.removeAudio();
+
     this.el.removeAttribute("audio-zone-source");
   },
 
   createAudio: function() {
-    APP.supplementaryAttenuation.delete(this.el);
+    this.removeAudio();
+
     APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const audioListener = this.el.sceneEl.audioListener;
     const { audioType } = getCurrentAudioSettings(this.el);
@@ -324,15 +332,11 @@ AFRAME.registerComponent("audio-target", {
     }
   },
 
-  destroyAudio() {
+  removeAudio() {
     const audio = this.el.getObject3D(this.attrName);
-    if (!audio) return;
-
-    this.audioSystem.removeAudio(audio);
-    this.el.removeObject3D(this.attrName);
-
-    APP.supplementaryAttenuation.delete(this.el);
-    APP.audios.delete(this.el);
-    APP.sourceType.delete(this.el);
+    if (audio) {
+      this.audioSystem.removeAudio(this.audio);
+      this.el.removeObject3D(this.attrName);
+    }
   }
 });
