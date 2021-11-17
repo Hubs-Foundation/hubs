@@ -89,7 +89,10 @@ export default class MediaDevicesManager {
 
   get selectedSpeakersDeviceId() {
     const { preferredSpeakers } = this._store.state.preferences;
-    return preferredSpeakers || "default";
+    const exists = this.outputDevices.some(device => {
+      return device.value === preferredSpeakers;
+    });
+    return exists ? preferredSpeakers : this.outputDevices[0]?.value || "default";
   }
 
   get lastUsedMicDeviceId() {
@@ -133,12 +136,7 @@ export default class MediaDevicesManager {
   }
 
   changeAudioOutput(deviceId) {
-    let speakersDeviceId = deviceId;
-    if (!speakersDeviceId) {
-      speakersDeviceId = this.outputDevices[0].value;
-    }
-    this._store.update({ preferences: { preferredSpeakers: speakersDeviceId } });
-    console.log(`Selected output device: ${this.speakersLabelForDeviceId(speakersDeviceId)}`);
+    this._store.update({ preferences: { preferredSpeakers: deviceId } });
   }
 
   async startMicShare(deviceId) {

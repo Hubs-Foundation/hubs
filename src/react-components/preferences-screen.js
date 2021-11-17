@@ -834,8 +834,7 @@ class PreferencesScreen extends Component {
           key: "preferredSpeakers",
           prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
           options: [{ value: "default", text: "Default" }],
-          defaultString: "default",
-          onChanged: this.onSpeakersSelectionChanged
+          defaultString: "default"
         }
       })
     };
@@ -847,10 +846,6 @@ class PreferencesScreen extends Component {
     } else {
       this.mediaDevicesManager.startMicShare(deviceId).then(this.updateMediaDevices);
     }
-  };
-
-  onSpeakersSelectionChanged = deviceId => {
-    this.mediaDevicesManager.changeAudioOutput(deviceId);
   };
 
   onMediaDevicesUpdated = () => {
