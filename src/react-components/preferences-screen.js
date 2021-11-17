@@ -819,8 +819,7 @@ class PreferencesScreen extends Component {
       preferredMic: {
         key: "preferredMic",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "none", text: "None" }],
-        defaultString: "none",
+        options: [],
         onChanged: this.onMicSelectionChanged
       },
       preferredCamera: {
@@ -840,11 +839,7 @@ class PreferencesScreen extends Component {
   }
 
   onMicSelectionChanged = deviceId => {
-    if (deviceId === "none") {
-      this.mediaDevicesManager.stopMicShare().then(this.updateMediaDevices);
-    } else {
-      this.mediaDevicesManager.startMicShare(deviceId).then(this.updateMediaDevices);
-    }
+    this.mediaDevicesManager.startMicShare(deviceId).then(this.updateMediaDevices);
   };
 
   onMediaDevicesUpdated = () => {
@@ -858,16 +853,7 @@ class PreferencesScreen extends Component {
       text: device.label
     }));
     const preferredMic = { ...this.state.preferredMic };
-    preferredMic.options = [
-      {
-        value: "none",
-        text: this.props.intl.formatMessage({
-          id: "preferences-screen.preferred-mic.default",
-          defaultMessage: "None"
-        })
-      }
-    ];
-    preferredMic.options.push(...micOptions);
+    preferredMic.options = micOptions;
 
     const speakersOptions = this.mediaDevicesManager.outputDevices.map(device => ({
       value: device.value,
@@ -913,13 +899,6 @@ class PreferencesScreen extends Component {
       preferredSpeakers,
       preferredCamera
     });
-  };
-
-  storeUpdated = () => {
-    const deviceId = this.props.store?.state?.preferences?.preferredMic;
-    if (!deviceId && this.mediaDevicesManager.isMicShared) {
-      this.mediaDevicesManager.stopMicShare();
-    }
   };
 
   componentDidMount() {
