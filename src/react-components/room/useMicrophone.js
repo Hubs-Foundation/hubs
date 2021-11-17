@@ -6,6 +6,7 @@ export function useMicrophone(scene, updateRate = 50) {
   const [isMicMuted, setIsMicMuted] = useState(!APP.dialog.isMicEnabled);
   const [isMicEnabled, setIsMicEnabled] = useState(window.APP.mediaDevicesManager.isMicShared);
   const [micVolume, setMicVolume] = useState(0);
+  const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
 
   useEffect(
     () => {
@@ -46,6 +47,8 @@ export function useMicrophone(scene, updateRate = 50) {
       scene.addEventListener("action_end_mic_sharing", onMicDisabled);
       scene.addEventListener("local-media-stream-created", onMicEnabled);
 
+      setIsPermissionsGranted(window.APP.mediaDevicesManager.isPermissionsGranted);
+
       return () => {
         clearTimeout(timeout);
         APP.dialog.off("mic-state-changed", onMicMutedStateChanged);
@@ -61,8 +64,8 @@ export function useMicrophone(scene, updateRate = 50) {
   }, []);
 
   const onEnableMicrophone = useCallback(() => {
-    window.APP.mediaDevicesManager.startMicShare(window.APP.mediaDevicesManager.lastUsedMicDeviceId);
+    window.APP.mediaDevicesManager.startMicShare(window.APP.mediaDevicesManager.selectedMicDeviceId);
   }, []);
 
-  return { isMicMuted, micVolume, toggleMute, isMicEnabled, onEnableMicrophone };
+  return { isMicMuted, micVolume, toggleMute, isMicEnabled, onEnableMicrophone, isPermissionsGranted };
 }
