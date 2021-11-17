@@ -144,3 +144,8 @@ $mobile-breakpoint-width: 450px;
   color: theme.$text5-color;
   line-height: 20px;
 }
+
+:local(.error-text) {
+  align-self: "start";
+  color: theme.$error-color;
+}

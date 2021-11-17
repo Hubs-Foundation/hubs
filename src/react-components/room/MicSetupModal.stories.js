@@ -36,9 +36,9 @@ export default {
 
 const Template = args => <RoomLayout viewport={<MicSetupModal {...args} />} />;
 
-export const Primary = Template.bind({});
+export const Base = Template.bind({});
 
-Primary.args = {
+Base.args = {
   selectedMicrophone: micOptions[0],
   microphoneEnabled: true,
   microphoneOptions: micOptions,
@@ -57,4 +57,18 @@ NoSpeakers.args = {
   microphoneOptions: micOptions,
   micLevel: 0.5,
   microphoneMuted: false
+};
+
+export const NoPermissions = Template.bind({});
+
+NoPermissions.args = {
+  selectedMicrophone: micOptions[0],
+  microphoneEnabled: true,
+  microphoneOptions: micOptions,
+  micLevel: 0.5,
+  selectedSpeaker: speakerOptions[0],
+  speakerOptions: speakerOptions,
+  speakerLevel: 0.5,
+  microphoneMuted: false,
+  permissionsGranted: false
 };

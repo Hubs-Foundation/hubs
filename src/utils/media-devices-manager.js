@@ -23,6 +23,7 @@ export default class MediaDevicesManager {
     this._audioTrack = null;
     this.audioSystem = audioSystem;
     this._mediaStream = audioSystem.outboundStream;
+    this._permissionsGranted = false;
 
     navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
   }
@@ -103,6 +104,10 @@ export default class MediaDevicesManager {
     return this._mediaStream?.getVideoTracks().length > 0;
   }
 
+  get isPermissionsGranted() {
+    return this._permissionsGranted;
+  }
+
   onDeviceChange = () => {
     this.fetchMediaDevices().then(() => {
       this._scene.emit("devicechange", null);
@@ -114,13 +119,16 @@ export default class MediaDevicesManager {
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
         this.micDevices = mediaDevices
+          .filter(d => d.deviceId !== "")
           .filter(d => d.kind === "audioinput")
           .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substr(0, 9)})` }));
         this.videoDevices = mediaDevices
+          .filter(d => d.deviceId !== "")
           .filter(d => d.kind === "videoinput")
           .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substr(0, 9)})` }));
         if (MediaDevicesManager.isAudioOutputSelectEnabled) {
           this.outputDevices = mediaDevices
+            .filter(d => d.deviceId !== "")
             .filter(d => d.kind === "audiooutput")
             .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substr(0, 9)})` }));
           this.changeAudioOutput(this.selectedSpeakersDeviceId);
@@ -222,10 +230,13 @@ export default class MediaDevicesManager {
         this.audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
       }
 
+      this._permissionsGranted = true;
+
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
       console.error("Error during getUserMedia: ", e);
+      this._permissionsGranted = false;
       this.audioTrack = null;
       return false;
     }
