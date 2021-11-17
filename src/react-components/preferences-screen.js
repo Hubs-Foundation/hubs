@@ -833,8 +833,7 @@ class PreferencesScreen extends Component {
         preferredSpeakers: {
           key: "preferredSpeakers",
           prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-          options: [{ value: "default", text: "Default" }],
-          defaultString: "default"
+          options: []
         }
       })
     };
@@ -875,16 +874,7 @@ class PreferencesScreen extends Component {
       text: device.label
     }));
     const preferredSpeakers = { ...this.state.preferredSpeakers };
-    preferredSpeakers.options = [
-      {
-        value: "default",
-        text: this.props.intl.formatMessage({
-          id: "preferences-screen.preferred-speakers.default",
-          defaultMessage: "Default"
-        })
-      }
-    ];
-    preferredSpeakers.options.push(...speakersOptions);
+    preferredSpeakers.options = speakersOptions;
 
     // Video devices update
     const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
