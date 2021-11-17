@@ -95,11 +95,6 @@ export default class MediaDevicesManager {
     return exists ? preferredSpeakers : this.outputDevices[0]?.value || "default";
   }
 
-  get lastUsedMicDeviceId() {
-    const { lastUsedMicDeviceId } = this._store.state.preferences;
-    return lastUsedMicDeviceId;
-  }
-
   get isMicShared() {
     return this.audioTrack !== null;
   }
@@ -154,7 +149,7 @@ export default class MediaDevicesManager {
     if (this.audioTrack) {
       const micDeviceId = this.deviceIdForMicDeviceLabel(this.micLabelForAudioTrack(this.audioTrack));
       if (micDeviceId) {
-        this._store.update({ settings: { lastUsedMicDeviceId: micDeviceId } });
+        this._store.update({ preferences: { preferredMic: micDeviceId } });
         console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
       }
       this._scene.emit("local-media-stream-created");
@@ -168,7 +163,7 @@ export default class MediaDevicesManager {
   }
 
   async startLastUsedMicShare() {
-    return await this.startMicShare(this.lastUsedMicDeviceId);
+    return await this.startMicShare(this.selectedMicDeviceId);
   }
 
   async _startMicShare(constraints = { audio: {} }) {
