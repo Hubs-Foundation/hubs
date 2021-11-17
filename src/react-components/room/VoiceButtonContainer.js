@@ -9,15 +9,15 @@ import { FormattedMessage } from "react-intl";
 export function VoiceButtonContainer({ scene }) {
   const buttonRef = useRef();
 
-  const { isMicMuted, volume, toggleMute, isMicEnabled } = useMicrophone(scene);
+  const { isMicMuted, micVolume, toggleMute, isMicEnabled } = useMicrophone(scene);
 
   useEffect(
     () => {
       const rect = buttonRef.current.querySelector("rect");
 
-      if (volume < 0.05) {
+      if (micVolume < 0.05) {
         rect.setAttribute("height", 0);
-      } else if (volume < 0.3) {
+      } else if (micVolume < 0.3) {
         rect.setAttribute("y", 8);
         rect.setAttribute("height", 4);
       } else {
@@ -25,7 +25,7 @@ export function VoiceButtonContainer({ scene }) {
         rect.setAttribute("height", 8);
       }
     },
-    [volume, isMicMuted]
+    [micVolume, isMicMuted]
   );
 
   return (
