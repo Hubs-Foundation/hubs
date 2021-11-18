@@ -6,6 +6,7 @@ import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { SharePopoverButton } from "./SharePopover";
 import { FormattedMessage } from "react-intl";
 import useAvatar from "./useAvatar";
+import { MediaDevicesEvents } from "../../utils/media-devices-manager";
 
 function useShare(scene, hubChannel) {
   const [sharingSource, setSharingSource] = useState(null);
@@ -69,7 +70,7 @@ function useShare(scene, hubChannel) {
   const toggleShareCamera = useCallback(
     () => {
       if (sharingSource) {
-        scene.emit("action_end_video_sharing");
+        scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
       } else {
         scene.emit("action_share_camera");
       }
@@ -80,7 +81,7 @@ function useShare(scene, hubChannel) {
   const toggleShareScreen = useCallback(
     () => {
       if (sharingSource) {
-        scene.emit("action_end_video_sharing");
+        scene.emit(MediaDevicesEvents.V);
       } else {
         scene.emit("action_share_screen");
       }
@@ -91,7 +92,7 @@ function useShare(scene, hubChannel) {
   const toggleShareCameraToAvatar = useCallback(
     () => {
       if (sharingSource) {
-        scene.emit("action_end_video_sharing");
+        scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
       } else {
         scene.emit("action_share_camera", { target: "avatar" });
       }

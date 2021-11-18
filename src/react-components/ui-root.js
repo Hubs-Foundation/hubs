@@ -46,7 +46,6 @@ import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { ToolbarButton } from "./input/ToolbarButton";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
-import { MicPermissionsModal } from "./room/MicPermissionsModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
@@ -94,6 +93,7 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
+import { MediaDevices, MediaDevicesEvents, PermissionStatus } from "../utils/media-devices-manager";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -325,6 +325,8 @@ class UIRoot extends Component {
       this.forceUpdate();
     });
 
+    this.updateMediaPermissions();
+
     const scene = this.props.scene;
 
     const unsubscribe = this.props.history.listen((location, action) => {
@@ -475,16 +477,12 @@ class UIRoot extends Component {
     this.setState({ showVideoShareFailed: true });
   };
 
-  toggleMute = () => {
-    APP.dialog.toggleMicrophone();
-  };
-
   shareVideo = mediaSource => {
     this.props.scene.emit(`action_share_${mediaSource}`);
   };
 
   endShareVideo = () => {
-    this.props.scene.emit("action_end_video_sharing");
+    this.props.scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
   };
 
   spawnPen = () => {
@@ -557,12 +555,12 @@ class UIRoot extends Component {
 
     if (hasGrantedMic) {
       if (!this.mediaDevicesManager.isMicShared) {
-        await this.mediaDevicesManager.startLastUsedMicShare();
+        await this.mediaDevicesManager.startMicShare({});
       }
       this.beginOrSkipAudioSetup();
     } else {
-      this.onRequestMicPermission();
-      this.pushHistoryState("entry_step", "mic_grant");
+      this.updateMediaPermissions();
+      this.pushHistoryState("entry_step", "audio");
     }
 
     this.setState({ waitingOnAudio: false });
@@ -588,18 +586,18 @@ class UIRoot extends Component {
   };
 
   micDeviceChanged = async deviceId => {
-    this.mediaDevicesManager.startMicShare(deviceId);
+    this.mediaDevicesManager.startMicShare({ deviceId });
   };
 
   speakerDeviceChanged = async deviceId => {
     this.mediaDevicesManager.changeAudioOutput(deviceId);
   };
 
-  onRequestMicPermission = async () => {
-    console.log("Microphone permission requested");
-    // TODO: Show an error state if getting the microphone permissions fails
-    await this.mediaDevicesManager.startLastUsedMicShare();
-    this.beginOrSkipAudioSetup();
+  updateMediaPermissions = async () => {
+    await this.mediaDevicesManager.updatePermissions();
+    if (this.mediaDevicesManager.getPermissionsStatus(MediaDevices.MICROPHONE) === PermissionStatus.GRANTED) {
+      await this.mediaDevicesManager.startMicShare({});
+    }
   };
 
   beginOrSkipAudioSetup = () => {
@@ -826,8 +824,8 @@ class UIRoot extends Component {
               if (promptForNameAndAvatarBeforeEntry) {
                 this.pushHistoryState("entry_step", "profile");
               } else {
-                this.onRequestMicPermission();
-                this.pushHistoryState("entry_step", "mic_grant");
+                this.updateMediaPermissions();
+                this.pushHistoryState("entry_step", "audio");
               }
             } else {
               this.handleForceEntry();
@@ -1049,9 +1047,6 @@ class UIRoot extends Component {
           <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
             {this.renderDevicePanel()}
           </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
-            <MicPermissionsModal onBack={() => this.props.history.goBack()} />
-          </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
           </StateRoute>
@@ -1069,8 +1064,8 @@ class UIRoot extends Component {
                     this.pushHistoryState();
                     this.handleForceEntry();
                   } else {
-                    this.onRequestMicPermission();
-                    this.pushHistoryState("entry_step", "mic_grant");
+                    this.updateMediaPermissions();
+                    this.pushHistoryState("entry_step", "audio");
                   }
                 }}
                 showBackButton
