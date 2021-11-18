@@ -1,3 +1,5 @@
+import { EventEmitter } from "eventemitter3";
+
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
@@ -12,8 +14,32 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 // then we rely upon the user to select the proper mic.
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
 const audioOutputSelectEnabled = "sinkId" in HTMLMediaElement.prototype;
-export default class MediaDevicesManager {
+
+export const MediaDevicesEvents = Object.freeze({
+  PERMISSIONS_STATUS_CHANGED: "permissions_status_changed",
+  MIC_SHARE_STARTED: "mic_share_started",
+  MIC_SHARE_ENDED: "mic_share_ended",
+  VIDEO_SHARE_STARTED: "video_share_started",
+  VIDEO_SHARE_ENDED: "video_share_ended"
+});
+
+export const PermissionStatus = Object.freeze({
+  GRANTED: "granted",
+  DENIED: "denied",
+  PROMPT: "prompt"
+});
+
+export const MediaDevices = Object.freeze({
+  MICROPHONE: "microphone",
+  SPEAKERS: "speakers",
+  CAMERA: "camera",
+  DISPLAY: "display"
+});
+
+export default class MediaDevicesManager extends EventEmitter {
   constructor(scene, store, audioSystem) {
+    super();
+
     this._scene = scene;
     this._store = store;
     this._micDevices = [];
@@ -23,7 +49,12 @@ export default class MediaDevicesManager {
     this._audioTrack = null;
     this.audioSystem = audioSystem;
     this._mediaStream = audioSystem.outboundStream;
-    this._permissionsGranted = false;
+    this._permissionsStatus = {
+      [MediaDevices.MICROPHONE]: PermissionStatus.PROMPT,
+      [MediaDevices.SPEAKERS]: PermissionStatus.PROMPT,
+      [MediaDevices.CAMERA]: PermissionStatus.PROMPT,
+      [MediaDevices.DISPLAY]: PermissionStatus.PROMPT
+    };
 
     navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
   }
@@ -97,15 +128,15 @@ export default class MediaDevicesManager {
   }
 
   get isMicShared() {
-    return this.audioTrack !== null;
+    return this.audioTrack !== null && this.getPermissionsStatus(MediaDevices.MICROPHONE) === PermissionStatus.GRANTED;
   }
 
   get isVideoShared() {
     return this._mediaStream?.getVideoTracks().length > 0;
   }
 
-  get isPermissionsGranted() {
-    return this._permissionsGranted;
+  getPermissionsStatus(type) {
+    return this._permissionsStatus[type];
   }
 
   onDeviceChange = () => {
@@ -114,21 +145,41 @@ export default class MediaDevicesManager {
     });
   };
 
+  async updatePermissions() {
+    await this.fetchMediaDevices();
+    const micStatus = this.micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
+    this._permissionsStatus[MediaDevices.MICROPHONE] = micStatus;
+    this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+      mediaDevice: MediaDevices.MICROPHONE,
+      status: micStatus
+    });
+    const videoStatus = this.videoDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
+    this._permissionsStatus[MediaDevices.CAMERA] = videoStatus;
+    this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+      mediaDevice: MediaDevices.CAMERA,
+      status: videoStatus
+    });
+    const speakersStatus = this.micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
+    this._permissionsStatus[MediaDevices.SPEAKERS] = speakersStatus;
+    this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+      mediaDevice: MediaDevices.SPEAKERS,
+      status: speakersStatus
+    });
+  }
+
   async fetchMediaDevices() {
     console.log("Fetching media devices");
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
+        mediaDevices = mediaDevices.filter(d => d.label !== "");
         this.micDevices = mediaDevices
-          .filter(d => d.deviceId !== "")
           .filter(d => d.kind === "audioinput")
           .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substr(0, 9)})` }));
         this.videoDevices = mediaDevices
-          .filter(d => d.deviceId !== "")
           .filter(d => d.kind === "videoinput")
           .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substr(0, 9)})` }));
         if (MediaDevicesManager.isAudioOutputSelectEnabled) {
           this.outputDevices = mediaDevices
-            .filter(d => d.deviceId !== "")
             .filter(d => d.kind === "audiooutput")
             .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substr(0, 9)})` }));
           this.changeAudioOutput(this.selectedSpeakersDeviceId);
@@ -142,8 +193,11 @@ export default class MediaDevicesManager {
     this._store.update({ preferences: { preferredSpeakers: deviceId } });
   }
 
-  async startMicShare(deviceId) {
+  async startMicShare({ deviceId, unmute }) {
     console.log("Starting microphone sharing");
+    if (!deviceId) {
+      deviceId = this.selectedMicDeviceId;
+    }
     let constraints = { audio: {} };
     if (deviceId) {
       constraints = { audio: { deviceId: { ideal: [deviceId] } } };
@@ -160,18 +214,18 @@ export default class MediaDevicesManager {
         this._store.update({ preferences: { preferredMic: micDeviceId } });
         console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
       }
-      this._scene.emit("local-media-stream-created");
+      this._scene.emit(MediaDevicesEvents.MIC_SHARE_STARTED);
     } else {
       console.log("No available audio tracks");
     }
 
     await APP.dialog.setLocalMediaStream(this._mediaStream);
 
-    return result;
-  }
+    if (unmute) {
+      APP.dialog.enableMicrophone(true);
+    }
 
-  async startLastUsedMicShare() {
-    return await this.startMicShare(this.selectedMicDeviceId);
+    return result;
   }
 
   async _startMicShare(constraints = { audio: {} }) {
@@ -206,7 +260,12 @@ export default class MediaDevicesManager {
       this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
       this.audioTrack = newStream.getAudioTracks()[0];
       this.audioTrack.addEventListener("ended", () => {
-        this._scene.emit("action_end_mic_sharing");
+        this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
+        this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.DENIED;
+        this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+          mediaDevice: MediaDevices.MICROPHONE,
+          status: PermissionStatus.DENIED
+        });
       });
 
       if (/Oculus/.test(navigator.userAgent)) {
@@ -222,7 +281,7 @@ export default class MediaDevicesManager {
 
           this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
 
-          this._scene.emit("local-media-stream-created");
+          this._scene.emit(MediaDevicesEvents.MIC_SHARE_STARTED);
 
           this.audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
         };
@@ -230,13 +289,22 @@ export default class MediaDevicesManager {
         this.audioTrack.addEventListener("ended", recreateAudioStream, { once: true });
       }
 
-      this._permissionsGranted = true;
+      this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.GRANTED;
+      this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+        mediaDevice: MediaDevices.MICROPHONE,
+        status: PermissionStatus.GRANTED
+      });
 
       return true;
     } catch (e) {
       // Error fetching audio track, most likely a permission denial.
       console.error("Error during getUserMedia: ", e);
-      this._permissionsGranted = false;
+      this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
+      this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.DENIED;
+      this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+        mediaDevice: MediaDevices.MICROPHONE,
+        status: PermissionStatus.DENIED
+      });
       this.audioTrack = null;
       return false;
     }
@@ -271,7 +339,15 @@ export default class MediaDevicesManager {
           // Ideally we would use track.contentHint but it seems to be read-only in Chrome so we just add a custom property
           track["_hubs_contentHint"] = isDisplayMedia ? "share" : "camera";
           track.addEventListener("ended", () => {
-            this._scene.emit("action_end_video_sharing");
+            this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
+            const mediaDevice = isDisplayMedia ? MediaDevices.DISPLAY : MediaDevices.CAMERA;
+            if (mediaDevice === MediaDevices.CAMERA) {
+              this._permissionsStatus[mediaDevice] = PermissionStatus.DENIED;
+              this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+                mediaDevice,
+                status: PermissionStatus.DENIED
+              });
+            }
           });
           this._mediaStream.addTrack(track);
         });
@@ -281,13 +357,21 @@ export default class MediaDevicesManager {
         }
 
         await APP.dialog.setLocalMediaStream(this._mediaStream);
+
+        const mediaDevice = isDisplayMedia ? MediaDevices.DISPLAY : MediaDevices.CAMERA;
+        this._permissionsStatus[mediaDevice] = PermissionStatus.GRANTED;
+        this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, { mediaDevice, status: PermissionStatus.GRANTED });
       }
     } catch (e) {
       error(e);
-      this._scene.emit("action_end_video_sharing");
+      this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
+      const mediaDevice = isDisplayMedia ? MediaDevices.DISPLAY : MediaDevices.CAMERA;
+      this._permissionsStatus[mediaDevice] = PermissionStatus.DENIED;
+      this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, { mediaDevice, status: PermissionStatus.DENIED });
       return;
     }
 
+    this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_STARTED);
     success(isDisplayMedia, videoTrackAdded, target);
   }
 

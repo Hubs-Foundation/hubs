@@ -1,4 +1,5 @@
 import React from "react";
+import { PermissionStatus } from "../../utils/media-devices-manager";
 import { RoomLayout } from "../layout/RoomLayout";
 import { MicSetupModal } from "./MicSetupModal";
 
@@ -70,5 +71,5 @@ NoPermissions.args = {
   speakerOptions: speakerOptions,
   speakerLevel: 0.5,
   microphoneMuted: false,
-  permissionsGranted: false
+  PermissionStatus: PermissionStatus.DENIED
 };

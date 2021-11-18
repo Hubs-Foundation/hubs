@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import MovingAverage from "moving-average";
+import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-manager";
 
 export function useMicrophone(scene, updateRate = 50) {
+  const mediaDevicesManager = window.APP.mediaDevicesManager;
   const movingAvgRef = useRef();
   const [isMicMuted, setIsMicMuted] = useState(!APP.dialog.isMicEnabled);
   const [isMicEnabled, setIsMicEnabled] = useState(window.APP.mediaDevicesManager.isMicShared);
   const [micVolume, setMicVolume] = useState(0);
-  const [isPermissionsGranted, setIsPermissionsGranted] = useState(false);
+  const [permissionStatus, setPermissionsStatus] = useState(
+    mediaDevicesManager.getPermissionsStatus(MediaDevices.MICROPHONE)
+  );
 
   useEffect(
     () => {
@@ -34,7 +38,6 @@ export function useMicrophone(scene, updateRate = 50) {
       const onMicMutedStateChanged = ({ enabled }) => {
         setIsMicMuted(!enabled);
       };
-
       APP.dialog.on("mic-state-changed", onMicMutedStateChanged);
 
       const onMicEnabled = () => {
@@ -43,29 +46,41 @@ export function useMicrophone(scene, updateRate = 50) {
       const onMicDisabled = () => {
         setIsMicEnabled(false);
       };
+      scene.addEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, onMicDisabled);
+      scene.addEventListener(MediaDevicesEvents.MIC_SHARE_STARTED, onMicEnabled);
 
-      scene.addEventListener("action_end_mic_sharing", onMicDisabled);
-      scene.addEventListener("local-media-stream-created", onMicEnabled);
-
-      setIsPermissionsGranted(window.APP.mediaDevicesManager.isPermissionsGranted);
+      const onPermissionsChanged = ({ mediaDevice, status }) => {
+        if (mediaDevice === MediaDevices.MICROPHONE) {
+          setPermissionsStatus(status);
+        }
+      };
+      mediaDevicesManager.on(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
 
       return () => {
         clearTimeout(timeout);
         APP.dialog.off("mic-state-changed", onMicMutedStateChanged);
-        scene.removeEventListener("action_end_mic_sharing", onMicDisabled);
-        scene.removeEventListener("local-media-stream-created", onMicEnabled);
+        scene.removeEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, onMicDisabled);
+        scene.removeEventListener(MediaDevicesEvents.MIC_SHARE_STARTED, onMicEnabled);
+        mediaDevicesManager.off(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
       };
     },
-    [setMicVolume, scene, updateRate]
+    [setMicVolume, scene, updateRate, mediaDevicesManager]
   );
 
-  const toggleMute = useCallback(() => {
-    APP.dialog.toggleMicrophone();
-  }, []);
+  const toggleMute = useCallback(
+    () => {
+      if (mediaDevicesManager.isMicShared) {
+        APP.dialog.toggleMicrophone();
+      } else {
+        mediaDevicesManager.startMicShare({ unmute: true });
+      }
+    },
+    [mediaDevicesManager]
+  );
 
   const onEnableMicrophone = useCallback(() => {
-    window.APP.mediaDevicesManager.startMicShare(window.APP.mediaDevicesManager.selectedMicDeviceId);
+    window.APP.mediaDevicesManager.startMicShare({ deviceId: window.APP.mediaDevicesManager.selectedMicDeviceId });
   }, []);
 
-  return { isMicMuted, micVolume, toggleMute, isMicEnabled, onEnableMicrophone, isPermissionsGranted };
+  return { isMicMuted, micVolume, toggleMute, isMicEnabled, onEnableMicrophone, permissionStatus };
 }
