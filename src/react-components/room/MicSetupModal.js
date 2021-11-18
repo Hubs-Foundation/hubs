@@ -16,6 +16,7 @@ import { FormattedMessage } from "react-intl";
 import { LevelBar } from "../misc/LevelBar";
 import { Popover } from "../popover/Popover";
 import { Icon } from "../misc/Icon";
+import { PermissionStatus } from "../../utils/media-devices-manager";
 
 export function MicSetupModal({
   className,
@@ -35,7 +36,7 @@ export function MicSetupModal({
   onEnableMicrophone,
   onEnterRoom,
   onBack,
-  permissionsGranted,
+  permissionStatus,
   ...rest
 }) {
   return (
@@ -57,7 +58,7 @@ export function MicSetupModal({
             <div
               className={classNames(styles.iconContainer, microphoneEnabled ? styles.iconEnabled : styles.iconDisabled)}
             >
-              {permissionsGranted && microphoneEnabled && !microphoneMuted ? (
+              {permissionStatus === PermissionStatus.GRANTED && microphoneEnabled && !microphoneMuted ? (
                 <MicrophoneIcon />
               ) : (
                 <MicrophoneMutedIcon />
@@ -65,7 +66,7 @@ export function MicSetupModal({
               <LevelBar width={48} height={48} level={!microphoneEnabled || microphoneMuted ? 0 : micLevel} />
             </div>
             <div className={styles.actionContainer}>
-              {permissionsGranted && microphoneEnabled ? (
+              {permissionStatus === PermissionStatus.GRANTED && microphoneEnabled ? (
                 <>
                   <ToggleInput
                     label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle-v2" defaultMessage="Mute" />}
@@ -99,21 +100,22 @@ export function MicSetupModal({
                   </Popover>
                 </>
               ) : (
-                (permissionsGranted && (
+                (permissionStatus === PermissionStatus.PROMPT && (
                   <Button preset="primary" onClick={onEnableMicrophone} sm>
                     <FormattedMessage id="mic-setup-modal.enable-mic-button" defaultMessage="Enable Microphone" />
                   </Button>
-                )) || (
+                )) ||
+                (permissionStatus === PermissionStatus.DENIED && (
                   <p className={styles.errorText}>
                     <FormattedMessage
                       id="mic-setup-modal.mic-pernissions"
-                      defaultMessage="You need to enable the microphone access"
+                      defaultMessage="You need to grant the microphone permission to use the microphone"
                     />
                   </p>
-                )
+                ))
               )}
             </div>
-            {permissionsGranted &&
+            {permissionStatus === PermissionStatus.GRANTED &&
               microphoneEnabled && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
@@ -139,7 +141,7 @@ export function MicSetupModal({
                 <FormattedMessage id="mic-setup-modal.test-audio-button" defaultMessage="Test Audio" />
               </Button>
             </div>
-            {permissionsGranted &&
+            {permissionStatus === PermissionStatus.GRANTED &&
               speakerOptions?.length > 0 && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
@@ -182,11 +184,11 @@ MicSetupModal.propTypes = {
   onChangeSpeaker: PropTypes.func,
   onEnterRoom: PropTypes.func,
   onBack: PropTypes.func,
-  permissionsGranted: PropTypes.bool
+  permissionStatus: PropTypes.number
 };
 
 MicSetupModal.defaultProps = {
   micLevel: 0,
   speakerLevel: 0,
-  permissionsGranted: true
+  permissionStatus: PermissionStatus.PROMPT
 };
