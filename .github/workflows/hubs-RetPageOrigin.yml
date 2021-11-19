@@ -53,19 +53,19 @@ jobs:
           sudo docker push $toTag
           echo "promoted :$fromTag to :$toTag"
 
-  staging_pr:
+  staging_pr_to_prod:
     if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
-    needs: build
+    needs: promote
     steps:
       - name: create pr for staging -> prod
         run: |
           gh pr create -H staging -B prod
 
-  prod_release:
+  prod_cut_release_branch:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
-    needs: build
+    needs: promote
     steps:
       - name: cut release branch for prod
         run: |
