@@ -1,7 +1,8 @@
 name: hubs
 on:
   push:
-    branches: [master, dev, feature/turkey]
+  pull_request:
+    branches: [master, dev, staging, prod]
   workflow_dispatch:
 
 env:
@@ -32,10 +33,22 @@ jobs:
         with:
           context: hubs/
           file: hubs/RetPageOriginDockerfile
-          tags: ${{ env.registryName }}/${{ env.containerName }}:${{ github.sha }}
+          tags: ${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number  }}
           cache-from: type=registry,ref=${{ env.registryName }}/${{ env.containerName }}:buildcache
           cache-to: type=registry,ref=${{ env.registryName }}/${{ env.containerName }}:buildcache,mode=max
           push: true
+      - name: pull request tag
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          fromTag=${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
+          toTag=${{ env.registryName }}/${{ env.containerName }}:$PR_NUMBER
+          echo ${{ secrets.DOCKER_HUB_PWD }} | sudo docker login --username $registryName --password-stdin             
+          docker pull $fromTag
+          docker tag $fromTag $toTag
+          sudo docker push $toTag
+          echo "promoted :$fromTag to :$toTag"
 
   promote:
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
@@ -44,10 +57,10 @@ jobs:
     steps:
       - name: pull <GITHUB_SHA>, re-tag, push
         run: |
-          shaTag=${{ env.registryName }}/${{ env.containerName }}:${{ github.sha }}
-          envTag=${GITHUB_REF/'refs/heads/'/}        
+          fromTag=${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
+          toTag=${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}        
           echo ${{ secrets.DOCKER_HUB_PWD }} | sudo docker login --username $registryName --password-stdin             
-          docker pull $shaTag
-          docker tag $shaTag $envTag
-          sudo docker push $envTag
-          echo "promoted :$shaTag to :$envTag"
+          docker pull $fromTag
+          docker tag $fromTag $toTag
+          sudo docker push $toTag
+          echo "promoted :$fromTag to :$toTag"

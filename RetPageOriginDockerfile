@@ -6,9 +6,9 @@ from node:16.13 as builder
 run mkdir -p /hubs/admin/ && cd /hubs
 copy package.json ./
 copy package-lock.json ./
+run npm ci
 copy admin/package.json admin/
 copy admin/package-lock.json admin/
-run npm ci
 run cd admin && npm ci && cd ..
 copy . .
 env BASE_ASSETS_PATH="{{rawhubs-base-assets-path}}"
