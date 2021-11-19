@@ -38,35 +38,41 @@ jobs:
           cache-to: type=registry,ref=${{ env.registryName }}/${{ env.containerName }}:buildcache,mode=max
           push: true
 
-  promote:
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: promote artifact
-        run: |
-          fromTag=${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
-          toTag=${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}        
-          echo ${{ secrets.DOCKER_HUB_PWD }} | sudo docker login --username $registryName --password-stdin             
-          docker pull $fromTag
-          docker tag $fromTag $toTag
-          sudo docker push $toTag
-          echo "promoted :$fromTag to :$toTag"
+  turkeyGitops:
+    uses: mozilla/hubs-ops/.github/reusableWorkflows/turkeyGitops.yml@gha-template
+    with:
+      promoteFrom: ${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
+      promoteTo: ${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}
 
-  staging_pr_to_prod:
-    if: github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
-    needs: promote
-    steps:
-      - name: create pr for staging -> prod
-        run: |
-          gh pr create -H staging -B prod
+  # promote:
+  #   if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: promote artifact
+  #       run: |
+  #         fromTag=${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
+  #         toTag=${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}
+  #         echo ${{ secrets.DOCKER_HUB_PWD }} | sudo docker login --username $registryName --password-stdin
+  #         docker pull $fromTag
+  #         docker tag $fromTag $toTag
+  #         sudo docker push $toTag
+  #         echo "promoted :$fromTag to :$toTag"
 
-  prod_cut_release_branch:
-    if: github.ref == 'refs/heads/prod'
-    runs-on: ubuntu-latest
-    needs: promote
-    steps:
-      - name: cut release branch for prod
-        run: |
-          git checkout -b releases/$(date '+%y%m%d').$GITHUB_RUN_NUMBER
+  # staging_pr_to_prod:
+  #   if: github.ref == 'refs/heads/staging'
+  #   runs-on: ubuntu-latest
+  #   needs: promote
+  #   steps:
+  #     - name: create pr for staging -> prod
+  #       run: |
+  #         gh pr create -H staging -B prod
+
+  # prod_cut_release_branch:
+  #   if: github.ref == 'refs/heads/prod'
+  #   runs-on: ubuntu-latest
+  #   needs: promote
+  #   steps:
+  #     - name: cut release branch for prod
+  #       run: |
+  #         git checkout -b releases/$(date '+%y%m%d').$GITHUB_RUN_NUMBER
