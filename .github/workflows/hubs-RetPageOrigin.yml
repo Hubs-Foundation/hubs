@@ -38,6 +38,7 @@ jobs:
           push: true
 
   turkeyGitops:
+    needs: build
     uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@feature/gha-template
     with:
       # promoteFrom: ${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
