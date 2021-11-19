@@ -41,10 +41,10 @@ jobs:
     needs: build
     uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@feature/gha-template
     with:
-      # promoteFrom: ${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
-      # promoteTo: ${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}
       promoteFrom: mozillareality/hubs:${{ github.run_number }}
       promoteTo: mozillareality/hubs:${GITHUB_REF/'refs/heads/'/}
+      promoteFrom: ${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
+      promoteTo: ${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}      
 
   # promote:
   #   if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
