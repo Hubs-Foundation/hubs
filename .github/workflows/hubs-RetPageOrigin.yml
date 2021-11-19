@@ -1,8 +1,7 @@
 name: hubs
 on:
   push:
-    paths-ignore:
-      - "README.md"
+    paths-ignore: ["README.md"]
   workflow_dispatch:
 
 env:
