@@ -39,7 +39,7 @@ jobs:
           push: true
 
   turkeyGitops:
-    uses: mozilla/hubs-ops/.github/Workflows/turkeyGitops.yml@gha-template
+    uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@gha-template
     with:
       promoteFrom: ${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
       promoteTo: ${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}
