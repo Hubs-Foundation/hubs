@@ -4,11 +4,10 @@ on:
     paths-ignore: ["README.md"]
   workflow_dispatch:
 
-env:
-  registryName: mozillareality
-  containerName: hubs
-
 jobs:
+  env:
+    registryName: mozillareality
+    containerName: hubs
   build:
     runs-on: ubuntu-latest
     steps:
