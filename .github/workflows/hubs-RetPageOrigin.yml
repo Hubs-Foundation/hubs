@@ -43,6 +43,8 @@ jobs:
     with:
       promoteFrom: mozillareality/hubs:${{ github.run_number }}
       promoteTo: mozillareality/hubs:${GITHUB_REF/'refs/heads/'/}
+      # https://docs.github.com/en/actions/learn-github-actions/reusing-workflows#limitations
+      #   Any environment variables set in an env context defined at the workflow level in the caller workflow are not propagated to the called workflow.
       # promoteFrom: ${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
       # promoteTo: ${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}
 
