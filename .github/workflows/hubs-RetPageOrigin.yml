@@ -83,4 +83,5 @@ jobs:
       - name: cut release branch for prod
         run: |
           cd ./hubs_prod
-          git checkout -b releases/$(date '+%y%m%d').$GITHUB_RUN_NUMBER
+          branchName="releases/$(date '+%y%m%d').$GITHUB_RUN_NUMBER"
+          git checkout -b $branchName && git push origin $branchName
