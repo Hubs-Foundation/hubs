@@ -76,6 +76,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: promote
     steps:
+      - name: checkout-hubs
+        uses: actions/checkout@v2
+        with:
+          path: /hubs_prod
       - name: cut release branch for prod
         run: |
+          cd /hubs_prod
           git checkout -b releases/$(date '+%y%m%d').$GITHUB_RUN_NUMBER
