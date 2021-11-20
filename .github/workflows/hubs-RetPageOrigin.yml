@@ -37,6 +37,7 @@ jobs:
           cache-to: type=registry,ref=${{ env.registryName }}/${{ env.containerName }}:buildcache,mode=max
           push: true
 
+  # todo: revisit github action reusable workflows when it reaches general availability
   # turkeyGitops:
   #   needs: build
   #   uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@feature/gha-template
