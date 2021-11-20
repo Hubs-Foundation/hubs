@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: create pr for staging -> prod
         run: |
-          gh pr create -H staging -B prod
+          gh pr create -H staging -B prod -a tanfarming --title "releasing" --body "note: merge this PR == production release"
 
   prod_cut_release_branch:
     if: github.ref == 'refs/heads/prod'
