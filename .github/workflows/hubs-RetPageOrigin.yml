@@ -47,7 +47,7 @@ jobs:
   #     # promoteTo: ${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}
 
   promote:
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     needs: build
     steps:
