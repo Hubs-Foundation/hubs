@@ -54,10 +54,11 @@ jobs:
       - name: promote artifact
         run: |
           fromTag=${{ env.registryName }}/${{ env.containerName }}:${{ github.run_number }}
-          toTag=${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}
+          toTag=${{ env.registryName }}/${{ env.containerName }}:${GITHUB_REF/'refs/heads/'/}          
+          toTag=${toTag//:master/:dev}
+          echo "promoting :$fromTag to :$toTag"
           echo ${{ secrets.DOCKER_HUB_PWD }} | sudo docker login --username $registryName --password-stdin
           docker pull $fromTag && docker tag $fromTag $toTag && sudo docker push $toTag
-          echo "promoted :$fromTag to :$toTag"
 
   staging_pr_to_prod:
     if: github.ref == 'refs/heads/staging'
