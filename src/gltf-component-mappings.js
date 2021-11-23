@@ -24,6 +24,8 @@ function registerRootSceneComponent(componentName) {
 
 registerRootSceneComponent("fog");
 
+AFRAME.GLTFModelPlus.registerComponent("troika-text", "troika-text");
+
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
   el.setAttribute("quack", { quackPercentage: 0.1 });
