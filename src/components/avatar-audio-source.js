@@ -135,7 +135,7 @@ AFRAME.registerComponent("avatar-audio-source", {
   },
 
   remove: function() {
-    APP.dialog.off("stream_updated", this._onStreamUpdated);
+    APP.dialog.off("stream_updated", this._onStreamUpdated, this);
     this.destroyAudio();
   }
 });
