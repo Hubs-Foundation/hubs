@@ -4,7 +4,7 @@ $breakpoint-md: 768px; // Tablets
 $breakpoint-lg: 992px; // Desktops
 $breakpoint-xl: 1200px; // Large Desktops
 $breakpoint-xxl: 1600px; // Extra Large Desktops
-$breakpoint-vr: 500px; // Standalone VR Browsers
+$breakpoint-vr: 600px; // Standalone VR Browsers
 
 $transparent: transparent;
 $transparent-hover: rgba(0, 0, 0, 0.08);
@@ -42,9 +42,9 @@ $green: #7ED320;
 $green-hover: #8CDF2F;
 $green-pressed: #72BE1D;
 
-$blue: #12A4ED;
-$blue-hover: #2AADEF;
-$blue-pressed: #1094D5;
+$blue: #007AB8;
+$blue-hover: #008BD1;
+$blue-pressed: #00699E;
 
 $purple: #7854F6;
 $purple-hover: #8C6EF7;
@@ -116,6 +116,7 @@ $link-color-hover: var(--link-color-hover);
 $link-color-pressed: var(--link-color-pressed);
 
 $accept-color: var(--accept-color);
+$accept-border-color: var(--accept-border-color);
 $accept-color-hover: var(--accept-color-hover);
 $accept-color-pressed: var(--accept-color-pressed);
 
@@ -124,24 +125,33 @@ $cancel-color-hover: var(--cancel-color-hover);
 $cancel-color-pressed: var(--cancel-color-pressed);
 
 $accent1-color: var(--accent1-color);
+$accent1-border-color: var(--accent1-border-color);
 $accent1-color-hover: var(--accent1-color-hover);
 $accent1-color-pressed: var(--accent1-color-pressed);
 
 $accent2-color: var(--accent2-color);
+$accent2-border-color: var(--accent2-border-color);
 $accent2-color-hover: var(--accent2-color-hover);
 $accent2-color-pressed: var(--accent2-color-pressed);
 
 $accent3-color: var(--accent3-color);
 $accent3-color-hover: var(--accent3-color-hover);
 $accent3-color-pressed: var(--accent3-color-pressed);
+$accent3-border-color: var(--accent3-border-color);
 
 $accent4-color: var(--accent4-color);
+$accent4-border-color: var(--accent4-border-color);
 $accent4-color-hover: var(--accent4-color-hover);
 $accent4-color-pressed: var(--accent4-color-pressed);
 
 $accent5-color: var(--accent5-color);
+$accent5-border-color: var(--accent5-border-color);
 $accent5-color-hover: var(--accent5-color-hover);
 $accent5-color-pressed: var(--accent5-color-pressed);
+
+$accent6-color: var(--accent6-color);
+$accent6-color-hover: var(--accent6-color-hover);
+$accent6-color-pressed: var(--accent6-color-pressed);
 
 $primary-color: var(--primary-color);
 $primary-color-hover: var(--primary-color-hover);
@@ -237,10 +247,18 @@ $overlay-border-color: var(--overlay-border-color);
 $overlay-outline-color: var(--overlay-outline-color);
 
 $toolbar-icon-color: var(--toolbar-icon-color);
+$toolbar-icon-selected-bg: var(--toolbar-icon-selected-bg);
 $toolbar-basic-icon-color: var(--toolbar-basic-icon-color);
+$toolbar-basic-selected-icon-color: var(--toolbar-basic-selected-icon-color);
 $toolbar-basic-color: var(--toolbar-basic-color);
 $toolbar-basic-color-hover: var(--toolbar-basic-color-hover);
 $toolbar-basic-color-pressed: var(--toolbar-basic-color-pressed);
+$toolbar-basic-border-color: var(--toolbar-basic-border-color);
+$toolbar-label-accent1: var(--toolbar-label-accent1);
+$toolbar-label-accent2: var(--toolbar-label-accent2);
+$toolbar-label-accent3: var(--toolbar-label-accent3);
+$toolbar-label-accent4: var(--toolbar-label-accent4);
+$toolbar-label-accent5: var(--toolbar-label-accent5);
 
 $tile-text-color: var(--tile-text-color);
 $tile-bg-color: var(--tile-bg-color);

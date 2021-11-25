@@ -3,6 +3,7 @@
 :local(.content) {
   align-items: center;
   padding: 24px;
+  padding-top: 10px;
   text-align: center;
 }
 
@@ -15,9 +16,12 @@
 
   /* TODO: This styling into AvatarPreview */
   & > :first-child {
+    /*
+    We need to set dimensions explicitly here, since AvatarPreview
+    resizes itself to its container's dimensions.
+    */
     width: 168px;
-    height: 300px;
-    min-height: 300px;
+    height: 250px;
     border-radius: 8px;
     background-color: theme.$tile-bg-color;
   }

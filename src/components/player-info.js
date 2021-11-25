@@ -51,8 +51,7 @@ AFRAME.registerComponent("player-info", {
     this.handleModelError = this.handleModelError.bind(this);
     this.handleRemoteModelError = this.handleRemoteModelError.bind(this);
     this.update = this.update.bind(this);
-    this.localStateAdded = this.localStateAdded.bind(this);
-    this.localStateRemoved = this.localStateRemoved.bind(this);
+    this.onMicStateChanged = this.onMicStateChanged.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -69,6 +68,8 @@ AFRAME.registerComponent("player-info", {
     registerComponentInstance(this, "player-info");
   },
   remove() {
+    const avatarEl = this.el.querySelector("[avatar-audio-source]");
+    APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
   },
   play() {
@@ -85,8 +86,7 @@ AFRAME.registerComponent("player-info", {
     this.el.sceneEl.addEventListener("stateremoved", this.update);
 
     if (this.isLocalPlayerInfo) {
-      this.el.sceneEl.addEventListener("stateadded", this.localStateAdded);
-      this.el.sceneEl.addEventListener("stateremoved", this.localStateRemoved);
+      APP.dialog.on("mic-state-changed", this.onMicStateChanged);
     }
   },
   pause() {
@@ -102,8 +102,7 @@ AFRAME.registerComponent("player-info", {
     window.APP.store.removeEventListener("statechanged", this.update);
 
     if (this.isLocalPlayerInfo) {
-      this.el.sceneEl.removeEventListener("stateadded", this.localStateAdded);
-      this.el.sceneEl.removeEventListener("stateremoved", this.localStateRemoved);
+      APP.dialog.off("mic-state-changed", this.onMicStateChanged);
     }
   },
 
@@ -187,6 +186,13 @@ AFRAME.registerComponent("player-info", {
         el.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
       }
     }
+
+    const avatarEl = this.el.querySelector("[avatar-audio-source]");
+    if (this.data.muted) {
+      APP.isAudioPaused.add(avatarEl);
+    } else {
+      APP.isAudioPaused.delete(avatarEl);
+    }
   },
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();
@@ -195,14 +201,7 @@ AFRAME.registerComponent("player-info", {
     this.data.avatarSrc = defaultAvatar;
     this.applyProperties();
   },
-  localStateAdded(e) {
-    if (e.detail === "muted") {
-      this.el.setAttribute("player-info", { muted: true });
-    }
-  },
-  localStateRemoved(e) {
-    if (e.detail === "muted") {
-      this.el.setAttribute("player-info", { muted: false });
-    }
+  onMicStateChanged({ enabled }) {
+    this.el.setAttribute("player-info", { muted: !enabled });
   }
 });

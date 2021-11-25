@@ -1,15 +1,8 @@
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
 import waterNormalsUrl from "../assets/waternormals.jpg";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
-const {
-  Mesh,
-  PlaneBufferGeometry,
-  MeshStandardMaterial,
-  MeshPhongMaterial,
-  Vector2,
-  TextureLoader,
-  RepeatWrapping
-} = THREE;
+const { Mesh, PlaneBufferGeometry, MeshStandardMaterial, MeshPhongMaterial, Vector2, RepeatWrapping } = THREE;
 
 /**
  * SimpleWater
@@ -43,7 +36,7 @@ export default class SimpleWater extends Mesh {
 
     normalMap.wrapS = normalMap.wrapT = RepeatWrapping;
 
-    const material = new materialClass({ color: 0x0054df, normalMap });
+    const material = new materialClass({ color: 0x0054df, normalMap, roughness: 0.5, metalness: 0.5 });
     material.name = "SimpleWaterMaterial";
 
     material.onBeforeCompile = shader => {
@@ -287,7 +280,7 @@ AFRAME.registerComponent("simple-water", {
 
   init() {
     if (!waterNormalMap) {
-      waterNormalMap = new TextureLoader().load(waterNormalsUrl);
+      waterNormalMap = new HubsTextureLoader().load(waterNormalsUrl);
     }
 
     const usePhongShader = window.APP.store.materialQualitySetting !== "high";

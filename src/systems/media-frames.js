@@ -1,11 +1,13 @@
 import { MediaType } from "../utils/media-utils";
-import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { applyPersistentSync } from "../utils/permissions-utils";
+import { cloneObject3D, disposeNode } from "../utils/three-utils";
+import qsTruthy from "../utils/qs_truthy";
 
-// TODO better handling for 3d objects
 function scaleForAspectFit(containerSize, itemSize) {
-  return Math.min(containerSize.x / itemSize.x, containerSize.y / itemSize.y);
+  return Math.min(containerSize.x / itemSize.x, containerSize.y / itemSize.y, containerSize.z / itemSize.z);
 }
+
+const DEBUG = qsTruthy("debug");
 
 const isCapturableByType = {
   [MediaType.ALL]: function(el) {
@@ -176,16 +178,6 @@ AFRAME.registerComponent("media-frame", {
         })
       )
     );
-
-    const previewMaterial = new THREE.MeshBasicMaterial();
-    previewMaterial.side = THREE.DoubleSide;
-    previewMaterial.transparent = true;
-    previewMaterial.opacity = 0.5;
-
-    const geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
-    const previewMesh = new THREE.Mesh(geometry, previewMaterial);
-    previewMesh.visible = false;
-    this.el.setObject3D("preview", previewMesh);
   },
 
   update(oldData) {
@@ -223,30 +215,103 @@ AFRAME.registerComponent("media-frame", {
     components.splice(components.indexOf(this), 1);
   },
 
-  // TODO this "preview" feels a bit hacky and error prone, also needs support for previewing 3D objects
+  tick(_, dt) {
+    if (this.mixer) {
+      this.mixer.update(dt / 1000);
+    }
+  },
+
   showPreview(capturableEntity) {
-    const srcMesh = capturableEntity.getObject3D("mesh");
+    if (!this.preview) {
+      const srcMesh = capturableEntity.getObject3D("mesh");
+      const clonedMesh = cloneObject3D(srcMesh, false);
 
-    if (!isCapturableByType[MediaType.ALL_2D](capturableEntity) || !(srcMesh && srcMesh.material)) return;
-    const previewMesh = this.el.getObject3D("preview");
+      clonedMesh.traverse(node => {
+        if (node.isMesh) {
+          if (node.material) {
+            node.material = node.material.clone();
+            node.material.transparent = true;
+            node.material.opacity = 0.5;
+            node.material.needsUpdate = true;
+          }
+        }
+      });
 
-    previewMesh.material.map = srcMesh.material.map;
-    previewMesh.material.needsUpdate = true;
+      const loopAnimation = capturableEntity.components["loop-animation"];
+      if (loopAnimation && loopAnimation.isPlaying) {
+        const originalAnimation = loopAnimation.currentActions[loopAnimation.data.activeClipIndex];
+        const animation = clonedMesh.animations[loopAnimation.data.activeClipIndex];
+        this.mixer = new THREE.AnimationMixer(clonedMesh);
+        const action = this.mixer.clipAction(animation);
+        action.syncWith(originalAnimation);
+        action.setLoop(THREE.LoopRepeat, Infinity).play();
+      }
 
-    previewMesh.scale.copy(srcMesh.scale);
-    previewMesh.scale.multiplyScalar(scaleForAspectFit(this.data.bounds, srcMesh.scale));
-    // Preview mesh UVs are set to accomidate textureLoader default, but video textures don't match this
-    previewMesh.scale.y *= TEXTURES_FLIP_Y !== previewMesh.material.map.flipY ? -1 : 1;
+      // Reset offsets
+      clonedMesh.position.set(0, 0, 0);
+      clonedMesh.quaternion.identity();
+      let aabb = new THREE.Box3().setFromObject(clonedMesh);
+      const size = new THREE.Vector3();
+      aabb.getSize(size);
+      let center = new THREE.Vector3();
+      aabb.getCenter(center);
+      clonedMesh.position.copy(center);
+      clonedMesh.position.multiplyScalar(-1);
+      clonedMesh.matrixNeedsUpdate = true;
+      this.preview = new THREE.Object3D();
+      this.el.sceneEl.object3D.add(this.preview);
+      this.preview.add(clonedMesh);
 
-    previewMesh.matrixNeedsUpdate = true;
-    previewMesh.visible = true;
+      // Apply preview mesh transforms to match the frame ones
+      this.el.object3D.updateWorldMatrix(true);
+      const worldPos = new THREE.Vector3();
+      this.el.object3D.getWorldPosition(worldPos);
+      const worldQuat = new THREE.Quaternion();
+      this.el.object3D.getWorldQuaternion(worldQuat);
+      this.preview.position.copy(worldPos);
+      this.preview.scale.multiplyScalar(scaleForAspectFit(this.data.bounds, size));
+      this.preview.setRotationFromQuaternion(worldQuat);
+      this.preview.matrixNeedsUpdate = true;
+
+      if (DEBUG) {
+        const quat = this.preview.quaternion.clone();
+        this.preview.quaternion.identity();
+        this.preview.matrixNeedsUpdate = true;
+        this.preview.updateMatrixWorld(true);
+        aabb = new THREE.Box3().setFromObject(this.preview);
+        this.preview.quaternion.copy(quat);
+        this.preview.matrixNeedsUpdate = true;
+        this.preview.updateMatrixWorld(true);
+        this.helperBBAA = new THREE.Box3Helper(aabb, 0xffff00);
+        this.helperBBAA.setRotationFromQuaternion(this.preview.quaternion);
+        this.el.sceneEl.object3D.add(this.helperBBAA);
+
+        this.centerBBAA = new THREE.AxesHelper(0.25);
+        center = new THREE.Vector3();
+        aabb.getCenter(center);
+        this.centerBBAA.position.copy(center);
+        this.centerBBAA.setRotationFromQuaternion(this.preview.quaternion);
+        this.el.sceneEl.object3D.add(this.centerBBAA);
+      }
+    }
   },
 
   hidePreview() {
-    const previewMesh = this.el.getObject3D("preview");
-    previewMesh.material.map = null;
-    previewMesh.material.needsUpdate = true;
-    previewMesh.visible = false;
+    if (this.preview) {
+      this.el.sceneEl.object3D.remove(this.preview);
+      if (this.mixer) {
+        this.mixer.stopAllAction();
+        this.mixer.uncacheRoot(this.preview);
+        this.mixer = null;
+      }
+      disposeNode(this.preview);
+      this.preview = null;
+
+      if (DEBUG) {
+        this.el.sceneEl.object3D.remove(this.helperBBAA);
+        this.el.sceneEl.object3D.remove(this.centerBBAA);
+      }
+    }
   },
 
   snapObject(capturedEl) {
@@ -261,22 +326,39 @@ AFRAME.registerComponent("media-frame", {
 
   capture(capturableEntity) {
     if (NAF.utils.isMine(this.el) || NAF.utils.takeOwnership(this.el)) {
-      this.el.setAttribute("media-frame", {
-        targetId: capturableEntity.id,
-        originalTargetScale: new THREE.Vector3().copy(capturableEntity.object3D.scale)
-      });
-      const worldPosition = new THREE.Vector3();
-      this.el.object3D.getWorldPosition(worldPosition);
-      capturableEntity.object3D.position.copy(worldPosition);
-      const worldQuat = new THREE.Quaternion();
-      this.el.object3D.updateWorldMatrix(true);
-      this.el.object3D.getWorldQuaternion(worldQuat);
-      capturableEntity.object3D.setRotationFromQuaternion(worldQuat);
-      capturableEntity.object3D.scale.setScalar(
-        scaleForAspectFit(this.data.bounds, capturableEntity.getObject3D("mesh").scale)
-      );
-      capturableEntity.object3D.matrixNeedsUpdate = true;
-      capturableEntity.components["floaty-object"].setLocked(true);
+      const update = () => {
+        this.el.setAttribute("media-frame", {
+          targetId: capturableEntity.id,
+          originalTargetScale: new THREE.Vector3().copy(capturableEntity.object3D.scale)
+        });
+
+        capturableEntity.object3D.scale.set(1, 1, 1);
+        capturableEntity.object3D.quaternion.identity();
+        capturableEntity.object3D.matrixNeedsUpdate = true;
+        capturableEntity.object3D.updateMatrixWorld();
+        const srcMesh = capturableEntity.getObject3D("mesh");
+        const size = new THREE.Vector3();
+        new THREE.Box3().setFromObject(srcMesh).getSize(size);
+
+        capturableEntity.object3D.scale.multiplyScalar(scaleForAspectFit(this.data.bounds, size));
+        capturableEntity.object3D.matrixNeedsUpdate = true;
+
+        this.snapObject(capturableEntity);
+      };
+
+      // Make sure we snap the media element when it's loaded (otherwise we may only snap the loading object)
+      if (capturableEntity.components["media-loader"].isPlaying) {
+        capturableEntity.addEventListener(
+          "media-loaded",
+          () => {
+            update();
+          },
+          { once: true }
+        );
+      }
+
+      update();
+
       this.hidePreview();
     } else {
       // TODO what do we do about this state? should evenetually resolve itself as it will try again next frame...

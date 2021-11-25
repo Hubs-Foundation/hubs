@@ -16,7 +16,7 @@ export default function VideoMessage({ name, body: { src: url }, className, mayS
     title: intl.formatMessage(
       {
         id: "video-message.default-tweet",
-        defaultMessage: "Taken in {shareHashtag}, join me at {url}"
+        defaultMessage: "Taken in {shareHashtag}"
       },
       {
         shareHashtag: configs.translation("share-hashtag"),
