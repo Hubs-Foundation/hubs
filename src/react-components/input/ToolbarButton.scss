@@ -10,7 +10,8 @@
 
   label {
     cursor: pointer;
-    color: theme.$text1-color;
+    // color: theme.$text1-color;
+    color: #ffffff;
     margin-top: 8px;
     margin-bottom: 3px;
     white-space: pre-wrap;
@@ -26,7 +27,7 @@
   justify-content: center;
   align-items: center;
   border: 1px solid theme.$transparent;
-  background-color: theme.$transparent;
+  background-color: #ffffff;
 
   transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
 

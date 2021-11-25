@@ -40,10 +40,10 @@ AllButtons.parameters = {
 //     toolbarCenter={
 //       <>
         <ToolbarButton icon={<MicrophoneIcon />} label="Voice" preset="basic" />,
-//         <ToolbarButton icon={<ShareIcon />} label="Share" preset="accent5" />
+        <ToolbarButton icon={<ShareIcon />} label="Share" preset="accent5" />,
 //         <ToolbarButton icon={<ObjectIcon />} label="Place" preset="accent3" />
-          <ToolbarButton icon={<ReactionIcon />} label="React" preset="accent2" />
-//         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" />
+          <ToolbarButton icon={<ReactionIcon />} label="React" preset="accent2" />,
+        <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" />
 //       </>
 //     }
 //     toolbarRight={
