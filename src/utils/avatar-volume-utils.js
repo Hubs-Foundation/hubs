@@ -37,3 +37,17 @@ export function calcGainMultiplier(level) {
     level <= MAX_VOLUME_LABELS / 2 ? level * SMALL_GAIN_STEP : 1 + (level - MAX_VOLUME_LABELS / 2) * BIG_GAIN_STEP
   );
 }
+
+export function updateAvatarVolumesPref(userId, gainMultiplier) {
+  const avatarVoiceLevels = APP.store.state.preferences.avatarVoiceLevels || {};
+  avatarVoiceLevels[userId] = gainMultiplier;
+  APP.store.update({
+    preferences: {
+      avatarVoiceLevels: avatarVoiceLevels
+    }
+  });
+}
+
+export function getAvatarVolumePref(userId) {
+  return APP.store.state.preferences.avatarVoiceLevels?.[userId];
+}
