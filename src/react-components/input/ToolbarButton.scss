@@ -13,6 +13,7 @@
     color: theme.$text1-color;
     margin-top: 8px;
     margin-bottom: 3px;
+    white-space: nowrap;
   }
 }
 
@@ -181,6 +182,7 @@
 :local(.accept) {
   :local(.icon-container) {
     background-color: theme.$accept-color;
+    border-color: theme.$accept-border-color;
   }  
 
   &:hover :local(.icon-container) {
