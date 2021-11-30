@@ -16,32 +16,36 @@ export default function useAvatarVolume(sessionId) {
   const controlsEl = playerInfo?.el.querySelector("[avatar-volume-controls]");
   const controls = controlsEl?.components["avatar-volume-controls"];
   const [levelStep, setLevelStep] = useState(0);
-  const [level, setLevel] = useState(controls?.getGainMultiplier());
-  const [isMuted, setIsMuted] = useState(controls?.isLocalMuted);
+  const [level, setLevel] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
 
-  const onGainMultiplierUpdated = useCallback(({ detail: { gainMultiplier } }) => {
-    const newValue = calcLevel(gainMultiplier);
-    setLevelStep(newValue > gainMultiplier ? calcLevelStepDown(gainMultiplier) : calcLevelStepUp(gainMultiplier));
-    setLevel(newValue);
-  }, []);
+  const onGainMultiplierUpdated = useCallback(
+    ({ detail: { gainMultiplier } }) => {
+      const newLevel = calcLevel(gainMultiplier);
+      setLevelStep(newLevel > level ? calcLevelStepDown(gainMultiplier) : calcLevelStepUp(gainMultiplier));
+      setLevel(newLevel);
+    },
+    [level]
+  );
 
   const updateGainMultiplier = useCallback(
     value => {
       if (!controls) return;
       const gainMultiplier = calcGainMultiplier(value);
       controls.updateGainMultiplier(gainMultiplier, true);
-      const newValue = calcLevel(gainMultiplier);
-      setLevelStep(newValue < value ? calcLevelStepDown(value) : calcLevelStepUp(value));
-      setLevel(undefined);
     },
     [controls]
   );
+
+  const onLocalMutedUpdated = useCallback(({ detail: { muted } }) => {
+    setIsMuted(muted);
+  }, []);
 
   const updateMuted = useCallback(
     muted => {
       if (!controls) return;
       setIsMuted(!!muted);
-      controls.updateLocalMuted(!!muted);
+      controls.updateLocalMuted(!!muted, true);
     },
     [controls]
   );
@@ -50,13 +54,17 @@ export default function useAvatarVolume(sessionId) {
     () => {
       if (!controlsEl) return;
       controlsEl.addEventListener("gain_multiplier_updated", onGainMultiplierUpdated);
+      controlsEl.addEventListener("local_muted_updated", onLocalMutedUpdated);
+
       onGainMultiplierUpdated({ detail: { gainMultiplier: controls.getGainMultiplier() } });
-      setIsMuted(controls.isLocalMuted);
+      setIsMuted(controls.isLocalMuted());
+
       return () => {
         controlsEl.removeEventListener("gain_multiplier_updated", onGainMultiplierUpdated);
+        controlsEl.removeEventListener("local_muted_updated", onLocalMutedUpdated);
       };
     },
-    [controls, controlsEl, onGainMultiplierUpdated, updateMuted]
+    [controls, controlsEl, onGainMultiplierUpdated, onLocalMutedUpdated]
   );
 
   return [minLevel, maxLevel, levelStep, level, updateGainMultiplier, isMuted, updateMuted];

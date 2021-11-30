@@ -38,9 +38,12 @@ export function calcGainMultiplier(level) {
   );
 }
 
-export function updateAvatarVolumesPref(userId, gainMultiplier) {
+export function updateAvatarVolumesPref(userId, gainMultiplier, muted) {
   const avatarVoiceLevels = APP.store.state.preferences.avatarVoiceLevels || {};
-  avatarVoiceLevels[userId] = gainMultiplier;
+  avatarVoiceLevels[userId] = {
+    gainMultiplier,
+    muted
+  };
   APP.store.update({
     preferences: {
       avatarVoiceLevels: avatarVoiceLevels
