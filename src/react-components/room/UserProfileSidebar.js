@@ -7,12 +7,19 @@ import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import styles from "./UserProfileSidebar.scss";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Slider } from "../input/Slider";
+import { ToolbarButton } from "../input/ToolbarButton";
+import { ReactComponent as VolumeHigh } from "../icons/VolumeHigh.svg";
+import { ReactComponent as VolumeMuted } from "../icons/VolumeMuted.svg";
+import useAvatarVolume from "./useAvatarVolume";
 
 export function UserProfileSidebar({
   className,
+  userId,
   displayName,
   identityName,
   avatarPreview,
+  hasMicPresence,
   isSignedIn,
   canPromote,
   onPromote,
@@ -21,6 +28,7 @@ export function UserProfileSidebar({
   isHidden,
   onToggleHidden,
   canMute,
+  isNetworkMuted,
   onMute,
   canKick,
   onKick,
@@ -30,7 +38,7 @@ export function UserProfileSidebar({
   ...rest
 }) {
   const intl = useIntl();
-
+  const [minLevel, maxLevel, levelStep, level, updateGainMultiplier, isMuted, updateMuted] = useAvatarVolume(userId);
   return (
     <Sidebar
       title={identityName ? `${displayName} (${identityName})` : displayName}
@@ -40,6 +48,31 @@ export function UserProfileSidebar({
     >
       <Column center padding>
         <div className={styles.avatarPreviewContainer}>{avatarPreview || <div />}</div>
+        {hasMicPresence && (
+          <div className={styles.sliderContainer}>
+            <ToolbarButton
+              icon={isNetworkMuted || isMuted ? <VolumeMuted /> : <VolumeHigh />}
+              selected={isNetworkMuted || isMuted}
+              preset="accent4"
+              style={{ display: "block" }}
+              onClick={() => {
+                updateMuted(!isMuted);
+              }}
+              disabled={isNetworkMuted}
+            />
+            <Slider
+              min={minLevel}
+              max={maxLevel}
+              step={levelStep}
+              digits={2}
+              value={level}
+              defaultValue={maxLevel / 2}
+              onChange={updateGainMultiplier}
+              className={styles.sliderInputContainer}
+              disabled={isNetworkMuted || isMuted}
+            />
+          </div>
+        )}
         {canPromote && (
           <Button
             preset="accept"
@@ -104,9 +137,11 @@ export function UserProfileSidebar({
 
 UserProfileSidebar.propTypes = {
   className: PropTypes.string,
+  userId: PropTypes.string,
   displayName: PropTypes.string,
   identityName: PropTypes.string,
   avatarPreview: PropTypes.node,
+  hasMicPresence: PropTypes.bool,
   isSignedIn: PropTypes.bool,
   canPromote: PropTypes.bool,
   onPromote: PropTypes.func,
@@ -115,6 +150,7 @@ UserProfileSidebar.propTypes = {
   isHidden: PropTypes.bool,
   onToggleHidden: PropTypes.func,
   canMute: PropTypes.bool,
+  isNetworkMuted: PropTypes.bool,
   onMute: PropTypes.func,
   canKick: PropTypes.bool,
   onKick: PropTypes.func,

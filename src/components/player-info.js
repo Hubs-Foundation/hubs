@@ -107,7 +107,10 @@ AFRAME.registerComponent("player-info", {
     }
   },
 
-  update() {
+  update(oldData) {
+    if (this.data.muted !== oldData.muted) {
+      this.el.emit("remote_mute_updated", { muted: this.data.muted });
+    }
     this.applyProperties();
   },
   updateDisplayName(e) {

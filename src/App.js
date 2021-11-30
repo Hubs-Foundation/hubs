@@ -20,7 +20,7 @@ export class App {
     this.gainMultipliers = new Map(); //                  el -> Number
     this.supplementaryAttenuation = new Map(); //         el -> Number
     this.clippingState = new Set();
-    this.linkedMutedState = new Set();
+    this.mutedState = new Set();
     this.isAudioPaused = new Set();
   }
 }

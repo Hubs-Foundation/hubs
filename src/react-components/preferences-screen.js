@@ -12,6 +12,7 @@ import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
 import MediaDevicesManager from "../utils/media-devices-manager";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
+import { Slider } from "./input/Slider";
 
 export const CLIPPING_THRESHOLD_ENABLED = false;
 export const CLIPPING_THRESHOLD_MIN = 0.0;
@@ -92,15 +93,11 @@ export class NumberRangeSelector extends Component {
   };
   state = {
     isFocused: false,
-    isDragging: false,
     displayValue: "",
     digitsFromUser: 0
   };
   constructor(props) {
     super(props);
-    this.myRoot = React.createRef();
-    this.stopDragging = this.stopDragging.bind(this);
-    this.drag = this.drag.bind(this);
     this.storeUpdated = this.storeUpdated.bind(this);
   }
 
@@ -118,8 +115,6 @@ export class NumberRangeSelector extends Component {
 
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    window.addEventListener("mouseup", this.stopDragging);
-    window.addEventListener("mousemove", this.drag);
     const currentValue =
       this.props.store.state.preferences[this.props.storeKey] !== undefined
         ? this.props.store.state.preferences[this.props.storeKey]
@@ -127,21 +122,7 @@ export class NumberRangeSelector extends Component {
     this.setState({ displayValue: currentValue.toFixed(this.props.digits) });
   }
   componentWillUnmount() {
-    window.removeEventListener("mouseup", this.stopDragging);
-    window.removeEventListener("mousemove", this.drag);
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-  }
-
-  stopDragging() {
-    this.setState({ isDragging: false });
-  }
-
-  drag(e) {
-    if (!this.state.isDragging) return;
-    const t = Math.max(0, Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1));
-    const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
-    this.setState({ displayValue: num.toFixed(this.props.digits) });
-    this.props.setValue(num);
   }
 
   render() {
@@ -157,7 +138,6 @@ export class NumberRangeSelector extends Component {
             type="text"
             value={this.state.displayValue}
             onClick={e => {
-              //e.preventDefault();
               e.target.focus();
               e.target.select();
             }}
@@ -179,34 +159,17 @@ export class NumberRangeSelector extends Component {
             }}
           />
         </div>
-        <div
-          ref={this.myRoot}
-          className={classNames(styles.rangeSlider)}
-          onMouseDown={e => {
-            e.preventDefault();
-            this.setState({ isDragging: true, digitsFromUser: 0 });
-            const t = Math.max(
-              0,
-              Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1)
-            );
-            const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
-            this.setState({ displayValue: num.toFixed(this.props.digits) });
-            this.props.setValue(num);
+        <Slider
+          step={this.props.step}
+          min={this.props.min}
+          max={this.props.max}
+          value={currentValue}
+          onChange={value => {
+            const num = round(this.props.step, parseFloat(value));
+            this.setState({ displayValue: num.toFixed(this.props.digits), digitsFromUser: 0 });
+            this.props.setValue(parseFloat(num.toFixed(this.props.digits)));
           }}
-        >
-          <input
-            type="range"
-            step={this.props.step}
-            min={this.props.min}
-            max={this.props.max}
-            value={currentValue}
-            onChange={e => {
-              const num = round(this.props.step, parseFloat(e.target.value));
-              this.setState({ displayValue: num.toFixed(this.props.digits), digitsFromUser: 0 });
-              this.props.setValue(parseFloat(num.toFixed(this.props.digits)));
-            }}
-          />
-        </div>
+        />
       </div>
     );
   }

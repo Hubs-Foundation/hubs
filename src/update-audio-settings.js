@@ -50,7 +50,7 @@ export function getCurrentAudioSettings(el) {
     safariOverrides
   );
 
-  if (APP.clippingState.has(el) || APP.linkedMutedState.has(el)) {
+  if (APP.clippingState.has(el) || APP.mutedState.has(el)) {
     settings.gain = 0;
   } else if (APP.gainMultipliers.has(el)) {
     settings.gain = settings.gain * APP.gainMultipliers.get(el);

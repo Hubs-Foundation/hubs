@@ -1,9 +1,13 @@
 import { updateAudioSettings } from "../update-audio-settings";
 import { VOLUME_LABELS } from "./media-video";
-const MAX_MULTIPLIER = 8;
-const SMALL_STEP = 1 / (VOLUME_LABELS.length / 2);
-const BIG_STEP = (MAX_MULTIPLIER - 1) / (VOLUME_LABELS.length / 2);
-const DEFAULT_VOLUME_BAR_MULTIPLIER = 1.0;
+import { findAncestorWithComponent } from "../utils/scene-graph";
+import {
+  calcLevel,
+  calcGainStepDown,
+  calcGainStepUp,
+  DEFAULT_VOLUME_BAR_MULTIPLIER,
+  MAX_GAIN_MULTIPLIER
+} from "../utils/avatar-volume-utils";
 
 AFRAME.registerComponent("avatar-volume-controls", {
   init() {
@@ -12,6 +16,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.volumeUpButton = this.el.querySelector(".avatar-volume-up-button");
     this.volumeDownButton = this.el.querySelector(".avatar-volume-down-button");
+    this.muteButton = this.el.querySelector(".avatar-mute-button");
     this.volumeLabel = this.el.querySelector(".avatar-volume-label");
     this.volumeUpButton.object3D.addEventListener("interact", this.volumeUp);
     this.volumeDownButton.object3D.addEventListener("interact", this.volumeDown);
@@ -20,17 +25,25 @@ AFRAME.registerComponent("avatar-volume-controls", {
     window.APP.store.addEventListener("statechanged", this.update);
     this.audioEl = this.el.parentEl.parentEl.querySelector("[avatar-audio-source]");
     APP.gainMultipliers.set(this.audioEl, DEFAULT_VOLUME_BAR_MULTIPLIER);
+    this.el.emit("gain_multiplier_updated", { gainMultiplier: DEFAULT_VOLUME_BAR_MULTIPLIER });
+    this.playerInfo = findAncestorWithComponent(this.el, "player-info").components["player-info"];
+    this.onRemoteMuteUpdated = this.onRemoteMuteUpdated.bind(this);
+    this.playerInfo.el.addEventListener("remote_mute_updated", this.onRemoteMuteUpdated);
+    this.isLocalMuted = this.playerInfo.data.muted;
+    this.muteButton.object3D.visible = this.playerInfo.data.muted;
     this.updateVolumeLabel();
   },
   remove() {
     APP.gainMultipliers.delete(this.audioEl);
     window.APP.store.removeEventListener("statechanged", this.update);
+    this.playerInfo.el.removeEventListener("remote_mute_updated", this.onRemoteMuteUpdated);
   },
 
   changeVolumeBy(v) {
     let gainMultiplier = APP.gainMultipliers.get(this.audioEl);
-    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_MULTIPLIER);
+    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_GAIN_MULTIPLIER);
     APP.gainMultipliers.set(this.audioEl, gainMultiplier);
+    this.el.emit("gain_multiplier_updated", { gainMultiplier });
     this.updateVolumeLabel();
     const audio = APP.audios.get(this.audioEl);
     if (audio) {
@@ -40,24 +53,43 @@ AFRAME.registerComponent("avatar-volume-controls", {
 
   volumeUp() {
     const gainMultiplier = APP.gainMultipliers.get(this.audioEl);
-    const step = gainMultiplier > 1 - SMALL_STEP ? BIG_STEP : SMALL_STEP;
-    this.changeVolumeBy(step);
+    this.changeVolumeBy(calcGainStepUp(gainMultiplier));
   },
 
   volumeDown() {
     const gainMultiplier = APP.gainMultipliers.get(this.audioEl);
-    const step = gainMultiplier > 1 + SMALL_STEP ? BIG_STEP : SMALL_STEP;
-    this.changeVolumeBy(-1 * step);
+    this.changeVolumeBy(-1 * calcGainStepDown(gainMultiplier));
   },
 
   updateVolumeLabel() {
     const gainMultiplier = APP.gainMultipliers.get(this.audioEl);
-    const numBars = Math.min(
-      VOLUME_LABELS.length - 1,
-      gainMultiplier <= 1.001
-        ? Math.floor(gainMultiplier / SMALL_STEP)
-        : Math.floor(VOLUME_LABELS.length / 2 + (gainMultiplier - 1) / BIG_STEP)
+    const numBars = calcLevel(gainMultiplier);
+    this.volumeLabel.setAttribute(
+      "text",
+      "value",
+      gainMultiplier === 0 || this.isLocalMuted ? "Muted" : VOLUME_LABELS[numBars]
     );
-    this.volumeLabel.setAttribute("text", "value", gainMultiplier === 0 ? "Muted" : VOLUME_LABELS[numBars]);
+  },
+
+  onGainMultiplierUpdated(gainMultiplier) {
+    APP.gainMultipliers.set(this.audioEl, gainMultiplier);
+    const audio = APP.audios.get(this.audioEl);
+    if (audio) {
+      updateAudioSettings(this.audioEl, audio);
+    }
+    this.updateVolumeLabel();
+  },
+
+  getGainMultiplier() {
+    return APP.gainMultipliers.get(this.audioEl);
+  },
+
+  onLocalMutedUpdated(muted) {
+    this.isLocalMuted = muted;
+    this.updateVolumeLabel();
+  },
+
+  onRemoteMuteUpdated({ detail: { muted } }) {
+    this.muteButton.object3D.visible = !muted;
   }
 });
