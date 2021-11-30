@@ -1544,7 +1544,7 @@ class UIRoot extends Component {
                           hubChannel={this.props.hubChannel}
                           scene={this.props.scene}
                         />
-                        {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
+                        {/* {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />} */}
                         { <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> }
                         { <PlacePopoverContainer
                           scene={this.props.scene}
