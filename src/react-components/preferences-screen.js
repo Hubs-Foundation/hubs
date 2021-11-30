@@ -199,6 +199,22 @@ BooleanPreference.propTypes = {
   setValue: PropTypes.func
 };
 
+function MapCountPreference({ store, storeKey, defaultValue, text }) {
+  const storedPref = store.state.preferences[storeKey];
+  const value = storedPref ? Object.keys(storedPref).length : defaultValue;
+  return (
+    <span className={styles.preferenceLabel}>
+      {value} {text}
+    </span>
+  );
+}
+MapCountPreference.propTypes = {
+  store: PropTypes.object,
+  storeKey: PropTypes.string,
+  defaultValue: PropTypes.number,
+  text: PropTypes.string
+};
+
 class Select extends React.Component {
   static propTypes = {
     children: PropTypes.node.isRequired,
@@ -262,7 +278,8 @@ export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
   SELECT: 2,
   NUMBER_WITH_RANGE: 3,
-  MAX_RESOLUTION: 4
+  MAX_RESOLUTION: 4,
+  MAP_COUNT: 5
 };
 
 export class MaxResolutionPreferenceItem extends Component {
@@ -358,6 +375,10 @@ const preferenceLabels = defineMessages({
   globalSFXVolume: {
     id: "preferences-screen.preference.global-sfx-volume",
     defaultMessage: "SFX Volume"
+  },
+  avatarVoiceLevels: {
+    id: "preferences-screen.preference.avatar-volumes",
+    defaultMessage: "Stored avatar volumes"
   },
   disableSoundEffects: {
     id: "preferences-screen.preference.disable-sound-effects",
@@ -658,7 +679,8 @@ const controlType = new Map([
   [PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, BooleanPreference],
   [PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION, MaxResolutionPreferenceItem],
   [PREFERENCE_LIST_ITEM_TYPE.SELECT, PreferenceSelect],
-  [PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE, NumberRangeSelector]
+  [PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE, NumberRangeSelector],
+  [PREFERENCE_LIST_ITEM_TYPE.MAP_COUNT, MapCountPreference]
 ]);
 
 function Control({ itemProps, store, setValue }) {
@@ -987,6 +1009,15 @@ class PreferencesScreen extends Component {
             step: 5,
             digits: 0,
             defaultNumber: 100
+          },
+          {
+            key: "avatarVoiceLevels",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.MAP_COUNT,
+            defaultValue: 0,
+            text: intl.formatMessage({
+              id: "preferences-screen.preference.avatar-volumes.entries",
+              defaultMessage: "Entries"
+            })
           },
           { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {

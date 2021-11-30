@@ -29,7 +29,7 @@ export default function useAvatarVolume(sessionId) {
     value => {
       if (!controls) return;
       const gainMultiplier = calcGainMultiplier(value);
-      controls.onGainMultiplierUpdated(gainMultiplier);
+      controls.updateGainMultiplier(gainMultiplier, true);
       const newValue = calcLevel(gainMultiplier);
       setLevelStep(newValue < value ? calcLevelStepDown(value) : calcLevelStepUp(value));
       setLevel(undefined);
@@ -41,7 +41,7 @@ export default function useAvatarVolume(sessionId) {
     muted => {
       if (!controls) return;
       setIsMuted(!!muted);
-      controls.onLocalMutedUpdated(!!muted);
+      controls.updateLocalMuted(!!muted);
     },
     [controls]
   );

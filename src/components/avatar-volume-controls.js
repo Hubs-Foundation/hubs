@@ -29,9 +29,9 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.playerInfo = findAncestorWithComponent(this.el, "player-info").components["player-info"];
     this.onRemoteMuteUpdated = this.onRemoteMuteUpdated.bind(this);
     this.playerInfo.el.addEventListener("remote_mute_updated", this.onRemoteMuteUpdated);
-    this.isLocalMuted = this.playerInfo.data.muted;
     this.muteButton.object3D.visible = this.playerInfo.data.muted;
     this.updateGainMultiplier(getAvatarVolumePref(this.playerInfo.displayName) || DEFAULT_VOLUME_BAR_MULTIPLIER);
+    this.updateLocalMuted(this.playerInfo.data.muted);
   },
   remove() {
     APP.gainMultipliers.delete(this.audioEl);
@@ -39,7 +39,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.playerInfo.el.removeEventListener("remote_mute_updated", this.onRemoteMuteUpdated);
   },
 
-  updateGainMultiplier(gainMultiplier) {
+  updateGainMultiplier(gainMultiplier, updatePref = false) {
     APP.gainMultipliers.set(this.audioEl, gainMultiplier);
     const audio = APP.audios.get(this.audioEl);
     if (audio) {
@@ -47,21 +47,21 @@ AFRAME.registerComponent("avatar-volume-controls", {
     }
     this.updateVolumeLabel();
 
-    updateAvatarVolumesPref(this.playerInfo.displayName, gainMultiplier);
+    updatePref && updateAvatarVolumesPref(this.playerInfo.displayName, gainMultiplier);
   },
 
   volumeUp() {
     let gainMultiplier = APP.gainMultipliers.get(this.audioEl);
     const step = calcGainStepUp(gainMultiplier);
     gainMultiplier = THREE.Math.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
-    this.updateGainMultiplier(gainMultiplier);
+    this.updateGainMultiplier(gainMultiplier, true);
   },
 
   volumeDown() {
     let gainMultiplier = APP.gainMultipliers.get(this.audioEl);
     const step = -calcGainStepDown(gainMultiplier);
     gainMultiplier = THREE.Math.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
-    this.updateGainMultiplier(gainMultiplier);
+    this.updateGainMultiplier(gainMultiplier, true);
   },
 
   updateVolumeLabel() {
@@ -74,15 +74,11 @@ AFRAME.registerComponent("avatar-volume-controls", {
     );
   },
 
-  onGainMultiplierUpdated(gainMultiplier) {
-    this.updateGainMultiplier(gainMultiplier);
-  },
-
   getGainMultiplier() {
     return APP.gainMultipliers.get(this.audioEl);
   },
 
-  onLocalMutedUpdated(muted) {
+  updateLocalMuted(muted) {
     this.isLocalMuted = muted;
     this.updateVolumeLabel();
   },
