@@ -55,6 +55,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     const step = calcGainStepUp(gainMultiplier);
     gainMultiplier = THREE.Math.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
     this.updateGainMultiplier(gainMultiplier, true);
+    this.el.emit("gain_multiplier_updated", { gainMultiplier });
   },
 
   volumeDown() {
@@ -62,6 +63,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     const step = -calcGainStepDown(gainMultiplier);
     gainMultiplier = THREE.Math.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
     this.updateGainMultiplier(gainMultiplier, true);
+    this.el.emit("gain_multiplier_updated", { gainMultiplier });
   },
 
   updateVolumeLabel() {
