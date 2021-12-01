@@ -98,6 +98,13 @@ export class EnvironmentSystem {
       Object.assign(envSettings, envSettingsEl.components["environment-settings"].data);
     }
 
+    // TODO animated objects should not be static
+    envEl.object3D.traverse(o => {
+      if (o.isMesh) {
+        o.reflectionProbeMode = "static";
+      }
+    });
+
     this.applyEnvSettings(envSettings);
   }
 
@@ -192,5 +199,26 @@ AFRAME.registerComponent("environment-settings", {
     toneMapping: { default: defaultEnvSettings.toneMapping, oneOf: Object.values(toneMappingOptions) },
     toneMappingExposure: { default: defaultEnvSettings.toneMappingExposure },
     backgroundColor: { type: "color", default: defaultEnvSettings.background }
+  }
+});
+
+AFRAME.registerComponent("reflection-probe", {
+  schema: {
+    size: { default: 1 },
+    envMapTexture: { type: "map" }
+  },
+
+  init: function() {
+    this.el.object3D.updateMatrices();
+
+    const box = new THREE.Box3()
+      .setFromCenterAndSize(new THREE.Vector3(), new THREE.Vector3().setScalar(this.data.size * 2))
+      .applyMatrix4(this.el.object3D.matrixWorld);
+
+    this.el.setObject3D("probe", new THREE.ReflectionProbe(box, this.data.envMapTexture));
+
+    this.el.sceneEl.object3D.add(
+      new THREE.Box3Helper(box, new THREE.Color(Math.random(), Math.random(), Math.random()))
+    );
   }
 });

@@ -267,6 +267,9 @@ export function injectCustomShaderChunks(obj) {
   obj.traverse(object => {
     if (!object.material) return;
 
+    // TODO this does not really belong here
+    object.reflectionProbeMode = "dynamic";
+
     updateMaterials(object, material => {
       if (material.hubs_InjectedCustomShaderChunks) return material;
       if (!validMaterials.includes(material.type)) {
