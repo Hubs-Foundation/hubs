@@ -78,9 +78,5 @@ export function useMicrophone(scene, updateRate = 50) {
     [mediaDevicesManager]
   );
 
-  const onEnableMicrophone = useCallback(() => {
-    window.APP.mediaDevicesManager.startMicShare({ deviceId: window.APP.mediaDevicesManager.selectedMicDeviceId });
-  }, []);
-
-  return { isMicMuted, micVolume, toggleMute, isMicEnabled, onEnableMicrophone, permissionStatus };
+  return { isMicMuted, micVolume, toggleMute, isMicEnabled, permissionStatus };
 }

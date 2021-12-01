@@ -559,7 +559,7 @@ class UIRoot extends Component {
       }
       this.beginOrSkipAudioSetup();
     } else {
-      this.updateMediaPermissions();
+      this.onRequestMicPermission();
       this.pushHistoryState("entry_step", "audio");
     }
 
@@ -593,11 +593,12 @@ class UIRoot extends Component {
     this.mediaDevicesManager.changeAudioOutput(deviceId);
   };
 
+  onRequestMicPermission = async () => {
+    await this.mediaDevicesManager.startMicShare({});
+  };
+
   updateMediaPermissions = async () => {
     await this.mediaDevicesManager.updatePermissions();
-    if (this.mediaDevicesManager.getPermissionsStatus(MediaDevices.MICROPHONE) === PermissionStatus.GRANTED) {
-      await this.mediaDevicesManager.startMicShare({});
-    }
   };
 
   beginOrSkipAudioSetup = () => {
@@ -824,7 +825,7 @@ class UIRoot extends Component {
               if (promptForNameAndAvatarBeforeEntry) {
                 this.pushHistoryState("entry_step", "profile");
               } else {
-                this.updateMediaPermissions();
+                this.onRequestMicPermission();
                 this.pushHistoryState("entry_step", "audio");
               }
             } else {
@@ -1064,7 +1065,7 @@ class UIRoot extends Component {
                     this.pushHistoryState();
                     this.handleForceEntry();
                   } else {
-                    this.updateMediaPermissions();
+                    this.onRequestMicPermission();
                     this.pushHistoryState("entry_step", "audio");
                   }
                 }}

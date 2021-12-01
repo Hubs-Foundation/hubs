@@ -16,7 +16,6 @@ export default {
     onChangeSpeaker: { action: "speaker changed" },
     onPlaySound: { action: "sound played" },
     onChangeMicrophoneMuted: { action: "microphone mute state changed" },
-    onEnableMicrophone: { action: "enable microphone" },
     onEnterRoom: { action: "enter room" },
     onBack: { action: "back" },
     onTestAudio: { action: "test audio" },
