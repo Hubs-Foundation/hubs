@@ -5,7 +5,7 @@ import { Button } from "../input/Button";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
 import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
-import { ReactComponent as HelpIcon } from "../icons/Help.svg";
+import { ReactComponent as InfoIcon } from "../icons/Info.svg";
 import styles from "./MicSetupModal.scss";
 import { BackButton } from "../input/BackButton";
 import { SelectInputField } from "../input/SelectInputField";
@@ -104,7 +104,7 @@ export function MicSetupModal({
                     {({ openPopover, closePopover, triggerRef }) => (
                       <Icon
                         ref={triggerRef}
-                        icon={<HelpIcon />}
+                        icon={<InfoIcon className={styles.infoIcon} />}
                         onMouseEnter={openPopover}
                         onMouseLeave={closePopover}
                       />
