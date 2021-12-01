@@ -17,10 +17,6 @@ $mobile-breakpoint-width: 450px;
   @media(max-width: $mobile-breakpoint-width) {
     flex-flow: wrap;
   }
-  
-  svg path {
-    stroke-width: 1;
-  }
 }
 
 :local(.audio-io-container) {
@@ -37,56 +33,45 @@ $mobile-breakpoint-width: 450px;
   background-color: theme.$transparent;
 
   transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
-
-  svg {
-    *[stroke=\#000] {
-      stroke: theme.$toolbar-icon-color;
-      transition: stroke 0.1s ease-in-out;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$toolbar-icon-color;
-      transition: fill 0.1s ease-in-out;
-    }
-  }
 }
 
 :local(.icon-enabled) {
-  svg {
-    *[stroke=\#000] {
-      stroke: theme.$text1-color;
-    }
+  path {
+    stroke-width: 1;
+  }
 
-    *[fill=\#000] {
-      fill: theme.$text1-color;
-    }
+  width: 48px;
+  height: 48px;
+
+  *[stroke=\#000] {
+    stroke: theme.$text1-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$text1-color;
   }
 }
 
 :local(.icon-disabled) {
-  svg {
-    *[stroke=\#000] {
-      stroke: theme.$text2-color;
-    }
+  path {
+    stroke-width: 1;
+  }
 
-    *[fill=\#000] {
-      fill: theme.$text2-color;
-    }
+  width: 48px;
+  height: 48px;
+
+  *[stroke=\#000] {
+    stroke: theme.$text2-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$text2-color;
   }
 }
 
 :local(.icon-container) {
   display: flex;
   margin-bottom: 10px;
-
-  svg {
-    path {
-      stroke-width: 1;
-    }
-
-    width: 48px;
-    height: 48px;
-  }
 }
 
 :local(.action-container) {  
@@ -95,23 +80,6 @@ $mobile-breakpoint-width: 450px;
   display: flex;
   align-items: center;
   gap: 10px;
-  
-  svg {
-    path {
-      stroke-width: 1;
-    }
-
-    *[stroke=\#000] {
-      stroke: theme.$text2-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text2-color;
-    }
-
-    width: 18px;
-    height: 18px;
-  }
 }
 
 :local(.selection-container) {  
@@ -145,7 +113,13 @@ $mobile-breakpoint-width: 450px;
   line-height: 20px;
 }
 
-:local(.error-text) {
-  align-self: "start";
-  color: theme.$error-color;
+:local(.error-title) {
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-bold;
+}
+
+:local(.spinner-container) {
+  position: absolute;
+  margin-left: -11px;
+  margin-top: -11px;
 }

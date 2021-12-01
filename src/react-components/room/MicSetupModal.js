@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import classNames from "classnames";
 import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
@@ -17,6 +16,7 @@ import { LevelBar } from "../misc/LevelBar";
 import { Popover } from "../popover/Popover";
 import { Icon } from "../misc/Icon";
 import { PermissionStatus } from "../../utils/media-devices-manager";
+import { Spinner } from "../misc/Spinner";
 
 export function MicSetupModal({
   className,
@@ -33,12 +33,12 @@ export function MicSetupModal({
   onPlaySound,
   microphoneMuted,
   onChangeMicrophoneMuted,
-  onEnableMicrophone,
   onEnterRoom,
   onBack,
   permissionStatus,
   ...rest
 }) {
+  const iconStyle = microphoneEnabled ? styles.iconEnabled : styles.iconDisabled;
   return (
     <Modal
       title={<FormattedMessage id="mic-setup-modal.title" defaultMessage="Microphone Setup" />}
@@ -55,15 +55,27 @@ export function MicSetupModal({
         </p>
         <div className={styles.audioCheckContainer}>
           <div className={styles.audioIoContainer}>
-            <div
-              className={classNames(styles.iconContainer, microphoneEnabled ? styles.iconEnabled : styles.iconDisabled)}
-            >
-              {permissionStatus === PermissionStatus.GRANTED && microphoneEnabled && !microphoneMuted ? (
-                <MicrophoneIcon />
-              ) : (
-                <MicrophoneMutedIcon />
+            <div className={styles.iconContainer}>
+              <div>
+                {permissionStatus === PermissionStatus.PROMPT && (
+                  <div className={styles.spinnerContainer}>
+                    <Spinner />
+                  </div>
+                )}
+                {permissionStatus === PermissionStatus.GRANTED && microphoneEnabled && !microphoneMuted ? (
+                  <MicrophoneIcon className={iconStyle} />
+                ) : (
+                  <MicrophoneMutedIcon className={iconStyle} />
+                )}
+              </div>
+              {permissionStatus === PermissionStatus.GRANTED && (
+                <LevelBar
+                  className={styles.level}
+                  width={48}
+                  height={48}
+                  level={!microphoneEnabled || microphoneMuted ? 0 : micLevel}
+                />
               )}
-              <LevelBar width={48} height={48} level={!microphoneEnabled || microphoneMuted ? 0 : micLevel} />
             </div>
             <div className={styles.actionContainer}>
               {permissionStatus === PermissionStatus.GRANTED && microphoneEnabled ? (
@@ -101,15 +113,25 @@ export function MicSetupModal({
                 </>
               ) : (
                 (permissionStatus === PermissionStatus.PROMPT && (
-                  <Button preset="primary" onClick={onEnableMicrophone} sm>
-                    <FormattedMessage id="mic-setup-modal.enable-mic-button" defaultMessage="Enable Microphone" />
-                  </Button>
+                  <p>
+                    <FormattedMessage
+                      id="mic-setup-modal.mic-permission-prompt"
+                      defaultMessage="Requesting access to your microphone..."
+                    />
+                  </p>
                 )) ||
                 (permissionStatus === PermissionStatus.DENIED && (
-                  <p className={styles.errorText}>
+                  <p>
+                    <span className={styles.errorTitle}>
+                      <FormattedMessage
+                        id="mic-setup-modal.error-title"
+                        defaultMessage="Microphone access was blocked."
+                        className={styles.errorTitle}
+                      />
+                    </span>{" "}
                     <FormattedMessage
-                      id="mic-setup-modal.mic-pernissions"
-                      defaultMessage="You need to grant the microphone permission to use the microphone"
+                      id="mic-setup-modal.error-description"
+                      defaultMessage="To talk in Hubs you will need to allow microphone access."
                     />
                   </p>
                 ))
@@ -132,8 +154,8 @@ export function MicSetupModal({
               )}
           </div>
           <div className={styles.audioIoContainer}>
-            <div className={classNames(styles.iconContainer, styles.iconEnabled)}>
-              <VolumeHighIcon style={{ marginRight: "5px" }} />
+            <div className={styles.iconContainer}>
+              <VolumeHighIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
               <LevelBar width={48} height={48} level={soundPlaying ? speakerLevel : 0} />
             </div>
             <div className={styles.actionContainer}>
@@ -178,7 +200,6 @@ MicSetupModal.propTypes = {
   selectedMicrophone: PropTypes.string,
   microphoneOptions: PropTypes.array,
   onChangeMicrophone: PropTypes.func,
-  onEnableMicrophone: PropTypes.func,
   selectedSpeaker: PropTypes.string,
   speakerOptions: PropTypes.array,
   onChangeSpeaker: PropTypes.func,
