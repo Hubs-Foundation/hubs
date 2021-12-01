@@ -123,3 +123,13 @@ $mobile-breakpoint-width: 450px;
   margin-left: -11px;
   margin-top: -11px;
 }
+
+:local(.info-icon) {
+  *[stroke=\#000] {
+    stroke: theme.$darkgrey;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$darkgrey;
+  }
+}
