@@ -29,7 +29,7 @@ export function useMicrophone(scene, updateRate = 50) {
         movingAvgRef.current.push(Date.now(), analyser.volume);
         const average = movingAvgRef.current.movingAverage();
         const nextVolume = max === 0 ? 0 : average / max;
-        setMicVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
+        setMicVolume(prevVolume => Math.max(0.15, Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
         timeout = setTimeout(updateMicVolume, updateRate);
       };
 
