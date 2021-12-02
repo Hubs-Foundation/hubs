@@ -66,8 +66,7 @@ export default class MessageDispatch extends EventTarget {
     uiRoot = uiRoot || document.getElementById("ui-root");
     const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
 
-    // TODO: Some of the commands below should be available without requiring
-    //       room entry. For example, audiomode should not require room entry.
+    // TODO: Some of the commands below should be available without requiring room entry.
     if (!entered && (!isGhost || command === "duck")) {
       this.log(LogMessageType.roomEntryRequired);
       return;
@@ -170,13 +169,6 @@ export default class MessageDispatch extends EventTarget {
             captureSystem.start();
             this.log(LogMessageType.captureStarted);
           }
-        }
-        break;
-      case "audiomode":
-        {
-          window.APP.store.update({
-            preferences: { disableLeftRightPanning: args[0] === "panner" ? false : true }
-          });
         }
         break;
       case "audioNormalization":
