@@ -819,7 +819,7 @@ class PreferencesScreen extends Component {
       preferredMic: {
         key: "preferredMic",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [],
+        options: [{ value: "none", text: "None" }],
         onChanged: this.onMicSelectionChanged
       },
       preferredCamera: {
@@ -832,7 +832,7 @@ class PreferencesScreen extends Component {
         preferredSpeakers: {
           key: "preferredSpeakers",
           prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-          options: []
+          options: [{ value: "none", text: "None" }],
         }
       })
     };
@@ -853,14 +853,14 @@ class PreferencesScreen extends Component {
       text: device.label
     }));
     const preferredMic = { ...this.state.preferredMic };
-    preferredMic.options = micOptions;
+    preferredMic.options = micOptions?.length > 0 ? micOptions : [{ value: "none", text: "None" }];
 
     const speakersOptions = this.mediaDevicesManager.outputDevices.map(device => ({
       value: device.value,
       text: device.label
     }));
     const preferredSpeakers = { ...this.state.preferredSpeakers };
-    preferredSpeakers.options = speakersOptions;
+    preferredSpeakers.options = speakersOptions?.length > 0 ? speakersOptions : [{ value: "none", text: "None" }];
 
     // Video devices update
     const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
