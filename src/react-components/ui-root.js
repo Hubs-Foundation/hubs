@@ -93,7 +93,7 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
-import { MediaDevices, MediaDevicesEvents, PermissionStatus } from "../utils/media-devices-manager";
+import { MediaDevicesEvents } from "../utils/media-devices-manager";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
