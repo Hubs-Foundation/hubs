@@ -156,7 +156,7 @@ export function MicSetupModal({
           <div className={styles.audioIoContainer}>
             <div className={styles.iconContainer}>
               <VolumeHighIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
-              <LevelBar width={48} height={48} level={soundPlaying ? speakerLevel : 0} />
+              <LevelBar width={64} height={48} level={soundPlaying ? speakerLevel : 0} />
             </div>
             <div className={styles.actionContainer}>
               <Button preset="basic" onClick={onPlaySound} sm>
