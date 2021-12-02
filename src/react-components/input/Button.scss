@@ -24,8 +24,8 @@
 }
 
 :local(.basic), :local(.transparent) {
-  color: theme.$text4-color;
-  border: 2px solid theme.$basic-border-color;
+  color: theme.$text1-color;
+  border: 2px solid theme.$border2-color;
   background-color: theme.$basic-color;
 
   svg {
@@ -39,12 +39,12 @@
   }
 
   &:hover {
-    color: theme.$text4-color-hover;
+    color: theme.$text1-color;
     background-color: theme.$basic-color-hover;
   }
 
   &:active {
-    color: theme.$text4-color-pressed;
+    color: theme.$text1-color;
     background-color: theme.$basic-color-pressed;
   }
 }
@@ -289,7 +289,7 @@
 }
 
 :local(.button):disabled {
-  border-color: transparent;
+  border-color: theme.$border2-color;
   cursor: not-allowed;
   color: theme.$disabled-text-color;
   opacity: 0.7;
