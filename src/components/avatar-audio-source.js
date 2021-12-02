@@ -100,7 +100,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
 
-    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning === true;
+    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
     this.onPreferenceChanged = () => {
       const newPref = APP.store.state.preferences.disableLeftRightPanning;
       const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && !this.isCreatingAudio;

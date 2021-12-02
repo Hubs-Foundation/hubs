@@ -166,7 +166,7 @@ AFRAME.registerComponent("media-video", {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning === true;
+    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
     this.onPreferenceChanged = () => {
       const newPref = APP.store.state.preferences.disableLeftRightPanning;
       const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && this.audio && this.mediaElementAudioSource;
