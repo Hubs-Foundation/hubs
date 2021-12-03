@@ -233,9 +233,11 @@ export class AudioSystem {
       GAIN_TIME_CONST
     );
 
+    this.outputMediaAudio.pause();
     MediaDevicesManager.isAudioOutputSelectEnabled &&
       window.APP.mediaDevicesManager &&
       this.outputMediaAudio.setSinkId(window.APP.mediaDevicesManager.selectedSpeakersDeviceId);
+    this.outputMediaAudio.play();
   }
 
   /**
