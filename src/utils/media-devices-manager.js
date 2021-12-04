@@ -235,16 +235,22 @@ export default class MediaDevicesManager extends EventEmitter {
     }
 
     try {
+      this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.PROMPT;
+      this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+        mediaDevice: MediaDevices.MICROPHONE,
+        status: PermissionStatus.PROMPT
+      });
+
       console.log("Adding microphone media stream");
       const newStream = await navigator.mediaDevices.getUserMedia(constraints);
       this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
       this.audioTrack = newStream.getAudioTracks()[0];
       this.audioTrack.addEventListener("ended", () => {
         this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
-        this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.DENIED;
+        this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.PROMPT;
         this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
           mediaDevice: MediaDevices.MICROPHONE,
-          status: PermissionStatus.DENIED
+          status: PermissionStatus.PROMPT
         });
       });
 
@@ -306,8 +312,19 @@ export default class MediaDevicesManager extends EventEmitter {
 
     try {
       if (isDisplayMedia) {
+        this._permissionsStatus[MediaDevices.DISPLAY] = PermissionStatus.PROMPT;
+        this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+          mediaDevice: MediaDevices.DISPLAY,
+          status: PermissionStatus.PROMPT
+        });
         newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
       } else {
+        this._permissionsStatus[MediaDevices.CAMERA] = PermissionStatus.PROMPT;
+        this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+          mediaDevice: MediaDevices.CAMERA,
+          status: PermissionStatus.PROMPT
+        });
+
         newStream = await navigator.mediaDevices.getUserMedia(constraints);
       }
 
