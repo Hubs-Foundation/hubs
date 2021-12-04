@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import MovingAverage from "moving-average";
-import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-manager";
+import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
 
 export function useMicrophone(scene, updateRate = 50) {
   const mediaDevicesManager = window.APP.mediaDevicesManager;
