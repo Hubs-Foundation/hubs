@@ -2,7 +2,7 @@ import { injectCustomShaderChunks } from "../utils/media-utils";
 import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 import defaultAvatar from "../assets/models/DefaultAvatar.glb";
-import { MediaDevicesEvents } from "../utils/media-devices-manager";
+import { MediaDevicesEvents } from "../utils/media-devices-utils";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
