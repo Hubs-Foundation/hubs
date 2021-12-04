@@ -85,13 +85,13 @@ export const Prompt = Template.bind({});
 
 Prompt.args = {
   selectedMicrophone: micOptions[0],
-  microphoneEnabled: true,
+  isMicrophoneEnabled: true,
   microphoneOptions: micOptions,
   micLevel: 0.5,
   selectedSpeaker: speakerOptions[0],
   speakerOptions: speakerOptions,
   speakerLevel: 0.5,
-  microphoneMuted: false,
+  isMicrophoneMuted: false,
   permissionStatus: PermissionStatus.PROMPT
 };
 
@@ -99,13 +99,13 @@ export const Granted = Template.bind({});
 
 Granted.args = {
   selectedMicrophone: micOptions[0],
-  microphoneEnabled: true,
+  isMicrophoneEnabled: true,
   microphoneOptions: micOptions,
   micLevel: 0.5,
   selectedSpeaker: speakerOptions[0],
   speakerOptions: speakerOptions,
   speakerLevel: 0.5,
-  microphoneMuted: false,
+  isMicrophoneMuted: false,
   permissionStatus: PermissionStatus.GRANTED
 };
 
@@ -113,13 +113,13 @@ export const Denied = Template.bind({});
 
 Denied.args = {
   selectedMicrophone: micOptions[0],
-  microphoneEnabled: true,
+  isMicrophoneEnabled: true,
   microphoneOptions: micOptions,
   micLevel: 0.5,
   selectedSpeaker: speakerOptions[0],
   speakerOptions: speakerOptions,
   speakerLevel: 0.5,
-  microphoneMuted: false,
+  isMicrophoneMuted: false,
   permissionStatus: PermissionStatus.DENIED
 };
 
@@ -127,9 +127,9 @@ export const NoSpeakers = Template.bind({});
 
 NoSpeakers.args = {
   selectedMicrophone: micOptions[0],
-  microphoneEnabled: true,
+  isMicrophoneEnabled: true,
   microphoneOptions: micOptions,
   micLevel: 0.5,
-  microphoneMuted: false,
+  isMicrophoneMuted: false,
   permissionStatus: PermissionStatus.GRANTED
 };

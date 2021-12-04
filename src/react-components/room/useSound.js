@@ -6,7 +6,7 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
   const soundTimeoutRef = useRef();
   const audioElRef = useRef();
-  const [soundPlaying, setSoundPlaying] = useState(false);
+  const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const { soundVolume, onAttachSource, onDettachSource } = useVolumeMeter({ updateRate });
 
   useEffect(
@@ -48,15 +48,15 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
         audio.currentTime = 0;
         clearTimeout(soundTimeoutRef.current);
         audio.play();
-        setSoundPlaying(true);
+        setIsSoundPlaying(true);
 
         soundTimeoutRef.current = setTimeout(() => {
-          setSoundPlaying(false);
+          setIsSoundPlaying(false);
         }, 1393);
       }
     },
-    [audioElRef, setSoundPlaying]
+    [audioElRef, setIsSoundPlaying]
   );
 
-  return [soundPlaying, playSound, soundVolume];
+  return [isSoundPlaying, playSound, soundVolume];
 }
