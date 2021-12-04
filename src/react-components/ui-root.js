@@ -1558,10 +1558,7 @@ class UIRoot extends Component {
                     )}
                     {entered && (
                       <>
-                        <VoiceButtonContainer
-                          scene={this.props.scene}
-                          microphoneEnabled={this.mediaDevicesManager.isMicShared}
-                        />
+                        <VoiceButtonContainer scene={this.props.scene} />
                         <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                         <PlacePopoverContainer
                           scene={this.props.scene}
