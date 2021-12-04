@@ -21,7 +21,7 @@ import {
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
-import { MediaDevicesEvents } from "./utils/media-devices-utils";
+import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
 
 const isIOS = detectIOS();
 
@@ -331,7 +331,7 @@ export default class SceneEntryManager {
           );
         }
 
-        this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
+        this.scene.emit("share_video_enabled", { source: isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA });
         this.scene.addState("sharing_video");
       }
     };
@@ -359,7 +359,7 @@ export default class SceneEntryManager {
       const preferredCamera = store.state.preferences.preferredCamera || "default";
       switch (preferredCamera) {
         case "default":
-          constraints.video.mediaSource = "camera";
+          constraints.video.mediaSource = MediaDevices.CAMERA;
           break;
         case "user":
         case "environment":
