@@ -15,7 +15,7 @@ import { FormattedMessage } from "react-intl";
 import { LevelBar } from "../misc/LevelBar";
 import { Popover } from "../popover/Popover";
 import { Icon } from "../misc/Icon";
-import { PermissionStatus } from "../../utils/media-devices-manager";
+import { PermissionStatus } from "../../utils/media-devices-utils";
 import { Spinner } from "../misc/Spinner";
 
 export function MicSetupModal({

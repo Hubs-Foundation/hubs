@@ -21,7 +21,7 @@ import {
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
-import { MediaDevicesEvents } from "./utils/media-devices-manager";
+import { MediaDevicesEvents } from "./utils/media-devices-utils";
 
 const isIOS = detectIOS();
 
