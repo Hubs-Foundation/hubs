@@ -205,7 +205,7 @@ MicSetupModal.propTypes = {
   onChangeSpeaker: PropTypes.func,
   onEnterRoom: PropTypes.func,
   onBack: PropTypes.func,
-  permissionStatus: PropTypes.number
+  permissionStatus: PropTypes.string
 };
 
 MicSetupModal.defaultProps = {
