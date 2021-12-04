@@ -23,7 +23,6 @@ $input-height: 40px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    font-size: 10pt;
   }
 
   &:hover {
@@ -80,7 +79,6 @@ $input-height: 40px;
   width: 100%;
   padding: 8px;
   cursor: pointer;
-  font-size: 10pt;
 
   &:focus {
     outline: none;
