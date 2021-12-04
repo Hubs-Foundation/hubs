@@ -16,5 +16,5 @@ export const MediaDevices = Object.freeze({
   MICROPHONE: "microphone",
   SPEAKERS: "speakers",
   CAMERA: "camera",
-  DISPLAY: "display"
+  SCREEN: "screen"
 });

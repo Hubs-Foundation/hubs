@@ -33,7 +33,7 @@ export default class MediaDevicesManager extends EventEmitter {
       [MediaDevices.MICROPHONE]: PermissionStatus.PROMPT,
       [MediaDevices.SPEAKERS]: PermissionStatus.PROMPT,
       [MediaDevices.CAMERA]: PermissionStatus.PROMPT,
-      [MediaDevices.DISPLAY]: PermissionStatus.PROMPT
+      [MediaDevices.SCREEN]: PermissionStatus.PROMPT
     };
 
     navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
@@ -113,6 +113,18 @@ export default class MediaDevicesManager extends EventEmitter {
 
   get isVideoShared() {
     return this._mediaStream?.getVideoTracks().length > 0;
+  }
+
+  get isWebcamShared() {
+    return this._mediaStream.getVideoTracks().some(track => {
+      track["_hubs_contentHint"] === MediaDevices.CAMERA;
+    });
+  }
+
+  get isScreenShared() {
+    return this._mediaStream.getVideoTracks().some(track => {
+      track["_hubs_contentHint"] === MediaDevices.SCREEN;
+    });
   }
 
   getPermissionsStatus(type) {
@@ -312,9 +324,9 @@ export default class MediaDevicesManager extends EventEmitter {
 
     try {
       if (isDisplayMedia) {
-        this._permissionsStatus[MediaDevices.DISPLAY] = PermissionStatus.PROMPT;
+        this._permissionsStatus[MediaDevices.SCREEN] = PermissionStatus.PROMPT;
         this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
-          mediaDevice: MediaDevices.DISPLAY,
+          mediaDevice: MediaDevices.SCREEN,
           status: PermissionStatus.PROMPT
         });
         newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
@@ -334,10 +346,10 @@ export default class MediaDevicesManager extends EventEmitter {
 
         newStream.getVideoTracks().forEach(track => {
           // Ideally we would use track.contentHint but it seems to be read-only in Chrome so we just add a custom property
-          track["_hubs_contentHint"] = isDisplayMedia ? "share" : "camera";
+          track["_hubs_contentHint"] = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
           track.addEventListener("ended", () => {
             this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
-            const mediaDevice = isDisplayMedia ? MediaDevices.DISPLAY : MediaDevices.CAMERA;
+            const mediaDevice = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
             if (mediaDevice === MediaDevices.CAMERA) {
               this._permissionsStatus[mediaDevice] = PermissionStatus.DENIED;
               this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
@@ -355,14 +367,14 @@ export default class MediaDevicesManager extends EventEmitter {
 
         await APP.dialog.setLocalMediaStream(this._mediaStream);
 
-        const mediaDevice = isDisplayMedia ? MediaDevices.DISPLAY : MediaDevices.CAMERA;
+        const mediaDevice = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
         this._permissionsStatus[mediaDevice] = PermissionStatus.GRANTED;
         this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, { mediaDevice, status: PermissionStatus.GRANTED });
       }
     } catch (e) {
       error(e);
       this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
-      const mediaDevice = isDisplayMedia ? MediaDevices.DISPLAY : MediaDevices.CAMERA;
+      const mediaDevice = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
       this._permissionsStatus[mediaDevice] = PermissionStatus.DENIED;
       this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, { mediaDevice, status: PermissionStatus.DENIED });
       return;
