@@ -832,7 +832,7 @@ class PreferencesScreen extends Component {
         preferredSpeakers: {
           key: "preferredSpeakers",
           prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-          options: [{ value: "none", text: "None" }],
+          options: [{ value: "none", text: "None" }]
         }
       })
     };
