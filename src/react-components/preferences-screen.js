@@ -820,7 +820,8 @@ class PreferencesScreen extends Component {
         key: "preferredMic",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "none", text: "None" }],
-        onChanged: this.onMicSelectionChanged
+        onChanged: this.onMicSelectionChanged,
+        defaultString: "Default"
       },
       preferredCamera: {
         key: "preferredCamera",
@@ -832,7 +833,8 @@ class PreferencesScreen extends Component {
         preferredSpeakers: {
           key: "preferredSpeakers",
           prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-          options: [{ value: "none", text: "None" }]
+          options: [{ value: "none", text: "None" }],
+          defaultString: "Default"
         }
       })
     };

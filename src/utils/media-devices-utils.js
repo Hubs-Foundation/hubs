@@ -18,3 +18,5 @@ export const MediaDevices = Object.freeze({
   CAMERA: "camera",
   SCREEN: "screen"
 });
+
+export const DEFAULT_SINK_ID = "default";
