@@ -3,7 +3,6 @@
 
 :local(.ui) {
   @extend %default-font;
-
   width: 100%;
   height: 100%;
   top: 0;
@@ -53,20 +52,6 @@
   margin-bottom: 32px;
 }
 
-:local(.tweetButton) {
-  @extend %action-button;
-  background-color: theme.$twitter-primary-color;
-  align-self: center;
-  padding-right: 32px;
-  display: flex;
-  flex-direction: row;
-
-  img {
-    width: 42px;
-    height: 42px;
-    margin-right: 6px;
-  }
-}
 
 :local(.logo) {
   width: 100%;
@@ -164,42 +149,63 @@
   }
 }
 
-:local(.createButtons) {
-  position: relative;
+
+:local(.scenePreviewButtonWrapper) {
+  margin: auto;
   display: flex;
-  margin-bottom: 12px;
+  max-width: 60vw;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
-:local(.createButton) {
+:local(.scenePreviewButton) {
   @extend %action-button;
-  width: 100%;
-  border: 0;
-  flex: 1;
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #007AB8;
+  background-color: #007AB8; 
+  color: theme.$text5-color;
+  box-sizing: border-box;
+  border-radius: 13px;
+  margin: .5rem 0 .5rem 0;
+  svg {
+    margin-right: 8px;
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color
+    }
+  }
+  &:hover {
+    background-color: #008bd1;
+    color: theme.$text5-color;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$text5-color
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$text5-color
+      }
+    }
+    
+  }
+  &:active {
+    background-color: #00699E;
+  }
 }
 
 :local(.unavailable) {
-  color: white;
+  color: theme.$text1-color;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
 }
 
-:local(.spokeButton) {
-  @extend %action-button;
-  background-color: theme.$spoke-primary-color;
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 12px;
-  align-self: center;
-  padding-left: 30px;
-  padding-right: 30px;
-
-  svg {
-    font-size: 24px;
-    margin-right: 15px;
-  }
-}
 
 :local(.attribution) {
   & > * {
