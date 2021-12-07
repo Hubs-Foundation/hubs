@@ -20,7 +20,7 @@ function performDelayedReconnect(gainNode) {
 import * as sdpTransform from "sdp-transform";
 import MediaDevicesManager from "../utils/media-devices-manager";
 import { THREE } from "aframe";
-import { DEFAULT_SINK_ID } from "../utils/media-devices-utils";
+import { DEFAULT_DEVICE_ID } from "../utils/media-devices-utils";
 
 function isThreeAudio(node) {
   return node instanceof THREE.Audio || node instanceof THREE.PositionalAudio;
@@ -219,7 +219,7 @@ export class AudioSystem {
 
     if (MediaDevicesManager.isAudioOutputSelectEnabled && window.APP.mediaDevicesManager) {
       const sinkId = window.APP.mediaDevicesManager.selectedSpeakersDeviceId;
-      const isDefault = sinkId === DEFAULT_SINK_ID;
+      const isDefault = sinkId === DEFAULT_DEVICE_ID;
       const sink = isDefault ? this._sceneEl.audioListener.getInput() : this.audioDestination;
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);

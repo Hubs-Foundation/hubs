@@ -11,6 +11,7 @@ import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
 import MediaDevicesManager from "../utils/media-devices-manager";
+import { MediaDevicesEvents } from "../utils/media-devices-utils";
 
 export const CLIPPING_THRESHOLD_ENABLED = false;
 export const CLIPPING_THRESHOLD_MIN = 0.0;
@@ -808,9 +809,8 @@ class PreferencesScreen extends Component {
     // We should either avoid remounting or persist the category somewhere besides state.
     super();
 
-    this.devicesUpdated = () => {
-      this.updateVideoDevices();
-    };
+    this.storeUpdated = this.storeUpdated.bind(this);
+
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
 
     this.state = {
@@ -820,7 +820,6 @@ class PreferencesScreen extends Component {
         key: "preferredMic",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "none", text: "None" }],
-        onChanged: this.onMicSelectionChanged,
         defaultString: "Default"
       },
       preferredCamera: {
@@ -839,10 +838,6 @@ class PreferencesScreen extends Component {
       })
     };
   }
-
-  onMicSelectionChanged = deviceId => {
-    this.mediaDevicesManager.startMicShare({ deviceId }).then(this.updateMediaDevices);
-  };
 
   onMediaDevicesUpdated = () => {
     this.updateMediaDevices();
@@ -905,14 +900,23 @@ class PreferencesScreen extends Component {
 
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    this.props.scene.addEventListener("devicechange", this.onMediaDevicesUpdated);
+    this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
 
     this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
   }
 
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    this.props.scene.removeEventListener("devicechange", this.onMediaDevicesUpdated);
+    this.mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
+  }
+
+  storeUpdated() {
+    const { preferredMic } = this.props.store.state.preferences;
+    if (preferredMic !== this.mediaDevicesManager.selectedMicDeviceId) {
+      this.mediaDevicesManager
+        .startMicShare({ deviceId: preferredMic, updatePrefs: false })
+        .then(this.updateMediaDevices);
+    }
   }
 
   createSections() {
