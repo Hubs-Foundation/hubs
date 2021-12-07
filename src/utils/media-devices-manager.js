@@ -229,6 +229,7 @@ export default class MediaDevicesManager extends EventEmitter {
         status: PermissionStatus.GRANTED
       });
     } else {
+      this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
       this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.DENIED;
       this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
         mediaDevice: MediaDevices.MICROPHONE,
