@@ -3,7 +3,8 @@ export const MediaDevicesEvents = Object.freeze({
   MIC_SHARE_STARTED: "mic_share_started",
   MIC_SHARE_ENDED: "mic_share_ended",
   VIDEO_SHARE_STARTED: "video_share_started",
-  VIDEO_SHARE_ENDED: "video_share_ended"
+  VIDEO_SHARE_ENDED: "video_share_ended",
+  DEVICE_CHANGE: "devicechange"
 });
 
 export const PermissionStatus = Object.freeze({
@@ -19,4 +20,4 @@ export const MediaDevices = Object.freeze({
   SCREEN: "screen"
 });
 
-export const DEFAULT_SINK_ID = "default";
+export const DEFAULT_DEVICE_ID = "default";
