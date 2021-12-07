@@ -97,7 +97,7 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get selectedMicDeviceId() {
-    return this.deviceIdForMicDeviceLabel(this.selectedMicLabel);
+    return this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || DEFAULT_DEVICE_ID;
   }
 
   get preferredMicDeviceId() {
@@ -110,7 +110,7 @@ export default class MediaDevicesManager extends EventEmitter {
     const exists = this.outputDevices.some(device => {
       return device.value === preferredSpeakers;
     });
-    return exists ? preferredSpeakers : this.outputDevices[0]?.value || "default";
+    return exists ? preferredSpeakers : this.outputDevices[0]?.value || DEFAULT_DEVICE_ID;
   }
 
   get isMicShared() {
