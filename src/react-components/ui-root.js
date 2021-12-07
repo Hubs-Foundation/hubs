@@ -555,7 +555,9 @@ class UIRoot extends Component {
 
     if (hasGrantedMic) {
       if (!this.mediaDevicesManager.isMicShared) {
-        await this.mediaDevicesManager.startMicShare({});
+        await this.mediaDevicesManager.startMicShare({
+          deviceId: this.mediaDevicesManager.preferredMicDeviceId
+        });
       }
       this.beginOrSkipAudioSetup();
     } else {
@@ -585,16 +587,10 @@ class UIRoot extends Component {
     await this.performDirectEntryFlow(true);
   };
 
-  micDeviceChanged = async deviceId => {
-    this.mediaDevicesManager.startMicShare({ deviceId });
-  };
-
-  speakerDeviceChanged = async deviceId => {
-    this.mediaDevicesManager.changeAudioOutput(deviceId);
-  };
-
   onRequestMicPermission = async () => {
-    await this.mediaDevicesManager.startMicShare({});
+    await this.mediaDevicesManager.startMicShare({
+      deviceId: this.mediaDevicesManager.preferredMicDeviceId
+    });
   };
 
   updateMediaPermissions = async () => {
@@ -896,15 +892,9 @@ class UIRoot extends Component {
     return (
       <MicSetupModalContainer
         scene={this.props.scene}
-        selectedMicrophone={this.mediaDevicesManager.selectedMicDeviceId}
-        selectedSpeaker={this.mediaDevicesManager.selectedSpeakersDeviceId}
-        microphoneOptions={this.mediaDevicesManager.micDevices}
-        speakerOptions={this.mediaDevicesManager.outputDevices}
-        onChangeMicrophone={this.micDeviceChanged}
-        onChangeSpeaker={this.speakerDeviceChanged}
         micMutedOnEntry={muteOnEntry}
-        onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onEnterRoom={this.onAudioReadyButton}
+        onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onBack={() => this.props.history.goBack()}
       />
     );
