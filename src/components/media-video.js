@@ -166,11 +166,11 @@ AFRAME.registerComponent("media-video", {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
+    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
     this.onPreferenceChanged = () => {
-      const newPref = APP.store.state.preferences.audioOutputMode;
-      const shouldRecreateAudio = audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
-      audioOutputModePref = newPref;
+      const newPref = APP.store.state.preferences.disableLeftRightPanning;
+      const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && this.audio && this.mediaElementAudioSource;
+      disableLeftRightPanningPref = newPref;
       if (shouldRecreateAudio) {
         this.setupAudio();
       }
