@@ -29,12 +29,10 @@ export function getCurrentStreamer() {
 }
 
 export function getPlayerInfo(sessionId) {
-  if (!window.APP || !window.APP.componentRegistry || !window.APP.hubChannel || !window.APP.hubChannel.presence)
-    return null;
   const playerInfos = window.APP.componentRegistry["player-info"] || [];
-  const playerInfo = playerInfos.filter(info => {
+  const playerInfo = playerInfos.find(info => {
     return info.playerSessionId === sessionId;
   });
 
-  return playerInfo[0];
+  return playerInfo;
 }
