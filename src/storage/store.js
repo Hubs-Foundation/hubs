@@ -364,6 +364,7 @@ export default class Store extends EventTarget {
     // Cleanup unsupported properties
     if (!valid) {
       errors.forEach(error => {
+        console.error(`Removing invalid preference from store: ${error.message}`);
         delete error.instance[error.argument];
       });
     }
