@@ -165,9 +165,9 @@ export class NumberRangeSelector extends Component {
           max={this.props.max}
           value={currentValue}
           onChange={value => {
-            const num = round(this.props.step, parseFloat(value));
+            const num = round(this.props.step, value);
             this.setState({ displayValue: num.toFixed(this.props.digits), digitsFromUser: 0 });
-            this.props.setValue(parseFloat(num.toFixed(this.props.digits)));
+            this.props.setValue(num.toFixed(this.props.digits));
           }}
         />
       </div>
