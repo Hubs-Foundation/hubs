@@ -35,8 +35,9 @@ export function getCurrentAudioSettings(el) {
   const audioOverrides = APP.audioOverrides.get(el);
   const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
   const zoneSettings = APP.zoneOverrides.get(el);
-  const preferencesOverrides =
-    APP.store.state.preferences.disableLeftRightPanning === true ? { audioType: AudioType.Stereo } : {};
+  const preferencesOverrides = APP.store.state.preferences.disableLeftRightPanning
+    ? { audioType: AudioType.Stereo }
+    : {};
   const safariOverrides = isSafari() ? { audioType: AudioType.Stereo } : {};
   const settings = Object.assign(
     {},
