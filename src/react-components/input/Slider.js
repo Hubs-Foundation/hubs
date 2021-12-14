@@ -97,7 +97,7 @@ export function Slider({ min, max, step, digits, value, defaultValue, onChange, 
           const viewportOffset = myRoot.current.getBoundingClientRect();
           const t = Math.max(0, Math.min((e.clientX - viewportOffset.left) / viewportOffset.width, 1));
           const num = round(step, min + t * (max - min));
-          const finalNum = num.toFixed(digits);
+          const finalNum = parseFloat(num.toFixed(digits));
           onUpdateValue(finalNum);
         }}
       >
@@ -112,7 +112,7 @@ export function Slider({ min, max, step, digits, value, defaultValue, onChange, 
           onChange={e => {
             if (disabled) return;
             const num = round(step, e.target.value);
-            const finalNum = num.toFixed(digits);
+            const finalNum = parseFloat(num.toFixed(digits));
             onUpdateValue(finalNum);
           }}
         />
