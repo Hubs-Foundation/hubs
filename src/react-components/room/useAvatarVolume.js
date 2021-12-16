@@ -11,7 +11,7 @@ import {
 const minLevel = 0;
 const maxLevel = MAX_VOLUME_LABELS - 1;
 
-export default function useAvatarVolume(sessionId) {
+export default function useAvatarVolume(sessionId, updateVolume) {
   const playerInfo = getPlayerInfo(sessionId);
   const controlsEl = playerInfo?.el.querySelector("[avatar-volume-controls]");
   const controls = controlsEl?.components["avatar-volume-controls"];
@@ -24,8 +24,9 @@ export default function useAvatarVolume(sessionId) {
       const newLevel = calcLevel(gainMultiplier);
       setLevelStep(newLevel > level ? calcLevelStepDown(gainMultiplier) : calcLevelStepUp(gainMultiplier));
       setLevel(newLevel);
+      updateVolume && updateVolume(newLevel);
     },
-    [level]
+    [level, updateVolume]
   );
 
   const updateGainMultiplier = useCallback(
@@ -67,5 +68,5 @@ export default function useAvatarVolume(sessionId) {
     [controls, controlsEl, onGainMultiplierUpdated, onLocalMutedUpdated]
   );
 
-  return [minLevel, maxLevel, levelStep, level, updateGainMultiplier, isMuted, updateMuted];
+  return [minLevel, maxLevel, levelStep, updateGainMultiplier, isMuted, updateMuted];
 }

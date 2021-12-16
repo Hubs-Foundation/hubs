@@ -1,13 +1,9 @@
-import React from "react";
-import { useState, useCallback, useEffect, useRef } from "react";
+import React, { forwardRef, memo, useImperativeHandle, useRef } from "react";
+import { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Slider.scss";
 import { trackColor } from "./Slider.scss";
-
-function round(step, n) {
-  return Math.round(n / step) * step;
-}
 
 function getLinearGradientCSS(ratio, leftColor, rightColor) {
   return [
@@ -28,105 +24,56 @@ function updateGradient(el, min, max, value) {
   }
 }
 
-export function Slider({ min, max, step, digits, value, defaultValue, onChange, disabled, className }) {
-  const myRoot = useRef();
-  const inputRef = useRef();
-  const [displayValue, setDisplayValue] = useState(-1);
-  const [isDragging, setIsDragging] = useState(false);
+export const Slider = memo(
+  forwardRef(({ min, max, step, defaultValue, onChange, disabled, className, ...rest }, ref) => {
+    const inputRef = useRef();
+    const [displayValue, setDisplayValue] = useState(defaultValue);
 
-  let currentValue = defaultValue;
-  if (isDragging) {
-    currentValue = displayValue !== -1 ? displayValue : defaultValue;
-  } else {
-    currentValue = value !== undefined ? value : displayValue !== -1 ? displayValue : defaultValue;
-  }
+    const updateValue = useCallback(
+      value => {
+        setDisplayValue(value);
+        updateGradient(inputRef.current, min, max, value);
+      },
+      [inputRef, min, max, setDisplayValue]
+    );
 
-  const stopDragging = useCallback(
-    () => {
-      setIsDragging(false);
-    },
-    [setIsDragging]
-  );
-
-  const onUpdateValue = useCallback(
-    v => {
-      setDisplayValue(v);
-      if (onChange) {
-        onChange(v);
+    useImperativeHandle(ref, () => ({
+      setValue: value => {
+        updateValue(value);
       }
-    },
-    [onChange, setDisplayValue]
-  );
+    }));
 
-  const drag = useCallback(
-    e => {
-      if (!isDragging) return;
-      const viewportOffset = myRoot.current.getBoundingClientRect();
-      const t = Math.max(0, Math.min((e.clientX - viewportOffset.left) / viewportOffset.width, 1));
-      const num = round(step, min + t * (max - min));
-      onUpdateValue(num);
-    },
-    [isDragging, step, min, max, onUpdateValue]
-  );
-
-  useEffect(
-    () => {
-      window.addEventListener("mouseup", stopDragging);
-      window.addEventListener("mousemove", drag);
-
-      updateGradient(inputRef.current, min, max, currentValue);
-
-      return () => {
-        window.removeEventListener("mouseup", stopDragging);
-        window.removeEventListener("mousemove", drag);
-      };
-    },
-    [drag, stopDragging, inputRef, min, max, currentValue]
-  );
-
-  return (
-    <div className={classNames(styles.numberWithRange, className)}>
-      <div
-        ref={myRoot}
-        className={classNames(styles.rangeSlider)}
-        disabled={disabled}
-        onMouseDown={e => {
-          e.preventDefault();
-          if (disabled) return;
-          setIsDragging(true);
-          const viewportOffset = myRoot.current.getBoundingClientRect();
-          const t = Math.max(0, Math.min((e.clientX - viewportOffset.left) / viewportOffset.width, 1));
-          const num = round(step, min + t * (max - min));
-          const finalNum = parseFloat(num.toFixed(digits));
-          onUpdateValue(finalNum);
-        }}
-      >
-        <input
-          ref={inputRef}
-          type="range"
-          step={step}
-          min={min}
-          max={max}
-          value={currentValue}
-          disabled={disabled}
-          onChange={e => {
-            if (disabled) return;
-            const num = round(step, e.target.value);
-            const finalNum = parseFloat(num.toFixed(digits));
-            onUpdateValue(finalNum);
-          }}
-        />
+    return (
+      <div className={classNames(styles.numberWithRange, className)}>
+        <div className={classNames(styles.rangeSlider)} disabled={disabled}>
+          <input
+            ref={inputRef}
+            type="range"
+            step={step}
+            min={min}
+            max={max}
+            value={displayValue}
+            disabled={disabled}
+            onChange={e => {
+              if (disabled) return;
+              const value = parseFloat(e.target.value);
+              updateValue(value);
+              if (onChange) {
+                onChange(value);
+              }
+            }}
+            {...rest}
+          />
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  })
+);
 
 Slider.propTypes = {
   min: PropTypes.number,
   max: PropTypes.number,
   step: PropTypes.number,
-  digits: PropTypes.number,
-  value: PropTypes.number,
   defaultValue: PropTypes.number,
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
@@ -137,7 +84,5 @@ Slider.defaultProps = {
   min: 0,
   max: 100,
   step: 1,
-  digits: 0,
-  currentValue: 50,
   disabled: false
 };

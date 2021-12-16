@@ -46,7 +46,6 @@ Controlled.args = {
   min: 0,
   max: 8,
   step: 1,
-  value: 4,
   defaultValue: 4,
   disabled: false
 };
