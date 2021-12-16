@@ -151,12 +151,5 @@ UserProfileSidebarContainer.propTypes = {
   onBack: PropTypes.func,
   onClose: PropTypes.func,
   onCloseDialog: PropTypes.func.isRequired,
-  showNonHistoriedDialog: PropTypes.func,
-  minVolume: PropTypes.number,
-  maxVolume: PropTypes.number,
-  volumeStep: PropTypes.number,
-  volume: PropTypes.number,
-  updateGainMultiplier: PropTypes.func,
-  isMuted: PropTypes.bool,
-  updateMuted: PropTypes.func
+  showNonHistoriedDialog: PropTypes.func
 };
