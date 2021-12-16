@@ -57,8 +57,10 @@ export default function useAvatarVolume(sessionId, updateVolume) {
       controlsEl.addEventListener("gain_multiplier_updated", onGainMultiplierUpdated);
       controlsEl.addEventListener("local_muted_updated", onLocalMutedUpdated);
 
-      onGainMultiplierUpdated({ detail: { gainMultiplier: controls.getGainMultiplier() } });
-      setIsMuted(controls.isLocalMuted());
+      const gainMultiplier = APP.gainMultipliers.get(controls.audioEl);
+      onGainMultiplierUpdated({ detail: { gainMultiplier } });
+      const isLocalMuted = APP.mutedState.has(controls.audioEl);
+      setIsMuted(isLocalMuted);
 
       return () => {
         controlsEl.removeEventListener("gain_multiplier_updated", onGainMultiplierUpdated);

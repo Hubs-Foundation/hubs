@@ -47,7 +47,8 @@ AFRAME.registerComponent("avatar-volume-controls", {
     }
     this.updateVolumeLabel();
     this.el.emit("gain_multiplier_updated", { gainMultiplier });
-    updatePref && updateAvatarVolumesPref(this.playerInfo.displayName, gainMultiplier, this.isLocalMuted());
+    const isLocalMuted = APP.mutedState.has(this.audioEl);
+    updatePref && updateAvatarVolumesPref(this.playerInfo.displayName, gainMultiplier, isLocalMuted);
   },
 
   updateLocalMuted(muted, updatePref = false) {
@@ -62,7 +63,9 @@ AFRAME.registerComponent("avatar-volume-controls", {
     }
     this.updateVolumeLabel();
     this.el.emit("local_muted_updated", { muted });
-    updatePref && updateAvatarVolumesPref(this.playerInfo.displayName, this.getGainMultiplier(), this.isLocalMuted());
+    const gainMultiplier = APP.gainMultipliers.get(this.audioEl);
+    const isLocalMuted = APP.mutedState.has(this.audioEl);
+    updatePref && updateAvatarVolumesPref(this.playerInfo.displayName, gainMultiplier, isLocalMuted);
   },
 
   volumeUp() {
@@ -81,20 +84,13 @@ AFRAME.registerComponent("avatar-volume-controls", {
 
   updateVolumeLabel() {
     const gainMultiplier = APP.gainMultipliers.get(this.audioEl);
+    const isLocalMuted = APP.mutedState.has(this.audioEl);
     const numBars = calcLevel(gainMultiplier);
     this.volumeLabel.setAttribute(
       "text",
       "value",
-      gainMultiplier === 0 || this.isLocalMuted() ? "Muted" : VOLUME_LABELS[numBars]
+      gainMultiplier === 0 || isLocalMuted ? "Muted" : VOLUME_LABELS[numBars]
     );
-  },
-
-  getGainMultiplier() {
-    return APP.gainMultipliers.get(this.audioEl);
-  },
-
-  isLocalMuted() {
-    return APP.mutedState.has(this.audioEl);
   },
 
   onRemoteMuteUpdated({ detail: { muted } }) {
