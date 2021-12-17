@@ -16,24 +16,7 @@ const Template = args => (
 export const Base = Template.bind({});
 Base.argTypes = {
   onChange: { action: "changed" },
-  value: {
-    table: {
-      disable: true
-    }
-  }
-};
-Base.args = {
-  min: 0,
-  max: 8,
-  step: 1,
-  defaultValue: 4,
-  disabled: false
-};
-
-export const Controlled = Template.bind({});
-Controlled.argTypes = {
-  onChange: { action: "changed" },
-  value: {
+  defaultValue: {
     control: {
       type: "range",
       min: 0,
@@ -42,7 +25,7 @@ Controlled.argTypes = {
     }
   }
 };
-Controlled.args = {
+Base.args = {
   min: 0,
   max: 8,
   step: 1,
