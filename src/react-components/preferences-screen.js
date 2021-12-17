@@ -999,11 +999,11 @@ class PreferencesScreen extends Component {
           {
             key: "globalMediaVolume",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-            min: 0,
-            max: 200,
-            step: 5,
+            min: GLOBAL_VOLUME_MIN,
+            max: GLOBAL_VOLUME_MAX,
+            step: GLOBAL_VOLUME_STEP,
             digits: 0,
-            defaultNumber: 100
+            defaultNumber: GLOBAL_VOLUME_DEFAULT
           },
           {
             key: "globalSFXVolume",
