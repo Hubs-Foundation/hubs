@@ -18,7 +18,7 @@ Base.argTypes = {
   onChange: { action: "changed" },
   defaultValue: {
     control: {
-      type: "range",
+      type: "number",
       min: 0,
       max: 8,
       step: 1
