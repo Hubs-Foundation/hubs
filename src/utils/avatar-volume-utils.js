@@ -51,6 +51,6 @@ export function updateAvatarVolumesPref(displayName, gainMultiplier, muted) {
   });
 }
 
-export function getAvatarVolumePref(userId) {
-  return APP.store.state.preferences.avatarVoiceLevels?.[userId];
+export function getAvatarVolumePref(displayName) {
+  return APP.store.state.preferences.avatarVoiceLevels?.[displayName];
 }
