@@ -12,6 +12,16 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as VolumeHigh } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMuted } from "../icons/VolumeMuted.svg";
 import useAvatarVolume from "./useAvatarVolume";
+import {
+  calcLevel,
+  calcLevelStepDown,
+  calcLevelStepUp,
+  calcGainMultiplier,
+  MAX_VOLUME_LABELS
+} from "../../utils/avatar-volume-utils";
+
+const MIN = 0;
+const MAX = MAX_VOLUME_LABELS - 1;
 
 export function UserProfileSidebar({
   className,
@@ -39,16 +49,24 @@ export function UserProfileSidebar({
 }) {
   const intl = useIntl();
   const sliderRef = useRef();
-  const updateVolume = useCallback(
-    level => {
-      sliderRef.current.setValue(level);
+  const onMultiplierChanged = useCallback(
+    multiplier => {
+      sliderRef.current.setValue(calcLevel(multiplier));
     },
     [sliderRef]
   );
-  const [minLevel, maxLevel, levelStep, updateGainMultiplier, isMuted, updateMuted] = useAvatarVolume(
+  const [multiplier, prevMultiplier, updateMultiplier, isMuted, updateMuted] = useAvatarVolume(
     userId,
-    updateVolume
+    onMultiplierChanged
   );
+  const onLevelChanged = useCallback(
+    level => {
+      updateMultiplier(calcGainMultiplier(level));
+    },
+    [updateMultiplier]
+  );
+  const newLevel = calcLevel(multiplier);
+  const step = multiplier > prevMultiplier ? calcLevelStepDown(newLevel) : calcLevelStepUp(newLevel);
   return (
     <Sidebar
       title={identityName ? `${displayName} (${identityName})` : displayName}
@@ -72,11 +90,10 @@ export function UserProfileSidebar({
             />
             <Slider
               ref={sliderRef}
-              min={minLevel}
-              max={maxLevel}
-              step={levelStep}
-              defaultValue={maxLevel / 2}
-              onChange={updateGainMultiplier}
+              min={MIN}
+              max={MAX}
+              step={step}
+              onChange={onLevelChanged}
               className={styles.sliderInputContainer}
               disabled={isNetworkMuted || isMuted}
             />
