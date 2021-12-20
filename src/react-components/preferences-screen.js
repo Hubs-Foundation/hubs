@@ -24,10 +24,6 @@ export const GLOBAL_VOLUME_MAX = 200;
 export const GLOBAL_VOLUME_STEP = 5;
 export const GLOBAL_VOLUME_DEFAULT = 100;
 
-function round(step, n) {
-  return Math.round(n / step) * step;
-}
-
 function WarnIcon() {
   return (
     <i className={styles.flex}>

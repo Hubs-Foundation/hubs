@@ -1,4 +1,4 @@
-import React, { forwardRef, memo, useEffect, useImperativeHandle, useRef } from "react";
+import React, { forwardRef, memo, useImperativeHandle, useRef } from "react";
 import { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
