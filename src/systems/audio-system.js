@@ -177,7 +177,6 @@ export class AudioSystem {
   }
 
   addAudio(mixerTrack, audioNode) {
-    this.removeAudio(audioNode);
     audioNode.gain.connect(this.mixer[mixerTrack]);
   }
 
