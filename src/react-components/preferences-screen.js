@@ -110,6 +110,7 @@ export class NumberRangeSelector extends Component {
           : this.props.defaultNumber;
       const digits = Math.max(this.state.digitsFromUser, this.props.digits);
       this.setState({ displayValue: currentValue.toFixed(digits) });
+      this.sliderRef.current?.setValue(currentValue);
     }
     this.forceUpdate();
   }

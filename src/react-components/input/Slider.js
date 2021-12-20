@@ -43,13 +43,6 @@ export const Slider = memo(
       }
     }));
 
-    useEffect(
-      () => {
-        updateValue(displayValue);
-      },
-      [updateValue, displayValue]
-    );
-
     return (
       <div className={classNames(styles.numberWithRange, className)}>
         <div className={classNames(styles.rangeSlider)} disabled={disabled}>
