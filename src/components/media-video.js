@@ -338,8 +338,8 @@ AFRAME.registerComponent("media-video", {
 
   setupAudio() {
     if (this.audio) {
-      this.audio.disconnect();
       this.el.removeObject3D("sound");
+      this.audioSystem.removeAudio(this.audio);
     }
     APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
@@ -356,8 +356,6 @@ AFRAME.registerComponent("media-video", {
     } else {
       this.audio = new THREE.Audio(audioListener);
     }
-
-    this.audioSystem.removeAudio(this.audio);
     this.audioSystem.addAudio(SourceType.MEDIA_VIDEO, this.audio);
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
