@@ -509,7 +509,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 			"sourceSize": {"w":64,"h":64}
 		},
-		"focus-action.png":
+		"mute_on.png":
 		{
 			"frame": {"x":872,"y":1100,"w":64,"h":64},
 			"rotated": false,
@@ -517,7 +517,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 			"sourceSize": {"w":64,"h":64}
 		},
-		"mute_on.png":
+		"rotate-cursor.png":
 		{
 			"frame": {"x":952,"y":1100,"w":64,"h":64},
 			"rotated": false,
@@ -525,17 +525,9 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
 			"sourceSize": {"w":64,"h":64}
 		},
-		"rotate-cursor.png":
-		{
-			"frame": {"x":1032,"y":1100,"w":64,"h":64},
-			"rotated": false,
-			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-			"sourceSize": {"w":64,"h":64}
-		},
 		"snap_camera.png":
 		{
-			"frame": {"x":1112,"y":1100,"w":64,"h":64},
+			"frame": {"x":1032,"y":1100,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
