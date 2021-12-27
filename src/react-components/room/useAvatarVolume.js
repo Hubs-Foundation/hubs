@@ -5,27 +5,24 @@ export default function useAvatarVolume(sessionId, onMultiplierChanged) {
   const playerInfo = getPlayerInfo(sessionId);
   const controlsEl = playerInfo?.el.querySelector("[avatar-volume-controls]");
   const controls = controlsEl?.components["avatar-volume-controls"];
-  const [prevMultiplier, setPrevMultiplier] = useState(0);
   const [multiplier, setMultiplier] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
 
   const onMultiplierUpdated = useCallback(
     ({ detail: { gainMultiplier } }) => {
-      setPrevMultiplier(multiplier);
       setMultiplier(gainMultiplier);
       onMultiplierChanged && onMultiplierChanged(gainMultiplier);
     },
-    [multiplier, onMultiplierChanged]
+    [onMultiplierChanged]
   );
 
   const updateMultiplier = useCallback(
     gainMultiplier => {
       if (!controls) return;
-      setPrevMultiplier(multiplier);
       setMultiplier(gainMultiplier);
       controls.updateGainMultiplier(gainMultiplier, true);
     },
-    [controls, multiplier]
+    [controls]
   );
 
   const onLocalMutedUpdated = useCallback(({ detail: { muted } }) => {
@@ -60,5 +57,5 @@ export default function useAvatarVolume(sessionId, onMultiplierChanged) {
     [controls, controlsEl, onMultiplierUpdated, onLocalMutedUpdated]
   );
 
-  return [multiplier, prevMultiplier, updateMultiplier, isMuted, updateMuted];
+  return [multiplier, updateMultiplier, isMuted, updateMuted];
 }

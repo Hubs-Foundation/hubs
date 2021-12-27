@@ -94,7 +94,6 @@ export class NumberRangeSelector extends Component {
   };
   constructor(props) {
     super(props);
-    this.sliderRef = React.createRef();
     this.storeUpdated = this.storeUpdated.bind(this);
   }
 
@@ -106,7 +105,6 @@ export class NumberRangeSelector extends Component {
           : this.props.defaultNumber;
       const digits = Math.max(this.state.digitsFromUser, this.props.digits);
       this.setState({ displayValue: currentValue.toFixed(digits) });
-      this.sliderRef.current?.setValue(currentValue);
     }
     this.forceUpdate();
   }
@@ -118,7 +116,6 @@ export class NumberRangeSelector extends Component {
         ? this.props.store.state.preferences[this.props.storeKey]
         : this.props.defaultNumber;
     this.setState({ displayValue: currentValue.toFixed(this.props.digits) });
-    this.sliderRef.current?.setValue(currentValue);
   }
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
@@ -155,16 +152,14 @@ export class NumberRangeSelector extends Component {
               this.setState({ displayValue: sanitizedInput, digitsFromUser: countDigits(sanitizedInput) });
               const numberOrReset = isNaN(parseFloat(sanitizedInput)) ? undefined : parseFloat(sanitizedInput);
               this.props.setValue(numberOrReset);
-              this.sliderRef.current?.setValue(numberOrReset);
             }}
           />
         </div>
         <Slider
-          ref={this.sliderRef}
           step={this.props.step}
           min={this.props.min}
           max={this.props.max}
-          defaultValue={currentValue}
+          value={currentValue}
           onChange={value => {
             const num = value.toFixed(this.props.digits);
             this.setState({ displayValue: num, digitsFromUser: 0 });

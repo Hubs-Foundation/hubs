@@ -1,5 +1,4 @@
-import React, { forwardRef, memo, useImperativeHandle, useRef } from "react";
-import { useState, useCallback } from "react";
+import React, { memo, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Slider.scss";
@@ -17,64 +16,50 @@ function getLinearGradientCSS(ratio, leftColor, rightColor) {
   ].join("");
 }
 
-function updateGradient(el, min, max, value) {
+function updateGradient(el, min, max) {
   if (el) {
-    const ratio = ((value - min) / (max - min)).toFixed(2);
+    const ratio = ((parseFloat(el.value) - min) / (max - min)).toFixed(2);
     el.style.backgroundImage = getLinearGradientCSS(ratio, trackColor, "transparent");
   }
 }
 
-export const Slider = memo(
-  forwardRef(({ min, max, step, defaultValue, onChange, disabled, className, ...rest }, ref) => {
-    const inputRef = useRef();
-    const [displayValue, setDisplayValue] = useState(defaultValue);
+export const Slider = memo(({ min, max, step, value, onChange, disabled, className, ...rest }) => {
+  const inputRef = useRef();
 
-    const updateValue = useCallback(
-      value => {
-        setDisplayValue(value);
-        updateGradient(inputRef.current, min, max, value);
-      },
-      [inputRef, min, max, setDisplayValue]
-    );
+  useEffect(() => {
+    updateGradient(inputRef.current, min, max);
+  });
 
-    useImperativeHandle(ref, () => ({
-      setValue: value => {
-        updateValue(value);
-      }
-    }));
-
-    return (
-      <div className={classNames(styles.numberWithRange, className)}>
-        <div className={classNames(styles.rangeSlider)} disabled={disabled}>
-          <input
-            ref={inputRef}
-            type="range"
-            step={step}
-            min={min}
-            max={max}
-            value={displayValue}
-            disabled={disabled}
-            onChange={e => {
-              if (disabled) return;
-              const value = parseFloat(e.target.value);
-              updateValue(value);
-              if (onChange) {
-                onChange(value);
-              }
-            }}
-            {...rest}
-          />
-        </div>
+  return (
+    <div className={classNames(styles.numberWithRange, className)}>
+      <div className={classNames(styles.rangeSlider)} disabled={disabled}>
+        <input
+          ref={inputRef}
+          type="range"
+          step={step}
+          min={min}
+          max={max}
+          value={value}
+          disabled={disabled}
+          onChange={e => {
+            if (disabled) return;
+            value === undefined && updateGradient(inputRef.current, min, max);
+            if (onChange) {
+              onChange(parseFloat(e.target.value));
+            }
+          }}
+          {...rest}
+        />
       </div>
-    );
-  })
-);
+    </div>
+  );
+});
 
 Slider.propTypes = {
   min: PropTypes.number,
   max: PropTypes.number,
   step: PropTypes.number,
-  defaultValue: PropTypes.number,
+  value: PropTypes.number,
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
   className: PropTypes.string
@@ -84,6 +69,5 @@ Slider.defaultProps = {
   min: 0,
   max: 100,
   step: 1,
-  defaultValue: 50,
   disabled: false
 };

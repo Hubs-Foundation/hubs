@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { Sidebar } from "../sidebar/Sidebar";
 import { CloseButton } from "../input/CloseButton";
@@ -48,17 +48,7 @@ export function UserProfileSidebar({
   ...rest
 }) {
   const intl = useIntl();
-  const sliderRef = useRef();
-  const onMultiplierChanged = useCallback(
-    multiplier => {
-      sliderRef.current.setValue(calcLevel(multiplier));
-    },
-    [sliderRef]
-  );
-  const [multiplier, prevMultiplier, updateMultiplier, isMuted, updateMuted] = useAvatarVolume(
-    userId,
-    onMultiplierChanged
-  );
+  const [multiplier, updateMultiplier, isMuted, updateMuted] = useAvatarVolume(userId);
   const onLevelChanged = useCallback(
     level => {
       updateMultiplier(calcGainMultiplier(level));
@@ -66,7 +56,6 @@ export function UserProfileSidebar({
     [updateMultiplier]
   );
   const newLevel = calcLevel(multiplier);
-  const step = multiplier > prevMultiplier ? calcLevelStepDown(newLevel) : calcLevelStepUp(newLevel);
   return (
     <Sidebar
       title={identityName ? `${displayName} (${identityName})` : displayName}
@@ -89,10 +78,10 @@ export function UserProfileSidebar({
               disabled={isNetworkMuted}
             />
             <Slider
-              ref={sliderRef}
               min={MIN}
               max={MAX}
-              step={step}
+              step={1}
+              value={newLevel}
               onChange={onLevelChanged}
               className={styles.sliderInputContainer}
               disabled={isNetworkMuted || isMuted}

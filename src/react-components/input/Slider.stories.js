@@ -13,10 +13,10 @@ const Template = args => (
   </Column>
 );
 
-export const Base = Template.bind({});
-Base.argTypes = {
+export const Controlled = Template.bind({});
+Controlled.argTypes = {
   onChange: { action: "changed" },
-  defaultValue: {
+  value: {
     control: {
       type: "number",
       min: 0,
@@ -25,10 +25,21 @@ Base.argTypes = {
     }
   }
 };
-Base.args = {
+Controlled.args = {
   min: 0,
   max: 8,
   step: 1,
-  defaultValue: 4,
+  value: 4,
+  disabled: false
+};
+
+export const Uncontrolled = Template.bind({});
+Uncontrolled.argTypes = {
+  onChange: { action: "changed" }
+};
+Uncontrolled.args = {
+  min: 0,
+  max: 8,
+  step: 1,
   disabled: false
 };
