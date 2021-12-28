@@ -22,6 +22,7 @@ import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, hubUrl } from "../utils/phoenix-utils";
 import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
+import { isIOS } from "../utils/is-mobile";
 
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowserContainer from "./media-browser";
@@ -144,6 +145,7 @@ class UIRoot extends Component {
     showSignInDialog: PropTypes.bool,
     signInMessage: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
+    onSignInDialogVisibilityChanged: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     onAvatarSaved: PropTypes.func,
@@ -395,8 +397,11 @@ class UIRoot extends Component {
   };
 
   showContextualSignInDialog = () => {
-    const { signInMessage, authChannel, onContinueAfterSignIn } = this.props;
-
+    const { signInMessage, authChannel } = this.props;
+    const onCallback = () => {
+      const { onContinueAfterSignIn } = this.props;
+      (onContinueAfterSignIn && onContinueAfterSignIn()) || this.closeDialog();
+    };
     this.showNonHistoriedDialog(RoomSignInModalContainer, {
       step: SignInStep.submit,
       message: signInMessage,
@@ -405,7 +410,7 @@ class UIRoot extends Component {
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
-          onClose: onContinueAfterSignIn || this.closeDialog
+          onClose: onCallback
         });
 
         await authComplete;
@@ -413,11 +418,11 @@ class UIRoot extends Component {
         this.setState({ signedIn: true });
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
-          onClose: onContinueAfterSignIn || this.closeDialog,
-          onContinue: onContinueAfterSignIn || this.closeDialog
+          onClose: onCallback,
+          onContinue: onCallback
         });
       },
-      onClose: onContinueAfterSignIn || this.closeDialog
+      onClose: onCallback
     });
   };
 
@@ -606,12 +611,7 @@ class UIRoot extends Component {
 
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
-    return (
-      (isMobile || AFRAME.utils.device.isMobileVR()) &&
-      !AFRAME.utils.device.isIOS() &&
-      !this.state.enterInVR &&
-      screenfull.enabled
-    );
+    return (isMobile || AFRAME.utils.device.isMobileVR()) && !isIOS() && !this.state.enterInVR && screenfull.enabled;
   };
 
   onAudioReadyButton = async () => {
@@ -654,9 +654,10 @@ class UIRoot extends Component {
   closeDialog = () => {
     if (this.state.dialog) {
       this.setState({ dialog: null });
-    } else {
-      this.props.history.goBack();
     }
+
+    const { onSignInDialogVisibilityChanged } = this.props;
+    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(false);
 
     if (isIn2DInterstitial()) {
       exit2DInterstitialAndEnterVR();
@@ -666,6 +667,8 @@ class UIRoot extends Component {
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
+    const { onSignInDialogVisibilityChanged } = this.props;
+    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(true);
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });

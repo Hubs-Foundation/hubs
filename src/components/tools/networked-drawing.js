@@ -764,7 +764,7 @@ AFRAME.registerComponent("deserialize-drawing-button", {
         addMeshScaleAnimation(drawingManager.drawing.el.object3DMap.mesh, { x: 0.001, y: 0.001, z: 0.001 });
 
         if (this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned) {
-          this.targetEl.setAttribute("pinnable", "pinned", false);
+          window.APP.pinningHelper.setPinned(this.targetEl, false);
         }
         this.targetEl.parentEl.removeChild(this.targetEl);
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PEN_START_DRAW);

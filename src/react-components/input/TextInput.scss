@@ -34,6 +34,12 @@ $input-height: 40px;
     padding: 0 16px;
     border-width: 0;
     min-height: auto;
+    border: none;
+    
+    &:hover {
+      border:none;
+    }
+    
 
     :global(.keyboard-user) &:focus {
       border-width: 0;
@@ -52,6 +58,7 @@ $input-height: 40px;
         border-bottom-right-radius: theme.$border-radius-regular;
       }
     }
+    
   }
 
   :local(.icon-button), & > svg  {

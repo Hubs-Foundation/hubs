@@ -24,6 +24,7 @@ import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
+import "./utils/aframe-overrides";
 
 // A-Frame hardcodes THREE.Cache.enabled = true
 // But we don't want to use THREE.Cache because
@@ -44,10 +45,6 @@ import "networked-aframe/src/index";
 import "aframe-rounded";
 import "webrtc-adapter";
 import "aframe-slice9-component";
-import "./utils/threejs-positional-audio-updatematrixworld";
-import "./utils/threejs-world-update";
-import "./utils/threejs-raycast-patches";
-import patchThreeAllocations from "./utils/threejs-allocation-patches";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -65,7 +62,7 @@ import "./phoenix-adapter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL } from "./naf-dialog-adapter";
+import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECTED } from "./naf-dialog-adapter";
 import "./change-hub";
 
 import "./components/scene-components";
@@ -196,6 +193,7 @@ import "./gltf-component-mappings";
 
 import { App } from "./App";
 import MediaDevicesManager from "./utils/media-devices-manager";
+import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
@@ -206,20 +204,6 @@ window.APP.RENDER_ORDER = {
   HUD_ICONS: 2,
   CURSOR: 3
 };
-
-// TODO: Remove comments
-// TODO: Rename or reconfigure these as needed
-APP.audios = new Map(); //                           el -> (THREE.Audio || THREE.PositionalAudio)
-APP.sourceType = new Map(); //                       el -> SourceType
-APP.audioOverrides = new Map(); //                   el -> AudioSettings
-APP.zoneOverrides = new Map(); //                    el -> AudioSettings
-APP.audioDebugPanelOverrides = new Map(); // SourceType -> AudioSettings
-APP.sceneAudioDefaults = new Map(); //       SourceType -> AudioSettings
-APP.gainMultipliers = new Map(); //                  el -> Number
-APP.supplementaryAttenuation = new Map(); //         el -> Number
-APP.clippingState = new Set();
-APP.linkedMutedState = new Set();
-APP.isAudioPaused = new Set();
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
@@ -270,6 +254,7 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContainer";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
+import { LogMessageType } from "./react-components/room/ChatSidebar";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -282,6 +267,7 @@ let isOAuthModal = false;
 if (window.opener && window.opener.doingTwitterOAuth) {
   window.opener.postMessage("oauth-successful");
   isOAuthModal = true;
+  window.close();
 }
 
 const isBotMode = qsTruthy("bot");
@@ -756,7 +742,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
-    patchThreeAllocations();
   };
   if (scene.hasLoaded) {
     onSceneLoaded();
@@ -777,6 +762,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;
 
+  APP.dialog.on(DIALOG_CONNECTION_CONNECTED, () => {
+    scene.emit("didConnectToDialog");
+  });
   APP.dialog.on(DIALOG_CONNECTION_ERROR_FATAL, () => {
     // TODO: Change the wording of the connect error to match dialog connection error
     // TODO: Tell the user that dialog is broken, but don't completely end the experience
@@ -810,9 +798,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (actionError && onFailure) onFailure(actionError);
         exit2DInterstitialAndEnterVR();
+      },
+      onSignInDialogVisibilityChanged: visible => {
+        if (visible) {
+          remountUI({ showSignInDialog: true });
+        } else {
+          remountUI({ showSignInDialog: false, onContinueAfterSignIn: null });
+        }
       }
     });
   };
+
+  window.APP.pinningHelper = new PinningHelper(hubChannel, authChannel, store, performConditionalSignIn);
 
   window.addEventListener("action_create_avatar", () => {
     performConditionalSignIn(
@@ -1221,6 +1218,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         newName: current.profile.displayName
       });
     }
+  });
+  events.on(`hub:change`, ({ key, previous, current }) => {
+    if (
+      key === hubChannel.channel.socket.params().session_id &&
+      previous.profile.avatarId !== current.profile.avatarId
+    ) {
+      messageDispatch.log(LogMessageType.avatarChanged);
+    }
+  });
+  events.on(`hub:change`, ({ key, current }) => {
+    scene.emit("presence_updated", {
+      sessionId: key,
+      profile: current.profile,
+      roles: current.roles,
+      permissions: current.permissions,
+      streaming: current.streaming,
+      recording: current.recording
+    });
   });
 
   // We need to be able to wait for initial presence syncs across reconnects and socket migrations,

@@ -487,6 +487,7 @@ AFRAME.registerComponent("camera-tool", {
       if (cancel) {
         this.videoRecorder.onstop = () => {};
         this.videoRecorder._free();
+        this.el.sceneEl.emit("action_camera_recording_ended");
       }
 
       this.videoRecorder.stop();
@@ -499,8 +500,8 @@ AFRAME.registerComponent("camera-tool", {
     clearInterval(this.videoCountdownInterval);
 
     this.videoCountdownInterval = null;
-    this.el.setAttribute("camera-tool", "label", "");
-    this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
+
+    this.el.setAttribute("camera-tool", { label: " ", isRecording: false, isSnapping: false });
   },
 
   tick() {

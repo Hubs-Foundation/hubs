@@ -623,13 +623,16 @@ const CATEGORY_AUDIO = 0;
 const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
+
 const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_MISC];
+
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
   // [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
   [CATEGORY_MISC]: { id: "preferences-screen.category.misc", defaultMessage: "Misc" },
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
-  [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" }
+  [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" },
+  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" }
 });
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -1079,6 +1082,7 @@ class PreferencesScreen extends Component {
             defaultString: defaultMaterialQualitySetting,
             promptForRefresh: true
           },
+
           // {
           //   key: "enableDynamicShadows",
           //   prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
@@ -1093,6 +1097,16 @@ class PreferencesScreen extends Component {
           // { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
           // { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           // { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+        ]
+      ],
+      [
+        CATEGORY_ACCESSIBILITY,
+        [
+          {
+            key: "disableLeftRightPanning",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: false
+          }
         ]
       ]
     ]);

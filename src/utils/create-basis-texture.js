@@ -1,14 +1,16 @@
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
 import { rewriteBasisTranscoderUrls } from "./media-url-utils";
 const loadingManager = new THREE.LoadingManager();
 loadingManager.setURLModifier(rewriteBasisTranscoderUrls);
 let ktxLoader;
+let basisLoader;
 export function createBasisTexture(url) {
-  if (!ktxLoader) {
-    ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
+  if (!basisLoader) {
+    basisLoader = new BasisTextureLoader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
   }
   return new Promise((resolve, reject) => {
-    ktxLoader.basisLoader.load(
+    basisLoader.load(
       url,
       function(texture) {
         texture.encoding = THREE.sRGBEncoding;

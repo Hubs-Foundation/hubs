@@ -32,18 +32,19 @@ export function getCurrentAudioSettings(el) {
   const sourceType = APP.sourceType.get(el);
   const defaults = defaultSettingsForSourceType.get(sourceType);
   const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
-  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
   const audioOverrides = APP.audioOverrides.get(el);
+  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
   const zoneSettings = APP.zoneOverrides.get(el);
-  const preferencesOverrides =
-    APP.store.state.preferences.audioOutputMode === "audio" ? { audioType: AudioType.Stereo } : {};
+  const preferencesOverrides = APP.store.state.preferences.disableLeftRightPanning
+    ? { audioType: AudioType.Stereo }
+    : {};
   const safariOverrides = isSafari() ? { audioType: AudioType.Stereo } : {};
   const settings = Object.assign(
     {},
     defaults,
     sceneOverrides,
-    audioDebugPanelOverrides,
     audioOverrides,
+    audioDebugPanelOverrides,
     zoneSettings,
     preferencesOverrides,
     safariOverrides
@@ -84,7 +85,7 @@ export function shouldAddSupplementaryAttenuation(el, audio) {
   // This function must distinguish between Audios that are "incidentally"
   // not PositionalAudios from Audios that are "purposefully" not PositionalAudios:
   // - An audio is "incidentally" non-positional if it only non-positional
-  //     because the audioOutputMode pref is set to "audio", or
+  //     because the disableLeftRightPanning pref is set to true, or
   //     because panner nodes are broken on a particular platform, or
   //     because of something else like that.
   // - An audio is "purposefully" non-positional if it was authored to be
@@ -101,7 +102,7 @@ export function shouldAddSupplementaryAttenuation(el, audio) {
   //
   // Instead, we determine what the audioType would be if it were not for the
   // "incidental" factors. In particular, we check if the audioType would have
-  // been PannerNode if we ignored the overrides due to audioOutputMode and platform
+  // been PannerNode if we ignored the overrides due to disableLeftRightPanning and platform
   // problems (e.g. Safari).
   //
   // If the audioType would have been PannerNode, then we should apply "fake",

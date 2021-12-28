@@ -90,14 +90,13 @@ export const SCHEMA = {
 
     preferences: {
       type: "object",
-      // Allow removed preferences to pass validation
-      additionalProperties: true,
+      additionalProperties: false,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
         preferredMic: { type: "string" },
         preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
-        audioOutputMode: { type: "string" },
+        disableLeftRightPanning: { type: "bool" },
         audioNormalization: { type: "bool" },
         invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
@@ -109,6 +108,7 @@ export const SCHEMA = {
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
         fastRoomSwitching: { type: "bool" },
+        lazyLoadSceneMedia: { type: "bool" },
         preferMobileObjectInfoPanel: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
@@ -254,6 +254,18 @@ export default class Store extends EventTarget {
     }
 
     this._signOutOnExpiredAuthToken();
+
+    const maybeDispatchThemeChanged = (() => {
+      let previous;
+      return () => {
+        const current = this.state.preferences.theme;
+        if ((previous || current) && previous !== current) {
+          this.dispatchEvent(new CustomEvent("themechanged", { detail: { current, previous } }));
+        }
+        previous = current;
+      };
+    })();
+    this.addEventListener("statechanged", maybeDispatchThemeChanged);
   }
 
   _signOutOnExpiredAuthToken = () => {
@@ -353,12 +365,14 @@ export default class Store extends EventTarget {
 
   update(newState, mergeOpts) {
     const finalState = merge(this.state, newState, mergeOpts);
-    const { valid } = validator.validate(finalState, SCHEMA);
+    const { valid, errors } = validator.validate(finalState, SCHEMA);
 
+    // Cleanup unsupported properties
     if (!valid) {
-      // Intentionally not including details about the state or validation result here, since we don't want to leak
-      // sensitive data in the error message.
-      throw new Error(`Write to store failed schema validation.`);
+      errors.forEach(error => {
+        console.error(`Removing invalid preference from store: ${error.message}`);
+        delete error.instance[error.argument];
+      });
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));

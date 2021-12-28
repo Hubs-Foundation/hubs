@@ -55,14 +55,15 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
     const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
-    let audio;
+    let audio = this.el.getObject3D(this.attrName);
+    if (audio) {
+      this.audioSystem.removeAudio(audio);
+    }
     if (audioType === AudioType.PannerNode) {
       audio = new THREE.PositionalAudio(audioListener);
     } else {
       audio = new THREE.Audio(audioListener);
     }
-
-    this.audioSystem.removeAudio(audio);
     this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, audio);
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
@@ -100,11 +101,11 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
 
-    let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
+    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
     this.onPreferenceChanged = () => {
-      const newPref = APP.store.state.preferences.audioOutputMode;
-      const shouldRecreateAudio = audioOutputModePref !== newPref && !this.isCreatingAudio;
-      audioOutputModePref = newPref;
+      const newPref = APP.store.state.preferences.disableLeftRightPanning;
+      const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && !this.isCreatingAudio;
+      disableLeftRightPanningPref = newPref;
       if (shouldRecreateAudio) {
         this.createAudio();
       }
@@ -135,7 +136,7 @@ AFRAME.registerComponent("avatar-audio-source", {
   },
 
   remove: function() {
-    APP.dialog.off("stream_updated", this._onStreamUpdated);
+    APP.dialog.off("stream_updated", this._onStreamUpdated, this);
     this.destroyAudio();
   }
 });
@@ -282,13 +283,17 @@ AFRAME.registerComponent("audio-target", {
     APP.supplementaryAttenuation.delete(this.el);
     APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const audioListener = this.el.sceneEl.audioListener;
-    let audio = null;
     const { audioType } = getCurrentAudioSettings(this.el);
+    let audio = this.el.getObject3D(this.attrName);
+    if (audio) {
+      this.audioSystem.removeAudio(audio);
+    }
     if (audioType === AudioType.PannerNode) {
       audio = new THREE.PositionalAudio(audioListener);
     } else {
       audio = new THREE.Audio(audioListener);
     }
+    this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, audio);
 
     if (this.data.maxDelay > 0) {
       const delayNode = audio.context.createDelay(this.data.maxDelay);
@@ -299,12 +304,8 @@ AFRAME.registerComponent("audio-target", {
     this.el.setObject3D(this.attrName, audio);
     audio.matrixNeedsUpdate = true;
     audio.updateMatrixWorld();
-    this.audio = audio;
 
-    this.audioSystem.removeAudio(this.audio);
-    this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, this.audio);
-
-    this.audio.updateMatrixWorld();
+    audio.updateMatrixWorld();
     APP.audios.set(this.el, audio);
     updateAudioSettings(this.el, audio);
   },
@@ -314,7 +315,10 @@ AFRAME.registerComponent("audio-target", {
     const srcZone = srcEl && srcEl.components["zone-audio-source"];
     const node = srcZone && srcZone.getGainFilter();
     if (node) {
-      this.audio.setNodeSource(node);
+      const audio = this.el.getObject3D(this.attrName);
+      if (audio) {
+        audio.setNodeSource(node);
+      }
     } else {
       console.warn(`Failed to get audio from source for ${this.el.className}`, srcEl);
     }
@@ -324,7 +328,7 @@ AFRAME.registerComponent("audio-target", {
     const audio = this.el.getObject3D(this.attrName);
     if (!audio) return;
 
-    this.audioSystem.removeAudio(this.audio);
+    this.audioSystem.removeAudio(audio);
     this.el.removeObject3D(this.attrName);
 
     APP.supplementaryAttenuation.delete(this.el);

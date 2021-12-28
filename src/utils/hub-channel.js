@@ -150,10 +150,7 @@ export default class HubChannel extends EventTarget {
     if (this.fetchPermissionsTimeout) {
       clearTimeout(this.fetchPermissionsTimeout);
     }
-    this.fetchPermissionsTimeout = setTimeout(async () => {
-      const result = await this.fetchPermissions();
-      this.dispatchEvent(new CustomEvent("permissions-refreshed", { detail: result }));
-    }, nextRefresh);
+    this.fetchPermissionsTimeout = setTimeout(this.fetchPermissions, nextRefresh);
   };
 
   sendEnteringEvent = async () => {
@@ -430,8 +427,7 @@ export default class HubChannel extends EventTarget {
   isHidden = sessionId => this._blockedSessionIds.has(sessionId);
 
   kick = async sessionId => {
-    const permsToken = await this.fetchPermissions();
-    APP.dialog.kick(sessionId, permsToken);
+    APP.dialog.kick(sessionId);
     this.channel.push("kick", { session_id: sessionId });
   };
 

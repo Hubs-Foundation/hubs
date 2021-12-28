@@ -112,7 +112,7 @@ export default class MediaDevicesManager {
     console.log("Starting microphone sharing");
     let constraints = { audio: {} };
     if (deviceId) {
-      constraints = { audio: { deviceId: { exact: [deviceId] } } };
+      constraints = { audio: { deviceId: { ideal: [deviceId] } } };
     }
 
     const result = await this._startMicShare(constraints);

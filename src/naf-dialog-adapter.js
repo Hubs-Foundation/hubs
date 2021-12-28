@@ -36,6 +36,7 @@ const WEBCAM_SIMULCAST_ENCODINGS = [
 // Used for simulcast screen sharing.
 const SCREEN_SHARING_SIMULCAST_ENCODINGS = [{ dtx: true, maxBitrate: 1500000 }, { dtx: true, maxBitrate: 6000000 }];
 
+export const DIALOG_CONNECTION_CONNECTED = "dialog-connection-connected";
 export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
 
 export class DialogAdapter extends EventEmitter {
@@ -440,9 +441,11 @@ export class DialogAdapter extends EventEmitter {
         try {
           await this._joinRoom();
           resolve();
+          this.emit(DIALOG_CONNECTION_CONNECTED);
         } catch (err) {
           this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
           reject(err);
+          this.emit(DIALOG_CONNECTION_ERROR_FATAL);
         }
       });
     });
@@ -944,12 +947,12 @@ export class DialogAdapter extends EventEmitter {
     }
   }
 
-  kick(clientId, permsToken) {
+  kick(clientId) {
     return this._protoo
       .request("kick", {
         room_id: this.room,
         user_id: clientId,
-        token: permsToken
+        token: this._joinToken
       })
       .then(() => {
         document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));
