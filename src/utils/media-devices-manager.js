@@ -145,21 +145,20 @@ export default class MediaDevicesManager {
       this.audioTrack.stop();
     }
 
-    constraints.audio.echoCancellation = this._store.state.preferences.disableEchoCancellation === true ? false : true;
+    constraints.audio.echoCancellation = true;
     constraints.audio.noiseSuppression = this._store.state.preferences.disableNoiseSuppression === true ? false : true;
     constraints.audio.autoGainControl = this._store.state.preferences.disableAutoGainControl === true ? false : true;
 
     if (isFirefoxReality) {
       //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081
-      constraints.audio.echoCancellation =
-        this._store.state.preferences.disableEchoCancellation === false ? true : false;
+      constraints.audio.echoCancellation = true;
       constraints.audio.noiseSuppression =
         this._store.state.preferences.disableNoiseSuppression === false ? true : false;
       constraints.audio.autoGainControl = this._store.state.preferences.disableAutoGainControl === false ? true : false;
 
       this._store.update({
         preferences: {
-          disableEchoCancellation: !constraints.audio.echoCancellation,
+          disableEchoCancellation: false,
           disableNoiseSuppression: !constraints.audio.noiseSuppression,
           disableAutoGainControl: !constraints.audio.autoGainControl
         }
