@@ -463,7 +463,7 @@ export default class SceneEntryManager {
             frameRate: 30
           },
           audio: {
-            echoCancellation: window.APP.store.state.preferences.disableEchoCancellation === true ? false : true,
+            echoCancellation: true,
             noiseSuppression: window.APP.store.state.preferences.disableNoiseSuppression === true ? false : true,
             autoGainControl: window.APP.store.state.preferences.disableAutoGainControl === true ? false : true
           }
