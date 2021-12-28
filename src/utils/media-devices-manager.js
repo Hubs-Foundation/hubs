@@ -159,7 +159,7 @@ export default class MediaDevicesManager {
 
       this._store.update({
         preferences: {
-          echoCancellation: !constraints.audio.echoCancellation,
+          disableEchoCancellation: false,
           disableNoiseSuppression: !constraints.audio.noiseSuppression,
           disableAutoGainControl: !constraints.audio.autoGainControl
         }
