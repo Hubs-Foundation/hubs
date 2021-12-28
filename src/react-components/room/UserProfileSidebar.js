@@ -12,13 +12,7 @@ import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as VolumeHigh } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMuted } from "../icons/VolumeMuted.svg";
 import useAvatarVolume from "./useAvatarVolume";
-import {
-  calcLevel,
-  calcLevelStepDown,
-  calcLevelStepUp,
-  calcGainMultiplier,
-  MAX_VOLUME_LABELS
-} from "../../utils/avatar-volume-utils";
+import { calcLevel, calcGainMultiplier, MAX_VOLUME_LABELS } from "../../utils/avatar-volume-utils";
 
 const MIN = 0;
 const MAX = MAX_VOLUME_LABELS - 1;

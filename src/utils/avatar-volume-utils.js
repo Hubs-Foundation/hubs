@@ -14,14 +14,6 @@ export function calcGainStepDown(gainMultiplier) {
   return gainMultiplier > 1 + SMALL_GAIN_STEP ? BIG_GAIN_STEP : SMALL_GAIN_STEP;
 }
 
-export function calcLevelStepUp(level) {
-  return level > MAX_VOLUME_LABELS / 2 - SMALL_LEVEL_STEP ? BIG_LEVEL_STEP : SMALL_LEVEL_STEP;
-}
-
-export function calcLevelStepDown(level) {
-  return level > MAX_VOLUME_LABELS / 2 + SMALL_LEVEL_STEP ? BIG_LEVEL_STEP : SMALL_LEVEL_STEP;
-}
-
 export function calcLevel(gainMultiplier) {
   return Math.min(
     MAX_VOLUME_LABELS - 1,
