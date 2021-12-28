@@ -42,7 +42,6 @@ export const Slider = memo(({ min, max, step, value, onChange, disabled, classNa
           value={value}
           disabled={disabled}
           onChange={e => {
-            if (disabled) return;
             value === undefined && updateGradient(inputRef.current, min, max);
             if (onChange) {
               onChange(parseFloat(e.target.value));
