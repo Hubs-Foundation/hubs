@@ -145,7 +145,7 @@ export default class MediaDevicesManager {
       this.audioTrack.stop();
     }
 
-    constraints.audio.echoCancellation = this._store.state.preferences.disableEchoCancellation = true;
+    constraints.audio.echoCancellation = true;
     constraints.audio.noiseSuppression = this._store.state.preferences.disableNoiseSuppression === true ? false : true;
     constraints.audio.autoGainControl = this._store.state.preferences.disableAutoGainControl === true ? false : true;
 
