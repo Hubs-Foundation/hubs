@@ -92,11 +92,11 @@ export function UserProfileSidebar({
             <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute" />
           </Button>
         )}
-        {canKick && (
+        {/* {canKick && (
           <Button preset="cancel" onClick={onKick}>
             <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick" />
           </Button>
-        )}
+        )} */}
       </Column>
     </Sidebar>
   );
