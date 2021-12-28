@@ -1550,7 +1550,7 @@ class UIRoot extends Component {
                             }
                             onClick={() => this.props.scene.enterVR()}
                           />
-                          )}
+                        )}
                       </>
                     )}
                     {entered && (
@@ -1583,21 +1583,15 @@ class UIRoot extends Component {
                           scene={this.props.scene}
                           microphoneEnabled={this.mediaDevicesManager.isMicShared}
                         />
-                        <ReactionPopoverContainer
-                          hub={this.props.hub}
-                          hubChannel={this.props.hubChannel}
-                          scene={this.props.scene}
-                        />
-                        {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
+                        {/* <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> */}
                         {/* 스트리머 모드 */}
-                        { <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} /> }
-                        { <PlacePopoverContainer
+                        {/* <PlacePopoverContainer
                           scene={this.props.scene}
                           hubChannel={this.props.hubChannel}
                           mediaSearchStore={this.props.mediaSearchStore}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
-                        /> }
-
+                        /> */}
+                        {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
                       </>
                     )}
                     <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
@@ -1624,6 +1618,20 @@ class UIRoot extends Component {
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
+                    {/* {entered && (
+                      <ToolbarButton
+                        icon={<LeaveIcon />}
+                        label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
+                        preset="cancel"
+                        onClick={() => {
+                          this.showNonHistoriedDialog(LeaveRoomModal, {
+                            destinationUrl: "/",
+                            reason: LeaveReason.leaveRoom
+                          });
+                        }}
+                      />
+                    )} */}
+                    {/* <MoreMenuPopoverButton menu={moreMenu} /> */}
                   </>
                 }
               />
