@@ -152,7 +152,6 @@ export default class MediaDevicesManager {
     if (isFirefoxReality) {
       //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081
       constraints.audio.echoCancellation = true;
-        true
       constraints.audio.noiseSuppression =
         this._store.state.preferences.disableNoiseSuppression === false ? true : false;
       constraints.audio.autoGainControl = this._store.state.preferences.disableAutoGainControl === false ? true : false;
