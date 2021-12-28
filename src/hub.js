@@ -703,6 +703,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  window.APP.store.state.preferences.disableEchoCancellation = true;
   await store.initProfile();
 
   const canvas = document.querySelector(".a-canvas");
