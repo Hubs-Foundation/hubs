@@ -51,6 +51,7 @@
       "text2-color": "#E7E7E7",
       "text3-color": "#BBBBBB",
       "text4-color": "#BBBBBB",
+      "text-inverted-color": "#000000",
       "secondary-color": "#3A4048",
       "secondary-color-hover": "#5D646C",
       "border1-color": "#3A4048",

@@ -212,7 +212,6 @@ class SceneUI extends Component {
         >
           {this.state.showScreenshot && <img src={this.props.sceneScreenshotURL} />}
         </div>
-        <div className={styles.whiteOverlay} />
         <div className={styles.grid}>
           <div className={styles.mainPanel}>
             <a href="/" className={styles.logo}>
@@ -273,28 +272,11 @@ class SceneUI extends Component {
               </a>
             </div>
           </div>
-        </div>
-        <div className={styles.info}>
-          <div className={styles.name}>{this.props.sceneName}</div>
-          <div className={styles.attribution}>{attributions}</div>
-        </div>
-        <IfFeature name="enable_spoke">
-          <div className={styles.spoke}>
-            <div className={styles.madeWith}>
-              <FormattedMessage
-                id="scene-page.made-with"
-                defaultMessage="made with <a/>"
-                values={{
-                  a: () => (
-                    <a href="/spoke">
-                      <img src={configs.image("editor_logo")} />
-                    </a>
-                  )
-                }}
-              />
-            </div>
+          <div className={styles.info}>
+            <div className={styles.name}>{this.props.sceneName}</div>
+            <div className={styles.attribution}>{attributions}</div>
           </div>
-        </IfFeature>
+        </div>
       </div>
     );
   }
