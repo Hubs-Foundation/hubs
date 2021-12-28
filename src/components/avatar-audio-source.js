@@ -304,7 +304,7 @@ AFRAME.registerComponent("audio-target", {
     } else {
       audio = new THREE.Audio(audioListener);
     }
-    this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: this.audio });
+    this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: audio });
 
     if (this.data.maxDelay > 0) {
       const delayNode = audio.context.createDelay(this.data.maxDelay);
@@ -316,7 +316,7 @@ AFRAME.registerComponent("audio-target", {
     audio.matrixNeedsUpdate = true;
     audio.updateMatrixWorld();
 
-    this.audio.updateMatrixWorld();
+    audio.updateMatrixWorld();
     APP.audios.set(this.el, audio);
     updateAudioSettings(this.el, audio);
   },
