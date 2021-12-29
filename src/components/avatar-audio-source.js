@@ -44,7 +44,7 @@ async function getMediaStream(el) {
 
 AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function() {
-    APP.supplementaryAttenuation.delete(this.el);
+    this.removeAudio();
 
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
@@ -56,14 +56,12 @@ AFRAME.registerComponent("avatar-audio-source", {
     const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
     let audio = this.el.getObject3D(this.attrName);
-    if (audio) {
-      this.audioSystem.removeAudio(audio);
-    }
     if (audioType === AudioType.PannerNode) {
       audio = new THREE.PositionalAudio(audioListener);
     } else {
       audio = new THREE.Audio(audioListener);
     }
+
     this.audioSystem.addAudio(SourceType.AVATAR_AUDIO_SOURCE, audio);
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
@@ -82,19 +80,17 @@ AFRAME.registerComponent("avatar-audio-source", {
     updateAudioSettings(this.el, audio);
   },
 
-  destroyAudio() {
+  removeAudio() {
     const audio = this.el.getObject3D(this.attrName);
-    if (!audio) return;
-
-    this.audioSystem.removeAudio(audio);
-    this.el.removeObject3D(this.attrName);
-
-    APP.audios.delete(this.el);
-    APP.sourceType.delete(this.el);
-    APP.supplementaryAttenuation.delete(this.el);
+    if (audio) {
+      this.audioSystem.removeAudio(audio);
+      this.el.removeObject3D(this.attrName);
+    }
   },
 
   init() {
+    this.createAudio = this.createAudio.bind(this);
+
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
@@ -111,6 +107,7 @@ AFRAME.registerComponent("avatar-audio-source", {
       }
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
+    this.el.addEventListener("audio_type_changed", this.createAudio);
   },
 
   async _onStreamUpdated(peerId, kind) {
@@ -136,8 +133,16 @@ AFRAME.registerComponent("avatar-audio-source", {
   },
 
   remove: function() {
-    APP.dialog.off("stream_updated", this._onStreamUpdated, this);
-    this.destroyAudio();
+    APP.dialog.off("stream_updated", this._onStreamUpdated);
+
+    window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
+    this.el.removeEventListener("audio_type_changed", this.createAudio);
+
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
+    APP.supplementaryAttenuation.delete(this.el);
+
+    this.removeAudio();
   }
 });
 
@@ -272,22 +277,28 @@ AFRAME.registerComponent("audio-target", {
       this.connectAudio();
     }, 0);
     this.el.setAttribute("audio-zone-source");
+
+    this.createAudio = this.createAudio.bind(this);
+    this.el.addEventListener("audio_type_changed", this.createAudio);
   },
 
   remove: function() {
-    this.destroyAudio();
+    APP.supplementaryAttenuation.delete(this.el);
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
+
+    this.removeAudio();
+
     this.el.removeAttribute("audio-zone-source");
   },
 
   createAudio: function() {
-    APP.supplementaryAttenuation.delete(this.el);
+    this.removeAudio();
+
     APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const audioListener = this.el.sceneEl.audioListener;
     const { audioType } = getCurrentAudioSettings(this.el);
     let audio = this.el.getObject3D(this.attrName);
-    if (audio) {
-      this.audioSystem.removeAudio(audio);
-    }
     if (audioType === AudioType.PannerNode) {
       audio = new THREE.PositionalAudio(audioListener);
     } else {
@@ -324,15 +335,11 @@ AFRAME.registerComponent("audio-target", {
     }
   },
 
-  destroyAudio() {
+  removeAudio() {
     const audio = this.el.getObject3D(this.attrName);
-    if (!audio) return;
-
-    this.audioSystem.removeAudio(audio);
-    this.el.removeObject3D(this.attrName);
-
-    APP.supplementaryAttenuation.delete(this.el);
-    APP.audios.delete(this.el);
-    APP.sourceType.delete(this.el);
+    if (audio) {
+      this.audioSystem.removeAudio(this.audio);
+      this.el.removeObject3D(this.attrName);
+    }
   }
 });

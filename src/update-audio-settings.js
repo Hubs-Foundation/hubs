@@ -74,7 +74,14 @@ export function updateAudioSettings(el, audio) {
   // Follow these rules and you'll have a good time:
   // - If a THREE.Audio or THREE.PositionalAudio is created, call this function.
   // - If audio settings change, call this function.
-  applySettings(audio, getCurrentAudioSettings(el));
+  const settings = getCurrentAudioSettings(el);
+  if (
+    (audio.panner === undefined && settings.audioType === AudioType.PannerNode) ||
+    (audio.panner !== undefined && settings.audioType === AudioType.Stereo)
+  ) {
+    el.emit("audio_type_changed");
+  }
+  applySettings(audio, settings);
 }
 
 export function shouldAddSupplementaryAttenuation(el, audio) {

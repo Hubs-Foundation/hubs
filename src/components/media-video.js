@@ -87,6 +87,7 @@ AFRAME.registerComponent("media-video", {
     this.snap = this.snap.bind(this);
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
+    this.setupAudio = this.setupAudio.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
 
@@ -176,6 +177,7 @@ AFRAME.registerComponent("media-video", {
       }
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
+    this.el.addEventListener("audio_type_changed", this.setupAudio);
   },
 
   play() {
@@ -337,10 +339,8 @@ AFRAME.registerComponent("media-video", {
   },
 
   setupAudio() {
-    if (this.audio) {
-      this.el.removeObject3D("sound");
-      this.audioSystem.removeAudio(this.audio);
-    }
+    this.removeAudio();
+
     APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
     if (this.data.videoPaused) {
@@ -829,11 +829,7 @@ AFRAME.registerComponent("media-video", {
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
 
-    if (this.audio) {
-      this.el.removeObject3D("sound");
-      this.audioSystem.removeAudio(this.audio);
-      delete this.audio;
-    }
+    this.removeAudio();
 
     if (this.networkedEl) {
       this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
@@ -858,5 +854,14 @@ AFRAME.registerComponent("media-video", {
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
+    this.el.addEventListener("audio_type_changed", this.setupAudio);
+  },
+
+  removeAudio() {
+    if (this.audio) {
+      this.el.removeObject3D("sound");
+      this.audioSystem.removeAudio(this.audio);
+      delete this.audio;
+    }
   }
 });
