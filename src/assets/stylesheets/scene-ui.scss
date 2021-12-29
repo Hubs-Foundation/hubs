@@ -54,8 +54,8 @@
     width: 100%;
   }
   svg {
-    width: 100%;
-    min-height: 210px;
+    width: clamp(200px, 100%, 17vw);
+    height: clamp(200px, 100%, 17vh);
   }
 }
 
@@ -67,10 +67,12 @@
   flex-direction: column;
   align-items: center;
   align-self: center;
+  text-align: center;
   @media (min-width: theme.$breakpoint-lg) {
     align-items: flex-start;
     align-self: left;
     margin-left: 16px;
+    text-align: left;
   }
 }
 
@@ -81,7 +83,7 @@
 
 :local(.attribution) {
   font-size: 1.0em;
-  white-space: wrap;
+  white-space: normal;
 
   .remix {
     font-size: 0.8em;
@@ -89,7 +91,7 @@
 
   a {
     font-size: 0.8em;
-    color: black;
+    color: theme.$text1-color;
     pointer-events: auto;
   }
 }
