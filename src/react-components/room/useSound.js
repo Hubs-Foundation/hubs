@@ -7,7 +7,7 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
   const soundTimeoutRef = useRef();
   const audioElRef = useRef();
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
-  const { soundVolume, onAttachSource, onDettachSource } = useVolumeMeter({ updateRate });
+  const { soundVolume, setAudioSource } = useVolumeMeter({ updateRate });
 
   useEffect(
     () => {
@@ -27,17 +27,17 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
       const source = audioCtx.createMediaElementSource(audio);
       audioSystem.addAudio({ sourceType: SourceType.SFX, node: source });
 
-      onAttachSource(source);
+      setAudioSource(source);
       audioElRef.current = audio;
 
       return () => {
         audioElRef.current.pause();
         audioElRef.current.currentTime = 0;
         clearTimeout(soundTimeoutRef.current);
-        onDettachSource();
+        setAudioSource(null);
       };
     },
-    [audioSystem, onAttachSource, onDettachSource, scene, webmSrc, mp3Src, oggSrc, wavSrc]
+    [audioSystem, setAudioSource, scene, webmSrc, mp3Src, oggSrc, wavSrc]
   );
 
   const playSound = useCallback(

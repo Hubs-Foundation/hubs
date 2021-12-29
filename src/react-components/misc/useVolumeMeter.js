@@ -66,23 +66,20 @@ export function useVolumeMeter({ updateRate = 50 }) {
     [nodeRef, analyserRef, updateRate]
   );
 
-  const onDettachSource = useCallback(
-    () => {
-      nodeRef.current?.disconnect();
-    },
-    [nodeRef]
-  );
-
-  const onAttachSource = useCallback(
+  const setAudioSource = useCallback(
     source => {
-      nodeRef.current?.disconnect();
-      nodeRef.current = source;
-      if (nodeRef.current) {
-        nodeRef.current.connect(analyserRef.current);
+      if (source) {
+        nodeRef.current?.disconnect();
+        nodeRef.current = source;
+        if (nodeRef.current) {
+          nodeRef.current.connect(analyserRef.current);
+        }
+      } else {
+        nodeRef.current?.disconnect();
       }
     },
     [nodeRef, analyserRef]
   );
 
-  return { soundVolume, onAttachSource, onDettachSource };
+  return { soundVolume, setAudioSource };
 }
