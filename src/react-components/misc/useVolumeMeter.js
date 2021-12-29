@@ -29,7 +29,7 @@ function updateVolume(analyser, meter) {
 
 export function useVolumeMeter({ updateRate = 50 }) {
   const movingAvgRef = useRef();
-  const meterRef = useRef({ levels: [], volume: 0, prevVolume: 0 });
+  const meterRef = useRef({ levels: [], volume: 0, prevVolume: 0, max: 0 });
   const [soundVolume, setSoundVolume] = useState(0);
   const analyserRef = useRef();
   const nodeRef = useRef();
@@ -44,17 +44,16 @@ export function useVolumeMeter({ updateRate = 50 }) {
       analyserRef.current.fftSize = 32;
       meterRef.current.levels = new Uint8Array(analyserRef.current.fftSize);
 
-      let max = 0;
       const timout = setInterval(() => {
         updateVolume(analyserRef.current, meterRef.current);
 
-        max = Math.max(meterRef.current.volume, max);
+        meterRef.current.max = Math.max(meterRef.current.volume, meterRef.current.max);
 
         // We use a moving average to smooth out the visual animation or else it would twitch too fast for
         // the css renderer to keep up.
         movingAvgRef.current.push(Date.now(), meterRef.current.volume);
         const average = movingAvgRef.current.movingAverage();
-        const nextVolume = max === 0 ? 0 : average / max;
+        const nextVolume = meterRef.current.max === 0 ? 0 : average / meterRef.current.max;
 
         setSoundVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
       }, updateRate);
