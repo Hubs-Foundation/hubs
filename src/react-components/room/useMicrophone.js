@@ -1,41 +1,29 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import MovingAverage from "moving-average";
 import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
+import { useVolumeMeter } from "../misc/useVolumeMeter";
 
 export function useMicrophone(scene, updateRate = 50) {
+  const audioSystem = scene.systems["hubs-systems"].audioSystem;
   const mediaDevicesManager = window.APP.mediaDevicesManager;
   const movingAvgRef = useRef();
   const [isMicMuted, setIsMicMuted] = useState(!APP.dialog.isMicEnabled);
   const [isMicEnabled, setIsMicEnabled] = useState(window.APP.mediaDevicesManager.isMicShared);
-  const [micVolume, setMicVolume] = useState(0);
   const [permissionStatus, setPermissionsStatus] = useState(
     mediaDevicesManager.getPermissionsStatus(MediaDevices.MICROPHONE)
   );
   const [selectedMicDeviceId, setSelectedMicDeviceId] = useState(mediaDevicesManager.selectedMicDeviceId);
   const [micDevices, setMicDevices] = useState(mediaDevicesManager.micDevices);
+  const { volume } = useVolumeMeter({
+    analyser: audioSystem.outboundAnalyser,
+    updateRate
+  });
 
   useEffect(
     () => {
       if (!movingAvgRef.current) {
         movingAvgRef.current = MovingAverage(updateRate * 2);
       }
-
-      let max = 0;
-      let timeout;
-
-      const updateMicVolume = () => {
-        const analyser = scene.systems["local-audio-analyser"];
-        max = Math.max(analyser.volume, max);
-        // We use a moving average to smooth out the visual animation or else it would twitch too fast for
-        // the css renderer to keep up.
-        movingAvgRef.current.push(Date.now(), analyser.volume);
-        const average = movingAvgRef.current.movingAverage();
-        const nextVolume = max === 0 ? 0 : average / max;
-        setMicVolume(prevVolume => Math.max(0.15, Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
-        timeout = setTimeout(updateMicVolume, updateRate);
-      };
-
-      updateMicVolume();
 
       const onMicMutedStateChanged = ({ enabled }) => {
         setIsMicMuted(!enabled);
@@ -74,7 +62,6 @@ export function useMicrophone(scene, updateRate = 50) {
       setMicDevices(mediaDevicesManager.micDevices);
 
       return () => {
-        clearTimeout(timeout);
         APP.dialog.off("mic-state-changed", onMicMutedStateChanged);
         scene.removeEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, onMicDisabled);
         scene.removeEventListener(MediaDevicesEvents.MIC_SHARE_STARTED, onMicEnabled);
@@ -84,14 +71,14 @@ export function useMicrophone(scene, updateRate = 50) {
     },
     [
       setIsMicMuted,
-      setMicVolume,
       setIsMicEnabled,
       setSelectedMicDeviceId,
       setMicDevices,
       setPermissionsStatus,
       scene,
       updateRate,
-      mediaDevicesManager
+      mediaDevicesManager,
+      volume
     ]
   );
 
@@ -117,7 +104,7 @@ export function useMicrophone(scene, updateRate = 50) {
 
   return {
     isMicMuted,
-    micVolume,
+    micVolume: volume,
     toggleMute,
     isMicEnabled,
     permissionStatus,

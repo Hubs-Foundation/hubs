@@ -7,7 +7,8 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
   const soundTimeoutRef = useRef();
   const audioElRef = useRef();
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
-  const { soundVolume, setAudioSource } = useVolumeMeter({ updateRate });
+  const analyserRef = useRef(THREE.AudioContext.getContext().createAnalyser());
+  const { volume, setAudioSource } = useVolumeMeter({ analyser: analyserRef.current, updateRate });
 
   useEffect(
     () => {
@@ -58,5 +59,5 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
     [audioElRef, setIsSoundPlaying]
   );
 
-  return [isSoundPlaying, playSound, soundVolume];
+  return { isSoundPlaying, playSound, soundVolume: volume };
 }

@@ -20,7 +20,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
     micDevices
   } = useMicrophone(scene);
   const { speakerDeviceChanged, selectedSpeakersDeviceId, speakerDevices } = useSpeakers(scene);
-  const [isSoundPlaying, playSound, soundVolume] = useSound({ scene, webmSrc, mp3Src, oggSrc, wavSrc });
+  const { isSoundPlaying, playSound, soundVolume } = useSound({ scene, webmSrc, mp3Src, oggSrc, wavSrc });
 
   return (
     <MicSetupModal

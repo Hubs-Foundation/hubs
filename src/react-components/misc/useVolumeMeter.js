@@ -27,11 +27,10 @@ function updateVolume(analyser, meter) {
   meter.prevVolume = meter.volume;
 }
 
-export function useVolumeMeter({ updateRate = 50 }) {
+export function useVolumeMeter({ analyser, updateRate = 50 }) {
   const movingAvgRef = useRef();
   const meterRef = useRef({ levels: [], volume: 0, prevVolume: 0, max: 0 });
-  const [soundVolume, setSoundVolume] = useState(0);
-  const analyserRef = useRef();
+  const [volume, setVolume] = useState(0);
   const nodeRef = useRef();
 
   useEffect(
@@ -40,12 +39,11 @@ export function useVolumeMeter({ updateRate = 50 }) {
         movingAvgRef.current = MovingAverage(updateRate * 2);
       }
 
-      analyserRef.current = THREE.AudioContext.getContext().createAnalyser();
-      analyserRef.current.fftSize = 32;
-      meterRef.current.levels = new Uint8Array(analyserRef.current.fftSize);
+      analyser.fftSize = 32;
+      meterRef.current.levels = new Uint8Array(analyser.fftSize);
 
       const timout = setInterval(() => {
-        updateVolume(analyserRef.current, meterRef.current);
+        updateVolume(analyser, meterRef.current);
 
         meterRef.current.max = Math.max(meterRef.current.volume, meterRef.current.max);
 
@@ -55,7 +53,7 @@ export function useVolumeMeter({ updateRate = 50 }) {
         const average = movingAvgRef.current.movingAverage();
         const nextVolume = meterRef.current.max === 0 ? 0 : average / meterRef.current.max;
 
-        setSoundVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
+        setVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
       }, updateRate);
 
       return () => {
@@ -63,7 +61,7 @@ export function useVolumeMeter({ updateRate = 50 }) {
         clearInterval(timout);
       };
     },
-    [nodeRef, analyserRef, updateRate]
+    [nodeRef, analyser, updateRate]
   );
 
   const setAudioSource = useCallback(
@@ -72,14 +70,14 @@ export function useVolumeMeter({ updateRate = 50 }) {
         nodeRef.current?.disconnect();
         nodeRef.current = source;
         if (nodeRef.current) {
-          nodeRef.current.connect(analyserRef.current);
+          nodeRef.current.connect(analyser);
         }
       } else {
         nodeRef.current?.disconnect();
       }
     },
-    [nodeRef, analyserRef]
+    [nodeRef, analyser]
   );
 
-  return { soundVolume, setAudioSource };
+  return { volume, setAudioSource };
 }
