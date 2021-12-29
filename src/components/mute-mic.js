@@ -52,16 +52,16 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onToggle: function() {
-    APP.dialog.toggleMicrophone();
+    APP.mediaDevicesManager.toggleMic();
     if (!this.el.sceneEl.is("entered")) return;
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
   },
 
   onMute: function() {
-    APP.dialog.enableMicrophone(false);
+    APP.mediaDevicesManager.micEnabled = false;
   },
 
   onUnmute: function() {
-    APP.dialog.enableMicrophone(true);
+    APP.mediaDevicesManager.micEnabled = true;
   }
 });

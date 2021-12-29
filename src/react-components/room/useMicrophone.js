@@ -7,7 +7,7 @@ export function useMicrophone(scene, updateRate = 50) {
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
   const mediaDevicesManager = window.APP.mediaDevicesManager;
   const movingAvgRef = useRef();
-  const [isMicMuted, setIsMicMuted] = useState(!APP.dialog.isMicEnabled);
+  const [isMicMuted, setIsMicMuted] = useState(!mediaDevicesManager.isMicEnabled);
   const [isMicEnabled, setIsMicEnabled] = useState(window.APP.mediaDevicesManager.isMicShared);
   const [permissionStatus, setPermissionsStatus] = useState(
     mediaDevicesManager.getPermissionsStatus(MediaDevices.MICROPHONE)
@@ -85,7 +85,7 @@ export function useMicrophone(scene, updateRate = 50) {
   const toggleMute = useCallback(
     () => {
       if (mediaDevicesManager.isMicShared) {
-        APP.dialog.toggleMicrophone();
+        mediaDevicesManager.toggleMic();
       } else {
         mediaDevicesManager.startMicShare({ unmute: true });
       }
