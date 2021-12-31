@@ -416,35 +416,15 @@ AFRAME.registerComponent("camera-tool", {
     const chunks = [];
     const recordingStartTime = performance.now();
 
-    this.videoRecorder.ondataavailable = e => chunks.push(e.data);
+    this.videoRecorder.ondataavailable = e => {
+      chunks.push(e.data);
+      if (this.videoRecorder) return;
 
-    this.updateRenderTargetNextTick = true;
-
-    this.videoRecorder.start();
-    this.el.setAttribute("camera-tool", { isRecording: true, label: " " });
-    this.el.sceneEl.emit("action_camera_recording_started");
-
-    if (duration !== Infinity) {
-      this.videoCountdown = this.data.captureDuration;
-      this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
-
-      this.videoCountdownInterval = setInterval(() => {
-        this.videoCountdown--;
-
-        if (this.videoCountdown === 0) {
-          this.stopRecording();
-          this.videoCountdownInterval = null;
-        } else {
-          this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
-        }
-      }, 1000);
-    }
-
-    this.videoRecorder._free = () => (chunks.length = 0); // Used for cancelling
-    this.videoRecorder.onstop = async () => {
-      this.el.sceneEl.emit("action_camera_recording_ended");
-
-      if (chunks.length === 0) return;
+      // recording was stopped
+      if (this.isRecordingCancelled) {
+        chunks.length = 0;
+        return;
+      }
       const mimeType = chunks[0].type;
       const recordingDuration = performance.now() - recordingStartTime;
       const blob = new Blob(chunks, { type: mimeType });
@@ -480,18 +460,38 @@ AFRAME.registerComponent("camera-tool", {
 
       orientation.then(() => this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA }));
     };
+
+    this.updateRenderTargetNextTick = true;
+
+    this.videoRecorder.start();
+    this.el.setAttribute("camera-tool", { isRecording: true, label: " " });
+    this.el.sceneEl.emit("action_camera_recording_started");
+
+    if (duration !== Infinity) {
+      this.videoCountdown = this.data.captureDuration;
+      this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+
+      this.videoCountdownInterval = setInterval(() => {
+        this.videoCountdown--;
+
+        if (this.videoCountdown === 0) {
+          this.stopRecording();
+          this.videoCountdownInterval = null;
+        } else {
+          this.el.setAttribute("camera-tool", "label", `${this.videoCountdown}`);
+        }
+      }, 1000);
+    }
   },
 
   stopRecording(cancel) {
+    this.el.sceneEl.emit("action_camera_recording_ended");
     if (this.videoRecorder) {
-      if (cancel) {
-        this.videoRecorder.onstop = () => {};
-        this.videoRecorder._free();
-        this.el.sceneEl.emit("action_camera_recording_ended");
-      }
+      this.isRecordingCancelled = cancel;
 
-      this.videoRecorder.stop();
+      const _videoRecorder = this.videoRecorder;
       this.videoRecorder = null;
+      _videoRecorder.stop();
 
       if (!cancel) {
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
