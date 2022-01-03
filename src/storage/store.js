@@ -133,7 +133,8 @@ export const SCHEMA = {
         showAudioDebugPanel: { type: "bool" },
         enableAudioClipping: { type: "bool" },
         audioClippingThreshold: { type: "number" },
-        theme: { type: "string" }
+        theme: { type: "string" },
+        avatarVoiceLevels: { type: "object" }
       }
     },
 
