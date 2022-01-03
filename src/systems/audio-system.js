@@ -189,6 +189,7 @@ export class AudioSystem {
   addAudio({ sourceType, node }) {
     let outputNode = node;
     if (isThreeAudio(node)) {
+      node.gain.disconnect();
       outputNode = node.gain;
     }
     outputNode.connect(this.mixer[sourceType]);
