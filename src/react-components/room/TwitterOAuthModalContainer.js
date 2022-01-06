@@ -30,7 +30,14 @@ export function TwitterOAuthModalContainer({ hubChannel, onConnected, onClose })
         popup.focus();
         popupRef.current = popup;
       } catch (error) {
-        console.error(error);
+        if (error === "twitter_probably_misconfigured") {
+          console.error(
+            "Twitter might be misconfigured. Check the docs here: https://hubs.mozilla.com/docs/hubs-cloud-enable-media-browser.html#twitter"
+          );
+        } else {
+          console.error(error);
+        }
+        onClose();
       }
     },
     [hubChannel]
