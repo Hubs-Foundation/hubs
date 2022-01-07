@@ -10,6 +10,11 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
 import anime from "animejs";
 import { Layers } from "./layers";
+const { detect } = require("detect-browser");
+
+const browser = detect();
+
+const isFirefox = browser.name === "firefox";
 
 const cameraModelPromise = waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
 
@@ -372,17 +377,23 @@ AFRAME.registerComponent("camera-tool", {
     const stream = new MediaStream();
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
-    // HACK: FF 73+ seems to fail to decode videos with no audio track, so we always include a silent track.
-    // Note that chrome won't generate the video without some data flowing to the track, hence the oscillator.
-    const attachBlankAudio = () => {
-      const context = THREE.AudioContext.getContext();
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      const destination = context.createMediaStreamDestination();
-      gain.gain.setValueAtTime(0.0001, context.currentTime);
-      oscillator.connect(destination);
-      gain.connect(destination);
-      stream.addTrack(destination.stream.getAudioTracks()[0]);
+    // This adds hacks for current browser issues with media recordings when audio tracks are muted or missing.
+    const fixAudioTracks = () => {
+      if (isFirefox) {
+        // FF 73+ seems to fail to decode videos with no audio track, so we always include a silent track.
+        const context = THREE.AudioContext.getContext();
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        const destination = context.createMediaStreamDestination();
+        gain.gain.setValueAtTime(0.0001, context.currentTime);
+        oscillator.connect(destination);
+        gain.connect(destination);
+        stream.addTrack(destination.stream.getAudioTracks()[0]);
+      } else {
+        // Chrome has issues when the audio tracks are muted.
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=1223382
+        stream.getAudioTracks().forEach(t => stream.removeTrack(t));
+      }
     };
 
     if (this.data.captureAudio) {
@@ -405,10 +416,10 @@ AFRAME.registerComponent("camera-tool", {
         const audio = destination.stream.getAudioTracks()[0];
         stream.addTrack(audio);
       } else {
-        attachBlankAudio();
+        fixAudioTracks();
       }
     } else {
-      attachBlankAudio();
+      fixAudioTracks();
     }
 
     stream.addTrack(track);
@@ -416,7 +427,10 @@ AFRAME.registerComponent("camera-tool", {
     const chunks = [];
     const recordingStartTime = performance.now();
 
-    this.videoRecorder.ondataavailable = e => chunks.push(e.data);
+    this.videoRecorder.ondataavailable = e => {
+      console.log("Camera Tool: ondataavailable => " + e.data?.size);
+      chunks.push(e.data);
+    };
 
     this.updateRenderTargetNextTick = true;
 
