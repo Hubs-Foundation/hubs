@@ -622,7 +622,7 @@
   "user-profile-sidebar.unhide-button": "Montrer",
   "verify-modal.close-window": "Merci de fermer cette fenêtre de navigateur et de retourner à {origin}.",
   "verify-modal.error": "Erreur en vérifiant l'adresse email",
-  "verify-modal.title": "Vérifier",
+  "verify-modal.title": "Vérification",
   "verify-modal.unknown-error": "Erreur inconnue",
   "verify-modal.verification-complete": "Vérification terminée",
   "verify-modal.verifying-email": "Vérification de l'adresse email",
