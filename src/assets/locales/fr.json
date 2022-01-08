@@ -83,7 +83,7 @@
   "chat-sidebar.log-message.audio-normalization-disabled": "La normalisation audio est désactivée.",
   "chat-sidebar.log-message.audio-normalization-nan": "La commande audioNormalization nécessite un nombre valide dans les paramètres...",
   "chat-sidebar.log-message.audio-resumed": "L'audio a repris.",
-  "chat-sidebar.log-message.audio-suspended": "L'audio a été suspendu, cliquez quelque part dans la salle pour reprendre l'audio.",
+  "chat-sidebar.log-message.audio-suspended": "L'audio a été mis en pause, cliquez quelque part dans la salle pour reprendre l'audio.",
   "chat-sidebar.log-message.avatar-changed": "Votre avatar a été modifié.",
   "chat-sidebar.log-message.capture-already-running": "La capture est déjà en cours.",
   "chat-sidebar.log-message.capture-already-stopped": "La capture est déjà arrêtée.",
