@@ -284,7 +284,7 @@
   "more-menu.tos": "Conditions d'utilisation",
   "more-menu.unfavorite-room": "Supprimer la salle des favoris",
   "more-menu.whats-new": "Quoi de neuf",
-  "oauth-screen.description": "Vous devrez vous connecter pour {provider} accéder à la salle.",
+  "oauth-screen.description": "Vous devrez vous connecter à {provider} pour accéder à la salle.",
   "oauth-screen.email-reason": "Nous allons demander un accès à votre adresse email pour vous éviter de vous connecter à nouveau la prochaine fois.",
   "oauth-screen.sign-in-button": "Se connecter par {provider}",
   "oauth-screen.title": "Se Connecter Pour Continuer",
