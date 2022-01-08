@@ -442,7 +442,7 @@
   "reaction-popover.emoji-label.wave": "Faire coucou",
   "reaction-popover.title": "Réagir",
   "revoke-token-modal.cancel": "Annuler",
-  "revoke-token-modal.description1": "Êtes-vous sûr de vouloir revoquer ce jeton ?",
+  "revoke-token-modal.description1": "Êtes-vous sûr(e) de vouloir revoquer ce jeton ?",
   "revoke-token-modal.description2": "Tout script ou requête utilisant ce jeton perdra l'accès.",
   "revoke-token-modal.revoke": "Revoquer",
   "revoke-token-modal.revoke-warning-1": "Cette action est",
