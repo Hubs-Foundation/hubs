@@ -90,7 +90,7 @@
   "close-room-modal.message": "En fermant cette salle, vous allez exclure tous les participants, vous y compris, et la fermer définitivement.{linebreak}Confirmer ? Cette action ne peut pas être annulée.",
   "close-room-modal.room-name-match-error": "Le nom de la salle ne correspond pas",
   "close-room-modal.title": "Fermer la salle",
-  "close-room-modal.type-to-confirm": "Entrer le nom de la salle pour confirmer: {roomName}",
+  "close-room-modal.type-to-confirm": "Entrer le nom de la salle pour confirmer : {roomName}",
   "content-menu.objects-menu-button": "Objets",
   "content-menu.people-menu-button": "Personnes ({presenceCount})",
   "copyable-text-input-field.copied-label": "Copié",
