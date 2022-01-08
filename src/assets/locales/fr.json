@@ -327,7 +327,7 @@
   "people-sidebar.voice-label.not-talking": "Ne pas parler",
   "people-sidebar.voice-label.talking": "Parler",
   "photo-message.body": "{name} a pris une <a>photo</a>.",
-  "photo-message.default-tweet": "Capturé dans {shareHashtag}, rejoignez-moi ici {url}",
+  "photo-message.default-tweet": "Capturé dans {shareHashtag}",
   "place-popover.item-type.avatar": "Avatar",
   "place-popover.item-type.camera": "Caméra",
   "place-popover.item-type.gif": "GIF",
