@@ -249,7 +249,7 @@
   "media-tile.action.edit-scene": "Éditer la scène",
   "media-tile.action.room-info": "Info de la salle",
   "media-tile.action.show-similar-avatars": "Montrer les avatars similaires",
-  "media-tile.joined-room": "Joint {relativeTime}",
+  "media-tile.joined-room": "A rejoint {relativeTime}",
   "mic-permissions-modal.grant-mic-permissions": "Accorder les autorisations au micro",
   "mic-permissions-modal.mic-access-needed": "Vous avez besoin d'un micro pour être entendu par les autres participants.{linebreak}Vous pourrez couper votre micro dans la salle.",
   "mic-permissions-modal.title": "Entrer par un appareil",
