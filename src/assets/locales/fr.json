@@ -406,7 +406,7 @@
   "preferences-screen.preference.invert-touchscreen-camera-move": "Inverser la direction du mouvement de caméra pour les écrans tactiles",
   "preferences-screen.preference.lazy-load-scene-media": "Activer le chargement différé des ressources média de la scène",
   "preferences-screen.preference.locale": "Langue",
-  "preferences-screen.preference.material-quality-setting": "Qualité des surfaces (materials)",
+  "preferences-screen.preference.material-quality-setting": "Qualité des textures",
   "preferences-screen.preference.max-resolution": "Résolution maximale",
   "preferences-screen.preference.movement-speed-modifier": "Modificateur de la vitesse de mouvement",
   "preferences-screen.preference.mute-mic-on-entry": "Couper le micro en entrant",
