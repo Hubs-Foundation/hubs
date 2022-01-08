@@ -386,7 +386,7 @@
   "preferences-screen.preference.allow-multiple-hubs-instances": "Désactiver la sortie automatique quand de multiples instances de hubs sont ouvertes",
   "preferences-screen.preference.animate-waypoint-transitions": "Animer les transitions entre les waypoints",
   "preferences-screen.preference.audio-clipping-threshold": "Seuil pour l'audio clipping",
-  "preferences-screen.preference.disable-auto-gain-control": "Désactiver le contrôle automatique du gain du micro",
+  "preferences-screen.preference.disable-auto-gain-control": "Désactiver le contrôle automatique du volume du micro",
   "preferences-screen.preference.disable-auto-pixel-ratio": "Désactiver les ajustements automatiques du ratio de pixels",
   "preferences-screen.preference.disable-backwards-movement": "Désactiver les mouvements en marche arrière",
   "preferences-screen.preference.disable-echo-cancellation": "Désactiver l'annulation d'écho du micro",
