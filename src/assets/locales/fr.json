@@ -94,7 +94,7 @@
   "chat-sidebar.log-message.fly-mode-enabled": "Mode déplacement en volant activé.",
   "chat-sidebar.log-message.invalid-audio-normalization-range": "La commande audioNormalization nécessite un volume de base entre 0 [aucune normalisation] et 255. 0 par défaut. La valeur recommandée est 4, si vous souhaitez activer la normalisation.",
   "chat-sidebar.log-message.invalid-scene-url": "Cette URL ne pointe vers aucune scène ou fichier GLB valide.",
-  "chat-sidebar.log-message.join-failed": "Échec pour rejoindre la salle : {message}",
+  "chat-sidebar.log-message.join-failed": "L'entrée dans la salle a échoué : {message}",
   "chat-sidebar.log-message.positional-audio-disabled": "Audio spatialisé désactivé.",
   "chat-sidebar.log-message.positional-audio-enabled": "Audio spatialisé activé.",
   "chat-sidebar.log-message.room-entry-required": "Vous devez entrer dans la salle pour utiliser cette commande.",
