@@ -557,7 +557,7 @@
   "verify-modal.verification-complete": "Vérification terminée",
   "verify-modal.verifying-email": "Vérification de l'adresse email",
   "video-message.body": "{name} a fait une <a>vidéo</a>.",
-  "video-message.default-tweet": "Capturé dans {shareHashtag}, rejoignez-moi ici {url}",
+  "video-message.default-tweet": "Capturé dans {shareHashtag}",
   "voice-button-container.label": "Voix",
   "webvr-unsupported-modal.download-firefox-button": "Télécharger Firefox",
   "webvr-unsupported-modal.message": "WebVR n'est pas compatible avec ce navigateur, merci d'utiliser Firefox pour vous connecter avec Oculus ou SteamVR.",
