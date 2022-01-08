@@ -299,7 +299,7 @@
   "object-url-modal.create-object-button": "Créer un Objet",
   "object-url-modal.message": "Téléversez ou collez une URL pointant vers une image, vidéo, modèle ou scène. Vous pouvez trouver des modèles sur <sketchfablink>Sketchfab</sketchfablink> et <polylink>Google Poly</polylink>.",
   "object-url-modal.message-with-collection": "Téléversez ou collez une URL pointant vers une image, vidéo, modèle ou scène. Vous pouvez trouver des modèles sur <sketchfablink>Sketchfab</sketchfablink> et <polylink>Google Poly</polylink>, ou dans notre <collectionlink>collection</collectionlink>.",
-  "object-url-modal.title": "Objet personalisé",
+  "object-url-modal.title": "Objet personnalisé",
   "object-url-modal.url-field-description": "Accepte les fichiers glb, png, jpg, gif, mp4, et mp3",
   "object-url-modal.url-field-label": "URL vers objet ou fichier",
   "objects-sidebar.no-objects": "Il n'y a pas d'objets dans la salle.",
