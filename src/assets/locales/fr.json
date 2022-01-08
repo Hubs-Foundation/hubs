@@ -416,7 +416,7 @@
   "preferences-screen.preference.prefer-mobile-object-info-panel": "Préférer le panneau mobile d'informations d'objet",
   "preferences-screen.preference.preferred-camera": "Caméra préférée",
   "preferences-screen.preference.preferred-mic": "Micro préféré",
-  "preferences-screen.preference.show-audio-debug-panel": "Montrer le panneau de deboguage audio",
+  "preferences-screen.preference.show-audio-debug-panel": "Montrer le panneau de débogage audio",
   "preferences-screen.preference.show-fps-counter": "Montrer le compteur de FPS",
   "preferences-screen.preference.show-rtc-debug-panel": "Montrer le panneau RTC",
   "preferences-screen.preference.snap-rotation-degrees": "Crans de rotation (en degrés)",
