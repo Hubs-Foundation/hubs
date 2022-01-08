@@ -309,6 +309,8 @@
   "more-menu.tos": "Conditions d'utilisation",
   "more-menu.unfavorite-room": "Supprimer la salle des favoris",
   "more-menu.whats-new": "Quoi de neuf",
+  "more-menu.you": "Vous",
+  "more-menu.you-signed-in-as": "Vous (connecté(e) en tant que {email})",
   "new-token-scopes.read-rooms.description": "Lire les données de la salle",
   "new-token-scopes.write-rooms.description": "Écrire les données de la salle",
   "new-token.back": "Retour",
