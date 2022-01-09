@@ -703,7 +703,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  const req = new XMLHttpRequest();
+  req.open('GET', document.location, false);
+  req.send(null);
+  const token = req.getResponseHeader("token");
+
+
   await store.initProfile();
+  await store.initCredential(token);
 
   const canvas = document.querySelector(".a-canvas");
   canvas.classList.add("a-hidden");

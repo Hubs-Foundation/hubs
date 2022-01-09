@@ -40,7 +40,8 @@ export default class HubChannel extends EventTarget {
     super();
     this.store = store;
     this.hubId = hubId;
-    this._signedIn = !!this.store.state.credentials.token;
+    //this._signedIn = !!this.store.state.credentials.token;
+    this._signedIn = true;
     this._permissions = {};
     this._blockedSessionIds = new Set();
 

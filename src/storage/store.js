@@ -285,11 +285,17 @@ export default class Store extends EventTarget {
     //}
   };
 
+  initCredential = async(token) => {
+      this.update({ credentials: {token: token, email: null}});
+  }
+
+
   resetToRandomDefaultAvatar = async () => {
     this.update({
       profile: { ...(this.state.profile || {}), avatarId: await fetchRandomDefaultAvatarId() }
     });
   };
+  
 
   get state() {
     if (!this.hasOwnProperty(STORE_STATE_CACHE_KEY)) {

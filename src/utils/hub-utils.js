@@ -7,7 +7,7 @@ export function getCurrentHubId() {
     qs.get("hub_id") ||
     (document.location.pathname === "/" && defaultRoomId
       ? defaultRoomId
-      : document.location.pathname.substring(1).split("/")[0])
+      : document.location.pathname.substring(1).split("/")[1])
   );
 }
 
