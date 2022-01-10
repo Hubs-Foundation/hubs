@@ -28,7 +28,6 @@ export function MicSetupModal({
   isMicrophoneEnabled,
   micLevel,
   speakerLevel,
-  isSoundPlaying,
   onPlaySound,
   isMicrophoneMuted,
   onChangeMicrophoneMuted,
@@ -152,7 +151,7 @@ export function MicSetupModal({
           <div className={styles.audioIoContainer}>
             <div className={styles.iconContainer}>
               <VolumeHighIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
-              <LevelBar width={48} height={48} level={isSoundPlaying ? speakerLevel : 0} />
+              <LevelBar width={48} height={48} level={speakerLevel} />
             </div>
             <div className={styles.actionContainer}>
               <Button preset="basic" onClick={onPlaySound} sm>
@@ -186,7 +185,6 @@ export function MicSetupModal({
 
 MicSetupModal.propTypes = {
   className: PropTypes.string,
-  isSoundPlaying: PropTypes.bool,
   onPlaySound: PropTypes.func,
   micLevel: PropTypes.number,
   speakerLevel: PropTypes.number,

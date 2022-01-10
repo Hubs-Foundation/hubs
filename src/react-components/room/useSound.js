@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { SourceType } from "../../components/audio-params";
 import { useVolumeMeter } from "../misc/useVolumeMeter";
 
@@ -6,7 +6,6 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
   const soundTimeoutRef = useRef();
   const audioElRef = useRef();
-  const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const analyserRef = useRef(THREE.AudioContext.getContext().createAnalyser());
   const { volume, setAudioSource } = useVolumeMeter({ analyser: analyserRef.current, updateRate });
 
@@ -34,7 +33,6 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
       return () => {
         audioElRef.current.pause();
         audioElRef.current.currentTime = 0;
-        clearTimeout(soundTimeoutRef.current);
         setAudioSource(null);
       };
     },
@@ -49,15 +47,10 @@ export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavS
         audio.currentTime = 0;
         clearTimeout(soundTimeoutRef.current);
         audio.play();
-        setIsSoundPlaying(true);
-
-        soundTimeoutRef.current = setTimeout(() => {
-          setIsSoundPlaying(false);
-        }, 1393);
       }
     },
-    [audioElRef, setIsSoundPlaying]
+    [audioElRef]
   );
 
-  return { isSoundPlaying, playSound, soundVolume: volume };
+  return { playSound, soundVolume: volume };
 }

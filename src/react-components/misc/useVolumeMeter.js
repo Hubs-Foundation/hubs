@@ -53,7 +53,7 @@ export function useVolumeMeter({ analyser, updateRate = 50 }) {
         const average = movingAvgRef.current.movingAverage();
         const nextVolume = meterRef.current.max === 0 ? 0 : average / meterRef.current.max;
 
-        setVolume(prevVolume => (Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume));
+        setVolume(prevVolume => Math.max(Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume, 0.1));
       }, updateRate);
 
       return () => {
