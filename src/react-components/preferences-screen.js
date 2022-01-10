@@ -912,7 +912,10 @@ class PreferencesScreen extends Component {
 
   storeUpdated() {
     const { preferredMic } = this.props.store.state.preferences;
-    if (preferredMic !== this.mediaDevicesManager.selectedMicDeviceId) {
+    if (
+      MediaDevicesManager.isAudioInputSelectEnabled &&
+      preferredMic !== this.mediaDevicesManager.selectedMicDeviceId
+    ) {
       this.mediaDevicesManager
         .startMicShare({ deviceId: preferredMic, updatePrefs: false })
         .then(this.updateMediaDevices);
@@ -992,7 +995,7 @@ class PreferencesScreen extends Component {
       [
         CATEGORY_AUDIO,
         [
-          this.state.preferredMic,
+          ...(MediaDevicesManager.isAudioInputSelectEnabled ? [this.state.preferredMic] : []),
           ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {

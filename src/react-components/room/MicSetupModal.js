@@ -133,7 +133,8 @@ export function MicSetupModal({
               )}
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
-              isMicrophoneEnabled && (
+              isMicrophoneEnabled &&
+              microphoneOptions?.length > 0 && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
                     <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />

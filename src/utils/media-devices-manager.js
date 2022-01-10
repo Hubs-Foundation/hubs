@@ -1,5 +1,6 @@
 import { EventEmitter } from "eventemitter3";
 import { MediaDevicesEvents, PermissionStatus, MediaDevices, DEFAULT_DEVICE_ID } from "./media-devices-utils";
+import { detectOS, detect } from "detect-browser";
 
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -14,7 +15,14 @@ const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 // Note that this doesn't have to be exhaustive: if no devices match any regex
 // then we rely upon the user to select the proper mic.
 const HMD_MIC_REGEXES = [/\Wvive\W/i, /\Wrift\W/i];
+
 const audioOutputSelectEnabled = "sinkId" in HTMLMediaElement.prototype;
+
+// Subsequest calls to getUserMedia throw an exception and return a muted track so we disable mic selection for the moment.
+// Safari 15+
+const detectedOS = detectOS(navigator.userAgent);
+const browser = detect();
+const audioInputSelectEnabled = !(["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name));
 
 export default class MediaDevicesManager extends EventEmitter {
   constructor(scene, store, audioSystem) {
@@ -42,6 +50,10 @@ export default class MediaDevicesManager extends EventEmitter {
 
   static get isAudioOutputSelectEnabled() {
     return audioOutputSelectEnabled;
+  }
+
+  static get isAudioInputSelectEnabled() {
+    return audioInputSelectEnabled;
   }
 
   get deviceId() {
@@ -97,12 +109,14 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get selectedMicDeviceId() {
-    return this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || DEFAULT_DEVICE_ID;
+    return MediaDevicesManager.isAudioInputSelectEnabled
+      ? this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || DEFAULT_DEVICE_ID
+      : DEFAULT_DEVICE_ID;
   }
 
   get preferredMicDeviceId() {
     const { preferredMic } = this._store.state.preferences;
-    return preferredMic || DEFAULT_DEVICE_ID;
+    return MediaDevicesManager.isAudioInputSelectEnabled ? preferredMic || DEFAULT_DEVICE_ID : DEFAULT_DEVICE_ID;
   }
 
   get selectedSpeakersDeviceId() {
@@ -182,9 +196,11 @@ export default class MediaDevicesManager extends EventEmitter {
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
         mediaDevices = mediaDevices.filter(d => d.label !== "");
-        this.micDevices = mediaDevices
-          .filter(d => d.kind === "audioinput")
-          .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substr(0, 9)})` }));
+        if (MediaDevicesManager.isAudioInputSelectEnabled) {
+          this.micDevices = mediaDevices
+            .filter(d => d.kind === "audioinput")
+            .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substr(0, 9)})` }));
+        }
         this.videoDevices = mediaDevices
           .filter(d => d.kind === "videoinput")
           .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substr(0, 9)})` }));
@@ -203,7 +219,9 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   async startMicShare({ deviceId, unmute, updatePrefs = true }) {
+    if (this.isMicShared && this.selectedMicDeviceId === deviceId) return;
     console.log("Starting microphone sharing");
+
     if (!deviceId) {
       deviceId = DEFAULT_DEVICE_ID;
     }
