@@ -223,7 +223,6 @@ export default class MediaDevicesManager extends EventEmitter {
         updatePrefs && this._store.update({ preferences: { preferredMic: micDeviceId } });
         console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
       }
-      this._scene.emit(MediaDevicesEvents.MIC_SHARE_STARTED);
     } else {
       console.log("No available audio tracks");
     }
@@ -235,6 +234,7 @@ export default class MediaDevicesManager extends EventEmitter {
     }
 
     if (result) {
+      this._scene.emit(MediaDevicesEvents.MIC_SHARE_STARTED);
       this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.GRANTED;
       this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
         mediaDevice: MediaDevices.MICROPHONE,
