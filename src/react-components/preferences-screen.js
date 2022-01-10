@@ -10,6 +10,8 @@ import styles from "../assets/stylesheets/preferences-screen.scss";
 import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
+import MediaDevicesManager from "../utils/media-devices-manager";
+import { MediaDevicesEvents } from "../utils/media-devices-utils";
 
 export const CLIPPING_THRESHOLD_ENABLED = false;
 export const CLIPPING_THRESHOLD_MIN = 0.0;
@@ -374,6 +376,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.preferred-mic",
     defaultMessage: "Preferred mic"
   },
+  preferredSpeakers: {
+    id: "preferences-screen.preference.preferred-speakers",
+    defaultMessage: "Preferred speakers"
+  },
   muteMicOnEntry: {
     id: "preferences-screen.preference.mute-mic-on-entry",
     defaultMessage: "Mute microphone on entry"
@@ -385,6 +391,10 @@ const preferenceLabels = defineMessages({
   globalMediaVolume: {
     id: "preferences-screen.preference.global-media-volume",
     defaultMessage: "Media Volume"
+  },
+  globalSFXVolume: {
+    id: "preferences-screen.preference.global-sfx-volume",
+    defaultMessage: "SFX Volume"
   },
   disableSoundEffects: {
     id: "preferences-screen.preference.disable-sound-effects",
@@ -799,9 +809,8 @@ class PreferencesScreen extends Component {
     // We should either avoid remounting or persist the category somewhere besides state.
     super();
 
-    this.devicesUpdated = () => {
-      this.updateVideoDevices();
-    };
+    this.storeUpdated = this.storeUpdated.bind(this);
+
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
 
     this.state = {
@@ -811,25 +820,24 @@ class PreferencesScreen extends Component {
         key: "preferredMic",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "none", text: "None" }],
-        defaultString: "none",
-        onChanged: this.onMicSelectionChanged
+        defaultString: "Default"
       },
       preferredCamera: {
         key: "preferredCamera",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "none", text: "None" }],
         defaultString: "none"
-      }
+      },
+      ...(MediaDevicesManager.isAudioOutputSelectEnabled && {
+        preferredSpeakers: {
+          key: "preferredSpeakers",
+          prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+          options: [{ value: "none", text: "None" }],
+          defaultString: "Default"
+        }
+      })
     };
   }
-
-  onMicSelectionChanged = deviceId => {
-    if (deviceId === "none") {
-      this.mediaDevicesManager.stopMicShare().then(this.updateMediaDevices);
-    } else {
-      this.mediaDevicesManager.startMicShare(deviceId).then(this.updateMediaDevices);
-    }
-  };
 
   onMediaDevicesUpdated = () => {
     this.updateMediaDevices();
@@ -842,17 +850,14 @@ class PreferencesScreen extends Component {
       text: device.label
     }));
     const preferredMic = { ...this.state.preferredMic };
-    preferredMic.options = [
-      {
-        value: "none",
-        text: this.props.intl.formatMessage({
-          id: "preferences-screen.preferred-mic.default",
-          defaultMessage: "None"
-        })
-      }
-    ];
-    preferredMic.options.push(...micOptions);
-    this.props.store.update({ preferences: { ["preferredMic"]: this.mediaDevicesManager.selectedMicDeviceId } });
+    preferredMic.options = micOptions?.length > 0 ? micOptions : [{ value: "none", text: "None" }];
+
+    const speakersOptions = this.mediaDevicesManager.outputDevices.map(device => ({
+      value: device.value,
+      text: device.label
+    }));
+    const preferredSpeakers = { ...this.state.preferredSpeakers };
+    preferredSpeakers.options = speakersOptions?.length > 0 ? speakersOptions : [{ value: "none", text: "None" }];
 
     // Video devices update
     const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
@@ -886,30 +891,35 @@ class PreferencesScreen extends Component {
     preferredCamera.options.push(...videoOptions);
 
     // Update media devices state
-    this.setState({ preferredMic, preferredCamera });
-  };
-
-  storeUpdated = () => {
-    const deviceId = this.props.store?.state?.preferences?.preferredMic;
-    if (!deviceId && this.mediaDevicesManager.isMicShared) {
-      this.mediaDevicesManager.stopMicShare();
-    }
+    this.setState({
+      preferredMic,
+      preferredSpeakers,
+      preferredCamera
+    });
   };
 
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    this.props.scene.addEventListener("devicechange", this.onMediaDevicesUpdated);
+    this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
 
-    if (!this.mediaDevicesManager.isMicShared) {
-      this.mediaDevicesManager.startMicShare().then(this.updateMediaDevices);
-    } else {
-      this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
-    }
+    this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
   }
 
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    this.props.scene.removeEventListener("devicechange", this.onMediaDevicesUpdated);
+    this.mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
+  }
+
+  storeUpdated() {
+    const { preferredMic } = this.props.store.state.preferences;
+    if (
+      MediaDevicesManager.isAudioInputSelectEnabled &&
+      preferredMic !== this.mediaDevicesManager.selectedMicDeviceId
+    ) {
+      this.mediaDevicesManager
+        .startMicShare({ deviceId: preferredMic, updatePrefs: false })
+        .then(this.updateMediaDevices);
+    }
   }
 
   createSections() {
@@ -985,7 +995,8 @@ class PreferencesScreen extends Component {
       [
         CATEGORY_AUDIO,
         [
-          this.state.preferredMic,
+          ...(MediaDevicesManager.isAudioInputSelectEnabled ? [this.state.preferredMic] : []),
+          ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {
             key: "globalVoiceVolume",
@@ -998,6 +1009,15 @@ class PreferencesScreen extends Component {
           },
           {
             key: "globalMediaVolume",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 0,
+            max: 200,
+            step: 5,
+            digits: 0,
+            defaultNumber: 100
+          },
+          {
+            key: "globalSFXVolume",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 0,
             max: 200,

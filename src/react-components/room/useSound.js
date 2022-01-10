@@ -1,52 +1,56 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { SourceType } from "../../components/audio-params";
+import { useVolumeMeter } from "../misc/useVolumeMeter";
 
-export function useSound({ webmSrc, mp3Src, oggSrc, wavSrc }) {
+export function useSound({ scene, updateRate = 50, webmSrc, mp3Src, oggSrc, wavSrc }) {
+  const audioSystem = scene.systems["hubs-systems"].audioSystem;
   const soundTimeoutRef = useRef();
   const audioElRef = useRef();
-  const [soundPlaying, setSoundPlaying] = useState(false);
+  const analyserRef = useRef(THREE.AudioContext.getContext().createAnalyser());
+  const { volume, setAudioSource } = useVolumeMeter({ analyser: analyserRef.current, updateRate });
 
   useEffect(
     () => {
-      const audioEl = document.createElement("audio");
+      const audio = document.createElement("audio");
 
-      if (audioEl.canPlayType("audio/webm")) {
-        audioEl.src = webmSrc;
-      } else if (audioEl.canPlayType("audio/mpeg")) {
-        audioEl.src = mp3Src;
-      } else if (audioEl.canPlayType("audio/ogg")) {
-        audioEl.src = oggSrc;
+      if (audio.canPlayType("audio/webm")) {
+        audio.src = webmSrc;
+      } else if (audio.canPlayType("audio/mpeg")) {
+        audio.src = mp3Src;
+      } else if (audio.canPlayType("audio/ogg")) {
+        audio.src = oggSrc;
       } else {
-        audioEl.src = wavSrc;
+        audio.src = wavSrc;
       }
 
-      audioElRef.current = audioEl;
+      const audioCtx = THREE.AudioContext.getContext();
+      const source = audioCtx.createMediaElementSource(audio);
+      audioSystem.addAudio({ sourceType: SourceType.SFX, node: source });
+
+      setAudioSource(source);
+      audioElRef.current = audio;
 
       return () => {
-        audioEl.pause();
-        audioEl.currentTime = 0;
-        clearTimeout(soundTimeoutRef.current);
+        audioElRef.current.pause();
+        audioElRef.current.currentTime = 0;
+        setAudioSource(null);
       };
     },
-    [webmSrc, mp3Src, oggSrc, wavSrc]
+    [audioSystem, setAudioSource, scene, webmSrc, mp3Src, oggSrc, wavSrc]
   );
 
   const playSound = useCallback(
     () => {
-      const audioEl = audioElRef.current;
+      const audio = audioElRef.current;
 
-      if (audioEl) {
-        audioEl.currentTime = 0;
+      if (audio) {
+        audio.currentTime = 0;
         clearTimeout(soundTimeoutRef.current);
-        audioEl.play();
-        setSoundPlaying(true);
-
-        soundTimeoutRef.current = setTimeout(() => {
-          setSoundPlaying(false);
-        }, 1393);
+        audio.play();
       }
     },
-    [audioElRef, setSoundPlaying]
+    [audioElRef]
   );
 
-  return [soundPlaying, playSound];
+  return { playSound, soundVolume: volume };
 }
