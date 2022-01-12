@@ -27,3 +27,10 @@ export function getCurrentStreamer() {
 
   return null;
 }
+
+export function getPlayerInfo(sessionId) {
+  const playerInfos = window.APP.componentRegistry["player-info"] || [];
+  return playerInfos.find(info => {
+    return info.playerSessionId === sessionId;
+  });
+}
