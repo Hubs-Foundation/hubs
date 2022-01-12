@@ -382,7 +382,29 @@ module.exports = async (env, argv) => {
         // Some JS assets are loaded at runtime and should be coppied unmodified and loaded using file-loader
         {
           test: [
-            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js")
+            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js"),
+            path.resolve(
+              __dirname,
+              "node_modules",
+              "three",
+              "examples",
+              "js",
+              "libs",
+              "draco",
+              "gltf",
+              "draco_decoder.js"
+            ),
+            path.resolve(
+              __dirname,
+              "node_modules",
+              "three",
+              "examples",
+              "js",
+              "libs",
+              "draco",
+              "gltf",
+              "draco_wasm_wrapper.js"
+            )
           ],
           loader: "file-loader",
           options: {

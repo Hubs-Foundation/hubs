@@ -23,7 +23,9 @@ export function UserProfileSidebarContainer({
     roles
   } = user;
   const mayKick = hubChannel.canOrWillIfCreator("kick_users");
-  const mayMute = user.micPresence && !user.micPresence.muted && hubChannel.canOrWillIfCreator("mute_users");
+  const hasMicPresence = !!user.micPresence;
+  const isNetworkMuted = user.micPresence?.muted;
+  const mayMute = !isNetworkMuted && hubChannel.canOrWillIfCreator("mute_users");
   const [isOwner, setIsOwner] = useState(!!roles.owner);
   const isCreator = !!roles.creator;
   const isSignedIn = !!roles.signed_in;
@@ -37,7 +39,7 @@ export function UserProfileSidebarContainer({
         getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => setAvatarThumbnailUrl(avatarThumbnailUrl));
       }
     },
-    [avatarId, setAvatarThumbnailUrl]
+    [avatarId, setAvatarThumbnailUrl, user]
   );
 
   const addOwner = useCallback(
@@ -117,6 +119,7 @@ export function UserProfileSidebarContainer({
 
   return (
     <UserProfileSidebar
+      userId={user.id}
       displayName={displayName}
       identityName={identityName}
       avatarPreview={<img src={avatarThumbnailUrl} />}
@@ -128,12 +131,14 @@ export function UserProfileSidebarContainer({
       isHidden={isHidden}
       onToggleHidden={toggleHidden}
       canMute={mayMute}
+      isNetworkMuted={isNetworkMuted}
       onMute={mute}
       canKick={mayKick}
       onKick={kick}
       showBackButton={showBackButton}
       onClose={onClose}
       onBack={onBack}
+      hasMicPresence={hasMicPresence}
     />
   );
 }

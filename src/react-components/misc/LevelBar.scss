@@ -1,0 +1,19 @@
+@use '../styles/theme';
+
+:local(.level-bar-container) {
+  display: flex;
+}
+
+:local(.level-bar-border) {
+  position: relative;
+  width: 18px;
+  border: 1px solid var(--toolbar-basic-border-color);
+  border-radius: theme.$border-radius-small;
+}
+
+:local(.level-bar) {
+  position: absolute;
+  width: 18px;
+  border-radius: theme.$border-radius-small;
+  background-color: theme.$green;
+}
