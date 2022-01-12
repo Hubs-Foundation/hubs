@@ -394,7 +394,7 @@
   "preferences-screen.preference.disable-idle-detection": "Désactiver la sortie automatique si inactif ou en arrière-plan",
   "preferences-screen.preference.disable-movement": "Désactiver le mouvement",
   "preferences-screen.preference.disable-noise-suppression": "Désactiver la suppression de bruit du micro",
-  "preferences-screen.preference.disable-panning": "Désactiver le panning audio gauche/droite",
+  "preferences-screen.preference.disable-panning": "Désactiver l'audio panoramique (gauche/droite)"
   "preferences-screen.preference.disable-sound-effects": "Désactiver les effets sonores",
   "preferences-screen.preference.disable-strafing": "Désactiver le mitraillage",
   "preferences-screen.preference.disable-teleporter": "Désactiver la téléportation",
