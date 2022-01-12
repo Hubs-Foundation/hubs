@@ -1,15 +1,29 @@
 import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
-import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
-import { ToolbarButton } from "../input/ToolbarButton";
 import { useMicrophone } from "./useMicrophone";
-import { FormattedMessage } from "react-intl";
+import { AudioToolbarPopoverButton } from "./AudioToolbarPopover";
+import { useSpeakers } from "./useSpeakers";
+import { useSound } from "./useSound";
+import webmSrc from "../../assets/sfx/tone.webm";
+import mp3Src from "../../assets/sfx/tone.mp3";
+import oggSrc from "../../assets/sfx/tone.ogg";
+import wavSrc from "../../assets/sfx/tone.wav";
 
 export function VoiceButtonContainer({ scene }) {
   const buttonRef = useRef();
 
-  const { isMicMuted, micVolume, toggleMute, isMicEnabled } = useMicrophone(scene);
+  const {
+    micVolume,
+    isMicEnabled,
+    permissionStatus,
+    micDeviceChanged,
+    selectedMicDeviceId,
+    micDevices,
+    isMicMuted,
+    toggleMute
+  } = useMicrophone(scene);
+  const { speakerDeviceChanged, selectedSpeakersDeviceId, speakerDevices } = useSpeakers(scene);
+  const { playSound, soundVolume } = useSound({ scene, webmSrc, mp3Src, oggSrc, wavSrc });
 
   useEffect(
     () => {
@@ -29,13 +43,21 @@ export function VoiceButtonContainer({ scene }) {
   );
 
   return (
-    <ToolbarButton
+    <AudioToolbarPopoverButton
       ref={buttonRef}
-      icon={isMicMuted || !isMicEnabled ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
-      label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}
-      preset="basic"
-      onClick={toggleMute}
-      statusColor={isMicMuted || !isMicEnabled ? "disabled" : "enabled"}
+      micLevel={micVolume}
+      speakerLevel={soundVolume}
+      onPlaySound={playSound}
+      isMicrophoneEnabled={isMicEnabled}
+      isMicrophoneMuted={isMicMuted}
+      permissionStatus={permissionStatus}
+      selectedMicrophone={selectedMicDeviceId}
+      selectedSpeaker={selectedSpeakersDeviceId}
+      microphoneOptions={micDevices}
+      speakerOptions={speakerDevices}
+      onChangeMicrophone={micDeviceChanged}
+      onChangeSpeaker={speakerDeviceChanged}
+      onChangeMicrophoneMuted={toggleMute}
     />
   );
 }

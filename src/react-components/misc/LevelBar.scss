@@ -1,6 +1,7 @@
 @use '../styles/theme';
 
 :local(.level-bar-container) {
+  position: relative;
   display: flex;
 }
 

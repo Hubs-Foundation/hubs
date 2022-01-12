@@ -69,7 +69,7 @@ export function MicSetupModal({
               {permissionStatus === PermissionStatus.GRANTED && (
                 <LevelBar
                   className={styles.level}
-                  width={48}
+                  width={24}
                   height={48}
                   level={!isMicrophoneEnabled || isMicrophoneMuted ? 0 : micLevel}
                 />
@@ -152,7 +152,7 @@ export function MicSetupModal({
           <div className={styles.audioIoContainer}>
             <div className={styles.iconContainer}>
               <VolumeHighIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
-              <LevelBar width={48} height={48} level={speakerLevel} />
+              <LevelBar width={24} height={48} level={speakerLevel} />
             </div>
             <div className={styles.actionContainer}>
               <Button preset="basic" onClick={onPlaySound} sm>

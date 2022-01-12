@@ -677,3 +677,27 @@
 :local(.status-recording) {
   background-color: theme.$status-recording-color;
 }
+
+:local(.left) {
+  :local(.icon-container) {
+    width: 48px;
+    border-radius: 0px;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
+  } 
+}
+
+:local(.middle) {
+  :local(.icon-container) {
+    border-radius: 0px;
+  }
+}
+
+:local(.right) {
+  :local(.icon-container) {
+    width: 48px;
+    border-radius: 0px;
+    border-top-right-radius: 9999px;
+    border-bottom-right-radius: 9999px;
+  }
+}
