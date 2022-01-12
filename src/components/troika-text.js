@@ -23,8 +23,8 @@ function numberOrPercent(defaultValue) {
 AFRAME.registerComponent("troika-text", {
   schema: {
     align: { type: "string", default: "left", oneOf: ["left", "right", "center", "justify"] },
-    anchor: { default: "center", oneOf: ["left", "right", "center", "align"] },
-    baseline: { default: "center", oneOf: ["top", "center", "bottom"] },
+    anchorX: { default: "left", oneOf: ["left", "right", "center", "align"] },
+    anchorY: { default: "bottom-baseline", oneOf: ["top", "top-baseline", "middle", "bottom-baseline", "bottom"] },
     clipRect: {
       type: "string",
       default: "",
@@ -50,7 +50,7 @@ AFRAME.registerComponent("troika-text", {
     direction: { type: "string", default: "auto", oneOf: ["auto", "ltr", "rtl"] },
     fillOpacity: { type: "number", default: 1 },
     font: { type: "string" },
-    fontSize: { type: "number", default: 0.2 },
+    fontSize: { type: "number", default: 1 },
     letterSpacing: { type: "number", default: 0 },
     lineHeight: { type: "number" },
     maxWidth: { type: "number", default: Infinity },
@@ -64,6 +64,7 @@ AFRAME.registerComponent("troika-text", {
     strokeColor: { type: "color", default: "grey" },
     strokeOpacity: { type: "number", default: 1 },
     strokeWidth: numberOrPercent(0),
+    text: { type: "string", default: "" },
     textIndent: { type: "number", default: 0 },
     value: { type: "string" },
     whiteSpace: { default: "normal", oneOf: ["normal", "nowrap"] }
@@ -91,18 +92,19 @@ AFRAME.registerComponent("troika-text", {
     const mesh = this.troikaTextMesh;
 
     // Update the text mesh
-    mesh.text = (data.text || "").replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+    mesh.text = data.text || "";
     mesh.textAlign = data.textAlign;
     mesh.anchorX = data.anchorX;
     mesh.anchorY = data.anchorY;
-    mesh.color = data.color;
+    mesh.color = new THREE.Color(data.color);
     mesh.curveRadius = data.curveRadius;
     mesh.depthOffset = data.depthOffset || 0;
     mesh.direction = data.direction;
     mesh.fillOpacity = data.fillOpacity;
-    mesh.font = data.font; //TODO accept and load URL
+    mesh.font = data.font;
     mesh.fontSize = data.fontSize;
     mesh.letterSpacing = data.letterSpacing || 0;
+    mesh.clipRect = data.clipRect;
     mesh.lineHeight = data.lineHeight || "normal";
     mesh.outlineBlur = data.outlineBlur;
     mesh.outlineColor = data.outlineColor;
@@ -127,10 +129,5 @@ AFRAME.registerComponent("troika-text", {
   remove: function() {
     // Free memory
     this.troikaTextMesh.dispose();
-
-    // If using sub-entity, remove it
-    if (this.troikaTextEntity !== this.el) {
-      this.el.removeChild(this.troikaTextEntity);
-    }
   }
 });
