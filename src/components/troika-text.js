@@ -78,7 +78,6 @@ AFRAME.registerComponent("troika-text", {
    * Called once when component is attached for initial setup.
    */
   init: function() {
-    console.log("init1");
     this.troikaTextMesh = new Text();
     this.el.setObject3D("mesh", this.troikaTextMesh);
   },
