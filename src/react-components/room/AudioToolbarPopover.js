@@ -58,13 +58,15 @@ function AudioToolbarPopoverContent({
       <p style={{ alignSelf: "start" }}>
         <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
       </p>
-      <SelectInputField
-        className={styles.selectionInput}
-        buttonClassName={styles.selectionInput}
-        value={selectedSpeaker}
-        options={speakerOptions}
-        onChange={onChangeSpeaker}
-      />
+      {speakerOptions?.length > 0 && (
+        <SelectInputField
+          className={styles.selectionInput}
+          buttonClassName={styles.selectionInput}
+          value={selectedSpeaker}
+          options={speakerOptions}
+          onChange={onChangeSpeaker}
+        />
+      )}
       <Row noWrap>
         <VolumeHighIcon className={iconStyle} style={{ marginRight: "12px" }} />
         <LevelBar width={200} height={24} level={speakerLevel} />
