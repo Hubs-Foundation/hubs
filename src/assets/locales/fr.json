@@ -519,7 +519,7 @@
   "save-api-token.copied": "Copié",
   "save-api-token.copy-label": "Jeton API",
   "save-api-token.description1": "Veuillez sauvegarder ce jeton API dans un endroit sûr.",
-  "save-api-token.description2": "Vous ne serez pas en mesure de le voir de nouveau une fois que vous aurez fermé cette fenêtre.",
+  "save-api-token.description2": "Vous ne serez pas en mesure de le voir de nouveau une fois cette fenêtre fermée.",
   "save-api-token.revoke": "Confirmer et fermer",
   "save-api-token.scopes": "Portées d'accès",
   "save-api-token.title": "Jeton API",
