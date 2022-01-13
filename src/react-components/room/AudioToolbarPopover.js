@@ -44,7 +44,11 @@ function AudioToolbarPopoverContent({
         onChange={onChangeMicrophone}
       />
       <Row noWrap>
-        <MicrophoneIcon className={iconStyle} style={{ marginRight: "12px" }} />
+        {isMicrophoneEnabled && !isMicrophoneMuted ? (
+          <MicrophoneIcon className={iconStyle} style={{ marginRight: "12px" }} />
+        ) : (
+          <MicrophoneMutedIcon className={iconStyle} style={{ marginRight: "12px" }} />
+        )}
         <LevelBar width={200} height={24} level={!isMicrophoneEnabled || isMicrophoneMuted ? 0 : micLevel} />
       </Row>
       <Row nowrap>
