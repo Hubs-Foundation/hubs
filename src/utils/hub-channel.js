@@ -360,7 +360,7 @@ export default class HubChannel extends EventTarget {
         .receive("ok", res => {
           resolve(res.oauth_url);
         })
-        .receive("error", reject);
+        .receive("error", err => reject(new Error(err.reason)));
     });
   };
 
