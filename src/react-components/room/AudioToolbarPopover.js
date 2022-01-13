@@ -113,7 +113,7 @@ export const AudioToolbarPopoverButton = memo(
     return (
       <Popover
         title={title}
-        content={() => <AudioToolbarPopoverContent {...rest} />}
+        content={<AudioToolbarPopoverContent {...rest} />}
         placement="top-start"
         offsetDistance={28}
         initiallyVisible={initiallyVisible}
@@ -148,6 +148,5 @@ export const AudioToolbarPopoverButton = memo(
 
 AudioToolbarPopoverButton.propTypes = {
   initiallyVisible: PropTypes.bool,
-  popoverApiRef: PropTypes.object,
   ...AudioToolbarPopoverContent.propTypes
 };
