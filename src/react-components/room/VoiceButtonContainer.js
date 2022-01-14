@@ -4,10 +4,7 @@ import { useMicrophone } from "./useMicrophone";
 import { AudioToolbarPopoverButton } from "./AudioToolbarPopover";
 import { useSpeakers } from "./useSpeakers";
 import { useSound } from "./useSound";
-import webmSrc from "../../assets/sfx/tone.webm";
-import mp3Src from "../../assets/sfx/tone.mp3";
-import oggSrc from "../../assets/sfx/tone.ogg";
-import wavSrc from "../../assets/sfx/tone.wav";
+import { SOUND_SPEAKER_TONE } from "../../systems/sound-effects-system";
 
 export function VoiceButtonContainer({ scene }) {
   const buttonRef = useRef();
@@ -23,7 +20,10 @@ export function VoiceButtonContainer({ scene }) {
     toggleMute
   } = useMicrophone(scene);
   const { speakerDeviceChanged, selectedSpeakersDeviceId, speakerDevices } = useSpeakers(scene);
-  const { playSound, soundVolume } = useSound({ scene, webmSrc, mp3Src, oggSrc, wavSrc });
+  const { playSound, soundVolume } = useSound({
+    scene,
+    sound: SOUND_SPEAKER_TONE
+  });
 
   useEffect(
     () => {
