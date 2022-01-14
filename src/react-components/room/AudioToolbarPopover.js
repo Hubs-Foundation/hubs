@@ -49,7 +49,7 @@ function AudioToolbarPopoverContent({
         ) : (
           <MicrophoneMutedIcon className={iconStyle} style={{ marginRight: "12px" }} />
         )}
-        <LevelBar width={200} height={24} level={!isMicrophoneEnabled || isMicrophoneMuted ? 0 : micLevel} />
+        <LevelBar className={styles.levelBar} level={!isMicrophoneEnabled || isMicrophoneMuted ? 0 : micLevel} />
       </Row>
       <Row nowrap>
         <ToggleInput
@@ -73,7 +73,7 @@ function AudioToolbarPopoverContent({
       )}
       <Row noWrap>
         <VolumeHighIcon className={iconStyle} style={{ marginRight: "12px" }} />
-        <LevelBar width={200} height={24} level={speakerLevel} />
+        <LevelBar className={styles.levelBar} level={speakerLevel} />
       </Row>
       <Button preset="basic" onClick={onPlaySound} sm>
         <FormattedMessage id="mic-setup-modal.test-audio-button" defaultMessage="Test Audio" />

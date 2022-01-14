@@ -1,35 +1,32 @@
-import React, { useMemo } from "react";
+import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
+import classNames from "classnames";
 import styles from "./LevelBar.scss";
 
-export function LevelBar({ width, height, level }) {
-  const clip = useMemo(
+export function LevelBar({ className, level }) {
+  const ref = useRef();
+
+  useEffect(
     () => {
-      if (height > width) {
-        return `rect(${height - level * height}px, ${width}px, ${height}px, 0px)`;
+      const pct = level * 100;
+      if (ref.current.clientWidth > ref.current.clientHeight) {
+        ref.current.style.clipPath = `polygon(0% 100%, ${pct}% 100%, ${pct}% 0%, 0% 0%)`;
       } else {
-        return `rect(0, ${level * width}px, ${height}px, 0px)`;
+        ref.current.style.clipPath = `polygon(0% 100%, 100% 100%, 100% ${100 - pct}%, 0% ${100 - pct}%)`;
       }
     },
-    [width, height, level]
+    [ref, level]
   );
+
   return (
-    <div className={styles.levelBarContainer}>
-      <div className={styles.levelBarBorder} style={{ width: `${width}px`, height: `${height}px` }} />
-      <div
-        className={styles.levelBar}
-        style={{
-          height: `${height}px`,
-          width: `${width}px`,
-          clip: `${clip}`
-        }}
-      />
+    <div className={classNames(styles.levelBarContainer, className)}>
+      <div className={styles.levelBarBorder} />
+      <div ref={ref} className={styles.levelBar} />
     </div>
   );
 }
 
 LevelBar.propTypes = {
-  width: PropTypes.number,
-  height: PropTypes.number,
+  className: PropTypes.string,
   level: PropTypes.number
 };

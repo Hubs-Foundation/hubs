@@ -133,3 +133,8 @@ $mobile-breakpoint-width: 450px;
     fill: theme.$darkgrey;
   }
 }
+
+:local(.level-bar) {
+  width: 24px;
+  height: 100%;
+}

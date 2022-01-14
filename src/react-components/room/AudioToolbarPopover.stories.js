@@ -75,6 +75,22 @@ export default {
         options: speakerOptions
       },
       defaultValue: speakerOptions[0]
+    },
+    micLevel: {
+      control: {
+        type: "number",
+        min: 0,
+        max: 1,
+        step: 0.1
+      }
+    },
+    speakerLevel: {
+      control: {
+        type: "number",
+        min: 0,
+        max: 1,
+        step: 0.1
+      }
     }
   }
 };
