@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MovingAverage from "moving-average";
 
 const MIN_VOLUME_THRESHOLD = 0.08;
@@ -31,7 +31,6 @@ export function useVolumeMeter({ analyser, updateRate = 50 }) {
   const movingAvgRef = useRef();
   const meterRef = useRef({ levels: [], volume: 0, prevVolume: 0, max: 0 });
   const [volume, setVolume] = useState(0);
-  const nodeRef = useRef();
 
   useEffect(
     () => {
@@ -57,27 +56,11 @@ export function useVolumeMeter({ analyser, updateRate = 50 }) {
       }, updateRate);
 
       return () => {
-        nodeRef.current?.disconnect();
         clearInterval(timout);
       };
     },
-    [nodeRef, analyser, updateRate]
+    [analyser, updateRate]
   );
 
-  const setAudioSource = useCallback(
-    source => {
-      if (source) {
-        nodeRef.current?.disconnect();
-        nodeRef.current = source;
-        if (nodeRef.current) {
-          nodeRef.current.connect(analyser);
-        }
-      } else {
-        nodeRef.current?.disconnect();
-      }
-    },
-    [nodeRef, analyser]
-  );
-
-  return { volume, setAudioSource };
+  return { volume };
 }
