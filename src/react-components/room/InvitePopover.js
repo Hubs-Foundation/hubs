@@ -28,12 +28,17 @@ function InvitePopoverContent({ url, shortUrl, code, embed, inviteRequired, fetc
             value={code}
             buttonPreset="accent4"
             description={
-              <>
-                Enter code on{" "}
-                <a href={shortUrl} target="_blank" rel="noopener noreferrer">
-                  {shortUrl.replace("https://", "")}
-                </a>
-              </>
+              <FormattedMessage
+                id="invite-popover.enter-code"
+                defaultMessage="Enter code on {hubslink}"
+                values={{
+                  hubslink: (
+                    <a href={shortUrl} target="_blank" rel="noopener noreferrer">
+                      {shortUrl.replace("https://", "")}
+                    </a>
+                  )
+                }}
+              />
             }
           />
           <CopyableTextInputField
