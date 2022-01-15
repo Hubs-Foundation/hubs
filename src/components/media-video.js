@@ -523,7 +523,7 @@ AFRAME.registerComponent("media-video", {
         // We want to treat audio almost exactly like video, so we mock a video texture with an image property.
         texture = new THREE.Texture();
         texture.image = videoEl;
-        isReady = () => true;
+        isReady = () => videoEl.readyState > 0;
       } else {
         texture = new THREE.VideoTexture(videoEl);
         texture.minFilter = THREE.LinearFilter;

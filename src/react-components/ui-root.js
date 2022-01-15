@@ -740,6 +740,7 @@ class UIRoot extends Component {
         () => {
           this.showNonHistoriedDialog(TweetModalContainer, {
             hubChannel: this.props.hubChannel,
+            isAdmin: configs.isAdmin(),
             ...detail
           });
         },
