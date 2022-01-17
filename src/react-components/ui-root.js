@@ -888,13 +888,17 @@ class UIRoot extends Component {
 
   renderAudioSetupPanel = () => {
     const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    this.mediaDevicesManager.micShouldBeEnabled = !muteOnEntry;
     // TODO: Show HMD mic not chosen warning
     return (
       <MicSetupModalContainer
         scene={this.props.scene}
-        micMutedOnEntry={muteOnEntry}
         onEnterRoom={this.onAudioReadyButton}
-        onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
+        onMicMuted={() =>
+          this.props.store.update({
+            preferences: { muteMicOnEntry: !(this.props.store.state.preferences["muteMicOnEntry"] || false) }
+          })
+        }
         onBack={() => this.props.history.goBack()}
       />
     );
