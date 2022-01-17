@@ -5,12 +5,15 @@ import { useMicrophone } from "./useMicrophone";
 import { useSound } from "./useSound";
 import { SOUND_SPEAKER_TONE } from "../../systems/sound-effects-system";
 import { useSpeakers } from "./useSpeakers";
+import { useCallback } from "react";
 
 export function MicSetupModalContainer({ scene, ...rest }) {
-  const { micMutedOnEntry } = rest;
+  const { onMicMuted } = rest;
   const {
     micVolume,
     isMicEnabled,
+    isMicMuted,
+    toggleMute,
     permissionStatus,
     micDeviceChanged,
     selectedMicDeviceId,
@@ -21,6 +24,13 @@ export function MicSetupModalContainer({ scene, ...rest }) {
     scene,
     sound: SOUND_SPEAKER_TONE
   });
+  const onChangeMicrophoneMuted = useCallback(
+    () => {
+      toggleMute();
+      onMicMuted();
+    },
+    [toggleMute, onMicMuted]
+  );
 
   return (
     <MicSetupModal
@@ -28,7 +38,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       speakerLevel={soundVolume}
       onPlaySound={playSound}
       isMicrophoneEnabled={isMicEnabled}
-      isMicrophoneMuted={micMutedOnEntry}
+      isMicrophoneMuted={isMicMuted}
       permissionStatus={permissionStatus}
       selectedMicrophone={selectedMicDeviceId}
       selectedSpeaker={selectedSpeakersDeviceId}
@@ -36,6 +46,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       speakerOptions={speakerDevices}
       onChangeMicrophone={micDeviceChanged}
       onChangeSpeaker={speakerDeviceChanged}
+      onChangeMicrophoneMuted={onChangeMicrophoneMuted}
       {...rest}
     />
   );
