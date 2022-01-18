@@ -622,3 +622,4 @@ AFRAME.GLTFModelPlus.registerComponent(
     });
   }
 );
+AFRAME.GLTFModelPlus.registerComponent("mirror", "mirror");
