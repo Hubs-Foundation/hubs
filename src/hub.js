@@ -384,16 +384,17 @@ export async function getSceneUrlForHub(hub) {
     isLegacyBundle = !(glbAsset || hasExtension);
   }
 
-  if (isLegacyBundle) {
+  if (sceneUrl.indexOf("blob:") === 0) {
+    return document.querySelector("a-scene").is("entered") ? sceneUrl : loadingEnvironment;
+  } else if (isLegacyBundle) {
     // Deprecated
     const res = await fetch(sceneUrl);
     const data = await res.json();
     const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
-    sceneUrl = new URL(data.assets[0].src, baseURL).href;
+    return new URL(data.assets[0].src, baseURL).href;
   } else {
-    sceneUrl = proxiedUrlFor(sceneUrl);
+    return proxiedUrlFor(sceneUrl);
   }
-  return sceneUrl;
 }
 
 export async function updateEnvironmentForHub(hub, entryManager) {

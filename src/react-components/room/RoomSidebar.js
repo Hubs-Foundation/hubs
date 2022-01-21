@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import styles from "./RoomSidebar.scss";
 import { Sidebar } from "../sidebar/Sidebar";
@@ -8,6 +8,7 @@ import { IconButton } from "../input/IconButton";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import { FormattedMessage, useIntl } from "react-intl";
+import qsTruthy from "../../utils/qs_truthy";
 
 function SceneAttribution({ attribution }) {
   const intl = useIntl();
@@ -135,7 +136,59 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
   );
 }
 
-export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChangeScene }) {
+function DebugSceneDropzone({ hubChannel }) {
+  const [lastBlobUrl, setLastBlobUrl] = useState();
+  const [dropping, setDropping] = useState(false);
+
+  const handleDragEnter = e => {
+    e.preventDefault();
+    setDropping(true);
+  };
+  const handleDragLeave = e => {
+    e.preventDefault();
+    setDropping(false);
+  };
+
+  const handleDragOver = e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = e => {
+    e.preventDefault();
+    URL.revokeObjectURL(lastBlobUrl);
+    const url = URL.createObjectURL(e.dataTransfer.files[0]);
+    hubChannel.updateScene(url);
+    setLastBlobUrl(url);
+    setDropping(false);
+  };
+
+  return (
+    <div
+      style={{
+        border: "1px solid black",
+        width: "200px",
+        height: "200px",
+        backgroundColor: dropping ? "#eee" : "white",
+        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "5px"
+      }}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+    >
+      drop scene glb
+      <span style={{ marginTop: "5px", color: "#888" }}>(This will only work locally for you)</span>
+    </div>
+  );
+}
+
+export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChangeScene, hubChannel }) {
   return (
     <Sidebar
       title={<FormattedMessage id="room-sidebar.title" defaultMessage="Room" />}
@@ -164,6 +217,7 @@ export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChang
           canChangeScene={canEdit}
           onChangeScene={onChangeScene}
         />
+        {qsTruthy("debugLocalScene") && <DebugSceneDropzone hubChannel={hubChannel} />}
       </Column>
     </Sidebar>
   );

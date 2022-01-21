@@ -291,6 +291,8 @@ export default class SceneEntryManager {
     document.addEventListener("drop", e => {
       e.preventDefault();
 
+      if (qsTruthy("debugLocalScene")) return;
+
       let url = e.dataTransfer.getData("url");
 
       if (!url) {
