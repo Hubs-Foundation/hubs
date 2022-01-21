@@ -163,6 +163,7 @@ function DebugSceneDropzone({ hubChannel }) {
     setDropping(false);
   };
 
+  /* eslint-disable @calm/react-intl/missing-formatted-message*/
   return (
     <div
       style={{
@@ -186,7 +187,12 @@ function DebugSceneDropzone({ hubChannel }) {
       <span style={{ marginTop: "5px", color: "#888" }}>(This will only work locally for you)</span>
     </div>
   );
+  /* eslint-enable @calm/react-intl/missing-formatted-message*/
 }
+
+DebugSceneDropzone.propTypes = {
+  hubChannel: PropTypes.object
+};
 
 export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChangeScene, hubChannel }) {
   return (
@@ -229,5 +235,6 @@ RoomSidebar.propTypes = {
   onClose: PropTypes.func,
   canEdit: PropTypes.bool,
   onEdit: PropTypes.func,
-  onChangeScene: PropTypes.func
+  onChangeScene: PropTypes.func,
+  hubChannel: PropTypes.object
 };
