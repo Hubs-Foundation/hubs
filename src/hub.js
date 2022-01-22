@@ -384,7 +384,10 @@ export async function getSceneUrlForHub(hub) {
     isLegacyBundle = !(glbAsset || hasExtension);
   }
 
-  if (isLegacyBundle) {
+  if (qsTruthy("debugLocalScene") && sceneUrl?.startsWith("blob:")) {
+    // we skip doing this if you haven't entered because refreshing the page will invalidate blob urls and break loading
+    sceneUrl = document.querySelector("a-scene").is("entered") ? sceneUrl : loadingEnvironment;
+  } else if (isLegacyBundle) {
     // Deprecated
     const res = await fetch(sceneUrl);
     const data = await res.json();

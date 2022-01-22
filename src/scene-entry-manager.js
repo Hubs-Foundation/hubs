@@ -288,8 +288,17 @@ export default class SceneEntryManager {
 
     document.addEventListener("dragover", e => e.preventDefault());
 
+    let lastDebugScene;
     document.addEventListener("drop", e => {
       e.preventDefault();
+
+      if (qsTruthy("debugLocalScene")) {
+        URL.revokeObjectURL(lastDebugScene);
+        const url = URL.createObjectURL(e.dataTransfer.files[0]);
+        this.hubChannel.updateScene(url);
+        lastDebugScene = url;
+        return;
+      }
 
       let url = e.dataTransfer.getData("url");
 
