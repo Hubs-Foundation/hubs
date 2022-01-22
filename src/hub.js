@@ -384,7 +384,8 @@ export async function getSceneUrlForHub(hub) {
     isLegacyBundle = !(glbAsset || hasExtension);
   }
 
-  if (sceneUrl.indexOf("blob:") === 0) {
+  if (qsTruthy("debugLocalScene") && sceneUrl.indexOf("blob:") === 0) {
+    // we skip doing this if you haven't entered because refreshing the page will invalidate blob urls and break loading
     return document.querySelector("a-scene").is("entered") ? sceneUrl : loadingEnvironment;
   } else if (isLegacyBundle) {
     // Deprecated

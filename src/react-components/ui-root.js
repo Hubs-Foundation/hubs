@@ -1501,7 +1501,6 @@ class UIRoot extends Component {
                           }}
                           onClose={() => this.setSidebar(null)}
                           onChangeScene={this.onChangeScene}
-                          hubChannel={this.props.hubChannel}
                         />
                       )}
                       {this.state.sidebarId === "room-info-settings" && (
