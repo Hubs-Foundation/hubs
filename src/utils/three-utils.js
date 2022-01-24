@@ -223,7 +223,7 @@ export const interpolateAffine = (function() {
   return function(startMat4, endMat4, progress, outMat4) {
     start.quaternion.setFromRotationMatrix(mat4.extractRotation(startMat4));
     end.quaternion.setFromRotationMatrix(mat4.extractRotation(endMat4));
-    THREE.Quaternion.slerp(start.quaternion, end.quaternion, interpolated.quaternion, progress);
+    interpolated.quaternion.slerpQuaternions(start.quaternion, end.quaternion, progress);
     interpolated.position.lerpVectors(
       start.position.setFromMatrixColumn(startMat4, 3),
       end.position.setFromMatrixColumn(endMat4, 3),

@@ -1,7 +1,7 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
-import pinnedEntityToGltf from "./utils/pinned-entity-to-gltf";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
+import { isIOS as detectIOS } from "./utils/is-mobile";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 
 const isBotMode = qsTruthy("bot");
@@ -11,7 +11,7 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 const isDebug = qsTruthy("debug");
 const qs = new URLSearchParams(location.search);
 
-import { addMedia, getPromotionTokenForFile } from "./utils/media-utils";
+import { addMedia } from "./utils/media-utils";
 import {
   isIn2DInterstitial,
   handleExitTo2DInterstitial,
@@ -21,8 +21,9 @@ import {
 import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
+import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
 
-const isIOS = AFRAME.utils.device.isIOS();
+const isIOS = detectIOS();
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -121,7 +122,7 @@ export default class SceneEntryManager {
 
     this.scene.addState("entered");
 
-    APP.dialog.enableMicrophone(!muteOnEntry);
+    APP.mediaDevicesManager.enableMic = !muteOnEntry;
   };
 
   whenSceneLoaded = callback => {
@@ -188,7 +189,7 @@ export default class SceneEntryManager {
 
         if (entity.components.networked.data.persistent) {
           NAF.utils.takeOwnership(entity);
-          this._unpinElement(entity);
+          window.APP.pinningHelper.unpinElement(entity);
           entity.parentNode.removeChild(entity);
         } else {
           NAF.entities.removeEntity(id);
@@ -205,74 +206,6 @@ export default class SceneEntryManager {
     document.body.addEventListener("unblocked", ev => {
       NAF.connection.entities.completeSync(ev.detail.clientId, true);
     });
-  };
-
-  _pinElement = async el => {
-    const { networkId } = el.components.networked.data;
-
-    const { fileId, src } = el.components["media-loader"].data;
-
-    let fileAccessToken, promotionToken;
-    if (fileId) {
-      fileAccessToken = new URL(src).searchParams.get("token");
-      const storedPromotionToken = getPromotionTokenForFile(fileId);
-      if (storedPromotionToken) {
-        promotionToken = storedPromotionToken.promotionToken;
-      }
-    }
-
-    const gltfNode = pinnedEntityToGltf(el);
-    if (!gltfNode) return;
-    el.setAttribute("networked", { persistent: true });
-    el.setAttribute("media-loader", { fileIsOwned: true });
-
-    try {
-      await this.hubChannel.pin(networkId, gltfNode, fileId, fileAccessToken, promotionToken);
-      this.store.update({ activity: { hasPinned: true } });
-    } catch (e) {
-      if (e.reason === "invalid_token") {
-        await this.authChannel.signOut(this.hubChannel);
-        this._signInAndPinOrUnpinElement(el);
-      } else {
-        console.warn("Pin failed for unknown reason", e);
-      }
-    }
-  };
-
-  _signInAndPinOrUnpinElement = (el, pin) => {
-    const action = pin
-      ? () => this._pinElement(el)
-      : async () => {
-          await this._unpinElement(el);
-        };
-
-    this.performConditionalSignIn(
-      () => this.hubChannel.signedIn,
-      action,
-      pin ? SignInMessages.pin : SignInMessages.unpin,
-      () => {
-        // UI pins/un-pins the entity optimistically, so we undo that here.
-        // Note we have to disable the sign in flow here otherwise this will recurse.
-        this._disableSignInOnPinAction = true;
-        el.setAttribute("pinnable", "pinned", !pin);
-        this._disableSignInOnPinAction = false;
-      }
-    );
-  };
-
-  _unpinElement = el => {
-    const components = el.components;
-    const networked = components.networked;
-
-    if (!networked || !networked.data || !NAF.utils.isMine(el)) return;
-
-    const networkId = components.networked.data.networkId;
-    el.setAttribute("networked", { persistent: false });
-
-    const mediaLoader = components["media-loader"];
-    const fileId = mediaLoader.data && mediaLoader.data.fileId;
-
-    this.hubChannel.unpin(networkId, fileId);
   };
 
   _setupMedia = () => {
@@ -303,18 +236,6 @@ export default class SceneEntryManager {
 
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
-
-    const handlePinEvent = (e, pinned) => {
-      if (this._disableSignInOnPinAction) return;
-      const el = e.detail.el;
-
-      if (NAF.utils.isMine(el)) {
-        this._signInAndPinOrUnpinElement(e.detail.el, pinned);
-      }
-    };
-
-    this.scene.addEventListener("pinned", e => handlePinEvent(e, true));
-    this.scene.addEventListener("unpinned", e => handlePinEvent(e, false));
 
     this.scene.addEventListener("object_spawned", e => {
       this.hubChannel.sendObjectSpawnedEvent(e.detail.objectType);
@@ -367,8 +288,17 @@ export default class SceneEntryManager {
 
     document.addEventListener("dragover", e => e.preventDefault());
 
+    let lastDebugScene;
     document.addEventListener("drop", e => {
       e.preventDefault();
+
+      if (qsTruthy("debugLocalScene")) {
+        URL.revokeObjectURL(lastDebugScene);
+        const url = URL.createObjectURL(e.dataTransfer.files[0]);
+        this.hubChannel.updateScene(url);
+        lastDebugScene = url;
+        return;
+      }
 
       let url = e.dataTransfer.getData("url");
 
@@ -404,10 +334,13 @@ export default class SceneEntryManager {
         } else {
           currentVideoShareEntity = spawnMediaInfrontOfPlayer(this.mediaDevicesManager.mediaStream, undefined);
           // Wire up custom removal event which will stop the stream.
-          currentVideoShareEntity.setAttribute("emit-scene-event-on-remove", "event:action_end_video_sharing");
+          currentVideoShareEntity.setAttribute(
+            "emit-scene-event-on-remove",
+            `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`
+          );
         }
 
-        this.scene.emit("share_video_enabled", { source: isDisplayMedia ? "screen" : "camera" });
+        this.scene.emit("share_video_enabled", { source: isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA });
         this.scene.addState("sharing_video");
       }
     };
@@ -435,7 +368,7 @@ export default class SceneEntryManager {
       const preferredCamera = store.state.preferences.preferredCamera || "default";
       switch (preferredCamera) {
         case "default":
-          constraints.video.mediaSource = "camera";
+          constraints.video.mediaSource = MediaDevices.CAMERA;
           break;
         case "user":
         case "environment":
@@ -475,7 +408,7 @@ export default class SceneEntryManager {
       );
     });
 
-    this.scene.addEventListener("action_end_video_sharing", async () => {
+    this.scene.addEventListener(MediaDevicesEvents.VIDEO_SHARE_ENDED, async () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
 
@@ -493,7 +426,7 @@ export default class SceneEntryManager {
       isHandlingVideoShare = false;
     });
 
-    this.scene.addEventListener("action_end_mic_sharing", async () => {
+    this.scene.addEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, async () => {
       await this.mediaDevicesManager.stopMicShare();
     });
 

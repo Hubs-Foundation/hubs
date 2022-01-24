@@ -135,7 +135,7 @@
     "screenfull": "^4.0.1",
     "sdp-transform": "^2.14.1",
     "semver": "^7.3.2",
-    "three": "^0.128.0",
+    "three": "github:mozillareality/three.js#hubs-patches-133",
     "three-ammo": "github:infinitelee/three-ammo",
     "three-bmfont-text": "github:mozillareality/three-bmfont-text#hubs/master",
     "three-mesh-bvh": "^0.3.7",

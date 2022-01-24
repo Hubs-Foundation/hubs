@@ -1,5 +1,5 @@
 import nextTick from "../utils/next-tick";
-import { mapMaterials, convertStandardMaterial } from "../utils/material-utils";
+import { updateMaterials, mapMaterials, convertStandardMaterial } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
@@ -8,6 +8,8 @@ import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -58,7 +60,8 @@ const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
 function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
-    throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
+    console.warn(`Inflator failed. "${componentName}" component does not exist.`);
+    return;
   }
   if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
     for (let i = 0; i < componentData.length; i++) {
@@ -246,11 +249,33 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
     const entityComponents = getHubsComponents(object3D);
     const el = object3D.el;
 
+    function resolveNodeRefs(componentData) {
+      for (const propName in componentData) {
+        const value = componentData[propName];
+        const type = value?.__mhc_link_type;
+        if (type === "node" && value.index !== undefined) {
+          if (indexToEntityMap[value.index]) {
+            componentData[propName] = indexToEntityMap[value.index].object3D;
+          } else {
+            console.warn("inflateComponents: invalid node reference", propName);
+            componentData[propName] = null;
+          }
+        }
+      }
+      return componentData;
+    }
+
     if (entityComponents && el) {
       for (const prop in entityComponents) {
         if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          await inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+          await inflator(
+            el,
+            componentName,
+            resolveNodeRefs(entityComponents[prop]),
+            entityComponents,
+            indexToEntityMap
+          );
         }
       }
     }
@@ -261,7 +286,13 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
       for (const prop in materialComponents) {
         if (materialComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          await inflator(el, componentName, materialComponents[prop], materialComponents, indexToEntityMap);
+          await inflator(
+            el,
+            componentName,
+            resolveNodeRefs(materialComponents[prop]),
+            materialComponents,
+            indexToEntityMap
+          );
         }
       }
     }
@@ -343,6 +374,7 @@ function runMigration(version, json) {
 }
 
 let ktxLoader;
+let dracoLoader;
 
 class GLTFHubsPlugin {
   constructor(parser, jsonPreprocessor) {
@@ -399,21 +431,6 @@ class GLTFHubsPlugin {
         node.extras.gltfIndex = i;
       }
     }
-
-    function hookDef(defType, hookName) {
-      return Promise.all(
-        parser.json[defType].map((_def, idx) => {
-          return Promise.all(
-            parser._invokeAll(function(ext) {
-              return ext[hookName] && ext[hookName](idx);
-            })
-          );
-        })
-      );
-    }
-
-    // TODO decide if thse should get put into the GLTF loader itself
-    return Promise.all([hookDef("scenes", "extendScene"), hookDef("nodes", "extendNode")]);
   }
 
   afterRoot(gltf) {
@@ -422,7 +439,7 @@ class GLTFHubsPlugin {
       // @TODO: Should this be fixed in the gltf loader?
       object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
       const materialQuality = window.APP.store.materialQualitySetting;
-      object.material = mapMaterials(object, material => convertStandardMaterial(material, materialQuality));
+      updateMaterials(object, material => convertStandardMaterial(material, materialQuality));
     });
 
     // Replace animation target node name with the node uuid.
@@ -453,37 +470,57 @@ class GLTFHubsComponentsExtension {
     this.name = "MOZ_hubs_components";
   }
 
-  _markDefs() {
-    // TODO hack to keep hubs component data in userData. Remove once we handle all component stuff in a plugin
-    delete this.parser.extensions.MOZ_hubs_components;
-  }
-
-  extendScene(sceneIdx) {
-    const ext = this.parser.json.scenes[sceneIdx]?.extensions?.MOZ_hubs_components;
-    if (ext) return this.resolveComponentLinks(ext);
-  }
-
-  extendNode(nodeIdx) {
-    const ext = this.parser.json.nodes[nodeIdx]?.extensions?.MOZ_hubs_components;
-    if (ext) return this.resolveComponentLinks(ext);
-  }
-
-  resolveComponentLinks(ext) {
+  afterRoot({ scenes, parser }) {
     const deps = [];
 
-    for (const componentName in ext) {
-      const props = ext[componentName];
-      for (const propName in props) {
-        const value = props[propName];
-        const type = value?.__mhc_link_type;
-        if (type && value.index !== undefined) {
-          deps.push(
-            this.parser.getDependency(type, value.index).then(loadedDep => {
-              props[propName] = loadedDep;
-            })
-          );
+    const resolveComponents = (gltfRootType, obj) => {
+      const idx = parser.associations.get(obj)?.[gltfRootType];
+      if (idx === undefined) return;
+      const ext = parser.json[gltfRootType][idx].extensions?.[this.name];
+      if (!ext) return;
+
+      // TODO putting this into userData is a bit silly, we should just inflate here, but entities need to be inflated first...
+      obj.userData.gltfExtensions = Object.assign(obj.userData.gltfExtensions || {}, {
+        MOZ_hubs_components: ext
+      });
+
+      for (const componentName in ext) {
+        const props = ext[componentName];
+        for (const propName in props) {
+          const value = props[propName];
+          const type = value?.__mhc_link_type;
+          if (type && value.index !== undefined) {
+            deps.push(
+              parser.getDependency(type, value.index).then(loadedDep => {
+                // TODO similar to above, this logic being spread out in multiple places is not great...
+                // Node refences are assumed to always be in the scene graph. These referneces are late-resolved in inflateComponents
+                // otherwise they will need to be updated when cloning (which happens as part of caching).
+                if (type === "node") return;
+
+                if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
+                  // For now assume all non HDR textures linked in hubs components are sRGB.
+                  // We can allow this to be overriden later if needed
+                  loadedDep.encoding = THREE.sRGBEncoding;
+                }
+
+                props[propName] = loadedDep;
+
+                return loadedDep;
+              })
+            );
+          }
         }
       }
+    };
+
+    for (let i = 0; i < scenes.length; i++) {
+      // TODO this should be done by GLTLoader
+      parser.associations.set(scenes[i], { scenes: i });
+      scenes[i].traverse(obj => {
+        resolveComponents("scenes", obj);
+        resolveComponents("nodes", obj);
+        mapMaterials(obj, resolveComponents.bind(this, "materials"));
+      });
     }
 
     return Promise.all(deps);
@@ -534,6 +571,7 @@ class GLTFHubsTextureBasisExtension {
   constructor(parser) {
     this.parser = parser;
     this.name = "MOZ_HUBS_texture_basis";
+    this.basisLoader = null;
   }
 
   loadTexture(textureIndex) {
@@ -545,7 +583,11 @@ class GLTFHubsTextureBasisExtension {
       return null;
     }
 
-    if (!parser.options.ktx2Loader) {
+    if (this.basisLoader === null) {
+      this.basisLoader = new BasisTextureLoader(parser.options.manager).detectSupport(AFRAME.scenes[0].renderer);
+    }
+
+    if (!this.basisLoader) {
       // @TODO: Display warning (only if the extension is in extensionsRequired)?
       return null;
     }
@@ -554,9 +596,8 @@ class GLTFHubsTextureBasisExtension {
 
     const extensionDef = textureDef.extensions[this.name];
     const source = json.images[extensionDef.source];
-    const loader = parser.options.ktx2Loader.basisLoader;
 
-    return parser.loadTextureImage(textureIndex, source, loader);
+    return parser.loadTextureImage(textureIndex, source, this.basisLoader);
   }
 }
 
@@ -615,9 +656,15 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   if (!ktxLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
     ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
   }
+  if (!dracoLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
+    dracoLoader = new DRACOLoader(loadingManager);
+  }
 
   if (ktxLoader) {
     gltfLoader.setKTX2Loader(ktxLoader);
+  }
+  if (dracoLoader) {
+    gltfLoader.setDRACOLoader(dracoLoader);
   }
 
   return new Promise((resolve, reject) => {

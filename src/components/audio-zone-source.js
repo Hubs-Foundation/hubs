@@ -4,12 +4,12 @@ import { updateAudioSettings } from "../update-audio-settings";
 AFRAME.registerComponent("audio-zone-source", {
   init() {
     this.originalAudioParamsData = null;
-    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.registerSource(this);
+    this.el.sceneEl.systems["hubs-systems"]?.audioZonesSystem.registerSource(this);
   },
 
   remove() {
     APP.zoneOverrides.delete(this.el);
-    this.el.sceneEl.systems["hubs-systems"].audioZonesSystem.unregisterSource(this);
+    this.el.sceneEl.systems["hubs-systems"]?.audioZonesSystem.unregisterSource(this);
   },
 
   getPosition: (() => {

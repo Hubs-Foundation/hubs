@@ -66,8 +66,7 @@ export default class MessageDispatch extends EventTarget {
     uiRoot = uiRoot || document.getElementById("ui-root");
     const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
 
-    // TODO: Some of the commands below should be available without requiring
-    //       room entry. For example, audiomode should not require room entry.
+    // TODO: Some of the commands below should be available without requiring room entry.
     if (!entered && (!isGhost || command === "duck")) {
       this.log(LogMessageType.roomEntryRequired);
       return;
@@ -170,24 +169,6 @@ export default class MessageDispatch extends EventTarget {
             captureSystem.start();
             this.log(LogMessageType.captureStarted);
           }
-        }
-        break;
-      case "audiomode":
-        {
-          const shouldEnablePositionalAudio = window.APP.store.state.preferences.audioOutputMode === "audio";
-          window.APP.store.update({
-            // TODO: This should probably just be a boolean to disable panner node settings
-            // and even if it's not, "audio" is a weird name for the "audioOutputMode" that means
-            // "stereo" / "not panner".
-            preferences: { audioOutputMode: shouldEnablePositionalAudio ? "panner" : "audio" }
-          });
-          // TODO: The user message here is a little suspicious. We might be ignoring the
-          // user preference (e.g. if panner nodes are broken in safari, then we never create
-          // panner nodes, regardless of user preference.)
-          // Warning: This comment may be out of date when you read it.
-          this.log(
-            shouldEnablePositionalAudio ? LogMessageType.positionalAudioEnabled : LogMessageType.positionalAudioDisabled
-          );
         }
         break;
       case "audioNormalization":

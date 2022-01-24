@@ -20,7 +20,9 @@ const DEFAULT_COLORS = {
 function getThemeColor(name) {
   const themeId = window.APP?.store?.state?.preferences?.theme;
 
-  const theme = themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId);
+  const theme =
+    (themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId)) ||
+    configs.APP_CONFIG?.theme?.themes?.find(theme => theme.default === true);
   if (theme?.variables?.[name]) {
     return theme.variables[name];
   }

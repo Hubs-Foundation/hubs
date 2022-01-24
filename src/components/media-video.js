@@ -4,7 +4,7 @@ import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
 import { MediaPlayer } from "dashjs";
-import { addAndArrangeMedia, createVideoOrAudioEl } from "../utils/media-utils";
+import { addAndArrangeMedia, createVideoOrAudioEl, hasAudioTracks } from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { buildAbsoluteURL } from "url-toolkit";
@@ -19,13 +19,15 @@ import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-se
 import { SourceType, AudioType } from "./audio-params";
 import { errorTexture } from "../utils/error-texture";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
+import { isSafari } from "../utils/detect-safari";
+import { isIOS as detectIOS } from "../utils/is-mobile";
 
 import qsTruthy from "../utils/qs_truthy";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
 
-const isIOS = AFRAME.utils.device.isIOS();
+const isIOS = detectIOS();
 const audioIconTexture = new HubsTextureLoader().load(audioIcon);
 
 export const VOLUME_LABELS = [];
@@ -50,7 +52,7 @@ function timeFmt(t) {
   return h === "00" ? `${m}:${s}` : `${h}:${m}:${s}`;
 }
 
-const MAX_MULTIPLIER = 2;
+const MAX_GAIN_MULTIPLIER = 2;
 
 AFRAME.registerComponent("media-video", {
   schema: {
@@ -85,6 +87,7 @@ AFRAME.registerComponent("media-video", {
     this.snap = this.snap.bind(this);
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
+    this.setupAudio = this.setupAudio.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
 
@@ -94,6 +97,7 @@ AFRAME.registerComponent("media-video", {
     this.isSnapping = false;
     this.videoIsLive = null; // value null until we've determined if the video is live or not.
     this.onSnapImageLoaded = () => (this.isSnapping = false);
+    this.hasAudioTracks = false;
 
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
@@ -163,16 +167,17 @@ AFRAME.registerComponent("media-video", {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
+    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
     this.onPreferenceChanged = () => {
-      const newPref = APP.store.state.preferences.audioOutputMode;
-      const shouldRecreateAudio = audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
-      audioOutputModePref = newPref;
+      const newPref = APP.store.state.preferences.disableLeftRightPanning;
+      const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && this.audio && this.mediaElementAudioSource;
+      disableLeftRightPanningPref = newPref;
       if (shouldRecreateAudio) {
         this.setupAudio();
       }
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
+    this.el.addEventListener("audio_type_changed", this.setupAudio);
   },
 
   play() {
@@ -206,7 +211,7 @@ AFRAME.registerComponent("media-video", {
 
   changeVolumeBy(v) {
     let gainMultiplier = APP.gainMultipliers.get(this.el);
-    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_MULTIPLIER);
+    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_GAIN_MULTIPLIER);
     APP.gainMultipliers.set(this.el, gainMultiplier);
     this.updateVolumeLabel();
     const audio = APP.audios.get(this.el);
@@ -334,11 +339,15 @@ AFRAME.registerComponent("media-video", {
   },
 
   setupAudio() {
-    if (this.audio) {
-      this.audio.disconnect();
-      this.el.removeObject3D("sound");
-    }
+    this.removeAudio();
+
     APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
+
+    if (this.data.videoPaused) {
+      APP.isAudioPaused.add(this.el);
+    } else {
+      APP.isAudioPaused.delete(this.el);
+    }
 
     const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
@@ -347,9 +356,7 @@ AFRAME.registerComponent("media-video", {
     } else {
       this.audio = new THREE.Audio(audioListener);
     }
-
-    this.audioSystem.removeAudio(this.audio);
-    this.audioSystem.addAudio(SourceType.MEDIA_VIDEO, this.audio);
+    this.audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: this.audio });
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
@@ -378,11 +385,14 @@ AFRAME.registerComponent("media-video", {
         texture = linkedVideoTexture;
         audioSourceEl = linkedAudioSource;
       } else {
+        this.el.emit("video-loading");
         ({ texture, audioSourceEl } = await this.createVideoTextureAudioSourceEl());
         if (getCurrentMirroredMedia() === this.el) {
           await refreshMediaMirror();
         }
       }
+
+      this.hasAudioTracks = hasAudioTracks(audioSourceEl);
 
       // No way to cancel promises, so if src has changed while we were creating the texture just throw it away.
       if (this.data.src !== src) {
@@ -399,7 +409,7 @@ AFRAME.registerComponent("media-video", {
             linkedMediaElementAudioSource ||
             this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
 
-          this.setupAudio();
+          this.hasAudioTracks && this.setupAudio();
         }
       }
 
@@ -511,7 +521,7 @@ AFRAME.registerComponent("media-video", {
         // We want to treat audio almost exactly like video, so we mock a video texture with an image property.
         texture = new THREE.Texture();
         texture.image = videoEl;
-        isReady = () => true;
+        isReady = () => videoEl.readyState > 0;
       } else {
         texture = new THREE.VideoTexture(videoEl);
         texture.minFilter = THREE.LinearFilter;
@@ -645,7 +655,30 @@ AFRAME.registerComponent("media-video", {
         }
       } else {
         videoEl.src = url;
-        videoEl.onerror = failLoad;
+
+        // Workaround for Safari.
+        // Safari seems to have a bug that it doesn't transfer range property in HTTP request header
+        // for redirects if crossOrigin is set (while other major browsers do).
+        // So Safari can fail to load video if the server responds redirect because
+        // it expects 206 HTTP status code but gets 200.
+        // If we fail to load video on Safari we retry with fetch() and videoEl.srcObject
+        // which may avoid the problem.
+        // Refer to #4516 for the details.
+        if (isSafari()) {
+          // There seems no way to detect whether the error is caused by the problem mentioned above.
+          // So always retrying.
+          videoEl.onerror = async () => {
+            videoEl.onerror = failLoad;
+            try {
+              const res = await fetch(url);
+              videoEl.srcObject = await res.blob();
+            } catch (e) {
+              failLoad(e);
+            }
+          };
+        } else {
+          videoEl.onerror = failLoad;
+        }
 
         // audioSrc is non-empty only if audio track is separated from video track (eg. 360 video)
         if (this.data.audioSrc) {
@@ -696,6 +729,8 @@ AFRAME.registerComponent("media-video", {
     const isPinned = pinnableElement.components.pinnable && pinnableElement.components.pinnable.data.pinned;
     this.playbackControls.object3D.visible = !this.data.hidePlaybackControls && !!this.video;
     this.timeLabel.object3D.visible = !this.data.hidePlaybackControls;
+    this.volumeLabel.object3D.visible = this.volumeUpButton.object3D.visible = this.volumeDownButton.object3D.visible =
+      this.hasAudioTracks && !this.data.hidePlaybackControls && !!this.video;
 
     this.snapButton.object3D.visible =
       !!this.video && !this.data.contentType.startsWith("audio/") && window.APP.hubChannel.can("spawn_and_move_media");
@@ -718,7 +753,7 @@ AFRAME.registerComponent("media-video", {
     this.volumeLabel.setAttribute(
       "text",
       "value",
-      gainMultiplier === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(gainMultiplier / (MAX_MULTIPLIER / 20))]
+      gainMultiplier === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(gainMultiplier / (MAX_GAIN_MULTIPLIER / 20))]
     );
   },
 
@@ -794,11 +829,7 @@ AFRAME.registerComponent("media-video", {
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
 
-    if (this.audio) {
-      this.el.removeObject3D("sound");
-      this.audioSystem.removeAudio(this.audio);
-      delete this.audio;
-    }
+    this.removeAudio();
 
     if (this.networkedEl) {
       this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
@@ -823,5 +854,14 @@ AFRAME.registerComponent("media-video", {
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
+    this.el.addEventListener("audio_type_changed", this.setupAudio);
+  },
+
+  removeAudio() {
+    if (this.audio) {
+      this.el.removeObject3D("sound");
+      this.audioSystem.removeAudio({ node: this.audio });
+      delete this.audio;
+    }
   }
 });

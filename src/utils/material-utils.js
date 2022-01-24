@@ -8,13 +8,23 @@ export function forEachMaterial(object3D, fn) {
   }
 }
 
-export function mapMaterials(object3D, fn) {
+export function updateMaterials(object3D, fn) {
   if (!object3D.material) return;
+
+  if (Array.isArray(object3D.material)) {
+    object3D.material = object3D.material.map(fn);
+  } else {
+    object3D.material = fn(object3D.material);
+  }
+}
+
+export function mapMaterials(object3D, fn) {
+  if (!object3D.material) return [];
 
   if (Array.isArray(object3D.material)) {
     return object3D.material.map(fn);
   } else {
-    return fn(object3D.material);
+    return [fn(object3D.material)];
   }
 }
 
@@ -46,9 +56,6 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
     material.wireframeLinewidth = source.wireframeLinewidth;
     material.wireframeLinecap = source.wireframeLinecap;
     material.wireframeLinejoin = source.wireframeLinejoin;
-
-    material.skinning = source.skinning;
-    material.morphTargets = source.morphTargets;
 
     return material;
   }
@@ -157,10 +164,6 @@ class HubsMeshPhongMaterial extends THREE.MeshPhongMaterial {
     material.wireframeLinewidth = source.wireframeLinewidth;
     material.wireframeLinecap = source.wireframeLinecap;
     material.wireframeLinejoin = source.wireframeLinejoin;
-
-    material.skinning = source.skinning;
-    material.morphTargets = source.morphTargets;
-    material.morphNormals = source.morphNormals;
 
     return material;
   }

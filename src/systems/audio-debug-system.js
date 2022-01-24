@@ -117,7 +117,7 @@ AFRAME.registerSystem("audio-debug", {
         audio.getWorldPosition(sourcePos);
         audio.getWorldDirection(sourceDir);
         this.sourcePositions[sourceNum] = this.navMeshObject.worldToLocal(sourcePos).clone(); // TODO: Use Vector3 pool
-        this.sourceOrientations[sourceNum] = this.navMeshObject.worldToLocal(sourcePos).clone();
+        this.sourceOrientations[sourceNum] = this.navMeshObject.worldToLocal(sourceDir).clone();
 
         const panner = audio.panner || fakePanner;
 
@@ -181,7 +181,6 @@ AFRAME.registerSystem("audio-debug", {
               obj._hubs_audio_debug_prev_material = null;
               obj.material.needsUpdate = true;
             }
-            obj.geometry.computeFaceNormals();
             obj.geometry.computeVertexNormals();
           }
         }

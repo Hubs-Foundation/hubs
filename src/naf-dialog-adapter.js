@@ -2,6 +2,7 @@ import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
+import { MediaDevices } from "./utils/media-devices-utils";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -36,6 +37,7 @@ const WEBCAM_SIMULCAST_ENCODINGS = [
 // Used for simulcast screen sharing.
 const SCREEN_SHARING_SIMULCAST_ENCODINGS = [{ dtx: true, maxBitrate: 1500000 }, { dtx: true, maxBitrate: 6000000 }];
 
+export const DIALOG_CONNECTION_CONNECTED = "dialog-connection-connected";
 export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
 
 export class DialogAdapter extends EventEmitter {
@@ -440,9 +442,11 @@ export class DialogAdapter extends EventEmitter {
         try {
           await this._joinRoom();
           resolve();
+          this.emit(DIALOG_CONNECTION_CONNECTED);
         } catch (err) {
           this.emitRTCEvent("warn", "Adapter", () => `Error during connect: ${error}`);
           reject(err);
+          this.emit(DIALOG_CONNECTION_ERROR_FATAL);
         }
       });
     });
@@ -775,7 +779,6 @@ export class DialogAdapter extends EventEmitter {
           } else {
             // stopTracks = false because otherwise the track will end during a temporary disconnect
             this._micProducer = await this._sendTransport.produce({
-              paused: !this._micShouldBeEnabled,
               track,
               stopTracks: false,
               codecOptions: { opusStereo: false, opusDtx: true },
@@ -787,14 +790,20 @@ export class DialogAdapter extends EventEmitter {
               this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
               this._micProducer = null;
             });
+
+            if (!this._micShouldBeEnabled) {
+              this._micProducer.pause();
+            }
+
+            this.emit("mic-state-changed", { enabled: this.isMicEnabled });
           }
         } else {
           sawVideo = true;
 
-          if (track._hubs_contentHint === "share") {
+          if (track._hubs_contentHint === MediaDevices.SCREEN) {
             await this.disableCamera();
             await this.enableShare(track);
-          } else if (track._hubs_contentHint === "camera") {
+          } else if (track._hubs_contentHint === MediaDevices.CAMERA) {
             await this.disableShare();
             await this.enableCamera(track);
           }
@@ -901,6 +910,10 @@ export class DialogAdapter extends EventEmitter {
     }
   }
 
+  set micShouldBeEnabled(enabled) {
+    this._micShouldBeEnabled = enabled;
+  }
+
   enableMicrophone(enabled) {
     if (!this._micProducer) {
       console.error("Tried to toggle mic but there's no producer.");
@@ -944,12 +957,12 @@ export class DialogAdapter extends EventEmitter {
     }
   }
 
-  kick(clientId, permsToken) {
+  kick(clientId) {
     return this._protoo
       .request("kick", {
         room_id: this.room,
         user_id: clientId,
-        token: permsToken
+        token: this._joinToken
       })
       .then(() => {
         document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));

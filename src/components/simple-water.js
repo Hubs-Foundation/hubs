@@ -36,7 +36,7 @@ export default class SimpleWater extends Mesh {
 
     normalMap.wrapS = normalMap.wrapT = RepeatWrapping;
 
-    const material = new materialClass({ color: 0x0054df, normalMap });
+    const material = new materialClass({ color: 0x0054df, normalMap, roughness: 0.5, metalness: 0.5 });
     material.name = "SimpleWaterMaterial";
 
     material.onBeforeCompile = shader => {

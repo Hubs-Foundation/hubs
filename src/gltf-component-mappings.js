@@ -23,7 +23,6 @@ function registerRootSceneComponent(componentName) {
 }
 
 registerRootSceneComponent("fog");
-registerRootSceneComponent("background");
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
@@ -84,6 +83,7 @@ AFRAME.GLTFModelPlus.registerComponent("morph-audio-feedback", "morph-audio-feed
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("uv-scroll", "uv-scroll");
+AFRAME.GLTFModelPlus.registerComponent("frustrum", "frustrum");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
   "shape-helper",
@@ -599,22 +599,18 @@ AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componen
   el.setAttribute(componentName, { ...componentData });
 });
 
+AFRAME.GLTFModelPlus.registerComponent("background", "background", (el, _componentName, componentData) => {
+  console.warn(
+    "The `background` component is deprecated, use `backgroundColor` on the `environment-settings` component instead."
+  );
+  // This assumes the background component is on the root entity, which it is for spoke, the only thing using this component
+  el.setAttribute("environment-settings", { backgroundColor: new THREE.Color(componentData.color) });
+});
+
 AFRAME.GLTFModelPlus.registerComponent(
   "environment-settings",
   "environment-settings",
   (el, componentName, componentData) => {
-    // assume equirect for env and background for now
-    // TODO do we always want to flipy for these?
-    if (componentData.envMapTexture) {
-      componentData.envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
-      componentData.envMapTexture.flipY = true;
-    }
-
-    if (componentData.backgroundTexture) {
-      componentData.backgroundTexture.mapping = THREE.EquirectangularReflectionMapping;
-      componentData.backgroundTexture.flipY = true;
-    }
-
     // TODO a bit silly to be storing this as an aframe component. Use a glboal store of some sort
     el.setAttribute(componentName, {
       ...componentData,

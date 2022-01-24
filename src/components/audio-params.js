@@ -6,7 +6,7 @@ export const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
 export const SourceType = Object.freeze({
   MEDIA_VIDEO: 0,
   AVATAR_AUDIO_SOURCE: 1,
-  // TODO: Fill in missing value (2)
+  SFX: 2,
   AUDIO_TARGET: 3,
   AUDIO_ZONE: 4
 });
@@ -25,24 +25,24 @@ export const DistanceModelType = {
 export const AvatarAudioDefaults = Object.freeze({
   audioType: AudioType.PannerNode,
   distanceModel: DistanceModelType.Inverse,
-  rolloffFactor: 2,
-  refDistance: 1,
+  rolloffFactor: 5,
+  refDistance: 5,
   maxDistance: 10000,
   coneInnerAngle: 180,
   coneOuterAngle: 360,
-  coneOuterGain: 0,
+  coneOuterGain: 0.9,
   gain: 1.0
 });
 
 export const MediaAudioDefaults = Object.freeze({
   audioType: AudioType.PannerNode,
   distanceModel: DistanceModelType.Inverse,
-  rolloffFactor: 1,
-  refDistance: 1,
+  rolloffFactor: 5,
+  refDistance: 5,
   maxDistance: 10000,
   coneInnerAngle: 360,
   coneOuterAngle: 0,
-  coneOuterGain: 0,
+  coneOuterGain: 0.9,
   gain: 0.5
 });
 
