@@ -268,14 +268,14 @@ export default class Store extends EventTarget {
   initProfile = async () => {
     const search = window.location.search;
     const params = new URLSearchParams(search);
-    const avatarId = params.get('avatarId');
+    const avartarId = params.get('avatarId');
     const displayName = params.get('displayName');
 
     if (this._shouldResetAvatarOnInit) {
       await this.resetToRandomDefaultAvatar();
     } else {
       this.update({
-        profile: { avatarId: avatarId, displayName:displayName }
+        profile: { avatarId: avartarId, displayName:displayName }
       });
     }
 

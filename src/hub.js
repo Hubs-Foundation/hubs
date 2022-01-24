@@ -707,8 +707,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   req.open('GET', document.location, false);
   req.send(null);
   const token = req.getResponseHeader("token");
-
-
+  
   await store.initProfile();
   await store.initCredential(token);
 
@@ -1160,6 +1159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     Cookies.remove(OAUTH_FLOW_PERMS_TOKEN_KEY);
   }
   const hubPhxChannel = socket.channel(`hub:${hubId}`, APP.hubChannelParamsForPermsToken(oauthFlowPermsToken));
+  const hubclusterPhxChannel = socket.channel(`hubcluster:cnuAAA`, {});
   hubChannel.channel = hubPhxChannel;
   hubChannel.presence = new Presence(hubPhxChannel);
   const { rawOnJoin, rawOnLeave } = denoisePresence(presenceEventsForHub(events));
@@ -1252,6 +1252,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
     });
   });
+
+  hubclusterPhxChannel
+    .join()
+    .receive("ok", resp => { console.log("Joined successfully", resp) })
+    .receive("error", resp => { console.log("Unable to join", resp) })
+
+  hubclusterPhxChannel.on("new_msg", payload => {
+      console.log(payload);
+  })
+
+  hubclusterPhxChannel.push("new_msg", {body: "test123123123"})
 
   hubPhxChannel
     .join()

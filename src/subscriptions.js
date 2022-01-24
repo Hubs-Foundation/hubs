@@ -25,7 +25,7 @@ export default class Subscriptions {
     if (navigator.serviceWorker) {
       try {
         navigator.serviceWorker
-          .register("/hub.service.js")
+          .register("/hubs/hub.service.js")
           .then(() => {
             navigator.serviceWorker.ready
               .then(registration => this.setRegistration(registration))
