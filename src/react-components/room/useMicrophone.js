@@ -1,51 +1,26 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import MovingAverage from "moving-average";
+import { useState, useEffect, useCallback } from "react";
 import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
-import { useVolumeMeter } from "../misc/useVolumeMeter";
 
-export function useMicrophone(scene, updateRate = 50) {
-  const audioSystem = scene.systems["hubs-systems"].audioSystem;
+export function useMicrophone(scene) {
   const mediaDevicesManager = window.APP.mediaDevicesManager;
-  const movingAvgRef = useRef();
-  const [isMicMuted, setIsMicMuted] = useState(!mediaDevicesManager.isMicEnabled);
-  const [isMicEnabled, setIsMicEnabled] = useState(window.APP.mediaDevicesManager.isMicShared);
-  const [permissionStatus, setPermissionsStatus] = useState(
-    mediaDevicesManager.getPermissionsStatus(MediaDevices.MICROPHONE)
-  );
   const [selectedMicDeviceId, setSelectedMicDeviceId] = useState(mediaDevicesManager.selectedMicDeviceId);
   const [micDevices, setMicDevices] = useState(mediaDevicesManager.micDevices);
-  const { volume } = useVolumeMeter({
-    analyser: audioSystem.outboundAnalyser,
-    updateRate
-  });
 
   useEffect(
     () => {
-      if (!movingAvgRef.current) {
-        movingAvgRef.current = MovingAverage(updateRate * 2);
-      }
-
-      const onMicMutedStateChanged = ({ enabled }) => {
-        setIsMicMuted(!enabled);
-      };
-      APP.dialog.on("mic-state-changed", onMicMutedStateChanged);
-
       const onMicEnabled = () => {
-        setIsMicEnabled(true);
         setSelectedMicDeviceId(mediaDevicesManager.selectedMicDeviceId);
         setMicDevices(mediaDevicesManager.micDevices);
       };
       const onMicDisabled = () => {
-        setIsMicEnabled(false);
         setSelectedMicDeviceId(mediaDevicesManager.selectedMicDeviceId);
         setMicDevices(mediaDevicesManager.micDevices);
       };
       scene.addEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, onMicDisabled);
       scene.addEventListener(MediaDevicesEvents.MIC_SHARE_STARTED, onMicEnabled);
 
-      const onPermissionsChanged = ({ mediaDevice, status }) => {
+      const onPermissionsChanged = ({ mediaDevice }) => {
         if (mediaDevice === MediaDevices.MICROPHONE) {
-          setPermissionsStatus(status);
           setSelectedMicDeviceId(mediaDevicesManager.selectedMicDeviceId);
           setMicDevices(mediaDevicesManager.micDevices);
         }
@@ -62,35 +37,13 @@ export function useMicrophone(scene, updateRate = 50) {
       setMicDevices(mediaDevicesManager.micDevices);
 
       return () => {
-        APP.dialog.off("mic-state-changed", onMicMutedStateChanged);
         scene.removeEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, onMicDisabled);
         scene.removeEventListener(MediaDevicesEvents.MIC_SHARE_STARTED, onMicEnabled);
         mediaDevicesManager.off(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
         mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, onDeviceChange);
       };
     },
-    [
-      setIsMicMuted,
-      setIsMicEnabled,
-      setSelectedMicDeviceId,
-      setMicDevices,
-      setPermissionsStatus,
-      scene,
-      updateRate,
-      mediaDevicesManager,
-      volume
-    ]
-  );
-
-  const toggleMute = useCallback(
-    () => {
-      if (mediaDevicesManager.isMicShared) {
-        mediaDevicesManager.toggleMic();
-      } else {
-        mediaDevicesManager.startMicShare({ unmute: true });
-      }
-    },
-    [mediaDevicesManager]
+    [setSelectedMicDeviceId, setMicDevices, scene, mediaDevicesManager]
   );
 
   const micDeviceChanged = useCallback(
@@ -103,11 +56,6 @@ export function useMicrophone(scene, updateRate = 50) {
   );
 
   return {
-    isMicMuted,
-    micVolume: volume,
-    toggleMute,
-    isMicEnabled,
-    permissionStatus,
     micDeviceChanged,
     selectedMicDeviceId,
     micDevices

@@ -1,6 +1,7 @@
 import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
-import { AudioToolbarPopoverButton } from "./AudioToolbarPopover";
+import { AudioPopoverButton } from "./AudioPopoverButton";
+import { AudioPopoverContent } from "./AudioPopoverContent";
 
 const micOptions = ["Microphone 1", "Microphone 2 long text", "Microphone 3 even much much longer text"];
 const speakerOptions = [
@@ -15,7 +16,7 @@ const speakerOptions = [
 ];
 
 export default {
-  title: "Room/AudioToolbarPopover",
+  title: "Room/AudioPopover",
   parameters: {
     layout: "fullscreen"
   },
@@ -40,24 +41,6 @@ export default {
     },
     onChangeMicrophoneMuted: {
       action: "microphone mute state changed",
-      table: {
-        category: "Events"
-      }
-    },
-    onEnterRoom: {
-      action: "enter room",
-      table: {
-        category: "Events"
-      }
-    },
-    onBack: {
-      action: "back",
-      table: {
-        category: "Events"
-      }
-    },
-    onTestAudio: {
-      action: "test audio",
       table: {
         category: "Events"
       }
@@ -95,7 +78,35 @@ export default {
   }
 };
 
-const Template = args => <RoomLayout toolbarCenter={<AudioToolbarPopoverButton initiallyVisible {...args} />} />;
+const Template = args => (
+  <RoomLayout
+    toolbarCenter={
+      <AudioPopoverButton
+        content={
+          <AudioPopoverContent
+            selectedMicrophone={args.selectedMicrophone}
+            isMicrophoneEnabled={args.isMicrophoneEnabled}
+            microphoneOptions={args.microphoneOptions}
+            micLevel={args.micLevel}
+            selectedSpeaker={args.selectedSpeaker}
+            speakerOptions={args.speakerOptions}
+            speakerLevel={args.speakerLevel}
+            isMicrophoneMuted={args.isMicrophoneMuted}
+            permissionStatus={args.permissionStatus}
+            onChangeMicrophone={args.onChangeMicrophone}
+            onChangeMicrophoneMuted={args.onChangeMicrophoneMuted}
+            onChangeSpeaker={args.onChangeSpeaker}
+            onPlaySound={args.onPlaySound}
+          />
+        }
+        initiallyVisible
+        isMicrophoneEnabled={args.isMicrophoneEnabled}
+        isMicrophoneMuted={args.isMicrophoneMuted}
+        onChangeMicrophoneMuted={args.onChangeMicrophoneMuted}
+      />
+    }
+  />
+);
 
 export const Base = Template.bind({});
 
@@ -107,6 +118,5 @@ Base.args = {
   selectedSpeaker: speakerOptions[0],
   speakerOptions: speakerOptions,
   speakerLevel: 0.5,
-  isMicrophoneMuted: false,
-  permissionStatus: PermissionStatus.PROMPT
+  isMicrophoneMuted: false
 };
