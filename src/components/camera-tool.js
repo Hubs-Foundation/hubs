@@ -33,7 +33,7 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 const VIEWFINDER_FPS = 6;
 const VIDEO_FPS = 25;
 // Prefer h264 if available due to faster decoding speec on most platforms
-const videoCodec = ["h264", "vp9,opus", "vp8,opus", "vp9", "vp8"].find(
+const videoCodec = ["h264", "vp9,opus", "vp9"].find(
   codec => window.MediaRecorder && MediaRecorder.isTypeSupported(`video/webm; codecs=${codec}`)
 );
 const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;

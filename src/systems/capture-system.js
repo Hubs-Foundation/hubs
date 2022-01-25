@@ -14,7 +14,7 @@ AFRAME.registerSystem("capture-system", {
     const video = this.el.canvas.captureStream().getVideoTracks()[0];
     this._stream.addTrack(video);
 
-    this._recorder = new MediaRecorder(this._stream, { mimeType: "video/webm; codecs=vp8" });
+    this._recorder = new MediaRecorder(this._stream, { mimeType: "video/webm; codecs=vp9" });
 
     const chunks = [];
 
@@ -31,7 +31,7 @@ AFRAME.registerSystem("capture-system", {
   },
 
   available() {
-    return qsTruthy("video_capture") && window.MediaRecorder && MediaRecorder.isTypeSupported("video/webm; codecs=vp8");
+    return qsTruthy("video_capture") && window.MediaRecorder && MediaRecorder.isTypeSupported("video/webm; codecs=vp9");
   },
 
   started() {
