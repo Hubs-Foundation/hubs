@@ -1123,8 +1123,8 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 1,
             max: 5,
-            step: 1,
-            digits: 0,
+            step: 0.5,
+            digits: 1,
             defaultNumber: 1
           }
         ]
