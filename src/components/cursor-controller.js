@@ -127,9 +127,9 @@ AFRAME.registerComponent("cursor-controller", {
         this.color.copy(NO_HIGHLIGHT);
       }
 
-      if (!this.data.cursor.object3DMap.mesh.material.color.equals(this.color)) {
-        this.data.cursor.object3DMap.mesh.material.color.copy(this.color);
-        this.data.cursor.object3DMap.mesh.material.needsUpdate = true;
+      if (!this.data.cursorVisual.object3DMap.mesh.material.color.equals(this.color)) {
+        this.data.cursorVisual.object3DMap.mesh.material.color.copy(this.color);
+        this.data.cursorVisual.object3DMap.mesh.material.needsUpdate = true;
       }
 
       if (this.line.material.visible) {
