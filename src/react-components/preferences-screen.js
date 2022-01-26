@@ -507,6 +507,10 @@ const preferenceLabels = defineMessages({
   disableLeftRightPanning: {
     id: "preferences-screen.preference.disable-panning",
     defaultMessage: "Disable audio left/right panning"
+  },
+  cursorSize: {
+    id: "preferences-screen.preference.cursor-size",
+    defaultMessage: "Cursor Size"
   }
 });
 
@@ -1113,7 +1117,16 @@ class PreferencesScreen extends Component {
           { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
           { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          {
+            key: "cursorSize",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 1,
+            max: 5,
+            step: 1,
+            digits: 0,
+            defaultNumber: 1
+          }
         ]
       ],
       [
