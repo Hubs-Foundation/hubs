@@ -134,7 +134,8 @@ export const SCHEMA = {
         enableAudioClipping: { type: "bool" },
         audioClippingThreshold: { type: "number" },
         theme: { type: "string" },
-        avatarVoiceLevels: { type: "object" }
+        avatarVoiceLevels: { type: "object" },
+        cursorSize: { type: "number" }
       }
     },
 

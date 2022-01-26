@@ -9,6 +9,7 @@ const TRANSFORM_COLOR_2 = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
+    cursorVisual: { type: "selector" },
     camera: { type: "selector" },
     far: { default: 100 },
     near: { default: 0.01 },
@@ -19,10 +20,10 @@ AFRAME.registerComponent("cursor-controller", {
   init: function() {
     this.enabled = false;
 
-    this.data.cursor.addEventListener(
+    this.data.cursorVisual.addEventListener(
       "loaded",
       () => {
-        this.data.cursor.object3DMap.mesh.renderOrder = window.APP.RENDER_ORDER.CURSOR;
+        this.data.cursorVisual.object3DMap.mesh.renderOrder = window.APP.RENDER_ORDER.CURSOR;
       },
       { once: true }
     );
@@ -126,9 +127,9 @@ AFRAME.registerComponent("cursor-controller", {
         this.color.copy(NO_HIGHLIGHT);
       }
 
-      if (!this.data.cursor.object3DMap.mesh.material.color.equals(this.color)) {
-        this.data.cursor.object3DMap.mesh.material.color.copy(this.color);
-        this.data.cursor.object3DMap.mesh.material.needsUpdate = true;
+      if (!this.data.cursorVisual.object3DMap.mesh.material.color.equals(this.color)) {
+        this.data.cursorVisual.object3DMap.mesh.material.color.copy(this.color);
+        this.data.cursorVisual.object3DMap.mesh.material.needsUpdate = true;
       }
 
       if (this.line.material.visible) {
