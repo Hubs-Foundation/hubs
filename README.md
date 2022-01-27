@@ -1,3 +1,7 @@
+# Equal Entry Hub - A Research Project for XR Access
+
+The 3D Content Descriptions group is part of the Accessible Development of XR Workstream at [XRAccess](https://xraccess.org/workstreams/adxr/) and will be used to demonstrate features that enable people who are blind or low-vision to get information about content that is used within spatial worlds.
+
 # [Mozilla Hubs](https://hubs.mozilla.com/)
 
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![Build Status](https://travis-ci.org/mozilla/hubs.svg?branch=master)](https://travis-ci.org/mozilla/hubs) [![Discord](https://img.shields.io/discord/498741086295031808)](https://discord.gg/CzAbuGu)
