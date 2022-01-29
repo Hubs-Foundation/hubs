@@ -217,8 +217,15 @@ AFRAME.registerComponent("reflection-probe", {
 
     this.el.setObject3D("probe", new THREE.ReflectionProbe(box, this.data.envMapTexture));
 
-    this.el.sceneEl.object3D.add(
-      new THREE.Box3Helper(box, new THREE.Color(Math.random(), Math.random(), Math.random()))
-    );
+    if (this.el.sceneEl.systems["hubs-systems"].environmentSystem.debugMode) {
+      const debugBox = new THREE.Box3().setFromCenterAndSize(
+        new THREE.Vector3(),
+        new THREE.Vector3().setScalar(this.data.size * 2)
+      );
+      this.el.setObject3D(
+        "helper",
+        new THREE.Box3Helper(debugBox, new THREE.Color(Math.random(), Math.random(), Math.random()))
+      );
+    }
   }
 });
