@@ -1,5 +1,11 @@
 import { EventEmitter } from "eventemitter3";
-import { MediaDevicesEvents, PermissionStatus, MediaDevices, DEFAULT_DEVICE_ID } from "./media-devices-utils";
+import {
+  MediaDevicesEvents,
+  PermissionStatus,
+  MediaDevices,
+  DEFAULT_DEVICE_ID,
+  NO_DEVICE_ID
+} from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 
 const isMobile = AFRAME.utils.device.isMobile();
@@ -73,7 +79,15 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get micDevices() {
-    return this._micDevices;
+    if (MediaDevicesManager.isAudioInputSelectEnabled) {
+      if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.DENIED) {
+        return [{ value: NO_DEVICE_ID, label: "None" }];
+      } else {
+        return this._micDevices;
+      }
+    } else {
+      return [{ value: DEFAULT_DEVICE_ID, label: "Default" }];
+    }
   }
 
   set micDevices(micDevices) {
@@ -109,14 +123,28 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get selectedMicDeviceId() {
-    return MediaDevicesManager.isAudioInputSelectEnabled
-      ? this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || DEFAULT_DEVICE_ID
-      : DEFAULT_DEVICE_ID;
+    if (MediaDevicesManager.isAudioInputSelectEnabled) {
+      if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.DENIED) {
+        return NO_DEVICE_ID;
+      } else {
+        return this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || DEFAULT_DEVICE_ID;
+      }
+    } else {
+      return DEFAULT_DEVICE_ID;
+    }
   }
 
   get preferredMicDeviceId() {
-    const { preferredMic } = this._store.state.preferences;
-    return MediaDevicesManager.isAudioInputSelectEnabled ? preferredMic || DEFAULT_DEVICE_ID : DEFAULT_DEVICE_ID;
+    if (MediaDevicesManager.isAudioInputSelectEnabled) {
+      if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.DENIED) {
+        return NO_DEVICE_ID;
+      } else {
+        const { preferredMic } = this._store.state.preferences;
+        return preferredMic || DEFAULT_DEVICE_ID;
+      }
+    } else {
+      return DEFAULT_DEVICE_ID;
+    }
   }
 
   get selectedSpeakersDeviceId() {
@@ -305,12 +333,13 @@ export default class MediaDevicesManager extends EventEmitter {
       const newStream = await navigator.mediaDevices.getUserMedia(constraints);
       this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
       this.audioTrack = newStream.getAudioTracks()[0];
-      this.audioTrack.addEventListener("ended", () => {
+      this.audioTrack.addEventListener("ended", async () => {
+        this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.DENIED;
+        await this.fetchMediaDevices();
         this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
-        this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.PROMPT;
         this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
           mediaDevice: MediaDevices.MICROPHONE,
-          status: PermissionStatus.PROMPT
+          status: PermissionStatus.DENIED
         });
       });
 
@@ -372,16 +401,15 @@ export default class MediaDevicesManager extends EventEmitter {
         newStream.getVideoTracks().forEach(track => {
           // Ideally we would use track.contentHint but it seems to be read-only in Chrome so we just add a custom property
           track["_hubs_contentHint"] = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
-          track.addEventListener("ended", () => {
-            this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
+          track.addEventListener("ended", async () => {
+            await this.fetchMediaDevices();
             const mediaDevice = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
-            if (mediaDevice === MediaDevices.CAMERA) {
-              this._permissionsStatus[mediaDevice] = PermissionStatus.DENIED;
-              this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
-                mediaDevice,
-                status: PermissionStatus.DENIED
-              });
-            }
+            this._permissionsStatus[mediaDevice] = PermissionStatus.DENIED;
+            this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
+            this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
+              mediaDevice,
+              status: PermissionStatus.DENIED
+            });
           });
           this._mediaStream.addTrack(track);
         });

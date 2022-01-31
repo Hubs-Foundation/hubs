@@ -15,11 +15,13 @@ export const presets = [
   "accent5"
 ];
 
+export const types = ["none", "left", "middle", "right"];
+
 export const statusColors = ["recording", "unread", "enabled", "disabled"];
 
 export const ToolbarButton = forwardRef(
   (
-    { preset, className, iconContainerClassName, children, icon, label, selected, large, statusColor, ...rest },
+    { preset, className, iconContainerClassName, children, icon, label, selected, large, statusColor, type, ...rest },
     ref
   ) => {
     return (
@@ -28,6 +30,7 @@ export const ToolbarButton = forwardRef(
         className={classNames(
           styles.toolbarButton,
           styles[preset],
+          styles[type],
           { [styles.selected]: selected, [styles.large]: large },
           className
         )}
@@ -53,7 +56,8 @@ ToolbarButton.propTypes = {
   large: PropTypes.bool,
   className: PropTypes.string,
   iconContainerClassName: PropTypes.string,
-  children: PropTypes.node
+  children: PropTypes.node,
+  type: PropTypes.oneOf(types)
 };
 
 ToolbarButton.defaultProps = {

@@ -155,6 +155,13 @@ export class AudioSystem {
     this.mixer[SourceType.MEDIA_VIDEO].connect(this._sceneEl.audioListener.getInput());
     this.mixer[SourceType.SFX].connect(this._sceneEl.audioListener.getInput());
 
+    // Analyser to show the output audio level
+    this.mixerAnalyser = this.audioContext.createAnalyser();
+    this.mixerAnalyser.fftSize = 32;
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this.mixerAnalyser);
+    this.mixer[SourceType.SFX].connect(this.mixerAnalyser);
+
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
 
@@ -224,10 +231,13 @@ export class AudioSystem {
       const sink = isDefault ? this._sceneEl.audioListener.getInput() : this.audioDestination;
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);
+      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
       this.mixer[SourceType.MEDIA_VIDEO].disconnect();
       this.mixer[SourceType.MEDIA_VIDEO].connect(sink);
+      this.mixer[SourceType.MEDIA_VIDEO].connect(this.mixerAnalyser);
       this.mixer[SourceType.SFX].disconnect();
       this.mixer[SourceType.SFX].connect(sink);
+      this.mixer[SourceType.SFX].connect(this.mixerAnalyser);
       if (isDefault) {
         if (this.outputMediaAudio) {
           this.outputMediaAudio.pause();

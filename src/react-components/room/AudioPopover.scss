@@ -1,0 +1,72 @@
+@use "../styles/theme.scss";
+
+:local(.audio-toolbar-popover) {
+  width: 100%;
+  height: 100%;
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    padding-top: 8px;
+    width: 272px;
+    overflow: hidden;
+  }
+}
+
+:local(.selection-input) {  
+  width: 100%;
+  max-width: none;
+}
+
+:local(.buttons-container) {
+  display: flex;
+}
+
+:local(.icon-enabled) {
+  path {
+    stroke-width: 1;
+  }
+
+  width: 24px;
+  height: 24px;
+
+  *[stroke=\#000] {
+    stroke: theme.$text1-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$text1-color;
+  }
+}
+
+:local(.icon-disabled) {
+  path {
+    stroke-width: 1;
+  }
+
+  width: 24px;
+  height: 24px;
+
+  *[stroke=\#000] {
+    stroke: theme.$text2-color;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$text2-color;
+  }
+}
+
+:local(.arrow-button) {
+  svg {
+    transform: rotate(180deg);
+  }
+}
+
+:local(.arrow-button-selected) {
+  svg {
+    transform: rotate(0deg);
+  }
+}
+
+:local(.level-bar) {
+  width: 100%;
+  height: 24px;
+}

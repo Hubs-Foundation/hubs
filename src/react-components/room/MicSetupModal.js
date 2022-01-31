@@ -4,7 +4,7 @@ import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
-import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
+import { ReactComponent as VolumeOffIcon } from "../icons/VolumeOff.svg";
 import { ReactComponent as InfoIcon } from "../icons/Info.svg";
 import styles from "./MicSetupModal.scss";
 import { BackButton } from "../input/BackButton";
@@ -44,7 +44,7 @@ export function MicSetupModal({
       className={className}
       {...rest}
     >
-      <Column center padding className={styles.content}>
+      <Column center padding grow className={styles.content}>
         <p>
           <FormattedMessage
             id="mic-setup-modal.check-mic"
@@ -68,9 +68,7 @@ export function MicSetupModal({
               </div>
               {permissionStatus === PermissionStatus.GRANTED && (
                 <LevelBar
-                  className={styles.level}
-                  width={48}
-                  height={48}
+                  className={styles.levelBar}
                   level={!isMicrophoneEnabled || isMicrophoneMuted ? 0 : micLevel}
                 />
               )}
@@ -151,8 +149,8 @@ export function MicSetupModal({
           </div>
           <div className={styles.audioIoContainer}>
             <div className={styles.iconContainer}>
-              <VolumeHighIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
-              <LevelBar width={48} height={48} level={speakerLevel} />
+              <VolumeOffIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
+              <LevelBar className={styles.levelBar} level={speakerLevel} />
             </div>
             <div className={styles.actionContainer}>
               <Button preset="basic" onClick={onPlaySound} sm>

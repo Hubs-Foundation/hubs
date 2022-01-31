@@ -8,6 +8,10 @@ $mobile-breakpoint-width: 450px;
     font-weight: theme.$font-weight-medium;
     line-height: 1.2;
   }
+
+  & > :last-child {
+    margin-top: auto;
+  }
 }
 
 :local(.audio-check-container) {
@@ -40,8 +44,8 @@ $mobile-breakpoint-width: 450px;
     stroke-width: 1;
   }
 
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
 
   *[stroke=\#000] {
     stroke: theme.$text1-color;
@@ -132,4 +136,9 @@ $mobile-breakpoint-width: 450px;
   *[fill=\#000] {
     fill: theme.$darkgrey;
   }
+}
+
+:local(.level-bar) {
+  width: 24px;
+  height: 100%;
 }
