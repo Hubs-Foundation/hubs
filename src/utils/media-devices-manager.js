@@ -1,5 +1,11 @@
 import { EventEmitter } from "eventemitter3";
-import { MediaDevicesEvents, PermissionStatus, MediaDevices, DEFAULT_DEVICE_ID, NO_DEVICE_ID } from "./media-devices-utils";
+import {
+  MediaDevicesEvents,
+  PermissionStatus,
+  MediaDevices,
+  DEFAULT_DEVICE_ID,
+  NO_DEVICE_ID
+} from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 
 const isMobile = AFRAME.utils.device.isMobile();
