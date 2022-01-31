@@ -14,8 +14,9 @@
 
 :local(.level-bar) {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: theme.$border-radius-small;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
   background-color: theme.$green;
+  margin-left: 4px;
+  margin-top: 4px;
 }
