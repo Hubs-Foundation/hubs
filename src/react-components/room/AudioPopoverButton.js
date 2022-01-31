@@ -44,6 +44,7 @@ export const AudioPopoverButton = ({
             onClick={togglePopover}
             type={"left"}
             className={popoverVisible ? styles.arrowButton : styles.arrowButtonSelected}
+            title={"Audio Settings"}
           />
           <ToolbarButton
             ref={ref}
