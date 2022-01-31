@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import styles from "./AudioPopover.scss";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
-import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
+import { ReactComponent as VolumeOff } from "../icons/VolumeOff.svg";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
 import { SelectInputField } from "../input/SelectInputField";
@@ -69,7 +69,7 @@ export const AudioPopoverContent = ({
         />
       )}
       <Row noWrap>
-        <VolumeHighIcon className={iconStyle} style={{ marginRight: "12px" }} />
+        <VolumeOff className={iconStyle} style={{ marginRight: "12px" }} />
         <LevelBar className={styles.levelBar} level={speakerLevel} />
       </Row>
       <Button preset="basic" onClick={onPlaySound} sm>

@@ -4,7 +4,7 @@ import { Modal } from "../modal/Modal";
 import { Button } from "../input/Button";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
-import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
+import { ReactComponent as VolumeOffIcon } from "../icons/VolumeOff.svg";
 import { ReactComponent as InfoIcon } from "../icons/Info.svg";
 import styles from "./MicSetupModal.scss";
 import { BackButton } from "../input/BackButton";
@@ -149,7 +149,7 @@ export function MicSetupModal({
           </div>
           <div className={styles.audioIoContainer}>
             <div className={styles.iconContainer}>
-              <VolumeHighIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
+              <VolumeOffIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
               <LevelBar className={styles.levelBar} level={speakerLevel} />
             </div>
             <div className={styles.actionContainer}>
