@@ -8,6 +8,10 @@ $mobile-breakpoint-width: 450px;
     font-weight: theme.$font-weight-medium;
     line-height: 1.2;
   }
+
+  & > :last-child {
+    margin-top: auto;
+  }
 }
 
 :local(.audio-check-container) {
