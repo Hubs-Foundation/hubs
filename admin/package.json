@@ -63,7 +63,7 @@
     "sass": "^1.26.10",
     "sass-loader": "^9.0.2",
     "selfsigned": "^1.10.2",
-    "shelljs": "^0.8.1",
+    "shelljs": "^0.8.5",
     "style-loader": "^0.20.2",
     "url-loader": "^1.0.1",
     "webpack": "^4.43.0",
