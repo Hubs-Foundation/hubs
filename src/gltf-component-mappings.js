@@ -618,3 +618,12 @@ AFRAME.GLTFModelPlus.registerComponent(
     });
   }
 );
+
+AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (el, componentName, componentData) => {
+  // TODO PMREMGenerator should be fixed to not assume this
+  componentData.envMapTexture.flipY = true;
+  // Assume texture is always an equirect for now
+  componentData.envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+  el.setAttribute(componentName, componentData);
+});
