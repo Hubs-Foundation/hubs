@@ -87,6 +87,7 @@
             <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
             <img id="cursor-image" crossorigin="anonymous" src="./assets/images/cursor.svg">
             <img id="nametag" crossorigin="anonymous" src="./assets/hud/nametag.9.png">
+            <img id="nametag-border" crossorigin="anonymous" src="./assets/hud/nametag-border.9.png">
 
             <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
             <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
@@ -141,11 +142,14 @@
                         <template data-name="Neck">
                             <a-entity tags="ignoreSpaceBubble: true;">
                                 <a-entity
-                                    billboard="onlyY: true;"
                                     class="nametag"
-                                    text="side: double; textAlign: center; color: #ddd; fontSize: 0.3; outlineWidth: 1%;"
+                                    billboard
                                     position="0 1 0"
-                                ></a-entity>
+                                >
+                                    <a-entity class="nametag-background-id" mixin="nametag-background" slice9="width: 1"></a-entity>
+                                    <a-entity text="side: double; align: center; width: 2.5; color: #ddd" text-raycast-hack position="0 0 0.001"></a-entity>
+                                    <a-entity class="nametag-status-border-id" mixin="nametag-status-border" visible="false" slice9="width: 1"></a-entity>
+                                </a-entity>
                                 <a-entity
                                     billboard="onlyY: true;"
                                     class="identityName"
@@ -970,6 +974,19 @@
                     transparent: false;
                     alphaTest: 0.1;
                     src: #nametag"
+            ></a-mixin>
+
+            <a-mixin id="nametag-status-border"
+                slice9="
+                    width: 0.45;
+                    height: 0.2;
+                    left: 64;
+                    top: 64;
+                    right: 66;
+                    bottom: 66;
+                    transparent: false;
+                    alphaTest: 0.1;
+                    src: #nametag-border"
             ></a-mixin>
 
             <a-mixin id="rounded-text-button"

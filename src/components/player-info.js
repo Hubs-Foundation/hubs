@@ -4,7 +4,8 @@ import { registerComponentInstance, deregisterComponentInstance } from "../utils
 import defaultAvatar from "../assets/models/DefaultAvatar.glb";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 
-const NAMETAG_PADDING = 0.05;
+const NAMETAG_BACKGROUND_PADDING = 0.05;
+const NAMETAG_STATUS_BORDER_PADDING = 0.035;
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -55,6 +56,7 @@ AFRAME.registerComponent("player-info", {
     this.handleRemoteModelError = this.handleRemoteModelError.bind(this);
     this.update = this.update.bind(this);
     this.onMicStateChanged = this.onMicStateChanged.bind(this);
+    this.onAnalyserVolumeUpdated = this.onAnalyserVolumeUpdated.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -90,6 +92,8 @@ AFRAME.registerComponent("player-info", {
 
     if (this.isLocalPlayerInfo) {
       APP.dialog.on("mic-state-changed", this.onMicStateChanged);
+    } else {
+      this.el.addEventListener("analyser-volume-updated", this.onAnalyserVolumeUpdated);
     }
   },
   pause() {
@@ -106,6 +110,8 @@ AFRAME.registerComponent("player-info", {
 
     if (this.isLocalPlayerInfo) {
       APP.dialog.off("mic-state-changed", this.onMicStateChanged);
+    } else {
+      this.el.removeEventListener("analyser-volume-updated", this.onAnalyserVolumeUpdated);
     }
   },
 
@@ -143,14 +149,24 @@ AFRAME.registerComponent("player-info", {
 
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
-      nametagEl.setAttribute("text", { value: this.displayName });
+      const text = this.el.querySelector("[text]");
+      text.setAttribute("text", { value: this.displayName });
 
       // Update the name tag width based on the text width
-      const slice9 = nametagEl.parentElement.components["slice9"];
-      if (slice9) {
-        const size = nametagEl.components["text"].getSize();
-        size && nametagEl.parentElement.setAttribute("slice9", "width", size.x + NAMETAG_PADDING * 2);
+      const size = text.components["text"].getSize();
+      if (size) {
+        const nametagBackground = this.el.querySelector(".nametag-background-id");
+        if (nametagBackground) {
+          nametagBackground.setAttribute("slice9", "width", size.x + NAMETAG_BACKGROUND_PADDING * 2);
+          this.nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
+          const slice = nametagBackground.components["slice9"];
+          this.nametagStatusBorder.setAttribute("slice9", {
+            width: slice.data.width + NAMETAG_STATUS_BORDER_PADDING,
+            height: slice.data.height + NAMETAG_STATUS_BORDER_PADDING
+          });
+        }
       }
+
       nametagEl.object3D.visible = !infoShouldBeHidden;
     }
     const identityNameEl = this.el.querySelector(".identityName");
@@ -216,5 +232,9 @@ AFRAME.registerComponent("player-info", {
   },
   onMicStateChanged({ enabled }) {
     this.el.setAttribute("player-info", { muted: !enabled });
+  },
+
+  onAnalyserVolumeUpdated({ detail: { volume } }) {
+    this.nametagStatusBorder?.setAttribute("visible", volume > 0.01);
   }
 });

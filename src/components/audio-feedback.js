@@ -84,6 +84,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
   tick: function(t) {
     if (!this.avatarIsQuiet) {
       this._updateAnalysis(t);
+      this.el.emit("analyser-volume-updated", { volume: this.volume });
     }
   },
 
