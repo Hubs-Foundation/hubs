@@ -91,7 +91,7 @@ const FONTS = {
   }
 };
 
-AFRAME.registerComponent("text", {
+AFRAME.registerComponent("textt", {
   multiple: true,
   schema: {
     align: { type: "string", default: "left", oneOf: ["left", "right", "center"] },

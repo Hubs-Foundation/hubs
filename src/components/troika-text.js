@@ -20,11 +20,19 @@ function numberOrPercent(defaultValue) {
   };
 }
 
-AFRAME.registerComponent("troika-text", {
+/*
+ * TODO Temporarily changed some property namesto match existing component properties,
+ * would rather just remap them in gltf-compponent-mappings when present, and change any in hub.html by hand
+ * anchor -> ancorX
+ * baseline -> anchorY
+ * value -> text (might be worth just keeping this due to code changes needed)
+*/
+
+AFRAME.registerComponent("text", {
   schema: {
     align: { type: "string", default: "left", oneOf: ["left", "right", "center", "justify"] },
-    anchorX: { default: "left", oneOf: ["left", "right", "center", "align"] },
-    anchorY: { default: "bottom-baseline", oneOf: ["top", "top-baseline", "middle", "bottom-baseline", "bottom"] },
+    anchor: { default: "center", oneOf: ["left", "right", "center", "align"] },
+    baseline: { default: "middle", oneOf: ["top", "top-baseline", "middle", "bottom-baseline", "bottom"] },
     clipRect: {
       type: "string",
       default: "",
@@ -46,11 +54,11 @@ AFRAME.registerComponent("troika-text", {
     },
     color: { type: "color", default: "#FFF" },
     curveRadius: { type: "number", default: 0 },
-    depthOffset: { type: "number", default: 0 },
+    depthOffset: { type: "number", default: 0.001 },
     direction: { type: "string", default: "auto", oneOf: ["auto", "ltr", "rtl"] },
     fillOpacity: { type: "number", default: 1 },
     font: { type: "string" },
-    fontSize: { type: "number", default: 1 },
+    fontSize: { type: "number", default: 0.075 },
     letterSpacing: { type: "number", default: 0 },
     lineHeight: { type: "number" },
     maxWidth: { type: "number", default: Infinity },
@@ -64,15 +72,11 @@ AFRAME.registerComponent("troika-text", {
     strokeColor: { type: "color", default: "grey" },
     strokeOpacity: { type: "number", default: 1 },
     strokeWidth: numberOrPercent(0),
-    text: { type: "string", default: "" },
+    value: { type: "string", default: "" },
     textIndent: { type: "number", default: 0 },
-    value: { type: "string" },
-    whiteSpace: { default: "normal", oneOf: ["normal", "nowrap"] }
-
-    // attrs that can be configured via troika-text-material:
-    // opacity: {type: 'number', default: 1.0},
-    // transparent: {default: true},
-    // side: {default: 'front', oneOf: ['front', 'back', 'double']},
+    whiteSpace: { default: "normal", oneOf: ["normal", "nowrap"] },
+    opacity: { type: "number", default: 1.0 },
+    side: { default: "front", oneOf: ["front", "back", "double"] }
   },
 
   /**
@@ -92,11 +96,13 @@ AFRAME.registerComponent("troika-text", {
     const mesh = this.troikaTextMesh;
 
     // Update the text mesh
-    mesh.text = data.text || "";
+    mesh.text = data.value || "";
     mesh.textAlign = data.textAlign;
-    mesh.anchorX = data.anchorX;
-    mesh.anchorY = data.anchorY;
-    mesh.color = new THREE.Color(data.color);
+    mesh.anchorX = data.anchor;
+    mesh.anchorY = data.baseline;
+    mesh.color = data.color;
+    mesh.material.side = data.side;
+    mesh.material.opacity = data.opacity;
     mesh.curveRadius = data.curveRadius;
     mesh.depthOffset = data.depthOffset || 0;
     mesh.direction = data.direction;
