@@ -23,6 +23,18 @@ AFRAME.registerComponent("text-button", {
       this.updateButtonState();
     };
     this.textEl = this.el.querySelector("[text]");
+
+    if (this.el.getObject3D("mesh")) {
+      this.el.components.slice9.material.toneMapped = false;
+    } else {
+      this.el.addEventListener(
+        "object3dset",
+        () => {
+          this.el.components.slice9.material.toneMapped = false;
+        },
+        { once: true }
+      );
+    }
   },
 
   play() {

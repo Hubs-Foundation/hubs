@@ -84,6 +84,7 @@ AFRAME.registerComponent("text", {
    */
   init: function() {
     this.troikaTextMesh = new Text();
+    this.troikaTextMesh.material.toneMapped = false;
     this.el.setObject3D("mesh", this.troikaTextMesh);
   },
 
