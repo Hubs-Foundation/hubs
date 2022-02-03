@@ -14,7 +14,9 @@ const DEFAULT_COLORS = {
   "action-subtitle-color": "#F0F0F0",
   "notice-background-color": "#2F80ED",
   "notice-text-color": "#FFFFFF",
-  "favorited-color": "#FFC000"
+  "favorited-color": "#FFC000",
+  "nametag-color": "#000000",
+  "nametag-text-color": "#FFFFFF"
 };
 
 function getThemeColor(name) {
@@ -33,6 +35,8 @@ function getThemeColor(name) {
 function activateTheme() {
   const actionColor = getThemeColor("action-color");
   const actionHoverColor = getThemeColor("action-color-highlight");
+  const nametagColor = getThemeColor("nametag-color");
+  const nametagTextColor = getThemeColor("nametag-text-color");
 
   if (document.querySelector("#rounded-text-button")) {
     // NOTE, using the object-based {} setAttribute variant in a-frame
@@ -64,6 +68,13 @@ function activateTheme() {
       .setAttribute(
         "text-button",
         `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
+      );
+
+    document
+      .querySelector("#nametag-background")
+      .setAttribute(
+        "text-button",
+        `textHoverColor: #fff; textColor: ${nametagTextColor}; backgroundColor: ${nametagColor}; backgroundHoverColor: #aaa;`
       );
   }
 }

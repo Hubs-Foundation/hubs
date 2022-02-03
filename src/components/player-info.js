@@ -4,6 +4,8 @@ import { registerComponentInstance, deregisterComponentInstance } from "../utils
 import defaultAvatar from "../assets/models/DefaultAvatar.glb";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 
+const NAMETAG_PADDING = 0.05;
+
 function ensureAvatarNodes(json) {
   const { nodes } = json;
   if (!nodes.some(node => node.name === "Head")) {
@@ -142,6 +144,13 @@ AFRAME.registerComponent("player-info", {
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       nametagEl.setAttribute("text", { value: this.displayName });
+
+      // Update the name tag width based on the text width
+      const slice9 = nametagEl.parentElement.components["slice9"];
+      if (slice9) {
+        const size = nametagEl.components["text"].getSize();
+        size && nametagEl.parentElement.setAttribute("slice9", "width", size.x + NAMETAG_PADDING * 2);
+      }
       nametagEl.object3D.visible = !infoShouldBeHidden;
     }
     const identityNameEl = this.el.querySelector(".identityName");
