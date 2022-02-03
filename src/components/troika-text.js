@@ -54,7 +54,7 @@ AFRAME.registerComponent("text", {
     },
     color: { type: "color", default: "#FFF" },
     curveRadius: { type: "number", default: 0 },
-    depthOffset: { type: "number", default: 0.001 },
+    depthOffset: { type: "number", default: 0 },
     direction: { type: "string", default: "auto", oneOf: ["auto", "ltr", "rtl"] },
     fillOpacity: { type: "number", default: 1 },
     font: { type: "string" },
@@ -85,7 +85,7 @@ AFRAME.registerComponent("text", {
   init: function() {
     this.troikaTextMesh = new Text();
     this.troikaTextMesh.material.toneMapped = false;
-    this.el.setObject3D("mesh", this.troikaTextMesh);
+    this.el.setObject3D("text", this.troikaTextMesh);
   },
 
   /**
