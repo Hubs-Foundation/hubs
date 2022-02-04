@@ -270,8 +270,8 @@ try {
     isOAuthModal = true;
     window.close();
   }
-} catch(e) {
-  console.error("Exception in oauth processing code", e);  
+} catch (e) {
+  console.error("Exception in oauth processing code", e);
 }
 
 const isBotMode = qsTruthy("bot");

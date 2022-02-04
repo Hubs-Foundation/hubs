@@ -748,7 +748,7 @@ AFRAME.registerComponent("gltf-model-plus", {
     if (this.data.batch && this.model) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
     }
-    if(this.data.useCache) {
+    if (this.data.useCache) {
       const src = resolveAsset(this.data.src);
       if (src) {
         gltfCache.release(src);
