@@ -31,8 +31,8 @@ function numberOrPercent(defaultValue) {
 AFRAME.registerComponent("text", {
   schema: {
     align: { type: "string", default: "left", oneOf: ["left", "right", "center", "justify"] },
-    anchor: { default: "center", oneOf: ["left", "right", "center", "align"] },
-    baseline: { default: "middle", oneOf: ["top", "top-baseline", "middle", "bottom-baseline", "bottom"] },
+    anchorX: { default: "center", oneOf: ["left", "right", "center", "align"] },
+    anchorY: { default: "middle", oneOf: ["top", "top-baseline", "middle", "bottom-baseline", "bottom"] },
     clipRect: {
       type: "string",
       default: "",
@@ -57,7 +57,7 @@ AFRAME.registerComponent("text", {
     depthOffset: { type: "number", default: 0 },
     direction: { type: "string", default: "auto", oneOf: ["auto", "ltr", "rtl"] },
     fillOpacity: { type: "number", default: 1 },
-    font: { type: "string" },
+    fontUrl: { type: "string" },
     fontSize: { type: "number", default: 0.075 },
     letterSpacing: { type: "number", default: 0 },
     lineHeight: { type: "number" },
@@ -99,8 +99,8 @@ AFRAME.registerComponent("text", {
     // Update the text mesh
     mesh.text = data.value || "";
     mesh.textAlign = data.textAlign;
-    mesh.anchorX = data.anchor;
-    mesh.anchorY = data.baseline;
+    mesh.anchorX = data.anchorX;
+    mesh.anchorY = data.anchorY;
     mesh.color = data.color;
     mesh.material.side = data.side;
     mesh.material.opacity = data.opacity;
@@ -108,7 +108,7 @@ AFRAME.registerComponent("text", {
     mesh.depthOffset = data.depthOffset || 0;
     mesh.direction = data.direction;
     mesh.fillOpacity = data.fillOpacity;
-    mesh.font = data.font;
+    mesh.font = data.fontUrl;
     mesh.fontSize = data.fontSize;
     mesh.letterSpacing = data.letterSpacing || 0;
     mesh.clipRect = data.clipRect;

@@ -85,7 +85,7 @@ AFRAME.registerComponent("stats-plus", {
   },
   initVRStats() {
     this.vrPanel = document.createElement("a-entity");
-    this.vrPanel.setAttribute("text", { width: 0.5, whiteSpace: "pre", value: "_", baseline: "bottom" });
+    this.vrPanel.setAttribute("text", { maxWidth: 0.5, value: "_", anchorY: "bottom" });
     this.vrPanel.addEventListener(
       "loaded",
       () =>
