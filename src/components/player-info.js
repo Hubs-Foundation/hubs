@@ -57,9 +57,11 @@ AFRAME.registerComponent("player-info", {
     this.update = this.update.bind(this);
     this.onMicStateChanged = this.onMicStateChanged.bind(this);
     this.onAnalyserVolumeUpdated = this.onAnalyserVolumeUpdated.bind(this);
+    this.onUpdateNametag = this.onUpdateNametag.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
+    this._nametagStatusBorder = null;
 
     if (!this.isLocalPlayerInfo) {
       NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
@@ -150,23 +152,8 @@ AFRAME.registerComponent("player-info", {
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       const text = this.el.querySelector("[text]");
+      text.addEventListener("text-updated", this.onUpdateNametag, { once: true });
       text.setAttribute("text", { value: this.displayName });
-
-      // Update the name tag width based on the text width
-      const size = text.components["text"].getSize();
-      if (size) {
-        const nametagBackground = this.el.querySelector(".nametag-background-id");
-        if (nametagBackground) {
-          nametagBackground.setAttribute("slice9", "width", size.x + NAMETAG_BACKGROUND_PADDING * 2);
-          this.nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
-          const slice = nametagBackground.components["slice9"];
-          this.nametagStatusBorder.setAttribute("slice9", {
-            width: slice.data.width + NAMETAG_STATUS_BORDER_PADDING,
-            height: slice.data.height + NAMETAG_STATUS_BORDER_PADDING
-          });
-        }
-      }
-
       nametagEl.object3D.visible = !infoShouldBeHidden;
     }
     const identityNameEl = this.el.querySelector(".identityName");
@@ -235,6 +222,21 @@ AFRAME.registerComponent("player-info", {
   },
 
   onAnalyserVolumeUpdated({ detail: { volume } }) {
-    this.nametagStatusBorder?.setAttribute("visible", volume > 0.01);
+    this._nametagStatusBorder?.setAttribute("visible", volume > 0.01);
+  },
+
+  onUpdateNametag({ detail: text }) {
+    // Update the name tag width based on the text width
+    const size = text.getSize();
+    const nametagBackground = this.el.querySelector(".nametag-background-id");
+    if (size && nametagBackground) {
+      nametagBackground.setAttribute("slice9", "width", size.x + NAMETAG_BACKGROUND_PADDING * 2);
+      this._nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
+      const slice = nametagBackground.components["slice9"];
+      this._nametagStatusBorder.setAttribute("slice9", {
+        width: slice.data.width + NAMETAG_STATUS_BORDER_PADDING,
+        height: slice.data.height + NAMETAG_STATUS_BORDER_PADDING
+      });
+    }
   }
 });
