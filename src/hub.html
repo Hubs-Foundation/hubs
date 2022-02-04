@@ -147,8 +147,15 @@
                                     position="0 1 0"
                                 >
                                     <a-entity class="nametag-background-id" mixin="nametag-background" slice9="width: 1"></a-entity>
-                                    <a-entity text="side: double; align: center; width: 2.5; color: #ddd" text-raycast-hack position="0 0 0.001"></a-entity>
+                                    <a-entity class="nametag-text-id" text="side: double; align: center; width: 2.5; color: #ddd" text-raycast-hack position="0 0 0.001"></a-entity>
                                     <a-entity class="nametag-status-border-id" mixin="nametag-status-border" visible="false" slice9="width: 1"></a-entity>
+                                    <a-entity
+                                        is-not-remote-hover-target
+                                        class="nametag-volume-id"
+                                        sprite="name: recording-badge.png"
+                                        scale="0.25 0.25 0.25"
+                                        position="0 -0.2 0.001"
+                                    ></a-entity>
                                 </a-entity>
                                 <a-entity
                                     billboard="onlyY: true;"

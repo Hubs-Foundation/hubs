@@ -7,6 +7,34 @@ import { MediaDevicesEvents } from "../utils/media-devices-utils";
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
 
+export const STATUS = Object.freeze({
+  IDLE: 0,
+  TALKING: 1
+});
+
+export const ELEMENTS = Object.freeze({
+  DISPLAY_NAME: 0,
+  ICON_LEFT: 1,
+  ICON_RIGHT: 2,
+  ICON_MIDDLE: 2
+});
+
+export const NAMETAG_POSITIONS = Object.freeze({
+  [STATUS.IDLE]: {
+    [ELEMENTS.DISPLAY_NAME]: {
+      position: [0, 0, 0.001]
+    }
+  },
+  [STATUS.TALKING]: {
+    [ELEMENTS.DISPLAY_NAME]: {
+      position: [0, 0.1, 0.001]
+    },
+    [ELEMENTS.ICON_LEFT]: [0, -0.2, 0.001],
+    [ELEMENTS.ICON_RIGHT]: [0, -0.2, 0.001],
+    [ELEMENTS.ICON_MIDDLE]: [0, -0.2, 0.001]
+  }
+});
+
 function ensureAvatarNodes(json) {
   const { nodes } = json;
   if (!nodes.some(node => node.name === "Head")) {
@@ -57,11 +85,11 @@ AFRAME.registerComponent("player-info", {
     this.update = this.update.bind(this);
     this.onMicStateChanged = this.onMicStateChanged.bind(this);
     this.onAnalyserVolumeUpdated = this.onAnalyserVolumeUpdated.bind(this);
-    this.onUpdateNametag = this.onUpdateNametag.bind(this);
+    this.onDisplayNameUpdated = this.onDisplayNameUpdated.bind(this);
+    this.status = new Set();
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
-    this._nametagStatusBorder = null;
 
     if (!this.isLocalPlayerInfo) {
       NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
@@ -152,7 +180,7 @@ AFRAME.registerComponent("player-info", {
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       const text = this.el.querySelector("[text]");
-      text.addEventListener("text-updated", this.onUpdateNametag, { once: true });
+      text.addEventListener("text-updated", this.onDisplayNameUpdated, { once: true });
       text.setAttribute("text", { value: this.displayName });
       nametagEl.object3D.visible = !infoShouldBeHidden;
     }
@@ -222,21 +250,58 @@ AFRAME.registerComponent("player-info", {
   },
 
   onAnalyserVolumeUpdated({ detail: { volume } }) {
-    this._nametagStatusBorder?.setAttribute("visible", volume > 0.01);
+    const newStatus = new Set(this.status);
+    if (volume < 0.01 || this.data.muted) {
+      newStatus.delete(STATUS.TALKING);
+    } else {
+      newStatus.add(STATUS.TALKING);
+    }
+    this.processStatus(newStatus);
   },
 
-  onUpdateNametag({ detail: text }) {
-    // Update the name tag width based on the text width
-    const size = text.getSize();
+  onDisplayNameUpdated() {
+    this.processStatus();
+  },
+
+  processStatus(newStatus) {
+    const status = newStatus || this.status;
     const nametagBackground = this.el.querySelector(".nametag-background-id");
-    if (size && nametagBackground) {
-      nametagBackground.setAttribute("slice9", "width", size.x + NAMETAG_BACKGROUND_PADDING * 2);
-      this._nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
-      const slice = nametagBackground.components["slice9"];
-      this._nametagStatusBorder.setAttribute("slice9", {
-        width: slice.data.width + NAMETAG_STATUS_BORDER_PADDING,
-        height: slice.data.height + NAMETAG_STATUS_BORDER_PADDING
-      });
+    if (nametagBackground) {
+      // Get the updated text size
+      const nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
+      const nametagVolumeId = this.el.querySelector(".nametag-volume-id");
+      const nametagText = this.el.querySelector(".nametag-text-id");
+      const size = nametagText.components["text"].getSize();
+      const nametagBackgroundSlice = nametagBackground.components["slice9"];
+
+      if (status.has(STATUS.TALKING) && !this.status.has(STATUS.TALKING)) {
+        clearTimeout(this.expandHandle);
+        this.expandHandle = null;
+        nametagBackground.setAttribute("slice9", { width: size.x + NAMETAG_BACKGROUND_PADDING * 2, height: 0.5 });
+        nametagText.setAttribute("position", { x: 0, y: 0.1, z: 0.001 });
+        nametagVolumeId.setAttribute("position", { x: 0, y: -0.1, z: 0.001 });
+        nametagVolumeId.setAttribute("visible", true);
+        nametagStatusBorder.setAttribute("visible", true);
+        nametagStatusBorder.setAttribute("slice9", {
+          width: nametagBackgroundSlice.data.width + NAMETAG_STATUS_BORDER_PADDING,
+          height: nametagBackgroundSlice.data.height + NAMETAG_STATUS_BORDER_PADDING
+        });
+      } else if (status.size === 0 && this.status.size === status.size) {
+        if (!this.expandHandle) {
+          this.expandHandle = setTimeout(() => {
+            nametagBackground.setAttribute("slice9", { width: size.x + NAMETAG_BACKGROUND_PADDING * 2, height: 0.2 });
+            nametagText.setAttribute("position", { x: 0, y: 0, z: 0.001 });
+            nametagVolumeId.setAttribute("visible", false);
+            nametagStatusBorder.setAttribute("visible", false);
+            nametagStatusBorder.setAttribute("slice9", {
+              width: nametagBackgroundSlice.data.width + NAMETAG_STATUS_BORDER_PADDING,
+              height: nametagBackgroundSlice.data.height + NAMETAG_STATUS_BORDER_PADDING
+            });
+            this.expandHandle = null;
+          }, 1000);
+        }
+      }
     }
+    this.status = new Set(newStatus);
   }
 });
