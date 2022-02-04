@@ -264,10 +264,14 @@ let isOAuthModal = false;
 
 // OAuth popup handler
 // TODO: Replace with a new oauth callback route that has this postMessage script.
-if (window.opener && window.opener.doingTwitterOAuth) {
-  window.opener.postMessage("oauth-successful");
-  isOAuthModal = true;
-  window.close();
+try {
+  if (window.opener && window.opener.doingTwitterOAuth) {
+    window.opener.postMessage("oauth-successful");
+    isOAuthModal = true;
+    window.close();
+  }
+} catch(e) {
+  console.error("Exception in oauth processing code", e);  
 }
 
 const isBotMode = qsTruthy("bot");
