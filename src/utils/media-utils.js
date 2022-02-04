@@ -260,14 +260,12 @@ export const cloneMedia = (sourceEl, template, src = null, networked = true, lin
   );
 };
 
-import { Text } from "troika-three-text";
-
 export function injectCustomShaderChunks(obj) {
   const shaderUniforms = [];
   const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
 
   obj.traverse(object => {
-    if (!object.material || object instanceof Text) return;
+    if (!object.material || object.isTroikaText) return;
 
     // TODO this does not really belong here
     object.reflectionProbeMode = "dynamic";
