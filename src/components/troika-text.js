@@ -20,14 +20,6 @@ function numberOrPercent(defaultValue) {
   };
 }
 
-/*
- * TODO Temporarily changed some property namesto match existing component properties,
- * would rather just remap them in gltf-compponent-mappings when present, and change any in hub.html by hand
- * anchor -> ancorX
- * baseline -> anchorY
- * value -> text (might be worth just keeping this due to code changes needed)
-*/
-
 AFRAME.registerComponent("text", {
   schema: {
     align: { type: "string", default: "left", oneOf: ["left", "right", "center", "justify"] },
@@ -57,7 +49,9 @@ AFRAME.registerComponent("text", {
     depthOffset: { type: "number", default: 0 },
     direction: { type: "string", default: "auto", oneOf: ["auto", "ltr", "rtl"] },
     fillOpacity: { type: "number", default: 1 },
+    // This is different from the Troika preoperty name, Using "fontUrl" to prevent conflict with previous "font" p=roperty and to allow us to make named fonts later
     fontUrl: { type: "string" },
+    // This default value differs from the Troika default of 0.1, it most closely matches the size of our previous text component.
     fontSize: { type: "number", default: 0.075 },
     letterSpacing: { type: "number", default: 0 },
     lineHeight: { type: "number" },
@@ -72,6 +66,7 @@ AFRAME.registerComponent("text", {
     strokeColor: { type: "color", default: "grey" },
     strokeOpacity: { type: "number", default: 1 },
     strokeWidth: numberOrPercent(0),
+    // Note this is different than the Troika property name, Using "value" instead of "text" here to prevent code changes.
     value: { type: "string", default: "" },
     textIndent: { type: "number", default: 0 },
     whiteSpace: { default: "normal", oneOf: ["normal", "nowrap"] },

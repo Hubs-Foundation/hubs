@@ -526,27 +526,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 
 AFRAME.GLTFModelPlus.registerComponent("video-texture-source", "video-texture-source");
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "text",
-  "text",
-  (el, componentName, componentData, _components, indexToEntityMap) => {
-    const cleanedData = {
-      ...componentData
-    };
-    // Minimally support values from legacy text components, show warning
-    if (!componentData.text && componentData.value) {
-      console.warn(
-        "The `text` component you are using has been deprecated. Be sure to use the latest version of the Blender Exporter."
-      );
-      cleanedData.anchorX = componentData.anchor;
-      cleanedData.anchorY = componentData.baseline;
-      delete cleanedData.anchor;
-      delete cleanedData.baseline;
-    }
-
-    el.setAttribute(componentName, cleanedData);
-  }
-);
+AFRAME.GLTFModelPlus.registerComponent("text", "text");
 
 AFRAME.GLTFModelPlus.registerComponent(
   "audio-target",
