@@ -748,9 +748,11 @@ AFRAME.registerComponent("gltf-model-plus", {
     if (this.data.batch && this.model) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
     }
-    const src = resolveAsset(this.data.src);
-    if (src) {
-      gltfCache.release(src);
+    if(this.data.useCache) {
+      const src = resolveAsset(this.data.src);
+      if (src) {
+        gltfCache.release(src);
+      }
     }
   },
 
@@ -844,7 +846,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         if (el) rewires.push(() => (o.el = el));
       });
 
-      if (lastSrc) {
+      if (lastSrc && this.data.useCache) {
         gltfCache.release(lastSrc);
       }
       this.el.setObject3D("mesh", object3DToSet);
