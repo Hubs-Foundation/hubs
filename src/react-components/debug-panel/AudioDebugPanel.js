@@ -5,16 +5,14 @@ import styles from "./AudioDebugPanel.scss";
 import { CollapsiblePanel } from ".//CollapsiblePanel";
 import classNames from "classnames";
 import {
-  CLIPPING_THRESHOLD_ENABLED,
   CLIPPING_THRESHOLD_MIN,
   CLIPPING_THRESHOLD_MAX,
   CLIPPING_THRESHOLD_STEP,
-  CLIPPING_THRESHOLD_DEFAULT,
   GLOBAL_VOLUME_MIN,
   GLOBAL_VOLUME_MAX,
-  GLOBAL_VOLUME_STEP,
-  GLOBAL_VOLUME_DEFAULT
+  GLOBAL_VOLUME_STEP
 } from "../../react-components/preferences-screen";
+import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT, GLOBAL_VOLUME_DEFAULT } from "../../storage/store";
 import { SelectInputField } from "../input/SelectInputField";
 import { DISTANCE_MODEL_OPTIONS, DistanceModelType, SourceType } from "../../components/audio-params";
 import { getCurrentAudioSettingsForSourceType, updateAudioSettings } from "../../update-audio-settings";

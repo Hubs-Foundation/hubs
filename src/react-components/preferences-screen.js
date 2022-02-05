@@ -7,23 +7,19 @@ import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
 import { FormattedMessage, injectIntl, useIntl, defineMessages } from "react-intl";
 import styles from "../assets/stylesheets/preferences-screen.scss";
-import { defaultMaterialQualitySetting } from "../storage/store";
+import { SCHEMA, GLOBAL_VOLUME_DEFAULT } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
 import MediaDevicesManager from "../utils/media-devices-manager";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { Slider } from "./input/Slider";
 
-export const CLIPPING_THRESHOLD_ENABLED = false;
 export const CLIPPING_THRESHOLD_MIN = 0.0;
 export const CLIPPING_THRESHOLD_MAX = 0.1;
 export const CLIPPING_THRESHOLD_STEP = 0.001;
-export const CLIPPING_THRESHOLD_DEFAULT = 0.015;
 export const GLOBAL_VOLUME_MIN = 0;
 export const GLOBAL_VOLUME_MAX = 200;
 export const GLOBAL_VOLUME_STEP = 5;
-export const GLOBAL_VOLUME_DEFAULT = 100;
-export const NAMETAG_VISIBILITY_DISTANCE_DEFAULT = 5;
 
 function WarnIcon() {
   return (
@@ -548,10 +544,11 @@ class PreferenceListItem extends Component {
       <span className={styles.preferenceLabel}>{intl.formatMessage(preferenceLabels[this.props.storeKey])}</span>
     );
     const hasPref =
-      this.props.store.state.preferences[this.props.storeKey] !== undefined ||
-      (this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION &&
-        (this.props.store.state.preferences.maxResolutionWidth !== undefined ||
-          this.props.store.state.preferences.maxResolutionHeight !== undefined));
+      this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION
+        ? this.props.store.state.preferences.maxResolutionWidth !== undefined ||
+          this.props.store.state.preferences.maxResolutionHeight !== undefined
+        : this.props.store.state.preferences[this.props.storeKey] !==
+          SCHEMA.definitions.preferences.properties[this.props.storeKey].default;
     const resetToDefault = hasPref ? (
       <ResetToDefaultButton
         onClick={() => {
@@ -565,7 +562,7 @@ class PreferenceListItem extends Component {
               });
               break;
             default:
-              this.props.setValue(undefined);
+              this.props.setValue(SCHEMA.definitions.preferences.properties[this.props.storeKey].default);
               break;
           }
           this.forceUpdate();
@@ -942,14 +939,31 @@ class PreferencesScreen extends Component {
       });
     }
 
+    const prefSchema = SCHEMA.definitions.preferences.properties;
     const DEFINITIONS = new Map([
       [
         CATEGORY_TOUCHSCREEN,
         [
-          { key: "enableOnScreenJoystickLeft", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "enableOnScreenJoystickRight", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "enableGyro", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
-          { key: "invertTouchscreenCameraMove", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true }
+          {
+            key: "enableOnScreenJoystickLeft",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.enableOnScreenJoystickLeft.default
+          },
+          {
+            key: "enableOnScreenJoystickRight",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.enableOnScreenJoystickRight.default
+          },
+          {
+            key: "enableGyro",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.enableGyro.default
+          },
+          {
+            key: "invertTouchscreenCameraMove",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.invertTouchscreenCameraMove.default
+          }
         ]
       ],
       [
@@ -962,12 +976,28 @@ class PreferencesScreen extends Component {
             max: 90,
             step: 5,
             digits: 0,
-            defaultNumber: 45
+            defaultNumber: prefSchema.snapRotationDegrees.default
           },
-          { key: "disableMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableBackwardsMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableStrafing", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableTeleporter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          {
+            key: "disableMovement",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.disableMovement.default
+          },
+          {
+            key: "disableBackwardsMovement",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.disableBackwardsMovement.default
+          },
+          {
+            key: "disableStrafing",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.disableStrafing.default
+          },
+          {
+            key: "disableTeleporter",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.disableTeleporter.default
+          },
           {
             key: "movementSpeedModifier",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
@@ -975,7 +1005,7 @@ class PreferencesScreen extends Component {
             max: 2,
             step: 0.1,
             digits: 1,
-            defaultNumber: 1
+            defaultNumber: prefSchema.movementSpeedModifier.default
           }
         ]
       ],
@@ -984,7 +1014,11 @@ class PreferencesScreen extends Component {
         [
           this.state.preferredMic,
           ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
-          { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          {
+            key: "muteMicOnEntry",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.muteMicOnEntry.default
+          },
           {
             key: "globalVoiceVolume",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
@@ -992,7 +1026,7 @@ class PreferencesScreen extends Component {
             max: GLOBAL_VOLUME_MAX,
             step: GLOBAL_VOLUME_STEP,
             digits: 0,
-            defaultNumber: GLOBAL_VOLUME_DEFAULT
+            defaultNumber: prefSchema.globalVoiceVolume.default
           },
           {
             key: "globalMediaVolume",
@@ -1010,7 +1044,7 @@ class PreferencesScreen extends Component {
             max: 200,
             step: 5,
             digits: 0,
-            defaultNumber: 100
+            defaultNumber: prefSchema.globalMediaVolume.default
           },
           {
             key: "avatarVoiceLevels",
@@ -1021,29 +1055,33 @@ class PreferencesScreen extends Component {
               defaultMessage: "Entries"
             })
           },
-          { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          {
+            key: "disableSoundEffects",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.disableSoundEffects.default
+          },
           {
             key: "disableEchoCancellation",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
+            defaultBool: prefSchema.disableEchoCancellation.default,
             promptForRefresh: true
           },
           {
             key: "disableNoiseSuppression",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
+            defaultBool: prefSchema.disableNoiseSuppression.default,
             promptForRefresh: true
           },
           {
             key: "disableAutoGainControl",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
+            defaultBool: prefSchema.disableAutoGainControl.default,
             promptForRefresh: true
           },
           {
             key: "enableAudioClipping",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: CLIPPING_THRESHOLD_ENABLED,
+            defaultBool: prefSchema.enableAudioClipping.default,
             promptForRefresh: false
           },
           {
@@ -1053,9 +1091,13 @@ class PreferencesScreen extends Component {
             max: CLIPPING_THRESHOLD_MAX,
             step: CLIPPING_THRESHOLD_STEP,
             digits: 3,
-            defaultNumber: 0.015
+            defaultNumber: prefSchema.audioClippingThreshold.default
           },
-          { key: "showAudioDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+          {
+            key: "showAudioDebugPanel",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.showAudioDebugPanel.default
+          }
         ]
       ],
       [
@@ -1065,13 +1107,18 @@ class PreferencesScreen extends Component {
             key: "locale",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableLocales,
-            defaultString: "browser"
+            defaultString: prefSchema.locale.default
           },
           {
             key: "theme",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableThemes,
-            defaultString: "Browser Default"
+            defaultString: prefSchema.theme.default
+          },
+          {
+            key: "onlyShowNametagsInFreeze",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.onlyShowNametagsInFreeze.default
           },
           { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
           {
@@ -1114,7 +1161,7 @@ class PreferencesScreen extends Component {
                 })
               }
             ],
-            defaultString: "showAll",
+            defaultString: prefSchema.nametagVisibility.default,
             promptForRefresh: false
           },
           {
@@ -1124,7 +1171,7 @@ class PreferencesScreen extends Component {
             max: 20,
             step: 1,
             digits: 2,
-            defaultNumber: NAMETAG_VISIBILITY_DISTANCE_DEFAULT
+            defaultNumber: prefSchema.nametagVisibilityDistance.default
           },
           this.state.preferredCamera,
           {
@@ -1153,24 +1200,60 @@ class PreferencesScreen extends Component {
                 })
               }
             ],
-            defaultString: defaultMaterialQualitySetting,
+            defaultString: prefSchema.materialQualitySetting.default,
             promptForRefresh: true
           },
           {
             key: "enableDynamicShadows",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
+            defaultBool: prefSchema.enableDynamicShadows.default,
             promptForRefresh: true
           },
-          { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "fastRoomSwitching", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "lazyLoadSceneMedia", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
-          { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          {
+            key: "disableAutoPixelRatio",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.disableAutoPixelRatio.default
+          },
+          {
+            key: "allowMultipleHubsInstances",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.allowMultipleHubsInstances.default
+          },
+          {
+            key: "disableIdleDetection",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.disableIdleDetection.default
+          },
+          {
+            key: "fastRoomSwitching",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.fastRoomSwitching.default
+          },
+          {
+            key: "lazyLoadSceneMedia",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.lazyLoadSceneMedia.default
+          },
+          {
+            key: "preferMobileObjectInfoPanel",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.preferMobileObjectInfoPanel.default
+          },
+          {
+            key: "animateWaypointTransitions",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.animateWaypointTransitions.default
+          },
+          {
+            key: "showFPSCounter",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.showFPSCounter.default
+          },
+          {
+            key: "showRtcDebugPanel",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: prefSchema.showRtcDebugPanel.default
+          },
           {
             key: "cursorSize",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
@@ -1178,7 +1261,7 @@ class PreferencesScreen extends Component {
             max: 5,
             step: 0.5,
             digits: 1,
-            defaultNumber: 1
+            defaultNumber: prefSchema.cursorSize.default
           }
         ]
       ],
@@ -1188,7 +1271,7 @@ class PreferencesScreen extends Component {
           {
             key: "disableLeftRightPanning",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false
+            defaultBool: prefSchema.disableLeftRightPanning.default
           }
         ]
       ]
