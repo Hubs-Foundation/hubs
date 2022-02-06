@@ -301,7 +301,7 @@ class UIRoot extends Component {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
-    window.addEventListener("focus_chat", this.focusChat);
+    window.addEventListener("focus_chat", this.onFocusChat);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -394,7 +394,7 @@ class UIRoot extends Component {
     window.removeEventListener("concurrentload", this.onConcurrentLoad);
     window.removeEventListener("idle_detected", this.onIdleDetected);
     window.removeEventListener("activity_detected", this.onActivityDetected);
-    window.removeEventListener("focus_chat", this.focusChat);
+    window.removeEventListener("focus_chat", this.onFocusChat);
   }
 
   storeUpdated = () => {
@@ -780,7 +780,7 @@ class UIRoot extends Component {
     });
   }
 
-  focusChat = e => {
+  onFocusChat = e => {
     this.setSidebar("chat", {
       chatInputEffect: input => {
         input.focus();
