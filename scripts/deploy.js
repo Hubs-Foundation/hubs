@@ -48,7 +48,7 @@ const getTs = (() => {
 
   const env = Object.assign(process.env, buildEnv);
 
-  for (const d in ["./dist", "./admin/dist"]) {
+  for (const d of ["./dist", "./admin/dist"]) {
     rmdir(d, err => {
       if (err) {
         console.error(err);
