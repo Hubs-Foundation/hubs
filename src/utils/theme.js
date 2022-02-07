@@ -17,7 +17,7 @@ const DEFAULT_COLORS = {
   "favorited-color": "#FFC000",
   "nametag-color": "#000000",
   "nametag-text-color": "#FFFFFF",
-  "nametag-border-color": "#00FF00"
+  "nametag-border-color": "#7ED320"
 };
 
 function getThemeColor(name) {

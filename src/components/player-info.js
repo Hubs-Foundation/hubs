@@ -3,6 +3,7 @@ import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 import defaultAvatar from "../assets/models/DefaultAvatar.glb";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
+import anime from "animejs";
 
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
@@ -277,26 +278,195 @@ AFRAME.registerComponent("player-info", {
       if (status.has(STATUS.TALKING) && !this.status.has(STATUS.TALKING)) {
         clearTimeout(this.expandHandle);
         this.expandHandle = null;
-        nametagBackground.setAttribute("slice9", { width: size.x + NAMETAG_BACKGROUND_PADDING * 2, height: 0.5 });
-        nametagText.setAttribute("position", { x: 0, y: 0.1, z: 0.001 });
-        nametagVolumeId.setAttribute("position", { x: 0, y: -0.1, z: 0.001 });
+        const nameTagBackgroundSlice = nametagBackground.components["slice9"];
+        const backgroundConfig = {
+          duration: 400,
+          easing: "easeOutElastic",
+          elasticity: 400,
+          loop: 0,
+          round: false,
+          width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
+          height: 0.5,
+          targets: nameTagBackgroundSlice.data,
+          update: anim => {
+            const value = anim.animatables[0].target;
+            nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
+            nametagStatusBorder.setAttribute("slice9", {
+              width: value.width + NAMETAG_STATUS_BORDER_PADDING,
+              height: value.height + NAMETAG_STATUS_BORDER_PADDING
+            });
+          },
+          complete: anim => {
+            const value = anim.animatables[0].target;
+            nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
+            nametagStatusBorder.setAttribute("slice9", {
+              width: value.width + NAMETAG_STATUS_BORDER_PADDING,
+              height: value.height + NAMETAG_STATUS_BORDER_PADDING
+            });
+          }
+        };
+        anime(backgroundConfig);
+        const nametagTextPosition = nametagText.components["position"];
+        const nameTextconfig = {
+          duration: 400,
+          easing: "easeOutElastic",
+          elasticity: 400,
+          loop: 0,
+          round: false,
+          x: 0,
+          y: 0.1,
+          z: 0.001,
+          targets: nametagTextPosition.data,
+          update: anim => {
+            const value = anim.animatables[0].target;
+            nametagText.setAttribute("position", { x: value.x, y: value.y, z: value.z });
+          },
+          complete: anim => {
+            const value = anim.animatables[0].target;
+            nametagText.setAttribute("position", { x: value.x, y: value.y, z: value.z });
+          }
+        };
+        anime(nameTextconfig);
+        const nameTagVolumePosition = nametagVolumeId.components["position"];
+        const nameTextVolPositionConfig = {
+          duration: 400,
+          easing: "easeOutElastic",
+          elasticity: 400,
+          loop: 0,
+          round: false,
+          x: 0,
+          y: -0.1,
+          z: 0.001,
+          targets: nameTagVolumePosition.data,
+          update: anim => {
+            const value = anim.animatables[0].target;
+            nametagVolumeId.setAttribute("position", { x: value.x, y: value.y, z: value.z });
+          },
+          complete: anim => {
+            const value = anim.animatables[0].target;
+            nametagVolumeId.setAttribute("position", { x: value.x, y: value.y, z: value.z });
+          }
+        };
+        anime(nameTextVolPositionConfig);
+        const nameTagVolumeScale = nametagVolumeId.components["scale"];
+        const nameTextVolScaleConfig = {
+          duration: 400,
+          easing: "easeOutElastic",
+          elasticity: 400,
+          loop: 0,
+          round: false,
+          x: 0.15,
+          y: 0.15,
+          z: 0.15,
+          targets: nameTagVolumeScale.data,
+          update: anim => {
+            const value = anim.animatables[0].target;
+            nametagVolumeId.setAttribute("scale", { x: value.x, y: value.y, z: value.z });
+          },
+          complete: anim => {
+            const value = anim.animatables[0].target;
+            nametagVolumeId.setAttribute("scale", { x: value.x, y: value.y, z: value.z });
+          }
+        };
+        anime(nameTextVolScaleConfig);
         nametagVolumeId.setAttribute("visible", true);
         nametagStatusBorder.setAttribute("visible", true);
-        nametagStatusBorder.setAttribute("slice9", {
-          width: nametagBackgroundSlice.data.width + NAMETAG_STATUS_BORDER_PADDING,
-          height: nametagBackgroundSlice.data.height + NAMETAG_STATUS_BORDER_PADDING
-        });
       } else if (status.size === 0 && this.status.size === status.size) {
         if (!this.expandHandle) {
           this.expandHandle = setTimeout(() => {
-            nametagBackground.setAttribute("slice9", { width: size.x + NAMETAG_BACKGROUND_PADDING * 2, height: 0.2 });
-            nametagText.setAttribute("position", { x: 0, y: 0, z: 0.001 });
+            const nameTagBackgroundSlice = nametagBackground.components["slice9"];
+            const backgroundConfig = {
+              duration: 400,
+              easing: "easeOutElastic",
+              elasticity: 400,
+              loop: 0,
+              round: false,
+              width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
+              height: 0.2,
+              targets: nameTagBackgroundSlice.data,
+              update: anim => {
+                const value = anim.animatables[0].target;
+                nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
+                nametagStatusBorder.setAttribute("slice9", {
+                  width: value.width + NAMETAG_STATUS_BORDER_PADDING,
+                  height: value.height + NAMETAG_STATUS_BORDER_PADDING
+                });
+              },
+              complete: anim => {
+                const value = anim.animatables[0].target;
+                nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
+                nametagStatusBorder.setAttribute("slice9", {
+                  width: value.width + NAMETAG_STATUS_BORDER_PADDING,
+                  height: value.height + NAMETAG_STATUS_BORDER_PADDING
+                });
+              }
+            };
+            anime(backgroundConfig);
+            const nametagTextPosition = nametagText.components["position"];
+            const nameTextconfig = {
+              duration: 400,
+              easing: "easeOutElastic",
+              elasticity: 400,
+              loop: 0,
+              round: false,
+              x: 0,
+              y: 0,
+              z: 0.001,
+              targets: nametagTextPosition.data,
+              update: anim => {
+                const value = anim.animatables[0].target;
+                nametagText.setAttribute("position", { x: value.x, y: value.y, z: value.z });
+              },
+              complete: anim => {
+                const value = anim.animatables[0].target;
+                nametagText.setAttribute("position", { x: value.x, y: value.y, z: value.z });
+              }
+            };
+            anime(nameTextconfig);
+            const nameTagVolumePosition = nametagVolumeId.components["position"];
+            const nameTextVolPositionConfig = {
+              duration: 400,
+              easing: "easeOutElastic",
+              elasticity: 400,
+              loop: 0,
+              round: false,
+              x: 0,
+              y: 0,
+              z: 0,
+              targets: nameTagVolumePosition.data,
+              update: anim => {
+                const value = anim.animatables[0].target;
+                nametagVolumeId.setAttribute("position", { x: value.x, y: value.y, z: value.z });
+              },
+              complete: anim => {
+                const value = anim.animatables[0].target;
+                nametagVolumeId.setAttribute("position", { x: value.x, y: value.y, z: value.z });
+              }
+            };
+            anime(nameTextVolPositionConfig);
+            const nameTagVolumeScale = nametagVolumeId.components["scale"];
+            const nameTextVolScaleConfig = {
+              duration: 400,
+              easing: "easeOutElastic",
+              elasticity: 400,
+              loop: 0,
+              round: false,
+              x: 0,
+              y: 0,
+              z: 0,
+              targets: nameTagVolumeScale.data,
+              update: anim => {
+                const value = anim.animatables[0].target;
+                nametagVolumeId.setAttribute("scale", { x: value.x, y: value.y, z: value.z });
+              },
+              complete: anim => {
+                const value = anim.animatables[0].target;
+                nametagVolumeId.setAttribute("scale", { x: value.x, y: value.y, z: value.z });
+              }
+            };
+            anime(nameTextVolScaleConfig);
             nametagVolumeId.setAttribute("visible", false);
             nametagStatusBorder.setAttribute("visible", false);
-            nametagStatusBorder.setAttribute("slice9", {
-              width: nametagBackgroundSlice.data.width + NAMETAG_STATUS_BORDER_PADDING,
-              height: nametagBackgroundSlice.data.height + NAMETAG_STATUS_BORDER_PADDING
-            });
             this.expandHandle = null;
           }, 1000);
         }
