@@ -197,7 +197,8 @@ class UIRoot extends Component {
     objectInfo: null,
     objectSrc: "",
     sidebarId: null,
-    presenceCount: 0
+    presenceCount: 0,
+    chatInputEffect: () => {}
   };
 
   constructor(props) {
@@ -300,6 +301,7 @@ class UIRoot extends Component {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
+    window.addEventListener("focus_chat", this.onFocusChat);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -392,6 +394,7 @@ class UIRoot extends Component {
     window.removeEventListener("concurrentload", this.onConcurrentLoad);
     window.removeEventListener("idle_detected", this.onIdleDetected);
     window.removeEventListener("activity_detected", this.onActivityDetected);
+    window.removeEventListener("focus_chat", this.onFocusChat);
   }
 
   storeUpdated = () => {
@@ -762,7 +765,7 @@ class UIRoot extends Component {
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
-    this.setState({ sidebarId, selectedUserId: null, ...otherState });
+    this.setState({ sidebarId, chatInputEffect: () => {}, selectedUserId: null, ...otherState });
   }
 
   toggleSidebar(sidebarId, otherState) {
@@ -776,6 +779,15 @@ class UIRoot extends Component {
       };
     });
   }
+
+  onFocusChat = e => {
+    this.setSidebar("chat", {
+      chatInputEffect: input => {
+        input.focus();
+        input.value = e.detail.prefix;
+      }
+    });
+  };
 
   renderInterstitialPrompt = () => {
     return (
@@ -1444,6 +1456,7 @@ class UIRoot extends Component {
                           canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
                           scene={this.props.scene}
                           onClose={() => this.setSidebar(null)}
+                          inputEffect={this.state.chatInputEffect}
                         />
                       )}
                       {this.state.sidebarId === "objects" && (
