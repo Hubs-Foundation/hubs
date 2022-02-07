@@ -174,10 +174,16 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
           sendMessage(e.target.value);
           setMessage("");
+          // intentionally only doing this on "enter" press and not clicking of send button
+          if (e.target.value.startsWith("/")) {
+            onClose();
+          }
         }
+      } else if (e.key === "Escape") {
+        onClose();
       }
     },
-    [sendMessage, setMessage]
+    [sendMessage, setMessage, onClose]
   );
 
   const onSendMessage = useCallback(
