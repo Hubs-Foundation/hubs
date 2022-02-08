@@ -25,8 +25,8 @@ function numberOrPercent(defaultValue) {
 
 AFRAME.registerComponent("text", {
   schema: {
-    align: { type: "string", default: "left", oneOf: ["left", "right", "center", "justify"] },
-    anchorX: { default: "center", oneOf: ["left", "right", "center", "align"] },
+    textAlign: { type: "string", default: "left", oneOf: ["left", "right", "center", "justify"] },
+    anchorX: { default: "center", oneOf: ["left", "right", "center"] },
     anchorY: { default: "middle", oneOf: ["top", "top-baseline", "middle", "bottom-baseline", "bottom"] },
     clipRect: {
       type: "string",
