@@ -274,11 +274,13 @@ AFRAME.registerComponent("player-info", {
       const nametagText = this.el.querySelector(".nametag-text-id");
       const size = nametagText.components["text"].getSize();
       const nametagBackgroundSlice = nametagBackground.components["slice9"];
+      const nametagTextPosition = nametagText.components["position"];
+      const nameTagVolumePosition = nametagVolumeId.components["position"];
+      const nameTagVolumeScale = nametagVolumeId.components["scale"];
 
       if (status.has(STATUS.TALKING) && !this.status.has(STATUS.TALKING)) {
         clearTimeout(this.expandHandle);
         this.expandHandle = null;
-        const nameTagBackgroundSlice = nametagBackground.components["slice9"];
         const backgroundConfig = {
           duration: 400,
           easing: "easeOutElastic",
@@ -287,7 +289,7 @@ AFRAME.registerComponent("player-info", {
           round: false,
           width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
           height: 0.5,
-          targets: nameTagBackgroundSlice.data,
+          targets: nametagBackgroundSlice.data,
           update: anim => {
             const value = anim.animatables[0].target;
             nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
@@ -306,7 +308,6 @@ AFRAME.registerComponent("player-info", {
           }
         };
         anime(backgroundConfig);
-        const nametagTextPosition = nametagText.components["position"];
         const nameTextconfig = {
           duration: 400,
           easing: "easeOutElastic",
@@ -327,7 +328,6 @@ AFRAME.registerComponent("player-info", {
           }
         };
         anime(nameTextconfig);
-        const nameTagVolumePosition = nametagVolumeId.components["position"];
         const nameTextVolPositionConfig = {
           duration: 400,
           easing: "easeOutElastic",
@@ -348,16 +348,13 @@ AFRAME.registerComponent("player-info", {
           }
         };
         anime(nameTextVolPositionConfig);
-        const nameTagVolumeScale = nametagVolumeId.components["scale"];
         const nameTextVolScaleConfig = {
           duration: 400,
           easing: "easeOutElastic",
           elasticity: 400,
           loop: 0,
           round: false,
-          x: 0.15,
           y: 0.15,
-          z: 0.15,
           targets: nameTagVolumeScale.data,
           update: anim => {
             const value = anim.animatables[0].target;
@@ -451,9 +448,7 @@ AFRAME.registerComponent("player-info", {
               elasticity: 400,
               loop: 0,
               round: false,
-              x: 0,
               y: 0,
-              z: 0,
               targets: nameTagVolumeScale.data,
               update: anim => {
                 const value = anim.animatables[0].target;
