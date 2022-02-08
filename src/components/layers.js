@@ -1,6 +1,9 @@
 export const Layers = {
   // Layers 0 - 2 reserverd by ThreeJS and AFrame.
-  reflection: 3
+  CAMERA_LAYER_REFLECTION: 3,
+  CAMERA_LAYER_INSPECT: 4,
+  CAMERA_LAYER_BATCH_INSPECT: 5,
+  CAMERA_LAYER_VIDEO_TEXTURE_TARGET: 6
 };
 
 /**

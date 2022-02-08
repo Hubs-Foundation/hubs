@@ -14,12 +14,18 @@ let turnRightKey = "E";
 // TODO The API to map from physical key to character is experimental. Depending on prospects of this getting wider
 // implimentation we may want to cook up our own polyfill based on observing key inputs
 if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
-  window.navigator.keyboard.getLayoutMap().then(function(map) {
-    moveKeys = `${map.get("KeyW") || "W"} ${map.get("KeyA") || "A"} ${map.get("KeyS") || "S"} ${map.get("KeyD") ||
-      "D"}`.toUpperCase();
-    turnLeftKey = map.get("KeyQ")?.toUpperCase();
-    turnRightKey = map.get("KeyE")?.toUpperCase();
-  });
+  window.navigator.keyboard
+    .getLayoutMap()
+    .then(function(map) {
+      moveKeys = `${map.get("KeyW") || "W"} ${map.get("KeyA") || "A"} ${map.get("KeyS") || "S"} ${map.get("KeyD") ||
+        "D"}`.toUpperCase();
+      turnLeftKey = map.get("KeyQ")?.toUpperCase();
+      turnRightKey = map.get("KeyE")?.toUpperCase();
+    })
+    .catch(function(e) {
+      // This occurs on Chrome 93 when the Hubs page is in an iframe
+      console.warn(`Unable to remap keyboard: ${e}`);
+    });
 }
 
 const onboardingMessages = defineMessages({

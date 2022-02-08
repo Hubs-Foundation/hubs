@@ -14,18 +14,38 @@ function reducer(state, action) {
         loading: !(state.environmentLoaded && state.networkConnected),
         messageKey: state.environmentLoaded ? "enteringRoom" : "loadingObjects"
       };
-    case "environment-loaded":
+    case "environment-loaded": {
+      const loaded = state.lazyLoadMedia
+        ? state.networkConnected && state.dialogConnected
+        : state.allObjectsLoaded && state.networkConnected && state.dialogConnected;
       return {
         ...state,
         environmentLoaded: true,
-        loading: !(state.allObjectsLoaded && state.networkConnected),
-        messageKey: state.allObjectsLoaded ? "enteringRoom" : "loadingObjects"
+        loading: !loaded,
+        messageKey: state.lazyLoadMedia
+          ? loaded
+            ? "enteringRoom"
+            : "connectingScene"
+          : loaded
+            ? "enteringRoom"
+            : "loadingObjects"
       };
+    }
     case "network-connected":
       return {
         ...state,
         networkConnected: true,
-        loading: !(state.environmentLoaded && state.allObjectsLoaded)
+        loading: state.lazyLoadMedia
+          ? !(state.environmentLoaded && state.dialogConnected)
+          : !(state.environmentLoaded && state.allObjectsLoaded && state.dialogConnected)
+      };
+    case "dialog-connected":
+      return {
+        ...state,
+        dialogConnected: true,
+        loading: state.lazyLoadMedia
+          ? !(state.environmentLoaded && state.networkConnected)
+          : !(state.environmentLoaded && state.allObjectsLoaded && state.networkConnected)
       };
   }
 }
@@ -42,6 +62,11 @@ const messages = defineMessages({
     description: "The loading progress. How many objects have finished loading?",
     defaultMessage: "Loading objects {loadedCount}/{objectCount}"
   },
+  connectingScene: {
+    id: "loading-screen.connecting",
+    description: "The scene is loaded, we are waiting for the networked scene to be connected to enter.",
+    defaultMessage: "Connecting to the scene..."
+  },
   enteringRoom: {
     id: "loading-screen.entering-room",
     description:
@@ -53,6 +78,7 @@ const messages = defineMessages({
 export function useRoomLoadingState(sceneEl) {
   // Holds the id of the current
   const loadingTimeoutRef = useRef();
+  const lazyLoadMedia = APP.store.state.preferences.lazyLoadSceneMedia;
 
   const [{ loading, messageKey, objectCount, loadedCount }, dispatch] = useReducer(reducer, {
     loading: !sceneEl.is("loaded"),
@@ -61,7 +87,9 @@ export function useRoomLoadingState(sceneEl) {
     loadedCount: 0,
     allObjectsLoaded: false,
     environmentLoaded: false,
-    networkConnected: false
+    networkConnected: false,
+    dialogConnected: false,
+    lazyLoadMedia
   });
 
   const onObjectLoading = useCallback(
@@ -103,35 +131,61 @@ export function useRoomLoadingState(sceneEl) {
     [dispatch]
   );
 
+  const onDialogConnected = useCallback(
+    () => {
+      dispatch({ type: "dialog-connected" });
+    },
+    [dispatch]
+  );
+
   useEffect(
     () => {
       // Once the scene has loaded the dependencies to this hook will change,
       // the event listeners will be removed, and we can prevent adding them again.
       if (loading) {
-        sceneEl.addEventListener("model-loading", onObjectLoading);
-        sceneEl.addEventListener("image-loading", onObjectLoading);
-        sceneEl.addEventListener("pdf-loading", onObjectLoading);
-        sceneEl.addEventListener("model-loaded", onObjectLoaded);
-        sceneEl.addEventListener("image-loaded", onObjectLoaded);
-        sceneEl.addEventListener("pdf-loaded", onObjectLoaded);
-        sceneEl.addEventListener("model-error", onObjectLoaded);
+        if (!lazyLoadMedia) {
+          sceneEl.addEventListener("model-loading", onObjectLoading);
+          sceneEl.addEventListener("image-loading", onObjectLoading);
+          sceneEl.addEventListener("pdf-loading", onObjectLoading);
+          sceneEl.addEventListener("video-loading", onObjectLoading);
+          sceneEl.addEventListener("model-loaded", onObjectLoaded);
+          sceneEl.addEventListener("image-loaded", onObjectLoaded);
+          sceneEl.addEventListener("pdf-loaded", onObjectLoaded);
+          sceneEl.addEventListener("video-loaded", onObjectLoaded);
+          sceneEl.addEventListener("model-error", onObjectLoaded);
+        }
         sceneEl.addEventListener("environment-scene-loaded", onEnvironmentLoaded);
         sceneEl.addEventListener("didConnectToNetworkedScene", onNetworkConnected);
+        sceneEl.addEventListener("didConnectToDialog", onDialogConnected);
       }
 
       return () => {
-        sceneEl.removeEventListener("model-loading", onObjectLoading);
-        sceneEl.removeEventListener("image-loading", onObjectLoading);
-        sceneEl.removeEventListener("pdf-loading", onObjectLoading);
-        sceneEl.removeEventListener("model-loaded", onObjectLoaded);
-        sceneEl.removeEventListener("image-loaded", onObjectLoaded);
-        sceneEl.removeEventListener("pdf-loaded", onObjectLoaded);
-        sceneEl.removeEventListener("model-error", onObjectLoaded);
+        if (!lazyLoadMedia) {
+          sceneEl.removeEventListener("model-loading", onObjectLoading);
+          sceneEl.removeEventListener("image-loading", onObjectLoading);
+          sceneEl.removeEventListener("pdf-loading", onObjectLoading);
+          sceneEl.removeEventListener("video-loading", onObjectLoading);
+          sceneEl.removeEventListener("model-loaded", onObjectLoaded);
+          sceneEl.removeEventListener("image-loaded", onObjectLoaded);
+          sceneEl.removeEventListener("pdf-loaded", onObjectLoaded);
+          sceneEl.removeEventListener("video-loaded", onObjectLoaded);
+          sceneEl.removeEventListener("model-error", onObjectLoaded);
+        }
         sceneEl.removeEventListener("environment-scene-loaded", onEnvironmentLoaded);
         sceneEl.removeEventListener("didConnectToNetworkedScene", onNetworkConnected);
+        sceneEl.removeEventListener("didConnectToDialog", onDialogConnected);
       };
     },
-    [sceneEl, loading, onObjectLoaded, onObjectLoading, onEnvironmentLoaded, onNetworkConnected]
+    [
+      sceneEl,
+      loading,
+      onObjectLoaded,
+      onObjectLoading,
+      onEnvironmentLoaded,
+      onNetworkConnected,
+      onDialogConnected,
+      lazyLoadMedia
+    ]
   );
 
   const intl = useIntl();

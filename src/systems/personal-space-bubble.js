@@ -254,7 +254,10 @@ AFRAME.registerComponent("personal-space-invader", {
           if (!material.userData.originalProps) {
             originalProps = material.userData.originalProps = {
               opacity: material.opacity,
-              transparent: material.transparent
+              transparent: material.transparent,
+              format: material.format,
+              blending: material.blending,
+              side: material.side
             };
           }
 
@@ -263,6 +266,13 @@ AFRAME.registerComponent("personal-space-invader", {
           // not across avatars in the room.
           material.opacity = invading ? this.data.invadingOpacity : originalProps.opacity;
           material.transparent = invading || originalProps.transparent;
+
+          // Note: Since ThreeJS 0.132 the default format for GLTF imported opaque materials is RGBFormat
+          // so we need to switch before enabling transparency.
+          material.format = invading ? THREE.RGBAFormat : originalProps.format;
+          material.blending = invading ? THREE.NormalBlending : originalProps.blending;
+          // This shouldn't be necessary but for some reason transparency doens't work on some models if they are single sided.
+          material.side = invading ? THREE.DoubleSide : originalProps.side;
         });
       });
     } else {

@@ -3,7 +3,6 @@ import merge from "deepmerge";
 import Cookies from "js-cookie";
 import jwtDecode from "jwt-decode";
 import { qsGet } from "../utils/qs_truthy.js";
-import { isSafari } from "../utils/detect-safari";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
@@ -108,6 +107,8 @@ export const SCHEMA = {
         showFPSCounter: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
+        fastRoomSwitching: { type: "bool" },
+        lazyLoadSceneMedia: { type: "bool" },
         preferMobileObjectInfoPanel: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
@@ -128,6 +129,9 @@ export const SCHEMA = {
         disableAutoGainControl: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
+        showAudioDebugPanel: { type: "bool" },
+        enableAudioClipping: { type: "bool" },
+        audioClippingThreshold: { type: "number" },
         theme: { type: "string" }
       }
     },
@@ -240,12 +244,6 @@ export default class Store extends EventTarget {
       preferences: {}
     });
 
-    // Temporary fix for distorted audio in Safari.
-    // See https://github.com/mozilla/hubs/issues/4411
-    if (isSafari()) {
-      this.update({ preferences: { audioOutputMode: "audio" } });
-    }
-
     this._shouldResetAvatarOnInit = false;
 
     const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
@@ -256,6 +254,18 @@ export default class Store extends EventTarget {
     }
 
     this._signOutOnExpiredAuthToken();
+
+    const maybeDispatchThemeChanged = (() => {
+      let previous;
+      return () => {
+        const current = this.state.preferences.theme;
+        if ((previous || current) && previous !== current) {
+          this.dispatchEvent(new CustomEvent("themechanged", { detail: { current, previous } }));
+        }
+        previous = current;
+      };
+    })();
+    this.addEventListener("statechanged", maybeDispatchThemeChanged);
   }
 
   _signOutOnExpiredAuthToken = () => {
