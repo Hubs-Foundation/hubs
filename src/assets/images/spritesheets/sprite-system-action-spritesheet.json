@@ -205,7 +205,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
 			"sourceSize": {"w":128,"h":128}
 		},
-		"nametag-volume.png":
+		"recording-badge.png":
 		{
 			"frame": {"x":738,"y":8,"w":128,"h":128},
 			"rotated": false,
@@ -213,7 +213,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
 			"sourceSize": {"w":128,"h":128}
 		},
-		"recording-badge.png":
+		"spawn-disabled.png":
 		{
 			"frame": {"x":738,"y":152,"w":128,"h":128},
 			"rotated": false,
@@ -221,7 +221,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
 			"sourceSize": {"w":128,"h":128}
 		},
-		"spawn-disabled.png":
+		"spawn-hover.png":
 		{
 			"frame": {"x":738,"y":296,"w":128,"h":128},
 			"rotated": false,
@@ -229,7 +229,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
 			"sourceSize": {"w":128,"h":128}
 		},
-		"spawn-hover.png":
+		"spawn.png":
 		{
 			"frame": {"x":738,"y":440,"w":128,"h":128},
 			"rotated": false,
@@ -237,17 +237,9 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
 			"sourceSize": {"w":128,"h":128}
 		},
-		"spawn.png":
-		{
-			"frame": {"x":738,"y":584,"w":128,"h":128},
-			"rotated": false,
-			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
-			"sourceSize": {"w":128,"h":128}
-		},
 		"Background.png":
 		{
-			"frame": {"x":8,"y":738,"w":128,"h":48},
+			"frame": {"x":738,"y":584,"w":128,"h":48},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":48},
@@ -255,7 +247,7 @@
 		},
 		"camera-action.png":
 		{
-			"frame": {"x":8,"y":802,"w":64,"h":64},
+			"frame": {"x":738,"y":648,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -263,7 +255,7 @@
 		},
 		"close-action.png":
 		{
-			"frame": {"x":88,"y":802,"w":64,"h":64},
+			"frame": {"x":8,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -271,7 +263,7 @@
 		},
 		"deserialize-action.png":
 		{
-			"frame": {"x":168,"y":802,"w":64,"h":64},
+			"frame": {"x":88,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -279,7 +271,7 @@
 		},
 		"drop-action.png":
 		{
-			"frame": {"x":248,"y":802,"w":64,"h":64},
+			"frame": {"x":168,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -287,7 +279,7 @@
 		},
 		"focus-action.png":
 		{
-			"frame": {"x":328,"y":802,"w":64,"h":64},
+			"frame": {"x":248,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -295,7 +287,7 @@
 		},
 		"inspect-action.png":
 		{
-			"frame": {"x":408,"y":802,"w":64,"h":64},
+			"frame": {"x":328,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -303,7 +295,7 @@
 		},
 		"mute-action.png":
 		{
-			"frame": {"x":488,"y":802,"w":64,"h":64},
+			"frame": {"x":408,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -311,7 +303,7 @@
 		},
 		"next.png":
 		{
-			"frame": {"x":568,"y":802,"w":64,"h":64},
+			"frame": {"x":488,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -319,7 +311,7 @@
 		},
 		"pin-action.png":
 		{
-			"frame": {"x":648,"y":802,"w":64,"h":64},
+			"frame": {"x":568,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -327,7 +319,7 @@
 		},
 		"prev.png":
 		{
-			"frame": {"x":728,"y":802,"w":64,"h":64},
+			"frame": {"x":648,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -335,7 +327,7 @@
 		},
 		"recenter-action.png":
 		{
-			"frame": {"x":882,"y":8,"w":64,"h":64},
+			"frame": {"x":728,"y":738,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -343,7 +335,7 @@
 		},
 		"record-action-alpha.png":
 		{
-			"frame": {"x":882,"y":88,"w":64,"h":64},
+			"frame": {"x":882,"y":8,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -351,7 +343,7 @@
 		},
 		"record-action.png":
 		{
-			"frame": {"x":882,"y":168,"w":64,"h":64},
+			"frame": {"x":882,"y":88,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -359,7 +351,7 @@
 		},
 		"remove-action.png":
 		{
-			"frame": {"x":882,"y":248,"w":64,"h":64},
+			"frame": {"x":882,"y":168,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -367,7 +359,7 @@
 		},
 		"rotate-action.png":
 		{
-			"frame": {"x":882,"y":328,"w":64,"h":64},
+			"frame": {"x":882,"y":248,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -375,7 +367,7 @@
 		},
 		"scale-action.png":
 		{
-			"frame": {"x":882,"y":408,"w":64,"h":64},
+			"frame": {"x":882,"y":328,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -383,7 +375,7 @@
 		},
 		"serialize-action.png":
 		{
-			"frame": {"x":882,"y":488,"w":64,"h":64},
+			"frame": {"x":882,"y":408,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -391,7 +383,7 @@
 		},
 		"snap-page.png":
 		{
-			"frame": {"x":882,"y":568,"w":64,"h":64},
+			"frame": {"x":882,"y":488,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -399,7 +391,7 @@
 		},
 		"spawn_message.png":
 		{
-			"frame": {"x":882,"y":648,"w":64,"h":64},
+			"frame": {"x":882,"y":568,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -407,7 +399,7 @@
 		},
 		"spawn_message_dark-hover.png":
 		{
-			"frame": {"x":882,"y":728,"w":64,"h":64},
+			"frame": {"x":882,"y":648,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -415,7 +407,7 @@
 		},
 		"spawn_message_dark.png":
 		{
-			"frame": {"x":8,"y":882,"w":64,"h":64},
+			"frame": {"x":882,"y":728,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -423,7 +415,7 @@
 		},
 		"stop-action.png":
 		{
-			"frame": {"x":88,"y":882,"w":64,"h":64},
+			"frame": {"x":8,"y":818,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -431,7 +423,7 @@
 		},
 		"undo-action.png":
 		{
-			"frame": {"x":168,"y":882,"w":64,"h":64},
+			"frame": {"x":88,"y":818,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -439,7 +431,7 @@
 		},
 		"unmute-action.png":
 		{
-			"frame": {"x":248,"y":882,"w":64,"h":64},
+			"frame": {"x":168,"y":818,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
