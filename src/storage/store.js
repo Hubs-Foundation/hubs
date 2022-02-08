@@ -135,7 +135,8 @@ export const SCHEMA = {
         audioClippingThreshold: { type: "number" },
         theme: { type: "string" },
         avatarVoiceLevels: { type: "object" },
-        cursorSize: { type: "number" }
+        cursorSize: { type: "number" },
+        nametagVisibility: { type: "string" }
       }
     },
 

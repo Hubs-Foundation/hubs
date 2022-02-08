@@ -13,29 +13,6 @@ export const STATUS = Object.freeze({
   TALKING: 1
 });
 
-export const ELEMENTS = Object.freeze({
-  DISPLAY_NAME: 0,
-  ICON_LEFT: 1,
-  ICON_RIGHT: 2,
-  ICON_MIDDLE: 2
-});
-
-export const NAMETAG_POSITIONS = Object.freeze({
-  [STATUS.IDLE]: {
-    [ELEMENTS.DISPLAY_NAME]: {
-      position: [0, 0, 0.001]
-    }
-  },
-  [STATUS.TALKING]: {
-    [ELEMENTS.DISPLAY_NAME]: {
-      position: [0, 0.1, 0.001]
-    },
-    [ELEMENTS.ICON_LEFT]: [0, -0.2, 0.001],
-    [ELEMENTS.ICON_RIGHT]: [0, -0.2, 0.001],
-    [ELEMENTS.ICON_MIDDLE]: [0, -0.2, 0.001]
-  }
-});
-
 function ensureAvatarNodes(json) {
   const { nodes } = json;
   if (!nodes.some(node => node.name === "Head")) {
@@ -175,15 +152,27 @@ AFRAME.registerComponent("player-info", {
   applyDisplayName() {
     const store = window.APP.store;
 
-    const infoShouldBeHidden =
-      this.isLocalPlayerInfo || (store.state.preferences.onlyShowNametagsInFreeze && !this.el.sceneEl.is("frozen"));
+    let isNametagVisible = !this.isLocalPlayerInfo;
+    const nametagVisibility = store.state.preferences.nametagVisibility;
+    if (nametagVisibility === "showNone") {
+      const freezeModeVisible = store.state.preferences.onlyShowNametagsInFreeze && this.el.sceneEl.is("frozen");
+      isNametagVisible &= freezeModeVisible;
+    } else if (nametagVisibility === "showAll") {
+      isNametagVisible &= true;
+    }
 
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       const text = this.el.querySelector("[text]");
       text.addEventListener("text-updated", this.onDisplayNameUpdated, { once: true });
       text.setAttribute("text", { value: this.displayName });
-      nametagEl.object3D.visible = !infoShouldBeHidden;
+      nametagEl.object3D.visible = isNametagVisible;
+      const nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
+      const nametagVolumeId = this.el.querySelector(".nametag-volume-id");
+      if (nametagVolumeId && nametagStatusBorder) {
+        nametagVolumeId.setAttribute("visible", isNametagVisible);
+        nametagStatusBorder.setAttribute("visible", isNametagVisible);
+      }
     }
     const identityNameEl = this.el.querySelector(".identityName");
     if (identityNameEl) {
@@ -194,12 +183,12 @@ AFRAME.registerComponent("player-info", {
     }
     const recordingBadgeEl = this.el.querySelector(".recordingBadge");
     if (recordingBadgeEl) {
-      recordingBadgeEl.object3D.visible = this.isRecording && !infoShouldBeHidden;
+      recordingBadgeEl.object3D.visible = this.isRecording && isNametagVisible;
     }
 
     const modBadgeEl = this.el.querySelector(".modBadge");
     if (modBadgeEl) {
-      modBadgeEl.object3D.visible = !this.isRecording && this.isOwner && !infoShouldBeHidden;
+      modBadgeEl.object3D.visible = !this.isRecording && this.isOwner && this.isNametagVisible;
     }
   },
   applyProperties(e) {
@@ -269,12 +258,12 @@ AFRAME.registerComponent("player-info", {
     const nametagBackground = this.el.querySelector(".nametag-background-id");
     if (nametagBackground) {
       // Get the updated text size
-      const nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
-      const nametagVolumeId = this.el.querySelector(".nametag-volume-id");
       const nametagText = this.el.querySelector(".nametag-text-id");
       const size = nametagText.components["text"].getSize();
       const nametagBackgroundSlice = nametagBackground.components["slice9"];
       const nametagTextPosition = nametagText.components["position"];
+      const nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
+      const nametagVolumeId = this.el.querySelector(".nametag-volume-id");
       const nameTagVolumePosition = nametagVolumeId.components["position"];
       const nameTagVolumeScale = nametagVolumeId.components["scale"];
 

@@ -511,6 +511,10 @@ const preferenceLabels = defineMessages({
   cursorSize: {
     id: "preferences-screen.preference.cursor-size",
     defaultMessage: "Cursor Size"
+  },
+  nametagVisibility: {
+    id: "preferences-screen.preference.nametag-visibility",
+    defaultMessage: "Nametag visibility"
   }
 });
 
@@ -1123,6 +1127,28 @@ class PreferencesScreen extends Component {
             step: 0.5,
             digits: 1,
             defaultNumber: 1
+          },
+          {
+            key: "nametagVisibility",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: [
+              {
+                value: "showAll",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-all",
+                  defaultMessage: "Show All"
+                })
+              },
+              {
+                value: "showNone",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-none",
+                  defaultMessage: "Show None"
+                })
+              }
+            ],
+            defaultString: "showAll",
+            promptForRefresh: false
           }
         ]
       ],
