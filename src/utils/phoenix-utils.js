@@ -56,8 +56,14 @@ export function getReticulumFetchUrl(path, absolute = false, host = null, port =
 }
 
 export function getUploadsUrl(path, absolute = false, host = null, port = null) {
-  return configs.UPLOADS_HOST
-    ? `https://${configs.UPLOADS_HOST}${port ? `:${port}` : ""}${path}`
+  // If the Hubs Cloud stack is configured to use Cloudflare, we need to ignore the configured UPLOADS_HOST
+  // since reticulum will only serve uploads via the Cloudflare worker. BASE_ASSETS_PATH will have been
+  // correctly configured to use the Cloudflare worker, though we only need the hostname,
+  // not the full assets URL.
+  const isUsingCloudflare = configs.BASE_ASSETS_PATH.includes("workers.dev");
+  const uploadsHost = isUsingCloudflare ? new URL(configs.BASE_ASSETS_PATH).hostname : configs.UPLOADS_HOST;
+  return uploadsHost
+    ? `https://${uploadsHost}${port ? `:${port}` : ""}${path}`
     : getReticulumFetchUrl(path, absolute, host, port);
 }
 
