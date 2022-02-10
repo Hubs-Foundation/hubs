@@ -120,6 +120,7 @@ AFRAME.registerComponent("camera-tool", {
     const material = new THREE.MeshBasicMaterial({
       map: this.renderTarget.texture
     });
+    material.toneMapped = false;
 
     // Bit of a hack here to only update the renderTarget when the screens are in view
     material.map.isVideoTexture = true;
