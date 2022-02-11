@@ -265,7 +265,7 @@ export function injectCustomShaderChunks(obj) {
   const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
 
   obj.traverse(object => {
-    if (!object.material || object.isTroikaText) return;
+    if (!object.material) return;
 
     // TODO this does not really belong here
     object.reflectionProbeMode = "dynamic";
