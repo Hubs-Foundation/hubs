@@ -118,6 +118,7 @@ AFRAME.registerComponent("media-image", {
 
     if (!this.mesh || projection !== oldData.projection) {
       const material = new THREE.MeshBasicMaterial();
+      material.toneMapped = false;
 
       let geometry;
 

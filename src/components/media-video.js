@@ -456,6 +456,7 @@ AFRAME.registerComponent("media-video", {
 
     if (!this.mesh || projection !== oldData.projection) {
       const material = new THREE.MeshBasicMaterial();
+      material.toneMapped = false;
 
       let geometry;
 
