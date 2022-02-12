@@ -225,7 +225,8 @@ module.exports = (env, argv) => {
           RETICULUM_SERVER: process.env.RETICULUM_SERVER,
           CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
-          UPLOADS_HOST: process.env.UPLOADS_HOST
+          UPLOADS_HOST: process.env.UPLOADS_HOST,
+          BASE_ASSETS_PATH: process.env.BASE_ASSETS_PATH
         })
       })
     ]
