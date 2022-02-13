@@ -8,11 +8,6 @@ import anime from "animejs";
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
 
-export const STATUS = Object.freeze({
-  IDLE: 0,
-  TALKING: 1
-});
-
 function ensureAvatarNodes(json) {
   const { nodes } = json;
   if (!nodes.some(node => node.name === "Head")) {
@@ -38,6 +33,30 @@ function ensureAvatarNodes(json) {
   return json;
 }
 
+const ANIM_CONFIG = {
+  duration: 400,
+  easing: "easeOutElastic",
+  elasticity: 400,
+  loop: 0,
+  round: false
+};
+
+function animComp(el, component, props, { showOnBegin = true, hideOnComplete = false } = {}) {
+  const config = Object.assign({}, ANIM_CONFIG, props, {
+    targets: el.components[component].data,
+    begin: () => {
+      if (showOnBegin) el.setAttribute("visible", true);
+    },
+    update: anim => {
+      el.setAttribute(component, anim.animatables[0].target);
+    },
+    complete: anim => {
+      el.setAttribute(component, anim.animatables[0].target);
+      if (hideOnComplete) el.setAttribute("visible", false);
+    }
+  });
+  anime(config);
+}
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -55,6 +74,10 @@ AFRAME.registerComponent("player-info", {
     this.identityName = null;
     this.isOwner = false;
     this.isRecording = false;
+    this.isHandRaised = false;
+    this.wasHandRaised = false;
+    this.isTalking = false;
+    this.isNametagVisible = false;
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
@@ -63,8 +86,7 @@ AFRAME.registerComponent("player-info", {
     this.update = this.update.bind(this);
     this.onMicStateChanged = this.onMicStateChanged.bind(this);
     this.onAnalyserVolumeUpdated = this.onAnalyserVolumeUpdated.bind(this);
-    this.onDisplayNameUpdated = this.onDisplayNameUpdated.bind(this);
-    this.status = new Set();
+    this.onNameTagUpdated = this.onNameTagUpdated.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -97,6 +119,7 @@ AFRAME.registerComponent("player-info", {
 
     this.el.sceneEl.addEventListener("stateadded", this.update);
     this.el.sceneEl.addEventListener("stateremoved", this.update);
+    this.el.sceneEl.addEventListener("presence_updated", this.update);
 
     if (this.isLocalPlayerInfo) {
       APP.dialog.on("mic-state-changed", this.onMicStateChanged);
@@ -114,6 +137,7 @@ AFRAME.registerComponent("player-info", {
     }
     this.el.sceneEl.removeEventListener("stateadded", this.update);
     this.el.sceneEl.removeEventListener("stateremoved", this.update);
+    this.el.sceneEl.removeEventListener("presence_updated", this.update);
     window.APP.store.removeEventListener("statechanged", this.update);
 
     if (this.isLocalPlayerInfo) {
@@ -144,6 +168,8 @@ AFRAME.registerComponent("player-info", {
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
+    this.wasHandRaised = this.isHandRaised;
+    this.isHandRaised = presenceMeta.handRaised;
     this.applyDisplayName();
   },
   can(perm) {
@@ -152,27 +178,21 @@ AFRAME.registerComponent("player-info", {
   applyDisplayName() {
     const store = window.APP.store;
 
-    let isNametagVisible = !this.isLocalPlayerInfo;
+    this.isNametagVisible = !this.isLocalPlayerInfo;
     const nametagVisibility = store.state.preferences.nametagVisibility;
     if (nametagVisibility === "showNone") {
       const freezeModeVisible = store.state.preferences.onlyShowNametagsInFreeze && this.el.sceneEl.is("frozen");
-      isNametagVisible &= freezeModeVisible;
+      this.isNametagVisible = this.isNametagVisible && freezeModeVisible;
     } else if (nametagVisibility === "showAll") {
-      isNametagVisible &= true;
+      this.isNametagVisible = true;
     }
 
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       const text = this.el.querySelector("[text]");
-      text.addEventListener("text-updated", this.onDisplayNameUpdated, { once: true });
+      text.addEventListener("text-updated", this.onNameTagUpdated, { once: true });
       text.setAttribute("text", { value: this.displayName });
-      nametagEl.object3D.visible = isNametagVisible;
-      const nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
-      const nametagVolumeId = this.el.querySelector(".nametag-volume-id");
-      if (nametagVolumeId && nametagStatusBorder) {
-        nametagVolumeId.setAttribute("visible", isNametagVisible);
-        nametagStatusBorder.setAttribute("visible", isNametagVisible);
-      }
+      nametagEl.object3D.visible = this.isNametagVisible;
     }
     const identityNameEl = this.el.querySelector(".identityName");
     if (identityNameEl) {
@@ -183,13 +203,15 @@ AFRAME.registerComponent("player-info", {
     }
     const recordingBadgeEl = this.el.querySelector(".recordingBadge");
     if (recordingBadgeEl) {
-      recordingBadgeEl.object3D.visible = this.isRecording && isNametagVisible;
+      recordingBadgeEl.object3D.visible = this.isRecording && this.isNametagVisible;
     }
 
     const modBadgeEl = this.el.querySelector(".modBadge");
     if (modBadgeEl) {
       modBadgeEl.object3D.visible = !this.isRecording && this.isOwner && this.isNametagVisible;
     }
+
+    this.onNameTagUpdated();
   },
   applyProperties(e) {
     this.applyDisplayName();
@@ -240,222 +262,71 @@ AFRAME.registerComponent("player-info", {
   },
 
   onAnalyserVolumeUpdated({ detail: { volume } }) {
-    const newStatus = new Set(this.status);
-    if (volume < 0.01 || this.data.muted) {
-      newStatus.delete(STATUS.TALKING);
-    } else {
-      newStatus.add(STATUS.TALKING);
-    }
-    this.processStatus(newStatus);
+    this.wasTalking = this.isTalking;
+    this.isTalking = volume > 0.01 && !this.data.muted;
+    this.onNameTagUpdated();
   },
 
-  onDisplayNameUpdated() {
-    this.processStatus();
-  },
-
-  processStatus(newStatus) {
-    const status = newStatus || this.status;
+  onNameTagUpdated() {
     const nametagBackground = this.el.querySelector(".nametag-background-id");
     if (nametagBackground) {
       // Get the updated text size
       const nametagText = this.el.querySelector(".nametag-text-id");
-      const size = nametagText.components["text"].getSize();
-      const nametagBackgroundSlice = nametagBackground.components["slice9"];
-      const nametagTextPosition = nametagText.components["position"];
+      const size = nametagText.components["text"]?.getSize();
       const nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
       const nametagVolumeId = this.el.querySelector(".nametag-volume-id");
-      const nameTagVolumePosition = nametagVolumeId.components["position"];
-      const nameTagVolumeScale = nametagVolumeId.components["scale"];
 
-      if (status.has(STATUS.TALKING) && !this.status.has(STATUS.TALKING)) {
-        clearTimeout(this.expandHandle);
-        this.expandHandle = null;
-        const backgroundConfig = {
-          duration: 400,
-          easing: "easeOutElastic",
-          elasticity: 400,
-          loop: 0,
-          round: false,
-          width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
-          height: 0.5,
-          targets: nametagBackgroundSlice.data,
-          update: anim => {
-            const value = anim.animatables[0].target;
-            nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
-            nametagStatusBorder.setAttribute("slice9", {
-              width: value.width + NAMETAG_STATUS_BORDER_PADDING,
-              height: value.height + NAMETAG_STATUS_BORDER_PADDING
-            });
-          },
-          complete: anim => {
-            const value = anim.animatables[0].target;
-            nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
-            nametagStatusBorder.setAttribute("slice9", {
-              width: value.width + NAMETAG_STATUS_BORDER_PADDING,
-              height: value.height + NAMETAG_STATUS_BORDER_PADDING
-            });
+      if (size) {
+        if (this.isTalking && !this.wasTalking) {
+          clearTimeout(this.expandHandle);
+          this.expandHandle = null;
+          animComp(nametagBackground, "slice9", { width: size.x + NAMETAG_BACKGROUND_PADDING * 2, height: 0.5 });
+          animComp(
+            nametagStatusBorder,
+            "slice9",
+            {
+              width: size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
+              height: 0.5 + NAMETAG_STATUS_BORDER_PADDING
+            },
+            { showOnBegin: true && this.isNametagVisible }
+          );
+          animComp(nametagText, "position", { x: 0, y: 0.1, z: 0.001 });
+          animComp(
+            nametagVolumeId,
+            "position",
+            { x: 0, y: -0.1, z: 0.001 },
+            { showOnBegin: true && this.isNametagVisible }
+          );
+          animComp(nametagVolumeId, "scale", { y: 0.15 });
+        } else if (this.wasTalking && !this.isTalking) {
+          if (!this.expandHandle) {
+            this.expandHandle = setTimeout(() => {
+              animComp(nametagBackground, "slice9", { width: size.x + NAMETAG_BACKGROUND_PADDING * 2, height: 0.2 });
+              animComp(
+                nametagStatusBorder,
+                "slice9",
+                {
+                  width: size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
+                  height: 0.2 + NAMETAG_STATUS_BORDER_PADDING
+                },
+                { hideOnComplete: true }
+              );
+              animComp(nametagText, "position", { x: 0, y: 0, z: 0.001 });
+              animComp(nametagVolumeId, "position", { x: 0, y: 0, z: 0 });
+              animComp(nametagVolumeId, "scale", { y: 0 }, { hideOnComplete: true });
+            }, 1000);
           }
-        };
-        anime(backgroundConfig);
-        const nameTextconfig = {
-          duration: 400,
-          easing: "easeOutElastic",
-          elasticity: 400,
-          loop: 0,
-          round: false,
-          x: 0,
-          y: 0.1,
-          z: 0.001,
-          targets: nametagTextPosition.data,
-          update: anim => {
-            const value = anim.animatables[0].target;
-            nametagText.setAttribute("position", { x: value.x, y: value.y, z: value.z });
-          },
-          complete: anim => {
-            const value = anim.animatables[0].target;
-            nametagText.setAttribute("position", { x: value.x, y: value.y, z: value.z });
-          }
-        };
-        anime(nameTextconfig);
-        const nameTextVolPositionConfig = {
-          duration: 400,
-          easing: "easeOutElastic",
-          elasticity: 400,
-          loop: 0,
-          round: false,
-          x: 0,
-          y: -0.1,
-          z: 0.001,
-          targets: nameTagVolumePosition.data,
-          update: anim => {
-            const value = anim.animatables[0].target;
-            nametagVolumeId.setAttribute("position", { x: value.x, y: value.y, z: value.z });
-          },
-          complete: anim => {
-            const value = anim.animatables[0].target;
-            nametagVolumeId.setAttribute("position", { x: value.x, y: value.y, z: value.z });
-          }
-        };
-        anime(nameTextVolPositionConfig);
-        const nameTextVolScaleConfig = {
-          duration: 400,
-          easing: "easeOutElastic",
-          elasticity: 400,
-          loop: 0,
-          round: false,
-          y: 0.15,
-          targets: nameTagVolumeScale.data,
-          update: anim => {
-            const value = anim.animatables[0].target;
-            nametagVolumeId.setAttribute("scale", { x: value.x, y: value.y, z: value.z });
-          },
-          complete: anim => {
-            const value = anim.animatables[0].target;
-            nametagVolumeId.setAttribute("scale", { x: value.x, y: value.y, z: value.z });
-          }
-        };
-        anime(nameTextVolScaleConfig);
-        nametagVolumeId.setAttribute("visible", true);
-        nametagStatusBorder.setAttribute("visible", true);
-      } else if (status.size === 0 && this.status.size === status.size) {
-        if (!this.expandHandle) {
-          this.expandHandle = setTimeout(() => {
-            const nameTagBackgroundSlice = nametagBackground.components["slice9"];
-            const backgroundConfig = {
-              duration: 400,
-              easing: "easeOutElastic",
-              elasticity: 400,
-              loop: 0,
-              round: false,
-              width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
-              height: 0.2,
-              targets: nameTagBackgroundSlice.data,
-              update: anim => {
-                const value = anim.animatables[0].target;
-                nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
-                nametagStatusBorder.setAttribute("slice9", {
-                  width: value.width + NAMETAG_STATUS_BORDER_PADDING,
-                  height: value.height + NAMETAG_STATUS_BORDER_PADDING
-                });
-              },
-              complete: anim => {
-                const value = anim.animatables[0].target;
-                nametagBackground.setAttribute("slice9", { width: value.width, height: value.height });
-                nametagStatusBorder.setAttribute("slice9", {
-                  width: value.width + NAMETAG_STATUS_BORDER_PADDING,
-                  height: value.height + NAMETAG_STATUS_BORDER_PADDING
-                });
-              }
-            };
-            anime(backgroundConfig);
-            const nametagTextPosition = nametagText.components["position"];
-            const nameTextconfig = {
-              duration: 400,
-              easing: "easeOutElastic",
-              elasticity: 400,
-              loop: 0,
-              round: false,
-              x: 0,
-              y: 0,
-              z: 0.001,
-              targets: nametagTextPosition.data,
-              update: anim => {
-                const value = anim.animatables[0].target;
-                nametagText.setAttribute("position", { x: value.x, y: value.y, z: value.z });
-              },
-              complete: anim => {
-                const value = anim.animatables[0].target;
-                nametagText.setAttribute("position", { x: value.x, y: value.y, z: value.z });
-              }
-            };
-            anime(nameTextconfig);
-            const nameTagVolumePosition = nametagVolumeId.components["position"];
-            const nameTextVolPositionConfig = {
-              duration: 400,
-              easing: "easeOutElastic",
-              elasticity: 400,
-              loop: 0,
-              round: false,
-              x: 0,
-              y: 0,
-              z: 0,
-              targets: nameTagVolumePosition.data,
-              update: anim => {
-                const value = anim.animatables[0].target;
-                nametagVolumeId.setAttribute("position", { x: value.x, y: value.y, z: value.z });
-              },
-              complete: anim => {
-                const value = anim.animatables[0].target;
-                nametagVolumeId.setAttribute("position", { x: value.x, y: value.y, z: value.z });
-              }
-            };
-            anime(nameTextVolPositionConfig);
-            const nameTagVolumeScale = nametagVolumeId.components["scale"];
-            const nameTextVolScaleConfig = {
-              duration: 400,
-              easing: "easeOutElastic",
-              elasticity: 400,
-              loop: 0,
-              round: false,
-              y: 0,
-              targets: nameTagVolumeScale.data,
-              update: anim => {
-                const value = anim.animatables[0].target;
-                nametagVolumeId.setAttribute("scale", { x: value.x, y: value.y, z: value.z });
-              },
-              complete: anim => {
-                const value = anim.animatables[0].target;
-                nametagVolumeId.setAttribute("scale", { x: value.x, y: value.y, z: value.z });
-              }
-            };
-            anime(nameTextVolScaleConfig);
-            nametagVolumeId.setAttribute("visible", false);
-            nametagStatusBorder.setAttribute("visible", false);
-            this.expandHandle = null;
-          }, 1000);
         }
       }
     }
-    this.status = new Set(newStatus);
+    const handRaisedId = this.el.querySelector(".hand-raised-id");
+    const handRaisedScale = handRaisedId?.components["scale"];
+    if (handRaisedId && handRaisedScale) {
+      if (this.isHandRaised && !this.wasHandRaised) {
+        animComp(handRaisedId, "scale", { x: 0.2, y: 0.2, z: 0.2 });
+      } else if (this.wasHandRaised && !this.isHandRaised) {
+        animComp(handRaisedId, "scale", { x: 0, y: 0, z: 0 }, { hideOnComplete: true });
+      }
+    }
   }
 });

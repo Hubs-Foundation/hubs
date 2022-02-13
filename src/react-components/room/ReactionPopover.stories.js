@@ -13,6 +13,14 @@ export default {
   title: "Room/ReactionPopover",
   parameters: {
     layout: "fullscreen"
+  },
+  argTypes: {
+    onToggleHandRaised: {
+      action: "Hand Raised Changed",
+      table: {
+        category: "Events"
+      }
+    }
   }
 };
 
@@ -26,4 +34,18 @@ const items = [
   { id: "cry", label: "Cry", src: emoji6Particle }
 ];
 
-export const Base = () => <RoomLayout toolbarCenter={<ReactionPopoverButton items={items} />} />;
+export const Base = args => (
+  <RoomLayout
+    toolbarCenter={
+      <ReactionPopoverButton
+        presence={{ handRaised: args.handRaised }}
+        items={items}
+        onToggleHandRaised={args.onToggleHandRaised}
+      />
+    }
+  />
+);
+
+Base.args = {
+  handRaised: false
+};

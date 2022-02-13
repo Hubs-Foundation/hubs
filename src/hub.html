@@ -159,7 +159,15 @@
                                     ></a-entity>
                                 </a-entity>
                                 <a-entity
-                                    billboard="onlyY: true;"
+                                    is-not-remote-hover-target
+                                    class="hand-raised-id"
+                                    sprite="name: hand-raised.png;"
+                                    scale="0.2 0.2 0.2"
+                                    position="0 0.5 0.001"
+                                    visible="false"
+                                ></a-entity>
+                                <a-entity
+                                    billboard
                                     class="identityName"
                                     text="side: double; textAlign: center; color: #ddd; fontSize: 0.15; outlineWidth: 1%;"
                                     visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"

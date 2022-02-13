@@ -953,6 +953,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
   scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
 
+  scene.addEventListener("action_raise_hand", () => window.APP.hubChannel.raiseHand());
+  scene.addEventListener("action_lower_hand", () => window.APP.hubChannel.lowerHand());
+
   if (qs.get("required_version") && process.env.BUILD_VERSION) {
     const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
 
@@ -1171,7 +1174,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles: meta.roles,
       permissions: meta.permissions,
       streaming: meta.streaming,
-      recording: meta.recording
+      recording: meta.recording,
+      handRaised: meta.handRaised
     });
   });
   events.on(`hub:join`, ({ key, meta }) => {
@@ -1238,7 +1242,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles: current.roles,
       permissions: current.permissions,
       streaming: current.streaming,
-      recording: current.recording
+      recording: current.recording,
+      handRaised: current.handRaised
     });
   });
 

@@ -1,13 +1,21 @@
 {
 	"meta": {
 		"image": "sprite-system-nofilter-spritesheet.png",
-		"size": {"w":256,"h":256},
+		"size": {"w":512,"h":256},
 		"scale": "1"
 	},
 	"frames": {
-		"nametag-volume.png":
+		"hand-raised.png":
 		{
 			"frame": {"x":8,"y":8,"w":128,"h":128},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+			"sourceSize": {"w":128,"h":128}
+		},
+		"nametag-volume.png":
+		{
+			"frame": {"x":152,"y":8,"w":128,"h":128},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},

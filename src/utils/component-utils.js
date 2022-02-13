@@ -34,3 +34,15 @@ export function getPlayerInfo(sessionId) {
     return info.playerSessionId === sessionId;
   });
 }
+
+export function getPlayerPresence(sessionId) {
+  if (!window.APP || !window.APP.hubChannel || !window.APP.hubChannel.presence) return null;
+  const presences = window.APP.hubChannel.presence.state;
+
+  const presence = presences[sessionId];
+  if (presence && presence.metas[presence.metas.length - 1]) {
+    return presence.metas[presence.metas.length - 1];
+  }
+
+  return null;
+}
