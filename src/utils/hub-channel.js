@@ -221,6 +221,14 @@ export default class HubChannel extends EventTarget {
     this.channel.push("events:lower_hand", {});
   }
 
+  beginTyping() {
+    this.channel.push("events:begin_typing", {});
+  }
+
+  endTyping() {
+    this.channel.push("events:end_typing", {});
+  }
+
   getEntryTimingFlags = () => {
     const entryTimingFlags = { isNewDaily: true, isNewMonthly: true, isNewDayWindow: true, isNewMonthWindow: true };
     const storedLastEnteredAt = this.store.state.activity.lastEnteredAt;
