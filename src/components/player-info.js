@@ -9,6 +9,7 @@ import { getThemeColor } from "../utils/theme";
 
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
+const NAMETAG_FADE_OUT_DELAY = 1000;
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -417,7 +418,7 @@ AFRAME.registerComponent("player-info", {
               this.isNametagExpanded = false;
             });
           }
-        }, 1000);
+        }, NAMETAG_FADE_OUT_DELAY);
       }
       this.isFirstNametagPass = false;
     }
