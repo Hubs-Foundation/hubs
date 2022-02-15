@@ -1,10 +1,14 @@
-# [Mozilla Hubs](https://hubs.mozilla.com/)
+# [LearnVerse](https://learnverse.spaces)
 
-[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![Build Status](https://travis-ci.org/mozilla/hubs.svg?branch=master)](https://travis-ci.org/mozilla/hubs) [![Discord](https://img.shields.io/discord/498741086295031808)](https://discord.gg/CzAbuGu)
+A [Mozilla Hubs](https://hubs.mozilla.com/) fork for online tutoring, integrated with [NEAR](https://near.org/) blockchain for in-app currencies and NFTs.
+
+[Learn more about LearnVerse](https://learnverse.spaces)
 
 The client-side code for [Mozilla Hubs](https://hubs.mozilla.com/), an online 3D collaboration platform that works for desktop, mobile, and VR platforms.
 
 [Learn more about Hubs](https://hubs.mozilla.com/docs/welcome.html)
+
+
 
 ## Getting Started
 
@@ -20,18 +24,24 @@ If you just want to check out how Hubs works and make your own modifications con
 
 [Install NodeJS](https://nodejs.org) if you haven't already. We recommend version 12 or above.
 
-Run the following commands:
+Run the following commands to for local development:
 
 ```bash
 git clone https://github.com/mozilla/hubs.git
 cd hubs
 npm ci
-npm run dev
+npm start
 ```
 
 Then visit https://localhost:8080 (note: HTTPS is required, you'll need to accept the warning for the self-signed SSL certificate)
 
 > Note: When running the Hubs client locally, you will still connect to the development versions of our [Janus WebRTC](https://github.com/mozilla/janus-plugin-sfu) and [reticulum](https://github.com/mozilla/reticulum) servers. These servers do not allow being accessed outside of localhost. If you want to host your own Hubs servers, please check out [Hubs Cloud](https://hubs.mozilla.com/docs/hubs-cloud-intro.html).
+
+
+Run the following commands to deploy changes to production:
+```bash
+npm run deploy
+```
 
 ## Documentation
 
@@ -63,4 +73,11 @@ Mozilla and Hubs believe that privacy is fundamental to a healthy internet. Read
 
 ## License
 
+Open source dual license:
+
+[![License: MPL 2.0 AND GPL-3.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-brightgreen.svg)](https://opensource.org/licenses/GPL-3.0)
+
 Hubs is licensed with the [Mozilla Public License 2.0](./LICENSE)
+
+LearnVerse is a fork of Hubs and licensed with the [GNU General Public License version 3](https://opensource.org/licenses/GPL-3.0)
