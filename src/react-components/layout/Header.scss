@@ -2,7 +2,7 @@
 
 header {
   display: block;
-  
+
 
   @media(min-width: theme.$breakpoint-lg) {
     padding: 0;
@@ -33,6 +33,7 @@ header {
           }
         }
       }
+
       padding-top: 20px;
 
       @media(min-width: theme.$breakpoint-lg) {
@@ -76,14 +77,16 @@ header {
 
 :local(.home-link) {
   display: inline-block;
-  width: 124px;
-  height: 83px;
+  width: 180px;
+  margin-top: -15px;
   @media(min-width: theme.$breakpoint-lg) {
-   img {
-    height: 32px;
+    img {
+      height: 32px;
     }
   }
+
 }
+
 :local(.sign-in) {
   display: none;
   flex-direction: column;
@@ -91,7 +94,7 @@ header {
   padding-top: 20px;
   font-size: theme.$font-size-md;
   font-weight: theme.$font-weight-bold;
-  
+
   a {
     margin-left: 8px;
     color: theme.$link-color;
@@ -135,16 +138,20 @@ header {
     margin-right: 42px;
     padding: 0;
   }
+
   svg {
     margin-left: 21px;
     cursor: pointer;
-      *[fill]{
-        fill: theme.$text1-color;
-      }
+
+    *[fill] {
+      fill: theme.$text1-color;
+    }
   }
+
   li:first-child {
     padding-top: 0;
   }
+
   a {
     font-size: 1.2rem;
   }
@@ -159,18 +166,21 @@ header {
 
   header.is-active {
     opacity: 1;
-    height:280px;
+    height: 280px;
     visibility: visible;
     transition: opacity .4s, visibility .4s, height .6s;
+
     ul {
-      height:230px;
+      height: 230px;
       justify-content: space-between;
     }
   }
+
   header.cloud {
-    height:230px;
+    height: 230px;
+
     ul {
-      height:200px;
+      height: 200px;
       justify-content: center;
     }
   }

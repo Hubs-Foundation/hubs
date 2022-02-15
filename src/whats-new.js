@@ -104,7 +104,7 @@ class WhatsNew extends Component {
             </Center>
           }
         >
-          <div className="container">
+          <div className="container hidden">
             <div className="main">
               <div className="content">
                 <h1>

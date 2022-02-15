@@ -23,7 +23,7 @@ export function EnterOnDeviceModal({
 
   return (
     <Modal
-      title={<FormattedMessage id="enter-on-device-modal.title" defaultMessage="Enter on Device" />}
+      title={<FormattedMessage id="enter-on-device-modal.title" defaultMessage="Join using VR device or phone" />}
       beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       {...rest}

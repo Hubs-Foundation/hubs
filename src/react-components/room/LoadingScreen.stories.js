@@ -10,7 +10,7 @@ export default {
 };
 
 const infoMessages = [
-  { heading: "Tip:", message: "Press the Q & E keys to turn left and right." },
+  /* { heading: "Tip:", message: "Press the Q & E keys to turn left and right." },
   {
     heading: "What's New?",
     message: (
@@ -21,9 +21,9 @@ const infoMessages = [
         </a>
       </>
     )
-  }
+  }*/
 ];
 
 export const Base = () => (
-  <LoadingScreen logoSrc={logoSrc} message="Loading objects 2/14" infoMessages={infoMessages} />
+  // <LoadingScreen logoSrc={logoSrc} message="Loading objects 2/14" infoMessages={infoMessages} />
 );

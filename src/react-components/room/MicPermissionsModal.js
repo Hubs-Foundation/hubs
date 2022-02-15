@@ -11,7 +11,7 @@ import { FormattedMessage } from "react-intl";
 export function MicPermissionsModal({ className, error, onClickErrorButton, errorButtonLabel, onBack, ...rest }) {
   return (
     <Modal
-      title={<FormattedMessage id="mic-permissions-modal.title" defaultMessage="Enter on Device" />}
+      title={<FormattedMessage id="mic-permissions-modal.title" defaultMessage="Join on VR device or phone" />}
       beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       {...rest}

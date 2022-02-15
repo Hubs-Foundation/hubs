@@ -79,9 +79,10 @@ const onStoreChanged = (function() {
 
 waitForDOMContentLoaded().then(() => {
   if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme["dark-theme"]) {
+    // document.body.classList.add("light-theme");
     document.body.classList.add("dark-theme");
   } else {
-    document.body.classList.add("light-theme");
+    document.body.classList.add("dark-theme");
   }
   activateTheme();
   window.APP?.store?.addEventListener("statechanged", onStoreChanged);
