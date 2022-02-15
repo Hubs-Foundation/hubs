@@ -5,6 +5,7 @@ import defaultAvatar from "../assets/models/DefaultAvatar.glb";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import anime from "animejs";
 import MovingAverage from "moving-average";
+import { getThemeColor } from "../utils/theme";
 
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
@@ -311,7 +312,7 @@ AFRAME.registerComponent("player-info", {
         width: size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
         height: height + NAMETAG_STATUS_BORDER_PADDING
       },
-      { hideOnEnd: true, onComplete }
+      { hideOnEnd: !this.nametagState.isHandRaised, onComplete }
     );
   },
 
@@ -382,6 +383,7 @@ AFRAME.registerComponent("player-info", {
   onNameTagUpdated() {
     if (!this.isNametagVisible) return;
     this.nametagBackgroundEl = this.el.querySelector(".nametag-background-id");
+    this.statusExpanded = this.isStatusExpanded();
     if (this.nametagBackgroundEl) {
       this.nametagTextEl = this.el.querySelector(".nametag-text-id");
       const size = this.nametagTextEl.components["text"]?.getSize();
@@ -396,7 +398,6 @@ AFRAME.registerComponent("player-info", {
       this.badgeExpanded = this.isBadgeExpanded();
       const badgeUpdated = this.hasStatusChanged(["isOwner", "isRecording"]);
       const refreshBadge = this.badgeExpanded && badgeUpdated;
-      this.statusExpanded = this.isStatusExpanded();
       if (this.statusExpanded || refreshBadge || this.isFirstNametagPass) {
         clearTimeout(this.expandHandle);
         this.expandHandle = null;
@@ -423,8 +424,18 @@ AFRAME.registerComponent("player-info", {
     const handRaisedId = this.el.querySelector(".hand-raised-id");
     if (handRaisedId) {
       if (this.nametagState.isHandRaised) {
+        this.nametagStatusBorder.setAttribute("visible", true);
+        this.nametagStatusBorder.setAttribute(
+          "text-button",
+          `backgroundColor: ${getThemeColor("nametag-border-color-raised-hand")}`
+        );
         animComp(handRaisedId, "scale", { x: 0.2, y: 0.2, z: 0.2 }, { showOnStart: true });
       } else {
+        this.nametagStatusBorder.setAttribute("visible", this.isNametagExpanded === true);
+        this.nametagStatusBorder.setAttribute(
+          "text-button",
+          `backgroundColor: ${getThemeColor("nametag-border-color")}`
+        );
         animComp(handRaisedId, "scale", { x: 0, y: 0, z: 0 }, { hideOnEnd: true });
       }
     }
