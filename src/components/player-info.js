@@ -10,6 +10,7 @@ import { getThemeColor } from "../utils/theme";
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
 const NAMETAG_FADE_OUT_DELAY = 1000;
+const NAMETAG_MIN_WIDTH = 0.6;
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -92,7 +93,6 @@ AFRAME.registerComponent("player-info", {
     this.update = this.update.bind(this);
     this.onMicStateChanged = this.onMicStateChanged.bind(this);
     this.onAnalyserVolumeUpdated = this.onAnalyserVolumeUpdated.bind(this);
-    this.onNameTagUpdated = this.onNameTagUpdated.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -198,7 +198,7 @@ AFRAME.registerComponent("player-info", {
     const nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && nametagEl) {
       const text = this.el.querySelector("[text]");
-      text.addEventListener("text-updated", this.onNameTagUpdated, { once: true });
+      text.addEventListener("text-updated", () => this.onNameTagUpdated(true), { once: true });
       text.setAttribute("text", { value: this.displayName + (this.identityName ? ` (${this.identityName})` : "") });
       nametagEl.object3D.visible = this.isNametagVisible;
     }
@@ -381,7 +381,7 @@ AFRAME.registerComponent("player-info", {
     return this.nametagState.isOwner || this.nametagState.isRecording;
   },
 
-  onNameTagUpdated() {
+  onNameTagUpdated(force = false) {
     if (!this.isNametagVisible) return;
     this.nametagBackgroundEl = this.el.querySelector(".nametag-background-id");
     this.statusExpanded = this.isStatusExpanded();
@@ -389,7 +389,7 @@ AFRAME.registerComponent("player-info", {
       this.nametagTextEl = this.el.querySelector(".nametag-text-id");
       const size = this.nametagTextEl.components["text"]?.getSize();
       if (!size) return;
-
+      size.x = Math.max(size.x, NAMETAG_MIN_WIDTH);
       this.nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
       this.nametagVolumeEl = this.el.querySelector(".nametag-volume-id");
       this.typingEl = this.el.querySelector(".typing-id");
@@ -399,7 +399,7 @@ AFRAME.registerComponent("player-info", {
       this.badgeExpanded = this.isBadgeExpanded();
       const badgeUpdated = this.hasStatusChanged(["isOwner", "isRecording"]);
       const refreshBadge = this.badgeExpanded && badgeUpdated;
-      if (this.statusExpanded || refreshBadge || this.isFirstNametagPass) {
+      if (this.statusExpanded || refreshBadge || this.isFirstNametagPass || force) {
         clearTimeout(this.expandHandle);
         this.expandHandle = null;
         this.nametagIn(size, () => {
