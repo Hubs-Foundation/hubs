@@ -76,9 +76,6 @@ AFRAME.registerComponent("player-info", {
   init() {
     this.displayName = null;
     this.identityName = null;
-    this.isOwner = false;
-    this.isRecording = false;
-    this.talkingAvg = new Array(128);
     this.isFirstNametagPass = true;
     this.lastNametagState = {};
     this.nametagState = {};
@@ -289,8 +286,8 @@ AFRAME.registerComponent("player-info", {
 
   nametagIn(size, onComplete) {
     let height = 0.2;
-    if (this.statusExpanded) height += 0.25;
-    if (this.badgeExpanded) height += 0.25;
+    if (this.statusExpanded) height += 0.2;
+    if (this.badgeExpanded) height += 0.15;
     animComp(this.nametagBackgroundEl, "slice9", {
       width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
       height
@@ -308,8 +305,8 @@ AFRAME.registerComponent("player-info", {
 
   nametagOut(size, onComplete) {
     let height = 0.2;
-    if (this.statusExpanded) height += 0.25;
-    if (this.badgeExpanded) height += 0.25;
+    if (this.statusExpanded) height += 0.2;
+    if (this.badgeExpanded) height += 0.15;
     animComp(this.nametagBackgroundEl, "slice9", {
       width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
       height
@@ -326,56 +323,56 @@ AFRAME.registerComponent("player-info", {
   },
 
   displayNameIn() {
-    let height = 0.0;
+    let height = 0;
     if (this.statusExpanded && !this.badgeExpanded) height = 0.1;
-    if (!this.statusExpanded && this.badgeExpanded) height = -0.1;
-    animComp(this.nametagTextEl, "position", { x: 0, y: height, z: 0.001 });
+    if (!this.statusExpanded && this.badgeExpanded) height = -0.065;
+    if (this.statusExpanded && this.badgeExpanded) height = 0.035;
+    animComp(this.nametagTextEl, "position", { y: height });
   },
 
   displayNameOut() {
-    let height = 0.0;
+    let height = 0;
     if (this.statusExpanded && !this.badgeExpanded) height = 0.1;
-    if (!this.statusExpanded && this.badgeExpanded) height = -0.1;
-    animComp(this.nametagTextEl, "position", { x: 0, y: height, z: 0.001 });
+    if (!this.statusExpanded && this.badgeExpanded) height = -0.065;
+    if (this.statusExpanded && this.badgeExpanded) height = 0.035;
+    animComp(this.nametagTextEl, "position", { y: height });
   },
 
   statusIconsIn() {
-    let height = -0.1;
-    if (this.statusExpanded || this.badgeExpanded) height = -0.1;
-    if (this.statusExpanded && this.badgeExpanded) height = -0.2;
-    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height, z: 0.001 });
+    let height = -0.075;
+    if (this.badgeExpanded) height = -0.15;
+    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height });
     animComp(this.nametagVolumeEl, "scale", { y: 0.15 }, { showOnStart: this.nametagState.isTalking });
-    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height, z: 0.001 });
+    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height });
     animComp(this.typingEl, "scale", { x: 0.3, y: 0.3, z: 0.3 }, { showOnStart: this.nametagState.isTyping });
   },
 
   statusIconsOut() {
-    let height = -0.1;
-    if (this.statusExpanded || this.badgeExpanded) height = -0.1;
-    if (this.statusExpanded && this.badgeExpanded) height = -0.2;
-    animComp(this.nametagVolumeEl, "position", { x: 0, y: height, z: 0 });
+    let height = -0.075;
+    if (this.badgeExpanded) height = -0.15;
+    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height });
     animComp(this.nametagVolumeEl, "scale", { y: 0 }, { hideOnEnd: true });
-    animComp(this.typingEl, "position", { x: 0, y: height, z: 0.001 });
+    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height });
     animComp(this.typingEl, "scale", { x: 0, y: 0, z: 0 }, { hideOnEnd: true });
   },
 
-  badgeIconsIn() {
-    let height = 0.1;
+  badgeIconsUpdate() {
+    let height = 0.075;
     if (this.statusExpanded) height += 0.1;
-    animComp(this.recordingBadgeEl, "position", { x: 0, y: height, z: 0.001 });
+    animComp(this.recordingBadgeEl, "position", { y: height });
     animComp(this.recordingBadgeEl, "scale", { y: 0.1 }, { showOnStart: this.nametagState.isRecording });
-  },
-
-  badgeIconsOut() {
-    let height = 0.1;
-    if (this.statusExpanded) height += 0.1;
-    animComp(this.recordingBadgeEl, "position", { x: 0, y: height, z: 0 });
-    animComp(this.recordingBadgeEl, "scale", { y: 0 }, { hideOnEnd: true });
+    animComp(this.modBadgeEl, "position", { y: height });
+    animComp(
+      this.modBadgeEl,
+      "scale",
+      { y: 0.1 },
+      { showOnStart: this.nametagState.isOwner && !this.nametagState.isRecording }
+    );
   },
 
   hasStatusChanged(props) {
     if (props) {
-      return props.every(prop => this.nametagState[prop] === this.lastNametagState[prop]);
+      return props.some(prop => this.nametagState[prop] !== this.lastNametagState[prop]);
     } else {
       return JSON.stringify(this.nametagState) !== JSON.stringify(this.lastNametagState);
     }
@@ -396,14 +393,20 @@ AFRAME.registerComponent("player-info", {
       this.nametagTextEl = this.el.querySelector(".nametag-text-id");
       const size = this.nametagTextEl.components["text"]?.getSize();
       if (!size) return;
+
       this.nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
       this.nametagVolumeEl = this.el.querySelector(".nametag-volume-id");
       this.typingEl = this.el.querySelector(".typing-id");
       this.recordingBadgeEl = this.el.querySelector(".recordingBadge");
       this.modBadgeEl = this.el.querySelector(".modBadge");
-      this.statusExpanded = this.isStatusExpanded();
+
       this.badgeExpanded = this.isBadgeExpanded();
-      if (this.statusExpanded || this.badgeExpanded || this.isFirstNametagPass) {
+      const badgeUpdated = this.hasStatusChanged(["isOwner", "isRecording"]);
+      const refreshBadge = this.badgeExpanded && badgeUpdated;
+      this.statusExpanded = this.isStatusExpanded();
+      const statusUpdated = this.hasStatusChanged(["isTalking", "isTyping"]);
+      const refreshStatus = this.statusExpanded && statusUpdated;
+      if (refreshStatus || refreshBadge || this.isFirstNametagPass) {
         clearTimeout(this.expandHandle);
         this.expandHandle = null;
         this.nametagIn(size, () => {
@@ -411,13 +414,13 @@ AFRAME.registerComponent("player-info", {
         });
         this.displayNameIn();
         this.statusIconsIn();
-        this.badgeIconsIn();
+        this.badgeIconsUpdate();
       } else {
         this.expandHandle = setTimeout(() => {
           if (this.isNametagExpanded) {
             this.displayNameOut();
             this.statusIconsOut();
-            this.badgeIconsOut();
+            this.badgeIconsUpdate();
             this.nametagOut(size, () => {
               this.isNametagExpanded = false;
             });
