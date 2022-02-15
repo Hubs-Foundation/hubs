@@ -288,11 +288,11 @@ AFRAME.registerComponent("player-info", {
   },
 
   isStatusExpanded() {
-    return this.nametagState.isTalking || this.nametagState.isTyping;
+    return !!this.nametagState.isTalking || !!this.nametagState.isTyping;
   },
 
   isBadgeExpanded() {
-    return this.nametagState.isOwner || this.nametagState.isRecording;
+    return !!this.nametagState.isOwner || !!this.nametagState.isRecording;
   },
 
   updateNametag(size, { onComplete, hideOnEnd } = {}) {
@@ -363,23 +363,17 @@ AFRAME.registerComponent("player-info", {
       this.badgeExpanded = this.isBadgeExpanded();
       const badgeUpdated = this.hasStatusChanged(["isOwner", "isRecording"]);
       const refreshBadge = this.badgeExpanded && badgeUpdated;
-      const statusUpdated = this.hasStatusChanged(["isTalking", "isTyping"]);
-      const refreshStatus = this.statusExpanded && statusUpdated;
       if (this.statusExpanded || refreshBadge || this.isFirstNametagPass || force) {
-        if (refreshStatus || refreshBadge) {
-          console.log("XXX: IN");
-          clearTimeout(this.expandHandle);
-          this.expandHandle = null;
-          this.isNametagExpanded = true;
-          this.updateNametag(size);
-          this.updateName();
-          this.updateStatusIcons();
-          this.updateBadgeIcons();
-        }
+        clearTimeout(this.expandHandle);
+        this.expandHandle = null;
+        this.isNametagExpanded = true;
+        this.updateNametag(size);
+        this.updateName();
+        this.updateStatusIcons();
+        this.updateBadgeIcons();
       } else {
         this.expandHandle = setTimeout(() => {
           if (this.isNametagExpanded) {
-            console.log("XXX: OUT");
             this.updateName();
             this.updateStatusIcons({ hideOnEnd: true });
             this.updateBadgeIcons();
