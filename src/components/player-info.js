@@ -197,15 +197,8 @@ AFRAME.registerComponent("player-info", {
     if (this.displayName && nametagEl) {
       const text = this.el.querySelector("[text]");
       text.addEventListener("text-updated", this.onNameTagUpdated, { once: true });
-      text.setAttribute("text", { value: this.displayName });
+      text.setAttribute("text", { value: this.displayName + (this.identityName ? ` (${this.identityName})` : "") });
       nametagEl.object3D.visible = this.isNametagVisible;
-    }
-    const identityNameEl = this.el.querySelector(".identityName");
-    if (identityNameEl) {
-      if (this.identityName) {
-        identityNameEl.setAttribute("text", { value: this.identityName });
-        identityNameEl.object3D.visible = this.el.sceneEl.is("frozen");
-      }
     }
 
     this.onNameTagUpdated();
@@ -404,9 +397,7 @@ AFRAME.registerComponent("player-info", {
       const badgeUpdated = this.hasStatusChanged(["isOwner", "isRecording"]);
       const refreshBadge = this.badgeExpanded && badgeUpdated;
       this.statusExpanded = this.isStatusExpanded();
-      const statusUpdated = this.hasStatusChanged(["isTalking", "isTyping"]);
-      const refreshStatus = this.statusExpanded && statusUpdated;
-      if (refreshStatus || refreshBadge || this.isFirstNametagPass) {
+      if (this.statusExpanded || refreshBadge || this.isFirstNametagPass) {
         clearTimeout(this.expandHandle);
         this.expandHandle = null;
         this.nametagIn(size, () => {
