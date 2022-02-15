@@ -279,92 +279,6 @@ AFRAME.registerComponent("player-info", {
     }
   },
 
-  nametagIn(size, onComplete) {
-    let height = 0.2;
-    if (this.statusExpanded) height += 0.2;
-    if (this.badgeExpanded) height += 0.15;
-    animComp(this.nametagBackgroundEl, "slice9", {
-      width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
-      height
-    });
-    animComp(
-      this.nametagStatusBorder,
-      "slice9",
-      {
-        width: size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
-        height: height + NAMETAG_STATUS_BORDER_PADDING
-      },
-      { showOnStart: this.statusExpanded, onComplete }
-    );
-  },
-
-  nametagOut(size, onComplete) {
-    let height = 0.2;
-    if (this.statusExpanded) height += 0.2;
-    if (this.badgeExpanded) height += 0.15;
-    animComp(this.nametagBackgroundEl, "slice9", {
-      width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
-      height
-    });
-    animComp(
-      this.nametagStatusBorder,
-      "slice9",
-      {
-        width: size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
-        height: height + NAMETAG_STATUS_BORDER_PADDING
-      },
-      { hideOnEnd: !this.nametagState.isHandRaised, onComplete }
-    );
-  },
-
-  displayNameIn() {
-    let height = 0;
-    if (this.statusExpanded && !this.badgeExpanded) height = 0.1;
-    if (!this.statusExpanded && this.badgeExpanded) height = -0.065;
-    if (this.statusExpanded && this.badgeExpanded) height = 0.035;
-    animComp(this.nametagTextEl, "position", { y: height });
-  },
-
-  displayNameOut() {
-    let height = 0;
-    if (this.statusExpanded && !this.badgeExpanded) height = 0.1;
-    if (!this.statusExpanded && this.badgeExpanded) height = -0.065;
-    if (this.statusExpanded && this.badgeExpanded) height = 0.035;
-    animComp(this.nametagTextEl, "position", { y: height });
-  },
-
-  statusIconsIn() {
-    let height = -0.075;
-    if (this.badgeExpanded) height = -0.15;
-    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height });
-    animComp(this.nametagVolumeEl, "scale", { y: 0.15 }, { showOnStart: this.nametagState.isTalking });
-    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height });
-    animComp(this.typingEl, "scale", { y: 0.3 }, { showOnStart: this.nametagState.isTyping });
-  },
-
-  statusIconsOut() {
-    let height = -0.075;
-    if (this.badgeExpanded) height = -0.15;
-    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height });
-    animComp(this.nametagVolumeEl, "scale", { y: 0 }, { hideOnEnd: true });
-    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height });
-    animComp(this.typingEl, "scale", { y: 0 }, { hideOnEnd: true });
-  },
-
-  badgeIconsUpdate() {
-    let height = 0.075;
-    if (this.statusExpanded) height += 0.1;
-    animComp(this.recordingBadgeEl, "position", { y: height });
-    animComp(this.recordingBadgeEl, "scale", { y: 0.1 }, { showOnStart: this.nametagState.isRecording });
-    animComp(this.modBadgeEl, "position", { y: height });
-    animComp(
-      this.modBadgeEl,
-      "scale",
-      { y: 0.1 },
-      { showOnStart: this.nametagState.isOwner && !this.nametagState.isRecording }
-    );
-  },
-
   hasStatusChanged(props) {
     if (props) {
       return props.some(prop => this.nametagState[prop] !== this.lastNametagState[prop]);
@@ -379,6 +293,56 @@ AFRAME.registerComponent("player-info", {
 
   isBadgeExpanded() {
     return this.nametagState.isOwner || this.nametagState.isRecording;
+  },
+
+  updateNametag(size, { onComplete, hideOnEnd } = {}) {
+    let height = 0.2;
+    if (this.statusExpanded) height += 0.2;
+    if (this.badgeExpanded) height += 0.15;
+    animComp(this.nametagBackgroundEl, "slice9", {
+      width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
+      height
+    });
+    animComp(
+      this.nametagStatusBorder,
+      "slice9",
+      {
+        width: size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
+        height: height + NAMETAG_STATUS_BORDER_PADDING
+      },
+      { showOnStart: this.statusExpanded, hideOnEnd, onComplete }
+    );
+  },
+
+  updateName() {
+    let height = 0;
+    if (this.statusExpanded && !this.badgeExpanded) height = 0.1;
+    if (!this.statusExpanded && this.badgeExpanded) height = -0.065;
+    if (this.statusExpanded && this.badgeExpanded) height = 0.035;
+    animComp(this.nametagTextEl, "position", { y: height });
+  },
+
+  updateStatusIcons({ hideOnEnd } = {}) {
+    let height = -0.075;
+    if (this.badgeExpanded) height = -0.15;
+    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height });
+    animComp(this.nametagVolumeEl, "scale", { y: 0.15 }, { showOnStart: this.nametagState.isTalking, hideOnEnd });
+    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height });
+    animComp(this.typingEl, "scale", { y: 0.3 }, { showOnStart: this.nametagState.isTyping, hideOnEnd });
+  },
+
+  updateBadgeIcons() {
+    let height = 0.075;
+    if (this.statusExpanded) height += 0.1;
+    animComp(this.recordingBadgeEl, "position", { y: height });
+    animComp(this.recordingBadgeEl, "scale", { y: 0.1 }, { showOnStart: this.nametagState.isRecording });
+    animComp(this.modBadgeEl, "position", { y: height });
+    animComp(
+      this.modBadgeEl,
+      "scale",
+      { y: 0.1 },
+      { showOnStart: this.nametagState.isOwner && !this.nametagState.isRecording }
+    );
   },
 
   onNameTagUpdated(force = false) {
@@ -399,23 +363,31 @@ AFRAME.registerComponent("player-info", {
       this.badgeExpanded = this.isBadgeExpanded();
       const badgeUpdated = this.hasStatusChanged(["isOwner", "isRecording"]);
       const refreshBadge = this.badgeExpanded && badgeUpdated;
+      const statusUpdated = this.hasStatusChanged(["isTalking", "isTyping"]);
+      const refreshStatus = this.statusExpanded && statusUpdated;
       if (this.statusExpanded || refreshBadge || this.isFirstNametagPass || force) {
-        clearTimeout(this.expandHandle);
-        this.expandHandle = null;
-        this.nametagIn(size, () => {
+        if (refreshStatus || refreshBadge) {
+          console.log("XXX: IN");
+          clearTimeout(this.expandHandle);
+          this.expandHandle = null;
           this.isNametagExpanded = true;
-        });
-        this.displayNameIn();
-        this.statusIconsIn();
-        this.badgeIconsUpdate();
+          this.updateNametag(size);
+          this.updateName();
+          this.updateStatusIcons();
+          this.updateBadgeIcons();
+        }
       } else {
         this.expandHandle = setTimeout(() => {
           if (this.isNametagExpanded) {
-            this.displayNameOut();
-            this.statusIconsOut();
-            this.badgeIconsUpdate();
-            this.nametagOut(size, () => {
-              this.isNametagExpanded = false;
+            console.log("XXX: OUT");
+            this.updateName();
+            this.updateStatusIcons({ hideOnEnd: true });
+            this.updateBadgeIcons();
+            this.updateNametag(size, {
+              onComplete: () => {
+                this.isNametagExpanded = false;
+              },
+              hideOnEnd: !this.nametagState.isHandRaised
             });
           }
         }, NAMETAG_FADE_OUT_DELAY);
