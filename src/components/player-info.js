@@ -339,7 +339,7 @@ AFRAME.registerComponent("player-info", {
     animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height });
     animComp(this.nametagVolumeEl, "scale", { y: 0.15 }, { showOnStart: this.nametagState.isTalking });
     animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height });
-    animComp(this.typingEl, "scale", { x: 0.3, y: 0.3, z: 0.3 }, { showOnStart: this.nametagState.isTyping });
+    animComp(this.typingEl, "scale", { y: 0.3 }, { showOnStart: this.nametagState.isTyping });
   },
 
   statusIconsOut() {
@@ -348,7 +348,7 @@ AFRAME.registerComponent("player-info", {
     animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height });
     animComp(this.nametagVolumeEl, "scale", { y: 0 }, { hideOnEnd: true });
     animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height });
-    animComp(this.typingEl, "scale", { x: 0, y: 0, z: 0 }, { hideOnEnd: true });
+    animComp(this.typingEl, "scale", { y: 0 }, { hideOnEnd: true });
   },
 
   badgeIconsUpdate() {
