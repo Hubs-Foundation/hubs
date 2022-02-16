@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styles from "./AudioPopover.scss";
 import { Popover } from "../popover/Popover";
@@ -18,12 +18,30 @@ export const AudioPopoverButton = ({
   content,
   isMicrophoneMuted,
   isMicrophoneEnabled,
+  micLevel,
   onChangeMicrophoneMuted
 }) => {
   const ref = useRef();
   const intl = useIntl();
   const title = intl.formatMessage(invitePopoverTitle);
   const popoverApiRef = useRef();
+
+  useEffect(
+    () => {
+      const rect = ref.current.querySelector("rect");
+
+      if (micLevel <= 0.1) {
+        rect.setAttribute("height", 0);
+      } else if (micLevel < 0.3) {
+        rect.setAttribute("y", 8);
+        rect.setAttribute("height", 4);
+      } else {
+        rect.setAttribute("y", 4);
+        rect.setAttribute("height", 8);
+      }
+    },
+    [micLevel]
+  );
 
   return (
     <Popover
@@ -65,6 +83,7 @@ AudioPopoverButton.propTypes = {
   initiallyVisible: PropTypes.bool,
   isMicrophoneMuted: PropTypes.bool,
   isMicrophoneEnabled: PropTypes.bool,
+  micLevel: PropTypes.number,
   onChangeMicrophoneMuted: PropTypes.func,
   content: PropTypes.element
 };
