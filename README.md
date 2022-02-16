@@ -1,6 +1,7 @@
 # [LearnVerse](https://learnverse.spaces)
-
+### branch = learnverse
 A [Mozilla Hubs](https://hubs.mozilla.com/) fork for online tutoring, integrated with [NEAR](https://near.org/) blockchain for in-app currencies and NFTs.
+
 
 [Learn more about LearnVerse](https://learnverse.spaces)
 
@@ -27,8 +28,9 @@ If you just want to check out how Hubs works and make your own modifications con
 Run the following commands to for local development:
 
 ```bash
-git clone https://github.com/mozilla/hubs.git
+git clone https://github.com/mozilla/hubs.git || git@github.com:mylearnverse/LearnVerseHub.git
 cd hubs
+git learnverse
 npm ci
 npm start
 ```
