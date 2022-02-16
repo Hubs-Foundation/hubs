@@ -9,7 +9,7 @@ import { AuthContextProvider } from "./react-components/auth/AuthContext";
 
 const store = new Store();
 window.APP = { store };
-
+z
 import registerTelemetry from "./telemetry";
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/whats-new.scss";

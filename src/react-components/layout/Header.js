@@ -8,6 +8,7 @@ import styles from "./Header.scss";
 import { Container } from "./Container";
 import { SocialBar } from "../home/SocialBar";
 import { SignInButton } from "../home/SignInButton";
+import { WalletButton } from "../learnverse/near/WalletButton";
 
 export function Header({
   appName,
@@ -101,6 +102,7 @@ export function Header({
           ) : (
             <SignInButton />
           )}
+          <WalletButton />
         </div>
         {isHmc ? <SocialBar mobile /> : null}
       </Container>
