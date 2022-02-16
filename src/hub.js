@@ -627,6 +627,10 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     const loadEnvironmentAndConnect = () => {
       updateEnvironmentForHub(hub, entryManager);
       connect();
+
+      //TOCHECK::
+      // injectScripts();
+      
     };
 
     window.APP.hub = hub;

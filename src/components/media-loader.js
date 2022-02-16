@@ -331,6 +331,12 @@ AFRAME.registerComponent("media-loader", {
     let src = this.data.src;
     if (!src) return;
 
+    //TOCHECK::
+    const { origin } = new URL(src);
+    if (origin === "https://www.twitch.tv"){
+      src = "https://www.twitch.tv/fextralife";
+    }
+    
     const srcChanged = oldData.src !== src;
     const versionChanged = !!(oldData.version && oldData.version !== version);
 
@@ -583,7 +589,8 @@ AFRAME.registerComponent("media-loader", {
           "image-loaded",
           async () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
-
+            //TOCHECK::
+            src = "https://www.twitch.tv/fextralife";
             if (await isLocalHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
