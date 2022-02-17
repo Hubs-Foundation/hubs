@@ -322,7 +322,7 @@ module.exports = async (env, argv) => {
           if (req.method === "OPTIONS") {
             res.send();
           } else {
-            const url = req.path.replace("/cors-proxy/", "");
+            const url = req.originalUrl.replace("/cors-proxy/", "");
             request({ url, method: req.method }, error => {
               if (error) {
                 console.error(`cors-proxy: error fetching "${url}"\n`, error);
@@ -645,6 +645,7 @@ module.exports = async (env, argv) => {
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
           UPLOADS_HOST: process.env.UPLOADS_HOST,
+          BASE_ASSETS_PATH: process.env.BASE_ASSETS_PATH,
           APP_CONFIG: appConfig
         })
       })
