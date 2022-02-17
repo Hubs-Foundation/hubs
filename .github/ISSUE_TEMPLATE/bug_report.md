@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve Hubs
 title: ''
-labels: bug, needs triage, jira-hubs
+labels: bug, needs triage
 assignees: ''
 
 ---
