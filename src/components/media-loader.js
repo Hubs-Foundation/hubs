@@ -22,12 +22,13 @@ import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effect
 import { loadModel } from "./gltf-model-plus";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { getLiveGameStreams } from "../utils/customization/twitch-utils";
 
 import { SHAPE } from "three-ammo/constants";
 
 let loadingObjectEnvMap;
 let loadingObject;
-
+let g_twitchLiveStreams = [];
 waitForDOMContentLoaded().then(() => {
   loadModel(loadingObjectSrc).then(gltf => {
     loadingObject = gltf;
@@ -325,7 +326,7 @@ AFRAME.registerComponent("media-loader", {
     // The only use-case for refresh right now is re-fetching screenshots.
     this.el.setAttribute("media-loader", { version: Math.floor(Date.now() / 1000) });
   },
-
+  
   async update(oldData, forceLocalRefresh) {
     const { version, contentSubtype } = this.data;
     let src = this.data.src;
@@ -334,7 +335,12 @@ AFRAME.registerComponent("media-loader", {
     //TOCHECK::
     const { origin } = new URL(src);
     if (origin === "https://www.twitch.tv"){
-      src = "https://www.twitch.tv/fextralife";
+      if (g_twitchLiveStreams.length === 0){
+        console.log("LENGTH IS 000000");
+        g_twitchLiveStreams = await getLiveGameStreams();
+      } 
+      src = g_twitchLiveStreams.shift();
+      console.log("########################### " + src);
     }
     
     const srcChanged = oldData.src !== src;
