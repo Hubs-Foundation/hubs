@@ -45,7 +45,7 @@ const ANIM_CONFIG = {
   round: false
 };
 
-async function animComp(el, component, props, { onComplete, showOnStart, hideOnEnd } = {}) {
+function animComp(el, component, props, { onComplete, showOnStart, hideOnEnd } = {}) {
   const cmp = el.components[component];
   if (!el || !cmp) return;
   const config = Object.assign({}, ANIM_CONFIG, props, {
@@ -195,12 +195,12 @@ AFRAME.registerComponent("player-info", {
       this.isNametagVisible = true;
     }
 
-    const nametagEl = this.el.querySelector(".nametag");
-    if (this.displayName && nametagEl) {
+    this.nametagEl = this.el.querySelector(".nametag");
+    if (this.displayName && this.nametagEl) {
       const text = this.el.querySelector("[text]");
       text.addEventListener("text-updated", () => this.onNameTagUpdated(true), { once: true });
       text.setAttribute("text", { value: this.displayName + (this.identityName ? ` (${this.identityName})` : "") });
-      nametagEl.object3D.visible = this.isNametagVisible;
+      this.nametagEl.object3D.visible = this.isNametagVisible;
     }
 
     this.onNameTagUpdated();
@@ -262,6 +262,7 @@ AFRAME.registerComponent("player-info", {
       isTalking = average > 0.01;
     }
     if (isTalking) {
+      this.lastVolumeUpdate = this.volumeUpdate;
       this.updateNameTagState({ isTalking });
     } else {
       if (this.volumeUpdate - this.lastVolumeUpdate > 2000) {
@@ -295,16 +296,19 @@ AFRAME.registerComponent("player-info", {
     return !!this.nametagState.isOwner || !!this.nametagState.isRecording;
   },
 
-  updateNametag(size, { onComplete, hideOnEnd } = {}) {
+  updateContainer(size, { onComplete, hideOnEnd } = {}) {
     let height = 0.2;
-    if (this.statusExpanded) height += 0.2;
-    if (this.badgeExpanded) height += 0.15;
+    let deltaY = 0;
+    if (this.statusExpanded) {
+      height += 0.2;
+      deltaY += 0.1;
+    }
     animComp(this.nametagBackgroundEl, "slice9", {
       width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
       height
     });
     animComp(
-      this.nametagStatusBorder,
+      this.nametagStatusBorderEl,
       "slice9",
       {
         width: size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
@@ -312,74 +316,49 @@ AFRAME.registerComponent("player-info", {
       },
       { showOnStart: this.statusExpanded, hideOnEnd, onComplete }
     );
-  },
-
-  updateName() {
-    let height = 0;
-    if (this.statusExpanded && !this.badgeExpanded) height = 0.1;
-    if (!this.statusExpanded && this.badgeExpanded) height = -0.065;
-    if (this.statusExpanded && this.badgeExpanded) height = 0.035;
-    animComp(this.nametagTextEl, "position", { y: height });
+    animComp(this.nametagPivotEl, "position", {
+      y: -deltaY
+    });
   },
 
   updateStatusIcons({ hideOnEnd } = {}) {
-    let height = -0.075;
-    if (this.badgeExpanded) height = -0.15;
-    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0, y: height });
+    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0 });
     animComp(this.nametagVolumeEl, "scale", { y: 0.15 }, { showOnStart: this.nametagState.isTalking, hideOnEnd });
-    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0, y: height });
+    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0 });
     animComp(this.typingEl, "scale", { y: 0.3 }, { showOnStart: this.nametagState.isTyping, hideOnEnd });
-  },
-
-  updateBadgeIcons() {
-    let height = 0.075;
-    if (this.statusExpanded) height += 0.1;
-    animComp(this.recordingBadgeEl, "position", { y: height });
-    animComp(this.recordingBadgeEl, "scale", { y: 0.1 }, { showOnStart: this.nametagState.isRecording });
-    animComp(this.modBadgeEl, "position", { y: height });
-    animComp(
-      this.modBadgeEl,
-      "scale",
-      { y: 0.1 },
-      { showOnStart: this.nametagState.isOwner && !this.nametagState.isRecording }
-    );
   },
 
   onNameTagUpdated(force = false) {
     if (!this.isNametagVisible) return;
-    this.nametagBackgroundEl = this.el.querySelector(".nametag-background-id");
     this.statusExpanded = this.isStatusExpanded();
-    if (this.nametagBackgroundEl) {
+    if (this.nametagEl) {
+      this.nametagPivotEl = this.el.querySelector(".nametag-pivot");
+      this.nametagBackgroundEl = this.el.querySelector(".nametag-background-id");
       this.nametagTextEl = this.el.querySelector(".nametag-text-id");
-      const size = this.nametagTextEl.components["text"]?.getSize();
+      if (!this.nametagTextEl) return;
+      const size = this.nametagTextEl.components["text"].getSize();
       if (!size) return;
       size.x = Math.max(size.x, NAMETAG_MIN_WIDTH);
-      this.nametagStatusBorder = this.el.querySelector(".nametag-status-border-id");
+      this.nametagStatusBorderEl = this.el.querySelector(".nametag-status-border-id");
       this.nametagVolumeEl = this.el.querySelector(".nametag-volume-id");
       this.typingEl = this.el.querySelector(".typing-id");
-      this.recordingBadgeEl = this.el.querySelector(".recordingBadge");
-      this.modBadgeEl = this.el.querySelector(".modBadge");
 
-      this.badgeExpanded = this.isBadgeExpanded();
-      const badgeUpdated = this.hasStatusChanged(["isOwner", "isRecording"]);
-      const refreshBadge = this.badgeExpanded && badgeUpdated;
-      if (this.statusExpanded || refreshBadge || this.isFirstNametagPass || force) {
+      if (this.statusExpanded || this.isFirstNametagPass || force) {
         clearTimeout(this.expandHandle);
         this.expandHandle = null;
-        this.isNametagExpanded = true;
-        this.updateNametag(size);
-        this.updateName();
         this.updateStatusIcons();
-        this.updateBadgeIcons();
+        this.updateContainer(size, {
+          onComplete: () => {
+            this.isContainerExpanded = true;
+          }
+        });
       } else {
         this.expandHandle = setTimeout(() => {
-          if (this.isNametagExpanded) {
-            this.updateName();
+          if (this.isContainerExpanded) {
             this.updateStatusIcons({ hideOnEnd: true });
-            this.updateBadgeIcons();
-            this.updateNametag(size, {
+            this.updateContainer(size, {
               onComplete: () => {
-                this.isNametagExpanded = false;
+                this.isContainerExpanded = false;
               },
               hideOnEnd: !this.nametagState.isHandRaised
             });
@@ -388,23 +367,35 @@ AFRAME.registerComponent("player-info", {
       }
       this.isFirstNametagPass = false;
     }
+    const recordingBadgeEl = this.el.querySelector(".recordingBadge");
+    const modBadgeEl = this.el.querySelector(".modBadge");
+    if (recordingBadgeEl && modBadgeEl) {
+      animComp(recordingBadgeEl, "scale", { y: 0.1 }, { showOnStart: this.nametagState.isRecording });
+      animComp(
+        modBadgeEl,
+        "scale",
+        { y: 0.1 },
+        { showOnStart: this.nametagState.isOwner && !this.nametagState.isRecording }
+      );
+    }
     const handRaisedId = this.el.querySelector(".hand-raised-id");
     if (handRaisedId) {
       if (this.nametagState.isHandRaised) {
-        this.nametagStatusBorder.setAttribute("visible", true);
-        this.nametagStatusBorder.setAttribute(
+        this.nametagStatusBorderEl.setAttribute("visible", true);
+        this.nametagStatusBorderEl.setAttribute(
           "text-button",
           `backgroundColor: ${getThemeColor("nametag-border-color-raised-hand")}`
         );
         animComp(handRaisedId, "scale", { x: 0.2, y: 0.2, z: 0.2 }, { showOnStart: true });
       } else {
-        this.nametagStatusBorder.setAttribute("visible", this.isNametagExpanded === true);
-        this.nametagStatusBorder.setAttribute(
+        this.nametagStatusBorderEl.setAttribute("visible", this.isContainerExpanded === true);
+        this.nametagStatusBorderEl.setAttribute(
           "text-button",
           `backgroundColor: ${getThemeColor("nametag-border-color")}`
         );
         animComp(handRaisedId, "scale", { x: 0, y: 0, z: 0 }, { hideOnEnd: true });
       }
     }
+    this.nametagEl && animComp(this.nametagEl, "position", { y: this.nametagState.isHandRaised ? 1 : 0.75 });
   }
 });

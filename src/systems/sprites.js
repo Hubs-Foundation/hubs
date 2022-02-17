@@ -3,18 +3,16 @@
 // See doc/spritesheet-generation.md for information about this spritesheet
 import spritesheetAction from "../assets/images/spritesheets/sprite-system-action-spritesheet.json";
 import spritesheetNotice from "../assets/images/spritesheets/sprite-system-notice-spritesheet.json";
-import spritesheetNoFilter from "../assets/images/spritesheets/sprite-system-nofilter-spritesheet.json";
 import { createImageTexture } from "../utils/media-utils";
 import spritesheetActionPng from "../assets/images/spritesheets/sprite-system-action-spritesheet.png";
 import spritesheetNoticePng from "../assets/images/spritesheets/sprite-system-notice-spritesheet.png";
-import spritesheetNoFilterPng from "../assets/images/spritesheets/sprite-system-nofilter-spritesheet.png";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
 import frag from "./sprites/sprite.frag";
 import { getThemeColorShifter } from "../utils/theme-sprites";
 import { disposeTexture } from "../utils/material-utils";
 
-const pngs = [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"], [spritesheetNoFilterPng, "nofilter"]];
+const pngs = [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]];
 
 const multiviewVertPrefix = [
   // GLSL 3.0 conversion
@@ -52,7 +50,7 @@ function isVisible(o) {
 }
 
 AFRAME.registerComponent("sprite", {
-  schema: { name: { type: "string" } },
+  schema: { name: { type: "string" }, filter: { default: true } },
   tick() {
     // TODO when we run out of sprites we currently just stop rendering them. We need to do something better.
     if (!(this.didRegisterWithSystem || this.didFailToRegister) && this.el.sceneEl.systems["hubs-systems"]) {
@@ -104,16 +102,8 @@ const normalizedFrame = (function() {
   };
 })();
 
-const getSheetType = sprite => {
-  if (spritesheetAction.frames[sprite.data.name]) {
-    return "action";
-  } else if (spritesheetNotice.frames[sprite.data.name]) {
-    return "notice";
-  } else {
-    return "nofilter";
-  }
-};
-const SHEET_TYPES = ["action", "notice", "nofilter"];
+const getSheetType = sprite => (spritesheetAction.frames[sprite.data.name] ? "action" : "notice");
+const SHEET_TYPES = ["action", "notice"];
 
 const raycastOnSprite = (function() {
   const vA = new THREE.Vector3();
@@ -224,18 +214,10 @@ export class SpriteSystem {
   constructor(scene) {
     this.missingSprites = [];
     this.maxSprites = 1024;
-    this.slots = {
-      action: new Array(this.maxSprites),
-      notice: new Array(this.maxSprites),
-      nofilter: new Array(this.maxSprites)
-    };
-    this.spriteWithIndex = { action: new Map(), notice: new Map(), nofilter: new Map() };
-    this.indexWithSprite = { action: new Map(), notice: new Map(), nofilter: new Map() };
-    this.stack = {
-      action: new Array(this.maxSprites),
-      notice: new Array(this.maxSprites),
-      nofilter: new Array(this.maxSprites)
-    };
+    this.slots = { action: new Array(this.maxSprites), notice: new Array(this.maxSprites) };
+    this.spriteWithIndex = { action: new Map(), notice: new Map() };
+    this.indexWithSprite = { action: new Map(), notice: new Map() };
+    this.stack = { action: new Array(this.maxSprites), notice: new Array(this.maxSprites) };
     this.meshes = {};
 
     for (const stack of Object.values(this.stack)) {
@@ -257,7 +239,7 @@ export class SpriteSystem {
 
     Promise.all([domReady]).then(() => {
       for (const [spritesheetPng, type] of pngs) {
-        Promise.all([createImageTexture(spritesheetPng, getThemeColorShifter(type)), waitForDOMContentLoaded()]).then(
+        Promise.all([createImageTexture(spritesheetPng, null), waitForDOMContentLoaded()]).then(
           ([spritesheetTexture]) => {
             const material = new THREE.RawShaderMaterial({
               uniforms: {
@@ -285,7 +267,7 @@ export class SpriteSystem {
     APP.store.addEventListener("themechanged", async () => {
       for (const [spritesheetPng, type] of pngs) {
         if (this.meshes[type]) {
-          const newTexture = await createImageTexture(spritesheetPng, getThemeColorShifter(type));
+          const newTexture = await createImageTexture(spritesheetPng, null);
           const oldTexture = this.meshes[type].material.uniforms.u_spritesheet.value;
           if (oldTexture) {
             disposeTexture(oldTexture);
@@ -298,7 +280,7 @@ export class SpriteSystem {
   }
 
   tick(t) {
-    if (!this.meshes.action || !this.meshes.notice || !this.meshes.nofilter) return;
+    if (!this.meshes.action || !this.meshes.notice) return;
 
     for (let i = 0; i < SHEET_TYPES.length; i++) {
       const sheetType = SHEET_TYPES[i];
@@ -362,7 +344,7 @@ export class SpriteSystem {
     const i = spriteWithIndex.get(sprite);
     const frame = normalizedFrame(
       sprite.data.name,
-      sheetType === "action" ? spritesheetAction : sheetType === "notice" ? spritesheetNotice : spritesheetNoFilter,
+      sheetType === "action" ? spritesheetAction : spritesheetNotice,
       this.missingSprites
     );
     const aUvs = mesh.geometry.attributes["a_uvs"];
@@ -375,7 +357,7 @@ export class SpriteSystem {
   }
 
   add(sprite) {
-    if (!this.meshes.action || !this.meshes.notice || !this.meshes.nofilter) {
+    if (!this.meshes.action || !this.meshes.notice) {
       return 0;
     }
     const sheetType = getSheetType(sprite);

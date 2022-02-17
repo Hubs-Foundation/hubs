@@ -5,9 +5,6 @@ import { promisifyWorker } from "./promisify-worker.js";
 const colorShift = promisifyWorker(new ColorShiftWorker());
 
 function getThemeColorShifter(type) {
-  if (type === "nofilter") {
-    return;
-  }
   // Goal of this algorithm is to take a ctx pointing to a spritesheet
   // that has a single saturated color, and convert it to another.
   return async (ctx, w, h) => {

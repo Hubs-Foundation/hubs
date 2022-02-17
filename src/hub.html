@@ -88,6 +88,9 @@
             <img id="cursor-image" crossorigin="anonymous" src="./assets/images/cursor.svg">
             <img id="nametag" crossorigin="anonymous" src="./assets/hud/nametag.9.png">
             <img id="nametag-border" crossorigin="anonymous" src="./assets/hud/nametag-border.9.png">
+            <img id="nametag-volume" crossorigin="anonymous" src="./assets/hud/nametag-volume.png">
+            <img id="nametag-typing" crossorigin="anonymous" src="./assets/hud/nametag-typing.png">
+            <img id="hand-raised" crossorigin="anonymous" src="./assets/hud/hand-raised.png">
 
             <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
             <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
@@ -146,31 +149,20 @@
                                     billboard
                                     position="0 1 0"
                                 >
-                                    <a-entity class="nametag-background-id" mixin="nametag-background" slice9="width: 1"></a-entity>
+                                    <a-entity class="nametag-pivot" position="0 0 0">
+                                        <a-entity class="nametag-background-id" mixin="nametag-background" slice9="width: 1">
+                                            <a-entity class="nametag-status-border-id" mixin="nametag-status-border" visible="false" slice9="width: 1"></a-entity>
+                                        </a-entity>
+                                    </a-entity>
                                     <a-entity class="nametag-text-id" text="side: double; align: center; width: 2.5; color: #ddd" text-raycast-hack position="0 0 0.001"></a-entity>
-                                    <a-entity class="nametag-status-border-id" mixin="nametag-status-border" visible="false" slice9="width: 1"></a-entity>
-                                    <a-entity
-                                        is-not-remote-hover-target
-                                        class="nametag-volume-id"
-                                        sprite="name: nametag-volume.png;"
-                                        scale="0.15 0.15 0.15"
-                                        position="0 -0.1 0.001"
-                                        visible="false"
-                                    ></a-entity>
-                                    <a-entity
-                                        is-not-remote-hover-target
-                                        class="typing-id"
-                                        sprite="name: typing.png;"
-                                        scale="0.3 0.3 0.3"
-                                        position="0 -0.1 0.001"
-                                        visible="false"
-                                    ></a-entity>
+                                    <a-image class="nametag-volume-id" scale="0.15 0.15 0.15" position="0 -0.18 0.001" src="#nametag-volume" visible="false" material="alphaTest:0.1;"></a-image>
+                                    <a-image class="typing-id" scale="0.3 0.3 0.3" position="0 -0.18 0.001" src="#nametag-typing" visible="false" material="alphaTest:0.1;"></a-image>
                                     <a-entity
                                         is-not-remote-hover-target
                                         class="recordingBadge"
                                         sprite="name: recording-badge.png"
                                         scale="0.10 0.10 0.10"
-                                        position="0 0.1 0.001"
+                                        position="0 0.2 0.001"
                                         visible="false"
                                     ></a-entity>
                                     <a-entity
@@ -178,7 +170,7 @@
                                         class="modBadge"
                                         sprite="name: mod-badge.png"
                                         scale="0.10 0.10 0.10"
-                                        position="0 0.1 0.001"
+                                        position="0 0.2 0.001"
                                         visible="false"
                                     ></a-entity>
                                 </a-entity>
@@ -989,7 +981,8 @@
                     top: 64;
                     right: 66;
                     bottom: 66;
-                    transparent: false;
+                    transparent: true;
+                    opacity: 0.5;
                     alphaTest: 0.1;
                     src: #nametag"
             ></a-mixin>
