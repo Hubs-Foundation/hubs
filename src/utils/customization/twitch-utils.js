@@ -1,5 +1,5 @@
-let clientId = "ymk1qvzdx1m0rejhp5jsmn68eku69c";
-let clientSecret = "llfu5f1iak2sut2tr8v3bd7on16g4d";
+let clientId = "uyelnjz5y4nqd9rgvq8tqucqy1kwa0";
+let clientSecret = "sud4l33iyaw3xoy6sdo6otlynsnndj";
 
 function getTwitchAuthorization() {
     let url = `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=client_credentials`;
