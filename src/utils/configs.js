@@ -22,9 +22,17 @@ let isAdmin = false;
   const el = document.querySelector(`meta[name='env:${x.toLowerCase()}']`);
   configs[x] = el ? el.getAttribute("content") : process.env[x];
 
-  if (x === "BASE_ASSETS_PATH" && configs[x]) {
+  const BASE_ASSETS_PATH_KEY = "BASE_ASSETS_PATH";
+  if (x === BASE_ASSETS_PATH_KEY && configs[BASE_ASSETS_PATH_KEY]) {
+    // BASE_ASSETS_PATH might be a relative URL like "/" when it is set in
+    // .env or .defaults.env when running locally. We need to convert that
+    // to an absolute URL.
+    if (!configs[BASE_ASSETS_PATH_KEY].startsWith("http")) {
+      configs[BASE_ASSETS_PATH_KEY] = new URL(configs[BASE_ASSETS_PATH_KEY], window.location).toString();
+    }
+
     // eslint-disable-next-line no-undef
-    __webpack_public_path__ = configs[x];
+    __webpack_public_path__ = configs[BASE_ASSETS_PATH_KEY];
   }
 });
 
