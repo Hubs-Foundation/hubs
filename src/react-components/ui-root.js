@@ -1115,11 +1115,11 @@ class UIRoot extends Component {
       {
         id: "user",
         label: !this.state.signedIn ? (
-          <FormattedMessage id="more-menu.you" defaultMessage="You" />
+          <FormattedMessage id="more-menu.not-signed-in" defaultMessage="You are not signed in" />
         ) : (
           <FormattedMessage
             id="more-menu.you-signed-in-as"
-            defaultMessage="You (Signed in as: {email})"
+            defaultMessage="Signed in as: {email}"
             values={{ email: maskEmail(this.props.store.state.credentials.email) }}
           />
         ),
