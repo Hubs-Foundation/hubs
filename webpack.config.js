@@ -322,7 +322,7 @@ module.exports = async (env, argv) => {
           if (req.method === "OPTIONS") {
             res.send();
           } else {
-            const url = req.path.replace("/cors-proxy/", "");
+            const url = req.originalUrl.replace("/cors-proxy/", "");
             request({ url, method: req.method }, error => {
               if (error) {
                 console.error(`cors-proxy: error fetching "${url}"\n`, error);
