@@ -334,9 +334,7 @@ AFRAME.registerComponent("camera-tool", {
     this.label.object3D.visible = !!label && !isRecordingUnbound;
     const showActionLabelBackground = this.label.object3D.visible && this.data.isRecording && !isRecordingUnbound;
 
-    if (label) {
-      this.label.setAttribute("text", { value: label, color: showActionLabelBackground ? "#fafafa" : "#ff3464" });
-    }
+    this.label.setAttribute("text", { value: label, color: showActionLabelBackground ? "#fafafa" : "#ff3464" });
 
     this.labelActionBackground.object3D.visible = showActionLabelBackground;
     this.labelBackground.object3D.visible = this.label.object3D.visible && !showActionLabelBackground;
