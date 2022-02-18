@@ -1147,6 +1147,13 @@ class PreferencesScreen extends Component {
                   id: "preferences-screen.nametag-visibility.show-frozen",
                   defaultMessage: "Only in Frozen state"
                 })
+              },
+              {
+                value: "showSpeaking",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-speaking",
+                  defaultMessage: "Only speaking"
+                })
               }
             ],
             defaultString: "showAll",

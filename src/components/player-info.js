@@ -204,6 +204,8 @@ AFRAME.registerComponent("player-info", {
       this.isNametagVisible = true;
     } else if (nametagVisibility === "showFrozen") {
       this.isNametagVisible = this.el.sceneEl.is("frozen");
+    } else if (nametagVisibility === "showSpeaking") {
+      this.isNametagVisible = this.isTalking;
     }
 
     this.nametagEl = this.el.querySelector(".nametag");
@@ -215,7 +217,7 @@ AFRAME.registerComponent("player-info", {
           this.size = this.nametagTextEl.components["text"].getSize();
           if (this.size) {
             this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
-            this.updateNameTag();
+            this.updateContainer();
           }
         },
         { once: true }
@@ -276,7 +278,7 @@ AFRAME.registerComponent("player-info", {
       APP.isAudioPaused.delete(avatarEl);
     }
 
-    this.updateNameTag();
+    this.updateContainer();
     this.updateState();
   },
   handleModelError() {
@@ -293,17 +295,37 @@ AFRAME.registerComponent("player-info", {
   onAnalyserVolumeUpdated({ detail: { volume } }) {
     let isTalking = false;
     this.volume = volume;
-    this.volumeUpdate = Date.now();
-    this.volumeAvg.push(this.volumeUpdate, volume);
+    this.volumeAvg.push(Date.now(), volume);
     if (!this.data.muted) {
       const average = this.volumeAvg.movingAverage();
       isTalking = average > 0.01;
     }
+    this.wasTalking = this.isTalking;
     this.isTalking = isTalking;
-    this.updateVolume();
+    if (window.APP.store.state.preferences.nametagVisibility === "showSpeaking") {
+      if (!this.isTalking && this.wasTalking) {
+        this.frozenTimer = setTimeout(() => {
+          this.isNametagVisible = false;
+          this.updateContainer();
+          this.updateBorder();
+          this.updateState();
+          this.updateTyping();
+        }, 1000);
+      } else if (this.isTalking && !this.wasTalking) {
+        clearTimeout(this.frozenTimer);
+        this.isNametagVisible = true;
+        this.updateContainer();
+        this.updateBorder();
+        this.updateState();
+        this.updateTyping();
+      }
+    }
+    if (this.isNametagVisible) {
+      this.updateVolume();
+    }
   },
 
-  updateNameTag() {
+  updateContainer() {
     if (!this.size) return;
     this.nametagBackgroundEl = this.nametagBackgroundEl || this.el.querySelector(".nametag-background-id");
     if (!this.nametagBackgroundEl) return;
