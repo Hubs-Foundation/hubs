@@ -436,10 +436,6 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.locale",
     defaultMessage: "Language"
   },
-  onlyShowNametagsInFreeze: {
-    id: "preferences-screen.preference.only-show-nametags-in-freeze",
-    defaultMessage: "Only show nametags while frozen"
-  },
   animateWaypointTransitions: {
     id: "preferences-screen.preference.animate-waypoint-transitions",
     defaultMessage: "Animate waypoint transitions"
@@ -514,7 +510,7 @@ const preferenceLabels = defineMessages({
   },
   nametagVisibility: {
     id: "preferences-screen.preference.nametag-visibility",
-    defaultMessage: "Nametag visibility"
+    defaultMessage: "Show Nametag"
   }
 });
 
@@ -1072,7 +1068,6 @@ class PreferencesScreen extends Component {
             options: availableThemes,
             defaultString: "Browser Default"
           },
-          { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
           this.state.preferredCamera,
           {
@@ -1136,14 +1131,21 @@ class PreferencesScreen extends Component {
                 value: "showAll",
                 text: intl.formatMessage({
                   id: "preferences-screen.nametag-visibility.show-all",
-                  defaultMessage: "Show All"
+                  defaultMessage: "Always"
                 })
               },
               {
                 value: "showNone",
                 text: intl.formatMessage({
                   id: "preferences-screen.nametag-visibility.show-none",
-                  defaultMessage: "Show None"
+                  defaultMessage: "Never"
+                })
+              },
+              {
+                value: "showFrozen",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-frozen",
+                  defaultMessage: "Only in Frozen state"
                 })
               }
             ],

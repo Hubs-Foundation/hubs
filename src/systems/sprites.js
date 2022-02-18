@@ -9,7 +9,6 @@ import spritesheetNoticePng from "../assets/images/spritesheets/sprite-system-no
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
 import frag from "./sprites/sprite.frag";
-import { getThemeColorShifter } from "../utils/theme-sprites";
 import { disposeTexture } from "../utils/material-utils";
 
 const pngs = [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]];
