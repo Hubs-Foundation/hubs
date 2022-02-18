@@ -400,7 +400,7 @@ AFRAME.registerComponent("player-info", {
     this.modBadgeEl = this.modBadgeEl || this.el.querySelector(".modBadge");
     this.modBadgeEl?.setAttribute("visible", this.isOwner && !this.isRecording && this.isNametagVisible);
     this.handRaisedEl = this.handRaisedEl || this.el.querySelector(".hand-raised-id");
-    this.handRaisedEl?.setAttribute("visible", this.isNametagVisible);
+    this.handRaisedEl?.setAttribute("visible", this.isHandRaised && this.isNametagVisible);
     animComp(this.handRaisedEl, "scale", this.isHandRaised ? { x: 0.2, y: 0.2, z: 0.2 } : { x: 0, y: 0, z: 0 }, {
       showOnStart: this.isHandRaised,
       hideOnEnd: !this.isHandRaised
