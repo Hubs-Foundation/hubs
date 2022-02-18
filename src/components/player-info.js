@@ -87,6 +87,7 @@ AFRAME.registerComponent("player-info", {
     this.isRecording = false;
     this.isHandRaised = false;
     this.volumeAvg = new MovingAverage(128);
+    this.wsNametagVisible = false;
     this.isNametagVisible = false;
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
@@ -98,6 +99,7 @@ AFRAME.registerComponent("player-info", {
     this.onAnalyserVolumeUpdated = this.onAnalyserVolumeUpdated.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
+    this.avatarRig = document.getElementById("avatar-rig");
     this.playerSessionId = null;
 
     if (!this.isLocalPlayerInfo) {
@@ -110,22 +112,40 @@ AFRAME.registerComponent("player-info", {
       });
     }
     registerComponentInstance(this, "player-info");
+    this.nametagVisibility = window.APP.store.state.preferences.nametagVisibility;
+    this.nametagVisibilityDistance = window.APP.store.state.preferences.nametagVisibilityDistance;
   },
   remove() {
+    clearTimeout(this.frozenTimer);
     const avatarEl = this.el.querySelector("[avatar-audio-source]");
     APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
   },
-  tick(t) {
-    if (!this.nametagTypingEl || this.isTalking || !this.isTyping) return;
-    let time = t;
-    this.nametagTypingEl.object3D.traverse(o => {
-      if (o.material) {
-        o.material.opacity = (Math.sin(time / TYPING_ANIM_SPEED) + 1) / 2;
-        time -= TYPING_ANIM_SPEED;
+  tick: (() => {
+    let typingAnimTime = 0;
+    const worldPos = new THREE.Vector3();
+    const avatarRigWorldPos = new THREE.Vector3();
+    return function(t) {
+      if (!this.isLocalPlayerInfo) {
+        if (this.nametagVisibility === "showClose") {
+          this.avatarRig.object3D.getWorldPosition(avatarRigWorldPos);
+          this.el.object3D.getWorldPosition(worldPos);
+          this.wasNametagVisible = this.isNametagVisible;
+          this.isNametagVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
+          this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
+        }
       }
-    });
-  },
+      if (this.nametagTypingEl && !this.isTalking && this.isTyping) {
+        typingAnimTime = t;
+        this.nametagTypingEl.object3D.traverse(o => {
+          if (o.material) {
+            o.material.opacity = (Math.sin(typingAnimTime / TYPING_ANIM_SPEED) + 1) / 2;
+            typingAnimTime -= TYPING_ANIM_SPEED;
+          }
+        });
+      }
+    };
+  })(),
   play() {
     this.el.addEventListener("model-loaded", this.applyProperties);
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
@@ -197,14 +217,16 @@ AFRAME.registerComponent("player-info", {
   },
   applyDisplayName() {
     this.isNametagVisible = !this.isLocalPlayerInfo;
-    const nametagVisibility = window.APP.store.state.preferences.nametagVisibility;
-    if (nametagVisibility === "showNone") {
+    this.nametagVisibilityDistance = window.APP.store.state.preferences.nametagVisibilityDistance;
+    this.nametagVisibility = window.APP.store.state.preferences.nametagVisibility;
+    this.wasNametagVisible = this.isNametagVisible;
+    if (this.nametagVisibility === "showNone") {
       this.isNametagVisible = false;
-    } else if (nametagVisibility === "showAll") {
+    } else if (this.nametagVisibility === "showAll") {
       this.isNametagVisible = true;
-    } else if (nametagVisibility === "showFrozen") {
+    } else if (this.nametagVisibility === "showFrozen") {
       this.isNametagVisible = this.el.sceneEl.is("frozen");
-    } else if (nametagVisibility === "showSpeaking") {
+    } else if (this.nametagVisibility === "showSpeaking") {
       this.isNametagVisible = this.isTalking;
     }
 
@@ -302,27 +324,25 @@ AFRAME.registerComponent("player-info", {
     }
     this.wasTalking = this.isTalking;
     this.isTalking = isTalking;
-    if (window.APP.store.state.preferences.nametagVisibility === "showSpeaking") {
+    if (this.nametagVisibility === "showSpeaking") {
       if (!this.isTalking && this.wasTalking) {
         this.frozenTimer = setTimeout(() => {
+          this.wasNametagVisible = this.isNametagVisible;
           this.isNametagVisible = false;
-          this.updateContainer();
-          this.updateBorder();
-          this.updateState();
-          this.updateTyping();
+          this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
         }, 1000);
       } else if (this.isTalking && !this.wasTalking) {
         clearTimeout(this.frozenTimer);
+        this.wasNametagVisible = this.isNametagVisible;
         this.isNametagVisible = true;
-        this.updateContainer();
-        this.updateBorder();
-        this.updateState();
-        this.updateTyping();
+        this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
       }
     }
-    if (this.isNametagVisible) {
-      this.updateVolume();
-    }
+    this.isNametagVisible && this.updateVolume();
+  },
+
+  updateNameTag() {
+    this.updateContainer() && this.updateBorder() && this.updateState() && this.updateTyping() && this.updateVolume();
   },
 
   updateContainer() {

@@ -135,7 +135,8 @@ export const SCHEMA = {
         theme: { type: "string" },
         avatarVoiceLevels: { type: "object" },
         cursorSize: { type: "number" },
-        nametagVisibility: { type: "string" }
+        nametagVisibility: { type: "string" },
+        nametagVisibilityDistance: { type: "number" }
       }
     },
 

@@ -511,6 +511,10 @@ const preferenceLabels = defineMessages({
   nametagVisibility: {
     id: "preferences-screen.preference.nametag-visibility",
     defaultMessage: "Show Nametag"
+  },
+  nametagVisibilityDistance: {
+    id: "preferences-screen.preference.nametag-visibility-distance",
+    defaultMessage: "Nametag visibility distance"
   }
 });
 
@@ -1154,10 +1158,26 @@ class PreferencesScreen extends Component {
                   id: "preferences-screen.nametag-visibility.show-speaking",
                   defaultMessage: "Only speaking"
                 })
+              },
+              {
+                value: "showClose",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-close",
+                  defaultMessage: "Close to me"
+                })
               }
             ],
             defaultString: "showAll",
             promptForRefresh: false
+          },
+          {
+            key: "nametagVisibilityDistance",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 1,
+            max: 20,
+            step: 1,
+            digits: 2,
+            defaultNumber: 5
           }
         ]
       ],
