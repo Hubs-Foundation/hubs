@@ -9,8 +9,9 @@ import { getThemeColor } from "../utils/theme";
 
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
-const NAMETAG_FADE_OUT_DELAY = 1000;
 const NAMETAG_MIN_WIDTH = 0.6;
+const NAMETAG_HEIGHT = 0.25;
+const TYPING_ANIM_SPEED = 150;
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -80,10 +81,12 @@ AFRAME.registerComponent("player-info", {
     this.displayName = null;
     this.identityName = null;
     this.isFirstNametagPass = true;
-    this.lastNametagState = {};
-    this.nametagState = {};
+    this.isTalking = false;
+    this.isTyping = false;
+    this.isOwner = false;
+    this.isRecording = false;
+    this.isHandRaised = false;
     this.volumeAvg = new MovingAverage(128);
-    this.lastVolumeUpdate = Date.now();
     this.isNametagVisible = false;
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
@@ -112,6 +115,16 @@ AFRAME.registerComponent("player-info", {
     const avatarEl = this.el.querySelector("[avatar-audio-source]");
     APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
+  },
+  tick(t) {
+    if (!this.nametagTypingEl || this.isTalking || !this.isTyping) return;
+    let time = t;
+    this.nametagTypingEl.object3D.traverse(o => {
+      if (o.material) {
+        o.material.opacity = (Math.sin(time / TYPING_ANIM_SPEED) + 1) / 2;
+        time -= TYPING_ANIM_SPEED;
+      }
+    });
   },
   play() {
     this.el.addEventListener("model-loaded", this.applyProperties);
@@ -172,12 +185,12 @@ AFRAME.registerComponent("player-info", {
     this.permissions = presenceMeta.permissions;
     this.displayName = presenceMeta.profile.displayName;
     this.identityName = presenceMeta.profile.identityName;
-    const isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
-    const isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
-    const isHandRaised = presenceMeta.handRaised;
-    const isTyping = presenceMeta.typing;
-    this.updateNameTagState({ isOwner, isRecording, isHandRaised, isTyping });
     this.applyDisplayName();
+    this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
+    this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
+    this.isTyping = !!presenceMeta.typing;
+    this.isHandRaised = !!presenceMeta.handRaised;
+    this.updateState();
   },
   can(perm) {
     return !!this.permissions && this.permissions[perm];
@@ -197,13 +210,26 @@ AFRAME.registerComponent("player-info", {
 
     this.nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && this.nametagEl) {
-      const text = this.el.querySelector("[text]");
-      text.addEventListener("text-updated", () => this.onNameTagUpdated(true), { once: true });
-      text.setAttribute("text", { value: this.displayName + (this.identityName ? ` (${this.identityName})` : "") });
+      this.nametagTextEl = this.el.querySelector(".nametag-text-id");
+      this.nametagTextEl.addEventListener("text-updated", () => this.updateNameTag(true), { once: true });
+      this.nametagTextEl.setAttribute("text", {
+        value: this.displayName
+      });
       this.nametagEl.object3D.visible = this.isNametagVisible;
+      this.size = this.nametagTextEl.components["text"].getSize();
+      if (this.size) {
+        this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
+        this.updateNameTag();
+      }
     }
 
-    this.onNameTagUpdated();
+    const identityNameEl = this.el.querySelector(".identityName");
+    if (identityNameEl) {
+      if (this.identityName) {
+        identityNameEl.setAttribute("text", { value: this.identityName });
+        identityNameEl.object3D.visible = this.el.sceneEl.is("frozen");
+      }
+    }
   },
   applyProperties(e) {
     this.applyDisplayName();
@@ -241,6 +267,9 @@ AFRAME.registerComponent("player-info", {
     } else {
       APP.isAudioPaused.delete(avatarEl);
     }
+
+    this.updateNameTag();
+    this.updateState();
   },
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();
@@ -255,147 +284,81 @@ AFRAME.registerComponent("player-info", {
 
   onAnalyserVolumeUpdated({ detail: { volume } }) {
     let isTalking = false;
+    this.volume = volume;
     this.volumeUpdate = Date.now();
     this.volumeAvg.push(this.volumeUpdate, volume);
     if (!this.data.muted) {
       const average = this.volumeAvg.movingAverage();
       isTalking = average > 0.01;
     }
-    if (isTalking) {
-      this.lastVolumeUpdate = this.volumeUpdate;
-      this.updateNameTagState({ isTalking });
-    } else {
-      if (this.volumeUpdate - this.lastVolumeUpdate > 2000) {
-        this.lastVolumeUpdate = this.volumeUpdate;
-        this.updateNameTagState({ isTalking });
-      }
-    }
+    this.isTalking = isTalking;
+    this.updateVolume();
   },
 
-  updateNameTagState(newState) {
-    Object.assign(this.lastNametagState, this.nametagState);
-    Object.assign(this.nametagState, newState);
-    if (this.hasStatusChanged()) {
-      this.onNameTagUpdated();
-    }
-  },
-
-  hasStatusChanged(props) {
-    if (props) {
-      return props.some(prop => this.nametagState[prop] !== this.lastNametagState[prop]);
-    } else {
-      return JSON.stringify(this.nametagState) !== JSON.stringify(this.lastNametagState);
-    }
-  },
-
-  isStatusExpanded() {
-    return !!this.nametagState.isTalking || !!this.nametagState.isTyping;
-  },
-
-  isBadgeExpanded() {
-    return !!this.nametagState.isOwner || !!this.nametagState.isRecording;
-  },
-
-  updateContainer(size, { onComplete, hideOnEnd } = {}) {
-    let height = 0.2;
-    let deltaY = 0;
-    if (this.statusExpanded) {
-      height += 0.2;
-      deltaY += 0.1;
-    }
-    animComp(this.nametagBackgroundEl, "slice9", {
-      width: size.x + NAMETAG_BACKGROUND_PADDING * 2,
-      height
+  updateNameTag() {
+    if (!this.isNametagVisible || !this.size) return;
+    this.nametagBackgroundEl = this.nametagBackgroundEl || this.el.querySelector(".nametag-background-id");
+    if (!this.nametagBackgroundEl) return;
+    this.nametagBackgroundEl.setAttribute("slice9", {
+      width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2,
+      height: NAMETAG_HEIGHT
     });
-    animComp(
-      this.nametagStatusBorderEl,
-      "slice9",
-      {
-        width: size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
-        height: height + NAMETAG_STATUS_BORDER_PADDING
-      },
-      { showOnStart: this.statusExpanded, hideOnEnd, onComplete }
+    this.updateBorder();
+  },
+
+  updateVolume() {
+    if (!this.isNametagVisible || !this.size) return;
+    this.nametagVolumeEl = this.nametagVolumeEl || this.el.querySelector(".nametag-volume-id");
+    if (!this.nametagVolumeEl) return;
+    this.nametagVolumeEl.setAttribute("visible", this.isTalking);
+    if (this.isTalking) {
+      this.nametagVolumeEl.setAttribute("geometry", { width: this.volume * this.size.x * 0.8 });
+    }
+    this.updateBorder();
+    this.updateTyping();
+  },
+
+  updateBorder() {
+    if (!this.isNametagVisible || !this.size) return;
+    this.nametagStatusBorderEl = this.nametagStatusBorderEl || this.el.querySelector(".nametag-status-border-id");
+    if (!this.nametagStatusBorderEl) return;
+    this.nametagStatusBorderEl.setAttribute("slice9", {
+      width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
+      height: NAMETAG_HEIGHT + NAMETAG_STATUS_BORDER_PADDING
+    });
+    this.nametagStatusBorderEl.setAttribute("visible", this.isTyping || this.isTalking || this.isHandRaised);
+    this.nametagStatusBorderEl?.setAttribute(
+      "text-button",
+      `backgroundColor: ${getThemeColor(
+        this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color"
+      )}`
     );
-    animComp(this.nametagPivotEl, "position", {
-      y: -deltaY
-    });
   },
 
-  updateStatusIcons({ hideOnEnd } = {}) {
-    animComp(this.nametagVolumeEl, "position", { x: this.nametagState.isTyping ? -0.15 : 0 });
-    animComp(this.nametagVolumeEl, "scale", { y: 0.15 }, { showOnStart: this.nametagState.isTalking, hideOnEnd });
-    animComp(this.typingEl, "position", { x: this.nametagState.isTalking ? 0.15 : 0 });
-    animComp(this.typingEl, "scale", { y: 0.3 }, { showOnStart: this.nametagState.isTyping, hideOnEnd });
-  },
-
-  onNameTagUpdated(force = false) {
+  updateState() {
     if (!this.isNametagVisible) return;
-    this.statusExpanded = this.isStatusExpanded();
-    if (this.nametagEl) {
-      this.nametagPivotEl = this.el.querySelector(".nametag-pivot");
-      this.nametagBackgroundEl = this.el.querySelector(".nametag-background-id");
-      this.nametagTextEl = this.el.querySelector(".nametag-text-id");
-      if (!this.nametagTextEl) return;
-      const size = this.nametagTextEl.components["text"].getSize();
-      if (!size) return;
-      size.x = Math.max(size.x, NAMETAG_MIN_WIDTH);
-      this.nametagStatusBorderEl = this.el.querySelector(".nametag-status-border-id");
-      this.nametagVolumeEl = this.el.querySelector(".nametag-volume-id");
-      this.typingEl = this.el.querySelector(".typing-id");
+    this.recordingBadgeEl = this.recordingBadgeEl || this.el.querySelector(".recordingBadge");
+    this.modBadgeEl = this.modBadgeEl || this.el.querySelector(".modBadge");
+    if (!this.recordingBadgeEl || !this.modBadgeEl) return;
+    if (this.recordingBadgeEl && this.modBadgeEl) {
+      this.recordingBadgeEl.setAttribute("visible", this.isRecording);
+      this.modBadgeEl.setAttribute("visible", this.isOwner && !this.isRecording);
+    }
+    this.handRaisedEl = this.handRaisedEl || this.el.querySelector(".hand-raised-id");
+    this.handRaisedEl &&
+      animComp(this.handRaisedEl, "scale", this.isHandRaised ? { x: 0.2, y: 0.2, z: 0.2 } : { x: 0, y: 0, z: 0 }, {
+        showOnStart: this.isHandRaised,
+        hideOnEnd: !this.isHandRaised
+      });
+    this.nametagEl && animComp(this.nametagEl, "position", { y: this.isHandRaised ? 1.3 : 1.1 });
+    this.updateTyping();
+  },
 
-      if (this.statusExpanded || this.isFirstNametagPass || force) {
-        clearTimeout(this.expandHandle);
-        this.expandHandle = null;
-        this.updateStatusIcons();
-        this.updateContainer(size, {
-          onComplete: () => {
-            this.isContainerExpanded = true;
-          }
-        });
-      } else {
-        this.expandHandle = setTimeout(() => {
-          if (this.isContainerExpanded) {
-            this.updateStatusIcons({ hideOnEnd: true });
-            this.updateContainer(size, {
-              onComplete: () => {
-                this.isContainerExpanded = false;
-              },
-              hideOnEnd: !this.nametagState.isHandRaised
-            });
-          }
-        }, NAMETAG_FADE_OUT_DELAY);
-      }
-      this.isFirstNametagPass = false;
+  updateTyping() {
+    this.nametagTypingEl = this.nametagTypingEl || this.el.querySelector(".nametag-typing-id");
+    if (!this.nametagTypingEl) return;
+    for (const dotEl of this.nametagTypingEl.children) {
+      dotEl.setAttribute("visible", this.isTyping && !this.isTalking);
     }
-    const recordingBadgeEl = this.el.querySelector(".recordingBadge");
-    const modBadgeEl = this.el.querySelector(".modBadge");
-    if (recordingBadgeEl && modBadgeEl) {
-      animComp(recordingBadgeEl, "scale", { y: 0.1 }, { showOnStart: this.nametagState.isRecording });
-      animComp(
-        modBadgeEl,
-        "scale",
-        { y: 0.1 },
-        { showOnStart: this.nametagState.isOwner && !this.nametagState.isRecording }
-      );
-    }
-    const handRaisedId = this.el.querySelector(".hand-raised-id");
-    if (handRaisedId) {
-      if (this.nametagState.isHandRaised) {
-        this.nametagStatusBorderEl.setAttribute("visible", true);
-        this.nametagStatusBorderEl.setAttribute(
-          "text-button",
-          `backgroundColor: ${getThemeColor("nametag-border-color-raised-hand")}`
-        );
-        animComp(handRaisedId, "scale", { x: 0.2, y: 0.2, z: 0.2 }, { showOnStart: true });
-      } else {
-        this.nametagStatusBorderEl.setAttribute("visible", this.isContainerExpanded === true);
-        this.nametagStatusBorderEl.setAttribute(
-          "text-button",
-          `backgroundColor: ${getThemeColor("nametag-border-color")}`
-        );
-        animComp(handRaisedId, "scale", { x: 0, y: 0, z: 0 }, { hideOnEnd: true });
-      }
-    }
-    this.nametagEl && animComp(this.nametagEl, "position", { y: this.nametagState.isHandRaised ? 1 : 0.75 });
   }
 });

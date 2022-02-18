@@ -88,8 +88,6 @@
             <img id="cursor-image" crossorigin="anonymous" src="./assets/images/cursor.svg">
             <img id="nametag" crossorigin="anonymous" src="./assets/hud/nametag.9.png">
             <img id="nametag-border" crossorigin="anonymous" src="./assets/hud/nametag-border.9.png">
-            <img id="nametag-volume" crossorigin="anonymous" src="./assets/hud/nametag-volume.png">
-            <img id="nametag-typing" crossorigin="anonymous" src="./assets/hud/nametag-typing.png">
             <img id="hand-raised" crossorigin="anonymous" src="./assets/hud/hand-raised.png">
 
             <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
@@ -139,51 +137,56 @@
                                 hand-pose__left
                                 hand-pose__right
                                 networked-audio-analyser
-                            ></a-entity>
+                            >
+                                <a-entity tags="ignoreSpaceBubble: true;">
+                                    <a-entity
+                                        class="nametag"
+                                        billboard
+                                        position="0 1.1 0"
+                                    >
+                                        <a-entity class="nametag-background-id" mixin="nametag-background" slice9="width: 1">
+                                            <a-entity class="nametag-status-border-id" mixin="nametag-status-border" visible="false" slice9="width: 1"></a-entity>
+                                            <a-entity class="nametag-text-id" text="side: double; align: center; width: 2.5; color: #ddd" text-raycast-hack position="0 0.025 0.001"></a-entity>
+                                            <a-plane class="nametag-volume-id" visible="false" position="0 -0.075 0.001" material="shader:flat;" color="#7ED320" height="0.025" width="0.1"></a-plane>
+                                            <a-entity class="nametag-typing-id" position="0 -0.075 0.001">
+                                                <a-circle position="-0.07 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                                <a-circle position="-0.035 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                                <a-circle position="0 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                                <a-circle position="0.035 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                                <a-circle position="0.07 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                            </a-entity>
+                                        </a-entity>
+                                        <a-entity
+                                            is-not-remote-hover-target
+                                            class="recordingBadge"
+                                            sprite="name: recording-badge.png"
+                                            scale="0.10 0.10 0.10"
+                                            position="0 0.25 0.001"
+                                            visible="false"
+                                        ></a-entity>
+                                        <a-entity
+                                            is-not-remote-hover-target
+                                            class="modBadge"
+                                            sprite="name: mod-badge.png"
+                                            scale="0.10 0.10 0.10"
+                                            position="0 0.25 0.001"
+                                            visible="false"
+                                        ></a-entity>
+                                        <a-entity
+                                            class="identityName"
+                                            text="side: double; align: center; color: #ddd"
+                                            visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
+                                            position="0 0.4 0"
+                                            scale="3 3 3"
+                                        ></a-entity>
+                                    </a-entity>
+                                    <a-image billboard class="hand-raised-id" scale="0.2 0.2 0.2" position="0 0.95 0.001" src="#hand-raised" visible="false" material="alphaTest:0.1;"></a-image>
+                                </a-entity>
+                            </a-entity>
                         </template>
 
                         <template data-name="Neck">
-                            <a-entity tags="ignoreSpaceBubble: true;">
-                                <a-entity
-                                    class="nametag"
-                                    billboard
-                                    position="0 1 0"
-                                >
-                                    <a-entity class="nametag-pivot" position="0 0 0">
-                                        <a-entity class="nametag-background-id" mixin="nametag-background" slice9="width: 1">
-                                            <a-entity class="nametag-status-border-id" mixin="nametag-status-border" visible="false" slice9="width: 1"></a-entity>
-                                        </a-entity>
-                                    </a-entity>
-                                    <a-entity class="nametag-text-id" text="side: double; align: center; width: 2.5; color: #ddd" text-raycast-hack position="0 0 0.001"></a-entity>
-                                    <a-image class="nametag-volume-id" scale="0.15 0.15 0.15" position="0 -0.18 0.001" src="#nametag-volume" visible="false" material="alphaTest:0.1;"></a-image>
-                                    <a-image class="typing-id" scale="0.3 0.3 0.3" position="0 -0.18 0.001" src="#nametag-typing" visible="false" material="alphaTest:0.1;"></a-image>
-                                    <a-entity
-                                        is-not-remote-hover-target
-                                        class="recordingBadge"
-                                        sprite="name: recording-badge.png"
-                                        scale="0.10 0.10 0.10"
-                                        position="0 0.2 0.001"
-                                        visible="false"
-                                    ></a-entity>
-                                    <a-entity
-                                        is-not-remote-hover-target
-                                        class="modBadge"
-                                        sprite="name: mod-badge.png"
-                                        scale="0.10 0.10 0.10"
-                                        position="0 0.2 0.001"
-                                        visible="false"
-                                    ></a-entity>
-                                </a-entity>
-                                <a-entity
-                                    billboard
-                                    is-not-remote-hover-target
-                                    class="hand-raised-id"
-                                    sprite="name: hand-raised.png;"
-                                    scale="0.2 0.2 0.2"
-                                    position="0 0.5 0.001"
-                                    visible="false"
-                                ></a-entity>
-                            </a-entity>
+                            <a-entity></a-entity>
                         </template>
 
                         <template data-name="Spine">
@@ -1306,9 +1309,7 @@
                 </template>
 
                 <template data-name="Neck">
-                    <a-entity>
-                        <a-entity class="nametag" visible="false" text ></a-entity>
-                    </a-entity>
+                    <a-entity></a-entity>
                 </template>
                 <template data-name="Spine">
                     <a-entity>

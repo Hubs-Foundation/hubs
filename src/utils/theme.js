@@ -39,6 +39,7 @@ function activateTheme() {
   const actionHoverColor = getThemeColor("action-color-highlight");
   const nametagColor = getThemeColor("nametag-color");
   const nametagTextColor = getThemeColor("nametag-text-color");
+  const nametagBorderColor = getThemeColor("nametag-border-color");
 
   if (document.querySelector("#rounded-text-button")) {
     // NOTE, using the object-based {} setAttribute variant in a-frame
@@ -78,6 +79,10 @@ function activateTheme() {
         "text-button",
         `textHoverColor: #fff; textColor: ${nametagTextColor}; backgroundColor: ${nametagColor}; backgroundHoverColor: #aaa;`
       );
+
+    document
+      .querySelector("#nametag-status-border")
+      .setAttribute("text-button", `backgroundColor: ${nametagBorderColor}`);
   }
 }
 
