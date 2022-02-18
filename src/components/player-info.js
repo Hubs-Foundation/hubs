@@ -211,16 +211,20 @@ AFRAME.registerComponent("player-info", {
     this.nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && this.nametagEl) {
       this.nametagTextEl = this.el.querySelector(".nametag-text-id");
-      this.nametagTextEl.addEventListener("text-updated", () => this.updateNameTag(true), { once: true });
+      this.nametagTextEl.addEventListener(
+        "text-updated",
+        () => {
+          this.size = this.nametagTextEl.components["text"].getSize();
+          if (this.size) {
+            this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
+            this.updateNameTag();
+          }
+        },
+        { once: true }
+      );
       this.nametagTextEl.setAttribute("text", {
         value: this.displayName
       });
-      this.nametagEl.object3D.visible = this.isNametagVisible;
-      this.size = this.nametagTextEl.components["text"].getSize();
-      if (this.size) {
-        this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
-        this.updateNameTag();
-      }
     }
 
     const identityNameEl = this.el.querySelector(".identityName");
