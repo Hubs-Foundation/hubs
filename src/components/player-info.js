@@ -47,7 +47,7 @@ const ANIM_CONFIG = {
 };
 
 function animComp(el, component, props, { onComplete, showOnStart, hideOnEnd } = {}) {
-  const cmp = el.components[component];
+  const cmp = el?.components[component];
   if (!el || !cmp) return;
   const config = Object.assign({}, ANIM_CONFIG, props, {
     targets: el.components[component].data,
@@ -132,7 +132,7 @@ AFRAME.registerComponent("player-info", {
           this.el.object3D.getWorldPosition(worldPos);
           this.wasNametagVisible = this.isNametagVisible;
           this.isNametagVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
-          this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
+          this.updateNameTagVisibility();
         }
       }
       if (this.nametagTypingEl && !this.isTalking && this.isTyping) {
@@ -229,6 +229,7 @@ AFRAME.registerComponent("player-info", {
     } else if (this.nametagVisibility === "showSpeaking") {
       this.isNametagVisible = this.isTalking;
     }
+    this.updateNameTagVisibility();
 
     this.nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && this.nametagEl) {
@@ -329,28 +330,38 @@ AFRAME.registerComponent("player-info", {
         this.frozenTimer = setTimeout(() => {
           this.wasNametagVisible = this.isNametagVisible;
           this.isNametagVisible = false;
-          this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
+          this.isNametagVisible !== this.wasNametagVisible && this.updateNameTagVisibility();
         }, 1000);
       } else if (this.isTalking && !this.wasTalking) {
         clearTimeout(this.frozenTimer);
         this.wasNametagVisible = this.isNametagVisible;
         this.isNametagVisible = true;
-        this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
+        this.isNametagVisible !== this.wasNametagVisible && this.updateNameTagVisibility();
       }
     }
+    this.isNametagVisible && this.isTalking !== this.wasTalking && this.updateBorder();
     this.isNametagVisible && this.updateVolume();
   },
 
-  updateNameTag() {
-    this.updateContainer() && this.updateBorder() && this.updateState() && this.updateTyping() && this.updateVolume();
+  updateNameTagVisibility() {
+    if (this.isNametagVisible !== this.wasNametagVisible) {
+      this.nametagBackgroundEl?.setAttribute("visible", this.isNametagVisible);
+      this.nametagStatusBorderEl?.setAttribute(
+        "visible",
+        (this.isTyping || this.isTalking || this.isHandRaised) && this.isNametagVisible
+      );
+      this.nametagVolumeEl?.setAttribute("visible", this.isTalking && this.isNametagVisible);
+      this.recordingBadgeEl?.setAttribute("visible", this.isRecording && this.isNametagVisible);
+      this.handRaisedEl?.setAttribute("visible", this.isNametagVisible);
+      this.updateTyping();
+    }
   },
 
   updateContainer() {
     if (!this.size) return;
     this.nametagBackgroundEl = this.nametagBackgroundEl || this.el.querySelector(".nametag-background-id");
-    if (!this.nametagBackgroundEl) return;
-    this.nametagBackgroundEl.setAttribute("visible", this.isNametagVisible);
-    this.nametagBackgroundEl.setAttribute("slice9", {
+    this.nametagBackgroundEl?.setAttribute("visible", this.isNametagVisible);
+    this.nametagBackgroundEl?.setAttribute("slice9", {
       width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2,
       height: NAMETAG_HEIGHT
     });
@@ -360,29 +371,23 @@ AFRAME.registerComponent("player-info", {
   updateVolume() {
     if (!this.size) return;
     this.nametagVolumeEl = this.nametagVolumeEl || this.el.querySelector(".nametag-volume-id");
-    if (!this.nametagVolumeEl) return;
-    this.nametagVolumeEl.setAttribute("visible", this.isTalking && this.isNametagVisible);
-    if (this.isTalking) {
-      this.nametagVolumeEl.setAttribute("geometry", { width: this.volume * this.size.x * 0.8 });
-    }
-    this.updateBorder();
+    this.nametagVolumeEl?.setAttribute("visible", this.isTalking && this.isNametagVisible);
+    this.nametagVolumeEl?.setAttribute("geometry", { width: this.volume * this.size.x * 0.8 });
     this.updateTyping();
   },
 
   updateBorder() {
     if (!this.size) return;
     this.nametagStatusBorderEl = this.nametagStatusBorderEl || this.el.querySelector(".nametag-status-border-id");
-    if (!this.nametagStatusBorderEl) return;
-    this.nametagStatusBorderEl.setAttribute("visible", this.isNametagVisible);
-    this.nametagStatusBorderEl.setAttribute("slice9", {
+    this.nametagStatusBorderEl?.setAttribute("slice9", {
       width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
       height: NAMETAG_HEIGHT + NAMETAG_STATUS_BORDER_PADDING
     });
-    this.nametagStatusBorderEl.setAttribute(
+    this.nametagStatusBorderEl?.setAttribute(
       "visible",
       (this.isTyping || this.isTalking || this.isHandRaised) && this.isNametagVisible
     );
-    this.nametagStatusBorderEl.setAttribute(
+    this.nametagStatusBorderEl?.setAttribute(
       "text-button",
       `backgroundColor: ${getThemeColor(
         this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color"
@@ -393,27 +398,23 @@ AFRAME.registerComponent("player-info", {
   updateState() {
     this.recordingBadgeEl = this.recordingBadgeEl || this.el.querySelector(".recordingBadge");
     this.modBadgeEl = this.modBadgeEl || this.el.querySelector(".modBadge");
-    if (!this.recordingBadgeEl || !this.modBadgeEl) return;
-    if (this.recordingBadgeEl && this.modBadgeEl) {
-      this.recordingBadgeEl.setAttribute("visible", this.isRecording && this.isNametagVisible);
-      this.modBadgeEl.setAttribute("visible", this.isOwner && !this.isRecording && this.isNametagVisible);
-    }
+    this.modBadgeEl?.setAttribute("visible", this.isOwner && !this.isRecording && this.isNametagVisible);
     this.handRaisedEl = this.handRaisedEl || this.el.querySelector(".hand-raised-id");
-    this.handRaisedEl && this.handRaisedEl.setAttribute("visible", this.isNametagVisible);
-    this.handRaisedEl &&
-      animComp(this.handRaisedEl, "scale", this.isHandRaised ? { x: 0.2, y: 0.2, z: 0.2 } : { x: 0, y: 0, z: 0 }, {
-        showOnStart: this.isHandRaised,
-        hideOnEnd: !this.isHandRaised
-      });
-    this.nametagEl && animComp(this.nametagEl, "position", { y: this.isHandRaised ? 1.3 : 1.1 });
+    this.handRaisedEl?.setAttribute("visible", this.isNametagVisible);
+    animComp(this.handRaisedEl, "scale", this.isHandRaised ? { x: 0.2, y: 0.2, z: 0.2 } : { x: 0, y: 0, z: 0 }, {
+      showOnStart: this.isHandRaised,
+      hideOnEnd: !this.isHandRaised
+    });
+    animComp(this.nametagEl, "position", { y: this.isHandRaised ? 1.3 : 1.1 });
     this.updateTyping();
   },
 
   updateTyping() {
     this.nametagTypingEl = this.nametagTypingEl || this.el.querySelector(".nametag-typing-id");
-    if (!this.nametagTypingEl) return;
-    for (const dotEl of this.nametagTypingEl.children) {
-      dotEl.setAttribute("visible", this.isTyping && !this.isTalking && this.isNametagVisible);
+    if (this.nametagTypingEl) {
+      for (const dotEl of this.nametagTypingEl.children) {
+        dotEl.setAttribute("visible", this.isTyping && !this.isTalking && this.isNametagVisible);
+      }
     }
   }
 });
