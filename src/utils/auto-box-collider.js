@@ -23,7 +23,9 @@ export const computeLocalBoundingBox = (function() {
       }
       node.updateMatrices();
       toRootSpace.multiplyMatrices(rootInverse, node.matrixWorld);
-      if (node.geometry) {
+      // TODO Troika Text GlyphGeometry has issues with this code, but we don't
+      // actually want to include it's bounds anyway so just ignore it for now.
+      if (node.geometry && !node.isTroikaText) {
         if (node.geometry.isGeometry) {
           for (let i = 0; i < node.geometry.vertices; i++) {
             vertex.copy(node.geometry.vertices[i]).applyMatrix4(toRootSpace);
