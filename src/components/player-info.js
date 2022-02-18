@@ -220,6 +220,9 @@ AFRAME.registerComponent("player-info", {
         },
         { once: true }
       );
+      if (this.displayName.length > 18) {
+        this.displayName = this.displayName.slice(0, 18).concat("...");
+      }
       this.nametagTextEl.setAttribute("text", {
         value: this.displayName
       });
@@ -228,6 +231,9 @@ AFRAME.registerComponent("player-info", {
     const identityNameEl = this.el.querySelector(".identityName");
     if (identityNameEl) {
       if (this.identityName) {
+        if (this.identityName.length > 18) {
+          this.identityName = this.identityName.slice(0, 18).concat("...");
+        }
         identityNameEl.setAttribute("text", { value: this.identityName });
         identityNameEl.object3D.visible = this.el.sceneEl.is("frozen");
       }
