@@ -89,6 +89,7 @@ AFRAME.registerComponent("player-info", {
     this.volumeAvg = new MovingAverage(128);
     this.wsNametagVisible = false;
     this.isNametagVisible = false;
+    this.size = new THREE.Vector3();
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
@@ -126,14 +127,13 @@ AFRAME.registerComponent("player-info", {
     const worldPos = new THREE.Vector3();
     const avatarRigWorldPos = new THREE.Vector3();
     return function(t) {
-      if (!this.isLocalPlayerInfo) {
-        if (this.nametagVisibility === "showClose") {
-          this.avatarRig.object3D.getWorldPosition(avatarRigWorldPos);
-          this.el.object3D.getWorldPosition(worldPos);
-          this.wasNametagVisible = this.isNametagVisible;
-          this.isNametagVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
-          this.updateNameTagVisibility();
-        }
+      if (this.isLocalPlayerInfo) return;
+      if (this.nametagVisibility === "showClose") {
+        this.avatarRig.object3D.getWorldPosition(avatarRigWorldPos);
+        this.el.object3D.getWorldPosition(worldPos);
+        this.wasNametagVisible = this.isNametagVisible;
+        this.isNametagVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
+        this.updateNameTagVisibility();
       }
       if (this.nametagTypingEl && !this.isTalking && this.isTyping) {
         typingAnimTime = t;
@@ -233,15 +233,13 @@ AFRAME.registerComponent("player-info", {
 
     this.nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && this.nametagEl) {
-      this.nametagTextEl = this.el.querySelector(".nametag-text-id");
+      this.nametagTextEl = this.el.querySelector(".nametag-text");
       this.nametagTextEl.addEventListener(
         "text-updated",
         () => {
           this.size = this.nametagTextEl.components["text"].getSize();
-          if (this.size) {
-            this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
-            this.updateContainer();
-          }
+          this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
+          this.updateContainer();
         },
         { once: true }
       );
@@ -344,6 +342,7 @@ AFRAME.registerComponent("player-info", {
   },
 
   updateNameTagVisibility() {
+    if (this.isLocalPlayerInfo) return;
     if (this.isNametagVisible !== this.wasNametagVisible) {
       this.nametagBackgroundEl?.setAttribute("visible", this.isNametagVisible);
       this.nametagStatusBorderEl?.setAttribute(
@@ -358,8 +357,8 @@ AFRAME.registerComponent("player-info", {
   },
 
   updateContainer() {
-    if (!this.size) return;
-    this.nametagBackgroundEl = this.nametagBackgroundEl || this.el.querySelector(".nametag-background-id");
+    if (this.isLocalPlayerInfo) return;
+    this.nametagBackgroundEl = this.nametagBackgroundEl || this.el.querySelector(".nametag-background");
     this.nametagBackgroundEl?.setAttribute("visible", this.isNametagVisible);
     this.nametagBackgroundEl?.setAttribute("slice9", {
       width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2,
@@ -369,16 +368,16 @@ AFRAME.registerComponent("player-info", {
   },
 
   updateVolume() {
-    if (!this.size) return;
-    this.nametagVolumeEl = this.nametagVolumeEl || this.el.querySelector(".nametag-volume-id");
+    if (this.isLocalPlayerInfo) return;
+    this.nametagVolumeEl = this.nametagVolumeEl || this.el.querySelector(".nametag-volume");
     this.nametagVolumeEl?.setAttribute("visible", this.isTalking && this.isNametagVisible);
     this.nametagVolumeEl?.setAttribute("geometry", { width: this.volume * this.size.x * 0.8 });
     this.updateTyping();
   },
 
   updateBorder() {
-    if (!this.size) return;
-    this.nametagStatusBorderEl = this.nametagStatusBorderEl || this.el.querySelector(".nametag-status-border-id");
+    if (this.isLocalPlayerInfo) return;
+    this.nametagStatusBorderEl = this.nametagStatusBorderEl || this.el.querySelector(".nametag-status-border");
     this.nametagStatusBorderEl?.setAttribute("slice9", {
       width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
       height: NAMETAG_HEIGHT + NAMETAG_STATUS_BORDER_PADDING
@@ -396,7 +395,9 @@ AFRAME.registerComponent("player-info", {
   },
 
   updateState() {
+    if (this.isLocalPlayerInfo) return;
     this.recordingBadgeEl = this.recordingBadgeEl || this.el.querySelector(".recordingBadge");
+    this.recordingBadgeEl?.setAttribute("visible", this.isRecording && this.isNametagVisible);
     this.modBadgeEl = this.modBadgeEl || this.el.querySelector(".modBadge");
     this.modBadgeEl?.setAttribute("visible", this.isOwner && !this.isRecording && this.isNametagVisible);
     this.handRaisedEl = this.handRaisedEl || this.el.querySelector(".hand-raised-id");
@@ -410,7 +411,8 @@ AFRAME.registerComponent("player-info", {
   },
 
   updateTyping() {
-    this.nametagTypingEl = this.nametagTypingEl || this.el.querySelector(".nametag-typing-id");
+    if (this.isLocalPlayerInfo) return;
+    this.nametagTypingEl = this.nametagTypingEl || this.el.querySelector(".nametag-typing");
     if (this.nametagTypingEl) {
       for (const dotEl of this.nametagTypingEl.children) {
         dotEl.setAttribute("visible", this.isTyping && !this.isTalking && this.isNametagVisible);

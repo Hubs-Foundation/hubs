@@ -144,11 +144,11 @@
                                         billboard="onlyY: true;"
                                         position="0 1.1 0"
                                     >
-                                        <a-entity class="nametag-background-id" mixin="nametag-background" slice9="width: 1">
-                                            <a-entity class="nametag-status-border-id" mixin="nametag-status-border" visible="false" slice9="width: 1"></a-entity>
-                                            <a-entity class="nametag-text-id" text="side: double; textAlign: center; color: #ddd; fontSize: 0.3; outlineWidth: 1%;" text-raycast-hack position="0 0.025 0.001"></a-entity>
-                                            <a-plane class="nametag-volume-id" visible="false" position="0 -0.075 0.001" material="shader:flat;" color="#7ED320" height="0.025" width="0.1"></a-plane>
-                                            <a-entity class="nametag-typing-id" position="0 -0.075 0.001">
+                                        <a-entity class="nametag-background" mixin="nametag-background-mixin" slice9="width: 1">
+                                            <a-entity class="nametag-status-border" mixin="nametag-status-border-mixin" visible="false" slice9="width: 1"></a-entity>
+                                            <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1; outlineWidth: 1%;" text-raycast-hack position="0 0.025 0.001"></a-entity>
+                                            <a-plane class="nametag-volume" visible="false" position="0 -0.075 0.001" material="shader:flat;" color="#7ED320" height="0.025" width="0.1"></a-plane>
+                                            <a-entity class="nametag-typing" position="0 -0.075 0.001">
                                                 <a-circle position="-0.07 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
                                                 <a-circle position="-0.035 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
                                                 <a-circle position="0 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
@@ -174,10 +174,9 @@
                                         ></a-entity>
                                         <a-entity
                                             class="identityName"
-                                            text="side: double; textAlign: center; color: #ddd; fontSize: 0.3; outlineWidth: 1%;"
+                                            text="side: double; textAlign: center; color: #ddd; fontSize: 0.1; outlineWidth: 1%;"
                                             visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
                                             position="0 0.4 0"
-                                            scale="3 3 3"
                                         ></a-entity>
                                     </a-entity>
                                     <a-image billboard="onlyY: true;" class="hand-raised-id" scale="0.2 0.2 0.2" position="0 0.95 0.001" src="#hand-raised" visible="false" material="alphaTest:0.1;"></a-image>
@@ -195,7 +194,7 @@
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
                                 <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui">
                                     <a-entity billboard="onlyY: true;" class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
-                                        <a-entity class="avatar-volume-label" text="value: 0%; anchorX: center; textAlign: center; color: #ff3464; letterSpacing: 0.08;" text-raycast-hack position="0.0 0.675 0.35" scale="1.25 1.25 1.25"></a-entity>
+                                        <a-entity class="avatar-volume-label" text="value: 0%; anchorX: center; textAlign: center; color: #ff3464; letterSpacing: 0.08;" text-raycast-hack position="0.0 0.45 0.35" scale="1.25 1.25 1.25"></a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.45 0.35" class="avatar-volume-down-button">
                                             <a-entity text="value: -; anchorX: center; textAlign: center; color: #ccc;" text-raycast-hack position="0 0 0.001" scale="0.85 0.85 0.85"></a-entity>
                                         </a-entity>
@@ -976,7 +975,7 @@
                 </a-entity>
             </template>
 
-            <a-mixin id="nametag-background"
+            <a-mixin id="nametag-background-mixin"
                 slice9="
                     width: 0.45;
                     height: 0.2;
@@ -990,7 +989,7 @@
                     src: #nametag"
             ></a-mixin>
 
-            <a-mixin id="nametag-status-border"
+            <a-mixin id="nametag-status-border-mixin"
                 slice9="
                     width: 0.45;
                     height: 0.2;

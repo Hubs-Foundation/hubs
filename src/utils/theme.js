@@ -74,14 +74,14 @@ function activateTheme() {
       );
 
     document
-      .querySelector("#nametag-background")
+      .querySelector("#nametag-background-mixin")
       .setAttribute(
         "text-button",
         `textHoverColor: #fff; textColor: ${nametagTextColor}; backgroundColor: ${nametagColor}; backgroundHoverColor: #aaa;`
       );
 
     document
-      .querySelector("#nametag-status-border")
+      .querySelector("#nametag-status-border-mixin")
       .setAttribute("text-button", `backgroundColor: ${nametagBorderColor}`);
   }
 }
