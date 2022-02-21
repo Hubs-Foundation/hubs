@@ -560,7 +560,10 @@ export default class SceneEntryManager {
       this.mediaDevicesManager.mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
     }
 
-    await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
-    audioEl.play();
+    this.mediaDevicesManager.micShouldBeEnabled = true;
+    this.scene.addEventListener("didConnectToDialog", async () => {
+      await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
+      audioEl.play();
+    });
   };
 }
