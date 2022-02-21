@@ -371,7 +371,7 @@ AFRAME.registerComponent("player-info", {
     if (this.isLocalPlayerInfo) return;
     this.nametagVolumeEl = this.nametagVolumeEl || this.el.querySelector(".nametag-volume");
     this.nametagVolumeEl?.setAttribute("visible", this.isTalking && this.isNametagVisible);
-    this.nametagVolumeEl?.setAttribute("geometry", { width: this.volume * this.size.x * 0.8 });
+    this.nametagVolumeEl?.setAttribute("scale", { x: this.volume * this.size.x });
     this.updateTyping();
   },
 
