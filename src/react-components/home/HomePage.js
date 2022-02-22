@@ -96,7 +96,7 @@ export function HomePage() {
                 { appName: configs.translation("app-name") }
               )}
               src={configs.image("home_background")}
-            />
+            />             
           </div>
         </div>
       </Container>

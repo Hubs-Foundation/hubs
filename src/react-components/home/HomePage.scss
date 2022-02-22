@@ -21,8 +21,8 @@
   display: flex;
   justify-content: center;
   padding: 20px;
-  width: 150px;
-  
+  width: 250px;
+  margin-top: -10px;
   img {
     width: 100%;
     align-self: flex-start;
@@ -81,6 +81,7 @@
   @media (min-width: theme.$breakpoint-lg) {
     margin-bottom: 0;
     margin-left: 16px;
+    margin-right: 16px;
     justify-content: flex-start;
     align-items: flex-start;
 

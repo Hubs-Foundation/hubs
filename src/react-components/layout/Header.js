@@ -39,7 +39,8 @@ export function Header({
             {enableSpoke && (
               <li>
                 <a href="/spoke">
-                  {isHmc ? <FormattedMessage id="header.spoke" defaultMessage="Spoke" /> : editorName}
+                  {/* {isHmc ? <FormattedMessage id="header.spoke" defaultMessage="Spoke" /> : editorName} */}
+                  {<FormattedMessage id="header.spoke" defaultMessage="Spoke" />}
                 </a>
               </li>
             )}
