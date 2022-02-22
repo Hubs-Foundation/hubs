@@ -19,7 +19,7 @@ const reactionPopoverTitle = defineMessage({
 
 function ReactionPopoverContent({ items, presence, onToggleHandRaised, ...rest }) {
   return (
-    <Column padding="sm" grow gap="sm" className={styles.popover}>
+    <Column padding="sm" grow gap="sm">
       <Row noWrap>
         <ImageGridPopover items={items} {...rest} />
       </Row>
@@ -102,7 +102,6 @@ export function ReactionPopoverButton({ items, presence, onToggleHandRaised }) {
         }
       }}
       disableFullscreen={isTooltipVisible}
-      popoverClass={styles.popover}
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
         <ToolbarButton
