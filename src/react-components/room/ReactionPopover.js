@@ -115,24 +115,12 @@ export function ReactionPopoverButton({ items, presence, onToggleHandRaised }) {
           }
           selected={popoverVisible}
           onClick={() => {
-            if (isReactionsVisible) {
-              if (presence.handRaised) {
-                setIsTooltipVisible(!isTooltipVisible);
-                setIsReactionsVisible(!isReactionsVisible);
-              } else {
-                setIsTooltipVisible(false);
-                setIsReactionsVisible(false);
-                togglePopover();
-              }
+            setIsReactionsVisible(!isReactionsVisible);
+            if (presence.handRaised) {
+              setIsTooltipVisible(!isTooltipVisible);
             } else {
-              if (presence.handRaised) {
-                setIsTooltipVisible(!isTooltipVisible);
-                setIsReactionsVisible(!isReactionsVisible);
-              } else {
-                setIsReactionsVisible(true);
-                setIsTooltipVisible(false);
-                togglePopover();
-              }
+              setIsTooltipVisible(false);
+              togglePopover();
             }
           }}
           label={title}
