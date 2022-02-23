@@ -333,13 +333,14 @@ AFRAME.registerComponent("media-loader", {
     if (!src) return;
 
     //TOCHECK::
-    const { origin } = new URL(src);
+    const { origin, pathname } = new URL(src);
     if (origin === "https://www.twitch.tv"){
       if (g_twitchLiveStreams.length === 0){
         console.log("LENGTH IS 000000");
         g_twitchLiveStreams = await getLiveGameStreams();
       } 
-      src = g_twitchLiveStreams.shift();
+      // console.log("--------------------------" + pathname.substring(1));
+      src = g_twitchLiveStreams[pathname.substring(1)];
       console.log("########################### " + src);
     }
     
