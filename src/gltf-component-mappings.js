@@ -120,20 +120,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
     willMaintainWorldUp: true
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
-  const nav = AFRAME.scenes[0].systems.nav;
-  const zone = componentData.zone || "character";
-  let found = false;
-  el.object3D.traverse(node => {
-    if (node.isMesh && !found) {
-      found = true;
-      nav.loadMesh(node, zone);
-    }
-  });
-  // There isn't actually an a-frame nav-mesh component, but we want to tag this el as a nav-mesh since
-  // nav-mesh-helper will query for it later.
-  el.setAttribute("nav-mesh");
-});
+
+AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh");
 
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
