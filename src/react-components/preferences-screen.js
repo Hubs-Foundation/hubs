@@ -1073,6 +1073,58 @@ class PreferencesScreen extends Component {
             defaultString: "Browser Default"
           },
           { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+          {
+            key: "nametagVisibility",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: [
+              {
+                value: "showAll",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-all",
+                  defaultMessage: "Always"
+                })
+              },
+              {
+                value: "showNone",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-none",
+                  defaultMessage: "Never"
+                })
+              },
+              {
+                value: "showFrozen",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-frozen",
+                  defaultMessage: "Only in Frozen state"
+                })
+              },
+              {
+                value: "showSpeaking",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-speaking",
+                  defaultMessage: "Only speaking"
+                })
+              },
+              {
+                value: "showClose",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-close",
+                  defaultMessage: "Close to me"
+                })
+              }
+            ],
+            defaultString: "showAll",
+            promptForRefresh: false
+          },
+          {
+            key: "nametagVisibilityDistance",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 1,
+            max: 20,
+            step: 1,
+            digits: 2,
+            defaultNumber: 5
+          },
           this.state.preferredCamera,
           {
             key: "materialQualitySetting",
@@ -1126,58 +1178,6 @@ class PreferencesScreen extends Component {
             step: 0.5,
             digits: 1,
             defaultNumber: 1
-          },
-          {
-            key: "nametagVisibility",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-            options: [
-              {
-                value: "showAll",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-all",
-                  defaultMessage: "Always"
-                })
-              },
-              {
-                value: "showNone",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-none",
-                  defaultMessage: "Never"
-                })
-              },
-              {
-                value: "showFrozen",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-frozen",
-                  defaultMessage: "Only in Frozen state"
-                })
-              },
-              {
-                value: "showSpeaking",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-speaking",
-                  defaultMessage: "Only speaking"
-                })
-              },
-              {
-                value: "showClose",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-close",
-                  defaultMessage: "Close to me"
-                })
-              }
-            ],
-            defaultString: "showAll",
-            promptForRefresh: false
-          },
-          {
-            key: "nametagVisibilityDistance",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-            min: 1,
-            max: 20,
-            step: 1,
-            digits: 2,
-            defaultNumber: 5
           }
         ]
       ],
