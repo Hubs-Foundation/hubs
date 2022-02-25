@@ -45,13 +45,14 @@ export function RoomEntryModal({
           <p>{roomName}</p>
         </div>
         <Column center className={styles.buttons}>
-          {showJoinRoom && (
-            <Button preset="accent4" onClick={onJoinRoom}>
-              <EnterIcon />
-              <span>
-                <FormattedMessage id="room-entry-modal.join-room-button" defaultMessage="Join Room" />
-              </span>
-            </Button>
+          {showJoinRoom && ( 
+            onJoinRoom()
+            // <Button preset="accent4" onClick={onJoinRoom}>
+            //   <EnterIcon />
+            //   <span>
+            //     <FormattedMessage id="room-entry-modal.join-room-button" defaultMessage="Join Room" />
+            //   </span>
+            // </Button>
           )}
           {showEnterOnDevice && (
             <Button preset="accent5" onClick={onEnterOnDevice}>
