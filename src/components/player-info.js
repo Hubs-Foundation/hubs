@@ -6,11 +6,15 @@ import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import anime from "animejs";
 import MovingAverage from "moving-average";
 import { getThemeColor } from "../utils/theme";
+import qsTruthy from "../utils/qs_truthy";
 
+const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
 const NAMETAG_MIN_WIDTH = 0.6;
 const NAMETAG_HEIGHT = 0.25;
+const NAMETAG_OFFSET = 0.35;
+const NAMETAG_HAND_OFFSET = 0.2;
 const TYPING_ANIM_SPEED = 150;
 
 function ensureAvatarNodes(json) {
@@ -65,6 +69,7 @@ function animComp(el, component, props, { onComplete, showOnStart, hideOnEnd } =
   });
   anime(config);
 }
+
 /**
  * Sets player info state, including avatar choice and display name.
  * @namespace avatar
@@ -90,6 +95,8 @@ AFRAME.registerComponent("player-info", {
     this.wsNametagVisible = false;
     this.isNametagVisible = false;
     this.size = new THREE.Vector3();
+    this.avatarBBAA = new THREE.Box3();
+    this.avatarBBAASize = new THREE.Vector3();
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
@@ -111,6 +118,10 @@ AFRAME.registerComponent("player-info", {
           this.updateFromPresenceMeta(playerPresence.metas[0]);
         }
       });
+      if (DEBUG) {
+        this.avatarBBAAHelper = new THREE.Box3Helper(this.avatarBBAA, 0xffff00);
+        this.el.sceneEl.object3D.add(this.avatarBBAAHelper);
+      }
     }
     registerComponentInstance(this, "player-info");
     this.nametagVisibility = window.APP.store.state.preferences.nametagVisibility;
@@ -121,11 +132,13 @@ AFRAME.registerComponent("player-info", {
     const avatarEl = this.el.querySelector("[avatar-audio-source]");
     APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
+    if (DEBUG) this.el.sceneEl.object3D.remove(this.avatarBBAAHelper);
   },
   tick: (() => {
     let typingAnimTime = 0;
     const worldPos = new THREE.Vector3();
     const avatarRigWorldPos = new THREE.Vector3();
+    const avatarBBAACenter = new THREE.Vector3();
     return function(t) {
       if (this.isLocalPlayerInfo) return;
       if (this.nametagVisibility === "showClose") {
@@ -133,7 +146,7 @@ AFRAME.registerComponent("player-info", {
         this.el.object3D.getWorldPosition(worldPos);
         this.wasNametagVisible = this.isNametagVisible;
         this.isNametagVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
-        this.updateNameTagVisibility();
+        this.updateNameTag();
       }
       if (this.nametagTypingEl && !this.isTalking && this.isTyping) {
         typingAnimTime = t;
@@ -143,6 +156,12 @@ AFRAME.registerComponent("player-info", {
             typingAnimTime -= TYPING_ANIM_SPEED;
           }
         });
+      }
+      if (DEBUG) {
+        this.updateAvatarModelBBAA();
+        this.avatarBBAA.getCenter(avatarBBAACenter);
+        this.avatarBBAA.setFromCenterAndSize(avatarBBAACenter, this.avatarBBAASize);
+        this.avatarBBAAHelper.matrixNeedsUpdate = true;
       }
     };
   })(),
@@ -210,7 +229,7 @@ AFRAME.registerComponent("player-info", {
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.isTyping = !!presenceMeta.typing;
     this.isHandRaised = !!presenceMeta.handRaised;
-    this.updateState();
+    this.updateNameTag();
   },
   can(perm) {
     return !!this.permissions && this.permissions[perm];
@@ -229,7 +248,7 @@ AFRAME.registerComponent("player-info", {
     } else if (this.nametagVisibility === "showSpeaking") {
       this.isNametagVisible = this.isTalking;
     }
-    this.updateNameTagVisibility();
+    this.updateNameTag();
 
     this.nametagEl = this.el.querySelector(".nametag");
     if (this.displayName && this.nametagEl) {
@@ -239,7 +258,7 @@ AFRAME.registerComponent("player-info", {
         () => {
           this.size = this.nametagTextEl.components["text"].getSize();
           this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
-          this.updateContainer();
+          this.updateNameTag();
         },
         { once: true }
       );
@@ -299,8 +318,7 @@ AFRAME.registerComponent("player-info", {
       APP.isAudioPaused.delete(avatarEl);
     }
 
-    this.updateContainer();
-    this.updateState();
+    this.updateNameTag();
   },
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();
@@ -328,32 +346,24 @@ AFRAME.registerComponent("player-info", {
         this.frozenTimer = setTimeout(() => {
           this.wasNametagVisible = this.isNametagVisible;
           this.isNametagVisible = false;
-          this.isNametagVisible !== this.wasNametagVisible && this.updateNameTagVisibility();
+          this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
         }, 1000);
       } else if (this.isTalking && !this.wasTalking) {
         clearTimeout(this.frozenTimer);
         this.wasNametagVisible = this.isNametagVisible;
         this.isNametagVisible = true;
-        this.isNametagVisible !== this.wasNametagVisible && this.updateNameTagVisibility();
+        this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
       }
     }
     this.isNametagVisible && this.isTalking !== this.wasTalking && this.updateBorder();
     this.isNametagVisible && this.updateVolume();
   },
 
-  updateNameTagVisibility() {
+  updateNameTag() {
     if (this.isLocalPlayerInfo) return;
-    if (this.isNametagVisible !== this.wasNametagVisible) {
-      this.nametagBackgroundEl?.setAttribute("visible", this.isNametagVisible);
-      this.nametagStatusBorderEl?.setAttribute(
-        "visible",
-        (this.isTyping || this.isTalking || this.isHandRaised) && this.isNametagVisible
-      );
-      this.nametagVolumeEl?.setAttribute("visible", this.isTalking && this.isNametagVisible);
-      this.recordingBadgeEl?.setAttribute("visible", this.isRecording && this.isNametagVisible);
-      this.handRaisedEl?.setAttribute("visible", this.isNametagVisible);
-      this.updateTyping();
-    }
+    this.updateContainer();
+    this.updateVolume();
+    this.updateState();
   },
 
   updateContainer() {
@@ -406,7 +416,13 @@ AFRAME.registerComponent("player-info", {
       showOnStart: this.isHandRaised,
       hideOnEnd: !this.isHandRaised
     });
-    animComp(this.nametagEl, "position", { y: this.isHandRaised ? 1.3 : 1.1 });
+    this.updateAvatarModelBBAA();
+    this.handRaisedEl?.setAttribute("position", { y: this.avatarBBAASize.y + NAMETAG_HAND_OFFSET });
+    animComp(this.nametagEl, "position", {
+      y: this.isHandRaised
+        ? this.avatarBBAASize.y + NAMETAG_OFFSET + NAMETAG_HAND_OFFSET
+        : this.avatarBBAASize.y + NAMETAG_OFFSET
+    });
     this.updateTyping();
   },
 
@@ -418,5 +434,15 @@ AFRAME.registerComponent("player-info", {
         dotEl.setAttribute("visible", this.isTyping && !this.isTalking && this.isNametagVisible);
       }
     }
+  },
+
+  updateAvatarModelBBAA() {
+    this.avatarBBAA.makeEmpty();
+    this.el.querySelector(".model")?.object3D.traverse(obj => {
+      if (obj.isSkinnedMesh) {
+        this.avatarBBAA.expandByObject(obj);
+      }
+    });
+    this.avatarBBAA.getSize(this.avatarBBAASize);
   }
 });
