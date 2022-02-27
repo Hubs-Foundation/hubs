@@ -463,6 +463,6 @@
   "user-profile-sidebar.kick-button": "강퇴",
   "user-profile-sidebar.promote-button-disabled-label": "{displayName} 님이 로그아웃 하셨습니다.",
   "user-profile-sidebar.demote-button-disabled-label": "{displayName} 님이 로그아웃 하셨습니다.",
-  "promote-client-modal.message": "사용자를 승격하면 Room 설정 및 관리 도구에 대한 전체 권한이 부여됩니다.{linebreak}하시겠습니까?",
+  "promote-client-modal.message": "관리자로 임명하면 Room 설정 및 관리 도구에 대한 전체 권한이 부여됩니다.{linebreak}관리자로 임명하시겠습니까?",
   "promote-client-modal.confirm-prefix": "네, {name} 님을 관리자로 임명합니다."
 }
