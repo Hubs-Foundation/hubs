@@ -36,7 +36,7 @@ class WhatsNew extends Component {
     const endpoint = "/api/v1/whats-new";
     const params = ["source=hubs", this.state.moreCursor ? `cursor=${this.state.moreCursor}` : ""].join("&");
 
-    let moreCursor;
+    let moreCursor = null;
     let pullRequests = [];
     try {
       const respJson = await fetch(`${endpoint}?${params}`).then(r => r.json());
