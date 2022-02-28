@@ -7,14 +7,15 @@ import anime from "animejs";
 import MovingAverage from "moving-average";
 import { getThemeColor } from "../utils/theme";
 import qsTruthy from "../utils/qs_truthy";
+import { findAncestorWithComponent } from "../utils/scene-graph";
 
 const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
 const NAMETAG_MIN_WIDTH = 0.6;
 const NAMETAG_HEIGHT = 0.25;
-const NAMETAG_OFFSET = 0.35;
-const NAMETAG_HAND_OFFSET = 0.2;
+const NAMETAG_OFFSET = 0.15;
+const NAMETAG_HAND_OFFSET = 0.3;
 const TYPING_ANIM_SPEED = 150;
 
 function ensureAvatarNodes(json) {
@@ -97,9 +98,11 @@ AFRAME.registerComponent("player-info", {
     this.size = new THREE.Vector3();
     this.avatarBBAA = new THREE.Box3();
     this.avatarBBAASize = new THREE.Vector3();
+    this.avatarBBAACenter = new THREE.Vector3();
     this.applyProperties = this.applyProperties.bind(this);
     this.updateDisplayName = this.updateDisplayName.bind(this);
     this.applyDisplayName = this.applyDisplayName.bind(this);
+    this.handleModelLoaded = this.handleModelLoaded.bind(this);
     this.handleModelError = this.handleModelError.bind(this);
     this.handleRemoteModelError = this.handleRemoteModelError.bind(this);
     this.update = this.update.bind(this);
@@ -109,6 +112,7 @@ AFRAME.registerComponent("player-info", {
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.avatarRig = document.getElementById("avatar-rig");
     this.playerSessionId = null;
+    this.ikRootEl = findAncestorWithComponent(this.el, "ik-root");
 
     if (!this.isLocalPlayerInfo) {
       NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
@@ -138,7 +142,6 @@ AFRAME.registerComponent("player-info", {
     let typingAnimTime = 0;
     const worldPos = new THREE.Vector3();
     const avatarRigWorldPos = new THREE.Vector3();
-    const avatarBBAACenter = new THREE.Vector3();
     return function(t) {
       if (this.isLocalPlayerInfo) return;
       if (this.nametagVisibility === "showClose") {
@@ -159,14 +162,13 @@ AFRAME.registerComponent("player-info", {
       }
       if (DEBUG) {
         this.updateAvatarModelBBAA();
-        this.avatarBBAA.getCenter(avatarBBAACenter);
-        this.avatarBBAA.setFromCenterAndSize(avatarBBAACenter, this.avatarBBAASize);
         this.avatarBBAAHelper.matrixNeedsUpdate = true;
+        this.avatarBBAAHelper.updateMatrixWorld(true);
       }
     };
   })(),
   play() {
-    this.el.addEventListener("model-loaded", this.applyProperties);
+    this.el.addEventListener("model-loaded", this.handleModelLoaded);
     this.el.sceneEl.addEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").addEventListener("model-error", this.handleModelError);
@@ -186,7 +188,7 @@ AFRAME.registerComponent("player-info", {
     }
   },
   pause() {
-    this.el.removeEventListener("model-loaded", this.applyProperties);
+    this.el.removeEventListener("model-loaded", this.handleModelLoaded);
     this.el.sceneEl.removeEventListener("presence_updated", this.updateDisplayName);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);
@@ -320,6 +322,22 @@ AFRAME.registerComponent("player-info", {
 
     this.updateNameTag();
   },
+  handleModelLoaded() {
+    this.nametagBackgroundEl = this.el.querySelector(".nametag-background");
+    this.nametagVolumeEl = this.el.querySelector(".nametag-volume");
+    this.nametagStatusBorderEl = this.el.querySelector(".nametag-status-border");
+    this.recordingBadgeEl = this.el.querySelector(".recordingBadge");
+    this.modBadgeEl = this.el.querySelector(".modBadge");
+    this.handRaisedEl = this.el.querySelector(".hand-raised-id");
+    this.nametagTypingEl = this.el.querySelector(".nametag-typing");
+    if (this.nametagTextEl) {
+      this.size = this.nametagTextEl.components["text"].getSize();
+      this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
+    }
+    setTimeout(() => {
+      this.applyProperties();
+    }, 500);
+  },
   handleModelError() {
     window.APP.store.resetToRandomDefaultAvatar();
   },
@@ -404,27 +422,31 @@ AFRAME.registerComponent("player-info", {
     );
   },
 
-  updateState() {
-    if (this.isLocalPlayerInfo) return;
-    this.recordingBadgeEl = this.recordingBadgeEl || this.el.querySelector(".recordingBadge");
-    this.recordingBadgeEl?.setAttribute("visible", this.isRecording && this.isNametagVisible);
-    this.modBadgeEl = this.modBadgeEl || this.el.querySelector(".modBadge");
-    this.modBadgeEl?.setAttribute("visible", this.isOwner && !this.isRecording && this.isNametagVisible);
-    this.handRaisedEl = this.handRaisedEl || this.el.querySelector(".hand-raised-id");
-    this.handRaisedEl?.setAttribute("visible", this.isHandRaised && this.isNametagVisible);
-    animComp(this.handRaisedEl, "scale", this.isHandRaised ? { x: 0.2, y: 0.2, z: 0.2 } : { x: 0, y: 0, z: 0 }, {
-      showOnStart: this.isHandRaised,
-      hideOnEnd: !this.isHandRaised
-    });
-    this.updateAvatarModelBBAA();
-    this.handRaisedEl?.setAttribute("position", { y: this.avatarBBAASize.y + NAMETAG_HAND_OFFSET });
-    animComp(this.nametagEl, "position", {
-      y: this.isHandRaised
-        ? this.avatarBBAASize.y + NAMETAG_OFFSET + NAMETAG_HAND_OFFSET
-        : this.avatarBBAASize.y + NAMETAG_OFFSET
-    });
-    this.updateTyping();
-  },
+  updateState: (() => {
+    const tmpVector = new THREE.Vector3();
+    return function() {
+      if (this.isLocalPlayerInfo) return;
+      this.recordingBadgeEl = this.recordingBadgeEl || this.el.querySelector(".recordingBadge");
+      this.recordingBadgeEl?.setAttribute("visible", this.isRecording && this.isNametagVisible);
+      this.modBadgeEl = this.modBadgeEl || this.el.querySelector(".modBadge");
+      this.modBadgeEl?.setAttribute("visible", this.isOwner && !this.isRecording && this.isNametagVisible);
+      this.handRaisedEl = this.handRaisedEl || this.el.querySelector(".hand-raised-id");
+      this.handRaisedEl?.setAttribute("visible", this.isHandRaised && this.isNametagVisible);
+      animComp(this.handRaisedEl, "scale", this.isHandRaised ? { x: 0.2, y: 0.2, z: 0.2 } : { x: 0, y: 0, z: 0 }, {
+        showOnStart: this.isHandRaised,
+        hideOnEnd: !this.isHandRaised
+      });
+      this.updateAvatarModelBBAA();
+      const diff =
+        Math.abs(tmpVector.subVectors(this.ikRootEl.object3D.position, this.avatarBBAACenter).y) +
+        this.avatarBBAASize.y / 2;
+      this.handRaisedEl?.setAttribute("position", { y: diff + NAMETAG_OFFSET });
+      animComp(this.nametagEl, "position", {
+        y: this.isHandRaised ? diff + NAMETAG_OFFSET + NAMETAG_HAND_OFFSET : diff + NAMETAG_OFFSET
+      });
+      this.updateTyping();
+    };
+  })(),
 
   updateTyping() {
     if (this.isLocalPlayerInfo) return;
@@ -437,12 +459,10 @@ AFRAME.registerComponent("player-info", {
   },
 
   updateAvatarModelBBAA() {
-    this.avatarBBAA.makeEmpty();
-    this.el.querySelector(".model")?.object3D.traverse(obj => {
-      if (obj.isSkinnedMesh) {
-        this.avatarBBAA.expandByObject(obj);
-      }
-    });
-    this.avatarBBAA.getSize(this.avatarBBAASize);
+    if (this.el.querySelector(".AvatarRoot")?.object3D) {
+      this.avatarBBAA.setFromObject(this.el.querySelector(".AvatarRoot")?.object3D);
+      this.avatarBBAA.getSize(this.avatarBBAASize);
+      this.avatarBBAA.getCenter(this.avatarBBAACenter);
+    }
   }
 });

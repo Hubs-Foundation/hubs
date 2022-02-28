@@ -130,6 +130,50 @@
 
                     <a-entity class="right-controller" matrix-auto-update></a-entity>
 
+                    <a-entity tags="ignoreSpaceBubble: true;">
+                        <a-entity
+                            class="nametag"
+                            billboard="onlyY: true;"
+                            position="0 0 0"
+                        >
+                            <a-entity class="nametag-background" mixin="nametag-background-mixin" slice9="width: 1">
+                                <a-entity class="nametag-status-border" mixin="nametag-status-border-mixin" visible="false" slice9="width: 1"></a-entity>
+                                <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0.025 0.001"></a-entity>
+                                <a-plane class="nametag-volume" visible="false" position="0 -0.075 0.001" material="shader:flat;" color="#7ED320" height="0.025" width="1"></a-plane>
+                                <a-entity class="nametag-typing" position="0 -0.075 0.001">
+                                    <a-circle position="-0.07 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                    <a-circle position="-0.035 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                    <a-circle position="0 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                    <a-circle position="0.035 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                    <a-circle position="0.07 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                </a-entity>
+                            </a-entity>
+                            <a-entity
+                                is-not-remote-hover-target
+                                class="recordingBadge"
+                                sprite="name: recording-badge.png"
+                                scale="0.10 0.10 0.10"
+                                position="0 0.25 0.001"
+                                visible="false"
+                            ></a-entity>
+                            <a-entity
+                                is-not-remote-hover-target
+                                class="modBadge"
+                                sprite="name: mod-badge.png"
+                                scale="0.10 0.10 0.10"
+                                position="0 0.25 0.001"
+                                visible="false"
+                            ></a-entity>
+                            <a-entity
+                                class="identityName"
+                                text="side: double; textAlign: center; color: #ddd; fontSize: 0.1; outlineWidth: 1%;"
+                                visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
+                                position="0 0.4 0"
+                            ></a-entity>
+                        </a-entity>
+                        <a-image billboard="onlyY: true;" class="hand-raised-id" scale="0.2 0.2 0.2" position="0 0.95 0.001" src="#hand-raised" visible="false" material="alphaTest:0.1;"></a-image>
+                    </a-entity>
+
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="AvatarRoot">
                             <a-entity
@@ -138,49 +182,6 @@
                                 hand-pose__right
                                 networked-audio-analyser
                             >
-                                <a-entity tags="ignoreSpaceBubble: true;">
-                                    <a-entity
-                                        class="nametag"
-                                        billboard="onlyY: true;"
-                                        position="0 1.1 0"
-                                    >
-                                        <a-entity class="nametag-background" mixin="nametag-background-mixin" slice9="width: 1">
-                                            <a-entity class="nametag-status-border" mixin="nametag-status-border-mixin" visible="false" slice9="width: 1"></a-entity>
-                                            <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0.025 0.001"></a-entity>
-                                            <a-plane class="nametag-volume" visible="false" position="0 -0.075 0.001" material="shader:flat;" color="#7ED320" height="0.025" width="1"></a-plane>
-                                            <a-entity class="nametag-typing" position="0 -0.075 0.001">
-                                                <a-circle position="-0.07 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                                <a-circle position="-0.035 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                                <a-circle position="0 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                                <a-circle position="0.035 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                                <a-circle position="0.07 0 0" visible="false" color="#FFFFFF" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                            </a-entity>
-                                        </a-entity>
-                                        <a-entity
-                                            is-not-remote-hover-target
-                                            class="recordingBadge"
-                                            sprite="name: recording-badge.png"
-                                            scale="0.10 0.10 0.10"
-                                            position="0 0.25 0.001"
-                                            visible="false"
-                                        ></a-entity>
-                                        <a-entity
-                                            is-not-remote-hover-target
-                                            class="modBadge"
-                                            sprite="name: mod-badge.png"
-                                            scale="0.10 0.10 0.10"
-                                            position="0 0.25 0.001"
-                                            visible="false"
-                                        ></a-entity>
-                                        <a-entity
-                                            class="identityName"
-                                            text="side: double; textAlign: center; color: #ddd; fontSize: 0.1; outlineWidth: 1%;"
-                                            visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
-                                            position="0 0.4 0"
-                                        ></a-entity>
-                                    </a-entity>
-                                    <a-image billboard="onlyY: true;" class="hand-raised-id" scale="0.2 0.2 0.2" position="0 0.95 0.001" src="#hand-raised" visible="false" material="alphaTest:0.1;"></a-image>
-                                </a-entity>
                             </a-entity>
                         </template>
 
