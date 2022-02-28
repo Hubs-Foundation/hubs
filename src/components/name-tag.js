@@ -70,6 +70,8 @@ AFRAME.registerComponent("name-tag", {
     this.ikRootEl = findAncestorWithComponent(this.el, "ik-root");
     this.playerInfo = this.el.components["player-info"];
 
+    this.nametagEl = this.el.querySelector(".nametag");
+    this.identityNameEl = this.el.querySelector(".identityName");
     this.nametagBackgroundEl = this.el.querySelector(".nametag-background");
     this.nametagVolumeEl = this.el.querySelector(".nametag-volume");
     this.nametagStatusBorderEl = this.el.querySelector(".nametag-status-border");
@@ -164,8 +166,7 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateDisplayName() {
-    this.nametagEl = this.el.querySelector(".nametag");
-    if (this.displayName && this.nametagEl) {
+    if (this.displayName) {
       this.nametagTextEl = this.el.querySelector(".nametag-text");
       this.nametagTextEl.addEventListener(
         "text-updated",
@@ -184,15 +185,13 @@ AFRAME.registerComponent("name-tag", {
       });
     }
 
-    const identityNameEl = this.el.querySelector(".identityName");
-    if (identityNameEl) {
-      if (this.identityName) {
-        if (this.identityName.length > DISPLAY_NAME_LENGTH) {
-          this.identityName = this.identityName.slice(0, DISPLAY_NAME_LENGTH).concat("...");
-        }
-        identityNameEl.setAttribute("text", { value: this.identityName });
-        identityNameEl.object3D.visible = this.el.sceneEl.is("frozen");
+
+    if (this.identityName) {
+      if (this.identityName.length > DISPLAY_NAME_LENGTH) {
+        this.identityName = this.identityName.slice(0, DISPLAY_NAME_LENGTH).concat("...");
       }
+      this.identityNameEl.setAttribute("text", { value: this.identityName });
+      this.identityNameEl.object3D.visible = this.el.sceneEl.is("frozen");
     }
   },
 
