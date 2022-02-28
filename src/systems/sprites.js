@@ -9,6 +9,7 @@ import spritesheetNoticePng from "../assets/images/spritesheets/sprite-system-no
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
 import frag from "./sprites/sprite.frag";
+import { getThemeColorShifter } from "../utils/theme-sprites";
 import { disposeTexture } from "../utils/material-utils";
 
 const pngs = [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]];
@@ -49,7 +50,7 @@ function isVisible(o) {
 }
 
 AFRAME.registerComponent("sprite", {
-  schema: { name: { type: "string" }, filter: { default: true } },
+  schema: { name: { type: "string" } },
   tick() {
     // TODO when we run out of sprites we currently just stop rendering them. We need to do something better.
     if (!(this.didRegisterWithSystem || this.didFailToRegister) && this.el.sceneEl.systems["hubs-systems"]) {
@@ -238,7 +239,7 @@ export class SpriteSystem {
 
     Promise.all([domReady]).then(() => {
       for (const [spritesheetPng, type] of pngs) {
-        Promise.all([createImageTexture(spritesheetPng, null), waitForDOMContentLoaded()]).then(
+        Promise.all([createImageTexture(spritesheetPng, getThemeColorShifter(type)), waitForDOMContentLoaded()]).then(
           ([spritesheetTexture]) => {
             const material = new THREE.RawShaderMaterial({
               uniforms: {
@@ -266,7 +267,7 @@ export class SpriteSystem {
     APP.store.addEventListener("themechanged", async () => {
       for (const [spritesheetPng, type] of pngs) {
         if (this.meshes[type]) {
-          const newTexture = await createImageTexture(spritesheetPng, null);
+          const newTexture = await createImageTexture(spritesheetPng, getThemeColorShifter(type));
           const oldTexture = this.meshes[type].material.uniforms.u_spritesheet.value;
           if (oldTexture) {
             disposeTexture(oldTexture);
