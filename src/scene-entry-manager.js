@@ -561,9 +561,14 @@ export default class SceneEntryManager {
     }
 
     this.mediaDevicesManager.micShouldBeEnabled = true;
-    this.scene.addEventListener("didConnectToDialog", async () => {
+    const connect = async () => {
       await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
       audioEl.play();
-    });
+    };
+    if (APP.dialog._sendTransport) {
+      connect();
+    } else {
+      this.scene.addEventListener("didConnectToDialog", connect);
+    }
   };
 }
