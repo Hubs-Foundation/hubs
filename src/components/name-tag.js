@@ -46,7 +46,7 @@ function animComp(el, component, props, { onComplete, showOnStart, hideOnEnd } =
 AFRAME.registerComponent("name-tag", {
   schema: {},
   init() {
-    this.preferences = window.APP.store.state.preferences;
+    this.store = window.APP.store;
     this.displayName = null;
     this.identityName = null;
     this.isTalking = false;
@@ -91,10 +91,10 @@ AFRAME.registerComponent("name-tag", {
       this.el.sceneEl.object3D.add(this.avatarBBAAHelper);
     }
 
-    this.nametagVisibility = this.preferences.nametagVisibility;
+    this.nametagVisibility = this.store.state.preferences.nametagVisibility;
     this.nametagVisibilityDistance = this.nametagVisibilityDistance =
-      this.preferences.nametagVisibilityDistance !== undefined
-        ? this.preferences.nametagVisibilityDistance
+      this.store.state.preferences.nametagVisibilityDistance !== undefined
+        ? this.store.state.preferences.nametagVisibilityDistance
         : NAMETAG_VISIBILITY_DISTANCE_DEFAULT;
     this.updateNameTagVisibility();
   },
@@ -236,10 +236,10 @@ AFRAME.registerComponent("name-tag", {
 
   updateNameTagVisibility() {
     this.nametagVisibilityDistance =
-      this.preferences.nametagVisibilityDistance !== undefined
-        ? this.preferences.nametagVisibilityDistance
+      this.store.state.preferences.nametagVisibilityDistance !== undefined
+        ? this.store.state.preferences.nametagVisibilityDistance
         : NAMETAG_VISIBILITY_DISTANCE_DEFAULT;
-    this.nametagVisibility = this.preferences.nametagVisibility;
+    this.nametagVisibility = this.store.state.preferences.nametagVisibility;
     this.wasNametagVisible = this.isNametagVisible;
     if (this.nametagVisibility === "showNone") {
       this.isNametagVisible = false;
