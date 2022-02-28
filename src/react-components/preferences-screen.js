@@ -23,6 +23,7 @@ export const GLOBAL_VOLUME_MIN = 0;
 export const GLOBAL_VOLUME_MAX = 200;
 export const GLOBAL_VOLUME_STEP = 5;
 export const GLOBAL_VOLUME_DEFAULT = 100;
+export const NAMETAG_VISIBILITY_DISTANCE_DEFAULT = 5;
 
 function WarnIcon() {
   return (
@@ -1123,7 +1124,7 @@ class PreferencesScreen extends Component {
             max: 20,
             step: 1,
             digits: 2,
-            defaultNumber: 5
+            defaultNumber: NAMETAG_VISIBILITY_DISTANCE_DEFAULT
           },
           this.state.preferredCamera,
           {

@@ -81,6 +81,7 @@ import "./components/hoverable-visuals";
 import "./components/hover-visuals";
 import "./components/offset-relative-to";
 import "./components/player-info";
+import "./components/name-tag";
 import "./components/debug";
 import "./components/hand-poses";
 import "./components/hud-controller";
