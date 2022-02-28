@@ -70,6 +70,7 @@ AFRAME.registerComponent("name-tag", {
     this.ikRootEl = findAncestorWithComponent(this.el, "ik-root");
     this.playerInfo = this.el.components["player-info"];
 
+    this.modelEl = this.el.querySelector(".model");
     this.nametagEl = this.el.querySelector(".nametag");
     this.identityNameEl = this.el.querySelector(".identityName");
     this.nametagBackgroundEl = this.el.querySelector(".nametag-background");
@@ -319,8 +320,8 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateAvatarModelBBAA() {
-    if (this.el.querySelector(".AvatarRoot")?.object3D) {
-      this.avatarBBAA.setFromObject(this.el.querySelector(".AvatarRoot")?.object3D);
+    if (this.modelEl.object3D) {
+      this.avatarBBAA.setFromObject(this.modelEl.object3D);
       this.avatarBBAA.getSize(this.avatarBBAASize);
       this.avatarBBAA.getCenter(this.avatarBBAACenter);
     }
