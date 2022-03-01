@@ -186,7 +186,6 @@ AFRAME.registerComponent("name-tag", {
       });
     }
 
-
     if (this.identityName) {
       if (this.identityName.length > DISPLAY_NAME_LENGTH) {
         this.identityName = this.identityName.slice(0, DISPLAY_NAME_LENGTH).concat("...");
