@@ -118,7 +118,7 @@ AFRAME.registerComponent("name-tag", {
         this.isNametagVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
         this.updateNameTag();
       }
-      if (this.nametagTypingEl && !this.isTalking && this.isTyping) {
+      if (!this.isTalking && this.isTyping) {
         typingAnimTime = t;
         this.nametagTypingEl.object3D.traverse(o => {
           if (o.material) {
@@ -197,6 +197,8 @@ AFRAME.registerComponent("name-tag", {
 
   onModelLoaded() {
     setTimeout(() => {
+      this.size = this.nametagTextEl.components["text"].getSize();
+      this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
       this.updateNameTag();
     }, 500);
   },
