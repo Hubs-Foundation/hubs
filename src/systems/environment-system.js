@@ -89,6 +89,8 @@ export class EnvironmentSystem {
   updateEnvironment(envEl) {
     const envSettingsEl = envEl.querySelector("[environment-settings]");
     const skyboxEl = envEl.querySelector("[skybox]");
+    const navmeshEl = envEl.querySelector("[nav-mesh]");
+
     const envSettings = {
       ...defaultEnvSettings,
       skybox: skyboxEl?.components["skybox"]
@@ -96,6 +98,11 @@ export class EnvironmentSystem {
 
     if (envSettingsEl) {
       Object.assign(envSettings, envSettingsEl.components["environment-settings"].data);
+    }
+
+    const navMesh = navmeshEl?.object3D.getObjectByProperty("isMesh", true);
+    if (navMesh) {
+      AFRAME.scenes[0].systems.nav.loadMesh(navMesh, navmeshEl.components["nav-mesh"].data.zone);
     }
 
     // TODO animated objects should not be static
@@ -193,6 +200,12 @@ export class EnvironmentSystem {
     }
   }
 }
+
+AFRAME.registerComponent("nav-mesh", {
+  schema: {
+    zone: { default: "character" }
+  }
+});
 
 AFRAME.registerComponent("environment-settings", {
   schema: {

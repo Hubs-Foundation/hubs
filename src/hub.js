@@ -231,8 +231,6 @@ import "./components/set-yxz-order";
 
 import "./components/cursor-controller";
 
-import "./components/nav-mesh-helper";
-
 import "./components/tools/pen";
 import "./components/tools/pen-laser";
 import "./components/tools/networked-drawing";
