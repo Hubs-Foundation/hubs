@@ -257,8 +257,8 @@ module.exports = async (env, argv) => {
   };
 
   // Behind and environment var for now pending further testing
-  if (process.env.CSP_HOST) {
-    const CSPResp = await fetch(`https://${process.env.CSP_HOST}/`);
+  if (process.env.DEV_CSP_SOURCE) {
+    const CSPResp = await fetch(`https://${process.env.DEV_CSP_SOURCE}/`);
     const remoteCSP = CSPResp.headers.get("content-security-policy");
     devServerHeaders["content-security-policy"] = remoteCSP;
     // .replaceAll("connect-src", "connect-src https://example.com");
