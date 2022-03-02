@@ -29,7 +29,7 @@ function ReactionPopoverContent({ items, presence, onToggleHandRaised, ...rest }
         </label>
       </Row>
       <Row nowrap>
-        <HandRaisedButton active={presence.handRaised} onClick={onToggleHandRaised} />
+        <HandRaisedButton active={presence.hand_raised} onClick={onToggleHandRaised} />
       </Row>
     </Column>
   );
@@ -98,7 +98,7 @@ export function ReactionPopoverButton({ items, presence, onToggleHandRaised }) {
       onChangeVisible={visible => {
         if (!visible) {
           setIsReactionsVisible(false);
-          setIsTooltipVisible(presence.handRaised);
+          setIsTooltipVisible(presence.hand_raised);
         }
       }}
       disableFullscreen={isTooltipVisible}
@@ -107,7 +107,7 @@ export function ReactionPopoverButton({ items, presence, onToggleHandRaised }) {
         <ToolbarButton
           ref={triggerRef}
           icon={
-            presence.handRaised ? (
+            presence.hand_raised ? (
               <HandRaisedIcon width="32px" height="32px" style={{ marginLeft: "5px" }} />
             ) : (
               <ReactionIcon />
@@ -116,7 +116,7 @@ export function ReactionPopoverButton({ items, presence, onToggleHandRaised }) {
           selected={popoverVisible}
           onClick={() => {
             setIsReactionsVisible(!isReactionsVisible);
-            if (presence.handRaised) {
+            if (presence.hand_raised) {
               setIsTooltipVisible(!isTooltipVisible);
             } else {
               setIsTooltipVisible(false);

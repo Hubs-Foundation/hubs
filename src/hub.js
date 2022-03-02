@@ -1179,7 +1179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       permissions: meta.permissions,
       streaming: meta.streaming,
       recording: meta.recording,
-      handRaised: meta.hand_raised,
+      hand_raised: meta.hand_raised,
       typing: meta.typing
     });
   });
@@ -1248,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       permissions: current.permissions,
       streaming: current.streaming,
       recording: current.recording,
-      handRaised: current.hand_raised,
+      hand_raised: current.hand_raised,
       typing: current.typing
     });
   });

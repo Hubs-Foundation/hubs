@@ -38,7 +38,7 @@ export const Base = args => (
   <RoomLayout
     toolbarCenter={
       <ReactionPopoverButton
-        presence={{ handRaised: args.handRaised }}
+        presence={{ hand_raised: args.handRaised }}
         items={items}
         onToggleHandRaised={args.onToggleHandRaised}
       />

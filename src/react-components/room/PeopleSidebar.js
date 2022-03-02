@@ -125,7 +125,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
               type="button"
               onClick={e => onSelectPerson(person, e)}
             >
-              {person.handRaised && <HandRaisedIcon />}
+              {person.hand_raised && <HandRaisedIcon />}
               {<DeviceIcon title={getDeviceLabel(person.context, intl)} />}
               {!person.context.discord && VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micPresence, intl)} />}
               <p>{getPersonName(person, intl)}</p>
