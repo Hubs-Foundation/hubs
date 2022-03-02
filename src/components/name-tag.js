@@ -158,7 +158,6 @@ AFRAME.registerComponent("name-tag", {
   updateFromPresenceMeta(presenceMeta) {
     this.displayName = presenceMeta.profile.displayName;
     this.identityName = presenceMeta.profile.identityName;
-    this.updateDisplayName();
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
     this.isTyping = !!presenceMeta.typing;
@@ -255,6 +254,7 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateNameTag() {
+    this.updateDisplayName();
     this.updateContainer();
     this.updateVolume();
     this.updateState();
