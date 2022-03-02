@@ -796,15 +796,13 @@ class UIRoot extends Component {
             if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
-              
-              this.state.waitingOnAudio = true;
-              this.onAudioReadyButton();
-              // if (promptForNameAndAvatarBeforeEntry) {
-              //   this.pushHistoryState("entry_step", "profile");
-              // } else {
-              //   this.onRequestMicPermission();
-              //   this.pushHistoryState("entry_step", "mic_grant");
-              // }
+
+              if (promptForNameAndAvatarBeforeEntry) {
+                this.pushHistoryState("entry_step", "profile");
+              } else {
+                this.onRequestMicPermission();
+                this.pushHistoryState("entry_step", "mic_grant");
+              }
             } else {
               this.handleForceEntry();
             }
@@ -1026,7 +1024,7 @@ class UIRoot extends Component {
             <MicPermissionsModal onBack={() => this.props.history.goBack()} />
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
-          {this.renderAudioSetupPanel()}
+            {this.renderAudioSetupPanel()}
           </StateRoute>
           <StateRoute
             stateKey="entry_step"
