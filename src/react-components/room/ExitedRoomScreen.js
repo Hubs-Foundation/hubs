@@ -66,7 +66,7 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSou
       <>
         <b>
           <FormattedMessage
-            id="exited-room-screen.no-longer-availible"
+            id="exited-room-screen.no-longer-available"
             defaultMessage="Sorry, this room is no longer available."
           />
         </b>
