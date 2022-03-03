@@ -16,9 +16,13 @@ export function willRequireUserGesture() {
 }
 
 export async function showFullScreenIfAvailable() {
-  if (shouldShowFullScreen()) {
-    hasEnteredFullScreenThisSession = true;
-    await screenfull.request();
+  try{
+    if (shouldShowFullScreen()) {
+      // hasEnteredFullScreenThisSession = true;
+      // await screenfull.request();
+    }
+  } catch{
+    console.log("################### showwFullScreenIfAvailable caused exception")
   }
 }
 

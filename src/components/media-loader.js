@@ -341,6 +341,11 @@ AFRAME.registerComponent("media-loader", {
       } 
       // console.log("--------------------------" + pathname.substring(1));
       src = g_twitchLiveStreams[pathname.substring(1)];
+      if (src === undefined){
+        console.log("########################### retryingggg " + src);
+        g_twitchLiveStreams = await getLiveGameStreams();
+        src = g_twitchLiveStreams[0];
+      }
       console.log("########################### " + src);
     }
     

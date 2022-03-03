@@ -14,7 +14,7 @@ function getTwitchAuthorization() {
 }
 
 export async function getLiveGameStreams() {
-    const endpoint = "https://api.twitch.tv/helix/streams?first=7";
+    const endpoint = "https://api.twitch.tv/helix/streams?first=8";
 
     let authorizationObject = await getTwitchAuthorization();
     let { access_token, expires_in, token_type } = authorizationObject;
