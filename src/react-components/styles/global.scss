@@ -100,6 +100,14 @@
   --disabled-bg-color:  var(--background3-color);
   --disabled-icon-color: var(--text3-color);
 
+  --signin-color: #{theme.$blue};
+  --signin-border-color: var(--signin-color);
+
+  --landing-color: #{theme.$blue};
+  --landing-color-hover: #{theme.$blue-hover};
+  --landing-color-pressed: #{theme.$blue-pressed};
+  --landing-border-color: var(--landing-border-color);
+
   --radio-border-color: var(--border1-color);
   --radio-bg-color: var(--basic-color);
   --radio-bg-color-hover: var(--basic-color-hover);
@@ -136,6 +144,9 @@
   --chat-bubble-link-color-sent-hover: var(--basic-color-hover);
   --chat-bubble-link-color-sent-pressed: var(--basic-color-pressed);
   --chat-bubble-bg-color-received: var(--background3-color);
+
+  --spawned-chat-bubble-bg-color: #{theme.$black};
+  --spawned-chat-bubble-text-color: #{theme.$white};
 
   --tip-text-color: var(--text5-color);
   --tip-bg-color: var(--accent4-color);

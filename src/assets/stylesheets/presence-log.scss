@@ -179,8 +179,8 @@
   margin: 0;
 
   :local(.presence-log-entry) {
-    background-color: black;
-    color: white;
+    background-color: theme.$spawned-chat-bubble-bg-color;
+    color: theme.$spawned-chat-bubble-text-color;
     min-height: 18px;
     padding: 8px 16px;
     border-radius: 16px;

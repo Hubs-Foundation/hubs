@@ -187,6 +187,14 @@ $disabled-text-color: var(--disabled-text-color);
 $disabled-bg-color: var(--disabled-bg-color);
 $disabled-icon-color: var(--disabled-icon-color);
 
+$signin-color: var(--signin-color);
+$signin-border-color: var(--signin-border-color);
+
+$landing-color: var(--landing-color);
+$landing-color-hover: var(--landing-color-hover);
+$landing-color-pressed: var(--landing-color-pressed);
+$landing-border-color: var(--landing-border-color);
+
 $radio-border-color: var(--radio-border-color);
 $radio-bg-color: var(--radio-bg-color);
 $radio-bg-color-hover: var(--radio-bg-color-hover);
@@ -223,6 +231,9 @@ $chat-bubble-text-color-sent: var(--chat-bubble-text-color-sent);
 $chat-bubble-link-color-sent-hover: var(--chat-bubble-link-color-sent-hover);
 $chat-bubble-link-color-sent-pressed: var(--chat-bubble-link-color-sent-pressed);
 $chat-bubble-bg-color-received: var(--chat-bubble-bg-color-received);
+
+$spawned-chat-bubble-bg-color: var(--spawned-chat-bubble-bg-color);
+$spawned-chat-bubble-text-color: var(--spawned-chat-bubble-text-color);
 
 $tip-text-color: var(--tip-text-color);
 $tip-bg-color: var(--tip-bg-color);
