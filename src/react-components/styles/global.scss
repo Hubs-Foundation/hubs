@@ -97,7 +97,7 @@
   --basic-border-color: var(--border1-color);
 
   --disabled-text-color: var(--text4-color);
-  --disabled-bg-color:  var(--background3-color);
+  --disabled-bg-color: var(--background3-color);
   --disabled-icon-color: var(--text3-color);
 
   --signin-color: #{theme.$blue};
@@ -106,7 +106,7 @@
   --landing-color: #{theme.$blue};
   --landing-color-hover: #{theme.$blue-hover};
   --landing-color-pressed: #{theme.$blue-pressed};
-  --landing-border-color: var(--landing-border-color);
+  --landing-border-color: var(--landing-color);
 
   --radio-border-color: var(--border1-color);
   --radio-bg-color: var(--basic-color);
