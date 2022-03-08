@@ -4,6 +4,8 @@ import { getThemeColor } from "../utils/theme";
 import qsTruthy from "../utils/qs_truthy";
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import { NAMETAG_VISIBILITY_DISTANCE_DEFAULT } from "../react-components/preferences-screen";
+import { THREE } from "aframe";
+import { setMatrixWorld } from "../utils/three-utils";
 
 const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
@@ -16,31 +18,11 @@ const DISPLAY_NAME_LENGTH = 18;
 
 const ANIM_CONFIG = {
   duration: 400,
-  easing: "easeOutElastic",
+  easing: "easeOutQuart",
   elasticity: 400,
   loop: 0,
   round: false
 };
-
-function animComp(el, component, props, { onComplete, showOnStart, hideOnEnd } = {}) {
-  const cmp = el?.components[component];
-  if (!el || !cmp) return;
-  const config = Object.assign({}, ANIM_CONFIG, props, {
-    targets: el.components[component].data,
-    begin: () => {
-      if (showOnStart !== undefined) el.setAttribute("visible", showOnStart);
-    },
-    update: anim => {
-      el.setAttribute(component, anim.animatables[0].target);
-    },
-    complete: anim => {
-      el.setAttribute(component, anim.animatables[0].target);
-      if (hideOnEnd !== undefined) el.setAttribute("visible", !hideOnEnd);
-      onComplete && onComplete();
-    }
-  });
-  anime(config);
-}
 
 AFRAME.registerComponent("name-tag", {
   schema: {},
@@ -60,8 +42,10 @@ AFRAME.registerComponent("name-tag", {
     this.avatarBBAASize = new THREE.Vector3();
     this.avatarBBAACenter = new THREE.Vector3();
     this.nametagHeight = 0;
+    this.tmpNametagVisible = false;
 
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
+    this.onModelLoading = this.onModelLoading.bind(this);
     this.onModelLoaded = this.onModelLoaded.bind(this);
     this.onAnalyserVolumeUpdated = this.onAnalyserVolumeUpdated.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
@@ -79,6 +63,7 @@ AFRAME.registerComponent("name-tag", {
     this.modBadgeEl = this.el.querySelector(".modBadge");
     this.handRaisedEl = this.el.querySelector(".hand-raised-id");
     this.nametagTypingEl = this.el.querySelector(".nametag-typing");
+    this.nametagTextEl = this.el.querySelector(".nametag-text");
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
       this.playerSessionId = NAF.utils.getCreator(networkedEntity);
@@ -102,6 +87,7 @@ AFRAME.registerComponent("name-tag", {
   },
 
   remove() {
+    clearInterval(this.firstIkStepHandler);
     if (DEBUG) this.el.sceneEl.object3D.remove(this.avatarBBAAHelper);
   },
 
@@ -109,7 +95,24 @@ AFRAME.registerComponent("name-tag", {
     let typingAnimTime = 0;
     const worldPos = new THREE.Vector3();
     const avatarRigWorldPos = new THREE.Vector3();
+    const matPos = new THREE.Vector3();
+    const matRot = new THREE.Quaternion();
+    const matScale = new THREE.Vector3();
+    const mat = new THREE.Matrix4();
     return function(t) {
+      if (this.model) {
+        this.nametagEl.object3D.getWorldPosition(worldPos);
+        this.neckEl.object3D.matrixWorld.decompose(matPos, matRot, matScale);
+        matScale.set(1, 1, 1);
+        matPos.setY(this.nametagElPosY + this.ikRootEl.object3D.position.y);
+        mat.compose(
+          matPos,
+          matRot,
+          matScale
+        );
+        setMatrixWorld(this.nametagEl.object3D, mat);
+      }
+
       if (this.nametagVisibility === "showClose") {
         this.avatarRig.object3D.getWorldPosition(avatarRigWorldPos);
         this.el.object3D.getWorldPosition(worldPos);
@@ -135,6 +138,7 @@ AFRAME.registerComponent("name-tag", {
   })(),
 
   play() {
+    this.el.addEventListener("model-loading", this.onModelLoading);
     this.el.addEventListener("model-loaded", this.onModelLoaded);
     this.el.addEventListener("analyser-volume-updated", this.onAnalyserVolumeUpdated);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
@@ -142,6 +146,7 @@ AFRAME.registerComponent("name-tag", {
   },
 
   pause() {
+    this.el.removeEventListener("model-loading", this.onModelLoading);
     this.el.removeEventListener("model-loaded", this.onModelLoaded);
     this.el.removeEventListener("analyser-volume-updated", this.onAnalyserVolumeUpdated);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
@@ -166,7 +171,6 @@ AFRAME.registerComponent("name-tag", {
 
   updateDisplayName() {
     if (this.displayName) {
-      this.nametagTextEl = this.el.querySelector(".nametag-text");
       this.nametagTextEl.addEventListener(
         "text-updated",
         () => {
@@ -193,19 +197,38 @@ AFRAME.registerComponent("name-tag", {
     }
   },
 
-  onModelLoaded({ detail: { model } }) {
-    this.model = model;
-    setTimeout(() => {
-      this.updateAvatarModelBBAA();
-      const tmpVector = new THREE.Vector3();
-      this.nametagHeight =
-        Math.abs(tmpVector.subVectors(this.ikRootEl.object3D.position, this.avatarBBAACenter).y) +
-        this.avatarBBAASize.y / 2;
+  onModelLoading() {
+    this.tmpNametagVisible = false;
+    this.updateNameTagVisibility();
+    this.model = null;
+  },
 
-      this.size = this.nametagTextEl.components["text"].getSize();
-      this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
-      this.updateNameTag();
-    }, 500);
+  onModelLoaded({ detail: { model } }) {
+    clearInterval(this.firstIkStepHandler);
+    const checkIkStep = () => {
+      if (this.ikRootEl.object3D.visible) {
+        clearInterval(this.firstIkStepHandler);
+        this.neckEl = this.el.querySelector(".Neck");
+        this.tmpNametagVisible = true;
+        this.updateNameTagVisibility();
+        this.model = model;
+        this.updateNameTagPosition();
+      }
+    };
+    this.firstIkStepHandler = setInterval(checkIkStep, 500);
+  },
+
+  updateNameTagPosition() {
+    this.updateAvatarModelBBAA();
+    const tmpVector = new THREE.Vector3();
+    this.nametagHeight =
+      Math.abs(tmpVector.subVectors(this.ikRootEl.object3D.position, this.avatarBBAACenter).y) +
+      this.avatarBBAASize.y / 2 +
+      NAMETAG_OFFSET;
+    this.nametagElPosY = this.nametagHeight;
+    this.size = this.nametagTextEl.components["text"].getSize();
+    this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
+    this.updateNameTag();
   },
 
   onAnalyserVolumeUpdated({ detail: { volume } }) {
@@ -245,21 +268,25 @@ AFRAME.registerComponent("name-tag", {
       this.store.state.preferences.nametagVisibilityDistance !== undefined
         ? this.store.state.preferences.nametagVisibilityDistance
         : NAMETAG_VISIBILITY_DISTANCE_DEFAULT;
-    this.nametagVisibility = this.store.state.preferences.nametagVisibility;
     this.wasNametagVisible = this.isNametagVisible;
+    let prefNametagVisibility = this.store.state.preferences.nametagVisibility === undefined;
     if (this.nametagVisibility === "showNone") {
-      this.isNametagVisible = false;
+      prefNametagVisibility = false;
     } else if (this.nametagVisibility === "showAll") {
-      this.isNametagVisible = true;
+      prefNametagVisibility = true;
     } else if (this.nametagVisibility === "showFrozen") {
-      this.isNametagVisible = this.el.sceneEl.is("frozen");
+      prefNametagVisibility = this.el.sceneEl.is("frozen");
     } else if (this.nametagVisibility === "showSpeaking") {
-      this.isNametagVisible = this.isTalking;
+      prefNametagVisibility = this.isTalking;
+    } else {
+      prefNametagVisibility = true;
     }
+    this.isNametagVisible = prefNametagVisibility && this.tmpNametagVisible;
     this.updateNameTag();
   },
 
   updateNameTag() {
+    if (!this.model) return;
     this.updateDisplayName();
     this.updateContainer();
     this.updateVolume();
@@ -302,12 +329,35 @@ AFRAME.registerComponent("name-tag", {
     this.recordingBadgeEl.setAttribute("visible", this.isRecording && this.isNametagVisible);
     this.modBadgeEl.setAttribute("visible", this.isOwner && !this.isRecording && this.isNametagVisible);
     this.handRaisedEl.setAttribute("visible", this.isHandRaised && this.isNametagVisible);
-    animComp(this.handRaisedEl, "scale", this.isHandRaised ? { x: 0.2, y: 0.2, z: 0.2 } : { x: 0, y: 0, z: 0 }, {
-      showOnStart: this.isHandRaised,
-      hideOnEnd: !this.isHandRaised
+    const targetScale = this.isHandRaised ? 0.2 : 0;
+    anime({
+      ...ANIM_CONFIG,
+      targets: {
+        x: this.handRaisedEl.object3D.scale.x,
+        y: this.handRaisedEl.object3D.scale.y,
+        z: this.handRaisedEl.object3D.scale.z
+      },
+      x: targetScale,
+      y: targetScale,
+      z: targetScale,
+      update: anim => {
+        this.handRaisedEl.object3D.scale.set(
+          anim.animatables[0].target.x,
+          anim.animatables[0].target.y,
+          anim.animatables[0].target.z
+        );
+        this.handRaisedEl.object3D.matrixNeedsUpdate = true;
+      }
     });
-    animComp(this.nametagEl, "position", {
-      y: this.nametagHeight + NAMETAG_OFFSET * (this.isHandRaised ? 2 : 1)
+    anime({
+      ...ANIM_CONFIG,
+      targets: {
+        y: this.nametagElPosY
+      },
+      y: this.nametagHeight + (this.isHandRaised ? NAMETAG_OFFSET : 0),
+      update: anim => {
+        this.nametagElPosY = anim.animatables[0].target.y;
+      }
     });
     this.updateTyping();
   },
@@ -319,10 +369,9 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateAvatarModelBBAA() {
-    if (this.model) {
-      this.avatarBBAA.setFromObject(this.model);
-      this.avatarBBAA.getSize(this.avatarBBAASize);
-      this.avatarBBAA.getCenter(this.avatarBBAACenter);
-    }
+    if (!this.model) return;
+    this.avatarBBAA.setFromObject(this.model);
+    this.avatarBBAA.getSize(this.avatarBBAASize);
+    this.avatarBBAA.getCenter(this.avatarBBAACenter);
   }
 });
