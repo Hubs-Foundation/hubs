@@ -1398,7 +1398,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("mute", ({ session_id }) => {
     if (session_id === NAF.clientId) {
-      APP.dialog.enableMicrophone(false);
+      APP.mediaDevicesManager.micEnabled = false;
     }
   });
 
