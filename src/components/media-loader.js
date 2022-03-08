@@ -339,14 +339,15 @@ AFRAME.registerComponent("media-loader", {
         console.log("LENGTH IS 000000");
         g_twitchLiveStreams = await getLiveGameStreams();
       } 
-      // console.log("--------------------------" + pathname.substring(1));
-      src = g_twitchLiveStreams[pathname.substring(1)];
-      if (src === undefined){
-        console.log("########################### retryingggg " + src);
-        g_twitchLiveStreams = await getLiveGameStreams();
-        src = g_twitchLiveStreams[0];
+      if (g_twitchLiveStreams.length > 6){
+        src = g_twitchLiveStreams[pathname.substring(1)];
+        if (src === undefined){
+          console.log("########################### retryingggg " + src);
+          g_twitchLiveStreams = await getLiveGameStreams();
+          src = g_twitchLiveStreams[6];
+        }
+        console.log("########################### " + src + " INDEX=" + pathname.substring(1));
       }
-      console.log("########################### " + src);
     }
     
     const srcChanged = oldData.src !== src;

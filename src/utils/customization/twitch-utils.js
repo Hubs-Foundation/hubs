@@ -14,7 +14,7 @@ function getTwitchAuthorization() {
 }
 
 export async function getLiveGameStreams() {
-    const endpoint = "https://api.twitch.tv/helix/streams?first=8";
+    const endpoint = "https://api.twitch.tv/helix/streams";
 
     let authorizationObject = await getTwitchAuthorization();
     let { access_token, expires_in, token_type } = authorizationObject;
@@ -31,17 +31,32 @@ export async function getLiveGameStreams() {
     "Client-Id": clientId,
     };
 
+    let recommendedStreams = [  "https://www.twitch.tv/tmxk319", 
+                                "https://www.twitch.tv/noway4u_sir",
+                                "https://www.twitch.tv/lolpacifictw",
+                                "https://www.twitch.tv/lol_nemesis",
+                                "https://www.twitch.tv/rybsonlol_",
+                                "https://www.twitch.tv/nanajam777"  ];
+
     let printAddress = await fetch(endpoint, {headers,
     })
     .then((res) => res.json())
     .then((dataRows) => {
         var liveStreamUrls = [];
+        var liveRecommendedStreamUrls = [];
         for (const item of dataRows.data){
-        if (!item.is_mature && item.type === "live"){
-            liveStreamUrls.push("https://www.twitch.tv/" + item.user_login);
-        } 
+            if (item.type === "live"){
+                let liveStreamUrl = "https://www.twitch.tv/" + item.user_login;
+                for(const rstream of recommendedStreams){
+                    if (liveStreamUrl === rstream){                        
+                        liveRecommendedStreamUrls.push(rstream);
+                    }
+                }
+                liveStreamUrls.push("https://www.twitch.tv/" + item.user_login);
+            } 
         }
-        return liveStreamUrls;
+        console.log("################# recommended live: " + liveRecommendedStreamUrls.length)
+        return [...liveRecommendedStreamUrls, ...liveStreamUrls];
     });
  
     return printAddress;
