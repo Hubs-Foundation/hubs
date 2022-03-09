@@ -6,8 +6,8 @@ const debugMaterial = new THREE.LineBasicMaterial({
 });
 
 export const AudioZoneShape = {
-  Box: 0,
-  Sphere: 1
+  Box: "box",
+  Sphere: "sphere"
 };
 
 AFRAME.registerComponent("audio-zone", {
