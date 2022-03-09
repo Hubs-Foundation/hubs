@@ -39,7 +39,7 @@ AFRAME.registerComponent("mirror", {
   init() {
     const geometry = this.el.object3DMap?.mesh?.geometry;
     if (!geometry) {
-      throw new Error('can not find "object3DMap.mesh.geometry"');
+      throw new Error("can not find 'object3DMap.mesh.geometry'");
     }
 
     const reflector = new Reflector(geometry, {
