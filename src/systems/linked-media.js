@@ -65,7 +65,7 @@ AFRAME.registerSystem("linked-media", {
 
       // As a convenience, if elA is a video, we restore its volume to 50% since we muted it upon link.
       if (elA.components["media-video"]) {
-        elA.setAttribute("media-video", "volume", 0.5);
+        elA.setAttribute("media-video", "volume", 0);
       }
     }
 

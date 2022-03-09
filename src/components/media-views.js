@@ -255,7 +255,7 @@ AFRAME.registerComponent("media-video", {
     src: { type: "string" },
     audioSrc: { type: "string" },
     contentType: { type: "string" },
-    volume: { type: "number", default: 0.5 },
+    volume: { type: "number", default: 0 },
     loop: { type: "boolean", default: true },
     audioType: { type: "string", default: "pannernode" },
     hidePlaybackControls: { type: "boolean", default: false },
