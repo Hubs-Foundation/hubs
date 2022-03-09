@@ -310,7 +310,7 @@ class ContentCDNComponent extends Component {
                   <b>WARNING - Do not &quot;add site&quot; to Cloudflare</b>, you only need to create workers)
                 </li>
                 <li>
-                  In <b>Home</b> tab, click on <b>Workers</b> side panel. You&apos;ll be asked to create a workers subdomain. 
+                  In the <b>Home</b> tab, click on the <b>Workers</b> side panel. You&apos;ll be asked to create a workers subdomain.
                 </li>
                 <li>
                   Enter your workers subdomain here:
