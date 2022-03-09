@@ -1,31 +1,26 @@
 import { Reflector } from "three/examples/jsm/objects/Reflector";
 
-/** In Reference, camera-tool.js line 605 and line 663 */
-function prepareSetPlayerHeadVisible() {
-  /** @return { THREE.Object3D? } */
-  const getPlayerHead = () => document.getElementById("avatar-head")?.object3D;
+/** @return { THREE.Object3D? } */
+const getPlayerHead = () => document.getElementById("avatar-head")?.object3D;
 
-  let playerHead = getPlayerHead();
+/**
+ * In Reference, camera-tool.js line 605 and line 663
+ *
+ * @param { boolean } visible
+ */
+function setPlayerHeadVisible(visible) {
+  const playerHead = getPlayerHead();
+  if (!playerHead) {
+    return;
+  }
 
-  /**
-   * @param { boolean } visible
-   */
-  return function(visible) {
-    if (!playerHead) {
-      playerHead = getPlayerHead();
-      return;
-    }
+  const scale = visible ? 1 : 0.0001;
 
-    const scale = visible ? 1 : 0.0001;
-
-    playerHead.visible = visible;
-    playerHead.scale.set(scale, scale, scale);
-    playerHead.updateMatrices(true, true);
-    playerHead.updateMatrixWorld(true, true);
-  };
+  playerHead.visible = visible;
+  playerHead.scale.set(scale, scale, scale);
+  playerHead.updateMatrices(true, true);
+  playerHead.updateMatrixWorld(true, true);
 }
-
-const setPlayerHeadVisible = prepareSetPlayerHeadVisible();
 
 /**
  * Should need to entity that has geometry primitive
