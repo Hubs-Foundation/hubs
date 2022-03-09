@@ -19,6 +19,12 @@ AFRAME.registerSystem("nav", {
     geometry.applyMatrix4(mesh.matrixWorld);
     this.pathfinder.setZoneData(zone, Pathfinding.createZone(geometry));
     this.mesh = mesh;
+
+    const teleporters = document.querySelectorAll("[teleporter]");
+    for (let i = 0; i < teleporters.length; i++) {
+      teleporters[i].components["teleporter"].queryCollisionEntities();
+    }
+
     this.el.sceneEl.emit("nav-mesh-loaded");
 
     if (qsTruthy("debugNavmesh")) {

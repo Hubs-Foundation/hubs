@@ -3,7 +3,6 @@
 
 :local(.ui) {
   @extend %default-font;
-
   width: 100%;
   height: 100%;
   top: 0;
@@ -13,84 +12,68 @@
   color: white;
 }
 
-:local(.whiteOverlay) {
-  background-color: rgba(255, 255, 255, 0.2);
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
-
 :local(.grid) {
   display: grid;
-  grid-template-columns: 1fr 20px minmax(200px, 400px) 20px 1fr;
-  grid-template-rows: 1fr 3fr 1fr;
+  grid-template-rows: 10vh 69vh 1fr;
   width: 100%;
   height: 100%;
+  @media (min-height: theme.$breakpoint-vr) {
+    grid-template-rows: 17vh 69vh 1fr;
+  }
 }
 
 :local(.mainPanel) {
-  grid-column: 3;
+  margin: auto;
+  width: clamp(300px, 100%, 80vw);
   grid-row: 2;
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
   pointer-events: auto;
-
 }
 
 :local(.logoTagline) {
-  color: black;
-  text-shadow: 0px 0px 10px #888;
+  color: theme.$text1-color;
+  text-shadow: 0px 0px 10px theme.$text-inverted-color;
   font-weight: bold;
   text-align: center;
-  white-space: nowrap;
   display: flex;
   justify-content: center;
   font-size: 1.2em;
-  margin-bottom: 32px;
+  margin: 30px 0;
 }
 
-:local(.tweetButton) {
-  @extend %action-button;
-  background-color: theme.$twitter-primary-color;
-  align-self: center;
-  padding-right: 32px;
-  display: flex;
-  flex-direction: row;
-
-  img {
-    width: 42px;
-    height: 42px;
-    margin-right: 6px;
-  }
-}
 
 :local(.logo) {
-  width: 100%;
+  width: clamp(200px, 100%, 17vw);
   display: block;
-  filter: drop-shadow(0 0 4px #888);
-  padding-bottom: 1em;
-
+  filter: drop-shadow(0 0 4px theme.$text-inverted-color);
+  
   img {
     width: 100%;
   }
   svg {
-    width: 100%;
-    min-height: 210px;
+    width: clamp(200px, 100%, 17vw);
+    height: clamp(200px, 100%, 17vh);
   }
 }
 
 :local(.info) {
-  position: absolute;
-  color: black;
-  text-shadow: 0px 0px 10px #888;
-  bottom: 12px;
-  left: 12px;
+  grid-row: 3;
+  color: theme.$text1-color;
+  text-shadow: 0px 0px 10px theme.$text-inverted-color;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  align-self: center;
+  text-align: center;
+  @media (min-width: theme.$breakpoint-lg) {
+    align-items: flex-start;
+    align-self: left;
+    margin-left: 16px;
+    text-align: left;
+  }
 }
 
 :local(.name) {
@@ -100,7 +83,7 @@
 
 :local(.attribution) {
   font-size: 1.0em;
-  white-space: wrap;
+  white-space: normal;
 
   .remix {
     font-size: 0.8em;
@@ -108,7 +91,7 @@
 
   a {
     font-size: 0.8em;
-    color: black;
+    color: theme.$text1-color;
     pointer-events: auto;
   }
 }
@@ -135,71 +118,63 @@
   transition: visibility 0s 0.5s, opacity 0.5s linear;
 }
 
-:local(.spoke) {
-  @media(max-width: 768px) {
-    display: none;
-  }
-
-  pointer-events: auto;
-  position: absolute;
-  right: 12px;
-  bottom: 8px;
+:local(.scenePreviewButtonWrapper) {
+  margin: auto;
   display: flex;
+  max-width: 60vw;
   flex-direction: column;
-  text-align: left;
-  font-size: 0.8em;
-  font-weight: bold;
-
-  :local(.madeWith) {
-    color: black;
-    text-shadow: 0px 0px 4px #333;
-    margin-left: 4px;
-    position: absolute;
-    top: -1em;
-    left: 0;
-  }
-
-  img {
-    width: 200px;
-  }
+  justify-content: space-evenly;
+  align-items: center;
 }
 
-:local(.createButtons) {
-  position: relative;
-  display: flex;
-  margin-bottom: 12px;
-}
-
-:local(.createButton) {
+:local(.scenePreviewButton) {
   @extend %action-button;
-  width: 100%;
-  border: 0;
-  flex: 1;
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #007AB8;
+  background-color: #007AB8; 
+  color: theme.$text5-color;
+  box-sizing: border-box;
+  border-radius: 13px;
+  margin: .5rem 0 .5rem 0;
+  white-space: nowrap;
+  svg {
+    margin-right: 8px;
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color
+    }
+  }
+  &:hover {
+    background-color: #008bd1;
+    color: theme.$text5-color;
+    svg {
+      *[stroke=\#000] {
+        stroke: theme.$text5-color
+      }
+  
+      *[fill=\#000] {
+        fill: theme.$text5-color
+      }
+    }
+    
+  }
+  &:active {
+    background-color: #00699E;
+  }
 }
 
 :local(.unavailable) {
-  color: white;
+  color: theme.$text5-color;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
 }
 
-:local(.spokeButton) {
-  @extend %action-button;
-  background-color: theme.$spoke-primary-color;
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 12px;
-  align-self: center;
-  padding-left: 30px;
-  padding-right: 30px;
-
-  svg {
-    font-size: 24px;
-    margin-right: 15px;
-  }
-}
 
 :local(.attribution) {
   & > * {

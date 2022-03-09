@@ -23,9 +23,8 @@
   --text5-color: #{theme.$white};
   --text5-color-hover: var(--text5-color);
   --text5-color-pressed: var(--text5-color);
-  --text6-color: #{theme.$black};
-  --text6-color-hover: var(--text6-color);
-  --text6-color-pressed: var(--text6-color);
+  --text-inverted-color: #{theme.$white};
+ 
 
   --link-color: #{theme.$blue};
   --link-color-hover: #{theme.$blue-hover};

@@ -89,6 +89,8 @@ export class EnvironmentSystem {
   updateEnvironment(envEl) {
     const envSettingsEl = envEl.querySelector("[environment-settings]");
     const skyboxEl = envEl.querySelector("[skybox]");
+    const navmeshEl = envEl.querySelector("[nav-mesh]");
+
     const envSettings = {
       ...defaultEnvSettings,
       skybox: skyboxEl?.components["skybox"]
@@ -97,6 +99,18 @@ export class EnvironmentSystem {
     if (envSettingsEl) {
       Object.assign(envSettings, envSettingsEl.components["environment-settings"].data);
     }
+
+    const navMesh = navmeshEl?.object3D.getObjectByProperty("isMesh", true);
+    if (navMesh) {
+      AFRAME.scenes[0].systems.nav.loadMesh(navMesh, navmeshEl.components["nav-mesh"].data.zone);
+    }
+
+    // TODO animated objects should not be static
+    envEl.object3D.traverse(o => {
+      if (o.isMesh) {
+        o.reflectionProbeMode = "static";
+      }
+    });
 
     this.applyEnvSettings(envSettings);
   }
@@ -187,10 +201,44 @@ export class EnvironmentSystem {
   }
 }
 
+AFRAME.registerComponent("nav-mesh", {
+  schema: {
+    zone: { default: "character" }
+  }
+});
+
 AFRAME.registerComponent("environment-settings", {
   schema: {
     toneMapping: { default: defaultEnvSettings.toneMapping, oneOf: Object.values(toneMappingOptions) },
     toneMappingExposure: { default: defaultEnvSettings.toneMappingExposure },
     backgroundColor: { type: "color", default: defaultEnvSettings.background }
+  }
+});
+
+AFRAME.registerComponent("reflection-probe", {
+  schema: {
+    size: { default: 1 },
+    envMapTexture: { type: "map" }
+  },
+
+  init: function() {
+    this.el.object3D.updateMatrices();
+
+    const box = new THREE.Box3()
+      .setFromCenterAndSize(new THREE.Vector3(), new THREE.Vector3().setScalar(this.data.size * 2))
+      .applyMatrix4(this.el.object3D.matrixWorld);
+
+    this.el.setObject3D("probe", new THREE.ReflectionProbe(box, this.data.envMapTexture));
+
+    if (this.el.sceneEl.systems["hubs-systems"].environmentSystem.debugMode) {
+      const debugBox = new THREE.Box3().setFromCenterAndSize(
+        new THREE.Vector3(),
+        new THREE.Vector3().setScalar(this.data.size * 2)
+      );
+      this.el.setObject3D(
+        "helper",
+        new THREE.Box3Helper(debugBox, new THREE.Color(Math.random(), Math.random(), Math.random()))
+      );
+    }
   }
 });

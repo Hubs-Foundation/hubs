@@ -89,14 +89,14 @@ export const SCHEMA = {
 
     preferences: {
       type: "object",
-      // Allow removed preferences to pass validation
-      additionalProperties: true,
+      additionalProperties: false,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
         preferredMic: { type: "string" },
+        preferredSpeakers: { type: "string" },
         preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool" },
-        audioOutputMode: { type: "string" },
+        disableLeftRightPanning: { type: "bool" },
         audioNormalization: { type: "bool" },
         invertTouchscreenCameraMove: { type: "bool" },
         enableOnScreenJoystickLeft: { type: "bool" },
@@ -114,6 +114,7 @@ export const SCHEMA = {
         maxResolutionHeight: { type: "number" },
         globalVoiceVolume: { type: "number" },
         globalMediaVolume: { type: "number" },
+        globalSFXVolume: { type: "number" },
         snapRotationDegrees: { type: "number" },
         materialQualitySetting: { type: "string" },
         enableDynamicShadows: { type: "bool" },
@@ -132,7 +133,9 @@ export const SCHEMA = {
         showAudioDebugPanel: { type: "bool" },
         enableAudioClipping: { type: "bool" },
         audioClippingThreshold: { type: "number" },
-        theme: { type: "string" }
+        theme: { type: "string" },
+        avatarVoiceLevels: { type: "object" },
+        cursorSize: { type: "number" }
       }
     },
 
@@ -360,12 +363,14 @@ export default class Store extends EventTarget {
 
   update(newState, mergeOpts) {
     const finalState = merge(this.state, newState, mergeOpts);
-    const { valid } = validator.validate(finalState, SCHEMA);
+    const { valid, errors } = validator.validate(finalState, SCHEMA);
 
+    // Cleanup unsupported properties
     if (!valid) {
-      // Intentionally not including details about the state or validation result here, since we don't want to leak
-      // sensitive data in the error message.
-      throw new Error(`Write to store failed schema validation.`);
+      errors.forEach(error => {
+        console.error(`Removing invalid preference from store: ${error.message}`);
+        delete error.instance[error.argument];
+      });
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));

@@ -13,6 +13,7 @@
     color: theme.$text1-color;
     margin-top: 8px;
     margin-bottom: 3px;
+    white-space: nowrap;
   }
 }
 
@@ -181,6 +182,7 @@
 :local(.accept) {
   :local(.icon-container) {
     background-color: theme.$accept-color;
+    border-color: theme.$accept-border-color;
   }  
 
   &:hover :local(.icon-container) {
@@ -674,4 +676,28 @@
 
 :local(.status-recording) {
   background-color: theme.$status-recording-color;
+}
+
+:local(.left) {
+  :local(.icon-container) {
+    width: 48px;
+    border-radius: 0px;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
+  } 
+}
+
+:local(.middle) {
+  :local(.icon-container) {
+    border-radius: 0px;
+  }
+}
+
+:local(.right) {
+  :local(.icon-container) {
+    width: 48px;
+    border-radius: 0px;
+    border-top-right-radius: 9999px;
+    border-bottom-right-radius: 9999px;
+  }
 }

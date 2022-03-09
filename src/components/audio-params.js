@@ -6,7 +6,7 @@ export const DISTANCE_MODEL_OPTIONS = ["linear", "inverse", "exponential"];
 export const SourceType = Object.freeze({
   MEDIA_VIDEO: 0,
   AVATAR_AUDIO_SOURCE: 1,
-  // TODO: Fill in missing value (2)
+  SFX: 2,
   AUDIO_TARGET: 3,
   AUDIO_ZONE: 4
 });

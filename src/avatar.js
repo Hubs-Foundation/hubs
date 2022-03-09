@@ -108,7 +108,7 @@ class AvatarPage extends React.Component {
                 {copyState === "copying" ? (
                   <FormattedMessage id="avatar-page.copying-avatar" defaultMessage="Copying..." />
                 ) : (
-                  <FormattedMessage id="avatar-page.copyied-avatar" defaultMessage="Copied" />
+                  <FormattedMessage id="avatar-page.copied-avatar" defaultMessage="Copied" />
                 )}
               </div>
             ) : (

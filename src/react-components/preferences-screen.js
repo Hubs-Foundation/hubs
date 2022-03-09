@@ -10,6 +10,9 @@ import styles from "../assets/stylesheets/preferences-screen.scss";
 import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
+import MediaDevicesManager from "../utils/media-devices-manager";
+import { MediaDevicesEvents } from "../utils/media-devices-utils";
+import { Slider } from "./input/Slider";
 
 export const CLIPPING_THRESHOLD_ENABLED = false;
 export const CLIPPING_THRESHOLD_MIN = 0.0;
@@ -20,10 +23,6 @@ export const GLOBAL_VOLUME_MIN = 0;
 export const GLOBAL_VOLUME_MAX = 200;
 export const GLOBAL_VOLUME_STEP = 5;
 export const GLOBAL_VOLUME_DEFAULT = 100;
-
-function round(step, n) {
-  return Math.round(n / step) * step;
-}
 
 function WarnIcon() {
   return (
@@ -90,15 +89,11 @@ export class NumberRangeSelector extends Component {
   };
   state = {
     isFocused: false,
-    isDragging: false,
     displayValue: "",
     digitsFromUser: 0
   };
   constructor(props) {
     super(props);
-    this.myRoot = React.createRef();
-    this.stopDragging = this.stopDragging.bind(this);
-    this.drag = this.drag.bind(this);
     this.storeUpdated = this.storeUpdated.bind(this);
   }
 
@@ -116,8 +111,6 @@ export class NumberRangeSelector extends Component {
 
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    window.addEventListener("mouseup", this.stopDragging);
-    window.addEventListener("mousemove", this.drag);
     const currentValue =
       this.props.store.state.preferences[this.props.storeKey] !== undefined
         ? this.props.store.state.preferences[this.props.storeKey]
@@ -125,21 +118,7 @@ export class NumberRangeSelector extends Component {
     this.setState({ displayValue: currentValue.toFixed(this.props.digits) });
   }
   componentWillUnmount() {
-    window.removeEventListener("mouseup", this.stopDragging);
-    window.removeEventListener("mousemove", this.drag);
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-  }
-
-  stopDragging() {
-    this.setState({ isDragging: false });
-  }
-
-  drag(e) {
-    if (!this.state.isDragging) return;
-    const t = Math.max(0, Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1));
-    const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
-    this.setState({ displayValue: num.toFixed(this.props.digits) });
-    this.props.setValue(num);
   }
 
   render() {
@@ -155,7 +134,6 @@ export class NumberRangeSelector extends Component {
             type="text"
             value={this.state.displayValue}
             onClick={e => {
-              //e.preventDefault();
               e.target.focus();
               e.target.select();
             }}
@@ -177,34 +155,17 @@ export class NumberRangeSelector extends Component {
             }}
           />
         </div>
-        <div
-          ref={this.myRoot}
-          className={classNames(styles.rangeSlider)}
-          onMouseDown={e => {
-            e.preventDefault();
-            this.setState({ isDragging: true, digitsFromUser: 0 });
-            const t = Math.max(
-              0,
-              Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1)
-            );
-            const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
-            this.setState({ displayValue: num.toFixed(this.props.digits) });
-            this.props.setValue(num);
+        <Slider
+          step={this.props.step}
+          min={this.props.min}
+          max={this.props.max}
+          value={currentValue}
+          onChange={value => {
+            const num = value.toFixed(this.props.digits);
+            this.setState({ displayValue: num, digitsFromUser: 0 });
+            this.props.setValue(parseFloat(num));
           }}
-        >
-          <input
-            type="range"
-            step={this.props.step}
-            min={this.props.min}
-            max={this.props.max}
-            value={currentValue}
-            onChange={e => {
-              const num = round(this.props.step, parseFloat(e.target.value));
-              this.setState({ displayValue: num.toFixed(this.props.digits), digitsFromUser: 0 });
-              this.props.setValue(parseFloat(num.toFixed(this.props.digits)));
-            }}
-          />
-        </div>
+        />
       </div>
     );
   }
@@ -232,6 +193,22 @@ BooleanPreference.propTypes = {
   storeKey: PropTypes.string,
   defaultBool: PropTypes.bool,
   setValue: PropTypes.func
+};
+
+function MapCountPreference({ store, storeKey, defaultValue, text }) {
+  const storedPref = store.state.preferences[storeKey];
+  const value = storedPref ? Object.keys(storedPref).length : defaultValue;
+  return (
+    <span className={styles.preferenceLabel}>
+      {value} {text}
+    </span>
+  );
+}
+MapCountPreference.propTypes = {
+  store: PropTypes.object,
+  storeKey: PropTypes.string,
+  defaultValue: PropTypes.number,
+  text: PropTypes.string
 };
 
 class Select extends React.Component {
@@ -297,7 +274,8 @@ export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
   SELECT: 2,
   NUMBER_WITH_RANGE: 3,
-  MAX_RESOLUTION: 4
+  MAX_RESOLUTION: 4,
+  MAP_COUNT: 5
 };
 
 export class MaxResolutionPreferenceItem extends Component {
@@ -374,6 +352,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.preferred-mic",
     defaultMessage: "Preferred mic"
   },
+  preferredSpeakers: {
+    id: "preferences-screen.preference.preferred-speakers",
+    defaultMessage: "Preferred speakers"
+  },
   muteMicOnEntry: {
     id: "preferences-screen.preference.mute-mic-on-entry",
     defaultMessage: "Mute microphone on entry"
@@ -385,6 +367,14 @@ const preferenceLabels = defineMessages({
   globalMediaVolume: {
     id: "preferences-screen.preference.global-media-volume",
     defaultMessage: "Media Volume"
+  },
+  globalSFXVolume: {
+    id: "preferences-screen.preference.global-sfx-volume",
+    defaultMessage: "SFX Volume"
+  },
+  avatarVoiceLevels: {
+    id: "preferences-screen.preference.avatar-volumes",
+    defaultMessage: "Stored avatar volumes"
   },
   disableSoundEffects: {
     id: "preferences-screen.preference.disable-sound-effects",
@@ -513,6 +503,14 @@ const preferenceLabels = defineMessages({
   lazyLoadSceneMedia: {
     id: "preferences-screen.preference.lazy-load-scene-media",
     defaultMessage: "Enable Scene Media Lazy Loading"
+  },
+  disableLeftRightPanning: {
+    id: "preferences-screen.preference.disable-panning",
+    defaultMessage: "Disable audio left/right panning"
+  },
+  cursorSize: {
+    id: "preferences-screen.preference.cursor-size",
+    defaultMessage: "Cursor Size"
   }
 });
 
@@ -627,13 +625,15 @@ const CATEGORY_CONTROLS = 1;
 const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
+const CATEGORY_ACCESSIBILITY = 5;
 const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
   [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
   [CATEGORY_MISC]: { id: "preferences-screen.category.misc", defaultMessage: "Misc" },
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
-  [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" }
+  [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" },
+  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" }
 });
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -679,7 +679,8 @@ const controlType = new Map([
   [PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, BooleanPreference],
   [PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION, MaxResolutionPreferenceItem],
   [PREFERENCE_LIST_ITEM_TYPE.SELECT, PreferenceSelect],
-  [PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE, NumberRangeSelector]
+  [PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE, NumberRangeSelector],
+  [PREFERENCE_LIST_ITEM_TYPE.MAP_COUNT, MapCountPreference]
 ]);
 
 function Control({ itemProps, store, setValue }) {
@@ -793,9 +794,8 @@ class PreferencesScreen extends Component {
     // We should either avoid remounting or persist the category somewhere besides state.
     super();
 
-    this.devicesUpdated = () => {
-      this.updateVideoDevices();
-    };
+    this.storeUpdated = this.storeUpdated.bind(this);
+
     this.mediaDevicesManager = window.APP.mediaDevicesManager;
 
     this.state = {
@@ -805,25 +805,24 @@ class PreferencesScreen extends Component {
         key: "preferredMic",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "none", text: "None" }],
-        defaultString: "none",
-        onChanged: this.onMicSelectionChanged
+        defaultString: "Default"
       },
       preferredCamera: {
         key: "preferredCamera",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "none", text: "None" }],
         defaultString: "none"
-      }
+      },
+      ...(MediaDevicesManager.isAudioOutputSelectEnabled && {
+        preferredSpeakers: {
+          key: "preferredSpeakers",
+          prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+          options: [{ value: "none", text: "None" }],
+          defaultString: "Default"
+        }
+      })
     };
   }
-
-  onMicSelectionChanged = deviceId => {
-    if (deviceId === "none") {
-      this.mediaDevicesManager.stopMicShare().then(this.updateMediaDevices);
-    } else {
-      this.mediaDevicesManager.startMicShare(deviceId).then(this.updateMediaDevices);
-    }
-  };
 
   onMediaDevicesUpdated = () => {
     this.updateMediaDevices();
@@ -836,17 +835,14 @@ class PreferencesScreen extends Component {
       text: device.label
     }));
     const preferredMic = { ...this.state.preferredMic };
-    preferredMic.options = [
-      {
-        value: "none",
-        text: this.props.intl.formatMessage({
-          id: "preferences-screen.preferred-mic.default",
-          defaultMessage: "None"
-        })
-      }
-    ];
-    preferredMic.options.push(...micOptions);
-    this.props.store.update({ preferences: { ["preferredMic"]: this.mediaDevicesManager.selectedMicDeviceId } });
+    preferredMic.options = micOptions;
+
+    const speakersOptions = this.mediaDevicesManager.outputDevices.map(device => ({
+      value: device.value,
+      text: device.label
+    }));
+    const preferredSpeakers = { ...this.state.preferredSpeakers };
+    preferredSpeakers.options = speakersOptions?.length > 0 ? speakersOptions : [{ value: "none", text: "None" }];
 
     // Video devices update
     const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
@@ -880,30 +876,32 @@ class PreferencesScreen extends Component {
     preferredCamera.options.push(...videoOptions);
 
     // Update media devices state
-    this.setState({ preferredMic, preferredCamera });
-  };
-
-  storeUpdated = () => {
-    const deviceId = this.props.store?.state?.preferences?.preferredMic;
-    if (!deviceId && this.mediaDevicesManager.isMicShared) {
-      this.mediaDevicesManager.stopMicShare();
-    }
+    this.setState({
+      preferredMic,
+      preferredSpeakers,
+      preferredCamera
+    });
   };
 
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    this.props.scene.addEventListener("devicechange", this.onMediaDevicesUpdated);
+    this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
 
-    if (!this.mediaDevicesManager.isMicShared) {
-      this.mediaDevicesManager.startMicShare().then(this.updateMediaDevices);
-    } else {
-      this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
-    }
+    this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
   }
 
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    this.props.scene.removeEventListener("devicechange", this.onMediaDevicesUpdated);
+    this.mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
+  }
+
+  storeUpdated() {
+    const { preferredMic } = this.props.store.state.preferences;
+    if (preferredMic !== this.mediaDevicesManager.selectedMicDeviceId) {
+      this.mediaDevicesManager
+        .startMicShare({ deviceId: preferredMic, updatePrefs: false })
+        .then(this.updateMediaDevices);
+    }
   }
 
   createSections() {
@@ -980,6 +978,7 @@ class PreferencesScreen extends Component {
         CATEGORY_AUDIO,
         [
           this.state.preferredMic,
+          ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {
             key: "globalVoiceVolume",
@@ -993,11 +992,29 @@ class PreferencesScreen extends Component {
           {
             key: "globalMediaVolume",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: GLOBAL_VOLUME_MIN,
+            max: GLOBAL_VOLUME_MAX,
+            step: GLOBAL_VOLUME_STEP,
+            digits: 0,
+            defaultNumber: GLOBAL_VOLUME_DEFAULT
+          },
+          {
+            key: "globalSFXVolume",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 0,
             max: 200,
             step: 5,
             digits: 0,
             defaultNumber: 100
+          },
+          {
+            key: "avatarVoiceLevels",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.MAP_COUNT,
+            defaultValue: 0,
+            text: intl.formatMessage({
+              id: "preferences-screen.preference.avatar-volumes.entries",
+              defaultMessage: "Entries"
+            })
           },
           { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           {
@@ -1097,7 +1114,26 @@ class PreferencesScreen extends Component {
           { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
           { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          {
+            key: "cursorSize",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 1,
+            max: 5,
+            step: 0.5,
+            digits: 1,
+            defaultNumber: 1
+          }
+        ]
+      ],
+      [
+        CATEGORY_ACCESSIBILITY,
+        [
+          {
+            key: "disableLeftRightPanning",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: false
+          }
         ]
       ]
     ]);
@@ -1111,7 +1147,16 @@ class PreferencesScreen extends Component {
     }
 
     return new Map([
-      [CATEGORY_AUDIO, [{ items: items.get(CATEGORY_AUDIO) }]],
+      [
+        CATEGORY_AUDIO,
+        [
+          { items: items.get(CATEGORY_AUDIO) },
+          {
+            name: intl.formatMessage(categoryNames[CATEGORY_ACCESSIBILITY]),
+            items: items.get(CATEGORY_ACCESSIBILITY)
+          }
+        ]
+      ],
       [
         CATEGORY_CONTROLS,
         [

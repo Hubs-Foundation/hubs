@@ -2,6 +2,7 @@ import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
+import { MediaDevices } from "./utils/media-devices-utils";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -778,7 +779,6 @@ export class DialogAdapter extends EventEmitter {
           } else {
             // stopTracks = false because otherwise the track will end during a temporary disconnect
             this._micProducer = await this._sendTransport.produce({
-              paused: !this._micShouldBeEnabled,
               track,
               stopTracks: false,
               codecOptions: { opusStereo: false, opusDtx: true },
@@ -790,14 +790,20 @@ export class DialogAdapter extends EventEmitter {
               this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
               this._micProducer = null;
             });
+
+            if (!this._micShouldBeEnabled) {
+              this._micProducer.pause();
+            }
+
+            this.emit("mic-state-changed", { enabled: this.isMicEnabled });
           }
         } else {
           sawVideo = true;
 
-          if (track._hubs_contentHint === "share") {
+          if (track._hubs_contentHint === MediaDevices.SCREEN) {
             await this.disableCamera();
             await this.enableShare(track);
-          } else if (track._hubs_contentHint === "camera") {
+          } else if (track._hubs_contentHint === MediaDevices.CAMERA) {
             await this.disableShare();
             await this.enableCamera(track);
           }
@@ -902,6 +908,10 @@ export class DialogAdapter extends EventEmitter {
     } else {
       this.enableMicrophone(true);
     }
+  }
+
+  set micShouldBeEnabled(enabled) {
+    this._micShouldBeEnabled = enabled;
   }
 
   enableMicrophone(enabled) {

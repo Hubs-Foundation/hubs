@@ -1,0 +1,15 @@
+name: hubs
+on:
+  push:
+    branches:
+    paths-ignore: ["README.md"]
+  workflow_dispatch:
+
+jobs:
+  turkeyGitops:
+    uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@master
+    with:
+      registry: mozillareality
+      dockerfile: RetPageOriginDockerfile
+    secrets:
+      DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}

@@ -92,12 +92,13 @@ ChatLengthWarning.propTypes = {
   maxLength: PropTypes.number
 };
 
-export function ChatInput({ warning, isOverMaxLength, ...props }) {
+export const ChatInput = forwardRef(({ warning, isOverMaxLength, ...props }, ref) => {
   const intl = useIntl();
 
   return (
     <div className={styles.chatInputContainer}>
       <TextAreaInput
+        ref={ref}
         textInputStyles={styles.chatInputTextAreaStyles}
         className={classNames({ [styles.warningBorder]: isOverMaxLength })}
         placeholder={intl.formatMessage({ id: "chat-sidebar.input.placeholder", defaultMessage: "Message..." })}
@@ -106,7 +107,7 @@ export function ChatInput({ warning, isOverMaxLength, ...props }) {
       {warning}
     </div>
   );
-}
+});
 
 ChatInput.propTypes = {
   onSpawn: PropTypes.func,

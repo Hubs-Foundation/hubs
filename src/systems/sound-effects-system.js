@@ -15,8 +15,10 @@ import URL_TACK from "../assets/sfx/tack.mp3";
 import URL_MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
 import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
 import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
+import URL_SPEAKER_TONE from "../assets/sfx/tone.mp3";
 import { setMatrixWorld } from "../utils/three-utils";
 import { isSafari } from "../utils/detect-safari";
+import { SourceType } from "../components/audio-params";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;
@@ -44,6 +46,7 @@ export const SOUND_MEDIA_LOADED = soundEnum++;
 export const SOUND_CAMERA_TOOL_COUNTDOWN = soundEnum++;
 export const SOUND_PREFERENCE_MENU_HOVER = soundEnum++;
 export const SOUND_SPAWN_EMOJI = soundEnum++;
+export const SOUND_SPEAKER_TONE = soundEnum++;
 
 // Safari doesn't support the promise form of decodeAudioData, so we polyfill it.
 function decodeAudioData(audioContext, arrayBuffer) {
@@ -87,7 +90,8 @@ export class SoundEffectsSystem {
       [SOUND_MEDIA_LOADING, URL_MEDIA_LOADING],
       [SOUND_MEDIA_LOADED, URL_MEDIA_LOADED],
       [SOUND_PREFERENCE_MENU_HOVER, URL_FREEZE],
-      [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI]
+      [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI],
+      [SOUND_SPEAKER_TONE, URL_SPEAKER_TONE]
     ];
     const loading = new Map();
     const load = url => {
@@ -127,7 +131,7 @@ export class SoundEffectsSystem {
     // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
     const source = this.audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    source.connect(this.audioContext.destination);
+    this.scene.systems["hubs-systems"].audioSystem.addAudio({ sourceType: SourceType.SFX, node: source });
     source.loop = loop;
     this.pendingAudioSourceNodes.push(source);
     return source;
@@ -138,13 +142,17 @@ export class SoundEffectsSystem {
     const audioBuffer = this.sounds.get(sound);
     if (!audioBuffer) return null;
 
-    const disablePositionalAudio = isSafari() || window.APP.store.state.preferences.audioOutputMode === "audio";
+    const disablePositionalAudio = isSafari() || window.APP.store.state.preferences.disableLeftRightPanning;
     const positionalAudio = disablePositionalAudio
       ? new THREE.Audio(this.scene.audioListener)
       : new THREE.PositionalAudio(this.scene.audioListener);
     positionalAudio.setBuffer(audioBuffer);
     positionalAudio.loop = loop;
     this.pendingPositionalAudios.push(positionalAudio);
+    this.scene.systems["hubs-systems"].audioSystem.addAudio({
+      sourceType: SourceType.SFX,
+      node: positionalAudio
+    });
     return positionalAudio;
   }
 
@@ -180,7 +188,7 @@ export class SoundEffectsSystem {
     const gain = this.audioContext.createGain();
     source.buffer = audioBuffer;
     source.connect(gain);
-    gain.connect(this.audioContext.destination);
+    this.scene.systems["hubs-systems"].audioSystem.addAudio({ sourceType: SourceType.SFX, node: gain });
     source.loop = true;
     this.pendingAudioSourceNodes.push(source);
     return { gain, source };
@@ -192,6 +200,7 @@ export class SoundEffectsSystem {
       this.pendingAudioSourceNodes.splice(index, 1);
     } else {
       node.stop();
+      this.scene.systems["hubs-systems"].audioSystem.removeAudio({ node });
     }
   }
 
@@ -213,6 +222,7 @@ export class SoundEffectsSystem {
     this.positionalAudiosFollowingObject3Ds = this.positionalAudiosFollowingObject3Ds.filter(
       ({ positionalAudio }) => positionalAudio !== inPositionalAudio
     );
+    this.scene.systems["hubs-systems"].audioSystem.removeAudio({ node: inPositionalAudio });
   }
 
   stopAllPositionalAudios() {

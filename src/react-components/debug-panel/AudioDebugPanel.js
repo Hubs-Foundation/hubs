@@ -93,12 +93,14 @@ function getPrefs() {
     enableAudioClipping: APP.store.state.preferences.enableAudioClipping,
     audioClippingThreshold: APP.store.state.preferences.audioClippingThreshold,
     globalVoiceVolume: APP.store.state.preferences.globalVoiceVolume,
-    globalMediaVolume: APP.store.state.preferences.globalMediaVolume
+    globalMediaVolume: APP.store.state.preferences.globalMediaVolume,
+    globalSFXVolume: APP.store.state.preferences.globalSFXVolume
   };
   if (prefs.enableAudioClipping === undefined) prefs.enableAudioClipping = CLIPPING_THRESHOLD_ENABLED;
   if (prefs.audioClippingThreshold === undefined) prefs.audioClippingThreshol = CLIPPING_THRESHOLD_DEFAULT;
   if (prefs.globalVoiceVolume === undefined) prefs.globalVoiceVolume = GLOBAL_VOLUME_DEFAULT;
   if (prefs.globalMediaVolume === undefined) prefs.globalMediaVolume = GLOBAL_VOLUME_DEFAULT;
+  if (prefs.globalSFXVolume === undefined) prefs.globalSFXVolume = GLOBAL_VOLUME_DEFAULT;
   return prefs;
 }
 
@@ -228,6 +230,23 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
           >
             <p className={classNames(styles.propText)}>
               <FormattedMessage id="audio-debug-view.global.mediaVolume" defaultMessage="Media Volume" />
+            </p>
+          </SliderProperty>
+          <SliderProperty
+            defaultValue={preferences.globalSFXVolume}
+            step={GLOBAL_VOLUME_STEP}
+            min={GLOBAL_VOLUME_MIN}
+            max={GLOBAL_VOLUME_MAX}
+            onChange={value => {
+              APP.store.update({
+                preferences: {
+                  globalSFXVolume: value
+                }
+              });
+            }}
+          >
+            <p className={classNames(styles.propText)}>
+              <FormattedMessage id="audio-debug-view.global.sfxVolume" defaultMessage="SFX Volume" />
             </p>
           </SliderProperty>
         </CollapsiblePanel>

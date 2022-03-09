@@ -252,6 +252,18 @@ module.exports = async (env, argv) => {
     ]
   };
 
+  const devServerHeaders = {
+    "Access-Control-Allow-Origin": "*"
+  };
+
+  // Behind and environment var for now pending further testing
+  if (process.env.DEV_CSP_SOURCE) {
+    const CSPResp = await fetch(`https://${process.env.DEV_CSP_SOURCE}/`);
+    const remoteCSP = CSPResp.headers.get("content-security-policy");
+    devServerHeaders["content-security-policy"] = remoteCSP;
+    // .replaceAll("connect-src", "connect-src https://example.com");
+  }
+
   return {
     node: {
       // need to specify this manually because some random lodash code will try to access
@@ -285,9 +297,7 @@ module.exports = async (env, argv) => {
       public: `${host}:8080`,
       useLocalIp: true,
       allowedHosts: [host, "hubs.local"],
-      headers: {
-        "Access-Control-Allow-Origin": "*"
-      },
+      headers: devServerHeaders,
       hot: liveReload,
       inline: liveReload,
       historyApiFallback: {
@@ -382,7 +392,29 @@ module.exports = async (env, argv) => {
         // Some JS assets are loaded at runtime and should be coppied unmodified and loaded using file-loader
         {
           test: [
-            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js")
+            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js"),
+            path.resolve(
+              __dirname,
+              "node_modules",
+              "three",
+              "examples",
+              "js",
+              "libs",
+              "draco",
+              "gltf",
+              "draco_decoder.js"
+            ),
+            path.resolve(
+              __dirname,
+              "node_modules",
+              "three",
+              "examples",
+              "js",
+              "libs",
+              "draco",
+              "gltf",
+              "draco_wasm_wrapper.js"
+            )
           ],
           loader: "file-loader",
           options: {

@@ -9,6 +9,7 @@ import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -373,6 +374,7 @@ function runMigration(version, json) {
 }
 
 let ktxLoader;
+let dracoLoader;
 
 class GLTFHubsPlugin {
   constructor(parser, jsonPreprocessor) {
@@ -654,9 +656,15 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   if (!ktxLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
     ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
   }
+  if (!dracoLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
+    dracoLoader = new DRACOLoader(loadingManager);
+  }
 
   if (ktxLoader) {
     gltfLoader.setKTX2Loader(ktxLoader);
+  }
+  if (dracoLoader) {
+    gltfLoader.setDRACOLoader(dracoLoader);
   }
 
   return new Promise((resolve, reject) => {
@@ -740,9 +748,11 @@ AFRAME.registerComponent("gltf-model-plus", {
     if (this.data.batch && this.model) {
       this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
     }
-    const src = resolveAsset(this.data.src);
-    if (src) {
-      gltfCache.release(src);
+    if (this.data.useCache) {
+      const src = resolveAsset(this.data.src);
+      if (src) {
+        gltfCache.release(src);
+      }
     }
   },
 
@@ -836,7 +846,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         if (el) rewires.push(() => (o.el = el));
       });
 
-      if (lastSrc) {
+      if (lastSrc && this.data.useCache) {
         gltfCache.release(lastSrc);
       }
       this.el.setObject3D("mesh", object3DToSet);

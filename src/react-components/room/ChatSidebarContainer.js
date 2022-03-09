@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import {
   ChatSidebar,
@@ -160,11 +160,12 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occupantCount, onClose }) {
+export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occupantCount, inputEffect, onClose }) {
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
   const intl = useIntl();
+  const inputRef = useRef();
 
   const onKeyDown = useCallback(
     e => {
@@ -173,10 +174,16 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
           sendMessage(e.target.value);
           setMessage("");
+          // intentionally only doing this on "enter" press and not clicking of send button
+          if (e.target.value.startsWith("/")) {
+            onClose();
+          }
         }
+      } else if (e.key === "Escape") {
+        onClose();
       }
     },
-    [sendMessage, setMessage]
+    [sendMessage, setMessage, onClose]
   );
 
   const onSendMessage = useCallback(
@@ -203,6 +210,8 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     },
     [scene]
   );
+
+  useEffect(() => inputEffect(inputRef.current), [inputEffect, inputRef]);
 
   useEffect(
     () => {
@@ -269,6 +278,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
       </ChatMessageList>
       <ChatInput
         id="chat-input"
+        ref={inputRef}
         onKeyDown={onKeyDown}
         onChange={e => setMessage(e.target.value)}
         placeholder={placeholder}
@@ -306,7 +316,8 @@ ChatSidebarContainer.propTypes = {
   presences: PropTypes.object.isRequired,
   occupantCount: PropTypes.number.isRequired,
   scene: PropTypes.object.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  inputEffect: PropTypes.func.isRequired
 };
 
 export function ChatToolbarButtonContainer(props) {

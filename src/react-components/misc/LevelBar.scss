@@ -1,0 +1,22 @@
+@use '../styles/theme';
+
+:local(.level-bar-container) {
+  position: relative;
+  display: flex;
+}
+
+:local(.level-bar-border) {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--toolbar-basic-border-color);
+  border-radius: theme.$border-radius-small;
+}
+
+:local(.level-bar) {
+  position: absolute;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  background-color: theme.$green;
+  margin-left: 4px;
+  margin-top: 4px;
+}

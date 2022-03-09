@@ -52,7 +52,7 @@ function timeFmt(t) {
   return h === "00" ? `${m}:${s}` : `${h}:${m}:${s}`;
 }
 
-const MAX_MULTIPLIER = 2;
+const MAX_GAIN_MULTIPLIER = 2;
 
 AFRAME.registerComponent("media-video", {
   schema: {
@@ -87,6 +87,7 @@ AFRAME.registerComponent("media-video", {
     this.snap = this.snap.bind(this);
     this.changeVolumeBy = this.changeVolumeBy.bind(this);
     this.togglePlaying = this.togglePlaying.bind(this);
+    this.setupAudio = this.setupAudio.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
 
@@ -166,16 +167,17 @@ AFRAME.registerComponent("media-video", {
       evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
     });
 
-    let audioOutputModePref = APP.store.state.preferences.audioOutputMode;
+    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
     this.onPreferenceChanged = () => {
-      const newPref = APP.store.state.preferences.audioOutputMode;
-      const shouldRecreateAudio = audioOutputModePref !== newPref && this.audio && this.mediaElementAudioSource;
-      audioOutputModePref = newPref;
+      const newPref = APP.store.state.preferences.disableLeftRightPanning;
+      const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && this.audio && this.mediaElementAudioSource;
+      disableLeftRightPanningPref = newPref;
       if (shouldRecreateAudio) {
         this.setupAudio();
       }
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
+    this.el.addEventListener("audio_type_changed", this.setupAudio);
   },
 
   play() {
@@ -209,7 +211,7 @@ AFRAME.registerComponent("media-video", {
 
   changeVolumeBy(v) {
     let gainMultiplier = APP.gainMultipliers.get(this.el);
-    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_MULTIPLIER);
+    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_GAIN_MULTIPLIER);
     APP.gainMultipliers.set(this.el, gainMultiplier);
     this.updateVolumeLabel();
     const audio = APP.audios.get(this.el);
@@ -337,10 +339,8 @@ AFRAME.registerComponent("media-video", {
   },
 
   setupAudio() {
-    if (this.audio) {
-      this.audio.disconnect();
-      this.el.removeObject3D("sound");
-    }
+    this.removeAudio();
+
     APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
     if (this.data.videoPaused) {
@@ -356,9 +356,7 @@ AFRAME.registerComponent("media-video", {
     } else {
       this.audio = new THREE.Audio(audioListener);
     }
-
-    this.audioSystem.removeAudio(this.audio);
-    this.audioSystem.addAudio(SourceType.MEDIA_VIDEO, this.audio);
+    this.audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: this.audio });
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
     this.el.setObject3D("sound", this.audio);
@@ -458,6 +456,7 @@ AFRAME.registerComponent("media-video", {
 
     if (!this.mesh || projection !== oldData.projection) {
       const material = new THREE.MeshBasicMaterial();
+      material.toneMapped = false;
 
       let geometry;
 
@@ -755,7 +754,7 @@ AFRAME.registerComponent("media-video", {
     this.volumeLabel.setAttribute(
       "text",
       "value",
-      gainMultiplier === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(gainMultiplier / (MAX_MULTIPLIER / 20))]
+      gainMultiplier === 0 ? "MUTE" : VOLUME_LABELS[Math.floor(gainMultiplier / (MAX_GAIN_MULTIPLIER / 20))]
     );
   },
 
@@ -831,11 +830,7 @@ AFRAME.registerComponent("media-video", {
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
 
-    if (this.audio) {
-      this.el.removeObject3D("sound");
-      this.audioSystem.removeAudio(this.audio);
-      delete this.audio;
-    }
+    this.removeAudio();
 
     if (this.networkedEl) {
       this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
@@ -860,5 +855,14 @@ AFRAME.registerComponent("media-video", {
     }
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
+    this.el.addEventListener("audio_type_changed", this.setupAudio);
+  },
+
+  removeAudio() {
+    if (this.audio) {
+      this.el.removeObject3D("sound");
+      this.audioSystem.removeAudio({ node: this.audio });
+      delete this.audio;
+    }
   }
 });
