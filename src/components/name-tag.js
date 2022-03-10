@@ -38,9 +38,9 @@ AFRAME.registerComponent("name-tag", {
     this.volumeAvg = new MovingAverage(128);
     this.isNametagVisible = true;
     this.size = new THREE.Vector3();
-    this.avatarBBAA = new THREE.Box3();
-    this.avatarBBAASize = new THREE.Vector3();
-    this.avatarBBAACenter = new THREE.Vector3();
+    this.avatarAABB = new THREE.Box3();
+    this.avatarAABBSize = new THREE.Vector3();
+    this.avatarAABBCenter = new THREE.Vector3();
     this.nametagHeight = 0;
     this.tmpNametagVisible = false;
 
@@ -73,7 +73,7 @@ AFRAME.registerComponent("name-tag", {
     });
 
     if (DEBUG) {
-      this.avatarBBAAHelper = new THREE.Box3Helper(this.avatarBBAA, 0xffff00);
+      this.avatarBBAAHelper = new THREE.Box3Helper(this.avatarAABB, 0xffff00);
       this.el.sceneEl.object3D.add(this.avatarBBAAHelper);
     }
 
@@ -221,8 +221,8 @@ AFRAME.registerComponent("name-tag", {
     this.updateAvatarModelBBAA();
     const tmpVector = new THREE.Vector3();
     this.nametagHeight =
-      Math.abs(tmpVector.subVectors(this.ikRoot.position, this.avatarBBAACenter).y) +
-      this.avatarBBAASize.y / 2 +
+      Math.abs(tmpVector.subVectors(this.ikRoot.position, this.avatarAABBCenter).y) +
+      this.avatarAABBSize.y / 2 +
       NAMETAG_OFFSET;
     this.nametagElPosY = this.nametagHeight;
     this.size = this.nametagText.el.components["text"].getSize();
@@ -366,8 +366,8 @@ AFRAME.registerComponent("name-tag", {
 
   updateAvatarModelBBAA() {
     if (!this.model) return;
-    this.avatarBBAA.setFromObject(this.model);
-    this.avatarBBAA.getSize(this.avatarBBAASize);
-    this.avatarBBAA.getCenter(this.avatarBBAACenter);
+    this.avatarAABB.setFromObject(this.model);
+    this.avatarAABB.getSize(this.avatarAABBSize);
+    this.avatarAABB.getCenter(this.avatarAABBCenter);
   }
 });
