@@ -638,7 +638,7 @@ AFRAME.registerComponent("camera-tool", {
         renderer.xr.enabled = false;
 
         if (allowVideo && this.videoRecorder && !this.videoRenderTarget) {
-          // Create a separate render target for video becuase we need to flip and (sometimes) downscale it before
+          // Create a separate render target for video because we need to flip and (sometimes) downscale it before
           // encoding it to video.
           this.videoRenderTarget = new THREE.WebGLRenderTarget(CAPTURE_WIDTH, CAPTURE_HEIGHT, {
             format: THREE.RGBAFormat,
