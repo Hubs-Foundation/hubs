@@ -1,3 +1,4 @@
+import { THREE } from "aframe";
 import { Reflector } from "three/examples/jsm/objects/Reflector";
 
 /** @return { THREE.Object3D? } */
@@ -22,6 +23,10 @@ function setPlayerHeadVisible(visible) {
   playerHead.updateMatrixWorld(true, true);
 }
 
+const DEFAULT_MIRROR_GEOMETRY = new THREE.PlaneBufferGeometry();
+const DEFAULT_TEXTURE_WIDTH = window.innerWidth * window.devicePixelRatio;
+const DEFAULT_TEXTURE_HEIGHT = window.innerHeight * window.devicePixelRatio;
+
 /**
  * Should need to entity that has geometry primitive
  *
@@ -37,15 +42,11 @@ AFRAME.registerComponent("mirror", {
   },
 
   init() {
-    const geometry = this.el.object3DMap?.mesh?.geometry;
-    if (!geometry) {
-      throw new Error("can not find 'object3DMap.mesh.geometry'");
-    }
-
+    const geometry = this.el.object3DMap?.mesh?.geometry || DEFAULT_MIRROR_GEOMETRY;
     const reflector = new Reflector(geometry, {
       color: this.data.color,
-      textureWidth: window.innerWidth * window.devicePixelRatio,
-      textureHeight: window.innerHeight * window.devicePixelRatio
+      textureWidth: DEFAULT_TEXTURE_WIDTH,
+      textureHeight: DEFAULT_TEXTURE_HEIGHT
     });
     const { onBeforeRender } = reflector;
 
