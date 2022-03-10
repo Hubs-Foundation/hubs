@@ -47,7 +47,6 @@ AFRAME.registerComponent("name-tag", {
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onModelLoading = this.onModelLoading.bind(this);
     this.onModelLoaded = this.onModelLoaded.bind(this);
-    this.onAnalyserVolumeUpdated = this.onAnalyserVolumeUpdated.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
 
     this.avatarRig = document.getElementById("avatar-rig");
@@ -101,6 +100,7 @@ AFRAME.registerComponent("name-tag", {
     const mat = new THREE.Matrix4();
     return function(t) {
       if (this.model) {
+        this.updateAnalyserVolume(this.audioAnalyzer.volume);
         this.nametagEl.object3D.getWorldPosition(worldPos);
         this.neckEl.object3D.matrixWorld.decompose(matPos, matRot, matScale);
         matScale.set(1, 1, 1);
@@ -140,7 +140,6 @@ AFRAME.registerComponent("name-tag", {
   play() {
     this.el.addEventListener("model-loading", this.onModelLoading);
     this.el.addEventListener("model-loaded", this.onModelLoaded);
-    this.el.addEventListener("analyser-volume-updated", this.onAnalyserVolumeUpdated);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.addEventListener("statechanged", this.onStateChanged);
   },
@@ -148,7 +147,6 @@ AFRAME.registerComponent("name-tag", {
   pause() {
     this.el.removeEventListener("model-loading", this.onModelLoading);
     this.el.removeEventListener("model-loaded", this.onModelLoaded);
-    this.el.removeEventListener("analyser-volume-updated", this.onAnalyserVolumeUpdated);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.removeEventListener("statechanged", this.onStateChanged);
   },
@@ -209,6 +207,7 @@ AFRAME.registerComponent("name-tag", {
       if (this.ikRootEl.object3D.visible) {
         clearInterval(this.firstIkStepHandler);
         this.neckEl = this.el.querySelector(".Neck");
+        this.audioAnalyzer = this.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
         this.tmpNametagVisible = true;
         this.updateNameTagVisibility();
         this.model = model;
@@ -231,7 +230,7 @@ AFRAME.registerComponent("name-tag", {
     this.updateNameTag();
   },
 
-  onAnalyserVolumeUpdated({ detail: { volume } }) {
+  updateAnalyserVolume(volume) {
     let isTalking = false;
     this.volume = volume;
     this.volumeAvg.push(Date.now(), volume);
