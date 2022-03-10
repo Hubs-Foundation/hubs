@@ -1,11 +1,5 @@
 import { EventEmitter } from "eventemitter3";
-import {
-  MediaDevicesEvents,
-  PermissionStatus,
-  MediaDevices,
-  DEFAULT_DEVICE_ID,
-  NO_DEVICE_ID
-} from "./media-devices-utils";
+import { MediaDevicesEvents, PermissionStatus, MediaDevices, NO_DEVICE_ID } from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 
 const isMobile = AFRAME.utils.device.isMobile();
@@ -76,6 +70,18 @@ export default class MediaDevicesManager extends EventEmitter {
     this._audioTrack = audioTrack;
   }
 
+  get defaultInputDeviceId() {
+    return this._micDevices && this._micDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+  }
+
+  get defaultOutputDeviceId() {
+    return this._outputDevices && this._outputDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+  }
+
+  get defaultVideoDeviceId() {
+    return this._videoDevices && this._videoDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+  }
+
   get micDevices() {
     if (MediaDevicesManager.isAudioInputSelectEnabled) {
       if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.DENIED) {
@@ -84,7 +90,7 @@ export default class MediaDevicesManager extends EventEmitter {
         return this._micDevices;
       }
     } else {
-      return [{ value: DEFAULT_DEVICE_ID, label: "Default" }];
+      return [{ value: this.defaultInputDeviceId, label: this.micLabelForDeviceId(this.defaultInputDeviceId) }];
     }
   }
 
@@ -125,10 +131,10 @@ export default class MediaDevicesManager extends EventEmitter {
       if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.DENIED) {
         return NO_DEVICE_ID;
       } else {
-        return this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || DEFAULT_DEVICE_ID;
+        return this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || this.defaultInputDeviceId;
       }
     } else {
-      return DEFAULT_DEVICE_ID;
+      return this.defaultInputDeviceId;
     }
   }
 
@@ -138,10 +144,10 @@ export default class MediaDevicesManager extends EventEmitter {
         return NO_DEVICE_ID;
       } else {
         const { preferredMic } = this._store.state.preferences;
-        return preferredMic || DEFAULT_DEVICE_ID;
+        return preferredMic || this.defaultInputDeviceId;
       }
     } else {
-      return DEFAULT_DEVICE_ID;
+      return this.defaultInputDeviceId;
     }
   }
 
@@ -150,7 +156,7 @@ export default class MediaDevicesManager extends EventEmitter {
     const exists = this.outputDevices.some(device => {
       return device.value === preferredSpeakers;
     });
-    return exists ? preferredSpeakers : this.outputDevices[0]?.value || DEFAULT_DEVICE_ID;
+    return exists ? preferredSpeakers : this.outputDevices[0]?.value || this.defaultOutputDeviceId;
   }
 
   get isMicShared() {
@@ -253,7 +259,7 @@ export default class MediaDevicesManager extends EventEmitter {
     console.log("Starting microphone sharing");
 
     if (!deviceId) {
-      deviceId = DEFAULT_DEVICE_ID;
+      deviceId = this.defaultInputDeviceId;
     }
     let constraints = { audio: {} };
     if (deviceId) {
