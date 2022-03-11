@@ -36,7 +36,7 @@ AFRAME.registerComponent("name-tag", {
     this.isRecording = false;
     this.isHandRaised = false;
     this.volumeAvg = new MovingAverage(128);
-    this.isNametagVisible = true;
+    this.shouldBeVisible = true;
     this.size = new THREE.Vector3();
     this.avatarAABB = new THREE.Box3();
     this.avatarAABBSize = new THREE.Vector3();
@@ -50,10 +50,8 @@ AFRAME.registerComponent("name-tag", {
     this.onStateChanged = this.onStateChanged.bind(this);
 
     this.avatarRig = document.getElementById("avatar-rig").object3D;
-    this.ikRoot = findAncestorWithComponent(this.el, "ik-root").object3D;
-    this.playerInfo = this.el.components["player-info"];
 
-    this.nametag = this.el.querySelector(".nametag").object3D;
+    this.nametag = this.el.object3D;
     this.identityName = this.el.querySelector(".identityName").object3D;
     this.nametagBackground = this.el.querySelector(".nametag-background").object3D;
     this.nametagVolume = this.el.querySelector(".nametag-volume").object3D;
@@ -99,26 +97,11 @@ AFRAME.registerComponent("name-tag", {
     const matScale = new THREE.Vector3();
     const mat = new THREE.Matrix4();
     return function(t) {
-      if (this.model) {
-        this.updateAnalyserVolume(this.audioAnalyzer.volume);
-        this.nametag.getWorldPosition(worldPos);
-        this.neck.matrixWorld.decompose(matPos, matRot, matScale);
-        matScale.set(1, 1, 1);
-        matPos.setY(this.nametagElPosY + this.ikRoot.position.y);
-        mat.compose(
-          matPos,
-          matRot,
-          matScale
-        );
-        setMatrixWorld(this.nametag, mat);
-      }
-
       if (this.nametagVisibility === "showClose") {
         this.avatarRig.getWorldPosition(avatarRigWorldPos);
         this.el.object3D.getWorldPosition(worldPos);
-        this.wasNametagVisible = this.isNametagVisible;
-        this.isNametagVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
-        this.updateNameTag();
+        this.wasNametagVisible = this.shouldBeVisible;
+        this.shouldBeVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
       }
       if (!this.isTalking && this.isTyping) {
         typingAnimTime = t;
@@ -129,6 +112,20 @@ AFRAME.registerComponent("name-tag", {
           }
         });
       }
+      if (this.model) {
+        this.updateAnalyserVolume(this.audioAnalyzer.volume);
+        this.neck.matrixWorld.decompose(matPos, matRot, matScale);
+        matScale.set(1, 1, 1);
+        matPos.setY(this.nametagElPosY + this.ikRoot.position.y);
+        mat.compose(
+          matPos,
+          matRot,
+          matScale
+        );
+        setMatrixWorld(this.nametag, mat);
+
+        this.el.object3D.visible = this.shouldBeVisible && this.tmpNametagVisible;
+      }
       if (DEBUG) {
         this.updateAvatarModelBBAA();
         this.avatarBBAAHelper.matrixNeedsUpdate = true;
@@ -138,15 +135,15 @@ AFRAME.registerComponent("name-tag", {
   })(),
 
   play() {
-    this.el.addEventListener("model-loading", this.onModelLoading);
-    this.el.addEventListener("model-loaded", this.onModelLoaded);
+    this.el.parentEl.addEventListener("model-loading", this.onModelLoading);
+    this.el.parentEl.addEventListener("model-loaded", this.onModelLoaded);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.addEventListener("statechanged", this.onStateChanged);
   },
 
   pause() {
-    this.el.removeEventListener("model-loading", this.onModelLoading);
-    this.el.removeEventListener("model-loaded", this.onModelLoaded);
+    this.el.parentEl.removeEventListener("model-loading", this.onModelLoading);
+    this.el.parentEl.removeEventListener("model-loaded", this.onModelLoaded);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.removeEventListener("statechanged", this.onStateChanged);
   },
@@ -191,25 +188,24 @@ AFRAME.registerComponent("name-tag", {
         this.identityName = this.identityName.slice(0, DISPLAY_NAME_LENGTH).concat("...");
       }
       this.identityName.el.setAttribute("text", { value: this.identityName });
-      this.identityName.visible = this.el.sceneEl.is("frozen");
     }
   },
 
   onModelLoading() {
     this.tmpNametagVisible = false;
-    this.updateNameTagVisibility();
     this.model = null;
   },
 
   onModelLoaded({ detail: { model } }) {
     clearInterval(this.firstIkStepHandler);
     const checkIkStep = () => {
+      this.ikRoot = findAncestorWithComponent(this.el, "ik-root").object3D;
+      this.playerInfo = this.ikRoot.el.components["player-info"];
       if (this.ikRoot.visible) {
         clearInterval(this.firstIkStepHandler);
-        this.neck = this.el.querySelector(".Neck").object3D;
-        this.audioAnalyzer = this.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
+        this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
+        this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
         this.tmpNametagVisible = true;
-        this.updateNameTagVisibility();
         this.model = model;
         this.updateNameTagPosition();
       }
@@ -234,7 +230,7 @@ AFRAME.registerComponent("name-tag", {
     let isTalking = false;
     this.volume = volume;
     this.volumeAvg.push(Date.now(), volume);
-    if (!this.playerInfo.data.muted) {
+    if (!this.playerInfo?.data.muted) {
       const average = this.volumeAvg.movingAverage();
       isTalking = average > 0.01;
     }
@@ -243,19 +239,19 @@ AFRAME.registerComponent("name-tag", {
     if (this.nametagVisibility === "showSpeaking") {
       if (!this.isTalking && this.wasTalking) {
         this.frozenTimer = setTimeout(() => {
-          this.wasNametagVisible = this.isNametagVisible;
-          this.isNametagVisible = false;
-          this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
+          this.wasNametagVisible = this.shouldBeVisible;
+          this.shouldBeVisible = false;
+          this.shouldBeVisible !== this.wasNametagVisible && this.updateNameTag();
         }, 1000);
       } else if (this.isTalking && !this.wasTalking) {
         clearTimeout(this.frozenTimer);
-        this.wasNametagVisible = this.isNametagVisible;
-        this.isNametagVisible = true;
-        this.isNametagVisible !== this.wasNametagVisible && this.updateNameTag();
+        this.wasNametagVisible = this.shouldBeVisible;
+        this.shouldBeVisible = true;
+        this.shouldBeVisible !== this.wasNametagVisible && this.updateNameTag();
       }
     }
-    this.isNametagVisible && this.isTalking !== this.wasTalking && this.updateBorder();
-    this.isNametagVisible && this.updateVolume();
+    this.shouldBeVisible && this.isTalking !== this.wasTalking && this.updateBorder();
+    this.shouldBeVisible && this.updateVolume();
   },
 
   onStateChanged() {
@@ -267,21 +263,18 @@ AFRAME.registerComponent("name-tag", {
       this.store.state.preferences.nametagVisibilityDistance !== undefined
         ? this.store.state.preferences.nametagVisibilityDistance
         : NAMETAG_VISIBILITY_DISTANCE_DEFAULT;
-    this.wasNametagVisible = this.isNametagVisible;
-    let prefNametagVisibility = this.store.state.preferences.nametagVisibility === undefined;
+    this.wasNametagVisible = this.shouldBeVisible;
     if (this.nametagVisibility === "showNone") {
-      prefNametagVisibility = false;
+      this.shouldBeVisible = false;
     } else if (this.nametagVisibility === "showAll") {
-      prefNametagVisibility = true;
+      this.shouldBeVisible = true;
     } else if (this.nametagVisibility === "showFrozen") {
-      prefNametagVisibility = this.el.sceneEl.is("frozen");
+      this.shouldBeVisible = this.el.sceneEl.is("frozen");
     } else if (this.nametagVisibility === "showSpeaking") {
-      prefNametagVisibility = this.isTalking;
+      this.shouldBeVisible = this.isTalking;
     } else {
-      prefNametagVisibility = true;
+      this.shouldBeVisible = true;
     }
-    this.isNametagVisible = prefNametagVisibility && this.tmpNametagVisible;
-    this.updateNameTag();
   },
 
   updateNameTag() {
@@ -293,7 +286,6 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateContainer() {
-    this.nametagBackground.visible = this.isNametagVisible;
     this.nametagBackground.el.setAttribute("slice9", {
       width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2,
       height: NAMETAG_HEIGHT
@@ -302,17 +294,17 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateVolume() {
-    this.nametagVolume.visible = this.isTalking && this.isNametagVisible;
+    this.nametagVolume.visible = this.isTalking;
     this.nametagVolume.el.setAttribute("scale", { x: this.volume * this.size.x });
     this.updateTyping();
   },
 
   updateBorder() {
+    this.nametagStatusBorder.visible = this.isTyping || this.isTalking || this.isHandRaised;
     this.nametagStatusBorder.el.setAttribute("slice9", {
       width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
       height: NAMETAG_HEIGHT + NAMETAG_STATUS_BORDER_PADDING
     });
-    this.nametagStatusBorder.visible = (this.isTyping || this.isTalking || this.isHandRaised) && this.isNametagVisible;
     this.nametagStatusBorder.el.setAttribute(
       "text-button",
       `backgroundColor: ${getThemeColor(
@@ -322,9 +314,9 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateState() {
-    this.recordingBadge.visible = this.isRecording && this.isNametagVisible;
-    this.modBadge.visible = this.isOwner && !this.isRecording && this.isNametagVisible;
-    this.handRaised.visible = this.isHandRaised && this.isNametagVisible;
+    this.recordingBadge.visible = this.isRecording;
+    this.modBadge.visible = this.isOwner && !this.isRecording;
+    this.handRaised.visible = this.isHandRaised;
     const targetScale = this.isHandRaised ? 0.2 : 0;
     anime({
       ...ANIM_CONFIG,
@@ -360,7 +352,7 @@ AFRAME.registerComponent("name-tag", {
 
   updateTyping() {
     for (const dot of this.nametagTyping.children) {
-      dot.visible = this.isTyping && !this.isTalking && this.isNametagVisible;
+      dot.visible = this.isTyping && !this.isTalking;
     }
   },
 

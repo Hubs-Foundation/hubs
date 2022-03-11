@@ -121,7 +121,7 @@
                 </a-entity>
             </template>
             <template id="remote-avatar">
-                <a-entity tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info name-tag matrix-auto-update visible="false">
+                <a-entity tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info matrix-auto-update visible="false">
                     <a-entity class="camera" matrix-auto-update>
                         <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                     </a-entity>
@@ -130,7 +130,7 @@
 
                     <a-entity class="right-controller" matrix-auto-update></a-entity>
 
-                    <a-entity class="nametag" tags="ignoreSpaceBubble: true;" position="0 0 0" billboard="onlyY: true;">
+                    <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" billboard="onlyY: true;">
                         <a-entity class="nametag-background" mixin="nametag-background-mixin" slice9="width: 1">
                             <a-entity class="nametag-status-border" mixin="nametag-status-border-mixin" visible="false" slice9="width: 1"></a-entity>
                             <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0.025 0.001"></a-entity>
