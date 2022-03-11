@@ -84,7 +84,7 @@ AFRAME.registerComponent("name-tag", {
         : NAMETAG_VISIBILITY_DISTANCE_DEFAULT,
       2
     );
-    this.updateNameTagVisibility();
+    this.onStateChanged();
   },
 
   remove() {
@@ -244,10 +244,6 @@ AFRAME.registerComponent("name-tag", {
   },
 
   onStateChanged() {
-    this.updateNameTagVisibility();
-  },
-
-  updateNameTagVisibility() {
     this.nametagVisibilityDistance = Math.pow(
       this.store.state.preferences.nametagVisibilityDistance !== undefined
         ? this.store.state.preferences.nametagVisibilityDistance
