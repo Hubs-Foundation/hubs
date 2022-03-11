@@ -122,7 +122,9 @@ class Menu extends Component {
     return (
       <List className={this.props.classes.root}>
         <ListItem className={this.props.classes.logo}>
-          <img className={this.props.classes.logo} src={HubsCloudLogo} />
+          <a href="/">
+            <img className={this.props.classes.logo} src={HubsCloudLogo} />
+          </a>
         </ListItem>
         <ListItem
           className={this.props.classes.item}
