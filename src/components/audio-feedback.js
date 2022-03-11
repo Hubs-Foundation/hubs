@@ -10,6 +10,7 @@ import { MediaDevicesEvents } from "../utils/media-devices-utils";
 // the avatar is quiet during that entire duration (eg they are muted)
 const DISABLE_AT_VOLUME_THRESHOLD = 0.00001;
 const DISABLE_GRACE_PERIOD_MS = 10000;
+const IS_TALKING_THRESHOLD_MS = 1000;
 const MIN_VOLUME_THRESHOLD = 0.08;
 
 const calculateVolume = (analyser, levels) => {
@@ -55,7 +56,8 @@ AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
     this.prevVolume = 0;
-    this.avatarIsQuiet = true;
+    this.disableUpdates = true;
+    this.avatarIsTalking = false;
 
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
@@ -82,13 +84,13 @@ AFRAME.registerComponent("networked-audio-analyser", {
   },
 
   tick: function(t) {
-    if (!this.avatarIsQuiet) {
+    if (!this.disableUpdates) {
       this._updateAnalysis(t);
     }
   },
 
   _runScheduledWork: function() {
-    if (this.avatarIsQuiet) {
+    if (this.disableUpdates) {
       this._updateAnalysis();
     }
   },
@@ -104,14 +106,18 @@ AFRAME.registerComponent("networked-audio-analyser", {
 
     if (this.volume < DISABLE_AT_VOLUME_THRESHOLD) {
       if (t && this.lastSeenVolume && this.lastSeenVolume < t - DISABLE_GRACE_PERIOD_MS) {
-        this.avatarIsQuiet = true;
+        this.disableUpdates = true;
+      }
+      if (t && this.lastSeenVolume && this.lastSeenVolume < t - IS_TALKING_THRESHOLD_MS) {
+        this.avatarIsTalking = false;
       }
     } else {
       if (t) {
         this.lastSeenVolume = t;
       }
 
-      this.avatarIsQuiet = false;
+      this.disableUpdates = false;
+      this.avatarIsTalking = true;
     }
   }
 });

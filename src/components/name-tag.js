@@ -113,7 +113,7 @@ AFRAME.registerComponent("name-tag", {
         });
       }
       if (this.isAvatarReady) {
-        this.updateAnalyserVolume(this.audioAnalyzer.volume);
+        this.updateAnalyserVolume();
         this.neck.getWorldPosition(worldPos);
         worldPos.setY(this.nametagElPosY + this.ikRoot.position.y);
         mat.setPosition(worldPos);
@@ -200,7 +200,6 @@ AFRAME.registerComponent("name-tag", {
 
   onModelIkFirstTick() {
     this.ikRoot = findAncestorWithComponent(this.el, "ik-root").object3D;
-    this.playerInfo = this.ikRoot.el.components["player-info"];
     if (this.ikRoot.visible) {
       this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
       this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
@@ -222,16 +221,9 @@ AFRAME.registerComponent("name-tag", {
     this.updateNameTag();
   },
 
-  updateAnalyserVolume(volume) {
-    let isTalking = false;
-    this.volume = volume;
-    this.volumeAvg.push(Date.now(), volume);
-    if (!this.playerInfo?.data.muted) {
-      const average = this.volumeAvg.movingAverage();
-      isTalking = average > 0.01;
-    }
+  updateAnalyserVolume() {
     this.wasTalking = this.isTalking;
-    this.isTalking = isTalking;
+    this.isTalking = this.audioAnalyzer.avatarIsTalking;
     if (this.nametagVisibility === "showSpeaking") {
       if (!this.isTalking && this.wasTalking) {
         this.frozenTimer = setTimeout(() => {
@@ -293,7 +285,7 @@ AFRAME.registerComponent("name-tag", {
 
   updateVolume() {
     this.nametagVolume.visible = this.isTalking;
-    this.nametagVolume.el.setAttribute("scale", { x: this.volume * this.size.x });
+    this.nametagVolume.el.setAttribute("scale", { x: this.audioAnalyzer.volume * this.size.x });
     this.updateTyping();
   },
 
