@@ -43,6 +43,7 @@ AFRAME.registerComponent("name-tag", {
     this.avatarAABBCenter = new THREE.Vector3();
     this.nametagHeight = 0;
     this.isAvatarReady = false;
+    this.lastUpdateTime = Date.now();
 
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onModelLoading = this.onModelLoading.bind(this);
@@ -226,13 +227,13 @@ AFRAME.registerComponent("name-tag", {
     this.isTalking = this.audioAnalyzer.avatarIsTalking;
     if (this.nametagVisibility === "showSpeaking") {
       if (!this.isTalking && this.wasTalking) {
-        this.frozenTimer = setTimeout(() => {
+        if (Date.now() - this.lastUpdateTime > 1000) {
           this.wasNametagVisible = this.shouldBeVisible;
           this.shouldBeVisible = false;
           this.shouldBeVisible !== this.wasNametagVisible && this.updateNameTag();
-        }, 1000);
+        }
       } else if (this.isTalking && !this.wasTalking) {
-        clearTimeout(this.frozenTimer);
+        this.lastUpdateTime = Date.now();
         this.wasNametagVisible = this.shouldBeVisible;
         this.shouldBeVisible = true;
         this.shouldBeVisible !== this.wasNametagVisible && this.updateNameTag();
