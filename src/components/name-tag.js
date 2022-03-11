@@ -42,10 +42,12 @@ AFRAME.registerComponent("name-tag", {
     this.avatarAABBSize = new THREE.Vector3();
     this.avatarAABBCenter = new THREE.Vector3();
     this.nametagHeight = 0;
+    this.isAvatarReady = false;
 
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onModelLoading = this.onModelLoading.bind(this);
     this.onModelLoaded = this.onModelLoaded.bind(this);
+    this.onModelIkFirstTick = this.onModelIkFirstTick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
 
     this.avatarRig = document.getElementById("avatar-rig").object3D;
@@ -110,13 +112,13 @@ AFRAME.registerComponent("name-tag", {
           }
         });
       }
-      if (this.model) {
+      if (this.isAvatarReady) {
         this.updateAnalyserVolume(this.audioAnalyzer.volume);
         this.neck.getWorldPosition(worldPos);
         worldPos.setY(this.nametagElPosY + this.ikRoot.position.y);
         mat.setPosition(worldPos);
         setMatrixWorld(this.nametag, mat);
-        this.el.object3D.visible = this.shouldBeVisible && this.model;
+        this.el.object3D.visible = this.shouldBeVisible && this.isAvatarReady;
       }
       if (DEBUG) {
         this.updateAvatarModelBBAA();
@@ -129,6 +131,7 @@ AFRAME.registerComponent("name-tag", {
   play() {
     this.el.parentEl.addEventListener("model-loading", this.onModelLoading);
     this.el.parentEl.addEventListener("model-loaded", this.onModelLoaded);
+    this.el.parentEl.addEventListener("ik-first-tick", this.onModelIkFirstTick);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.addEventListener("statechanged", this.onStateChanged);
   },
@@ -136,6 +139,7 @@ AFRAME.registerComponent("name-tag", {
   pause() {
     this.el.parentEl.removeEventListener("model-loading", this.onModelLoading);
     this.el.parentEl.removeEventListener("model-loaded", this.onModelLoaded);
+    this.el.parentEl.removeEventListener("ik-first-tick", this.onModelIkFirstTick);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.removeEventListener("statechanged", this.onStateChanged);
   },
@@ -187,22 +191,22 @@ AFRAME.registerComponent("name-tag", {
 
   onModelLoading() {
     this.model = null;
+    this.isAvatarReady = false;
   },
 
   onModelLoaded({ detail: { model } }) {
-    clearInterval(this.firstIkStepHandler);
-    const checkIkStep = () => {
-      this.ikRoot = findAncestorWithComponent(this.el, "ik-root").object3D;
-      this.playerInfo = this.ikRoot.el.components["player-info"];
-      if (this.ikRoot.visible) {
-        clearInterval(this.firstIkStepHandler);
-        this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
-        this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
-        this.model = model;
-        this.updateNameTagPosition();
-      }
-    };
-    this.firstIkStepHandler = setInterval(checkIkStep, 500);
+    this.model = model;
+  },
+
+  onModelIkFirstTick() {
+    this.ikRoot = findAncestorWithComponent(this.el, "ik-root").object3D;
+    this.playerInfo = this.ikRoot.el.components["player-info"];
+    if (this.ikRoot.visible) {
+      this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
+      this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
+      this.isAvatarReady = true;
+      this.updateNameTagPosition();
+    }
   },
 
   updateNameTagPosition() {
@@ -273,7 +277,7 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateNameTag() {
-    if (!this.model) return;
+    if (!this.isAvatarReady) return;
     this.updateContainer();
     this.updateVolume();
     this.updateState();
