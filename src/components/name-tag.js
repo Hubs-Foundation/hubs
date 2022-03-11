@@ -42,7 +42,6 @@ AFRAME.registerComponent("name-tag", {
     this.avatarAABBSize = new THREE.Vector3();
     this.avatarAABBCenter = new THREE.Vector3();
     this.nametagHeight = 0;
-    this.tmpNametagVisible = false;
 
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onModelLoading = this.onModelLoading.bind(this);
@@ -117,7 +116,7 @@ AFRAME.registerComponent("name-tag", {
         worldPos.setY(this.nametagElPosY + this.ikRoot.position.y);
         mat.setPosition(worldPos);
         setMatrixWorld(this.nametag, mat);
-        this.el.object3D.visible = this.shouldBeVisible && this.tmpNametagVisible;
+        this.el.object3D.visible = this.shouldBeVisible && this.model;
       }
       if (DEBUG) {
         this.updateAvatarModelBBAA();
@@ -187,7 +186,6 @@ AFRAME.registerComponent("name-tag", {
   },
 
   onModelLoading() {
-    this.tmpNametagVisible = false;
     this.model = null;
   },
 
@@ -200,7 +198,6 @@ AFRAME.registerComponent("name-tag", {
         clearInterval(this.firstIkStepHandler);
         this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
         this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
-        this.tmpNametagVisible = true;
         this.model = model;
         this.updateNameTagPosition();
       }
