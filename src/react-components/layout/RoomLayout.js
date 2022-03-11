@@ -25,12 +25,13 @@ export function RoomLayout({
       {sidebar && <div className={classNames(styles.sidebar, sidebarClassName)}>{sidebar}</div>}
       <div className={classNames(styles.modalContainer, styles.viewport)}>{modal}</div>
       {(toolbarLeft || toolbarCenter || toolbarRight) && (
-        <Toolbar
-          className={classNames(styles.main, styles.toolbar, toolbarClassName)}
-          left={toolbarLeft}
-          center={toolbarCenter}
-          right={toolbarRight}
-        />
+        <div />
+        // <Toolbar
+        //   className={classNames(styles.main, styles.toolbar, toolbarClassName)}
+        //   left={toolbarLeft}
+        //   center={toolbarCenter}
+        //   right={toolbarRight}
+        // />
       )}
       <div
         className={classNames(styles.main, styles.viewport, { [styles.streaming]: streaming }, viewportClassName)}
