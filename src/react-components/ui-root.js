@@ -1346,19 +1346,20 @@ class UIRoot extends Component {
                     {!this.props.selectedObject && <CompactMoreMenuButton />}
                     {(!this.props.selectedObject ||
                       (this.props.breakpoint !== "sm" && this.props.breakpoint !== "md")) && (
-                      <ContentMenu>
-                        {showObjectList && (
-                          <ObjectsMenuButton
-                            active={this.state.sidebarId === "objects"}
-                            onClick={() => this.toggleSidebar("objects")}
-                          />
-                        )}
-                        <PeopleMenuButton
-                          active={this.state.sidebarId === "people"}
-                          onClick={() => this.toggleSidebar("people")}
-                          presenceCount={this.state.presenceCount}
-                        />
-                      </ContentMenu>
+                        <div />
+                      // <ContentMenu>
+                      //   {showObjectList && (
+                      //     <ObjectsMenuButton
+                      //       active={this.state.sidebarId === "objects"}
+                      //       onClick={() => this.toggleSidebar("objects")}
+                      //     />
+                      //   )}
+                      //   <PeopleMenuButton
+                      //     active={this.state.sidebarId === "people"}
+                      //     onClick={() => this.toggleSidebar("people")}
+                      //     presenceCount={this.state.presenceCount}
+                      //   />
+                      // </ContentMenu>
                     )}
                     {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
                     {this.props.activeObject && (
