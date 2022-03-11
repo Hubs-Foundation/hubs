@@ -76,10 +76,12 @@ AFRAME.registerComponent("name-tag", {
     }
 
     this.nametagVisibility = this.store.state.preferences.nametagVisibility;
-    this.nametagVisibilityDistance = this.nametagVisibilityDistance =
+    this.nametagVisibilityDistance = Math.pow(
       this.store.state.preferences.nametagVisibilityDistance !== undefined
         ? this.store.state.preferences.nametagVisibilityDistance
-        : NAMETAG_VISIBILITY_DISTANCE_DEFAULT;
+        : NAMETAG_VISIBILITY_DISTANCE_DEFAULT,
+      2
+    );
     this.updateNameTagVisibility();
   },
 
@@ -98,7 +100,7 @@ AFRAME.registerComponent("name-tag", {
         this.avatarRig.getWorldPosition(avatarRigWorldPos);
         this.el.object3D.getWorldPosition(worldPos);
         this.wasNametagVisible = this.shouldBeVisible;
-        this.shouldBeVisible = avatarRigWorldPos.sub(worldPos).length() < this.nametagVisibilityDistance;
+        this.shouldBeVisible = avatarRigWorldPos.sub(worldPos).lengthSq() < this.nametagVisibilityDistance;
       }
       if (!this.isTalking && this.isTyping) {
         typingAnimTime = t;
@@ -250,11 +252,14 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateNameTagVisibility() {
-    this.nametagVisibilityDistance =
+    this.nametagVisibilityDistance = Math.pow(
       this.store.state.preferences.nametagVisibilityDistance !== undefined
         ? this.store.state.preferences.nametagVisibilityDistance
-        : NAMETAG_VISIBILITY_DISTANCE_DEFAULT;
+        : NAMETAG_VISIBILITY_DISTANCE_DEFAULT,
+      2
+    );
     this.wasNametagVisible = this.shouldBeVisible;
+    this.nametagVisibility = this.store.state.preferences.nametagVisibility;
     if (this.nametagVisibility === "showNone") {
       this.shouldBeVisible = false;
     } else if (this.nametagVisibility === "showAll") {
