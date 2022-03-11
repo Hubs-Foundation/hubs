@@ -159,7 +159,7 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateDisplayName() {
-    if (this.displayName) {
+    if (this.displayName && this.displayName !== this.prevDisplayName) {
       this.nametagText.el.addEventListener(
         "text-updated",
         () => {
@@ -175,6 +175,7 @@ AFRAME.registerComponent("name-tag", {
       this.nametagText.el.setAttribute("text", {
         value: this.displayName
       });
+      this.prevDisplayName = this.displayName;
     }
 
     if (this.identityName) {
