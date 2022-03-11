@@ -88,7 +88,6 @@ AFRAME.registerComponent("name-tag", {
   },
 
   remove() {
-    clearInterval(this.firstIkStepHandler);
     if (DEBUG) this.el.sceneEl.object3D.remove(this.avatarBBAAHelper);
   },
 
