@@ -210,7 +210,7 @@ AFRAME.registerComponent("name-tag", {
       this.nametagText.el.addEventListener(
         "text-updated",
         () => {
-          this.size = this.nametagText.el.components["text"].getSize();
+          this.nametagText.el.components["text"].getSize(this.size);
           this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
           this.resizeNameTag();
         },
@@ -254,7 +254,7 @@ AFRAME.registerComponent("name-tag", {
       this.avatarAABBSize.y / 2 +
       NAMETAG_OFFSET;
     this.nametagElPosY = this.nametagHeight + (this.isHandRaised ? NAMETAG_OFFSET : 0);
-    this.size = this.nametagText.el.components["text"].getSize();
+    this.nametagText.el.components["text"].getSize(this.size);
     this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
     this.isAvatarReady = true;
 

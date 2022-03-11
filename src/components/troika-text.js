@@ -140,10 +140,9 @@ AFRAME.registerComponent("text", {
 
   getSize: (function() {
     const size = new THREE.Vector3();
-    return function() {
-      this.troikaTextMesh.geometry.computeBoundingBox();
+    return function(outSize) {
       this.troikaTextMesh.geometry.boundingBox.getSize(size);
-      return new THREE.Vector3(
+      outSize.set(
         size.x * this.troikaTextMesh.scale.x,
         size.y * this.troikaTextMesh.scale.y,
         size.z * this.troikaTextMesh.scale.z
