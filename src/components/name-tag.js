@@ -92,9 +92,6 @@ AFRAME.registerComponent("name-tag", {
     let typingAnimTime = 0;
     const worldPos = new THREE.Vector3();
     const avatarRigWorldPos = new THREE.Vector3();
-    const matPos = new THREE.Vector3();
-    const matRot = new THREE.Quaternion();
-    const matScale = new THREE.Vector3();
     const mat = new THREE.Matrix4();
     return function(t) {
       if (this.nametagVisibility === "showClose") {
@@ -114,16 +111,10 @@ AFRAME.registerComponent("name-tag", {
       }
       if (this.model) {
         this.updateAnalyserVolume(this.audioAnalyzer.volume);
-        this.neck.matrixWorld.decompose(matPos, matRot, matScale);
-        matScale.set(1, 1, 1);
-        matPos.setY(this.nametagElPosY + this.ikRoot.position.y);
-        mat.compose(
-          matPos,
-          matRot,
-          matScale
-        );
+        this.neck.getWorldPosition(worldPos);
+        worldPos.setY(this.nametagElPosY + this.ikRoot.position.y);
+        mat.setPosition(worldPos);
         setMatrixWorld(this.nametag, mat);
-
         this.el.object3D.visible = this.shouldBeVisible && this.tmpNametagVisible;
       }
       if (DEBUG) {
