@@ -52,7 +52,7 @@
   "exited-room-screen.reason.scene-error": "Scene을 불러오는데 실패했습니다.",
   "exited-room-screen.reason.connect-error": "Room에 연결할 수 없습니다. 나중에 다시 시도하십시오.",
   "exited-room-screen.reason.version-mismatch": "배포한 버전은 아직 사용할 수 없습니다. 5초 후에 페이지가 새로고침 됩니다.",
-  "exited-room-screen.no-longer-availible": "죄송합니다, 이 Room은 더 이상 이용할 수 없습니다.",
+  "exited-room-screen.no-longer-available": "죄송합니다, 이 Room은 더 이상 이용할 수 없습니다.",
   "exited-room-screen.closed-room-tos": "Room을 닫았거나, 또는 <toslink>이용 약관</toslink>을 위반한다는 신고가 접수 된 경우.",
   "exited-room-screen.contact-us": "문의 사항이 있으면 {contactEmail} 으로 문의하십시오.",
   "exited-room-screen.source-link": "자체 서버를 실행하려는 경우 <a>GitHub</a>에서 Hubs의 소스 코드를 사용할 수 있습니다.",

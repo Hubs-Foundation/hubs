@@ -149,7 +149,7 @@
   "exited-room-screen.contact-us": "Si vous avez des questions, contactez-nous via {contactEmail}.",
   "exited-room-screen.create-room": "Vous pouvez aussi <a>créer une nouvelle salle</a>.",
   "exited-room-screen.home-button": "Retour à l'accueil",
-  "exited-room-screen.no-longer-availible": "Désolé, cette salle n'est plus disponible.",
+  "exited-room-screen.no-longer-available": "Désolé, cette salle n'est plus disponible.",
   "exited-room-screen.reason.closed": "Cette salle n'est plus disponible.",
   "exited-room-screen.reason.connect-error": "Impossible de se connecter à cette salle, merci de réessayer plus tard.",
   "exited-room-screen.reason.denied": "Vous n'êtes pas autorisé(e) à rejoindre cette salle. Demandez une autorisation au créateur de cette salle.",
