@@ -98,7 +98,7 @@ function deepModuleDependencyTest(modulesArr) {
 
     const name = module.nameForCondition();
 
-    return deps.some(depName => name.startsWith(depName));
+    return deps.some(depName => name?.startsWith(depName));
   };
 }
 
@@ -264,11 +264,14 @@ module.exports = async (env, argv) => {
     // .replaceAll("connect-src", "connect-src https://example.com");
   }
 
+  process.traceDeprecation = true;
+
   return {
     node: {
       // need to specify this manually because some random lodash code will try to access
       // Buffer on the global object if it exists, so webpack will polyfill on its behalf
       Buffer: false,
+      // process: false,
       fs: "empty"
     },
     entry: {
@@ -292,14 +295,22 @@ module.exports = async (env, argv) => {
     },
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
-      https: createHTTPSConfig(),
+      client: {
+        overlay: {
+          errors: true,
+          warnings: false
+        }
+      },
+      server: {
+        type: "https",
+        options: createHTTPSConfig()
+      },
       host: "0.0.0.0",
-      public: `${host}:8080`,
-      useLocalIp: true,
+      port: 8080,
       allowedHosts: [host, "hubs.local"],
       headers: devServerHeaders,
       hot: liveReload,
-      inline: liveReload,
+      liveReload: liveReload,
       historyApiFallback: {
         rewrites: [
           { from: /^\/signin/, to: "/signin.html" },
@@ -310,7 +321,7 @@ module.exports = async (env, argv) => {
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
       },
-      before: function(app) {
+      onBeforeSetupMiddleware: function({ app }) {
         // Local CORS proxy
         app.all("/cors-proxy/*", (req, res) => {
           res.header("Access-Control-Allow-Origin", "*");
@@ -645,22 +656,26 @@ module.exports = async (env, argv) => {
           removeComments: false
         }
       }),
-      new CopyWebpackPlugin([
-        {
-          from: "src/hub.service.js",
-          to: "hub.service.js"
-        }
-      ]),
-      new CopyWebpackPlugin([
-        {
-          from: "src/schema.toml",
-          to: "schema.toml"
-        }
-      ]),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/hub.service.js",
+            to: "hub.service.js"
+          }
+        ]
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/schema.toml",
+            to: "schema.toml"
+          }
+        ]
+      }),
       // Extract required css and add a content hash.
       new MiniCssExtractPlugin({
-        filename: "assets/stylesheets/[name]-[contenthash].css",
-        disable: argv.mode !== "production"
+        filename: "assets/stylesheets/[name]-[contenthash].css"
+        // disable: argv.mode !== "production"
       }),
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
