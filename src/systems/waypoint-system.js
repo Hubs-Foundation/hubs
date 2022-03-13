@@ -255,8 +255,8 @@ export class WaypointSystem {
   getUnoccupiableSpawnPoint() {
     const candidates = this.ready.filter(component => isUnoccupiableSpawnPoint(component.data));
     //Fix for multiple random entry
-    //return candidates.length && candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
-    return candidates.length && candidates[0];
+    // return candidates.length && candidates[0];
+    return candidates.length && candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
   }
   lostOwnershipOfWaypoint(e) {
     if (this.currentWaypoint && this.currentWaypoint.el === e.detail.el) {

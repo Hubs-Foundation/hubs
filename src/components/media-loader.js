@@ -333,22 +333,22 @@ AFRAME.registerComponent("media-loader", {
     if (!src) return;
 
     //TOCHECK::
-    const { origin, pathname } = new URL(src);
-    if (origin === "https://www.twitch.tv"){
-      if (g_twitchLiveStreams.length === 0){
-        console.log("LENGTH IS 000000");
-        g_twitchLiveStreams = await getLiveGameStreams();
-      } 
-      if (g_twitchLiveStreams.length > 6){
-        src = g_twitchLiveStreams[pathname.substring(1)];
-        if (src === undefined){
-          console.log("########################### retryingggg " + src);
-          g_twitchLiveStreams = await getLiveGameStreams();
-          src = g_twitchLiveStreams[6];
-        }
-        console.log("########################### " + src + " INDEX=" + pathname.substring(1));
-      }
-    }
+    // const { origin, pathname } = new URL(src);
+    // if (origin === "https://www.twitch.tv"){
+    //   if (g_twitchLiveStreams.length === 0){
+    //     console.log("LENGTH IS 000000");
+    //     g_twitchLiveStreams = await getLiveGameStreams();
+    //   } 
+    //   if (g_twitchLiveStreams.length > 6){
+    //     src = g_twitchLiveStreams[pathname.substring(1)];
+    //     if (src === undefined){
+    //       console.log("########################### retryingggg " + src);
+    //       g_twitchLiveStreams = await getLiveGameStreams();
+    //       src = g_twitchLiveStreams[6];
+    //     }
+    //     console.log("########################### " + src + " INDEX=" + pathname.substring(1));
+    //   }
+    // }
     
     const srcChanged = oldData.src !== src;
     const versionChanged = !!(oldData.version && oldData.version !== version);
