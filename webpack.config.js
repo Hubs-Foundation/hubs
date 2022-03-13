@@ -267,12 +267,15 @@ module.exports = async (env, argv) => {
   process.traceDeprecation = true;
 
   return {
-    node: {
-      // need to specify this manually because some random lodash code will try to access
-      // Buffer on the global object if it exists, so webpack will polyfill on its behalf
-      Buffer: false,
-      // process: false,
-      fs: "empty"
+    resolve: {
+      fallback: {
+        // need to specify this manually because some random lodash code will try to access
+        // Buffer on the global object if it exists, so webpack will polyfill on its behalf
+        Buffer: false,
+        fs: false,
+        stream: require.resolve("stream-browserify"),
+        path: require.resolve("path-browserify")
+      }
     },
     entry: {
       support: path.join(__dirname, "src", "support.js"),
@@ -383,6 +386,7 @@ module.exports = async (env, argv) => {
           }
         },
         {
+          // TODO not needed for wp 5 but need to update workers initialization
           test: /\.worker\.js$/,
           loader: "worker-loader",
           options: {
@@ -554,6 +558,9 @@ module.exports = async (env, argv) => {
       }
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        process: "process/browser"
+      }),
       new BundleAnalyzerPlugin({
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
       }),
