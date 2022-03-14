@@ -954,12 +954,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   scene.addEventListener("action_camera_recording_started", () => hubChannel.beginRecording());
   scene.addEventListener("action_camera_recording_ended", () => hubChannel.endRecording());
 
-  scene.addEventListener("action_raise_hand", () => window.APP.hubChannel.raiseHand());
-  scene.addEventListener("action_lower_hand", () => window.APP.hubChannel.lowerHand());
-
-  scene.addEventListener("action_typing_started", () => window.APP.hubChannel.beginTyping());
-  scene.addEventListener("action_typing_ended", () => window.APP.hubChannel.endTyping());
-
   if (qs.get("required_version") && process.env.BUILD_VERSION) {
     const buildNumber = process.env.BUILD_VERSION.split(" ", 1)[0]; // e.g. "123 (abcd5678)"
 

@@ -46,7 +46,11 @@ export function ReactionPopoverContainer({ scene }) {
 
   const onToggleHandRaised = useCallback(
     () => {
-      scene.emit(presence.hand_raised ? "action_lower_hand" : "action_raise_hand");
+      if (presence.hand_raised) {
+        window.APP.hubChannel.lowerHand()
+      } else {
+        window.APP.hubChannel.raiseHand()
+      }
     },
     [scene, presence]
   );
