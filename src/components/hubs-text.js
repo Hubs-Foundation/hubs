@@ -86,8 +86,8 @@ function loadTexture(src) {
 
 const FONTS = {
   roboto: {
-    json: loadFont("https://meta-uokdc.com/assets/fonts/font.json"),
-    texture: loadTexture("https://meta-uokdc.com/assets/fonts/font.png")
+    json: loadFont("https://meta.gjeibiz.com/assets/fonts/font.json"),
+    texture: loadTexture("https://meta.gjeibiz.com/assets/fonts/font.png")
   }
 };
 
