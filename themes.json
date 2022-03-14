@@ -31,7 +31,7 @@
       "background2-color": "#282C31",
       "background3-color": "#3A4048",
       "background4-color": "#5D646C",
-      "loading-screen-background": "radial-gradient(50% 50% at 50% 50%, #15171B 0%, #282C31 100%)",
+      "loading-screen-background": "#000000",
       "border1-color": "#3A4048",
       "border2-color": "#5D646C",
       "border3-color": "#5D646C",

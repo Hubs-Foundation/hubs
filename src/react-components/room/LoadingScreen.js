@@ -18,8 +18,8 @@ export function LoadingScreen({ logoSrc, message, infoMessages }) {
       }
       bottom={
         <>
-          <h3>{infoMessage.heading}</h3>
-          <p>{infoMessage.message}</p>
+          {/* <h3>{infoMessage.heading}</h3> */}
+          {/* <p>{infoMessage.message}</p> */}
         </>
       }
     />
