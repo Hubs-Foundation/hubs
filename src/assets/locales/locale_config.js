@@ -7,7 +7,8 @@ export const AVAILABLE_LOCALES = {
   es: "Español",
   ru: "Pусский",
   fr: "Français",
-  ko: "한국어"
+  ko: "한국어",
+  de: "Deutsch"
 };
 
 // Map from alternative primary language tags to those we support
