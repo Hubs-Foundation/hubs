@@ -210,9 +210,11 @@ AFRAME.registerComponent("name-tag", {
       this.nametagText.el.addEventListener(
         "text-updated",
         () => {
-          this.nametagText.el.components["text"].getSize(this.size);
-          this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
-          this.resizeNameTag();
+          if (this.nametagText.el) {
+            this.nametagText.el.components["text"].getSize(this.size);
+            this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
+            this.resizeNameTag();
+          }
         },
         { once: true }
       );
