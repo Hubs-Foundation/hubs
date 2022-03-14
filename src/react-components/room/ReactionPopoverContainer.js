@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { ReactionPopoverButton } from "./ReactionPopover";
 import { spawnEmojiInFrontOfUser, emojis } from "../../components/emoji";
 import { defineMessages, useIntl } from "react-intl";
-import { getPlayerPresence } from "../../utils/component-utils";
 
 const emojiLabels = defineMessages({
   smile: { id: "reaction-popover.emoji-label.smile", defaultMessage: "Smile" },
@@ -16,8 +15,8 @@ const emojiLabels = defineMessages({
   cry: { id: "reaction-popover.emoji-label.cry", defaultMessage: "Cry" }
 });
 
-function usePresence(scene) {
-  const [presence, setPresence] = useState(getPlayerPresence(NAF.clientId));
+function usePresence(scene, initialPresence) {
+  const [presence, setPresence] = useState(initialPresence);
 
   const onPresenceUpdate = ({ detail: presence }) => {
     if (presence.sessionId === NAF.clientId) setPresence(presence);
@@ -33,9 +32,9 @@ function usePresence(scene) {
   return presence;
 }
 
-export function ReactionPopoverContainer({ scene }) {
+export function ReactionPopoverContainer({ scene, initialPresence }) {
   const intl = useIntl();
-  const presence = usePresence(scene);
+  const presence = usePresence(scene, initialPresence);
 
   const items = emojis.map(emoji => ({
     src: emoji.particleEmitterConfig.src,
@@ -59,5 +58,6 @@ export function ReactionPopoverContainer({ scene }) {
 }
 
 ReactionPopoverContainer.propTypes = {
-  scene: PropTypes.object
+  scene: PropTypes.object,
+  initialPresence: PropTypes.object
 };

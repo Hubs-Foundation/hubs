@@ -1580,7 +1580,10 @@ class UIRoot extends Component {
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                         />
                         {this.props.hubChannel.can("spawn_emoji") && (
-                          <ReactionPopoverContainer scene={this.props.scene} />
+                          <ReactionPopoverContainer
+                            scene={this.props.scene}
+                            initialPresence={getPresenceProfileForSession(this.props.presences, this.props.sessionId)}
+                          />
                         )}
                       </>
                     )}
