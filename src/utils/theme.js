@@ -16,6 +16,7 @@ const DEFAULT_COLORS = {
   "notice-text-color": "#FFFFFF",
   "favorited-color": "#FFC000",
   "nametag-color": "#000000",
+  "nametag-volume-color": "#7ED320",
   "nametag-text-color": "#FFFFFF",
   "nametag-border-color": "#7ED320",
   "nametag-border-color-raised-hand": "#FFCD74"
@@ -37,9 +38,6 @@ function getThemeColor(name) {
 function activateTheme() {
   const actionColor = getThemeColor("action-color");
   const actionHoverColor = getThemeColor("action-color-highlight");
-  const nametagColor = getThemeColor("nametag-color");
-  const nametagTextColor = getThemeColor("nametag-text-color");
-  const nametagBorderColor = getThemeColor("nametag-border-color");
 
   if (document.querySelector("#rounded-text-button")) {
     // NOTE, using the object-based {} setAttribute variant in a-frame
@@ -72,17 +70,6 @@ function activateTheme() {
         "text-button",
         `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
       );
-
-    document
-      .querySelector("#nametag-background-mixin")
-      .setAttribute(
-        "text-button",
-        `textHoverColor: #fff; textColor: ${nametagTextColor}; backgroundColor: ${nametagColor}; backgroundHoverColor: #aaa;`
-      );
-
-    document
-      .querySelector("#nametag-status-border-mixin")
-      .setAttribute("text-button", `backgroundColor: ${nametagBorderColor}`);
   }
 }
 

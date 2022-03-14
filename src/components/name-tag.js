@@ -64,6 +64,8 @@ AFRAME.registerComponent("name-tag", {
     this.nametagTyping = this.el.querySelector(".nametag-typing").object3D;
     this.nametagText = this.el.querySelector(".nametag-text").object3D;
 
+    this.updateTheme();
+
     NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
       this.playerSessionId = NAF.utils.getCreator(networkedEntity);
       const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
@@ -265,6 +267,16 @@ AFRAME.registerComponent("name-tag", {
     this.resizeNameTag();
   },
 
+  updateTheme() {
+    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(
+      getThemeColor(this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color")
+    );
+    this.nametagVolume.el.object3DMap.mesh.material.color.set(getThemeColor("nametag-volume-color"));
+    this.nametagBackground.el.object3DMap.mesh.material.color.set(getThemeColor("nametag-color"));
+    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(getThemeColor("nametag-border-color"));
+    this.nametagText.el.setAttribute("text", "color", getThemeColor("nametag-text-color"));
+  },
+
   onStateChanged() {
     this.nametagVisibilityDistance = Math.pow(
       this.store.state.preferences.nametagVisibilityDistance !== undefined
@@ -273,6 +285,7 @@ AFRAME.registerComponent("name-tag", {
       2
     );
     this.nametagVisibility = this.store.state.preferences.nametagVisibility;
+    this.updateTheme();
   },
 
   resizeNameTag() {
@@ -287,11 +300,8 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateHandRaised() {
-    this.nametagStatusBorder.el.setAttribute(
-      "text-button",
-      `backgroundColor: ${getThemeColor(
-        this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color"
-      )}`
+    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(
+      getThemeColor(this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color")
     );
     const targetScale = this.isHandRaised ? 0.2 : 0;
     anime({
