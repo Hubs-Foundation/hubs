@@ -3,7 +3,6 @@ import MovingAverage from "moving-average";
 import { getThemeColor } from "../utils/theme";
 import qsTruthy from "../utils/qs_truthy";
 import { findAncestorWithComponent } from "../utils/scene-graph";
-import { NAMETAG_VISIBILITY_DISTANCE_DEFAULT } from "../react-components/preferences-screen";
 import { THREE } from "aframe";
 import { setMatrixWorld } from "../utils/three-utils";
 
@@ -43,7 +42,6 @@ AFRAME.registerComponent("name-tag", {
     this.avatarAABBCenter = new THREE.Vector3();
     this.nametagHeight = 0;
     this.isAvatarReady = false;
-    this.lastUpdateTime = Date.now();
 
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onModelLoading = this.onModelLoading.bind(this);
@@ -79,13 +77,6 @@ AFRAME.registerComponent("name-tag", {
       this.el.sceneEl.object3D.add(this.avatarBBAAHelper);
     }
 
-    this.nametagVisibility = this.store.state.preferences.nametagVisibility;
-    this.nametagVisibilityDistance = Math.pow(
-      this.store.state.preferences.nametagVisibilityDistance !== undefined
-        ? this.store.state.preferences.nametagVisibilityDistance
-        : NAMETAG_VISIBILITY_DISTANCE_DEFAULT,
-      2
-    );
     this.onStateChanged();
   },
 
@@ -96,7 +87,6 @@ AFRAME.registerComponent("name-tag", {
   tick: (() => {
     let typingAnimTime = 0;
     const worldPos = new THREE.Vector3();
-    const avatarRigWorldPos = new THREE.Vector3();
     const mat = new THREE.Matrix4();
     return function(t) {
       if (!this.isAvatarReady) {
@@ -105,26 +95,6 @@ AFRAME.registerComponent("name-tag", {
       }
       this.wasTalking = this.isTalking;
       this.isTalking = this.audioAnalyzer.avatarIsTalking;
-      if (this.nametagVisibility === "showClose") {
-        this.avatarRig.getWorldPosition(avatarRigWorldPos);
-        this.nametag.getWorldPosition(worldPos);
-        this.shouldBeVisible = avatarRigWorldPos.sub(worldPos).lengthSq() < this.nametagVisibilityDistance;
-      } else if (this.nametagVisibility === "showSpeaking") {
-        if (!this.isTalking && this.wasTalking) {
-          if (Date.now() - this.lastUpdateTime > 1000) {
-            this.shouldBeVisible = false;
-          }
-        } else if (this.isTalking && !this.wasTalking) {
-          this.lastUpdateTime = Date.now();
-          this.shouldBeVisible = true;
-        }
-      } else if (this.nametagVisibility === "showFrozen") {
-        this.shouldBeVisible = this.el.sceneEl.is("frozen");
-      } else if (this.nametagVisibility === "showNone") {
-        this.shouldBeVisible = false;
-      } else {
-        this.shouldBeVisible = true;
-      }
 
       if (this.shouldBeVisible) {
         this.nametag.visible = true;
@@ -177,6 +147,7 @@ AFRAME.registerComponent("name-tag", {
     this.el.parentEl.addEventListener("ik-first-tick", this.onModelIkFirstTick);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.addEventListener("statechanged", this.onStateChanged);
+    this.el.sceneEl.systems["hubs-systems"].nameTagSystem.register(this);
   },
 
   pause() {
@@ -185,6 +156,7 @@ AFRAME.registerComponent("name-tag", {
     this.el.parentEl.removeEventListener("ik-first-tick", this.onModelIkFirstTick);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.removeEventListener("statechanged", this.onStateChanged);
+    this.el.sceneEl.systems["hubs-systems"].nameTagSystem.unregister(this);
   },
 
   onPresenceUpdated({ detail: presenceMeta }) {
@@ -278,13 +250,6 @@ AFRAME.registerComponent("name-tag", {
   },
 
   onStateChanged() {
-    this.nametagVisibilityDistance = Math.pow(
-      this.store.state.preferences.nametagVisibilityDistance !== undefined
-        ? this.store.state.preferences.nametagVisibilityDistance
-        : NAMETAG_VISIBILITY_DISTANCE_DEFAULT,
-      2
-    );
-    this.nametagVisibility = this.store.state.preferences.nametagVisibility;
     this.updateTheme();
   },
 
