@@ -378,7 +378,9 @@ AFRAME.registerComponent("camera-tool", {
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
     // This adds hacks for current browser issues with media recordings when audio tracks are muted or missing.
-    const fixAudioTracks = () => {
+    const attachBlankAudio = () => {
+      // Chrome has issues when the audio tracks are silent so we only do this for FF.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=1223382
       if (isFirefox) {
         // FF 73+ seems to fail to decode videos with no audio track, so we always include a silent track.
         const context = THREE.AudioContext.getContext();
@@ -389,10 +391,6 @@ AFRAME.registerComponent("camera-tool", {
         oscillator.connect(destination);
         gain.connect(destination);
         stream.addTrack(destination.stream.getAudioTracks()[0]);
-      } else {
-        // Chrome has issues when the audio tracks are muted.
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=1223382
-        stream.getAudioTracks().forEach(t => stream.removeTrack(t));
       }
     };
 
@@ -416,10 +414,10 @@ AFRAME.registerComponent("camera-tool", {
         const audio = destination.stream.getAudioTracks()[0];
         stream.addTrack(audio);
       } else {
-        fixAudioTracks();
+        attachBlankAudio();
       }
     } else {
-      fixAudioTracks();
+      attachBlankAudio();
     }
 
     stream.addTrack(track);
