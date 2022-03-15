@@ -427,10 +427,7 @@ AFRAME.registerComponent("camera-tool", {
     const chunks = [];
     const recordingStartTime = performance.now();
 
-    this.videoRecorder.ondataavailable = e => {
-      console.log("Camera Tool: ondataavailable => " + e.data?.size);
-      chunks.push(e.data);
-    };
+    this.videoRecorder.ondataavailable = e => chunks.push(e.data);
 
     this.updateRenderTargetNextTick = true;
 
