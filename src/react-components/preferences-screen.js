@@ -977,7 +977,7 @@ class PreferencesScreen extends Component {
       [
         CATEGORY_AUDIO,
         [
-          this.state.preferredMic,
+          ...(MediaDevicesManager.isAudioInputSelectEnabled ? [this.state.preferredMic] : []),
           ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           {
             key: "muteMicOnEntry",

@@ -16,6 +16,7 @@ import { LevelBar } from "../misc/LevelBar";
 import { Popover } from "../popover/Popover";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { Spinner } from "../misc/Spinner";
+import MediaDevicesManager from "../../utils/media-devices-manager";
 
 export function MicSetupModal({
   className,
@@ -131,6 +132,7 @@ export function MicSetupModal({
               )}
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
+              MediaDevicesManager.isAudioInputSelectEnabled &&
               isMicrophoneEnabled &&
               microphoneOptions?.length > 0 && (
                 <div className={styles.selectionContainer}>
