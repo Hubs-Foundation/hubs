@@ -9,7 +9,10 @@ copy package-lock.json ./
 run npm ci
 copy admin/package.json admin/
 copy admin/package-lock.json admin/
-run cd admin && npm ci && cd ..
+run cd admin
+copy scripts/docker/turkey-swaps/admin-menu.js src/react-components/admin-menu.js
+run npm ci 
+run cd ..
 copy . .
 env BASE_ASSETS_PATH="{{rawhubs-base-assets-path}}"
 run npm run build 1> /dev/null
