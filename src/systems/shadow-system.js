@@ -1,4 +1,4 @@
-import { traverseAnimationTargets } from "../utils/three-utils";
+import { updateMaterials } from "../utils/material-utils.js";
 
 const frustumBox = new THREE.Box3();
 const inverseShadowCameraMatrixWorld = new THREE.Matrix4();
@@ -90,50 +90,44 @@ function resizeShadowCameraFrustum(light, boundingBox) {
 
 export class ShadowSystem {
   constructor(sceneEl) {
-    this.needsUpdate = false;
-    this.dynamicShadowsEnabled = window.APP.store.state.preferences.enableDynamicShadows;
     this.sceneEl = sceneEl;
-    this.onEnvironmentSceneLoaded = this.onEnvironmentSceneLoaded.bind(this);
-    this.sceneEl.addEventListener("environment-scene-loaded", this.onEnvironmentSceneLoaded);
     this.shadowCameraBoundingBox = new THREE.Box3();
+    this.previousShadowsEnabled = this.realtimeShadowsEnabled = null;
+    window.APP.store.addEventListener("statechanged", this.updatePrefs.bind(this));
+    this.updatePrefs();
   }
 
-  onEnvironmentSceneLoaded({ detail: environmentObject3D }) {
-    this.environmentObject3D = environmentObject3D;
-    this.needsUpdate = true;
-    this.sceneEl.renderer.shadowMap.autoUpdate = this.dynamicShadowsEnabled;
+  updatePrefs() {
+    this.realtimeShadowsEnabled =
+      window.APP.store.state.preferences.enableDynamicShadows === true &&
+      window.APP.store.materialQualitySetting !== "low";
+    if (this.previousShadowsEnabled !== this.realtimeShadowsEnabled) {
+      this.sceneEl.setAttribute("shadow", { enabled: this.realtimeShadowsEnabled });
+
+      // If scene has already rendered, materials which can receive shadows must be updated.
+      if (this.sceneEl.hasLoaded) {
+        this.sceneEl.object3D.traverse(node => {
+          if (node.receiveShadow && node.material) {
+            updateMaterials(node, material => {
+              material.needsUpdate = true;
+              return material;
+            });
+          }
+        });
+      }
+    }
+    this.previousShadowsEnabled = this.realtimeShadowsEnabled;
   }
 
   tick() {
-    const environmentObject3D = this.environmentObject3D;
-
-    if (
-      !this.needsUpdate ||
-      window.APP.store.state.preferences.materialQualitySetting === "low" ||
-      !environmentObject3D
-    ) {
+    if (!this.realtimeShadowsEnabled) {
       return;
     }
-
-    if (!this.dynamicShadowsEnabled) {
-      traverseAnimationTargets(environmentObject3D, environmentObject3D.animations, animatedNode => {
-        animatedNode.traverse(child => {
-          child.castShadow = false;
-          child.receiveShadow = false;
-        });
-      });
-    }
-
-    computeShadowCameraBoundingBox(environmentObject3D, this.shadowCameraBoundingBox);
-
-    environmentObject3D.traverse(object3D => {
+    computeShadowCameraBoundingBox(this.sceneEl.object3D, this.shadowCameraBoundingBox);
+    this.sceneEl.object3D.traverse(object3D => {
       if (object3D.isDirectionalLight) {
         resizeShadowCameraFrustum(object3D, this.shadowCameraBoundingBox);
       }
     });
-
-    this.sceneEl.renderer.shadowMap.needsUpdate = true;
-
-    this.needsUpdate = false;
   }
 }

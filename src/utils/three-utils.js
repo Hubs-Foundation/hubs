@@ -345,25 +345,6 @@ export const childMatch = (function() {
   };
 })();
 
-export function traverseAnimationTargets(rootObject, animations, callback) {
-  if (animations && animations.length > 0) {
-    for (const animation of animations) {
-      for (const track of animation.tracks) {
-        const { nodeName } = THREE.PropertyBinding.parseTrackName(track.name);
-        let animatedNode = rootObject.getObjectByProperty("uuid", nodeName);
-
-        if (!animatedNode) {
-          animatedNode = rootObject.getObjectByName(nodeName);
-        }
-
-        if (animatedNode) {
-          callback(animatedNode);
-        }
-      }
-    }
-  }
-}
-
 export function createPlaneBufferGeometry(width, height, widthSegments, heightSegments, flipY = true) {
   const geometry = new THREE.PlaneBufferGeometry(width, height, widthSegments, heightSegments);
   // Three.js seems to assume texture flipY is true for all its built in geometry
