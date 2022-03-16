@@ -6,7 +6,7 @@ import { getAppLogo } from "../../utils/get-app-logo";
 import { CreateRoomButton } from "./CreateRoomButton";
 import { PWAButton } from "./PWAButton";
 import { useFavoriteRooms } from "./useFavoriteRooms";
-//import { usePublicRooms } from "./usePublicRooms";
+import { usePublicRooms } from "./usePublicRooms";
 import styles from "./HomePage.scss";
 import { AuthContext } from "../auth/AuthContext";
 import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
@@ -27,10 +27,10 @@ export function HomePage() {
   const intl = useIntl();
 
   const { results: favoriteRooms } = useFavoriteRooms();
-  //const { results: publicRooms } = usePublicRooms();
+  const { results: publicRooms } = usePublicRooms();
 
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
-  const sortedPublicRooms = []; //Array.from(publicRooms).sort((a, b) => b.member_count - a.member_count);
+  const sortedPublicRooms = Array.from(publicRooms).sort((a, b) => b.member_count - a.member_count);
   const wrapInBold = chunk => <b>{chunk}</b>;
   const isHmc = configs.feature("show_cloud");
   useEffect(() => {
