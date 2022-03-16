@@ -807,7 +807,7 @@ class PreferencesScreen extends Component {
 
   updateMediaDevices = () => {
     // Audio devices update
-    const micOptions = this.mediaDevicesManager.micDevices.map(device => ({
+    const micOptions = this.mediaDevicesManager.micDevicesOptions.map(device => ({
       value: device.value,
       text: device.label
     }));

@@ -71,31 +71,19 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get defaultInputDeviceId() {
-    return this._micDevices && this._micDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+    return this._micDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
   }
 
   get defaultOutputDeviceId() {
-    return this._outputDevices && this._outputDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+    return this._outputDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
   }
 
   get defaultVideoDeviceId() {
-    return this._videoDevices && this._videoDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+    return this._videoDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
   }
 
-  get micDevices() {
-    if (MediaDevicesManager.isAudioInputSelectEnabled) {
-      if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.DENIED) {
-        return [{ value: NO_DEVICE_ID, label: "None" }];
-      } else {
-        return this._micDevices;
-      }
-    } else {
-      return [{ value: this.defaultInputDeviceId, label: this.micLabelForDeviceId(this.defaultInputDeviceId) }];
-    }
-  }
-
-  set micDevices(micDevices) {
-    this._micDevices = micDevices;
+  get micDevicesOptions() {
+    return this._micDevices.length > 0 ? this._micDevices : [{ value: NO_DEVICE_ID, label: "None" }];
   }
 
   get videoDevices() {
@@ -127,28 +115,17 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get selectedMicDeviceId() {
-    if (MediaDevicesManager.isAudioInputSelectEnabled) {
-      if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.DENIED) {
-        return NO_DEVICE_ID;
-      } else {
-        return this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || this.defaultInputDeviceId;
-      }
-    } else {
-      return this.defaultInputDeviceId;
-    }
+    return MediaDevicesManager.isAudioInputSelectEnabled &&
+      this._permissionsStatus[MediaDevices.MICROPHONE] !== PermissionStatus.GRANTED
+      ? NO_DEVICE_ID
+      : this.deviceIdForMicDeviceLabel(this.selectedMicLabel) || this.defaultInputDeviceId;
   }
 
   get preferredMicDeviceId() {
-    if (MediaDevicesManager.isAudioInputSelectEnabled) {
-      if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.DENIED) {
-        return NO_DEVICE_ID;
-      } else {
-        const { preferredMic } = this._store.state.preferences;
-        return preferredMic || this.defaultInputDeviceId;
-      }
-    } else {
-      return this.defaultInputDeviceId;
-    }
+    return MediaDevicesManager.isAudioInputSelectEnabled &&
+      this._permissionsStatus[MediaDevices.MICROPHONE] !== PermissionStatus.GRANTED
+      ? NO_DEVICE_ID
+      : this._store.state.preferences.preferredMic || NO_DEVICE_ID;
   }
 
   get selectedSpeakersDeviceId() {
@@ -207,7 +184,7 @@ export default class MediaDevicesManager extends EventEmitter {
 
   async updatePermissions() {
     await this.fetchMediaDevices();
-    const micStatus = this.micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
+    const micStatus = this._micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
     this._permissionsStatus[MediaDevices.MICROPHONE] = micStatus;
     this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
       mediaDevice: MediaDevices.MICROPHONE,
@@ -219,7 +196,7 @@ export default class MediaDevicesManager extends EventEmitter {
       mediaDevice: MediaDevices.CAMERA,
       status: videoStatus
     });
-    const speakersStatus = this.micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
+    const speakersStatus = this._micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
     this._permissionsStatus[MediaDevices.SPEAKERS] = speakersStatus;
     this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
       mediaDevice: MediaDevices.SPEAKERS,
@@ -233,7 +210,7 @@ export default class MediaDevicesManager extends EventEmitter {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
         mediaDevices = mediaDevices.filter(d => d.label !== "");
         if (MediaDevicesManager.isAudioInputSelectEnabled) {
-          this.micDevices = mediaDevices
+          this._micDevices = mediaDevices
             .filter(d => d.kind === "audioinput")
             .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substr(0, 9)})` }));
         }
@@ -450,7 +427,7 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   deviceIdForMicDeviceLabel(label) {
-    return this.micDevices.filter(d => d.label === label).map(d => d.value)[0];
+    return this._micDevices.filter(d => d.label === label).map(d => d.value)[0];
   }
 
   deviceIdForSpeakersDeviceLabel(label) {
@@ -458,7 +435,7 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   micLabelForDeviceId(deviceId) {
-    return this.micDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
+    return this._micDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
   }
 
   speakersLabelForDeviceId(deviceId) {
@@ -466,7 +443,7 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   hasHmdMicrophone() {
-    return !!this.state.micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
+    return !!this.state._micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
   }
 
   videoDeviceIdForMicLabel(label) {
