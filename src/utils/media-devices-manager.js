@@ -75,31 +75,23 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get defaultOutputDeviceId() {
-    return this._outputDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+    return this._outputDevices.length > 0 ? this._outputDevices[0].value : NO_DEVICE_ID;
   }
 
   get defaultVideoDeviceId() {
-    return this._videoDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+    return this._videoDevices.length > 0 ? this._videoDevices[0].value : NO_DEVICE_ID;
   }
 
   get micDevicesOptions() {
     return this._micDevices.length > 0 ? this._micDevices : [{ value: NO_DEVICE_ID, label: "None" }];
   }
 
-  get videoDevices() {
-    return this._videoDevices;
+  get videoDevicesOptions() {
+    return this._videoDevices.length > 0 ? this._videoDevices : [{ value: NO_DEVICE_ID, label: "None" }];
   }
 
-  set videoDevices(videoDevices) {
-    this._videoDevices = videoDevices;
-  }
-
-  set outputDevices(outputDevices) {
-    this._outputDevices = outputDevices;
-  }
-
-  get outputDevices() {
-    return this._outputDevices;
+  get outputDevicesOptions() {
+    return this._outputDevices.length > 0 ? this._outputDevices : [{ value: NO_DEVICE_ID, label: "None" }];
   }
 
   get mediaStream() {
@@ -130,10 +122,10 @@ export default class MediaDevicesManager extends EventEmitter {
 
   get selectedSpeakersDeviceId() {
     const { preferredSpeakers } = this._store.state.preferences;
-    const exists = this.outputDevices.some(device => {
+    const exists = this._outputDevices.some(device => {
       return device.value === preferredSpeakers;
     });
-    return exists ? preferredSpeakers : this.outputDevices[0]?.value || this.defaultOutputDeviceId;
+    return exists ? preferredSpeakers : this._outputDevices[0]?.value || this.defaultOutputDeviceId;
   }
 
   get isMicShared() {
@@ -190,7 +182,7 @@ export default class MediaDevicesManager extends EventEmitter {
       mediaDevice: MediaDevices.MICROPHONE,
       status: micStatus
     });
-    const videoStatus = this.videoDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
+    const videoStatus = this._videoDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
     this._permissionsStatus[MediaDevices.CAMERA] = videoStatus;
     this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
       mediaDevice: MediaDevices.CAMERA,
@@ -214,11 +206,11 @@ export default class MediaDevicesManager extends EventEmitter {
             .filter(d => d.kind === "audioinput")
             .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substr(0, 9)})` }));
         }
-        this.videoDevices = mediaDevices
+        this._videoDevices = mediaDevices
           .filter(d => d.kind === "videoinput")
           .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substr(0, 9)})` }));
         if (MediaDevicesManager.isAudioOutputSelectEnabled) {
-          this.outputDevices = mediaDevices
+          this._outputDevices = mediaDevices
             .filter(d => d.kind === "audiooutput")
             .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substr(0, 9)})` }));
         }
@@ -431,7 +423,7 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   deviceIdForSpeakersDeviceLabel(label) {
-    return this.outputDevices.filter(d => d.label === label).map(d => d.value)[0];
+    return this._outputDevices.filter(d => d.label === label).map(d => d.value)[0];
   }
 
   micLabelForDeviceId(deviceId) {
@@ -439,7 +431,7 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   speakersLabelForDeviceId(deviceId) {
-    return this.outputDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
+    return this._outputDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
   }
 
   hasHmdMicrophone() {
@@ -447,10 +439,10 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   videoDeviceIdForMicLabel(label) {
-    return this.videoDevices.filter(d => d.label === label).map(d => d.value)[0];
+    return this._videoDevices.filter(d => d.label === label).map(d => d.value)[0];
   }
 
   videoLabelForDeviceId(deviceId) {
-    return this.videoDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
+    return this._videoDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
   }
 }

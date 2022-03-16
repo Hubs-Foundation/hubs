@@ -6,26 +6,26 @@ export function useSpeakers() {
   const [selectedSpeakersDeviceId, setSelectedSpeakersDeviceId] = useState(
     mediaDevicesManager.selectedSpeakersDeviceId
   );
-  const [speakerDevices, setSpeakerDevices] = useState(mediaDevicesManager.outputDevices);
+  const [speakerDevices, setSpeakerDevices] = useState(mediaDevicesManager.outputDevicesOptions);
 
   useEffect(
     () => {
       const onPermissionsChanged = ({ mediaDevice }) => {
         if (mediaDevice === MediaDevices.MICROPHONE) {
           setSelectedSpeakersDeviceId(mediaDevicesManager.selectedSpeakersDeviceId);
-          setSpeakerDevices(mediaDevicesManager.outputDevices);
+          setSpeakerDevices(mediaDevicesManager.outputDevicesOptions);
         }
       };
       mediaDevicesManager.on(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
 
       const onDeviceChange = () => {
         setSelectedSpeakersDeviceId(mediaDevicesManager.selectedSpeakersDeviceId);
-        setSpeakerDevices(mediaDevicesManager.outputDevices);
+        setSpeakerDevices(mediaDevicesManager.outputDevicesOptions);
       };
       mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, onDeviceChange);
 
       setSelectedSpeakersDeviceId(mediaDevicesManager.selectedSpeakersDeviceId);
-      setSpeakerDevices(mediaDevicesManager.outputDevices);
+      setSpeakerDevices(mediaDevicesManager.outputDevicesOptions);
 
       return () => {
         mediaDevicesManager.off(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
@@ -38,7 +38,7 @@ export function useSpeakers() {
   const speakerDeviceChanged = useCallback(
     deviceId => {
       mediaDevicesManager.changeAudioOutput(deviceId);
-      setSpeakerDevices(mediaDevicesManager.outputDevices);
+      setSpeakerDevices(mediaDevicesManager.outputDevicesOptions);
       setSelectedSpeakersDeviceId(deviceId);
     },
     [mediaDevicesManager]
