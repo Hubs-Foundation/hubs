@@ -265,15 +265,15 @@ export default class MediaDevicesManager extends EventEmitter {
     }
 
     if (result) {
-      this._scene.emit(MediaDevicesEvents.MIC_SHARE_STARTED);
       this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.GRANTED;
+      this._scene.emit(MediaDevicesEvents.MIC_SHARE_STARTED);
       this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
         mediaDevice: MediaDevices.MICROPHONE,
         status: PermissionStatus.GRANTED
       });
     } else {
-      this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
       this._permissionsStatus[MediaDevices.MICROPHONE] = PermissionStatus.DENIED;
+      this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
       this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
         mediaDevice: MediaDevices.MICROPHONE,
         status: PermissionStatus.DENIED
@@ -386,18 +386,18 @@ export default class MediaDevicesManager extends EventEmitter {
 
         const mediaDevice = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
         this._permissionsStatus[mediaDevice] = PermissionStatus.GRANTED;
+        this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_STARTED);
         this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, { mediaDevice, status: PermissionStatus.GRANTED });
       }
     } catch (e) {
       error(e);
-      this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
       const mediaDevice = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
       this._permissionsStatus[mediaDevice] = PermissionStatus.DENIED;
+      this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
       this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, { mediaDevice, status: PermissionStatus.DENIED });
       return;
     }
 
-    this._scene.emit(MediaDevicesEvents.VIDEO_SHARE_STARTED);
     success(isDisplayMedia, videoTrackAdded, target);
   }
 
