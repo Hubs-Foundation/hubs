@@ -58,7 +58,7 @@ Button.defaultProps = {
 export function NextButton(props) {
   return (
     <Button preset="accept" {...props}>
-      <FormattedMessage id="button.next" defaultMessage="Next" />
+      <FormattedMessage id="button.next" defaultMessage="次へ" />
     </Button>
   );
 }
@@ -66,7 +66,7 @@ export function NextButton(props) {
 export function CancelButton(props) {
   return (
     <Button preset="cancel" {...props}>
-      <FormattedMessage id="button.cancel" defaultMessage="Cancel" />
+      <FormattedMessage id="button.cancel" defaultMessage="キャンセル" />
     </Button>
   );
 }
@@ -74,7 +74,7 @@ export function CancelButton(props) {
 export function ContinueButton(props) {
   return (
     <Button preset="accept" {...props}>
-      <FormattedMessage id="button.continue" defaultMessage="Continue" />
+      <FormattedMessage id="button.continue" defaultMessage="次へ" />
     </Button>
   );
 }
@@ -82,7 +82,7 @@ export function ContinueButton(props) {
 export function AcceptButton(props) {
   return (
     <Button preset="accept" {...props}>
-      <FormattedMessage id="button.accept" defaultMessage="Accept" />
+      <FormattedMessage id="button.accept" defaultMessage="OK" />
     </Button>
   );
 }
@@ -90,7 +90,7 @@ export function AcceptButton(props) {
 export function ApplyButton(props) {
   return (
     <Button preset="accept" {...props}>
-      <FormattedMessage id="button.apply" defaultMessage="Apply" />
+      <FormattedMessage id="button.apply" defaultMessage="保存" />
     </Button>
   );
 }

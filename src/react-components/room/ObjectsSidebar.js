@@ -30,12 +30,12 @@ function getObjectIcon(type) {
 }
 
 const objectTypeNames = defineMessages({
-  video: { id: "objects-sidebar.object-type.video", defaultMessage: "Video" },
-  audio: { id: "objects-sidebar.object-type.audio", defaultMessage: "Audio" },
-  image: { id: "objects-sidebar.object-type.image", defaultMessage: "Image" },
+  video: { id: "objects-sidebar.object-type.video", defaultMessage: "動画" },
+  audio: { id: "objects-sidebar.object-type.audio", defaultMessage: "音声" },
+  image: { id: "objects-sidebar.object-type.image", defaultMessage: "画像" },
   pdf: { id: "objects-sidebar.object-type.pdf", defaultMessage: "PDF" },
-  model: { id: "objects-sidebar.object-type.model", defaultMessage: "Model" },
-  default: { id: "objects-sidebar.object-type.default", defaultMessage: "Object" }
+  model: { id: "objects-sidebar.object-type.model", defaultMessage: "3Dモデル" },
+  default: { id: "objects-sidebar.object-type.default", defaultMessage: "オブジェクト" }
 });
 
 export function ObjectsSidebarItem({ selected, object, ...rest }) {

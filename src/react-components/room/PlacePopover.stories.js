@@ -19,15 +19,15 @@ export default {
 };
 
 const items = [
-  { id: "pen", icon: PenIcon, color: "accent5", label: "Pen" },
-  { id: "camera", icon: CameraIcon, color: "accent5", label: "Camera" },
-  { id: "text", icon: TextIcon, color: "accent4", label: "Text" },
-  { id: "link", icon: LinkIcon, color: "accent4", label: "Link" },
+  { id: "pen", icon: PenIcon, color: "accent5", label: "ペン" },
+  { id: "camera", icon: CameraIcon, color: "accent5", label: "カメラ" },
+  { id: "text", icon: TextIcon, color: "accent4", label: "テキスト" },
+  { id: "link", icon: LinkIcon, color: "accent4", label: "外部リンク" },
   { id: "gif", icon: GIFIcon, color: "accent2", label: "GIF" },
-  { id: "model", icon: ObjectIcon, color: "accent2", label: "3D Model" },
-  { id: "avatar", icon: AvatarIcon, color: "accent1", label: "Avatar" },
-  { id: "scene", icon: SceneIcon, color: "accent1", label: "Scene" },
-  { id: "upload", icon: UploadIcon, color: "accent3", label: "Upload" }
+  { id: "model", icon: ObjectIcon, color: "accent2", label: "3Dモデル" },
+  { id: "avatar", icon: AvatarIcon, color: "accent1", label: "アバター" },
+  { id: "scene", icon: SceneIcon, color: "accent1", label: "背景を変更" },
+  { id: "upload", icon: UploadIcon, color: "accent3", label: "アップロード" }
 ];
 
 export const Base = () => <RoomLayout toolbarCenter={<PlacePopoverButton items={items} />} />;

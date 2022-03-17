@@ -123,6 +123,13 @@ export default class SceneEntryManager {
 
     this.scene.addState("entered");
 
+    
+    //TOMO ADDED
+    if(savedURL!=""){
+      location.hash=spawnPoint
+    }
+    //TOMO ADDED END
+
     if (muteOnEntry) {
       this.scene.emit("action_mute");
     }

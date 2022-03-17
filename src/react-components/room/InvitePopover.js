@@ -60,7 +60,7 @@ InvitePopoverContent.propTypes = {
 
 const invitePopoverTitle = defineMessage({
   id: "invite-popover.title",
-  defaultMessage: "Invite"
+  defaultMessage: "招待する"
 });
 
 export function InvitePopoverButton({

@@ -54,7 +54,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
 
   return (
     <Modal
-      title={<FormattedMessage id="object-url-modal.title" defaultMessage="Custom Object" />}
+      title={<FormattedMessage id="object-url-modal.title" defaultMessage="カスタムオブジェクト" />}
       beforeTitle={<CloseButton onClick={onClose} />}
     >
       <Column as="form" padding center onSubmit={handleSubmit(onSubmit)}>
@@ -115,7 +115,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
         </p>
         <TextInputField
           name="url"
-          label={<FormattedMessage id="object-url-modal.url-field-label" defaultMessage="Object URL or File" />}
+          label={<FormattedMessage id="object-url-modal.url-field-label" defaultMessage="URLを入力、またはファイルをアップロード" />}
           placeholder="https://example.com/avatar.glb"
           type={hasFile ? "text" : "url"}
           value={fileName || url || ""}
@@ -132,12 +132,12 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           description={
             <FormattedMessage
               id="object-url-modal.url-field-description"
-              defaultMessage="Accepts glb, png, jpg, gif, mp4, and mp3 files"
+              defaultMessage="glb, png, jpg, gif, mp4, mp3ファイルがアップロードできます。"
             />
           }
         />
         <Button type="submit" preset="accept">
-          <FormattedMessage id="object-url-modal.create-object-button" defaultMessage="Create Object" />
+          <FormattedMessage id="object-url-modal.create-object-button" defaultMessage="オブジェクトを作成" />
         </Button>
       </Column>
     </Modal>

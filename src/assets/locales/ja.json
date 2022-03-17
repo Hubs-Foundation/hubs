@@ -55,7 +55,7 @@
   "invite-link-input-field.revoke-confirm-yes": "yes",
   "leave-room-modal.create-room.confirm": "Leave and Create Room",
   "leave-room-modal.create-room.message": "新しい部屋を作成し、この部屋が残ります。よろしいですか？",
-  "leave-room-modal.join-room.confirm": "Join Room",
+  "leave-room-modal.join-room.confirm": "入室する",
   "leave-room-modal.join-room.message": "新しい部屋に参加すると,この部屋から退室します。よろしいですか？",
   "link-page.create-room-button": "新しい部屋を作成します",
   "link-page.enter-code": "コードを入力してください:",

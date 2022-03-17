@@ -348,7 +348,7 @@ ChatMessageList.propTypes = {
 export function ChatSidebar({ onClose, children, ...rest }) {
   return (
     <Sidebar
-      title={<FormattedMessage id="chat-sidebar.title" defaultMessage="Chat" />}
+      title={<FormattedMessage id="chat-sidebar.title" defaultMessage="チャット" />}
       beforeTitle={<CloseButton onClick={onClose} />}
       contentClassName={styles.content}
       {...rest}
@@ -371,7 +371,7 @@ export function ChatToolbarButton(props) {
       {...props}
       icon={<ChatIcon />}
       preset="accent4"
-      label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
+      label={<FormattedMessage id="chat-toolbar-button" defaultMessage="チャット" />}
     />
   );
 }

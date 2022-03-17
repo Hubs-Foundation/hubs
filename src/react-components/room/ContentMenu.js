@@ -25,7 +25,7 @@ export function ObjectsMenuButton(props) {
     <ContentMenuButton {...props}>
       <ObjectsIcon />
       <span>
-        <FormattedMessage id="content-menu.objects-menu-button" defaultMessage="Objects" />
+        <FormattedMessage id="content-menu.objects-menu-button" defaultMessage="オブジェクト" />
       </span>
     </ContentMenuButton>
   );
@@ -36,7 +36,7 @@ export function PeopleMenuButton(props) {
     <ContentMenuButton {...props}>
       <PeopleIcon />
       <span>
-        <FormattedMessage id="content-menu.people-menu-button" defaultMessage="People" />
+        <FormattedMessage id="content-menu.people-menu-button" defaultMessage="ユーザ" />
       </span>
     </ContentMenuButton>
   );

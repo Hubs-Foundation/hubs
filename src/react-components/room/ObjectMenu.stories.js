@@ -19,7 +19,7 @@ export const Base = () => (
       <ObjectMenu title="Object" currentObjectIndex={1} objectCount={12}>
         <ObjectMenuButton>
           <PinIcon />
-          <span>Pin</span>
+          <span>ピン留めする</span>
         </ObjectMenuButton>
         <ObjectMenuButton>
           <LinkIcon />
@@ -45,7 +45,7 @@ export const WithSidebarOpen = () => (
       <ObjectMenu title="Object" currentObjectIndex={1} objectCount={12}>
         <ObjectMenuButton>
           <PinIcon />
-          <span>Pin</span>
+          <span>ピン留めする</span>
         </ObjectMenuButton>
         <ObjectMenuButton>
           <LinkIcon />

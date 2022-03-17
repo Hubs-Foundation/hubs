@@ -20,7 +20,7 @@ export function AvatarSettingsContent({
     <Column as="form" className={styles.content} {...rest}>
       <TextInputField
         disabled={disableDisplayNameInput}
-        label={<FormattedMessage id="avatar-settings-content.display-name-label" defaultMessage="Display Name" />}
+        label={<FormattedMessage id="avatar-settings-content.display-name-label" defaultMessage="ニックネーム" />}
         value={displayName}
         pattern={displayNamePattern}
         spellCheck="false"
@@ -29,7 +29,7 @@ export function AvatarSettingsContent({
         description={
           <FormattedMessage
             id="avatar-settings-content.display-name-description"
-            defaultMessage="Alphanumerics, hyphens, underscores, and tildes. At least 3 characters, no more than 32"
+            defaultMessage="英数字、ハイフン(-)、アンダースコア（_)のみ使用できます。"
           />
         }
         ref={displayNameInputRef}
@@ -37,7 +37,7 @@ export function AvatarSettingsContent({
       <div className={styles.avatarPreviewContainer}>
         {avatarPreview || <div />}
         <Button type="button" preset="basic" onClick={onChangeAvatar}>
-          <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="Change Avatar" />
+          <FormattedMessage id="avatar-settings-content.change-avatar-button" defaultMessage="アバターを変更" />
         </Button>
       </div>
       <AcceptButton preset="accept" type="submit" />

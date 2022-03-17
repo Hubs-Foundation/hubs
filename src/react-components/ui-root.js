@@ -1136,31 +1136,31 @@ class UIRoot extends Component {
       },
       {
         id: "room",
-        label: <FormattedMessage id="more-menu.room" defaultMessage="Room" />,
+        label: <FormattedMessage id="more-menu.room" defaultMessage="ルーム" />,
         items: [
           {
             id: "room-info",
-            label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings" />,
+            label: <FormattedMessage id="more-menu.room-info" defaultMessage="ルーム情報と設定" />,
             icon: HomeIcon,
             onClick: () => this.setSidebar("room-info")
           },
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
             (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
               id: "invite",
-              label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
+              label: <FormattedMessage id="more-menu.invite" defaultMessage="招待する" />,
               icon: InviteIcon,
               onClick: () => this.props.scene.emit("action_invite")
             },
           this.isFavorited()
             ? {
                 id: "unfavorite-room",
-                label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room" />,
+                label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="お気に入りを削除" />,
                 icon: StarIcon,
                 onClick: () => this.toggleFavorited()
               }
             : {
                 id: "favorite-room",
-                label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room" />,
+                label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="お気に入りに追加" />,
                 icon: StarOutlineIcon,
                 onClick: () => this.toggleFavorited()
               },
@@ -1178,7 +1178,7 @@ class UIRoot extends Component {
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
             entered && {
               id: "leave-room",
-              label: <FormattedMessage id="more-menu.enter-leave-room" defaultMessage="Leave Room" />,
+              label: <FormattedMessage id="more-menu.enter-leave-room" defaultMessage="退出する" />,
               icon: LeaveIcon,
               onClick: () => {
                 this.showNonHistoriedDialog(LeaveRoomModal, {
@@ -1189,7 +1189,7 @@ class UIRoot extends Component {
             },
           canCloseRoom && {
             id: "close-room",
-            label: <FormattedMessage id="more-menu.close-room" defaultMessage="Close Room" />,
+            label: <FormattedMessage id="more-menu.close-room" defaultMessage="ルームを閉じる" />,
             icon: DeleteIcon,
             onClick: () =>
               this.props.performConditionalSignIn(
@@ -1506,7 +1506,7 @@ class UIRoot extends Component {
                       <>
                         <ToolbarButton
                           icon={<EnterIcon />}
-                          label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="Join Room" />}
+                          label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="入室する" />}
                           preset="accept"
                           onClick={() => this.setState({ watching: false })}
                         />
@@ -1515,7 +1515,7 @@ class UIRoot extends Component {
                             icon={<VRIcon />}
                             preset="accent5"
                             label={
-                              <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="Spectate in VR" />
+                              <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="外から見る" />
                             }
                             onClick={() => this.props.scene.enterVR()}
                           />
@@ -1545,7 +1545,7 @@ class UIRoot extends Component {
                           className={styleUtils.hideLg}
                           icon={<VRIcon />}
                           preset="accept"
-                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
+                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="VRモード" />}
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
@@ -1558,14 +1558,14 @@ class UIRoot extends Component {
                         <ToolbarButton
                           icon={<VRIcon />}
                           preset="accept"
-                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
+                          label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="VRモード" />}
                           onClick={() => exit2DInterstitialAndEnterVR(true)}
                         />
                       )}
                     {entered && (
                       <ToolbarButton
                         icon={<LeaveIcon />}
-                        label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
+                        label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="退出する" />}
                         preset="cancel"
                         onClick={() => {
                           this.showNonHistoriedDialog(LeaveRoomModal, {

@@ -51,7 +51,7 @@ export const All = args => (
           icon={<InviteIcon />}
           selected={popoverVisible}
           onClick={togglePopover}
-          label="Invite"
+          label="招待する"
         />
       )}
     </Popover>

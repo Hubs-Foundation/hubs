@@ -11,7 +11,7 @@ export function BackButton({ className, ...rest }) {
     <IconButton className={classNames(styles.backButton, className)} {...rest}>
       <ChevronBackIcon />
       <span>
-        <FormattedMessage id="back-button" defaultMessage="Back" />
+        <FormattedMessage id="back-button" defaultMessage="戻る" />
       </span>
     </IconButton>
   );

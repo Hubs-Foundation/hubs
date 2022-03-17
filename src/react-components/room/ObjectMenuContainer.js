@@ -70,9 +70,9 @@ function ObjectMenuItems({ hubChannel, scene, activeObject, deselectObject, onGo
         <PinIcon />
         <span>
           {isPinned ? (
-            <FormattedMessage id="object-menu.unpin-object-button" defaultMessage="Unpin" />
+            <FormattedMessage id="object-menu.unpin-object-button" defaultMessage="ピン留めを外す" />
           ) : (
-            <FormattedMessage id="object-menu.pin-object-button" defaultMessage="Pin" />
+            <FormattedMessage id="object-menu.pin-object-button" defaultMessage="ピン留め" />
           )}
         </span>
       </ObjectMenuButton>
