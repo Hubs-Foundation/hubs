@@ -173,9 +173,6 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   tick() {
-    // TODO: come up with a cleaner way to handle this.
-    // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
-    if (!this.el.object3D.visible) return;
     if (!this.cameraEl) return;
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 

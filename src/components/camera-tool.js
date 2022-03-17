@@ -117,6 +117,7 @@ AFRAME.registerComponent("camera-tool", {
 
     this.camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
     this.camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+    this.camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
     this.camera.rotation.set(0, Math.PI, 0);
     this.camera.position.set(0, 0, 0.05);
     this.camera.matrixNeedsUpdate = true;
@@ -579,7 +580,6 @@ AFRAME.registerComponent("camera-tool", {
       const sceneEl = this.el.sceneEl;
       const renderer = this.renderer || sceneEl.renderer;
       const now = performance.now();
-      const playerHead = this.cameraSystem.playerHead;
 
       // Perform lookAt in tock so it will re-orient after grabs, etc.
       if (this.trackTarget) {
@@ -599,24 +599,6 @@ AFRAME.registerComponent("camera-tool", {
         this.takeSnapshotNextTick ||
         (this.updateRenderTargetNextTick && (this.viewfinderInViewThisFrame || this.videoRecorder))
       ) {
-        if (playerHead) {
-          // We want to scale our own head in between frames now that we're taking a video/photo.
-          let scale = 1;
-          // TODO: The local-audio-analyser has the non-networked media stream, which is active
-          // even while the user is muted. This should be looking at a different analyser that
-          // has the networked media stream instead.
-          const analyser = this.el.sceneEl.systems["local-audio-analyser"];
-
-          if (analyser && playerHead.el.components["scale-audio-feedback"]) {
-            scale = getAudioFeedbackScale(this.el.object3D, playerHead, 1, 2, analyser.volume);
-          }
-
-          playerHead.visible = true;
-          playerHead.scale.set(scale, scale, scale);
-          playerHead.updateMatrices(true, true);
-          playerHead.updateMatrixWorld(true, true);
-        }
-
         let playerHudWasVisible = false;
 
         if (this.playerHud) {
@@ -668,12 +650,6 @@ AFRAME.registerComponent("camera-tool", {
 
         renderer.xr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
-        if (playerHead) {
-          playerHead.visible = false;
-          playerHead.scale.set(0.00000001, 0.00000001, 0.00000001);
-          playerHead.updateMatrices(true, true);
-          playerHead.updateMatrixWorld(true, true);
-        }
 
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;

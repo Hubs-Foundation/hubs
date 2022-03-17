@@ -11,17 +11,8 @@ AFRAME.registerSystem("camera-tools", {
     this.updateMyCamera = this.updateMyCamera.bind(this);
 
     waitForDOMContentLoaded().then(() => {
-      const playerModelEl = document.querySelector("#avatar-rig .model");
-      playerModelEl.addEventListener("model-loading", () => (this.playerHead = null));
-      playerModelEl.addEventListener("model-loaded", this.updatePlayerHead.bind(this));
-      this.updatePlayerHead();
       this.updateMyCamera();
     });
-  },
-
-  updatePlayerHead() {
-    const headEl = document.getElementById("avatar-head");
-    this.playerHead = headEl && headEl.object3D;
   },
 
   register(el) {
