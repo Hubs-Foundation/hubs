@@ -32,6 +32,7 @@
   --link-color-pressed: #{theme.$blue-pressed};
 
   --accept-color: #{theme.$green};
+  --accept-border-color: #{theme.$green};
   --accept-color-hover: #{theme.$green-hover};
   --accept-color-pressed: #{theme.$green-pressed};
 
@@ -40,24 +41,33 @@
   --cancel-color-pressed: #{theme.$red-pressed};
 
   --accent1-color: #{theme.$red};
+  --accent1-border-color: var(--accent1-color);
   --accent1-color-hover: #{theme.$red-hover};
   --accent1-color-pressed: #{theme.$red-pressed};
 
   --accent2-color: #{theme.$orange};
+  --accent2-border-color: var(--accent2-color);
   --accent2-color-hover: #{theme.$orange-hover};
   --accent2-color-pressed: #{theme.$orange-pressed};
 
   --accent3-color: #{theme.$green};
+  --accent3-border-color: var(--accent3-color);
   --accent3-color-hover: #{theme.$green-hover};
   --accent3-color-pressed: #{theme.$green-pressed};
 
   --accent4-color: #{theme.$blue};
+  --accent4-border-color: var(--accent4-color);
   --accent4-color-hover: #{theme.$blue-hover};
   --accent4-color-pressed: #{theme.$blue-pressed};
 
   --accent5-color: #{theme.$purple};
+  --accent5-border-color: var(--accent5-color);
   --accent5-color-hover: #{theme.$purple-hover};
   --accent5-color-pressed: #{theme.$purple-pressed};
+
+  --accent6-color: #{theme.$black};
+  --accent6-color-hover: #{theme.$black-hover};
+  --accent6-color-pressed: #{theme.$black-pressed};
 
   --primary-color: #{theme.$blue};
   --primary-color-hover: #{theme.$blue-hover};
@@ -153,10 +163,18 @@
   --overlay-outline-color: #{theme.$white};
 
   --toolbar-icon-color: var(--text5-color);
+  --toolbar-icon-selected-bg: var(--transparent); 
   --toolbar-basic-icon-color: var(--text1-color);
+  --toolbar-basic-selected-icon-color: var(--text1-color);
   --toolbar-basic-color: var(--secondary-color);
   --toolbar-basic-color-hover: var(--secondary-color-hover);
   --toolbar-basic-color-pressed: var(--secondary-color-pressed);
+  --toolbar-basic-border-color: var(--basic-border-color);
+  --toolbar-label-accent1: var(--accent1-color);
+  --toolbar-label-accent2: var(--accent2-color);
+  --toolbar-label-accent3: var(--accent3-color);
+  --toolbar-label-accent4: var(--accent4-color);
+  --toolbar-label-accent5: var(--accent5-color);
 
   --tile-text-color: var(--text4-color);
   --tile-bg-color: var(--secondary-color);
@@ -444,4 +462,10 @@ input::placeholder {
 
 summary {
   cursor: pointer;
+}
+
+.hmc-logo {
+  [fill] {
+    fill: theme.$text1-color;
+  }
 }

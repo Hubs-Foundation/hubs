@@ -10,6 +10,9 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vert from "./sprites/sprite.vert";
 import frag from "./sprites/sprite.frag";
 import { getThemeColorShifter } from "../utils/theme-sprites";
+import { disposeTexture } from "../utils/material-utils";
+
+const pngs = [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]];
 
 const multiviewVertPrefix = [
   // GLSL 3.0 conversion
@@ -224,18 +227,18 @@ export class SpriteSystem {
     }
 
     const vertexShader = String.prototype.concat(
-      scene.renderer.vr.multiview ? multiviewVertPrefix : nonmultiviewVertPrefix,
+      scene.renderer.xr.multiview ? multiviewVertPrefix : nonmultiviewVertPrefix,
       vert
     );
     const fragmentShader = String.prototype.concat(
-      scene.renderer.vr.multiview ? multiviewFragPrefix : nonmultiviewFragPrefix,
+      scene.renderer.xr.multiview ? multiviewFragPrefix : nonmultiviewFragPrefix,
       frag
     );
 
     const domReady = waitForDOMContentLoaded();
 
     Promise.all([domReady]).then(() => {
-      for (const [spritesheetPng, type] of [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]]) {
+      for (const [spritesheetPng, type] of pngs) {
         Promise.all([createImageTexture(spritesheetPng, getThemeColorShifter(type)), waitForDOMContentLoaded()]).then(
           ([spritesheetTexture]) => {
             const material = new THREE.RawShaderMaterial({
@@ -258,6 +261,20 @@ export class SpriteSystem {
             mesh.raycast = this.raycast.bind(this);
           }
         );
+      }
+    });
+
+    APP.store.addEventListener("themechanged", async () => {
+      for (const [spritesheetPng, type] of pngs) {
+        if (this.meshes[type]) {
+          const newTexture = await createImageTexture(spritesheetPng, getThemeColorShifter(type));
+          const oldTexture = this.meshes[type].material.uniforms.u_spritesheet.value;
+          if (oldTexture) {
+            disposeTexture(oldTexture);
+          }
+          this.meshes[type].material.uniforms.u_spritesheet.value = newTexture;
+          this.meshes[type].material.uniformsNeedUpdate = true;
+        }
       }
     });
   }

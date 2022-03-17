@@ -7,11 +7,13 @@ import { ReactComponent as EnterIcon } from "../icons/Enter.svg";
 import { ReactComponent as VRIcon } from "../icons/VR.svg";
 import { ReactComponent as ShowIcon } from "../icons/Show.svg";
 import { ReactComponent as SettingsIcon } from "../icons/Settings.svg";
+import { ReactComponent as HmcLogo } from "../icons/HmcLogo.svg";
 import styles from "./RoomEntryModal.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
+import configs from "../../utils/configs";
 
 export function RoomEntryModal({
   appName,
@@ -29,13 +31,14 @@ export function RoomEntryModal({
   ...rest
 }) {
   const breakpoint = useCssBreakpoints();
+  const isHmc = configs.feature("show_cloud");
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
       <Column center className={styles.content}>
         {breakpoint !== "sm" &&
           breakpoint !== "md" && (
             <div className={styles.logoContainer}>
-              <img src={logoSrc} alt={appName} />
+              {isHmc ? <HmcLogo className="hmc-logo" /> : <img src={logoSrc} alt={appName} />}
             </div>
           )}
         <div className={styles.roomName}>

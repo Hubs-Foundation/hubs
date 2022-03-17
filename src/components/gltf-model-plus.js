@@ -1,5 +1,5 @@
 import nextTick from "../utils/next-tick";
-import { mapMaterials, convertStandardMaterial } from "../utils/material-utils";
+import { updateMaterials, mapMaterials, convertStandardMaterial } from "../utils/material-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
@@ -7,6 +7,8 @@ import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import { disposeNode, cloneObject3D } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -57,7 +59,8 @@ const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
 function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
-    throw new Error(`Inflator failed. "${componentName}" component does not exist.`);
+    console.warn(`Inflator failed. "${componentName}" component does not exist.`);
+    return;
   }
   if (AFRAME.components[componentName].multiple && Array.isArray(componentData)) {
     for (let i = 0; i < componentData.length; i++) {
@@ -245,11 +248,33 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
     const entityComponents = getHubsComponents(object3D);
     const el = object3D.el;
 
+    function resolveNodeRefs(componentData) {
+      for (const propName in componentData) {
+        const value = componentData[propName];
+        const type = value?.__mhc_link_type;
+        if (type === "node" && value.index !== undefined) {
+          if (indexToEntityMap[value.index]) {
+            componentData[propName] = indexToEntityMap[value.index].object3D;
+          } else {
+            console.warn("inflateComponents: invalid node reference", propName);
+            componentData[propName] = null;
+          }
+        }
+      }
+      return componentData;
+    }
+
     if (entityComponents && el) {
       for (const prop in entityComponents) {
         if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          await inflator(el, componentName, entityComponents[prop], entityComponents, indexToEntityMap);
+          await inflator(
+            el,
+            componentName,
+            resolveNodeRefs(entityComponents[prop]),
+            entityComponents,
+            indexToEntityMap
+          );
         }
       }
     }
@@ -260,7 +285,13 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
       for (const prop in materialComponents) {
         if (materialComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
-          await inflator(el, componentName, materialComponents[prop], materialComponents, indexToEntityMap);
+          await inflator(
+            el,
+            componentName,
+            resolveNodeRefs(materialComponents[prop]),
+            materialComponents,
+            indexToEntityMap
+          );
         }
       }
     }
@@ -341,18 +372,262 @@ function runMigration(version, json) {
   }
 }
 
-const loadLightmap = async (parser, materialIndex) => {
-  const lightmapDef = parser.json.materials[materialIndex].extensions.MOZ_lightmap;
-  const [material, lightMap] = await Promise.all([
-    parser.getDependency("material", materialIndex),
-    parser.getDependency("texture", lightmapDef.index)
-  ]);
-  material.lightMap = lightMap;
-  material.lightMapIntensity = lightmapDef.intensity !== undefined ? lightmapDef.intensity : 1;
-  return lightMap;
-};
-
 let ktxLoader;
+
+class GLTFHubsPlugin {
+  constructor(parser, jsonPreprocessor) {
+    this.parser = parser;
+    this.jsonPreprocessor = jsonPreprocessor;
+
+    // We override glTF parser textureLoader with our HubsTextureLoader for
+    // 1. Clean up the texture image related resources after it is uploaded to WebGL texture
+    // 2. Use ImageBitmapLoader if it is available. The latest official Three.js (r128) glTF loader
+    //    attempts to use ImageBitmapLoader if it is avaiable except for Firefox.
+    //    But we want to use ImageBitmapLoader even for Firefox so we need this overriding hack.
+    // But overriding the textureLoader is hacky and it can cause future potential problems
+    // especially in upstraming Three.js. So ideally we should replace this hack
+    // with the one using more proper APIs like plugin system at some point.
+    // Note: Be careful when replacing our Three.js fork with the official upstraming one that
+    //       the latest ImageBitmapLoader passes the second argument to createImageBitmap()
+    //       but currently createImageBitmap() on Firefox fails if the second argument is defined.
+    //       https://bugzilla.mozilla.org/show_bug.cgi?id=1367251
+    //       and this is the reason why the official glTF loader doesn't use ImageBitmapLoader
+    //       for Firefox. We will need a workaround for that.
+    parser.textureLoader = new HubsTextureLoader(parser.options.manager);
+  }
+
+  beforeRoot() {
+    const parser = this.parser;
+    const jsonPreprocessor = this.jsonPreprocessor;
+
+    //
+    if (jsonPreprocessor) {
+      parser.json = jsonPreprocessor(parser.json);
+    }
+
+    // Ideally Hubs components stuffs should be handled in MozHubsComponents plugin?
+    let version = 0;
+    if (
+      parser.json.extensions &&
+      parser.json.extensions.MOZ_hubs_components &&
+      parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
+    ) {
+      version = parser.json.extensions.MOZ_hubs_components.version;
+    }
+    runMigration(version, parser.json);
+
+    // Note: Here may be rewritten with the one with parser.associations
+    const nodes = parser.json.nodes;
+    if (nodes) {
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+
+        if (!node.extras) {
+          node.extras = {};
+        }
+
+        node.extras.gltfIndex = i;
+      }
+    }
+  }
+
+  afterRoot(gltf) {
+    gltf.scene.traverse(object => {
+      // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
+      // @TODO: Should this be fixed in the gltf loader?
+      object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
+      const materialQuality = window.APP.store.materialQualitySetting;
+      updateMaterials(object, material => convertStandardMaterial(material, materialQuality));
+    });
+
+    // Replace animation target node name with the node uuid.
+    // I assume track name is 'nodename.property'.
+    if (gltf.animations) {
+      for (const animation of gltf.animations) {
+        for (const track of animation.tracks) {
+          const parsedPath = THREE.PropertyBinding.parseTrackName(track.name);
+          for (const scene of gltf.scenes) {
+            const node = THREE.PropertyBinding.findNode(scene, parsedPath.nodeName);
+            if (node) {
+              track.name = track.name.replace(/^[^.]*\./, node.uuid + ".");
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    //
+    gltf.scene.animations = gltf.animations;
+  }
+}
+
+class GLTFHubsComponentsExtension {
+  constructor(parser) {
+    this.parser = parser;
+    this.name = "MOZ_hubs_components";
+  }
+
+  afterRoot({ scenes, parser }) {
+    const deps = [];
+
+    const resolveComponents = (gltfRootType, obj) => {
+      const idx = parser.associations.get(obj)?.[gltfRootType];
+      if (idx === undefined) return;
+      const ext = parser.json[gltfRootType][idx].extensions?.[this.name];
+      if (!ext) return;
+
+      // TODO putting this into userData is a bit silly, we should just inflate here, but entities need to be inflated first...
+      obj.userData.gltfExtensions = Object.assign(obj.userData.gltfExtensions || {}, {
+        MOZ_hubs_components: ext
+      });
+
+      for (const componentName in ext) {
+        const props = ext[componentName];
+        for (const propName in props) {
+          const value = props[propName];
+          const type = value?.__mhc_link_type;
+          if (type && value.index !== undefined) {
+            deps.push(
+              parser.getDependency(type, value.index).then(loadedDep => {
+                // TODO similar to above, this logic being spread out in multiple places is not great...
+                // Node refences are assumed to always be in the scene graph. These referneces are late-resolved in inflateComponents
+                // otherwise they will need to be updated when cloning (which happens as part of caching).
+                if (type === "node") return;
+
+                if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
+                  // For now assume all non HDR textures linked in hubs components are sRGB.
+                  // We can allow this to be overriden later if needed
+                  loadedDep.encoding = THREE.sRGBEncoding;
+                }
+
+                props[propName] = loadedDep;
+
+                return loadedDep;
+              })
+            );
+          }
+        }
+      }
+    };
+
+    for (let i = 0; i < scenes.length; i++) {
+      // TODO this should be done by GLTLoader
+      parser.associations.set(scenes[i], { scenes: i });
+      scenes[i].traverse(obj => {
+        resolveComponents("scenes", obj);
+        resolveComponents("nodes", obj);
+        mapMaterials(obj, resolveComponents.bind(this, "materials"));
+      });
+    }
+
+    return Promise.all(deps);
+  }
+}
+
+class GLTFHubsLightMapExtension {
+  constructor(parser) {
+    this.parser = parser;
+    this.name = "MOZ_lightmap";
+  }
+
+  // @TODO: Ideally we should use extendMaterialParams hook.
+  //        But the current official glTF loader doesn't fire extendMaterialParams
+  //        hook for unlit and specular-glossiness materials.
+  //        So using loadMaterial hook as workaround so far.
+  //        Cons is loadMaterial hook is fired as _invokeOne so
+  //        if other plugins defining loadMaterial is registered
+  //        there is a chance that this light map extension handler isn't called.
+  //        The glTF loader should be updated to remove the limitation.
+  loadMaterial(materialIndex) {
+    const parser = this.parser;
+    const json = parser.json;
+    const materialDef = json.materials[materialIndex];
+
+    if (!materialDef.extensions || !materialDef.extensions[this.name]) {
+      return null;
+    }
+
+    const extensionDef = materialDef.extensions[this.name];
+
+    const pending = [];
+
+    pending.push(parser.loadMaterial(materialIndex));
+    pending.push(parser.getDependency("texture", extensionDef.index));
+
+    return Promise.all(pending).then(results => {
+      const material = results[0];
+      const lightMap = results[1];
+      material.lightMap = lightMap;
+      material.lightMapIntensity = extensionDef.intensity !== undefined ? extensionDef.intensity : 1;
+      return material;
+    });
+  }
+}
+
+class GLTFHubsTextureBasisExtension {
+  constructor(parser) {
+    this.parser = parser;
+    this.name = "MOZ_HUBS_texture_basis";
+    this.basisLoader = null;
+  }
+
+  loadTexture(textureIndex) {
+    const parser = this.parser;
+    const json = parser.json;
+    const textureDef = json.textures[textureIndex];
+
+    if (!textureDef.extensions || !textureDef.extensions[this.name]) {
+      return null;
+    }
+
+    if (this.basisLoader === null) {
+      this.basisLoader = new BasisTextureLoader(parser.options.manager).detectSupport(AFRAME.scenes[0].renderer);
+    }
+
+    if (!this.basisLoader) {
+      // @TODO: Display warning (only if the extension is in extensionsRequired)?
+      return null;
+    }
+
+    console.warn(`The ${this.name} extension is deprecated, you should use KHR_texture_basisu instead.`);
+
+    const extensionDef = textureDef.extensions[this.name];
+    const source = json.images[extensionDef.source];
+
+    return parser.loadTextureImage(textureIndex, source, this.basisLoader);
+  }
+}
+
+class GLTFMozTextureRGBE {
+  constructor(parser, loader) {
+    this.parser = parser;
+    this.loader = loader;
+    this.name = "MOZ_texture_rgbe";
+  }
+
+  loadTexture(textureIndex) {
+    const parser = this.parser;
+    const json = parser.json;
+    const textureDef = json.textures[textureIndex];
+
+    if (!textureDef.extensions || !textureDef.extensions[this.name]) {
+      return null;
+    }
+
+    const extensionDef = textureDef.extensions[this.name];
+    const source = json.images[extensionDef.source];
+    return parser.loadTextureImage(textureIndex, source, this.loader).then(t => {
+      // TODO pretty severe artifacting when using mipmaps, disable for now
+      if (t.minFilter == THREE.NearestMipmapNearestFilter || t.minFilter == THREE.NearestMipmapLinearFilter) {
+        t.minFilter = THREE.NearestFilter;
+      } else if (t.minFilter == THREE.LinearMipmapNearestFilter || t.minFilter == THREE.LinearMipmapLinearFilter) {
+        t.minFilter = THREE.LinearFilter;
+      }
+      return t;
+    });
+  }
+}
 
 export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
@@ -366,6 +641,12 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
+  gltfLoader
+    .register(parser => new GLTFHubsComponentsExtension(parser))
+    .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
+    .register(parser => new GLTFHubsLightMapExtension(parser))
+    .register(parser => new GLTFHubsTextureBasisExtension(parser))
+    .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)));
 
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
   // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of
@@ -378,93 +659,18 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     gltfLoader.setKTX2Loader(ktxLoader);
   }
 
-  const parser = await new Promise((resolve, reject) => gltfLoader.createParser(gltfUrl, resolve, onProgress, reject));
-
-  parser.textureLoader = new HubsTextureLoader(loadingManager);
-
-  if (jsonPreprocessor) {
-    parser.json = jsonPreprocessor(parser.json);
-  }
-
-  let version = 0;
-  if (
-    parser.json.extensions &&
-    parser.json.extensions.MOZ_hubs_components &&
-    parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
-  ) {
-    version = parser.json.extensions.MOZ_hubs_components.version;
-  }
-  runMigration(version, parser.json);
-
-  const nodes = parser.json.nodes;
-  if (nodes) {
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-
-      if (!node.extras) {
-        node.extras = {};
-      }
-
-      node.extras.gltfIndex = i;
+  return new Promise((resolve, reject) => {
+    gltfLoader.load(gltfUrl, resolve, onProgress, reject);
+  }).finally(() => {
+    if (fileMap) {
+      // The GLTF is now cached as a THREE object, we can get rid of the original blobs
+      Object.keys(fileMap).forEach(URL.revokeObjectURL);
     }
-  }
-
-  // Mark the special nodes/meshes in json for efficient parse, all json manipulation should happen before this point
-  parser.markDefs();
-
-  const materials = parser.json.materials;
-  const extensionDeps = [];
-  if (materials) {
-    for (let i = 0; i < materials.length; i++) {
-      const materialNode = materials[i];
-
-      if (!materialNode.extensions) continue;
-
-      if (materialNode.extensions.MOZ_lightmap) {
-        extensionDeps.push(loadLightmap(parser, i));
-      }
-    }
-  }
-
-  // Note this is being done in place of parser.parse() which we now no longer call. This gives us more control over the order of execution.
-  // TODO all of the weird stuff we are doing here and above would be much better implemented as "plugins" for the latst GLTFLoader
-  const [scenes, animations, cameras] = await Promise.all([
-    parser.getDependencies("scene"),
-    parser.getDependencies("animation"),
-    parser.getDependencies("camera"),
-    Promise.all(extensionDeps)
-  ]);
-  const gltf = {
-    scene: scenes[parser.json.scene || 0],
-    scenes,
-    animations,
-    cameras,
-    asset: parser.json.asset,
-    parser,
-    userData: {}
-  };
-
-  // this is likely a noop since the whole parser will get GCed
-  parser.cache.removeAll();
-
-  gltf.scene.traverse(object => {
-    // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
-    object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
-    const materialQuality = window.APP.store.materialQualitySetting;
-    object.material = mapMaterials(object, material => convertStandardMaterial(material, materialQuality));
   });
-
-  if (fileMap) {
-    // The GLTF is now cached as a THREE object, we can get rid of the original blobs
-    Object.keys(fileMap).forEach(URL.revokeObjectURL);
-  }
-
-  gltf.scene.animations = gltf.animations;
-
-  return gltf;
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
+  console.log(`Loading model ${src}`);
   if (useCache) {
     if (gltfCache.has(src)) {
       gltfCache.retain(src);
@@ -522,6 +728,10 @@ AFRAME.registerComponent("gltf-model-plus", {
     this.loadTemplates();
   },
 
+  play() {
+    this.el.components["listed-media"] && this.el.sceneEl.emit("listed_media_changed");
+  },
+
   update() {
     this.applySrc(resolveAsset(this.data.src), this.data.contentType);
   },
@@ -569,7 +779,7 @@ AFRAME.registerComponent("gltf-model-plus", {
       // If we had inflated something already before, clean that up
       this.disposeLastInflatedEl();
 
-      this.model = gltf.scene || gltf.scenes[0];
+      this.model = gltf.scene;
 
       if (this.data.batch) {
         this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.model);
@@ -625,12 +835,6 @@ AFRAME.registerComponent("gltf-model-plus", {
         const el = o.el;
         if (el) rewires.push(() => (o.el = el));
       });
-
-      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-
-      if (environmentMapComponent) {
-        environmentMapComponent.applyEnvironmentMap(object3DToSet);
-      }
 
       if (lastSrc) {
         gltfCache.release(lastSrc);

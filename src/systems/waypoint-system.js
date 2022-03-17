@@ -298,6 +298,9 @@ export class WaypointSystem {
         this.nextMoveToSpawnResolve = resolve;
       });
     }
+    // Reset system state to allow for waypoint selection based on URL fragments
+    this.previousWaypointHash = null;
+    this.initialSpawnHappened = false;
     return this.nextMoveToSpawn;
   }
   moveToWaypoint(waypointComponent, instant) {
@@ -330,7 +333,7 @@ export class WaypointSystem {
       const waypoint = this.ready.find(c => c.el.object3D.name === waypointName);
       if (waypoint) {
         this.moveToWaypoint(waypoint, this.previousWaypointHash === null);
-        window.location.hash = ""; // Reset so you can re-activate the same waypoint
+        window.history.replaceState(null, null, window.location.href.split("#")[0]); // Reset so you can re-activate the same waypoint
       }
       this.previousWaypointHash = window.location.hash;
     }

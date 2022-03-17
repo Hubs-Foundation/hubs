@@ -89,7 +89,8 @@ export const SCHEMA = {
 
     preferences: {
       type: "object",
-      additionalProperties: false,
+      // Allow removed preferences to pass validation
+      additionalProperties: true,
       properties: {
         shouldPromptForRefresh: { type: "bool" },
         preferredMic: { type: "string" },
@@ -106,6 +107,8 @@ export const SCHEMA = {
         showFPSCounter: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
         disableIdleDetection: { type: "bool" },
+        fastRoomSwitching: { type: "bool" },
+        lazyLoadSceneMedia: { type: "bool" },
         preferMobileObjectInfoPanel: { type: "bool" },
         maxResolutionWidth: { type: "number" },
         maxResolutionHeight: { type: "number" },
@@ -126,6 +129,9 @@ export const SCHEMA = {
         disableAutoGainControl: { type: "bool" },
         locale: { type: "string" },
         showRtcDebugPanel: { type: "bool" },
+        showAudioDebugPanel: { type: "bool" },
+        enableAudioClipping: { type: "bool" },
+        audioClippingThreshold: { type: "number" },
         theme: { type: "string" }
       }
     },
@@ -248,6 +254,18 @@ export default class Store extends EventTarget {
     }
 
     this._signOutOnExpiredAuthToken();
+
+    const maybeDispatchThemeChanged = (() => {
+      let previous;
+      return () => {
+        const current = this.state.preferences.theme;
+        if ((previous || current) && previous !== current) {
+          this.dispatchEvent(new CustomEvent("themechanged", { detail: { current, previous } }));
+        }
+        previous = current;
+      };
+    })();
+    this.addEventListener("statechanged", maybeDispatchThemeChanged);
   }
 
   _signOutOnExpiredAuthToken = () => {

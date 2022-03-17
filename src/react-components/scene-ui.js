@@ -9,6 +9,7 @@ import { createAndRedirectToNewHub, getReticulumFetchUrl } from "../utils/phoeni
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCodeBranch } from "@fortawesome/free-solid-svg-icons/faCodeBranch";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons/faPencilAlt";
+import { ReactComponent as HmcLogo } from "./icons/HmcLogo.svg";
 
 class SceneUI extends Component {
   static propTypes = {
@@ -69,7 +70,7 @@ class SceneUI extends Component {
     }
 
     const { sceneAllowRemixing, isOwner, sceneProjectId, parentScene, sceneId, intl } = this.props;
-
+    const isHmc = configs.feature("show_cloud");
     const sceneUrl = [location.protocol, "//", location.host, location.pathname].join("");
     const tweetText = intl.formatMessage(
       {
@@ -99,13 +100,7 @@ class SceneUI extends Component {
       const _name = name || title || unknown;
       const _author = author || unknown;
 
-      if (url) {
-        if (url.includes("sketchfab.com")) {
-          source = "Sketchfab";
-        } else if (url.includes("poly.google.com")) {
-          source = "Google Poly";
-        }
-      }
+      source = url && url.includes("sketchfab.com") ? "Sketchfab" : "";
 
       if (remix) {
         <span className="remix">
@@ -207,7 +202,6 @@ class SceneUI extends Component {
         attributions = <span>{this.props.sceneAttributions.extras}</span>;
       }
     }
-
     return (
       <div className={styles.ui}>
         <div
@@ -222,10 +216,14 @@ class SceneUI extends Component {
         <div className={styles.grid}>
           <div className={styles.mainPanel}>
             <a href="/" className={styles.logo}>
-              <img
-                src={configs.image("logo")}
-                alt={<FormattedMessage id="scene-page.logo-alt" defaultMessage="Logo" />}
-              />
+              {isHmc ? (
+                <HmcLogo className="hmc-logo" />
+              ) : (
+                <img
+                  src={configs.image("logo")}
+                  alt={<FormattedMessage id="scene-page.logo-alt" defaultMessage="Logo" />}
+                />
+              )}
             </a>
             <div className={styles.logoTagline}>{configs.translation("app-tagline")}</div>
             {this.props.showCreateRoom && (

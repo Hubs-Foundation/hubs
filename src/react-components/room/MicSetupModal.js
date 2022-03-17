@@ -115,6 +115,7 @@ export function MicSetupModal({
             large
           />
         </div>
+<<<<<<< HEAD
         {microphoneEnabled && (
           <>
             <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
@@ -125,6 +126,16 @@ export function MicSetupModal({
             />
           </>
         )}
+=======
+        <>
+          <SelectInputField value={selectedMicrophone} options={microphoneOptions} onChange={onChangeMicrophone} />
+          <ToggleInput
+            label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle" defaultMessage="Mute My Microphone" />}
+            checked={microphoneMuted}
+            onChange={onChangeMicrophoneMuted}
+          />
+        </>
+>>>>>>> upstream/hubs-cloud
         <Button preset="accept" onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="入室する" />
         </Button>

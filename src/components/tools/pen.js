@@ -140,11 +140,6 @@ AFRAME.registerComponent("pen", {
 
     this.el.setObject3D("mesh", this.penTip);
 
-    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-    if (environmentMapComponent) {
-      environmentMapComponent.applyEnvironmentMap(this.el.parentEl.object3D);
-    }
-
     this.penLaserAttributesUpdated = false;
     this.penLaserAttributes = {
       color: "#FF0033",

@@ -9,6 +9,7 @@ import { loadModel } from "./gltf-model-plus";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
 import anime from "animejs";
+import { Layers } from "./layers";
 
 const cameraModelPromise = waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
 
@@ -39,8 +40,9 @@ const videoMimeType = videoCodec ? `video/webm; codecs=${videoCodec}` : null;
 const hasWebGL2 = !!document.createElement("canvas").getContext("webgl2");
 const allowVideo = !!videoMimeType && hasWebGL2;
 
-const CAPTURE_WIDTH = isMobileVR ? 640 : 1280;
-const CAPTURE_HEIGHT = isMobileVR ? 360 : 720;
+const isOculusBrowser = navigator.userAgent.match(/Oculus/);
+const CAPTURE_WIDTH = isMobileVR && !isOculusBrowser ? 640 : 1280;
+const CAPTURE_HEIGHT = isMobileVR && !isOculusBrowser ? 360 : 720;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 const CAPTURE_DURATIONS = [3, 7, 15, 30, 60, Infinity];
@@ -109,6 +111,7 @@ AFRAME.registerComponent("camera-tool", {
     });
 
     this.camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
+    this.camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
     this.camera.rotation.set(0, Math.PI, 0);
     this.camera.position.set(0, 0, 0.05);
     this.camera.matrixNeedsUpdate = true;
@@ -182,11 +185,6 @@ AFRAME.registerComponent("camera-tool", {
 
       const width = 0.28;
       const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
-
-      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-      if (environmentMapComponent) {
-        environmentMapComponent.applyEnvironmentMap(this.el.object3D);
-      }
 
       this.screen = new THREE.Mesh(geometry, material);
       this.screen.rotation.set(0, Math.PI, 0);
@@ -388,7 +386,7 @@ AFRAME.registerComponent("camera-tool", {
     };
 
     if (this.data.captureAudio) {
-      const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
+      const selfAudio = await APP.dialog.getMediaStream(NAF.clientId, "audio");
 
       // NOTE: if we don't have a self audio track, we can end up generating an empty video (browser bug?)
       // if no audio comes through on the listener source. (Eg the room is otherwise silent.)
@@ -489,6 +487,7 @@ AFRAME.registerComponent("camera-tool", {
       if (cancel) {
         this.videoRecorder.onstop = () => {};
         this.videoRecorder._free();
+        this.el.sceneEl.emit("action_camera_recording_ended");
       }
 
       this.videoRecorder.stop();
@@ -501,8 +500,8 @@ AFRAME.registerComponent("camera-tool", {
     clearInterval(this.videoCountdownInterval);
 
     this.videoCountdownInterval = null;
-    this.el.setAttribute("camera-tool", "label", "");
-    this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
+
+    this.el.setAttribute("camera-tool", { label: " ", isRecording: false, isSnapping: false });
   },
 
   tick() {
@@ -634,10 +633,10 @@ AFRAME.registerComponent("camera-tool", {
           boneVisibilitySystem.tick();
         }
 
-        const tmpVRFlag = renderer.vr.enabled;
+        const tmpVRFlag = renderer.xr.enabled;
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
         delete sceneEl.object3D.onAfterRender;
-        renderer.vr.enabled = false;
+        renderer.xr.enabled = false;
 
         if (allowVideo && this.videoRecorder && !this.videoRenderTarget) {
           // Create a separate render target for video becuase we need to flip and (sometimes) downscale it before
@@ -659,7 +658,7 @@ AFRAME.registerComponent("camera-tool", {
         renderer.render(sceneEl.object3D, this.camera);
         renderer.setRenderTarget(null);
 
-        renderer.vr.enabled = tmpVRFlag;
+        renderer.xr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
         if (playerHead) {
           playerHead.visible = false;
@@ -689,29 +688,36 @@ AFRAME.registerComponent("camera-tool", {
         this.lastUpdate = now;
 
         if (this.videoRecorder) {
-          // This blit operation will (if necessary) scale/resample the view finder render target and, importantly,
-          // flip the texture on Y
-          blitFramebuffer(
-            renderer,
-            this.renderTarget,
-            0,
-            0,
-            RENDER_WIDTH,
-            RENDER_HEIGHT,
-            this.videoRenderTarget,
-            0,
-            CAPTURE_HEIGHT,
-            CAPTURE_WIDTH,
-            0
-          );
+          // https://chromium.googlesource.com/chromium/src/gpu/+/master/command_buffer/service/gles2_cmd_decoder.cc#8899
+          // We avoid using blitting and flip the render target pixels for OB.
+          if (!isOculusBrowser) {
+            // This blit operation will (if necessary) scale/resample the view finder render target and, importantly,
+            // flip the texture on Y
+            blitFramebuffer(
+              renderer,
+              this.renderTarget,
+              0,
+              0,
+              RENDER_WIDTH,
+              RENDER_HEIGHT,
+              this.videoRenderTarget,
+              0,
+              CAPTURE_HEIGHT,
+              CAPTURE_WIDTH,
+              0
+            );
+          }
           renderer.readRenderTargetPixels(
-            this.videoRenderTarget,
+            !isOculusBrowser ? this.videoRenderTarget : this.renderTarget,
             0,
             0,
             CAPTURE_WIDTH,
             CAPTURE_HEIGHT,
             this.videoPixels
           );
+          if (isOculusBrowser) {
+            this.flipPixelsY(this.videoPixels, CAPTURE_WIDTH, CAPTURE_HEIGHT);
+          }
           this.videoImageData.data.set(this.videoPixels);
           this.videoContext.putImageData(this.videoImageData, 0, 0);
         }
@@ -745,6 +751,20 @@ AFRAME.registerComponent("camera-tool", {
       }
     };
   })(),
+
+  flipPixelsY(pixels, width, height) {
+    const halfHeight = (height / 2) | 0;
+    const bytesPerRow = width * 4;
+
+    const temp = new Uint8Array(width * 4);
+    for (let y = 0; y < halfHeight; ++y) {
+      const topOffset = y * bytesPerRow;
+      const bottomOffset = (height - y - 1) * bytesPerRow;
+      temp.set(pixels.subarray(topOffset, topOffset + bytesPerRow));
+      pixels.copyWithin(topOffset, bottomOffset, bottomOffset + bytesPerRow);
+      pixels.set(temp, bottomOffset);
+    }
+  },
 
   isHoldingSnapshotTrigger: function() {
     const interaction = AFRAME.scenes[0].systems.interaction;

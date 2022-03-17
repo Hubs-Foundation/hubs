@@ -36,11 +36,22 @@ export function PeopleMenuButton(props) {
     <ContentMenuButton {...props}>
       <PeopleIcon />
       <span>
+<<<<<<< HEAD
         <FormattedMessage id="content-menu.people-menu-button" defaultMessage="ユーザ" />
+=======
+        <FormattedMessage
+          id="content-menu.people-menu-button"
+          defaultMessage="People ({presenceCount})"
+          values={{ presenceCount: props.presencecount }}
+        />
+>>>>>>> upstream/hubs-cloud
       </span>
     </ContentMenuButton>
   );
 }
+PeopleMenuButton.propTypes = {
+  presencecount: PropTypes.number
+};
 
 export function ContentMenu({ children }) {
   return <div className={styles.contentMenu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>;

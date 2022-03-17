@@ -20,6 +20,7 @@ import Info from "@material-ui/icons/Info";
 import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import withCommonStyles from "../utils/with-common-styles";
 import { getAdminInfo, getEditableConfig } from "../utils/ita";
+import configs from "../utils/configs";
 
 // Send quota to use as heuristic for checking if in SES sandbox
 // https://forums.aws.amazon.com/thread.jspa?threadID=61090
@@ -63,25 +64,6 @@ class SystemEditorComponent extends Component {
 
     return (
       <>
-        <Card className={this.props.classes.container} style={{ border: "5px solid #ffcc00" }}>
-          <CardContent className={this.props.classes.info}>
-            <Typography variant="title" gutterBottom>
-              ⚠️ A future update will impact your Hubs Cloud deployment ⚠️
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              We will release an updated client interface for Hubs Cloud after March 25, 2021. This update significantly
-              changes the way Hubs looks, but all functionality will remain the same. For more information visit{" "}
-              <a
-                href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-look-and-feel.html"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Hubs Docs: Hubs Cloud Customizing Look and Feel
-              </a>
-              .
-            </Typography>
-          </CardContent>
-        </Card>
         <Card className={this.props.classes.container}>
           <Title title="Hubs Cloud" />
           <CardContent className={this.props.classes.info}>
@@ -312,7 +294,7 @@ class SystemEditorComponent extends Component {
               <ListItemText
                 primary={
                   <span>
-                    Add your API keys for Google Analytics, Sketchfab, Google Poly, Discord, etc. - &nbsp;
+                    Add your API keys for Google Analytics, Sketchfab, Discord, etc. - &nbsp;
                     <i>Server Settings menu &nbsp;&gt;&nbsp;API Keys tab</i>
                   </span>
                 }
@@ -352,6 +334,31 @@ class SystemEditorComponent extends Component {
               />
             </ListItem>
           </List>
+        </Card>
+        <Card className={this.props.classes.container}>
+          <Title title="Hubs Cloud" />
+          <CardContent className={this.props.classes.info}>
+            <Typography variant="title" gutterBottom>
+              Your hub version:
+            </Typography>
+            {configs.IS_LOCAL_OR_CUSTOM_CLIENT ? (
+              <>
+                <Typography variant="body1" gutterBottom>
+                  App client: Custom client
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {`(Undeploy custom client to run build ${process.env.BUILD_VERSION || "?"})`}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  {`(Remember to regularly pull in upstream changes from the "hubs-cloud" branch: https://github.com/mozilla/hubs)`}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="body1" gutterBottom>
+                {`App client: ${process.env.BUILD_VERSION || "?"}`}
+              </Typography>
+            )}
+          </CardContent>
         </Card>
       </>
     );

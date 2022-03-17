@@ -25,7 +25,6 @@ const PRIVACY_POLICY_LINKS = {
   images: "https://privacy.microsoft.com/en-us/privacystatement",
   gifs: "https://tenor.com/legal-privacy",
   sketchfab: "https://sketchfab.com/privacy",
-  poly: "https://policies.google.com/privacy",
   youtube: "https://policies.google.com/privacy",
   twitch: "https://www.twitch.tv/p/legal/privacy-policy/"
 };
@@ -51,18 +50,6 @@ const DEFAULT_FACETS = {
     { text: "Science", params: { filter: "science-technology" } },
     { text: "Sports", params: { filter: "sports-fitness" } },
     { text: "Weapons", params: { filter: "weapons-military" } }
-  ],
-  poly: [
-    { text: "Featured", params: { filter: "" } },
-    { text: "Animals", params: { filter: "animals" } },
-    { text: "Architecture", params: { filter: "architecture" } },
-    { text: "Art", params: { filter: "art" } },
-    { text: "Food", params: { filter: "food" } },
-    { text: "Nature", params: { filter: "nature" } },
-    { text: "Objects", params: { filter: "objects" } },
-    { text: "People", params: { filter: "people" } },
-    { text: "Scenes", params: { filter: "scenes" } },
-    { text: "Transport", params: { filter: "transport" } }
   ],
   avatars: [
     { text: "Featured", params: { filter: "featured" } },
@@ -93,10 +80,6 @@ const poweredByMessages = defineMessages({
   sketchfab: {
     id: "media-browser.powered_by.sketchfab",
     defaultMessage: "Search by Sketchfab"
-  },
-  poly: {
-    id: "media-browser.powered_by.poly",
-    defaultMessage: "Search by Google"
   },
   twitch: {
     id: "media-browser.powered_by.twitch",
@@ -132,7 +115,6 @@ const searchPlaceholderMessages = defineMessages({
   gifs: { id: "media-browser.search-placeholder.gifs", defaultMessage: "Search for GIFs..." },
   twitch: { id: "media-browser.search-placeholder.twitch", defaultMessage: "Search for Twitch streams..." },
   sketchfab: { id: "media-browser.search-placeholder.sketchfab", defaultMessage: "Search Sketchfab Models..." },
-  poly: { id: "media-browser.search-placeholder.poly", defaultMessage: "Search Google Poly Models..." },
   default: { id: "media-browser.search-placeholder.default", defaultMessage: "Search..." }
 });
 

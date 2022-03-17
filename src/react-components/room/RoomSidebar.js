@@ -18,11 +18,7 @@ function SceneAttribution({ attribution }) {
   const author = attribution.author || unknown;
 
   if (attribution.url) {
-    const source = attribution.url.includes("sketchfab.com")
-      ? "Sketchfab"
-      : attribution.url.includes("poly.google.com")
-        ? "Google Poly"
-        : null;
+    const source = attribution.url.includes("sketchfab.com") ? "Sketchfab" : null;
 
     return (
       <li className={styles.attribution}>
@@ -80,7 +76,12 @@ function allowDisplayOfSceneLink(accountId, scene) {
 }
 
 export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, onChangeScene }) {
-  if (!scene) return null;
+  const changeSceneButton = canChangeScene && (
+    <Button preset="primary" onClick={onChangeScene}>
+      <FormattedMessage id="room-sidebar.scene-info.change-scene-button" defaultMessage="Change Scene" />
+    </Button>
+  );
+  if (!scene) return changeSceneButton;
   const showSceneLink = allowDisplayOfSceneLink(accountId, scene);
   const attributions = (scene.attributions && scene.attributions.content) || [];
   const creator = scene.attributions && scene.attributions.creator;
@@ -129,11 +130,7 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
             <ul className={styles.attributions}>{filteredAttributionElements}</ul>
           </InputField>
         )}
-      {canChangeScene && (
-        <Button preset="primary" onClick={onChangeScene}>
-          <FormattedMessage id="room-sidebar.scene-info.change-scene-button" defaultMessage="Change Scene" />
-        </Button>
-      )}
+      {changeSceneButton}
     </>
   );
 }
@@ -160,15 +157,13 @@ export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChang
             {room.description}
           </InputField>
         )}
-        {room.scene && (
-          <SceneInfo
-            accountId={accountId}
-            scene={room.scene}
-            showAttributions
-            canChangeScene={canEdit}
-            onChangeScene={onChangeScene}
-          />
-        )}
+        <SceneInfo
+          accountId={accountId}
+          scene={room.scene}
+          showAttributions
+          canChangeScene={canEdit}
+          onChangeScene={onChangeScene}
+        />
       </Column>
     </Sidebar>
   );
