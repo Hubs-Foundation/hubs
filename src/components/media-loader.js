@@ -383,20 +383,14 @@ AFRAME.registerComponent("media-loader", {
     //     }
     //     console.log("########################### " + src + " INDEX=" + pathname.substring(1));
     //   }
+    }
+    else if (origin === "https://www.image_place_holder.com"){
       //tarik is place holder for image1
-      if (src === "https://www.twitch.tv/tarik") {
-        var images = await fetchImagesFromToplevelServer();
-        console.log("################### images = ", images);
-        if (images !== [])
-          src = images[0];
-      }
-      else if (src === "https://www.twitch.tv/lck") {
-        var images = await fetchImagesFromToplevelServer();
-        console.log("################### images = ", images);
-        if (images !== [])
-          src = images[1];
-      }
-    } 
+      var images = await fetchImagesFromToplevelServer();
+      console.log("################### images = ", images);
+      if (images !== [])
+        src = images[pathname.substring(1)];
+    }
     const srcChanged = oldData.src !== src;
     const versionChanged = !!(oldData.version && oldData.version !== version);
 
