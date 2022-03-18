@@ -57,9 +57,9 @@
     "button.accept": "확인",
     "button.apply": "적용",
   
-    "auto-exit-warning-modal.message": "세션 자동 종료 시간 {secondsRemaining}초",
-    "auto-exit-warning-modal.reason.concurrent-session": "다른 세션 시작",
-    "auto-exit-warning-modal.reason.idle": "오랫동안 움직임이 없습니다.",
+    "auto-exit-warning-modal.message": "이 세션이 {secondsRemaining} 초 후 자동으로 종료됩니다.",
+    "auto-exit-warning-modal.reason.concurrent-session": "다른 세션을 시작하셨습니다.",
+    "auto-exit-warning-modal.reason.idle": "오랜 시간 움직이지 않으셨습니다.",
   
     "loading-screen.default" : "scene 불러오는 중...",
     "loading-screen.loading-objects" : "objects 불러오는 중 {loadedCount}/{objectCount}",
@@ -531,5 +531,29 @@
     "user-profile-sidebar.demote-button-disabled-label": "{displayName} 님이 로그아웃 하셨습니다.",
   
     "promote-client-modal.message": "관리자로 임명하면 Room 설정 및 관리 도구에 대한 전체 권한이 부여됩니다.{linebreak}관리자로 임명하시겠습니까?",
-    "promote-client-modal.confirm-prefix": "네, {name} 님을 관리자로 임명합니다."
+    "promote-client-modal.confirm-prefix": "네, {name} 님을 관리자로 임명합니다.",
+
+    "audio-debug-panel.audio-debug-avatar-title": "아바타",
+    "audio-debug-panel.audio-debug-global-title": "Globals",
+    "audio-debug-panel.audio-debug-media-title": "미디어",
+    "audio-debug-panel.audio-debug-title": "오디오 디버그",
+    
+    "audio-debug-view.avatar.distanceModel": "모델 간격",
+    "audio-debug-view.avatar.innerAngle": "내부 각도",
+    "audio-debug-view.avatar.maxDistance": "최대 간격",
+    "audio-debug-view.avatar.outerAngle": "외부 각도",
+    "audio-debug-view.avatar.outerGain": "Outer Gain",
+    "audio-debug-view.avatar.refDistance": "참조 간격",
+    "audio-debug-view.avatar.rolloffFactor": "Rolloff",
+    "audio-debug-view.global.clippingThreshold": "Clipping",
+    "audio-debug-view.global.mediaVolume": "미디어 볼륨",
+    "audio-debug-view.global.sfxVolume": "SFX 볼륨",
+    "audio-debug-view.global.voiceVolume": "음성 볼륨",
+    "audio-debug-view.media.distanceModel": "모델 간격",
+    "audio-debug-view.media.innerAngle": "내부 각도",
+    "audio-debug-view.media.maxDistance": "최대 간격",
+    "audio-debug-view.media.outerAngle": "외부 각도",
+    "audio-debug-view.media.outerGain": "Outer Gain",
+    "audio-debug-view.media.refDistance": "참조 간격",
+    "audio-debug-view.media.rolloffFactor": "Rolloff"
   }
