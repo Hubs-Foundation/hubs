@@ -27,7 +27,7 @@ const calculateVolume = (analyser, levels) => {
 const tempScaleFromPosition = new THREE.Vector3();
 const tempScaleToPosition = new THREE.Vector3();
 
-export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, volume) {
+function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, volume) {
   tempScaleToPosition.setFromMatrixPosition(toObject.matrixWorld);
   tempScaleFromPosition.setFromMatrixPosition(fromObject.matrixWorld);
   const distance = tempScaleFromPosition.distanceTo(tempScaleToPosition) / 10;

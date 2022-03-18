@@ -3,7 +3,6 @@ import { createImageBitmap } from "../utils/image-bitmap-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, SOUND_CAMERA_TOOL_COUNTDOWN } from "../systems/sound-effects-system";
-import { getAudioFeedbackScale } from "./audio-feedback";
 import { cloneObject3D } from "../utils/three-utils";
 import { loadModel } from "./gltf-model-plus";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
