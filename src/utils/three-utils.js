@@ -377,3 +377,106 @@ export function createPlaneBufferGeometry(width, height, widthSegments, heightSe
   }
   return geometry;
 }
+
+import { Layers } from "../components/layers";
+
+// This code is from three-vrm. We will likely be using that in the future and this inlined code can go away
+function excludeTriangles(triangles, bws, skinIndex, exclude) {
+  let count = 0;
+  if (bws != null && bws.length > 0) {
+    for (let i = 0; i < triangles.length; i += 3) {
+      const a = triangles[i];
+      const b = triangles[i + 1];
+      const c = triangles[i + 2];
+      const bw0 = bws[a];
+      const skin0 = skinIndex[a];
+
+      if (bw0[0] > 0 && exclude.includes(skin0[0])) continue;
+      if (bw0[1] > 0 && exclude.includes(skin0[1])) continue;
+      if (bw0[2] > 0 && exclude.includes(skin0[2])) continue;
+      if (bw0[3] > 0 && exclude.includes(skin0[3])) continue;
+
+      const bw1 = bws[b];
+      const skin1 = skinIndex[b];
+      if (bw1[0] > 0 && exclude.includes(skin1[0])) continue;
+      if (bw1[1] > 0 && exclude.includes(skin1[1])) continue;
+      if (bw1[2] > 0 && exclude.includes(skin1[2])) continue;
+      if (bw1[3] > 0 && exclude.includes(skin1[3])) continue;
+
+      const bw2 = bws[c];
+      const skin2 = skinIndex[c];
+      if (bw2[0] > 0 && exclude.includes(skin2[0])) continue;
+      if (bw2[1] > 0 && exclude.includes(skin2[1])) continue;
+      if (bw2[2] > 0 && exclude.includes(skin2[2])) continue;
+      if (bw2[3] > 0 && exclude.includes(skin2[3])) continue;
+
+      triangles[count++] = a;
+      triangles[count++] = b;
+      triangles[count++] = c;
+    }
+  }
+  return count;
+}
+
+function createErasedMesh(src, erasingBonesIndex) {
+  const dst = new THREE.SkinnedMesh(src.geometry.clone(), src.material);
+  dst.name = `${src.name}(headless)`;
+  dst.frustumCulled = src.frustumCulled;
+  dst.layers.set(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
+
+  const geometry = dst.geometry;
+
+  const skinIndexAttr = geometry.getAttribute("skinIndex").array;
+  const skinIndex = [];
+  for (let i = 0; i < skinIndexAttr.length; i += 4) {
+    skinIndex.push([skinIndexAttr[i], skinIndexAttr[i + 1], skinIndexAttr[i + 2], skinIndexAttr[i + 3]]);
+  }
+
+  const skinWeightAttr = geometry.getAttribute("skinWeight").array;
+  const skinWeight = [];
+  for (let i = 0; i < skinWeightAttr.length; i += 4) {
+    skinWeight.push([skinWeightAttr[i], skinWeightAttr[i + 1], skinWeightAttr[i + 2], skinWeightAttr[i + 3]]);
+  }
+
+  const index = geometry.getIndex();
+  if (!index) {
+    throw new Error("The geometry doesn't have an index buffer");
+  }
+  const oldTriangles = Array.from(index.array);
+
+  const count = excludeTriangles(oldTriangles, skinWeight, skinIndex, erasingBonesIndex);
+  const newTriangle = [];
+  for (let i = 0; i < count; i++) {
+    newTriangle[i] = oldTriangles[i];
+  }
+  geometry.setIndex(newTriangle);
+
+  if (src.onBeforeRender) {
+    dst.onBeforeRender = src.onBeforeRender;
+  }
+
+  dst.bind(new THREE.Skeleton(src.skeleton.bones, src.skeleton.boneInverses), new THREE.Matrix4());
+
+  return dst;
+}
+
+function isEraseTarget(bone) {
+  return bone.name === "Head" || (bone.parent && isEraseTarget(bone.parent));
+}
+
+export function createHeadlessModelForSkinnedMesh(mesh) {
+  const eraseBoneIndexes = [];
+  mesh.skeleton.bones.forEach((bone, index) => {
+    if (isEraseTarget(bone)) eraseBoneIndexes.push(index);
+  });
+
+  if (!eraseBoneIndexes.length) {
+    mesh.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+    mesh.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
+    return;
+  }
+
+  mesh.layers.set(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+
+  return createErasedMesh(mesh, eraseBoneIndexes);
+}
