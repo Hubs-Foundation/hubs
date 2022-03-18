@@ -1,5 +1,10 @@
 export const Layers = {
-  // Layers 0 - 2 reserverd by ThreeJS and AFrame.
+  // These 3 layers are hardcoded in THREE
+  CAMERA_LAYER_DEFAULT: 0,
+  // We disable support for these in camera-system to simplify dealing with layers
+  // CAMERA_LAYER_XR_LEFT_EYE: 1,
+  // CAMERA_LAYER_XR_RIGHT_EYE: 2,
+
   CAMERA_LAYER_REFLECTION: 3,
   CAMERA_LAYER_INSPECT: 4,
   CAMERA_LAYER_BATCH_INSPECT: 5,

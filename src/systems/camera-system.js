@@ -231,11 +231,14 @@ export class CameraSystem {
         if (customFOV) {
           cameraEl.setAttribute("camera", { fov: customFOV });
         }
-        const cameras = scene.is("vr-mode") ? scene.renderer.xr.getCamera().cameras : [cameraEl.getObject3D("camera")];
-        cameras.forEach(cam => {
-          cam.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
-          cam.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
-        });
+        const vrMode = scene.is("vr-mode");
+        const camera = vrMode ? scene.renderer.xr.getCamera() : cameraEl.getObject3D("camera");
+        if (vrMode) {
+          // We don't currently make use of left/right eye layers so just use the same layers for all of them to simplify things
+          camera.cameras[0].layers = camera.cameras[1].layers = camera.layers;
+        }
+        camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+        camera.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
       };
 
       if (this.viewingCamera.components.camera) {
@@ -276,13 +279,8 @@ export class CameraSystem {
     this.inspectable = inspectable;
     this.pivot = pivot;
 
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.xr.getCamera() : scene.camera;
+    const camera = scene.is("vr-mode") ? scene.renderer.xr.getCamera() : scene.camera;
     this.snapshot.mask = camera.layers.mask;
-    if (vrMode) {
-      this.snapshot.mask0 = camera.cameras[0].layers.mask;
-      this.snapshot.mask1 = camera.cameras[1].layers.mask;
-    }
     if (!this.lightsEnabled) {
       this.hideEverythingButThisObject(inspectable);
     } else {
@@ -383,13 +381,8 @@ export class CameraSystem {
     o.traverse(enableInspectLayer);
 
     const scene = AFRAME.scenes[0];
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.xr.getCamera() : scene.camera;
+    const camera = scene.is("vr-mode") ? scene.renderer.xr.getCamera() : scene.camera;
     camera.layers.set(Layers.CAMERA_LAYER_INSPECT);
-    if (vrMode) {
-      camera.cameras[0].layers.set(Layers.CAMERA_LAYER_INSPECT);
-      camera.cameras[1].layers.set(Layers.CAMERA_LAYER_INSPECT);
-    }
   }
 
   showEverythingAsNormal() {
@@ -398,13 +391,8 @@ export class CameraSystem {
       this.notHiddenObject = null;
     }
     const scene = AFRAME.scenes[0];
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.xr.getCamera() : scene.camera;
+    const camera = scene.is("vr-mode") ? scene.renderer.xr.getCamera() : scene.camera;
     camera.layers.mask = this.snapshot.mask;
-    if (vrMode) {
-      camera.cameras[0].layers.mask = this.snapshot.mask0;
-      camera.cameras[1].layers.mask = this.snapshot.mask1;
-    }
   }
 
   tick = (function() {
