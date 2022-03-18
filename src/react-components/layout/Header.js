@@ -71,6 +71,13 @@ export function Header({
                 </a>
               </li>
             )}
+            {isHmc && (
+              <li>
+                <a href="/labs">
+                  <FormattedMessage id="header.labs" defaultMessage="Labs" />
+                </a>
+              </li>
+            )}
             {isAdmin && (
               <li>
                 <a href="/admin" rel="noreferrer noopener">
