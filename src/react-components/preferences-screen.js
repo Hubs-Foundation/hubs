@@ -875,9 +875,7 @@ class PreferencesScreen extends Component {
   storeUpdated() {
     const { preferredMic } = this.props.store.state.preferences;
     if (preferredMic !== this.mediaDevicesManager.selectedMicDeviceId) {
-      this.mediaDevicesManager
-        .startMicShare({ deviceId: preferredMic, updatePrefs: false })
-        .then(this.updateMediaDevices);
+      this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
     }
   }
 

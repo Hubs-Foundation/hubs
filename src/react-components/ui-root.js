@@ -327,8 +327,6 @@ class UIRoot extends Component {
       this.forceUpdate();
     });
 
-    this.updateMediaPermissions();
-
     const scene = this.props.scene;
 
     const unsubscribe = this.props.history.listen((location, action) => {
@@ -558,9 +556,7 @@ class UIRoot extends Component {
 
     if (hasGrantedMic) {
       if (!this.mediaDevicesManager.isMicShared) {
-        await this.mediaDevicesManager.startMicShare({
-          deviceId: this.mediaDevicesManager.preferredMicDeviceId
-        });
+        await this.mediaDevicesManager.startMicShare({});
       }
       this.beginOrSkipAudioSetup();
     } else {
@@ -591,13 +587,7 @@ class UIRoot extends Component {
   };
 
   onRequestMicPermission = async () => {
-    await this.mediaDevicesManager.startMicShare({
-      deviceId: this.mediaDevicesManager.preferredMicDeviceId
-    });
-  };
-
-  updateMediaPermissions = async () => {
-    await this.mediaDevicesManager.updatePermissions();
+    await this.mediaDevicesManager.startMicShare({});
   };
 
   beginOrSkipAudioSetup = () => {

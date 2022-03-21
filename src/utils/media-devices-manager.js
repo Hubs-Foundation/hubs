@@ -229,7 +229,7 @@ export default class MediaDevicesManager extends EventEmitter {
     console.log("Starting microphone sharing");
 
     if (!deviceId) {
-      deviceId = this.defaultInputDeviceId;
+      deviceId = this.preferredMicDeviceId;
     }
     let constraints = { audio: {} };
     if (deviceId) {
