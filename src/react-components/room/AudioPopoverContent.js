@@ -16,12 +16,10 @@ import { Button } from "../input/Button";
 export const AudioPopoverContent = ({
   micLevel,
   microphoneOptions,
-  selectedMicrophone,
   onChangeMicrophone,
   isMicrophoneEnabled,
   isMicrophoneMuted,
   onChangeMicrophoneMuted,
-  selectedSpeaker,
   speakerOptions,
   onChangeSpeaker,
   speakerLevel,
@@ -36,9 +34,8 @@ export const AudioPopoverContent = ({
       <SelectInputField
         className={styles.selectionInput}
         buttonClassName={styles.selectionInput}
-        value={selectedMicrophone}
-        options={microphoneOptions}
         onChange={onChangeMicrophone}
+        {...microphoneOptions}
       />
       <Row noWrap>
         {isMicrophoneEnabled && !isMicrophoneMuted ? (
@@ -59,13 +56,12 @@ export const AudioPopoverContent = ({
       <p style={{ alignSelf: "start" }}>
         <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
       </p>
-      {speakerOptions?.length > 0 && (
+      {speakerOptions?.options?.length > 0 && (
         <SelectInputField
           className={styles.selectionInput}
           buttonClassName={styles.selectionInput}
-          value={selectedSpeaker}
-          options={speakerOptions}
           onChange={onChangeSpeaker}
+          {...speakerOptions}
         />
       )}
       <Row noWrap>
@@ -87,10 +83,8 @@ AudioPopoverContent.propTypes = {
   isMicrophoneEnabled: PropTypes.bool,
   isMicrophoneMuted: PropTypes.bool,
   onChangeMicrophoneMuted: PropTypes.func,
-  selectedMicrophone: PropTypes.string,
-  microphoneOptions: PropTypes.array,
+  microphoneOptions: PropTypes.object,
   onChangeMicrophone: PropTypes.func,
-  selectedSpeaker: PropTypes.string,
-  speakerOptions: PropTypes.array,
+  speakerOptions: PropTypes.object,
   onChangeSpeaker: PropTypes.func
 };
