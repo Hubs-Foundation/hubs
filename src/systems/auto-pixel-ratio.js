@@ -20,12 +20,12 @@ AFRAME.registerSystem("auto-pixel-ratio", {
     this.maxPixelRatio = window.devicePixelRatio;
     this.pixelRatioToTimesDecreased = {};
 
-    this.disabledByPref = !!window.APP.store.state.preferences.disableAutoPixelRatio;
+    this.disabledByPref = window.APP.store.state.preferences.disableAutoPixelRatio;
     this.onPreferenceChange = this.onPreferenceChange.bind(this);
     window.APP.store.addEventListener("statechanged", this.onPreferenceChange);
   },
   onPreferenceChange() {
-    this.disabledByPref = !!window.APP.store.state.preferences.disableAutoPixelRatio;
+    this.disabledByPref = window.APP.store.state.preferences.disableAutoPixelRatio;
   },
   tick(time, delta) {
     if (!this.enabled || this.disabledByPref || this.maxPixelRatio === MIN_PIXEL_RATIO) return;

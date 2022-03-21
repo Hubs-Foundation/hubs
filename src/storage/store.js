@@ -11,11 +11,7 @@ const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
 
-export const CLIPPING_THRESHOLD_ENABLED = false;
-export const CLIPPING_THRESHOLD_DEFAULT = 0.015;
-export const GLOBAL_VOLUME_DEFAULT = 100;
-
-export const defaultMaterialQualitySetting = (function() {
+const defaultMaterialQuality = (function() {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
 
   // HACK: AFRAME is not available on all pages, so we catch the ReferenceError.
@@ -37,6 +33,9 @@ export const defaultMaterialQualitySetting = (function() {
 
   return "high";
 })();
+
+//workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081 : disable echoCancellation, noiseSuppression, autoGainControl
+const isFirefoxReality = window.AFRAME?.utils.device.isMobileVR() && navigator.userAgent.match(/Firefox/);
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
@@ -96,9 +95,10 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         shouldPromptForRefresh: { type: "bool", default: false },
-        preferredMic: { type: "string", default: "none" },
-        preferredSpeakers: { type: "string", default: "none" },
-        preferredCamera: { type: "string", default: "none" },
+        // Mic, Speaker & Camera set dynamically
+        preferredMic: { type: "string" },
+        preferredSpeakers: { type: "string" },
+        preferredCamera: { type: "string" },
         muteMicOnEntry: { type: "bool", default: false },
         disableLeftRightPanning: { type: "bool", default: false },
         audioNormalization: { type: "bool", default: 0.0 },
@@ -113,13 +113,14 @@ export const SCHEMA = {
         fastRoomSwitching: { type: "bool", default: false },
         lazyLoadSceneMedia: { type: "bool", default: false },
         preferMobileObjectInfoPanel: { type: "bool", default: false },
+        // if unset, maxResolution = screen resolution
         maxResolutionWidth: { type: "number", default: undefined },
         maxResolutionHeight: { type: "number", default: undefined },
-        globalVoiceVolume: { type: "number", default: GLOBAL_VOLUME_DEFAULT },
+        globalVoiceVolume: { type: "number", default: 100 },
         globalMediaVolume: { type: "number", default: 100 },
         globalSFXVolume: { type: "number", default: 100 },
         snapRotationDegrees: { type: "number", default: 45 },
-        materialQualitySetting: { type: "string", default: defaultMaterialQualitySetting },
+        materialQualitySetting: { type: "string", default: defaultMaterialQuality },
         enableDynamicShadows: { type: "bool", default: false },
         disableSoundEffects: { type: "bool", default: false },
         disableMovement: { type: "bool", default: false },
@@ -128,19 +129,19 @@ export const SCHEMA = {
         disableTeleporter: { type: "bool", default: false },
         disableAutoPixelRatio: { type: "bool", default: false },
         movementSpeedModifier: { type: "number", default: 1 },
-        disableEchoCancellation: { type: "bool", default: false },
-        disableNoiseSuppression: { type: "bool", default: false },
-        disableAutoGainControl: { type: "bool", default: false },
+        disableEchoCancellation: { type: "bool", default: isFirefoxReality },
+        disableNoiseSuppression: { type: "bool", default: isFirefoxReality },
+        disableAutoGainControl: { type: "bool", default: isFirefoxReality },
         locale: { type: "string", default: "browser" },
         showRtcDebugPanel: { type: "bool", default: false },
         showAudioDebugPanel: { type: "bool", default: false },
-        enableAudioClipping: { type: "bool", default: CLIPPING_THRESHOLD_ENABLED },
+        enableAudioClipping: { type: "bool", default: false },
         audioClippingThreshold: { type: "number", default: 0.015 },
         theme: { type: "string", default: "Browser Default" },
-        avatarVoiceLevels: { type: "object" },
         cursorSize: { type: "number", default: 1 },
         nametagVisibility: { type: "string", default: "showAll" },
-        nametagVisibilityDistance: { type: "number", default: 5 }
+        nametagVisibilityDistance: { type: "number", default: 5 },
+        avatarVoiceLevels: { type: "object" }
       }
     },
 
@@ -416,11 +417,7 @@ export default class Store extends EventTarget {
     return finalState;
   }
 
-  get materialQualitySetting() {
-    if (this.state.preferences.materialQualitySetting) {
-      return this.state.preferences.materialQualitySetting;
-    }
-
-    return defaultMaterialQualitySetting;
+  get schema() {
+    return SCHEMA;
   }
 }

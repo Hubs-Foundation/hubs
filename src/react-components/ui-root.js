@@ -277,7 +277,7 @@ class UIRoot extends Component {
   }
 
   onConcurrentLoad = () => {
-    if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
+    if (qsTruthy("allow_multi") || this.props.store.state.preferences.allowMultipleHubsInstances) return;
     this.startAutoExitTimer(AutoExitReason.concurrentSession);
   };
 
@@ -285,7 +285,7 @@ class UIRoot extends Component {
     if (
       this.props.disableAutoExitOnIdle ||
       this.state.isStreaming ||
-      this.props.store.state.preferences["disableIdleDetection"]
+      this.props.store.state.preferences.disableIdleDetection
     )
       return;
     this.startAutoExitTimer(AutoExitReason.idle);
@@ -624,7 +624,7 @@ class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
+    const muteOnEntry = this.props.store.state.preferences.muteMicOnEntry;
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
@@ -900,7 +900,7 @@ class UIRoot extends Component {
   };
 
   renderAudioSetupPanel = () => {
-    this.mediaDevicesManager.micShouldBeEnabled = !this.props.store.state.preferences["muteMicOnEntry"];
+    this.mediaDevicesManager.micShouldBeEnabled = !this.props.store.state.preferences.muteMicOnEntry;
     // TODO: Show HMD mic not chosen warning
     return (
       <MicSetupModalContainer
@@ -908,7 +908,7 @@ class UIRoot extends Component {
         onEnterRoom={this.onAudioReadyButton}
         onMicMuted={() =>
           this.props.store.update({
-            preferences: { muteMicOnEntry: !this.props.store.state.preferences["muteMicOnEntry"] }
+            preferences: { muteMicOnEntry: !this.props.store.state.preferences.muteMicOnEntry }
           })
         }
         onBack={() => this.props.history.goBack()}
@@ -1028,8 +1028,8 @@ class UIRoot extends Component {
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
-    const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
-    const showAudioDebugPanel = this.props.store.state.preferences["showAudioDebugPanel"];
+    const showRtcDebugPanel = this.props.store.state.preferences.showRtcDebugPanel;
+    const showAudioDebugPanel = this.props.store.state.preferences.showAudioDebugPanel;
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;

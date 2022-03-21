@@ -9,8 +9,6 @@ import {
 import { detectOS, detect } from "detect-browser";
 
 const isMobile = AFRAME.utils.device.isMobile();
-const isMobileVR = AFRAME.utils.device.isMobileVR();
-const isFirefoxReality = isMobileVR && navigator.userAgent.match(/Firefox/);
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -307,26 +305,9 @@ export default class MediaDevicesManager extends EventEmitter {
       this.audioTrack.stop();
     }
 
-    constraints.audio.echoCancellation = this._store.state.preferences.disableEchoCancellation === true ? false : true;
-    constraints.audio.noiseSuppression = this._store.state.preferences.disableNoiseSuppression === true ? false : true;
-    constraints.audio.autoGainControl = this._store.state.preferences.disableAutoGainControl === true ? false : true;
-
-    if (isFirefoxReality) {
-      //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081
-      constraints.audio.echoCancellation =
-        this._store.state.preferences.disableEchoCancellation === false ? true : false;
-      constraints.audio.noiseSuppression =
-        this._store.state.preferences.disableNoiseSuppression === false ? true : false;
-      constraints.audio.autoGainControl = this._store.state.preferences.disableAutoGainControl === false ? true : false;
-
-      this._store.update({
-        preferences: {
-          disableEchoCancellation: !constraints.audio.echoCancellation,
-          disableNoiseSuppression: !constraints.audio.noiseSuppression,
-          disableAutoGainControl: !constraints.audio.autoGainControl
-        }
-      });
-    }
+    constraints.audio.echoCancellation = !this._store.state.preferences.disableEchoCancellation;
+    constraints.audio.noiseSuppression = !this._store.state.preferences.disableNoiseSuppression;
+    constraints.audio.autoGainControl = !this._store.state.preferences.disableAutoGainControl;
 
     try {
       console.log("Adding microphone media stream");

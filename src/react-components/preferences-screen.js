@@ -7,7 +7,6 @@ import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
 import { FormattedMessage, injectIntl, useIntl, defineMessages } from "react-intl";
 import styles from "../assets/stylesheets/preferences-screen.scss";
-import { SCHEMA, GLOBAL_VOLUME_DEFAULT } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
 import MediaDevicesManager from "../utils/media-devices-manager";
@@ -280,16 +279,27 @@ export class MaxResolutionPreferenceItem extends Component {
     store: PropTypes.object
   };
   render() {
+    const onChange = () => {
+      const numWidth = parseInt(document.getElementById("maxResolutionWidth").value);
+      const numHeight = parseInt(document.getElementById("maxResolutionHeight").value);
+      this.props.store.update({
+        preferences: {
+          maxResolutionWidth: numWidth ? numWidth : 0,
+          maxResolutionHeight: numHeight ? numHeight : 0
+        }
+      });
+    };
     return (
       <div className={classNames(styles.maxResolutionPreferenceItem)}>
         <input
+          id="maxResolutionWidth"
           tabIndex="0"
           type="number"
           step="1"
           min="0"
           value={
             this.props.store.state.preferences.maxResolutionWidth === undefined
-              ? 1920
+              ? window.screen.width
               : this.props.store.state.preferences.maxResolutionWidth
           }
           onClick={e => {
@@ -297,22 +307,18 @@ export class MaxResolutionPreferenceItem extends Component {
             e.target.focus();
             e.target.select();
           }}
-          onChange={e => {
-            const num = parseInt(e.target.value);
-            this.props.store.update({
-              preferences: { maxResolutionWidth: num ? num : 0 }
-            });
-          }}
+          onChange={onChange}
         />
         &nbsp;{"x"}&nbsp;
         <input
+          id="maxResolutionHeight"
           tabIndex="0"
           type="number"
           step="1"
           min="0"
           value={
             this.props.store.state.preferences.maxResolutionHeight === undefined
-              ? 1920
+              ? window.screen.height
               : this.props.store.state.preferences.maxResolutionHeight
           }
           onClick={e => {
@@ -320,12 +326,7 @@ export class MaxResolutionPreferenceItem extends Component {
             e.target.focus();
             e.target.select();
           }}
-          onChange={e => {
-            const num = parseInt(e.target.value);
-            this.props.store.update({
-              preferences: { maxResolutionHeight: num ? num : 0 }
-            });
-          }}
+          onChange={onChange}
         />
       </div>
     );
@@ -543,12 +544,12 @@ class PreferenceListItem extends Component {
     const label = (
       <span className={styles.preferenceLabel}>{intl.formatMessage(preferenceLabels[this.props.storeKey])}</span>
     );
+    const prefSchema = this.props.store.schema.definitions.preferences.properties;
     const hasPref =
       this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION
         ? this.props.store.state.preferences.maxResolutionWidth !== undefined ||
           this.props.store.state.preferences.maxResolutionHeight !== undefined
-        : this.props.store.state.preferences[this.props.storeKey] !==
-          SCHEMA.definitions.preferences.properties[this.props.storeKey].default;
+        : this.props.store.state.preferences[this.props.storeKey] !== prefSchema[this.props.storeKey].default;
     const resetToDefault = hasPref ? (
       <ResetToDefaultButton
         onClick={() => {
@@ -562,7 +563,7 @@ class PreferenceListItem extends Component {
               });
               break;
             default:
-              this.props.setValue(SCHEMA.definitions.preferences.properties[this.props.storeKey].default);
+              this.props.setValue(prefSchema[this.props.storeKey].default);
               break;
           }
           this.forceUpdate();
@@ -939,7 +940,7 @@ class PreferencesScreen extends Component {
       });
     }
 
-    const prefSchema = SCHEMA.definitions.preferences.properties;
+    const prefSchema = this.props.store.schema.definitions.preferences.properties;
     const DEFINITIONS = new Map([
       [
         CATEGORY_TOUCHSCREEN,
@@ -1035,7 +1036,7 @@ class PreferencesScreen extends Component {
             max: GLOBAL_VOLUME_MAX,
             step: GLOBAL_VOLUME_STEP,
             digits: 0,
-            defaultNumber: GLOBAL_VOLUME_DEFAULT
+            defaultNumber: prefSchema.globalMediaVolume.default
           },
           {
             key: "globalSFXVolume",
@@ -1044,7 +1045,7 @@ class PreferencesScreen extends Component {
             max: 200,
             step: 5,
             digits: 0,
-            defaultNumber: prefSchema.globalMediaVolume.default
+            defaultNumber: prefSchema.globalSFXVolume.default
           },
           {
             key: "avatarVoiceLevels",
@@ -1315,7 +1316,7 @@ class PreferencesScreen extends Component {
 
   render() {
     const intl = this.props.intl;
-    const shouldPromptForRefresh = !!this.props.store.state.preferences.shouldPromptForRefresh;
+    const shouldPromptForRefresh = this.props.store.state.preferences.shouldPromptForRefresh;
 
     return (
       <div className={classNames(styles.preferencesPanel)}>

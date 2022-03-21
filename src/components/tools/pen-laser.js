@@ -17,7 +17,7 @@ AFRAME.registerComponent("pen-laser", {
 
   init() {
     let material = new THREE.MeshStandardMaterial({ color: "red", opacity: 0.5, transparent: true, visible: true });
-    const quality = window.APP.store.materialQualitySetting;
+    const quality = window.APP.store.state.preferences.materialQualitySetting;
     material = convertStandardMaterial(material, quality);
 
     const tipMaterial = material.clone();
