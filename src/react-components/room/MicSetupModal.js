@@ -59,7 +59,7 @@ export function MicSetupModal({
                     <Spinner />
                   </div>
                 )}
-                {permissionStatus === PermissionStatus.GRANTED && isMicrophoneEnabled && !isMicrophoneMuted ? (
+                {permissionStatus === PermissionStatus.GRANTED && !isMicrophoneMuted ? (
                   <MicrophoneIcon className={iconStyle} />
                 ) : (
                   <MicrophoneMutedIcon className={iconStyle} />
@@ -73,7 +73,7 @@ export function MicSetupModal({
               )}
             </div>
             <div className={styles.actionContainer}>
-              {permissionStatus === PermissionStatus.GRANTED && isMicrophoneEnabled ? (
+              {permissionStatus === PermissionStatus.GRANTED ? (
                 <>
                   <ToggleInput
                     label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle-v2" defaultMessage="Mute" />}
@@ -130,9 +130,7 @@ export function MicSetupModal({
               )}
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
-              MediaDevicesManager.isAudioInputSelectEnabled &&
-              microphoneOptions?.options?.length > 0 &&
-              isMicrophoneEnabled && (
+              MediaDevicesManager.isAudioInputSelectEnabled && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
                     <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
@@ -157,7 +155,7 @@ export function MicSetupModal({
               </Button>
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
-              speakerOptions?.options?.length > 0 && (
+              MediaDevicesManager.isAudioOutputSelectEnabled && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
                     <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
