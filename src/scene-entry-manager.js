@@ -1,7 +1,6 @@
 import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
-import { isIOS as detectIOS } from "./utils/is-mobile";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 
 const isBotMode = qsTruthy("bot");
@@ -22,8 +21,6 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
-
-const isIOS = detectIOS();
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -354,57 +351,23 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_share_camera", event => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
-
-      const constraints = {
-        video: {
-          width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
-          frameRate: 30
-        }
-        //TODO: Capture audio from camera?
-      };
-
-      // check preferences
-      const preferredCamera = this.store.state.preferences.preferredCamera;
-      switch (preferredCamera) {
-        case "default":
-          constraints.video.mediaSource = MediaDevices.CAMERA;
-          break;
-        case "user":
-        case "environment":
-          constraints.video.facingMode = preferredCamera;
-          break;
-        default:
-          constraints.video.deviceId = preferredCamera;
-          break;
-      }
-
-      this.mediaDevicesManager.startVideoShare(constraints, false, event.detail?.target, shareSuccess, shareError);
+      this.mediaDevicesManager.startVideoShare({
+        isDisplayMedia: false,
+        target: event.detail?.target,
+        success: shareSuccess,
+        error: shareError
+      });
     });
 
     this.scene.addEventListener("action_share_screen", () => {
       if (isHandlingVideoShare) return;
       isHandlingVideoShare = true;
-
-      this.mediaDevicesManager.startVideoShare(
-        {
-          video: {
-            // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
-            // other than your current monitor that has a different aspect ratio.
-            width: 720 * (screen.width / screen.height),
-            height: 720,
-            frameRate: 30
-          },
-          audio: {
-            echoCancellation: !this.store.state.preferences.disableEchoCancellation,
-            noiseSuppression: !this.store.state.preferences.disableNoiseSuppression,
-            autoGainControl: !this.store.state.preferences.disableAutoGainControl
-          }
-        },
-        true,
-        null,
-        shareSuccess,
-        shareError
-      );
+      this.mediaDevicesManager.startVideoShare({
+        isDisplayMedia: true,
+        target: null,
+        success: shareSuccess,
+        error: shareError
+      });
     });
 
     this.scene.addEventListener(MediaDevicesEvents.VIDEO_SHARE_ENDED, async () => {

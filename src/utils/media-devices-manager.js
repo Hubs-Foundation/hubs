@@ -1,6 +1,7 @@
 import { EventEmitter } from "eventemitter3";
 import { MediaDevicesEvents, PermissionStatus, MediaDevices, NO_DEVICE_ID } from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
+import { isIOS as detectIOS } from "./is-mobile";
 
 const isMobile = AFRAME.utils.device.isMobile();
 
@@ -339,15 +340,34 @@ export default class MediaDevicesManager extends EventEmitter {
     APP.dialog.enableMicrophone(false);
   }
 
-  async startVideoShare(constraints, isDisplayMedia, target, success, error) {
+  async startVideoShare({ isDisplayMedia, target, success, error }) {
     let newStream;
     let videoTrackAdded = false;
 
     try {
       if (isDisplayMedia) {
-        newStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+        newStream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            // Work around BMO 1449832 by calculating the width. This will break for multi monitors if you share anything
+            // other than your current monitor that has a different aspect ratio.
+            width: 720 * (screen.width / screen.height),
+            height: 720,
+            frameRate: 30
+          },
+          audio: {
+            echoCancellation: window.APP.store.state.preferences.disableEchoCancellation === true ? false : true,
+            noiseSuppression: window.APP.store.state.preferences.disableNoiseSuppression === true ? false : true,
+            autoGainControl: window.APP.store.state.preferences.disableAutoGainControl === true ? false : true
+          }
+        });
       } else {
-        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        newStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
+            frameRate: 30
+          }
+          //TODO: Capture audio from camera?
+        });
       }
 
       const videoTracks = newStream ? newStream.getVideoTracks() : [];
