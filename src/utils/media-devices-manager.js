@@ -171,6 +171,7 @@ export default class MediaDevicesManager extends EventEmitter {
 
   onDeviceChange = () => {
     this.fetchMediaDevices().then(() => {
+      this.changeAudioOutput(this.selectedSpeakersDeviceId);
       this.emit(MediaDevicesEvents.DEVICE_CHANGE, null);
     });
   };
