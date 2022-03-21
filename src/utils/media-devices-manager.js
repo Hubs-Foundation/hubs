@@ -203,18 +203,16 @@ export default class MediaDevicesManager extends EventEmitter {
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
         mediaDevices = mediaDevices.filter(d => d.label !== "");
-        if (MediaDevicesManager.isAudioInputSelectEnabled) {
-          this._micDevices = mediaDevices
-            .filter(d => d.kind === "audioinput")
-            .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substr(0, 9)})` }));
-        }
+        this._micDevices = mediaDevices
+          .filter(d => d.deviceId !== "default" && d.kind === "audioinput")
+          .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substring(0, 9)})` }));
         this._videoDevices = mediaDevices
-          .filter(d => d.kind === "videoinput")
-          .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substr(0, 9)})` }));
+          .filter(d => d.deviceId !== "default" && d.kind === "videoinput")
+          .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substring(0, 9)})` }));
         if (MediaDevicesManager.isAudioOutputSelectEnabled) {
           this._outputDevices = mediaDevices
-            .filter(d => d.kind === "audiooutput")
-            .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substr(0, 9)})` }));
+            .filter(d => d.deviceId !== "default" && d.kind === "audiooutput")
+            .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substring(0, 9)})` }));
         }
         resolve();
       });
@@ -436,7 +434,12 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   micLabelForAudioTrack(audioTrack) {
-    return (audioTrack && audioTrack.label) || "";
+    const label = (audioTrack && audioTrack.label) || "";
+    if (label.indexOf("Default - ") < 0) {
+      return label;
+    } else {
+      return label.substring(10);
+    }
   }
 
   deviceIdForMicDeviceLabel(label) {
