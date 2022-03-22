@@ -53,7 +53,7 @@ AFRAME.registerComponent("name-tag", {
     this.avatarRig = document.getElementById("avatar-rig").object3D;
 
     this.nametag = this.el.object3D;
-    this.identityName = this.el.querySelector(".identityName").object3D;
+    this.nametagIdentityName = this.el.querySelector(".identityName").object3D;
     this.nametagBackground = this.el.querySelector(".nametag-background").object3D;
     this.nametagVolume = this.el.querySelector(".nametag-volume").object3D;
     this.nametagStatusBorder = this.el.querySelector(".nametag-status-border").object3D;
@@ -206,7 +206,7 @@ AFRAME.registerComponent("name-tag", {
       if (this.identityName.length > DISPLAY_NAME_LENGTH) {
         this.identityName = this.identityName.slice(0, DISPLAY_NAME_LENGTH).concat("...");
       }
-      this.identityName.el.setAttribute("text", { value: this.identityName });
+      this.nametagIdentityName.el.setAttribute("text", { value: this.identityName });
     }
   },
 
