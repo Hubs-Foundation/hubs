@@ -102,7 +102,6 @@ export const SCHEMA = {
         enableOnScreenJoystickLeft: { type: "bool" },
         enableOnScreenJoystickRight: { type: "bool" },
         enableGyro: { type: "bool" },
-        onlyShowNametagsInFreeze: { type: "bool" },
         animateWaypointTransitions: { type: "bool" },
         showFPSCounter: { type: "bool" },
         allowMultipleHubsInstances: { type: "bool" },
@@ -135,7 +134,9 @@ export const SCHEMA = {
         audioClippingThreshold: { type: "number" },
         theme: { type: "string" },
         avatarVoiceLevels: { type: "object" },
-        cursorSize: { type: "number" }
+        cursorSize: { type: "number" },
+        nametagVisibility: { type: "string" },
+        nametagVisibilityDistance: { type: "number" }
       }
     },
 

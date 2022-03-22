@@ -33,6 +33,7 @@ import { EmojiSystem } from "./emoji-system";
 import { AudioZonesSystem } from "./audio-zones-system";
 import { GainSystem } from "./audio-gain-system";
 import { EnvironmentSystem } from "./environment-system";
+import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -75,6 +76,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.audioZonesSystem = new AudioZonesSystem();
     this.gainSystem = new GainSystem();
     this.environmentSystem = new EnvironmentSystem(this.el);
+    this.nameTagSystem = new NameTagVisibilitySystem(this.el);
   },
 
   tick(t, dt) {
@@ -121,6 +123,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.mediaFramesSystem.tick();
     this.audioZonesSystem.tick(this.el);
     this.gainSystem.tick();
+    this.nameTagSystem.tick();
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();

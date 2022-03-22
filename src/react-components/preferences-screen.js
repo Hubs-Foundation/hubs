@@ -23,6 +23,7 @@ export const GLOBAL_VOLUME_MIN = 0;
 export const GLOBAL_VOLUME_MAX = 200;
 export const GLOBAL_VOLUME_STEP = 5;
 export const GLOBAL_VOLUME_DEFAULT = 100;
+export const NAMETAG_VISIBILITY_DISTANCE_DEFAULT = 5;
 
 function WarnIcon() {
   return (
@@ -436,10 +437,6 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.locale",
     defaultMessage: "Language"
   },
-  onlyShowNametagsInFreeze: {
-    id: "preferences-screen.preference.only-show-nametags-in-freeze",
-    defaultMessage: "Only show nametags while frozen"
-  },
   animateWaypointTransitions: {
     id: "preferences-screen.preference.animate-waypoint-transitions",
     defaultMessage: "Animate waypoint transitions"
@@ -511,6 +508,14 @@ const preferenceLabels = defineMessages({
   cursorSize: {
     id: "preferences-screen.preference.cursor-size",
     defaultMessage: "Cursor Size"
+  },
+  nametagVisibility: {
+    id: "preferences-screen.preference.nametag-visibility",
+    defaultMessage: "Show Nametag"
+  },
+  nametagVisibilityDistance: {
+    id: "preferences-screen.preference.nametag-visibility-distance",
+    defaultMessage: "Nametag visibility distance"
   }
 });
 
@@ -1068,8 +1073,59 @@ class PreferencesScreen extends Component {
             options: availableThemes,
             defaultString: "Browser Default"
           },
-          { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+          {
+            key: "nametagVisibility",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: [
+              {
+                value: "showAll",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-all",
+                  defaultMessage: "Always"
+                })
+              },
+              {
+                value: "showNone",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-none",
+                  defaultMessage: "Never"
+                })
+              },
+              {
+                value: "showFrozen",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-frozen",
+                  defaultMessage: "Only in Frozen state"
+                })
+              },
+              {
+                value: "showSpeaking",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-speaking",
+                  defaultMessage: "Only speaking"
+                })
+              },
+              {
+                value: "showClose",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-close",
+                  defaultMessage: "Close to me"
+                })
+              }
+            ],
+            defaultString: "showAll",
+            promptForRefresh: false
+          },
+          {
+            key: "nametagVisibilityDistance",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 1,
+            max: 20,
+            step: 1,
+            digits: 2,
+            defaultNumber: NAMETAG_VISIBILITY_DISTANCE_DEFAULT
+          },
           this.state.preferredCamera,
           {
             key: "materialQualitySetting",

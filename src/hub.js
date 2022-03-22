@@ -81,6 +81,7 @@ import "./components/hoverable-visuals";
 import "./components/hover-visuals";
 import "./components/offset-relative-to";
 import "./components/player-info";
+import "./components/name-tag";
 import "./components/debug";
 import "./components/hand-poses";
 import "./components/hud-controller";
@@ -1171,7 +1172,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles: meta.roles,
       permissions: meta.permissions,
       streaming: meta.streaming,
-      recording: meta.recording
+      recording: meta.recording,
+      hand_raised: meta.hand_raised,
+      typing: meta.typing
     });
   });
   events.on(`hub:join`, ({ key, meta }) => {
@@ -1238,7 +1241,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles: current.roles,
       permissions: current.permissions,
       streaming: current.streaming,
-      recording: current.recording
+      recording: current.recording,
+      hand_raised: current.hand_raised,
+      typing: current.typing
     });
   });
 
