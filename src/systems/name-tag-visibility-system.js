@@ -37,23 +37,28 @@ export class NameTagVisibilitySystem {
       this.avatarRig.getWorldPosition(avatarRigWorldPos);
       this.components.forEach(nametag => {
         if (this.nametagVisibility === "showSpeaking") {
+          const now = Date.now();
           if (!nametag.isTalking && nametag.wasTalking) {
-            if (Date.now() - nametag.lastUpdateTime > 1000) {
+            if (now - nametag.lastUpdateTime > 1000) {
               nametag.shouldBeVisible = false;
             }
           } else if (nametag.isTalking && !nametag.wasTalking) {
             nametag.lastUpdateTime = Date.now();
             nametag.shouldBeVisible = true;
+          } else {
+            if (now - nametag.lastUpdateTime > 1000) {
+              nametag.shouldBeVisible = false;
+            }
           }
         } else if (this.nametagVisibility === "showFrozen") {
           nametag.shouldBeVisible = this.sceneEl.is("frozen");
         } else if (this.nametagVisibility === "showNone") {
           nametag.shouldBeVisible = false;
-        } else if (this.nametagVisibility === "showAll") {
-          nametag.shouldBeVisible = true;
         } else if (this.nametagVisibility === "showClose") {
           nametag.el.object3D.getWorldPosition(worldPos);
           nametag.shouldBeVisible = worldPos.sub(avatarRigWorldPos).lengthSq() < this.nametagVisibilityDistance;
+        } else {
+          nametag.shouldBeVisible = true;
         }
       });
     };

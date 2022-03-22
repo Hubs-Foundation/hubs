@@ -42,6 +42,7 @@ AFRAME.registerComponent("name-tag", {
     this.avatarAABBCenter = new THREE.Vector3();
     this.nametagHeight = 0;
     this.isAvatarReady = false;
+    this.lastUpdateTime = Date.now();
 
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onModelLoading = this.onModelLoading.bind(this);
