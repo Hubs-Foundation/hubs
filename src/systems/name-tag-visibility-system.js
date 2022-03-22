@@ -45,7 +45,7 @@ export class NameTagVisibilitySystem {
           } else if (nametag.isTalking && !nametag.wasTalking) {
             nametag.lastUpdateTime = Date.now();
             nametag.shouldBeVisible = true;
-          } else {
+          } else if (!nametag.isTalking && !nametag.wasTalking) {
             if (now - nametag.lastUpdateTime > 1000) {
               nametag.shouldBeVisible = false;
             }
