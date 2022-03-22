@@ -43,41 +43,6 @@ const forceMeshBatching = qsTruthy("batchMeshes");
 const forceImageBatching = qsTruthy("batchImages");
 const disableBatching = qsTruthy("disableBatching");
 
-async function fetchImagesFromToplevelServer(){
-  var images = [];
-  //get the current hub_id and construct a url
-  const myHub = window.APP.hub.hub_id;
-  // Check for photo gallery room
-  // if (myHub !== photoGalleryRoom){
-  //   return [];
-  // }
-  
-  const url = "https://38asq7ebgj.execute-api.us-east-1.amazonaws.com/dev/injectscripts?hubid="+ myHub;
-  // const url = "http://localhost:3000/injectscripts?hubid=" + myHub;
-  console.log("################# ToplevelServerUrl", url);
- //fetch the url with a get method which will return scripts to inject
- const response = await fetch(url, {
-    method: 'get'
-  });
-  const data = await response.text();
-  var myUrls = data.split(",");
-  console.log("######### obtained URLS", myUrls );
-  for(var items of myUrls) {
-       if(items === "noUrls"){
-         return [];
-       }
-       //inject some scripts based on the returned array of urls
-      //  var newScript = document.createElement("script");
-      //  newScript.type = 'text/javascript';
-      //  var srcAt = document.createAttribute('src');
-      //  srcAt.value = items;
-      //  newScript.setAttributeNode(srcAt);
-  }
-  images = myUrls;
-
-  return images;
-};
-
 AFRAME.registerComponent("media-loader", {
   schema: {
     playSoundEffect: { default: true },
@@ -368,8 +333,8 @@ AFRAME.registerComponent("media-loader", {
     if (!src) return;
 
     //TOCHECK::
-    const { origin, pathname } = new URL(src);
-    if (origin === "https://www.twitch.tv"){
+    // const { origin, pathname } = new URL(src);
+    // if (origin === "https://www.twitch.tv"){
     //   if (g_twitchLiveStreams.length === 0){
     //     console.log("LENGTH IS 000000");
     //     g_twitchLiveStreams = await getLiveGameStreams();
@@ -383,14 +348,7 @@ AFRAME.registerComponent("media-loader", {
     //     }
     //     console.log("########################### " + src + " INDEX=" + pathname.substring(1));
     //   }
-    }
-    else if (origin === "https://www.image_place_holder.com"){
-      //tarik is place holder for image1
-      var images = await fetchImagesFromToplevelServer();
-      console.log("################### images = ", images);
-      if (images !== [])
-        src = images[pathname.substring(1)];
-    }
+    // }
     const srcChanged = oldData.src !== src;
     const versionChanged = !!(oldData.version && oldData.version !== version);
 
