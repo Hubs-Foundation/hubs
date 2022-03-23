@@ -364,7 +364,7 @@ export default class SceneEntryManager {
       };
 
       // check preferences
-      const preferredCamera = this.store.state.preferences.preferredCamera || "default";
+      const preferredCamera = this.store.state.preferences.preferredCamera;
       switch (preferredCamera) {
         case "default":
           constraints.video.mediaSource = MediaDevices.CAMERA;

@@ -95,10 +95,9 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         shouldPromptForRefresh: { type: "bool", default: false },
-        // Mic, Speaker & Camera set dynamically
-        preferredMic: { type: "string" },
-        preferredSpeakers: { type: "string" },
-        preferredCamera: { type: "string" },
+        preferredMic: { type: "string", default: "Default" },
+        preferredSpeakers: { type: "string", default: "Default" },
+        preferredCamera: { type: "string", default: "none" },
         muteMicOnEntry: { type: "bool", default: false },
         disableLeftRightPanning: { type: "bool", default: false },
         audioNormalization: { type: "bool", default: 0.0 },
