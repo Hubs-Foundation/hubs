@@ -364,8 +364,7 @@ export default class SceneEntryManager {
       };
 
       // check preferences
-      const store = window.APP.store;
-      const preferredCamera = store.state.preferences.preferredCamera || "default";
+      const preferredCamera = this.store.state.preferences.preferredCamera;
       switch (preferredCamera) {
         case "default":
           constraints.video.mediaSource = MediaDevices.CAMERA;
@@ -396,9 +395,9 @@ export default class SceneEntryManager {
             frameRate: 30
           },
           audio: {
-            echoCancellation: window.APP.store.state.preferences.disableEchoCancellation === true ? false : true,
-            noiseSuppression: window.APP.store.state.preferences.disableNoiseSuppression === true ? false : true,
-            autoGainControl: window.APP.store.state.preferences.disableAutoGainControl === true ? false : true
+            echoCancellation: !this.store.state.preferences.disableEchoCancellation,
+            noiseSuppression: !this.store.state.preferences.disableNoiseSuppression,
+            autoGainControl: !this.store.state.preferences.disableAutoGainControl
           }
         },
         true,

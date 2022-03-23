@@ -1,4 +1,3 @@
-import { NAMETAG_VISIBILITY_DISTANCE_DEFAULT } from "../react-components/preferences-screen";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 export class NameTagVisibilitySystem {
@@ -10,12 +9,7 @@ export class NameTagVisibilitySystem {
     this.tick = this.tick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
     this.nametagVisibility = this.store.state.preferences.nametagVisibility;
-    this.nametagVisibilityDistance = Math.pow(
-      this.store.state.preferences.nametagVisibilityDistance !== undefined
-        ? this.store.state.preferences.nametagVisibilityDistance
-        : NAMETAG_VISIBILITY_DISTANCE_DEFAULT,
-      2
-    );
+    this.nametagVisibilityDistance = Math.pow(this.store.state.preferences.nametagVisibilityDistance, 2);
     waitForDOMContentLoaded().then(() => {
       this.avatarRig = document.getElementById("avatar-rig").object3D;
     });
@@ -65,12 +59,7 @@ export class NameTagVisibilitySystem {
   })();
 
   onStateChanged() {
-    this.nametagVisibilityDistance = Math.pow(
-      this.store.state.preferences.nametagVisibilityDistance !== undefined
-        ? this.store.state.preferences.nametagVisibilityDistance
-        : NAMETAG_VISIBILITY_DISTANCE_DEFAULT,
-      2
-    );
+    this.nametagVisibilityDistance = Math.pow(this.store.state.preferences.nametagVisibilityDistance, 2);
     this.nametagVisibility = this.store.state.preferences.nametagVisibility;
   }
 }

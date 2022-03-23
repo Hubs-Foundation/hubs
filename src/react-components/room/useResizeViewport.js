@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 // ResizeObserver not currently supported in Firefox Android
 import ResizeObserver from "resize-observer-polyfill";
 
-const DEFAULT_MAX_RESOLUTION = 1920;
-
 // Modified from AFrame
 function getRenderResolution(canvasRect, maxResolution, isVR) {
   const pixelRatio = window.devicePixelRatio;
@@ -37,18 +35,17 @@ function getRenderResolution(canvasRect, maxResolution, isVR) {
 
 export function useResizeViewport(viewportRef, store, scene) {
   const [maxResolution, setMaxResolution] = useState({
-    width: DEFAULT_MAX_RESOLUTION,
-    height: DEFAULT_MAX_RESOLUTION
+    width: window.screen.width,
+    height: window.screen.height
   });
 
   useEffect(
     () => {
       function onStoreChanged() {
         const { maxResolutionWidth, maxResolutionHeight } = store.state.preferences;
-
         setMaxResolution({
-          width: maxResolutionWidth === undefined ? DEFAULT_MAX_RESOLUTION : maxResolutionWidth,
-          height: maxResolutionHeight === undefined ? DEFAULT_MAX_RESOLUTION : maxResolutionHeight
+          width: maxResolutionWidth === undefined ? window.screen.width : maxResolutionWidth,
+          height: maxResolutionHeight === undefined ? window.screen.height : maxResolutionHeight
         });
       }
 

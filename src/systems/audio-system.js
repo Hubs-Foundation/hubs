@@ -212,13 +212,13 @@ export class AudioSystem {
 
   updatePrefs() {
     const { globalVoiceVolume, globalMediaVolume, globalSFXVolume } = window.APP.store.state.preferences;
-    let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
+    let newGain = globalMediaVolume / 100;
     this.mixer[SourceType.MEDIA_VIDEO].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
 
-    newGain = (globalSFXVolume !== undefined ? globalSFXVolume : 100) / 100;
+    newGain = globalSFXVolume / 100;
     this.mixer[SourceType.SFX].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
 
-    newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
+    newGain = globalVoiceVolume / 100;
     this.mixer[SourceType.AVATAR_AUDIO_SOURCE].gain.setTargetAtTime(
       newGain,
       this.audioContext.currentTime,
