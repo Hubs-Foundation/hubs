@@ -227,6 +227,7 @@ export class AudioSystem {
     if (MediaDevicesManager.isAudioOutputSelectEnabled && window.APP.mediaDevicesManager) {
       const sinkId = window.APP.mediaDevicesManager.selectedSpeakersDeviceId;
       const isDefault = sinkId === window.APP.mediaDevicesManager.defaultOutputDeviceId;
+      if ((!this.outputMediaAudio && isDefault) || sinkId === this.outputMediaAudio?.sinkId) return;
       const sink = isDefault ? this._sceneEl.audioListener.getInput() : this.audioDestination;
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);
