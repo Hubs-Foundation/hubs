@@ -4,6 +4,7 @@ import { detectOS, detect } from "detect-browser";
 import { isIOS as detectIOS } from "./is-mobile";
 
 const isMobile = AFRAME.utils.device.isMobile();
+const isIOS = detectIOS();
 
 // This is a list of regexes that match the microphone labels of HMDs.
 //
@@ -357,7 +358,7 @@ export default class MediaDevicesManager extends EventEmitter {
       } else {
         newStream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: detectIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
+            width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
             frameRate: 30
           }
           //TODO: Capture audio from camera?
