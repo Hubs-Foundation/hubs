@@ -119,7 +119,7 @@ export default class SceneEntryManager {
 
     this.scene.addState("entered");
 
-    APP.mediaDevicesManager.enableMic = !muteOnEntry;
+    APP.mediaDevicesManager.micEnabled = !muteOnEntry;
   };
 
   whenSceneLoaded = callback => {
@@ -132,8 +132,8 @@ export default class SceneEntryManager {
     }
   };
 
-  enterSceneWhenLoaded = enterInVR => {
-    this.whenSceneLoaded(() => this.enterScene(enterInVR));
+  enterSceneWhenLoaded = (enterInVR, muteOnEntry) => {
+    this.whenSceneLoaded(() => this.enterScene(enterInVR, muteOnEntry));
   };
 
   exitScene = () => {
@@ -522,7 +522,6 @@ export default class SceneEntryManager {
       this.mediaDevicesManager.mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
     }
 
-    this.mediaDevicesManager.micShouldBeEnabled = true;
     const connect = async () => {
       await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
       audioEl.play();
