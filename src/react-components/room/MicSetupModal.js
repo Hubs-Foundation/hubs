@@ -16,13 +16,12 @@ import { LevelBar } from "../misc/LevelBar";
 import { Popover } from "../popover/Popover";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { Spinner } from "../misc/Spinner";
+import MediaDevicesManager from "../../utils/media-devices-manager";
 
 export function MicSetupModal({
   className,
-  selectedMicrophone,
   microphoneOptions,
   onChangeMicrophone,
-  selectedSpeaker,
   speakerOptions,
   onChangeSpeaker,
   isMicrophoneEnabled,
@@ -60,7 +59,7 @@ export function MicSetupModal({
                     <Spinner />
                   </div>
                 )}
-                {permissionStatus === PermissionStatus.GRANTED && isMicrophoneEnabled && !isMicrophoneMuted ? (
+                {permissionStatus === PermissionStatus.GRANTED && !isMicrophoneMuted ? (
                   <MicrophoneIcon className={iconStyle} />
                 ) : (
                   <MicrophoneMutedIcon className={iconStyle} />
@@ -74,7 +73,7 @@ export function MicSetupModal({
               )}
             </div>
             <div className={styles.actionContainer}>
-              {permissionStatus === PermissionStatus.GRANTED && isMicrophoneEnabled ? (
+              {permissionStatus === PermissionStatus.GRANTED ? (
                 <>
                   <ToggleInput
                     label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle-v2" defaultMessage="Mute" />}
@@ -131,8 +130,7 @@ export function MicSetupModal({
               )}
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
-              isMicrophoneEnabled &&
-              microphoneOptions?.length > 0 && (
+              MediaDevicesManager.isAudioInputSelectEnabled && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
                     <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
@@ -140,9 +138,8 @@ export function MicSetupModal({
                   <SelectInputField
                     className={styles.selectionInput}
                     buttonClassName={styles.selectionInput}
-                    value={selectedMicrophone}
-                    options={microphoneOptions}
                     onChange={onChangeMicrophone}
+                    {...microphoneOptions}
                   />
                 </div>
               )}
@@ -158,17 +155,16 @@ export function MicSetupModal({
               </Button>
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
-              speakerOptions?.length > 0 && (
+              MediaDevicesManager.isAudioOutputSelectEnabled && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
                     <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
                   </p>
                   <SelectInputField
-                    value={selectedSpeaker}
-                    options={speakerOptions}
                     onChange={onChangeSpeaker}
                     className={styles.selectionInput}
                     buttonClassName={styles.selectionInput}
+                    {...speakerOptions}
                   />
                 </div>
               )}
@@ -190,11 +186,9 @@ MicSetupModal.propTypes = {
   isMicrophoneEnabled: PropTypes.bool,
   isMicrophoneMuted: PropTypes.bool,
   onChangeMicrophoneMuted: PropTypes.func,
-  selectedMicrophone: PropTypes.string,
-  microphoneOptions: PropTypes.array,
+  microphoneOptions: PropTypes.object,
   onChangeMicrophone: PropTypes.func,
-  selectedSpeaker: PropTypes.string,
-  speakerOptions: PropTypes.array,
+  speakerOptions: PropTypes.object,
   onChangeSpeaker: PropTypes.func,
   onEnterRoom: PropTypes.func,
   onBack: PropTypes.func,

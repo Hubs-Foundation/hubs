@@ -208,7 +208,7 @@ class UIRoot extends Component {
 
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.props.exitScene();
-    this.mediaDevicesManager = window.APP.mediaDevicesManager;
+    this.mediaDevicesManager = APP.mediaDevicesManager;
   }
 
   componentDidUpdate(prevProps) {
@@ -326,8 +326,6 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("devicechange", () => {
       this.forceUpdate();
     });
-
-    this.updateMediaPermissions();
 
     const scene = this.props.scene;
 
@@ -558,9 +556,7 @@ class UIRoot extends Component {
 
     if (hasGrantedMic) {
       if (!this.mediaDevicesManager.isMicShared) {
-        await this.mediaDevicesManager.startMicShare({
-          deviceId: this.mediaDevicesManager.preferredMicDeviceId
-        });
+        await this.mediaDevicesManager.startMicShare({});
       }
       this.beginOrSkipAudioSetup();
     } else {
@@ -591,13 +587,7 @@ class UIRoot extends Component {
   };
 
   onRequestMicPermission = async () => {
-    await this.mediaDevicesManager.startMicShare({
-      deviceId: this.mediaDevicesManager.preferredMicDeviceId
-    });
-  };
-
-  updateMediaPermissions = async () => {
-    await this.mediaDevicesManager.updatePermissions();
+    await this.mediaDevicesManager.startMicShare({});
   };
 
   beginOrSkipAudioSetup = () => {

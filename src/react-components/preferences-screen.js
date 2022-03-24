@@ -776,7 +776,7 @@ class PreferencesScreen extends Component {
 
     this.storeUpdated = this.storeUpdated.bind(this);
 
-    this.mediaDevicesManager = window.APP.mediaDevicesManager;
+    this.mediaDevicesManager = APP.mediaDevicesManager;
 
     this.state = {
       category: CATEGORY_AUDIO,
@@ -802,19 +802,25 @@ class PreferencesScreen extends Component {
   }
 
   onMediaDevicesUpdated = () => {
+    const currentSpeakers = this.mediaDevicesManager.selectedSpeakersDeviceId;
+    if (this.props.store.state.preferences.preferredSpeakers !== currentSpeakers) {
+      this.props.store.update({
+        preferences: { preferredSpeakers: currentSpeakers }
+      });
+    }
     this.updateMediaDevices();
   };
 
   updateMediaDevices = () => {
     // Audio devices update
-    const micOptions = this.mediaDevicesManager.micDevices.map(device => ({
+    const micOptions = this.mediaDevicesManager.micDevicesOptions.map(device => ({
       value: device.value,
       text: device.label
     }));
     const preferredMic = { ...this.state.preferredMic };
     preferredMic.options = micOptions;
 
-    const speakersOptions = this.mediaDevicesManager.outputDevices.map(device => ({
+    const speakersOptions = this.mediaDevicesManager.outputDevicesOptions.map(device => ({
       value: device.value,
       text: device.label
     }));
@@ -822,7 +828,7 @@ class PreferencesScreen extends Component {
     preferredSpeakers.options = speakersOptions?.length > 0 ? speakersOptions : [{ value: "none", text: "None" }];
 
     // Video devices update
-    const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
+    const videoOptions = this.mediaDevicesManager.videoDevicesOptions.map(device => ({
       value: device.value,
       text: device.label
     }));
@@ -875,9 +881,7 @@ class PreferencesScreen extends Component {
   storeUpdated() {
     const { preferredMic } = this.props.store.state.preferences;
     if (preferredMic !== this.mediaDevicesManager.selectedMicDeviceId) {
-      this.mediaDevicesManager
-        .startMicShare({ deviceId: preferredMic, updatePrefs: false })
-        .then(this.updateMediaDevices);
+      this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
     }
   }
 
@@ -914,7 +918,6 @@ class PreferencesScreen extends Component {
       });
     }
 
-    const prefSchema = this.props.store.schema.definitions.preferences.properties;
     const DEFINITIONS = new Map([
       [
         CATEGORY_TOUCHSCREEN,
@@ -977,7 +980,7 @@ class PreferencesScreen extends Component {
       [
         CATEGORY_AUDIO,
         [
-          this.state.preferredMic,
+          ...(MediaDevicesManager.isAudioInputSelectEnabled ? [this.state.preferredMic] : []),
           ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           {
             key: "muteMicOnEntry",

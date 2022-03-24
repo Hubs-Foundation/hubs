@@ -778,7 +778,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
-  window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);
+  APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);
 
   const performConditionalSignIn = async (predicate, action, signInMessage, onFailure) => {
     if (predicate()) return action();

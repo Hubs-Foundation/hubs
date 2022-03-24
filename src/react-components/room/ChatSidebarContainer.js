@@ -187,7 +187,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
       typingTimeoutRef.current = setTimeout(() => window.APP.hubChannel.endTyping(), 500);
       window.APP.hubChannel.beginTyping();
     },
-    [scene, sendMessage, setMessage, onClose]
+    [sendMessage, setMessage, onClose]
   );
 
   const onSendMessage = useCallback(

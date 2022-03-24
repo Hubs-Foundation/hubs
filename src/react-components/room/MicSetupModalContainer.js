@@ -15,8 +15,8 @@ export function MicSetupModalContainer({ scene, ...rest }) {
   });
   const { onMicMuted } = rest;
   const { isMicEnabled, isMicMuted, toggleMute, permissionStatus } = useMicrophoneStatus(scene);
-  const { micDeviceChanged, selectedMicDeviceId, micDevices } = useMicrophone(scene);
-  const { speakerDeviceChanged, selectedSpeakersDeviceId, speakerDevices } = useSpeakers(scene);
+  const { micDeviceChanged, micDevices } = useMicrophone(scene);
+  const { speakerDeviceChanged, speakerDevices } = useSpeakers();
   const { playSound, soundVolume } = useSound({
     scene,
     sound: SOUND_SPEAKER_TONE
@@ -37,8 +37,6 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       isMicrophoneEnabled={isMicEnabled}
       isMicrophoneMuted={isMicMuted}
       permissionStatus={permissionStatus}
-      selectedMicrophone={selectedMicDeviceId}
-      selectedSpeaker={selectedSpeakersDeviceId}
       microphoneOptions={micDevices}
       speakerOptions={speakerDevices}
       onChangeMicrophone={micDeviceChanged}

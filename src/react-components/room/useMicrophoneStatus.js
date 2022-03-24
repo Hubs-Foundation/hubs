@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
 
 export function useMicrophoneStatus(scene) {
-  const mediaDevicesManager = window.APP.mediaDevicesManager;
+  const mediaDevicesManager = APP.mediaDevicesManager;
   const [isMicMuted, setIsMicMuted] = useState(!mediaDevicesManager.isMicEnabled);
-  const [isMicEnabled, setIsMicEnabled] = useState(window.APP.mediaDevicesManager.isMicShared);
+  const [isMicEnabled, setIsMicEnabled] = useState(APP.mediaDevicesManager.isMicShared);
   const [permissionStatus, setPermissionsStatus] = useState(
     mediaDevicesManager.getPermissionsStatus(MediaDevices.MICROPHONE)
   );
