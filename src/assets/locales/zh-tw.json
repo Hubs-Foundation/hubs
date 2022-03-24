@@ -21,6 +21,8 @@
 	"audio-debug-view.media.outerGain": "音效範圍外的增量",
 	"audio-debug-view.media.refDistance": "參考距離",
 	"audio-debug-view.media.rolloffFactor": "漸變效果",
+	"preferences-screen.preference.cursor-size": "光標大小",
+	"audio-toolbar-popover.title": "聲音",
 	"auto-exit-warning-modal.message": "會話將在 {secondsRemaining} 秒後結束",
 	"auto-exit-warning-modal.reason.concurrent-session": "你已經開始了新的會話",
 	"auto-exit-warning-modal.reason.idle": "你已經長時間沒有進行操作.",
