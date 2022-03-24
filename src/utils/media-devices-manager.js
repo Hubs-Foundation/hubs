@@ -357,7 +357,7 @@ export default class MediaDevicesManager extends EventEmitter {
       } else {
         newStream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: isIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
+            width: detectIOS ? { max: 1280 } : { max: 1280, ideal: 720 },
             frameRate: 30
           }
           //TODO: Capture audio from camera?
