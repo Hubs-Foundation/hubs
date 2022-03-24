@@ -290,9 +290,7 @@ export default class MediaDevicesManager extends EventEmitter {
       this.audioTrack = newStream.getAudioTracks()[0];
       this.audioTrack.addEventListener("ended", async () => {
         this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
-        if (this._permissionsStatus[MediaDevices.MICROPHONE] === PermissionStatus.GRANTED) {
-          this.startMicShare({ unmute: this.isMicEnabled });
-        }
+        this.startMicShare({ unmute: this.isMicEnabled });
       });
 
       if (/Oculus/.test(navigator.userAgent)) {
