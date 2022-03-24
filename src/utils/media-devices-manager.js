@@ -238,7 +238,14 @@ export default class MediaDevicesManager extends EventEmitter {
     if (this.audioTrack) {
       const micDeviceId = this.deviceIdForMicDeviceLabel(this.micLabelForAudioTrack(this.audioTrack));
       if (micDeviceId) {
-        updatePrefs && this._store.update({ preferences: { preferredMic: micDeviceId } });
+        if (updatePrefs) {
+          this._store.update({
+            preferences: {
+              preferredMic: micDeviceId,
+              preferredSpeakers: this.selectedSpeakersDeviceId
+            }
+          });
+        }
         console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
       }
     } else {
