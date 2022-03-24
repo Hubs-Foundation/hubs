@@ -802,6 +802,12 @@ class PreferencesScreen extends Component {
   }
 
   onMediaDevicesUpdated = () => {
+    const currentSpeakers = this.mediaDevicesManager.selectedSpeakersDeviceId;
+    if (this.props.store.state.preferences.preferredSpeakers !== currentSpeakers) {
+      this.props.store.update({
+        preferences: { preferredSpeakers: currentSpeakers }
+      });
+    }
     this.updateMediaDevices();
   };
 
