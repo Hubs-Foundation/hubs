@@ -208,7 +208,7 @@ class UIRoot extends Component {
 
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.props.exitScene();
-    this.mediaDevicesManager = window.APP.mediaDevicesManager;
+    this.mediaDevicesManager = APP.mediaDevicesManager;
   }
 
   componentDidUpdate(prevProps) {

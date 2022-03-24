@@ -776,7 +776,7 @@ class PreferencesScreen extends Component {
 
     this.storeUpdated = this.storeUpdated.bind(this);
 
-    this.mediaDevicesManager = window.APP.mediaDevicesManager;
+    this.mediaDevicesManager = APP.mediaDevicesManager;
 
     this.state = {
       category: CATEGORY_AUDIO,

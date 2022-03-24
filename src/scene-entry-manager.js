@@ -42,7 +42,7 @@ export default class SceneEntryManager {
       console.log("Scene is loaded so setting up controllers");
       this.rightCursorController.components["cursor-controller"].enabled = false;
       this.leftCursorController.components["cursor-controller"].enabled = false;
-      this.mediaDevicesManager = window.APP.mediaDevicesManager;
+      this.mediaDevicesManager = APP.mediaDevicesManager;
       this._setupBlocking();
     });
   };

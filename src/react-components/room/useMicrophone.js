@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
 
 export function useMicrophone(scene) {
-  const mediaDevicesManager = window.APP.mediaDevicesManager;
+  const mediaDevicesManager = APP.mediaDevicesManager;
   const [micDevices, setMicDevices] = useState({
     value: mediaDevicesManager.selectedMicDeviceId,
     options: mediaDevicesManager.micDevicesOptions

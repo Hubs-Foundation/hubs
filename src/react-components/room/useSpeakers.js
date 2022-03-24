@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
 
 export function useSpeakers() {
-  const mediaDevicesManager = window.APP.mediaDevicesManager;
+  const mediaDevicesManager = APP.mediaDevicesManager;
   const [speakerDevices, setSpeakerDevices] = useState({
     value: mediaDevicesManager.selectedSpeakersDeviceId,
     options: mediaDevicesManager.outputDevicesOptions
