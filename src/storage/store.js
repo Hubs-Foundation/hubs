@@ -10,6 +10,7 @@ const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
+import { NO_DEVICE_ID } from "../utils/media-devices-utils.js";
 
 const defaultMaterialQuality = (function() {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
@@ -95,9 +96,10 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         shouldPromptForRefresh: { type: "bool", default: false },
-        preferredMic: { type: "string", default: "Default" },
-        preferredSpeakers: { type: "string", default: "Default" },
-        preferredCamera: { type: "string", default: "none" },
+        // Preferred media will be set dynamically
+        preferredMic: { type: "string", default: NO_DEVICE_ID },
+        preferredSpeakers: { type: "string", default: NO_DEVICE_ID },
+        preferredCamera: { type: "string", default: NO_DEVICE_ID },
         muteMicOnEntry: { type: "bool", default: false },
         disableLeftRightPanning: { type: "bool", default: false },
         audioNormalization: { type: "bool", default: 0.0 },
