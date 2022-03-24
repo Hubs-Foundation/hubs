@@ -890,17 +890,11 @@ class UIRoot extends Component {
   };
 
   renderAudioSetupPanel = () => {
-    this.mediaDevicesManager.micShouldBeEnabled = !this.props.store.state.preferences.muteMicOnEntry;
     // TODO: Show HMD mic not chosen warning
     return (
       <MicSetupModalContainer
         scene={this.props.scene}
         onEnterRoom={this.onAudioReadyButton}
-        onMicMuted={() =>
-          this.props.store.update({
-            preferences: { muteMicOnEntry: !this.props.store.state.preferences.muteMicOnEntry }
-          })
-        }
         onBack={() => this.props.history.goBack()}
       />
     );
