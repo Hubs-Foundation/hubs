@@ -918,7 +918,6 @@ class PreferencesScreen extends Component {
       });
     }
 
-    const prefSchema = this.props.store.schema.definitions.preferences.properties;
     const DEFINITIONS = new Map([
       [
         CATEGORY_TOUCHSCREEN,
