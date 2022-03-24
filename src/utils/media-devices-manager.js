@@ -115,11 +115,6 @@ export default class MediaDevicesManager extends EventEmitter {
       : this.deviceIdForMicDeviceLabel(this.selectedMicLabel);
   }
 
-  get preferredMicDeviceId() {
-    const { preferredMic } = this._store.state.preferences;
-    return preferredMic !== NO_DEVICE_ID ? preferredMic : undefined;
-  }
-
   get selectedSpeakersDeviceId() {
     const { preferredSpeakers } = this._store.state.preferences;
     const exists = this._outputDevices.some(device => {
@@ -227,7 +222,8 @@ export default class MediaDevicesManager extends EventEmitter {
     console.log("Starting microphone sharing");
 
     if (!deviceId) {
-      deviceId = this.preferredMicDeviceId;
+      const { preferredMic } = this._store.state.preferences;
+      deviceId = preferredMic !== NO_DEVICE_ID ? preferredMic : undefined;
     }
     let constraints = { audio: {} };
     if (deviceId) {
