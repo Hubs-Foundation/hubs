@@ -221,7 +221,7 @@ AFRAME.registerComponent("bad-example", {
 
 ### Avoid using aframe's THREE property components
 
-Do not use aframe's `position`, `rotation`, `scaale`, or `visibile` components, and instead just directly modify the Object3D properties. These add an additional layer of indirection and performance overhead.
+Do not use aframe's `position`, `rotation`, `scale`, or `visible` components, and instead just directly modify the Object3D properties. These add an additional layer of indirection and performance overhead.
 
 Don't:
 ```js
