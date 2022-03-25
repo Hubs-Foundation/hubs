@@ -66,7 +66,7 @@ class Foo {
 
 ### Only store things on `this` that are actually persistent state.
 
-If you don't care about the state between frames and are only re-using it for [GC reasons](#dont-allocate-objects-every-frame))  use a closure or variable defined at the root of the file instead.
+If you don't care about the state between frames and are only re-using it for [GC reasons](#dont-allocate-objects-every-frame)  use a closure or variable defined at the root of the file instead.
 
 Don't:
 ```js
