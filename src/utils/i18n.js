@@ -8,7 +8,7 @@ const defaultLocaleData = {
   "contact-email": "app@company.com",
   "company-name": "Company",
   "share-hashtag": "#app",
-  "app-description": "Gather share and collaborate together in a virtual, private and safe space",
+  "app-description": "Gather share and collaborate together in a virtual, private and safe space. (Modified Custom Client, 3/20/2022)",
   "app-tagline": "Private social VR in your web browser"
 };
 

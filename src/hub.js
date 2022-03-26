@@ -188,6 +188,7 @@ import "./systems/listed-media";
 import "./systems/linked-media";
 import "./systems/audio-debug-system";
 import "./systems/audio-gain-system";
+import "./systems/research-logger";
 
 import "./gltf-component-mappings";
 
@@ -236,6 +237,7 @@ import "./components/nav-mesh-helper";
 
 import "./components/tools/pen";
 import "./components/tools/pen-laser";
+
 import "./components/tools/networked-drawing";
 import "./components/tools/drawing-manager";
 
