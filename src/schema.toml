@@ -71,6 +71,8 @@ theme.notice-background-color = { category = "theme", type = "color", name = "Se
 theme.notice-text-color = { category = "theme", type = "color", name = "Secondary Text Color", description = "[deprecated] Notice and indicator text color.", deprecated="true" }
 theme.notice-widget-color = { category = "theme", type = "color", name = "Secondary Widget Color", description = "[deprecated] Notice and indicator UI widget color.", deprecated="true" }
 theme.favorited-color = { category = "theme", type = "color", name = "Favorited Color", description = "[deprecated] Favorited Color", deprecated = "true" }
+theme.nametag-color = { category = "theme", type = "color", name = "Nametag Color", description = "Avatar nametag color." }
+theme.nametag-text-color = { category = "theme", type = "color", name = "Nametag Color", description = "Avatar nametag text color." }
 theme.themes = { category = "theme", type = "json", name = "Themes", description = "A json array describing custom client themes." }
 
 links.terms_of_use = { category = "links", type = "string", name = "Terms of Use", description = "Link to your terms of use page."}

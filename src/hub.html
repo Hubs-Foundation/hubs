@@ -86,6 +86,9 @@
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
             <img id="cursor-image" crossorigin="anonymous" src="./assets/images/cursor.svg">
+            <img id="nametag" crossorigin="anonymous" src="./assets/hud/nametag.9.png">
+            <img id="nametag-border" crossorigin="anonymous" src="./assets/hud/nametag-border.9.png">
+            <img id="hand-raised" crossorigin="anonymous" src="./assets/hud/hand-raised.png">
 
             <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
             <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
@@ -127,6 +130,44 @@
 
                     <a-entity class="right-controller" matrix-auto-update></a-entity>
 
+                    <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" billboard="onlyY: true;">
+                        <a-entity class="nametag-background" mixin="nametag-background-mixin" slice9="width: 1">
+                            <a-entity class="nametag-status-border" mixin="nametag-status-border-mixin" visible="false" slice9="width: 1"></a-entity>
+                            <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0.025 0.001"></a-entity>
+                            <a-plane class="nametag-volume" visible="false" position="0 -0.075 0.001" material="shader:flat; color:#7ED320;" height="0.025" width="1"></a-plane>
+                            <a-entity class="nametag-typing" position="0 -0.075 0.001">
+                                <a-circle position="-0.07 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                <a-circle position="-0.035 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                <a-circle position="0 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                <a-circle position="0.035 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                                <a-circle position="0.07 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
+                            </a-entity>
+                        </a-entity>
+                        <a-entity
+                            is-not-remote-hover-target
+                            class="recordingBadge"
+                            sprite="name: recording-badge.png"
+                            scale="0.10 0.10 0.10"
+                            position="0 0.25 0.001"
+                            visible="false"
+                        ></a-entity>
+                        <a-entity
+                            is-not-remote-hover-target
+                            class="modBadge"
+                            sprite="name: mod-badge.png"
+                            scale="0.10 0.10 0.10"
+                            position="0 0.25 0.001"
+                            visible="false"
+                        ></a-entity>
+                        <a-entity
+                            class="identityName"
+                            text="side: double; textAlign: center; color: #ddd; fontSize: 0.1; outlineWidth: 1%;"
+                            visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
+                            position="0 0.4 0"
+                        ></a-entity>
+                        <a-image class="hand-raised-id" scale="0.2 0.2 0.2" position="0 -0.3 0.001" src="#hand-raised" visible="false" material="alphaTest:0.1;"></a-image>
+                    </a-entity>
+
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="AvatarRoot">
                             <a-entity
@@ -134,40 +175,7 @@
                                 hand-pose__left
                                 hand-pose__right
                                 networked-audio-analyser
-                            ></a-entity>
-                        </template>
-
-                        <template data-name="Neck">
-                            <a-entity tags="ignoreSpaceBubble: true;">
-                                <a-entity
-                                    billboard="onlyY: true;"
-                                    class="nametag"
-                                    text="side: double; textAlign: center; color: #ddd; fontSize: 0.3; outlineWidth: 1%;"
-                                    position="0 1 0"
-                                ></a-entity>
-                                <a-entity
-                                    billboard="onlyY: true;"
-                                    class="identityName"
-                                    text="side: double; textAlign: center; color: #ddd; fontSize: 0.15; outlineWidth: 1%;"
-                                    visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
-                                    position="0 0.8 0"
-                                ></a-entity>
-                                <a-entity
-                                    billboard="onlyY: true;"
-                                    is-not-remote-hover-target
-                                    class="recordingBadge"
-                                    sprite="name: recording-badge.png"
-                                    scale="0.10 0.10 0.10"
-                                    position="0 1.2 -0.02"
-                                ></a-entity>
-                                <a-entity
-                                    billboard="onlyY: true;"
-                                    is-not-remote-hover-target
-                                    class="modBadge"
-                                    sprite="name: mod-badge.png"
-                                    scale="0.10 0.10 0.10"
-                                    position="0 1.2 -0.02"
-                                ></a-entity>
+                            >
                             </a-entity>
                         </template>
 
@@ -177,11 +185,11 @@
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
                                 <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui">
                                     <a-entity billboard="onlyY: true;" class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
-                                        <a-entity class="avatar-volume-label" text="value: 0%; anchorX: center; textAlign: center; color: #ff3464; letterSpacing: 0.08;" text-raycast-hack position="0.0 0.675 0.35" scale="1.25 1.25 1.25"></a-entity>
-                                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.675 0.35" class="avatar-volume-down-button">
+                                        <a-entity class="avatar-volume-label" text="value: 0%; anchorX: center; textAlign: center; color: #ff3464; letterSpacing: 0.08;" text-raycast-hack position="0.0 0.45 0.35" scale="1.25 1.25 1.25"></a-entity>
+                                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.45 0.35" class="avatar-volume-down-button">
                                             <a-entity text="value: -; anchorX: center; textAlign: center; color: #ccc;" text-raycast-hack position="0 0 0.001" scale="0.85 0.85 0.85"></a-entity>
                                         </a-entity>
-                                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.45 0.675 0.35" class="avatar-volume-up-button">
+                                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.45 0.45 0.35" class="avatar-volume-up-button">
                                             <a-entity text="value: +; anchorX: center; textAlign: center; color: #ccc;" text-raycast-hack position="0 0 0.001" scale="0.85 0.85 0.85"></a-entity>
                                         </a-entity>
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" block-button position="0 0 .35">
@@ -957,6 +965,33 @@
                 </a-entity>
             </template>
 
+            <a-mixin id="nametag-background-mixin"
+                slice9="
+                    width: 0.45;
+                    height: 0.2;
+                    left: 64;
+                    top: 64;
+                    right: 66;
+                    bottom: 66;
+                    transparent: true;
+                    opacity: 0.5;
+                    alphaTest: 0.1;
+                    src: #nametag"
+            ></a-mixin>
+
+            <a-mixin id="nametag-status-border-mixin"
+                slice9="
+                    width: 0.45;
+                    height: 0.2;
+                    left: 64;
+                    top: 64;
+                    right: 66;
+                    bottom: 66;
+                    transparent: false;
+                    alphaTest: 0.1;
+                    src: #nametag-border"
+            ></a-mixin>
+
             <a-mixin id="rounded-text-button"
                 slice9="
                     width: 0.45;
@@ -1262,11 +1297,6 @@
                     ></a-entity>
                 </template>
 
-                <template data-name="Neck">
-                    <a-entity>
-                        <a-entity class="nametag" visible="false" text ></a-entity>
-                    </a-entity>
-                </template>
                 <template data-name="Spine">
                     <a-entity>
                         <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>

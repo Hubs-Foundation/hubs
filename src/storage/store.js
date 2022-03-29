@@ -10,8 +10,9 @@ const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
+import { NO_DEVICE_ID } from "../utils/media-devices-utils.js";
 
-export const defaultMaterialQualitySetting = (function() {
+const defaultMaterialQuality = (function() {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
 
   // HACK: AFRAME is not available on all pages, so we catch the ReferenceError.
@@ -33,6 +34,9 @@ export const defaultMaterialQualitySetting = (function() {
 
   return "high";
 })();
+
+//workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081 : disable echoCancellation, noiseSuppression, autoGainControl
+const isFirefoxReality = window.AFRAME?.utils.device.isMobileVR() && navigator.userAgent.match(/Firefox/);
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
@@ -91,51 +95,54 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        shouldPromptForRefresh: { type: "bool" },
-        preferredMic: { type: "string" },
-        preferredSpeakers: { type: "string" },
-        preferredCamera: { type: "string" },
-        muteMicOnEntry: { type: "bool" },
-        disableLeftRightPanning: { type: "bool" },
-        audioNormalization: { type: "bool" },
-        invertTouchscreenCameraMove: { type: "bool" },
-        enableOnScreenJoystickLeft: { type: "bool" },
-        enableOnScreenJoystickRight: { type: "bool" },
-        enableGyro: { type: "bool" },
-        onlyShowNametagsInFreeze: { type: "bool" },
-        animateWaypointTransitions: { type: "bool" },
-        showFPSCounter: { type: "bool" },
-        allowMultipleHubsInstances: { type: "bool" },
-        disableIdleDetection: { type: "bool" },
-        fastRoomSwitching: { type: "bool" },
-        lazyLoadSceneMedia: { type: "bool" },
-        preferMobileObjectInfoPanel: { type: "bool" },
-        maxResolutionWidth: { type: "number" },
-        maxResolutionHeight: { type: "number" },
-        globalVoiceVolume: { type: "number" },
-        globalMediaVolume: { type: "number" },
-        globalSFXVolume: { type: "number" },
-        snapRotationDegrees: { type: "number" },
-        materialQualitySetting: { type: "string" },
-        enableDynamicShadows: { type: "bool" },
-        disableSoundEffects: { type: "bool" },
-        disableMovement: { type: "bool" },
-        disableBackwardsMovement: { type: "bool" },
-        disableStrafing: { type: "bool" },
-        disableTeleporter: { type: "bool" },
-        disableAutoPixelRatio: { type: "bool" },
-        movementSpeedModifier: { type: "number" },
-        disableEchoCancellation: { type: "bool" },
-        disableNoiseSuppression: { type: "bool" },
-        disableAutoGainControl: { type: "bool" },
-        locale: { type: "string" },
-        showRtcDebugPanel: { type: "bool" },
-        showAudioDebugPanel: { type: "bool" },
-        enableAudioClipping: { type: "bool" },
-        audioClippingThreshold: { type: "number" },
-        theme: { type: "string" },
-        avatarVoiceLevels: { type: "object" },
-        cursorSize: { type: "number" }
+        shouldPromptForRefresh: { type: "bool", default: false },
+        // Preferred media will be set dynamically
+        preferredMic: { type: "string", default: NO_DEVICE_ID },
+        preferredSpeakers: { type: "string", default: NO_DEVICE_ID },
+        preferredCamera: { type: "string", default: NO_DEVICE_ID },
+        muteMicOnEntry: { type: "bool", default: false },
+        disableLeftRightPanning: { type: "bool", default: false },
+        audioNormalization: { type: "bool", default: 0.0 },
+        invertTouchscreenCameraMove: { type: "bool", default: true },
+        enableOnScreenJoystickLeft: { type: "bool", default: false },
+        enableOnScreenJoystickRight: { type: "bool", default: false },
+        enableGyro: { type: "bool", default: true },
+        animateWaypointTransitions: { type: "bool", default: true },
+        showFPSCounter: { type: "bool", default: false },
+        allowMultipleHubsInstances: { type: "bool", default: false },
+        disableIdleDetection: { type: "bool", default: false },
+        fastRoomSwitching: { type: "bool", default: false },
+        lazyLoadSceneMedia: { type: "bool", default: false },
+        preferMobileObjectInfoPanel: { type: "bool", default: false },
+        // if unset, maxResolution = screen resolution
+        maxResolutionWidth: { type: "number", default: undefined },
+        maxResolutionHeight: { type: "number", default: undefined },
+        globalVoiceVolume: { type: "number", default: 100 },
+        globalMediaVolume: { type: "number", default: 100 },
+        globalSFXVolume: { type: "number", default: 100 },
+        snapRotationDegrees: { type: "number", default: 45 },
+        materialQualitySetting: { type: "string", default: defaultMaterialQuality },
+        enableDynamicShadows: { type: "bool", default: false },
+        disableSoundEffects: { type: "bool", default: false },
+        disableMovement: { type: "bool", default: false },
+        disableBackwardsMovement: { type: "bool", default: false },
+        disableStrafing: { type: "bool", default: false },
+        disableTeleporter: { type: "bool", default: false },
+        disableAutoPixelRatio: { type: "bool", default: false },
+        movementSpeedModifier: { type: "number", default: 1 },
+        disableEchoCancellation: { type: "bool", default: isFirefoxReality },
+        disableNoiseSuppression: { type: "bool", default: isFirefoxReality },
+        disableAutoGainControl: { type: "bool", default: isFirefoxReality },
+        locale: { type: "string", default: "browser" },
+        showRtcDebugPanel: { type: "bool", default: false },
+        showAudioDebugPanel: { type: "bool", default: false },
+        enableAudioClipping: { type: "bool", default: false },
+        audioClippingThreshold: { type: "number", default: 0.015 },
+        theme: { type: "string", default: "Browser Default" },
+        cursorSize: { type: "number", default: 1 },
+        nametagVisibility: { type: "string", default: "showAll" },
+        nametagVisibilityDistance: { type: "number", default: 5 },
+        avatarVoiceLevels: { type: "object" }
       }
     },
 
@@ -222,6 +229,8 @@ export default class Store extends EventTarget {
   constructor() {
     super();
 
+    this._preferences = {};
+
     if (localStorage.getItem(LOCAL_STORE_KEY) === null) {
       localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({}));
     }
@@ -303,7 +312,18 @@ export default class Store extends EventTarget {
 
   get state() {
     if (!this.hasOwnProperty(STORE_STATE_CACHE_KEY)) {
-      this[STORE_STATE_CACHE_KEY] = JSON.parse(localStorage.getItem(LOCAL_STORE_KEY));
+      const state = (this[STORE_STATE_CACHE_KEY] = JSON.parse(localStorage.getItem(LOCAL_STORE_KEY)));
+      if (!state.preferences) state.preferences = {};
+      this._preferences = { ...state.preferences }; // cache prefs without injected defaults
+      // inject default values
+      for (const [key, props] of Object.entries(SCHEMA.definitions.preferences.properties)) {
+        if (!props.hasOwnProperty("default")) continue;
+        if (!state.preferences.hasOwnProperty(key)) {
+          state.preferences[key] = props.default;
+        } else if (state.preferences[key] === props.default) {
+          delete this._preferences[key];
+        }
+      }
     }
 
     return this[STORE_STATE_CACHE_KEY];
@@ -362,7 +382,7 @@ export default class Store extends EventTarget {
   }
 
   update(newState, mergeOpts) {
-    const finalState = merge(this.state, newState, mergeOpts);
+    const finalState = merge({ ...this.state, preferences: this._preferences }, newState, mergeOpts);
     const { valid, errors } = validator.validate(finalState, SCHEMA);
 
     // Cleanup unsupported properties
@@ -371,6 +391,20 @@ export default class Store extends EventTarget {
         console.error(`Removing invalid preference from store: ${error.message}`);
         delete error.instance[error.argument];
       });
+    }
+
+    if (newState.preferences) {
+      // clear preference if equal to default value so that, when client is updated with different defaults,
+      // new defaults will apply without user action
+      for (const [key, value] of Object.entries(finalState.preferences)) {
+        if (
+          SCHEMA.definitions.preferences.properties[key]?.hasOwnProperty("default") &&
+          value === SCHEMA.definitions.preferences.properties[key].default
+        ) {
+          delete finalState.preferences[key];
+        }
+      }
+      this._preferences = finalState.preferences;
     }
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
@@ -384,11 +418,7 @@ export default class Store extends EventTarget {
     return finalState;
   }
 
-  get materialQualitySetting() {
-    if (this.state.preferences.materialQualitySetting) {
-      return this.state.preferences.materialQualitySetting;
-    }
-
-    return defaultMaterialQualitySetting;
+  get schema() {
+    return SCHEMA;
   }
 }

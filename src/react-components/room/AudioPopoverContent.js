@@ -12,16 +12,15 @@ import { LevelBar } from "../misc/LevelBar";
 import { ToggleInput } from "../input/ToggleInput";
 import { Divider } from "../layout/Divider";
 import { Button } from "../input/Button";
+import MediaDevicesManager from "../../utils/media-devices-manager";
 
 export const AudioPopoverContent = ({
   micLevel,
   microphoneOptions,
-  selectedMicrophone,
   onChangeMicrophone,
   isMicrophoneEnabled,
   isMicrophoneMuted,
   onChangeMicrophoneMuted,
-  selectedSpeaker,
   speakerOptions,
   onChangeSpeaker,
   speakerLevel,
@@ -33,13 +32,14 @@ export const AudioPopoverContent = ({
       <p style={{ alignSelf: "start" }}>
         <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
       </p>
-      <SelectInputField
-        className={styles.selectionInput}
-        buttonClassName={styles.selectionInput}
-        value={selectedMicrophone}
-        options={microphoneOptions}
-        onChange={onChangeMicrophone}
-      />
+      {MediaDevicesManager.isAudioInputSelectEnabled && (
+        <SelectInputField
+          className={styles.selectionInput}
+          buttonClassName={styles.selectionInput}
+          onChange={onChangeMicrophone}
+          {...microphoneOptions}
+        />
+      )}
       <Row noWrap>
         {isMicrophoneEnabled && !isMicrophoneMuted ? (
           <MicrophoneIcon className={iconStyle} style={{ marginRight: "12px" }} />
@@ -59,13 +59,12 @@ export const AudioPopoverContent = ({
       <p style={{ alignSelf: "start" }}>
         <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
       </p>
-      {speakerOptions?.length > 0 && (
+      {MediaDevicesManager.isAudioOutputSelectEnabled && (
         <SelectInputField
           className={styles.selectionInput}
           buttonClassName={styles.selectionInput}
-          value={selectedSpeaker}
-          options={speakerOptions}
           onChange={onChangeSpeaker}
+          {...speakerOptions}
         />
       )}
       <Row noWrap>
@@ -87,10 +86,8 @@ AudioPopoverContent.propTypes = {
   isMicrophoneEnabled: PropTypes.bool,
   isMicrophoneMuted: PropTypes.bool,
   onChangeMicrophoneMuted: PropTypes.func,
-  selectedMicrophone: PropTypes.string,
-  microphoneOptions: PropTypes.array,
+  microphoneOptions: PropTypes.object,
   onChangeMicrophone: PropTypes.func,
-  selectedSpeaker: PropTypes.string,
-  speakerOptions: PropTypes.array,
+  speakerOptions: PropTypes.object,
   onChangeSpeaker: PropTypes.func
 };

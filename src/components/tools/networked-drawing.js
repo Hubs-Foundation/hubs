@@ -60,7 +60,7 @@ AFRAME.registerComponent("networked-drawing", {
 
     let material = new THREE.MeshStandardMaterial(options);
 
-    const quality = window.APP.store.materialQualitySetting;
+    const quality = window.APP.store.state.preferences.materialQualitySetting;
     material = convertStandardMaterial(material, quality);
 
     this.sharedBufferGeometryManager = new SharedBufferGeometryManager();

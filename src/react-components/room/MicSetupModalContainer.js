@@ -8,26 +8,26 @@ import { SOUND_SPEAKER_TONE } from "../../systems/sound-effects-system";
 import { useSpeakers } from "./useSpeakers";
 import { useCallback } from "react";
 import { useVolumeMeter } from "../misc/useVolumeMeter";
+import { useState } from "react";
 
 export function MicSetupModalContainer({ scene, ...rest }) {
   const { volume: micVolume } = useVolumeMeter({
     analyser: scene.systems["hubs-systems"].audioSystem.outboundAnalyser
   });
-  const { onMicMuted } = rest;
-  const { isMicEnabled, isMicMuted, toggleMute, permissionStatus } = useMicrophoneStatus(scene);
-  const { micDeviceChanged, selectedMicDeviceId, micDevices } = useMicrophone(scene);
-  const { speakerDeviceChanged, selectedSpeakersDeviceId, speakerDevices } = useSpeakers(scene);
+  const { isMicEnabled, permissionStatus } = useMicrophoneStatus(scene);
+  const { micDeviceChanged, micDevices } = useMicrophone(scene);
+  const { speakerDeviceChanged, speakerDevices } = useSpeakers();
   const { playSound, soundVolume } = useSound({
     scene,
     sound: SOUND_SPEAKER_TONE
   });
-  const onChangeMicrophoneMuted = useCallback(
-    () => {
-      toggleMute();
-      onMicMuted();
-    },
-    [toggleMute, onMicMuted]
-  );
+  const [isMicMutedOnEntry, setIsMicMutedOnEntry] = useState(APP.store.state.preferences["muteMicOnEntry"]);
+  const onChangeMicrophoneMuted = useCallback(({ target: { checked: muted } }) => {
+    setIsMicMutedOnEntry(muted);
+    APP.store.update({
+      preferences: { muteMicOnEntry: muted }
+    });
+  }, []);
 
   return (
     <MicSetupModal
@@ -35,10 +35,8 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       speakerLevel={soundVolume}
       onPlaySound={playSound}
       isMicrophoneEnabled={isMicEnabled}
-      isMicrophoneMuted={isMicMuted}
+      isMicrophoneMuted={isMicMutedOnEntry}
       permissionStatus={permissionStatus}
-      selectedMicrophone={selectedMicDeviceId}
-      selectedSpeaker={selectedSpeakersDeviceId}
       microphoneOptions={micDevices}
       speakerOptions={speakerDevices}
       onChangeMicrophone={micDeviceChanged}

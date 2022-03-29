@@ -2,39 +2,51 @@ import { useState, useEffect, useCallback } from "react";
 import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
 
 export function useMicrophone(scene) {
-  const mediaDevicesManager = window.APP.mediaDevicesManager;
-  const [selectedMicDeviceId, setSelectedMicDeviceId] = useState(mediaDevicesManager.selectedMicDeviceId);
-  const [micDevices, setMicDevices] = useState(mediaDevicesManager.micDevices);
+  const mediaDevicesManager = APP.mediaDevicesManager;
+  const [micDevices, setMicDevices] = useState({
+    value: mediaDevicesManager.selectedMicDeviceId,
+    options: mediaDevicesManager.micDevicesOptions
+  });
 
   useEffect(
     () => {
       const onMicEnabled = () => {
-        setSelectedMicDeviceId(mediaDevicesManager.selectedMicDeviceId);
-        setMicDevices(mediaDevicesManager.micDevices);
+        setMicDevices({
+          value: mediaDevicesManager.selectedMicDeviceId,
+          options: mediaDevicesManager.micDevicesOptions
+        });
       };
       const onMicDisabled = () => {
-        setSelectedMicDeviceId(mediaDevicesManager.selectedMicDeviceId);
-        setMicDevices(mediaDevicesManager.micDevices);
+        setMicDevices({
+          value: mediaDevicesManager.selectedMicDeviceId,
+          options: mediaDevicesManager.micDevicesOptions
+        });
       };
       scene.addEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, onMicDisabled);
       scene.addEventListener(MediaDevicesEvents.MIC_SHARE_STARTED, onMicEnabled);
 
       const onPermissionsChanged = ({ mediaDevice }) => {
         if (mediaDevice === MediaDevices.MICROPHONE) {
-          setSelectedMicDeviceId(mediaDevicesManager.selectedMicDeviceId);
-          setMicDevices(mediaDevicesManager.micDevices);
+          setMicDevices({
+            value: mediaDevicesManager.selectedMicDeviceId,
+            options: mediaDevicesManager.micDevicesOptions
+          });
         }
       };
       mediaDevicesManager.on(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
 
       const onDeviceChange = () => {
-        setSelectedMicDeviceId(mediaDevicesManager.selectedMicDeviceId);
-        setMicDevices(mediaDevicesManager.micDevices);
+        setMicDevices({
+          value: mediaDevicesManager.selectedMicDeviceId,
+          options: mediaDevicesManager.micDevicesOptions
+        });
       };
       mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, onDeviceChange);
 
-      setSelectedMicDeviceId(mediaDevicesManager.selectedMicDeviceId);
-      setMicDevices(mediaDevicesManager.micDevices);
+      setMicDevices({
+        value: mediaDevicesManager.selectedMicDeviceId,
+        options: mediaDevicesManager.micDevicesOptions
+      });
 
       return () => {
         scene.removeEventListener(MediaDevicesEvents.MIC_SHARE_ENDED, onMicDisabled);
@@ -43,13 +55,15 @@ export function useMicrophone(scene) {
         mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, onDeviceChange);
       };
     },
-    [setSelectedMicDeviceId, setMicDevices, scene, mediaDevicesManager]
+    [setMicDevices, scene, mediaDevicesManager]
   );
 
   const micDeviceChanged = useCallback(
     deviceId => {
-      setSelectedMicDeviceId(deviceId);
-      setMicDevices(mediaDevicesManager.micDevices);
+      setMicDevices({
+        value: mediaDevicesManager.selectedMicDeviceId,
+        options: mediaDevicesManager.micDevicesOptions
+      });
       mediaDevicesManager.startMicShare({ deviceId });
     },
     [mediaDevicesManager]
@@ -57,7 +71,6 @@ export function useMicrophone(scene) {
 
   return {
     micDeviceChanged,
-    selectedMicDeviceId,
     micDevices
   };
 }

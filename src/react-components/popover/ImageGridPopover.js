@@ -10,6 +10,8 @@ export function ImageGridPopover({ fullscreen, items, closePopover }) {
         return (
           <img
             key={item.id}
+            // crossOrigin: "anonymous" is a workaround for CORS error on Chrome. See #4400
+            crossOrigin="anonymous"
             src={item.src}
             alt={item.label}
             onClick={() => {
@@ -19,8 +21,6 @@ export function ImageGridPopover({ fullscreen, items, closePopover }) {
 
               closePopover();
             }}
-            // crossOrigin: "anonymous" is a workaround for CORS error on Chrome. See #4400
-            crossOrigin="anonymous"
           />
         );
       })}

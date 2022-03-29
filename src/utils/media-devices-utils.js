@@ -20,5 +20,4 @@ export const MediaDevices = Object.freeze({
   SCREEN: "screen"
 });
 
-export const DEFAULT_DEVICE_ID = "default";
 export const NO_DEVICE_ID = "none";
