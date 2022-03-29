@@ -5,6 +5,8 @@ const DEFAULT_MIRROR_GEOMETRY = new THREE.PlaneBufferGeometry();
 const DEFAULT_TEXTURE_WIDTH = window.innerWidth * window.devicePixelRatio;
 const DEFAULT_TEXTURE_HEIGHT = window.innerHeight * window.devicePixelRatio;
 
+import { Layers } from "./layers";
+
 /**
  * Should need to entity that has geometry primitive
  *
@@ -27,5 +29,19 @@ AFRAME.registerComponent("mirror", {
       textureHeight: DEFAULT_TEXTURE_HEIGHT
     });
     this.el.setObject3D("mesh", reflector);
+
+    // HACK the first time we render this, add the appropriate camera layers to the virtual camera
+    const originalOnBeforeRender = reflector.onBeforeRender;
+    reflector.onBeforeRender = function(renderer, scene, camera) {
+      const originalRender = renderer.render;
+      renderer.render = function(scene, camera) {
+        camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+        camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+        reflector.onBeforeRender = originalOnBeforeRender;
+        originalRender.call(renderer, scene, camera);
+      };
+      originalOnBeforeRender(renderer, scene, camera);
+      renderer.render = originalRender;
+    };
   }
 });
