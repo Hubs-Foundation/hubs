@@ -25,16 +25,6 @@ const calculateVolume = (analyser, levels) => {
   return currVolume;
 };
 
-const tempScaleFromPosition = new THREE.Vector3();
-const tempScaleToPosition = new THREE.Vector3();
-
-export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, volume) {
-  tempScaleToPosition.setFromMatrixPosition(toObject.matrixWorld);
-  tempScaleFromPosition.setFromMatrixPosition(fromObject.matrixWorld);
-  const distance = tempScaleFromPosition.distanceTo(tempScaleToPosition) / 10;
-  return Math.min(maxScale, minScale + (maxScale - minScale) * volume * 8 * distance);
-}
-
 function updateVolume(component) {
   const newRawVolume = calculateVolume(component.analyser, component.levels);
 
@@ -158,7 +148,14 @@ AFRAME.registerSystem("local-audio-analyser", {
 
   tick: function() {
     if (!this.analyser) return;
-    updateVolume(this);
+
+    // TODO Ideally, when muted no audio should ever even make it into the analyser to begin with
+    if (APP.dialog.isMicEnabled) {
+      updateVolume(this);
+    } else {
+      this.prevVolume = this.volume;
+      this.volume = 0;
+    }
   }
 });
 
@@ -179,26 +176,13 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   tick() {
-    // TODO: come up with a cleaner way to handle this.
-    // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
-    if (!this.el.object3D.visible) return;
     if (!this.cameraEl) return;
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
-    const { minScale, maxScale } = this.data;
-
-    const { object3D } = this.el;
-
-    const scale = getAudioFeedbackScale(
-      this.el.object3D,
-      this.cameraEl.object3DMap.camera,
-      minScale,
-      maxScale,
-      this.analyser ? this.analyser.volume : 0
+    this.el.object3D.scale.setScalar(
+      THREE.Math.mapLinear(this.analyser?.volume || 0, 0, 1, this.data.minScale, this.data.maxScale)
     );
-
-    object3D.scale.setScalar(scale);
-    object3D.matrixNeedsUpdate = true;
+    this.el.object3D.matrixNeedsUpdate = true;
   }
 });
 

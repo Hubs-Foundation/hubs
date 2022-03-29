@@ -3,6 +3,8 @@ import { AVATAR_TYPES } from "../utils/avatar-utils";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 import defaultAvatar from "../assets/models/DefaultAvatar.glb";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
+import { createHeadlessModelForSkinnedMesh } from "../utils/three-utils";
+import { Layers } from "./layers";
 
 function ensureAvatarNodes(json) {
   const { nodes } = json;
@@ -43,6 +45,7 @@ AFRAME.registerComponent("player-info", {
     this.update = this.update.bind(this);
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onMicStateChanged = this.onMicStateChanged.bind(this);
+    this.onAvatarModelLoaded = this.onAvatarModelLoaded.bind(this);
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
@@ -65,7 +68,33 @@ AFRAME.registerComponent("player-info", {
     deregisterComponentInstance(this, "player-info");
   },
 
+  onAvatarModelLoaded(e) {
+    this.applyProperties(e);
+
+    const modelEl = this.el.querySelector(".model");
+    if (this.isLocalPlayerInfo && e.target === modelEl) {
+      let isSkinnedAvatar = false;
+      modelEl.object3D.traverse(function(o) {
+        if (o.isSkinnedMesh) {
+          const headlessMesh = createHeadlessModelForSkinnedMesh(o);
+          if (headlessMesh) {
+            isSkinnedAvatar = true;
+            o.parent.add(headlessMesh);
+          }
+        }
+      });
+      // This is to support using arbitrary models as avatars.
+      // TODO We can drop support for this when we go full VRM, or at least handle it earlier in the process.
+      if (!isSkinnedAvatar) {
+        modelEl.object3D.traverse(function(o) {
+          if (o.isMesh) o.layers.set(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+        });
+      }
+    }
+  },
+
   play() {
+    this.el.addEventListener("model-loaded", this.onAvatarModelLoaded);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").addEventListener("model-error", this.handleModelError);
@@ -83,6 +112,7 @@ AFRAME.registerComponent("player-info", {
   },
 
   pause() {
+    this.el.removeEventListener("model-loaded", this.onAvatarModelLoaded);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     if (this.isLocalPlayerInfo) {
       this.el.querySelector(".model").removeEventListener("model-error", this.handleModelError);

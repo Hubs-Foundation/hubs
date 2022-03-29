@@ -163,7 +163,13 @@ const ensureLightsAreSeenByCamera = function(o) {
     o.layers.enable(Layers.CAMERA_LAYER_INSPECT);
   }
 };
+
+const firstPersonOnlyLayer = new THREE.Layers();
+firstPersonOnlyLayer.set(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
 const enableInspectLayer = function(o) {
+  // Ignore first person only meshes
+  if (o.layers.test(firstPersonOnlyLayer)) return;
+
   const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
   const batch = batchManagerSystem.batchingEnabled && batchManagerSystem.batchManager.batchForMesh.get(o);
   if (batch) {
@@ -174,6 +180,9 @@ const enableInspectLayer = function(o) {
   }
 };
 const disableInspectLayer = function(o) {
+  // Ignore first person only meshes
+  if (o.layers.test(firstPersonOnlyLayer)) return;
+
   const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
   const batch = batchManagerSystem.batchingEnabled && batchManagerSystem.batchManager.batchForMesh.get(o);
   if (batch) {
@@ -222,8 +231,14 @@ export class CameraSystem {
         if (customFOV) {
           cameraEl.setAttribute("camera", { fov: customFOV });
         }
-        const cameras = scene.is("vr-mode") ? scene.renderer.xr.getCamera().cameras : [cameraEl.getObject3D("camera")];
-        cameras.forEach(cam => cam.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET));
+        const vrMode = scene.is("vr-mode");
+        const camera = vrMode ? scene.renderer.xr.getCamera() : cameraEl.getObject3D("camera");
+        if (vrMode) {
+          // We don't currently make use of left/right eye layers so just use the same layers for all of them to simplify things
+          camera.cameras[0].layers = camera.cameras[1].layers = camera.layers;
+        }
+        camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+        camera.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
       };
 
       if (this.viewingCamera.components.camera) {
@@ -231,17 +246,7 @@ export class CameraSystem {
       } else {
         scene.addEventListener("camera-set-active", setupCamera);
       }
-
-      // TODO this bookkeeping also exists elsewhere in the code, it would be nice to put these references in one place
-      const playerModelEl = document.querySelector("#avatar-rig .model");
-      playerModelEl.addEventListener("model-loading", () => (this.playerHead = null));
-      playerModelEl.addEventListener("model-loaded", this.updatePlayerHead.bind(this));
-      this.updatePlayerHead();
     });
-  }
-
-  updatePlayerHead() {
-    this.playerHead = document.getElementById("avatar-head");
   }
 
   nextMode() {
@@ -274,15 +279,13 @@ export class CameraSystem {
     this.inspectable = inspectable;
     this.pivot = pivot;
 
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.xr.getCamera() : scene.camera;
+    const camera = scene.is("vr-mode") ? scene.renderer.xr.getCamera() : scene.camera;
     this.snapshot.mask = camera.layers.mask;
-    if (vrMode) {
-      this.snapshot.mask0 = camera.cameras[0].layers.mask;
-      this.snapshot.mask1 = camera.cameras[1].layers.mask;
-    }
     if (!this.lightsEnabled) {
       this.hideEverythingButThisObject(inspectable);
+    } else {
+      camera.layers.disable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
+      camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
     }
 
     this.viewingCamera.object3DMap.camera.updateMatrices();
@@ -346,6 +349,10 @@ export class CameraSystem {
     if (this.mode === CAMERA_MODE_INSPECT && this.inspectable) {
       if (this.lightsEnabled) {
         this.showEverythingAsNormal();
+        const scene = AFRAME.scenes[0];
+        const camera = scene.is("vr-mode") ? scene.renderer.xr.getCamera() : scene.camera;
+        camera.layers.disable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
+        camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
       } else {
         this.hideEverythingButThisObject(this.inspectable);
       }
@@ -374,13 +381,8 @@ export class CameraSystem {
     o.traverse(enableInspectLayer);
 
     const scene = AFRAME.scenes[0];
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.xr.getCamera() : scene.camera;
+    const camera = scene.is("vr-mode") ? scene.renderer.xr.getCamera() : scene.camera;
     camera.layers.set(Layers.CAMERA_LAYER_INSPECT);
-    if (vrMode) {
-      camera.cameras[0].layers.set(Layers.CAMERA_LAYER_INSPECT);
-      camera.cameras[1].layers.set(Layers.CAMERA_LAYER_INSPECT);
-    }
   }
 
   showEverythingAsNormal() {
@@ -389,13 +391,8 @@ export class CameraSystem {
       this.notHiddenObject = null;
     }
     const scene = AFRAME.scenes[0];
-    const vrMode = scene.is("vr-mode");
-    const camera = vrMode ? scene.renderer.xr.getCamera() : scene.camera;
+    const camera = scene.is("vr-mode") ? scene.renderer.xr.getCamera() : scene.camera;
     camera.layers.mask = this.snapshot.mask;
-    if (vrMode) {
-      camera.cameras[0].layers.mask = this.snapshot.mask0;
-      camera.cameras[1].layers.mask = this.snapshot.mask1;
-    }
   }
 
   tick = (function() {
@@ -455,14 +452,6 @@ export class CameraSystem {
 
       if (this.userinput.get(paths.actions.nextCameraMode)) {
         this.nextMode();
-      }
-
-      const headShouldBeVisible = this.mode !== CAMERA_MODE_FIRST_PERSON;
-      if (this.playerHead && headShouldBeVisible !== this.playerHead.object3D.visible) {
-        this.playerHead.object3D.visible = headShouldBeVisible;
-
-        // Skip a frame so we don't see our own avatar, etc.
-        return;
       }
 
       this.ensureListenerIsParentedCorrectly(scene);
