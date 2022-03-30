@@ -231,12 +231,7 @@ export class CameraSystem {
         if (customFOV) {
           cameraEl.setAttribute("camera", { fov: customFOV });
         }
-        const vrMode = scene.is("vr-mode");
-        const camera = vrMode ? scene.renderer.xr.getCamera() : cameraEl.getObject3D("camera");
-        if (vrMode) {
-          // We don't currently make use of left/right eye layers so just use the same layers for all of them to simplify things
-          camera.cameras[0].layers = camera.cameras[1].layers = camera.layers;
-        }
+        const camera = cameraEl.getObject3D("camera");
         camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
         camera.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
       };
@@ -246,6 +241,22 @@ export class CameraSystem {
       } else {
         scene.addEventListener("camera-set-active", setupCamera);
       }
+
+      // xr.updateCamera gets called every render to copy the active cameras properties to the XR cameras. We also want to copy layers.
+      // TODO this logic should either be moved into THREE or removed when we ditch aframe camera system
+      const xrManager = scene.renderer.xr;
+      const updateXRCamera = xrManager.updateCamera;
+      xrManager.updateCamera = function(camera) {
+        updateXRCamera(camera);
+        const xrCamera = xrManager.getCamera();
+        xrCamera.layers.mask = camera.layers.mask;
+        if (xrCamera.cameras.length) {
+          xrCamera.cameras[0].layers.set(Layers.CAMERA_LAYER_XR_LEFT_EYE);
+          xrCamera.cameras[0].layers.mask |= camera.layers.mask;
+          xrCamera.cameras[1].layers.set(Layers.CAMERA_LAYER_XR_RIGHT_EYE);
+          xrCamera.cameras[1].layers.mask |= camera.layers.mask;
+        }
+      };
     });
   }
 
