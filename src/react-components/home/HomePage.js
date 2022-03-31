@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import classNames from "classnames";
 import configs from "../../utils/configs";
+import { getAppLogo } from "../../utils/get-app-logo";
 import { CreateRoomButton } from "./CreateRoomButton";
 import { PWAButton } from "./PWAButton";
 import { useFavoriteRooms } from "./useFavoriteRooms";
@@ -16,6 +17,10 @@ import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
 import { Column } from "../layout/Column";
 import { Button } from "../input/Button";
 import { Container } from "../layout/Container";
+import { SocialBar } from "../home/SocialBar";
+import { SignInButton } from "./SignInButton";
+import maskEmail from "../../utils/mask-email";
+import { ReactComponent as HmcLogo } from "../icons/HmcLogo.svg";
 
 export function HomePage() {
   const auth = useContext(AuthContext);
@@ -26,7 +31,8 @@ export function HomePage() {
 
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
   const sortedPublicRooms = Array.from(publicRooms).sort((a, b) => b.member_count - a.member_count);
-
+  const wrapInBold = chunk => <b>{chunk}</b>;
+  const isHmc = configs.feature("show_cloud");
   useEffect(() => {
     const qs = new URLSearchParams(location.search);
 
@@ -47,13 +53,33 @@ export function HomePage() {
   }, []);
 
   const canCreateRooms = !configs.feature("disable_room_creation") || auth.isAdmin;
-
+  const email = auth.email;
   return (
     <PageContainer className={styles.homePage}>
       <Container>
         <div className={styles.hero}>
+          {auth.isSignedIn ? (
+            <div className={styles.signInContainer}>
+              <span>
+                <FormattedMessage
+                  id="header.signed-in-as"
+                  defaultMessage="Signed in as {email}"
+                  values={{ email: maskEmail(email) }}
+                />
+              </span>
+              <a href="#" onClick={auth.signOut} className={styles.mobileSignOut}>
+                <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
+              </a>
+            </div>
+          ) : (
+            <SignInButton mobile />
+          )}
           <div className={styles.logoContainer}>
-            <img alt={configs.translation("app-name")} src={configs.image("logo")} />
+            {isHmc ? (
+              <HmcLogo className="hmc-logo" />
+            ) : (
+              <img alt={configs.translation("app-name")} src={getAppLogo()} />
+            )}
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
@@ -84,14 +110,15 @@ export function HomePage() {
             <p>
               <FormattedMessage
                 id="home-page.rooms-blurb"
-                defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs, you’ll have a private virtual meeting space that you can instantly share - no downloads or VR headset necessary."
+                defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with Hubs, you’ll have a private virtual meeting space that you can instantly share <b>- no downloads or VR headset necessary.</b>"
+                values={{ b: wrapInBold }}
               />
             </p>
           </Column>
           <Column padding gap="xl" className={styles.card}>
             <img src={configs.image("landing_communicate_thumb")} />
             <h3>
-              <FormattedMessage id="home-page.communicate-title" defaultMessage="Communicate naturally" />
+              <FormattedMessage id="home-page.communicate-title" defaultMessage="Communicate and Collaborate" />
             </h3>
             <p>
               <FormattedMessage
@@ -159,12 +186,17 @@ export function HomePage() {
         </Container>
       )}
       <Container>
-        <Column padding center grow>
-          <Button lg preset="primary" as="a" href="/link">
+        <Column center grow>
+          <Button thin preset="landing" as="a" href="/link">
             <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
           </Button>
         </Column>
       </Container>
+      {isHmc ? (
+        <Column center>
+          <SocialBar />
+        </Column>
+      ) : null}
     </PageContainer>
   );
 }

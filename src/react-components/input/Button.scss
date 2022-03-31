@@ -25,7 +25,7 @@
 
 :local(.basic), :local(.transparent) {
   color: theme.$text4-color;
-  border: 1px solid theme.$basic-border-color;
+  border: 2px solid theme.$basic-border-color;
   background-color: theme.$basic-color;
 
   svg {
@@ -82,7 +82,8 @@
 :local(.accept) {
   color: theme.$text5-color;
   background-color: theme.$accept-color;
-
+  border: 2px solid theme.$accept-border-color;
+  
   svg {
     *[stroke=\#000] {
       stroke: theme.$text5-color;
@@ -96,6 +97,7 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accept-color-hover;
+    border: 2px solid theme.$accept-border-color;
   }
 
   &:active {
@@ -157,6 +159,7 @@
 :local(.accent2) {
   color: theme.$text5-color;
   background-color: theme.$accent2-color;
+  border: 2px solid theme.$accent2-border-color;
 
   svg {
     *[stroke=\#000] {
@@ -171,6 +174,7 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent2-color-hover;
+    border: 2px solid theme.$accent2-border-color
   }
 
   &:active {
@@ -207,6 +211,7 @@
 :local(.accent4) {
   color: theme.$text5-color;
   background-color: theme.$accent4-color;
+  border: 2px solid theme.$accent4-border-color;
 
   svg {
     *[stroke=\#000] {
@@ -221,6 +226,7 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent4-color-hover;
+    border: 2px solid theme.$accent4-border-color;
   }
 
   &:active {
@@ -232,6 +238,7 @@
 :local(.accent5) {
   color: theme.$text5-color;
   background-color: theme.$accent5-color;
+  border: 2px solid theme.$accent5-border-color;
 
   svg {
     *[stroke=\#000] {
@@ -246,11 +253,38 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent5-color-hover;
+    border: 2px solid theme.$accent5-border-color;
   }
 
   &:active {
     color: theme.$text5-color-pressed;
     background-color: theme.$accent5-color-pressed;
+  }
+}
+
+
+:local(.accent6) {
+  color: theme.$text5-color;
+  background-color: theme.$accent6-color;
+
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text5-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text5-color;
+    }
+  }
+
+  &:hover {
+    color: theme.$text5-color-hover;
+    background-color: theme.$accent6-color-hover;
+  }
+
+  &:active {
+    color: theme.$text5-color-pressed;
+    background-color: theme.$accent6-color-pressed;
   }
 }
 
@@ -285,4 +319,38 @@
 
 :local(.xl) {
   height: 64px;
+}
+
+:local(.thin) {
+  min-height: 41px;
+  height: 41px;
+  &:hover {
+    color: theme.$text5-color-hover;
+  }
+}
+
+:local(.thick) {
+  height: 53px;
+}
+
+:local(.signin) {
+  border: 2px solid #007AB8;
+  background-color: transparent;
+  color: #007AB8;
+  box-sizing: border-box;
+  border-radius: 13px;
+}
+
+:local(.landing) {
+  border: 2px solid #007AB8;
+  background-color: #007AB8; 
+  color: theme.$text5-color;
+  box-sizing: border-box;
+  border-radius: 13px;
+  &:hover {
+    background-color: #008bd1;
+  }
+  &:active {
+    background-color: #00699E;
+  }
 }

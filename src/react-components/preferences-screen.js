@@ -11,6 +11,16 @@ import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "./styles/theme";
 
+export const CLIPPING_THRESHOLD_ENABLED = false;
+export const CLIPPING_THRESHOLD_MIN = 0.0;
+export const CLIPPING_THRESHOLD_MAX = 0.1;
+export const CLIPPING_THRESHOLD_STEP = 0.001;
+export const CLIPPING_THRESHOLD_DEFAULT = 0.015;
+export const GLOBAL_VOLUME_MIN = 0;
+export const GLOBAL_VOLUME_MAX = 200;
+export const GLOBAL_VOLUME_STEP = 5;
+export const GLOBAL_VOLUME_DEFAULT = 100;
+
 function round(step, n) {
   return Math.round(n / step) * step;
 }
@@ -480,9 +490,29 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.show-rtc-debug-panel",
     defaultMessage: "Show RTC Panel"
   },
+  showAudioDebugPanel: {
+    id: "preferences-screen.preference.show-audio-debug-panel",
+    defaultMessage: "Show Audio Debug Panel"
+  },
+  enableAudioClipping: {
+    id: "preferences-screen.preference.enable-audio-clipping",
+    defaultMessage: "Enable Audio Clipping"
+  },
+  audioClippingThreshold: {
+    id: "preferences-screen.preference.audio-clipping-threshold",
+    defaultMessage: "Audio Clipping Threshold"
+  },
   theme: {
     id: "preferences-screen.preference.theme",
     defaultMessage: "Theme"
+  },
+  fastRoomSwitching: {
+    id: "preferences-screen.preference.fast-room-switching",
+    defaultMessage: "Enable Fast Room Switching"
+  },
+  lazyLoadSceneMedia: {
+    id: "preferences-screen.preference.lazy-load-scene-media",
+    defaultMessage: "Enable Scene Media Lazy Loading"
   }
 });
 
@@ -954,11 +984,11 @@ class PreferencesScreen extends Component {
           {
             key: "globalVoiceVolume",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-            min: 0,
-            max: 200,
-            step: 5,
+            min: GLOBAL_VOLUME_MIN,
+            max: GLOBAL_VOLUME_MAX,
+            step: GLOBAL_VOLUME_STEP,
             digits: 0,
-            defaultNumber: 100
+            defaultNumber: GLOBAL_VOLUME_DEFAULT
           },
           {
             key: "globalMediaVolume",
@@ -987,7 +1017,23 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
             defaultBool: false,
             promptForRefresh: true
-          }
+          },
+          {
+            key: "enableAudioClipping",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            defaultBool: CLIPPING_THRESHOLD_ENABLED,
+            promptForRefresh: false
+          },
+          {
+            key: "audioClippingThreshold",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: CLIPPING_THRESHOLD_MIN,
+            max: CLIPPING_THRESHOLD_MAX,
+            step: CLIPPING_THRESHOLD_STEP,
+            digits: 3,
+            defaultNumber: 0.015
+          },
+          { key: "showAudioDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
         ]
       ],
       [
@@ -1046,6 +1092,8 @@ class PreferencesScreen extends Component {
           { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          { key: "fastRoomSwitching", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          { key: "lazyLoadSceneMedia", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
           { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
           { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },

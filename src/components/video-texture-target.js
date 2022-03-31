@@ -1,6 +1,7 @@
 import { disposeTexture } from "../utils/material-utils";
 import { createVideoOrAudioEl } from "../utils/media-utils";
 import { findNode } from "../utils/three-utils";
+import { Layers } from "./layers";
 
 /**
  * @component video-texture-source
@@ -64,16 +65,16 @@ AFRAME.registerComponent("video-texture-source", {
     const sceneEl = this.el.sceneEl;
     const renderer = this.renderer || sceneEl.renderer;
 
-    const tmpVRFlag = renderer.vr.enabled;
+    const tmpXRFlag = renderer.xr.enabled;
     const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
     delete sceneEl.object3D.onAfterRender;
-    renderer.vr.enabled = false;
+    renderer.xr.enabled = false;
 
     renderer.setRenderTarget(this.renderTarget);
     renderer.render(sceneEl.object3D, this.camera);
     renderer.setRenderTarget(null);
 
-    renderer.vr.enabled = tmpVRFlag;
+    renderer.xr.enabled = tmpXRFlag;
     sceneEl.object3D.onAfterRender = tmpOnAfterRender;
 
     this.lastRenderTime = time;
@@ -106,6 +107,15 @@ AFRAME.registerComponent("video-texture-target", {
   },
 
   init() {
+    // Make video-texture-target objects inivisible before rendering to the frame buffer
+    // Chromium checks for loops when drawing to a framebuffer so if we don't exclude the objects
+    // that are using that rendertarget's texture we get an error. Firefox does not check.
+    // https://chromium.googlesource.com/chromium/src/+/460cac969e2e9ac38a2611be1a32db0361d88bfb/gpu/command_buffer/service/gles2_cmd_decoder.cc#9516
+    this.el.object3D.traverse(o => {
+      o.layers.mask1 = o.layers.mask;
+      o.layers.set(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+    });
+
     const material = this.getMaterial();
 
     if (!material) {
@@ -152,7 +162,7 @@ AFRAME.registerComponent("video-texture-target", {
 
         const streamClientId = src.substring(7).split("/")[1]; // /clients/<client id>/video is only URL for now
 
-        NAF.connection.adapter.getMediaStream(streamClientId, "video").then(stream => {
+        APP.dialog.getMediaStream(streamClientId, "video").then(stream => {
           if (src !== this.data.src) {
             // Prevent creating and loading video texture if the src changed while we were fetching the video stream.
             return;
@@ -208,6 +218,13 @@ AFRAME.registerComponent("video-texture-target", {
   },
 
   remove() {
+    this.el.object3D.traverse(o => {
+      if (o.layers.mask1) {
+        o.layers.mask = o.layers.mask1;
+        delete o.layers.mask1;
+      }
+    });
+
     // element sources can be shared and are expected to manage their own resources
     if (this.data.src === "el") return;
 

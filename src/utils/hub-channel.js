@@ -1,7 +1,7 @@
 import jwtDecode from "jwt-decode";
 import { EventTarget } from "event-target-shim";
 import { Presence } from "phoenix";
-import { migrateChannelToSocket, discordBridgesForPresences } from "./phoenix-utils";
+import { migrateChannelToSocket, discordBridgesForPresences, migrateToChannel } from "./phoenix-utils";
 import configs from "./configs";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -43,6 +43,8 @@ export default class HubChannel extends EventTarget {
     this._signedIn = !!this.store.state.credentials.token;
     this._permissions = {};
     this._blockedSessionIds = new Set();
+
+    store.addEventListener("profilechanged", this.sendProfileUpdate.bind(this));
   }
 
   get signedIn() {
@@ -104,23 +106,51 @@ export default class HubChannel extends EventTarget {
     }
   }
 
-  setPhoenixChannel = channel => {
-    this.channel = channel;
-    this.presence = new Presence(channel);
-  };
+  async migrateToHub(hubId) {
+    let presenceBindings;
+
+    const newChannel = this.channel.socket.channel(`hub:${hubId}`, APP.hubChannelParamsForPermsToken());
+    const data = await migrateToChannel(this.channel, newChannel);
+
+    if (this.presence) {
+      presenceBindings = {
+        onJoin: this.presence.caller.onJoin,
+        onLeave: this.presence.caller.onLeave,
+        onSync: this.presence.caller.onSync
+      };
+
+      this.presence.onJoin(function() {});
+      this.presence.onLeave(function() {});
+      this.presence.onSync(function() {});
+    }
+
+    this.channel = newChannel;
+    this.presence = new Presence(this.channel);
+    this.hubId = data.hubs[0].hub_id;
+
+    this.setPermissionsFromToken(data.perms_token);
+
+    if (presenceBindings) {
+      this.presence.onJoin(presenceBindings.onJoin);
+      this.presence.onLeave(presenceBindings.onLeave);
+      this.presence.onSync(presenceBindings.onSync);
+    }
+    return data;
+  }
 
   setPermissionsFromToken = token => {
     // Note: token is not verified.
+    this.token = token;
     this._permissions = jwtDecode(token);
     configs.setIsAdmin(this._permissions.postgrest_role === "ret_admin");
     this.dispatchEvent(new CustomEvent("permissions_updated"));
 
     // Refresh the token 1 minute before it expires.
     const nextRefresh = new Date(this._permissions.exp * 1000 - 60 * 1000) - new Date();
-    setTimeout(async () => {
-      const result = await this.fetchPermissions();
-      this.dispatchEvent(new CustomEvent("permissions-refreshed", { detail: result }));
-    }, nextRefresh);
+    if (this.fetchPermissionsTimeout) {
+      clearTimeout(this.fetchPermissionsTimeout);
+    }
+    this.fetchPermissionsTimeout = setTimeout(this.fetchPermissions, nextRefresh);
   };
 
   sendEnteringEvent = async () => {
@@ -147,13 +177,13 @@ export default class HubChannel extends EventTarget {
       }
     }
 
-    // This is fairly hacky, but gets the # of initial occupants
-    let initialOccupantCount = 0;
-    if (NAF.connection.adapter) {
-      // When I enter room as avatar, count number of people inside the room as avatars and lobby
-      // I enter room alone, no one in lobby, this is 0
-      initialOccupantCount = Object.keys(NAF.connection.adapter.occupants).length;
-    }
+    const initialOccupantCount = this.presence
+      .list((key, presence) => {
+        return { key, entryState: presence.metas[presence.metas.length - 1].presence };
+      })
+      .filter(({ key, entryState }) => {
+        return key !== NAF.clientId && entryState === "room";
+      }).length;
 
     const entryTimingFlags = this.getEntryTimingFlags();
 
@@ -330,7 +360,7 @@ export default class HubChannel extends EventTarget {
         .receive("ok", res => {
           resolve(res.oauth_url);
         })
-        .receive("error", reject);
+        .receive("error", err => reject(new Error(err.reason)));
     });
   };
 
@@ -380,6 +410,7 @@ export default class HubChannel extends EventTarget {
 
   hide = sessionId => {
     NAF.connection.adapter.block(sessionId);
+    APP.dialog.block(sessionId);
     this.channel.push("block", { session_id: sessionId });
     this._blockedSessionIds.add(sessionId);
   };
@@ -387,6 +418,7 @@ export default class HubChannel extends EventTarget {
   unhide = sessionId => {
     if (!this._blockedSessionIds.has(sessionId)) return;
     NAF.connection.adapter.unblock(sessionId);
+    APP.dialog.unblock(sessionId);
     NAF.connection.entities.completeSync(sessionId);
     this.channel.push("unblock", { session_id: sessionId });
     this._blockedSessionIds.delete(sessionId);
@@ -395,8 +427,7 @@ export default class HubChannel extends EventTarget {
   isHidden = sessionId => this._blockedSessionIds.has(sessionId);
 
   kick = async sessionId => {
-    const permsToken = await this.fetchPermissions();
-    NAF.connection.adapter.kick(sessionId, permsToken);
+    APP.dialog.kick(sessionId);
     this.channel.push("kick", { session_id: sessionId });
   };
 

@@ -94,6 +94,7 @@ export default class MediaDevicesManager {
   };
 
   async fetchMediaDevices() {
+    console.log("Fetching media devices");
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
         this.micDevices = mediaDevices
@@ -108,9 +109,10 @@ export default class MediaDevicesManager {
   }
 
   async startMicShare(deviceId) {
+    console.log("Starting microphone sharing");
     let constraints = { audio: {} };
     if (deviceId) {
-      constraints = { audio: { deviceId: { exact: [deviceId] } } };
+      constraints = { audio: { deviceId: { ideal: [deviceId] } } };
     }
 
     const result = await this._startMicShare(constraints);
@@ -129,7 +131,7 @@ export default class MediaDevicesManager {
       console.log("No available audio tracks");
     }
 
-    NAF.connection.adapter.enableMicrophone(true);
+    await APP.dialog.setLocalMediaStream(this._mediaStream);
 
     return result;
   }
@@ -165,6 +167,7 @@ export default class MediaDevicesManager {
     }
 
     try {
+      console.log("Adding microphone media stream");
       const newStream = await navigator.mediaDevices.getUserMedia(constraints);
       this.audioSystem.addStreamToOutboundAudio("microphone", newStream);
       this.audioTrack = newStream.getAudioTracks()[0];
@@ -208,10 +211,8 @@ export default class MediaDevicesManager {
     this.audioTrack?.stop();
     this.audioTrack = null;
 
-    this._scene.emit("action_mute");
-
-    NAF.connection.adapter.enableMicrophone(false);
-    await NAF.connection.adapter.setLocalMediaStream(this._mediaStream);
+    await APP.dialog.setLocalMediaStream(this._mediaStream);
+    APP.dialog.enableMicrophone(false);
   }
 
   async startVideoShare(constraints, isDisplayMedia, target, success, error) {
@@ -242,7 +243,7 @@ export default class MediaDevicesManager {
           this.audioSystem.addStreamToOutboundAudio("screenshare", newStream);
         }
 
-        await NAF.connection.adapter.setLocalMediaStream(this._mediaStream);
+        await APP.dialog.setLocalMediaStream(this._mediaStream);
       }
     } catch (e) {
       error(e);
@@ -263,7 +264,7 @@ export default class MediaDevicesManager {
 
     this.audioSystem.removeStreamFromOutboundAudio("screenshare");
 
-    await NAF.connection.adapter.setLocalMediaStream(this._mediaStream);
+    await APP.dialog.setLocalMediaStream(this._mediaStream);
   }
 
   async shouldShowHmdMicWarning() {

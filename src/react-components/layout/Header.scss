@@ -2,7 +2,7 @@
 
 header {
   display: block;
-  padding: 20px;
+  
 
   @media(min-width: theme.$breakpoint-lg) {
     padding: 0;
@@ -24,6 +24,15 @@ header {
     }
 
     li {
+      &:first-child {
+        padding-top: 20px;
+        @media(min-width: theme.$breakpoint-lg) {
+          img {
+            width: 100%;
+            height: 100%;
+          }
+        }
+      }
       padding-top: 20px;
 
       @media(min-width: theme.$breakpoint-lg) {
@@ -44,6 +53,7 @@ header {
       list-style: none;
       flex-direction: column;
       align-items: center;
+      justify-content: space-between;
 
       @media(min-width: theme.$breakpoint-lg) {
         justify-content: flex-end;
@@ -66,14 +76,16 @@ header {
 
 :local(.home-link) {
   display: inline-block;
-
-  img {
+  width: 124px;
+  height: 83px;
+  @media(min-width: theme.$breakpoint-lg) {
+   img {
     height: 32px;
+    }
   }
 }
-
 :local(.sign-in) {
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   padding-top: 20px;
@@ -86,9 +98,80 @@ header {
   }
 
   @media(min-width: theme.$breakpoint-lg) {
+    display: flex;
     flex-direction: row;
     justify-content: flex-end;
     flex: 1;
     padding-top: 0;
+  }
+}
+
+:local(.nav-container) {
+  position: relative;
+  margin-bottom: -56px;
+  margin-top: 1rem;
+  z-index: 1;
+  display: flex;
+  align-content: center;
+  flex-direction: row;
+  justify-content: flex-start;
+  width: 100vw;
+  @media(min-width: theme.$breakpoint-lg) {
+    display: none;
+  }
+}
+
+:local(.mobile-nav-wrapper) {
+  display: flex;
+  align-content: center;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: auto;
+  max-width: 100%;
+
+  header {
+    width: 100vw;
+    height: 220px;
+    margin-right: 42px;
+    padding: 0;
+  }
+  svg {
+    margin-left: 21px;
+    cursor: pointer;
+      *[fill]{
+        fill: theme.$text1-color;
+      }
+  }
+  li:first-child {
+    padding-top: 0;
+  }
+  a {
+    font-size: 1.2rem;
+  }
+
+  header {
+    visibility: hidden;
+    opacity: 0;
+    height: 0px;
+    transition: height .3s;
+    overflow: hidden;
+  }
+
+  header.is-active {
+    opacity: 1;
+    height:280px;
+    visibility: visible;
+    transition: opacity .4s, visibility .4s, height .6s;
+    ul {
+      height:230px;
+      justify-content: space-between;
+    }
+  }
+  header.cloud {
+    height:230px;
+    ul {
+      height:200px;
+      justify-content: center;
+    }
   }
 }
