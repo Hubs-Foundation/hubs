@@ -86,7 +86,7 @@
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
-
+            <img id="mock_auction_img" crossorigin="anonymous" src="./assets/images/custom/auction_mock.png">
             <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
             <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
 
@@ -1347,6 +1347,10 @@
 
     <div id="ui-root"></div>
     <div id="preload-overlay"></div>
+    <div id="web3-overlay">
+        <button id="web3-overlay-close-button">Close</button>
+        <iframe id="web3-iframe" src="" />
+    </div>
 </body>
 
 </html>
