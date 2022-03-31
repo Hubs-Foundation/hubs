@@ -1,0 +1,33 @@
+#web3-overlay {
+  margin: 0;
+  width: 485px;
+  height: 700px;
+  padding-top: 20px;
+  padding-left: 10px;
+
+  transition: opacity 0.5s linear;
+  opacity: 1;
+  position: relative;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  padding: 45px 20px 20px;
+  background-color: rgba(255, 255, 255, 0.5);
+  visibility: hidden;
+}
+
+#web3-overlay button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  padding: 3px;
+
+}
+
+#web3-overlay iframe {
+  height: 100%;
+  width: 100%;
+  border: 0;
+  position: center;
+}

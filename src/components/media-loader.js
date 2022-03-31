@@ -25,6 +25,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { getLiveGameStreams } from "../utils/customization/twitch-utils";
 
 import { SHAPE } from "three-ammo/constants";
+import { getEbisusBayApiUrl, loadCustomRoomObjects } from "../custom/hub"
 
 let loadingObjectEnvMap;
 let loadingObject;
@@ -73,6 +74,12 @@ AFRAME.registerComponent("media-loader", {
     this.refresh = this.refresh.bind(this);
     this.animating = false;
 
+    let buttonPosition = "99 56 55";
+    let textPosition = "";
+    let rotation = "";
+    let price = "";
+    let auctionId = "";
+    loadCustomRoomObjects(auctionId, buttonPosition, textPosition, rotation, price);
     try {
       NAF.utils
         .getNetworkedEntity(this.el)
