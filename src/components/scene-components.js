@@ -31,3 +31,4 @@ import "./audio-zone";
 import "./audio-zone-source";
 import "./troika-text";
 import "./frustrum";
+import "./set-active-camera";

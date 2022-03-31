@@ -58,7 +58,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
     this.spriteSystem = new SpriteSystem(this.el);
     this.batchManagerSystem = new BatchManagerSystem(this.el.object3D, this.el.renderer);
-    this.cameraSystem = new CameraSystem(this.el);
+    this.cameraSystem = new CameraSystem(this.el.camera, this.el.renderer);
     this.drawingMenuSystem = new DrawingMenuSystem(this.el);
     this.characterController = new CharacterControllerSystem(this.el);
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);

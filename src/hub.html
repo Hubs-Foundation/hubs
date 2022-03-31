@@ -55,8 +55,6 @@
     <div id="support-root"></div>
 
     <a-scene
-        disable-resize
-        embedded
         vr-mode-ui="enabled: false"
         loading-screen="enabled: false"
         hubs-systems
@@ -64,14 +62,6 @@
         listed-media
         local-audio-analyser
         class="grab-cursor"
-        renderer="
-            antialias: true;
-            colorManagement: true;
-            sortObjects: true;
-            physicallyCorrectLights: true;
-            alpha: false;
-            webgl2: true;
-            multiview: false;"
         shadow="type: pcfsoft;autoUpdate: false"
         networked-scene="audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
@@ -79,7 +69,6 @@
         freeze-controller
         personal-space-bubble="debug: false;"
         rotate-selected-object
-        light="defaultLightsEnabled: false"
     >
         <a-assets>
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
@@ -1370,7 +1359,6 @@
         <a-entity id="viewing-rig" set-yxz-order matrix-auto-update>
             <a-entity
                 id="viewing-camera"
-                camera="near: 0.05"
                 set-active-camera
                 rotation
                 fader

@@ -11,7 +11,6 @@ AFRAME.registerComponent("hemisphere-light", {
     this.light.position.set(0, 0, 0);
     this.light.matrixNeedsUpdate = true;
     this.el.setObject3D("hemisphere-light", this.light);
-    this.el.sceneEl.systems.light.registerLight(el);
   },
 
   update(prevData) {

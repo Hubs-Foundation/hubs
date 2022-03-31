@@ -28,13 +28,6 @@
 
     <a-scene
         loading-screen="enabled: false"
-        renderer="
-            antialias: true;
-            gammaOutput: true;
-            sortObjects: true;
-            physicallyCorrectLights: true;
-            colorManagement: true;
-            alpha: false;"
         shadow="type: pcfsoft;autoUpdate: false"
         light="defaultLightsEnabled: false"
     >
@@ -43,7 +36,7 @@
             static-body="shape: none;"
         ></a-entity>
 
-        <a-camera id="camera" fov="80" near="0.05" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
+        <a-entity id="camera" set-active-camera></a-entity>
     </a-scene>
 
     <div id="ui-root"></div>

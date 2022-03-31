@@ -24,17 +24,9 @@ function distance(x1, y1, x2, y2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-const getPlayerCamera = (() => {
-  let playerCamera;
-
-  return function() {
-    if (!playerCamera) {
-      playerCamera = document.getElementById("viewing-camera").components.camera.camera;
-    }
-
-    return playerCamera;
-  };
-})();
+const getPlayerCamera = function() {
+  return AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+};
 
 function isSingleActionButton(el) {
   return el.components.tags && el.components.tags.data.singleActionButton;

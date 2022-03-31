@@ -21,7 +21,6 @@ AFRAME.registerComponent("spot-light", {
     this.light.matrixNeedsUpdate = true;
     this.light.target.matrixNeedsUpdate = true;
     this.el.setObject3D("spot-light", this.light);
-    this.el.sceneEl.systems.light.registerLight(el);
   },
 
   update(prevData) {
