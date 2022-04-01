@@ -94,6 +94,9 @@ AFRAME.registerComponent("avatar-volume-controls", {
   },
 
   onRemoteMuteUpdated({ detail: { muted } }) {
-    this.muteButton.object3D.visible = !muted;
+    if (!this.el.sceneEl.systems.permissions.canOrWillIfCreator("mute_users")) return;
+    this.muteButton.object3D.traverse(obj => {
+      obj.visible = !muted;
+    });
   }
 });
