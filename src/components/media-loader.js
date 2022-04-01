@@ -73,7 +73,7 @@ AFRAME.registerComponent("media-loader", {
     this.refresh = this.refresh.bind(this);
     this.animating = false;
 
-    let buttonPosition = "99 56 55";
+    let buttonPosition = "99 56 47.5";
     let textPosition = "";
     let rotation = "";
     let price = "";
