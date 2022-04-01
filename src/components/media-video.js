@@ -73,7 +73,7 @@ AFRAME.registerComponent("media-video", {
   },
 
   init() {
-    APP.gainMultipliers.set(this.el, 1);
+    APP.gainMultipliers.set(this.el, 0);
     this.onPauseStateChange = this.onPauseStateChange.bind(this);
     this.updateHoverMenu = this.updateHoverMenu.bind(this);
     this.tryUpdateVideoPlaybackState = this.tryUpdateVideoPlaybackState.bind(this);

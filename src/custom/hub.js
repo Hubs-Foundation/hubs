@@ -42,7 +42,8 @@ function openWeb3Overlay(auctionId) {
     const web3IFrame = document.querySelector("#web3-iframe");
     // web3IFrame.className
     console.log("####### src = ", document.querySelector("#mock_auction_img").src);
-    web3IFrame.src = document.querySelector("#mock_auction_img").src;
+    // web3IFrame.src = document.querySelector("#mock_auction_img").src;
+    web3IFrame.src = "https://opensea.io/assets/0x495f947276749ce646f68ac8c248420045cb7b5e/62675306605735307680103560181868813150444485152825834265523622942535116128257";
     const web3Overlay = document.querySelector("#web3-overlay");
     web3Overlay.style.visibility = "visible";
   }, 200);

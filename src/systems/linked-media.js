@@ -75,10 +75,11 @@ AFRAME.registerSystem("linked-media", {
       const audio = APP.audios.get(elA);
       if (audio) {
         updateAudioSettings(elA, audio);
-    }
+      }
 
-    this.handlers = this.handlers.filter(([elA, elB]) => elA !== el && elB !== el);
-  },
+      this.handlers = this.handlers.filter(([elA, elB]) => elA !== el && elB !== el);
+    }
+},
 
   syncLinkage(elA, elB) {
     if (elB.components["networked"]) {

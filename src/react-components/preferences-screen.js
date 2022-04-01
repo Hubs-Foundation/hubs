@@ -970,7 +970,7 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 0,
             max: 2,
-            step: 0.1,
+            step: 0.5,
             digits: 1,
             defaultNumber: 2
           }
