@@ -933,10 +933,11 @@
                 </a-entity>
             </template>
 
+            <!-- link가 있는 이미지 hover하면 버튼을 출력해주는 부분 -->
             <template id="link-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
                     <a-entity mixin="rounded-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" open-media-button position="0 0 0.001">
-                        <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>
+                        <a-entity text="value:open link; width:1.5; align:center;" text-raycast-hack position="0 0.05 0.02"></a-entity>
                     </a-entity>
                 </a-entity>
             </template>

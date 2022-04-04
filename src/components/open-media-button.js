@@ -32,7 +32,7 @@ AFRAME.registerComponent("open-media-button", {
             if (url.hash && window.APP.hub.hub_id === hubId) {
               label = "go to";
             } else {
-              label = "visit room";
+              label = "입장하기";
             }
           }
         }
