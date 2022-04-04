@@ -215,6 +215,16 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     [scene]
   );
 
+  const onSelectEmoji = useCallback(
+    ({ emoji, pickerRemainedOpen }) => {
+      setMessage(message => message + emoji.native);
+      // If the picker remained open, avoid selecting the input so that the
+      // user can keep picking emojis.
+      if (!pickerRemainedOpen) inputRef.current.select();
+    },
+    [setMessage, inputRef]
+  );
+
   useEffect(() => inputEffect(inputRef.current), [inputEffect, inputRef]);
 
   useEffect(
@@ -297,9 +307,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         }
         afterInput={
           <>
-            {!isMobile && (
-              <EmojiPickerPopoverButton onSelectEmoji={emoji => setMessage(message => message + emoji.native)} />
-            )}
+            {!isMobile && <EmojiPickerPopoverButton onSelectEmoji={onSelectEmoji} />}
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
