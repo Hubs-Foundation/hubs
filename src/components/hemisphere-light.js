@@ -6,7 +6,6 @@ AFRAME.registerComponent("hemisphere-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.HemisphereLight();
     this.light.position.set(0, 0, 0);
     this.light.matrixNeedsUpdate = true;

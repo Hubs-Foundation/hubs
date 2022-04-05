@@ -9,7 +9,6 @@ AFRAME.registerComponent("directional-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.DirectionalLight();
     this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, 1);

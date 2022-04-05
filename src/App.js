@@ -62,7 +62,8 @@ export class App {
     const renderClock = new THREE.Clock();
 
     // Main RAF loop
-    function mainTick(_rafTime, _xrFrame) {
+    function mainTick(/*rafTime, _xrFrame*/) {
+      // TODO we should probably be using time from the raf loop itself
       const delta = renderClock.getDelta() * 1000;
       const time = renderClock.elapsedTime * 1000;
 

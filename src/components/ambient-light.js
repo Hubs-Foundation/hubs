@@ -5,7 +5,6 @@ AFRAME.registerComponent("ambient-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.AmbientLight();
     this.el.setObject3D("ambient-light", this.light);
     this.rendererSystem = this.el.sceneEl.systems.renderer;
