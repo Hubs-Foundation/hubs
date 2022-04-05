@@ -1,4 +1,4 @@
-AFRAME.registerComponent("set-active-camera", {
+AFRAME.registerComponent("inject-main-camera-here", {
   init() {
     // This is what actually puts the camera into the scene graph.
     // Ideally we would just be doing this ourselves, but we have to do it after the entity we want to parent it to is created
