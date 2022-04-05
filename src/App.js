@@ -33,6 +33,7 @@ export class App {
     canvas.dataset.aframeCanvas = true;
 
     const renderer = new THREE.WebGLRenderer({
+      // TODO we should not be using alpha: false https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#avoid_alphafalse_which_can_be_expensive
       alpha: false,
       antialias: true,
       depth: true,
@@ -40,16 +41,17 @@ export class App {
       premultipliedAlpha: true,
       preserveDrawingBuffer: false,
       logarithmicDepthBuffer: false,
+      // TODO we probably want high-performance
       powerPreference: "default",
       canvas
     });
 
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.sortObjects = false;
+
+    // These get overridden by environment-system but setting to the highly expected defaults to avoid any extra work
     renderer.physicallyCorrectLights = true;
     renderer.outputEncoding = THREE.sRGBEncoding;
 
-    sceneEl.maxCanvasSize = { height: 1920, width: 1920 };
     sceneEl.appendChild(renderer.domElement);
 
     const camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.05, 10000);
@@ -74,17 +76,6 @@ export class App {
 
     // This gets called after all system and component init functions
     sceneEl.addEventListener("loaded", () => {
-      console.log("scene loaded");
-
-      // Kick off render loop.
-      // if (sceneEl.renderer) {
-      //   if (window.performance) { window.performance.mark('render-started'); }
-      //   vrDisplay = utils.device.getVRDisplay();
-      //   if (vrDisplay && vrDisplay.isPresenting) {
-      //     vrManager.setDevice(vrDisplay);
-      //     vrManager.enabled = true;
-      //     sceneEl.enterVR();
-      //   }
       renderer.setAnimationLoop(mainTick);
       sceneEl.renderStarted = true;
     });
