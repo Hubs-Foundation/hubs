@@ -32,6 +32,12 @@ export class App {
     canvas.classList.add("a-canvas");
     canvas.dataset.aframeCanvas = true;
 
+    // TODO this comes from aframe and prevents zoom on ipad.
+    // This should alreeady be handleed by disable-ios-zoom but it does not appear to work
+    canvas.addEventListener("touchmove", function(event) {
+      event.preventDefault();
+    });
+
     const renderer = new THREE.WebGLRenderer({
       // TODO we should not be using alpha: false https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#avoid_alphafalse_which_can_be_expensive
       alpha: false,
