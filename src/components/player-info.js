@@ -50,19 +50,20 @@ AFRAME.registerComponent("player-info", {
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
 
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
-      this.playerSessionId = NAF.utils.getCreator(networkedEntity);
-      const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
-      if (playerPresence) {
-        this.updatePermissions(playerPresence.metas[0]);
-      }
-    });
+    if (!this.isLocalPlayerInfo) {
+      NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
+        this.playerSessionId = NAF.utils.getCreator(networkedEntity);
+        const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
+        if (playerPresence) {
+          this.updateFromPresenceMeta(playerPresence.metas[0]);
+        }
+      });
+    }
 
     registerComponentInstance(this, "player-info");
   },
 
   remove() {
-    clearTimeout(this.frozenTimer);
     const avatarEl = this.el.querySelector("[avatar-audio-source]");
     APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
@@ -129,10 +130,16 @@ AFRAME.registerComponent("player-info", {
   },
 
   onPresenceUpdated(e) {
-    this.updatePermissions(e.detail);
+    this.updateFromPresenceMeta(e.detail);
   },
 
-  updatePermissions(presenceMeta) {
+  updateFromPresenceMeta(presenceMeta) {
+    if (!this.playerSessionId && this.isLocalPlayerInfo) {
+      this.playerSessionId = NAF.clientId;
+    }
+    if (!this.playerSessionId) return;
+    if (this.playerSessionId !== presenceMeta.sessionId) return;
+
     this.permissions = presenceMeta.permissions;
   },
 

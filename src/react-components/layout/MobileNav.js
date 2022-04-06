@@ -55,6 +55,13 @@ export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCo
                     </a>
                   </li>
                 )}
+                {isHmc && (
+                  <li>
+                    <a href="/labs">
+                      <FormattedMessage id="header.labs" defaultMessage="Labs" />
+                    </a>
+                  </li>
+                )}
                 {isAdmin && (
                   <li>
                     <a style={{ marginLeft: 0 }} href="/admin" rel="noreferrer noopener">
