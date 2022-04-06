@@ -6,7 +6,7 @@ function registerNetworkSchemas() {
       return curr => {
         if (prev === null) {
           prev = new THREE.Vector3(curr.x, curr.y, curr.z);
-          return true;
+          return false;
         } else if (!NAF.utils.almostEqualVec3(prev, curr, epsilon)) {
           prev.copy(curr);
           return true;

@@ -177,7 +177,7 @@ AFRAME.registerComponent("ik-controller", {
     root.updateMatrices();
     const { camera, leftController, rightController } = this.ikRoot;
 
-    camera.object3D.updateMatrix();
+    camera.object3D.updateMatrices();
 
     const hasNewCameraTransform = !this.lastCameraTransform.equals(camera.object3D.matrix);
 
@@ -259,7 +259,7 @@ AFRAME.registerComponent("ik-controller", {
       invHipsQuaternion.copy(avatar.quaternion).invert();
       head.quaternion.setFromRotationMatrix(headTransform).premultiply(invHipsQuaternion);
 
-      avatar.updateMatrix();
+      avatar.updateMatrices();
       rootToChest.multiplyMatrices(avatar.matrix, chest.matrix);
       invRootToChest.copy(rootToChest).invert();
 
