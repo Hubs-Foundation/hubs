@@ -61,6 +61,9 @@ export class App {
 
     const renderClock = new THREE.Clock();
 
+    // TODO NAF currently depends on this, it should not
+    sceneEl.clock = renderClock;
+
     // Main RAF loop
     function mainTick(_rafTime, xrFrame) {
       // TODO we should probably be using time from the raf loop itself
