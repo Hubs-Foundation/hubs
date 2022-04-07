@@ -18,7 +18,7 @@ If you just want to check out how Hubs works and make your own modifications con
 
 ### Quick Start
 
-[Install NodeJS](https://nodejs.org) if you haven't already. We recommend version 12 or above.
+[Install NodeJS](https://nodejs.org) if you haven't already. We recommend version 14 or above.
 
 Run the following commands:
 
