@@ -121,14 +121,14 @@
                 </a-entity>
             </template>
             <template id="remote-avatar">
-                <a-entity tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info matrix-auto-update visible="false">
-                    <a-entity class="camera" matrix-auto-update>
+                <a-entity tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot" networked-avatar ik-root player-info visible="false">
+                    <a-entity class="camera">
                         <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                     </a-entity>
 
-                    <a-entity class="left-controller" matrix-auto-update></a-entity>
+                    <a-entity class="left-controller"></a-entity>
 
-                    <a-entity class="right-controller" matrix-auto-update></a-entity>
+                    <a-entity class="right-controller"></a-entity>
 
                     <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" billboard="onlyY: true;">
                         <a-entity class="nametag-background" mixin="nametag-background-mixin" slice9="width: 1">
@@ -319,7 +319,6 @@
                     scalable-when-grabbed
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
-                    matrix-auto-update
                     hoverable-visuals
                     position-at-border__freeze="target:.freeze-menu"
                     position-at-border__freeze-unprivileged="target:.freeze-unprivileged-menu"
@@ -557,7 +556,6 @@
                     scalable-when-grabbed
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
                     set-yxz-order
-                    matrix-auto-update
                     position-at-border__freeze="target:.freeze-menu;"
                     hoverable-visuals
                 >
@@ -607,7 +605,6 @@
                     tags="togglesHoveredActionSet: true; inspectable: true;"
                     set-unowned-body-kinematic
                     set-yxz-order
-                    matrix-auto-update
                 >
                     <a-entity class="ui interactable-ui">
                     </a-entity>
@@ -624,7 +621,6 @@
                     is-remote-hover-target
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
                     floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true; gravitySpeedLimit: 0; reduceAngularFloat: true;"
-                    matrix-auto-update
                     scale="0.5 0.5 0.5"
                     action-to-remove__pen="path: /actions/pen/remove;"
                     position-at-border="target:.pen-menu"
@@ -656,7 +652,6 @@
                     camera-tool
                     is-remote-hover-target
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
-                    matrix-auto-update
                     shape-helper="type: box; fit: manual; halfExtents: 0.22 0.14 0.1; offset: 0 0.02 0;"
                     floaty-object="autoLockOnRelease: true; autoLockOnLoad: true;"
                     owned-object-limiter="counter: #camera-counter"
@@ -1166,14 +1161,14 @@
                 <a-entity in-world-hud visibility-while-frozen="visible: false; requireHoverOnNonMobile: false;" rotation="30 0 0" >
                     <a-rounded height="0.08" width="0.2" color="#000000" position="-0.44 -0.045 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
                     <a-image scale="0.07 0.06 0.06" position="-0.38 -0.005 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
-                    <a-entity id="hud-presence-count" text="value: ; textAlign:center;" position="-0.30 -0.005 0.001" matrix-auto-update></a-entity>
+                    <a-entity id="hud-presence-count" text="value: ; textAlign:center;" position="-0.30 -0.005 0.001"></a-entity>
                     <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target tags="singleActionButton: true;">
                         <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
                             <a-entity text=" value:invite; textAlign:center;" text-raycast-hack position="0 0 0.001"></a-entity>
                         </a-entity>
                     </a-entity>
                     <a-rounded visible="false" vr-mode-toggle-visibility id="hud-tooltip" height="0.08" width="0.4" color="#000000" position="-0.2 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
-                        <a-entity text="value: ; textAlign:center; fontSize: 0.06;" position="0.2 0.04 0.001" matrix-auto-update></a-entity>
+                        <a-entity text="value: ; textAlign:center; fontSize: 0.06;" position="0.2 0.04 0.001"></a-entity>
                     </a-rounded>
                     <a-entity
                         is-remote-hover-target
@@ -1264,7 +1259,6 @@
                 visibility-by-path="path: /actions/leftHand/matrix"
                 hand-controls2="left"
                 teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
-                matrix-auto-update
                 body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 set-yxz-order
@@ -1278,7 +1272,6 @@
                 visibility-by-path="path: /actions/rightHand/matrix"
                 hand-controls2="right"
                 teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
-                matrix-auto-update
                 body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 set-yxz-order
@@ -1338,7 +1331,7 @@
                 "
         ></a-entity>
 
-        <a-entity matrix-auto-update class="ui interactable-ui vr-notice" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
+        <a-entity class="ui interactable-ui vr-notice" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
             <a-entity slice9="width: 0.8; height: 0.25; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
                 text-button="
                     textHoverColor: #fff;
@@ -1356,7 +1349,7 @@
                 <a-entity text="value:View your desktop to continue; textAlign:center;" position="0 0 0.001"></a-entity>
             </a-entity>
         </a-entity>
-        <a-entity matrix-auto-update class="ui interactable-ui media-mirror" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
+        <a-entity class="ui interactable-ui media-mirror" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
             <a-entity id="media-mirror-target" position="0 0 -0.075"></a-entity>
             <a-entity class="media-mirror-close" close-mirrored-media-button mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.35 0.001" scale="0.65 0.65 0.65">
                 <a-entity
@@ -1367,7 +1360,7 @@
                 ></a-entity>
             </a-entity>
         </a-entity>
-        <a-entity id="viewing-rig" set-yxz-order matrix-auto-update>
+        <a-entity id="viewing-rig" set-yxz-order>
             <a-entity
                 id="viewing-camera"
                 camera="near: 0.05"
@@ -1375,8 +1368,7 @@
                 rotation
                 fader
                 set-yxz-order
-                pitch-yaw-rotator
-                matrix-auto-update>
+                pitch-yaw-rotator>
             </a-entity>
         </a-entity>
         <a-entity id="scene-preview-node">
