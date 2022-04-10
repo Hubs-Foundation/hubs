@@ -190,6 +190,22 @@ async function fetchAppConfigAndEnvironmentVars() {
   return appConfig;
 }
 
+function htmlPagePlugin({ name, extraChunks = [], chunksSortMode, inject }) {
+  const options = {
+    filename: `${name}.html`,
+    template: path.join(__dirname, "src", `${name}.html`),
+    chunks: [...extraChunks, name],
+    minify: {
+      removeComments: false
+    }
+  };
+
+  if (chunksSortMode) options.chunksSortMode = chunksSortMode;
+  if (inject) options.inject = inject;
+
+  return new HTMLWebpackPlugin(options);
+}
+
 module.exports = async (env, argv) => {
   env = env || {};
 
@@ -547,103 +563,53 @@ module.exports = async (env, argv) => {
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
       }),
       // Each output page needs a HTMLWebpackPlugin entry
-      new HTMLWebpackPlugin({
-        filename: "index.html",
-        template: path.join(__dirname, "src", "index.html"),
-        chunks: ["support", "index"],
+      htmlPagePlugin({
+        name: "index",
+        extraChunks: ["support"],
+        chunksSortMode: "manual"
+      }),
+      htmlPagePlugin({
+        name: "hub",
+        extraChunks: ["webxr-polyfill", "support"],
         chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
-        filename: "hub.html",
-        template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["webxr-polyfill", "support", "hub"],
+      htmlPagePlugin({
+        name: "scene",
+        extraChunks: ["support"],
         chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
-        filename: "scene.html",
-        template: path.join(__dirname, "src", "scene.html"),
-        chunks: ["support", "scene"],
+      htmlPagePlugin({
+        name: "avatar",
+        extraChunks: ["support"],
         chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
-        filename: "avatar.html",
-        template: path.join(__dirname, "src", "avatar.html"),
-        chunks: ["support", "avatar"],
-        chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        name: "link",
+        extraChunks: ["support"],
+        chunksSortMode: "manual"
       }),
-      new HTMLWebpackPlugin({
-        filename: "link.html",
-        template: path.join(__dirname, "src", "link.html"),
-        chunks: ["support", "link"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        name: "discord"
       }),
-      new HTMLWebpackPlugin({
-        filename: "discord.html",
-        template: path.join(__dirname, "src", "discord.html"),
-        chunks: ["discord"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        name: "whats-new",
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
-        filename: "whats-new.html",
-        template: path.join(__dirname, "src", "whats-new.html"),
-        chunks: ["whats-new"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        name: "cloud",
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
-        filename: "cloud.html",
-        template: path.join(__dirname, "src", "cloud.html"),
-        chunks: ["cloud"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        name: "signin"
       }),
-      new HTMLWebpackPlugin({
-        filename: "signin.html",
-        template: path.join(__dirname, "src", "signin.html"),
-        chunks: ["signin"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        name: "verify"
       }),
-      new HTMLWebpackPlugin({
-        filename: "verify.html",
-        template: path.join(__dirname, "src", "verify.html"),
-        chunks: ["verify"],
-        minify: {
-          removeComments: false
-        }
-      }),
-      new HTMLWebpackPlugin({
-        filename: "tokens.html",
-        template: path.join(__dirname, "src", "tokens.html"),
-        chunks: ["tokens"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        name: "tokens"
       }),
       new CopyWebpackPlugin([
         {
