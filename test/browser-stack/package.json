@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "node ./tests/ie11.js"
+  },
+  "devDependencies": {
+    "selenium-webdriver": "^4.1.1"
+  }
+}
