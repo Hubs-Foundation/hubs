@@ -4,7 +4,8 @@
 NOTE: support.js needs to be as self-contained as possible, since it needs to work in legacy browers
 that we do not support. Avoid adding imports to libraries or other modules from our own codebase
 that might break the support UI in legacy browsers.
-We also do not support localization in this file.
+We also do not support localization in this file, since it would require additional transpiliation
+and polyfilling.
 */
 
 import React from "react";
@@ -31,9 +32,11 @@ function getPlatformSupport() {
   return [
     { name: "Web Assembly", supported: !!window.WebAssembly },
     { name: "Media Devices", supported: !!navigator.mediaDevices },
-    { name: "Shorthand initializer syntax", supported: syntaxSupported(SHORTHAND_INITIALIZER) },
-    { name: "Spread syntax", supported: syntaxSupported(SPREAD_SYNTAX) },
-    { name: "Optional catch syntax", supported: syntaxSupported(CATCH_SYNTAX) }
+    {
+      name: "Modern JavaScript Syntax",
+      supported:
+        syntaxSupported(CATCH_SYNTAX) && syntaxSupported(SPREAD_SYNTAX) && syntaxSupported(SHORTHAND_INITIALIZER)
+    }
   ];
 }
 
@@ -88,9 +91,9 @@ class Support extends React.Component {
           <p className={styles.unsupportedLangs}>
             · <span>Unsupported</span> · <span>No Soportado</span> · <span>Nicht Unterstützt</span>
             {" · "}
-            <span>Sem Suporte</span> · <span>Non Compatible</span> · <span>не поддерживается</span>
+            <span>Sem Suporte</span> · <span>Non Compatible</span> · <span>不支援</span>
             {" · "}
-            <span>サポートされていません</span> ·
+            <span>не поддерживается</span> · <span>サポートされていません</span> ·
           </p>
           <br />
           <p>
