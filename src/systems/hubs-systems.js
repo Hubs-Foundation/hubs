@@ -22,7 +22,6 @@ import { WaypointSystem } from "./waypoint-system";
 import { CharacterControllerSystem } from "./character-controller-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { CursorPoseTrackingSystem } from "./cursor-pose-tracking";
-import { ScaleInScreenSpaceSystem } from "./scale-in-screen-space";
 import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { AudioSystem } from "./audio-system";
@@ -63,7 +62,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.characterController = new CharacterControllerSystem(this.el);
     this.waypointSystem = new WaypointSystem(this.el, this.characterController);
     this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
-    this.scaleInScreenSpaceSystem = new ScaleInScreenSpaceSystem();
     this.menuAnimationSystem = new MenuAnimationSystem();
     this.audioSettingsSystem = new AudioSettingsSystem(this.el);
     this.animationMixerSystem = new AnimationMixerSystem();
@@ -97,7 +95,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.cursorTargettingSystem.tick(t);
     this.hoverMenuSystem.tick();
     this.positionAtBorderSystem.tick();
-    this.scaleInScreenSpaceSystem.tick();
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
     this.singleActionButtonSystem.tick();

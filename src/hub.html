@@ -74,7 +74,6 @@
             <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
             <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
             <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
-            <img id="cursor-image" crossorigin="anonymous" src="./assets/images/cursor.svg">
             <img id="nametag" crossorigin="anonymous" src="./assets/hud/nametag.9.png">
             <img id="nametag-border" crossorigin="anonymous" src="./assets/hud/nametag-border.9.png">
             <img id="hand-raised" crossorigin="anonymous" src="./assets/hud/hand-raised.png">
@@ -1072,21 +1071,10 @@
             cursor-controller="cursor: #left-cursor; camera: #avatar-pov-node; cursorVisual: #left-cursor-visual;"
         ></a-entity>
 
-        <a-sphere
+        <a-entity
             id="right-cursor"
-            material="shader: flat; visible: false;"
-            radius="0.02"
-            segments-width="9"
-            segments-height="9"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
-            <a-circle
-                id="right-cursor-visual"
-                radius="0.02"
-                material="shader: flat; src: #cursor-image; depthTest: false; opacity: 0.9;"
-                scale-in-screen-space="baseScale: 0.10 0.10 0.10; addedScale: 0.4 0.4 0.4; scalePreferenceName: cursorSize;"
-                billboard>
-            </a-circle>
             <a-entity
                 sprite
                 icon-button="image: rotate-cursor.png"
@@ -1095,23 +1083,12 @@
                 class="hud"
                 visible-if-transforming="hand:right"
             ></a-entity>
-        </a-sphere>
+        </a-entity>
 
-        <a-sphere
+        <a-entity
             id="left-cursor"
-            material="shader: flat; visible: false;"
-            radius="0.02"
-            segments-width="9"
-            segments-height="9"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
-            <a-circle
-                id="left-cursor-visual"
-                radius="0.02"
-                material="shader: flat; src: #cursor-image; depthTest: false; opacity: 0.9;"
-                scale-in-screen-space="baseScale: 0.10 0.10 0.10; addedScale: 0.4 0.4 0.4; scalePreferenceName: cursorSize;"
-                billboard>
-            </a-circle>
             <a-entity
                 sprite
                 icon-button="image: rotate-cursor.png"
@@ -1120,7 +1097,7 @@
                 class="hud"
                 visible-if-transforming="hand:left"
             ></a-entity>
-        </a-sphere>
+        </a-entity>
 
         <!-- Avatar Rig -->
         <a-entity
