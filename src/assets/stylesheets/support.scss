@@ -14,16 +14,16 @@
 }
 
 :local(.support-content) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   text-align: center;
+  margin: 1em;
   a {
     font-size: smaller;
     color: white;
   }
   input {
     width: 15em;
+    background: white;
+    color: black;
     font-size: 12pt;
     padding: 0.4em;
     border-radius: 10px;
@@ -33,11 +33,14 @@
     margin-left: 0.5em;
     font-size: 12pt;
   }
-}
-
-:local(.logo) {
-  max-width: 250px;
-  filter: drop-shadow(0 0 4px #888);
+  :local(.unsupported-langs) {
+    span {
+      white-space: nowrap;
+    }
+  }
+  table {
+    margin: auto;
+  }
 }
 
 :local(.details) {
