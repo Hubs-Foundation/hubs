@@ -57,7 +57,7 @@ function Root() {
         }
         else if(res.result == 'fail' && res.error == 'get_exhibitions_fail')
         {
-          toast.error('Get Exhibitions fail !', {autoClose:5000})
+          toast.error('Get Exhibitions fail !', {autoClose:1000})
         }
       })
       ExhibitionsService.getAllScenes().then((res)=>{
@@ -66,7 +66,7 @@ function Root() {
         }
         else if(res.result == 'fail' && res.error == 'get_exhibitions_fail')
         {
-          toast.error('Get Exhibitions fail !', {autoClose:5000})
+          toast.error('Get Exhibitions fail !', {autoClose:1000})
         }
       })
     } else {
@@ -77,7 +77,7 @@ function Root() {
         }
         else if(res.result == 'fail' && res.error == 'get_exhibitions_fail')
         {
-          toast.error('Get Exhibitions fail !', {autoClose:5000})
+          toast.error('Get Exhibitions fail !', {autoClose:1000})
         }
       })
     }
@@ -301,34 +301,34 @@ function Root() {
     const data = exhibition;
     ExhibitionsService.postCreateOne(data).then((res)=>{
       if(res.result == 'ok'){
-        toast.success('Create new tour success !', {autoClose:10000})
+        toast.success('Create new tour success !', {autoClose:5000})
         setIsOpenExhibition(false);
         // setExhibitions([...exhibitions, res.data]);
         window.location.reload();
       }
       else if(res.result == 'fail' && res.error == 'verify_token_fail')
       {
-        toast.error('You do not have permission to change or create !', {autoClose:10000})
+        toast.error('You do not have permission to change or create !', {autoClose:5000})
       }
       else if(res.result == 'fail' && res.error == 'create_exhibition_error')
       {
-        toast.error('The number of people in 1 room exceeds the allowed limit of 50 people !', {autoClose:10000})
+        toast.error('The number of people in 1 room exceeds the allowed limit of 50 people !', {autoClose:5000})
       }
       else if(res.result == 'fail' && res.error == 'invalid_name')
       {
-        toast.error('name should be length 4-255 !', {autoClose:10000})
+        toast.error('name should be length 4-255 !', {autoClose:5000})
       }
       else if(res.result == 'fail' && res.error == 'invalid_maxSize')
       {
-        toast.error('the number of people in the room cannot be less than 1 !', {autoClose:10000})
+        toast.error('the number of people in the room cannot be less than 1 !', {autoClose:5000})
       }
       else if(res.result == 'fail' && res.error == 'invalid_startDate')
       {
-        toast.error('You must select the start date !', {autoClose:10000})
+        toast.error('You must select the start date !', {autoClose:5000})
       }
       else
       {
-        toast.error('System error Please try again later !', {autoClose:10000})
+        toast.error('System error Please try again later !', {autoClose:5000})
       }
     })
   }
@@ -347,27 +347,27 @@ function Root() {
       }
       else if(res.result == 'fail' && res.error == 'verify_token_fail')
       {
-        toast.error('You do not have permission to change or create !', {autoClose:10000})
+        toast.error('You do not have permission to change or create !', {autoClose:5000})
       }
       else if(res.result == 'fail' && res.error == 'create_exhibition_error')
       {
-        toast.error('The number of people in 1 room exceeds the allowed limit of 50 people!', {autoClose:10000})
+        toast.error('The number of people in 1 room exceeds the allowed limit of 50 people!', {autoClose:5000})
       }
       else if(res.result == 'fail' && res.error == 'invalid_name')
       {
-        toast.error('name should be length 4-255 !', {autoClose:10000})
+        toast.error('name should be length 4-255 !', {autoClose:5000})
       }
       else if(res.result == 'fail' && res.error == 'invalid_maxSize')
       {
-        toast.error('the number of people in the room cannot be less than 1 !', {autoClose:10000})
+        toast.error('the number of people in the room cannot be less than 1 !', {autoClose:5000})
       }
       else if(res.result == 'fail' && res.error == 'invalid_startDate')
       {
-        toast.error('You must select the start date !', {autoClose:10000})
+        toast.error('You must select the start date !', {autoClose:5000})
       }
       else
       {
-        toast.error('System error Please try again later !', {autoClose:10000})
+        toast.error('System error Please try again later !', {autoClose:5000})
       }
     })
   }
@@ -378,18 +378,18 @@ function Root() {
         exhibitions.data.forEach(exhibition => {
           if(exhibition.id == exhibitionId){
             exhibition.public = res.data.public;
-            toast.success('Change status success !', {autoClose:10000})
+            toast.success('Change status success !', {autoClose:5000})
           }
         });
         setIsOpenToggle(!isOpenToggle);
       }
       else if(res.result == 'fail' && res.error =='invalid_id')
       {
-        toast.error('exhibition id is incorrect !', {autoClose:10000})
+        toast.error('exhibition id is incorrect !', {autoClose:5000})
       }
       else
       {
-        toast.error('System error Please try again later !', {autoClose:10000})
+        toast.error('System error Please try again later !', {autoClose:5000})
       }
       
     })

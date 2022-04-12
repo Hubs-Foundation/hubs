@@ -62,7 +62,7 @@ function Root() {
         }
         else if(res.result == 'fail' && res.error == 'get_exhibitions_fail')
         {
-          toast.error('Get Exhibitions fail !', {autoClose:5000})
+          toast.error('Get Exhibitions fail !', {autoClose:1000})
         }
       })
     } else {
@@ -73,7 +73,7 @@ function Root() {
         }
         else if(res.result == 'fail' && res.error == 'get_exhibitions_fail')
         {
-          toast.error('Get Exhibitions fail !', {autoClose:5000})
+          toast.error('Get Exhibitions fail !', {autoClose:1000})
         }
       })
     }
@@ -118,14 +118,14 @@ function Root() {
           if(exhibition.id == exhibitionId){
             exhibition.reservated = true;
             exhibition.reservationCount = exhibition.reservationCount + 1;
-            toast.success('Successful reservation!', {autoClose:5000})
+            toast.success('Successful reservation!', {autoClose:1000})
           }
         });
         setIsOpen(!isOpen);
       }
       else if(res.result == 'fail')
       {
-        toast.error('Error reservation!', {autoClose:5000})
+        toast.error('Error reservation!', {autoClose:1000})
       }
       
     })
