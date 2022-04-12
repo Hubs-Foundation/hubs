@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useRef } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FormattedMessage, injectIntl } from "react-intl";
@@ -11,10 +11,18 @@ import { ReactComponent as Twitter } from "./icons/Twitter.svg";
 import { ReactComponent as CodeBranch } from "./icons/CodeBranch.svg";
 import { ReactComponent as Pen } from "./icons/Pen.svg";
 
+import { useResizeViewport } from "./room/useResizeViewport";
+function ResizeHookWrapper({ store, scene }) {
+  const viewportRef = useRef(document.body);
+  useResizeViewport(viewportRef, store, scene);
+  return <></>;
+}
+
 class SceneUI extends Component {
   static propTypes = {
     intl: PropTypes.object,
     scene: PropTypes.object,
+    store: PropTypes.object,
     sceneLoaded: PropTypes.bool,
     sceneId: PropTypes.string,
     sceneName: PropTypes.string,
@@ -277,6 +285,7 @@ class SceneUI extends Component {
             <div className={styles.attribution}>{attributions}</div>
           </div>
         </div>
+        <ResizeHookWrapper store={this.props.store} scene={this.props.scene} />
       </div>
     );
   }

@@ -9,13 +9,11 @@ AFRAME.registerComponent("directional-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.DirectionalLight();
     this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, 1);
     this.light.add(this.light.target);
     this.el.setObject3D("directional-light", this.light);
-    this.el.sceneEl.systems.light.registerLight(el);
     this.rendererSystem = this.el.sceneEl.systems.renderer;
   },
 
