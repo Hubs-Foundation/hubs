@@ -1,0 +1,57 @@
+import React from "react";
+import "./popup.css";
+
+const Popup = props => {
+  const currentProps = {
+    data: {},
+    title: "Popup larchiveum",
+    size: 'lg',
+    content: <p>Wellcome to larchiveum</p>,
+    closeButton: true,
+    actions: [
+      {
+        class: 'btn btn-seccondary',
+        text: 'Cancle',
+        callback: ()=>{}
+      },
+      {
+        class: 'btn btn-success',
+        text: 'Ok',
+        callback: ()=>{}
+      }
+    ]
+  }
+
+  currentProps.data = props.data || currentProps.data;
+  currentProps.title = props.title || currentProps.title;
+  currentProps.size = props.size || currentProps.size;
+  currentProps.content = props.content || currentProps.content;
+  currentProps.closeButton = props.closeButton || currentProps.closeButton;
+  currentProps.actions = props.actions || currentProps.actions;
+  currentProps.handleClose = props.handleClose || currentProps.handleClose;
+  
+  return (
+    <div className="popup-overlay">
+      <div className={'popup-content ' + currentProps.size}>
+        <div className="modal">
+          {currentProps.closeButton = true ? 
+            <button className="close" onClick={currentProps.handleClose}>
+              &times;
+            </button>
+          :''}
+          <div className="header"> {currentProps.title}</div>
+          <div className="content">
+              {currentProps.content}
+          </div>
+          <div className="actions">
+            {currentProps.actions.map((action)=>{
+              return <button className={action.class} onClick={()=>{action.callback(currentProps.data)}}> {action.text} </button>
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+ 
+export default Popup;

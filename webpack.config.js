@@ -283,6 +283,9 @@ module.exports = async (env, argv) => {
       signin: path.join(__dirname, "src", "signin.js"),
       verify: path.join(__dirname, "src", "verify.js"),
       tokens: path.join(__dirname, "src", "tokens.js"),
+      signup: path.join(__dirname, "src", "signup.js"),
+      manager: path.join(__dirname, "src", "manager.js"),
+      index1: path.join(__dirname, "src", "index1.js"),
       "whats-new": path.join(__dirname, "src", "whats-new.js"),
       "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
     },
@@ -307,7 +310,12 @@ module.exports = async (env, argv) => {
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
           { from: /^\/tokens/, to: "/tokens.html" },
-          { from: /^\/whats-new/, to: "/whats-new.html" }
+          { from: /^\/whats-new/, to: "/whats-new.html" },
+          { from: /^\/signup/, to: "/signup.html" },
+          { from: /^\/manager/, to: "/manager.html" },
+          { from: /^\/manager\/exhibition\/:id/, to: "/exhibition.html" },
+          { from: /^\/manager\/exhibition/, to: "/manager.html" },
+          
         ]
       },
       before: function(app) {
@@ -548,6 +556,18 @@ module.exports = async (env, argv) => {
       }),
       // Each output page needs a HTMLWebpackPlugin entry
       new HTMLWebpackPlugin({
+        filename: "index1.html",
+        template: path.join(__dirname, "src", "index1.html"),
+        chunks: ["support", "index1"],
+        chunksSortMode: "manual",
+        minify: {
+          removeComments: false
+        }
+      }),
+
+      // ===============================================
+
+      new HTMLWebpackPlugin({
         filename: "index.html",
         template: path.join(__dirname, "src", "index.html"),
         chunks: ["support", "index"],
@@ -556,6 +576,32 @@ module.exports = async (env, argv) => {
           removeComments: false
         }
       }),
+
+      new HTMLWebpackPlugin({
+        filename: "exhibition.html",
+        template: path.join(__dirname, "src", "exhibition.html"),
+        chunks: ["exhibition"],
+        minify: {
+          removeComments: false
+        }
+      }),
+      new HTMLWebpackPlugin({
+        filename: "manager.html",
+        template: path.join(__dirname, "src", "manager.html"),
+        chunks: ["manager"],
+        minify: {
+          removeComments: false
+        }
+      }),
+      new HTMLWebpackPlugin({
+        filename: "signup.html",
+        template: path.join(__dirname, "src", "signup.html"),
+        chunks: ["signup"],
+        minify: {
+          removeComments: false
+        }
+      }),
+      // ===============================================
       new HTMLWebpackPlugin({
         filename: "hub.html",
         template: path.join(__dirname, "src", "hub.html"),
