@@ -15,42 +15,45 @@ function easeOutIn(t) {
   return 0.5 * (t = t * 2 - 1) * t * t + 0.5;
 }
 
-const RayCurve = function(numPoints, width) {
-  this.geometry = new THREE.BufferGeometry();
-  this.vertices = new Float32Array(numPoints * 3 * 6);
-  this.width = width;
-
-  this.geometry.setAttribute("position", new THREE.BufferAttribute(this.vertices, 3).setUsage(THREE.DynamicDrawUsage));
-
-  this.material = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-    transparent: true
-  });
-
-  this.mesh = new THREE.Mesh(this.geometry, this.material);
-
-  this.mesh.frustumCulled = false;
-  this.mesh.vertices = this.vertices;
-
-  this.direction = new THREE.Vector3();
-  this.numPoints = numPoints;
-};
-
 const UP = new THREE.Vector3(0, 1, 0);
-RayCurve.prototype = {
-  setDirection: function(direction) {
+
+class RayCurve extends THREE.Mesh {
+  constructor(numPoints, width) {
+    super(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true
+      })
+    );
+
+    this.vertices = new Float32Array(numPoints * 3 * 6);
+    this.width = width;
+
+    this.geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(this.vertices, 3).setUsage(THREE.DynamicDrawUsage)
+    );
+
+    this.frustumCulled = false;
+
+    this.direction = new THREE.Vector3();
+    this.numPoints = numPoints;
+  }
+
+  setDirection(direction) {
     this.direction
       .copy(direction)
       .cross(UP)
       .normalize()
       .multiplyScalar(this.width / 2);
-  },
+  }
 
-  setWidth: function(width) {
+  setWidth(width) {
     this.width = width;
-  },
+  }
 
-  setPoint: (function() {
+  setPoint = (function() {
     const A = new THREE.Vector3();
     const B = new THREE.Vector3();
     const C = new THREE.Vector3();
@@ -111,8 +114,8 @@ RayCurve.prototype = {
 
       this.geometry.attributes.position.needsUpdate = true;
     };
-  })()
-};
+  })();
+}
 
 function parabolicCurve(p0, v0, t, out) {
   out.x = p0.x + v0.x * t;
@@ -145,7 +148,7 @@ const checkLineIntersection = (function() {
 const MISS_OPACITY = 0.1;
 const HIT_OPACITY = 0.3;
 const MISS_COLOR = 0xff0000;
-const HIT_COLOR = 0x00ff00;
+const HIT_COLOR = 0x99ff99;
 const FORWARD = new THREE.Vector3(0, 0, -1);
 const LANDING_NORMAL = new THREE.Vector3(0, 1, 0);
 const MAX_LANDING_ANGLE = 45;
@@ -171,10 +174,8 @@ AFRAME.registerComponent("teleporter", {
     this.characterController = this.el.sceneEl.systems["hubs-systems"].characterController;
     this.isTeleporting = false;
     this.rayCurve = new RayCurve(20, 0.025);
-    this.rayCurve.mesh.visible = false;
-    this.teleportEntity = document.createElement("a-entity");
-    this.teleportEntity.setObject3D("mesh", this.rayCurve.mesh);
-    this.el.sceneEl.appendChild(this.teleportEntity);
+    this.rayCurve.visible = false;
+    this.el.sceneEl.object3D.add(this.rayCurve);
 
     this.p0 = new THREE.Vector3();
     this.v0 = new THREE.Vector3();
@@ -236,11 +237,11 @@ AFRAME.registerComponent("teleporter", {
       this.isTeleporting = true;
       this.timeTeleporting = 0;
       this.hit = false;
-      this.rayCurve.mesh.visible = true;
-      this.rayCurve.mesh.updateMatrixWorld();
-      this.rayCurve.mesh.material.opacity = MISS_OPACITY;
-      this.rayCurve.mesh.material.color.set(MISS_COLOR);
-      this.rayCurve.mesh.material.needsUpdate = true;
+      this.rayCurve.visible = true;
+      this.rayCurve.updateMatrixWorld();
+      this.rayCurve.material.opacity = MISS_OPACITY;
+      this.rayCurve.material.color.set(MISS_COLOR);
+      this.rayCurve.material.needsUpdate = true;
       this.teleportingSound = sfx.playSoundLoopedWithGain(SOUND_TELEPORT_START);
       if (this.teleportingSound) {
         this.teleportingSound.gain.gain.value = 0.005;
@@ -257,7 +258,7 @@ AFRAME.registerComponent("teleporter", {
     if (userinput.get(confirm)) {
       this.hitEntity.visible = false;
       this.isTeleporting = false;
-      this.rayCurve.mesh.visible = false;
+      this.rayCurve.visible = false;
 
       if (this.teleportingSound) {
         this.stopPlayingTeleportSound();
