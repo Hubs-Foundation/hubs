@@ -42,7 +42,6 @@ patchWebGLRenderingContext();
 require("three/examples/js/loaders/GLTFLoader");
 
 import "networked-aframe/src/index";
-import "aframe-rounded";
 import "webrtc-adapter";
 import { detectOS, detect } from "detect-browser";
 import {
