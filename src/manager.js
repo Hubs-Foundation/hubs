@@ -205,7 +205,9 @@ function Root() {
     const userInfo = Store.getUser();
     if(userInfo){
       return(
+        
         <span className="display-name">
+          <a className="gotohome" href='/admin'>Admin </a>
           <span className="nameA"> {userInfo.displayName || userInfo.email}</span> / <a className="gotohome" href='/'>Back Home </a>
         </span>
       ) 

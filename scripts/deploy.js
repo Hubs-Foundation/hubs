@@ -101,6 +101,9 @@ const getTs = (() => {
   });
   step.text = "Preparing Deploy.";
 
+  // HACK TO WORK AROUND NCP BEHAVIOUR
+  await new Promise(res => setTimeout(res, 5000));
+
   step.text = "Packaging Build.";
   tar.c({ sync: true, gzip: true, C: path.join(__dirname, "..", "dist"), file: "_build.tar.gz" }, ["."]);
   step.text = `Uploading Build ${buildEnv.BUILD_VERSION}.`;
