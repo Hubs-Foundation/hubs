@@ -1,8 +1,33 @@
 /* global AFRAME */
+import { textureLoader } from "../utils/media-utils";
 
-if (typeof AFRAME === "undefined") {
-  throw new Error("Component attempted to register before AFRAME was available.");
-}
+import actionButtonSrc from "../assets/hud/action_button.9.png";
+import buttonSrc from "../assets/hud/button.9.png";
+import nametagSrc from "../assets/hud/nametag.9.png";
+import nametagBorderSrc from "../assets/hud/nametag-border.9.png";
+
+const textures = {
+  "action-button": {
+    tex: textureLoader.load(actionButtonSrc),
+    width: 128,
+    height: 128
+  },
+  button: {
+    tex: textureLoader.load(buttonSrc),
+    width: 128,
+    height: 128
+  },
+  nametag: {
+    tex: textureLoader.load(nametagSrc),
+    width: 128,
+    height: 128
+  },
+  "nametag-border": {
+    tex: textureLoader.load(nametagBorderSrc),
+    width: 128,
+    height: 128
+  }
+};
 
 /**
  * Slice9 component for A-Frame.
@@ -19,7 +44,7 @@ AFRAME.registerComponent("slice9", {
     padding: { default: 0.1, min: 0.01 },
     right: { default: 0, min: 0 },
     side: { default: "front", oneOf: ["front", "back", "double"] },
-    src: { type: "map" },
+    src: { oneOf: Object.keys(textures) },
     top: { default: 0, min: 0 },
     transparent: { default: true },
     width: { default: 1, min: 0 },
@@ -96,8 +121,8 @@ AFRAME.registerComponent("slice9", {
       height = 1;
       width = 1;
     } else {
-      height = this.material.map.image.width;
-      width = this.material.map.image.width;
+      height = textures[data.src].height;
+      width = textures[data.src].width;
     }
     uv = {
       left: data.left / width,
@@ -193,6 +218,12 @@ AFRAME.registerComponent("slice9", {
     }
   },
 
+  setMap(texture) {
+    this.material.map = texture;
+    this.material.needsUpdate = true;
+    this.regenerateMesh();
+  },
+
   /**
    * Update `src` if using built-in material.
    */
@@ -205,7 +236,7 @@ AFRAME.registerComponent("slice9", {
       }
       // Texture added or changed.
       this.textureSrc = src;
-      this.el.sceneEl.systems.material.loadTexture(src, { src: src }, setMap.bind(this));
+      this.setMap(textures[src].tex);
       return;
     }
 
@@ -213,13 +244,8 @@ AFRAME.registerComponent("slice9", {
     if (!this.material.map) {
       return;
     }
-    setMap(null);
 
-    function setMap(texture) {
-      this.material.map = texture;
-      this.material.needsUpdate = true;
-      this.regenerateMesh();
-    }
+    this.setMap(null);
   }
 });
 
