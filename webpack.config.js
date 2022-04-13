@@ -281,6 +281,7 @@ module.exports = async (env, argv) => {
       discord: path.join(__dirname, "src", "discord.js"),
       cloud: path.join(__dirname, "src", "cloud.js"),
       signin: path.join(__dirname, "src", "signin.js"),
+      login: path.join(__dirname, "src", "login.js"),
       verify: path.join(__dirname, "src", "verify.js"),
       tokens: path.join(__dirname, "src", "tokens.js"),
       signup: path.join(__dirname, "src", "signup.js"),
@@ -306,6 +307,7 @@ module.exports = async (env, argv) => {
       historyApiFallback: {
         rewrites: [
           { from: /^\/signin/, to: "/signin.html" },
+          { from: /^\/login/, to: "/login.html" },
           { from: /^\/discord/, to: "/discord.html" },
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
@@ -671,6 +673,14 @@ module.exports = async (env, argv) => {
         filename: "signin.html",
         template: path.join(__dirname, "src", "signin.html"),
         chunks: ["signin"],
+        minify: {
+          removeComments: false
+        }
+      }),
+      new HTMLWebpackPlugin({
+        filename: "login.html",
+        template: path.join(__dirname, "src", "login.html"),
+        chunks: ["login"],
         minify: {
           removeComments: false
         }
