@@ -1,5 +1,5 @@
 
-import request from './apiRequest';
+import apiRequest from './apiRequest';
 import {API_ROOT} from './../constants';
 
 
@@ -61,6 +61,9 @@ class UserService {
         });
     };
 
+    verifyUser(email){
+       return apiRequest.post('/v1/auth/users/verifyUser', {email: email});
+    }
 
 }
 

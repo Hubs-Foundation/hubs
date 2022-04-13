@@ -9,6 +9,7 @@ import { HomePage } from "./react-components/page/HomePage";
 import { SigninPage } from "./react-components/page/SigninPage";
 import { SignupPage } from "./react-components/page/SignupPage";
 import { ManagerPage } from "./react-components/page/ManagerPage";
+import { WarningVerify } from "./react-components/page/WarningVerify";
 registerTelemetry("/home", "Hubs Home Page");
 
 const store = new Store();
@@ -35,7 +36,11 @@ function Root() {
       return (
         <SignupPage/>
       );
-    
+    case 'warning-verify':
+        return (
+          <WarningVerify/>
+        );
+
     case 'manager':
       return (
         <ManagerPage/>

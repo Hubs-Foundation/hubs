@@ -51,6 +51,15 @@ function Home() {
   }
 
   useEffect(() => {
+
+    // redirect to verify page
+    const qs = new URLSearchParams(location.search);
+    if (qs.has("auth_topic")) {
+      const redirectUrl = new URL("/verify", window.location);
+      redirectUrl.search = location.search;
+      window.location = redirectUrl;
+    }
+
     getAllExhibitions();
   },[filterExhibitionList.page])
 

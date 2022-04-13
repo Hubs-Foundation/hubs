@@ -1,6 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
+import async from "async";
 import { AuthContext } from "./AuthContext";
 import { VerifyModal, VerificationError, EmailVerified, VerifyingEmail } from "./VerifyModal";
+import UserService from "../../utilities/apiServices/UserService";
+import Store from '../../utilities/store';
 
 const VerificationStep = {
   verifying: "verifying",
@@ -10,52 +13,86 @@ const VerificationStep = {
 
 function useVerify() {
   const [step, setStep] = useState(VerificationStep.verifying);
-  const [error, setError] = useState();
+  const [larchiveumMessage, setLarchiveumMessage] = useState('');
+  const [hubMessage, setHubMessage] = useState('');
   const { verify } = useContext(AuthContext);
 
   useEffect(
+    
     () => {
-      const verifyAsync = async () => {
-        try {
-          const qs = new URLSearchParams(location.search);
 
-          const authParams = {
-            topic: qs.get("auth_topic"),
-            token: qs.get("auth_token"),
-            origin: qs.get("auth_origin"),
-            payload: qs.get("auth_payload")
-          };
-
-          await verify(authParams);
-          setStep(VerificationStep.complete);
-        } catch (error) {
-          setStep(VerificationStep.error);
-          setError(error);
+      async.parallel([
+        (cb) => {
+          const email = Store.getUser()?.email;
+          UserService.verifyUser(email)
+            .then((res)=>{
+              cb(null, res);
+            })
+            .catch((error)=>{
+              setLarchiveumMessage("Larchiveum singin error");
+              cb(null, null);
+            });
+        },
+        async (cb) => {
+          try {
+            const qs = new URLSearchParams(location.search);
+            const authParams = {
+              topic: qs.get("auth_topic"),
+              token: qs.get("auth_token"),
+              origin: qs.get("auth_origin"),
+              payload: qs.get("auth_payload")
+            };
+            await verify(authParams);
+            cb(null, true);
+          } catch (error) {
+            setHubMessage("Hubs signin error");
+            cb(null, true);
+          }
         }
-      };
-
-      verifyAsync();
+      ], (err, [larchiveum, hubs])=>{
+        debugger
+        if(larchiveum && hubs){
+          setStep(VerificationStep.complete);
+        }
+        else{
+          setStep(VerificationStep.error);
+        }
+      })
     },
     [verify]
   );
 
-  return { step, error };
+  return { step, larchiveumMessage, hubMessage };
 }
 
 export function VerifyModalContainer() {
-  const { step, error } = useVerify();
+  const { step, larchiveumMessage, hubMessage } = useVerify();
 
   let content;
 
+  if (step === VerificationStep.complete) {
+    content = <center>
+      <br></br><br></br><br></br><br></br>
+      <b>Verifying Email Complete</b>
+    </center>
+  }
+  else 
   if (step === VerificationStep.error) {
-    content = <VerificationError error={error} />;
-  } else if (step === VerificationStep.complete) {
-    const qs = new URLSearchParams(location.search);
-    const origin = qs.get("auth_origin");
-    content = <EmailVerified origin={origin} />;
+    content = <center>
+      <br></br><br></br>
+      <b>Verifying Email Error</b>
+      <br></br><br></br><br></br><br></br>
+      <p>{larchiveumMessage}</p>
+      <br></br>
+      <p>{hubMessage}</p>
+    </center>
   } else {
-    content = <VerifyingEmail />;
+    content = <VerifyingEmail/>;
   }
 
-  return <VerifyModal>{content}</VerifyModal>;
+  return (
+    <VerifyModal>
+      {content}
+    </VerifyModal>
+  );
 }
