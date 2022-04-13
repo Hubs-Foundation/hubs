@@ -135,7 +135,20 @@ body {
 
 		&:hover {
 			transform: scale(1.1);
-			color: #3EB2FD;
+			color: #007fd4;
+		}
+	}
+
+
+	.gotoadmin {
+		margin-top: 8px;
+		margin-right: 20px;
+		color: #ffc400;
+		cursor: pointer;
+
+		&:hover {
+			transform: scale(1.1);
+			color: #bb8f00;
 		}
 	}
 }
@@ -326,4 +339,10 @@ body {
 
 .ml-1 {
 	margin-left: 10px;
+}
+
+.icon-setting-admin {
+	position: absolute;
+	margin-left: -22px;
+	margin-top: 14px;
 }

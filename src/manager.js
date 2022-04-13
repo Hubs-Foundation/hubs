@@ -18,7 +18,7 @@ import defaultImage from './assets/larchiveum/default-image.png'
 import defaultImage1 from './assets/larchiveum/siri.gif'
 import Pagination from './react-components/pagination/pagination'
 import {APP_ROOT} from './utilities/constants'
-import { FaUserFriends ,FaRegCalendarAlt ,FaLink} from "react-icons/fa";
+import { FaUserFriends ,FaRegCalendarAlt ,FaLink,FaCog} from "react-icons/fa";
 
 registerTelemetry("/manager", "Hubs Home Page");
 
@@ -207,8 +207,8 @@ function Root() {
       return(
         
         <span className="display-name">
-          <a className="gotohome" href='/admin'>Admin </a>
-          <span className="nameA"> {userInfo.displayName || userInfo.email}</span> / <a className="gotohome" href='/'>Back Home </a>
+          <a className="gotoadmin" href={APP_ROOT + '/admin'}><FaCog className='icon-setting-admin'/> Admin </a>
+          <span className="nameA">{userInfo.displayName || userInfo.email}</span> / <a className="gotohome" href='/'>Back Home </a>
         </span>
       ) 
     }

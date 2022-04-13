@@ -253,7 +253,7 @@ function Root() {
         if(userInfo.type == 3)
         {
           return(
-            <a className="manager" href='./manager'> Manager </a> 
+            <a className="manager" href={APP_ROOT + '/manager'}> Manager </a> 
           )
         }
         else{
