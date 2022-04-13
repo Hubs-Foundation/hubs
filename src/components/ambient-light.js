@@ -7,13 +7,12 @@ AFRAME.registerComponent("ambient-light", {
   init() {
     this.light = new THREE.AmbientLight();
     this.el.setObject3D("ambient-light", this.light);
-    this.rendererSystem = this.el.sceneEl.systems.renderer;
   },
 
   update(prevData) {
     if (this.data.color !== prevData.color) {
       this.light.color.set(this.data.color);
-      this.rendererSystem.applyColorCorrection(this.light.color);
+      this.light.color.convertSRGBToLinear();
     }
 
     if (this.data.intensity !== prevData.intensity) {
