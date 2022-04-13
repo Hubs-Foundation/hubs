@@ -44,7 +44,6 @@ require("three/examples/js/loaders/GLTFLoader");
 import "networked-aframe/src/index";
 import "aframe-rounded";
 import "webrtc-adapter";
-import "aframe-slice9-component";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
