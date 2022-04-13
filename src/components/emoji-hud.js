@@ -87,27 +87,12 @@ AFRAME.registerComponent("emoji-hud", {
           spawnScale: { x: this.data.spawnedScale, y: this.data.spawnedScale, z: this.data.spawnedScale }
         });
 
-        const cylinder = document.createElement("a-cylinder");
-        cylinder.setAttribute("visibility-while-frozen", {
-          requireHoverOnNonMobile: false,
-          withPermission: "spawn_emoji"
-        });
-        cylinder.setAttribute("material", { opacity: 0.2, color: "#2f7fee" });
-        cylinder.setAttribute("segments-height", 1);
-        cylinder.setAttribute("segments-radial", 16);
-        cylinder.setAttribute("scale", { x: width / 2, y: width / 20, z: width / 5 });
-        cylinder.setAttribute("rotation", { x: 45, y: 0, z: 0 });
-
         setOffsetVector(i, emojis.length, width, spacing, offsetVector);
 
         spawnerEntity.object3D.position.copy(offsetVector);
         spawnerEntity.object3D.matrixNeedsUpdate = true;
 
-        cylinder.object3D.position.set(offsetVector.x, -width / 2, offsetVector.z + 0.01); //move back to avoid transparency issues with emojis
-        cylinder.object3D.matrixNeedsUpdate = true;
-
         this.el.appendChild(spawnerEntity);
-        this.el.appendChild(cylinder);
 
         this.spawnerEntities.push(spawnerEntity);
       }
