@@ -306,17 +306,20 @@ module.exports = async (env, argv) => {
       inline: liveReload,
       historyApiFallback: {
         rewrites: [
+          
           { from: /^\/signin/, to: "/signin.html" },
-          { from: /^\/login/, to: "/login.html" },
           { from: /^\/discord/, to: "/discord.html" },
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
           { from: /^\/tokens/, to: "/tokens.html" },
           { from: /^\/whats-new/, to: "/whats-new.html" },
           { from: /^\/signup/, to: "/signup.html" },
+
+
           { from: /^\/manager/, to: "/manager.html" },
           { from: /^\/manager\/exhibition\/:id/, to: "/exhibition.html" },
           { from: /^\/manager\/exhibition/, to: "/manager.html" },
+          { from: /^\/login/, to: "/login.html" },
           
         ]
       },

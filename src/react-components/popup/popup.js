@@ -1,5 +1,5 @@
 import React from "react";
-import "./popup.css";
+import "./popup.scss";
 
 const Popup = props => {
   const currentProps = {

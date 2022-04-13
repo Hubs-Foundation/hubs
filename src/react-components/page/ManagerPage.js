@@ -1,29 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from "react-dom";
-import registerTelemetry from "./telemetry";
-import "./utils/theme";
-import "./react-components/styles/global.scss";
-import "./assets/larchiveum/manager.scss"
-import Store from "./utilities/store";
-import ExhibitionsService from './utilities/apiServices/ExhibitionsService'
-import ReserveService from './utilities/apiServices/ReserveService'
-import Popup from './react-components/popup/popup';
-import AddIcon from './assets/larchiveum/add_black_24dp.svg';
+import registerTelemetry from "../../telemetry";
+import "../../utils/theme";
+import "../../react-components/styles/global.scss";
+import "../../assets/larchiveum/manager.scss"
+
+import Store from "../../utilities/store";
+import ExhibitionsService from '../../utilities/apiServices/ExhibitionsService'
+import ReserveService from '../../utilities/apiServices/ReserveService'
+import Popup from '../../react-components/popup/popup';
+import AddIcon from '../../assets/larchiveum/add_black_24dp.svg';
 import Moment from 'react-moment';
 import 'reactjs-popup/dist/index.css';
 import * as moment from 'moment'
 import {toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import defaultImage from './assets/larchiveum/default-image.png'
-import defaultImage1 from './assets/larchiveum/siri.gif'
-import Pagination from './react-components/pagination/pagination'
-import {APP_ROOT} from './utilities/constants'
+import defaultImage from '../../assets/larchiveum/default-image.png'
+import defaultImage1 from '../../assets/larchiveum/siri.gif'
+import Pagination from '../../react-components/pagination/pagination'
+import {APP_ROOT} from '../../utilities/constants'
 import { FaUserFriends ,FaRegCalendarAlt ,FaLink,FaCog} from "react-icons/fa";
+import { Manager } from 'react-popper-2';
 
 registerTelemetry("/manager", "Hubs Home Page");
 
-function Root() {
+export  function ManagerPage() {
+  return (
+    <ManagerHome/>
+  );
+}
 
+function ManagerHome() {
   toast.configure();
   const [scenes, setScenes] = useState([]);
   const [exhibitionsLoaded, setExhibitionsLoaded] = useState(false);
@@ -519,4 +526,3 @@ function Root() {
       </>
     );
 }  
-ReactDOM.render(<Root />, document.getElementById("manager-root"));
