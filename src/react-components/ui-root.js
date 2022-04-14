@@ -29,6 +29,7 @@ import MediaBrowserContainer from "./media-browser";
 
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
+import AvatarCreator from "./avatar-creator";
 import PreferencesScreen from "./preferences-screen.js";
 import PresenceLog from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
@@ -78,6 +79,7 @@ import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { AudioPopoverContainer } from "./room/AudioPopoverContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
+import { ChangeAvatarButtonContainer } from "./room/ChangeAvatarButtonContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
 import { SignInStep } from "./auth/SignInModal";
@@ -162,7 +164,8 @@ class UIRoot extends Component {
     onLoaded: PropTypes.func,
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
-    breakpoint: PropTypes.string
+    breakpoint: PropTypes.string,
+    mediaSearchStore: PropTypes.object
   };
 
   state = {
@@ -302,6 +305,7 @@ class UIRoot extends Component {
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
     window.addEventListener("focus_chat", this.onFocusChat);
+    window.addEventListener("change_avatar", this.onChangeAvatar);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -395,6 +399,7 @@ class UIRoot extends Component {
     window.removeEventListener("idle_detected", this.onIdleDetected);
     window.removeEventListener("activity_detected", this.onActivityDetected);
     window.removeEventListener("focus_chat", this.onFocusChat);
+    window.removeEventListener("change_avatar", this.onChangeAvatar);
   }
 
   storeUpdated = () => {
@@ -787,6 +792,11 @@ class UIRoot extends Component {
         input.value = e.detail.prefix;
       }
     });
+  };
+
+  onChangeAvatar = e => {
+    e.preventDefault();
+    this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
   };
 
   renderInterstitialPrompt = () => {
@@ -1349,6 +1359,36 @@ class UIRoot extends Component {
                 )}
               />
             )}
+            {!this.state.dialog && (
+              <StateRoute
+                stateKey="overlay"
+                stateValue="avatar-creator"
+                history={this.props.history}
+                render={props => (
+                  <AvatarCreator
+                    className={styles.avatarEditor}
+                    signedIn={this.state.signedIn}
+                    onSignIn={this.showContextualSignInDialog}
+                    onSave={() => {
+                      if (props.location.state.detail && props.location.state.detail.returnToProfile) {
+                        this.props.history.goBack();
+                      } else {
+                        this.props.history.goBack();
+                        // We are returning to the media browser. Trigger an update so that the filter switches to
+                        // my-avatars, now that we've saved an avatar.
+                        this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
+                      }
+                      this.props.onAvatarSaved();
+                    }}
+                    onClose={() => this.props.history.goBack()}
+                    store={this.props.store}
+                    debug={avatarEditorDebug}
+                    avatarId={props.location.state.detail && props.location.state.detail.avatarId}
+                    hideDelete={props.location.state.detail && props.location.state.detail.hideDelete}
+                  />
+                )}
+              />
+            )}
             {!this.state.dialog &&
               showMediaBrowser && (
                 <MediaBrowserContainer
@@ -1583,6 +1623,7 @@ class UIRoot extends Component {
                       </>
                     )}
                     <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
+                    <ChangeAvatarButtonContainer onClick={this.onChangeAvatar} />
                     {entered &&
                       isMobileVR && (
                         <ToolbarButton

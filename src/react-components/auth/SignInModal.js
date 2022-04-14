@@ -55,6 +55,10 @@ export const SignInMessages = defineMessages({
     id: "sign-in-modal.signin-message.create-avatar",
     defaultMessage: "You'll need to sign in to create avatars."
   },
+  createAvatarReadyPlayerMe: {
+    id: "sign-in-modal.signin-message.create-avatar-ready-player-me",
+    defaultMessage: "You'll need to sign in to create avatars."
+  },
   remixAvatar: {
     id: "sign-in-modal.signin-message.remix-avatar",
     defaultMessage: "You'll need to sign in to remix avatars."

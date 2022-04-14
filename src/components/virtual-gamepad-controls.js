@@ -128,6 +128,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.rightStick = nipplejs.create({
       zone: this.rightTouchZone,
       color: "white",
+      mode: 'static',
       fadeTime: 0
     });
     this.rightStick.on("start", this.onFirstInteraction);
@@ -142,6 +143,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.leftStick = nipplejs.create({
       zone: this.leftTouchZone,
       color: "white",
+      mode: 'static',
       fadeTime: 0
     });
     this.leftStick.on("start", this.onFirstInteraction);

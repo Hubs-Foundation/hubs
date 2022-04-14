@@ -822,6 +822,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   });
 
+   // #### ready player me avatar create ADD. jbshin 2022.04.14
+   window.addEventListener("action_create_avatar_ready_player_me", () => {
+    performConditionalSignIn(
+      () => hubChannel.signedIn,
+      // () => pushHistoryState(history, "overlay", "avatar-editor"),
+      () => pushHistoryState(history, "overlay", "avatar-creator"),
+      SignInMessages.createAvatar
+    );
+  });
+
   scene.addEventListener("scene_media_selected", e => {
     const sceneInfo = e.detail;
 

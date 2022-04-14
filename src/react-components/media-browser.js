@@ -338,6 +338,10 @@ class MediaBrowserContainer extends Component {
     window.dispatchEvent(new CustomEvent("action_create_avatar"));
   };
 
+  onCreateAvatarReadyPlayerMe = () => {
+    window.dispatchEvent(new CustomEvent("action_create_avatar_ready_player_me"));
+  };
+
   processThumbnailUrl = (entry, thumbnailWidth, thumbnailHeight) => {
     if (entry.images.preview.type === "mp4") {
       return proxiedUrlFor(entry.images.preview.url);
@@ -490,6 +494,13 @@ class MediaBrowserContainer extends Component {
                 type="avatar"
                 onClick={this.onCreateAvatar}
                 label={<FormattedMessage id="media-browser.create-avatar" defaultMessage="Create Avatar" />}
+              />
+            )}
+            {urlSource === "avatars" && (
+              <CreateTile
+                type="avatar"
+                onClick={this.onCreateAvatarReadyPlayerMe}
+                label={<FormattedMessage id="media-browser.create-avatar.ready-player-me" defaultMessage="Create Avatar\nfor Ready Player Me" />}
               />
             )}
             {urlSource === "scenes" &&

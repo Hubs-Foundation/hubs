@@ -9,13 +9,15 @@
   }
 }
 
+/* original value : left 0, right 55% */
 :local(.touchZone.left) {
-  left: 0;
-  right: 55%;
+  left: 15%;
+  right: 0;
 }
 
+/* original value : left 55%, right 0 */
 :local(.touchZone.right) {
-  left: 55%;
+  left: 85%;
   right: 0;
 }
 
@@ -42,7 +44,7 @@
   justify-content: center;
   width: 100px;
   height: 100px;
-  background-color: rgba(255,255,255,0.5);
+  background-color: rgba(255, 255, 255, 0.5);
   border-top-left-radius: 50%;
   border-top-right-radius: 50%;
   border-bottom-right-radius: 50%;

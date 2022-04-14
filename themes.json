@@ -5,7 +5,7 @@
     "name": "Hubs Default",
     "variables": {}
   },
-  {   
+  {
     "name": "Hubs Dark Mode",
     "id": "hubs-dark-mode",
     "darkModeDefault": true,
@@ -40,6 +40,10 @@
       "accent5-border-color": "#13a4ed",
       "accent5-color-hover": "#5D646C",
       "accent5-color-pressed": "#21242C",
+      "accent6-color": "#2B313B",
+      "accent6-border-color": "#13a4ed",
+      "accent6-color-hover": "#5D646C",
+      "accent6-color-pressed": "#21242C",
       "admin-color": "#13a4ed",
       "text1-color": "#ffffff",
       "text1-color-hover": "#E7E7E7",
@@ -84,7 +88,8 @@
       "toolbar-label-accent2": "#ffffff",
       "toolbar-label-accent3": "#ffffff",
       "toolbar-label-accent4": "#ffffff",
-      "toolbar-label-accent5": "#ffffff"
+      "toolbar-label-accent5": "#ffffff",
+      "toolbar-label-accent6": "#ffffff"
     }
   }
 ]
