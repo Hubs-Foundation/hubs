@@ -65,6 +65,13 @@ class UserService {
        return apiRequest.post('/v1/auth/users/verifyUser', {access_token: token});
     }
 
+    reSendVerifyMail(email){
+        return apiRequest.post('v1/users/reSendVerifyMail', {email: email});
+    }
+
+    checkToken(token){
+        return apiRequest.post('/v1/auth/users/checkToken', {access_token: token});
+    }
 }
 
 export default new UserService();
