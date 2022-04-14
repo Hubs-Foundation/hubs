@@ -57,7 +57,6 @@ class LoginForm extends React.Component{
         }
         else{
             UserService.login(data).then((res) => {
-                debugger
                 if(res.result == 'ok'){
                     Store.setUser(res.data);
                     window.location = '/';

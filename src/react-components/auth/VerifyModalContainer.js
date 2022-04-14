@@ -28,7 +28,6 @@ function useVerify() {
 
           UserService.verifyUser(token)
             .then((res)=>{
-              debugger
               Store.setUser(res.data.data);
               cb(null, res);
             })
@@ -54,7 +53,6 @@ function useVerify() {
           }
         }
       ], (err, [larchiveum, hubs])=>{
-        debugger
         if(larchiveum && hubs){
           setStep(VerificationStep.complete);
         }
