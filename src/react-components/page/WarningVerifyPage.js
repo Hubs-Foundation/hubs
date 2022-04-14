@@ -1,11 +1,60 @@
-import React from "react";
+
+import React, { useEffect, useState } from 'react';
 import ReactDOM from "react-dom";
 import registerTelemetry from "../../telemetry";
 import "../../utils/theme";
 import Store from "../../utilities/store";
-registerTelemetry("/signin", "Hubs Sign In Page");
+import UserService from "../../utilities/apiServices/UserService";
 
-export  function WarningVerifyPage() {
+
+export function WarningVerifyPage() {
+    return (
+      <WarningVerify/>
+    );
+}
+  
+function WarningVerify() {
+
+    const [sending, setSending] = useState(false);
+    const [sendingMessage, setSendingMessage] = useState('');
+
+    const sendEmail = (email)=>{
+        setSending(true);
+        UserService.reSendVerifyMail(email)
+            .then((response)=>{
+                if(response.data.result == 'ok'){
+                    setSending(false);
+                    sendingMessage("Send email success")
+                }
+                else{
+                    setSending(false);
+                    sendingMessage("Send email fail!")
+                }
+            })
+            .catch((error)=>{
+                setSending(false);
+                sendingMessage("Send email fail!")
+            });
+    } 
+
+    const ResendButton = ()=>{
+        if(!sending){
+            return (
+                <div className="d-flex center-flex" onClick={sendEmail}>
+                    <a className="btn btn-backhome">Re-send Email</a>
+                </div>
+            )
+        }
+        else {
+            return (
+                <div className="d-flex center-flex">
+                    <a className="btn btn-backhome">Sending</a>
+                </div>
+            )
+        }
+        
+    }
+
     if(Store.getUser()){
         window.location = '/';
     }
@@ -20,10 +69,12 @@ export  function WarningVerifyPage() {
                     <p className="margintop30vh"> You need to verify your account</p>
                     <p>Please go to your email and verify your account</p> 
                     <div className="d-flex center-flex"><a className="btn btn-backhome" href="/">Back Home</a></div>
+                    <ResendButton/>
                 </b>
-                
             </div>
           </div>
         )
     }
 }
+
+
