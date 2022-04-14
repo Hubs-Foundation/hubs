@@ -55,14 +55,11 @@
     <div id="support-root"></div>
 
     <a-scene
-        vr-mode-ui="enabled: false"
-        loading-screen="enabled: false"
         hubs-systems
         capture-system
         listed-media
         local-audio-analyser
         class="grab-cursor"
-        shadow="enabled: false; type: pcfsoft; autoUpdate: true"
         networked-scene="audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
