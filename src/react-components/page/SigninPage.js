@@ -95,7 +95,7 @@ class LoginForm extends React.Component{
     }
 
     return(
-      <div className="limiter">
+        <div className="limiter">
         <div className="container-login100">
             <div className="wrap-login100 p-l-80 p-r-80 p-t-62 p-b-62">
             <div className="gohome">
@@ -136,7 +136,7 @@ class LoginForm extends React.Component{
                 </form>
             </div>
         </div>
-    </div>
+        </div>
     )
   }
 }
