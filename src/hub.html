@@ -68,8 +68,9 @@
         rotate-selected-object
     >
         <a-assets>
-            <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
-            <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
+            <!-- Note our fork of aframe doesn't actually do any preloading with a-assets. These a-asset-items are only used for their src attribute. -->
+            <a-asset-item id="drawing-pen" src="./assets/models/DrawingPen.glb"></a-asset-item>
+            <a-asset-item id="spawn-point" src="./assets/models/spawn-point.glb"></a-asset-item>
 
             <template id="template-waypoint-avatar">
                 <a-entity waypoint></a-entity>
