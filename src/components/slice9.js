@@ -29,6 +29,21 @@ const textures = {
   }
 };
 
+function parseSide(side) {
+  switch (side) {
+    case "back": {
+      return THREE.BackSide;
+    }
+    case "double": {
+      return THREE.DoubleSide;
+    }
+    default: {
+      // Including case `front`.
+      return THREE.FrontSide;
+    }
+  }
+}
+
 /**
  * Slice9 component for A-Frame.
  */
@@ -55,37 +70,34 @@ AFRAME.registerComponent("slice9", {
   },
 
   init: function() {
-    var data = this.data;
-    var geometry;
-    var material;
+    const data = this.data;
 
     this.textureSrc = null;
 
-    geometry = this.geometry = new THREE.PlaneBufferGeometry(data.width, data.height, 3, 3);
+    const geometry = (this.geometry = new THREE.PlaneBufferGeometry(data.width, data.height, 3, 3));
 
     // Create mesh.
     if (data.usingCustomMaterial) {
       this.plane = new THREE.Mesh(geometry);
     } else {
-      material = this.material = new THREE.MeshBasicMaterial({
+      const material = (this.material = new THREE.MeshBasicMaterial({
         alphaTest: data.alphaTest,
         color: data.color,
         opacity: data.opacity,
         transparent: data.transparent,
         wireframe: data.debug
-      });
+      }));
       this.plane = new THREE.Mesh(geometry, material);
     }
     this.el.setObject3D("mesh", this.plane);
   },
 
   regenerateMesh: function() {
-    var data = this.data;
-    var height;
-    var pos = this.geometry.attributes.position.array;
-    var uv;
-    var uvs = this.geometry.attributes.uv.array;
-    var width;
+    const data = this.data;
+    let height;
+    const pos = this.geometry.attributes.position.array;
+    const uvs = this.geometry.attributes.uv.array;
+    let width;
 
     if (this.material && !this.material.map) {
       return;
@@ -124,7 +136,7 @@ AFRAME.registerComponent("slice9", {
       height = textures[data.src].height;
       width = textures[data.src].width;
     }
-    uv = {
+    const uv = {
       left: data.left / width,
       right: data.right / width,
       top: data.top / height,
@@ -155,12 +167,12 @@ AFRAME.registerComponent("slice9", {
     }
 
     // Update vertex positions
-    var w2 = data.width / 2;
-    var h2 = data.height / 2;
-    var left = -w2 + data.padding;
-    var right = w2 - data.padding;
-    var top = h2 - data.padding;
-    var bottom = -h2 + data.padding;
+    const w2 = data.width / 2;
+    const h2 = data.height / 2;
+    const left = -w2 + data.padding;
+    const right = w2 - data.padding;
+    const top = h2 - data.padding;
+    const bottom = -h2 + data.padding;
 
     setPos(0, -w2, h2);
     setPos(1, left, h2);
@@ -187,10 +199,8 @@ AFRAME.registerComponent("slice9", {
   },
 
   update: function(oldData) {
-    var data = this.data;
-    var diff;
-
-    diff = AFRAME.utils.diff(data, oldData);
+    const data = this.data;
+    const diff = AFRAME.utils.diff(data, oldData);
 
     // Update material if using built-in material.
     if (!data.usingCustomMaterial) {
@@ -228,7 +238,7 @@ AFRAME.registerComponent("slice9", {
    * Update `src` if using built-in material.
    */
   updateMap: function() {
-    var src = this.data.src;
+    const src = this.data.src;
 
     if (src) {
       if (src === this.textureSrc) {
@@ -248,18 +258,3 @@ AFRAME.registerComponent("slice9", {
     this.setMap(null);
   }
 });
-
-function parseSide(side) {
-  switch (side) {
-    case "back": {
-      return THREE.BackSide;
-    }
-    case "double": {
-      return THREE.DoubleSide;
-    }
-    default: {
-      // Including case `front`.
-      return THREE.FrontSide;
-    }
-  }
-}

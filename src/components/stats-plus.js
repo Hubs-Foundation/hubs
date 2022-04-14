@@ -2,9 +2,9 @@ import "./stats-plus.css";
 import qsTruthy from "../utils/qs_truthy";
 
 function ThreeStats(renderer) {
-  var _rS = null;
+  let _rS = null;
 
-  var _values = {
+  const _values = {
     "renderer.info.memory.geometries": {
       caption: "Geometries"
     },
@@ -26,7 +26,7 @@ function ThreeStats(renderer) {
     }
   };
 
-  var _groups = [
+  const _groups = [
     {
       caption: "Three.js - Memory",
       values: ["renderer.info.memory.geometries", "renderer.info.programs", "renderer.info.memory.textures"]
@@ -37,7 +37,7 @@ function ThreeStats(renderer) {
     }
   ];
 
-  var _fractions = [];
+  const _fractions = [];
 
   function _update() {
     _rS("renderer.info.memory.geometries").set(renderer.info.memory.geometries);
