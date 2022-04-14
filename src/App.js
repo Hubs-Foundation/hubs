@@ -1,5 +1,6 @@
 import Store from "./storage/store";
 import MediaSearchStore from "./storage/media-search-store";
+import qsTruthy from "./utils/qs_truthy";
 
 export class App {
   constructor() {
@@ -53,6 +54,8 @@ export class App {
     });
 
     renderer.setPixelRatio(window.devicePixelRatio);
+
+    renderer.debug.checkShaderErrors = qsTruthy("checkShaderErrors");
 
     // These get overridden by environment-system but setting to the highly expected defaults to avoid any extra work
     renderer.physicallyCorrectLights = true;
