@@ -89,6 +89,7 @@ export function VerifyModalContainer() {
       <p>{larchiveumMessage}</p>
       <br></br>
       <p>{hubMessage}</p>
+      <div className="d-flex center-flex margin-bottom20px"><a className="btn btn-backhome" href="/">Back Home</a></div>
     </center>
   } else {
     content = <VerifyingEmail/>;

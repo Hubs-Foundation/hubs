@@ -29,7 +29,8 @@ class SignUpForm extends React.Component{
         displayName: '',
         email: '',
         password: '',
-        submitted: false
+        submitted: false,
+        error:'',
       };
 
       this.handleChange = this.handleChange.bind(this);
