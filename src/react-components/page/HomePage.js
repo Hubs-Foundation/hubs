@@ -6,6 +6,7 @@ import "../../react-components/styles/global.scss";
 import "../../assets/larchiveum/style.scss"
 import * as moment from 'moment'
 import Store from "../../utilities/store";
+import StoreHub from "../../storage/store";
 import ExhibitionsService from '../../utilities/apiServices/ExhibitionsService'
 import ReserveService from '../../utilities/apiServices/ReserveService'
 import Popup from '../../react-components/popup/popup';
@@ -14,19 +15,18 @@ import { APP_ROOT } from '../../utilities/constants';
 import defaultImage from '../../assets/larchiveum/siri.gif'
 import Moment from 'react-moment';
 import 'reactjs-popup/dist/index.css';
+import UserService from '../../utilities/apiServices/UserService'
 import {toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 // ICON
-import {MdLaptopChromebook, MdPeopleAlt , MdCalendarToday , MdOutlineCheckCircleOutline ,MdOutlineLogout ,MdOutlineAccountCircle} from "react-icons/md";
-
+import {MdPublic,MdLaptopChromebook, MdPeopleAlt , MdCalendarToday , MdOutlineCheckCircleOutline ,MdOutlineLogout ,MdOutlineAccountCircle} from "react-icons/md";
+const store = new StoreHub();
 registerTelemetry("/home", "Hubs Home Page");
-
-export  function HomePage() {
-  return (
-    <Home/>
-  );
-}
-
+  export  function HomePage() {
+    return (
+      <Home/>
+    );
+  }
 function Home() {
   toast.configure();
   const [exhibitionsLoaded, setExhibitionsLoaded] = useState(false);
@@ -38,12 +38,39 @@ function Home() {
     pagination: {},
   });
   const [exhibitionNoti, setExhibitionNoti] = useState(undefined);
-  
   const [filterExhibitionList, setfilterExhibitionList] = useState({
     page: 1,
     pageSize: 9,
     sort:'startDate|asc', //format <attribute>|<order type>
-  })
+  }) 
+
+  function auth(){
+    const hubsToken = store.state?.credentials?.token;
+    const larchiveumToken = Store.getUser()?.token;
+    return UserService.check2Token(larchiveumToken, hubsToken).then((res) => {
+      if(res.result == 'ok'){
+        const email = Store.getUser()?.email;
+        if(!res.data.larchiveum || res.data.larchiveum.email != email)
+        {
+          return false;
+        }
+        else if(!res.data.hubs){
+          window.location = '/?page=warning-verify';
+        }
+        else
+        {
+          //loading false
+          return true;
+        }
+      }
+      else{
+        return false;
+      }
+    }).catch(() => {
+      return false;
+    });
+    
+}
 
   const togglePopup = (exhibitionId) => {
     setIsOpen(!isOpen);
@@ -51,7 +78,7 @@ function Home() {
   }
 
   useEffect(() => {
-
+    auth();
     // redirect to verify page
     const qs = new URLSearchParams(location.search);
     if (qs.has("auth_topic")) {
@@ -107,15 +134,37 @@ function Home() {
       }
       else
       {
-        window.location.href=APP_ROOT+'/'+idrooom;
-        //console.log(APP_ROOT+'/'+idrooom)
+        if(APP_ROOT === 'https://larchiveum.link')
+        {
+          window.location.href=APP_ROOT+'/'+idrooom;
+        }
+        else {
+          window.location.href=APP_ROOT+'/hub.html?hub_id='+idrooom;
+        }
       }
     }
     else{
         window.location = '/?page=signin';
     }
   }
-
+  const handleButtonVisitPublic =(event)=> {
+    var idrooom = event.currentTarget.getAttribute('data-roomid')
+    console.log(idrooom);
+    if (idrooom == null || idrooom == '')
+    {
+      
+    }
+    else
+    {
+      if(APP_ROOT === 'https://larchiveum.link')
+      {
+        window.location.href=APP_ROOT+'/'+idrooom;
+      }
+      else {
+        window.location.href=APP_ROOT+'/hub.html?hub_id='+idrooom;
+      }
+    }
+  }
   const openPopupReservation =(event)=> {
     var exhibitionId = event.currentTarget.getAttribute('data-id-exhibition');
     //console.log(exhibitionId, access_token);
@@ -166,59 +215,127 @@ function Home() {
                 }
               }).map((item, index) => {
                 const ButtonVisit =()=>{
+                  var today = new Date().setHours(0,0,0,0);  
+                  var startday = new Date(item.startDate).setHours(0,0,0,0);  
                   if(Store.getUser()){
-                    var today = new Date().setHours(0,0,0,0);  
-                    var startday = new Date(item.startDate).setHours(0,0,0,0);  
-                    if(item.reservated == true)
+                    if(item.public == 1)
                     {
-                      if(today<startday)
+                      if(today<=startday)
                       {
                         return(
                           <>
-                           <button className="signin-up btn-visit nt-time-yet" onClick={()=>{openPopupNotification(item)}} data-id-exhibition ={item.id}>It's not time yet</button>
+                            <div className="span3">
+                             <MdPublic size={37} color='#FFF'/>
+                            </div>
+                            <button className="signin-up btn-visit nt-time-yet" onClick={()=>{openPopupNotification(item)}} data-id-exhibition ={item.id}>It's not time yet</button>
                           </>
-                         )
+                          )
                       }
-                      else{
+                      else if(today > startday)
+                      {
                         return(
                           <>
-                           <div className="span3">
-                             <MdOutlineCheckCircleOutline size={37} color='#FFF'/>
-                           </div>
-                           <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>Visit tour</button>
+                            <div className="span3">
+                              <MdPublic size={37} color='#FFF'/>
+                            </div>
+                            <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>Visit tour</button>
                           </>
-                         )
+                        )
                       }
+                      else 
+                      {
+                        return(
+                          <>
+                            <div className="span3">
+                             <MdPublic size={37} color='#FFF'/>
+                           </div>
+                            <button className="signin-up btn-visit full" >The room is full</button>
+                          </>
+                        )
+                      }
+
                     }
                     else
                     {
-                      if(today > startday)
+                      if(item.reservated == true)
                       {
-                        return(
-                          <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>Visit tour</button>
-                          )
-                      }
-                      else if(today <= startday)
-                      {
-                        if(item.reservationCount < item.maxSize)
+                        if(today<startday)
                         {
                           return(
-                            <button className="signin-up btn-visit" onClick={openPopupReservation} data-id-exhibition ={item.id}>Reservation</button>
+                            <>
+                             <button className="signin-up btn-visit nt-time-yet" onClick={()=>{openPopupNotification(item)}} data-id-exhibition ={item.id}>It's not time yet</button>
+                            </>
+                           )
+                        }
+                        else{
+                          return(
+                            <>
+                             <div className="span3">
+                               <MdOutlineCheckCircleOutline size={37} color='#FFF'/>
+                             </div>
+                             <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>Visit tour</button>
+                            </>
+                           )
+                        }
+                      }
+                      else
+                      {
+                        if(today > startday)
+                        {
+                          return(
+                            <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>Visit tour</button>
                           )
                         }
-                        else 
+                        else if(today <= startday)
                         {
-                          return(
-                            <button className="signin-up btn-visit full" >The room is full</button>
-                          )
+                          if(item.reservationCount < item.maxSize)
+                          {
+                            return(
+                              <button className="signin-up btn-visit" onClick={openPopupReservation} data-id-exhibition ={item.id}>Reservation</button>
+                            )
+                          }
+                          else 
+                          {
+                            return(
+                              <button className="signin-up btn-visit full" >The room is full</button>
+                            )
+                          }
                         }
                       }
                     }
                   }
                   else{
-                    return(
-                      <button className="signin-up btn-visit" onClick={handleButtonVisit}>Visit tour</button>
-                    ) 
+                    if(item.public == 1)
+                    {
+                      if(today > startday)
+                      {
+                        return(
+                          <>
+                           <div className="span3">
+                             <MdPublic size={37} color='#FFF'/>
+                           </div>
+                           <button className="signin-up btn-visit reserved" onClick={handleButtonVisitPublic} data-roomid ={item.roomId}>Visit tour</button>
+                          </>
+                        )
+                      }
+                      else
+                      {
+                        return(
+                          <>
+                            <div className="span3">
+                              <MdPublic size={37} color='#FFF'/>
+                            </div>
+                            <button className="signin-up btn-visit nt-time-yet"  onClick={handleButtonVisit}>It's not time yet</button>
+                          </>
+                        )
+                      }
+                    }
+                    else{
+                      return(
+                        <button className="signin-up btn-visit" onClick={handleButtonVisit}>Visit tour</button>
+                      )
+                    }
+                     
                   }
                 }
                 if(item.room)
@@ -366,7 +483,7 @@ function Home() {
         handleClose={closePopupNotification}
       />}
 
-      <div className='background-homepage'>
+      <div className='background-homepage height-100vh'>
         <div className="row_1">
           <span className="text_1"> Larchiveum</span>
           {/* <img src={LogoCompany}/> */}

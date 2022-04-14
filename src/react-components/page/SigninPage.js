@@ -14,9 +14,9 @@ import { FaHome } from "react-icons/fa";
 registerTelemetry("/signin", "Hubs Sign In Page");
 
 export  function SigninPage() {
-    if(Store.getUser()){
-        window.location = '/';
-    }
+    // if(Store.getUser()){
+    //     window.location = '/';
+    // }
     return (
         <LoginForm />
     );

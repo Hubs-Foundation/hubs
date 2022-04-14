@@ -513,7 +513,7 @@ function ManagerHome() {
           handleClose={closePopupPublic}
         />}
 
-        <div className='manager-page'>
+        <div className='manager-page height-100vh'>
           <div className="row_1">
             <span className="text_1">Manager Larchiveum</span>
             <IAuth/>

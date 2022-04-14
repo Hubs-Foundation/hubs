@@ -48,12 +48,30 @@ class UserService {
     };
 
     login(data){
+        
         return fetch(`${API_ROOT}/v1/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(data)
+        })
+        .then((res) => res.json())
+        .catch((error) => {
+            console.log(error)
+        });
+    };
+
+    check2Token(larchiveumToken,hubsToken){
+        return fetch(`${API_ROOT}/v1/users/check2Token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                larchiveumToken: larchiveumToken,
+                hubsToken: hubsToken
+            })
         })
         .then((res) => res.json())
         .catch((error) => {
