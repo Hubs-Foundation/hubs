@@ -263,7 +263,8 @@ function Home() {
     const userInfo = Store.getUser();
     if(userInfo){
       const ManagerBtn =()=> {
-        if(userInfo.type == 3)
+        debugger
+        if(userInfo.type >= 3)
         {
           return(
             <a className="manager" href={APP_ROOT + '/?page=manager'}> <MdLaptopChromebook className="icon"/> Manager </a> 

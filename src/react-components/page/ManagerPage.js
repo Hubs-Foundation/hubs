@@ -234,7 +234,7 @@ function ManagerHome() {
 
   const AccountPermision =()=> {  
     const userInfo = Store.getUser();
-    if(userInfo && userInfo.type == 3){
+    if(userInfo && userInfo.type >= 3){
       return(
         <div className="title" >List Tour Larchiveum
           <button className="btn btn-create" onClick={()=>{openPopupExhibition(),setExhibitionType('create')}} ><img src={AddIcon}/></button>

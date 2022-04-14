@@ -57,13 +57,22 @@ class LoginForm extends React.Component{
         }
         else{
             UserService.login(data).then((res) => {
+                debugger
                 if(res.result == 'ok'){
                     Store.setUser(res.data);
                     window.location = '/';
                 }
-                else{
-                    this.setState({ error : 'Username or Password is incorrect' });
+                else
+                if(res.result == 'fail'){
+                    if(res.error == 'unverified'){
+                        window.location = '/?page=warning-verify';
+                    }
+                    else
+                    {
+                        this.setState({ error : 'Username or Password is incorrect' });
+                    }
                 }
+                
             })
         }
     }

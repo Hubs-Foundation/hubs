@@ -65,11 +65,14 @@ class SignUpForm extends React.Component{
         }
         else{
             UserService.signupWithEmail(data).then((res) => {
-                if(res.result == 'fail' && result.error == 'duplicated_email'){// && result.error == 'duplicated_email'
-                    this.setState({ error : 'Your email already exists in the system' });
+                if(res.result == 'ok'){
+                    window.location = '/?page=warning-verify';
                 }
-                else{
-                    window.location = '/?page=signin'
+                else
+                if(res.result == 'fail'){// && result.error == 'duplicated_email'
+                    if(res.error == 'duplicated_email'){
+                        this.setState({ error : 'Your email already exists in the system' });
+                    }
                 }
             })
         }

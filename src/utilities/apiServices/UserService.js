@@ -61,8 +61,8 @@ class UserService {
         });
     };
 
-    verifyUser(email){
-       return apiRequest.post('/v1/auth/users/verifyUser', {email: email});
+    verifyUser(token){
+       return apiRequest.post('/v1/auth/users/verifyUser', {access_token: token});
     }
 
 }
