@@ -263,7 +263,6 @@ function Home() {
     const userInfo = Store.getUser();
     if(userInfo){
       const ManagerBtn =()=> {
-        debugger
         if(userInfo.type >= 3)
         {
           return(
