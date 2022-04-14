@@ -76,7 +76,7 @@
     "@mozillareality/easing-functions": "^0.1.1",
     "@mozillareality/three-batch-manager": "github:mozillareality/three-batch-manager#master",
     "@popperjs/core": "^2.4.4",
-    "aframe": "github:mozillareality/aframe#hubs/master",
+    "aframe": "github:mozillareality/aframe#the-purge",
     "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
     "animejs": "github:mozillareality/anime#hubs/master",
