@@ -13,7 +13,7 @@ import Store from "../../utilities/store";
 import { FaHome } from "react-icons/fa";
 registerTelemetry("/signin", "Hubs Sign In Page");
 
-export  function WarningVerify() {
+export  function WarningVerifyPage() {
     if(Store.getUser()){
         window.location = '/';
     }

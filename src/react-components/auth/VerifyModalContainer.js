@@ -23,9 +23,13 @@ function useVerify() {
 
       async.parallel([
         (cb) => {
-          const email = Store.getUser()?.email;
-          UserService.verifyUser(email)
+          const param = (new URLSearchParams(location.href)).get('auth_topic') || '';
+          const token = param.replace('auth:', '');
+
+          UserService.verifyUser(token)
             .then((res)=>{
+              debugger
+              Store.setUser(res.data.data);
               cb(null, res);
             })
             .catch((error)=>{
