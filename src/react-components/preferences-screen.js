@@ -425,7 +425,7 @@ const preferenceLabels = defineMessages({
   },
   enableDynamicShadows: {
     id: "preferences-screen.preference.enable-dynamic-shadows",
-    defaultMessage: "Enable Dynamic Shadows"
+    defaultMessage: "Enable Real-time Shadows"
   },
   disableAutoPixelRatio: {
     id: "preferences-screen.preference.disable-auto-pixel-ratio",
@@ -1143,7 +1143,7 @@ class PreferencesScreen extends Component {
           {
             key: "enableDynamicShadows",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            promptForRefresh: true
+            defaultBool: false
           },
           {
             key: "disableAutoPixelRatio",
