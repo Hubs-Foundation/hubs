@@ -418,4 +418,51 @@
   .txt1 {
     font-weight: 600;
   }
+
+  .info-room {
+    font-size: 20px;
+    justify-content: center;
+    align-items: center;
+
+    .noti-title {
+      font-weight: 600;
+      font-size: 20px;
+      text-align: center;
+      padding: 20px;
+      color: #C00;
+    }
+
+    .d-flex {
+      width: 100%;
+      display: flex;
+
+      .w-40 {
+        width: 40%;
+
+        img {
+          border-radius: 8px;
+        }
+      }
+
+      .w-60 {
+        width: 60%;
+        padding-left: 25px;
+        justify-content: center;
+        align-items: center;
+
+        .text-bold {
+          font-weight: 600;
+          color: #111;
+        }
+
+        p {
+          margin-bottom: 10px;
+          font-size: 20px;
+          line-height: 1.25;
+        }
+      }
+
+    }
+
+  }
 }

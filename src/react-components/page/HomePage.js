@@ -112,7 +112,7 @@ function Home() {
       }
     }
     else{
-        window.location = '/signin';
+        window.location = '/?page=signin';
     }
   }
 
