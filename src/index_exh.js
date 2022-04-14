@@ -250,7 +250,7 @@ function Root() {
     const userInfo = Store.getUser();
     if(userInfo){
       const ManagerBtn =()=> {
-        if(userInfo.type == 3)
+        if(userInfo.type >= 3)
         {
           return(
             <a className="manager" href={APP_ROOT + '/manager'}> Manager </a> 
