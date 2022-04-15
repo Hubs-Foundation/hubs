@@ -41,8 +41,8 @@ function WarningVerify() {
     const ResendButton = ()=>{
         if(!sending){
             return (
-                <div className="d-flex center-flex" onClick={sendEmail}>
-                    <a className="btn btn-backhome">Re-send Email</a>
+                <div className="d-flex center-flex">
+                    <a className="btn btn-backhome" onClick={sendEmail}>Re-send Email</a>
                 </div>
             )
         }
