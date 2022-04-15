@@ -168,7 +168,7 @@ function ManagerHome() {
                   else
                   {
                     return(
-                      <button className="btn btn-publish" onClick={()=>{openPopupPublic(item.id)}} data-id-exhibition ={item.id}>Publish</button>
+                      <button className="btn btn-publish" onClick={()=>{openPopupPublic(item.id)}} data-id-exhibition ={item.id}>Public</button>
                     )
                   }
                 }
