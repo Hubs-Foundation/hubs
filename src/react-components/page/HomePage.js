@@ -125,7 +125,6 @@ function Home() {
   }
   
   const handleRemoveCookie =()=> {
-    debugger;
     store.removeHub();
     Store.removeUser();
     window.location.reload();

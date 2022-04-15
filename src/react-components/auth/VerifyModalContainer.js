@@ -5,6 +5,10 @@ import { VerifyModal, VerificationError, EmailVerified, VerifyingEmail } from ".
 import UserService from "../../utilities/apiServices/UserService";
 import Store from '../../utilities/store';
 
+import StoreHub from "../../storage/store";
+import hubChannel from './../../utils/hub-channel'
+
+const store = new StoreHub();
 const VerificationStep = {
   verifying: "verifying",
   complete: "complete",
@@ -45,6 +49,7 @@ function useVerify() {
               origin: qs.get("auth_origin"),
               payload: qs.get("auth_payload")
             };
+            store.removeHub();
             await verify(authParams);
             cb(null, true);
           } catch (error) {
