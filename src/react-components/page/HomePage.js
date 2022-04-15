@@ -122,17 +122,10 @@ function Home() {
   }
   
   const handleRemoveCookie =()=> {
+    debugger;
+    store.removeHub();
     Store.removeUser();
     window.location.reload();
-
-    // signOut = async hubChannel => {
-    //   if (hubChannel) {
-    //     await hubChannel.signOut();
-    //   }
-    //   this.StoreHub.update({ credentials: { token: null, email: null } });
-    //   await this.StoreHub.resetToRandomDefaultAvatar();
-    //   this._signedIn = false;
-    // };
   }
 
   const handleButtonVisit =(event)=> {
