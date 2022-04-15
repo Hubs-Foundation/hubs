@@ -54,8 +54,8 @@ function Home() {
   
   function auth(){
     const remove2Token = ()=>{
+      store.removeHub();
       Store.removeUser();
-      useContext(AuthContext).signOut();
     }
 
     const hubsToken = store.state?.credentials?.token;

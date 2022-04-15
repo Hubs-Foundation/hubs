@@ -41,7 +41,7 @@ class SignUpForm extends React.Component{
         const { name, value } = e.target;
         this.setState({ [name]: value });
     }
-    Remove2Cookies =()=> {
+    remove2Token =()=> {
         store.removeHub();
         Store.removeUser();
     }
@@ -71,7 +71,7 @@ class SignUpForm extends React.Component{
         else{
             UserService.signupWithEmail(data).then((res) => {
                 if(res.result == 'ok'){
-                    Remove2Cookies();
+                    remove2Token();
                     window.location = `/?page=warning-verify&email=${res.data.email}`;
                 }
                 else

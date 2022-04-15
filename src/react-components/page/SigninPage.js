@@ -12,7 +12,9 @@ import { validateEmail ,validateLength,validateLengthSpace} from '../../utils/co
 import Store from "../../utilities/store";
 import { FaHome } from "react-icons/fa";
 import { AuthContext } from "../auth/AuthContext";
-
+import StoreHub from "../../storage/store";
+import hubChannel from './../../utils/hub-channel'
+const store = new StoreHub();
 registerTelemetry("/signin", "Hubs Sign In Page");
 
 export  function SigninPage() {
@@ -38,8 +40,8 @@ class LoginForm extends React.Component{
     }
     
     remove2Token(){
+        store.removeHub();
         Store.removeUser();
-        useContext(AuthContext).signOut();
     }
   
 

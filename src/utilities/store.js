@@ -1,5 +1,8 @@
 
 import Cookies from "js-cookie";
+import StoreHub from "../storage/store";
+import hubChannel from '../utils/hub-channel'
+const store = new StoreHub();
 
 class Store {
     getUser(){
@@ -25,9 +28,7 @@ class Store {
 
     remove2Token(){
         this.removeUser();
-        
-        
-        auth.signOut();
+        store.removeHub();
     }
 }
 
