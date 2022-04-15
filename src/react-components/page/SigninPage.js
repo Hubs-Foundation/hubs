@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useContext} from "react";
 import ReactDOM from "react-dom";
 import registerTelemetry from "../../telemetry";
 import "../../utils/theme";
@@ -11,12 +11,14 @@ import UserService from '../../utilities/apiServices/UserService'
 import { validateEmail ,validateLength,validateLengthSpace} from '../../utils/commonFunc';
 import Store from "../../utilities/store";
 import { FaHome } from "react-icons/fa";
+import { AuthContext } from "../auth/AuthContext";
+
 registerTelemetry("/signin", "Hubs Sign In Page");
 
 export  function SigninPage() {
-    if(Store.getUser()){
-        window.location = '/';
-    }
+    // if(Store.getUser()){
+    //     window.location = '/';
+    // }
     return (
         <LoginForm />
     );
@@ -35,7 +37,11 @@ class LoginForm extends React.Component{
         this.handleSubmit = this.handleSubmit.bind(this);
     }
     
-    
+    remove2Token(){
+        Store.removeUser();
+        useContext(AuthContext).signOut();
+    }
+  
 
     handleChange(e) {
         const { name, value } = e.target;
@@ -58,17 +64,20 @@ class LoginForm extends React.Component{
         else{
             UserService.login(data).then((res) => {
                 if(res.result == 'ok'){
-                    Store.setUser(res.data);
-                    window.location = '/';
+                    window.location = `/?page=warning-verify&email=${res.data.email}`;
                 }
                 else
                 if(res.result == 'fail'){
-                    if(res.error == 'unverified'){
-                        window.location = '/?page=warning-verify';
+                    if(res.error == 'wrong_user'){
+                        this.setState({ error : 'Username is incorrect' });
+                    }
+                    else
+                    if(res.error == 'wrong_password'){
+                        this.setState({ error : 'Password is incorrect' });
                     }
                     else
                     {
-                        this.setState({ error : 'Username or Password is incorrect' });
+                        this.setState({ error : 'Login Error' });
                     }
                 }
                 

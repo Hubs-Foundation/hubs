@@ -22,6 +22,13 @@ class Store {
     removeUser(){
         let str = Cookies.remove('saveUserInfo');
     };
+
+    remove2Token(){
+        this.removeUser();
+        
+        
+        auth.signOut();
+    }
 }
 
 export default new Store();

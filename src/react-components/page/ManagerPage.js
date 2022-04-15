@@ -4,7 +4,7 @@ import registerTelemetry from "../../telemetry";
 import "../../utils/theme";
 import "../../react-components/styles/global.scss";
 import "../../assets/larchiveum/manager.scss"
-
+import "../../assets/larchiveum/loading.scss"
 import Store from "../../utilities/store";
 import ExhibitionsService from '../../utilities/apiServices/ExhibitionsService'
 import ReserveService from '../../utilities/apiServices/ReserveService'
@@ -21,6 +21,9 @@ import Pagination from '../../react-components/pagination/pagination'
 import {APP_ROOT} from '../../utilities/constants'
 import { FaUserFriends ,FaRegCalendarAlt ,FaLink,FaCog} from "react-icons/fa";
 import { Manager } from 'react-popper-2';
+import StoreHub from "../../storage/store";
+import UserService from '../../utilities/apiServices/UserService'
+const store = new StoreHub();
 
 registerTelemetry("/manager", "Hubs Home Page");
 
@@ -39,6 +42,7 @@ function ManagerHome() {
   const [exhibition, setExhibition] = useState(undefined);
   const [exhibitionType, setExhibitionType] = useState('create');
   const [exhibitionId, setExhibitionId] = useState(undefined);
+  const [isLoading, setIsLoading] = useState(true);
   const [exhibitions, setExhibitions] = useState({
     data: [],
     pagination: {},
@@ -48,8 +52,34 @@ function ManagerHome() {
     pageSize: 4,
     sort:'id|desc', //format <attribute>|<order type>
   })
-
+  function auth(){
+    const hubsToken = store.state?.credentials?.token;
+    const larchiveumToken = Store.getUser()?.token;
+    return UserService.check2Token(larchiveumToken, hubsToken).then((res) => {
+      if(res.result == 'ok'){
+        const email = Store.getUser()?.email;
+        if(!res.data.larchiveum || res.data.larchiveum.email != email)
+        {
+          setIsLoading(false);
+        }
+        else if(!res.data.hubs){
+          window.location = '/?page=warning-verify';
+        }
+        else
+        {
+          setIsLoading(false);
+        }
+      }
+      else{
+        setIsLoading(false);
+      }
+    }).catch(() => {
+      setIsLoading(false);
+    });
+    
+  }
   useEffect(() => {
+    auth();
     getAllExhibitions();
   },[filterExhibitionList.page])
 
@@ -210,11 +240,23 @@ function ManagerHome() {
 
   const IAuth =()=> {  
     const userInfo = Store.getUser();
+    const MasterAdmin =()=>{
+      if(userInfo.type == 5)
+      {
+        return(
+          <a className="gotoadmin" href={APP_ROOT + '/admin'}><FaCog className='icon-setting-admin'/> Admin </a>
+        )
+      }
+      else{
+        return(
+          <></>
+        )
+      }
+    }
     if(userInfo){
       return(
-        
         <span className="display-name">
-          <a className="gotoadmin" href={APP_ROOT + '/admin'}><FaCog className='icon-setting-admin'/> Admin </a>
+          <MasterAdmin/>
           <span className="nameA">{userInfo.displayName || userInfo.email}</span> / <a className="gotohome" href='/'>Back Home </a>
         </span>
       ) 
@@ -403,8 +445,22 @@ function ManagerHome() {
       
     })
   }
-
-  return (
+  if(isLoading)
+  {
+    return(
+      <div className='loading'>
+          <div className="loading-container">
+            <div className="item"></div>
+            <div className="item"></div>
+            <div className="item"></div>
+            <div className="item"></div>
+          </div>
+      </div>
+    )
+  }
+  else
+  {
+    return (
       <>
         {isOpenExhibition && <Popup
           size={'xl'}
@@ -488,7 +544,7 @@ function ManagerHome() {
           ]}
           handleClose={()=>{closePopupExhibition()}}
         />}
-
+  
         {isOpenToggle && <Popup
           title={<>Change public status</>}
           size={'sm'}
@@ -512,17 +568,18 @@ function ManagerHome() {
           ]}
           handleClose={closePopupPublic}
         />}
-
+  
         <div className='manager-page'>
           <div className="row_1">
             <span className="text_1">Manager Larchiveum</span>
             <IAuth/>
           </div>
-
+  
           <div className="row_2">
               <AccountPermision/>
           </div>
         </div>
       </>
     );
+  }
 }  

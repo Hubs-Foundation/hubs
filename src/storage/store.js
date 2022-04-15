@@ -271,6 +271,10 @@ export default class Store extends EventTarget {
     this.addEventListener("statechanged", maybeDispatchThemeChanged);
   }
 
+  removeHub(){
+    localStorage.removeItem(LOCAL_STORE_KEY);
+  };
+
   _signOutOnExpiredAuthToken = () => {
     if (!this.state.credentials.token) return;
 

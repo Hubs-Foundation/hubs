@@ -11,12 +11,12 @@ import SigninSocial from '../../react-components/signin/SigninSocial';
 import { validateEmail ,validateLength,validateLengthSpace} from '../../utils/commonFunc';
 import Store from "../../utilities/store";
 import { FaHome } from "react-icons/fa";
+import StoreHub from "../../storage/store";
+import hubChannel from './../../utils/hub-channel'
+const store = new StoreHub();
 registerTelemetry("/signup", "Hubs Sign Up Page");
 
 export  function SignupPage() {
-    if(Store.getUser()){
-        window.location = '/';
-    }
     return (
         <SignUpForm />
     );
@@ -24,23 +24,27 @@ export  function SignupPage() {
 
 class SignUpForm extends React.Component{
     constructor(props) {
-      super(props);
-      this.state = {
-        displayName: '',
-        email: '',
-        password: '',
-        submitted: false,
-        error:'',
-      };
+        super(props);
+        this.state = {
+            displayName: '',
+            email: '',
+            password: '',
+            submitted: false,
+            error:'',
+        };
 
-      this.handleChange = this.handleChange.bind(this);
-      this.handleSubmit = this.handleSubmit.bind(this);
-  }
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
 
-  handleChange(e) {
-      const { name, value } = e.target;
-      this.setState({ [name]: value });
-  }
+    handleChange(e) {
+        const { name, value } = e.target;
+        this.setState({ [name]: value });
+    }
+    Remove2Cookies =()=> {
+        store.removeHub();
+        Store.removeUser();
+    }
 
     handleSubmit(e) {
         e.preventDefault();
@@ -67,12 +71,13 @@ class SignUpForm extends React.Component{
         else{
             UserService.signupWithEmail(data).then((res) => {
                 if(res.result == 'ok'){
-                    window.location = '/?page=warning-verify';
+                    Remove2Cookies();
+                    window.location = `/?page=warning-verify&email=${res.data.email}`;
                 }
                 else
                 if(res.result == 'fail'){// && result.error == 'duplicated_email'
                     if(res.error == 'duplicated_email'){
-                        this.setState({ error : 'Your email already exists in the system' });
+                        this.setState({ error : 'Your email already exists' });
                     }
                 }
             })
