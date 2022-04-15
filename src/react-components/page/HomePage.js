@@ -298,7 +298,7 @@ function Home() {
                           if(item.reservationCount < item.maxSize)
                           {
                             return(
-                              <button className="signin-up btn-visit" onClick={openPopupReservation} data-id-exhibition ={item.id}>Reservation</button>
+                              <button className="signin-up btn-visit" onClick={openPopupReservation} data-id-exhibition ={item.id}>reserve</button>
                             )
                           }
                           else 
@@ -339,7 +339,7 @@ function Home() {
                     }
                     else{
                       return(
-                        <button className="signin-up btn-visit" onClick={handleButtonVisit}>Visit tour</button>
+                        <button className="signin-up btn-visit" onClick={handleButtonVisit}>Login to visit</button>
                       )
                     }
                      

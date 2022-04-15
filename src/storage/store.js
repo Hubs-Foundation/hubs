@@ -272,7 +272,6 @@ export default class Store extends EventTarget {
   }
 
   removeHub(){
-    debugger;
     localStorage.removeItem(LOCAL_STORE_KEY);
   };
 
