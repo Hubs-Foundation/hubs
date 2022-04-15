@@ -18,7 +18,8 @@ function WarningVerify() {
     const [sending, setSending] = useState(false);
     const [sendingMessage, setSendingMessage] = useState('');
 
-    const sendEmail = (email)=>{
+    const email = (new URLSearchParams(location.href)).get('email') || Store.getUser()?.email ;
+    const sendEmail = ()=>{
         setSending(true);
         UserService.reSendVerifyMail(email)
             .then((response)=>{

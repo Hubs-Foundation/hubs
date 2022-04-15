@@ -67,7 +67,7 @@ class SignUpForm extends React.Component{
         else{
             UserService.signupWithEmail(data).then((res) => {
                 if(res.result == 'ok'){
-                    window.location = '/?page=warning-verify';
+                    window.location = `/?page=warning-verify&email=${res.data.email}`;
                 }
                 else
                 if(res.result == 'fail'){// && result.error == 'duplicated_email'

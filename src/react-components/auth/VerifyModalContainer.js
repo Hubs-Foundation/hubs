@@ -76,6 +76,7 @@ export function VerifyModalContainer() {
     content = <center>
       <br></br><br></br><br></br><br></br>
       <b>Verifying Email Complete</b>
+      <div className="d-flex center-flex"><a className="btn btn-backhome" href="/">Back Home</a></div>
     </center>
   }
   else 
