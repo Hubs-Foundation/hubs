@@ -72,7 +72,7 @@ class SignUpForm extends React.Component{
                 else
                 if(res.result == 'fail'){// && result.error == 'duplicated_email'
                     if(res.error == 'duplicated_email'){
-                        this.setState({ error : 'Your email already exists in the system' });
+                        this.setState({ error : 'Your email already exists' });
                     }
                 }
             })

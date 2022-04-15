@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import ReactDOM from "react-dom";
 import registerTelemetry from "../../telemetry";
 import "../../utils/theme";
@@ -19,16 +19,21 @@ import 'reactjs-popup/dist/index.css';
 import UserService from '../../utilities/apiServices/UserService'
 import {toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AuthContext } from "../auth/AuthContext";
 import hubChannel from './../../utils/hub-channel'
 // ICON
 import {MdPublic,MdLaptopChromebook, MdPeopleAlt , MdCalendarToday , MdOutlineCheckCircleOutline ,MdOutlineLogout ,MdOutlineAccountCircle} from "react-icons/md";
+
 const store = new StoreHub();
+
 registerTelemetry("/home", "Hubs Home Page");
-  export  function HomePage() {
-    return (
-      <Home/>
-    );
-  }
+
+export  function HomePage() {
+  return (
+    <Home/>
+  );
+}
+
 function Home() {
   toast.configure();
   const [exhibitionsLoaded, setExhibitionsLoaded] = useState(false);
@@ -46,32 +51,30 @@ function Home() {
     pageSize: 9,
     sort:'startDate|asc', //format <attribute>|<order type>
   }) 
-
+  
   function auth(){
+    const remove2Token = ()=>{
+      Store.removeUser();
+      useContext(AuthContext).signOut();
+    }
+
     const hubsToken = store.state?.credentials?.token;
     const larchiveumToken = Store.getUser()?.token;
+
     return UserService.check2Token(larchiveumToken, hubsToken).then((res) => {
       if(res.result == 'ok'){
         const email = Store.getUser()?.email;
-        if(!res.data.larchiveum || res.data.larchiveum.email != email)
-        {
-          setIsLoading(false);
-        }
-        else if(!res.data.hubs){
-          window.location = '/?page=warning-verify';
-        }
-        else
-        {
-          setIsLoading(false);
+        if(!(res.data.larchiveum && res.data.larchiveum.email == email && res.data.hubs)){
+          remove2Token();
         }
       }
       else{
-        setIsLoading(false);
+        remove2Token();
       }
-    }).catch(() => {
+      setIsLoading(false);
+    }).catch((error) => {
       setIsLoading(false);
     });
-    
   }
 
   const togglePopup = (exhibitionId) => {
