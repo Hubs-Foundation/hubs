@@ -4,7 +4,6 @@ import { AuthContext } from "./AuthContext";
 import { VerifyModal, VerificationError, EmailVerified, VerifyingEmail } from "./VerifyModal";
 import UserService from "../../utilities/apiServices/UserService";
 import Store from '../../utilities/store';
-
 import StoreHub from "../../storage/store";
 import hubChannel from './../../utils/hub-channel'
 

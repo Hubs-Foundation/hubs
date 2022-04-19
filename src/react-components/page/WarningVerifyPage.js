@@ -4,8 +4,31 @@ import ReactDOM from "react-dom";
 import registerTelemetry from "../../telemetry";
 import "../../utils/theme";
 import Store from "../../utilities/store";
+import StoreHub from "../../storage/store";
 import UserService from "../../utilities/apiServices/UserService";
 
+const store = new StoreHub();
+window.APP = { store };
+
+function auth(){
+  const remove2Token = ()=>{
+    store.removeHub();
+    Store.removeUser();
+  }
+  const hubsToken = store.state?.credentials?.token;
+  const larchiveumToken = Store.getUser()?.token;
+
+  return UserService.check2Token(larchiveumToken, hubsToken).then((res) => {
+    if(res.result == 'ok'){
+      window.location = '/';
+    }
+    else{
+      remove2Token();
+    }
+  }).catch((error) => {
+    console.log('catch');
+  });
+}
 
 export function WarningVerifyPage() {
     return (
@@ -14,7 +37,7 @@ export function WarningVerifyPage() {
 }
   
 function WarningVerify() {
-
+    auth();
     const [sending, setSending] = useState(false);
     const [sendingMessage, setSendingMessage] = useState('');
 
