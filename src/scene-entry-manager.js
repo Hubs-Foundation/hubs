@@ -423,8 +423,7 @@ export default class SceneEntryManager {
       if (myCamera) {
         myCamera.parentNode.removeChild(myCamera);
       } else {
-        const entity = document.createElement("a-entity");
-        entity.setAttribute("networked", { template: "#interactable-camera" });
+        const entity = NAF.createNetworkedEntity("#interactable-camera");
         entity.setAttribute("offset-relative-to", {
           target: "#avatar-pov-node",
           offset: { x: 0, y: 0, z: -1.5 }
