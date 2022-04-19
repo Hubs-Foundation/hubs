@@ -1,3 +1,5 @@
+import cameraSchema from "./network-schemas/interactable-camera";
+
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {
     return () => {
@@ -248,25 +250,7 @@ function registerNetworkSchemas() {
     ]
   });
 
-  NAF.schemas.add({
-    template: "#interactable-camera",
-    components: [
-      "position",
-      "rotation",
-      {
-        component: "camera-tool",
-        property: "isSnapping"
-      },
-      {
-        component: "camera-tool",
-        property: "isRecording"
-      },
-      {
-        component: "camera-tool",
-        property: "label"
-      }
-    ]
-  });
+  NAF.schemas.add(cameraSchema);
 
   NAF.schemas.add({
     template: "#template-waypoint-avatar",
