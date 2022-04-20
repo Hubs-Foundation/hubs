@@ -9,6 +9,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
 import anime from "animejs";
 import { Layers } from "./layers";
+import { refSchema } from "../utils/jsx-entity";
 const { detect } = require("detect-browser");
 
 const browser = detect();
@@ -95,7 +96,14 @@ AFRAME.registerComponent("camera-tool", {
     captureAudio: { default: false },
     isSnapping: { default: false },
     isRecording: { default: false },
-    label: { default: "" }
+    label: { default: "" },
+
+    labelRef: refSchema,
+    snapButtonRef: refSchema,
+    snapMenuRef: refSchema,
+
+    screenRef: refSchema,
+    selfieScreenRef: refSchema
   },
 
   init() {
@@ -114,6 +122,14 @@ AFRAME.registerComponent("camera-tool", {
       stencil: false
     });
 
+    // Bit of a hack here to only update the renderTarget when the screens are in view
+    this.renderTarget.texture.isVideoTexture = true;
+    this.renderTarget.texture.update = () => {
+      if (this.showCameraViewfinder) {
+        this.viewfinderInViewThisFrame = true;
+      }
+    };
+
     this.camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
     this.camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
     this.camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
@@ -122,18 +138,11 @@ AFRAME.registerComponent("camera-tool", {
     this.camera.matrixNeedsUpdate = true;
     this.el.setObject3D("camera", this.camera);
 
-    const material = new THREE.MeshBasicMaterial({
-      map: this.renderTarget.texture
-    });
-    material.toneMapped = false;
+    this.screen = this.data.screenRef;
+    this.screen.material.map = this.renderTarget.texture;
 
-    // Bit of a hack here to only update the renderTarget when the screens are in view
-    material.map.isVideoTexture = true;
-    material.map.update = () => {
-      if (this.showCameraViewfinder) {
-        this.viewfinderInViewThisFrame = true;
-      }
-    };
+    this.selfieScreen = this.data.selfieScreenRef;
+    this.selfieScreen.material.map = this.renderTarget.texture;
 
     this.el.sceneEl.addEventListener("stateadded", () => this.updateUI());
     this.el.sceneEl.addEventListener("stateremoved", () => this.updateUI());
@@ -189,22 +198,7 @@ AFRAME.registerComponent("camera-tool", {
 
       anime(config);
 
-      const width = 0.28;
-      const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
-
-      this.screen = new THREE.Mesh(geometry, material);
-      this.screen.rotation.set(0, Math.PI, 0);
-      this.screen.position.set(0, 0, -0.042);
-      this.screen.matrixNeedsUpdate = true;
-      this.el.setObject3D("screen", this.screen);
-
-      this.selfieScreen = new THREE.Mesh(geometry, material);
-      this.selfieScreen.position.set(0, 0.4, 0);
-      this.selfieScreen.scale.set(-2, 2, 2);
-      this.selfieScreen.matrixNeedsUpdate = true;
-      this.el.setObject3D("selfieScreen", this.selfieScreen);
-
-      this.label = this.el.querySelector(".label");
+      this.label = this.data.labelRef;
       this.labelActionBackground = this.el.querySelector(".label-action-background");
       this.labelBackground = this.el.querySelector(".label-background");
       this.durationLabel = this.el.querySelector(".duration");
@@ -215,8 +209,8 @@ AFRAME.registerComponent("camera-tool", {
       this.label.object3D.visible = false;
       this.durationLabel.object3D.visible = false;
 
-      this.snapMenu = this.el.querySelector(".camera-snap-menu");
-      this.snapButton = this.el.querySelector(".snap-button");
+      this.snapMenu = this.data.snapMenuRef;
+      this.snapButton = this.data.snapButtonRef;
       this.recordButton = this.el.querySelector(".record-button");
 
       this.cancelButton = this.el.querySelector(".cancel-button");
