@@ -5,6 +5,7 @@ import qsTruthy from "../utils/qs_truthy";
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import { THREE } from "aframe";
 import { setMatrixWorld } from "../utils/three-utils";
+import nextTick from "../utils/next-tick";
 
 const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
@@ -217,7 +218,8 @@ AFRAME.registerComponent("name-tag", {
     this.model = model;
   },
 
-  onModelIkFirstTick() {
+  async onModelIkFirstTick() {
+    await nextTick();
     this.ikRoot = findAncestorWithComponent(this.el, "ik-root").object3D;
     this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
     this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
