@@ -33,14 +33,14 @@ export class NameTagVisibilitySystem {
         if (this.nametagVisibility === "showSpeaking") {
           const now = Date.now();
           if (!nametag.isTalking && nametag.wasTalking) {
-            if (now - nametag.lastUpdateTime > 1000) {
+            if (now - nametag.lastUpdateTime > 3000) {
               nametag.shouldBeVisible = false;
             }
           } else if (nametag.isTalking && !nametag.wasTalking) {
             nametag.lastUpdateTime = Date.now();
             nametag.shouldBeVisible = true;
           } else if (!nametag.isTalking && !nametag.wasTalking) {
-            if (now - nametag.lastUpdateTime > 1000) {
+            if (now - nametag.lastUpdateTime > 3000) {
               nametag.shouldBeVisible = false;
             }
           }
