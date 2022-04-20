@@ -1,84 +1,154 @@
-function parseChildren(children) {
-  const components = {};
-  const childEntities = [];
-  children.forEach(function(c) {
-    if (c === undefined) {
-      console.warn("found undefined node", c);
-    } else if (typeof c === "string") {
-      console.warn("found text node", c);
-    } else if (c.name) {
-      components[c.name] = c.props;
-    } else {
-      childEntities.push(c);
-    }
-  });
-  return { childEntities, components };
+function isValidChild(child) {
+  if (child === undefined) {
+    console.warn("found undefined node");
+    return false;
+  } else if (typeof child === "string") {
+    console.warn("found text node", child);
+    return false;
+  }
+
+  return true;
 }
+
+const vecAttrs = ["position", "scale", "rotation"];
+function parseVecAttr(attr, value) {
+  if (typeof value === "string") {
+    value = value.split(" ").map(parseFloat);
+    console.warn(`${attr} attribute was a string, it should be an array. -> scale={${JSON.stringify(value)}}`);
+  }
+  return value;
+}
+
+const reservedAttrs = ["id", "className", "visible", ...vecAttrs];
+
+// this is not just a simple object to trick aframes caching stuff
+class Ref {
+  constructor() {
+    this.current = null;
+  }
+}
+export function createRef() {
+  return new Ref();
+}
+
+export const refSchema = {
+  parse: v => v.current
+};
 
 export function createElementEntity(tag, attrs, ...children) {
-  if (typeof tag === "function") return tag(attrs);
-  if (tag === "a-entity") {
-    const aframeAttrs = {};
-    const { childEntities, components } = parseChildren(children);
-    Object.assign(components, attrs);
-    if (attrs.className) {
-      aframeAttrs.className = attrs.className;
-      delete components.className;
+  attrs = attrs || {};
+  if (typeof tag === "function") {
+    if (tag.prototype instanceof THREE.Object3D) {
+      let ref;
+      if (attrs.ref) {
+        ref = attrs.ref;
+        delete attrs.ref;
+      }
+      return {
+        type: "Object3D",
+        func: tag,
+        props: attrs,
+        children: children.filter(isValidChild),
+        ref
+      };
+    } else {
+      return tag(attrs);
     }
-    if (attrs.id) {
-      aframeAttrs.id = attrs.id;
-      delete components.id;
+  }
+  if (tag === "entity" || tag === "a-entity") {
+    let isLegacyEntity = tag === "a-entity";
+    if (isLegacyEntity) {
+      console.warn("Entity using 'a-entity' tag, it should be 'entity'.");
+      // do any special handling to make porting templates easier
     }
-    if (attrs.mixin) {
-      aframeAttrs.mixin = attrs.mixin;
-      delete components.mixin;
+    const outputAttrs = {};
+    const components = [];
+    let ref = null;
+
+    for (let attr in attrs) {
+      if (isLegacyEntity && vecAttrs.includes(attr)) {
+        outputAttrs[attr] = parseVecAttr(attr, attrs[attr]);
+      } else if (reservedAttrs.includes(attr)) {
+        outputAttrs[attr] = attrs[attr];
+      } else if (attr === "mixin") {
+        console.warn(`Mixins are not supported, consider creating a custom component for ${attrs.mixin}`);
+      } else if (attr === "ref") {
+        ref = attrs[attr];
+      } else {
+        components[attr] = attrs[attr];
+      }
     }
-    Object.keys(components).forEach(function(componentName) {
-      if (components[componentName] === true) components[componentName] = "";
-    });
+
     return {
-      attrs: aframeAttrs,
+      type: "entity",
+      attrs: outputAttrs,
       components,
-      children: childEntities
-    };
-  } else if (tag === "entity") {
-    const { childEntities, components } = parseChildren(children);
-    return {
-      attrs,
-      components,
-      children: childEntities
-    };
-  } else {
-    return {
-      name: tag,
-      props: attrs
+      children: children.filter(isValidChild),
+      ref
     };
   }
 }
 
-export function renderAsAframeEntity(entity) {
-  const el = document.createElement("a-entity");
-  if (entity.attrs.className) {
-    el.className = entity.attrs.className;
+export function renderAsAframeEntity(entityDef) {
+  if (entityDef.type === "entity") {
+    const el = document.createElement("a-entity");
+    if (entityDef.attrs.className) {
+      el.className = entityDef.attrs.className;
+    }
+    if (entityDef.attrs.id) {
+      el.id = entityDef.attrs.id;
+    }
+    if (entityDef.attrs.position) {
+      el.object3D.position.fromArray(entityDef.attrs.position);
+    }
+    if (entityDef.attrs.rotation) {
+      el.object3D.rotation.fromArray(entityDef.attrs.rotation);
+    }
+    if (entityDef.attrs.scale) {
+      el.object3D.scale.fromArray(entityDef.attrs.scale);
+    }
+    if (entityDef.attrs.visible !== undefined) {
+      el.object3D.visible = entityDef.attrs.visible;
+    }
+    if (entityDef.ref) {
+      console.log("setting ref", entityDef, el);
+      entityDef.ref.current = el;
+    }
+    entityDef.children.forEach(child => {
+      if (child.type === "Object3D") {
+        el.object3D.add(renderAsAframeEntity(child));
+      } else {
+        el.appendChild(renderAsAframeEntity(child));
+      }
+    });
+    Object.keys(entityDef.components).forEach(name => {
+      const componentProps = entityDef.components[name];
+      el.setAttribute(name, componentProps === true ? "" : componentProps);
+    });
+    return el;
+  } else if (entityDef.type === "Object3D") {
+    const obj = new entityDef.func();
+    for (const prop in entityDef.props) {
+      if (Array.isArray(entityDef.props[prop]) && obj[prop] && obj[prop].fromArray) {
+        obj[prop].fromArray(entityDef.props[prop]);
+      } else {
+        obj[prop] = entityDef.props[prop];
+      }
+    }
+    if (entityDef.ref) {
+      entityDef.ref.current = obj;
+    }
+    entityDef.children.forEach(child => {
+      if (child.type === "Object3D") {
+        obj.add(renderAsAframeEntity(child));
+      } else {
+        throw "entities can only be children of entities";
+      }
+    });
+    return obj;
+  } else {
+    throw "unknown entity type " + entityDef.type;
   }
-  if (entity.attrs.id) {
-    el.id = entity.attrs.id;
-  }
-  if (entity.attrs.position) {
-    el.object3D.position.copy(entity.attrs.position);
-  }
-  if (entity.attrs.rotation) {
-    el.object3D.rotation.copy(entity.attrs.rotation);
-  }
-  if (entity.attrs.scale) {
-    el.object3D.scale.copy(entity.attrs.scale);
-  }
-  if (entity.attrs.visible !== undefined) {
-    el.object3D.visible = entity.attrs.visible;
-  }
-  Object.keys(entity.components).forEach(name => el.setAttribute(name, entity.components[name]));
-  entity.children.forEach(child => el.appendChild(renderAsAframeEntity(child)));
-  return el;
 }
 
 function reduceNodes([siblingIndicies, prevNodes], entity) {
