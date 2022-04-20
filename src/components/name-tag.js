@@ -50,8 +50,6 @@ AFRAME.registerComponent("name-tag", {
     this.onModelIkFirstTick = this.onModelIkFirstTick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
 
-    this.avatarRig = document.getElementById("avatar-rig").object3D;
-
     this.nametag = this.el.object3D;
     this.nametagIdentityName = this.el.querySelector(".identityName").object3D;
     this.nametagBackground = this.el.querySelector(".nametag-background").object3D;

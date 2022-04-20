@@ -49,8 +49,10 @@ export class NameTagVisibilitySystem {
         } else if (this.nametagVisibility === "showNone") {
           nametag.shouldBeVisible = false;
         } else if (this.nametagVisibility === "showClose") {
-          nametag.el.object3D.getWorldPosition(worldPos);
-          nametag.shouldBeVisible = worldPos.sub(avatarRigWorldPos).lengthSq() < this.nametagVisibilityDistance;
+          if (nametag.ikRoot) {
+            nametag.ikRoot.getWorldPosition(worldPos);
+            nametag.shouldBeVisible = worldPos.sub(avatarRigWorldPos).lengthSq() < this.nametagVisibilityDistance;
+          }
         } else {
           nametag.shouldBeVisible = true;
         }
