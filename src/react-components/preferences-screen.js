@@ -141,7 +141,11 @@ export class NumberRangeSelector extends Component {
                 displayValue: numberOrReset === undefined ? "" : finalValue,
                 digitsFromUser: countDigits(sanitizedInput)
               });
-              this.props.setValue(finalValue);
+              this.props.setValue(
+                numberOrReset === undefined
+                  ? parseFloat(this.props.store.state.preferences[this.props.storeKey])
+                  : finalValue
+              );
             }}
           />
         </div>
