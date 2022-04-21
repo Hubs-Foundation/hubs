@@ -5,6 +5,7 @@ import qsTruthy from "../utils/qs_truthy";
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import { THREE } from "aframe";
 import { setMatrixWorld } from "../utils/three-utils";
+import nextTick from "../utils/next-tick";
 
 const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
@@ -50,8 +51,6 @@ AFRAME.registerComponent("name-tag", {
     this.onModelIkFirstTick = this.onModelIkFirstTick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
 
-    this.avatarRig = document.getElementById("avatar-rig").object3D;
-
     this.nametag = this.el.object3D;
     this.nametagIdentityName = this.el.querySelector(".identityName").object3D;
     this.nametagBackground = this.el.querySelector(".nametag-background").object3D;
@@ -74,15 +73,15 @@ AFRAME.registerComponent("name-tag", {
     });
 
     if (DEBUG) {
-      this.avatarBBAAHelper = new THREE.Box3Helper(this.avatarAABB, 0xffff00);
-      this.el.sceneEl.object3D.add(this.avatarBBAAHelper);
+      this.avatarAABBHelper = new THREE.Box3Helper(this.avatarAABB, 0xffff00);
+      this.el.sceneEl.object3D.add(this.avatarAABBHelper);
     }
 
     this.onStateChanged();
   },
 
   remove() {
-    if (DEBUG) this.el.sceneEl.object3D.remove(this.avatarBBAAHelper);
+    if (DEBUG) this.el.sceneEl.object3D.remove(this.avatarAABBHelper);
   },
 
   tick: (() => {
@@ -135,9 +134,9 @@ AFRAME.registerComponent("name-tag", {
       }
 
       if (DEBUG) {
-        this.updateAvatarModelBBAA();
-        this.avatarBBAAHelper.matrixNeedsUpdate = true;
-        this.avatarBBAAHelper.updateMatrixWorld(true);
+        this.updateAvatarModelAABB();
+        this.avatarAABBHelper.matrixNeedsUpdate = true;
+        this.avatarAABBHelper.updateMatrixWorld(true);
       }
     };
   })(),
@@ -219,12 +218,13 @@ AFRAME.registerComponent("name-tag", {
     this.model = model;
   },
 
-  onModelIkFirstTick() {
+  async onModelIkFirstTick() {
+    await nextTick();
     this.ikRoot = findAncestorWithComponent(this.el, "ik-root").object3D;
     this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
     this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
 
-    this.updateAvatarModelBBAA();
+    this.updateAvatarModelAABB();
     const tmpVector = new THREE.Vector3();
     this.nametagHeight =
       Math.abs(tmpVector.subVectors(this.ikRoot.position, this.avatarAABBCenter).y) +
@@ -301,7 +301,7 @@ AFRAME.registerComponent("name-tag", {
     });
   },
 
-  updateAvatarModelBBAA() {
+  updateAvatarModelAABB() {
     if (!this.model) return;
     this.avatarAABB.setFromObject(this.model);
     this.avatarAABB.getSize(this.avatarAABBSize);
