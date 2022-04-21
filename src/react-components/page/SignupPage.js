@@ -31,6 +31,7 @@ class SignUpForm extends React.Component{
             password: '',
             submitted: false,
             error:'',
+            disabled:false,
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -70,6 +71,7 @@ class SignUpForm extends React.Component{
         }
         else{
             UserService.signupWithEmail(data).then((res) => {
+                this.setState({ disabled : true });
                 if(res.result == 'ok'){
                     remove2Token();
                     window.location = `/?page=warning-verify&email=${res.data.email}`;
@@ -78,6 +80,7 @@ class SignUpForm extends React.Component{
                 if(res.result == 'fail'){// && result.error == 'duplicated_email'
                     if(res.error == 'duplicated_email'){
                         this.setState({ error : 'Your email already exists' });
+                        this.setState({ disabled : false });
                     }
                 }
             })
@@ -85,7 +88,7 @@ class SignUpForm extends React.Component{
     }
 
   render(){
-    const { displayName,email, password,repassword, submitted ,error} = this.state;
+    const { displayName,email, password,repassword, submitted ,error,disabled} = this.state;
     const MesageError=()=> {  
         if(error){
           return(
@@ -146,7 +149,7 @@ class SignUpForm extends React.Component{
                         <span className="focus-input100"></span>
                     </div>
                     <div className="container-login100-form-btn m-t-27 m-b-30">
-                        <button className="login100-form-btn">
+                        <button className="login100-form-btn" disabled={false}>
                             Sign Up
                         </button>
                     </div>

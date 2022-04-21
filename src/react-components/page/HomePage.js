@@ -244,7 +244,7 @@ function Home() {
                             <div className="span3">
                               <MdPublic size={37} color='#FFF'/>
                             </div>
-                            <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>Visit tour</button>
+                            <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>ENTER</button>
                           </>
                         )
                       }
@@ -279,7 +279,7 @@ function Home() {
                              <div className="span3">
                                <MdOutlineCheckCircleOutline size={37} color='#FFF'/>
                              </div>
-                             <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>Visit tour</button>
+                             <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>ENTER</button>
                             </>
                            )
                         }
@@ -289,7 +289,7 @@ function Home() {
                         if(today > startday)
                         {
                           return(
-                            <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>Visit tour</button>
+                            <button className="signin-up btn-visit reserved" onClick={handleButtonVisit} data-roomid ={item.roomId}>ENTER</button>
                           )
                         }
                         else if(today <= startday)
@@ -320,7 +320,7 @@ function Home() {
                            <div className="span3">
                              <MdPublic size={37} color='#FFF'/>
                            </div>
-                           <button className="signin-up btn-visit reserved" onClick={handleButtonVisitPublic} data-roomid ={item.roomId}>Visit tour</button>
+                           <button className="signin-up btn-visit reserved" onClick={handleButtonVisitPublic} data-roomid ={item.roomId}>ENTER</button>
                           </>
                         )
                       }
