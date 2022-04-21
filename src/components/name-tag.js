@@ -73,15 +73,15 @@ AFRAME.registerComponent("name-tag", {
     });
 
     if (DEBUG) {
-      this.avatarBBAAHelper = new THREE.Box3Helper(this.avatarAABB, 0xffff00);
-      this.el.sceneEl.object3D.add(this.avatarBBAAHelper);
+      this.avatarAABBHelper = new THREE.Box3Helper(this.avatarAABB, 0xffff00);
+      this.el.sceneEl.object3D.add(this.avatarAABBHelper);
     }
 
     this.onStateChanged();
   },
 
   remove() {
-    if (DEBUG) this.el.sceneEl.object3D.remove(this.avatarBBAAHelper);
+    if (DEBUG) this.el.sceneEl.object3D.remove(this.avatarAABBHelper);
   },
 
   tick: (() => {
@@ -134,9 +134,9 @@ AFRAME.registerComponent("name-tag", {
       }
 
       if (DEBUG) {
-        this.updateAvatarModelBBAA();
-        this.avatarBBAAHelper.matrixNeedsUpdate = true;
-        this.avatarBBAAHelper.updateMatrixWorld(true);
+        this.updateAvatarModelAABB();
+        this.avatarAABBHelper.matrixNeedsUpdate = true;
+        this.avatarAABBHelper.updateMatrixWorld(true);
       }
     };
   })(),
@@ -224,7 +224,7 @@ AFRAME.registerComponent("name-tag", {
     this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
     this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
 
-    this.updateAvatarModelBBAA();
+    this.updateAvatarModelAABB();
     const tmpVector = new THREE.Vector3();
     this.nametagHeight =
       Math.abs(tmpVector.subVectors(this.ikRoot.position, this.avatarAABBCenter).y) +
@@ -301,7 +301,7 @@ AFRAME.registerComponent("name-tag", {
     });
   },
 
-  updateAvatarModelBBAA() {
+  updateAvatarModelAABB() {
     if (!this.model) return;
     this.avatarAABB.setFromObject(this.model);
     this.avatarAABB.getSize(this.avatarAABBSize);
