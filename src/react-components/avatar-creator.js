@@ -267,7 +267,7 @@ class AvatarEditor extends Component {
                 {this.iframeField()}
                 <div className="split">
                   <AvatarPreview
-                    className="preview"
+                    className="preview hidden"
                     avatarGltfUrl={this.state.previewGltfUrl}
                     onGltfLoaded={this.handleGltfLoaded}
                     {...this.inputFiles}
