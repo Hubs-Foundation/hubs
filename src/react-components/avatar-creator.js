@@ -3,11 +3,16 @@ import PropTypes from "prop-types";
 import { defineMessage, FormattedMessage, injectIntl } from "react-intl";
 import classNames from "classnames";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
+import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons/faCloudUploadAlt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import configs from "../utils/configs";
+import IfFeature from "./if-feature";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
+import { upload } from "../utils/media-utils";
 import { ensureAvatarMaterial } from "../utils/avatar-utils";
 
+import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
 const delistAvatarInfoMessage = defineMessage({
@@ -43,7 +48,6 @@ const fetchAvatar = async avatarId => {
 };
 
 var avatar_url = null;
-
 // GLTFLoader plugin for splitting glTF and bin from glb.
 class GLTFBinarySplitterPlugin {
   constructor(parser) {
@@ -78,7 +82,7 @@ class GLTFBinarySplitterPlugin {
   }
 }
 
-class AvatarCreator extends Component {
+class AvatarEditor extends Component {
   static propTypes = {
     avatarId: PropTypes.string,
     onSave: PropTypes.func,
@@ -132,17 +136,46 @@ class AvatarCreator extends Component {
     }
   };
 
-  uploadAvatar = async e => {
-    console.log("#### upload avatar......");
-    console.log("#### avatar creators event e.. : " + e);
-    //e.preventDefault();
+  createOrUpdateAvatar = avatar => {
+    return fetchReticulumAuthenticated(
+      avatar.avatar_id ? `${AVATARS_API}/${avatar.avatar_id}` : AVATARS_API,
+      avatar.avatar_id ? "PUT" : "POST",
+      { avatar }
+    ).then(({ avatars }) => avatars[0]);
+  };
 
-    if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
-      const gltfLoader = new THREE.GLTFLoader().register(parser => new GLTFBinarySplitterPlugin(parser));
-      // const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
-      const gltfUrl = URL.createObjectURL(avatar_url);
+  getPreviewUrl = gltfUrl => {
+    return gltfUrl ? gltfUrl : this.state.avatar.base_gltf_url;
+  };
+
+  uploadAvatar = async e => {
+    this.setState({ uploading: true });
+    if (true) {
+      debugger;
+      console.log(avatar_url);
+      let gltfUrl;
+      const url = avatar_url; 
+      await fetch(url)
+      .then(res => res.blob()) // Gets the response and returns it as a blob
+      .then(blob => {
+        gltfUrl = URL.createObjectURL(blob);
+      });
       
+      const gltfLoader = new THREE.GLTFLoader().register(parser => new GLTFBinarySplitterPlugin(parser));
       const onProgress = console.log;
+
+      URL.revokeObjectURL(this.state.avatar.files["glb"]);
+      this.setState({
+        avatar: {
+          ...this.state.avatar,
+          ['parent_avatar_listing_id']: "",
+          files: {
+            ...this.state.avatar.files,
+            glb: gltfUrl
+          }
+        },
+        previewGltfUrl: this.getPreviewUrl(gltfUrl)
+      });
 
       await new Promise((resolve, reject) => {
         // GLTFBinarySplitterPlugin saves gltf and bin in gltf.files
@@ -156,20 +189,18 @@ class AvatarCreator extends Component {
           onProgress,
           reject
         );
+        URL.revokeObjectURL(gltfUrl);
       });
-
-      URL.revokeObjectURL(gltfUrl);
+      this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", {
+        type: "image/png"
+      });
     }
-
     this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", {
       type: "image/png"
     });
-
     const filesToUpload = ["gltf", "bin", "base_map", "emissive_map", "normal_map", "orm_map", "thumbnail"].filter(
       k => this.inputFiles[k] === null || this.inputFiles[k] instanceof File
     );
-
-    this.setState({ uploading: true });
 
     const fileUploads = await Promise.all(filesToUpload.map(f => this.inputFiles[f] && upload(this.inputFiles[f])));
     const avatar = {
@@ -185,54 +216,24 @@ class AvatarCreator extends Component {
     await this.createOrUpdateAvatar(avatar);
 
     this.setState({ uploading: false });
-    avatar_url = null;
 
     if (this.props.onSave) this.props.onSave();
 
-    console.log("#### upload avatar......complete !!!!");
   };
-
 
   iframeField = () => (
     <div>
        <iframe src="https://larchiveum.readyplayer.me/avatar?frameApi" width="1280px" height="720px"/>
      </div>
-
   );
 
   subscribe = (event) => {
+   
     console.log(event.data);
     avatar_url = event.data;
-    this.uploadAvatar();
-
-    const json = this.parse(event);
-      
-    if (json?.source !== 'readyplayerme') {
-      return;
-    }
-
-    // Susbribe to all events sent from Ready Player Me once frame is ready
-    if (json.eventName === 'v1.frame.ready') {
-      console.log("#### rpm get event....");
-      frame.contentWindow.postMessage(
-        JSON.stringify({
-          target: 'readyplayerme',
-          type: 'subscribe',
-          eventName: 'v1.**'
-        }),
-        '*'
-      );
-    }
-
-    // Get avatar GLB URL
-    if (json.eventName === 'v1.avatar.exported') {
-      console.log(`Avatar URL: ${json.data.url}`);
-      console.log(`Avatar URL: ${json.data}`);
-    }
-
-    // Get user id
-    if (json.eventName === 'v1.user.set') {
-      console.log(`User with id ${json.data.id} set: ${JSON.stringify(json)}`);
+    //this.uploadAvatar();
+    if (event.origin.startsWith('https://larchiveum.ready') && event.data.toString().includes('.glb')) {
+      this.uploadAvatar();
     }
   }
 
@@ -245,13 +246,7 @@ class AvatarCreator extends Component {
   }
 
   render() {
-    const { debug, intl } = this.props;
-    const { avatar } = this.state;
-
-    // window.addEventListener("message", receiveMessage, false);
     window.addEventListener('message', this.subscribe);
-    document.addEventListener('message', this.subscribe);
-
     return (
       <div className={classNames(styles.avatarEditor, this.props.className)}>
         {this.props.onClose && (
@@ -269,12 +264,21 @@ class AvatarCreator extends Component {
           <form onSubmit={this.uploadAvatar} className="center">
             <div className="split">
               <div className="form-body">
-              
-                {this.iframeField(
-                    
-                )
-                
-                }
+                {this.iframeField()}
+                <div className="split">
+                  <AvatarPreview
+                    className="preview"
+                    avatarGltfUrl={this.state.previewGltfUrl}
+                    onGltfLoaded={this.handleGltfLoaded}
+                    {...this.inputFiles}
+                    ref={p => (this.preview = p)}
+                  />
+                </div>
+                {this.state.uploading ? (
+                  <div className="loading-page"></div>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </form>
@@ -284,4 +288,4 @@ class AvatarCreator extends Component {
   }
 }
 
-export default injectIntl(AvatarCreator);
+export default injectIntl(AvatarEditor);
