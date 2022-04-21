@@ -15,7 +15,7 @@
     align-items: center;
   }
 
-  > .loader {
+  >.loader {
     position: absolute;
     left: calc(50% - 4.3em);
     top: calc(50% - 4.5em);
@@ -30,6 +30,7 @@
     p {
       margin: 0;
       margin-bottom: 0.5em;
+
       a {
         margin-right: 5px;
       }
@@ -47,6 +48,7 @@
     flex: 1;
     align-items: center;
     overflow: auto;
+
     @media (min-width: 768px) {
       padding-top: 2em;
     }
@@ -56,7 +58,7 @@
     display: flex;
     flex-direction: column;
 
-    > label {
+    >label {
       margin-top: 8px;
     }
 
@@ -64,9 +66,10 @@
       margin-bottom: 10px;
     }
 
-    > .text-field-container {
+    >.text-field-container {
       display: flex;
       align-items: center;
+
       label {
         margin-right: 5px;
       }
@@ -75,18 +78,22 @@
     .file-input-row {
       display: flex;
       align-items: center;
-      &.disabled{
+
+      &.disabled {
         opacity: 0.5;
       }
+
       label {
         display: flex;
         align-items: center;
         margin: 5px 0;
         cursor: pointer;
       }
+
       input {
         display: none;
       }
+
       .img-box {
         width: 50px;
         height: 50px;
@@ -98,6 +105,7 @@
         overflow: hidden;
         color: theme.$tile-text-color;
         position: relative;
+
         svg {
           position: absolute;
           left: 50%;
@@ -107,9 +115,11 @@
           height: 20px;
         }
       }
+
       img {
         width: 100%;
       }
+
       a {
         margin-left: 10px;
         color: theme.$link-color;
@@ -128,7 +138,8 @@
 
     .select-container {
       position: relative;
-      .arrow{
+
+      .arrow {
         position: absolute;
         right: 10px;
         bottom: 20px;
@@ -173,7 +184,7 @@
           background: theme.$tile-bg-color-pressed;
         }
 
-        &.custom{
+        &.custom {
           width: 100%;
           height: 40px;
 
@@ -182,6 +193,7 @@
             margin-top: -1px;
           }
         }
+
         img {
           position: absolute;
           top: 5px;
@@ -221,8 +233,10 @@
         min-width: 2em;
         min-height: 2em;
       }
+
       .checkbox:checked {
         position: relative;
+
         &::after {
           content: ' ';
           position: absolute;
@@ -239,6 +253,7 @@
     .license {
       font-size: 8pt;
       color: theme.$text2-color;
+
       a {
         color: theme.$text2-color;
       }
@@ -259,9 +274,18 @@
     margin-left: 2em;
     height: 450px;
     max-width: 200px;
+
     @media (max-width: 768px) {
       margin-left: 0.5em;
     }
+  }
+
+  .preview.hidden {
+    position: absolute;
+    top: 150px;
+    right: 10px;
+    z-index: 100;
+    visibility: hidden;
   }
 
   .form-submit {
@@ -270,6 +294,7 @@
     margin: 0;
     margin-bottom: 0.5em;
   }
+
   .form-submit:disabled {
     background-color: theme.$disabled-bg-color;
   }
@@ -288,6 +313,7 @@
   .delete-avatar {
     margin-top: 20px;
     color: theme.$text2-color;
+
     a {
       cursor: pointer;
       text-decoration: underline;
@@ -309,5 +335,134 @@
     @media (max-width: 768px) {
       padding-left: 0.5em;
     }
+  }
+}
+
+/* Absolute Center Spinner */
+.loading-page {
+  position: fixed;
+  z-index: 999;
+  height: 2em;
+  width: 2em;
+  overflow: show;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+/* Transparent Overlay */
+.loading-page:before {
+  content: '';
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(rgba(20, 20, 20, .8), rgba(0, 0, 0, .8));
+
+  background: -webkit-radial-gradient(rgba(20, 20, 20, .8), rgba(0, 0, 0, .8));
+}
+
+/* :not(:required) hides these rules from IE9 and below */
+.loading-page:not(:required) {
+  /* hide "loading..." text */
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+
+.loading-page:not(:required):after {
+  content: '';
+  display: block;
+  font-size: 10px;
+  width: 1em;
+  height: 1em;
+  margin-top: -0.5em;
+  -webkit-animation: spinner 150ms infinite linear;
+  -moz-animation: spinner 150ms infinite linear;
+  -ms-animation: spinner 150ms infinite linear;
+  -o-animation: spinner 150ms infinite linear;
+  animation: spinner 150ms infinite linear;
+  border-radius: 0.5em;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.75) 1.5em 0 0 0, rgba(255, 255, 255, 0.75) 1.1em 1.1em 0 0, rgba(255, 255, 255, 0.75) 0 1.5em 0 0, rgba(255, 255, 255, 0.75) -1.1em 1.1em 0 0, rgba(255, 255, 255, 0.75) -1.5em 0 0 0, rgba(255, 255, 255, 0.75) -1.1em -1.1em 0 0, rgba(255, 255, 255, 0.75) 0 -1.5em 0 0, rgba(255, 255, 255, 0.75) 1.1em -1.1em 0 0;
+  box-shadow: rgba(255, 255, 255, 0.75) 1.5em 0 0 0, rgba(255, 255, 255, 0.75) 1.1em 1.1em 0 0, rgba(255, 255, 255, 0.75) 0 1.5em 0 0, rgba(255, 255, 255, 0.75) -1.1em 1.1em 0 0, rgba(255, 255, 255, 0.75) -1.5em 0 0 0, rgba(255, 255, 255, 0.75) -1.1em -1.1em 0 0, rgba(255, 255, 255, 0.75) 0 -1.5em 0 0, rgba(255, 255, 255, 0.75) 1.1em -1.1em 0 0;
+}
+
+/* Animation */
+
+@-webkit-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-o-keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinner {
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }

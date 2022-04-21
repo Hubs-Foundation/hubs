@@ -144,9 +144,10 @@ class AvatarEditor extends Component {
   };
 
   uploadAvatar = async e => {
+    debugger
     e.preventDefault();
-
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
+      
       const gltfLoader = new THREE.GLTFLoader().register(parser => new GLTFBinarySplitterPlugin(parser));
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
@@ -156,6 +157,7 @@ class AvatarEditor extends Component {
         gltfLoader.load(
           gltfUrl,
           result => {
+           
             this.inputFiles.gltf = result.files.gltf;
             this.inputFiles.bin = result.files.bin;
             resolve(result);

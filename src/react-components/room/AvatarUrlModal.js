@@ -10,6 +10,11 @@ import { Column } from "../layout/Column";
 
 export function AvatarUrlModal({ onSubmit, onClose }) {
   const { handleSubmit, register } = useForm();
+  const handleChange = () => {
+    debugger;
+    console.log('handle change called');
+    document.getElementById('btnSubmitAvatar').click();
+  }
   return (
     <Modal title="Custom Avatar URL" beforeTitle={<CloseButton onClick={onClose} />}>
       <Column as="form" padding center onSubmit={handleSubmit(onSubmit)}>
@@ -19,21 +24,16 @@ export function AvatarUrlModal({ onSubmit, onClose }) {
           placeholder="https://example.com/avatar.glb"
           type="url"
           required
+          onChange={handleChange}
           ref={register}
-          description={
-            <a href="https://hubs.mozilla.com/docs/intro-avatars.html" target="_blank" rel="noopener noreferrer">
-              <FormattedMessage
-                id="avatar-url-modal.custom-avatar-docs-link"
-                defaultMessage="Learn more about custom avatars"
-              />
-            </a>
-          }
         />
-        <ApplyButton type="submit" />
+        <ApplyButton type="submit" id="btnSubmitAvatar"/>
       </Column>
     </Modal>
   );
 }
+
+
 
 AvatarUrlModal.propTypes = {
   onSubmit: PropTypes.func,
