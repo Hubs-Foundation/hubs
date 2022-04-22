@@ -11,10 +11,8 @@ import IfFeature from "./if-feature";
 import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { upload } from "../utils/media-utils";
 import { ensureAvatarMaterial } from "../utils/avatar-utils";
-
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
-
 const delistAvatarInfoMessage = defineMessage({
   id: "avatar-editor.delist-avatar-info",
   defaultMessage:
@@ -148,10 +146,9 @@ class AvatarEditor extends Component {
     return gltfUrl ? gltfUrl : this.state.avatar.base_gltf_url;
   };
 
-  uploadAvatar = async e => {
-    this.setState({ uploading: true });
+  previewAvatar = async e =>{
+    this.setState({ stepSave: true });
     if (true) {
-      debugger;
       console.log(avatar_url);
       let gltfUrl;
       const url = avatar_url; 
@@ -191,10 +188,11 @@ class AvatarEditor extends Component {
         );
         URL.revokeObjectURL(gltfUrl);
       });
-      this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", {
-        type: "image/png"
-      });
     }
+  }
+
+  uploadAvatar = async e => {
+    this.setState({ uploading: true });
     this.inputFiles.thumbnail = new File([await this.preview.snapshot()], "thumbnail.png", {
       type: "image/png"
     });
@@ -233,7 +231,7 @@ class AvatarEditor extends Component {
     avatar_url = event.data;
     //this.uploadAvatar();
     if (event.origin.startsWith('https://larchiveum.ready') && event.data.toString().includes('.glb')) {
-      this.uploadAvatar();
+      this.previewAvatar();
     }
   }
 
@@ -244,6 +242,21 @@ class AvatarEditor extends Component {
       return null;
     }
   }
+
+  textField = (name, placeholder, disabled, required) => (
+    <div className="text-field-container">
+      <input
+        id={`avatar-${name}`}
+        type="text"
+        disabled={disabled}
+        required={required}
+        placeholder={placeholder}
+        className="text-field"
+        value={this.state.avatar[name] || ""}
+        onChange={e => this.setState({ avatar: { ...this.state.avatar, [name]: e.target.value } })}
+      />
+    </div>
+  );
 
   render() {
     window.addEventListener('message', this.subscribe);
@@ -261,27 +274,87 @@ class AvatarEditor extends Component {
             <div className="loader-center" />
           </div>
         ) : (
-          <form onSubmit={this.uploadAvatar} className="center">
-            <div className="split">
-              <div className="form-body">
-                {this.iframeField()}
-                <div className="split">
-                  <AvatarPreview
-                    className="preview hidden"
-                    avatarGltfUrl={this.state.previewGltfUrl}
-                    onGltfLoaded={this.handleGltfLoaded}
-                    {...this.inputFiles}
-                    ref={p => (this.preview = p)}
-                  />
-                </div>
-                {this.state.uploading ? (
-                  <div className="loading-page"></div>
-                ) : (
-                  <></>
-                )}
-              </div>
+          <div className={classNames(styles.avatarEditor, this.props.className)}>
+          {this.props.onClose && (
+            <a className="close-button" onClick={this.props.onClose}>
+              <i>
+                <FontAwesomeIcon icon={faTimes} />
+              </i>
+            </a>
+          )}
+          {!this.state.avatar ? (
+            <div className="loader">
+              <div className="loader-center" />
             </div>
-          </form>
+          ) : (
+            <form className="center">
+              {!this.state.stepSave ? (
+                <>
+                  {this.iframeField()}
+                </>
+              ) : (
+              <>
+                {this.textField("name", "Name", false, true)}
+                <AvatarPreview
+                  className="preview mleft0"
+                  avatarGltfUrl={this.state.previewGltfUrl}
+                  onGltfLoaded={this.handleGltfLoaded}
+                  {...this.inputFiles}
+                  ref={p => (this.preview = p)}
+                />
+                <div className="info">
+                  <IfFeature name="show_avatar_editor_link">
+                    <p>
+                      <FormattedMessage
+                        id="avatar-editor.external-editor-info"
+                        defaultMessage="Create a custom skin for this avatar:"
+                      />{" "}
+                      {this.state.editorLinks.map(({ name, url }) => (
+                        <a
+                          key={name}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={url.replace("$AVATAR_GLTF", encodeURIComponent(this.state.previewGltfUrl))}
+                        >
+                          {name}
+                        </a>
+                      ))}
+                    </p>
+                  </IfFeature>
+                  <IfFeature name="show_avatar_pipelines_link">
+                    <p>
+                      <FormattedMessage
+                        id="avatar-editor.info"
+                        defaultMessage="Find more custom avatar resources <a>here</a>"
+                        values={{
+                          a: chunks => (
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              href="https://github.com/MozillaReality/hubs-avatar-pipelines"
+                            >
+                              {chunks}
+                            </a>
+                          )
+                        }}
+                      />
+                    </p>
+                  </IfFeature>
+                </div>
+                <div>
+                  <button disabled={this.state.uploading} className="form-submit" type="button" onClick={this.uploadAvatar}>
+                    {this.state.uploading ? ( 
+                      <FormattedMessage id="avatar-editor.submit-button.uploading" defaultMessage="Uploading..." />
+                    ) : (
+                      <FormattedMessage id="avatar-editor.submit-button.save" defaultMessage="Save" />
+                    )}
+                  </button>
+                </div>
+              </>
+              )}
+            </form>
+          )}
+        </div>
         )}
       </div>
     );

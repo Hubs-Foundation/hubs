@@ -697,7 +697,7 @@ class AvatarEditor extends Component {
             </div>
             <div>
               <button disabled={this.state.uploading} className="form-submit" type="submit">
-                {this.state.uploading ? (
+                {this.state.uploading ? ( 
                   <FormattedMessage id="avatar-editor.submit-button.uploading" defaultMessage="Uploading..." />
                 ) : (
                   <FormattedMessage id="avatar-editor.submit-button.save" defaultMessage="Save" />
