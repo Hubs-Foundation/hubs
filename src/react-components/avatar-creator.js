@@ -121,7 +121,7 @@ class AvatarEditor extends Component {
             base_gltf_url: randomAvatarResult.gltfs.base,
             parent_avatar_listing_id: randomAvatarResult.id
           },
-          previewGltfUrl: randomAvatarResult.gltfs.avatar
+          previewGltfUrl: null
         });
       } else {
         this.setState({
