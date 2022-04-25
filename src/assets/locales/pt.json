@@ -572,7 +572,7 @@
   "sign-in-modal.signin-message.tweet": "Você precisa entrar para enviar tuítes.",
   "sign-in-modal.signin-message.unpin": "Você precisa entrar para desafixar objetos.",
   "sign-in-modal.title": "Autenticação",
-  "sign-in-modal.wait-for-verification": "<p>E-mail de autenticação enviado para {email}!</p><p>Para continuar, clique no link que você recebeu através de seu smartphone, tablet ou computador.</p><p>Não reecbeu? Reporte para dbvroom@dbserver.com.br.</p>",
+  "sign-in-modal.wait-for-verification": "<p>E-mail de autenticação enviado para {email}!</p><p>Para continuar, clique no link que você recebeu através de seu smartphone, tablet ou computador.</p><p>Se você não receber, não poderás criar uma conta.</p>",
   "spectating-label.label": "Assistindo",
   "support.copied": "copiado!",
   "support.copy": "copiar",
