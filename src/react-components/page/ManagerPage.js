@@ -19,7 +19,7 @@ import defaultImage from '../../assets/larchiveum/default-image.png'
 import defaultImage1 from '../../assets/larchiveum/siri.gif'
 import Pagination from '../../react-components/pagination/pagination'
 import {APP_ROOT} from '../../utilities/constants'
-import { FaUserFriends ,FaRegCalendarAlt ,FaLink,FaCog} from "react-icons/fa";
+import { FaUserFriends ,FaRegCalendarAlt ,FaLink,FaCog,FaShapes} from "react-icons/fa";
 import { Manager } from 'react-popper-2';
 import StoreHub from "../../storage/store";
 import UserService from '../../utilities/apiServices/UserService'
@@ -244,7 +244,10 @@ function ManagerHome() {
       if(userInfo.type == 5)
       {
         return(
-          <a className="gotoadmin" href={APP_ROOT + '/admin'}><FaCog className='icon-setting-admin'/> Admin </a>
+          <>
+            <a className="gotospoke" href={APP_ROOT + '/spoke'}><FaShapes className='icon-setting-spoke'/> Spoke </a>
+            <a className="gotoadmin" href={APP_ROOT + '/admin'}><FaCog className='icon-setting-admin'/> Admin </a>
+          </>
         )
       }
       else{

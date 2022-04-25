@@ -1,6 +1,14 @@
-.WRAP_PAGINATION{
+.WRAP_PAGINATION {
+
     // margin: 10px;
-    .double, .single, .first-page, .pre-page, .current-page, .next-page, .last-page, .more{
+    .double,
+    .single,
+    .first-page,
+    .pre-page,
+    .current-page,
+    .next-page,
+    .last-page,
+    .more {
         padding: 10px;
         min-width: 35px;
         height: 35px;
@@ -12,103 +20,151 @@
         justify-content: center;
         margin: 0 5px;
         font-size: 18px;
-        color: #FFF;
+        color: #333;
+
         .ico {
             width: 20px;
             height: 20px;
-            path, circle {
-                fill: #FFF;
+
+            path,
+            circle {
+                fill: #333;
             }
         }
-        &:hover{
-            color:rgb(230, 230, 230);
+
+        &:hover {
+            color: rgb(230, 230, 230);
             background-image: linear-gradient(1deg, #4F58FD, #149BF3 99%);
+
             .ico {
-                path, circle{
+
+                path,
+                circle {
                     fill: rgb(230, 230, 230);
                 }
             }
         }
-        &.event-none{
+
+        &.event-none {
             .ico {
-                path, circle {
-                    fill: rgba(255, 255, 255, 0.555);
+
+                path,
+                circle {
+                    fill: #999;
                 }
             }
-            &:hover{
+
+            &:hover {
                 background: rgba(255, 255, 255, 0);
             }
         }
     }
 
-    .current-page{
-        color:rgb(230, 230, 230);
+    .current-page {
+        color: rgb(230, 230, 230);
         background-image: linear-gradient(1deg, #4F58FD, #149BF3 99%);
     }
-    .more{ // none button
+
+    .more {
+        // none button
         align-items: flex-end;
         cursor: default;
+
         .ico-more {
             width: 20px;
             height: 15px;
-            path, circle {
+
+            path,
+            circle {
                 fill: rgb(255, 255, 255);
             }
         }
-        &:hover{
+
+        &:hover {
             background-color: transparent;
+
             .ico-more {
-                path, circle{
+
+                path,
+                circle {
                     fill: var(--txt1);
                 }
             }
         }
     }
 }
-.justify-content-center{
+
+.justify-content-center {
     margin-top: 35px;
     margin-bottom: 50px;
     justify-content: center;
 }
 
-.theme-black{
-    .double, .single, .first-page, .pre-page, .current-page, .next-page, .last-page, .more{
+.theme-black {
+
+    .double,
+    .single,
+    .first-page,
+    .pre-page,
+    .current-page,
+    .next-page,
+    .last-page,
+    .more {
         color: #111;
         font-weight: bold;
+
         .ico {
             width: 20px;
             height: 20px;
-            path, circle {
+
+            path,
+            circle {
                 fill: #0096fa;
             }
         }
-        &:hover{
+
+        &:hover {
             background-image: #FFF;
+
             .ico {
-                path, circle{
+
+                path,
+                circle {
                     fill: #0099ff;
                 }
             }
-            &:hover{
+
+            &:hover {
                 .ico {
-                    path, circle{
+
+                    path,
+                    circle {
                         fill: #FFF;
                     }
                 }
             }
         }
-        &.event-none{
+
+        &.event-none {
             pointer-events: none;
+
             .ico {
-                path, circle {
+
+                path,
+                circle {
                     fill: #2eabff81;
                 }
             }
         }
     }
-    .more{ // none button
+
+    .more {
+
+        // none button
         .ico-more {
-            path, circle {
+
+            path,
+            circle {
                 fill: #0099ff;
             }
         }

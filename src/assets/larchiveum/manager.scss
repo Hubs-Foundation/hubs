@@ -12,7 +12,7 @@
 	width: 100%;
 	padding: 0;
 	background-size: 100%;
-	background-image: url(./background-manager.jpg);
+	// background-image: url(./background-manager.jpg);
 	background-attachment: fixed;
 
 	.row_1 {
@@ -26,7 +26,8 @@
 		padding: 20px;
 
 		.text_1 {
-			color: #ffffff;
+			color: #2b81f7;
+			font-weight: 600;
 			font-size: 30px;
 		}
 	}
@@ -132,9 +133,10 @@
 		.nameA {
 			cursor: pointer;
 			margin-right: 5px;
+			color: #333;
 
 			&:hover {
-				color: rgb(243, 243, 243);
+				color: #111;
 			}
 		}
 
@@ -152,14 +154,28 @@
 
 
 		.gotoadmin {
+			position: relative;
 			font-size: 17px;
-			margin-right: 15px;
+			margin-right: 25px;
 			color: #ffc400;
 			cursor: pointer;
 
 			&:hover {
 				transform: scale(1.1);
 				color: #bb8f00;
+			}
+		}
+
+		.gotospoke {
+			position: relative;
+			font-size: 17px;
+			margin-right: 35px;
+			color: #34C049;
+			cursor: pointer;
+
+			&:hover {
+				transform: scale(1.1);
+				color: #278f37;
 			}
 		}
 	}
@@ -187,13 +203,13 @@
 		margin-top: 26px;
 		width: 100%;
 		height: 220px;
-		background: rgba(255, 255, 255, 0.8);
+		background: rgba(209, 209, 209, 0.39);
 		border-radius: 10px;
 		display: flex;
 
 		&:hover {
 			//cursor: pointer;
-			background: rgba(255, 255, 255, 1);
+			background: rgba(209, 209, 209, 0.5);
 			transform: scale(1.01);
 			transition: 0.2s ease-in;
 		}
@@ -354,10 +370,16 @@
 		margin-left: 10px;
 	}
 
-	.icon-setting-admin {
+	.icon-setting-spoke {
 		position: absolute;
 		margin-left: -22px;
 		margin-top: 13px;
+	}
+
+	.icon-setting-admin {
+		position: absolute;
+		margin-left: 70px;
+		margin-top: -32px;
 	}
 
 
@@ -377,8 +399,9 @@
 
 .warning-content p {
 	text-align: center;
-	font-size: 22px;
-	color: #FFF;
+	font-size: 27px;
+	color: #2b81f7;
+	margin-bottom: 25px;
 }
 
 
