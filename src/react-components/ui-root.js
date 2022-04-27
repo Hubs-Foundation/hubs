@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from "react";
+import React, { Component, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import copy from "copy-to-clipboard";
@@ -164,8 +164,7 @@ class UIRoot extends Component {
     onLoaded: PropTypes.func,
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
-    breakpoint: PropTypes.string,
-    mediaSearchStore: PropTypes.object
+    breakpoint: PropTypes.string
   };
 
   state = {
@@ -796,7 +795,8 @@ class UIRoot extends Component {
 
   onChangeAvatar = e => {
     e.preventDefault();
-    this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
+    // this.props.mediaSearchStore.sourceNavigateWithNoNav("avatars", "use");
+    this.setSidebar("profile")
   };
 
   renderInterstitialPrompt = () => {
@@ -1382,7 +1382,6 @@ class UIRoot extends Component {
                     }}
                     onClose={() => this.props.history.goBack()}
                     store={this.props.store}
-                    debug={avatarEditorDebug}
                     avatarId={props.location.state.detail && props.location.state.detail.avatarId}
                     hideDelete={props.location.state.detail && props.location.state.detail.hideDelete}
                   />
@@ -1712,5 +1711,7 @@ UIRootHooksWrapper.propTypes = {
   messageDispatch: PropTypes.object,
   store: PropTypes.object.isRequired
 };
+
+
 
 export default UIRootHooksWrapper;

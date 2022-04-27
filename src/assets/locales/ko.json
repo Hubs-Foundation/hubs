@@ -162,7 +162,7 @@
   "toolbar.leave-room-button": "나가기",
   "avatar-setup-sidebar.title": "아바타 설정",
   "avatar-settings-content.display-name-label": "닉네임",
-  "avatar-settings-content.display-name-description": "알파벳, 하이픈(-), 언더스코어(_), 물결(~)로 구성된 3~32글자의 이름을 입력해주세요.",
+  "avatar-settings-content.display-name-description": "3~32글자의 한글, 알파벳, 숫자, 하이픈(-), 언더스코어(_), 물결(~)로 구성된 이름을 입력해주세요.",
   "avatar-settings-content.change-avatar-button": "아바타 변경하기",
   "avatar-toolbar-button": "아바타 변경",
   "media-browser.powered_by.images": "Bing에서 검색하기",
