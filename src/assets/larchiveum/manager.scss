@@ -15,6 +15,10 @@
 	// background-image: url(./background-manager.jpg);
 	background-attachment: fixed;
 
+	.btn-action {
+		margin-right: 25px;
+	}
+
 	.row_1 {
 		margin-top: 20px;
 		width: 80%;
@@ -75,7 +79,7 @@
 		background-image: linear-gradient(1deg, #4F58FD, #149BF3 99%);
 		color: #FFFFFF;
 		width: 100%;
-		margin-top: 65px;
+		margin-top: 35px;
 	}
 
 	.center-flex {
@@ -95,8 +99,17 @@
 		background-image: linear-gradient(1deg, rgba(246, 98, 18, 1), rgba(226, 20, 20, 1) 100%);
 		color: #FFFFFF;
 		width: 100%;
-		margin-top: 65px;
+		margin-top: 35px;
 		padding: 6px 10px !important;
+	}
+
+	.btn-close {
+		background-color: rgb(9, 186, 27);
+		background-image: linear-gradient(1deg, rgb(50, 176, 18), rgb(52, 208, 0) 100%);
+		color: #FFFFFF;
+		width: 100%;
+		margin-top: 10px;
+
 	}
 
 	.btn-edit {

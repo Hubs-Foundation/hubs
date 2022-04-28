@@ -38,6 +38,7 @@ function ManagerHome() {
   const [scenes, setScenes] = useState([]);
   const [exhibitionsLoaded, setExhibitionsLoaded] = useState(false);
   const [isOpenExhibition, setIsOpenExhibition] = useState(false);
+  const [isCloseRoom, setIsCloseRoom] = useState(false);
   const [isOpenToggle, setIsOpenToggle] = useState(false);
   const [exhibition, setExhibition] = useState(undefined);
   const [exhibitionType, setExhibitionType] = useState('create');
@@ -151,6 +152,15 @@ function ManagerHome() {
     setIsOpenToggle(false);
   }
 
+  const openCloseRoom =(exhibitionId)=> {
+    setExhibitionId(exhibitionId);
+    setIsCloseRoom(true);
+  }
+
+  const closeRoom = ()=> {
+    setIsCloseRoom(false);
+  }
+
   const renderExhibitions = () => {
     return (
       <>
@@ -196,6 +206,7 @@ function ManagerHome() {
                         <div className="btn-action">
                             <PublishButton/>
                             <button className="btn btn-edit" onClick={()=>{openPopupExhibition(item) , setExhibitionType('edit')}} data-id-exhibition ={item.id}>Edit</button>
+                            <button className="btn btn-close" onClick={()=>{openCloseRoom(item)}} data-id-exhibition ={item.id}>Close</button>
                         </div>
                     </div>
                   )
@@ -245,8 +256,8 @@ function ManagerHome() {
       {
         return(
           <>
-            <a className="gotospoke" href={APP_ROOT + '/spoke'}><FaShapes className='icon-setting-spoke'/> Spoke </a>
-            <a className="gotoadmin" href={APP_ROOT + '/admin'}><FaCog className='icon-setting-admin'/> Admin </a>
+            <a className="gotospoke" href={APP_ROOT + '/spoke'}> Spoke </a>
+            <a className="gotoadmin" href={APP_ROOT + '/admin'}> Admin </a>
           </>
         )
       }
@@ -448,6 +459,29 @@ function ManagerHome() {
       
     })
   }
+
+  const handelToggleCloseRoom=(exhibitionId)=>{
+    // ExhibitionsService.patchTogglePublic(exhibitionId).then((res) => {
+    //   if(res.result == 'ok'){
+    //     exhibitions.data.forEach(exhibition => {
+    //       if(exhibition.id == exhibitionId){
+    //         exhibition.public = res.data.public;
+    //         toast.success('Change status success !', {autoClose:5000})
+    //       }
+    //     });
+    //     setIsCloseRoom(!isCloseRoom);
+    //   }
+    //   else if(res.result == 'fail' && res.error =='invalid_id')
+    //   {
+    //     toast.error('exhibition id is incorrect !', {autoClose:5000})
+    //   }
+    //   else
+    //   {
+    //     toast.error('System error Please try again later !', {autoClose:5000})
+    //   }
+      
+    // })
+  }
   if(isLoading)
   {
     return(
@@ -572,6 +606,29 @@ function ManagerHome() {
           handleClose={closePopupPublic}
         />}
   
+        {isCloseRoom && <Popup
+          title={<>Close room</>}
+          size={'sm'}
+          content={<>
+              <br/>
+              Are you sure to close this room? People will not be able to access when you close the room ?
+              <br/>
+              <br/>
+          </>}
+          actions={[
+              {
+                text: "Close Room",
+                class: "btn1",
+                callback: ()=>{handelToggleCloseRoom(exhibitionId)},
+              },
+              {
+                text: "Cancel",
+                class: "btn2",
+                callback: ()=>{closeRoom()},
+              },
+          ]}
+          handleClose={closeRoom}
+        />}
         <div className='manager-page'>
           <div className="row_1">
             <span className="text_1">Manager Larchiveum</span>
