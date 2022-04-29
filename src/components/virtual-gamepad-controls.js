@@ -39,6 +39,9 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.rightMock.appendChild(this.rightMockSmall);
     this.mockJoystickContainer.appendChild(this.rightMock);
 
+    window.APP.store.state.preferences.enableOnScreenJoystickLeft = true;
+    window.APP.store.state.preferences.enableOnScreenJoystickRight = true;
+
     this.enableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
     this.enableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
     if (this.enableLeft || this.enableRight) {
@@ -75,6 +78,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
   onPreferenceChange() {
     const newEnableLeft = window.APP.store.state.preferences.enableOnScreenJoystickLeft;
     const newEnableRight = window.APP.store.state.preferences.enableOnScreenJoystickRight;
+
     const isChanged = this.enableLeft !== newEnableLeft || this.enableRight !== newEnableRight;
     if (!isChanged) {
       return;
