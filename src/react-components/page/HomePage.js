@@ -401,7 +401,7 @@ function Home() {
       return(
         <span className="display-name">
           <ManagerBtn/>
-          <span className="nameA"> {userInfo.displayName || userInfo.email}</span> <a className="logout" onClick={handleRemoveCookie}><MdOutlineLogout size={28} color='#111'/></a>
+          <span className="nameA"> {userInfo.displayName || userInfo.email} </span> | <a className='logout_btn' onClick={handleRemoveCookie}>Logout</a>
         </span>
       ) 
     }

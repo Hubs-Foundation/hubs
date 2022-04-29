@@ -271,7 +271,7 @@ function ManagerHome() {
       return(
         <span className="display-name">
           <MasterAdmin/>
-          <span className="nameA">{userInfo.displayName || userInfo.email}</span> / <a className="gotohome" href='/'>Back Home </a>
+          <span className="nameA">{userInfo.displayName || userInfo.email}</span> | <a className="gotohome" href='/'> Home</a>
         </span>
       ) 
     }

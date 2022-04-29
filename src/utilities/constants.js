@@ -5,8 +5,8 @@ const expireCookies = 1;
 const API_ROOT = "https://vdc-dev.gemiso.com/larchiveum";
 const ENV = "https://vdc-dev.gemiso.com/larchiveum";
 
-//const APP_ROOT = "https://larchiveum.link";
-const APP_ROOT = "https://hubs.local:8080";
+const APP_ROOT = "https://larchiveum.link";
+//const APP_ROOT = "https://hubs.local:8080";
 
 const naverApp = {
     clientID: 'pSh1Vk5d8Df3XZAURRC5',

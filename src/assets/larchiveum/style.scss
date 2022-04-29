@@ -18,6 +18,11 @@
 	background-size: cover;
 	background-repeat: no-repeat;
 
+	.logout_btn {
+		font-size: 16px;
+		cursor: pointer;
+	}
+
 	.row_1 {
 		position: relative;
 		margin-top: 20px;
@@ -106,12 +111,7 @@
 		line-height: 45px;
 
 		.nameA {
-			cursor: pointer;
 			margin-right: 5px;
-
-			&:hover {
-				color: #666;
-			}
 		}
 
 		.logout {
@@ -408,7 +408,7 @@
 	}
 
 	a.manager {
-		font-size: 20px;
+		font-size: 17px;
 		color: #149BF3;
 		margin-right: 15px;
 
