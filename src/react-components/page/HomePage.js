@@ -389,7 +389,7 @@ function Home() {
         if(userInfo.type >= 3)
         {
           return(
-            <a className="manager" href={APP_ROOT + '/?page=manager'}> <MdLaptopChromebook className="icon"/> Manager </a> 
+            <a className="manager" href={APP_ROOT + '/?page=manager'}> Manager </a> 
           )
         }
         else{
@@ -401,7 +401,7 @@ function Home() {
       return(
         <span className="display-name">
           <ManagerBtn/>
-          <span className="nameA"> {userInfo.displayName || userInfo.email}</span> <a className="logout" onClick={handleRemoveCookie}><MdOutlineLogout size={28} color='#111'/></a>
+          <span className="nameA"> {userInfo.displayName || userInfo.email} </span> | <a className='logout_btn' onClick={handleRemoveCookie}>Logout</a>
         </span>
       ) 
     }

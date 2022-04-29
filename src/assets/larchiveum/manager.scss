@@ -15,6 +15,10 @@
 	// background-image: url(./background-manager.jpg);
 	background-attachment: fixed;
 
+	.btn-action {
+		margin-right: 25px;
+	}
+
 	.row_1 {
 		margin-top: 20px;
 		width: 80%;
@@ -75,7 +79,7 @@
 		background-image: linear-gradient(1deg, #4F58FD, #149BF3 99%);
 		color: #FFFFFF;
 		width: 100%;
-		margin-top: 65px;
+		margin-top: 35px;
 	}
 
 	.center-flex {
@@ -95,8 +99,17 @@
 		background-image: linear-gradient(1deg, rgba(246, 98, 18, 1), rgba(226, 20, 20, 1) 100%);
 		color: #FFFFFF;
 		width: 100%;
-		margin-top: 65px;
+		margin-top: 35px;
 		padding: 6px 10px !important;
+	}
+
+	.btn-close {
+		background-color: rgb(9, 186, 27);
+		background-image: linear-gradient(1deg, rgb(50, 176, 18), rgb(52, 208, 0) 100%);
+		color: #FFFFFF;
+		width: 100%;
+		margin-top: 10px;
+
 	}
 
 	.btn-edit {
@@ -125,14 +138,12 @@
 	.display-name {
 		position: relative;
 		margin-right: 22px;
-		color: #FFFFFF;
 		float: right;
 		font-weight: bold;
 		line-height: 45px;
 
 		.nameA {
 			cursor: pointer;
-			margin-right: 5px;
 			color: #333;
 
 			&:hover {
@@ -141,35 +152,28 @@
 		}
 
 		.gotohome {
-			margin-top: 8px;
-			font-size: 17px;
-			color: #25a8ff;
+			font-size: 16px;
 			cursor: pointer;
-
-			&:hover {
-				transform: scale(1.1);
-				color: #007fd4;
-			}
 		}
 
 
 		.gotoadmin {
 			position: relative;
 			font-size: 17px;
-			margin-right: 25px;
+			margin-right: 15px;
 			color: #ffc400;
 			cursor: pointer;
 
 			&:hover {
 				transform: scale(1.1);
-				color: #bb8f00;
+				color: #eab400;
 			}
 		}
 
 		.gotospoke {
 			position: relative;
 			font-size: 17px;
-			margin-right: 35px;
+			margin-right: 15px;
 			color: #34C049;
 			cursor: pointer;
 
@@ -401,7 +405,7 @@
 	text-align: center;
 	font-size: 27px;
 	color: #2b81f7;
-	margin-bottom: 25px;
+	margin-bottom: 5px;
 }
 
 
