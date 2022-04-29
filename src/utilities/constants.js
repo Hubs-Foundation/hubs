@@ -5,10 +5,8 @@ const expireCookies = 1;
 const API_ROOT = "https://vdc-dev.gemiso.com/larchiveum";
 const ENV = "https://vdc-dev.gemiso.com/larchiveum";
 
-const APP_ROOT = "https://larchiveum.link";
-// const APP_ROOT = "https://hubs.local:8080";
-// const APP_ROOT = "https://localhost:8080";
-
+//const APP_ROOT = "https://larchiveum.link";
+const APP_ROOT = "https://hubs.local:8080";
 
 const naverApp = {
     clientID: 'pSh1Vk5d8Df3XZAURRC5',
@@ -24,6 +22,7 @@ const facebookApp = {
     //clientID: '339289624917102',
     clientID: '4835484659880198',
 }
+
 // WETOP
 // const googleApp = {
 //     clientID: "58132589047-m5tdln5da7dho7gb7mnp7kqitdnv5dvq.apps.googleusercontent.com",
