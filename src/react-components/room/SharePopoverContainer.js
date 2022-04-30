@@ -91,7 +91,7 @@ function useShare(scene, hubChannel) {
   const toggleShareScreen = useCallback(
     () => {
       if (sharingSource) {
-        scene.emit(MediaDevicesEvents.V);
+        scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
       } else {
         scene.emit("action_share_screen");
       }
