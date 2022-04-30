@@ -1,0 +1,816 @@
+{
+  "listCue": [
+    {
+      "name": "Test_1_spawn_item_avocado",
+      "role": "test",
+      "target": { "type": "glb",
+                  "dest": "url",
+                  "src":  "https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Avocado/glTF-Binary/Avocado.glb"},
+      "action": {"type": "spawn_item",
+                 "pos": {"x": 0, "y":1.0, "z":0},
+                 "rot": {"x": 0, "y":1.57, "z":0},
+                 "scale": {"x": 1.2, "y":1.2, "z":1.2}},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_2_spawn_item_video",
+      "role": "test",
+      "target": { "type": "video",
+                  "dest": "url",
+                  "src":  "https://www.youtube.com/watch?v=YE7VzlLtp-4"},
+      "action": { "type": "spawn_item",
+                  "pos": {"x": 1.3, "y":1.82, "z":1.85},
+                  "rot": {"x": 0, "y":-1.57, "z":0},
+                  "scale": {"x": 1.67, "y":1.67, "z":1.67},
+                  "volume":0.9,
+                  "distanceModel": "linear",
+                  "rolloffFactor":1,
+                  "refDistance":5,
+                  "maxDistance":10},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_3_spawn_prop",
+      "role": "test",
+      "target": { "type": "glb",
+                  "dest": "url",
+                  "src":  "https://xrtheater-assets.xrtheater.live/files/2acc1a73-429b-4895-b766-b28c954a39b2.glb"},
+      "action": {"type": "spawn_prop",
+                 "rot": {"x": 0, "y":1.57, "z":0},
+                 "scale": {"x": 1.2, "y":1.2, "z":1.2}},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_delete_Video_fm_Test_2",
+      "role": "test",
+      "target": { "type": "glb",
+                  "src": "Test_2_spawn_item_video"},
+      "action": {"type": "delete"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_move_Avocado_fm_Test_1",
+      "role": "test",
+      "target": { "type": "glb",
+                  "dest": "local",
+                  "src": "Test_1_spawn_item_avocado"},
+      "action": {"type": "move",
+                 "duration": 2000,
+                 "loop": true,
+                 "pos": {"x": 3, "y":3, "z":3},
+                 "rot": {"x": 0, "y":39.785, "z":0},
+                 "scale": {"x": 2, "y":2, "z":2}},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_jump_to_waypoint",
+      "role": "test",
+      "target": { },
+      "action": {"type": "jump_to_waypoint",
+                 "anchor":"#SHWaypoint"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_change_scene",
+      "role":"test",
+      "target": { },
+      "action": {"type": "change_scene",
+                 "link":"https://chat-mirror-us-assets.chatmirror.com/files/76f7a72b-467b-4bf4-aca6-1a9b604d44ec.bin",
+                 "refreshUI": true
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_change_avatar",
+      "role":"test",
+      "target": { },
+      "action": {"type": "change_avatar",
+                 "link":"https://github.com/romamile/virtualtheatre/raw/main/avatar_1.glb"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_ui_popin",
+      "role":"test",
+      "target": { "src": "https://cdn.pixabay.com/photo/2013/07/12/17/47/test-pattern-152459_960_720.png",
+                  "dest": "https://www.mozilla.com"},
+      "action": {"type": "ui_popin"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_call_global_function",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_global_function",
+                 "function_name":"testFunctionGlobal"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_call_method_from_object",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "function_name":"testFunction",
+                 "object_name":"testPersonalCode"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Strings_run",
+      "role": "strings-clem",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "function_name":"run",
+                 "object_name":"stringsFloormat"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Strings_stop",
+      "role": "strings-clem",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "function_name":"stop",
+                 "object_name":"stringsFloormat"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "SHSetupSS",
+      "role": "smarthome",
+      "target": { },
+      "action": {"type": "call_global_function",
+                 "function_name":"smartHomeSetupSS"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "SHSetup",
+      "role": "smarthome",
+      "target": { },
+      "action": {"type": "call_global_function",
+                 "function_name":"smartHomeSetup"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "SHCue2",
+      "role": "smarthome",
+      "target": { },
+      "action": {"type": "call_global_function",
+                 "function_name":"smartHomeCue2"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "SHCue3",
+      "role": "smarthome",
+      "target": { },
+      "action": {"type": "call_global_function",
+                 "function_name":"smartHomeCue3"},
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_lock_waypoint",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_lock_waypoint",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type" : "lock_waypoint",
+                     "waypoint" : "NPCWaypoint81",
+                     "recallAud" : true,
+                     "maxDist" : 0.001,
+                     "anime" : {
+                      "targets": "",
+                      "delay" : 1000,
+                      "loop": false,
+                      "autoplay": true,
+                      "easing": "easeOutSine",
+                      "duration": 7500
+                      },
+                      "timelines" : [
+                        { "x": -47.389263582373, "y": 2.876098918548304, "z": -7.5257407256272264, "duration": 10000, "delay":0 },
+                        { "x": -42.1537730137875, "y": 0.1825354554650358, "z": -7.662983934450706, "duration": 5000,  "easing": "easeInSine" },
+                        { "x": -41.8243485858889, "y": 0.18548062030659813, "z": -0.4719175056698982, "duration": 7000 }
+                      ]
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_load_360",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_load_360",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type": "load_360_video",
+                    "src" : "https://xrtheater-assets.xrtheater.live/spoke/assets/videos/SpokePromo-d2938564ef20e10abf757c09182a1056.mp4"}
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_load_360",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_load_360_image",
+                   "target": { "role": "general" },
+                   "action": { "type": "load_360_image",
+                    "src" : "https://uploads-prod.reticulum.io/files/e329adfb-6fe2-40c1-8647-c240ab6a5fca.jpg",
+                    "position" : {"x": 0, "y": -100, "z": 0},
+                    "scale" : {"x": 1000, "y": 500, "z": 1000}
+                  }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_load_particle",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_load_particle",
+                   "target": { "role": "general" },
+                   "action": { "type": "spawn_particle_emitter",
+                    "position" : {"x": 0, "y": 0, "z": 0},
+                    "scale" : {"x": 1, "y": 1, "z": 1},
+                    "rotation" : {"x": 0, "y": 0, "z": 0},
+                    "parameters" : {
+                      "particleCount": 10000.0,
+                      "src": "https://xrtheater-assets.xrtheater.live/spoke/assets/images/dot-75db99b125fe4e9afbe58696320bea73.png",
+                      "ageRandomness": 10.0,
+                      "lifetime": 1.0,
+                      "lifetimeRandomness": 1.0,
+                      "sizeCurve": "linear",
+                      "startSize": 0.4,
+                      "endSize": 0.01,
+                      "sizeRandomness": 0.5,
+                      "colorCurve": "linear",
+                      "startColor": "#000000",
+                      "startOpacity": 1.0,
+                      "middleColor": "#000000",
+                      "middleOpacity": 0.5,
+                      "endColor": "#332E2E",
+                      "endOpacity": 0.01,
+                      "velocityCurve": "linear",
+                      "startVelocity": { "x": 0, "y": 0, "z": 5 },
+                      "endVelocity": { "x": 0, "y": 0, "z": 5 },
+                      "angularVelocity": 5.0
+                    }
+                  }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_load_360",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_load_360_image",
+                   "target": { "role": "general" },
+                   "action": { "type": "load_360_image",
+                    "src" : "https://uploads-prod.reticulum.io/files/e329adfb-6fe2-40c1-8647-c240ab6a5fca.jpg",
+                    "position" : {"x": 0, "y": -100, "z": 0},
+                    "scale" : {"x": 1000, "y": 500, "z": 1000}
+                  }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_play_360",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_play_360",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type": "play_360_cutscene",
+                    "mapItem" : "test_load_360",
+                    "fadeDuration" : 5000}
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_fade_skybox_opacity",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_fade_skybox_opacity",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type": "socket_fade_skybox_opacity",
+                    "mapItem" : "test_load_360",
+                    "fadeDuration" : 5000}
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_toggle_flight",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_toggle_flight",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type": "socket_toggle_flight",
+                    "flight" : true}
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_toggle_movement",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_toggle_movement",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type": "socket_toggle_movement",
+                    "movement" : false}
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_change_avatar",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_change_avatar",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type": "change_avatar",
+                    "link" : "https://onboardxr.github.io/onboard_json/avatar/avatar1.glb"}
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_recall_audience",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_recall_audience",
+                   "target": { "role": "general" },
+                   "action": { "type": "recall_audience",
+                    "waypoint" : "TestWaypoint",
+                    "maxDist" : 10,
+                    "enableMotion" : false}
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_manipulate_avatar",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_manipulate_avatar",
+                   "target": { "role" : "individual",
+                     "name": "Brendan",
+                     "aspect" : "scale" },
+                   "action": { "type": "manipulate_avatar",
+                    "attr": "object3D",
+                     "anime": {
+                      "targets": "",
+                      "delay" : 1000,
+                      "loop": false,
+                      "autoplay": false,
+                      "easing": "easeInOutSine",
+                      "duration": 10000
+                      },
+                      "timelines" : [
+                        { "x": 100, "y": 50, "z": 100 }
+                      ]
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_manipulate_360_image",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_manipulate_360_image",
+                   "target": { "role" : "individual",
+                     "name": "Brendan",
+                     "aspect" : "opacity" },
+                   "action": { "type": "manipulate_360_image",
+                    "mapItem": "test_load_360_image",
+                    "attr": "object3D",
+                     "anime": {
+                      "targets": "",
+                      "delay" : 0,
+                      "loop": false,
+                      "autoplay": false,
+                      "easing": "linear",
+                      "duration": 10000
+                      },
+                      "timelines" : [
+                        { "opactiy": 0 }
+                      ]
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_spawn_360_gif",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_spawn_360_gif",
+                   "target": { "role" : "general"},
+                   "action": { "type": "spawn_360_gif",
+                    "src": "https://jigsawhubs-1-assets.onboardxr.live/files/094409af-bf2c-4b47-98c4-87db2bc40ce3.gif"
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_play_360_gif",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_play_360_gif",
+                   "target": { "role" : "general"},
+                   "action": { "type": "play_360_gif",
+                    "mapItem": "mapItem",
+                    "fadeDuration": 3000,
+                    "fadeDelay": 3000
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_manipulate_fog",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_manipulate_fog",
+                   "target": { "role" : "general",
+                     "aspect" : "maxDistance" },
+                   "action": { "type": "manipulate_fog",
+                    "attr": "fog",
+                     "anime": {
+                      "targets": "",
+                      "delay" : 0,
+                      "loop": false,
+                      "autoplay": false,
+                      "easing": "linear",
+                      "duration": 10000
+                      },
+                      "timelines" : [
+                        { "maxDistance": 0 }
+                      ]
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_spawn_fog",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_spawn_fog",
+                   "target": { "role" : "general",
+                     "aspect" : "maxDistance" },
+                   "action": { "type": "spawn_fog",
+                     "parameters": {"type" : "linear", "color": "#AAA"}
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_manipulate_particle_emitter",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_manipulate_particle_emitter",
+                   "target": { "role" : "general",
+                     "aspect" : "particle-emitter" },
+                   "action": { "type": "manipulate_particle_emitter",
+                    "mapItem": "test_load_particle",
+                    "attr": "TBD",
+                     "anime": {
+                      "targets": "",
+                      "delay" : 0,
+                      "loop": false,
+                      "autoplay": false,
+                      "easing": "linear",
+                      "duration": 10000
+                      },
+                      "timelines" : [
+                        {"particleCount": 1000.0}
+                      ]
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "Test_group_cues",
+      "role": "test",
+      "target": { },
+      "action": {"type": "group",
+        "indicies" : []
+      },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_change_to_octopus_avatar",
+      "role": "stagemanager",
+      "target": { },
+      "action": {"type": "change_avatar",
+                 "link":"https://github.com/mikemorran/Test2ndServerA/blob/main/public/Hero_Texture_Update_2.glb"},
+      "trig": {"type": "button",
+                "groupChain" : "NPCgroup1",
+               "time": 0}
+    },
+    {
+      "name": "test_octopus_avatar_starting_position",
+      "role": "stagemanager",
+      "target": { },
+      "action": {"type": "jump_to_waypoint",
+                 "anchor":"TestWaypoint"},
+      "trig": {"type": "button",
+                "groupChain" : "NPCgroup1",
+               "time": 0}
+      },
+      {
+      "name": "test_socket_change_rolloff",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_change_rolloff",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type": "change_rolloff",
+                    "names": ["brendan", "mike"],
+                    "rolloff": 99999999999,
+                    "refDistance": 0.000000001
+                    }
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_avatar_change_back",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_avatar_change_back",
+                   "target": { "role": "general" },
+                   "action": { "type": "avatar_change_back"}
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_manipulate_skybox_360",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_manipulate_skybox_360",
+                   "target": { "role": "general",
+                      "aspect": "rotation"
+                  },
+                   "action": { "type": "manipulate_skybox_360",
+                    "mapItem" : "test_load_360_image",
+                    "attr": "object3D",
+                    "anime": {
+                      "targets": "",
+                      "delay" : 0,
+                      "loop": true,
+                      "autoplay": false,
+                      "easing": "easeInCirc",
+                      "duration": 10000
+                      },
+                      "timelines" : [
+                        { "x": 0, "y": 360, "z": 0 }
+                      ]
+                    }
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "test_socket_manipulate_skybox_360",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_manipulate_skybox_360",
+                   "target": { "role": "general",
+                      "src": "test_load_360_image"
+                  },
+                   "action": { "type": "delete_socket_obj",
+                    "mapItem": "test_load_360_image"
+                    }
+                }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "NPC_8-1",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_lock_waypoint",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type" : "lock_waypoint",
+                     "waypoint" : "NPCWaypoint81",
+                     "recallAud" : true,
+                     "maxDist" : 0.001,
+                     "anime" : {
+                      "targets": "",
+                      "delay" : 1000,
+                      "loop": false,
+                      "autoplay": true,
+                      "easing": "easeOutSine",
+                      "duration": 7500
+                      },
+                      "timelines" : [
+                        { "x": -47.389263582373, "y": 2.876098918548304, "z": -7.5257407256272264, "duration": 10000, "delay": 10000 },
+                        { "x": -42.1537730137875, "y": 0.1825354554650358, "z": -7.662983934450706, "duration": 5000,  "easing": "easeInSine" },
+                        { "x": -41.8243485858889, "y": 0.18548062030659813, "z": -0.4719175056698982, "duration": 7000 }
+                      ]
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "NPC_8-2",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_lock_waypoint",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type" : "lock_waypoint",
+                     "waypoint" : "NPCWaypoint82",
+                     "recallAud" : true,
+                     "maxDist" : 1,
+                     "anime" : {
+                      "targets": "",
+                      "delay" : 0,
+                      "loop": false,
+                      "autoplay": true,
+                      "easing": "easeInSine",
+                      "duration": 3000
+                      },
+                      "timelines" : [
+                        { "x": -94.24702799390062, "y": 9.188397485822358, "z": -14.235554404224187}
+                      ]
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    },
+    {
+      "name": "NPC_7-1",
+      "role": "test",
+      "target": { },
+      "action": {"type": "call_method_from_object",
+                 "object_name": "sockSys",
+                 "function_name": "cueSocket",
+                 "_cue": { 
+                   "name": "test_lock_waypoint",
+                   "target": { "role": "stagemanager" },
+                   "action": { "type" : "lock_waypoint",
+                     "waypoint" : "NPCWaypoint71",
+                     "recallAud" : true,
+                     "maxDist" : 0.001,
+                     "anime" : {
+                      "targets": "",
+                      "delay" : 1000,
+                      "loop": false,
+                      "autoplay": true,
+                      "easing": "easeOutSine",
+                      "duration": 7000
+                      },
+                      "timelines" : [
+                        {"x": 0.558018701712822, "y": -2.2926751464183024, "z": 0.5374759002861802}
+                      ]
+                    }
+                  }
+                },
+      "trig": {"type": "button",
+               "time": 0}
+    }
+  ]
+}

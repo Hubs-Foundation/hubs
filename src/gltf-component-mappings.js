@@ -616,3 +616,14 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+//onboard
+AFRAME.GLTFModelPlus.registerComponent("vpt-stream", "vpt-stream", (el, _componentName, componentData) => {
+  console.log("VPT Stream " + _componentName);
+  if (componentData.hasOwnProperty("id")) {
+    el.setAttribute("id", componentData.id.trim());
+  }
+
+  el.setAttribute(_componentName, componentData);
+});
+//onboardend

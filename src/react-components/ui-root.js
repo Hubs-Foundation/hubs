@@ -95,6 +95,12 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 
+//onboard
+// == roman
+import "../onboardxr/onboard_data/stage-system.scss";
+// == roman end
+//onboard
+
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
 const IN_ROOM_MODAL_ROUTER_PATHS = ["/media"];
@@ -198,6 +204,9 @@ class UIRoot extends Component {
     objectSrc: "",
     sidebarId: null,
     presenceCount: 0,
+    //onboard
+    showAutoplay: false,
+    //onboardend
     chatInputEffect: () => {}
   };
 
@@ -298,6 +307,10 @@ class UIRoot extends Component {
   };
 
   componentDidMount() {
+    //onboard
+    this.props.scene.addEventListener("show_autoplay_dialog", () => this.setState({ showAutoplay: true }));
+    this.props.scene.addEventListener("hide_autoplay_dialog", () => this.setState({ showAutoplay: false }));
+    //onboardend
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
@@ -1305,6 +1318,67 @@ class UIRoot extends Component {
         ].filter(item => item)
       }
     ];
+
+    // onboard
+    window.helpMe = () => {
+      this.state.isHelping = !this.state.isHelping;
+      document.getElementById("helpImg").style.display = this.state.isHelping ? "block" : "none";
+    };
+
+    window.clap = () => {
+      let urlElt = "https://i.giphy.com/media/TlK63ETpu0aX6eJBRu0/source.gif";
+      // Info about me
+      var selfEl = AFRAME.scenes[0].querySelector("#avatar-rig");
+      var povCam = selfEl.querySelector("#avatar-pov-node");
+
+      // Loading asset
+      var elt = document.createElement("a-entity");
+      AFRAME.scenes[0].appendChild(elt);
+      elt.setAttribute("media-loader", { src: urlElt, fitToBox: true, resolve: true });
+      elt.setAttribute("networked", { template: "#interactable-media" });
+
+      // Positioning
+      elt.object3D.position.copy(selfEl.object3D.position);
+      elt.object3D.rotation.y = povCam.object3D.rotation.y;
+      elt.object3D.position.y += 2.22;
+
+      elt.object3D.position.x += 0.4 * Math.sin(povCam.object3D.rotation.y);
+      elt.object3D.position.z += 0.4 * Math.cos(povCam.object3D.rotation.y);
+
+      // Kill it after some time
+      setTimeout(() => {
+        elt.object3D.position.y = -9999999;
+      }, 5000);
+    };
+
+    const cueUI = window.stgSys.renderCueUI();
+    const clapIcon = (
+      <img className="nonDragSel iconTopLeftMenu" src="../assets/onBoard/clap.png" onClick={() => window.clap()} />
+    );
+
+    const helpIcon = (
+      <img className="nonDragSel iconTopLeftMenu" src="../assets/onBoard/help.svg" onClick={() => window.helpMe()} />
+    );
+
+    const helpImg = (
+      <img
+        id="helpImg"
+        className="nonDragSel"
+        style={{
+          position: "absolute",
+          top: "125px",
+          left: "75px",
+          width: "auto",
+          height: "80%",
+          margin: "auto",
+          display: "none"
+        }}
+        onClick={() => window.helpMe()}
+        src="../assets/onBoard/OB4Play.png"
+      />
+    );
+
+    // onboardend
 
     return (
       <MoreMenuContextProvider>

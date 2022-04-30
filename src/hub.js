@@ -253,6 +253,16 @@ import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 
+//onBoard - roman
+
+// 1.) Import of the onBoard javascript files (intended as javascript classes)
+
+import stgSysClass from "./onboardxr/onboard_data/stage-system.js";
+import loginManagerOB from "./onboardxr/hubs-docking/onboard-login-manager.js"; //mike
+import "./components/vpt-stream";
+
+//onBoard - roman end
+
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
 NAF.options.syncSource = PHOENIX_RELIABLE_NAF;
@@ -1404,4 +1414,45 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
+
+  //onBoard
+
+  // 1.) Import (at begining of file)
+
+  // 2.) Instantiation of the class in a global variable allocated to the window object
+  window.stgSys = new stgSysClass(hubChannel);
+
+  // 3.) Initialisation of the class
+  window.stgSys.init();
+
+  // 4.) User handling
+  // For now, in stgSys.ini() because of concurent race in loading of both JSON
+  //if (qs.has("k")) stgSys.initUser(qs.get("k"));
+  //else console.log(stgSys.myUser);
+
+  // 5.) Running of the loop of the class
+
+  // ========================
+  // PERSONAL CODE
+
+  // 1) Init
+  // window.clemMocapStreamer = new ClemMocapstreamerClass(); //clem
+  window.loginOb = new loginManagerOB(); //mike
+
+  // 2) Running
+  //clem
+  // if (window.location.href.includes("mocapstreamer")) {
+  // window.clemMocapStreamer.init();
+  // }
+  // if (window.location.href.includes("rusalka")) {
+  //   //window.clemRusalkaNSS.init();
+  //   window.clemRusalkaPolys.init();
+  // }
+  // if (String(AFRAME.scenes[0].attributes[3].value).match(/false/)) console.log('loaded')
+  //clemend
+
+  // PERSONAL CODE
+  // ========================
+
+  //onBoardend
 });

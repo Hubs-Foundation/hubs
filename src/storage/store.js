@@ -31,7 +31,12 @@ export const defaultMaterialQualitySetting = (function() {
     return qsDefault;
   }
 
-  return "high";
+  //onboard
+  //mike
+  // return "high";
+  return "medium";
+  //mikend
+  //onboardend
 })();
 
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
@@ -375,6 +380,24 @@ export default class Store extends EventTarget {
 
     localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify(finalState));
     delete this[STORE_STATE_CACHE_KEY];
+
+    //onboard
+    //FOR FORCING MATERIAL SETTINGS AND NAMETAGS
+    if (!window.localStorage.onBoardHasJoined) {
+      if (window.localStorage.___hubs_store) {
+        console.log("found hubs store");
+        let prefJSON = JSON.parse(window.localStorage.___hubs_store);
+        prefJSON.preferences.onlyShowNametagsInFreeze = true;
+        // prefJSON.preferences.disableTeleporter = true;
+        // prefJSON.preferences.muteMicOnEntry = true;
+        window.localStorage.___hubs_store = JSON.stringify(prefJSON);
+        window.localStorage.onBoardHasJoined = true;
+      } else {
+        console.log("waiting for hubs store");
+      }
+    }
+    //console.log("running forced settings");
+    //onboardend
 
     if (newState.profile !== undefined) {
       this.dispatchEvent(new CustomEvent("profilechanged"));

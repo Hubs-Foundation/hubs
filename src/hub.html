@@ -957,7 +957,19 @@
                     </a-entity>
                 </a-entity>
             </template>
-
+            <!-- onboard -->
+            <template id="vpt-stream-autoplay">
+                <a-entity
+                    billboard
+                    class="ui interactable-ui unmute-ui"
+                    tags="singleActionButton:true;" 
+                    mixin="rounded-text-button" 
+                    slice9="width: 0.8"                     
+                    is-remote-hover-target>
+                        <a-entity text="value:Play Stream; width:2; align:center;" text-raycast-hack position="0 0 0.02"></a-entity>                
+                </a-entity>
+            </template>
+            <!-- onboardend -->
             <a-mixin id="rounded-text-button"
                 slice9="
                     width: 0.45;

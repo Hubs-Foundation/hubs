@@ -143,6 +143,7 @@
     "troika-three-text": "^0.45.0",
     "use-clipboard-copy": "^0.1.2",
     "uuid": "^3.2.1",
+    "vpt-stream": "github:volumetricperformance/vpt-stream",
     "webrtc-adapter": "^7.7.0",
     "webxr-polyfill": "^2.0.3",
     "zip-loader": "^1.1.0"

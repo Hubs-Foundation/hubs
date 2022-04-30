@@ -33,7 +33,10 @@ AFRAME.registerSystem("exit-on-blur", {
     ) {
       this.lastTimeoutCheck = t;
       clearTimeout(this.exitTimeout);
-      this.exitTimeout = setTimeout(this.onTimeout, 30 * 1000);
+      //onboard
+      ///this.exitTimeout = setTimeout(this.onTimeout, 30 * 1000);
+      this.exitTimeout = setTimeout(this.onTimeout, 120 * 1000);
+      //onboardend
     }
   },
 

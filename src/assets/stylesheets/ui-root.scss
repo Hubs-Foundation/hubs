@@ -1,6 +1,43 @@
 @use "../../react-components/styles/theme.scss";
 @import 'shared';
 
+// onboard
+.topLeftMenu {
+  background-color: white;
+  position: absolute;
+  top: 0px;
+  padding: 5px;
+  border-radius: 28px;
+  display: flex;
+  pointer-events: auto;
+  margin: 15px;
+}
+
+.nonDragSel {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -khtml-user-select: none;
+  -o-user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
+
+ pointer-events: auto;
+ cursor: pointer;
+}
+
+.iconTopLeftMenu {
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 48px;
+  margin: 5px;
+}
+
+//onboardend
+
 :local(.ui) {
   @extend %default-font;
 

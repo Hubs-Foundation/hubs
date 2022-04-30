@@ -1,0 +1,86 @@
+{
+    "pdos01ndks91" : {
+        "show" : "invitedDress1",
+        "role" : "participant",
+        "date" : "06 Mar 2022",
+        "startingTime" : "21:45:00",
+        "endingTime" : "24:15:00"
+    },
+    "ydusmnv98212" : {
+        "show" : "invitedDress1",
+        "role" : "spectator",
+        "date" : "06 Mar 2022",
+        "startingTime" : "21:45:00",
+        "endingTime" : "24:15:00"
+    },
+    "81hf3k19cnb3" : {
+        "show" : "Show1",
+        "role" : "participant",
+        "date" : "07 Mar 2022",
+        "startingTime" : "21:45:00",
+        "endingTime" : "23:45:00"
+    },
+    "k393sjt481sn" : {
+        "show" : "Show1",
+        "role" : "spectator",
+        "date" : "07 Mar 2022",
+        "startingTime" : "21:45:00",
+        "endingTime" : "23:45:00"
+    },
+    "kaso129b47kd" : {
+        "show" : "Show2",
+        "role" : "participant",
+        "date" : "08 Mar 2022",
+        "startingTime" : "21:45:00",
+        "endingTime" : "23:45:00"
+    },
+    "00odb2kd71hy" : {
+        "show" : "Show2",
+        "role" : "spectator",
+        "date" : "08 Mar 2022",
+        "startingTime" : "21:45:00",
+        "endingTime" : "23:45:00"
+    },
+    "kd93ja8sht72" : {
+        "show" : "Show3",
+        "role" : "participant",
+        "date" : "09 Mar 2022",
+        "startingTime" : "21:00:00",
+        "endingTime" : "23:00:00"
+    },
+    "ma987d6h4ngj" : {
+        "show" : "Show3",
+        "role" : "spectator",
+        "date" : "09 Mar 2022",
+        "startingTime" : "21:00:00",
+        "endingTime" : "23:00:00"
+    },
+    "kd8fhansj765" : {
+        "show" : "Show4",
+        "role" : "participant",
+        "date" : "10 Mar 2022",
+        "startingTime" : "22:45:00",
+        "endingTime" : "24:45:00"
+    },
+    "lpod0927xnsi" : {
+        "show" : "Show4",
+        "role" : "spectator",
+        "date" : "10 Mar 2022",
+        "startingTime" : "22:45:00",
+        "endingTime" : "24:45:00"
+    },
+    "kd9172b23dk1" : {
+        "show" : "Show5",
+        "role" : "participant",
+        "date" : "11 Mar 2022",
+        "startingTime" : "22:45:00",
+        "endingTime" : "24:45:00"
+    },
+    "0pdoe8sngk18" : {
+        "show" : "Show5",
+        "role" : "spectator",
+        "date" : "11 Mar 2022",
+        "startingTime" : "22:45:00",
+        "endingTime" : "24:45:00"
+    }
+}

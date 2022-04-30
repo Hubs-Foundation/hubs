@@ -23,6 +23,10 @@ import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
 
+//onboard
+import { getSendNetworkedId } from "./onboardxr/hubs-docking/socket-function-helpers.js";
+//onboardend
+
 const isIOS = detectIOS();
 
 export default class SceneEntryManager {
@@ -121,6 +125,12 @@ export default class SceneEntryManager {
     setTimeout(() => this.store.bumpEntryCount(), 30000);
 
     this.scene.addState("entered");
+
+    //onboard
+    //mike
+    getSendNetworkedId();
+    //mikend
+    //onboardend
 
     APP.mediaDevicesManager.enableMic = !muteOnEntry;
   };
