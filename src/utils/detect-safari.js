@@ -1,6 +1,8 @@
 import { detect } from "detect-browser";
 
+const browser = detect();
+const browserIsSafari = ["iOS", "Mac OS"].includes(browser.os) && ["safari", "ios"].includes(browser.name);
+
 export function isSafari() {
-  const browser = detect();
-  return ["iOS", "Mac OS"].includes(browser.os) && ["safari", "ios"].includes(browser.name);
+  return browserIsSafari;
 }
