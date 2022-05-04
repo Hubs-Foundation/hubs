@@ -4,7 +4,20 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { canMove } from "../utils/permissions-utils";
 import { isTagged } from "../components/tags";
 import { addComponent, hasComponent, removeComponent } from "bitecs";
-import { Holdable, Hovered, Held, Pinned, RemoteHoverTarget, Rigidbody } from "../utils/jsx-entity";
+import {
+  Holdable,
+  Pinned,
+  RemoteHoverTarget,
+  Rigidbody,
+  HoveredRightRemote,
+  HoveredLeftRemote,
+  HoveredRightHand,
+  HoveredLeftHand,
+  HeldRightRemote,
+  HeldLeftRemote,
+  HeldRightHand,
+  HeldLeftHand
+} from "../utils/jsx-entity";
 
 function findHandCollisionTargetForHand(bodyId) {
   const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
@@ -221,22 +234,34 @@ AFRAME.registerSystem("interaction", {
     });
   },
 
-  tickInteractor(options, state) {
+  tickInteractor(options, state, hoveredComponent, heldComponent) {
     const userinput = AFRAME.scenes[0].systems.userinput;
+
     if (state.held) {
       const networked = state.held.components["networked"];
       const lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
       if (userinput.get(options.dropPath) || lostOwnership) {
-        removeComponent(APP.world, Held, state.held.eid);
+        //TODO: Does everything break if someone deletes the thing you're holding?
+        removeComponent(APP.world, heldComponent, state.held.object3D.eid);
         state.held = null;
       }
     } else {
       const interactorEid = options.entity.object3D.eid;
-      state.hovered = options.hoverFn.call(
+      const newHovered = options.hoverFn.call(
         this,
         hasComponent(APP.world, Rigidbody, interactorEid) && Rigidbody.bodyId[interactorEid]
       );
+
+      if (state.hovered && state.hovered !== newHovered) {
+        // HACK we have to check if the hovered object still has an eid in case it's been removed from the scene graph
+        state.hovered.object3D.eid && removeComponent(APP.world, hoveredComponent, state.hovered.object3D.eid);
+      }
+
+      state.hovered = newHovered;
+
       if (state.hovered) {
+        addComponent(APP.world, hoveredComponent, state.hovered.object3D.eid);
+
         const entity = state.hovered;
         const hoveredEid = entity.object3D.eid;
         const sceneIsFrozen = this.el.is("frozen");
@@ -261,7 +286,7 @@ AFRAME.registerSystem("interaction", {
           canMove(entity)
         ) {
           state.held = entity;
-          addComponent(APP.world, Held, hoveredEid);
+          addComponent(APP.world, heldComponent, hoveredEid);
         }
       }
     }
@@ -277,17 +302,17 @@ AFRAME.registerSystem("interaction", {
     Object.assign(this.previousState.leftHand, this.state.leftHand);
     Object.assign(this.previousState.leftRemote, this.state.leftRemote);
 
-    if (this.options.leftHand.entity.object3D.visible && !this.state.leftRemote.held) {
-      this.tickInteractor(this.options.leftHand, this.state.leftHand);
-    }
     if (this.options.rightHand.entity.object3D.visible && !this.state.rightRemote.held) {
-      this.tickInteractor(this.options.rightHand, this.state.rightHand);
+      this.tickInteractor(this.options.rightHand, this.state.rightHand, HoveredRightHand, HeldRightHand);
+    }
+    if (this.options.leftHand.entity.object3D.visible && !this.state.leftRemote.held) {
+      this.tickInteractor(this.options.leftHand, this.state.leftHand, HoveredLeftHand, HeldLeftHand);
     }
     if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
-      this.tickInteractor(this.options.rightRemote, this.state.rightRemote);
+      this.tickInteractor(this.options.rightRemote, this.state.rightRemote, HoveredRightRemote, HeldRightRemote);
     }
     if (!this.state.leftHand.held && !this.state.leftHand.hovered) {
-      this.tickInteractor(this.options.leftRemote, this.state.leftRemote);
+      this.tickInteractor(this.options.leftRemote, this.state.leftRemote, HoveredLeftRemote, HeldLeftRemote);
     }
   }
 });

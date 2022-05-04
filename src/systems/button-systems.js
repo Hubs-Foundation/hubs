@@ -1,38 +1,4 @@
 import { isTagged } from "../components/tags";
-import { CAMERA_MODE_INSPECT } from "./camera-system";
-
-export class SingleActionButtonSystem {
-  tick() {
-    this.didInteractThisFrame = false;
-    const interaction = AFRAME.scenes[0].systems.interaction;
-    const userinput = AFRAME.scenes[0].systems.userinput;
-    if (AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT) {
-      // TODO: Fix issue where button objects are "visible" but not on the inspect layer,
-      // which makes it so we can interact with them but cannot see them.
-      return;
-    }
-    const hovered = interaction.state.rightRemote.hovered;
-    if (hovered && userinput.get(interaction.options.rightRemote.grabPath) && isTagged(hovered, "singleActionButton")) {
-      this.didInteractThisFrame = true;
-      hovered.object3D.dispatchEvent({
-        type: "interact",
-        object3D: interaction.options.rightRemote.entity.object3D
-      });
-    }
-    const hovered2 = interaction.state.leftRemote.hovered;
-    if (
-      hovered2 &&
-      userinput.get(interaction.options.leftRemote.grabPath) &&
-      isTagged(hovered2, "singleActionButton")
-    ) {
-      this.didInteractThisFrame = true;
-      hovered2.object3D.dispatchEvent({
-        type: "interact",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
-    }
-  }
-}
 
 export class HoldableButtonSystem {
   tick() {
