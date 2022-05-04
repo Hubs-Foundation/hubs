@@ -91,6 +91,55 @@ class ExhibitionsService {
         });
     }
 
+    deleteOneExhibition(id){
+        return fetch(`${API_ROOT}/v1/auth/exhibitions/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                'access_token': Store.getUser()?.token
+            }
+        })
+        .then((res) => res.json())
+        .catch((error) => {
+            console.log(error)
+        });
+    }
+    
+    closeOneExhibition(id){
+        return fetch(`${API_ROOT}/v1/auth/exhibitions/close`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'access_token': Store.getUser()?.token
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        })
+        .then((res) => res.json())
+        .catch((error) => {
+            console.log(error)
+        });
+    }
+
+    openOneExhibition(id){
+        return fetch(`${API_ROOT}/v1/auth/exhibitions/open`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'access_token': Store.getUser()?.token
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        })
+        .then((res) => res.json())
+        .catch((error) => {
+            console.log(error)
+        });
+    }
+
+
 }
 
 export default new ExhibitionsService();

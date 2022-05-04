@@ -103,9 +103,18 @@
 		padding: 6px 10px !important;
 	}
 
-	.btn-close {
+	.btn-open {
 		background-color: rgb(9, 186, 27);
 		background-image: linear-gradient(1deg, rgb(50, 176, 18), rgb(52, 208, 0) 100%);
+		color: #FFFFFF;
+		width: 100%;
+		margin-top: 10px;
+
+	}
+
+	.btn-close {
+		background-color: rgb(186, 9, 168);
+		background-image: linear-gradient(1deg, rgb(176, 18, 163), rgb(208, 0, 201) 100%);
 		color: #FFFFFF;
 		width: 100%;
 		margin-top: 10px;

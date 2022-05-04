@@ -23,6 +23,7 @@ import { FaUserFriends ,FaRegCalendarAlt ,FaLink,FaCog,FaShapes} from "react-ico
 import { Manager } from 'react-popper-2';
 import StoreHub from "../../storage/store";
 import UserService from '../../utilities/apiServices/UserService'
+
 const store = new StoreHub();
 
 registerTelemetry("/manager", "Hubs Home Page");
@@ -39,6 +40,8 @@ function ManagerHome() {
   const [exhibitionsLoaded, setExhibitionsLoaded] = useState(false);
   const [isOpenExhibition, setIsOpenExhibition] = useState(false);
   const [isCloseRoom, setIsCloseRoom] = useState(false);
+  const [isOpenRoom, setIsOpenRoom] = useState(false);
+  const [isDeleteRoom, setIsDeleteRoom] = useState(false);
   const [isOpenToggle, setIsOpenToggle] = useState(false);
   const [exhibition, setExhibition] = useState(undefined);
   const [exhibitionType, setExhibitionType] = useState('create');
@@ -130,6 +133,7 @@ function ManagerHome() {
         sceneId: exhibition.sceneId,
         startDate: moment(exhibition.startDate).format('YYYY-MM-DD'),
         public: exhibition.public,
+
         maxSize: exhibition.maxSize,
       });
     }
@@ -152,15 +156,33 @@ function ManagerHome() {
     setIsOpenToggle(false);
   }
 
-  const openCloseRoom =(exhibitionId)=> {
+  const openPopupCloseRoom =(exhibitionId)=> {
     setExhibitionId(exhibitionId);
     setIsCloseRoom(true);
   }
 
-  const closeRoom = ()=> {
+  const closePopupCloseRoom = ()=> {
     setIsCloseRoom(false);
   }
 
+  const openPopupOpenRoom =(exhibitionId)=> {
+    setExhibitionId(exhibitionId);
+    setIsOpenRoom(true);
+  }
+
+  const closePopupOpenRoom = ()=> {
+    setIsOpenRoom(false);
+  }
+
+  
+  const openDeleteRoom =(exhibitionId)=> {
+    setExhibitionId(exhibitionId);
+    setIsDeleteRoom(true);
+  }
+
+  const deleteRoom = ()=> {
+    setIsDeleteRoom(false);
+  }
   const renderExhibitions = () => {
     return (
       <>
@@ -182,6 +204,24 @@ function ManagerHome() {
                     )
                   }
                 }
+
+                const ClosedButton = () =>{
+                  if(item.closed == 1)
+                  {
+                    return(
+                      <button className="btn btn-open" onClick={()=>{openPopupOpenRoom(item.id)}} data-id-exhibition ={item.id}>Open Room</button>
+                      
+                    )
+                  }
+                  else
+                  {
+                    return(
+                      <button className="btn btn-close" onClick={()=>{openPopupCloseRoom(item.id)}} data-id-exhibition ={item.id}>Close room</button>
+                      
+                    )
+                  }
+                }
+
                 if(item.room)
                 {
                   return (
@@ -206,7 +246,7 @@ function ManagerHome() {
                         <div className="btn-action">
                             <PublishButton/>
                             <button className="btn btn-edit" onClick={()=>{openPopupExhibition(item) , setExhibitionType('edit')}} data-id-exhibition ={item.id}>Edit</button>
-                            <button className="btn btn-close" onClick={()=>{openCloseRoom(item)}} data-id-exhibition ={item.id}>Close</button>
+                            <ClosedButton/>
                         </div>
                     </div>
                   )
@@ -233,7 +273,7 @@ function ManagerHome() {
                             </div>
                         </div>
                         <div className="btn-action">
-                            <button className="btn btn-delete" >Delete</button>
+                            <button className="btn btn-delete" onClick={()=>{openDeleteRoom(item.id)}} data-id-exhibition ={item.id}>Delete</button>
                         </div>
                     </div>
                   )
@@ -460,27 +500,68 @@ function ManagerHome() {
     })
   }
 
-  const handelToggleCloseRoom=(exhibitionId)=>{
-    // ExhibitionsService.patchTogglePublic(exhibitionId).then((res) => {
-    //   if(res.result == 'ok'){
-    //     exhibitions.data.forEach(exhibition => {
-    //       if(exhibition.id == exhibitionId){
-    //         exhibition.public = res.data.public;
-    //         toast.success('Change status success !', {autoClose:5000})
-    //       }
-    //     });
-    //     setIsCloseRoom(!isCloseRoom);
-    //   }
-    //   else if(res.result == 'fail' && res.error =='invalid_id')
-    //   {
-    //     toast.error('exhibition id is incorrect !', {autoClose:5000})
-    //   }
-    //   else
-    //   {
-    //     toast.error('System error Please try again later !', {autoClose:5000})
-    //   }
+  const handelToggleDeleteRoom=(exhibitionId)=>{
+    ExhibitionsService.deleteOneExhibition(exhibitionId).then((res) => {
+      if(res.result == 'ok'){
+        toast.success('Delete success !', {autoClose:5000})
+        setIsDeleteRoom(!isDeleteRoom);
+        getAllExhibitions();
+      }
+      else if(res.result == 'fail' && res.error =='wrong_exhibition')
+      {
+        toast.error('exhibition id is incorrect !', {autoClose:5000})
+      }
+      else
+      {
+        toast.error('System error Please try again later !', {autoClose:5000})
+      }
       
-    // })
+    })
+  }
+  
+  const handelCloseRoom=(exhibitionId)=>{
+    ExhibitionsService.closeOneExhibition(exhibitionId).then((res) => {
+      if(res.result == 'ok'){
+        exhibitions.data.forEach(exhibition => {
+          if(exhibition.id == exhibitionId){
+            exhibition.closed = res.data.closed;
+            toast.success('Change status success !', {autoClose:5000})
+          }
+        });
+        setIsCloseRoom(!isCloseRoom);
+      }
+      else if(res.result == 'fail' && res.error =='wrong_exhibition')
+      {
+        toast.error('exhibition id is incorrect !', {autoClose:5000})
+      }
+      else
+      {
+        toast.error('System error Please try again later !', {autoClose:5000})
+      }
+      
+    })
+  }
+  const handelOpenRoom=(exhibitionId)=>{
+    ExhibitionsService.openOneExhibition(exhibitionId).then((res) => {
+      if(res.result == 'ok'){
+        exhibitions.data.forEach(exhibition => {
+          if(exhibition.id == exhibitionId){
+            exhibition.closed = res.data.closed;
+            toast.success('Change status success !', {autoClose:5000})
+          }
+        });
+        setIsOpenRoom(!isOpenRoom);
+      }
+      else if(res.result == 'fail' && res.error =='wrong_exhibition')
+      {
+        toast.error('exhibition id is incorrect !', {autoClose:5000})
+      }
+      else
+      {
+        toast.error('System error Please try again later !', {autoClose:5000})
+      }
+      
+    })
   }
   if(isLoading)
   {
@@ -619,15 +700,63 @@ function ManagerHome() {
               {
                 text: "Close Room",
                 class: "btn1",
-                callback: ()=>{handelToggleCloseRoom(exhibitionId)},
+                callback: ()=>{handelCloseRoom(exhibitionId)},
               },
               {
                 text: "Cancel",
                 class: "btn2",
-                callback: ()=>{closeRoom()},
+                callback: ()=>{closePopupCloseRoom()},
               },
           ]}
-          handleClose={closeRoom}
+          handleClose={closePopupCloseRoom}
+        />}
+
+        {isOpenRoom && <Popup
+          title={<>Open room</>}
+          size={'sm'}
+          content={<>
+              <br/>
+              Are you sure to open this room? People will can access to the room ?
+              <br/>
+              <br/>
+          </>}
+          actions={[
+              {
+                text: "Open Room",
+                class: "btn1",
+                callback: ()=>{handelOpenRoom(exhibitionId)},
+              },
+              {
+                text: "Cancel",
+                class: "btn2",
+                callback: ()=>{closePopupOpenRoom()},
+              },
+          ]}
+          handleClose={closePopupOpenRoom}
+        />}
+
+        {isDeleteRoom && <Popup
+          title={<>Delete room</>}
+          size={'sm'}
+          content={<>
+              <br/>
+              Are you sure to delete this room? People will not be able to access when you close the room ?
+              <br/>
+              <br/>
+          </>}
+          actions={[
+              {
+                text: "Delete Room",
+                class: "btn1",
+                callback: ()=>{handelToggleDeleteRoom(exhibitionId)},
+              },
+              {
+                text: "Cancel",
+                class: "btn2",
+                callback: ()=>{deleteRoom()},
+              },
+          ]}
+          handleClose={deleteRoom}
         />}
         <div className='manager-page'>
           <div className="row_1">

@@ -9,7 +9,10 @@ import { HomePage } from "./react-components/page/HomePage";
 import { SigninPage } from "./react-components/page/SigninPage";
 import { SignupPage } from "./react-components/page/SignupPage";
 import { ManagerPage } from "./react-components/page/ManagerPage";
+import { ResetPasswordPage } from "./react-components/page/ResetPasswordPage";
 import { WarningVerifyPage } from "./react-components/page/WarningVerifyPage";
+
+
 registerTelemetry("/home", "Hubs Home Page");
 
 const store = new Store();
@@ -46,6 +49,11 @@ function Root() {
         <ManagerPage/>
       );
 
+    case 'reset-password':
+      return (
+        <ResetPasswordPage/>
+      );
+      
     default:
       return (
         <HomePage />
