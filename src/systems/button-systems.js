@@ -1,3 +1,4 @@
+import { isTagged } from "../components/tags";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 
 export class SingleActionButtonSystem {
@@ -11,12 +12,7 @@ export class SingleActionButtonSystem {
       return;
     }
     const hovered = interaction.state.rightRemote.hovered;
-    if (
-      hovered &&
-      userinput.get(interaction.options.rightRemote.grabPath) &&
-      hovered.components.tags &&
-      hovered.components.tags.data.singleActionButton
-    ) {
+    if (hovered && userinput.get(interaction.options.rightRemote.grabPath) && isTagged(hovered, "singleActionButton")) {
       this.didInteractThisFrame = true;
       hovered.object3D.dispatchEvent({
         type: "interact",
@@ -27,8 +23,7 @@ export class SingleActionButtonSystem {
     if (
       hovered2 &&
       userinput.get(interaction.options.leftRemote.grabPath) &&
-      hovered2.components.tags &&
-      hovered2.components.tags.data.singleActionButton
+      isTagged(hovered2, "singleActionButton")
     ) {
       this.didInteractThisFrame = true;
       hovered2.object3D.dispatchEvent({
@@ -45,6 +40,7 @@ export class HoldableButtonSystem {
     const held = interaction.state.rightRemote.held;
 
     if (this.prevHeld && this.prevHeld !== held) {
+      // TODO: Should this check for holdable button?
       this.prevHeld.object3D.dispatchEvent({
         type: "holdable-button-up",
         object3D: interaction.options.rightRemote.entity.object3D
@@ -62,16 +58,18 @@ export class HoldableButtonSystem {
     const heldLeft = interaction.state.leftRemote.held;
 
     if (this.prevHeldLeft && this.prevHeldLeft !== heldLeft) {
-      this.prevHeldLeft.object3D.dispatchEvent({
-        type: "holdable-button-up",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
+      isTagged(this.prevHeldLeft, "holdableButton") &&
+        this.prevHeldLeft.object3D.dispatchEvent({
+          type: "holdable-button-up",
+          object3D: interaction.options.leftRemote.entity.object3D
+        });
     }
     if (heldLeft && this.prevHeldLeft !== heldLeft) {
-      heldLeft.object3D.dispatchEvent({
-        type: "holdable-button-down",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
+      isTagged(this.heldLeft, "holdableButton") &&
+        heldLeft.object3D.dispatchEvent({
+          type: "holdable-button-down",
+          object3D: interaction.options.leftRemote.entity.object3D
+        });
     }
 
     this.prevHeldLeft = heldLeft;
@@ -97,7 +95,8 @@ const hasButtonComponent = (function() {
 })();
 
 function getHoverableButton(hovered) {
-  if (!hovered) return null;
+  if (!(hovered && hovered.el)) return null;
+  hovered = hovered.el;
   if (
     hasButtonComponent(hovered.components) ||
     hovered.classList.contains("teleport-waypoint-icon") ||

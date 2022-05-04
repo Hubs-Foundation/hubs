@@ -890,18 +890,6 @@
 
         <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
 
-        <a-entity id="drawing-manager" drawing-manager="penSpawner: #pen-spawner"></a-entity>
-
-        <a-entity
-            id="right-cursor-controller"
-            cursor-controller="cursor: #right-cursor; camera: #avatar-pov-node; cursorVisual: #right-cursor-visual;"
-        ></a-entity>
-
-        <a-entity
-            id="left-cursor-controller"
-            cursor-controller="cursor: #left-cursor; camera: #avatar-pov-node; cursorVisual: #left-cursor-visual;"
-        ></a-entity>
-
         <a-entity
             id="right-cursor"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
@@ -930,6 +918,16 @@
             ></a-entity>
         </a-entity>
 
+        <a-entity
+            id="right-cursor-controller"
+            cursor-controller="cursor: #right-cursor; camera: #avatar-pov-node; cursorVisual: #right-cursor-visual;"
+        ></a-entity>
+
+        <a-entity
+            id="left-cursor-controller"
+            cursor-controller="cursor: #left-cursor; camera: #avatar-pov-node; cursorVisual: #left-cursor-visual;"
+        ></a-entity>
+
         <!-- Avatar Rig -->
         <a-entity
             id="avatar-rig"
@@ -945,8 +943,8 @@
                 id="player-hud"
                 hud-controller="head: #viewing-camera;"
                 vr-mode-toggle-class="class: ui"
-                vr-mode-toggle-visibility
-                vr-mode-toggle-playing__hud-controller
+                x-vr-mode-toggle-visibility
+                x-vr-mode-toggle-playing__hud-controller
             >
                 <a-entity visibility-while-frozen="requireHoverOnNonMobile: false;" rotation="30 0 0">
                     <a-entity class="leave-btn" position="0 0 0" scale="0.7 0.7 0.7" leave-room-button is-remote-hover-target tags="singleActionButton: true;">
@@ -1123,6 +1121,8 @@
                 spawnScale: 0.5, 0.5, 0.5;
                 "
         ></a-entity>
+
+        <a-entity id="drawing-manager" drawing-manager="penSpawner: #pen-spawner"></a-entity>
 
         <a-entity class="ui interactable-ui vr-notice" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
             <a-entity slice9="width: 0.8; height: 0.25; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: button"

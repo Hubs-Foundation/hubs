@@ -56,9 +56,9 @@ function ActionButton({
   ...props
 }) {
   return (
-    <entity {...buttonStyles[type]} is-remote-hover-target tags="singleActionButton: true;" {...props}>
+    <a-entity {...buttonStyles[type]} is-remote-hover-target tags="singleActionButton: true;" {...props}>
       {image && (
-        <entity
+        <a-entity
           sprite
           className={iconClassName}
           icon-button={{ image, hoverImage }}
@@ -66,13 +66,13 @@ function ActionButton({
           position={[0, 0, 0.001]}
         />
       )}
-    </entity>
+    </a-entity>
   );
 }
 
 function RecordButton() {
   return (
-    <entity
+    <a-entity
       className="record-button"
       is-remote-hover-target
       tags={{ singleActionButton: true }}
@@ -80,21 +80,21 @@ function RecordButton() {
       scale={[0.75, 0.75, 0.75]}
       {...buttonStyles["rounded-action-button"]}
     >
-      <entity
+      <a-entity
         sprite=""
         className="record-icon"
         icon-button={{ image: "record-action.png", hoverImage: "record-action.png" }}
         scale={[0.175, 0.175, 0.175]}
         position={[0, 0, 0.001]}
       />
-      <entity
+      <a-entity
         sprite
         className="record-alpha-icon"
         icon-button={{ image: "record-action-alpha.png", hoverImage: "record-action-alpha.png" }}
         scale={[0.175, 0.175, 0.175]}
         position={[0, 0, 0.001]}
       />
-    </entity>
+    </a-entity>
   );
 }
 
@@ -113,7 +113,7 @@ function InteractableCamera() {
   const screenGeometry = new THREE.PlaneBufferGeometry(width, width / aspect);
 
   return (
-    <entity
+    <a-entity
       className="interactable"
       body-helper={{ type: "dynamic", mass: "0.001", collisionFilterGroup: "1", collisionFilterMask: "8" }}
       camera-tool={{ labelRef, snapButtonRef, snapMenuRef, screenRef, selfieScreenRef }}
@@ -146,8 +146,8 @@ function InteractableCamera() {
         scale={[-2, 2, 2]}
       />
 
-      <entity className="ui interactable-ui" ref={snapMenuRef}>
-        <entity
+      <a-entity className="ui interactable-ui" ref={snapMenuRef}>
+        <a-entity
           ref={labelRef}
           position={[0, 0.15, 0.081]}
           text={{ value: 3, textAlign: "center", color: "#fafafa", fontSize: 0.09 }}
@@ -159,7 +159,7 @@ function InteractableCamera() {
           scale={[0.75, 0.75, 0.75]}
         />
         <ActionButton className="label-background" position={[0, 0.15, 0.08]} scale={[0.75, 0.75, 0.75]} />
-        <entity
+        <a-entity
           className="duration"
           text="value: 5s; textAlign: center; color: #fafafa; fontSize: 0.09;"
           position={[0, -0.15, 0.09]}
@@ -198,8 +198,8 @@ function InteractableCamera() {
           scale={[0.75, 0.75, 0.75]}
           image="stop-action.png"
         />
-      </entity>
-      <entity
+      </a-entity>
+      <a-entity
         className="ui interactable-ui camera-menu"
         visibility-while-frozen={{ withinDistance: 100, withPermission: "spawn_camera" }}
       >
@@ -233,14 +233,14 @@ function InteractableCamera() {
           iconScale={0.165}
           image="remove-action.png"
         />
-      </entity>
-    </entity>
+      </a-entity>
+    </a-entity>
   );
 }
 
 export default {
   template: "#interactable-camera",
-  createEntity: function() {
+  addEntity: function() {
     const c = <InteractableCamera />;
     console.log(c);
     return renderAsAframeEntity(c);

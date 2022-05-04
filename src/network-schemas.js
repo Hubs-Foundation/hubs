@@ -1,4 +1,5 @@
 import cameraSchema from "./network-schemas/interactable-camera";
+import { cubeSchema } from "./network-schemas/interactable-cube";
 
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {
@@ -251,6 +252,7 @@ function registerNetworkSchemas() {
   });
 
   NAF.schemas.add(cameraSchema);
+  NAF.schemas.add(cubeSchema);
 
   NAF.schemas.add({
     template: "#template-waypoint-avatar",

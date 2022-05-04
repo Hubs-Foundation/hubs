@@ -3,11 +3,13 @@ import { paths } from "./userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { canMove } from "../utils/permissions-utils";
 import { isTagged } from "../components/tags";
+import { addComponent, hasComponent, removeComponent } from "bitecs";
+import { Holdable, Hovered, Held, Pinned, RemoteHoverTarget, Rigidbody } from "../utils/jsx-entity";
 
-function findHandCollisionTargetForHand(bodyHelper) {
+function findHandCollisionTargetForHand(bodyId) {
   const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
 
-  const handCollisions = physicsSystem.getCollisions(bodyHelper.uuid);
+  const handCollisions = physicsSystem.getCollisions(bodyId);
   if (handCollisions) {
     for (let i = 0; i < handCollisions.length; i++) {
       const bodyData = physicsSystem.bodyUuidToData.get(handCollisions[i]);
@@ -22,19 +24,22 @@ function findHandCollisionTargetForHand(bodyHelper) {
 }
 
 const notRemoteHoverTargets = new Map();
-const remoteHoverTargets = new Map();
 export function findRemoteHoverTarget(object3D) {
   if (!object3D) return null;
   if (notRemoteHoverTargets.get(object3D)) return null;
-  const target = remoteHoverTargets.get(object3D);
-  return target || findRemoteHoverTarget(object3D.parent);
+
+  if (object3D.eid !== undefined && hasComponent(APP.world, RemoteHoverTarget, object3D.eid)) {
+    return object3D.el;
+  }
+
+  return findRemoteHoverTarget(object3D.parent);
 }
 AFRAME.registerComponent("is-remote-hover-target", {
   init: function() {
-    remoteHoverTargets.set(this.el.object3D, this.el);
+    addComponent(APP.world, RemoteHoverTarget, this.el.object3D.eid);
   },
   remove: function() {
-    remoteHoverTargets.delete(this.el.object3D);
+    removeComponent(APP.world, RemoteHoverTarget, this.el.object3D.eid);
   }
 });
 AFRAME.registerComponent("is-not-remote-hover-target", {
@@ -222,26 +227,41 @@ AFRAME.registerSystem("interaction", {
       const networked = state.held.components["networked"];
       const lostOwnership = networked && networked.data && networked.data.owner !== NAF.clientId;
       if (userinput.get(options.dropPath) || lostOwnership) {
+        removeComponent(APP.world, Held, state.held.eid);
         state.held = null;
       }
     } else {
+      const interactorEid = options.entity.object3D.eid;
       state.hovered = options.hoverFn.call(
         this,
-        options.entity.components["body-helper"] && options.entity.components["body-helper"]
-          ? options.entity.components["body-helper"]
-          : null
+        hasComponent(APP.world, Rigidbody, interactorEid) && Rigidbody.bodyId[interactorEid]
       );
       if (state.hovered) {
         const entity = state.hovered;
-        const isFrozen = this.el.is("frozen");
-        const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
+        const hoveredEid = entity.object3D.eid;
+        const sceneIsFrozen = this.el.is("frozen");
+        const isPinned = hasComponent(APP.world, Pinned, hoveredEid);
+        // console.log(
+        //   JSON.stringify(
+        //     {
+        //       holdable: hasComponent(APP.world, Holdable, hoveredEid),
+        //       grabbing: userinput.get(options.grabPath),
+        //       sceneIsFrozen,
+        //       isPinned,
+        //       canMove: canMove(entity)
+        //     },
+        //     null,
+        //     4
+        //   )
+        // );
         if (
-          isTagged(entity, "isHoldable") &&
+          hasComponent(APP.world, Holdable, hoveredEid) &&
           userinput.get(options.grabPath) &&
-          (isFrozen || !isPinned) &&
+          (sceneIsFrozen || !isPinned) &&
           canMove(entity)
         ) {
           state.held = entity;
+          addComponent(APP.world, Held, hoveredEid);
         }
       }
     }

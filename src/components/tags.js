@@ -1,9 +1,49 @@
-export function isTagged(el, tag) {
-  return el && el.components && el.components.tags && el.components.tags.data[tag];
+import { addComponent, hasComponent, removeComponent } from "bitecs";
+import {
+  Holdable,
+  OffersRemoteConstraint,
+  HandCollisionTarget,
+  OffersHandConstraint,
+  TogglesHoveredActionSet,
+  SingleActionButton,
+  HoldableButton,
+  Pen,
+  HoverMenuChild,
+  Static,
+  Inspectable,
+  PreventAudioBoost,
+  IgnoreSpaceBubble
+} from "../utils/jsx-entity";
+
+const tag2ecs = {
+  isHoldable: Holdable,
+  offersRemoteConstraint: OffersRemoteConstraint,
+  isHandCollisionTarget: HandCollisionTarget,
+  offersHandConstraint: OffersHandConstraint,
+  togglesHoveredActionSet: TogglesHoveredActionSet,
+  singleActionButton: SingleActionButton,
+  holdableButton: HoldableButton,
+  isPen: Pen,
+  isHoverMenuChild: HoverMenuChild,
+  isStatic: Static,
+  inspectable: Inspectable,
+  preventAudioBoost: PreventAudioBoost,
+  ignoreSpaceBubble: IgnoreSpaceBubble
+};
+
+export function isTagged(elOrObject3D, tag) {
+  return elOrObject3D && hasComponent(APP.world, tag2ecs[tag], elOrObject3D.eid);
 }
 
-export function setTag(el, tag, value = true) {
-  return (el.components.tags.data[tag] = !!value);
+export function setTag(elOrObject3D, tag, value = true) {
+  const eid = elOrObject3D.eid;
+  const Component = tag2ecs[tag];
+  if (value) {
+    addComponent(APP.world, Component, eid);
+  } else {
+    removeComponent(APP.world, Component, eid);
+  }
+  return !!value;
 }
 
 AFRAME.registerComponent("tags", {
@@ -27,12 +67,19 @@ AFRAME.registerComponent("tags", {
       console.warn("Do not edit tags with .setAttribute");
     }
     this.didUpdateOnce = true;
+
+    const eid = this.el.eid;
+    Object.entries(this.data).forEach(function([tagName, isSet]) {
+      if (isSet) {
+        addComponent(APP.world, tag2ecs[tagName], eid);
+      }
+    });
   },
 
   remove() {
     const interaction = this.el.sceneEl.systems.interaction;
-    if (interaction.isHeld(this.el)) {
-      interaction.release(this.el);
+    if (interaction.isHeld(this.el.object3D)) {
+      interaction.release(this.el.object3D);
       this.el.sceneEl.systems["hubs-systems"].constraintsSystem.release(this.el);
     }
   }

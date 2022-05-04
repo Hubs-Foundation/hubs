@@ -1,5 +1,7 @@
 /* global NAF AFRAME */
 import { CONSTANTS } from "three-ammo";
+import { isTagged } from "../components/tags";
+import { Rigidbody } from "../utils/jsx-entity";
 const ACTIVATION_STATE = CONSTANTS.ACTIVATION_STATE;
 
 export class ConstraintsSystem {
@@ -25,66 +27,73 @@ export class ConstraintsSystem {
     this.constraintPairs = {};
   }
 
-  tickInteractor(constraintTag, entityId, state, prevState) {
+  tickInteractor(constraintTag, interactorEid, state, prevState) {
     if (!this.physicsSystem) return;
 
+    // TODO what is spawning?
+
     if (prevState.held === state.held) {
-      if (
-        !state.spawning &&
-        prevState.spawning &&
-        state.held &&
-        state.held.components.tags &&
-        state.held.components.tags.data[constraintTag]
-      ) {
-        state.held.setAttribute("body-helper", {
-          type: "dynamic",
-          activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
-        });
-        const heldEntityId = state.held.id;
-        const bodyUuid = state.held.components["body-helper"].uuid;
-        const targetEl = document.querySelector(`#${entityId}`);
-        const targetUuid = targetEl.components["body-helper"].uuid;
-        if (bodyUuid !== -1 && targetUuid !== -1) {
-          this.physicsSystem.addConstraint(entityId, bodyUuid, targetUuid, {});
-          if (!this.constraintPairs[heldEntityId]) {
-            this.constraintPairs[heldEntityId] = [];
+      if (!state.spawning && prevState.spawning && state.held && isTagged(state.held, constraintTag)) {
+        const eid = state.held.object3D.eid;
+        const bodyId = Rigidbody.bodyId[eid];
+
+        const bodyOptions = this.physicsSystem.bodyUuidToData.get(bodyId).options;
+        bodyOptions.type = "dynamic";
+        bodyOptions.activationState = ACTIVATION_STATE.DISABLE_DEACTIVATION;
+        this.physicsSystem.updateBody(bodyId, bodyOptions);
+
+        const interactorBodyId = Rigidbody.bodyId[interactorEid];
+        if (bodyId !== -1 && interactorBodyId !== -1) {
+          this.physicsSystem.addConstraint(interactorEid, bodyId, interactorBodyId, {});
+          if (!this.constraintPairs[eid]) {
+            this.constraintPairs[eid] = [];
           }
-          this.constraintPairs[heldEntityId].push(entityId);
+          this.constraintPairs[eid].push(interactorEid);
         }
       }
       return;
     }
-    if (prevState.held && prevState.held.components.tags && prevState.held.components.tags.data[constraintTag]) {
-      const heldEntityId = prevState.held.id;
-      if (this.constraintPairs[heldEntityId] && this.constraintPairs[heldEntityId].indexOf(entityId) !== -1) {
-        this.constraintPairs[heldEntityId].splice(this.constraintPairs[heldEntityId].indexOf(entityId), 1);
-        if (this.constraintPairs[heldEntityId].length === 0) {
-          delete this.constraintPairs[heldEntityId];
-        }
-        this.physicsSystem.removeConstraint(entityId);
-      }
 
-      if (!this.constraintPairs[heldEntityId] || this.constraintPairs[heldEntityId].length < 1) {
-        prevState.held.setAttribute("body-helper", { activationState: ACTIVATION_STATE.ACTIVE_TAG });
+    if (prevState.held && isTagged(prevState.held, constraintTag)) {
+      console.log("remove constraint from", prevState.held);
+      const eid = prevState.held.eid;
+      const bodyId = Rigidbody.bodyId[eid];
+
+      // TODO do we need this constraintPairs logic?
+      if (this.constraintPairs[eid] && this.constraintPairs[eid].indexOf(interactorEid) !== -1) {
+        this.constraintPairs[eid].splice(this.constraintPairs[eid].indexOf(interactorEid), 1);
+        if (this.constraintPairs[eid].length === 0) {
+          delete this.constraintPairs[eid];
+        }
+        this.physicsSystem.removeConstraint(interactorEid);
+      }
+      if (!this.constraintPairs[eid] || this.constraintPairs[eid].length < 1) {
+        const bodyOptions = this.physicsSystem.bodyUuidToData.get(bodyId).options;
+        // bodyOptions.type = "kinematic";
+        bodyOptions.activationState = ACTIVATION_STATE.ACTIVE_TAG;
+        this.physicsSystem.updateBody(bodyId, bodyOptions);
       }
     }
-    if (!state.spawning && state.held && state.held.components.tags.data[constraintTag]) {
+
+    if (!state.spawning && state.held && isTagged(state.held, constraintTag)) {
       if (!state.held.components["networked"] || NAF.utils.isMine(state.held) || NAF.utils.takeOwnership(state.held)) {
-        state.held.setAttribute("body-helper", {
-          type: "dynamic",
-          activationState: ACTIVATION_STATE.DISABLE_DEACTIVATION
-        });
-        const heldEntityId = state.held.id;
-        const bodyUuid = state.held.components["body-helper"].uuid;
-        const targetEl = document.querySelector(`#${entityId}`);
-        const targetUuid = targetEl.components["body-helper"].uuid;
-        if (bodyUuid !== -1 && targetUuid !== -1) {
-          this.physicsSystem.addConstraint(entityId, bodyUuid, targetUuid, {});
-          if (!this.constraintPairs[heldEntityId]) {
-            this.constraintPairs[heldEntityId] = [];
-          }
-          this.constraintPairs[heldEntityId].push(entityId);
+        const eid = state.held.eid;
+
+        const interactorBodyId = Rigidbody.bodyId[interactorEid];
+        const bodyId = Rigidbody.bodyId[eid];
+
+        const bodyOptions = this.physicsSystem.bodyUuidToData.get(bodyId).options;
+        bodyOptions.type = "dynamic";
+        bodyOptions.activationState = ACTIVATION_STATE.DISABLE_DEACTIVATION;
+        this.physicsSystem.updateBody(bodyId, bodyOptions);
+
+        console.log("add constraint to", interactorEid, bodyId, interactorBodyId);
+        this.physicsSystem.addConstraint(interactorEid, bodyId, interactorBodyId, {});
+        // TODO do we need this constraintPairs logic?
+        if (!this.constraintPairs[eid]) {
+          this.constraintPairs[eid] = [];
         }
+        this.constraintPairs[eid].push(interactorEid);
       } else {
         console.log("Failed to obtain ownership while trying to create constraint on networked object.");
       }
@@ -97,25 +106,25 @@ export class ConstraintsSystem {
 
     this.tickInteractor(
       "offersHandConstraint",
-      interaction.options.leftHand.entity.id,
+      interaction.options.leftHand.entity.object3D.eid,
       interaction.state.leftHand,
       this.prevLeftHand
     );
     this.tickInteractor(
       "offersHandConstraint",
-      interaction.options.rightHand.entity.id,
+      interaction.options.rightHand.entity.object3D.eid,
       interaction.state.rightHand,
       this.prevRightHand
     );
     this.tickInteractor(
       "offersRemoteConstraint",
-      interaction.options.rightRemote.entity.id,
+      interaction.options.rightRemote.entity.object3D.eid,
       interaction.state.rightRemote,
       this.prevRightRemote
     );
     this.tickInteractor(
       "offersRemoteConstraint",
-      interaction.options.leftRemote.entity.id,
+      interaction.options.leftRemote.entity.object3D.eid,
       interaction.state.leftRemote,
       this.prevLeftRemote
     );

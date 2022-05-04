@@ -25,14 +25,15 @@ export class PhysicsSystem {
     this.indexToUuid = {};
     this.bodyUuidToData = new Map();
 
+    this.debug = true;
     this.debugRequested = false;
     this.debugEnabled = false;
     this.scene = scene;
     this.stepDuration = 0;
 
     this.ready = false;
-    this.nextBodyUuid = 0;
-    this.nextShapeUuid = 0;
+    this.nextBodyUuid = 1;
+    this.nextShapeUuid = 1;
 
     const arrayBuffer = new ArrayBuffer(4 * BUFFER_CONFIG.BODY_DATA_SIZE * MAX_BODIES);
     this.objectMatricesFloatArray = new Float32Array(arrayBuffer);

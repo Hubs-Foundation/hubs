@@ -56,17 +56,12 @@ export function createElementEntity(tag, attrs, ...children) {
     }
   }
   if (tag === "entity" || tag === "a-entity") {
-    let isLegacyEntity = tag === "a-entity";
-    if (isLegacyEntity) {
-      console.warn("Entity using 'a-entity' tag, it should be 'entity'.");
-      // do any special handling to make porting templates easier
-    }
     const outputAttrs = {};
     const components = [];
     let ref = null;
 
     for (let attr in attrs) {
-      if (isLegacyEntity && vecAttrs.includes(attr)) {
+      if (vecAttrs.includes(attr)) {
         outputAttrs[attr] = parseVecAttr(attr, attrs[attr]);
       } else if (reservedAttrs.includes(attr)) {
         outputAttrs[attr] = attrs[attr];
@@ -80,7 +75,7 @@ export function createElementEntity(tag, attrs, ...children) {
     }
 
     return {
-      type: "entity",
+      type: tag === "a-entity" ? "a-entity" : "entity",
       attrs: outputAttrs,
       components,
       children: children.filter(isValidChild),
@@ -89,8 +84,68 @@ export function createElementEntity(tag, attrs, ...children) {
   }
 }
 
-export function renderAsAframeEntity(entityDef) {
-  if (entityDef.type === "entity") {
+import { addComponent, addEntity, removeEntity, defineComponent, Types } from "bitecs";
+
+export const Networked = defineComponent({ templateId: Types.ui8, networkId: Types.ui8, flags: Types.ui8 });
+export const Object3DTag = defineComponent();
+export const Spin = defineComponent({ x: Types.f32, y: Types.f32, z: Types.f32 });
+
+export const CursorRaycastable = defineComponent();
+export const RemoteHoverTarget = defineComponent();
+export const Holdable = defineComponent();
+export const Hovered = defineComponent();
+export const Held = defineComponent();
+export const OffersRemoteConstraint = defineComponent();
+export const HandCollisionTarget = defineComponent();
+export const OffersHandConstraint = defineComponent();
+export const TogglesHoveredActionSet = defineComponent();
+export const SingleActionButton = defineComponent();
+export const HoldableButton = defineComponent();
+export const Pen = defineComponent();
+export const HoverMenuChild = defineComponent();
+export const Static = defineComponent();
+export const Inspectable = defineComponent();
+export const PreventAudioBoost = defineComponent();
+export const IgnoreSpaceBubble = defineComponent();
+
+export const Rigidbody = defineComponent({ bodyId: Types.ui16 });
+
+export const Pinnable = defineComponent();
+export const Pinned = defineComponent();
+
+export const FloatyObject = defineComponent();
+
+export const NETWORK_FLAGS = {
+  INFLATED: 1,
+  IS_REMOTE_ENTITY: 2,
+  FLAG_3: 4
+};
+
+let networkId = 1;
+
+export function createNetworkedEntity(world, templateId, eid = addEntity(world)) {
+  world.networkSchemas[templateId].addEntity(world, eid);
+  addComponent(world, Networked, eid);
+  Networked.networkId[eid] = networkId++;
+  Networked.templateId[eid] = templateId;
+  return eid;
+}
+
+function addObject3DComponent(world, eid, obj) {
+  addComponent(APP.world, world.nameToComponent["object3d"], eid);
+  world.eid2obj.set(eid, obj);
+  obj.eid = eid;
+  obj.addEventListener("removed", function() {
+    removeEntity(world, eid);
+    // TODO should probably happen in a system that looks for Object3DTag component removal
+    world.eid2obj.delete(eid);
+    obj.eid = null;
+  });
+  return eid;
+}
+
+export function renderAsAframeEntity(entityDef, world, eid) {
+  if (entityDef.type === "a-entity") {
     const el = document.createElement("a-entity");
     if (entityDef.attrs.className) {
       el.className = entityDef.attrs.className;
@@ -115,10 +170,10 @@ export function renderAsAframeEntity(entityDef) {
       entityDef.ref.current = el;
     }
     entityDef.children.forEach(child => {
-      if (child.type === "Object3D") {
-        el.object3D.add(renderAsAframeEntity(child));
+      if (child.type === "a-entity") {
+        el.appendChild(renderAsAframeEntity(child, world));
       } else {
-        el.appendChild(renderAsAframeEntity(child));
+        el.object3D.add(renderAsAframeEntity(child, world));
       }
     });
     Object.keys(entityDef.components).forEach(name => {
@@ -126,6 +181,40 @@ export function renderAsAframeEntity(entityDef) {
       el.setAttribute(name, componentProps === true ? "" : componentProps);
     });
     return el;
+  } else if (entityDef.type === "entity") {
+    const obj = new THREE.Group();
+    if (entityDef.attrs.position) {
+      obj.position.fromArray(entityDef.attrs.position);
+    }
+    if (entityDef.attrs.rotation) {
+      obj.rotation.fromArray(entityDef.attrs.rotation);
+    }
+    if (entityDef.attrs.scale) {
+      obj.scale.fromArray(entityDef.attrs.scale);
+    }
+    if (eid === undefined) {
+      eid = addEntity(world);
+    }
+    addObject3DComponent(world, eid, obj);
+    if (entityDef.ref) {
+      entityDef.ref.current = eid;
+    }
+    Object.keys(entityDef.components).forEach(name => {
+      const componentProps = entityDef.components[name];
+      const Component = world.nameToComponent[name];
+      addComponent(world, Component, eid);
+      Object.keys(componentProps).forEach(propName => {
+        Component[propName][eid] = componentProps[propName];
+      });
+    });
+    entityDef.children.forEach(child => {
+      if (child.type === "a-entity") {
+        throw "a-entity can only be children of a-entity";
+      } else {
+        obj.add(renderAsAframeEntity(child, world));
+      }
+    });
+    return obj;
   } else if (entityDef.type === "Object3D") {
     const obj = new entityDef.func();
     for (const prop in entityDef.props) {
@@ -140,7 +229,7 @@ export function renderAsAframeEntity(entityDef) {
     }
     entityDef.children.forEach(child => {
       if (child.type === "Object3D") {
-        obj.add(renderAsAframeEntity(child));
+        obj.add(renderAsAframeEntity(child, world));
       } else {
         throw "entities can only be children of entities";
       }

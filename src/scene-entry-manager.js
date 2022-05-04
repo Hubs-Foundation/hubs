@@ -3,6 +3,8 @@ import nextTick from "./utils/next-tick";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
 import { SignInMessages } from "./react-components/auth/SignInModal";
 
+import { createNetworkedEntity } from "./utils/jsx-entity";
+
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
 const forceEnableTouchscreen = hackyMobileSafariTest();
@@ -417,19 +419,34 @@ export default class SceneEntryManager {
 
   _setupCamera = () => {
     this.scene.addEventListener("action_toggle_camera", () => {
-      if (!this.hubChannel.can("spawn_camera")) return;
-      const myCamera = this.scene.systems["camera-tools"].getMyCamera();
+      const avatarPov = document.querySelector("#avatar-pov-node").object3D;
 
-      if (myCamera) {
-        myCamera.parentNode.removeChild(myCamera);
-      } else {
-        const entity = NAF.createNetworkedEntity("#interactable-camera");
-        entity.setAttribute("offset-relative-to", {
-          target: "#avatar-pov-node",
-          offset: { x: 0, y: 0, z: -1.5 }
-        });
-        this.scene.appendChild(entity);
-      }
+      // const INTERACTABLE_CUBE = 0;
+      // const eid = createNetworkedEntity(APP.world, INTERACTABLE_CUBE);
+      // const obj = APP.world.eid2obj.get(eid);
+      // obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+      // this.scene.object3D.add(obj);
+
+      const aframeWrapper = NAF.createNetworkedEntity("#interactable-cube-media");
+      this.scene.appendChild(aframeWrapper);
+
+      const eid = aframeWrapper.object3D.children[0].eid;
+      const obj = APP.world.eid2obj.get(eid);
+      obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+
+      // if (!this.hubChannel.can("spawn_camera")) return;
+      // const myCamera = this.scene.systems["camera-tools"].getMyCamera();
+
+      // if (myCamera) {
+      //   myCamera.parentNode.removeChild(myCamera);
+      // } else {
+      //   const entity = NAF.createNetworkedEntity("#interactable-camera");
+      //   entity.setAttribute("offset-relative-to", {
+      //     target: "#avatar-pov-node",
+      //     offset: { x: 0, y: 0, z: -1.5 }
+      //   });
+      //   this.scene.appendChild(entity);
+      // }
     });
 
     this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
