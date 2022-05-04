@@ -33,6 +33,7 @@ import { GainSystem } from "./audio-gain-system";
 import { EnvironmentSystem } from "./environment-system";
 import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 import { singleActionButtonSystem } from "./single-action-button-system";
+import { removeNetworkedObjectSystem } from "./remove-networked-object-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -126,6 +127,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.audioZonesSystem.tick(this.el);
     this.gainSystem.tick();
     this.nameTagSystem.tick();
+
+    removeNetworkedObjectSystem(world);
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();

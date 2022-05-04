@@ -1,23 +1,12 @@
-import { removeNetworkedObject } from "../utils/removeNetworkedObject";
+import { RemoveNetworkedEntityButton } from "../utils/jsx-entity";
+import { addComponent, removeComponent } from "bitecs";
 
 AFRAME.registerComponent("remove-networked-object-button", {
   init() {
-    this.onClick = () => {
-      removeNetworkedObject(this.el.sceneEl, this.targetEl);
-      this.el.parentNode.removeAttribute("visibility-while-frozen");
-      this.el.parentNode.setAttribute("visible", false);
-    };
-
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.targetEl = networkedEl;
-    });
+    addComponent(APP.world, RemoveNetworkedEntityButton, this.el.object3D.eid);
   },
 
-  play() {
-    this.el.object3D.addEventListener("interact", this.onClick);
-  },
-
-  pause() {
-    this.el.object3D.removeEventListener("interact", this.onClick);
+  remove() {
+    removeComponent(APP.world, RemoveNetworkedEntityButton, this.el.object3D.eid);
   }
 });
