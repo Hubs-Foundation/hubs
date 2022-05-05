@@ -55,7 +55,7 @@ export class ConstraintsSystem {
     }
 
     if (prevState.held && isTagged(prevState.held, constraintTag)) {
-      console.log("remove constraint from", prevState.held);
+      // console.log("remove constraint from", prevState.held);
       const eid = prevState.held.eid;
       const bodyId = Rigidbody.bodyId[eid];
 
@@ -87,7 +87,7 @@ export class ConstraintsSystem {
         bodyOptions.activationState = ACTIVATION_STATE.DISABLE_DEACTIVATION;
         this.physicsSystem.updateBody(bodyId, bodyOptions);
 
-        console.log("add constraint to", interactorEid, bodyId, interactorBodyId);
+        // console.log("add constraint to", interactorEid, bodyId, interactorBodyId);
         this.physicsSystem.addConstraint(interactorEid, bodyId, interactorBodyId, {});
         // TODO do we need this constraintPairs logic?
         if (!this.constraintPairs[eid]) {

@@ -80,7 +80,6 @@ export const floatyObjectSystem = world => {
     const el = world.eid2obj.get(eid).el;
     const isMine = el.components.networked && NAF.utils.isMine(el);
     if (!isMine) {
-      console.log("It's not mine, giving up");
       removeComponent(world, MakeStaticWhenAtRest, eid);
       continue;
     }
@@ -93,7 +92,6 @@ export const floatyObjectSystem = world => {
       physicsSystem.getAngularVelocity(bodyId) < bodyData.options.angularSleepingThreshold;
 
     if (isAtRest) {
-      console.log("It's at rest, done");
       Object.assign(bodyData.options, {
         type: "kinematic"
       });
