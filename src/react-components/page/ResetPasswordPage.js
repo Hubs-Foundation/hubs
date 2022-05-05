@@ -7,26 +7,28 @@ import "../../assets/stylesheets/globals.scss";
 import "../../assets/login/signin.scss";
 import "../../assets/login/utils.scss";
 import UserService from '../../utilities/apiServices/UserService'
-import SigninSocial from '../signin/SigninSocial';
+import SigninSocial from '../../react-components/signin/SigninSocial';
 import { validateEmail ,validateLength,validateLengthSpace} from '../../utils/commonFunc';
 import Store from "../../utilities/store";
 import { FaHome } from "react-icons/fa";
 import StoreHub from "../../storage/store";
-import hubChannel from '../../utils/hub-channel'
+import hubChannel from './../../utils/hub-channel'
 const store = new StoreHub();
 registerTelemetry("/signup", "Hubs Sign Up Page");
 
 export  function ResetPasswordPage() {
     return (
-        <ResetPasswordForm />
+        <ResetPassword />
     );
 }
 
-class ResetPasswordForm extends React.Component{
+class ResetPassword extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
+            displayName: '',
             email: '',
+            password: '',
             submitted: false,
             error:'',
             disabled:false,
@@ -46,34 +48,50 @@ class ResetPasswordForm extends React.Component{
     }
 
     handleSubmit(e) {
+        const access_token = (new URL(window.location.href).searchParams.get("token"));
         e.preventDefault();
         this.setState({ submitted: true });
-        const {email} = this.state;
-        const data = {email};
-        if (validateEmail(email) === 'incorrect-email') {
-            this.setState({ error : 'Invalid email!' });
+        const {password,repassword } = this.state;
+        const data = {
+            access_token: access_token,
+            password: password
+        };
+
+        if (validateLengthSpace(password, 4, 64) === 'incorrect') {
+            this.setState({ error : 'Password does not contain space and must be between 4 ~ 64 characters' });
+            return false;
+        }
+        else if (password != repassword) {
+            this.setState({ error : 'Re-entered password does not match' });
             return false;
         }
         else{
-            // UserService.signupWithEmail(data).then((res) => {
-            //     this.setState({ disabled : true });
-            //     if(res.result == 'ok'){
-            //         remove2Token();
-            //         window.location = `/?page=warning-verify&email=${res.data.email}`;
-            //     }
-            //     else
-            //     if(res.result == 'fail'){// && result.error == 'duplicated_email'
-            //         if(res.error == 'duplicated_email'){
-            //             this.setState({ error : 'Your email already exists' });
-            //             this.setState({ disabled : false });
-            //         }
-            //     }
-            // })
+            UserService.resetPassword(data).then((res) => {
+                this.setState({ disabled : true });
+                if(res.result == 'ok'){
+                    window.location = "/?page=signin";
+                }
+                else
+                if(res.result == 'fail'){// && result.error == 'duplicated_email'
+                    if(res.error == 'invalid_password'){
+                        this.setState({ error : 'password should be length 6-20 characters' });
+                        this.setState({ disabled : false });
+                    }
+                    else if(res.error == 'verify_token_fail'){
+                        this.setState({ error : 'token verification failed, please try again' });
+                        this.setState({ disabled : false });
+                    }
+                    else if(res.error == 'token_incorrect'){
+                        this.setState({ error : 'token incorrect please try again' });
+                        this.setState({ disabled : false });
+                    }
+                }
+            })
         }
     }
 
   render(){
-    const { displayName,email, password,repassword, submitted ,error,disabled} = this.state;
+    const { password,repassword,error} = this.state;
     const MesageError=()=> {  
         if(error){
           return(
@@ -99,11 +117,20 @@ class ResetPasswordForm extends React.Component{
                     </span>
                     <div className="p-t-13 p-b-9">
                         <span className="txt1">
-                            Email
+                            Password
                         </span>
                     </div>
-                    <div className="wrap-input100 validate-input" data-validate="Email is required">
-                        <input className="input100" type="email" name="email" value={email} onChange={this.handleChange}  />
+                    <div className="wrap-input100 validate-input" data-validate="Password is required">
+                        <input className="input100" type="password" name="password" value={password} onChange={this.handleChange} />
+                        <span className="focus-input100"></span>
+                    </div>
+                    <div className="p-t-13 p-b-9">
+                        <span className="txt1">
+                            Re Password
+                        </span>
+                    </div>
+                    <div className="wrap-input100 validate-input" data-validate="Re Password is required">
+                        <input className="input100" type="password" name="repassword" value={repassword} onChange={this.handleChange} />
                         <span className="focus-input100"></span>
                     </div>
                     <div className="container-login100-form-btn m-t-27 m-b-30">
@@ -114,7 +141,7 @@ class ResetPasswordForm extends React.Component{
                     <MesageError/>
                     <div id="alternativeLogin">
                         <label className="txt1">Or sign in with: <a href='/?page=signin' className='btn_signup'>Sign In?</a></label>
-                        <SigninSocial/>
+                        {/* <SigninSocial/> */}
                     </div>
                 </form>
             </div>

@@ -425,3 +425,14 @@
 .margin-bottom20px {
 	margin-bottom: 25px;
 }
+
+@media (max-width:500px) {
+	.manager-page {
+
+		.row_1 {
+			.text_1 {
+				display: none;
+			}
+		}
+	}
+}

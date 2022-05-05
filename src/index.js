@@ -9,6 +9,7 @@ import { HomePage } from "./react-components/page/HomePage";
 import { SigninPage } from "./react-components/page/SigninPage";
 import { SignupPage } from "./react-components/page/SignupPage";
 import { ManagerPage } from "./react-components/page/ManagerPage";
+import { ForgotPasswordPage } from "./react-components/page/ForgotPasswordPage";
 import { ResetPasswordPage } from "./react-components/page/ResetPasswordPage";
 import { WarningVerifyPage } from "./react-components/page/WarningVerifyPage";
 
@@ -47,6 +48,11 @@ function Root() {
     case 'manager':
       return (
         <ManagerPage/>
+      );
+
+    case 'forgot-password':
+      return (
+        <ForgotPasswordPage/>
       );
 
     case 'reset-password':

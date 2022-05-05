@@ -79,6 +79,35 @@ class UserService {
         });
     };
 
+    requestResetPassword(email){
+        
+        return fetch(`${API_ROOT}/v1/users/requestResetPassword`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(email)
+        })
+        .then((res) => res.json())
+        .catch((error) => {
+            console.log(error)
+        });
+    };
+
+    resetPassword(data){
+        return fetch(`${API_ROOT}/v1/users/resetPassword`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        })
+        .then((res) => res.json())
+        .catch((error) => {
+            console.log(error)
+        });
+    };
+
     verifyUser(token){
        return apiRequest.post('/v1/auth/users/verifyUser', {access_token: token});
     }

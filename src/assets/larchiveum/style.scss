@@ -427,3 +427,13 @@
 .d-flex {
 	display: flex;
 }
+
+@media (max-width:500px) {
+	.background-homepage {
+		.row_1 {
+			.text_1 {
+				display: none;
+			}
+		}
+	}
+}
