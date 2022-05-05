@@ -1,3 +1,4 @@
+import { inflateMirror } from "../inflate-mirror";
 import { Layers } from "../components/layers";
 
 function isValidChild(child) {
@@ -72,7 +73,8 @@ export function createElementEntity(tag, attrs, ...children) {
       } else if (attr === "ref") {
         ref = attrs[attr];
       } else {
-        components[attr] = attrs[attr];
+        // if jsx transformed the attr into attr: true, change it to attr: {}.
+        components[attr] = attrs[attr] === true ? {} : attrs[attr];
       }
     }
 
@@ -143,7 +145,7 @@ export function createNetworkedEntity(world, templateId, eid = addEntity(world))
   return eid;
 }
 
-function addObject3DComponent(world, eid, obj) {
+export function addObject3DComponent(world, eid, obj) {
   if (hasComponent(APP.world, Object3DTag, eid)) {
     throw new Error("Tried to an object3D tag to an entity that already has one");
   }
@@ -178,7 +180,8 @@ const inflators = {
   "media-frame": () => {},
   water: () => {},
   text: () => {},
-  waypoint: () => {}
+  waypoint: () => {},
+  mirror: inflateMirror
 };
 
 export function renderAsAframeEntity(entityDef, world) {
