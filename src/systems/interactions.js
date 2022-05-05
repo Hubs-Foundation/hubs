@@ -5,6 +5,7 @@ import { canMove } from "../utils/permissions-utils";
 import { isTagged } from "../components/tags";
 import { addComponent, hasComponent, removeComponent } from "bitecs";
 import {
+  Held,
   Holdable,
   Pinned,
   RemoteHoverTarget,
@@ -243,6 +244,16 @@ AFRAME.registerSystem("interaction", {
       if (userinput.get(options.dropPath) || lostOwnership) {
         //TODO: Does everything break if someone deletes the thing you're holding?
         removeComponent(APP.world, heldComponent, state.held.object3D.eid);
+
+        if (
+          !hasComponent(APP.world, HeldRightRemote, state.held.object3D.eid) &&
+          !hasComponent(APP.world, HeldLeftRemote, state.held.object3D.eid) &&
+          !hasComponent(APP.world, HeldRightHand, state.held.object3D.eid) &&
+          !hasComponent(APP.world, HeldLeftHand, state.held.object3D.eid)
+        ) {
+          removeComponent(APP.world, Held, state.held.object3D.eid);
+        }
+
         state.held = null;
       }
     } else {
@@ -287,6 +298,7 @@ AFRAME.registerSystem("interaction", {
         ) {
           state.held = entity;
           addComponent(APP.world, heldComponent, hoveredEid);
+          addComponent(APP.world, Held, hoveredEid);
         }
       }
     }

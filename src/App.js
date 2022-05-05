@@ -186,51 +186,10 @@ const networkSystem = world => {
   return world;
 };
 
-const heldFloatyObjectsQuery = defineQuery([FloatyObject, Rigidbody, Held]);
-const exitedHeldFloadyObjectsQuery = exitQuery(heldFloatyObjectsQuery);
-const floatyObjectSystem = world => {
-  const ents = exitedHeldFloadyObjectsQuery(world);
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-  for (let i = 0; i < ents.length; i++) {
-    const eid = ents[i];
-    if (!(hasComponent(world, FloatyObject, eid) && hasComponent(world, Rigidbody, eid))) continue;
-
-    const bodyId = Rigidbody.bodyId[eid];
-    const bodyData = physicsSystem.bodyUuidToData.get(bodyId);
-
-    if (bodyData.linearVelocity < 1.85) {
-      Object.assign(bodyData.options, {
-        gravity: { x: 0, y: 0, z: 0 },
-        angularDamping: 0.5,
-        linearDamping: 0.95,
-        linearSleepingThreshold: 0.1,
-        angularSleepingThreshold: 0.1,
-        collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES,
-        type: "kinematic"
-      });
-      console.log(eid, "droppsed slow", bodyData.linearVelocity);
-    } else {
-      Object.assign(bodyData.options, {
-        gravity: { x: 0, y: -2, z: 0 },
-        angularDamping: 0.01,
-        linearDamping: 0.01,
-        linearSleepingThreshold: 1.6,
-        angularSleepingThreshold: 2.5,
-        collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
-      });
-      console.log(eid, "droppsed fast", bodyData.linearVelocity);
-    }
-    physicsSystem.updateBody(bodyId, bodyData.options);
-  }
-
-  return world;
-};
-
 const pipeline = pipe(
   timeSystem,
   networkSystem,
   physicsCompatSystem,
-  floatyObjectSystem,
   spinSystem
 );
 

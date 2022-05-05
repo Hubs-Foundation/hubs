@@ -1,3 +1,6 @@
+import { addComponent } from "bitecs";
+
+import { FloatyObject } from "../utils/jsx-entity";
 /* global AFRAME */
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 
@@ -26,6 +29,8 @@ AFRAME.registerComponent("floaty-object", {
   init() {
     this.onGrab = this.onGrab.bind(this);
     this.onRelease = this.onRelease.bind(this);
+
+    addComponent(APP.world, FloatyObject, this.el.object3D.eid);
   },
 
   tick() {
@@ -35,31 +40,12 @@ AFRAME.registerComponent("floaty-object", {
 
     const interaction = AFRAME.scenes[0].systems.interaction;
     const isHeld = interaction && interaction.isHeld(this.el);
+
     if (isHeld && !this.wasHeld) {
-      this.onGrab();
+      // this.onGrab();
     }
     if (this.wasHeld && !isHeld) {
-      this.onRelease();
-    }
-
-    if (!isHeld && this._makeStaticWhenAtRest) {
-      const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
-      const isMine = this.el.components.networked && NAF.utils.isMine(this.el);
-      const linearThreshold = this.bodyHelper.data.linearSleepingThreshold;
-      const angularThreshold = this.bodyHelper.data.angularSleepingThreshold;
-      const uuid = this.bodyHelper.uuid;
-      const isAtRest =
-        physicsSystem.bodyInitialized(uuid) &&
-        physicsSystem.getLinearVelocity(uuid) < linearThreshold &&
-        physicsSystem.getAngularVelocity(uuid) < angularThreshold;
-
-      if (isAtRest && isMine) {
-        this.el.setAttribute("body-helper", { type: "kinematic" });
-      }
-
-      if (isAtRest || !isMine) {
-        this._makeStaticWhenAtRest = false;
-      }
+      // this.onRelease();
     }
 
     this.wasHeld = isHeld;
