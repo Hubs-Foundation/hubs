@@ -341,27 +341,29 @@ function Home() {
                         <button className="signin-up btn-visit" onClick={handleButtonVisit}>Login to visit</button>
                       )
                     }
-                     
                   }
                 }
                 if(item.room)
                 {
-                  return (
-                    <div key={index} className={'items'}>
-                      <img src={item?.room?.thumbnailUrl} alt=""/>
-                      <ButtonVisit/>
-                      <div className="span1">{item?.room?.name}</div>
-                      <div className="span2"> 
-                        <p className="p-1"><MdPeopleAlt/>{item.reservationCount}/{item.maxSize}</p>
-                        <p className="p-1">
-                          <MdCalendarToday/>
-                          <Moment format="YYYY-MM-DD">
-                            {item.startDate}
-                          </Moment>
-                        </p>
+                  if(item.closed != 1)
+                  {
+                    return (
+                      <div key={index} className={'items'}>
+                        <img src={item?.room?.thumbnailUrl} alt=""/>
+                        <ButtonVisit/>
+                        <div className="span1">{item?.room?.name}</div>
+                        <div className="span2"> 
+                          <p className="p-1"><MdPeopleAlt/>{item.reservationCount}/{item.maxSize}</p>
+                          <p className="p-1">
+                            <MdCalendarToday/>
+                            <Moment format="YYYY-MM-DD">
+                              {item.startDate}
+                            </Moment>
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )
+                    )
+                  }
                 }
                 else{
                   return (
