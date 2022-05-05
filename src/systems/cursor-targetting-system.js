@@ -85,7 +85,6 @@ export class CursorTargettingSystem {
     }
 
     const eids = cursorRaycastableQuery(APP.world);
-    console.log("raycastable ents", eids);
     for (let i = 0; i < eids.length; i++) {
       targets.push(APP.world.eid2obj.get(eids[i]));
     }

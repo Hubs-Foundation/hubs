@@ -1,3 +1,5 @@
+import { Layers } from "../components/layers";
+
 function isValidChild(child) {
   if (child === undefined) {
     console.warn("found undefined node");
@@ -84,13 +86,14 @@ export function createElementEntity(tag, attrs, ...children) {
   }
 }
 
-import { addComponent, addEntity, removeEntity, defineComponent, Types } from "bitecs";
+import { hasComponent, addComponent, addEntity, removeEntity, defineComponent, Types } from "bitecs";
 
 export const Networked = defineComponent({ templateId: Types.ui8, networkId: Types.ui8, flags: Types.ui8 });
 export const Object3DTag = defineComponent();
 export const Spin = defineComponent({ x: Types.f32, y: Types.f32, z: Types.f32 });
 
 export const CursorRaycastable = defineComponent();
+export const TextTag = defineComponent();
 export const RemoteHoverTarget = defineComponent();
 export const Holdable = defineComponent();
 export const RemoveNetworkedEntityButton = defineComponent();
@@ -141,7 +144,10 @@ export function createNetworkedEntity(world, templateId, eid = addEntity(world))
 }
 
 function addObject3DComponent(world, eid, obj) {
-  addComponent(APP.world, world.nameToComponent["object3d"], eid);
+  if (hasComponent(APP.world, Object3DTag, eid)) {
+    throw new Error("Tried to an object3D tag to an entity that already has one");
+  }
+  addComponent(APP.world, Object3DTag, eid);
   world.eid2obj.set(eid, obj);
   obj.eid = eid;
   obj.addEventListener("removed", function() {
@@ -153,7 +159,29 @@ function addObject3DComponent(world, eid, obj) {
   return eid;
 }
 
-export function renderAsAframeEntity(entityDef, world, eid) {
+const createDefaultInflator = Component => {
+  return (world, eid, componentProps) => {
+    addComponent(world, Component, eid);
+    Object.keys(componentProps).forEach(propName => {
+      Component[propName][eid] = componentProps[propName];
+    });
+  };
+};
+
+const inflators = {
+  spin: createDefaultInflator(Spin),
+  "cursor-raycastable": createDefaultInflator(CursorRaycastable),
+  "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
+  "offers-remote-constraint": createDefaultInflator(OffersRemoteConstraint),
+  holdable: createDefaultInflator(Holdable),
+  rigidbody: createDefaultInflator(Rigidbody),
+  "media-frame": () => {},
+  water: () => {},
+  text: () => {},
+  waypoint: () => {}
+};
+
+export function renderAsAframeEntity(entityDef, world) {
   if (entityDef.type === "a-entity") {
     const el = document.createElement("a-entity");
     if (entityDef.attrs.className) {
@@ -191,7 +219,22 @@ export function renderAsAframeEntity(entityDef, world, eid) {
     });
     return el;
   } else if (entityDef.type === "entity") {
-    const obj = new THREE.Group();
+    const eid = addEntity(world);
+
+    Object.keys(entityDef.components).forEach(name => {
+      if (!inflators[name]) {
+        throw new Error(`Failed to inflate unknown component called ${name}`);
+      }
+
+      inflators[name](world, eid, entityDef.components[name]);
+    });
+
+    let obj = world.eid2obj.get(eid);
+    if (!obj) {
+      obj = new THREE.Group();
+      addObject3DComponent(world, eid, obj);
+    }
+
     if (entityDef.attrs.position) {
       obj.position.fromArray(entityDef.attrs.position);
     }
@@ -201,24 +244,12 @@ export function renderAsAframeEntity(entityDef, world, eid) {
     if (entityDef.attrs.scale) {
       obj.scale.fromArray(entityDef.attrs.scale);
     }
-    if (eid === undefined) {
-      eid = addEntity(world);
-    }
-    addObject3DComponent(world, eid, obj);
     if (entityDef.ref) {
       entityDef.ref.current = eid;
     }
-    Object.keys(entityDef.components).forEach(name => {
-      const componentProps = entityDef.components[name];
-      const Component = world.nameToComponent[name];
-      addComponent(world, Component, eid);
-      Object.keys(componentProps).forEach(propName => {
-        Component[propName][eid] = componentProps[propName];
-      });
-    });
     entityDef.children.forEach(child => {
       if (child.type === "a-entity") {
-        throw "a-entity can only be children of a-entity";
+        throw new Error("a-entity can only be children of a-entity");
       } else {
         obj.add(renderAsAframeEntity(child, world));
       }

@@ -13,12 +13,10 @@ import {
   Holdable,
   OffersRemoteConstraint,
   Rigidbody,
-  FloatyObject,
-  Held
+  FloatyObject
 } from "./utils/jsx-entity";
 import cubeSchema from "./network-schemas/interactable-cube";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
-import { COLLISION_LAYERS } from "./constants";
 
 Object.defineProperties(THREE.Object3D.prototype, {
   components: {
