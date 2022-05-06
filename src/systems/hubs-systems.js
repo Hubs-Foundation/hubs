@@ -26,6 +26,7 @@ import { AudioSettingsSystem } from "./audio-settings-system";
 import { AudioSystem } from "./audio-system";
 import { ShadowSystem } from "./shadow-system";
 import { MediaFramesSystem } from "./media-frames";
+import { mediaFramesSystem } from "./bit-media-frames";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
 import { EmojiSystem } from "./emoji-system";
 import { AudioZonesSystem } from "./audio-zones-system";
@@ -126,7 +127,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.spriteSystem.tick(t, dt);
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
-    this.mediaFramesSystem.tick();
+    // this.mediaFramesSystem.tick();
+    mediaFramesSystem(world);
     this.audioZonesSystem.tick(this.el);
     this.gainSystem.tick();
     this.nameTagSystem.tick();

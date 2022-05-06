@@ -1,4 +1,5 @@
 import { inflateMirror } from "../inflate-mirror";
+import { inflateMediaFrame } from "../inflate-media-frame";
 import { Layers } from "../components/layers";
 
 function isValidChild(child) {
@@ -109,6 +110,7 @@ export const HeldLeftHand = defineComponent();
 export const HeldRightRemote = defineComponent();
 export const HeldLeftRemote = defineComponent();
 export const Held = defineComponent();
+export const MediaFrame = defineComponent({ mediaType: Types.ui8 });
 export const OffersRemoteConstraint = defineComponent();
 export const HandCollisionTarget = defineComponent();
 export const OffersHandConstraint = defineComponent();
@@ -123,6 +125,7 @@ export const PreventAudioBoost = defineComponent();
 export const IgnoreSpaceBubble = defineComponent();
 
 export const Rigidbody = defineComponent({ bodyId: Types.ui16 });
+export const PhysicsShape = defineComponent({ shapeId: Types.ui16, halfExtents: [Types.f32, 3] });
 
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
@@ -177,7 +180,7 @@ const inflators = {
   "offers-remote-constraint": createDefaultInflator(OffersRemoteConstraint),
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
-  "media-frame": () => {},
+  "media-frame": inflateMediaFrame,
   water: () => {},
   text: () => {},
   waypoint: () => {},

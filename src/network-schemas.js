@@ -1,5 +1,6 @@
 import cameraSchema from "./network-schemas/interactable-camera";
 import { cubeSchema } from "./network-schemas/interactable-cube";
+import { mediaFrameSchema } from "./network-schemas/media-frame-schema";
 
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {
@@ -19,6 +20,8 @@ function registerNetworkSchemas() {
       };
     };
   };
+
+  NAF.schemas.add(mediaFrameSchema);
 
   // Note: networked template ids are semantically important. We use the template suffix as a filter
   // for allowing and authorizing messages in reticulum.
@@ -162,22 +165,6 @@ function registerNetworkSchemas() {
         component: "particle-emitter"
       }
     ]
-  });
-
-  NAF.schemas.add({
-    template: "#interactable-media-frame",
-    components: [
-      {
-        component: "media-frame",
-        property: "targetId"
-      },
-      {
-        component: "media-frame",
-        property: "originalTargetScale"
-      }
-    ],
-    // TODO we probably want media frames to support permissioning of some form
-    nonAuthorizedComponents: ["media-frame"]
   });
 
   NAF.schemas.add({

@@ -13,6 +13,7 @@ import {
   Holdable,
   OffersRemoteConstraint,
   Rigidbody,
+  PhysicsShape,
   FloatyObject
 } from "./utils/jsx-entity";
 import cubeSchema from "./network-schemas/interactable-cube";
@@ -86,23 +87,29 @@ const physicsCompatSystem = world => {
       angularSleepingThreshold: 2.5,
       angularFactor: { x: 1, y: 1, z: 1 },
       activationState: ACTIVATION_STATE.ACTIVE_TAG,
-      type: "kinematic",
       emitCollisionEvents: false,
-      disableCollision: false,
-      collisionFilterGroup: 1,
-      collisionFilterMask: 15,
-      scaleAutoUpdate: false
+      scaleAutoUpdate: false,
+      type: "kinematic",
+      disableCollision: true,
+      collisionFilterGroup: 16,
+      collisionFilterMask: 1
     });
+
     Rigidbody.bodyId[eid] = bodyId;
-    const shapeId = physicsSystem.addShapes(bodyId, obj, {
-      type: SHAPE.BOX,
-      fit: FIT.MANUAL,
-      halfExtents: { x: 0.5, y: 0.5, z: 0.25 },
-      margin: 0.01,
-      offset: { x: 0, y: 0, z: 0 },
-      orientation: { x: 0, y: 0, z: 0, w: 1 }
-    });
-    console.log("added body", eid, bodyId, shapeId);
+    console.log("added body", eid, bodyId);
+
+    if (hasComponent(world, PhysicsShape, eid)) {
+      const halfExtents = PhysicsShape.halfExtents[eid];
+      const shapeId = physicsSystem.addShapes(bodyId, obj, {
+        type: SHAPE.BOX,
+        fit: FIT.MANUAL,
+        halfExtents: { x: halfExtents[0], y: halfExtents[1], z: halfExtents[2] },
+        margin: 0.01,
+        offset: { x: 0, y: 0, z: 0 },
+        orientation: { x: 0, y: 0, z: 0, w: 1 }
+      });
+      console.log("added shape", eid, shapeId);
+    }
   }
 
   return world;

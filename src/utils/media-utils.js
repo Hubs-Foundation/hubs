@@ -13,13 +13,13 @@ import tlds from "tlds";
 import anime from "animejs";
 
 export const MediaType = {
-  ALL: "all",
-  ALL_2D: "all-2d",
-  MODEL: "model",
-  IMAGE: "image",
-  VIDEO: "video",
-  PDF: "pdf"
+  MODEL: 1 << 0,
+  IMAGE: 1 << 1,
+  VIDEO: 1 << 2,
+  PDF: 1 << 3
 };
+MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF;
+MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF;
 
 const linkify = Linkify();
 linkify.tlds(tlds);
