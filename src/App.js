@@ -72,7 +72,6 @@ const physicsCompatSystem = world => {
     const eid = eids[i];
     // TODO this is weird, handling the fact that body-helper sets this up already...
     if (Rigidbody.bodyId[eid]) {
-      console.log("Skipping", eid, "since it already has a body");
       continue;
     }
 
@@ -96,7 +95,6 @@ const physicsCompatSystem = world => {
     });
 
     Rigidbody.bodyId[eid] = bodyId;
-    console.log("added body", eid, bodyId);
 
     if (hasComponent(world, PhysicsShape, eid)) {
       const halfExtents = PhysicsShape.halfExtents[eid];
@@ -108,7 +106,6 @@ const physicsCompatSystem = world => {
         offset: { x: 0, y: 0, z: 0 },
         orientation: { x: 0, y: 0, z: 0, w: 1 }
       });
-      console.log("added shape", eid, shapeId);
     }
   }
 

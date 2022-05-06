@@ -25,7 +25,7 @@ export class PhysicsSystem {
     this.indexToUuid = {};
     this.bodyUuidToData = new Map();
 
-    this.debug = false;
+    this.debug = true;
     this.debugRequested = false;
     this.debugEnabled = false;
     this.scene = scene;
@@ -192,7 +192,12 @@ export class PhysicsSystem {
             for (let j = BUFFER_CONFIG.COLLISIONS_OFFSET; j < BUFFER_CONFIG.BODY_DATA_SIZE; j++) {
               const collidingIndex = this.objectMatricesIntArray[index * BUFFER_CONFIG.BODY_DATA_SIZE + j];
               if (collidingIndex !== -1) {
-                body.collisions.push(this.indexToUuid[collidingIndex]);
+                const collision = this.indexToUuid[collidingIndex];
+                if (collision !== undefined) {
+                  // This will happen whenever you delete an object that is colliding with something
+                  // because we eagerly delete from the map when removing a body.
+                  body.collisions.push(this.indexToUuid[collidingIndex]);
+                }
               }
             }
           }
@@ -242,10 +247,21 @@ export class PhysicsSystem {
     }
   }
 
+  updateBodyOptions(bodyId, options) {
+    this.workerHelpers.updateBody(bodyId, Object.assign(this.bodyUuidToData.get(bodyId).options, options));
+  }
+
   removeBody(uuid) {
     const idx = this.bodyUuids.indexOf(uuid);
     if (this.bodyUuidToData.has(uuid) && idx !== -1) {
       delete this.indexToUuid[this.bodyUuidToData.get(uuid).index];
+
+      const collisions = this.bodyUuidToData.get(uuid).collisions;
+      collisions.forEach(otherId => {
+        const otherData = this.bodyUuidToData.get(otherId).collisions;
+        otherData.splice(otherData.indexOf(uuid), 1);
+      });
+
       this.bodyUuidToData.delete(uuid);
       this.bodyUuids.splice(idx, 1);
       this.workerHelpers.removeBody(uuid);

@@ -43,7 +43,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
   // TODO: This is a hack around the physics system addBody call requiring its body to have parent
   guide.parent = new THREE.Group();
   addObject3DComponent(world, eid, guide);
-  addComponent(world, MediaFrame, eid);
+  addComponent(world, MediaFrame, eid, true);
   MediaFrame.mediaType[eid] = {
     all: MediaType.ALL,
     "all-2d": MediaType.ALL_2D,
@@ -52,6 +52,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
     video: MediaType.VIDEO,
     pdf: MediaType.PDF
   }[componentProps.mediaType];
+  MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
 
   addComponent(world, Rigidbody, eid);
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;

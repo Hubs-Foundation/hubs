@@ -62,12 +62,12 @@ export function setMatrixWorld(object3D, m) {
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {
     object3D.parent.updateMatrices();
-    object3D.matrix = object3D.matrix
+    object3D.matrix
       .copy(object3D.parent.matrixWorld)
       .invert()
-      .multiply(object3D.matrixWorld);
+      .multiply(m);
   } else {
-    object3D.matrix.copy(object3D.matrixWorld);
+    object3D.matrix.copy(m);
   }
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
   if (tempMatrix4.near(object3D.matrixWorld, EPSILON)) {

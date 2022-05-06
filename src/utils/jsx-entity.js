@@ -94,7 +94,6 @@ import { hasComponent, addComponent, addEntity, removeEntity, defineComponent, T
 export const Networked = defineComponent({ templateId: Types.ui8, networkId: Types.ui8, flags: Types.ui8 });
 export const Object3DTag = defineComponent();
 export const Spin = defineComponent({ x: Types.f32, y: Types.f32, z: Types.f32 });
-
 export const CursorRaycastable = defineComponent();
 export const TextTag = defineComponent();
 export const RemoteHoverTarget = defineComponent();
@@ -110,7 +109,16 @@ export const HeldLeftHand = defineComponent();
 export const HeldRightRemote = defineComponent();
 export const HeldLeftRemote = defineComponent();
 export const Held = defineComponent();
-export const MediaFrame = defineComponent({ mediaType: Types.ui8 });
+export const MediaFrame = defineComponent({
+  mediaType: Types.ui8,
+  target: Types.eid,
+  bounds: [Types.f32, 3],
+  originalTargetScale: [Types.f32, 3],
+  preview: Types.eid
+});
+export const MediaFramePreviewClone = defineComponent({
+  preview: Types.eid
+});
 export const OffersRemoteConstraint = defineComponent();
 export const HandCollisionTarget = defineComponent();
 export const OffersHandConstraint = defineComponent();
@@ -123,13 +131,10 @@ export const Static = defineComponent();
 export const Inspectable = defineComponent();
 export const PreventAudioBoost = defineComponent();
 export const IgnoreSpaceBubble = defineComponent();
-
 export const Rigidbody = defineComponent({ bodyId: Types.ui16 });
 export const PhysicsShape = defineComponent({ shapeId: Types.ui16, halfExtents: [Types.f32, 3] });
-
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
-
 export const FloatyObject = defineComponent();
 
 export const NETWORK_FLAGS = {
