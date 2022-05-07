@@ -1,5 +1,14 @@
 import { addObject3DComponent, MediaFrame, MediaFramePreviewClone, Held, Rigidbody } from "../utils/jsx-entity";
-import { addEntity, defineComponent, defineQuery, entityExists, exitQuery, hasComponent } from "bitecs";
+import {
+  addComponent,
+  removeComponent,
+  addEntity,
+  defineComponent,
+  defineQuery,
+  entityExists,
+  exitQuery,
+  hasComponent
+} from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 
@@ -103,32 +112,21 @@ const snapToFrame = (() => {
   };
 })();
 
-function releaseFromFrame(world, frameEid) {
-  const targetEid = MediaFrame.target[frameEid];
-  MediaFrame.target[frameEid] = 0;
-  if (!entityExists(world, targetEid)) return;
-
-  const targetObj = world.eid2obj.get(targetEid);
+function setMatrixScale(obj, scaleArray) {
   const position = new THREE.Vector3();
   const quaternion = new THREE.Quaternion();
   const scale = new THREE.Vector3();
-  targetObj.updateMatrices();
-  targetObj.matrixWorld.decompose(position, quaternion, scale);
   const m4 = new THREE.Matrix4();
+  obj.updateMatrices();
+  obj.matrixWorld.decompose(position, quaternion, scale);
   setMatrixWorld(
-    targetObj,
+    obj,
     m4.compose(
       position,
       quaternion,
-      scale.fromArray(MediaFrame.originalTargetScale[frameEid])
+      scale.fromArray(scaleArray)
     )
   );
-
-  // If anything reads this without resetting it, it's a BIG problem ;)
-  MediaFrame.originalTargetScale[frameEid].set([20, 20, 20]);
-
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-  physicsSystem.updateBodyOptions(Rigidbody.bodyId[targetEid], { type: "dynamic" });
 }
 
 function makeMeshClone(obj) {
@@ -244,6 +242,8 @@ export const mediaFramesSystem = (() => {
 
   const mediaFramesQuery = defineQuery([MediaFrame]);
   return function mediaFramesSystem(world) {
+    const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+
     const heldEids = heldQuery(world);
     let heldMask = 0;
     for (let i = 0; i < heldEids.length; i++) {
@@ -254,53 +254,66 @@ export const mediaFramesSystem = (() => {
     const mediaFrames = mediaFramesQuery(world);
     for (let i = 0; i < mediaFrames.length; i++) {
       const frameEid = mediaFrames[i];
-      const frameObj = world.eid2obj.get(frameEid);
-      frameObj.visible = !!(MediaFrame.mediaType[frameEid] & heldMask);
-      const targetEid = MediaFrame.target[frameEid];
-      if (targetEid) {
-        if (MediaFrame.preview[frameEid]) {
-          hidePreview(world, frameEid);
+
+      // if should release, release
+      if (MediaFrame.capturedEntity[frameEid] && !isColliding(world, frameEid, MediaFrame.capturedEntity[frameEid])) {
+        // Captured entity might have been deleted
+        if (entityExists(world, MediaFrame.capturedEntity[frameEid])) {
+          setMatrixScale(
+            world.eid2obj.get(MediaFrame.capturedEntity[frameEid]),
+            MediaFrame.originalTargetScale[frameEid]
+          );
+          physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "dynamic" });
         }
-        frameObj.material.uniforms.color.value.set(FULL_COLOR);
-        if (isColliding(world, frameEid, targetEid)) {
-          if (hasComponent(world, Held, targetEid)) {
-            frameObj.material.uniforms.color.value.set(HOVER_COLOR);
-            // TODO: This is different from the original behavior. Should we show preview in this case or not?
-            if (!MediaFrame.preview[frameEid]) showPreview(world, frameEid, targetEid);
-          } else if (droppedThisFrame(world, targetEid)) {
-            console.log("should resnap");
-            snapToFrame(world, frameEid, targetEid, world.eid2obj.get(targetEid).el.getObject3D("mesh"));
-            const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-            physicsSystem.updateBodyOptions(Rigidbody.bodyId[targetEid], { type: "kinematic" });
-          }
-        } else {
-          releaseFromFrame(world, frameEid);
-          console.log("release!");
-        }
-      } else {
-        frameObj.material.uniforms.color.value.set(EMPTY_COLOR);
-        const capturableEid = getCapturableEntity(world, frameEid);
-        if (capturableEid) {
-          // TODO We should be checking a "isManipulating" flag compoennt instead of "Held".
-          //      Constraint system, rotation, scale would all add the flag
-          if (hasComponent(world, Held, capturableEid)) {
-            frameObj.material.uniforms.color.value.set(HOVER_COLOR);
-            if (!MediaFrame.preview[frameEid]) showPreview(world, frameEid, capturableEid);
-          } else {
-            console.log("capture!");
-            MediaFrame.target[frameEid] = capturableEid;
-            const capturableObj = world.eid2obj.get(capturableEid);
-            capturableObj.updateMatrices();
-            const scale = new THREE.Vector3().setFromMatrixScale(capturableObj.matrixWorld);
-            MediaFrame.originalTargetScale[frameEid].set([scale.x, scale.y, scale.z]);
-            snapToFrame(world, frameEid, capturableEid, world.eid2obj.get(capturableEid).el.getObject3D("mesh"));
-            const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-            physicsSystem.updateBodyOptions(Rigidbody.bodyId[capturableEid], { type: "kinematic" });
-          }
-        } else {
-          if (MediaFrame.preview[frameEid]) hidePreview(world, frameEid);
+        MediaFrame.capturedEntity[frameEid] = 0;
+      }
+
+      // if should capture, capture
+      if (!MediaFrame.capturedEntity[frameEid]) {
+        const thingToCapture = getCapturableEntity(world, frameEid);
+        if (thingToCapture && !hasComponent(world, Held, thingToCapture)) {
+          MediaFrame.capturedEntity[frameEid] = thingToCapture;
+          const capturableObj = world.eid2obj.get(thingToCapture);
+          capturableObj.updateMatrices();
+          new THREE.Vector3()
+            .setFromMatrixScale(capturableObj.matrixWorld)
+            .toArray(MediaFrame.originalTargetScale[frameEid]);
+
+          snapToFrame(
+            world,
+            frameEid,
+            MediaFrame.capturedEntity[frameEid],
+            world.eid2obj.get(MediaFrame.capturedEntity[frameEid]).el.getObject3D("mesh")
+          );
+          physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "kinematic" });
         }
       }
+
+      // Snap if we dropped the captured thing
+      if (droppedThisFrame(world, MediaFrame.capturedEntity[frameEid])) {
+        snapToFrame(
+          world,
+          frameEid,
+          MediaFrame.capturedEntity[frameEid],
+          world.eid2obj.get(MediaFrame.capturedEntity[frameEid]).el.getObject3D("mesh")
+        );
+        physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "kinematic" });
+      }
+
+      // display the state
+      const capturableEid = MediaFrame.capturedEntity[frameEid] || getCapturableEntity(world, frameEid);
+      const shouldPreviewBeVisible = capturableEid && hasComponent(world, Held, capturableEid);
+      if (shouldPreviewBeVisible && !MediaFrame.preview[frameEid]) showPreview(world, frameEid, capturableEid);
+      if (!shouldPreviewBeVisible && MediaFrame.preview[frameEid]) hidePreview(world, frameEid);
+      const frameObj = world.eid2obj.get(frameEid);
+      frameObj.material.uniforms.color.value.set(
+        capturableEid && hasComponent(world, Held, capturableEid)
+          ? HOVER_COLOR
+          : MediaFrame.capturedEntity[frameEid]
+            ? FULL_COLOR
+            : EMPTY_COLOR
+      );
+      frameObj.visible = !!(MediaFrame.mediaType[frameEid] & heldMask);
 
       // Tick animation mixers for preview
       const previewEid = MediaFrame.preview[frameEid];

@@ -109,9 +109,10 @@ export const HeldLeftHand = defineComponent();
 export const HeldRightRemote = defineComponent();
 export const HeldLeftRemote = defineComponent();
 export const Held = defineComponent();
+export const Snapped = defineComponent();
 export const MediaFrame = defineComponent({
   mediaType: Types.ui8,
-  target: Types.eid,
+  capturedEntity: Types.eid,
   bounds: [Types.f32, 3],
   originalTargetScale: [Types.f32, 3],
   preview: Types.eid
