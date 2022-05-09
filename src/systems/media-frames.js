@@ -378,9 +378,11 @@ AFRAME.registerComponent("media-frame", {
         capturedEl.object3D.scale.copy(this.data.originalTargetScale);
         capturedEl.object3D.matrixNeedsUpdate = true;
         capturedEl.components["floaty-object"].setLocked(false);
+
+        if (!NAF.utils.isMine(capturedEl) && !NAF.utils.takeOwnership(capturedEl)) {
+          console.error("failed to take ownership of media frame object");
+        }
       }
-    } else {
-      console.error("failed to take ownership of media frame");
     }
   }
 });
