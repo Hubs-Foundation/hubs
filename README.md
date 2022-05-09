@@ -29,7 +29,14 @@ npm ci
 npm run dev
 ```
 
-Then visit https://localhost:8080 (note: HTTPS is required, you'll need to accept the warning for the self-signed SSL certificate)
+The development server is configured to set up the host "hubs.local". You need to add "hubs.local" to the local "hosts" file on your computer. On Linux and MacOS the path is "/etc/hosts" on Windows the path is "c:\Windows\System32\drivers\etc". You may check the documentation on https://phoenixnap.com/kb/how-to-edit-hosts-file-in-windows-mac-or-linux for help.
+
+```
+127.0.0.1	hubs.local
+127.0.0.1	hubs-proxy.local
+```
+
+Then visit https://hubs.local:8080 (note: HTTPS is required, you'll need to accept the warning for the self-signed SSL certificate)
 
 > Note: When running the Hubs client locally, you will still connect to the development versions of our [Janus WebRTC](https://github.com/mozilla/janus-plugin-sfu) and [reticulum](https://github.com/mozilla/reticulum) servers. These servers do not allow being accessed outside of localhost. If you want to host your own Hubs servers, please check out [Hubs Cloud](https://hubs.mozilla.com/docs/hubs-cloud-intro.html).
 
@@ -47,7 +54,7 @@ Read our [contributor guide](./CONTRIBUTING.md) to learn how you can submit bug 
 
 We're also looking for help with localization. The Hubs redesign has a lot of new text and we need help from people like you to translate it. Follow the [localization docs](./src/assets/locales/README.md) to get started.
 
-Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it. 
+Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it.
 
 ## Additional Resources
 
