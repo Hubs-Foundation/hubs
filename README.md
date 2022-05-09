@@ -29,7 +29,7 @@ npm ci
 npm run dev
 ```
 
-The backend dev server is configured with CORS to only accept connections from "hubs.local:8080" so you will need to access it from that host. To do this you likely want to add "hubs.local" and "hubs-proxy.local" to the local "hosts" file on your computer. On Linux/MacOS the path is "/etc/hosts", on Windows the path is "c:\Windows\System32\drivers\etc". You may check the documentation on https://phoenixnap.com/kb/how-to-edit-hosts-file-in-windows-mac-or-linux for help.
+The backend dev server is configured with CORS to only accept connections from "hubs.local:8080", so you will need to access it from that host. To do this, you likely want to add "hubs.local" and "hubs-proxy.local" to the [local "hosts" file](https://phoenixnap.com/kb/how-to-edit-hosts-file-in-windows-mac-or-linux) on your computer:
 
 ```
 127.0.0.1	hubs.local
