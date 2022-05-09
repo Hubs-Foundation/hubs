@@ -190,11 +190,12 @@ async function fetchAppConfigAndEnvironmentVars() {
   return appConfig;
 }
 
-function htmlPagePlugin({ name, extraChunks = [], chunksSortMode, inject }) {
+function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) {
+  const chunkName = filename.match(/(.+).html/)[1];
   const options = {
-    filename: `${name}.html`,
-    template: path.join(__dirname, "src", `${name}.html`),
-    chunks: [...extraChunks, name],
+    filename,
+    template: path.join(__dirname, "src", filename),
+    chunks: [...extraChunks, chunkName],
     minify: {
       removeComments: false
     }
@@ -564,52 +565,52 @@ module.exports = async (env, argv) => {
       }),
       // Each output page needs a HTMLWebpackPlugin entry
       htmlPagePlugin({
-        name: "index",
+        filename: "index.html",
         extraChunks: ["support"],
         chunksSortMode: "manual"
       }),
       htmlPagePlugin({
-        name: "hub",
+        filename: "hub.html",
         extraChunks: ["webxr-polyfill", "support"],
         chunksSortMode: "manual",
         inject: "head"
       }),
       htmlPagePlugin({
-        name: "scene",
+        filename: "scene.html",
         extraChunks: ["support"],
         chunksSortMode: "manual",
         inject: "head"
       }),
       htmlPagePlugin({
-        name: "avatar",
+        filename: "avatar.html",
         extraChunks: ["support"],
         chunksSortMode: "manual",
         inject: "head"
       }),
       htmlPagePlugin({
-        name: "link",
+        filename: "link.html",
         extraChunks: ["support"],
         chunksSortMode: "manual"
       }),
       htmlPagePlugin({
-        name: "discord"
+        filename: "discord.html"
       }),
       htmlPagePlugin({
-        name: "whats-new",
+        filename: "whats-new.html",
         inject: "head"
       }),
       htmlPagePlugin({
-        name: "cloud",
+        filename: "cloud.html",
         inject: "head"
       }),
       htmlPagePlugin({
-        name: "signin"
+        filename: "signin.html"
       }),
       htmlPagePlugin({
-        name: "verify"
+        filename: "verify.html"
       }),
       htmlPagePlugin({
-        name: "tokens"
+        filename: "tokens.html"
       }),
       new CopyWebpackPlugin([
         {
