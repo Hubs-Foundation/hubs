@@ -367,7 +367,7 @@ AFRAME.registerComponent("media-frame", {
   },
 
   release() {
-    if (NAF.utils.isMine(this.el) || NAF.utils.takeOwnership(this.el)) {
+    if (NAF.utils.isMine(this.el)) {
       const capturedEl = document.getElementById(this.data.targetId);
 
       this.el.setAttribute("media-frame", {
