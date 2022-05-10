@@ -202,8 +202,6 @@ AFRAME.registerComponent("slice9", {
     const data = this.data;
     const diff = AFRAME.utils.diff(data, oldData);
 
-    console.log("update slice9", diff, this.plane.material, this.plane.material.version, this);
-
     // Update material if using built-in material.
     if (!data.usingCustomMaterial) {
       this.plane.material.alphaTest = data.alphaTest;
