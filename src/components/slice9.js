@@ -80,13 +80,13 @@ AFRAME.registerComponent("slice9", {
     if (data.usingCustomMaterial) {
       this.plane = new THREE.Mesh(geometry);
     } else {
-      const material = (this.material = new THREE.MeshBasicMaterial({
+      const material = new THREE.MeshBasicMaterial({
         alphaTest: data.alphaTest,
         color: data.color,
         opacity: data.opacity,
         transparent: data.transparent,
         wireframe: data.debug
-      }));
+      });
       this.plane = new THREE.Mesh(geometry, material);
     }
     this.el.setObject3D("mesh", this.plane);
@@ -99,7 +99,7 @@ AFRAME.registerComponent("slice9", {
     const uvs = this.geometry.attributes.uv.array;
     let width;
 
-    if (this.material && !this.material.map) {
+    if (this.plane.material && !this.plane.material.map) {
       return;
     }
 
@@ -202,14 +202,17 @@ AFRAME.registerComponent("slice9", {
     const data = this.data;
     const diff = AFRAME.utils.diff(data, oldData);
 
+    console.log("update slice9", diff, this.plane.material, this.plane.material.version, this);
+
     // Update material if using built-in material.
     if (!data.usingCustomMaterial) {
-      this.material.alphaTest = data.alphaTest;
-      this.material.color.setStyle(data.color);
-      this.material.opacity = data.opacity;
-      this.material.transparent = data.transparent;
-      this.material.wireframe = data.debug;
-      this.material.side = parseSide(data.side);
+      this.plane.material.alphaTest = data.alphaTest;
+      this.plane.material.color.setStyle(data.color);
+      this.plane.material.opacity = data.opacity;
+      this.plane.material.transparent = data.transparent;
+      this.plane.material.wireframe = data.debug;
+      this.plane.material.side = parseSide(data.side);
+      this.plane.material.needsUpdate = true;
       if ("src" in diff) {
         this.updateMap();
       }
@@ -229,8 +232,8 @@ AFRAME.registerComponent("slice9", {
   },
 
   setMap(texture) {
-    this.material.map = texture;
-    this.material.needsUpdate = true;
+    this.plane.material.map = texture;
+    this.plane.material.needsUpdate = true;
     this.regenerateMesh();
   },
 
@@ -251,7 +254,7 @@ AFRAME.registerComponent("slice9", {
     }
 
     // Texture removed.
-    if (!this.material.map) {
+    if (!this.plane.material.map) {
       return;
     }
 
