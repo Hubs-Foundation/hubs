@@ -386,7 +386,10 @@ AFRAME.registerComponent("teleporter", {
       })
     );
     this.cylinder.position.y = data.hitCylinderHeight / 2;
-    this.cylinder.rotation.z = 180 * THREE.Math.DEG2RAD;
+    // UV's for THREE Geometries assume flipY
+    if (!CYLINDER_TEXTURE.flipY) {
+      this.cylinder.rotation.z = 180 * THREE.Math.DEG2RAD;
+    }
     hitEntity.add(this.cylinder);
 
     // create another torus for animating when the hit destination is ready to go
