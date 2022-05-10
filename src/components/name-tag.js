@@ -274,12 +274,13 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateTheme() {
-    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(
+    this.nametagStatusBorder.el.setAttribute(
+      "slice9",
+      "color",
       getThemeColor(this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color")
     );
     nametagVolumeMaterial.color.set(getThemeColor("nametag-volume-color"));
-    this.nametagBackground.el.object3DMap.mesh.material.color.set(getThemeColor("nametag-color"));
-    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(getThemeColor("nametag-border-color"));
+    this.nametagBackground.el.setAttribute("slice9", "color", getThemeColor("nametag-color"));
     this.nametagText.el.setAttribute("text", "color", getThemeColor("nametag-text-color"));
   },
 
@@ -299,7 +300,9 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateHandRaised() {
-    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(
+    this.nametagStatusBorder.el.setAttribute(
+      "slice9",
+      "color",
       getThemeColor(this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color")
     );
     const targetScale = this.isHandRaised ? 1 : 0;
