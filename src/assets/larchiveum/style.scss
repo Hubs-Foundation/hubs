@@ -142,10 +142,10 @@
 		font-size: 22px;
 		button{
 			font-weight: bold;
-			margin-right: 10px;
+			margin-right: 15px;
 			color: #666;
 			&.active{
-				color: rgb(52, 208, 0);
+				color: #C00;
 				transition: .6s ease-in;
 			}
 		}
