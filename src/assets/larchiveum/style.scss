@@ -137,6 +137,20 @@
 		grid-template-columns: 1fr 1fr 1fr;
 	}
 
+	.sort{
+		padding: 5px 20px;
+		font-size: 22px;
+		button{
+			font-weight: bold;
+			margin-right: 10px;
+			color: #666;
+			&.active{
+				color: rgb(52, 208, 0);
+				transition: .6s ease-in;
+			}
+		}
+	}
+
 	.items {
 		position: relative;
 		background: #149BF3;
