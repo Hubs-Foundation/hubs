@@ -23,6 +23,7 @@ class RayCurve extends THREE.Mesh {
       new THREE.BufferGeometry(),
       new THREE.MeshBasicMaterial({
         side: THREE.DoubleSide,
+        toneMapped: false,
         transparent: true
       })
     );
@@ -361,6 +362,7 @@ AFRAME.registerComponent("teleporter", {
         color: data.hitCylinderColor,
         side: THREE.DoubleSide,
         transparent: true,
+        toneMapped: false,
         depthTest: false
       })
     );
@@ -381,6 +383,7 @@ AFRAME.registerComponent("teleporter", {
         color: data.hitCylinderColor,
         side: THREE.DoubleSide,
         map: CYLINDER_TEXTURE,
+        toneMapped: false,
         transparent: true,
         depthTest: false
       })
