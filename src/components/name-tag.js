@@ -4,8 +4,11 @@ import { getThemeColor } from "../utils/theme";
 import qsTruthy from "../utils/qs_truthy";
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import { THREE } from "aframe";
-import { setMatrixWorld } from "../utils/three-utils";
 import nextTick from "../utils/next-tick";
+import { createPlaneBufferGeometry, setMatrixWorld } from "../utils/three-utils";
+import { textureLoader } from "../utils/media-utils";
+
+import handRaisedIconSrc from "../assets/hud/hand-raised.png";
 
 const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
@@ -23,6 +26,15 @@ const ANIM_CONFIG = {
   loop: 0,
   round: false
 };
+
+const nametagVolumeGeometry = new THREE.PlaneBufferGeometry(1, 0.025);
+const nametagVolumeMaterial = new THREE.MeshBasicMaterial({ color: "#7ED320" });
+
+const nametagTypingGeometry = new THREE.CircleBufferGeometry(0.01, 6);
+
+const handRaisedTexture = textureLoader.load(handRaisedIconSrc);
+const handRaisedGeometry = createPlaneBufferGeometry(0.2, 0.2, 1, 1, handRaisedTexture.flipY);
+const handRaisedMaterial = new THREE.MeshBasicMaterial({ transparent: true, map: handRaisedTexture });
 
 AFRAME.registerComponent("name-tag", {
   schema: {},
@@ -54,13 +66,32 @@ AFRAME.registerComponent("name-tag", {
     this.nametag = this.el.object3D;
     this.nametagIdentityName = this.el.querySelector(".identityName").object3D;
     this.nametagBackground = this.el.querySelector(".nametag-background").object3D;
-    this.nametagVolume = this.el.querySelector(".nametag-volume").object3D;
     this.nametagStatusBorder = this.el.querySelector(".nametag-status-border").object3D;
     this.recordingBadge = this.el.querySelector(".recordingBadge").object3D;
     this.modBadge = this.el.querySelector(".modBadge").object3D;
-    this.handRaised = this.el.querySelector(".hand-raised-id").object3D;
-    this.nametagTyping = this.el.querySelector(".nametag-typing").object3D;
     this.nametagText = this.el.querySelector(".nametag-text").object3D;
+
+    this.handRaised = new THREE.Mesh(handRaisedGeometry, handRaisedMaterial);
+    this.handRaised.position.set(0, -0.3, 0.001);
+    this.el.object3D.add(this.handRaised);
+
+    this.nametagVolume = new THREE.Mesh(nametagVolumeGeometry, nametagVolumeMaterial);
+    this.nametagVolume.position.set(0, -0.075, 0.001);
+    this.nametagVolume.visible = false;
+    this.el.object3D.add(this.nametagVolume);
+
+    // TODO this is horribly inneficient draw call and geometry wise. Replace with custom shader code or at least a uv-croll image
+    this.nametagTyping = new THREE.Group();
+    this.nametagTyping.position.set(0, -0.075, 0.001);
+    for (let i = 0; i < 5; i++) {
+      const dot = new THREE.Mesh(
+        nametagTypingGeometry,
+        new THREE.MeshBasicMaterial({ transparent: true, color: 0xffffff, depthWrite: false })
+      );
+      dot.position.x = i * 0.035 - 0.07;
+      this.nametagTyping.add(dot);
+    }
+    this.el.object3D.add(this.nametagTyping);
 
     this.updateTheme();
 
@@ -241,12 +272,13 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateTheme() {
-    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(
+    this.nametagStatusBorder.el.setAttribute(
+      "slice9",
+      "color",
       getThemeColor(this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color")
     );
-    this.nametagVolume.el.object3DMap.mesh.material.color.set(getThemeColor("nametag-volume-color"));
-    this.nametagBackground.el.object3DMap.mesh.material.color.set(getThemeColor("nametag-color"));
-    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(getThemeColor("nametag-border-color"));
+    nametagVolumeMaterial.color.set(getThemeColor("nametag-volume-color"));
+    this.nametagBackground.el.setAttribute("slice9", "color", getThemeColor("nametag-color"));
     this.nametagText.el.setAttribute("text", "color", getThemeColor("nametag-text-color"));
   },
 
@@ -266,10 +298,12 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updateHandRaised() {
-    this.nametagStatusBorder.el.object3DMap.mesh.material.color.set(
+    this.nametagStatusBorder.el.setAttribute(
+      "slice9",
+      "color",
       getThemeColor(this.isHandRaised ? "nametag-border-color-raised-hand" : "nametag-border-color")
     );
-    const targetScale = this.isHandRaised ? 0.2 : 0;
+    const targetScale = this.isHandRaised ? 1 : 0;
     anime({
       ...ANIM_CONFIG,
       targets: {

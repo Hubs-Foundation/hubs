@@ -5,7 +5,7 @@
     <!-- DO NOT REMOVE/EDIT THIS COMMENT - META_TAGS -->
 
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, minimal-ui, viewport-fit=cover">
 
     <link rel="icon" sizes="16x16 24x24 32x32 48x48 64x64" href="/favicon.ico">
     <!-- Web-App Manifest (https://w3c.github.io/manifest/) -->
@@ -55,14 +55,11 @@
     <div id="support-root"></div>
 
     <a-scene
-        vr-mode-ui="enabled: false"
-        loading-screen="enabled: false"
         hubs-systems
         capture-system
         listed-media
         local-audio-analyser
         class="grab-cursor"
-        shadow="enabled: false; type: pcfsoft; autoUpdate: true"
         networked-scene="audio: true; debug: true; connectOnLoad: false;"
         mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
         action-to-event__mute="path: /actions/muteMic; event: action_mute;"
@@ -71,16 +68,9 @@
         rotate-selected-object
     >
         <a-assets>
-            <img id="presence-count" crossorigin="anonymous" src="./assets/hud/presence-count.png">
-            <img id="action-button" crossorigin="anonymous" src="./assets/hud/action_button.9.png">
-            <img id="button" crossorigin="anonymous" src="./assets/hud/button.9.png">
-            <img id="cursor-image" crossorigin="anonymous" src="./assets/images/cursor.svg">
-            <img id="nametag" crossorigin="anonymous" src="./assets/hud/nametag.9.png">
-            <img id="nametag-border" crossorigin="anonymous" src="./assets/hud/nametag-border.9.png">
-            <img id="hand-raised" crossorigin="anonymous" src="./assets/hud/hand-raised.png">
-
-            <a-asset-item id="drawing-pen" response-type="arraybuffer" src="./assets/models/DrawingPen.glb"></a-asset-item>
-            <a-asset-item id="spawn-point" response-type="arraybuffer" src="./assets/models/spawn-point.glb"></a-asset-item>
+            <!-- Note our fork of aframe doesn't actually do any preloading with a-assets. These a-asset-items are only used for their src attribute. -->
+            <a-asset-item id="drawing-pen" src="./assets/models/DrawingPen.glb"></a-asset-item>
+            <a-asset-item id="spawn-point" src="./assets/models/spawn-point.glb"></a-asset-item>
 
             <template id="template-waypoint-avatar">
                 <a-entity waypoint></a-entity>
@@ -120,17 +110,9 @@
                     <a-entity class="right-controller"></a-entity>
 
                     <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" billboard="onlyY: true;">
-                        <a-entity class="nametag-background" mixin="nametag-background-mixin" slice9="width: 1">
-                            <a-entity class="nametag-status-border" mixin="nametag-status-border-mixin" visible="false" slice9="width: 1"></a-entity>
+                        <a-entity class="nametag-background" slice9="width: 1; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 0.5; alphaTest: 0.1; src: nametag;">
+                            <a-entity class="nametag-status-border" visible="false" slice9="width: 0.45; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; transparent: false; alphaTest: 0.1; src: nametag-border;"></a-entity>
                             <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0.025 0.001"></a-entity>
-                            <a-plane class="nametag-volume" visible="false" position="0 -0.075 0.001" material="shader:flat; color:#7ED320;" height="0.025" width="1"></a-plane>
-                            <a-entity class="nametag-typing" position="0 -0.075 0.001">
-                                <a-circle position="-0.07 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                <a-circle position="-0.035 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                <a-circle position="0 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                <a-circle position="0.035 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                                <a-circle position="0.07 0 0" color="#FFFFFF" segments="6" material="shader:flat; transparent:true; opacity:1; depthWrite:false;" radius="0.01"></a-circle>
-                            </a-entity>
                         </a-entity>
                         <a-entity
                             is-not-remote-hover-target
@@ -154,7 +136,6 @@
                             visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
                             position="0 0.4 0"
                         ></a-entity>
-                        <a-image class="hand-raised-id" scale="0.2 0.2 0.2" position="0 -0.3 0.001" src="#hand-raised" visible="false" material="alphaTest:0.1;"></a-image>
                     </a-entity>
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
@@ -343,7 +324,7 @@
                                     right: 66;
                                     bottom: 66;
                                     opacity: 1.0;
-                                    src: #button"
+                                    src: button"
                                 position="0 0.6 0.001">
                             </a-entity>
                             <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" camera-focus-button="track: false" position="-0.25 0.375 0.001">
@@ -949,33 +930,6 @@
                 </a-entity>
             </template>
 
-            <a-mixin id="nametag-background-mixin"
-                slice9="
-                    width: 0.45;
-                    height: 0.2;
-                    left: 64;
-                    top: 64;
-                    right: 66;
-                    bottom: 66;
-                    transparent: true;
-                    opacity: 0.5;
-                    alphaTest: 0.1;
-                    src: #nametag"
-            ></a-mixin>
-
-            <a-mixin id="nametag-status-border-mixin"
-                slice9="
-                    width: 0.45;
-                    height: 0.2;
-                    left: 64;
-                    top: 64;
-                    right: 66;
-                    bottom: 66;
-                    transparent: false;
-                    alphaTest: 0.1;
-                    src: #nametag-border"
-            ></a-mixin>
-
             <a-mixin id="rounded-text-button"
                 slice9="
                     width: 0.45;
@@ -986,7 +940,7 @@
                     bottom: 66;
                     transparent: false;
                     alphaTest: 0.1;
-                    src: #button"
+                    src: button"
             ></a-mixin>
 
             <a-mixin id="rounded-button"
@@ -999,7 +953,7 @@
                     bottom: 66;
                     transparent: false;
                     alphaTest: 0.1;
-                    src: #button"
+                    src: button"
             ></a-mixin>
 
             <a-mixin id="rounded-text-action-button"
@@ -1012,7 +966,7 @@
                     bottom: 66;
                     transparent: false;
                     alphaTest: 0.1;
-                    src: #action-button"
+                    src: action-button"
             ></a-mixin>
 
             <a-mixin id="rounded-action-button"
@@ -1025,7 +979,7 @@
                     bottom: 66;
                     transparent: false;
                     alphaTest: 0.1;
-                    src: #action-button"
+                    src: action-button"
             ></a-mixin>
 
             <a-mixin id="rounded-twitter-text-action-button"
@@ -1044,7 +998,7 @@
                     bottom: 66;
                     transparent: false;
                     alphaTest: 0.1;
-                    src: #button"
+                    src: button"
             ></a-mixin>
         </a-assets>
 
@@ -1072,21 +1026,10 @@
             cursor-controller="cursor: #left-cursor; camera: #avatar-pov-node; cursorVisual: #left-cursor-visual;"
         ></a-entity>
 
-        <a-sphere
+        <a-entity
             id="right-cursor"
-            material="shader: flat; visible: false;"
-            radius="0.02"
-            segments-width="9"
-            segments-height="9"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
-            <a-circle
-                id="right-cursor-visual"
-                radius="0.02"
-                material="shader: flat; src: #cursor-image; depthTest: false; opacity: 0.9;"
-                scale-in-screen-space="baseScale: 0.10 0.10 0.10; addedScale: 0.4 0.4 0.4; scalePreferenceName: cursorSize;"
-                billboard>
-            </a-circle>
             <a-entity
                 sprite
                 icon-button="image: rotate-cursor.png"
@@ -1095,23 +1038,12 @@
                 class="hud"
                 visible-if-transforming="hand:right"
             ></a-entity>
-        </a-sphere>
+        </a-entity>
 
-        <a-sphere
+        <a-entity
             id="left-cursor"
-            material="shader: flat; visible: false;"
-            radius="0.02"
-            segments-width="9"
-            segments-height="9"
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
-            <a-circle
-                id="left-cursor-visual"
-                radius="0.02"
-                material="shader: flat; src: #cursor-image; depthTest: false; opacity: 0.9;"
-                scale-in-screen-space="baseScale: 0.10 0.10 0.10; addedScale: 0.4 0.4 0.4; scalePreferenceName: cursorSize;"
-                billboard>
-            </a-circle>
             <a-entity
                 sprite
                 icon-button="image: rotate-cursor.png"
@@ -1120,7 +1052,7 @@
                 class="hud"
                 visible-if-transforming="hand:left"
             ></a-entity>
-        </a-sphere>
+        </a-entity>
 
         <!-- Avatar Rig -->
         <a-entity
@@ -1148,17 +1080,16 @@
                     </a-entity>
                 </a-entity>
                 <a-entity in-world-hud visibility-while-frozen="visible: false; requireHoverOnNonMobile: false;" rotation="30 0 0" >
-                    <a-rounded height="0.08" width="0.2" color="#000000" position="-0.44 -0.045 0" radius="0.040" opacity="0.35" class="hud bg"></a-rounded>
-                    <a-image scale="0.07 0.06 0.06" position="-0.38 -0.005 0.001" src="#presence-count" material="alphaTest:0.1;"></a-image>
+                    <a-entity sprite="name: Background.png" scale="0.2 0.08 1" position="-0.34 -0.005 0" class="hud bg"></a-entity>
                     <a-entity id="hud-presence-count" text="value: ; textAlign:center;" position="-0.30 -0.005 0.001"></a-entity>
                     <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target tags="singleActionButton: true;">
                         <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
                             <a-entity text=" value:invite; textAlign:center;" text-raycast-hack position="0 0 0.001"></a-entity>
                         </a-entity>
                     </a-entity>
-                    <a-rounded visible="false" vr-mode-toggle-visibility id="hud-tooltip" height="0.08" width="0.4" color="#000000" position="-0.2 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
-                        <a-entity text="value: ; textAlign:center; fontSize: 0.06;" position="0.2 0.04 0.001"></a-entity>
-                    </a-rounded>
+                    <a-entity visible="false" vr-mode-toggle-visibility id="hud-tooltip" position="-0.2 -0.2 0" rotation="-20 0 0" radius="0.025" opacity="0.35" class="hud bg">
+                        <a-entity text="value: ; textAlign:center; fontSize: 0.06; outlineWidth: 2%;" position="0.2 0.04 0.001"></a-entity>
+                    </a-entity>
                     <a-entity
                         is-remote-hover-target
                         tags="singleActionButton: true"
@@ -1167,7 +1098,6 @@
                         scale="0.1 0.1 0.1"
                         position="-0.17 0 0.001"
                         class="hud mic"
-                        material="alphaTest:0.1;"
                     ></a-entity>
                     <a-entity
                         is-remote-hover-target
@@ -1200,7 +1130,6 @@
                         scale="0.1 0.1 0.1"
                         position="0.17 0 0.001"
                         class="hud penhud"
-                        material="alphaTest:0.1;"
                     ></a-entity>
                     <a-entity
                         is-remote-hover-target
@@ -1218,7 +1147,6 @@
                         scale="0.1 0.1 0.1"
                         position="0.28 0 0.001"
                         class="hud camera-btn"
-                        material="alphaTest:0.1;"
                     ></a-entity>
                 </a-entity>
             </a-entity>
@@ -1321,7 +1249,7 @@
         ></a-entity>
 
         <a-entity class="ui interactable-ui vr-notice" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
-            <a-entity slice9="width: 0.8; height: 0.25; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: #button"
+            <a-entity slice9="width: 0.8; height: 0.25; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: button"
                 text-button="
                     textHoverColor: #fff;
                     textColor: #fff;

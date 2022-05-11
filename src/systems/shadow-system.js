@@ -93,6 +93,12 @@ export class ShadowSystem {
     this.sceneEl = sceneEl;
     this.shadowCameraBoundingBox = new THREE.Box3();
     this.previousShadowsEnabled = this.realtimeShadowsEnabled = null;
+
+    // Defaults previously in hub.html
+    sceneEl.renderer.shadowMap.enabled = false;
+    sceneEl.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    sceneEl.renderer.shadowMap.autoUpdate = true;
+
     window.APP.store.addEventListener("statechanged", this.updatePrefs.bind(this));
     this.updatePrefs();
   }
@@ -102,7 +108,7 @@ export class ShadowSystem {
       window.APP.store.state.preferences.enableDynamicShadows === true &&
       window.APP.store.materialQualitySetting !== "low";
     if (this.previousShadowsEnabled !== this.realtimeShadowsEnabled) {
-      this.sceneEl.setAttribute("shadow", { enabled: this.realtimeShadowsEnabled });
+      this.sceneEl.renderer.shadowMap.enabled = this.realtimeShadowsEnabled;
 
       // If scene has already rendered, materials which can receive shadows must be updated.
       if (this.sceneEl.hasLoaded) {

@@ -77,8 +77,6 @@
     "@mozillareality/three-batch-manager": "github:mozillareality/three-batch-manager#master",
     "@popperjs/core": "^2.4.4",
     "aframe": "github:mozillareality/aframe#hubs/master",
-    "aframe-rounded": "^1.0.3",
-    "aframe-slice9-component": "github:takahirox/aframe-slice9-component#AlphaTest",
     "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
     "animejs": "github:mozillareality/anime#hubs/master",

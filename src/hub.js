@@ -42,9 +42,7 @@ patchWebGLRenderingContext();
 require("three/examples/js/loaders/GLTFLoader");
 
 import "networked-aframe/src/index";
-import "aframe-rounded";
 import "webrtc-adapter";
-import "aframe-slice9-component";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -66,7 +64,6 @@ import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECT
 import "./change-hub";
 
 import "./components/scene-components";
-import "./components/scale-in-screen-space";
 import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
@@ -735,7 +732,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
-  scene.renderer.debug.checkShaderErrors = false;
 
   // HACK - Trigger initial batch preparation with an invisible object
   scene

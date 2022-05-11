@@ -281,9 +281,10 @@ export function injectCustomShaderChunks(obj) {
       // hover/toggle state, so for now just skip these while we figure out a more correct
       // solution.
       if (
-        object.el.classList.contains("ui") ||
-        object.el.classList.contains("hud") ||
-        object.el.getAttribute("text-button")
+        object.el &&
+        (object.el.classList.contains("ui") ||
+          object.el.classList.contains("hud") ||
+          object.el.getAttribute("text-button"))
       )
         return material;
 
