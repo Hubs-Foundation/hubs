@@ -1,4 +1,4 @@
-const expireCookies = 1;
+const expireCookies = 7;
 
 //const API_ROOT = "http://localhost:7500";
 const API_ROOT = "https://dev-api.sectic.com/larchiveum";
