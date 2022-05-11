@@ -69,6 +69,7 @@ const orbit = (function() {
     }
     pivot.updateMatrices();
     decompose(pivot.matrixWorld, owp, owq);
+    camera.updateMatrices();
     decompose(camera.matrixWorld, cwp, cwq);
     rig.getWorldQuaternion(rwq);
 
