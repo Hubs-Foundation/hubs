@@ -28,6 +28,7 @@ import { AudioSettingsSystem } from "./audio-settings-system";
 import { AudioSystem } from "./audio-system";
 import { ShadowSystem } from "./shadow-system";
 import { MediaFramesSystem } from "./media-frames";
+import { MediaPDFOculusFix } from "./media-pdf-oculus-fix";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
 import { EmojiSystem } from "./emoji-system";
 import { AudioZonesSystem } from "./audio-zones-system";
@@ -71,6 +72,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.shadowSystem = new ShadowSystem(this.el);
     this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
     this.inspectYourselfSystem = new InspectYourselfSystem();
+    this.mediaPDFOculusFix = new MediaPDFOculusFix();
     this.emojiSystem = new EmojiSystem(this.el);
     this.audioZonesSystem = new AudioZonesSystem();
     this.gainSystem = new GainSystem();
@@ -114,6 +116,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.inspectYourselfSystem.tick(this.el, systems.userinput, this.cameraSystem);
     this.cameraSystem.tick(this.el, dt);
     this.waypointSystem.tick(t, dt);
+    this.mediaPDFOculusFix.tick(this.el)
     this.menuAnimationSystem.tick(t);
     this.spriteSystem.tick(t, dt);
     this.uvScrollSystem.tick(dt);
