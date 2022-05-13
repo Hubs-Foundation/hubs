@@ -10,14 +10,16 @@
 }
 
 /* original value : left 0, right 55% */
+/* edit value : left 15%, right 0 */
 :local(.touchZone.left) {
-  left: 15%;
+  left: 0;
   right: 0;
 }
 
 /* original value : left 55%, right 0 */
+/* edit value : left 85%, right 0 */
 :local(.touchZone.right) {
-  left: 85%;
+  left: 0;
   right: 0;
 }
 
@@ -26,7 +28,7 @@
   height: 0;
   left: 0;
   right: 0;
-  bottom: 146px;
+  bottom: 20px;
   padding: 16px;
   align-items: center;
   justify-content: space-between;

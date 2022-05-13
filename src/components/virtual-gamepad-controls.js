@@ -39,6 +39,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.rightMock.appendChild(this.rightMockSmall);
     this.mockJoystickContainer.appendChild(this.rightMock);
 
+    // touch joystic always
     window.APP.store.state.preferences.enableOnScreenJoystickLeft = true;
     window.APP.store.state.preferences.enableOnScreenJoystickRight = true;
 
@@ -133,6 +134,10 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
       zone: this.rightTouchZone,
       color: "white",
       mode: 'static',
+      position: {
+        right: '15%',
+        top: '50%'
+      },
       fadeTime: 0
     });
     this.rightStick.on("start", this.onFirstInteraction);
@@ -148,6 +153,10 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
       zone: this.leftTouchZone,
       color: "white",
       mode: 'static',
+      position: {
+        left: '15%',
+        top: '50%'
+      },
       fadeTime: 0
     });
     this.leftStick.on("start", this.onFirstInteraction);
