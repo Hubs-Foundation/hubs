@@ -19,7 +19,7 @@ import defaultImage from "../../assets/larchiveum/default-image.png";
 import defaultImage1 from "../../assets/larchiveum/siri.gif";
 import Pagination from "../../react-components/pagination/pagination";
 import { APP_ROOT } from "../../utilities/constants";
-import { FaUserFriends, FaRegCalendarAlt, FaLink, FaCog, FaShapes } from "react-icons/fa";
+import { FaUserFriends, FaRegCalendarAlt, FaLink, FaTools } from "react-icons/fa";
 import { Manager } from "react-popper-2";
 import StoreHub from "../../storage/store";
 import UserService from "../../utilities/apiServices/UserService";
@@ -39,6 +39,7 @@ function ManagerHome() {
   const [isOpenExhibition, setIsOpenExhibition] = useState(false);
   const [isCloseRoom, setIsCloseRoom] = useState(false);
   const [isOpenRoom, setIsOpenRoom] = useState(false);
+  const [isOpenMedia, setIsOpenMedia] = useState(false);
   const [isDeleteRoom, setIsDeleteRoom] = useState(false);
   const [isOpenToggle, setIsOpenToggle] = useState(false);
   const [exhibition, setExhibition] = useState(undefined);
@@ -168,6 +169,15 @@ function ManagerHome() {
     setIsDeleteRoom(true);
   };
 
+  const openPopupCustomMedia = exhibitionId => {
+    setExhibitionId(exhibitionId);
+    setIsOpenMedia(true);
+  };
+
+  const closePopupCustomMedia = () => {
+    setIsOpenMedia(false);
+  };
+
   const deleteRoom = () => {
     setIsDeleteRoom(false);
   };
@@ -238,6 +248,13 @@ function ManagerHome() {
                   <div key={index} className={"items"}>
                     <span className="name-tour">{item.name}</span>
                     <img src={getSceneThumnail(item ? item.sceneId : undefined)} alt="" />
+                    <FaTools
+                      className="icon_edit_media"
+                      onClick={() => {
+                        openPopupCustomMedia(item.id);
+                      }}
+                      data-id-exhibition={item.id}
+                    />
                     <div className="content">
                       <div>
                         <span className="text-bold">{item?.room?.name}</span>
@@ -708,6 +725,56 @@ function ManagerHome() {
             ]}
             handleClose={() => {
               closePopupExhibition();
+            }}
+          />
+        )}
+
+        {isOpenMedia && (
+          <Popup
+            size={"xl"}
+            title={"Custom Media"}
+            content={
+              <>
+                <form className="create100-form validate-form d-flex form-custom-media" name="form">
+                  <div className="w-100">
+                    <div className="p-t-13 p-b-9">
+                      <div className="items">
+                        <div className="w-30">
+                          <img
+                            className="img"
+                            src="https://assets.website-files.com/6166f095fa2648fa044ae687/617504aa4f9dce2c12f49da4_embeding.jpg-0u5XFVh92xgWzs0qWjbuvb.jpeg"
+                          />
+                        </div>
+                        <div className="w-70">
+                          <div className="wrap-input100 validate-input">
+                            <input className="input100" type="text" name="name" placeholder="Name Tour" />
+                            <span className="focus-input100" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </>
+            }
+            actions={[
+              {
+                text: "Edit",
+                class: "btn-handle",
+                callback: () => {
+                  handelCustomMedia(exhibitionId);
+                }
+              },
+              {
+                text: "Cancel",
+                class: "btn-cancle",
+                callback: () => {
+                  closePopupCustomMedia();
+                }
+              }
+            ]}
+            handleClose={() => {
+              closePopupCustomMedia();
             }}
           />
         )}

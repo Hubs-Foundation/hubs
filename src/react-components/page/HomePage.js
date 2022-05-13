@@ -57,7 +57,7 @@ function Home() {
   const [filterExhibitionList, setfilterExhibitionList] = useState({
     page: 1,
     pageSize: 9,
-    sort: "startDate|asc" //format <attribute>|<order type>
+    sort: "startDate|desc" //format <attribute>|<order type>
   });
 
   function auth() {
@@ -199,7 +199,7 @@ function Home() {
 
   const sortNewest = () => {
     setfilterExhibitionList({
-      sort: "startDate|asc"
+      sort: "startDate|desc"
     });
     setIsActiveSortASC(true);
     setIsActiveSortDESC(false);
@@ -207,7 +207,7 @@ function Home() {
 
   const sortOldest = () => {
     setfilterExhibitionList({
-      sort: "startDate|desc"
+      sort: "startDate|asc"
     });
     setIsActiveSortASC(false);
     setIsActiveSortDESC(true);
