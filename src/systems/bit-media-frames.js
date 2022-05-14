@@ -1,4 +1,7 @@
-import { addObject3DComponent, MediaFrame, MediaFramePreviewClone, Held, Rigidbody } from "../utils/jsx-entity";
+// https://dev.reticulum.io/scenes/7vGnzkM/outdoor-meetup
+// A scene with media-frames
+import { addObject3DComponent, MediaFramePreviewClone, Held, Rigidbody } from "../utils/jsx-entity";
+import { MediaType } from "../utils/media-utils";
 import {
   addComponent,
   removeComponent,
@@ -9,8 +12,9 @@ import {
   exitQuery,
   hasComponent
 } from "bitecs";
-import { MediaType } from "../utils/media-utils";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
+import { MediaFrame, Owned } from "../bit-components";
+import { takeOwnership } from "./netcode";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
@@ -255,23 +259,41 @@ export const mediaFramesSystem = (() => {
     for (let i = 0; i < mediaFrames.length; i++) {
       const frameEid = mediaFrames[i];
 
-      // if should release, release
-      if (MediaFrame.capturedEntity[frameEid] && !isColliding(world, frameEid, MediaFrame.capturedEntity[frameEid])) {
-        // Captured entity might have been deleted
-        if (entityExists(world, MediaFrame.capturedEntity[frameEid])) {
-          setMatrixScale(
-            world.eid2obj.get(MediaFrame.capturedEntity[frameEid]),
-            MediaFrame.originalTargetScale[frameEid]
-          );
-          physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "dynamic" });
-        }
+      // if the captured entity was deleted, release
+      if (
+        MediaFrame.capturedEntity[frameEid] &&
+        !entityExists(world, MediaFrame.capturedEntity[frameEid]) &&
+        hasComponent(world, Owned, frameEid)
+      ) {
+        MediaFrame.capturedEntity[frameEid] = 0;
+      }
+
+      // release if we need to
+      if (
+        MediaFrame.capturedEntity[frameEid] &&
+        hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid]) &&
+        !isColliding(world, frameEid, MediaFrame.capturedEntity[frameEid])
+      ) {
+        setMatrixScale(
+          world.eid2obj.get(MediaFrame.capturedEntity[frameEid]),
+          MediaFrame.originalTargetScale[frameEid]
+        );
+        physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "dynamic" });
+
+        takeOwnership(world, frameEid);
         MediaFrame.capturedEntity[frameEid] = 0;
       }
 
       // if should capture, capture
       if (!MediaFrame.capturedEntity[frameEid]) {
         const thingToCapture = getCapturableEntity(world, frameEid);
-        if (thingToCapture && !hasComponent(world, Held, thingToCapture)) {
+        if (
+          thingToCapture &&
+          hasComponent(world, Owned, thingToCapture) &&
+          !hasComponent(world, Held, thingToCapture)
+        ) {
+          takeOwnership(world, frameEid);
+
           MediaFrame.capturedEntity[frameEid] = thingToCapture;
           const capturableObj = world.eid2obj.get(thingToCapture);
           capturableObj.updateMatrices();
@@ -290,7 +312,11 @@ export const mediaFramesSystem = (() => {
       }
 
       // Snap if we dropped the captured thing
-      if (droppedThisFrame(world, MediaFrame.capturedEntity[frameEid])) {
+      if (
+        MediaFrame.capturedEntity[frameEid] &&
+        hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid]) &&
+        droppedThisFrame(world, MediaFrame.capturedEntity[frameEid])
+      ) {
         snapToFrame(
           world,
           frameEid,
@@ -300,7 +326,7 @@ export const mediaFramesSystem = (() => {
         physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "kinematic" });
       }
 
-      // display the state
+      // Display the state
       const capturableEid = MediaFrame.capturedEntity[frameEid] || getCapturableEntity(world, frameEid);
       const shouldPreviewBeVisible = capturableEid && hasComponent(world, Held, capturableEid);
       if (shouldPreviewBeVisible && !MediaFrame.preview[frameEid]) showPreview(world, frameEid, capturableEid);
@@ -315,6 +341,7 @@ export const mediaFramesSystem = (() => {
       );
       frameObj.visible = !!(MediaFrame.mediaType[frameEid] & heldMask);
 
+      // TODO: Animation mixers should not be handled here
       // Tick animation mixers for preview
       const previewEid = MediaFrame.preview[frameEid];
       // TODO: We need to get the child because the animation mixer is on the mesh, not the parent group

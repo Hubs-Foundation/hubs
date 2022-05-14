@@ -91,7 +91,6 @@ export function createElementEntity(tag, attrs, ...children) {
 
 import { hasComponent, addComponent, addEntity, removeEntity, defineComponent, Types } from "bitecs";
 
-export const Networked = defineComponent({ templateId: Types.ui8, networkId: Types.ui8, flags: Types.ui8 });
 export const Object3DTag = defineComponent();
 export const Spin = defineComponent({ x: Types.f32, y: Types.f32, z: Types.f32 });
 export const CursorRaycastable = defineComponent();
@@ -110,13 +109,6 @@ export const HeldRightRemote = defineComponent();
 export const HeldLeftRemote = defineComponent();
 export const Held = defineComponent();
 export const Snapped = defineComponent();
-export const MediaFrame = defineComponent({
-  mediaType: Types.ui8,
-  capturedEntity: Types.eid,
-  bounds: [Types.f32, 3],
-  originalTargetScale: [Types.f32, 3],
-  preview: Types.eid
-});
 export const MediaFramePreviewClone = defineComponent({
   preview: Types.eid
 });
@@ -146,14 +138,6 @@ export const NETWORK_FLAGS = {
 
 let networkId = 1;
 
-export function createNetworkedEntity(world, templateId, eid = addEntity(world)) {
-  world.networkSchemas[templateId].addEntity(world, eid);
-  addComponent(world, Networked, eid);
-  Networked.networkId[eid] = networkId++;
-  Networked.templateId[eid] = templateId;
-  return eid;
-}
-
 export function addObject3DComponent(world, eid, obj) {
   if (hasComponent(APP.world, Object3DTag, eid)) {
     throw new Error("Tried to an object3D tag to an entity that already has one");
@@ -165,6 +149,7 @@ export function addObject3DComponent(world, eid, obj) {
     removeEntity(world, eid);
     // TODO should probably happen in a system that looks for Object3DTag component removal
     world.eid2obj.delete(eid);
+
     obj.eid = null;
   });
   return eid;

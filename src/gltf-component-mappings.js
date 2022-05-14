@@ -5,6 +5,10 @@ import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
+import { renderAsAframeEntity } from "./utils/jsx-entity";
+import { Networked, Owned } from "./bit-components";
+import { addComponent } from "bitecs";
+import { takeOwnership, TEMPLATE_ID_MEDIA_FRAME } from "./systems/netcode";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
@@ -121,13 +125,27 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
   el.setAttribute("waypoint", componentData);
 });
 
+import { createElementEntity } from "./utils/jsx-entity";
+import qsTruthy from "./utils/qs_truthy";
+/** @jsx createElementEntity */
+let netId = 1;
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, componentName, componentData, components) => {
-  const entity = NAF.createNetworkedEntity("#interactable-media-frame", componentData, {
-    owner: "scene",
-    persistent: true,
-    networkId: components.networked.id
-  });
-  el.appendChild(entity);
+  const obj = renderAsAframeEntity(<entity media-frame={componentData} />, APP.world);
+  const eid = obj.eid;
+
+  addComponent(APP.world, Networked, eid);
+  const netId = "parent1.media-frame-" + el.object3D.children[0].userData.gltfIndex;
+  APP.world.eid2nid.set(eid, netId);
+  APP.world.nid2eid.set(netId, eid);
+  Networked.templateId[eid] = TEMPLATE_ID_MEDIA_FRAME;
+
+  console.log(el.object3D);
+
+  // if (qsTruthy("host")) {
+  //   takeOwnership(APP.world, eid);
+  // }
+
+  el.object3D.add(obj);
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {

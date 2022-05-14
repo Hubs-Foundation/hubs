@@ -3,10 +3,10 @@ import MediaSearchStore from "./storage/media-search-store";
 import qsTruthy from "./utils/qs_truthy";
 import { addEntity, createWorld, defineQuery, enterQuery, exitQuery, hasComponent, pipe } from "bitecs";
 
+import { Networked, Owned } from "./bit-components";
 import {
   Spin,
   Object3DTag,
-  Networked,
   NETWORK_FLAGS,
   RemoteHoverTarget,
   CursorRaycastable,
@@ -112,85 +112,11 @@ const physicsCompatSystem = world => {
   return world;
 };
 
-const pendingNetworkData = [];
-NAF.connection.subscribeToDataChannel("test", function(_, _dataType, data) {
-  pendingNetworkData.push(data);
-});
-
 let lasteNetworkTick = 0;
 const networkedQuery = defineQuery([Networked]);
-const networkSystem = world => {
-  if (world.time.elapsed - lasteNetworkTick < 1000) {
-    return world;
-  }
-  lasteNetworkTick = world.time.elapsed;
-
-  // for (let i = 0; i < pendingNetworkData.length; i++) {
-  //   const deserializedEids = world.networkSchemas[0].deserialize(pendingNetworkData[i]);
-  //   for (let j = 0; j < deserializedEids.length; j++) {
-  //     const eid = deserializedEids[j];
-  //     if (hasComponent(world, Networked, eid) && !Networked.flags[eid] & NETWORK_FLAGS.INFLATED) {
-  //       const eid = world.networkSchemas[Networked.templateId[eid]].addEntity(world, eid);
-  //       const obj = world.eid2obj.get(eid);
-  //       world.scene.add(obj);
-  //       Networked.flags[eid] &= NETWORK_FLAGS.INFLATED & NETWORK_FLAGS.IS_REMOTE_ENTITY;
-  //       console.log("inflated", Networked.flags[eid], obj);
-  //     }
-  //   }
-  // }
-  // pendingNetworkData.length = 0;
-
-  for (let i = 0; i < pendingNetworkData.length; i++) {
-    const templateDatas = pendingNetworkData[i];
-    const schema = world.networkSchemas[i];
-    for (let j = 0; j < templateDatas.length; j++) {
-      const entityDatas = templateDatas[j];
-      if (entityDatas) {
-        const netIds = Object.keys(entityDatas);
-        for (let k = 0; k < netIds.length; k++) {
-          const netId = netIds[k];
-          const entityData = entityDatas[netId];
-          let eid = world.netIdToEid.get(netId);
-          if (eid === undefined) {
-            eid = schema.addEntity(world);
-            world.scene.add(world.eid2obj.get(eid));
-            world.netIdToEid.set(netId, eid);
-            console.log(`New network entity ${netId} -> ${eid}`);
-          }
-          console.log(`Got data for ${netId} -> ${eid}`, entityData);
-          schema.deserialize(world, eid, entityData);
-        }
-      }
-    }
-  }
-  pendingNetworkData.length = 0;
-
-  const entities = networkedQuery(world);
-
-  const data = [];
-  let haveData = false;
-
-  for (let i = 0; i < entities.length; i++) {
-    const eid = entities[i];
-    const netId = Networked.networkId[eid];
-    const schemaId = Networked.templateId[eid];
-    const schema = world.networkSchemas[schemaId];
-    const schemaData = data[schemaId] || {};
-    schemaData[netId] = schema.serialize(world, eid);
-    data[schemaId] = schemaData;
-    haveData = true;
-  }
-  if (haveData) {
-    NAF.connection.broadcastData("test", data);
-    console.log(data);
-  }
-
-  return world;
-};
 
 const pipeline = pipe(
   timeSystem,
-  networkSystem,
   physicsCompatSystem,
   spinSystem
 );
@@ -219,17 +145,22 @@ export class App {
 
     this.world = createWorld();
     this.world.eid2obj = new Map(); // eid -> Object3D
+    this.world.eid2nid = new Map();
+    this.world.nid2eid = new Map();
+
+    window.$o = eid => {
+      this.world.eid2obj.get(eid);
+    };
 
     // reserve entity 0 to avoid needing to check for undefined everywhere eid is checked for existance
     addEntity(this.world);
-
-    this.world.netIdToEid = new Map();
 
     // used for JSX and GLTFs
     this.world.nameToComponent = {
       object3d: Object3DTag,
       spin: Spin,
       networked: Networked,
+      owned: Owned,
       "cursor-raycastable": CursorRaycastable,
       "remote-hover-target": RemoteHoverTarget,
       holdable: Holdable,

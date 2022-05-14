@@ -157,8 +157,9 @@ export const addMedia = (
 
   const entity = document.createElement("a-entity");
 
+  const nid = NAF.utils.createNetworkId();
   if (networked) {
-    entity.setAttribute("networked", { template: template });
+    entity.setAttribute("networked", { template: template, networkId: nid });
   } else {
     const templateBody = document
       .importNode(document.body.querySelector(template).content, true)

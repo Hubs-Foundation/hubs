@@ -31,7 +31,7 @@ AFRAME.registerComponent("duck", {
         const angle = Math.random() * Math.PI * 2;
         const x = Math.cos(angle);
         const z = Math.sin(angle);
-        entity.setAttribute("body-helper", { gravity: { x, y: force, z } });
+        // entity.setAttribute("body-helper", { gravity: { x, y: force, z } });
       }
     }
   }
