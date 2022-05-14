@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
-import { Networked, Owned, MediaFrame } from "../bit-components";
+import { NetworkedMediaFrame, Networked, Owned, MediaFrame } from "../bit-components";
 
 const networkedObjectsQuery = defineQuery([Networked]);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
@@ -22,28 +22,14 @@ const schemas = {
     },
 
     deserialize(world, frameEid, update) {
-      if (update.capturedEntity && !world.nid2eid.has(update.capturedEntity)) {
-        console.error("I don't know about this entity...");
-        // TODO: Hold onto this update and reconsider it later
-        return;
-      }
+      // TODO: Hold onto updates if we can't apply them yet,
+      // like if we don't know about the captured entity
 
-      const newCapturedEid = update.capturedEntity ? world.nid2eid.get(update.capturedEntity) : 0; // TODO: nid / eid / 0 conversion
-      if (
-        MediaFrame.capturedEntity[frameEid] &&
-        MediaFrame.capturedEntity[frameEid] !== newCapturedEid &&
-        hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid])
-      ) {
-        // The captured entity changed... I need to pop the old one out
-        setMatrixScale(
-          world.eid2obj.get(MediaFrame.capturedEntity[frameEid]),
-          MediaFrame.originalTargetScale[frameEid]
-        );
-        physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "dynamic" });
-      }
-
-      MediaFrame.capturedEntity[frameEid] = newCapturedEid;
-      MediaFrame.originalTargetScale[frameEid].set(update.originalTargetScale);
+      addComponent(world, NetworkedMediaFrame, frameEid);
+      NetworkedMediaFrame.capturedEntity[frameEid] = update.capturedEntity
+        ? world.nid2eid.get(update.capturedEntity)
+        : 0;
+      NetworkedMediaFrame.originalTargetScale[frameEid].set(update.originalTargetScale);
     }
   }
 };

@@ -13,7 +13,7 @@ import {
   hasComponent
 } from "bitecs";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
-import { MediaFrame, Owned } from "../bit-components";
+import { NetworkedMediaFrame, MediaFrame, Owned } from "../bit-components";
 import { takeOwnership } from "./netcode";
 
 const EMPTY_COLOR = 0x6fc0fd;
@@ -233,21 +233,117 @@ function hidePreview(world, frameEid) {
   MediaFrame.preview[frameEid] = 0;
 }
 
-export const mediaFramesSystem = (() => {
-  const heldQuery = defineQuery([Held]);
-  const droppedQuery = exitQuery(heldQuery);
-  function droppedThisFrame(world, eid) {
-    const dropped = droppedQuery(world);
-    for (let i = 0; i < dropped.length; i++) {
-      if (dropped[i] === eid) return true;
-    }
-    return false;
+function step(world, frameEid) {
+  if (hasComponent(world, NetworkedMediaFrame, frameEid)) {
+    const state = {
+      newCapturedEntity: NetworkedMediaFrame.capturedEntity[frameEid],
+      newOriginalTargetScale: Array.from(NetworkedMediaFrame.originalTargetScale[frameEid])
+    };
+    removeComponent(world, NetworkedMediaFrame, frameEid);
+    return state;
   }
 
+  if (
+    MediaFrame.capturedEntity[frameEid] &&
+    !entityExists(world, MediaFrame.capturedEntity[frameEid]) &&
+    hasComponent(world, Owned, frameEid)
+  ) {
+    return { newCapturedEntity: 0, newOriginalTargetScale: [0, 0, 0] };
+  }
+
+  if (
+    MediaFrame.capturedEntity[frameEid] &&
+    hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid]) &&
+    !isColliding(world, frameEid, MediaFrame.capturedEntity[frameEid])
+  ) {
+    return { newCapturedEntity: 0, newOriginalTargetScale: [0, 0, 0] };
+  }
+
+  if (!MediaFrame.capturedEntity[frameEid]) {
+    const thingToCapture = getCapturableEntity(world, frameEid);
+    if (thingToCapture && hasComponent(world, Owned, thingToCapture) && !hasComponent(world, Held, thingToCapture)) {
+      const capturableObj = world.eid2obj.get(thingToCapture);
+      capturableObj.updateMatrices();
+      const newOriginalTargetScale = [0, 0, 0];
+      new THREE.Vector3().setFromMatrixScale(capturableObj.matrixWorld).toArray(newOriginalTargetScale);
+      return { newCapturedEntity: thingToCapture, newOriginalTargetScale };
+    }
+  }
+
+  // NO CHANGE!
+  return {
+    newCapturedEntity: MediaFrame.capturedEntity[frameEid],
+    newOriginalTargetScale: Array.from(MediaFrame.originalTargetScale[frameEid])
+  };
+}
+
+const heldQuery = defineQuery([Held]);
+const droppedQuery = exitQuery(heldQuery);
+function droppedThisFrame(world, eid) {
+  const dropped = droppedQuery(world);
+  for (let i = 0; i < dropped.length; i++) {
+    if (dropped[i] === eid) return true;
+  }
+  return false;
+}
+
+export function apply(world, frameEid, { newCapturedEntity, newOriginalTargetScale }) {
+  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+
+  if (newCapturedEntity === MediaFrame.capturedEntity[frameEid]) {
+    // Snap if we dropped the captured thing
+    if (
+      MediaFrame.capturedEntity[frameEid] &&
+      hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid]) &&
+      droppedThisFrame(world, MediaFrame.capturedEntity[frameEid])
+    ) {
+      snapToFrame(
+        world,
+        frameEid,
+        MediaFrame.capturedEntity[frameEid],
+        world.eid2obj.get(MediaFrame.capturedEntity[frameEid]).el.getObject3D("mesh")
+      );
+      physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "kinematic" });
+    }
+  } else {
+    // Remove the old on if needed
+    if (MediaFrame.capturedEntity[frameEid] && entityExists(world, MediaFrame.capturedEntity[frameEid])) {
+      setMatrixScale(world.eid2obj.get(MediaFrame.capturedEntity[frameEid]), MediaFrame.originalTargetScale[frameEid]);
+      physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "dynamic" });
+    }
+
+    // Capture the new one if needed
+    if (newCapturedEntity) {
+      takeOwnership(world, frameEid);
+      snapToFrame(world, frameEid, newCapturedEntity, world.eid2obj.get(newCapturedEntity).el.getObject3D("mesh"));
+      physicsSystem.updateBodyOptions(Rigidbody.bodyId[newCapturedEntity], { type: "kinematic" });
+    }
+  }
+
+  MediaFrame.capturedEntity[frameEid] = newCapturedEntity;
+  MediaFrame.originalTargetScale[frameEid] = newOriginalTargetScale;
+}
+
+export function display(world, frameEid, heldMask) {
+  // Display the state
+  const capturableEid = MediaFrame.capturedEntity[frameEid] || getCapturableEntity(world, frameEid);
+  const shouldPreviewBeVisible = capturableEid && hasComponent(world, Held, capturableEid);
+  if (shouldPreviewBeVisible && !MediaFrame.preview[frameEid]) showPreview(world, frameEid, capturableEid);
+  if (!shouldPreviewBeVisible && MediaFrame.preview[frameEid]) hidePreview(world, frameEid);
+  const frameObj = world.eid2obj.get(frameEid);
+  frameObj.material.uniforms.color.value.set(
+    capturableEid && hasComponent(world, Held, capturableEid)
+      ? HOVER_COLOR
+      : MediaFrame.capturedEntity[frameEid]
+        ? FULL_COLOR
+        : EMPTY_COLOR
+  );
+  frameObj.visible = !!(MediaFrame.mediaType[frameEid] & heldMask);
+}
+
+export const mediaFramesSystem = (() => {
   const mediaFramesQuery = defineQuery([MediaFrame]);
   return function mediaFramesSystem(world) {
-    const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-
     const heldEids = heldQuery(world);
     let heldMask = 0;
     for (let i = 0; i < heldEids.length; i++) {
@@ -259,87 +355,9 @@ export const mediaFramesSystem = (() => {
     for (let i = 0; i < mediaFrames.length; i++) {
       const frameEid = mediaFrames[i];
 
-      // if the captured entity was deleted, release
-      if (
-        MediaFrame.capturedEntity[frameEid] &&
-        !entityExists(world, MediaFrame.capturedEntity[frameEid]) &&
-        hasComponent(world, Owned, frameEid)
-      ) {
-        MediaFrame.capturedEntity[frameEid] = 0;
-      }
-
-      // release if we need to
-      if (
-        MediaFrame.capturedEntity[frameEid] &&
-        hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid]) &&
-        !isColliding(world, frameEid, MediaFrame.capturedEntity[frameEid])
-      ) {
-        setMatrixScale(
-          world.eid2obj.get(MediaFrame.capturedEntity[frameEid]),
-          MediaFrame.originalTargetScale[frameEid]
-        );
-        physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "dynamic" });
-
-        takeOwnership(world, frameEid);
-        MediaFrame.capturedEntity[frameEid] = 0;
-      }
-
-      // if should capture, capture
-      if (!MediaFrame.capturedEntity[frameEid]) {
-        const thingToCapture = getCapturableEntity(world, frameEid);
-        if (
-          thingToCapture &&
-          hasComponent(world, Owned, thingToCapture) &&
-          !hasComponent(world, Held, thingToCapture)
-        ) {
-          takeOwnership(world, frameEid);
-
-          MediaFrame.capturedEntity[frameEid] = thingToCapture;
-          const capturableObj = world.eid2obj.get(thingToCapture);
-          capturableObj.updateMatrices();
-          new THREE.Vector3()
-            .setFromMatrixScale(capturableObj.matrixWorld)
-            .toArray(MediaFrame.originalTargetScale[frameEid]);
-
-          snapToFrame(
-            world,
-            frameEid,
-            MediaFrame.capturedEntity[frameEid],
-            world.eid2obj.get(MediaFrame.capturedEntity[frameEid]).el.getObject3D("mesh")
-          );
-          physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "kinematic" });
-        }
-      }
-
-      // Snap if we dropped the captured thing
-      if (
-        MediaFrame.capturedEntity[frameEid] &&
-        hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid]) &&
-        droppedThisFrame(world, MediaFrame.capturedEntity[frameEid])
-      ) {
-        snapToFrame(
-          world,
-          frameEid,
-          MediaFrame.capturedEntity[frameEid],
-          world.eid2obj.get(MediaFrame.capturedEntity[frameEid]).el.getObject3D("mesh")
-        );
-        physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "kinematic" });
-      }
-
-      // Display the state
-      const capturableEid = MediaFrame.capturedEntity[frameEid] || getCapturableEntity(world, frameEid);
-      const shouldPreviewBeVisible = capturableEid && hasComponent(world, Held, capturableEid);
-      if (shouldPreviewBeVisible && !MediaFrame.preview[frameEid]) showPreview(world, frameEid, capturableEid);
-      if (!shouldPreviewBeVisible && MediaFrame.preview[frameEid]) hidePreview(world, frameEid);
-      const frameObj = world.eid2obj.get(frameEid);
-      frameObj.material.uniforms.color.value.set(
-        capturableEid && hasComponent(world, Held, capturableEid)
-          ? HOVER_COLOR
-          : MediaFrame.capturedEntity[frameEid]
-            ? FULL_COLOR
-            : EMPTY_COLOR
-      );
-      frameObj.visible = !!(MediaFrame.mediaType[frameEid] & heldMask);
+      const state = step(world, frameEid);
+      apply(world, frameEid, state);
+      display(world, frameEid, heldMask);
 
       // TODO: Animation mixers should not be handled here
       // Tick animation mixers for preview
