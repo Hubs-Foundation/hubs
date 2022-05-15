@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
-import { NetworkedMediaFrame, Networked, Owned, MediaFrame } from "../bit-components";
+import { FrameUpdate, Networked, Owned, MediaFrame } from "../bit-components";
 
 const networkedObjectsQuery = defineQuery([Networked]);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
@@ -24,11 +24,11 @@ const schemas = {
     },
 
     deserialize(world, frameEid, update) {
-      addComponent(world, NetworkedMediaFrame, frameEid);
-      NetworkedMediaFrame.isFull[frameEid] = update.isFull;
+      addComponent(world, FrameUpdate, frameEid);
+      FrameUpdate.isFull[frameEid] = update.isFull;
       // If we don't have an eid for this nid, set it to zero for now.
-      NetworkedMediaFrame.captured[frameEid] = (update.captured && world.nid2eid.get(update.captured)) || 0;
-      NetworkedMediaFrame.scale[frameEid].set(update.scale);
+      FrameUpdate.captured[frameEid] = (update.captured && world.nid2eid.get(update.captured)) || 0;
+      FrameUpdate.scale[frameEid].set(update.scale);
 
       // Re-enqueue this update if we did not have an eid for this nid.
       return update.captured && !world.nid2eid.has(update.captured);

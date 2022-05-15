@@ -1,5 +1,5 @@
 import { addObject3DComponent, Rigidbody, PhysicsShape } from "./utils/jsx-entity";
-import { MediaFrame, DesiredMediaFrame } from "./bit-components";
+import { MediaFrame } from "./bit-components";
 import { addComponent } from "bitecs";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 import { MediaType } from "./utils/media-utils";
@@ -44,7 +44,6 @@ export function inflateMediaFrame(world, eid, componentProps) {
   // TODO: This is a hack around the physics system addBody call requiring its body to have parent
   guide.parent = new THREE.Group();
   addObject3DComponent(world, eid, guide);
-  addComponent(world, DesiredMediaFrame, eid, true);
   addComponent(world, MediaFrame, eid, true);
   MediaFrame.mediaType[eid] = {
     all: MediaType.ALL,

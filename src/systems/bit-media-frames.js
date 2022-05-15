@@ -13,7 +13,7 @@ import {
   hasComponent
 } from "bitecs";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
-import { DesiredMediaFrame, NetworkedMediaFrame, MediaFrame, Owned } from "../bit-components";
+import { FrameUpdate, MediaFrame, Owned } from "../bit-components";
 import { takeOwnership } from "./netcode";
 
 const EMPTY_COLOR = 0x6fc0fd;
@@ -235,13 +235,9 @@ function hidePreview(world, frameEid) {
 
 const zero = [0, 0, 0];
 const vec3 = new THREE.Vector3();
-function step(world, frameEid) {
-  if (hasComponent(world, NetworkedMediaFrame, frameEid)) {
-    // Consume the network update
-    DesiredMediaFrame.captured[frameEid] = NetworkedMediaFrame.captured[frameEid];
-    DesiredMediaFrame.isFull[frameEid] = NetworkedMediaFrame.isFull[frameEid];
-    DesiredMediaFrame.scale[frameEid].set(NetworkedMediaFrame.scale[frameEid]);
-    removeComponent(world, NetworkedMediaFrame, frameEid);
+function maybeAddFrameUpdate(world, frameEid) {
+  if (hasComponent(world, FrameUpdate, frameEid)) {
+    // Nothing to do here. We need to apply the pending change
     return;
   }
 
@@ -251,9 +247,10 @@ function step(world, frameEid) {
     !entityExists(world, MediaFrame.captured[frameEid])
   ) {
     // Captured entity was deleted from my frame
-    DesiredMediaFrame.captured[frameEid] = 0;
-    DesiredMediaFrame.isFull[frameEid] = 0;
-    DesiredMediaFrame.scale[frameEid].set(zero);
+    addComponent(world, FrameUpdate, frameEid);
+    FrameUpdate.captured[frameEid] = 0;
+    FrameUpdate.isFull[frameEid] = 0;
+    FrameUpdate.scale[frameEid].set(zero);
     return;
   }
 
@@ -263,9 +260,10 @@ function step(world, frameEid) {
     !isColliding(world, frameEid, MediaFrame.captured[frameEid])
   ) {
     // My captured entity left the frame
-    DesiredMediaFrame.captured[frameEid] = 0;
-    DesiredMediaFrame.isFull[frameEid] = 0;
-    DesiredMediaFrame.scale[frameEid].set(zero);
+    addComponent(world, FrameUpdate, frameEid);
+    FrameUpdate.captured[frameEid] = 0;
+    FrameUpdate.isFull[frameEid] = 0;
+    FrameUpdate.scale[frameEid].set(zero);
     // TODO BUG: If an entity I do not own is captured by the media frame,
     //           and then I take ownership of the entity (by grabbing it),
     //           the physics system does not immediately notice the entity colliding with the frame,
@@ -277,11 +275,12 @@ function step(world, frameEid) {
     const capturable = getCapturableEntity(world, frameEid);
     if (capturable && hasComponent(world, Owned, capturable) && !hasComponent(world, Held, capturable)) {
       // Capture my entity
-      DesiredMediaFrame.captured[frameEid] = capturable;
-      DesiredMediaFrame.isFull[frameEid] = 1;
+      addComponent(world, FrameUpdate, frameEid);
+      FrameUpdate.captured[frameEid] = capturable;
+      FrameUpdate.isFull[frameEid] = 1;
       const obj = world.eid2obj.get(capturable);
       obj.updateMatrices();
-      vec3.setFromMatrixScale(obj.matrixWorld).toArray(DesiredMediaFrame.scale[frameEid]);
+      vec3.setFromMatrixScale(obj.matrixWorld).toArray(FrameUpdate.scale[frameEid]);
       return;
     }
   }
@@ -290,12 +289,14 @@ function step(world, frameEid) {
   return;
 }
 
-export function apply(world, frameEid) {
+export function applyFrameUpdate(world, frameEid) {
+  if (!hasComponent(world, FrameUpdate, frameEid)) return;
+
   // CAUTION: We cannot ONLY check whether the captured entity has changed, because
   //          we sometimes know a media frame is full without knowing what it captured.
   if (
-    DesiredMediaFrame.captured[frameEid] === MediaFrame.captured[frameEid] &&
-    DesiredMediaFrame.isFull[frameEid] === MediaFrame.isFull[frameEid]
+    FrameUpdate.captured[frameEid] === MediaFrame.captured[frameEid] &&
+    FrameUpdate.isFull[frameEid] === MediaFrame.isFull[frameEid]
   ) {
     // Nothing to do
     return;
@@ -313,23 +314,23 @@ export function apply(world, frameEid) {
     physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.captured[frameEid]], { type: "dynamic" });
   }
 
-  if (DesiredMediaFrame.captured[frameEid] && hasComponent(world, Owned, DesiredMediaFrame.captured[frameEid])) {
+  if (FrameUpdate.captured[frameEid] && hasComponent(world, Owned, FrameUpdate.captured[frameEid])) {
     // Capture my entity
     takeOwnership(world, frameEid);
     snapToFrame(
       world,
       frameEid,
-      DesiredMediaFrame.captured[frameEid],
-      world.eid2obj.get(DesiredMediaFrame.captured[frameEid]).el.getObject3D("mesh")
+      FrameUpdate.captured[frameEid],
+      world.eid2obj.get(FrameUpdate.captured[frameEid]).el.getObject3D("mesh")
     );
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[DesiredMediaFrame.captured[frameEid]], {
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[FrameUpdate.captured[frameEid]], {
       type: "kinematic"
     });
   }
 
-  MediaFrame.isFull[frameEid] = DesiredMediaFrame.isFull[frameEid];
-  MediaFrame.captured[frameEid] = DesiredMediaFrame.captured[frameEid];
-  MediaFrame.scale[frameEid].set(DesiredMediaFrame.scale[frameEid]);
+  MediaFrame.isFull[frameEid] = FrameUpdate.isFull[frameEid];
+  MediaFrame.captured[frameEid] = FrameUpdate.captured[frameEid];
+  MediaFrame.scale[frameEid].set(FrameUpdate.scale[frameEid]);
 }
 
 export function display(world, frameEid, heldMediaTypes) {
@@ -376,6 +377,7 @@ export function mediaFramesSystem(world) {
       hasComponent(world, Owned, MediaFrame.captured[frameEid]) &&
       droppedEntites.includes(MediaFrame.captured[frameEid])
     ) {
+      // I dropped my captured entity. Snap it back into place.
       snapToFrame(
         world,
         frameEid,
@@ -388,8 +390,12 @@ export function mediaFramesSystem(world) {
       );
     }
 
-    step(world, frameEid);
-    apply(world, frameEid);
+    maybeAddFrameUpdate(world, frameEid);
+    if (hasComponent(world, FrameUpdate, frameEid)) {
+      applyFrameUpdate(world, frameEid);
+      removeComponent(world, FrameUpdate, frameEid);
+    }
+
     display(world, frameEid, heldMediaTypes);
   }
 }
