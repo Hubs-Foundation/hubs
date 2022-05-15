@@ -19,7 +19,7 @@ const schemas = {
       updates.push({
         isFull: MediaFrame.isFull[eid],
         captured: MediaFrame.captured[eid] ? world.eid2nid.get(MediaFrame.captured[eid]) : 0,
-        originalTargetScale: Array.from(MediaFrame.originalTargetScale[eid])
+        scale: Array.from(MediaFrame.scale[eid])
       });
     },
 
@@ -28,7 +28,7 @@ const schemas = {
       NetworkedMediaFrame.isFull[frameEid] = update.isFull;
       // If we don't have an eid for this nid, set it to zero for now.
       NetworkedMediaFrame.captured[frameEid] = (update.captured && world.nid2eid.get(update.captured)) || 0;
-      NetworkedMediaFrame.originalTargetScale[frameEid].set(update.originalTargetScale);
+      NetworkedMediaFrame.scale[frameEid].set(update.scale);
 
       // Re-enqueue this update if we did not have an eid for this nid.
       return update.captured && !world.nid2eid.has(update.captured);

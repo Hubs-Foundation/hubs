@@ -237,10 +237,10 @@ const zero = [0, 0, 0];
 const vec3 = new THREE.Vector3();
 function step(world, frameEid) {
   if (hasComponent(world, NetworkedMediaFrame, frameEid)) {
-    // Should consume network state
+    // Consume the network update
     DesiredMediaFrame.captured[frameEid] = NetworkedMediaFrame.captured[frameEid];
     DesiredMediaFrame.isFull[frameEid] = NetworkedMediaFrame.isFull[frameEid];
-    DesiredMediaFrame.originalTargetScale[frameEid].set(NetworkedMediaFrame.originalTargetScale[frameEid]);
+    DesiredMediaFrame.scale[frameEid].set(NetworkedMediaFrame.scale[frameEid]);
     removeComponent(world, NetworkedMediaFrame, frameEid);
     return;
   }
@@ -253,7 +253,7 @@ function step(world, frameEid) {
     // Captured entity was deleted from my frame
     DesiredMediaFrame.captured[frameEid] = 0;
     DesiredMediaFrame.isFull[frameEid] = 0;
-    DesiredMediaFrame.originalTargetScale[frameEid].set(zero);
+    DesiredMediaFrame.scale[frameEid].set(zero);
     return;
   }
 
@@ -265,7 +265,7 @@ function step(world, frameEid) {
     // My captured entity left the frame
     DesiredMediaFrame.captured[frameEid] = 0;
     DesiredMediaFrame.isFull[frameEid] = 0;
-    DesiredMediaFrame.originalTargetScale[frameEid].set(zero);
+    DesiredMediaFrame.scale[frameEid].set(zero);
     // TODO BUG: If an entity I do not own is captured by the media frame,
     //           and then I take ownership of the entity (by grabbing it),
     //           the physics system does not immediately notice the entity colliding with the frame,
@@ -281,7 +281,7 @@ function step(world, frameEid) {
       DesiredMediaFrame.isFull[frameEid] = 1;
       const obj = world.eid2obj.get(capturable);
       obj.updateMatrices();
-      vec3.setFromMatrixScale(obj.matrixWorld).toArray(DesiredMediaFrame.originalTargetScale[frameEid]);
+      vec3.setFromMatrixScale(obj.matrixWorld).toArray(DesiredMediaFrame.scale[frameEid]);
       return;
     }
   }
@@ -309,7 +309,7 @@ export function apply(world, frameEid) {
     hasComponent(world, Owned, MediaFrame.captured[frameEid])
   ) {
     // Remove my captured entity from the frame and restore its original scale
-    setMatrixScale(world.eid2obj.get(MediaFrame.captured[frameEid]), MediaFrame.originalTargetScale[frameEid]);
+    setMatrixScale(world.eid2obj.get(MediaFrame.captured[frameEid]), MediaFrame.scale[frameEid]);
     physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.captured[frameEid]], { type: "dynamic" });
   }
 
@@ -329,12 +329,11 @@ export function apply(world, frameEid) {
 
   MediaFrame.isFull[frameEid] = DesiredMediaFrame.isFull[frameEid];
   MediaFrame.captured[frameEid] = DesiredMediaFrame.captured[frameEid];
-  MediaFrame.originalTargetScale[frameEid].set(DesiredMediaFrame.originalTargetScale[frameEid]);
+  MediaFrame.scale[frameEid].set(DesiredMediaFrame.scale[frameEid]);
 }
 
 export function display(world, frameEid, heldMediaTypes) {
   // Display the state
-
   const capturable = !MediaFrame.isFull[frameEid] && getCapturableEntity(world, frameEid);
   const shouldPreviewBeVisible = capturable && hasComponent(world, Held, capturable);
   if (shouldPreviewBeVisible && !MediaFrame.preview[frameEid]) showPreview(world, frameEid, capturable);
