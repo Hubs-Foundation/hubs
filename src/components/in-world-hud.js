@@ -10,6 +10,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn = this.el.querySelector(".spawn");
     this.pen = this.el.querySelector(".penhud");
     this.cameraBtn = this.el.querySelector(".camera-btn");
+    this.flyBtn = this.el.querySelector(".fly");
     this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
@@ -22,6 +23,7 @@ AFRAME.registerComponent("in-world-hud", {
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
       this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
       this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
+      this.flyBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("flying"));
       if (window.APP.hubChannel) {
         this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
         this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
@@ -30,7 +32,8 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onStateChange = evt => {
-      if (!(evt.detail === "frozen" || evt.detail === "pen" || evt.detail === "camera")) return;
+      if (!(evt.detail === "frozen" || evt.detail === "pen" || evt.detail === "camera" || evt.detail === "flying"))
+        return;
       this.updateButtonStates();
     };
 
@@ -54,6 +57,17 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("action_toggle_camera");
     };
 
+    this.onFlyClick = () => {
+      if (!window.APP.hubChannel.can("fly")) return;
+      const isFlying = this.el.sceneEl.systems["hubs-systems"].characterController.fly;
+      if (!isFlying) {
+        this.el.sceneEl.addState("flying");
+      } else {
+        this.el.sceneEl.removeState("flying");
+      }
+      this.el.sceneEl.systems["hubs-systems"].characterController.enableFly(!isFlying);
+    };
+
     this.onInviteClick = () => {
       this.el.emit("action_invite");
     };
@@ -74,6 +88,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
     this.pen.object3D.addEventListener("interact", this.onPenClick);
     this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
+    this.flyBtn.object3D.addEventListener("interact", this.onFlyClick);
     this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
@@ -87,6 +102,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);
     this.pen.object3D.removeEventListener("interact", this.onPenClick);
     this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
+    this.flyBtn.object3D.removeEventListener("interact", this.onFlyClick);
     this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });
