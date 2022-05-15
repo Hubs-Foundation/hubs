@@ -16,7 +16,7 @@ const schemas = {
     },
     serialize(world, eid, updates) {
       updates.push({
-        capturedEntity: MediaFrame.capturedEntity[eid] ? world.eid2nid.get(MediaFrame.capturedEntity[eid]) : 0, // TODO: nid / eid / 0 conversion
+        captured: MediaFrame.captured[eid] ? world.eid2nid.get(MediaFrame.captured[eid]) : 0, // TODO: nid / eid / 0 conversion
         originalTargetScale: Array.from(MediaFrame.originalTargetScale[eid])
       });
     },
@@ -26,8 +26,8 @@ const schemas = {
       // like if we don't know about the captured entity
 
       addComponent(world, NetworkedMediaFrame, frameEid);
-      NetworkedMediaFrame.capturedEntity[frameEid] = update.capturedEntity
-        ? world.nid2eid.get(update.capturedEntity)
+      NetworkedMediaFrame.captured[frameEid] = update.captured
+        ? world.nid2eid.get(update.captured)
         : 0;
       NetworkedMediaFrame.originalTargetScale[frameEid].set(update.originalTargetScale);
     }

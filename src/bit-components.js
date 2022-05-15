@@ -5,7 +5,7 @@ export const Owned = defineComponent();
 
 const MediaFrameShape = {
   isFull: Types.ui8,
-  capturedEntity: Types.eid,
+  captured: Types.eid,
   originalTargetScale: [Types.f32, 3]
 };
 export const NetworkedMediaFrame = defineComponent(MediaFrameShape);

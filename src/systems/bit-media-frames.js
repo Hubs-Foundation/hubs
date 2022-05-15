@@ -238,7 +238,7 @@ const vec3 = new THREE.Vector3();
 function step(world, frameEid) {
   if (hasComponent(world, NetworkedMediaFrame, frameEid)) {
     // Should consume network state
-    DesiredMediaFrame.capturedEntity[frameEid] = NetworkedMediaFrame.capturedEntity[frameEid];
+    DesiredMediaFrame.captured[frameEid] = NetworkedMediaFrame.captured[frameEid];
     DesiredMediaFrame.isFull[frameEid] = NetworkedMediaFrame.isFull[frameEid];
     DesiredMediaFrame.originalTargetScale[frameEid].set(NetworkedMediaFrame.originalTargetScale[frameEid]);
     removeComponent(world, NetworkedMediaFrame, frameEid);
@@ -246,24 +246,24 @@ function step(world, frameEid) {
   }
 
   if (
-    MediaFrame.capturedEntity[frameEid] &&
+    MediaFrame.captured[frameEid] &&
     hasComponent(world, Owned, frameEid) &&
-    !entityExists(world, MediaFrame.capturedEntity[frameEid])
+    !entityExists(world, MediaFrame.captured[frameEid])
   ) {
     // Captured entity was deleted from my frame
-    DesiredMediaFrame.capturedEntity[frameEid] = 0;
+    DesiredMediaFrame.captured[frameEid] = 0;
     DesiredMediaFrame.isFull[frameEid] = 0;
     DesiredMediaFrame.originalTargetScale[frameEid].set(zero);
     return;
   }
 
   if (
-    MediaFrame.capturedEntity[frameEid] &&
-    hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid]) &&
-    !isColliding(world, frameEid, MediaFrame.capturedEntity[frameEid])
+    MediaFrame.captured[frameEid] &&
+    hasComponent(world, Owned, MediaFrame.captured[frameEid]) &&
+    !isColliding(world, frameEid, MediaFrame.captured[frameEid])
   ) {
     // My captured entity left the frame
-    DesiredMediaFrame.capturedEntity[frameEid] = 0;
+    DesiredMediaFrame.captured[frameEid] = 0;
     DesiredMediaFrame.isFull[frameEid] = 0;
     DesiredMediaFrame.originalTargetScale[frameEid].set(zero);
     // TODO BUG: If an entity I do not own is captured by the media frame,
@@ -277,7 +277,7 @@ function step(world, frameEid) {
     const capturable = getCapturableEntity(world, frameEid);
     if (capturable && hasComponent(world, Owned, capturable) && !hasComponent(world, Held, capturable)) {
       // Capture my entity
-      DesiredMediaFrame.capturedEntity[frameEid] = capturable;
+      DesiredMediaFrame.captured[frameEid] = capturable;
       DesiredMediaFrame.isFull[frameEid] = 1;
       const obj = world.eid2obj.get(capturable);
       obj.updateMatrices();
@@ -294,7 +294,7 @@ export function apply(world, frameEid) {
   // CAUTION: We cannot ONLY check whether the captured entity has changed, because
   //          we sometimes know a media frame is full without knowing what it captured.
   if (
-    DesiredMediaFrame.capturedEntity[frameEid] === MediaFrame.capturedEntity[frameEid] &&
+    DesiredMediaFrame.captured[frameEid] === MediaFrame.captured[frameEid] &&
     DesiredMediaFrame.isFull[frameEid] === MediaFrame.isFull[frameEid]
   ) {
     // Nothing to do
@@ -304,34 +304,31 @@ export function apply(world, frameEid) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
 
   if (
-    MediaFrame.capturedEntity[frameEid] &&
-    entityExists(world, MediaFrame.capturedEntity[frameEid]) &&
-    hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid])
+    MediaFrame.captured[frameEid] &&
+    entityExists(world, MediaFrame.captured[frameEid]) &&
+    hasComponent(world, Owned, MediaFrame.captured[frameEid])
   ) {
     // Remove my captured entity from the frame and restore its original scale
-    setMatrixScale(world.eid2obj.get(MediaFrame.capturedEntity[frameEid]), MediaFrame.originalTargetScale[frameEid]);
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]], { type: "dynamic" });
+    setMatrixScale(world.eid2obj.get(MediaFrame.captured[frameEid]), MediaFrame.originalTargetScale[frameEid]);
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.captured[frameEid]], { type: "dynamic" });
   }
 
-  if (
-    DesiredMediaFrame.capturedEntity[frameEid] &&
-    hasComponent(world, Owned, DesiredMediaFrame.capturedEntity[frameEid])
-  ) {
+  if (DesiredMediaFrame.captured[frameEid] && hasComponent(world, Owned, DesiredMediaFrame.captured[frameEid])) {
     // Capture my entity
     takeOwnership(world, frameEid);
     snapToFrame(
       world,
       frameEid,
-      DesiredMediaFrame.capturedEntity[frameEid],
-      world.eid2obj.get(DesiredMediaFrame.capturedEntity[frameEid]).el.getObject3D("mesh")
+      DesiredMediaFrame.captured[frameEid],
+      world.eid2obj.get(DesiredMediaFrame.captured[frameEid]).el.getObject3D("mesh")
     );
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[DesiredMediaFrame.capturedEntity[frameEid]], {
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[DesiredMediaFrame.captured[frameEid]], {
       type: "kinematic"
     });
   }
 
   MediaFrame.isFull[frameEid] = DesiredMediaFrame.isFull[frameEid];
-  MediaFrame.capturedEntity[frameEid] = DesiredMediaFrame.capturedEntity[frameEid];
+  MediaFrame.captured[frameEid] = DesiredMediaFrame.captured[frameEid];
   MediaFrame.originalTargetScale[frameEid].set(DesiredMediaFrame.originalTargetScale[frameEid]);
 }
 
@@ -348,7 +345,7 @@ export function display(world, frameEid, heldMediaTypes) {
   if (frameObj.visible) {
     const isHoldingObjectOfInterest =
       (capturable && hasComponent(world, Held, capturable)) ||
-      (MediaFrame.capturedEntity[frameEid] && hasComponent(world, Held, MediaFrame.capturedEntity[frameEid]));
+      (MediaFrame.captured[frameEid] && hasComponent(world, Held, MediaFrame.captured[frameEid]));
 
     frameObj.material.uniforms.color.value.set(
       isHoldingObjectOfInterest ? HOVER_COLOR : MediaFrame.isFull[frameEid] ? FULL_COLOR : EMPTY_COLOR
@@ -376,18 +373,18 @@ export function mediaFramesSystem(world) {
     const frameEid = mediaFrames[i];
 
     if (
-      MediaFrame.capturedEntity[frameEid] &&
-      hasComponent(world, Owned, MediaFrame.capturedEntity[frameEid]) &&
-      droppedEntites.includes(MediaFrame.capturedEntity[frameEid])
+      MediaFrame.captured[frameEid] &&
+      hasComponent(world, Owned, MediaFrame.captured[frameEid]) &&
+      droppedEntites.includes(MediaFrame.captured[frameEid])
     ) {
       snapToFrame(
         world,
         frameEid,
-        MediaFrame.capturedEntity[frameEid],
-        world.eid2obj.get(MediaFrame.capturedEntity[frameEid]).el.getObject3D("mesh")
+        MediaFrame.captured[frameEid],
+        world.eid2obj.get(MediaFrame.captured[frameEid]).el.getObject3D("mesh")
       );
       AFRAME.scenes[0].systems["hubs-systems"].physicsSystem.updateBodyOptions(
-        Rigidbody.bodyId[MediaFrame.capturedEntity[frameEid]],
+        Rigidbody.bodyId[MediaFrame.captured[frameEid]],
         { type: "kinematic" }
       );
     }
