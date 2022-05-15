@@ -85,7 +85,12 @@ const snapToFrame = (() => {
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
     targetObj.matrixWorld.decompose(targetPos, targetQuat, targetScale);
 
-    // Reset rotation for correct box calculation
+    // TODO BUG: It seems like objects aren't always snapping to the correct size.
+    //
+    //
+    // TODO: Do we have to reset rotation for correct box calculation?
+    //       Should we reset the rotation to identity or to match the frame?
+    //
     // setMatrixWorld(
     //   targetObj,
     //   m4.compose(
@@ -95,12 +100,10 @@ const snapToFrame = (() => {
     //   )
     // );
 
-    // TODO: BUG box.setFromObject does not correctly account for out-of-date matrices.
-    //       We must update all the objects in the mesh hierarchy ourselves
+    // TODO: BUG Does box.setFromObject does correctly account for out-of-date matrices?
+    //           It seems like we have to update all the objects in the mesh hierarchy
     meshToFit.traverse(o => o.updateMatrices());
-    //       Updating the mesh alone is not enough;
-    //       We need the updates to flush down to the children.
-    //       i.e. This does not work: meshToFit.updateMatrices();
+    // meshToFit.updateMatrices(); // Shouldn't this do the trick?
 
     // Snap into frame
     setMatrixWorld(
