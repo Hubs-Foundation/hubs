@@ -269,7 +269,9 @@ AFRAME.registerComponent("media-frame", {
       const worldQuat = new THREE.Quaternion();
       this.el.object3D.getWorldQuaternion(worldQuat);
       this.preview.position.copy(worldPos);
-      this.preview.scale.multiplyScalar(scaleForAspectFit(this.data.bounds, size));
+      const worldScale = new THREE.Vector3();
+      this.el.object3D.getWorldScale(worldScale);
+      this.preview.scale.multiplyScalar(scaleForAspectFit(worldScale.multiply(this.data.bounds), size));
       this.preview.setRotationFromQuaternion(worldQuat);
       this.preview.matrixNeedsUpdate = true;
 
@@ -340,7 +342,9 @@ AFRAME.registerComponent("media-frame", {
         const size = new THREE.Vector3();
         new THREE.Box3().setFromObject(srcMesh).getSize(size);
 
-        capturableEntity.object3D.scale.multiplyScalar(scaleForAspectFit(this.data.bounds, size));
+        const worldScale = new THREE.Vector3();
+        this.el.object3D.getWorldScale(worldScale);
+        capturableEntity.object3D.scale.multiplyScalar(scaleForAspectFit(worldScale.multiply(this.data.bounds), size));
         capturableEntity.object3D.matrixNeedsUpdate = true;
 
         this.snapObject(capturableEntity);
