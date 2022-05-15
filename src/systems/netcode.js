@@ -16,20 +16,21 @@ const schemas = {
     },
     serialize(world, eid, updates) {
       updates.push({
-        captured: MediaFrame.captured[eid] ? world.eid2nid.get(MediaFrame.captured[eid]) : 0, // TODO: nid / eid / 0 conversion
+        isFull: MediaFrame.isFull[eid],
+        captured: MediaFrame.captured[eid] ? world.eid2nid.get(MediaFrame.captured[eid]) : 0,
         originalTargetScale: Array.from(MediaFrame.originalTargetScale[eid])
       });
     },
 
     deserialize(world, frameEid, update) {
-      // TODO: Hold onto updates if we can't apply them yet,
-      // like if we don't know about the captured entity
-
       addComponent(world, NetworkedMediaFrame, frameEid);
-      NetworkedMediaFrame.captured[frameEid] = update.captured
-        ? world.nid2eid.get(update.captured)
-        : 0;
+      NetworkedMediaFrame.isFull[frameEid] = update.isFull;
+      // If we don't have an eid for this nid, set it to zero for now.
+      NetworkedMediaFrame.captured[frameEid] = (update.captured && world.nid2eid.get(update.captured)) || 0;
       NetworkedMediaFrame.originalTargetScale[frameEid].set(update.originalTargetScale);
+
+      // Re-enqueue this update if we do not have an eid for this nid.
+      return update.captured && !world.nid2eid.has(update.captured);
     }
   }
 };
@@ -40,29 +41,29 @@ export function takeOwnership(world, eid) {
   Networked.lastOwnerTime[eid] = NAF.connection.getServerTime();
 }
 
-const pendingMsgs = [];
-
+const pendingMessages = [];
 NAF.connection.subscribeToDataChannel("nn", function(_, _dataType, data) {
-  pendingMsgs.push(data);
+  pendingMessages.push(data);
 });
 
-export function applyNetworkUpdates(world) {
-  const stillToProcess = {
-    updates: []
-  };
+const messagesToRevisit = {
+  updates: []
+};
 
-  for (let i = 0; i < pendingMsgs.length; i++) {
-    const msg = pendingMsgs[i];
-    for (let j = 0; j < msg.updates.length; j += 3) {
-      const nid = msg.updates[j];
-      const newLastOwnerTime = msg.updates[j + 1];
-      const update = msg.updates[j + 2];
+export function applyNetworkUpdates(world) {
+  for (let i = 0; i < pendingMessages.length; i++) {
+    const message = pendingMessages[i];
+    for (let j = 0; j < message.updates.length; j += 3) {
+      const nid = message.updates[j];
+      const newLastOwnerTime = message.updates[j + 1];
+      const update = message.updates[j + 2];
 
       if (!world.nid2eid.has(nid)) {
-        console.log("got update for", nid, "but we dont have it yet, holding onto it");
-        stillToProcess.updates.push(nid);
-        stillToProcess.updates.push(newLastOwnerTime);
-        stillToProcess.updates.push(update);
+        console.log(`Holding onto an update for ${nid} because we don't have it yet.`);
+        // TODO: What if we will NEVER be able to apply this update?
+        messagesToRevisit.updates.push(nid);
+        messagesToRevisit.updates.push(newLastOwnerTime);
+        messagesToRevisit.updates.push(update);
         continue;
       }
 
@@ -82,13 +83,20 @@ export function applyNetworkUpdates(world) {
       Networked.lastOwnerTime[eid] = newLastOwnerTime;
 
       const schema = schemas[Networked.templateId[eid]];
-      schema.deserialize(world, eid, update);
+      if (schema.deserialize(world, eid, update)) {
+        // TODO: What if we will NEVER be able to apply this update?
+        messagesToRevisit.updates.push(nid);
+        messagesToRevisit.updates.push(newLastOwnerTime);
+        messagesToRevisit.updates.push(update);
+      }
     }
   }
-  pendingMsgs.length = 0;
-  if (stillToProcess.updates.length) {
-    pendingMsgs.push(stillToProcess);
+
+  pendingMessages.length = 0;
+  if (messagesToRevisit.updates.length) {
+    pendingMessages.push(messagesToRevisit);
   }
+  messagesToRevisit.updates.length = 0;
 
   // TODO If there's a scene owned object, we should take ownership of it
 }
