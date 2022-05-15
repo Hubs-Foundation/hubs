@@ -14,6 +14,7 @@ const schemas = {
     addEntity: function(componentProps) {
       return renderAsAframeEntity(<entity media-frame={componentProps} />, APP.world);
     },
+
     serialize(world, eid, updates) {
       updates.push({
         isFull: MediaFrame.isFull[eid],
@@ -29,7 +30,7 @@ const schemas = {
       NetworkedMediaFrame.captured[frameEid] = (update.captured && world.nid2eid.get(update.captured)) || 0;
       NetworkedMediaFrame.originalTargetScale[frameEid].set(update.originalTargetScale);
 
-      // Re-enqueue this update if we do not have an eid for this nid.
+      // Re-enqueue this update if we did not have an eid for this nid.
       return update.captured && !world.nid2eid.has(update.captured);
     }
   }
@@ -46,11 +47,10 @@ NAF.connection.subscribeToDataChannel("nn", function(_, _dataType, data) {
   pendingMessages.push(data);
 });
 
-const messagesToRevisit = {
-  updates: []
-};
-
 export function applyNetworkUpdates(world) {
+  const messagesToRevisit = {
+    updates: []
+  };
   for (let i = 0; i < pendingMessages.length; i++) {
     const message = pendingMessages[i];
     for (let j = 0; j < message.updates.length; j += 3) {
@@ -96,7 +96,6 @@ export function applyNetworkUpdates(world) {
   if (messagesToRevisit.updates.length) {
     pendingMessages.push(messagesToRevisit);
   }
-  messagesToRevisit.updates.length = 0;
 
   // TODO If there's a scene owned object, we should take ownership of it
 }

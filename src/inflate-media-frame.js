@@ -44,6 +44,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
   // TODO: This is a hack around the physics system addBody call requiring its body to have parent
   guide.parent = new THREE.Group();
   addObject3DComponent(world, eid, guide);
+  addComponent(world, DesiredMediaFrame, eid, true);
   addComponent(world, MediaFrame, eid, true);
   MediaFrame.mediaType[eid] = {
     all: MediaType.ALL,
