@@ -240,6 +240,7 @@ const zero = [0, 0, 0];
 const vec3 = new THREE.Vector3();
 function maybeAddFrameUpdate(world, frameEid) {
   if (hasComponent(world, FrameUpdate, frameEid)) {
+    console.log("should apply pending frame update");
     // Nothing to do here. We need to apply the pending change
     return;
   }

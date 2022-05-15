@@ -32,6 +32,9 @@ const schemas = {
 
       // Re-enqueue this update if we did not have an eid for this nid.
       return update.captured && !world.nid2eid.has(update.captured);
+      // TODO BUG: We should only re enqueue this update if we have not received
+      //           a more recent update about this frame. Right now, we are re-enqueuing
+      //           invalid updates until the owner time changes (or the update becomes valid).
     }
   }
 };
@@ -133,6 +136,7 @@ export function networkSendSystem(world) {
     NAF.connection.broadcastDataGuaranteed("nn", {
       updates
     });
+    console.log(updates);
   }
 }
 
@@ -143,3 +147,19 @@ export function createNetworkedEntity(world, templateId, eid = addEntity(world))
   Networked.templateId[eid] = templateId;
   return eid;
 }
+
+// NAF.connection.broadcastDataGuaranteed("nn", {
+//   updates: [
+//     "parent1.media-frame-46",
+//     3322421220,
+//     {
+//       "isFull": 1,
+//       "captured": "565e735",
+//       "scale": [
+//         1,
+//         1,
+//         1
+//       ]
+//     }
+//   ]
+// })
