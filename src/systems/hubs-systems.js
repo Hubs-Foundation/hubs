@@ -25,8 +25,8 @@ import { MenuAnimationSystem } from "./menu-animation-system";
 import { AudioSettingsSystem } from "./audio-settings-system";
 import { AudioSystem } from "./audio-system";
 import { ShadowSystem } from "./shadow-system";
-import { MediaFramesSystem } from "./media-frames";
 import { mediaFramesSystem } from "./bit-media-frames";
+import { mediaFrameAnimationMixerSystem } from "./bit-media-frame-animation-mixers";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
 import { EmojiSystem } from "./emoji-system";
 import { AudioZonesSystem } from "./audio-zones-system";
@@ -71,7 +71,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.boneVisibilitySystem = new BoneVisibilitySystem();
     this.uvScrollSystem = new UVScrollSystem();
     this.shadowSystem = new ShadowSystem(this.el);
-    this.mediaFramesSystem = new MediaFramesSystem(this.physicsSystem, this.el.systems.interaction);
     this.inspectYourselfSystem = new InspectYourselfSystem();
     this.emojiSystem = new EmojiSystem(this.el);
     this.audioZonesSystem = new AudioZonesSystem();
@@ -131,8 +130,8 @@ AFRAME.registerSystem("hubs-systems", {
     this.spriteSystem.tick(t, dt);
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
-    // this.mediaFramesSystem.tick();
     mediaFramesSystem(world);
+    mediaFrameAnimationMixerSystem(world); // TODO: Remove
     this.audioZonesSystem.tick(this.el);
     this.gainSystem.tick();
     this.nameTagSystem.tick();
