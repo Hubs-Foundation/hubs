@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
-import configs from "../../utils/configs";
 import { useIntl } from "react-intl";
 import { LoadingScreen } from "./LoadingScreen";
 import { useRoomLoadingState } from "./useRoomLoadingState";
@@ -50,7 +49,7 @@ export function LoadingScreenContainer({ onLoaded, scene }) {
     [intl]
   );
 
-  return <LoadingScreen logoSrc={configs.image("logo")} message={message} infoMessages={infoMessages} />;
+  return <LoadingScreen message={message} infoMessages={infoMessages} />;
 }
 
 LoadingScreenContainer.propTypes = {

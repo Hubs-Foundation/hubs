@@ -138,7 +138,7 @@ export const SCHEMA = {
         showAudioDebugPanel: { type: "bool", default: false },
         enableAudioClipping: { type: "bool", default: false },
         audioClippingThreshold: { type: "number", default: 0.015 },
-        theme: { type: "string", default: "Browser Default" },
+        theme: { type: "string", default: undefined },
         cursorSize: { type: "number", default: 1 },
         nametagVisibility: { type: "string", default: "showAll" },
         nametagVisibilityDistance: { type: "number", default: 5 },
