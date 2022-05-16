@@ -45,7 +45,6 @@ AFRAME.registerComponent("body-helper", {
     this.el.object3D.updateMatrices();
     this.uuid = this.system.addBody(this.el.object3D, this.data);
     const eid = this.el.object3D.eid;
-    console.log("Adding rigidbody", eid, this.uuid, Rigidbody.bodyId[eid]);
     addComponent(APP.world, Rigidbody, eid);
     Rigidbody.bodyId[eid] = this.uuid; //uuid is a lie, it's actually an int
   },

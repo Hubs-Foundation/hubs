@@ -240,7 +240,6 @@ const zero = [0, 0, 0];
 const vec3 = new THREE.Vector3();
 function maybeAddFrameUpdate(world, frameEid) {
   if (hasComponent(world, FrameUpdate, frameEid)) {
-    console.log("should apply pending frame update");
     // Nothing to do here. We need to apply the pending change
     return;
   }
@@ -313,12 +312,14 @@ export function applyFrameUpdate(world, frameEid) {
     entityExists(world, MediaFrame.captured[frameEid]) &&
     hasComponent(world, Owned, MediaFrame.captured[frameEid])
   ) {
+    console.log("Releasing entity from frame.");
     // Remove my captured entity from the frame and restore its original scale
     setMatrixScale(world.eid2obj.get(MediaFrame.captured[frameEid]), MediaFrame.scale[frameEid]);
     physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.captured[frameEid]], { type: "dynamic" });
   }
 
   if (FrameUpdate.captured[frameEid] && hasComponent(world, Owned, FrameUpdate.captured[frameEid])) {
+    console.log("Capturing entity from frame.");
     // Capture my entity
     takeOwnership(world, frameEid);
     snapToFrame(

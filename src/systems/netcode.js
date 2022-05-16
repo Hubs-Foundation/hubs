@@ -73,13 +73,13 @@ export function applyNetworkUpdates(world) {
       const eid = world.nid2eid.get(nid);
 
       if (Networked.lastOwnerTime[eid] > newLastOwnerTime) {
-        console.log("Got update from an old owner, skipping", nid);
+        console.log("Received update from an old owner, skipping", nid);
         continue;
       }
 
       // TODO handle tiebreak
       if (hasComponent(world, Owned, eid) && newLastOwnerTime > Networked.lastOwnerTime[eid]) {
-        console.log("Lost ownership", nid);
+        console.log("Lost ownership: ", nid);
         removeComponent(world, Owned, eid);
       }
 
@@ -114,7 +114,6 @@ export function networkSendSystem(world) {
     const entities = enteredNetworkedObjectsQuery(world);
     for (let i = 0; i < entities.length; i++) {
       const eid = entities[i];
-      console.log("new networked object", eid, world.eid2nid.get(eid), Networked.templateId[eid]);
       // its a create if there is no networkId
     }
   }
@@ -136,7 +135,6 @@ export function networkSendSystem(world) {
     NAF.connection.broadcastDataGuaranteed("nn", {
       updates
     });
-    console.log(updates);
   }
 }
 
