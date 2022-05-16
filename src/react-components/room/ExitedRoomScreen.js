@@ -55,7 +55,7 @@ const messages = defineMessages({
   }
 });
 
-export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSourceLink }) {
+export function ExitedRoomScreen({ reason, showTerms, termsUrl, showSourceLink }) {
   const intl = useIntl();
 
   let subtitle = null;
@@ -153,13 +153,12 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, logoSrc, showSou
     );
   }
 
-  return <LoadingScreenLayout center={subtitle} logoSrc={logoSrc} />;
+  return <LoadingScreenLayout center={subtitle} />;
 }
 
 ExitedRoomScreen.propTypes = {
   reason: PropTypes.string.isRequired,
   showTerms: PropTypes.bool,
   termsUrl: PropTypes.string,
-  logoSrc: PropTypes.string,
   showSourceLink: PropTypes.bool
 };
