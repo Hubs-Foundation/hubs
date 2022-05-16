@@ -384,15 +384,16 @@ function Home() {
                     </div>
                   );
                 }
-              } else {
-                return (
-                  <div key={index} className={"items"}>
-                    <img src={defaultImage} alt="" />
-                    {/* <ButtonVisit/> */}
-                    <div className="span1-1">This room is currently unavailable</div>
-                  </div>
-                );
               }
+              // else {
+              //                 return (
+              //                   <div key={index} className={"items"}>
+              //                     <img src={defaultImage} alt="" />
+              //                     {/* <ButtonVisit/> */}
+              //                     <div className="span1-1">This room is currently unavailable</div>
+              //                   </div>
+              //                 );
+              //               }
             })}
           </>
         ) : (
