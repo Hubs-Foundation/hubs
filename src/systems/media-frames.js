@@ -59,7 +59,7 @@ export class MediaFramesSystem {
       if (frame.data.targetId === "empty") {
         // frame empty
         guideMesh.material.uniforms.color.value.set(EMPTY_COLOR);
-        const capturableEl = this.getCapturableEntityCollidingWithBody(frame.data.mediaType, bodyUUID);
+        const capturableEl = this.getCapturableEntityCollidingWithBody(frame, frame.data.mediaType, bodyUUID);
         if (capturableEl && NAF.utils.isMine(capturableEl)) {
           // capturable object I own is colliding with an empty frame
           if (this.interactionSystem.isHeld(capturableEl)) {
@@ -102,12 +102,15 @@ export class MediaFramesSystem {
     }
   }
 
-  getCapturableEntityCollidingWithBody(mediaType, bodyUUID) {
+  getCapturableEntityCollidingWithBody(frame, mediaType, bodyUUID) {
+    const ancestors = collectObjectAndAncestors(frame);
     const collisions = this.physicsSystem.getCollisions(bodyUUID);
     for (let i = 0; i < collisions.length; i++) {
       const bodyData = this.physicsSystem.bodyUuidToData.get(collisions[i]);
       const mediaObjectEl = bodyData && bodyData.object3D && bodyData.object3D.el;
-      if (isCapturableByType[mediaType](mediaObjectEl)) {
+
+      // Avoid capture ancestor for portable media-frame.
+      if (isCapturableByType[mediaType](mediaObjectEl) && !ancestors.has(mediaObjectEl.object3D)) {
         return mediaObjectEl;
       }
     }
@@ -388,3 +391,17 @@ AFRAME.registerComponent("media-frame", {
     }
   }
 });
+
+function collectObjectAndAncestors(frame) {
+  if (!frame._mediaFrameAncestors) {
+    // Media frame are either environment objects, or glb objects, thus have stable ancestors.
+    const ancestors = new Set();
+    let x = frame.el.object3D;
+    while (x) {
+      ancestors.add(x);
+      x = x.parent;
+    }
+    frame._mediaFrameAncestors = ancestors;
+  }
+  return frame._mediaFrameAncestors;
+}
