@@ -20,6 +20,9 @@ pkg_deps=(
 do_build() {
   ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
 
+  # Avoid using git:// protocol
+  git config --global url."git@github.com:".insteadOf git://github.com/
+
   # main client
   npm ci --verbose --no-progress
 
