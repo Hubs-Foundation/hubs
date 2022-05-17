@@ -148,6 +148,9 @@ export default class SceneEntryManager {
     if (this.scene.renderer) {
       this.scene.renderer.setAnimationLoop(null); // Stop animation loop, TODO A-Frame should do this
     }
+    document.querySelectorAll("[media-video]").forEach(el => {
+      el.components["media-video"].removeAudio();
+    });
     this.scene.parentNode.removeChild(this.scene);
   };
 
