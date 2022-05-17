@@ -240,13 +240,14 @@ function hidePreview(world, frameEid) {
 const zero = [0, 0, 0];
 const vec3 = new THREE.Vector3();
 function maybeAddFrameUpdate(world, frameEid) {
+  if (hasComponent(world, FrameUpdate, frameEid)) return false;
+
   if (
     hasComponent(world, Owned, frameEid) &&
     (MediaFrame.capturedNid[frameEid] && world.deletedNids.has(MediaFrame.capturedNid[frameEid]))
   ) {
     // Captured entity was deleted from my frame
     addComponent(world, FrameUpdate, frameEid);
-    FrameUpdate.captured[frameEid] = 0;
     FrameUpdate.capturedNid[frameEid] = 0;
     FrameUpdate.scale[frameEid].set(zero);
     return true;
@@ -256,10 +257,9 @@ function maybeAddFrameUpdate(world, frameEid) {
     hasComponent(world, Owned, frameEid) &&
     MediaFrame.capturedNid[frameEid] &&
     !MediaFrame.captured[frameEid] &&
-    world.createdNids.has(MediaFrame.capturedNid[frameEid])
+    world.nid2eid.get(world.sid2str.get(MediaFrame.capturedNid[frameEid]))
   ) {
     addComponent(world, FrameUpdate, frameEid);
-    FrameUpdate.captured[frameEid] = world.nid2eid.get(MediaFrame.capturedNid[frameEid]);
     FrameUpdate.capturedNid[frameEid] = MediaFrame.capturedNid[frameEid];
     FrameUpdate.scale[frameEid] = MediaFrame.scale[frameEid];
     return false;
@@ -272,7 +272,6 @@ function maybeAddFrameUpdate(world, frameEid) {
   ) {
     // My captured entity left the frame
     addComponent(world, FrameUpdate, frameEid);
-    FrameUpdate.captured[frameEid] = 0;
     FrameUpdate.capturedNid[frameEid] = 0;
     FrameUpdate.scale[frameEid].set(zero);
     // TODO BUG: If an entity I do not own is captured by the media frame,
@@ -287,7 +286,6 @@ function maybeAddFrameUpdate(world, frameEid) {
     if (capturable && hasComponent(world, Owned, capturable) && !hasComponent(world, Held, capturable)) {
       // Capture my entity
       addComponent(world, FrameUpdate, frameEid);
-      FrameUpdate.captured[frameEid] = capturable;
       FrameUpdate.capturedNid[frameEid] = world.str2sid.get(world.eid2nid.get(capturable));
       const obj = world.eid2obj.get(capturable);
       obj.updateMatrices();
@@ -301,10 +299,10 @@ function maybeAddFrameUpdate(world, frameEid) {
 }
 
 export function applyFrameUpdate(world, frameEid) {
-  if (!hasComponent(world, FrameUpdate, frameEid)) return;
+  const newCapturedEid = world.nid2eid.get(world.sid2str.get(FrameUpdate.capturedNid[frameEid])) || 0;
 
   if (
-    FrameUpdate.captured[frameEid] === MediaFrame.captured[frameEid] &&
+    newCapturedEid === MediaFrame.captured[frameEid] &&
     FrameUpdate.capturedNid[frameEid] === MediaFrame.capturedNid[frameEid]
   ) {
     // Nothing to do
@@ -318,29 +316,21 @@ export function applyFrameUpdate(world, frameEid) {
     entityExists(world, MediaFrame.captured[frameEid]) &&
     hasComponent(world, Owned, MediaFrame.captured[frameEid])
   ) {
-    console.log("Releasing entity from frame.");
     // Remove my captured entity from the frame and restore its original scale
     setMatrixScale(world.eid2obj.get(MediaFrame.captured[frameEid]), MediaFrame.scale[frameEid]);
     physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.captured[frameEid]], { type: "dynamic" });
   }
 
-  if (FrameUpdate.captured[frameEid] && hasComponent(world, Owned, FrameUpdate.captured[frameEid])) {
-    console.log("Capturing entity from frame.");
+  if (newCapturedEid && hasComponent(world, Owned, newCapturedEid)) {
     // Capture my entity
-    takeOwnership(world, frameEid);
-    snapToFrame(
-      world,
-      frameEid,
-      FrameUpdate.captured[frameEid],
-      world.eid2obj.get(FrameUpdate.captured[frameEid]).el.getObject3D("mesh")
-    );
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[FrameUpdate.captured[frameEid]], {
+    snapToFrame(world, frameEid, newCapturedEid, world.eid2obj.get(newCapturedEid).el.getObject3D("mesh"));
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[newCapturedEid], {
       type: "kinematic"
     });
   }
 
   MediaFrame.capturedNid[frameEid] = FrameUpdate.capturedNid[frameEid];
-  MediaFrame.captured[frameEid] = FrameUpdate.captured[frameEid];
+  MediaFrame.captured[frameEid] = newCapturedEid;
   MediaFrame.scale[frameEid].set(FrameUpdate.scale[frameEid]);
 }
 
@@ -401,8 +391,8 @@ export function mediaFramesSystem(world) {
       );
     }
 
-    const shouldTakeOwnership = !hasComponent(world, FrameUpdate, frameEid) && maybeAddFrameUpdate(world, frameEid);
-    if (shouldTakeOwnership) takeOwnership(world, frameEid);
+    if (maybeAddFrameUpdate(world, frameEid)) takeOwnership(world, frameEid);
+
     if (hasComponent(world, FrameUpdate, frameEid)) {
       applyFrameUpdate(world, frameEid);
       removeComponent(world, FrameUpdate, frameEid);

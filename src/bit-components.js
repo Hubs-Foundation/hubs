@@ -5,8 +5,6 @@ export const Owned = defineComponent();
 
 export const FrameUpdate = defineComponent({
   capturedNid: Types.ui32,
-  // TODO: Remove FrameUpdate.captured
-  captured: Types.eid,
   scale: [Types.f32, 3]
 });
 

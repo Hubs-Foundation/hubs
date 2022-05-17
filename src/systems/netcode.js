@@ -5,8 +5,6 @@ const networkedObjectsQuery = defineQuery([Networked]);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 const enteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
 
-const nid2eid = new Map();
-
 export const TEMPLATE_ID_LEGACY_NAF = 1;
 export const TEMPLATE_ID_MEDIA_FRAME = 2;
 const schemas = {
@@ -32,7 +30,6 @@ const schemas = {
 
       addComponent(world, FrameUpdate, frameEid);
       FrameUpdate.capturedNid[frameEid] = world.str2sid.get(update.capturedNid);
-      FrameUpdate.captured[frameEid] = world.nid2eid.get(update.capturedNid) || 0;
       FrameUpdate.scale[frameEid].set(update.scale);
       return;
     }
