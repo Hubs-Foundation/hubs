@@ -8,12 +8,6 @@ export const NetworkedMediaFrame = defineComponent({
   scale: [Types.f32, 3]
 });
 
-// TODO: Try doing it this way
-// export const NetworkedMediaFrame = defineComponent({
-//   capturedNid: Types.ui32,
-//   scale: [Types.f32, 3]
-// });
-
 export const MediaFrame = defineComponent({
   capturedNid: Types.ui32,
   scale: [Types.f32, 3],

@@ -14,13 +14,15 @@ const schemas = {
     },
 
     serialize(world, eid, updates) {
+      // TODO: Just "serialize this component: NetworkedMediaFrame and determine changes"
       updates.push({
-        capturedNid: MediaFrame.capturedNid[eid] ? world.sid2str.get(MediaFrame.capturedNid[eid]) : 0,
-        scale: Array.from(MediaFrame.scale[eid])
+        capturedNid: NetworkedMediaFrame.capturedNid[eid] ? world.sid2str.get(NetworkedMediaFrame.capturedNid[eid]) : 0,
+        scale: Array.from(NetworkedMediaFrame.scale[eid])
       });
     },
 
     deserialize(world, frameEid, update) {
+      // TODO: Just "deserialize this component of a known shape: NetworkedMediaFrame"
       if (!world.str2sid.has(update.capturedNid)) {
         // TODO: Make this a function call
         world.str2sid.set(update.capturedNid, world.nextSid);

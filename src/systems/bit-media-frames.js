@@ -309,6 +309,8 @@ export function mediaFramesSystem(world) {
         const obj = world.eid2obj.get(capturable);
         obj.updateMatrices();
         vec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
+        snapToFrame(world, frame, capturable, world.eid2obj.get(capturable).el.getObject3D("mesh"));
+        physicsSystem.updateBodyOptions(Rigidbody.bodyId[capturable], { type: "kinematic" });
       }
     }
 
@@ -316,14 +318,10 @@ export function mediaFramesSystem(world) {
       NetworkedMediaFrame.capturedNid[frame] !== MediaFrame.capturedNid[frame] &&
       (captured && entityExists(world, captured) && hasComponent(world, Owned, captured))
     ) {
+      // TODO: If you are resetting scale because you lost a race for the frame,
+      //       you should probably also move the object away from the frame.
       setMatrixScale(world.eid2obj.get(captured), MediaFrame.scale[frame]);
       physicsSystem.updateBodyOptions(Rigidbody.bodyId[captured], { type: "dynamic" });
-    }
-
-    const newCaptured = world.nid2eid.get(world.sid2str.get(NetworkedMediaFrame.capturedNid[frame])) || 0;
-    if (newCaptured && hasComponent(world, Owned, newCaptured) && newCaptured !== captured) {
-      snapToFrame(world, frame, newCaptured, world.eid2obj.get(newCaptured).el.getObject3D("mesh"));
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[newCaptured], { type: "kinematic" });
     }
 
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];
