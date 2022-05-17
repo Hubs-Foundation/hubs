@@ -10,7 +10,7 @@ pkg_build_deps=(
     core/coreutils
     core/bash
     core/node10/10.16.1/20190801173856 # Latest node10 fails during npm ci due to a permissions error creating tmp dir
-    core/git
+    core/git/2.31.0/20211016175551
 )
 
 pkg_deps=(
@@ -19,9 +19,6 @@ pkg_deps=(
 
 do_build() {
   ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
-
-  # Avoid using git:// protocol
-  git config --global url."git@github.com:".insteadOf git://github.com/
 
   # main client
   npm ci --verbose --no-progress
