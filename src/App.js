@@ -144,9 +144,16 @@ export class App {
     this.isAudioPaused = new Set();
 
     this.world = createWorld();
+
+    // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map(); // eid -> Object3D
-    this.world.eid2nid = new Map();
-    this.world.nid2eid = new Map();
+    this.world.eid2nid = new Map([[0, 0]]);
+    this.world.nid2eid = new Map([[0, 0]]);
+    // TODO: This does not have to exclusively store strings, so this could "toSid( thing ) -> ui32" and "fromSid( ui32 ) -> thing"
+    this.world.str2sid = new Map([[0, 0]]);
+    this.world.sid2str = new Map([[0, 0]]);
+    this.world.nextSid = 1;
+    this.world.deletedNids = new Set();
 
     window.$o = eid => {
       this.world.eid2obj.get(eid);

@@ -17,24 +17,24 @@ const schemas = {
 
     serialize(world, eid, updates) {
       updates.push({
-        isFull: MediaFrame.isFull[eid],
-        captured: MediaFrame.captured[eid] ? world.eid2nid.get(MediaFrame.captured[eid]) : 0,
+        capturedNid: MediaFrame.capturedNid[eid] ? world.sid2str.get(MediaFrame.capturedNid[eid]) : 0,
         scale: Array.from(MediaFrame.scale[eid])
       });
     },
 
     deserialize(world, frameEid, update) {
-      addComponent(world, FrameUpdate, frameEid);
-      FrameUpdate.isFull[frameEid] = update.isFull;
-      // If we don't have an eid for this nid, set it to zero for now.
-      FrameUpdate.captured[frameEid] = (update.captured && world.nid2eid.get(update.captured)) || 0;
-      FrameUpdate.scale[frameEid].set(update.scale);
+      if (!world.str2sid.has(update.capturedNid)) {
+        // TODO: Make this a function call
+        world.str2sid.set(update.capturedNid, world.nextSid);
+        world.sid2str.set(world.nextSid, update.capturedNid);
+        world.nextSid = world.nextSid + 1;
+      }
 
-      // Re-enqueue this update if we did not have an eid for this nid.
-      return update.captured && !world.nid2eid.has(update.captured);
-      // TODO BUG: We should only re enqueue this update if we have not received
-      //           a more recent update about this frame. Right now, we are re-enqueuing
-      //           invalid updates until the owner time changes (or the update becomes valid).
+      addComponent(world, FrameUpdate, frameEid);
+      FrameUpdate.capturedNid[frameEid] = world.str2sid.get(update.capturedNid);
+      FrameUpdate.captured[frameEid] = world.nid2eid.get(update.capturedNid) || 0;
+      FrameUpdate.scale[frameEid].set(update.scale);
+      return;
     }
   }
 };
@@ -52,8 +52,11 @@ NAF.connection.subscribeToDataChannel("nn", function(_, _dataType, data) {
 
 export function applyNetworkUpdates(world) {
   const messagesToRevisit = {
-    updates: []
+    creates: [],
+    updates: [],
+    deletes: []
   };
+
   for (let i = 0; i < pendingMessages.length; i++) {
     const message = pendingMessages[i];
     for (let j = 0; j < message.updates.length; j += 3) {
@@ -86,12 +89,20 @@ export function applyNetworkUpdates(world) {
       Networked.lastOwnerTime[eid] = newLastOwnerTime;
 
       const schema = schemas[Networked.templateId[eid]];
-      if (schema.deserialize(world, eid, update)) {
-        // TODO: What if we will NEVER be able to apply this update?
-        messagesToRevisit.updates.push(nid);
-        messagesToRevisit.updates.push(newLastOwnerTime);
-        messagesToRevisit.updates.push(update);
+      schema.deserialize(world, eid, update);
+    }
+
+    for (let j = 0; j < message.deletes.length; j += 1) {
+      const nid = message.deletes[j];
+
+      // TODO: Make this a function call
+      if (!world.str2sid.has(nid)) {
+        world.str2sid.set(nid, world.nextSid);
+        world.sid2str.set(world.nextSid, nid);
+        world.nextSid = world.nextSid + 1;
       }
+
+      world.deletedNids.add(world.str2sid.get(nid));
     }
   }
 
@@ -103,12 +114,18 @@ export function applyNetworkUpdates(world) {
   // TODO If there's a scene owned object, we should take ownership of it
 }
 
-const TICK_RATE = 1000;
+const TICK_RATE = 3000;
 let nextNetworkTick = 0;
 export function networkSendSystem(world) {
   if (performance.now() < nextNetworkTick) return;
 
   nextNetworkTick = performance.now() + TICK_RATE;
+
+  const message = {
+    creates: [],
+    updates: [],
+    deletes: []
+  };
 
   {
     const entities = enteredNetworkedObjectsQuery(world);
@@ -118,7 +135,6 @@ export function networkSendSystem(world) {
     }
   }
 
-  const updates = [];
   const entities = ownedNetworkObjectsQuery(world);
   for (let i = 0; i < entities.length; i++) {
     const eid = entities[i];
@@ -126,17 +142,31 @@ export function networkSendSystem(world) {
     if (templateId === TEMPLATE_ID_LEGACY_NAF) continue;
 
     const schema = schemas[templateId];
-    updates.push(world.eid2nid.get(eid));
-    updates.push(Networked.lastOwnerTime[eid]);
-    schema.serialize(world, eid, updates);
+    message.updates.push(world.eid2nid.get(eid));
+    message.updates.push(Networked.lastOwnerTime[eid]);
+    schema.serialize(world, eid, message.updates);
   }
 
-  if (updates.length) {
-    NAF.connection.broadcastDataGuaranteed("nn", {
-      updates
-    });
+  if (message.creates.length || message.updates.length || message.deletes.length) {
+    NAF.connection.broadcastDataGuaranteed("nn", message);
   }
 }
+
+// function onPeerJoined(world, peer) {
+//   const entities = ownedNetworkObjectsQuery(world);
+//   for (let i = 0; i < entities.length; i++) {
+//     const eid = entities[i];
+//     const templateId = Networked.templateId[eid];
+//     if (templateId === TEMPLATE_ID_LEGACY_NAF) continue;
+//
+//     const schema = schemas[templateId];
+//     updates.push(world.eid2nid.get(eid));
+//     updates.push(Networked.lastOwnerTime[eid]);
+//     schema.serialize(world, eid, updates, { full: true });
+//   }
+//
+//   NAF.connection.sendDataGuaranteed(peer, message);
+// }
 
 export function createNetworkedEntity(world, templateId, eid = addEntity(world)) {
   world.networkSchemas[templateId].addEntity(world, eid);
