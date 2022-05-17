@@ -7,8 +7,8 @@ pkg_license=('MPLv2')
 pkg_description="Duck-powered web-based social VR."
 pkg_upstream_url="https://hubs.mozilla.com/"
 pkg_build_deps=(
-    core/coreutils
-    core/bash
+    core/coreutils/8.32/20210826054709
+    core/bash/5.1/20210826055113
     core/node10/10.16.1/20190801173856 # Latest node10 fails during npm ci due to a permissions error creating tmp dir
     core/git/2.31.0/20211016175551
 )
@@ -19,6 +19,9 @@ pkg_deps=(
 
 do_build() {
   ln -s "$(hab pkg path core/coreutils)/bin/env" /usr/bin/env
+
+  # Avoid using git:// protocol
+  git config --global url."git@github.com:".insteadOf git://github.com/
 
   # main client
   npm ci --verbose --no-progress
