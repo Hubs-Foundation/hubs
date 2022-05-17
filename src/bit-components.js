@@ -17,7 +17,6 @@ export const NetworkedMediaFrame = defineComponent({
 export const MediaFrame = defineComponent({
   capturedNid: Types.ui32,
   scale: [Types.f32, 3],
-  captured: Types.eid,
   mediaType: Types.ui8,
   bounds: [Types.f32, 3],
   preview: Types.eid

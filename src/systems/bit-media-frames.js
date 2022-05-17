@@ -235,15 +235,19 @@ export function display(world, frameEid, heldMediaTypes) {
   // Display the state
   const capturable = !MediaFrame.capturedNid[frameEid] && getCapturableEntity(world, frameEid);
   const shouldPreviewBeVisible = capturable && hasComponent(world, Held, capturable);
-  if (shouldPreviewBeVisible && !MediaFrame.preview[frameEid]) showPreview(world, frameEid, capturable);
-  if (!shouldPreviewBeVisible && MediaFrame.preview[frameEid]) hidePreview(world, frameEid);
+  if (shouldPreviewBeVisible && !MediaFrame.preview[frameEid]) {
+    showPreview(world, frameEid, capturable);
+  } else if (!shouldPreviewBeVisible && MediaFrame.preview[frameEid]) {
+    hidePreview(world, frameEid);
+  }
 
   const frameObj = world.eid2obj.get(frameEid);
   frameObj.visible = !!(MediaFrame.mediaType[frameEid] & heldMediaTypes);
+
   if (frameObj.visible) {
+    const captured = world.nid2eid.get(world.sid2str.get(MediaFrame.capturedNid[frameEid])) || 0;
     const isHoldingObjectOfInterest =
-      (capturable && hasComponent(world, Held, capturable)) ||
-      (MediaFrame.captured[frameEid] && hasComponent(world, Held, MediaFrame.captured[frameEid]));
+      (captured && hasComponent(world, Held, captured)) || (capturable && hasComponent(world, Held, capturable));
 
     frameObj.material.uniforms.color.value.set(
       isHoldingObjectOfInterest ? HOVER_COLOR : MediaFrame.capturedNid[frameEid] ? FULL_COLOR : EMPTY_COLOR
@@ -271,27 +275,16 @@ export function mediaFramesSystem(world) {
   for (let i = 0; i < mediaFrames.length; i++) {
     const frameEid = mediaFrames[i];
 
-    if (
-      MediaFrame.captured[frameEid] &&
-      hasComponent(world, Owned, MediaFrame.captured[frameEid]) &&
-      droppedEntities.includes(MediaFrame.captured[frameEid])
-    ) {
-      snapToFrame(
-        world,
-        frameEid,
-        MediaFrame.captured[frameEid],
-        world.eid2obj.get(MediaFrame.captured[frameEid]).el.getObject3D("mesh")
-      );
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.captured[frameEid]], { type: "kinematic" });
+    const captured = world.nid2eid.get(world.sid2str.get(MediaFrame.capturedNid[frameEid])) || 0;
+
+    if (captured && hasComponent(world, Owned, captured) && droppedEntities.includes(captured)) {
+      snapToFrame(world, frameEid, captured, world.eid2obj.get(captured).el.getObject3D("mesh"));
+      physicsSystem.updateBodyOptions(Rigidbody.bodyId[captured], { type: "kinematic" });
     } else if (
-      // The captured entity was deleted from my frame
       (hasComponent(world, Owned, frameEid) &&
         MediaFrame.capturedNid[frameEid] &&
         world.deletedNids.has(MediaFrame.capturedNid[frameEid])) ||
-      // My captured entity left the frame
-      (MediaFrame.captured[frameEid] &&
-        hasComponent(world, Owned, MediaFrame.captured[frameEid]) &&
-        !isColliding(world, frameEid, MediaFrame.captured[frameEid]))
+      (captured && hasComponent(world, Owned, captured) && !isColliding(world, frameEid, captured))
     ) {
       takeOwnership(world, frameEid);
       NetworkedMediaFrame.capturedNid[frameEid] = 0;
@@ -313,25 +306,20 @@ export function mediaFramesSystem(world) {
 
     if (
       NetworkedMediaFrame.capturedNid[frameEid] !== MediaFrame.capturedNid[frameEid] &&
-      MediaFrame.captured[frameEid] &&
-      entityExists(world, MediaFrame.captured[frameEid]) &&
-      hasComponent(world, Owned, MediaFrame.captured[frameEid])
+      (captured && entityExists(world, captured) && hasComponent(world, Owned, captured))
     ) {
-      setMatrixScale(world.eid2obj.get(MediaFrame.captured[frameEid]), MediaFrame.scale[frameEid]);
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.captured[frameEid]], { type: "dynamic" });
+      setMatrixScale(world.eid2obj.get(captured), MediaFrame.scale[frameEid]);
+      physicsSystem.updateBodyOptions(Rigidbody.bodyId[captured], { type: "dynamic" });
     }
 
     const newCaptured = world.nid2eid.get(world.sid2str.get(NetworkedMediaFrame.capturedNid[frameEid])) || 0;
-    if (newCaptured && newCaptured !== MediaFrame.captured[frameEid] && hasComponent(world, Owned, newCaptured)) {
+    if (newCaptured && hasComponent(world, Owned, newCaptured) && newCaptured !== captured) {
       snapToFrame(world, frameEid, newCaptured, world.eid2obj.get(newCaptured).el.getObject3D("mesh"));
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[newCaptured], {
-        type: "kinematic"
-      });
+      physicsSystem.updateBodyOptions(Rigidbody.bodyId[newCaptured], { type: "kinematic" });
     }
 
     MediaFrame.capturedNid[frameEid] = NetworkedMediaFrame.capturedNid[frameEid];
     MediaFrame.scale[frameEid].set(NetworkedMediaFrame.scale[frameEid]);
-    MediaFrame.captured[frameEid] = newCaptured;
 
     display(world, frameEid, heldMediaTypes);
   }
