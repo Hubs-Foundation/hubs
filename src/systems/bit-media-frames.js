@@ -22,13 +22,24 @@ function mediaTypeMaskFor(world, eid) {
   return mediaTypeMask;
 }
 
+function isAncestor(a, b) {
+  if (a.children.includes(b)) return true;
+  for (let i = 0; i < a.children.length; i++) {
+    if (isAncestor(a.children[i], b)) return true;
+  }
+  return false;
+}
+
 function getCapturableEntity(world, frame) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   const collisions = physicsSystem.getCollisions(Rigidbody.bodyId[frame]);
+  const frameObj = world.eid2obj.get(frame);
   for (let i = 0; i < collisions.length; i++) {
     const bodyData = physicsSystem.bodyUuidToData.get(collisions[i]);
-    // TODO: Make sure bodyData.object3D is not an ancestor of this frame
-    if (MediaFrame.mediaType[frame] & mediaTypeMaskFor(world, bodyData.object3D.eid)) {
+    if (
+      MediaFrame.mediaType[frame] & mediaTypeMaskFor(world, bodyData.object3D.eid) &&
+      !isAncestor(bodyData.object3D, frameObj)
+    ) {
       return bodyData.object3D.eid;
     }
   }
