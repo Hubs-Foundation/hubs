@@ -22,8 +22,6 @@ function registerRootSceneComponent(componentName) {
   });
 }
 
-registerRootSceneComponent("fog");
-
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
   el.setAttribute("quack", { quackPercentage: 0.1 });
@@ -595,6 +593,21 @@ AFRAME.GLTFModelPlus.registerComponent("background", "background", (el, _compone
   );
   // This assumes the background component is on the root entity, which it is for spoke, the only thing using this component
   el.setAttribute("environment-settings", { backgroundColor: new THREE.Color(componentData.color) });
+});
+
+AFRAME.GLTFModelPlus.registerComponent("fog", "fog", (el, _componentName, componentData) => {
+  // TODO need to actually implement this in blender exporter before showing this warning
+  // console.warn(
+  //   "The `fog` component is deprecated, use the fog properties on the `environment-settings` component instead."
+  // );
+  // This assumes the fog component is on the root entitycoco
+  el.setAttribute("environment-settings", {
+    fogType: componentData.type,
+    fogColor: new THREE.Color(componentData.color),
+    fogNear: componentData.near,
+    fogFar: componentData.far,
+    fogDensity: componentData.density
+  });
 });
 
 AFRAME.GLTFModelPlus.registerComponent(
