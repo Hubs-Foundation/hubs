@@ -28,7 +28,6 @@ const schemas = {
         world.nextSid = world.nextSid + 1;
       }
 
-      addComponent(world, NetworkedMediaFrame, frameEid);
       NetworkedMediaFrame.capturedNid[frameEid] = world.str2sid.get(update.capturedNid);
       NetworkedMediaFrame.scale[frameEid].set(update.scale);
       return;

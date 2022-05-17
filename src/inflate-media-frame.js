@@ -1,5 +1,5 @@
 import { addObject3DComponent, Rigidbody, PhysicsShape } from "./utils/jsx-entity";
-import { MediaFrame } from "./bit-components";
+import { NetworkedMediaFrame, MediaFrame } from "./bit-components";
 import { addComponent } from "bitecs";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 import { MediaType } from "./utils/media-utils";
@@ -45,6 +45,8 @@ export function inflateMediaFrame(world, eid, componentProps) {
   guide.parent = new THREE.Group();
   addObject3DComponent(world, eid, guide);
   addComponent(world, MediaFrame, eid, true);
+  addComponent(world, NetworkedMediaFrame, eid, true);
+
   MediaFrame.mediaType[eid] = {
     all: MediaType.ALL,
     "all-2d": MediaType.ALL_2D,
