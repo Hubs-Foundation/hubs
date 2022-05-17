@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
-import { FrameUpdate, Networked, Owned, MediaFrame } from "../bit-components";
+import { NetworkedMediaFrame, Networked, Owned, MediaFrame } from "../bit-components";
 
 const networkedObjectsQuery = defineQuery([Networked]);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
@@ -28,9 +28,9 @@ const schemas = {
         world.nextSid = world.nextSid + 1;
       }
 
-      addComponent(world, FrameUpdate, frameEid);
-      FrameUpdate.capturedNid[frameEid] = world.str2sid.get(update.capturedNid);
-      FrameUpdate.scale[frameEid].set(update.scale);
+      addComponent(world, NetworkedMediaFrame, frameEid);
+      NetworkedMediaFrame.capturedNid[frameEid] = world.str2sid.get(update.capturedNid);
+      NetworkedMediaFrame.scale[frameEid].set(update.scale);
       return;
     }
   }

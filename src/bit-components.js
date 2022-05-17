@@ -3,7 +3,7 @@ import { defineComponent, Types } from "bitecs";
 export const Networked = defineComponent({ templateId: Types.ui8, lastOwnerTime: Types.ui32 });
 export const Owned = defineComponent();
 
-export const FrameUpdate = defineComponent({
+export const NetworkedMediaFrame = defineComponent({
   capturedNid: Types.ui32,
   scale: [Types.f32, 3]
 });

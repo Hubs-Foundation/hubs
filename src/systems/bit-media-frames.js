@@ -13,7 +13,7 @@ import {
   hasComponent
 } from "bitecs";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
-import { FrameUpdate, MediaFrame, Owned } from "../bit-components";
+import { NetworkedMediaFrame, MediaFrame, Owned } from "../bit-components";
 import { takeOwnership } from "./netcode";
 
 const EMPTY_COLOR = 0x6fc0fd;
@@ -239,17 +239,17 @@ function hidePreview(world, frameEid) {
 
 const zero = [0, 0, 0];
 const vec3 = new THREE.Vector3();
-function maybeAddFrameUpdate(world, frameEid) {
-  if (hasComponent(world, FrameUpdate, frameEid)) return false;
+function maybeAddNetworkedMediaFrame(world, frameEid) {
+  if (hasComponent(world, NetworkedMediaFrame, frameEid)) return false;
 
   if (
     hasComponent(world, Owned, frameEid) &&
     (MediaFrame.capturedNid[frameEid] && world.deletedNids.has(MediaFrame.capturedNid[frameEid]))
   ) {
     // Captured entity was deleted from my frame
-    addComponent(world, FrameUpdate, frameEid);
-    FrameUpdate.capturedNid[frameEid] = 0;
-    FrameUpdate.scale[frameEid].set(zero);
+    addComponent(world, NetworkedMediaFrame, frameEid);
+    NetworkedMediaFrame.capturedNid[frameEid] = 0;
+    NetworkedMediaFrame.scale[frameEid].set(zero);
     return true;
   }
 
@@ -259,9 +259,9 @@ function maybeAddFrameUpdate(world, frameEid) {
     !MediaFrame.captured[frameEid] &&
     world.nid2eid.get(world.sid2str.get(MediaFrame.capturedNid[frameEid]))
   ) {
-    addComponent(world, FrameUpdate, frameEid);
-    FrameUpdate.capturedNid[frameEid] = MediaFrame.capturedNid[frameEid];
-    FrameUpdate.scale[frameEid] = MediaFrame.scale[frameEid];
+    addComponent(world, NetworkedMediaFrame, frameEid);
+    NetworkedMediaFrame.capturedNid[frameEid] = MediaFrame.capturedNid[frameEid];
+    NetworkedMediaFrame.scale[frameEid] = MediaFrame.scale[frameEid];
     return false;
   }
 
@@ -271,9 +271,9 @@ function maybeAddFrameUpdate(world, frameEid) {
     !isColliding(world, frameEid, MediaFrame.captured[frameEid])
   ) {
     // My captured entity left the frame
-    addComponent(world, FrameUpdate, frameEid);
-    FrameUpdate.capturedNid[frameEid] = 0;
-    FrameUpdate.scale[frameEid].set(zero);
+    addComponent(world, NetworkedMediaFrame, frameEid);
+    NetworkedMediaFrame.capturedNid[frameEid] = 0;
+    NetworkedMediaFrame.scale[frameEid].set(zero);
     // TODO BUG: If an entity I do not own is captured by the media frame,
     //           and then I take ownership of the entity (by grabbing it),
     //           the physics system does not immediately notice the entity colliding with the frame,
@@ -285,11 +285,11 @@ function maybeAddFrameUpdate(world, frameEid) {
     const capturable = getCapturableEntity(world, frameEid);
     if (capturable && hasComponent(world, Owned, capturable) && !hasComponent(world, Held, capturable)) {
       // Capture my entity
-      addComponent(world, FrameUpdate, frameEid);
-      FrameUpdate.capturedNid[frameEid] = world.str2sid.get(world.eid2nid.get(capturable));
+      addComponent(world, NetworkedMediaFrame, frameEid);
+      NetworkedMediaFrame.capturedNid[frameEid] = world.str2sid.get(world.eid2nid.get(capturable));
       const obj = world.eid2obj.get(capturable);
       obj.updateMatrices();
-      vec3.setFromMatrixScale(obj.matrixWorld).toArray(FrameUpdate.scale[frameEid]);
+      vec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frameEid]);
       return true;
     }
   }
@@ -298,12 +298,12 @@ function maybeAddFrameUpdate(world, frameEid) {
   return false;
 }
 
-export function applyFrameUpdate(world, frameEid) {
-  const newCapturedEid = world.nid2eid.get(world.sid2str.get(FrameUpdate.capturedNid[frameEid])) || 0;
+export function applyNetworkedMediaFrame(world, frameEid) {
+  const newCapturedEid = world.nid2eid.get(world.sid2str.get(NetworkedMediaFrame.capturedNid[frameEid])) || 0;
 
   if (
     newCapturedEid === MediaFrame.captured[frameEid] &&
-    FrameUpdate.capturedNid[frameEid] === MediaFrame.capturedNid[frameEid]
+    NetworkedMediaFrame.capturedNid[frameEid] === MediaFrame.capturedNid[frameEid]
   ) {
     // Nothing to do
     return;
@@ -329,9 +329,9 @@ export function applyFrameUpdate(world, frameEid) {
     });
   }
 
-  MediaFrame.capturedNid[frameEid] = FrameUpdate.capturedNid[frameEid];
+  MediaFrame.capturedNid[frameEid] = NetworkedMediaFrame.capturedNid[frameEid];
   MediaFrame.captured[frameEid] = newCapturedEid;
-  MediaFrame.scale[frameEid].set(FrameUpdate.scale[frameEid]);
+  MediaFrame.scale[frameEid].set(NetworkedMediaFrame.scale[frameEid]);
 }
 
 export function display(world, frameEid, heldMediaTypes) {
@@ -391,11 +391,11 @@ export function mediaFramesSystem(world) {
       );
     }
 
-    if (maybeAddFrameUpdate(world, frameEid)) takeOwnership(world, frameEid);
+    if (maybeAddNetworkedMediaFrame(world, frameEid)) takeOwnership(world, frameEid);
 
-    if (hasComponent(world, FrameUpdate, frameEid)) {
-      applyFrameUpdate(world, frameEid);
-      removeComponent(world, FrameUpdate, frameEid);
+    if (hasComponent(world, NetworkedMediaFrame, frameEid)) {
+      applyNetworkedMediaFrame(world, frameEid);
+      removeComponent(world, NetworkedMediaFrame, frameEid);
     }
 
     display(world, frameEid, heldMediaTypes);
