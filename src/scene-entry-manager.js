@@ -115,7 +115,7 @@ export default class SceneEntryManager {
     })();
 
     // Bump stored entry count after 30s
-    setTimeout(() => this.store.bumpEntryCount(), 30000);
+    this.entryCountTimeout = setTimeout(() => this.store.bumpEntryCount(), 30000);
 
     this.scene.addState("entered");
 
@@ -137,6 +137,7 @@ export default class SceneEntryManager {
   };
 
   exitScene = () => {
+    clearTimeout(this.entryCountTimeout);
     this.scene.exitVR();
     if (APP.dialog && APP.dialog.localMediaStream) {
       APP.dialog.localMediaStream.getTracks().forEach(t => t.stop());
