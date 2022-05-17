@@ -23,9 +23,10 @@ function mediaTypeMaskFor(world, eid) {
 }
 
 function isAncestor(a, b) {
-  if (a.children.includes(b)) return true;
-  for (let i = 0; i < a.children.length; i++) {
-    if (isAncestor(a.children[i], b)) return true;
+  let ancestor = b.parent;
+  while (ancestor) {
+    if (ancestor === a) return true;
+    ancestor = ancestor.parent;
   }
   return false;
 }
