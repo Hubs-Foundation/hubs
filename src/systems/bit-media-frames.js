@@ -272,7 +272,6 @@ export function mediaFramesSystem(world) {
     const frameEid = mediaFrames[i];
 
     if (
-      // I dropped my already-captured entity
       MediaFrame.captured[frameEid] &&
       hasComponent(world, Owned, MediaFrame.captured[frameEid]) &&
       droppedEntities.includes(MediaFrame.captured[frameEid])
@@ -304,7 +303,6 @@ export function mediaFramesSystem(world) {
     } else if (!NetworkedMediaFrame.capturedNid[frameEid]) {
       const capturable = getCapturableEntity(world, frameEid);
       if (capturable && hasComponent(world, Owned, capturable) && !hasComponent(world, Held, capturable)) {
-        // The frame was empty and my entity should be captured
         takeOwnership(world, frameEid);
         NetworkedMediaFrame.capturedNid[frameEid] = world.str2sid.get(world.eid2nid.get(capturable));
         const obj = world.eid2obj.get(capturable);
@@ -319,14 +317,12 @@ export function mediaFramesSystem(world) {
       entityExists(world, MediaFrame.captured[frameEid]) &&
       hasComponent(world, Owned, MediaFrame.captured[frameEid])
     ) {
-      // Remove my entity from the frame and restore its original scale
       setMatrixScale(world.eid2obj.get(MediaFrame.captured[frameEid]), MediaFrame.scale[frameEid]);
       physicsSystem.updateBodyOptions(Rigidbody.bodyId[MediaFrame.captured[frameEid]], { type: "dynamic" });
     }
 
     const newCaptured = world.nid2eid.get(world.sid2str.get(NetworkedMediaFrame.capturedNid[frameEid])) || 0;
     if (newCaptured && newCaptured !== MediaFrame.captured[frameEid] && hasComponent(world, Owned, newCaptured)) {
-      // Snap my newly captured entity into the frame
       snapToFrame(world, frameEid, newCaptured, world.eid2obj.get(newCaptured).el.getObject3D("mesh"));
       physicsSystem.updateBodyOptions(Rigidbody.bodyId[newCaptured], {
         type: "kinematic"
