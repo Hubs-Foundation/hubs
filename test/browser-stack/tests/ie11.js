@@ -4,7 +4,7 @@ const assert = require("assert");
 
 const { createDriver, setStatusAndQuit } = require("../common/browserstack");
 
-async function runTestWithCaps() {
+async function runIE11UnsupportedTest() {
   const driver = createDriver({
     os: "Windows",
     osVersion: "10",
@@ -16,10 +16,10 @@ async function runTestWithCaps() {
   try {
     await driver.get("https://hubs.mozilla.com");
 
-    const homePageButton = await driver.wait(until.elementLocated(by.css("button")), 10000);
-    const homePageButtonText = await homePageButton.getText();
+    const unsupportedNotice = await driver.wait(until.elementLocated(by.id("support-root")), 10000);
+    const unsupportedNoticeText = await unsupportedNotice.getText();
 
-    assert.ok(/create room/i.test(homePageButtonText));
+    assert.ok(/missing required features/i.test(unsupportedNoticeText));
 
     await setStatusAndQuit(driver, { passed: true });
   } catch (e) {
@@ -29,4 +29,4 @@ async function runTestWithCaps() {
   }
 }
 
-runTestWithCaps();
+runIE11UnsupportedTest();
