@@ -119,17 +119,33 @@ export class NumberRangeSelector extends Component {
               e.target.focus();
               e.target.select();
             }}
-            onBlur={() => {
-              this.setState({ isFocused: false });
+            onBlur={e => {
+              const sanitizedInput = sanitize(e.target.value);
+              const numberOrReset = isNaN(parseFloat(sanitizedInput)) ? undefined : parseFloat(sanitizedInput);
+              this.setState({
+                displayValue:
+                  numberOrReset === undefined
+                    ? this.props.store.state.preferences[this.props.storeKey].toFixed(this.props.digits)
+                    : Math.min(Math.max(this.props.min, numberOrReset), this.props.max).toFixed(this.props.digits),
+                isFocused: false
+              });
             }}
             onFocus={() => {
               this.setState({ isFocused: true });
             }}
             onChange={e => {
               const sanitizedInput = sanitize(e.target.value);
-              this.setState({ displayValue: sanitizedInput, digitsFromUser: countDigits(sanitizedInput) });
               const numberOrReset = isNaN(parseFloat(sanitizedInput)) ? undefined : parseFloat(sanitizedInput);
-              this.props.setValue(numberOrReset);
+              const finalValue = Math.min(Math.max(this.props.min, numberOrReset), this.props.max);
+              this.setState({
+                displayValue: numberOrReset === undefined ? "" : finalValue,
+                digitsFromUser: countDigits(sanitizedInput)
+              });
+              this.props.setValue(
+                numberOrReset === undefined
+                  ? parseFloat(this.props.store.state.preferences[this.props.storeKey])
+                  : finalValue
+              );
             }}
           />
         </div>
@@ -425,7 +441,7 @@ const preferenceLabels = defineMessages({
   },
   enableDynamicShadows: {
     id: "preferences-screen.preference.enable-dynamic-shadows",
-    defaultMessage: "Enable Dynamic Shadows"
+    defaultMessage: "Enable Real-time Shadows"
   },
   disableAutoPixelRatio: {
     id: "preferences-screen.preference.disable-auto-pixel-ratio",
@@ -1143,7 +1159,7 @@ class PreferencesScreen extends Component {
           {
             key: "enableDynamicShadows",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            promptForRefresh: true
+            defaultBool: false
           },
           {
             key: "disableAutoPixelRatio",

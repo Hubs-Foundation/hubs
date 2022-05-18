@@ -6,7 +6,6 @@ import { Footer } from "./Footer";
 import { MobileNav } from "./MobileNav";
 
 export function Page({
-  appLogo,
   showCloud,
   enableSpoke,
   editorName,
@@ -36,8 +35,6 @@ export function Page({
   return (
     <>
       <Header
-        appName={appName}
-        appLogo={appLogo}
         showCloud={showCloud}
         enableSpoke={enableSpoke}
         editorName={editorName}
@@ -54,7 +51,6 @@ export function Page({
       />
       <main {...rest}>
         <MobileNav
-          enableSpoke={enableSpoke}
           showDocsLink={showDocsLink}
           showSourceLink={showSourceLink}
           showCommunityLink={showCommunityLink}
@@ -76,7 +72,6 @@ export function Page({
         companyLogoUrl={companyLogoUrl}
         showDiscordBotLink={showDiscordBotLink}
         appName={appName}
-        showCloud={showCloud}
         isHmc={isHmc}
       />
     </>
@@ -84,7 +79,6 @@ export function Page({
 }
 
 Page.propTypes = {
-  appLogo: PropTypes.string,
   showCloud: PropTypes.bool,
   enableSpoke: PropTypes.bool,
   editorName: PropTypes.string,

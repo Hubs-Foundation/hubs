@@ -124,13 +124,6 @@ async function enableChromeAEC(gainNode) {
 export class AudioSystem {
   constructor(sceneEl) {
     this._sceneEl = sceneEl;
-    this._sceneEl.audioListener = this._sceneEl.audioListener || new THREE.AudioListener();
-    if (this._sceneEl.camera) {
-      this._sceneEl.camera.add(this._sceneEl.audioListener);
-    }
-    this._sceneEl.addEventListener("camera-set-active", evt => {
-      evt.detail.cameraEl.getObject3D("camera").add(this._sceneEl.audioListener);
-    });
 
     this.audioContext = THREE.AudioContext.getContext();
     this.audioNodes = new Map();

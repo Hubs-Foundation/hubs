@@ -190,6 +190,23 @@ async function fetchAppConfigAndEnvironmentVars() {
   return appConfig;
 }
 
+function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) {
+  const chunkName = filename.match(/(.+).html/)[1];
+  const options = {
+    filename,
+    template: path.join(__dirname, "src", filename),
+    chunks: [...extraChunks, chunkName],
+    minify: {
+      removeComments: false
+    }
+  };
+
+  if (chunksSortMode) options.chunksSortMode = chunksSortMode;
+  if (inject) options.inject = inject;
+
+  return new HTMLWebpackPlugin(options);
+}
+
 module.exports = async (env, argv) => {
   env = env || {};
 
@@ -220,17 +237,18 @@ module.exports = async (env, argv) => {
     }
 
     if (env.localDev) {
+      const localDevHost = "hubs.local";
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
-        HOST: "hubs.local",
-        RETICULUM_SOCKET_SERVER: "hubs.local",
+        HOST: localDevHost,
+        RETICULUM_SOCKET_SERVER: localDevHost,
         CORS_PROXY_SERVER: "hubs-proxy.local:4000",
-        NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
-        BASE_ASSETS_PATH: "https://hubs.local:8080/",
-        RETICULUM_SERVER: "hubs.local:4000",
+        NON_CORS_PROXY_DOMAINS: `${localDevHost},dev.reticulum.io`,
+        BASE_ASSETS_PATH: `https://${localDevHost}:8080/`,
+        RETICULUM_SERVER: `${localDevHost}:4000`,
         POSTGREST_SERVER: "",
         ITA_SERVER: "",
-        UPLOADS_HOST: "https://hubs.local:4000"
+        UPLOADS_HOST: `https://${localDevHost}:4000`
       });
     }
   }
@@ -547,103 +565,53 @@ module.exports = async (env, argv) => {
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
       }),
       // Each output page needs a HTMLWebpackPlugin entry
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "index.html",
-        template: path.join(__dirname, "src", "index.html"),
-        chunks: ["support", "index"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+        extraChunks: ["support"],
+        chunksSortMode: "manual"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "hub.html",
-        template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["webxr-polyfill", "support", "hub"],
+        extraChunks: ["webxr-polyfill", "support"],
         chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "scene.html",
-        template: path.join(__dirname, "src", "scene.html"),
-        chunks: ["support", "scene"],
+        extraChunks: ["support"],
         chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "avatar.html",
-        template: path.join(__dirname, "src", "avatar.html"),
-        chunks: ["support", "avatar"],
+        extraChunks: ["support"],
         chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "link.html",
-        template: path.join(__dirname, "src", "link.html"),
-        chunks: ["support", "link"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+        extraChunks: ["support"],
+        chunksSortMode: "manual"
       }),
-      new HTMLWebpackPlugin({
-        filename: "discord.html",
-        template: path.join(__dirname, "src", "discord.html"),
-        chunks: ["discord"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        filename: "discord.html"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "whats-new.html",
-        template: path.join(__dirname, "src", "whats-new.html"),
-        chunks: ["whats-new"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "cloud.html",
-        template: path.join(__dirname, "src", "cloud.html"),
-        chunks: ["cloud"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
-        filename: "signin.html",
-        template: path.join(__dirname, "src", "signin.html"),
-        chunks: ["signin"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        filename: "signin.html"
       }),
-      new HTMLWebpackPlugin({
-        filename: "verify.html",
-        template: path.join(__dirname, "src", "verify.html"),
-        chunks: ["verify"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        filename: "verify.html"
       }),
-      new HTMLWebpackPlugin({
-        filename: "tokens.html",
-        template: path.join(__dirname, "src", "tokens.html"),
-        chunks: ["tokens"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        filename: "tokens.html"
       }),
       new CopyWebpackPlugin([
         {

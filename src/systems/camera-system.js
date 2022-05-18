@@ -58,23 +58,25 @@ const orbit = (function() {
   const rwq = new THREE.Quaternion();
   const UP = new THREE.Vector3();
   const RIGHT = new THREE.Vector3();
-  const target = new THREE.Object3D();
+  const dPos = new THREE.Vector3();
+  const targetPos = new THREE.Vector3();
+  const targetQuat = new THREE.Quaternion();
+  const targetScale = new THREE.Vector3(1, 1, 1);
+  const targetMatrix = new THREE.Matrix4();
   const dhQ = new THREE.Quaternion();
   const dvQ = new THREE.Quaternion();
   return function orbit(pivot, rig, camera, dh, dv, dz, dt, panY) {
-    if (!target.parent) {
-      // add dummy object to the scene, if this is the first time we call this function
-      AFRAME.scenes[0].object3D.add(target);
-      target.applyMatrix4(IDENTITY); // make sure target gets updated at least once for our matrix optimizations
-    }
     pivot.updateMatrices();
     decompose(pivot.matrixWorld, owp, owq);
+
+    camera.updateMatrices();
     decompose(camera.matrixWorld, cwp, cwq);
+
     rig.getWorldQuaternion(rwq);
 
     dhQ.setFromAxisAngle(UP.set(0, 1, 0).applyQuaternion(owq), 0.1 * dh * dt);
-    target.quaternion.copy(cwq).premultiply(dhQ);
-    const dPos = new THREE.Vector3().subVectors(cwp, owp);
+    targetQuat.copy(cwq).premultiply(dhQ);
+    dPos.subVectors(cwp, owp);
     const zoom = 1 - dz * dt;
     const newLength = dPos.length() * zoom;
     // TODO: These limits should be calculated based on the calculated view distance.
@@ -82,16 +84,21 @@ const orbit = (function() {
       dPos.multiplyScalar(zoom);
     }
 
-    dvQ.setFromAxisAngle(RIGHT.set(1, 0, 0).applyQuaternion(target.quaternion), 0.1 * dv * dt);
-    target.quaternion.premultiply(dvQ);
-    target.position.addVectors(owp, dPos.applyQuaternion(dhQ).applyQuaternion(dvQ)).add(
+    dvQ.setFromAxisAngle(RIGHT.set(1, 0, 0).applyQuaternion(targetQuat), 0.1 * dv * dt);
+    targetQuat.premultiply(dvQ);
+    targetPos.addVectors(owp, dPos.applyQuaternion(dhQ).applyQuaternion(dvQ)).add(
       UP.set(0, 1, 0)
         .multiplyScalar(panY * newLength)
-        .applyQuaternion(target.quaternion)
+        .applyQuaternion(targetQuat)
     );
-    target.matrixNeedsUpdate = true;
-    target.updateMatrices();
-    childMatch(rig, camera, target.matrixWorld);
+
+    targetMatrix.compose(
+      targetPos,
+      targetQuat,
+      targetScale
+    );
+
+    childMatch(rig, camera, targetMatrix);
   };
 })();
 
@@ -205,7 +212,8 @@ function getAudio(o) {
 
 const FALLOFF = 0.9;
 export class CameraSystem {
-  constructor(scene) {
+  constructor(camera, renderer) {
+    this.viewingCamera = camera;
     this.lightsEnabled = localStorage.getItem("show-background-while-inspecting") === "true";
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
@@ -213,10 +221,32 @@ export class CameraSystem {
     this.mode = CAMERA_MODE_SCENE_PREVIEW;
     this.snapshot = { audioTransform: new THREE.Matrix4(), matrixWorld: new THREE.Matrix4() };
     this.audioSourceTargetTransform = new THREE.Matrix4();
+
+    if (customFOV) {
+      this.viewingCamera.fov = customFOV;
+    }
+    this.viewingCamera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+    this.viewingCamera.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
+
+    // xr.updateCamera gets called every render to copy the active cameras properties to the XR cameras. We also want to copy layers.
+    // TODO this logic should either be moved into THREE or removed when we ditch aframe camera system
+    const xrManager = renderer.xr;
+    const updateXRCamera = xrManager.updateCamera;
+    xrManager.updateCamera = function(camera) {
+      updateXRCamera(camera);
+      const xrCamera = xrManager.getCamera();
+      xrCamera.layers.mask = camera.layers.mask;
+      if (xrCamera.cameras.length) {
+        xrCamera.cameras[0].layers.set(Layers.CAMERA_LAYER_XR_LEFT_EYE);
+        xrCamera.cameras[0].layers.mask |= camera.layers.mask;
+        xrCamera.cameras[1].layers.set(Layers.CAMERA_LAYER_XR_RIGHT_EYE);
+        xrCamera.cameras[1].layers.mask |= camera.layers.mask;
+      }
+    };
+
     waitForDOMContentLoaded().then(() => {
       this.avatarPOV = document.getElementById("avatar-pov-node");
       this.avatarRig = document.getElementById("avatar-rig");
-      this.viewingCamera = document.getElementById("viewing-camera");
       this.viewingRig = document.getElementById("viewing-rig");
 
       const bg = new THREE.Mesh(
@@ -225,38 +255,6 @@ export class CameraSystem {
       );
       bg.layers.set(Layers.CAMERA_LAYER_INSPECT);
       this.viewingRig.object3D.add(bg);
-
-      // TODO get rid of built in aframe camera system, we just keep having to fight it
-      const setupCamera = ({ detail: { cameraEl } }) => {
-        if (customFOV) {
-          cameraEl.setAttribute("camera", { fov: customFOV });
-        }
-        const camera = cameraEl.getObject3D("camera");
-        camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
-        camera.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
-      };
-
-      if (this.viewingCamera.components.camera) {
-        setupCamera({ detail: { cameraEl: this.viewingCamera } });
-      } else {
-        scene.addEventListener("camera-set-active", setupCamera);
-      }
-
-      // xr.updateCamera gets called every render to copy the active cameras properties to the XR cameras. We also want to copy layers.
-      // TODO this logic should either be moved into THREE or removed when we ditch aframe camera system
-      const xrManager = scene.renderer.xr;
-      const updateXRCamera = xrManager.updateCamera;
-      xrManager.updateCamera = function(camera) {
-        updateXRCamera(camera);
-        const xrCamera = xrManager.getCamera();
-        xrCamera.layers.mask = camera.layers.mask;
-        if (xrCamera.cameras.length) {
-          xrCamera.cameras[0].layers.set(Layers.CAMERA_LAYER_XR_LEFT_EYE);
-          xrCamera.cameras[0].layers.mask |= camera.layers.mask;
-          xrCamera.cameras[1].layers.set(Layers.CAMERA_LAYER_XR_RIGHT_EYE);
-          xrCamera.cameras[1].layers.mask |= camera.layers.mask;
-        }
-      };
     });
   }
 
@@ -299,7 +297,7 @@ export class CameraSystem {
       camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
     }
 
-    this.viewingCamera.object3DMap.camera.updateMatrices();
+    this.viewingCamera.updateMatrices();
     this.snapshot.matrixWorld.copy(this.viewingRig.object3D.matrixWorld);
 
     this.snapshot.audio = !(inspectable.el && isTagged(inspectable.el, "preventAudioBoost")) && getAudio(inspectable);
@@ -315,7 +313,7 @@ export class CameraSystem {
 
     moveRigSoCameraLooksAtPivot(
       this.viewingRig.object3D,
-      this.viewingCamera.object3DMap.camera,
+      this.viewingCamera,
       this.inspectable,
       this.pivot,
       distanceMod || 1
@@ -380,9 +378,9 @@ export class CameraSystem {
         (this.mode === CAMERA_MODE_FIRST_PERSON ||
           this.mode === CAMERA_MODE_THIRD_PERSON_NEAR ||
           this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
-        scene.audioListener.parent !== this.viewingCamera.object3DMap.camera
+        scene.audioListener.parent !== this.viewingCamera
       ) {
-        this.viewingCamera.object3DMap.camera.add(scene.audioListener);
+        this.viewingCamera.add(scene.audioListener);
       }
     }
   }
@@ -410,9 +408,9 @@ export class CameraSystem {
     const translation = new THREE.Matrix4();
     let uiRoot;
     return function tick(scene, dt) {
-      this.viewingCamera.object3DMap.camera.matrixNeedsUpdate = true;
-      this.viewingCamera.object3DMap.camera.updateMatrix();
-      this.viewingCamera.object3DMap.camera.updateMatrixWorld();
+      this.viewingCamera.matrixNeedsUpdate = true;
+      this.viewingCamera.updateMatrix();
+      this.viewingCamera.updateMatrixWorld();
 
       const entered = scene.is("entered");
       uiRoot = uiRoot || document.getElementById("ui-root");
@@ -424,7 +422,7 @@ export class CameraSystem {
         const scale = new THREE.Vector3();
         this.viewingRig.object3D.updateMatrices();
         this.viewingRig.object3D.matrixWorld.decompose(position, quat, scale);
-        position.setFromMatrixPosition(this.viewingCamera.object3DMap.camera.matrixWorld);
+        position.setFromMatrixPosition(this.viewingCamera.matrixWorld);
         position.y = position.y - 1.6;
         setMatrixWorld(
           this.avatarRig.object3D,
@@ -436,14 +434,14 @@ export class CameraSystem {
         );
         scene.systems["hubs-systems"].characterController.fly = true;
         this.avatarPOV.object3D.updateMatrices();
-        setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.object3DMap.camera.matrixWorld);
+        setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.matrixWorld);
       }
       if (!this.enteredScene && entered) {
         this.enteredScene = true;
         this.mode = CAMERA_MODE_FIRST_PERSON;
       }
       this.avatarPOVRotator = this.avatarPOVRotator || this.avatarPOV.components["pitch-yaw-rotator"];
-      this.viewingCameraRotator = this.viewingCameraRotator || this.viewingCamera.components["pitch-yaw-rotator"];
+      this.viewingCameraRotator = this.viewingCameraRotator || this.viewingCamera.el.components["pitch-yaw-rotator"];
       this.avatarPOVRotator.on = true;
       this.viewingCameraRotator.on = true;
 
@@ -472,11 +470,11 @@ export class CameraSystem {
         this.avatarRig.object3D.updateMatrices();
         setMatrixWorld(this.viewingRig.object3D, this.avatarRig.object3D.matrixWorld);
         if (scene.is("vr-mode")) {
-          this.viewingCamera.object3DMap.camera.updateMatrices();
-          setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.object3DMap.camera.matrixWorld);
+          this.viewingCamera.updateMatrices();
+          setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.matrixWorld);
         } else {
           this.avatarPOV.object3D.updateMatrices();
-          setMatrixWorld(this.viewingCamera.object3DMap.camera, this.avatarPOV.object3D.matrixWorld);
+          setMatrixWorld(this.viewingCamera, this.avatarPOV.object3D.matrixWorld);
         }
       } else if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
         if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR) {
@@ -487,7 +485,7 @@ export class CameraSystem {
         this.avatarRig.object3D.updateMatrices();
         this.viewingRig.object3D.matrixWorld.copy(this.avatarRig.object3D.matrixWorld).multiply(translation);
         setMatrixWorld(this.viewingRig.object3D, this.viewingRig.object3D.matrixWorld);
-        this.avatarPOV.object3D.quaternion.copy(this.viewingCamera.object3DMap.camera.quaternion);
+        this.avatarPOV.object3D.quaternion.copy(this.viewingCamera.quaternion);
         this.avatarPOV.object3D.matrixNeedsUpdate = true;
       } else if (this.mode === CAMERA_MODE_INSPECT) {
         this.avatarPOVRotator.on = false;
@@ -515,13 +513,7 @@ export class CameraSystem {
         }
         const panY = this.userinput.get(paths.actions.inspectPanY) || 0;
         if (this.userinput.get(paths.actions.resetInspectView)) {
-          moveRigSoCameraLooksAtPivot(
-            this.viewingRig.object3D,
-            this.viewingCamera.object3DMap.camera,
-            this.inspectable,
-            this.pivot,
-            1
-          );
+          moveRigSoCameraLooksAtPivot(this.viewingRig.object3D, this.viewingCamera, this.inspectable, this.pivot, 1);
         }
         if (this.snapshot.audio) {
           setMatrixWorld(this.snapshot.audio, this.audioSourceTargetTransform);
@@ -536,7 +528,7 @@ export class CameraSystem {
           orbit(
             this.pivot,
             this.viewingRig.object3D,
-            this.viewingCamera.object3DMap.camera,
+            this.viewingCamera,
             this.horizontalDelta,
             this.verticalDelta,
             this.inspectZoom,

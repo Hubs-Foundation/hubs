@@ -52,10 +52,13 @@ export function disposeNode(node) {
 }
 
 const IDENTITY = new THREE.Matrix4().identity();
+const tempMatrix4 = new THREE.Matrix4();
+const EPSILON = 0.00000000001;
 export function setMatrixWorld(object3D, m) {
   if (!object3D.matrixIsModified) {
     object3D.applyMatrix4(IDENTITY); // hack around our matrix optimizations
   }
+  tempMatrix4.copy(object3D.matrixWorld);
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {
     object3D.parent.updateMatrices();
@@ -67,7 +70,11 @@ export function setMatrixWorld(object3D, m) {
     object3D.matrix.copy(object3D.matrixWorld);
   }
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
-  object3D.childrenNeedMatrixWorldUpdate = true;
+  if (tempMatrix4.near(object3D.matrixWorld, EPSILON)) {
+    object3D.matrixWorld.copy(tempMatrix4);
+  } else {
+    object3D.childrenNeedMatrixWorldUpdate = true;
+  }
 }
 
 // Modified version of Don McCurdy's AnimationUtils.clone
@@ -344,25 +351,6 @@ export const childMatch = (function() {
     setMatrixWorld(parent, newParentMatrix);
   };
 })();
-
-export function traverseAnimationTargets(rootObject, animations, callback) {
-  if (animations && animations.length > 0) {
-    for (const animation of animations) {
-      for (const track of animation.tracks) {
-        const { nodeName } = THREE.PropertyBinding.parseTrackName(track.name);
-        let animatedNode = rootObject.getObjectByProperty("uuid", nodeName);
-
-        if (!animatedNode) {
-          animatedNode = rootObject.getObjectByName(nodeName);
-        }
-
-        if (animatedNode) {
-          callback(animatedNode);
-        }
-      }
-    }
-  }
-}
 
 export function createPlaneBufferGeometry(width, height, widthSegments, heightSegments, flipY = true) {
   const geometry = new THREE.PlaneBufferGeometry(width, height, widthSegments, heightSegments);

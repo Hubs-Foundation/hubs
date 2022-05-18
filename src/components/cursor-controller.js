@@ -9,7 +9,6 @@ const TRANSFORM_COLOR_2 = new THREE.Color(23 / 255, 64 / 255, 118 / 255);
 AFRAME.registerComponent("cursor-controller", {
   schema: {
     cursor: { type: "selector" },
-    cursorVisual: { type: "selector" },
     camera: { type: "selector" },
     far: { default: 100 },
     near: { default: 0.01 },
@@ -20,19 +19,70 @@ AFRAME.registerComponent("cursor-controller", {
   init: function() {
     this.enabled = false;
 
-    this.data.cursorVisual.addEventListener(
-      "loaded",
-      () => {
-        this.data.cursorVisual.object3DMap.mesh.renderOrder = window.APP.RENDER_ORDER.CURSOR;
-      },
-      { once: true }
+    this.cursorVisual = new THREE.Mesh(
+      new THREE.PlaneBufferGeometry(),
+      new THREE.ShaderMaterial({
+        depthTest: false,
+        uniforms: {
+          color: { value: new THREE.Color(0x2f80ed) }
+        },
+        vertexShader: `
+          varying vec2 vPos;
+          void main() {
+            vPos = position.xy;
+
+            vec4 mvPosition = modelViewMatrix * vec4( 0.0, 0.0, 0.0, 1.0 );
+
+            vec2 scale = vec2(
+              length( vec3( modelMatrix[ 0 ].x, modelMatrix[ 0 ].y, modelMatrix[ 0 ].z ) ),
+              length( vec3( modelMatrix[ 1 ].x, modelMatrix[ 1 ].y, modelMatrix[ 1 ].z ) )
+            );
+
+            float distance = -mvPosition.z;
+            scale *= distance; // negates projection scale
+            scale += min(1.0/distance, 0.3); // scale in screen space
+
+            float radius = 0.02;
+            mvPosition.xy += position.xy * radius * scale;
+            gl_Position = projectionMatrix * mvPosition;
+          }`,
+        fragmentShader: `
+          uniform vec3 color;
+          varying vec2 vPos;
+
+          void main() {
+            float distance = length(vPos);
+            if (distance > 0.5) {
+                discard;
+            }
+
+            gl_FragColor = vec4(
+              mix(color, vec3(0.0), step(0.35, distance)),
+              0.8
+            );
+
+            // #include <tonemapping_fragment>
+            #include <encodings_fragment>
+          }`
+      })
     );
+
+    const setCursorScale = () => {
+      this.cursorVisual.scale.setScalar(APP.store.state.preferences["cursorSize"] || 1);
+      this.cursorVisual.matrixNeedsUpdate = true;
+    };
+    APP.store.addEventListener("statechanged", setCursorScale);
+    setCursorScale();
+
+    this.cursorVisual.renderOrder = window.APP.RENDER_ORDER.CURSOR;
+    this.cursorVisual.material.transparent = true;
+    this.data.cursor.object3D.add(this.cursorVisual);
 
     this.intersection = null;
     this.raycaster = new THREE.Raycaster();
     this.raycaster.firstHitOnly = true; // flag specific to three-mesh-bvh
     this.distance = this.data.far;
-    this.color = new THREE.Color(0, 0, 0);
+    this.color = this.cursorVisual.material.uniforms.color.value;
 
     const lineGeometry = new THREE.BufferGeometry();
     lineGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
@@ -125,11 +175,6 @@ AFRAME.registerComponent("cursor-controller", {
         this.color.copy(HIGHLIGHT);
       } else {
         this.color.copy(NO_HIGHLIGHT);
-      }
-
-      if (!this.data.cursorVisual.object3DMap.mesh.material.color.equals(this.color)) {
-        this.data.cursorVisual.object3DMap.mesh.material.color.copy(this.color);
-        this.data.cursorVisual.object3DMap.mesh.material.needsUpdate = true;
       }
 
       if (this.line.material.visible) {

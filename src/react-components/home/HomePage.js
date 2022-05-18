@@ -2,7 +2,6 @@ import React, { useContext, useEffect } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import classNames from "classnames";
 import configs from "../../utils/configs";
-import { getAppLogo } from "../../utils/get-app-logo";
 import { CreateRoomButton } from "./CreateRoomButton";
 import { PWAButton } from "./PWAButton";
 import { useFavoriteRooms } from "./useFavoriteRooms";
@@ -19,8 +18,9 @@ import { Button } from "../input/Button";
 import { Container } from "../layout/Container";
 import { SocialBar } from "../home/SocialBar";
 import { SignInButton } from "./SignInButton";
+import { AppLogo } from "../misc/AppLogo";
+import { isHmc } from "../../utils/isHmc";
 import maskEmail from "../../utils/mask-email";
-import { ReactComponent as HmcLogo } from "../icons/HmcLogo.svg";
 
 export function HomePage() {
   const auth = useContext(AuthContext);
@@ -32,7 +32,6 @@ export function HomePage() {
   const sortedFavoriteRooms = Array.from(favoriteRooms).sort((a, b) => b.member_count - a.member_count);
   const sortedPublicRooms = Array.from(publicRooms).sort((a, b) => b.member_count - a.member_count);
   const wrapInBold = chunk => <b>{chunk}</b>;
-  const isHmc = configs.feature("show_cloud");
   useEffect(() => {
     const qs = new URLSearchParams(location.search);
 
@@ -75,11 +74,7 @@ export function HomePage() {
             <SignInButton mobile />
           )}
           <div className={styles.logoContainer}>
-            {isHmc ? (
-              <HmcLogo className="hmc-logo" />
-            ) : (
-              <img alt={configs.translation("app-name")} src={getAppLogo()} />
-            )}
+            <AppLogo />
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
@@ -192,7 +187,7 @@ export function HomePage() {
           </Button>
         </Column>
       </Container>
-      {isHmc ? (
+      {isHmc() ? (
         <Column center>
           <SocialBar />
         </Column>

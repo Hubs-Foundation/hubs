@@ -15,7 +15,7 @@ export function isIOS() {
 
 function isTablet(mockUserAgent) {
   const userAgent = mockUserAgent || window.navigator.userAgent;
-  return /ipad|Nexus (7|9)|xoom|sch-i800|playbook|tablet|kindle/i.test(userAgent);
+  return isIpadOS() || /ipad|Nexus (7|9)|xoom|sch-i800|playbook|tablet|kindle/i.test(userAgent);
 }
 
 function isR7() {

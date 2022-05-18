@@ -157,16 +157,6 @@ AFRAME.registerComponent("media-video", {
         this.updatePlaybackState();
       });
 
-    // from a-sound
-    const sceneEl = this.el.sceneEl;
-    sceneEl.audioListener = sceneEl.audioListener || new THREE.AudioListener();
-    if (sceneEl.camera) {
-      sceneEl.camera.add(sceneEl.audioListener);
-    }
-    sceneEl.addEventListener("camera-set-active", function(evt) {
-      evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
-    });
-
     let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
     this.onPreferenceChanged = () => {
       const newPref = APP.store.state.preferences.disableLeftRightPanning;

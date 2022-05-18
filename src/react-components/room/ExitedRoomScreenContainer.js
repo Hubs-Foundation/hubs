@@ -8,7 +8,6 @@ export function ExitedRoomScreenContainer({ reason }) {
     <ExitedRoomScreen
       showTerms={configs.feature("show_terms")}
       termsUrl={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
-      logoSrc={configs.image("logo")}
       showSourceLink={configs.feature("show_source_link")}
       reason={reason}
       contactEmail={configs.translation("contact-email")}

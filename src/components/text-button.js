@@ -25,12 +25,12 @@ AFRAME.registerComponent("text-button", {
     this.textEl = this.el.querySelector("[text]");
 
     if (this.el.getObject3D("mesh")) {
-      this.el.components.slice9.material.toneMapped = false;
+      this.el.components.slice9.plane.material.toneMapped = false;
     } else {
       this.el.addEventListener(
         "object3dset",
         () => {
-          this.el.components.slice9.material.toneMapped = false;
+          this.el.components.slice9.plane.material.toneMapped = false;
         },
         { once: true }
       );
