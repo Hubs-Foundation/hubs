@@ -37,7 +37,7 @@ const defaultEnvSettings = {
   backgroundColor: new THREE.Color("#000000"),
 
   fogType: null,
-  fogColor: new THREE.Color("#000000"),
+  fogColor: new THREE.Color("#ffffff"),
   fogDensity: 0.00025,
   fogFar: 1000,
   fogNear: 1
