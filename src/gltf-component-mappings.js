@@ -6,22 +6,6 @@ const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
 
-function registerRootSceneComponent(componentName) {
-  AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
-    const sceneEl = AFRAME.scenes[0];
-
-    sceneEl.setAttribute(componentName, componentData);
-
-    sceneEl.addEventListener(
-      "reset_scene",
-      () => {
-        sceneEl.removeAttribute(componentName);
-      },
-      { once: true }
-    );
-  });
-}
-
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
   el.setAttribute("quack", { quackPercentage: 0.1 });
