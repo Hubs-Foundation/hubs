@@ -2,7 +2,7 @@ name: browser-stack
 
 on:
   schedule:
-    - cron: '18 0 * * 1'
+    - cron: '0 18 * * *'
   workflow_dispatch:
 
 jobs:
