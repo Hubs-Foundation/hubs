@@ -7,7 +7,7 @@ import { Text } from "troika-three-text";
 // Mark this type of object so we can filter in from our shader patching
 Text.prototype.isTroikaText = true;
 
-const THREE_SIDES = {
+export const THREE_SIDES = {
   front: THREE.FrontSide,
   back: THREE.BackSide,
   double: THREE.DoubleSide

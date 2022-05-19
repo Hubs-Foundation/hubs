@@ -16,6 +16,8 @@ export const MediaFrame = defineComponent({
   preview: Types.eid
 });
 
+export const Text = defineComponent();
+
 window.$components = {
   Networked,
   Owned,

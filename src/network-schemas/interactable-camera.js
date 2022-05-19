@@ -1,7 +1,7 @@
 import { createElementEntity, createRef } from "../utils/jsx-entity";
 /** @jsx createElementEntity */
 
-import { renderAsAframeEntity } from "../utils/jsx-entity";
+import { renderAsEntity, renderAsAframeEntity } from "../utils/jsx-entity";
 import { getThemeColor } from "../utils/theme";
 
 const actionColor = getThemeColor("action-color");
@@ -262,3 +262,40 @@ export default {
     }
   ]
 };
+
+function CameraPrefab() {
+  const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshBasicMaterial());
+  const foos = [];
+  for (let i = 0; i < 10; i++) {
+    foos.push(<entity position={[0, i / 10, 0]} text={{ value: "foo bar baz" }} />);
+  }
+
+  return (
+    <entity object3D={cube}>
+      {foos[0]}
+      {foos[1]}
+      {foos[2]}
+      {foos[3]}
+      {foos[4]}
+      {foos[5]}
+      {foos[6]}
+    </entity>
+  );
+}
+
+function spawnACamera(world) {
+  return renderAsEntity(world, CameraPrefab());
+}
+
+const prefabs = new Map([["camera", spawnACamera]]);
+
+function spawnNetworkedEntity(world, prefab, initialData) {
+  const eid = prefabs.get(prefab)(world, initialData);
+  const obj = world.eid2obj.get(eid);
+  AFRAME.scenes[0].object3D.add(obj);
+  return eid;
+}
+
+window.spawnNetworkedEntity = spawnNetworkedEntity;
+
+// window.spawnNetworkedEntity(APP.world, "camera")

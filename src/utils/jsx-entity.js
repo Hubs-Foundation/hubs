@@ -1,7 +1,9 @@
 import { inflateMirror } from "../inflate-mirror";
 import { inflateMediaFrame } from "../inflate-media-frame";
+import { THREE_SIDES } from "../components/troika-text";
 import { Layers } from "../components/layers";
-
+import { Text } from "../bit-components";
+import { Text as TroikaText } from "troika-three-text";
 function isValidChild(child) {
   if (child === undefined) {
     console.warn("found undefined node");
@@ -164,6 +166,31 @@ const createDefaultInflator = Component => {
   };
 };
 
+function inflateText(world, eid, componentProps) {
+  addComponent(world, Text, eid);
+  const text = new TroikaText();
+  Object.entries(componentProps).forEach(([name, value]) => {
+    switch (name) {
+      case "value":
+        text.text = value;
+        break;
+      case "side":
+        text.material.side = THREE_SIDES[value];
+        break;
+      case "opacity":
+        text.material.side = value;
+        break;
+      case "fontUrl":
+        text.font = value;
+        break;
+      default:
+        text[name] = value;
+    }
+  });
+  text.sync();
+  addObject3DComponent(world, eid, text);
+}
+
 const inflators = {
   spin: createDefaultInflator(Spin),
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
@@ -172,11 +199,17 @@ const inflators = {
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
   "media-frame": inflateMediaFrame,
+  object3D: addObject3DComponent,
   water: () => {},
-  text: () => {},
+  text: inflateText,
   waypoint: () => {},
   mirror: inflateMirror
 };
+
+export function renderAsEntity(world, entityDef) {
+  const obj = renderAsAframeEntity(entityDef, world);
+  return obj.eid;
+}
 
 export function renderAsAframeEntity(entityDef, world) {
   if (entityDef.type === "a-entity") {
