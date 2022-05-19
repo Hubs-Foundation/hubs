@@ -263,39 +263,34 @@ export default {
   ]
 };
 
-function CameraPrefab() {
-  const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshBasicMaterial());
-  const foos = [];
-  for (let i = 0; i < 10; i++) {
-    foos.push(<entity position={[0, i / 10, 0]} text={{ value: "foo bar baz" }} />);
-  }
+import { textureLoader } from "../utils/media-utils";
 
+import buttonSrc from "../assets/hud/button.9.png";
+
+function Button({ text, width, height, textureSrc = buttonSrc, ...props }) {
+  const texture = textureLoader.load(textureSrc);
   return (
-    <entity object3D={cube}>
-      {foos[0]}
-      {foos[1]}
-      {foos[2]}
-      {foos[3]}
-      {foos[4]}
-      {foos[5]}
-      {foos[6]}
+    <entity
+      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
+      cursor-raycastable
+      remote-hover-target
+      single-action-button
+      {...props}
+    >
+      <entity
+        text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
+        position={[0, 0, 0.01]}
+      />
     </entity>
   );
 }
 
-function spawnACamera(world) {
-  return renderAsEntity(world, CameraPrefab());
+export function CameraPrefab() {
+  const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshBasicMaterial());
+  const foos = [];
+  for (let i = 1; i < 10; i++) {
+    foos.push(<Button position={[0, i, 0]} width={1 * i} height={0.5} text="hello" />);
+  }
+
+  return <entity>{foos}</entity>;
 }
-
-const prefabs = new Map([["camera", spawnACamera]]);
-
-function spawnNetworkedEntity(world, prefab, initialData) {
-  const eid = prefabs.get(prefab)(world, initialData);
-  const obj = world.eid2obj.get(eid);
-  AFRAME.scenes[0].object3D.add(obj);
-  return eid;
-}
-
-window.spawnNetworkedEntity = spawnNetworkedEntity;
-
-// window.spawnNetworkedEntity(APP.world, "camera")

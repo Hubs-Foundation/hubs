@@ -43,7 +43,7 @@ export class CursorTargettingSystem {
   }
 
   tick(t) {
-    if (this.dirty) {
+    if (this.dirty || enteredCursorRaycastableQuery(APP.world).length) {
       this.populateEntities(this.targets);
       this.dirty = false;
     }

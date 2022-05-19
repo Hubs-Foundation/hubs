@@ -18,6 +18,11 @@ export const MediaFrame = defineComponent({
 
 export const Text = defineComponent();
 
+export const Slice9 = defineComponent({
+  insets: [Types.ui32, 4],
+  size: [Types.f32, 2]
+});
+
 window.$components = {
   Networked,
   Owned,

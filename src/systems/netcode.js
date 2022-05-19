@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
-import { NetworkedMediaFrame, Networked, Owned, MediaFrame } from "../bit-components";
+import { NetworkedMediaFrame, Networked, Owned } from "../bit-components";
 
 const networkedObjectsQuery = defineQuery([Networked]);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
@@ -165,12 +165,18 @@ export function networkSendSystem(world) {
 //
 //   NAF.connection.sendDataGuaranteed(peer, message);
 // }
+//
 
-export function createNetworkedEntity(world, templateId, eid = addEntity(world)) {
-  world.networkSchemas[templateId].addEntity(world, eid);
-  addComponent(world, Networked, eid);
-  Networked.networkId[eid] = networkId++;
-  Networked.templateId[eid] = templateId;
+import { CameraPrefab } from "../network-schemas/interactable-camera";
+import { renderAsEntity } from "../utils/jsx-entity";
+
+const prefabs = new Map([["camera", CameraPrefab]]);
+
+export function createNetworkedEntity(world, prefabName, initialData) {
+  const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
+  const obj = world.eid2obj.get(eid);
+  AFRAME.scenes[0].object3D.add(obj);
+  console.log("Spawning network object", prefabName, obj, eid);
   return eid;
 }
 

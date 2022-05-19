@@ -2,7 +2,7 @@ import { inflateMirror } from "../inflate-mirror";
 import { inflateMediaFrame } from "../inflate-media-frame";
 import { THREE_SIDES } from "../components/troika-text";
 import { Layers } from "../components/layers";
-import { Text } from "../bit-components";
+import { Slice9, Text } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 function isValidChild(child) {
   if (child === undefined) {
@@ -85,7 +85,7 @@ export function createElementEntity(tag, attrs, ...children) {
       type: tag === "a-entity" ? "a-entity" : "entity",
       attrs: outputAttrs,
       components,
-      children: children.filter(isValidChild),
+      children: children.flat().filter(isValidChild),
       ref
     };
   }
@@ -191,15 +191,32 @@ function inflateText(world, eid, componentProps) {
   addObject3DComponent(world, eid, text);
 }
 
+import { updateSlice9Geometry } from "../update-slice9-geometry";
+
+function inflateSlice9(world, eid, { size, insets, texture }) {
+  const geometry = (this.geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3));
+  const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+  console.log(material);
+  const obj = new THREE.Mesh(geometry, material);
+  addObject3DComponent(world, eid, obj);
+
+  addComponent(world, Slice9, eid);
+  Slice9.insets[eid].set(insets);
+  Slice9.size[eid].set(size);
+  updateSlice9Geometry(world, eid);
+}
+
 const inflators = {
   spin: createDefaultInflator(Spin),
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
   "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
   "offers-remote-constraint": createDefaultInflator(OffersRemoteConstraint),
+  "single-action-button": createDefaultInflator(SingleActionButton),
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
   "media-frame": inflateMediaFrame,
   object3D: addObject3DComponent,
+  slice9: inflateSlice9,
   water: () => {},
   text: inflateText,
   waypoint: () => {},
