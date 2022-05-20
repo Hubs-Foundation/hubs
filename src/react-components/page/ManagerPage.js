@@ -7,7 +7,8 @@ import "../../assets/larchiveum/manager.scss";
 import "../../assets/larchiveum/loading.scss";
 import Store from "../../utilities/store";
 import ExhibitionsService from "../../utilities/apiServices/ExhibitionsService";
-import ReserveService from "../../utilities/apiServices/ReserveService";
+import MediaService from "../../utilities/apiServices/MediaService";
+import ProjectService from "../../utilities/apiServices/ProjectService";
 import Popup from "../../react-components/popup/popup";
 import AddIcon from "../../assets/larchiveum/add_black_24dp.svg";
 import Moment from "react-moment";
@@ -19,10 +20,13 @@ import defaultImage from "../../assets/larchiveum/default-image.png";
 import defaultImage1 from "../../assets/larchiveum/siri.gif";
 import Pagination from "../../react-components/pagination/pagination";
 import { APP_ROOT } from "../../utilities/constants";
-import { FaUserFriends, FaRegCalendarAlt, FaLink, FaTools } from "react-icons/fa";
+import { FaUserFriends, FaRegCalendarAlt, FaLink, FaTools ,FaVideo,FaRegImage,FaCodepen,FaListOl} from "react-icons/fa";
 import { Manager } from "react-popper-2";
 import StoreHub from "../../storage/store";
 import UserService from "../../utilities/apiServices/UserService";
+import e from "cors";
+import { counter } from "@fortawesome/fontawesome-svg-core";
+
 
 const store = new StoreHub();
 
@@ -36,25 +40,52 @@ function ManagerHome() {
   toast.configure();
   const [scenes, setScenes] = useState([]);
   const [exhibitionsLoaded, setExhibitionsLoaded] = useState(false);
+  const [projectsLoaded, setProjectsLoaded] = useState(true);
+  const [objectLoaded, setObjectLoaded] = useState(false);
+  const [mediaLoaded, setMediaLoaded] = useState(false);
   const [isOpenExhibition, setIsOpenExhibition] = useState(false);
   const [isCloseRoom, setIsCloseRoom] = useState(false);
   const [isOpenRoom, setIsOpenRoom] = useState(false);
   const [isOpenMedia, setIsOpenMedia] = useState(false);
+  const [isOpenObject, setIsOpenObject] = useState(false);
   const [isDeleteRoom, setIsDeleteRoom] = useState(false);
   const [isOpenToggle, setIsOpenToggle] = useState(false);
   const [exhibition, setExhibition] = useState(undefined);
   const [exhibitionType, setExhibitionType] = useState("create");
   const [exhibitionId, setExhibitionId] = useState(undefined);
+  const [projectId, setProjectId] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
+  const [isListRoom, setIsListRoom] = useState(true);
+  const [isListProject, setIsListProject] = useState(false);
   const [exhibitions, setExhibitions] = useState({
     data: [],
     pagination: {}
   });
+  const [projects, setProjects] = useState({
+    data: [],
+    pagination: {}
+  });
+  const [medias, setMedias] = useState({
+    data: [],
+    pagination: {}
+  });
+  const [objects, setObjects] = useState({
+    data: [],
+    pagination: {}
+  });
+
   const [filterExhibitionList, setfilterExhibitionList] = useState({
     page: 1,
     pageSize: 4,
     sort: "id|desc" //format <attribute>|<order type>
   });
+
+  const [filterProjectList, setfilterProjectList] = useState({
+    page: 1,
+    pageSize: 4,
+    sort: "id|desc" //format <attribute>|<order type>
+  });
+
   function auth() {
     const hubsToken = store.state?.credentials?.token;
     const larchiveumToken = Store.getUser()?.token;
@@ -85,6 +116,14 @@ function ManagerHome() {
     [filterExhibitionList.page]
   );
 
+  useEffect(
+    () => {
+      getAllProjects();
+    },
+    [filterProjectList.page]
+  );
+
+
   const getAllExhibitions = () => {
     const Auth = Store.getUser();
     var data = filterExhibitionList;
@@ -104,13 +143,19 @@ function ManagerHome() {
           toast.error("Get Exhibitions fail !", { autoClose: 1000 });
         }
       });
-    } else {
-      ExhibitionsService.getAllExhibitions(data).then(res => {
+    }
+  };
+
+  const getAllProjects = () => {
+    const Auth = Store.getUser();
+    var data = filterProjectList;
+    if (Auth) {
+      ProjectService.getListProjectWithObjects(data).then(res => {
         if (res.result == "ok") {
-          setExhibitions(res.data);
-          setExhibitionsLoaded(true);
-        } else if (res.result == "fail" && res.error == "get_exhibitions_fail") {
-          toast.error("Get Exhibitions fail !", { autoClose: 1000 });
+          setProjects(res.data);
+          setProjectsLoaded(true);
+        } else if (res.result == "fail") {
+          toast.error("Get Projects fail !", { autoClose: 1000 });
         }
       });
     }
@@ -171,21 +216,113 @@ function ManagerHome() {
 
   const openPopupCustomMedia = exhibitionId => {
     setExhibitionId(exhibitionId);
+    if (exhibitionId) {
+      MediaService.getListMedia(exhibitionId).then(res => {
+        if (res.result == "ok") {
+          setMedias(res.data);
+          setMediaLoaded(true);
+        } else if (res.result == "fail" && res.error == "verify_token_fail") {
+          toast.error("Invalid token !", { autoClose: 3000 });
+          closePopupCustomMedia();
+        }
+        else if (res.result == "fail" && res.error == "wrong_exhibition") {
+          toast.error("Wrong Exhibition !", { autoClose: 3000 });
+          closePopupCustomMedia();
+        }
+       else if (res.result == "fail" && res.error == "get_list_object_fail") {
+          toast.error("Get List Object fail !", { autoClose: 3000 });
+          closePopupCustomMedia();
+        }
+      });
+    }
     setIsOpenMedia(true);
   };
 
   const closePopupCustomMedia = () => {
     setIsOpenMedia(false);
+    setMedias(
+      {    
+        data: [],
+        pagination: {}
+      }
+    );
   };
+
+
+  const openPopupCustomObject = ProjectId => {
+    if (ProjectId) {
+      setProjectId(ProjectId);
+      ProjectService.getListObject(ProjectId).then(res => {
+        if (res.result == "ok") {
+          setObjects(res.data);
+          setObjectLoaded(true);
+        } else if (res.result == "fail" && res.error == "verify_token_fail") {
+          toast.error("Invalid token !", { autoClose: 1000 });
+          closePopupCustomObject();
+        }
+        else if (res.result == "fail" && res.error == "wrong_exhibition") {
+          toast.error("Wrong Exhibition !", { autoClose: 1000 });
+          closePopupCustomObject();
+        }
+      });
+    }
+    setIsOpenObject(true);
+  };
+
+  const closePopupCustomObject = () => {
+    setIsOpenObject(false);
+    setObjects(
+      {    
+        data: [],
+        pagination: {}
+      }
+    );
+  };
+
+  const handelSaveMediaURL = () => {
+    const data = medias.data.map((item) => {
+      return {
+        id : item.uuid,
+        url : item.url
+      }
+    })
+    const dataString = JSON.stringify(data);
+    MediaService.updateMediaMany(dataString).then(res => {
+      if (res.result == "ok") {
+        toast.success("update medias success ", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_list_media") {
+        toast.error("format of list media is incorrect ", { autoClose: 5000 });
+      }
+      else if (res.result == "fail" && res.error == "verify_token_fail") {
+        toast.error("Wrong token !", { autoClose: 5000 });
+      }
+    });
+  }
+
+  const handelOpenSpoke =()=>{
+    // window.location.href = "http://net-informations.com";
+    // window.location.href = APP_ROOT + "/spoke/" + projectId;
+    window.open(APP_ROOT + "/spoke/projects/" + projectId, '_blank');
+  }
 
   const deleteRoom = () => {
     setIsDeleteRoom(false);
   };
+
   const renderExhibitions = () => {
     return (
       <>
         {exhibitionsLoaded ? (
           <>
+            List Tour Larchiveum
+            <button
+                className="btn btn-create"
+                onClick={() => {
+                  openPopupExhibition(), setExhibitionType("create");
+                }}
+              >
+              <img src={AddIcon} />
+            </button>
             {exhibitions.data.map((item, index) => {
               const PublishButton = () => {
                 if (item.public == 1) {
@@ -245,6 +382,7 @@ function ManagerHome() {
 
               if (item.room) {
                 return (
+                <>
                   <div key={index} className={"items"}>
                     <span className="name-tour">{item.name}</span>
                     <img src={getSceneThumnail(item ? item.sceneId : undefined)} alt="" />
@@ -297,6 +435,8 @@ function ManagerHome() {
                       <ClosedButton />
                     </div>
                   </div>
+                </>
+
                 );
               } else {
                 return (
@@ -341,12 +481,73 @@ function ManagerHome() {
                   </div>
                 );
               }
-            }) //.sort((item1, item2)=>item1.id < item2.id ? 1 : -1)
+            })
             }
           </>
         ) : (
           <></>
         )}
+        {exhibitionsLoaded ? (
+            exhibitions.data.length > 0 ? (
+              <Pagination pagination={exhibitions.pagination} callFetchList={changePages} />
+            ) : null
+          ) : null}
+      </>
+    );
+  };
+
+  const renderProjects = () => {
+    return (
+      <>
+        {projectsLoaded ? (
+          <>
+            List Project Larchiveum
+            {projects.data.map((item, index) => {
+              let count_Image=0;
+              let count_Video=0;
+              let count_Model=0;
+              item?.objects.filter(item => item.type === 'image').map(item => {
+                  count_Image++;
+              })
+              item?.objects.filter(item => item.type === 'video').map(item => {
+                  count_Video++;
+              })
+              item?.objects.filter(item => item.type.includes('model')).map(item => {
+                  count_Model++;
+              })
+              return(
+                <>
+                  <div key={index} className={"items"}>
+                    <span className="name-tour">{item?.name}</span>
+                    <img src={item?.thumbnail_url} alt="" />
+                    <div className="content">
+                      <div>
+                        <span className="text-bold">{item?.name}</span>
+                        <div className="d-flex-icon">
+                          <span>{count_Image}<FaVideo className="icon"/></span>
+                          <span>{count_Video}<FaRegImage className="icon"/></span>
+                          <span>{count_Model}<FaCodepen className="icon"/></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="btn-action">
+                      <FaListOl className="btn-list-object" onClick={() => {  openPopupCustomObject(item.id);}}/>
+                    </div>
+                  </div>
+                </>
+              )
+            })}
+       
+          </>
+
+        ) : (
+          <></>
+        )}
+          {projectsLoaded ? (
+            projects.data.length > 0 ? (
+              <Pagination pagination={projects.pagination} callFetchList={changePagesProject} />
+            ) : null
+          ) : null}
       </>
     );
   };
@@ -387,9 +588,18 @@ function ManagerHome() {
     }
   };
 
+
+
   const changePages = page => {
     setfilterExhibitionList({
       ...filterExhibitionList,
+      page
+    });
+  };
+
+  const changePagesProject = page => {
+    setfilterProjectList({
+      ...filterProjectList,
       page
     });
   };
@@ -399,21 +609,14 @@ function ManagerHome() {
     if (userInfo && userInfo.type >= 3) {
       return (
         <div className="title">
-          List Tour Larchiveum
-          <button
-            className="btn btn-create"
-            onClick={() => {
-              openPopupExhibition(), setExhibitionType("create");
-            }}
-          >
-            <img src={AddIcon} />
-          </button>
-          <div className="col">{renderExhibitions()}</div>
-          {exhibitionsLoaded ? (
-            exhibitions.data.length > 0 ? (
-              <Pagination pagination={exhibitions.pagination} callFetchList={changePages} />
-            ) : null
-          ) : null}
+          <div className="col">
+            {isListRoom && (
+              renderExhibitions()
+            )}
+            {isListProject && (
+              renderProjects()
+            )}
+          </div>
         </div>
       );
     } else {
@@ -432,6 +635,7 @@ function ManagerHome() {
     setExhibition({ ...exhibition, [evt.target.name]: value });
   };
 
+
   const getSceneThumnail = sceneId => {
     let thumbnailUrl = null;
     for (const scene of scenes) {
@@ -449,6 +653,7 @@ function ManagerHome() {
     const handleChangeSceneThubmnail = e => {
       for (const scene of scenes) {
         if (scene.id === e.target.value) {
+
           setExhibition({ ...exhibition, [e.target.name]: e.target.value });
         }
       }
@@ -566,6 +771,41 @@ function ManagerHome() {
     });
   };
 
+  const handleChangeURL = (media , evt) => {
+    const value = evt.target.value;
+    media.url = value;
+    media.check = "checking";
+    setMedias({...medias});
+    fetch(media.url).then(response => {
+      const contentType = response.headers.get("content-type");
+      const type = contentType.split("/")[0];
+      if(media.type.includes(type))
+      {
+        media.check = "ok"
+      }
+      else{
+        media.check = "fail"
+      }
+      setMedias({...medias});
+    }).catch((error) => {
+        media.check = "fail";
+        setMedias({...medias});
+      });
+
+  }
+
+  const ActionListRoom = () => {
+    getAllExhibitions();
+    setIsListRoom(true);
+    setIsListProject(false);
+  };
+
+  const ActionListProject = () => {
+    getAllProjects();
+    setIsListRoom(false);
+    setIsListProject(true);
+  };
+
   const handelCloseRoom = exhibitionId => {
     ExhibitionsService.closeOneExhibition(exhibitionId).then(res => {
       if (res.result == "ok") {
@@ -600,6 +840,191 @@ function ManagerHome() {
       }
     });
   };
+
+  const renderListMedia = () => {
+    return (
+      <>
+        {mediaLoaded ? (
+          <>
+            {medias.data.map((item, index) => {
+              if(item)
+              {
+                const Thubmnail  = () => {
+                  if(item.type == 'video')          
+                  {
+                    return(
+                      <>
+                        <video src={item?.url}></video>
+                      </>
+                    )
+                  }
+                  else if(item.type == 'image')
+                  {
+                    return(
+                      <>
+                        <img
+                          src={item?.url}
+                        />
+                      </>
+                    )
+                  }
+                  else
+                  {
+                    return(
+                      <>
+                       
+                      </>
+                    )
+                  }
+                }
+                const icon_type = () => {
+
+                if(item.type == 'video')          
+                  {
+                    return(
+                      <FaVideo className="icon_type"/>
+                    )
+                  }
+                  else if(item.type == 'image')
+                  {
+                    return(
+                      <FaRegImage className="icon_type"/>
+                    )
+                  }
+                }
+                
+                return (
+                  <div key={index}  className="items">
+                    <div className="w-30">
+                      {Thubmnail()}
+                    </div>
+                    <div className="w-70">
+                      <h3 className="mb-3">{item?.name}</h3>
+                      {icon_type()}
+                      <div className="wrap-input100 validate-input">
+                        <input className="input100" type="text" name="src" placeholder="URL" onChange={(e) => handleChangeURL(item, e)} value={item?.url}/>
+                        <span className="focus-input100"/>
+                      </div>
+                      {item?.check != "cheking" ? "" :
+                        <span>Checking the url</span>
+                      }
+                      {item?.check != "fail" ? "" :
+                        <span>The URL is not correct</span>
+                      }
+                    </div>
+                  </div>
+                )
+              }
+            })}
+          </>
+             ) : (
+          <></>
+        )}
+      </>
+  )};
+
+  const renderListObject = () => {
+    return (
+      <>
+        {objectLoaded ? (
+          <>
+            {objects.data.map((item, index) => {
+              if(item)
+              {
+                const Thubmnail  = () => {
+                  if(item.type == 'video')          
+                  {
+                    return(
+                      <>
+                        <video src={item?.src}></video>
+                      </>
+                    )
+                  }
+                  else if(item.type == 'image')
+                  {
+                    return(
+                      <>
+                        <img
+                          src={item?.src}
+                        />
+                      </>
+                    )
+                  }
+                  else
+                  {
+                    return(
+                      <>
+                       <img
+                          src={item?.src}
+                        />
+                      </>
+                    )
+                  }
+                }
+                const icon_type = () => {
+
+                if(item.type == 'video')          
+                  {
+                    return(
+                      <FaVideo className="icon_type"/>
+                    )
+                  }
+                  else if(item.type == 'image')
+                  {
+                    return(
+                      <FaRegImage className="icon_type"/>
+                    )
+                  }
+                  else
+                  {
+                    return(
+                      <FaCodepen className="icon_type"/>
+                    )
+                  }
+                }
+                
+                return (
+                  <div key={index}  className="items list_obj">
+                    <div className="w-30">
+                      {Thubmnail()}
+                    </div>
+                    <div className="w-70">
+                      <h3 className="mb-3">{item?.name}</h3>
+                      {icon_type()}
+                      <label className="checkbox_Url_change">
+                        <input
+                          className="largerCheckbox"
+                          type="checkbox"
+                          name="public"
+                        />
+                        <span className="textCheckbox">URL Changeable</span>
+                      </label>
+          
+                    </div>
+                  </div>
+                )
+              }
+            })}
+          </>
+             ) : (
+          <></>
+        )}
+      </>
+  )};
+
+
+  const renderTabs = () => {
+    const userInfo = Store.getUser();
+      if (userInfo.type == 5) {
+        return (
+        <div className="tabs-Admin">
+          <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >LIST ROOM</button>  
+          <button className={isListProject ? "active" : ""} onClick={ActionListProject}>PROJECT</button>  
+        </div>
+        );
+      }
+    };
+
   if (isLoading) {
     return (
       <div className="loading">
@@ -725,56 +1150,6 @@ function ManagerHome() {
             ]}
             handleClose={() => {
               closePopupExhibition();
-            }}
-          />
-        )}
-
-        {isOpenMedia && (
-          <Popup
-            size={"xl"}
-            title={"Custom Media"}
-            content={
-              <>
-                <form className="create100-form validate-form d-flex form-custom-media" name="form">
-                  <div className="w-100">
-                    <div className="p-t-13 p-b-9">
-                      <div className="items">
-                        <div className="w-30">
-                          <img
-                            className="img"
-                            src="https://assets.website-files.com/6166f095fa2648fa044ae687/617504aa4f9dce2c12f49da4_embeding.jpg-0u5XFVh92xgWzs0qWjbuvb.jpeg"
-                          />
-                        </div>
-                        <div className="w-70">
-                          <div className="wrap-input100 validate-input">
-                            <input className="input100" type="text" name="name" placeholder="Name Tour" />
-                            <span className="focus-input100" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              </>
-            }
-            actions={[
-              {
-                text: "Edit",
-                class: "btn-handle",
-                callback: () => {
-                  handelCustomMedia(exhibitionId);
-                }
-              },
-              {
-                text: "Cancel",
-                class: "btn-cancle",
-                callback: () => {
-                  closePopupCustomMedia();
-                }
-              }
-            ]}
-            handleClose={() => {
-              closePopupCustomMedia();
             }}
           />
         )}
@@ -906,6 +1281,82 @@ function ManagerHome() {
             handleClose={deleteRoom}
           />
         )}
+
+        {isOpenMedia && (
+          <Popup
+            size={"xl"}
+            title={"Custom Media"}
+            content={
+              <>
+                <form className="create100-form validate-form d-flex form-custom-media" name="form">
+                  <div className="w-100">
+                    <div className="p-t-13 p-b-9">
+                      {renderListMedia()}
+                    </div>
+                  </div>
+                </form>
+              </>
+            }
+            actions={[
+              {
+                text: "Save",
+                class: "btn-handle",
+                callback: () => {
+                  handelSaveMediaURL();
+                }
+              },
+              {
+                text: "Cancel",
+                class: "btn-cancle",
+                callback: () => {
+                  closePopupCustomMedia();
+                }
+              }
+            ]}
+            handleClose={() => {
+              closePopupCustomMedia();
+            }}
+          />
+        )}
+
+        {isOpenObject && (
+          <Popup
+            size={"xl"}
+            title={"List Object"}
+            content={
+              <>
+                <form className="create100-form validate-form d-flex form-custom-media" name="form">
+                  <div className="w-100">
+                    <div className="p-t-13 p-b-9">
+                      {renderListObject()}
+                    </div>
+                  </div>
+                </form>
+              </>
+            }
+            actions={[
+              {
+                text: "Setup in Spoke",
+                class: "btn-handle",
+                callback: () => {
+                  handelOpenSpoke();
+                }
+              },
+              {
+                text: "Cancel",
+                class: "btn-cancle",
+                callback: () => {
+                  closePopupCustomObject();
+                }
+              }
+            ]}
+            handleClose={() => {
+              closePopupCustomObject();
+            }}
+          />
+        )}
+
+
         <div className="manager-page">
           <div className="row_1">
             <span className="text_1">Manager Larchiveum</span>
@@ -913,7 +1364,8 @@ function ManagerHome() {
           </div>
 
           <div className="row_2">
-            <AccountPermision />
+            {renderTabs()}
+              <AccountPermision />
           </div>
         </div>
       </>

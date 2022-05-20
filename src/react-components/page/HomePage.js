@@ -19,17 +19,12 @@ import "reactjs-popup/dist/index.css";
 import UserService from "../../utilities/apiServices/UserService";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AuthContext } from "../auth/AuthContext";
-import hubChannel from "./../../utils/hub-channel";
 // ICON
 import {
   MdPublic,
-  MdLaptopChromebook,
   MdPeopleAlt,
   MdCalendarToday,
   MdOutlineCheckCircleOutline,
-  MdOutlineLogout,
-  MdOutlineAccountCircle
 } from "react-icons/md";
 
 const store = new StoreHub();
@@ -114,6 +109,7 @@ function Home() {
       ExhibitionsService.getAllWithAuthExhibitions(data).then(res => {
         if (res.result == "ok") {
           setExhibitions(res.data);
+          console.log(res.data);
           setExhibitionsLoaded(true);
         } else if (res.result == "fail" && res.error == "get_exhibitions_fail") {
           toast.error("Get Exhibitions fail !", { autoClose: 1000 });

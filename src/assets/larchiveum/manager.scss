@@ -199,7 +199,7 @@
         margin-bottom: 45px;
         text-align: center;
         font-weight: 500;
-        color: #FFF;
+        color: #0099ff;
     }
 
     .row_2 {
@@ -225,7 +225,8 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            font-size: 40px;
+            font-size: 34px;
+            color: #FFF;
             cursor: pointer;
 
             &:hover {
@@ -367,6 +368,7 @@
             position: absolute;
             width: 60%;
             margin-left: 20%;
+            
         }
 
         .btn-publish {
@@ -453,7 +455,7 @@
     position: relative;
     width: 100%;
     max-height: 70vh;
-    overflow-y: scroll;
+    overflow-y: auto;
 
     .w-100 {
         width: 100%;
@@ -466,19 +468,111 @@
         .w-30 {
             width: 25%;
 
-            img {
-                border-radius: 10px;
-                width: 200px;
-                height: 140px;
-                object-fit: cover;
+            img , video {
+                border-radius: 5px;
+                width: 180px;
+                height: 120px;
+                object-fit: contain;
+background: #efefef;
             }
         }
 
         .w-70 {
+            position: relative;
             width: 70%;
-            display: flex;
+            display: block;
             justify-content: center;
             align-items: center;
         }
+        .mb-3{
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+    }
+}
+
+.icon_type{
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    color: #111;
+    font-size: 25px;
+}
+
+.tabs-Admin{
+    display: flex;
+    justify-content: center;
+    button{
+        width: 100%;
+        background: #efefef;
+        border-radius: 5px;
+        padding: 15px 50px;
+        margin-left: 20px;
+        margin-right: 20px;
+        margin-top: 30px;
+        color: #333;
+        &.active{
+            background: #0099ff;
+            color: #fff;
+        }
+        &:hover{
+            background: #0099ffaa;
+            color: #fff; 
+        }
+    }
+}
+
+.d-flex-icon{
+    margin-top: 50px;
+    display: flex;
+    width: 100%;
+    span{
+        display: flex;
+        width: 100px;
+        justify-content: center;
+        align-content: center;
+        .icon{
+            margin-left: 20px;
+font-size: 35px;
+            margin-top: 4px;
+        }
+    }
+}
+.btn-list-object{
+    position: absolute;
+    font-size: 50px;
+    margin-top: 86px;
+    right: 100px;
+    cursor: pointer;
+    &:hover{
+        transform: scale(1.2);
+        transition: .5s;
+    }
+}
+.list_obj{
+h3{
+margin-top: 10px;
+    width: 80%;
+}
+.icon_type {
+    position: absolute;
+    right: 5px;
+    top: 45px;
+    color: #111;
+    font-size: 25px;
+}
+}
+.checkbox_Url_change{
+    margin-top: 15px !important;
+    input.largerCheckbox {
+        width: 25px;
+        height: 25px;
+    }
+    .textCheckbox{
+        margin-left: 20px;
+        margin-bottom: 20px;
+        position: absolute;
+        font-size: 17px;
+        font-weight: 500;
     }
 }
