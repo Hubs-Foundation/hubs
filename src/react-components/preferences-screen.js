@@ -511,6 +511,14 @@ const preferenceLabels = defineMessages({
   cursorSize: {
     id: "preferences-screen.preference.cursor-size",
     defaultMessage: "Cursor Size"
+  },
+  joystickMovementSpeed: {
+    id: "preferences-screen.preference.joystick-movement-speed",
+    defaultMessage: "virtual joystick movement value"
+  },
+  joystickRotationSpeed: {
+    id: "preferences-screen.preference.joystick-rotation-speed",
+    defaultMessage: "virtual joystick rotation value"
   }
 });
 
@@ -941,6 +949,24 @@ class PreferencesScreen extends Component {
       [
         CATEGORY_TOUCHSCREEN,
         [
+          {
+            key: "joystickMovementSpeed",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 0.1,
+            max: 3,
+            step: 0.1,
+            digits: 1,
+            defaultNumber: 1.6
+          },
+          {
+            key: "joystickRotationSpeed",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 0.1,
+            max: 1,
+            step: 0.1,
+            digits: 1,
+            defaultNumber: 0.3
+          },
           { key: "enableOnScreenJoystickLeft", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
           { key: "enableOnScreenJoystickRight", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
           { key: "enableGyro", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },

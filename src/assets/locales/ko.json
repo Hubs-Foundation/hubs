@@ -413,6 +413,8 @@
   "preferences-screen.preference.disable-strafing": "좌우 이동 사용 안 함",
   "preferences-screen.preference.disable-teleporter": "텔레포트 사용 안 함",
   "preferences-screen.preference.movement-speed-modifier": "이동속도 조절",
+  "preferences-screen.preference.joystick-movement-speed": "버추얼 조이스틱 이동속도 조절",
+  "preferences-screen.preference.joystick-rotation-speed": "버추얼 조이스틱 회전속도 조절",
   "preferences-screen.preference.enable-on-screen-joystick-left": "왼쪽 화면 조이스틱을 사용하여 캐릭터 이동",
   "preferences-screen.preference.enable-on-screen-joystick-right": "오른쪽 화면 조이스틱을 사용하여 시점 이동",
   "preferences-screen.preference.enable-gyro": "자이로스코프 사용 (브라우저/디바이스가 지원하면)",

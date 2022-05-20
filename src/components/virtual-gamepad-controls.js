@@ -72,6 +72,10 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.lookDy = 0;
     this.lookDx = 0;
 
+    // original moveSpeed = 0.2, lookSpeed = 0.05
+    this.moveSpeed = 0.3;
+    this.lookSpeed = 0.03;
+
     this.el.sceneEl.addEventListener("enter-vr", this.onEnterVr);
     this.el.sceneEl.addEventListener("exit-vr", this.onExitVr);
   },
@@ -175,7 +179,16 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     if (window.APP.preferenceScreenIsVisible) return;
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
-    this.displacement.set(Math.cos(angle), 0, -Math.sin(angle)).multiplyScalar(force * 1.85);
+    const move_default = 1.6;
+    const preferences = window.APP.store.state.preferences;
+
+    if(preferences.joystickMovementSpeed == undefined)
+      this.moveSpeed = move_default;
+    else
+      this.moveSpeed = preferences.joystickMovementSpeed;
+  
+    // this.displacement.set(Math.cos(angle), 0, -Math.sin(angle)).multiplyScalar(force * 1.85);
+    this.displacement.set(Math.cos(angle), 0, -Math.sin(angle)).multiplyScalar(force * this.moveSpeed);
     this.moving = true;
   },
 
@@ -189,10 +202,20 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     // Set pitch and yaw angles on right stick move
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
-    const turnStrength = 0.05;
+    // const turnStrength = 0.05;
+    const look_default = 0.3;
+    const preferences = window.APP.store.state.preferences;
+
+    if(preferences.joystickRotationSpeed == undefined)
+      this.lookSpeed = look_default;
+    else
+      this.lookSpeed = preferences.joystickRotationSpeed;
+    
+      this.lookSpeed = this.lookSpeed * 0.1;
+
     this.rotating = true;
-    this.lookDy = -Math.cos(angle) * force * turnStrength;
-    this.lookDx = Math.sin(angle) * force * turnStrength;
+    this.lookDy = -Math.cos(angle) * force * this.lookSpeed;
+    this.lookDx = Math.sin(angle) * force * this.lookSpeed;
   },
 
   onLookJoystickEnd() {
