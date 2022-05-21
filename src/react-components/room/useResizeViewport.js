@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 // ResizeObserver not currently supported in Firefox Android
 import ResizeObserver from "resize-observer-polyfill";
+import {
+  addOrientationChangeListener,
+  removeOrientationChangeListener,
+  getMaxResolutionWidth,
+  getMaxResolutionHeight
+} from "../../utils/screen-orientation-utils";
 
 // Modified from AFrame
 function getRenderResolution(canvasRect, maxResolution, isVR) {
@@ -35,17 +41,16 @@ function getRenderResolution(canvasRect, maxResolution, isVR) {
 
 export function useResizeViewport(viewportRef, store, scene) {
   const [maxResolution, setMaxResolution] = useState({
-    width: window.screen.width,
-    height: window.screen.height
+    width: getMaxResolutionWidth(store),
+    height: getMaxResolutionHeight(store)
   });
 
   useEffect(
     () => {
       function onStoreChanged() {
-        const { maxResolutionWidth, maxResolutionHeight } = store.state.preferences;
         setMaxResolution({
-          width: maxResolutionWidth === undefined ? window.screen.width : maxResolutionWidth,
-          height: maxResolutionHeight === undefined ? window.screen.height : maxResolutionHeight
+          width: getMaxResolutionWidth(store),
+          height: getMaxResolutionHeight(store)
         });
       }
 
@@ -101,5 +106,23 @@ export function useResizeViewport(viewportRef, store, scene) {
       };
     },
     [viewportRef, scene, maxResolution]
+  );
+
+  useEffect(
+    () => {
+      function onOrientationChange() {
+        setMaxResolution({
+          width: getMaxResolutionWidth(store),
+          height: getMaxResolutionHeight(store)
+        });
+      }
+
+      addOrientationChangeListener(onOrientationChange);
+
+      return () => {
+        removeOrientationChangeListener(onOrientationChange);
+      };
+    },
+    [store]
   );
 }
