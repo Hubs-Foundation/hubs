@@ -4,6 +4,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { canMove } from "../utils/permissions-utils";
 import { isTagged } from "../components/tags";
 import { addComponent, hasComponent, removeComponent } from "bitecs";
+
 import {
   Held,
   Holdable,
@@ -18,7 +19,7 @@ import {
   HeldLeftRemote,
   HeldRightHand,
   HeldLeftHand
-} from "../utils/jsx-entity";
+} from "../bit-components";
 
 function findHandCollisionTargetForHand(bodyId) {
   const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;

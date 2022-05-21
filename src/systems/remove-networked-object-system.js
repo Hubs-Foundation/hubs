@@ -1,7 +1,7 @@
 import { removeNetworkedObject } from "../utils/removeNetworkedObject";
-import { RemoveNetworkedEntityButton, Interacted } from "../utils/jsx-entity";
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import { defineQuery } from "bitecs";
+import { Interacted, RemoveNetworkedEntityButton } from "../bit-components";
 
 const query = defineQuery([RemoveNetworkedEntityButton, Interacted]);
 

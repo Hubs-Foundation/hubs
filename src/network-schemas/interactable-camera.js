@@ -1,7 +1,6 @@
-import { createElementEntity, createRef } from "../utils/jsx-entity";
+import { renderAsAframeEntity, createElementEntity, createRef } from "../utils/jsx-entity";
 /** @jsx createElementEntity */
 
-import { renderAsEntity, renderAsAframeEntity } from "../utils/jsx-entity";
 import { getThemeColor } from "../utils/theme";
 
 const actionColor = getThemeColor("action-color");
@@ -128,6 +127,10 @@ function InteractableCamera() {
       position-at-border={{ target: ".camera-menu", isFlat: true }}
       set-yxz-order
     >
+      <entity ref={cameraRef} camera={layers} rotation={rotation} position={position} />
+
+      <entity object3D={loadGLTF(src)} />
+
       <THREE.Mesh
         name="screen"
         ref={screenRef}
@@ -294,3 +297,18 @@ export function CameraPrefab() {
 
   return <entity>{foos}</entity>;
 }
+
+export const FLAGS = {
+  captureAudio: 1,
+  showCameraViewfinder: 1 << 1
+};
+
+export const STATES = {
+  isDoingNothing: 0,
+  isSnapping: 1,
+  isRecording: 2
+};
+
+// Data on a camera
+// label, snapButton, snapMenu, screen, selfieScreen
+// renderTarget, camera

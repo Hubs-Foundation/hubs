@@ -1,10 +1,11 @@
 // https://dev.reticulum.io/scenes/7vGnzkM/outdoor-meetup
 // A scene with media-frames
-import { addObject3DComponent, MediaFramePreviewClone, Held, Rigidbody } from "../utils/jsx-entity";
+
+import { addObject3DComponent } from "../utils/jsx-entity";
 import { MediaType } from "../utils/media-utils";
-import { addComponent, addEntity, defineComponent, defineQuery, entityExists, exitQuery, hasComponent } from "bitecs";
+import { addEntity, defineQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
-import { NetworkedMediaFrame, MediaFrame, Owned } from "../bit-components";
+import { MediaFramePreviewClone, NetworkedMediaFrame, MediaFrame, Owned, Held, Rigidbody } from "../bit-components";
 import { takeOwnership } from "./netcode";
 
 const EMPTY_COLOR = 0x6fc0fd;

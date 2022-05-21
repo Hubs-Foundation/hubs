@@ -3,11 +3,11 @@ import MediaSearchStore from "./storage/media-search-store";
 import qsTruthy from "./utils/qs_truthy";
 import { addEntity, createWorld, defineQuery, enterQuery, exitQuery, hasComponent, pipe } from "bitecs";
 
-import { Networked, Owned } from "./bit-components";
 import {
+  Networked,
+  Owned,
   Spin,
   Object3DTag,
-  NETWORK_FLAGS,
   RemoteHoverTarget,
   CursorRaycastable,
   Holdable,
@@ -15,7 +15,7 @@ import {
   Rigidbody,
   PhysicsShape,
   FloatyObject
-} from "./utils/jsx-entity";
+} from "./bit-components";
 import cubeSchema from "./network-schemas/interactable-cube";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 

@@ -1,5 +1,5 @@
 import { addComponent, removeComponent } from "bitecs";
-import { Pinnable, Pinned } from "../utils/jsx-entity";
+import { Pinnable, Pinned } from "../bit-components";
 
 AFRAME.registerComponent("pinnable", {
   schema: {

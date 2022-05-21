@@ -1,4 +1,4 @@
-import { createElementEntity, renderAsAframeEntity, InteractableCube } from "../utils/jsx-entity";
+import { createElementEntity, renderAsAframeEntity } from "../utils/jsx-entity";
 /** @jsx createElementEntity */
 
 export const mediaFrameSchema = {

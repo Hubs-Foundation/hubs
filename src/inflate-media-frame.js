@@ -1,5 +1,5 @@
-import { addObject3DComponent, Rigidbody, PhysicsShape } from "./utils/jsx-entity";
-import { NetworkedMediaFrame, MediaFrame } from "./bit-components";
+import { addObject3DComponent } from "./utils/jsx-entity";
+import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape } from "./bit-components";
 import { addComponent } from "bitecs";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 import { MediaType } from "./utils/media-utils";

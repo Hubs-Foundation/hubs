@@ -1,5 +1,5 @@
 import { addComponent, removeComponent, defineQuery } from "bitecs";
-import { Interacted, SingleActionButton, HoveredRightRemote, HoveredLeftRemote } from "../utils/jsx-entity";
+import { HoveredLeftRemote, HoveredRightRemote, Interacted, SingleActionButton } from "../bit-components";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 
 const interactedQuery = defineQuery([Interacted]);

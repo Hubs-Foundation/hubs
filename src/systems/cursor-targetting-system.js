@@ -1,6 +1,6 @@
 import { defineQuery, enterQuery } from "bitecs";
+import { CursorRaycastable } from "../bit-components";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { CursorRaycastable } from "../utils/jsx-entity";
 
 const noop = function() {};
 AFRAME.registerComponent("overwrite-raycast-as-noop", {

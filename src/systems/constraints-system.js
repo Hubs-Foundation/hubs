@@ -1,7 +1,7 @@
 /* global NAF AFRAME */
 import { CONSTANTS } from "three-ammo";
+import { Rigidbody } from "../bit-components";
 import { isTagged } from "../components/tags";
-import { Rigidbody } from "../utils/jsx-entity";
 const ACTIVATION_STATE = CONSTANTS.ACTIVATION_STATE;
 
 export class ConstraintsSystem {

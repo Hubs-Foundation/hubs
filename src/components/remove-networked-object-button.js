@@ -1,5 +1,5 @@
-import { RemoveNetworkedEntityButton } from "../utils/jsx-entity";
 import { addComponent, removeComponent } from "bitecs";
+import { RemoveNetworkedEntityButton } from "../bit-components";
 
 AFRAME.registerComponent("remove-networked-object-button", {
   init() {

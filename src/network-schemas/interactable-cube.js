@@ -1,10 +1,10 @@
-import { createElementEntity, createRef, Spin } from "../utils/jsx-entity";
+import { renderAsAframeEntity, createElementEntity } from "../utils/jsx-entity";
 /** @jsx createElementEntity */
 
-import { renderAsAframeEntity } from "../utils/jsx-entity";
 import { defineQuery, Changed } from "bitecs";
 
 import * as bitecs from "bitecs";
+import { Spin } from "../bit-components";
 window.$B = bitecs;
 
 function ab2str(buffer) {

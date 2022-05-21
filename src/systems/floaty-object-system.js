@@ -9,10 +9,9 @@ import {
   hasComponent,
   Not
 } from "bitecs";
+import { FloatyObject, Held, Rigidbody } from "../bit-components";
 
 export const MakeStaticWhenAtRest = defineComponent();
-
-import { FloatyObject, Rigidbody, Held } from "../utils/jsx-entity";
 
 const heldFloatyObjectsQuery = defineQuery([FloatyObject, Rigidbody, Held]);
 const exitedHeldFloatyObjectsQuery = exitQuery(heldFloatyObjectsQuery);

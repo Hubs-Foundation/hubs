@@ -1,6 +1,5 @@
 import { addComponent } from "bitecs";
-
-import { FloatyObject } from "../utils/jsx-entity";
+import { FloatyObject } from "../bit-components";
 /* global AFRAME */
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 

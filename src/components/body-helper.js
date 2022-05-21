@@ -1,6 +1,6 @@
 import { addComponent, removeComponent } from "bitecs";
 import { CONSTANTS } from "three-ammo";
-import { Rigidbody } from "../utils/jsx-entity";
+import { Rigidbody } from "../bit-components";
 const ACTIVATION_STATE = CONSTANTS.ACTIVATION_STATE,
   TYPE = CONSTANTS.TYPE;
 

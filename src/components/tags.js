@@ -13,7 +13,7 @@ import {
   Inspectable,
   PreventAudioBoost,
   IgnoreSpaceBubble
-} from "../utils/jsx-entity";
+} from "../bit-components";
 
 const tag2ecs = {
   isHoldable: Holdable,
