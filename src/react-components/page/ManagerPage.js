@@ -26,6 +26,7 @@ import StoreHub from "../../storage/store";
 import UserService from "../../utilities/apiServices/UserService";
 import e from "cors";
 import { counter } from "@fortawesome/fontawesome-svg-core";
+import { object } from "prop-types";
 
 
 const store = new StoreHub();
@@ -57,18 +58,22 @@ function ManagerHome() {
   const [isLoading, setIsLoading] = useState(true);
   const [isListRoom, setIsListRoom] = useState(true);
   const [isListProject, setIsListProject] = useState(false);
+
   const [exhibitions, setExhibitions] = useState({
     data: [],
     pagination: {}
   });
+
   const [projects, setProjects] = useState({
     data: [],
     pagination: {}
   });
+
   const [medias, setMedias] = useState({
     data: [],
     pagination: {}
   });
+
   const [objects, setObjects] = useState({
     data: [],
     pagination: {}
@@ -118,11 +123,13 @@ function ManagerHome() {
 
   useEffect(
     () => {
-      getAllProjects();
+    const userInfo = Store.getUser();
+      if (userInfo.type == 5) {
+        getAllProjects();
+      }
     },
     [filterProjectList.page]
   );
-
 
   const getAllExhibitions = () => {
     const Auth = Store.getUser();
@@ -248,7 +255,6 @@ function ManagerHome() {
     );
   };
 
-
   const openPopupCustomObject = ProjectId => {
     if (ProjectId) {
       setProjectId(ProjectId);
@@ -300,13 +306,464 @@ function ManagerHome() {
   }
 
   const handelOpenSpoke =()=>{
-    // window.location.href = "http://net-informations.com";
-    // window.location.href = APP_ROOT + "/spoke/" + projectId;
-    window.open(APP_ROOT + "/spoke/projects/" + projectId, '_blank');
+    let list_uuid = [];
+     list_uuid = objects.data.map((item) => {
+      if(item?.changeable == true)
+      {
+        return (item.uuid)
+      }
+      return false;
+    })
+    const dataString = JSON.stringify(list_uuid);
+    console.log(projectId)
+    ProjectService.updateChangeableObjects( projectId, dataString).then(res => {
+      if (res.result == "ok") {
+        toast.success("update medias success ", { autoClose: 5000 });
+        window.open(APP_ROOT + "/spoke/projects/" + projectId , '_blank');
+      } else if (res.result == "fail" && res.error == "invalid_list_changeable_object_uuid") {
+        toast.error("List changeable object uuid incorrect", { autoClose: 5000 });
+      }
+      else if (res.result == "fail" && res.error == "verify_token_fail") {
+        toast.error("Wrong token !", { autoClose: 5000 });
+      }
+    });
+
   }
 
   const deleteRoom = () => {
     setIsDeleteRoom(false);
+  };
+
+  const ActionListRoom = () => {
+    getAllExhibitions();
+    setIsListRoom(true);
+    setIsListProject(false);
+  };
+
+  const ActionListProject = () => {
+    getAllProjects();
+    setIsListRoom(false);
+    setIsListProject(true);
+  };
+
+  const changePages = page => {
+    setfilterExhibitionList({
+      ...filterExhibitionList,
+      page
+    });
+  };
+
+  const changePagesProject = page => {
+    setfilterProjectList({
+      ...filterProjectList,
+      page
+    });
+  };
+
+  const handleChange = evt => {
+    const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
+    setExhibition({ ...exhibition, [evt.target.name]: value });
+  };
+
+  const handleChangeable = (object,evt) => {
+    if(object.changeable == true)
+    {
+      object.changeable = false;
+    }
+    else
+    {
+      object.changeable = true;
+    }
+    setObjects({...objects});
+  };
+
+  const handleChangeURL = (media , evt) => {
+    const value = evt.target.value;
+    media.url = value;
+    media.check = "checking";
+    setMedias({...medias});
+    fetch(media.url).then(response => {
+      const contentType = response.headers.get("content-type");
+      const type = contentType.split("/")[0];
+      if(media.type.includes(type))
+      {
+        media.check = "ok"
+      }
+      else{
+        media.check = "fail"
+      }
+      setMedias({...medias});
+    }).catch((error) => {
+        media.check = "fail";
+        setMedias({...medias});
+      });
+
+  }
+
+  const getSceneThumnail = sceneId => {
+    let thumbnailUrl = null;
+    for (const scene of scenes) {
+      if (scene.id === sceneId) {
+        thumbnailUrl = scene.thumbnailUrl;
+        break;
+      } else if (sceneId === undefined) {
+        thumbnailUrl = defaultImage;
+      }
+    }
+    return thumbnailUrl;
+  };
+
+  const ListScenes = () => {
+    const handleChangeSceneThubmnail = e => {
+      for (const scene of scenes) {
+        if (scene.id === e.target.value) {
+
+          setExhibition({ ...exhibition, [e.target.name]: e.target.value });
+        }
+      }
+    };
+
+    return (
+      <>
+        <div className="wrap-input100 validate-input">
+          <select
+            id="sceneSelection"
+            className="input100"
+            name="sceneId"
+            value={exhibition ? exhibition.sceneId : undefined}
+            onChange={handleChangeSceneThubmnail}
+          >
+            <option>---Choose Scene---</option>
+            {scenes.map((item, index) => {
+              return (
+                <option key={index} value={item.id}>
+                  {item.name}
+                </option>
+              );
+            })}
+          </select>
+          <span className="focus-input100" />
+        </div>
+        <div className="p-t-13 p-b-9">
+          <span className="txt1">Scene Thubmnail</span>
+        </div>
+        <img className="f-image-thumbnail" src={getSceneThumnail(exhibition ? exhibition.sceneId : undefined)} alt="" />
+      </>
+    );
+  };
+
+  const handleCreate = () => {
+    const data = exhibition;
+    ExhibitionsService.postCreateOne(data).then(res => {
+      if (res.result == "ok") {
+        toast.success("Create new tour success !", { autoClose: 5000 });
+        setIsOpenExhibition(false);
+        // setExhibitions([...exhibitions, res.data]);
+        window.location.reload();
+      } else if (res.result == "fail" && res.error == "verify_token_fail") {
+        toast.error("You do not have permission to change or create !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "create_exhibition_error") {
+        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_name") {
+        toast.error("name should be length 4-255 !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_maxSize") {
+        toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_startDate") {
+        toast.error("You must select the start date !", { autoClose: 5000 });
+      } else {
+        toast.error("System error Please try again later !", { autoClose: 5000 });
+      }
+    });
+  };
+
+  const handleEdit = () => {
+    const data = exhibition;
+    ExhibitionsService.putUpdateOne(data).then(res => {
+      if (res.result == "ok") {
+        exhibitions.data.forEach(exhibition => {
+          if (exhibition.id == res.data.id) {
+            toast.success("Edit Exhibition success !", { autoClose: 5000 });
+            setIsOpenExhibition(false);
+            getAllExhibitions();
+          }
+        });
+      } else if (res.result == "fail" && res.error == "verify_token_fail") {
+        toast.error("You do not have permission to change or create !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "create_exhibition_error") {
+        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people!", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_name") {
+        toast.error("name should be length 4-255 !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_maxSize") {
+        toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_startDate") {
+        toast.error("You must select the start date !", { autoClose: 5000 });
+      } else {
+        toast.error("System error Please try again later !", { autoClose: 5000 });
+      }
+    });
+  };
+
+  const handelTogglePublic = exhibitionId => {
+    ExhibitionsService.patchTogglePublic(exhibitionId).then(res => {
+      if (res.result == "ok") {
+        exhibitions.data.forEach(exhibition => {
+          if (exhibition.id == exhibitionId) {
+            exhibition.public = res.data.public;
+            toast.success("Change status success !", { autoClose: 5000 });
+          }
+        });
+        setIsOpenToggle(!isOpenToggle);
+      } else if (res.result == "fail" && res.error == "invalid_id") {
+        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
+      } else {
+        toast.error("System error Please try again later !", { autoClose: 5000 });
+      }
+    });
+  };
+
+  const handelToggleDeleteRoom = exhibitionId => {
+    ExhibitionsService.deleteOneExhibition(exhibitionId).then(res => {
+      if (res.result == "ok") {
+        toast.success("Delete success !", { autoClose: 5000 });
+        setIsDeleteRoom(!isDeleteRoom);
+        getAllExhibitions();
+      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
+        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
+      } else {
+        toast.error("System error Please try again later !", { autoClose: 5000 });
+      }
+    });
+  };
+
+  const handelCloseRoom = exhibitionId => {
+    ExhibitionsService.closeOneExhibition(exhibitionId).then(res => {
+      if (res.result == "ok") {
+        exhibitions.data.forEach(exhibition => {
+          if (exhibition.id == exhibitionId) {
+            exhibition.closed = res.data.closed;
+            toast.success("Change status success !", { autoClose: 5000 });
+          }
+        });
+        setIsCloseRoom(!isCloseRoom);
+      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
+        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
+      } else {
+        toast.error("System error Please try again later !", { autoClose: 5000 });
+      }
+    });
+  };
+
+  const handelOpenRoom = exhibitionId => {
+    ExhibitionsService.openOneExhibition(exhibitionId).then(res => {
+      if (res.result == "ok") {
+        exhibitions.data.forEach(exhibition => {
+          if (exhibition.id == exhibitionId) {
+            exhibition.closed = res.data.closed;
+            toast.success("Change status success !", { autoClose: 5000 });
+          }
+        });
+        setIsOpenRoom(!isOpenRoom);
+      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
+        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
+      } else {
+        toast.error("System error Please try again later !", { autoClose: 5000 });
+      }
+    });
+  };
+
+  const renderListMedia = () => {
+    return (
+      <>
+        {mediaLoaded ? (
+          <>
+            {medias.data.map((item, index) => {
+              if(item)
+              {
+                const Thubmnail  = () => {
+                  if(item.type == 'video')          
+                  {
+                    return(
+                      <>
+                        <video src={item?.url}></video>
+                      </>
+                    )
+                  }
+                  else if(item.type == 'image')
+                  {
+                    return(
+                      <>
+                        <img
+                          src={item?.url}
+                        />
+                      </>
+                    )
+                  }
+                  else
+                  {
+                    return(
+                      <>
+                       
+                      </>
+                    )
+                  }
+                }
+                const icon_type = () => {
+
+                if(item.type == 'video')          
+                  {
+                    return(
+                      <FaVideo className="icon_type"/>
+                    )
+                  }
+                  else if(item.type == 'image')
+                  {
+                    return(
+                      <FaRegImage className="icon_type"/>
+                    )
+                  }
+                }
+                
+                return (
+                  <div key={index}  className="items">
+                    <div className="w-30">
+                      {Thubmnail()}
+                    </div>
+                    <div className="w-70">
+                      <h3 className="mb-3">{item?.name}</h3>
+                      {icon_type()}
+                      <div className="wrap-input100 validate-input">
+                        <input className="input100" type="text" name="src" placeholder="URL" onChange={(e) => handleChangeURL(item, e)} value={item?.url}/>
+                        <span className="focus-input100"/>
+                      </div>
+                      {item?.check != "cheking" ? "" :
+                        <span>Checking the url</span>
+                      }
+                      {item?.check != "fail" ? "" :
+                        <span>The URL is not correct</span>
+                      }
+                    </div>
+                  </div>
+                )
+              }
+            })}
+          </>
+             ) : (
+          <></>
+        )}
+      </>
+  )};
+
+  const renderListObject = () => {
+    return (
+      <>
+        {objectLoaded ? (
+          <>
+
+            {objects.data.map((item, index) => {
+              if(item)
+              {
+                const Thubmnail  = () => {
+                  if(item.type == 'video')          
+                  {
+                    return(
+                      <>
+                        <video src={item?.src}></video>
+                      </>
+                    )
+                  }
+                  else if(item.type == 'image')
+                  {
+                    return(
+                      <>
+                        <img
+                          src={item?.src}
+                        />
+                      </>
+                    )
+                  }
+                  else
+                  {
+                    return(
+                      <>
+                       <img
+                          src={item?.src}
+                        />
+                      </>
+                    )
+                  }
+                }
+                if((item?.changeable)==undefined)
+                {
+                  if(item.src.includes(item.uuid))
+                  {
+                    item.changeable = true
+                  }
+                  else{
+                    item.changeable = false
+                  }
+                }
+                const icon_type = () => {
+
+                if(item.type == 'video')          
+                  {
+                    return(
+                      <FaVideo className="icon_type"/>
+                    )
+                  }
+                  else if(item.type == 'image')
+                  {
+                    return(
+                      <FaRegImage className="icon_type"/>
+                    )
+                  }
+                  else
+                  {
+                    return(
+                      <FaCodepen className="icon_type"/>
+                    )
+                  }
+                }
+                return (
+                  <div key={index}  className="items list_obj">
+                    <div className="w-30">
+                      {Thubmnail()}
+                    </div>
+                    <div className="w-70">
+                      <h3 className="mb-3">{item?.name}</h3>
+                      {icon_type()}
+                      <label className="checkbox_Url_change">
+                        <input
+                          className="largerCheckbox"
+                          type="checkbox"
+                          name="public"
+                          checked={item?.changeable}
+                          onChange={(e) => handleChangeable(item, e)}
+                        />
+                        <span className="textCheckbox">URL Changeable</span>
+                      </label>
+          
+                    </div>
+                  </div>
+                )
+              }
+            })}
+          </>
+             ) : (
+          <></>
+        )}
+      </>
+  )};
+
+  const renderTabs = () => {
+    const userInfo = Store.getUser();
+      if (userInfo.type == 5) {
+        return (
+        <div className="tabs-Admin">
+          <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >LIST ROOM</button>  
+          <button className={isListProject ? "active" : ""} onClick={ActionListProject}>PROJECT</button>  
+        </div>
+        );
+      }
   };
 
   const renderExhibitions = () => {
@@ -552,6 +1009,32 @@ function ManagerHome() {
     );
   };
 
+  const AccountPermision = () => {
+    const userInfo = Store.getUser();
+    if (userInfo && userInfo.type >= 3) {
+      return (
+        <div className="title">
+          <div className="col">
+            {isListRoom && (
+              renderExhibitions()
+            )}
+            {isListProject && (
+              renderProjects()
+            )}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="title">
+          <div className="title_access_err">
+            You do not have access <br /> Please login with an account manager to use this service
+          </div>
+        </div>
+      );
+    }
+  };
+
   const IAuth = () => {
     const userInfo = Store.getUser();
     const MasterAdmin = () => {
@@ -587,443 +1070,6 @@ function ManagerHome() {
       return <></>;
     }
   };
-
-
-
-  const changePages = page => {
-    setfilterExhibitionList({
-      ...filterExhibitionList,
-      page
-    });
-  };
-
-  const changePagesProject = page => {
-    setfilterProjectList({
-      ...filterProjectList,
-      page
-    });
-  };
-
-  const AccountPermision = () => {
-    const userInfo = Store.getUser();
-    if (userInfo && userInfo.type >= 3) {
-      return (
-        <div className="title">
-          <div className="col">
-            {isListRoom && (
-              renderExhibitions()
-            )}
-            {isListProject && (
-              renderProjects()
-            )}
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="title">
-          <div className="title_access_err">
-            You do not have access <br /> Please login with an account manager to use this service
-          </div>
-        </div>
-      );
-    }
-  };
-
-  const handleChange = evt => {
-    const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
-    setExhibition({ ...exhibition, [evt.target.name]: value });
-  };
-
-
-  const getSceneThumnail = sceneId => {
-    let thumbnailUrl = null;
-    for (const scene of scenes) {
-      if (scene.id === sceneId) {
-        thumbnailUrl = scene.thumbnailUrl;
-        break;
-      } else if (sceneId === undefined) {
-        thumbnailUrl = defaultImage;
-      }
-    }
-    return thumbnailUrl;
-  };
-
-  const ListScenes = () => {
-    const handleChangeSceneThubmnail = e => {
-      for (const scene of scenes) {
-        if (scene.id === e.target.value) {
-
-          setExhibition({ ...exhibition, [e.target.name]: e.target.value });
-        }
-      }
-    };
-
-    return (
-      <>
-        <div className="wrap-input100 validate-input">
-          <select
-            id="sceneSelection"
-            className="input100"
-            name="sceneId"
-            value={exhibition ? exhibition.sceneId : undefined}
-            onChange={handleChangeSceneThubmnail}
-          >
-            <option>---Choose Scene---</option>
-            {scenes.map((item, index) => {
-              return (
-                <option key={index} value={item.id}>
-                  {item.name}
-                </option>
-              );
-            })}
-          </select>
-          <span className="focus-input100" />
-        </div>
-        <div className="p-t-13 p-b-9">
-          <span className="txt1">Scene Thubmnail</span>
-        </div>
-        <img className="f-image-thumbnail" src={getSceneThumnail(exhibition ? exhibition.sceneId : undefined)} alt="" />
-      </>
-    );
-  };
-
-  const handleCreate = () => {
-    const data = exhibition;
-    ExhibitionsService.postCreateOne(data).then(res => {
-      if (res.result == "ok") {
-        toast.success("Create new tour success !", { autoClose: 5000 });
-        setIsOpenExhibition(false);
-        // setExhibitions([...exhibitions, res.data]);
-        window.location.reload();
-      } else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("You do not have permission to change or create !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "create_exhibition_error") {
-        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_name") {
-        toast.error("name should be length 4-255 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_maxSize") {
-        toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_startDate") {
-        toast.error("You must select the start date !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
-      }
-    });
-  };
-
-  const handleEdit = () => {
-    const data = exhibition;
-    ExhibitionsService.putUpdateOne(data).then(res => {
-      if (res.result == "ok") {
-        exhibitions.data.forEach(exhibition => {
-          if (exhibition.id == res.data.id) {
-            toast.success("Edit Exhibition success !", { autoClose: 5000 });
-            setIsOpenExhibition(false);
-            getAllExhibitions();
-          }
-        });
-      } else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("You do not have permission to change or create !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "create_exhibition_error") {
-        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people!", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_name") {
-        toast.error("name should be length 4-255 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_maxSize") {
-        toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_startDate") {
-        toast.error("You must select the start date !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
-      }
-    });
-  };
-
-  const handelTogglePublic = exhibitionId => {
-    ExhibitionsService.patchTogglePublic(exhibitionId).then(res => {
-      if (res.result == "ok") {
-        exhibitions.data.forEach(exhibition => {
-          if (exhibition.id == exhibitionId) {
-            exhibition.public = res.data.public;
-            toast.success("Change status success !", { autoClose: 5000 });
-          }
-        });
-        setIsOpenToggle(!isOpenToggle);
-      } else if (res.result == "fail" && res.error == "invalid_id") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
-      }
-    });
-  };
-
-  const handelToggleDeleteRoom = exhibitionId => {
-    ExhibitionsService.deleteOneExhibition(exhibitionId).then(res => {
-      if (res.result == "ok") {
-        toast.success("Delete success !", { autoClose: 5000 });
-        setIsDeleteRoom(!isDeleteRoom);
-        getAllExhibitions();
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
-      }
-    });
-  };
-
-  const handleChangeURL = (media , evt) => {
-    const value = evt.target.value;
-    media.url = value;
-    media.check = "checking";
-    setMedias({...medias});
-    fetch(media.url).then(response => {
-      const contentType = response.headers.get("content-type");
-      const type = contentType.split("/")[0];
-      if(media.type.includes(type))
-      {
-        media.check = "ok"
-      }
-      else{
-        media.check = "fail"
-      }
-      setMedias({...medias});
-    }).catch((error) => {
-        media.check = "fail";
-        setMedias({...medias});
-      });
-
-  }
-
-  const ActionListRoom = () => {
-    getAllExhibitions();
-    setIsListRoom(true);
-    setIsListProject(false);
-  };
-
-  const ActionListProject = () => {
-    getAllProjects();
-    setIsListRoom(false);
-    setIsListProject(true);
-  };
-
-  const handelCloseRoom = exhibitionId => {
-    ExhibitionsService.closeOneExhibition(exhibitionId).then(res => {
-      if (res.result == "ok") {
-        exhibitions.data.forEach(exhibition => {
-          if (exhibition.id == exhibitionId) {
-            exhibition.closed = res.data.closed;
-            toast.success("Change status success !", { autoClose: 5000 });
-          }
-        });
-        setIsCloseRoom(!isCloseRoom);
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
-      }
-    });
-  };
-  const handelOpenRoom = exhibitionId => {
-    ExhibitionsService.openOneExhibition(exhibitionId).then(res => {
-      if (res.result == "ok") {
-        exhibitions.data.forEach(exhibition => {
-          if (exhibition.id == exhibitionId) {
-            exhibition.closed = res.data.closed;
-            toast.success("Change status success !", { autoClose: 5000 });
-          }
-        });
-        setIsOpenRoom(!isOpenRoom);
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
-      }
-    });
-  };
-
-  const renderListMedia = () => {
-    return (
-      <>
-        {mediaLoaded ? (
-          <>
-            {medias.data.map((item, index) => {
-              if(item)
-              {
-                const Thubmnail  = () => {
-                  if(item.type == 'video')          
-                  {
-                    return(
-                      <>
-                        <video src={item?.url}></video>
-                      </>
-                    )
-                  }
-                  else if(item.type == 'image')
-                  {
-                    return(
-                      <>
-                        <img
-                          src={item?.url}
-                        />
-                      </>
-                    )
-                  }
-                  else
-                  {
-                    return(
-                      <>
-                       
-                      </>
-                    )
-                  }
-                }
-                const icon_type = () => {
-
-                if(item.type == 'video')          
-                  {
-                    return(
-                      <FaVideo className="icon_type"/>
-                    )
-                  }
-                  else if(item.type == 'image')
-                  {
-                    return(
-                      <FaRegImage className="icon_type"/>
-                    )
-                  }
-                }
-                
-                return (
-                  <div key={index}  className="items">
-                    <div className="w-30">
-                      {Thubmnail()}
-                    </div>
-                    <div className="w-70">
-                      <h3 className="mb-3">{item?.name}</h3>
-                      {icon_type()}
-                      <div className="wrap-input100 validate-input">
-                        <input className="input100" type="text" name="src" placeholder="URL" onChange={(e) => handleChangeURL(item, e)} value={item?.url}/>
-                        <span className="focus-input100"/>
-                      </div>
-                      {item?.check != "cheking" ? "" :
-                        <span>Checking the url</span>
-                      }
-                      {item?.check != "fail" ? "" :
-                        <span>The URL is not correct</span>
-                      }
-                    </div>
-                  </div>
-                )
-              }
-            })}
-          </>
-             ) : (
-          <></>
-        )}
-      </>
-  )};
-
-  const renderListObject = () => {
-    return (
-      <>
-        {objectLoaded ? (
-          <>
-            {objects.data.map((item, index) => {
-              if(item)
-              {
-                const Thubmnail  = () => {
-                  if(item.type == 'video')          
-                  {
-                    return(
-                      <>
-                        <video src={item?.src}></video>
-                      </>
-                    )
-                  }
-                  else if(item.type == 'image')
-                  {
-                    return(
-                      <>
-                        <img
-                          src={item?.src}
-                        />
-                      </>
-                    )
-                  }
-                  else
-                  {
-                    return(
-                      <>
-                       <img
-                          src={item?.src}
-                        />
-                      </>
-                    )
-                  }
-                }
-                const icon_type = () => {
-
-                if(item.type == 'video')          
-                  {
-                    return(
-                      <FaVideo className="icon_type"/>
-                    )
-                  }
-                  else if(item.type == 'image')
-                  {
-                    return(
-                      <FaRegImage className="icon_type"/>
-                    )
-                  }
-                  else
-                  {
-                    return(
-                      <FaCodepen className="icon_type"/>
-                    )
-                  }
-                }
-                
-                return (
-                  <div key={index}  className="items list_obj">
-                    <div className="w-30">
-                      {Thubmnail()}
-                    </div>
-                    <div className="w-70">
-                      <h3 className="mb-3">{item?.name}</h3>
-                      {icon_type()}
-                      <label className="checkbox_Url_change">
-                        <input
-                          className="largerCheckbox"
-                          type="checkbox"
-                          name="public"
-                        />
-                        <span className="textCheckbox">URL Changeable</span>
-                      </label>
-          
-                    </div>
-                  </div>
-                )
-              }
-            })}
-          </>
-             ) : (
-          <></>
-        )}
-      </>
-  )};
-
-
-  const renderTabs = () => {
-    const userInfo = Store.getUser();
-      if (userInfo.type == 5) {
-        return (
-        <div className="tabs-Admin">
-          <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >LIST ROOM</button>  
-          <button className={isListProject ? "active" : ""} onClick={ActionListProject}>PROJECT</button>  
-        </div>
-        );
-      }
-    };
 
   if (isLoading) {
     return (
@@ -1355,7 +1401,6 @@ function ManagerHome() {
             }}
           />
         )}
-
 
         <div className="manager-page">
           <div className="row_1">

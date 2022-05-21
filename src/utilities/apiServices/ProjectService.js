@@ -44,15 +44,15 @@ class ProjectService {
         });
     }
 
-    updateChangeableObjects(data){
-        return fetch(`${API_ROOT}/v1/auth/projects/${data.idProject}/objects`, {
+    updateChangeableObjects(projectId,data){
+        return fetch(`${API_ROOT}/v1/auth/projects/${projectId}/objects`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 'access_token': Store.getUser()?.token
             },
             body: JSON.stringify({
-                uuids: data.uuids
+                uuids: data
             })
 
         })
