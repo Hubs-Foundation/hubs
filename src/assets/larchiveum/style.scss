@@ -137,14 +137,16 @@
 		grid-template-columns: 1fr 1fr 1fr;
 	}
 
-	.sort{
+	.sort {
 		padding: 5px 20px;
 		font-size: 22px;
-		button{
+
+		button {
 			font-weight: bold;
 			margin-right: 15px;
 			color: #666;
-			&.active{
+
+			&.active {
 				color: #C00;
 				transition: .6s ease-in;
 			}
@@ -449,5 +451,27 @@
 				display: none;
 			}
 		}
+	}
+
+	.background-homepage .title_list {
+		font-size: 22px;
+		color: #149BF3;
+	}
+
+	.background-homepage .sort {
+		padding: 5px 20px;
+		font-size: 17px;
+	}
+
+	.background-homepage a.manager {
+		font-size: 17px;
+		color: #149BF3;
+		margin-right: 0px;
+	}
+
+	.background-homepage .display-name {
+		margin-right: 0;
+		font-weight: 600;
+		font-size: 18px;
 	}
 }
