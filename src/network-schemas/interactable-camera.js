@@ -288,14 +288,32 @@ function Button({ text, width, height, textureSrc = buttonSrc, ...props }) {
   );
 }
 
-export function CameraPrefab() {
-  const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshBasicMaterial());
-  const foos = [];
-  for (let i = 1; i < 10; i++) {
-    foos.push(<Button position={[0, i, 0]} width={1 * i} height={0.5} text="hello" />);
-  }
+function HoldableButton({ text, width, height, textureSrc = buttonSrc, ...props }) {
+  const texture = textureLoader.load(textureSrc);
+  return (
+    <entity
+      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
+      cursor-raycastable
+      remote-hover-target
+      holdable
+      holdable-button
+      {...props}
+    >
+      <entity
+        text={{ value: text, color: "#cc22cc", textAlign: "center", anchorX: "center", anchorY: "middle" }}
+        position={[0, 0, 0.01]}
+      />
+    </entity>
+  );
+}
 
-  return <entity>{foos}</entity>;
+export function CameraPrefab() {
+  return (
+    <entity>
+      <HoldableButton position={[0, 1, 0]} width={1} height={0.5} text="Welcome to our wonderfully grabbable world" />
+      <Button position={[0, 0, 0]} width={1} height={0.5} text="Welcome to our wonderful world" />
+    </entity>
+  );
 }
 
 export const FLAGS = {

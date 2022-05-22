@@ -4,6 +4,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { canMove } from "../utils/permissions-utils";
 import { isTagged } from "../components/tags";
 import { addComponent, hasComponent, removeComponent } from "bitecs";
+import { anyEntityWith } from "../utils/bit-utils";
 
 import {
   Held,
@@ -11,14 +12,14 @@ import {
   Pinned,
   RemoteHoverTarget,
   Rigidbody,
-  HoveredRightRemote,
-  HoveredLeftRemote,
-  HoveredRightHand,
-  HoveredLeftHand,
-  HeldRightRemote,
-  HeldLeftRemote,
-  HeldRightHand,
-  HeldLeftHand
+  HoveredRemoteRight,
+  HoveredRemoteLeft,
+  HoveredHandRight,
+  HoveredHandLeft,
+  HeldRemoteRight,
+  HeldRemoteLeft,
+  HeldHandRight,
+  HeldHandLeft
 } from "../bit-components";
 
 function findHandCollisionTargetForHand(bodyId) {
@@ -247,10 +248,10 @@ AFRAME.registerSystem("interaction", {
         removeComponent(APP.world, heldComponent, state.held.object3D.eid);
 
         if (
-          !hasComponent(APP.world, HeldRightRemote, state.held.object3D.eid) &&
-          !hasComponent(APP.world, HeldLeftRemote, state.held.object3D.eid) &&
-          !hasComponent(APP.world, HeldRightHand, state.held.object3D.eid) &&
-          !hasComponent(APP.world, HeldLeftHand, state.held.object3D.eid)
+          !hasComponent(APP.world, HeldRemoteRight, state.held.object3D.eid) &&
+          !hasComponent(APP.world, HeldRemoteLeft, state.held.object3D.eid) &&
+          !hasComponent(APP.world, HeldHandRight, state.held.object3D.eid) &&
+          !hasComponent(APP.world, HeldHandLeft, state.held.object3D.eid)
         ) {
           removeComponent(APP.world, Held, state.held.object3D.eid);
         }
@@ -278,19 +279,6 @@ AFRAME.registerSystem("interaction", {
         const hoveredEid = entity.object3D.eid;
         const sceneIsFrozen = this.el.is("frozen");
         const isPinned = hasComponent(APP.world, Pinned, hoveredEid);
-        // console.log(
-        //   JSON.stringify(
-        //     {
-        //       holdable: hasComponent(APP.world, Holdable, hoveredEid),
-        //       grabbing: userinput.get(options.grabPath),
-        //       sceneIsFrozen,
-        //       isPinned,
-        //       canMove: canMove(entity)
-        //     },
-        //     null,
-        //     4
-        //   )
-        // );
         if (
           hasComponent(APP.world, Holdable, hoveredEid) &&
           userinput.get(options.grabPath) &&
@@ -306,26 +294,24 @@ AFRAME.registerSystem("interaction", {
   },
 
   tick2() {
-    if (!this.el.is("entered")) {
-      return;
-    }
-
-    Object.assign(this.previousState.rightHand, this.state.rightHand);
-    Object.assign(this.previousState.rightRemote, this.state.rightRemote);
-    Object.assign(this.previousState.leftHand, this.state.leftHand);
-    Object.assign(this.previousState.leftRemote, this.state.leftRemote);
-
-    if (this.options.rightHand.entity.object3D.visible && !this.state.rightRemote.held) {
-      this.tickInteractor(this.options.rightHand, this.state.rightHand, HoveredRightHand, HeldRightHand);
-    }
-    if (this.options.leftHand.entity.object3D.visible && !this.state.leftRemote.held) {
-      this.tickInteractor(this.options.leftHand, this.state.leftHand, HoveredLeftHand, HeldLeftHand);
-    }
-    if (!this.state.rightHand.held && !this.state.rightHand.hovered) {
-      this.tickInteractor(this.options.rightRemote, this.state.rightRemote, HoveredRightRemote, HeldRightRemote);
-    }
-    if (!this.state.leftHand.held && !this.state.leftHand.hovered) {
-      this.tickInteractor(this.options.leftRemote, this.state.leftRemote, HoveredLeftRemote, HeldLeftRemote);
-    }
+    this.state.rightRemote.hovered =
+      anyEntityWith(APP.world, HoveredRemoteRight) &&
+      APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredRemoteRight)).el;
+    this.state.rightRemote.held =
+      anyEntityWith(APP.world, HeldRemoteRight) && APP.world.eid2obj.get(anyEntityWith(APP.world, HeldRemoteRight)).el;
+    this.state.leftRemote.hovered =
+      anyEntityWith(APP.world, HoveredRemoteLeft) &&
+      APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredRemoteLeft)).el;
+    this.state.leftRemote.held =
+      anyEntityWith(APP.world, HeldRemoteLeft) && APP.world.eid2obj.get(anyEntityWith(APP.world, HeldRemoteLeft)).el;
+    this.state.rightHand.hovered =
+      anyEntityWith(APP.world, HoveredHandRight) &&
+      APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredHandRight)).el;
+    this.state.rightHand.held =
+      anyEntityWith(APP.world, HeldHandRight) && APP.world.eid2obj.get(anyEntityWith(APP.world, HeldHandRight)).el;
+    this.state.leftHand.hovered =
+      anyEntityWith(APP.world, HoveredHandLeft) && APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredHandLeft)).el;
+    this.state.leftHand.held =
+      anyEntityWith(APP.world, HeldHandLeft) && APP.world.eid2obj.get(anyEntityWith(APP.world, HeldHandLeft)).el;
   }
 });

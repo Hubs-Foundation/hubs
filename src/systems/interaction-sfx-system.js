@@ -1,6 +1,17 @@
 import { paths } from "./userinput/paths";
 import { SOUND_HOVER_OR_GRAB } from "./sound-effects-system";
 import { isUI } from "./interactions";
+import {
+  HeldHandLeft,
+  HeldRemoteLeft,
+  HeldHandRight,
+  HeldRemoteRight,
+  HoveredHandLeft,
+  HoveredRemoteLeft,
+  HoveredHandRight,
+  HoveredRemoteRight
+} from "../bit-components";
+import { anyEntityWith } from "../utils/bit-utils";
 
 export class InteractionSfxSystem {
   constructor() {}
@@ -38,6 +49,25 @@ export class InteractionSfxSystem {
         state.leftRemote.held,
         "\nleftRemote hovered",
         state.leftRemote.hovered
+      );
+
+      console.log(
+        "Interaction System State\nleftHand held",
+        anyEntityWith(APP.world, HeldHandLeft),
+        "\nleftHand hovered",
+        anyEntityWith(APP.world, HoveredHandLeft),
+        "\nrightHand held",
+        anyEntityWith(APP.world, HeldHandRight),
+        "\nrightHand hovered",
+        anyEntityWith(APP.world, HoveredHandRight),
+        "\nrightRemote held",
+        anyEntityWith(APP.world, HeldRemoteRight),
+        "\nrightRemote hovered",
+        anyEntityWith(APP.world, HoveredRemoteRight),
+        "\nleftRemote held",
+        anyEntityWith(APP.world, HeldRemoteLeft),
+        "\nleftRemote hovered",
+        anyEntityWith(APP.world, HoveredRemoteLeft)
       );
     }
   }

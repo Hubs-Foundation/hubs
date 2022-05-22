@@ -5,6 +5,7 @@ import { Layers } from "../components/layers";
 import {
   CursorRaycastable,
   Holdable,
+  HoldableButton,
   Object3DTag,
   OffersRemoteConstraint,
   RemoteHoverTarget,
@@ -176,6 +177,7 @@ const inflators = {
   "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
   "offers-remote-constraint": createDefaultInflator(OffersRemoteConstraint),
   "single-action-button": createDefaultInflator(SingleActionButton),
+  "holdable-button": createDefaultInflator(HoldableButton),
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
   "media-frame": inflateMediaFrame,

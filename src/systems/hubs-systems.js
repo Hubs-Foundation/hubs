@@ -34,10 +34,13 @@ import { GainSystem } from "./audio-gain-system";
 import { EnvironmentSystem } from "./environment-system";
 import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 
-import { singleActionButtonSystem } from "./single-action-button-system";
-import { removeNetworkedObjectSystem } from "./remove-networked-object-system";
-import { floatyObjectSystem } from "./floaty-object-system";
+// new world
 import { networkSendSystem, applyNetworkUpdates } from "./netcode";
+import { singleActionButtonSystem } from "./single-action-button-system";
+import { holdSystem } from "./hold-system";
+import { floatyObjectSystem } from "./floaty-object-system";
+import { removeNetworkedObjectSystem } from "./remove-networked-object-system";
+// import { holdableButtonSystem } from "./holdable-button-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -89,7 +92,13 @@ AFRAME.registerSystem("hubs-systems", {
 
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
+
+    // Here's the new world order
     this.cursorTargettingSystem.tick(t);
+    // TODO: Hover with hands
+    singleActionButtonSystem(world);
+    holdSystem(world, systems.userinput);
+
     systems.interaction.tick2();
 
     // We run this earlier in the frame so things have a chance to override properties run by animations
@@ -106,7 +115,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
 
-    singleActionButtonSystem(world);
     floatyObjectSystem(world);
 
     this.holdableButtonSystem.tick();

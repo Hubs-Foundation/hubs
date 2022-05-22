@@ -14,6 +14,8 @@ const FULL_COLOR = 0x808080;
 
 function mediaTypeMaskFor(world, eid) {
   const obj = world.eid2obj.get(eid);
+  if (!obj.el) return 0;
+
   let mediaTypeMask = 0;
   // TODO AFRAME
   mediaTypeMask |= obj.el.components["gltf-model-plus"] && MediaType.MODEL;

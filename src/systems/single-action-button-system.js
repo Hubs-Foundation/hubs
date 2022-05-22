@@ -1,10 +1,28 @@
 import { addComponent, removeComponent, defineQuery } from "bitecs";
-import { HoveredLeftRemote, HoveredRightRemote, Interacted, SingleActionButton } from "../bit-components";
+import { HoveredRemoteLeft, HoveredRemoteRight, Interacted, SingleActionButton } from "../bit-components";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
+import { paths } from "./userinput/paths";
 
 const interactedQuery = defineQuery([Interacted]);
-const rightRemoteQuery = defineQuery([SingleActionButton, HoveredRightRemote]);
-const leftRemoteQuery = defineQuery([SingleActionButton, HoveredLeftRemote]);
+const rightRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteRight]);
+const leftRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteLeft]);
+
+function interact(world, entities, path, interactor) {
+  if (AFRAME.scenes[0].systems.userinput.get(path)) {
+    for (let i = 0; i < entities.length; i++) {
+      const eid = entities[i];
+      addComponent(world, Interacted, eid);
+      console.log("INteracted!@");
+
+      // TODO: New systems should not listen for this event
+      // Delete this when we're done interoping with old world systems
+      world.eid2obj.get(eid).dispatchEvent({
+        type: "interact",
+        object3D: interactor
+      });
+    }
+  }
+}
 
 export function singleActionButtonSystem(world) {
   // Clear the interactions from previous frames
@@ -20,30 +38,17 @@ export function singleActionButtonSystem(world) {
     return;
   }
 
-  const userinput = AFRAME.scenes[0].systems.userinput;
   const interaction = AFRAME.scenes[0].systems.interaction;
-
-  const rightEnts = rightRemoteQuery(world);
-  if (userinput.get(interaction.options.rightRemote.grabPath)) {
-    for (let i = 0; i < rightEnts.length; i++) {
-      const eid = rightEnts[i];
-      world.eid2obj.get(eid).dispatchEvent({
-        type: "interact",
-        object3D: interaction.options.rightRemote.entity.object3D
-      });
-      addComponent(world, Interacted, eid);
-    }
-  }
-
-  const leftEnts = leftRemoteQuery(world);
-  if (userinput.get(interaction.options.leftRemote.grabPath)) {
-    for (let i = 0; i < leftEnts.length; i++) {
-      const eid = leftEnts[i];
-      world.eid2obj.get(eid).dispatchEvent({
-        type: "interact",
-        object3D: interaction.options.leftRemote.entity.object3D
-      });
-      addComponent(world, Interacted, eid);
-    }
-  }
+  interact(
+    world,
+    leftRemoteQuery(world),
+    paths.actions.cursor.left.grab,
+    interaction.options.leftRemote.entity.object3D
+  );
+  interact(
+    world,
+    rightRemoteQuery(world),
+    paths.actions.cursor.right.grab,
+    interaction.options.rightRemote.entity.object3D
+  );
 }

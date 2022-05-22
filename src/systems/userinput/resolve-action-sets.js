@@ -1,8 +1,22 @@
 import { sets } from "./sets";
-import { isUI } from "./../interactions";
 import { CAMERA_MODE_INSPECT } from "../camera-system";
 import qsTruthy from "../../utils/qs_truthy";
 import { isTagged } from "../../components/tags";
+import { anyEntityWith } from "../../utils/bit-utils";
+import {
+  HeldRemoteRight,
+  HeldRemoteLeft,
+  HeldHandRight,
+  HeldHandLeft,
+  HoveredRemoteRight,
+  HoveredRemoteLeft,
+  HoveredHandRight,
+  HoveredHandLeft,
+  SingleActionButton,
+  HoldableButton,
+  Pen
+} from "../../bit-components";
+import { hasComponent } from "bitecs";
 const debugUserInput = qsTruthy("dui");
 
 let leftTeleporter, rightTeleporter;
@@ -25,38 +39,28 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.leftCursorHoldingInteractable, leftRemote.held);
   userinput.toggleSet(sets.rightCursorHoldingInteractable, rightRemote.held);
 
-  userinput.toggleSet(
-    sets.leftHandHoveringOnNothing,
-    !leftRemote.held && !leftRemote.hovered && !leftHand.held && !leftHand.hovered
-  );
-  userinput.toggleSet(
-    sets.rightHandHoveringOnNothing,
-    !rightRemote.held && !rightRemote.hovered && !rightHand.held && !rightHand.hovered
-  );
-  userinput.toggleSet(
-    sets.leftCursorHoveringOnNothing,
-    !leftHand.held && !leftHand.hovered && !leftRemote.held && !leftRemote.hovered
-  );
-  userinput.toggleSet(
-    sets.rightCursorHoveringOnNothing,
-    !rightHand.held && !rightHand.hovered && !rightRemote.held && !rightRemote.hovered
-  );
+  const world = APP.world;
+
+  userinput.toggleSet(sets.leftHandHoveringOnNothing, !anyEntityWith(world, HoveredHandLeft));
+  userinput.toggleSet(sets.rightHandHoveringOnNothing, !anyEntityWith(world, HoveredHandRight));
+  userinput.toggleSet(sets.leftCursorHoveringOnNothing, !anyEntityWith(world, HoveredRemoteLeft));
+  userinput.toggleSet(sets.rightCursorHoveringOnNothing, !anyEntityWith(world, HoveredRemoteRight));
 
   userinput.toggleSet(
     sets.leftHandHoveringOnPen,
-    !leftHand.held && leftHand.hovered && isTagged(leftHand.hovered, "isPen")
+    anyEntityWith(world, HoveredHandLeft) && hasComponent(world, Pen, anyEntityWith(world, HoveredHandLeft))
   );
   userinput.toggleSet(
     sets.rightHandHoveringOnPen,
-    !rightHand.held && rightHand.hovered && isTagged(rightHand.hovered, "isPen")
+    anyEntityWith(world, HoveredHandRight) && hasComponent(world, Pen, anyEntityWith(world, HoveredHandRight))
   );
   userinput.toggleSet(
     sets.leftCursorHoveringOnPen,
-    !leftHand.held && !leftHand.hovered && !leftRemote.held && isTagged(leftRemote.hovered, "isPen")
+    anyEntityWith(world, HoveredRemoteLeft) && hasComponent(world, Pen, anyEntityWith(world, HoveredRemoteLeft))
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnPen,
-    !rightHand.held && !rightHand.hovered && !rightRemote.held && isTagged(rightRemote.hovered, "isPen")
+    anyEntityWith(world, HoveredRemoteRight) && hasComponent(world, Pen, anyEntityWith(world, HoveredRemoteRight))
   );
 
   userinput.toggleSet(
@@ -173,31 +177,29 @@ export function resolveActionSets() {
 
   userinput.toggleSet(
     sets.leftCursorHoveringOnUI,
-    !leftHand.held && !leftHand.hovered && !leftRemote.held && isUI(leftRemote.hovered)
+    anyEntityWith(world, HoveredRemoteLeft) &&
+      (hasComponent(world, SingleActionButton, anyEntityWith(world, HoveredRemoteLeft)) ||
+        hasComponent(world, HoldableButton, anyEntityWith(world, HoveredRemoteLeft)))
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnUI,
-    !rightHand.held && !rightHand.hovered && !rightRemote.held && isUI(rightRemote.hovered)
+    anyEntityWith(world, HoveredRemoteRight) &&
+      (hasComponent(world, SingleActionButton, anyEntityWith(world, HoveredRemoteRight)) ||
+        hasComponent(world, HoldableButton, anyEntityWith(world, HoveredRemoteRight)))
   );
 
-  userinput.toggleSet(sets.leftCursorHoldingNothing, !leftHand.held && !leftRemote.held);
-  userinput.toggleSet(sets.rightCursorHoldingNothing, !rightHand.held && !rightRemote.held);
+  userinput.toggleSet(sets.leftCursorHoldingNothing, !anyEntityWith(APP.world, HeldRemoteLeft));
+  userinput.toggleSet(sets.rightCursorHoldingNothing, !anyEntityWith(APP.world, HeldRemoteRight));
 
   userinput.toggleSet(
     sets.leftCursorHoldingUI,
-    !leftHand.held &&
-      !leftHand.hovered &&
-      leftRemote.held &&
-      leftRemote.held.components.tags &&
-      leftRemote.held.components.tags.data.holdableButton
+    anyEntityWith(APP.world, HeldRemoteLeft) &&
+      hasComponent(APP.world, HoldableButton, anyEntityWith(APP.world, HeldRemoteLeft))
   );
   userinput.toggleSet(
     sets.rightCursorHoldingUI,
-    !rightHand.held &&
-      !rightHand.hovered &&
-      rightRemote.held &&
-      rightRemote.held.components.tags &&
-      rightRemote.held.components.tags.data.holdableButton
+    anyEntityWith(APP.world, HeldRemoteRight) &&
+      hasComponent(APP.world, HoldableButton, anyEntityWith(APP.world, HeldRemoteRight))
   );
 
   userinput.toggleSet(sets.leftHandTeleporting, leftTeleporter.isTeleporting);
