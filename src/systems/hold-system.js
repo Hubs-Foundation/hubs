@@ -74,14 +74,12 @@ const queryHoveredHandLeft = defineQuery([Holdable, HoveredHandLeft]);
 
 export function holdSystem(world, userinput) {
   grab(world, userinput, queryHoveredRemoteRight, HeldRemoteRight, GRAB_REMOTE_RIGHT);
-  drop(world, userinput, queryHeldRemoteRight, HeldRemoteRight, DROP_REMOTE_RIGHT);
-
   grab(world, userinput, queryHoveredRemoteLeft, HeldRemoteLeft, GRAB_REMOTE_LEFT);
-  drop(world, userinput, queryHeldRemoteLeft, HeldRemoteLeft, DROP_REMOTE_LEFT);
-
   grab(world, userinput, queryHoveredHandRight, HeldHandRight, GRAB_HAND_RIGHT);
-  drop(world, userinput, queryHeldHandRight, HeldHandRight, DROP_HAND_RIGHT);
-
   grab(world, userinput, queryHoveredHandLeft, HeldHandLeft, GRAB_HAND_LEFT);
+
+  drop(world, userinput, queryHeldRemoteRight, HeldRemoteRight, DROP_REMOTE_RIGHT);
+  drop(world, userinput, queryHeldRemoteLeft, HeldRemoteLeft, DROP_REMOTE_LEFT);
+  drop(world, userinput, queryHeldHandRight, HeldHandRight, DROP_HAND_RIGHT);
   drop(world, userinput, queryHeldHandLeft, HeldHandLeft, DROP_HAND_LEFT);
 }
