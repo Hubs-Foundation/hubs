@@ -906,6 +906,7 @@
 
         <a-entity
             id="right-cursor"
+            remote-right
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
             <a-entity
@@ -920,6 +921,7 @@
 
         <a-entity
             id="left-cursor"
+            remote-left
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
             <a-entity
@@ -1071,6 +1073,7 @@
             <a-entity
                 id="player-left-controller"
                 class="left-controller"
+                hand-left
                 track-pose="path: /actions/leftHand/matrix"
                 visibility-by-path="path: /actions/leftHand/matrix"
                 hand-controls2="left"
@@ -1084,6 +1087,7 @@
             <a-entity
                 id="player-right-controller"
                 class="right-controller"
+                hand-right
                 track-pose="path: /actions/rightHand/matrix"
                 visibility-by-path="path: /actions/rightHand/matrix"
                 hand-controls2="right"

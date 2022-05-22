@@ -18,6 +18,7 @@ import {
 } from "./bit-components";
 import cubeSchema from "./network-schemas/interactable-cube";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
+import "./aframe-to-bit-components";
 
 Object.defineProperties(THREE.Object3D.prototype, {
   components: {

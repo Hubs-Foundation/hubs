@@ -5,7 +5,7 @@ import { AnimationMixerSystem } from "../components/animation-mixer";
 import { UVScrollSystem } from "../components/uv-scroll";
 import { CursorTogglingSystem } from "./cursor-toggling-system";
 import { PhysicsSystem } from "./physics-system";
-import { ConstraintsSystem } from "./constraints-system";
+// import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
 import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
 import { DrawingMenuSystem } from "./drawing-menu-system";
@@ -38,6 +38,7 @@ import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 import { networkSendSystem, applyNetworkUpdates } from "./netcode";
 import { singleActionButtonSystem } from "./single-action-button-system";
 import { holdSystem } from "./hold-system";
+import { constraintsSystem } from "./bit-constraints-system";
 import { floatyObjectSystem } from "./floaty-object-system";
 import { removeNetworkedObjectSystem } from "./remove-networked-object-system";
 // import { holdableButtonSystem } from "./holdable-button-system";
@@ -53,7 +54,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.cursorTargettingSystem = new CursorTargettingSystem();
     this.positionAtBorderSystem = new PositionAtBorderSystem();
     this.physicsSystem = new PhysicsSystem(this.el.object3D);
-    this.constraintsSystem = new ConstraintsSystem(this.physicsSystem);
+    // this.constraintsSystem = new ConstraintsSystem(this.physicsSystem);
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
     this.holdableButtonSystem = new HoldableButtonSystem();
     this.hoverButtonSystem = new HoverButtonSystem();
@@ -98,6 +99,7 @@ AFRAME.registerSystem("hubs-systems", {
     // TODO: Hover with hands
     singleActionButtonSystem(world);
     holdSystem(world, systems.userinput);
+    constraintsSystem(world, systems.userinput);
 
     systems.interaction.tick2();
 
@@ -112,7 +114,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.cursorPoseTrackingSystem.tick();
     this.hoverMenuSystem.tick();
     this.positionAtBorderSystem.tick();
-    this.constraintsSystem.tick();
+    // this.constraintsSystem.tick();
     this.twoPointStretchingSystem.tick();
 
     floatyObjectSystem(world);

@@ -1,5 +1,13 @@
 import { addComponent, defineQuery, hasComponent, removeComponent } from "bitecs";
-import { HoveredRemoteLeft, HoveredRemoteRight, NotRemoteHoverTarget, RemoteHoverTarget } from "../bit-components";
+import { anyEntityWith } from "../utils/bit-utils";
+import {
+  HeldRemoteLeft,
+  HeldRemoteRight,
+  HoveredRemoteLeft,
+  HoveredRemoteRight,
+  NotRemoteHoverTarget,
+  RemoteHoverTarget
+} from "../bit-components";
 import { paths } from "../systems/userinput/paths";
 import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
@@ -146,8 +154,7 @@ AFRAME.registerComponent("cursor-controller", {
       this.raycaster.far = this.data.far * playerScale;
       this.raycaster.near = this.data.near * playerScale;
 
-      const interaction = AFRAME.scenes[0].systems.interaction;
-      const isGrabbing = left ? !!interaction.state.leftRemote.held : !!interaction.state.rightRemote.held;
+      const isGrabbing = left ? anyEntityWith(APP.world, HeldRemoteLeft) : anyEntityWith(APP.world, HeldRemoteRight);
       let isHoveringSomething = false;
       if (!isGrabbing) {
         rawIntersections.length = 0;
@@ -197,7 +204,7 @@ AFRAME.registerComponent("cursor-controller", {
           (!left && transformObjectSystem.hand.el.id === "player-right-controller"))
       ) {
         this.color.copy(TRANSFORM_COLOR_1).lerpHSL(TRANSFORM_COLOR_2, 0.5 + 0.5 * Math.sin(t / 1000.0));
-      } else if (isHoveringSomething || isGrabbing) {
+      } else if (isGrabbing || isHoveringSomething) {
         this.color.copy(HIGHLIGHT);
       } else {
         this.color.copy(NO_HIGHLIGHT);

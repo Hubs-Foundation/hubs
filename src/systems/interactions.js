@@ -19,7 +19,8 @@ import {
   HeldRemoteRight,
   HeldRemoteLeft,
   HeldHandRight,
-  HeldHandLeft
+  HeldHandLeft,
+  NotRemoteHoverTarget
 } from "../bit-components";
 
 function findHandCollisionTargetForHand(bodyId) {
@@ -61,9 +62,11 @@ AFRAME.registerComponent("is-remote-hover-target", {
 AFRAME.registerComponent("is-not-remote-hover-target", {
   init: function() {
     notRemoteHoverTargets.set(this.el.object3D, this.el);
+    addComponent(APP.world, NotRemoteHoverTarget, this.el.object3D.eid);
   },
   remove: function() {
     notRemoteHoverTargets.delete(this.el.object3D);
+    removeComponent(APP.world, NotRemoteHoverTarget, this.el.object3D.eid);
   }
 });
 

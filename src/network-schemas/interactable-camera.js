@@ -308,10 +308,20 @@ function HoldableButton({ text, width, height, textureSrc = buttonSrc, ...props 
 }
 
 export function CameraPrefab() {
+  const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial());
   return (
     <entity>
       <HoldableButton position={[0, 1, 0]} width={1} height={0.5} text="Welcome to our wonderfully grabbable world" />
       <Button position={[0, 0, 0]} width={1} height={0.5} text="Welcome to our wonderful world" />
+      <entity
+        scale={[0.25, 0.25, 0.25]}
+        object3D={cube}
+        cursor-raycastable
+        remote-hover-target
+        offers-remote-constraint
+        holdable
+        rigidbody
+      />
     </entity>
   );
 }
