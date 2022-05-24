@@ -148,13 +148,14 @@ export class App {
 
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map(); // eid -> Object3D
-    this.world.eid2nid = new Map([[0, 0]]);
-    this.world.nid2eid = new Map([[0, 0]]);
-    // TODO: This does not have to exclusively store strings, so this could "toSid( thing ) -> ui32" and "fromSid( ui32 ) -> thing"
-    this.world.str2sid = new Map([[0, 0]]);
-    this.world.sid2str = new Map([[0, 0]]);
-    this.world.nextSid = 1;
+
+    // HACK: We are setting the network id of the world to zero
+    this.world.nid2eid = new Map();
     this.world.deletedNids = new Set();
+
+    this.str2sid = new Map([[null, 0]]);
+    this.sid2str = new Map([[0, null]]);
+    this.nextSid = 1;
 
     window.$o = eid => {
       this.world.eid2obj.get(eid);
@@ -178,6 +179,21 @@ export class App {
     };
 
     this.world.networkSchemas = [cubeSchema];
+  }
+
+  getSid(str) {
+    if (!this.str2sid.has(str)) {
+      const sid = this.nextSid;
+      this.nextSid = this.nextSid + 1;
+      this.str2sid.set(str, sid);
+      this.sid2str.set(sid, str);
+      return sid;
+    }
+    return this.str2sid.get(str);
+  }
+
+  getString(sid) {
+    return this.sid2str.get(sid);
   }
 
   // This gets called by a-scene to setup the renderer, camera, and audio listener

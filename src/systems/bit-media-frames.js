@@ -5,7 +5,15 @@ import { addObject3DComponent } from "../utils/jsx-entity";
 import { MediaType } from "../utils/media-utils";
 import { addEntity, defineQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
-import { MediaFramePreviewClone, NetworkedMediaFrame, MediaFrame, Owned, Held, Rigidbody } from "../bit-components";
+import {
+  MediaFramePreviewClone,
+  NetworkedMediaFrame,
+  MediaFrame,
+  Owned,
+  Held,
+  Rigidbody,
+  Networked
+} from "../bit-components";
 import { takeOwnership } from "./netcode";
 
 const EMPTY_COLOR = 0x6fc0fd;
@@ -257,7 +265,7 @@ export function display(world, frame, heldMediaTypes) {
   frameObj.visible = !!(MediaFrame.mediaType[frame] & heldMediaTypes);
 
   if (frameObj.visible) {
-    const captured = world.nid2eid.get(world.sid2str.get(MediaFrame.capturedNid[frame])) || 0;
+    const captured = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
     const isHoldingObjectOfInterest =
       (captured && hasComponent(world, Held, captured)) || (capturable && hasComponent(world, Held, capturable));
 
@@ -287,7 +295,7 @@ export function mediaFramesSystem(world) {
   for (let i = 0; i < mediaFrames.length; i++) {
     const frame = mediaFrames[i];
 
-    const captured = world.nid2eid.get(world.sid2str.get(MediaFrame.capturedNid[frame])) || 0;
+    const captured = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
 
     if (captured && hasComponent(world, Owned, captured) && droppedEntities.includes(captured)) {
       snapToFrame(world, frame, captured, world.eid2obj.get(captured).el.getObject3D("mesh"));
@@ -309,7 +317,7 @@ export function mediaFramesSystem(world) {
       const capturable = getCapturableEntity(world, frame);
       if (capturable && hasComponent(world, Owned, capturable) && !hasComponent(world, Held, capturable)) {
         takeOwnership(world, frame);
-        NetworkedMediaFrame.capturedNid[frame] = world.str2sid.get(world.eid2nid.get(capturable));
+        NetworkedMediaFrame.capturedNid[frame] = Networked.id[capturable];
         const obj = world.eid2obj.get(capturable);
         obj.updateMatrices();
         vec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);

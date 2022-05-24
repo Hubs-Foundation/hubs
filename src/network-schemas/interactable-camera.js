@@ -309,10 +309,15 @@ function HoldableButton({ text, width, height, textureSrc = buttonSrc, ...props 
 
 export function CameraPrefab() {
   const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial());
+  const names = ["cancel", "next-duration", "prev-duration", "snap", "record", "stop", "capture-audio", "record"];
+  const buttons = names.map((name, i) => {
+    return <Button ref={createRef()} position={[0, i / 3, 0]} width={0.8} height={0.4} text={name} />;
+  });
+
   return (
-    <entity>
+    <entity logger={{ buttons }}>
       <HoldableButton position={[0, 1, 0]} width={1} height={0.5} text="Welcome to our wonderfully grabbable world" />
-      <Button position={[0, 0, 0]} width={1} height={0.5} text="Welcome to our wonderful world" />
+      {buttons}
       <entity
         scale={[0.25, 0.25, 0.25]}
         object3D={cube}

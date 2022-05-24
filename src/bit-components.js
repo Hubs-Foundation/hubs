@@ -1,6 +1,14 @@
 import { defineComponent, Types } from "bitecs";
 
-export const Networked = defineComponent({ templateId: Types.ui8, lastOwnerTime: Types.ui32 });
+export const Networked = defineComponent({
+  id: Types.ui32,
+  creator: Types.ui32,
+  owner: Types.ui32,
+
+  templateId: Types.ui8, // TODO Remove
+  lastOwnerTime: Types.ui32
+});
+
 export const Owned = defineComponent();
 export const NetworkedMediaFrame = defineComponent({
   capturedNid: Types.ui32,
@@ -61,3 +69,5 @@ export const PhysicsShape = defineComponent({ shapeId: Types.ui16, halfExtents: 
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
 export const FloatyObject = defineComponent();
+
+export const Logger = defineComponent();

@@ -2,8 +2,8 @@ import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } 
 import { NetworkedMediaFrame, Networked, Owned } from "../bit-components";
 
 const networkedObjectsQuery = defineQuery([Networked]);
-const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 const enteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
+const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
 export const TEMPLATE_ID_LEGACY_NAF = 1;
 export const TEMPLATE_ID_MEDIA_FRAME = 2;
@@ -16,21 +16,14 @@ const schemas = {
     serialize(world, eid, updates) {
       // TODO: Just "serialize this component: NetworkedMediaFrame and determine changes"
       updates.push({
-        capturedNid: NetworkedMediaFrame.capturedNid[eid] ? world.sid2str.get(NetworkedMediaFrame.capturedNid[eid]) : 0,
+        capturedNid: APP.getString(NetworkedMediaFrame.capturedNid[eid]),
         scale: Array.from(NetworkedMediaFrame.scale[eid])
       });
     },
 
     deserialize(world, frameEid, update) {
       // TODO: Just "deserialize this component of a known shape: NetworkedMediaFrame"
-      if (!world.str2sid.has(update.capturedNid)) {
-        // TODO: Make this a function call
-        world.str2sid.set(update.capturedNid, world.nextSid);
-        world.sid2str.set(world.nextSid, update.capturedNid);
-        world.nextSid = world.nextSid + 1;
-      }
-
-      NetworkedMediaFrame.capturedNid[frameEid] = world.str2sid.get(update.capturedNid);
+      NetworkedMediaFrame.capturedNid[frameEid] = APP.getSid(update.capturedNid);
       NetworkedMediaFrame.scale[frameEid].set(update.scale);
       return;
     }
@@ -57,6 +50,21 @@ export function applyNetworkUpdates(world) {
 
   for (let i = 0; i < pendingMessages.length; i++) {
     const message = pendingMessages[i];
+
+    for (let j = 0; j < message.creates.length; j += 4) {
+      const nid = message.creates[j];
+      const creator = message.creates[j + 1];
+      const owner = message.creates[j + 2];
+      const { prefabName, initialData } = message.creates[j + 3];
+
+      const eid = createNetworkedEntityFromRemote(world, prefabName, initialData);
+
+      addComponent(world, Networked, eid);
+      Networked.id[eid] = APP.getSid(nid);
+      Networked.creator[eid] = APP.getSid(creator);
+      Networked.owner[eid] = APP.getSid(owner);
+    }
+
     for (let j = 0; j < message.updates.length; j += 3) {
       const nid = message.updates[j];
       const newLastOwnerTime = message.updates[j + 1];
@@ -92,15 +100,7 @@ export function applyNetworkUpdates(world) {
 
     for (let j = 0; j < message.deletes.length; j += 1) {
       const nid = message.deletes[j];
-
-      // TODO: Make this a function call
-      if (!world.str2sid.has(nid)) {
-        world.str2sid.set(nid, world.nextSid);
-        world.sid2str.set(world.nextSid, nid);
-        world.nextSid = world.nextSid + 1;
-      }
-
-      world.deletedNids.add(world.str2sid.get(nid));
+      world.deletedNids.add(APP.getSid(nid));
     }
   }
 
@@ -111,6 +111,8 @@ export function applyNetworkUpdates(world) {
 
   // TODO If there's a scene owned object, we should take ownership of it
 }
+
+const createMessageDatas = new Map();
 
 const TICK_RATE = 3000;
 let nextNetworkTick = 0;
@@ -129,7 +131,12 @@ export function networkSendSystem(world) {
     const entities = enteredNetworkedObjectsQuery(world);
     for (let i = 0; i < entities.length; i++) {
       const eid = entities[i];
-      // its a create if there is no networkId
+      if (Networked.creator[eid] === APP.getSid(NAF.clientId)) {
+        message.creates.push(APP.getString(Networked.id[eid]));
+        message.creates.push(Networked.creator[eid]);
+        message.creates.push(Networked.owner[eid]);
+        message.creates.push(createMessageDatas.get(eid));
+      }
     }
   }
 
@@ -140,7 +147,7 @@ export function networkSendSystem(world) {
     if (templateId === TEMPLATE_ID_LEGACY_NAF) continue;
 
     const schema = schemas[templateId];
-    message.updates.push(world.eid2nid.get(eid));
+    message.updates.push(APP.getString(Networked.id[eid]));
     message.updates.push(Networked.lastOwnerTime[eid]);
     schema.serialize(world, eid, message.updates);
   }
@@ -174,24 +181,27 @@ const prefabs = new Map([["camera", CameraPrefab]]);
 
 export function createNetworkedEntity(world, prefabName, initialData) {
   const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
+
+  createMessageDatas.set(eid, { prefabName, initialData });
+
+  addComponent(world, Networked, eid);
+  Networked.id[eid] = APP.getSid(NAF.utils.createNetworkId());
+  Networked.creator[eid] = APP.getSid(NAF.clientId);
+  Networked.owner[eid] = APP.getSid(NAF.clientId);
+
   const obj = world.eid2obj.get(eid);
   AFRAME.scenes[0].object3D.add(obj);
   console.log("Spawning network object", prefabName, obj, eid);
   return eid;
 }
 
-// NAF.connection.broadcastDataGuaranteed("nn", {
-//   updates: [
-//     "parent1.media-frame-46",
-//     3322421220,
-//     {
-//       "isFull": 1,
-//       "captured": "565e735",
-//       "scale": [
-//         1,
-//         1,
-//         1
-//       ]
-//     }
-//   ]
-// })
+export function createNetworkedEntityFromRemote(world, prefabName, initialData) {
+  const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
+
+  createMessageDatas.set(eid, { prefabName, initialData });
+
+  const obj = world.eid2obj.get(eid);
+  AFRAME.scenes[0].object3D.add(obj);
+  console.log("Spawning network object", prefabName, obj, eid);
+  return eid;
+}

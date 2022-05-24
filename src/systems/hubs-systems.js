@@ -39,6 +39,7 @@ import { networkSendSystem, applyNetworkUpdates } from "./netcode";
 import { singleActionButtonSystem } from "./single-action-button-system";
 import { holdSystem } from "./hold-system";
 import { constraintsSystem } from "./bit-constraints-system";
+import { loggerSystem } from "./logger-system";
 import { floatyObjectSystem } from "./floaty-object-system";
 import { removeNetworkedObjectSystem } from "./remove-networked-object-system";
 // import { holdableButtonSystem } from "./holdable-button-system";
@@ -100,6 +101,7 @@ AFRAME.registerSystem("hubs-systems", {
     singleActionButtonSystem(world);
     holdSystem(world, systems.userinput);
     constraintsSystem(world, systems.userinput);
+    loggerSystem(world);
 
     systems.interaction.tick2();
 
