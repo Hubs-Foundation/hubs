@@ -1,6 +1,45 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
 import { NetworkedMediaFrame, Networked, Owned, NetworkedTransform, AEntity } from "../bit-components";
 
+import { CameraPrefab } from "../network-schemas/interactable-camera";
+import { renderAsEntity } from "../utils/jsx-entity";
+
+const prefabs = new Map([["camera", CameraPrefab]]);
+
+const createMessageDatas = new Map();
+
+export function createNetworkedEntity(world, prefabName, initialData) {
+  const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
+
+  createMessageDatas.set(eid, { prefabName, initialData });
+
+  addComponent(world, Networked, eid);
+  Networked.id[eid] = APP.getSid(NAF.utils.createNetworkId());
+  APP.world.nid2eid.set(Networked.id[eid], eid);
+  Networked.creator[eid] = APP.getSid(NAF.clientId);
+  Networked.owner[eid] = APP.getSid(NAF.clientId);
+
+  takeOwnership(world, eid);
+
+  const obj = world.eid2obj.get(eid);
+  AFRAME.scenes[0].object3D.add(obj);
+
+  console.log("Spawning network object", prefabName, obj, eid);
+
+  return eid;
+}
+
+export function createNetworkedEntityFromRemote(world, prefabName, initialData) {
+  const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
+
+  createMessageDatas.set(eid, { prefabName, initialData });
+
+  const obj = world.eid2obj.get(eid);
+  AFRAME.scenes[0].object3D.add(obj);
+  console.log("Spawning network object", prefabName, obj, eid);
+  return eid;
+}
+
 const networkedObjectsQuery = defineQuery([Networked]);
 const enteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
@@ -87,7 +126,6 @@ export function applyNetworkUpdates(world) {
       Networked.owner[eid] = APP.getSid(owner);
     }
 
-    let j = 0;
     for (let j = 0; j < message.updates.length; j++) {
       const updateMessage = message.updates[j];
       const nid = APP.getSid(updateMessage.nid);
@@ -136,8 +174,6 @@ export function applyNetworkUpdates(world) {
 
   // TODO If there's a scene owned object, we should take ownership of it
 }
-
-const createMessageDatas = new Map();
 
 const TICK_RATE = 3000;
 let nextNetworkTick = 0;
@@ -211,40 +247,3 @@ export function networkSendSystem(world) {
 //   NAF.connection.sendDataGuaranteed(peer, message);
 // }
 //
-
-import { CameraPrefab } from "../network-schemas/interactable-camera";
-import { renderAsEntity } from "../utils/jsx-entity";
-
-const prefabs = new Map([["camera", CameraPrefab]]);
-
-export function createNetworkedEntity(world, prefabName, initialData) {
-  const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
-
-  createMessageDatas.set(eid, { prefabName, initialData });
-
-  addComponent(world, Networked, eid);
-  Networked.id[eid] = APP.getSid(NAF.utils.createNetworkId());
-  APP.world.nid2eid.set(Networked.id[eid], eid);
-  Networked.creator[eid] = APP.getSid(NAF.clientId);
-  Networked.owner[eid] = APP.getSid(NAF.clientId);
-
-  takeOwnership(world, eid);
-
-  const obj = world.eid2obj.get(eid);
-  AFRAME.scenes[0].object3D.add(obj);
-
-  console.log("Spawning network object", prefabName, obj, eid);
-
-  return eid;
-}
-
-export function createNetworkedEntityFromRemote(world, prefabName, initialData) {
-  const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
-
-  createMessageDatas.set(eid, { prefabName, initialData });
-
-  const obj = world.eid2obj.get(eid);
-  AFRAME.scenes[0].object3D.add(obj);
-  console.log("Spawning network object", prefabName, obj, eid);
-  return eid;
-}
