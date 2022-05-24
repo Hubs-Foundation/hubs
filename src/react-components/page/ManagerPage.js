@@ -27,7 +27,7 @@ import UserService from "../../utilities/apiServices/UserService";
 import e from "cors";
 import { counter } from "@fortawesome/fontawesome-svg-core";
 import { object } from "prop-types";
-
+import ModelViewer from 'react-model-viewer';
 
 const store = new StoreHub();
 
@@ -44,6 +44,7 @@ function ManagerHome() {
   const [projectsLoaded, setProjectsLoaded] = useState(true);
   const [objectLoaded, setObjectLoaded] = useState(false);
   const [mediaLoaded, setMediaLoaded] = useState(false);
+  const [iconLoaded, setIconLoaded] = useState(false);
   const [isOpenExhibition, setIsOpenExhibition] = useState(false);
   const [isCloseRoom, setIsCloseRoom] = useState(false);
   const [isOpenRoom, setIsOpenRoom] = useState(false);
@@ -51,6 +52,7 @@ function ManagerHome() {
   const [isOpenObject, setIsOpenObject] = useState(false);
   const [isDeleteRoom, setIsDeleteRoom] = useState(false);
   const [isOpenToggle, setIsOpenToggle] = useState(false);
+  const [isOpenSpoke, setIsOpenSpoke] = useState(false);
   const [exhibition, setExhibition] = useState(undefined);
   const [exhibitionType, setExhibitionType] = useState("create");
   const [exhibitionId, setExhibitionId] = useState(undefined);
@@ -198,6 +200,22 @@ function ManagerHome() {
     setIsOpenToggle(false);
   };
 
+  // const openPopupSpoke = ProjectId => {
+  //   setExhibitionId(ProjectId);
+  //   setIsOpenSpoke(true);
+  // };
+
+  
+  const handelSpoke = () => {
+    window.open(APP_ROOT + "/spoke/projects/" + projectId , '_blank');
+    setIsOpenSpoke(false);
+    openPopupCustomObject(true);
+  };
+
+  const closePopupSpoke = () => {
+    setIsOpenSpoke(false);
+  };
+  
   const openPopupCloseRoom = exhibitionId => {
     setExhibitionId(exhibitionId);
     setIsCloseRoom(true);
@@ -286,6 +304,7 @@ function ManagerHome() {
   };
 
   const handelSaveMediaURL = () => {
+    setIconLoaded(true)
     const data = medias.data.map((item) => {
       return {
         id : item.uuid,
@@ -296,6 +315,7 @@ function ManagerHome() {
     MediaService.updateMediaMany(dataString).then(res => {
       if (res.result == "ok") {
         toast.success("update medias success ", { autoClose: 5000 });
+        setIconLoaded(false);
       } else if (res.result == "fail" && res.error == "invalid_list_media") {
         toast.error("format of list media is incorrect ", { autoClose: 5000 });
       }
@@ -306,6 +326,7 @@ function ManagerHome() {
   }
 
   const handelOpenSpoke =()=>{
+    setIconLoaded(true);
     let list_uuid = [];
      list_uuid = objects.data.map((item) => {
       if(item?.changeable == true)
@@ -318,8 +339,9 @@ function ManagerHome() {
     console.log(projectId)
     ProjectService.updateChangeableObjects( projectId, dataString).then(res => {
       if (res.result == "ok") {
-        toast.success("update medias success ", { autoClose: 5000 });
-        window.open(APP_ROOT + "/spoke/projects/" + projectId , '_blank');
+        setIconLoaded(false);
+        closePopupCustomObject();
+        setIsOpenSpoke(true);
       } else if (res.result == "fail" && res.error == "invalid_list_changeable_object_uuid") {
         toast.error("List changeable object uuid incorrect", { autoClose: 5000 });
       }
@@ -685,9 +707,7 @@ function ManagerHome() {
                   {
                     return(
                       <>
-                       <img
-                          src={item?.src}
-                        />
+                        <ModelViewer src={item?.src} />
                       </>
                     )
                   }
@@ -1232,6 +1252,38 @@ function ManagerHome() {
           />
         )}
 
+        {isOpenSpoke && (
+          <Popup
+            title={<>Go to page Spoke</>}
+            size={"sm"}
+            content={
+              <>
+                <br />
+                You need to go to spoke page to public project !
+                <br />
+                <br />
+              </>
+            }
+            actions={[
+              {
+                text: "Goto Spoke",
+                class: "btn1",
+                callback: () => {
+                  handelSpoke(projectId);
+                }
+              },
+              {
+                text: "Cancel",
+                class: "btn2",
+                callback: () => {
+                  closePopupSpoke();
+                }
+              }
+            ]}
+            handleClose={closePopupSpoke}
+          />
+        )}    
+
         {isCloseRoom && (
           <Popup
             title={<>Close room</>}
@@ -1345,7 +1397,7 @@ function ManagerHome() {
             }
             actions={[
               {
-                text: "Save",
+                text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
                 class: "btn-handle",
                 callback: () => {
                   handelSaveMediaURL();
@@ -1382,11 +1434,12 @@ function ManagerHome() {
             }
             actions={[
               {
-                text: "Setup in Spoke",
+                text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
                 class: "btn-handle",
                 callback: () => {
                   handelOpenSpoke();
                 }
+          
               },
               {
                 text: "Cancel",

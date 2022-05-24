@@ -45,7 +45,7 @@ const Popup = props => {
           </div>
           <div className="actions">
             {currentProps.actions.map((action)=>{
-              return <button className={action.class} onClick={()=>{action.callback(currentProps.data)}}> {action.text} </button>
+              return <button className={action.class} onClick={()=>{action.callback(currentProps.data)}}>{action.text} </button>
             })}
           </div>
         </div>
