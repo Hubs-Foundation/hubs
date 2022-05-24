@@ -17,6 +17,7 @@ import * as moment from "moment";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import defaultImage from "../../assets/larchiveum/default-image.png";
+import defaultModel from "../../assets/larchiveum/model-default.png";
 import defaultImage1 from "../../assets/larchiveum/siri.gif";
 import Pagination from "../../react-components/pagination/pagination";
 import { APP_ROOT } from "../../utilities/constants";
@@ -27,7 +28,6 @@ import UserService from "../../utilities/apiServices/UserService";
 import e from "cors";
 import { counter } from "@fortawesome/fontawesome-svg-core";
 import { object } from "prop-types";
-import ModelViewer from 'react-model-viewer';
 
 const store = new StoreHub();
 
@@ -57,7 +57,8 @@ function ManagerHome() {
   const [exhibitionType, setExhibitionType] = useState("create");
   const [exhibitionId, setExhibitionId] = useState(undefined);
   const [projectId, setProjectId] = useState(undefined);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingF, setIsLoadingF] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isListRoom, setIsListRoom] = useState(true);
   const [isListProject, setIsListProject] = useState(false);
 
@@ -102,17 +103,21 @@ function ManagerHome() {
           const email = Store.getUser()?.email;
           if (!res.data.larchiveum || res.data.larchiveum.email != email) {
             setIsLoading(false);
+            setIsLoadingF(false);
           } else if (!res.data.hubs) {
             window.location = "/?page=warning-verify";
           } else {
             setIsLoading(false);
+            setIsLoadingF(false);
           }
         } else {
           setIsLoading(false);
+          setIsLoadingF(false);
         }
       })
       .catch(() => {
         setIsLoading(false);
+        setIsLoadingF(false);
       });
   }
   useEffect(
@@ -141,8 +146,12 @@ function ManagerHome() {
         if (res.result == "ok") {
           setExhibitions(res.data);
           setExhibitionsLoaded(true);
+          setIsLoading(false);
+          setIsLoadingF(false);
         } else if (res.result == "fail" && res.error == "get_exhibitions_fail") {
           toast.error("Get Exhibitions fail !", { autoClose: 1000 });
+          setIsLoading(false);
+          setIsLoadingF(false);
         }
       });
       ExhibitionsService.getAllScenes().then(res => {
@@ -163,8 +172,10 @@ function ManagerHome() {
         if (res.result == "ok") {
           setProjects(res.data);
           setProjectsLoaded(true);
+          setIsLoading(false);
         } else if (res.result == "fail") {
           toast.error("Get Projects fail !", { autoClose: 1000 });
+          setIsLoading(false);
         }
       });
     }
@@ -209,7 +220,6 @@ function ManagerHome() {
   const handelSpoke = () => {
     window.open(APP_ROOT + "/spoke/projects/" + projectId , '_blank');
     setIsOpenSpoke(false);
-    openPopupCustomObject(true);
   };
 
   const closePopupSpoke = () => {
@@ -357,18 +367,21 @@ function ManagerHome() {
   };
 
   const ActionListRoom = () => {
+    setIsLoading(true);
     getAllExhibitions();
     setIsListRoom(true);
     setIsListProject(false);
   };
 
   const ActionListProject = () => {
+    setIsLoading(true);
     getAllProjects();
     setIsListRoom(false);
     setIsListProject(true);
   };
 
   const changePages = page => {
+    setIsLoading(true);
     setfilterExhibitionList({
       ...filterExhibitionList,
       page
@@ -376,6 +389,7 @@ function ManagerHome() {
   };
 
   const changePagesProject = page => {
+    setIsLoading(true);
     setfilterProjectList({
       ...filterProjectList,
       page
@@ -707,7 +721,7 @@ function ManagerHome() {
                   {
                     return(
                       <>
-                        <ModelViewer src={item?.src} />
+                        <model-viewer poster={defaultModel} src={item?.src}></model-viewer>
                       </>
                     )
                   }
@@ -1091,382 +1105,408 @@ function ManagerHome() {
     }
   };
 
-  if (isLoading) {
+  if (isLoadingF) {
     return (
-      <div className="loading">
-        <div className="loading-container">
-          <div className="item" />
-          <div className="item" />
-          <div className="item" />
-          <div className="item" />
+      <div className="loader-2">
+        <div className="loader">
+            <svg viewBox="0 0 80 80">
+                <circle id="test" cx="40" cy="40" r="32"></circle>
+            </svg>
+        </div>
+        <div className="loader triangle">
+            <svg viewBox="0 0 86 80">
+                <polygon points="43 8 79 72 7 72"></polygon>
+            </svg>
+        </div>
+        <div className="loader">
+            <svg viewBox="0 0 80 80">
+                <rect x="8" y="8" width="64" height="64"></rect>
+            </svg>
         </div>
       </div>
     );
   } else {
-    return (
-      <>
-        {isOpenExhibition && (
-          <Popup
-            size={"xl"}
-            title={exhibitionType == "edit" ? <>Edit Exhibition </> : <> Create Exhibition</>}
-            content={
-              <>
-                <form className="create100-form validate-form d-flex" name="form">
-                  <div className="w-60">
-                    <div className="p-t-13 p-b-9">
-                      <span className="txt1">Name Exhibition</span>
-                    </div>
-                    <div className="wrap-input100 validate-input">
-                      <input
-                        className="input100"
-                        type="text"
-                        name="name"
-                        value={exhibition ? exhibition.name : undefined}
-                        onChange={handleChange}
-                        placeholder="Name Tour"
-                      />
-                      <span className="focus-input100" />
-                    </div>
-                    <div className="p-t-13 p-b-9">
-                      <span className="txt1">Description</span>
-                    </div>
-                    <div className="wrap-input100 validate-input">
-                      <textarea
-                        className="textarea100"
-                        name="description"
-                        value={exhibition ? exhibition.description : undefined}
-                        onChange={handleChange}
-                        placeholder="Description about tour"
-                        rows="10"
-                      />
-                      <span className="focus-input100" />
-                    </div>
-                    <div className="p-t-13 p-b-9">
-                      <span className="txt1">Public</span>
-                    </div>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        name="public"
-                        checked={exhibition ? exhibition.public : undefined}
-                        onChange={handleChange}
-                      />
-                      <span className="slider" />
-                    </label>
-                  </div>
-                  <div className="w-40">
-                    <div className="d-flex-form">
-                      <div className="item-input">
-                        <div className="p-t-13 p-b-9">
-                          <span className="txt1">Max Size</span>
-                        </div>
-                        <div className="wrap-input100 validate-input">
-                          <input
-                            className="input100"
-                            type="number"
-                            min={0}
-                            max={50}
-                            name="maxSize"
-                            value={exhibition ? exhibition.maxSize : 1}
-                            onChange={handleChange}
-                          />
-                          <span className="focus-input100" />
-                        </div>
-                      </div>
-                      <div className="item-input">
-                        <div className="p-t-13 p-b-9">
-                          <span className="txt1">Start day</span>
-                        </div>
-                        <div className="wrap-input100 validate-input">
-                          <input
-                            className="input100"
-                            type="date"
-                            name="startDate"
-                            placeholder="dd-mm-yyyy"
-                            value={exhibition ? exhibition.startDate : undefined}
-                            onChange={handleChange}
-                          />
-                          <span className="focus-input100" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-t-13 p-b-9">
-                      <span className="txt1">List Scene</span>
-                    </div>
-                    <ListScenes />
-                  </div>
-                </form>
-              </>
-            }
-            actions={[
-              {
-                text: exhibitionType == "edit" ? "Edit" : "Create",
-                class: "btn-handle",
-                callback: () => {
-                  exhibitionType == "edit" ? handleEdit() : handleCreate();
-                }
-              },
-              {
-                text: "Cancel",
-                class: "btn-cancle",
-                callback: () => {
-                  closePopupExhibition();
-                }
-              }
-            ]}
-            handleClose={() => {
-              closePopupExhibition();
-            }}
-          />
-        )}
-
-        {isOpenToggle && (
-          <Popup
-            title={<>Change public status</>}
-            size={"sm"}
-            content={
-              <>
-                <br />
-                Are you sure Change this public status ?
-                <br />
-                <br />
-              </>
-            }
-            actions={[
-              {
-                text: "Change",
-                class: "btn1",
-                callback: () => {
-                  handelTogglePublic(exhibitionId);
-                }
-              },
-              {
-                text: "Cancel",
-                class: "btn2",
-                callback: () => {
-                  closePopupPublic();
-                }
-              }
-            ]}
-            handleClose={closePopupPublic}
-          />
-        )}
-
-        {isOpenSpoke && (
-          <Popup
-            title={<>Go to page Spoke</>}
-            size={"sm"}
-            content={
-              <>
-                <br />
-                You need to go to spoke page to public project !
-                <br />
-                <br />
-              </>
-            }
-            actions={[
-              {
-                text: "Goto Spoke",
-                class: "btn1",
-                callback: () => {
-                  handelSpoke(projectId);
-                }
-              },
-              {
-                text: "Cancel",
-                class: "btn2",
-                callback: () => {
-                  closePopupSpoke();
-                }
-              }
-            ]}
-            handleClose={closePopupSpoke}
-          />
-        )}    
-
-        {isCloseRoom && (
-          <Popup
-            title={<>Close room</>}
-            size={"sm"}
-            content={
-              <>
-                <br />
-                Are you sure to close this room? People will not be able to access when you close the room ?
-                <br />
-                <br />
-              </>
-            }
-            actions={[
-              {
-                text: "Close Room",
-                class: "btn1",
-                callback: () => {
-                  handelCloseRoom(exhibitionId);
-                }
-              },
-              {
-                text: "Cancel",
-                class: "btn2",
-                callback: () => {
-                  closePopupCloseRoom();
-                }
-              }
-            ]}
-            handleClose={closePopupCloseRoom}
-          />
-        )}
-
-        {isOpenRoom && (
-          <Popup
-            title={<>Open room</>}
-            size={"sm"}
-            content={
-              <>
-                <br />
-                Are you sure to open this room? People will can access to the room ?
-                <br />
-                <br />
-              </>
-            }
-            actions={[
-              {
-                text: "Open Room",
-                class: "btn1",
-                callback: () => {
-                  handelOpenRoom(exhibitionId);
-                }
-              },
-              {
-                text: "Cancel",
-                class: "btn2",
-                callback: () => {
-                  closePopupOpenRoom();
-                }
-              }
-            ]}
-            handleClose={closePopupOpenRoom}
-          />
-        )}
-
-        {isDeleteRoom && (
-          <Popup
-            title={<>Delete room</>}
-            size={"sm"}
-            content={
-              <>
-                <br />
-                Are you sure to delete this room? People will not be able to access when you close the room ?
-                <br />
-                <br />
-              </>
-            }
-            actions={[
-              {
-                text: "Delete Room",
-                class: "btn1",
-                callback: () => {
-                  handelToggleDeleteRoom(exhibitionId);
-                }
-              },
-              {
-                text: "Cancel",
-                class: "btn2",
-                callback: () => {
-                  deleteRoom();
-                }
-              }
-            ]}
-            handleClose={deleteRoom}
-          />
-        )}
-
-        {isOpenMedia && (
-          <Popup
-            size={"xl"}
-            title={"Custom Media"}
-            content={
-              <>
-                <form className="create100-form validate-form d-flex form-custom-media" name="form">
-                  <div className="w-100">
-                    <div className="p-t-13 p-b-9">
-                      {renderListMedia()}
-                    </div>
-                  </div>
-                </form>
-              </>
-            }
-            actions={[
-              {
-                text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
-                class: "btn-handle",
-                callback: () => {
-                  handelSaveMediaURL();
-                }
-              },
-              {
-                text: "Cancel",
-                class: "btn-cancle",
-                callback: () => {
-                  closePopupCustomMedia();
-                }
-              }
-            ]}
-            handleClose={() => {
-              closePopupCustomMedia();
-            }}
-          />
-        )}
-
-        {isOpenObject && (
-          <Popup
-            size={"xl"}
-            title={"List Object"}
-            content={
-              <>
-                <form className="create100-form validate-form d-flex form-custom-media" name="form">
-                  <div className="w-100">
-                    <div className="p-t-13 p-b-9">
-                      {renderListObject()}
-                    </div>
-                  </div>
-                </form>
-              </>
-            }
-            actions={[
-              {
-                text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
-                class: "btn-handle",
-                callback: () => {
-                  handelOpenSpoke();
-                }
-          
-              },
-              {
-                text: "Cancel",
-                class: "btn-cancle",
-                callback: () => {
-                  closePopupCustomObject();
-                }
-              }
-            ]}
-            handleClose={() => {
-              closePopupCustomObject();
-            }}
-          />
-        )}
-
-        <div className="manager-page">
-          <div className="row_1">
-            <span className="text_1">Manager Larchiveum</span>
-            <IAuth />
-          </div>
-
-          <div className="row_2">
-            {renderTabs()}
-              <AccountPermision />
+    if (isLoading) {
+      return (
+        <div className="loader-1">
+          <div className="loader triangle">
+              <svg viewBox="0 0 86 80">
+                  <polygon points="43 8 79 72 7 72"></polygon>
+              </svg>
           </div>
         </div>
-      </>
-    );
+      );
+    } 
+    else{
+      return (
+        <>
+          {isOpenExhibition && (
+            <Popup
+              size={"xl"}
+              title={exhibitionType == "edit" ? <>Edit Exhibition </> : <> Create Exhibition</>}
+              content={
+                <>
+                  <form className="create100-form validate-form d-flex" name="form">
+                    <div className="w-60">
+                      <div className="p-t-13 p-b-9">
+                        <span className="txt1">Name Exhibition</span>
+                      </div>
+                      <div className="wrap-input100 validate-input">
+                        <input
+                          className="input100"
+                          type="text"
+                          name="name"
+                          value={exhibition ? exhibition.name : undefined}
+                          onChange={handleChange}
+                          placeholder="Name Tour"
+                        />
+                        <span className="focus-input100" />
+                      </div>
+                      <div className="p-t-13 p-b-9">
+                        <span className="txt1">Description</span>
+                      </div>
+                      <div className="wrap-input100 validate-input">
+                        <textarea
+                          className="textarea100"
+                          name="description"
+                          value={exhibition ? exhibition.description : undefined}
+                          onChange={handleChange}
+                          placeholder="Description about tour"
+                          rows="10"
+                        />
+                        <span className="focus-input100" />
+                      </div>
+                      <div className="p-t-13 p-b-9">
+                        <span className="txt1">Public</span>
+                      </div>
+                      <label className="switch">
+                        <input
+                          type="checkbox"
+                          name="public"
+                          checked={exhibition ? exhibition.public : undefined}
+                          onChange={handleChange}
+                        />
+                        <span className="slider" />
+                      </label>
+                    </div>
+                    <div className="w-40">
+                      <div className="d-flex-form">
+                        <div className="item-input">
+                          <div className="p-t-13 p-b-9">
+                            <span className="txt1">Max Size</span>
+                          </div>
+                          <div className="wrap-input100 validate-input">
+                            <input
+                              className="input100"
+                              type="number"
+                              min={0}
+                              max={50}
+                              name="maxSize"
+                              value={exhibition ? exhibition.maxSize : 1}
+                              onChange={handleChange}
+                            />
+                            <span className="focus-input100" />
+                          </div>
+                        </div>
+                        <div className="item-input">
+                          <div className="p-t-13 p-b-9">
+                            <span className="txt1">Start day</span>
+                          </div>
+                          <div className="wrap-input100 validate-input">
+                            <input
+                              className="input100"
+                              type="date"
+                              name="startDate"
+                              placeholder="dd-mm-yyyy"
+                              value={exhibition ? exhibition.startDate : undefined}
+                              onChange={handleChange}
+                            />
+                            <span className="focus-input100" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-t-13 p-b-9">
+                        <span className="txt1">List Scene</span>
+                      </div>
+                      <ListScenes />
+                    </div>
+                  </form>
+                </>
+              }
+              actions={[
+                {
+                  text: exhibitionType == "edit" ? "Edit" : "Create",
+                  class: "btn-handle",
+                  callback: () => {
+                    exhibitionType == "edit" ? handleEdit() : handleCreate();
+                  }
+                },
+                {
+                  text: "Cancel",
+                  class: "btn-cancle",
+                  callback: () => {
+                    closePopupExhibition();
+                  }
+                }
+              ]}
+              handleClose={() => {
+                closePopupExhibition();
+              }}
+            />
+          )}
+  
+          {isOpenToggle && (
+            <Popup
+              title={<>Change public status</>}
+              size={"sm"}
+              content={
+                <>
+                  <br />
+                  Are you sure Change this public status ?
+                  <br />
+                  <br />
+                </>
+              }
+              actions={[
+                {
+                  text: "Change",
+                  class: "btn1",
+                  callback: () => {
+                    handelTogglePublic(exhibitionId);
+                  }
+                },
+                {
+                  text: "Cancel",
+                  class: "btn2",
+                  callback: () => {
+                    closePopupPublic();
+                  }
+                }
+              ]}
+              handleClose={closePopupPublic}
+            />
+          )}
+  
+          {isOpenSpoke && (
+            <Popup
+              title={<>Go to page Spoke</>}
+              size={"sm"}
+              content={
+                <>
+                  To continue the process, follow these steps:
+                  <ul>
+                    <li>- Go to spoke using the "Goto Spoke" button below </li>
+                    <li>- Click "Publish Scene" button on top toolbar</li>
+                    <li>- After the popup opens, select "Save Project"</li>
+                    <li>- After the popup opens, select "Save and Publish"</li>
+                    <li>- Finally, select "Save Scene" to finish</li>
+                  </ul>
+                </>
+              }
+              actions={[
+                {
+                  text: "Goto Spoke",
+                  class: "btn1",
+                  callback: () => {
+                    handelSpoke(projectId);
+                  }
+                },
+                {
+                  text: "Cancel",
+                  class: "btn2",
+                  callback: () => {
+                    closePopupSpoke();
+                  }
+                }
+              ]}
+              handleClose={closePopupSpoke}
+            />
+          )}    
+  
+          {isCloseRoom && (
+            <Popup
+              title={<>Close room</>}
+              size={"sm"}
+              content={
+                <>
+                  <br />
+                  Are you sure to close this room? People will not be able to access when you close the room ?
+                  <br />
+                  <br />
+                </>
+              }
+              actions={[
+                {
+                  text: "Close Room",
+                  class: "btn1",
+                  callback: () => {
+                    handelCloseRoom(exhibitionId);
+                  }
+                },
+                {
+                  text: "Cancel",
+                  class: "btn2",
+                  callback: () => {
+                    closePopupCloseRoom();
+                  }
+                }
+              ]}
+              handleClose={closePopupCloseRoom}
+            />
+          )}
+  
+          {isOpenRoom && (
+            <Popup
+              title={<>Open room</>}
+              size={"sm"}
+              content={
+                <>
+                  <br />
+                  Are you sure to open this room? People will can access to the room ?
+                  <br />
+                  <br />
+                </>
+              }
+              actions={[
+                {
+                  text: "Open Room",
+                  class: "btn1",
+                  callback: () => {
+                    handelOpenRoom(exhibitionId);
+                  }
+                },
+                {
+                  text: "Cancel",
+                  class: "btn2",
+                  callback: () => {
+                    closePopupOpenRoom();
+                  }
+                }
+              ]}
+              handleClose={closePopupOpenRoom}
+            />
+          )}
+  
+          {isDeleteRoom && (
+            <Popup
+              title={<>Delete room</>}
+              size={"sm"}
+              content={
+                <>
+                  <br />
+                  Are you sure to delete this room? People will not be able to access when you close the room ?
+                  <br />
+                  <br />
+                </>
+              }
+              actions={[
+                {
+                  text: "Delete Room",
+                  class: "btn1",
+                  callback: () => {
+                    handelToggleDeleteRoom(exhibitionId);
+                  }
+                },
+                {
+                  text: "Cancel",
+                  class: "btn2",
+                  callback: () => {
+                    deleteRoom();
+                  }
+                }
+              ]}
+              handleClose={deleteRoom}
+            />
+          )}
+  
+          {isOpenMedia && (
+            <Popup
+              size={"xl"}
+              title={"Custom Media"}
+              content={
+                <>
+                  <form className="create100-form validate-form d-flex form-custom-media" name="form">
+                    <div className="w-100">
+                      <div className="p-t-13 p-b-9">
+                        {renderListMedia()}
+                      </div>
+                    </div>
+                  </form>
+                </>
+              }
+              actions={[
+                {
+                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
+                  class: "btn-handle",
+                  callback: () => {
+                    handelSaveMediaURL();
+                  }
+                },
+                {
+                  text: "Cancel",
+                  class: "btn-cancle",
+                  callback: () => {
+                    closePopupCustomMedia();
+                  }
+                }
+              ]}
+              handleClose={() => {
+                closePopupCustomMedia();
+              }}
+            />
+          )}
+  
+          {isOpenObject && (
+            <Popup
+              size={"xl"}
+              title={"List Object"}
+              content={
+                <>
+                  <form className="create100-form validate-form d-flex form-custom-media" name="form">
+                    <div className="w-100">
+                      <div className="p-t-13 p-b-9">
+                        {renderListObject()}
+                      </div>
+                    </div>
+                  </form>
+                </>
+              }
+              actions={[
+                {
+                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
+                  class: "btn-handle",
+                  callback: () => {
+                    handelOpenSpoke();
+                  }
+            
+                },
+                {
+                  text: "Cancel",
+                  class: "btn-cancle",
+                  callback: () => {
+                    closePopupCustomObject();
+                  }
+                }
+              ]}
+              handleClose={() => {
+                closePopupCustomObject();
+              }}
+            />
+          )}
+  
+          <div className="manager-page">
+            <div className="row_1">
+              <span className="text_1">Manager Larchiveum</span>
+              <IAuth />
+            </div>
+  
+            <div className="row_2">
+              {renderTabs()}
+                <AccountPermision />
+            </div>
+          </div>
+        </>
+      );
+    }
   }
 }
