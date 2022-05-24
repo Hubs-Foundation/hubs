@@ -31,9 +31,14 @@ const schemas = {
 };
 
 export function takeOwnership(world, eid) {
-  // TODO handle case where lastOwner is already newer than now
-  addComponent(world, Owned, eid);
-  Networked.lastOwnerTime[eid] = NAF.connection.getServerTime();
+  // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame
+  if (hasComponent(world, AEntity, eid)) {
+    const el = world.eid2obj.get(eid).el;
+    !NAF.utils.isMine(el) && NAF.utils.takeOwnership(el);
+  } else {
+    addComponent(world, Owned, eid);
+    Networked.lastOwnerTime[eid] = Math.max(NAF.connection.getServerTime(), Networked.lastOwnerTime[eid] + 1);
+  }
 }
 
 const pendingMessages = [];

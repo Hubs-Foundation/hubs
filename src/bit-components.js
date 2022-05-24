@@ -27,6 +27,7 @@ export const Slice9 = defineComponent({
   size: [Types.f32, 2]
 });
 
+export const AEntity = defineComponent();
 export const Object3DTag = defineComponent();
 export const Spin = defineComponent({ x: Types.f32, y: Types.f32, z: Types.f32 });
 export const CursorRaycastable = defineComponent();

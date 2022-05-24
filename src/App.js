@@ -14,7 +14,8 @@ import {
   OffersRemoteConstraint,
   Rigidbody,
   PhysicsShape,
-  FloatyObject
+  FloatyObject,
+  AEntity
 } from "./bit-components";
 import cubeSchema from "./network-schemas/interactable-cube";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
@@ -164,18 +165,12 @@ export class App {
     // reserve entity 0 to avoid needing to check for undefined everywhere eid is checked for existance
     addEntity(this.world);
 
-    // used for JSX and GLTFs
+    // used in aframe and networked aframe to avoid imports
     this.world.nameToComponent = {
       object3d: Object3DTag,
-      spin: Spin,
       networked: Networked,
       owned: Owned,
-      "cursor-raycastable": CursorRaycastable,
-      "remote-hover-target": RemoteHoverTarget,
-      holdable: Holdable,
-      "offers-remote-constraint": OffersRemoteConstraint,
-      rigidbody: Rigidbody,
-      "floaty-object": FloatyObject
+      AEntity
     };
 
     this.world.networkSchemas = [cubeSchema];

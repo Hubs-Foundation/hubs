@@ -16,6 +16,7 @@ import {
   OffersRemoteConstraint,
   Rigidbody
 } from "../bit-components";
+import { takeOwnership } from "./netcode";
 
 const queryRemoteRight = defineQuery([HeldRemoteRight, OffersRemoteConstraint, Rigidbody]);
 const queryEnterRemoteRight = enterQuery(queryRemoteRight);
@@ -36,9 +37,10 @@ const queryExitHandLeft = exitQuery(queryHandLeft);
 const grabBodyOptions = { type: "dynamic", activationState: DISABLE_DEACTIVATION };
 const releaseBodyOptions = { activationState: ACTIVE_TAG };
 
-function add(physicsSystem, interactor, entities) {
+function add(world, physicsSystem, interactor, entities) {
   for (let i = 0; i < entities.length; i++) {
     const eid = entities[i];
+    takeOwnership(world, eid);
     physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {});
   }
@@ -56,10 +58,10 @@ function remove(world, offersConstraint, physicsSystem, interactor, entities) {
 
 export function constraintsSystem(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-  add(physicsSystem, anyEntityWith(world, RemoteRight), queryEnterRemoteRight(world));
-  add(physicsSystem, anyEntityWith(world, RemoteLeft), queryEnterRemoteLeft(world));
-  add(physicsSystem, anyEntityWith(world, HandRight), queryEnterHandRight(world));
-  add(physicsSystem, anyEntityWith(world, HandLeft), queryEnterHandLeft(world));
+  add(world, physicsSystem, anyEntityWith(world, RemoteRight), queryEnterRemoteRight(world));
+  add(world, physicsSystem, anyEntityWith(world, RemoteLeft), queryEnterRemoteLeft(world));
+  add(world, physicsSystem, anyEntityWith(world, HandRight), queryEnterHandRight(world));
+  add(world, physicsSystem, anyEntityWith(world, HandLeft), queryEnterHandLeft(world));
   remove(world, OffersRemoteConstraint, physicsSystem, anyEntityWith(world, RemoteRight), queryExitRemoteRight(world));
   remove(world, OffersRemoteConstraint, physicsSystem, anyEntityWith(world, RemoteLeft), queryExitRemoteLeft(world));
   remove(world, OffersHandConstraint, physicsSystem, anyEntityWith(world, HandRight), queryExitHandRight(world));
