@@ -297,6 +297,15 @@ AFRAME.registerSystem("interaction", {
   },
 
   tick2() {
+    this.previousState.rightRemote.hovered = this.state.rightRemote.hovered;
+    this.previousState.rightRemote.held = this.state.rightRemote.held;
+    this.previousState.leftRemote.hovered = this.state.leftRemote.hovered;
+    this.previousState.leftRemote.held = this.state.leftRemote.held;
+    this.previousState.leftHand.hovered = this.state.leftHand.hovered;
+    this.previousState.leftHand.held = this.state.leftHand.held;
+    this.previousState.rightHand.hovered = this.state.rightHand.hovered;
+    this.previousState.rightHand.held = this.state.rightHand.held;
+
     this.state.rightRemote.hovered =
       anyEntityWith(APP.world, HoveredRemoteRight) &&
       APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredRemoteRight)).el;
