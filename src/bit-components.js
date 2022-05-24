@@ -5,7 +5,6 @@ export const Networked = defineComponent({
   creator: Types.ui32,
   owner: Types.ui32,
 
-  templateId: Types.ui8, // TODO Remove
   lastOwnerTime: Types.ui32
 });
 
@@ -25,6 +24,10 @@ export const Text = defineComponent();
 export const Slice9 = defineComponent({
   insets: [Types.ui32, 4],
   size: [Types.f32, 2]
+});
+
+export const NetworkedTransform = defineComponent({
+  position: [Types.f32, 3]
 });
 
 export const AEntity = defineComponent();

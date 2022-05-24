@@ -138,8 +138,6 @@ AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, compon
   Networked.id[eid] = APP.getSid(netId);
   APP.world.nid2eid.set(APP.getSid(netId), eid);
 
-  Networked.templateId[eid] = TEMPLATE_ID_MEDIA_FRAME;
-
   console.log(el.object3D);
 
   // if (qsTruthy("host")) {

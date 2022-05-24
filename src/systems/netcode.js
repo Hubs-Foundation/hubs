@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
-import { NetworkedMediaFrame, Networked, Owned } from "../bit-components";
+import { NetworkedMediaFrame, Networked, Owned, NetworkedTransform, AEntity } from "../bit-components";
 
 const networkedObjectsQuery = defineQuery([Networked]);
 const enteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
@@ -7,28 +7,43 @@ const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
 export const TEMPLATE_ID_LEGACY_NAF = 1;
 export const TEMPLATE_ID_MEDIA_FRAME = 2;
-const schemas = {
-  [TEMPLATE_ID_MEDIA_FRAME]: {
-    addEntity: function(componentProps) {
-      return renderAsAframeEntity(<entity media-frame={componentProps} />, APP.world);
-    },
+const schemas = new Map([
+  [
+    NetworkedMediaFrame,
+    {
+      serialize(world, eid, data) {
+        // TODO: Just "serialize this component: NetworkedMediaFrame and determine changes"
+        data.push({
+          capturedNid: APP.getString(NetworkedMediaFrame.capturedNid[eid]),
+          scale: Array.from(NetworkedMediaFrame.scale[eid])
+        });
+      },
 
-    serialize(world, eid, updates) {
-      // TODO: Just "serialize this component: NetworkedMediaFrame and determine changes"
-      updates.push({
-        capturedNid: APP.getString(NetworkedMediaFrame.capturedNid[eid]),
-        scale: Array.from(NetworkedMediaFrame.scale[eid])
-      });
-    },
-
-    deserialize(world, frameEid, update) {
-      // TODO: Just "deserialize this component of a known shape: NetworkedMediaFrame"
-      NetworkedMediaFrame.capturedNid[frameEid] = APP.getSid(update.capturedNid);
-      NetworkedMediaFrame.scale[frameEid].set(update.scale);
-      return;
+      deserialize(world, frameEid, update) {
+        // TODO: Just "deserialize this component of a known shape: NetworkedMediaFrame"
+        NetworkedMediaFrame.capturedNid[frameEid] = APP.getSid(update.capturedNid);
+        NetworkedMediaFrame.scale[frameEid].set(update.scale);
+        return;
+      }
     }
-  }
-};
+  ],
+  [
+    NetworkedTransform,
+    {
+      serialize(world, eid, data) {
+        data.push({
+          position: Array.from(NetworkedTransform.position[eid])
+        });
+      },
+
+      deserialize(world, eid, update) {
+        NetworkedTransform.position[eid].set(update.position);
+        return;
+      }
+    }
+  ]
+]);
+const networkableComponents = [NetworkedMediaFrame, NetworkedTransform];
 
 export function takeOwnership(world, eid) {
   // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame
@@ -70,37 +85,40 @@ export function applyNetworkUpdates(world) {
       Networked.owner[eid] = APP.getSid(owner);
     }
 
-    for (let j = 0; j < message.updates.length; j += 3) {
-      const nid = message.updates[j];
-      const newLastOwnerTime = message.updates[j + 1];
-      const update = message.updates[j + 2];
+    let j = 0;
+    for (let j = 0; j < message.updates.length; j++) {
+      const updateMessage = message.updates[j];
+      const nid = APP.getSid(updateMessage.nid);
 
       if (!world.nid2eid.has(nid)) {
-        console.log(`Holding onto an update for ${nid} because we don't have it yet.`);
+        console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
         // TODO: What if we will NEVER be able to apply this update?
-        messagesToRevisit.updates.push(nid);
-        messagesToRevisit.updates.push(newLastOwnerTime);
-        messagesToRevisit.updates.push(update);
+        // messagesToRevisit.updates.push(updateMessage);
         continue;
       }
 
       const eid = world.nid2eid.get(nid);
 
-      if (Networked.lastOwnerTime[eid] > newLastOwnerTime) {
-        console.log("Received update from an old owner, skipping", nid);
+      if (Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime) {
+        console.log("Received update from an old owner, skipping", updateMessage.nid);
         continue;
       }
 
       // TODO handle tiebreak
-      if (hasComponent(world, Owned, eid) && newLastOwnerTime > Networked.lastOwnerTime[eid]) {
-        console.log("Lost ownership: ", nid);
+      if (hasComponent(world, Owned, eid) && updateMessage.lastOwnerTime > Networked.lastOwnerTime[eid]) {
+        console.log("Lost ownership: ", updateMessage.nid);
         removeComponent(world, Owned, eid);
       }
 
-      Networked.lastOwnerTime[eid] = newLastOwnerTime;
+      Networked.lastOwnerTime[eid] = updateMessage.lastOwnerTime;
 
-      const schema = schemas[Networked.templateId[eid]];
-      schema.deserialize(world, eid, update);
+      let cursor = 0;
+      for (let s = 0; s < updateMessage.componentIds.length; s++) {
+        const componentId = updateMessage.componentIds[s];
+        const schema = schemas.get(networkableComponents[componentId]);
+        schema.deserialize(world, eid, updateMessage.data[cursor]);
+        cursor += 1; // TODO we assume each serializer only writes 1 thing
+      }
     }
 
     for (let j = 0; j < message.deletes.length; j += 1) {
@@ -148,16 +166,29 @@ export function networkSendSystem(world) {
   const entities = ownedNetworkObjectsQuery(world);
   for (let i = 0; i < entities.length; i++) {
     const eid = entities[i];
-    const templateId = Networked.templateId[eid];
-    if (templateId === TEMPLATE_ID_LEGACY_NAF) continue;
 
-    const schema = schemas[templateId];
-    message.updates.push(APP.getString(Networked.id[eid]));
-    message.updates.push(Networked.lastOwnerTime[eid]);
-    schema.serialize(world, eid, message.updates);
+    const updateMessage = {
+      nid: APP.getString(Networked.id[eid]),
+      lastOwnerTime: Networked.lastOwnerTime[eid],
+      componentIds: [],
+      data: []
+    };
+
+    for (let j = 0; j < networkableComponents.length; j++) {
+      const Component = networkableComponents[j];
+      if (hasComponent(world, Component, eid)) {
+        updateMessage.componentIds.push(j);
+        schemas.get(Component).serialize(world, eid, updateMessage.data);
+      }
+    }
+
+    if (updateMessage.componentIds.length) {
+      message.updates.push(updateMessage);
+    }
   }
 
   if (message.creates.length || message.updates.length || message.deletes.length) {
+    // TODO we use NAF as a "dumb" transport here. This should happen in a better way
     NAF.connection.broadcastDataGuaranteed("nn", message);
   }
 }
