@@ -315,20 +315,33 @@ export function CameraPrefab() {
   });
 
   return (
-    <entity networked-transform logger={{ buttons }}>
-      <HoldableButton position={[0, 1, 0]} width={1} height={0.5} text="Welcome to our wonderfully grabbable world" />
-      {buttons}
-      <entity
-        scale={[0.25, 0.25, 0.25]}
-        object3D={cube}
-        cursor-raycastable
-        remote-hover-target
-        offers-remote-constraint
-        holdable
-        rigidbody
-      />
-    </entity>
+    <entity
+      scale={[0.25, 0.25, 0.25]}
+      object3D={cube}
+      networked-transform
+      cursor-raycastable
+      remote-hover-target
+      offers-remote-constraint
+      holdable
+      rigidbody
+    />
   );
+
+  // return (
+  //   <entity networked-transform logger={{ buttons }}>
+  //     <HoldableButton position={[0, 1, 0]} width={1} height={0.5} text="Welcome to our wonderfully grabbable world" />
+  //     {buttons}
+  //     <entity
+  //       scale={[0.25, 0.25, 0.25]}
+  //       object3D={cube}
+  //       cursor-raycastable
+  //       remote-hover-target
+  //       offers-remote-constraint
+  //       holdable
+  //       rigidbody
+  //     />
+  //   </entity>
+  // );
 }
 
 export const FLAGS = {

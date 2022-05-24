@@ -36,6 +36,8 @@ import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 
 // new world
 import { networkSendSystem, applyNetworkUpdates } from "./netcode";
+import { onOwnershipLost } from "./on-ownership-lost";
+import { notHoveredIfHeld } from "./not-hovered-if-held";
 import { singleActionButtonSystem } from "./single-action-button-system";
 import { holdSystem } from "./hold-system";
 import { constraintsSystem } from "./bit-constraints-system";
@@ -92,7 +94,7 @@ AFRAME.registerSystem("hubs-systems", {
     const world = APP.world;
 
     applyNetworkUpdates(world);
-
+    onOwnershipLost(world);
     networkedTransformSystem(world);
 
     const systems = AFRAME.scenes[0].systems;
@@ -101,8 +103,9 @@ AFRAME.registerSystem("hubs-systems", {
     // Here's the new world order
     this.cursorTargettingSystem.tick(t);
     // TODO: Hover with hands
-    singleActionButtonSystem(world);
     holdSystem(world, systems.userinput);
+    notHoveredIfHeld(world);
+    singleActionButtonSystem(world);
     constraintsSystem(world, systems.userinput);
     loggerSystem(world);
 
