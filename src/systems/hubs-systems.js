@@ -37,14 +37,13 @@ import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 // new world
 import { networkSendSystem, applyNetworkUpdates } from "./netcode";
 import { onOwnershipLost } from "./on-ownership-lost";
-import { notHoveredIfHeld } from "./not-hovered-if-held";
-import { singleActionButtonSystem } from "./single-action-button-system";
-import { holdSystem } from "./hold-system";
-import { constraintsSystem } from "./bit-constraints-system";
-import { loggerSystem } from "./logger-system";
+import { interactionSystem } from "./bit-interaction-system";
 import { floatyObjectSystem } from "./floaty-object-system";
 import { removeNetworkedObjectSystem } from "./remove-networked-object-system";
 import { networkedTransformSystem } from "./networked-transform";
+import { singleActionButtonSystem } from "./single-action-button-system";
+import { constraintsSystem } from "./bit-constraints-system";
+import { loggerSystem } from "./logger-system";
 // import { holdableButtonSystem } from "./holdable-button-system";
 
 AFRAME.registerSystem("hubs-systems", {
@@ -100,16 +99,11 @@ AFRAME.registerSystem("hubs-systems", {
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
 
-    // Here's the new world order
-    this.cursorTargettingSystem.tick(t);
-    // TODO: Hover with hands
-    holdSystem(world, systems.userinput);
-    notHoveredIfHeld(world);
+    interactionSystem(world, this.cursorTargettingSystem, t, systems);
+
     singleActionButtonSystem(world);
     constraintsSystem(world, systems.userinput);
     loggerSystem(world);
-
-    systems.interaction.tick2();
 
     // We run this earlier in the frame so things have a chance to override properties run by animations
     this.animationMixerSystem.tick(dt);
