@@ -20,8 +20,14 @@ import {
   HeldRemoteLeft,
   HeldHandRight,
   HeldHandLeft,
-  NotRemoteHoverTarget
+  NotRemoteHoverTarget,
+  AEntity
 } from "../bit-components";
+
+function anyAframeEntityWith(world, component) {
+  const eid = anyEntityWith(world, component);
+  return eid && hasComponent(world, AEntity, eid) && world.eid2obj.get(eid).el;
+}
 
 function findHandCollisionTargetForHand(bodyId) {
   const physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
@@ -306,24 +312,14 @@ AFRAME.registerSystem("interaction", {
     this.previousState.rightHand.hovered = this.state.rightHand.hovered;
     this.previousState.rightHand.held = this.state.rightHand.held;
 
-    this.state.rightRemote.hovered =
-      anyEntityWith(APP.world, HoveredRemoteRight) &&
-      APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredRemoteRight)).el;
-    this.state.rightRemote.held =
-      anyEntityWith(APP.world, HeldRemoteRight) && APP.world.eid2obj.get(anyEntityWith(APP.world, HeldRemoteRight)).el;
-    this.state.leftRemote.hovered =
-      anyEntityWith(APP.world, HoveredRemoteLeft) &&
-      APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredRemoteLeft)).el;
-    this.state.leftRemote.held =
-      anyEntityWith(APP.world, HeldRemoteLeft) && APP.world.eid2obj.get(anyEntityWith(APP.world, HeldRemoteLeft)).el;
-    this.state.rightHand.hovered =
-      anyEntityWith(APP.world, HoveredHandRight) &&
-      APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredHandRight)).el;
-    this.state.rightHand.held =
-      anyEntityWith(APP.world, HeldHandRight) && APP.world.eid2obj.get(anyEntityWith(APP.world, HeldHandRight)).el;
-    this.state.leftHand.hovered =
-      anyEntityWith(APP.world, HoveredHandLeft) && APP.world.eid2obj.get(anyEntityWith(APP.world, HoveredHandLeft)).el;
-    this.state.leftHand.held =
-      anyEntityWith(APP.world, HeldHandLeft) && APP.world.eid2obj.get(anyEntityWith(APP.world, HeldHandLeft)).el;
+    const world = APP.world;
+    this.state.rightRemote.hovered = anyAframeEntityWith(world, HoveredRemoteRight);
+    this.state.leftRemote.hovered = anyAframeEntityWith(world, HoveredRemoteLeft);
+    this.state.rightHand.hovered = anyAframeEntityWith(world, HoveredHandRight);
+    this.state.leftHand.hovered = anyAframeEntityWith(world, HoveredHandLeft);
+    this.state.rightRemote.held = anyAframeEntityWith(world, HeldRemoteRight);
+    this.state.leftRemote.held = anyAframeEntityWith(world, HeldRemoteLeft);
+    this.state.rightHand.held = anyAframeEntityWith(world, HeldHandRight);
+    this.state.leftHand.held = anyAframeEntityWith(world, HeldHandLeft);
   }
 });
