@@ -78,9 +78,11 @@ export function applyNetworkUpdates(world) {
       const { prefabName, initialData } = message.creates[j + 3];
 
       const eid = createNetworkedEntityFromRemote(world, prefabName, initialData);
+      console.log("got create message for", nid, eid);
 
       addComponent(world, Networked, eid);
       Networked.id[eid] = APP.getSid(nid);
+      APP.world.nid2eid.set(Networked.id[eid], eid);
       Networked.creator[eid] = APP.getSid(creator);
       Networked.owner[eid] = APP.getSid(owner);
     }
@@ -222,12 +224,17 @@ export function createNetworkedEntity(world, prefabName, initialData) {
 
   addComponent(world, Networked, eid);
   Networked.id[eid] = APP.getSid(NAF.utils.createNetworkId());
+  APP.world.nid2eid.set(Networked.id[eid], eid);
   Networked.creator[eid] = APP.getSid(NAF.clientId);
   Networked.owner[eid] = APP.getSid(NAF.clientId);
 
+  takeOwnership(world, eid);
+
   const obj = world.eid2obj.get(eid);
   AFRAME.scenes[0].object3D.add(obj);
+
   console.log("Spawning network object", prefabName, obj, eid);
+
   return eid;
 }
 

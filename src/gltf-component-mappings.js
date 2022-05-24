@@ -136,7 +136,7 @@ AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, compon
   addComponent(APP.world, Networked, eid);
   const netId = "parent1.media-frame-" + el.object3D.children[0].userData.gltfIndex;
   Networked.id[eid] = APP.getSid(netId);
-  APP.world.nid2eid.set(APP.getSid(netId), eid);
+  APP.world.nid2eid.set(Networked.id[eid], eid);
 
   console.log(el.object3D);
 

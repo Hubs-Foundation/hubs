@@ -315,7 +315,7 @@ export function CameraPrefab() {
   });
 
   return (
-    <entity logger={{ buttons }}>
+    <entity networked-transform logger={{ buttons }}>
       <HoldableButton position={[0, 1, 0]} width={1} height={0.5} text="Welcome to our wonderfully grabbable world" />
       {buttons}
       <entity

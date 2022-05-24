@@ -42,6 +42,7 @@ import { constraintsSystem } from "./bit-constraints-system";
 import { loggerSystem } from "./logger-system";
 import { floatyObjectSystem } from "./floaty-object-system";
 import { removeNetworkedObjectSystem } from "./remove-networked-object-system";
+import { networkedTransformSystem } from "./networked-transform";
 // import { holdableButtonSystem } from "./holdable-button-system";
 
 AFRAME.registerSystem("hubs-systems", {
@@ -91,6 +92,8 @@ AFRAME.registerSystem("hubs-systems", {
     const world = APP.world;
 
     applyNetworkUpdates(world);
+
+    networkedTransformSystem(world);
 
     const systems = AFRAME.scenes[0].systems;
     systems.userinput.tick2();
