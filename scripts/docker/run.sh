@@ -1,8 +1,14 @@
 
-# TODO: need a better one
-healthcheck(){
-    while true; do (echo -e 'HTTP/1.1 200 OK\r\n\r\n 1') | nc -lp 1111 > /dev/null; done
-}
+export turkeyCfg_postgrest_server=""
+export turkeyCfg_thumbnail_server="nearspark.reticulum.io"
+export turkeyCfg_base_assets_path="https://$SUB_DOMAIN-assets.$DOMAIN/hubs/"
+export turkeyCfg_non_cors_proxy_domains="$SUB_DOMAIN.$DOMAIN,$SUB_DOMAIN-assets.$DOMAIN"
+export turkeyCfg_reticulum_server="$SUB_DOMAIN.$DOMAIN"
+export turkeyCfg_cors_proxy_server="$SUB_DOMAIN-cors.$DOMAIN"
+export turkeyCfg_ga_tracking_id=""
+export turkeyCfg_shortlink_domain="$SUB_DOMAIN.$DOMAIN"
+export turkeyCfg_ita_server=""
+export turkeyCfg_sentry_dsn=""
 
 find /www/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}\//https:\/\/${SUB_DOMAIN}-assets.${DOMAIN}\/hubs\//g" {} \;           
 find /www/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}/https:\/\/${SUB_DOMAIN}-assets.${DOMAIN}\/hubs\//g" {} \; 
@@ -15,5 +21,4 @@ for f in /www/hubs/pages/*.html; do
     [[ $var == $prefix* ]] && sed -i "s/$anchor/ <meta name=\"env:${var#$prefix}\" content=\"${!var//\//\\\/}\"\/> $anchor/" $f; 
     done 
 done 
-healthcheck &
 nginx -g "daemon off;"
