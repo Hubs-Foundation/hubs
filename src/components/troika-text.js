@@ -3,7 +3,7 @@
 // by @jamesckane at Paradowski Creative (paradowski.com)
 
 import { Text } from "troika-three-text";
-import NotoSansSCUrl from "file-loader!../assets/fonts/NotoSansSC-Regular.otf";
+import NotoSansSCUrl from "../assets/fonts/NotoSansSC-Regular.otf";
 
 // Mark this type of object so we can filter in from our shader patching
 Text.prototype.isTroikaText = true;

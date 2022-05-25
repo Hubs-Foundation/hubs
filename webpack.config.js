@@ -488,7 +488,7 @@ module.exports = async (env, argv) => {
           ]
         },
         {
-          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm|3dl|cube)$/,
+          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm|3dl|cube|otf)$/,
           use: {
             loader: "file-loader",
             options: {
