@@ -7,7 +7,8 @@ import {
   defineQuery,
   exitQuery,
   hasComponent,
-  Not
+  Not,
+  entityExists
 } from "bitecs";
 import { FloatyObject, Held, Rigidbody } from "../bit-components";
 
@@ -38,9 +39,10 @@ export const floatyObjectSystem = world => {
   }
 
   {
-    const ents = exitedHeldFloatyObjectsQuery(world);
+    const ents = exitedHeldFloatyObjectsQuery(world).filter(eid => entityExists(world, eid));
     for (let i = 0; i < ents.length; i++) {
       const eid = ents[i];
+      if (!entityExists(world, eid)) continue;
       if (!(hasComponent(world, FloatyObject, eid) && hasComponent(world, Rigidbody, eid))) continue;
 
       const bodyId = Rigidbody.bodyId[eid];

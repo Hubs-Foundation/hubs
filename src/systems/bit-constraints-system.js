@@ -2,7 +2,7 @@ import { anyEntityWith } from "../utils/bit-utils";
 import { CONSTANTS } from "three-ammo";
 const { DISABLE_DEACTIVATION, ACTIVE_TAG } = CONSTANTS.ACTIVATION_STATE;
 
-import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import {
   RemoteRight,
   RemoteLeft,
@@ -49,6 +49,7 @@ function add(world, physicsSystem, interactor, entities) {
 function remove(world, offersConstraint, physicsSystem, interactor, entities) {
   for (let i = 0; i < entities.length; i++) {
     const eid = entities[i];
+    if (!entityExists(world, eid)) continue;
     if (hasComponent(world, offersConstraint, eid) && hasComponent(world, Rigidbody, eid)) {
       physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], releaseBodyOptions);
       physicsSystem.removeConstraint(interactor);

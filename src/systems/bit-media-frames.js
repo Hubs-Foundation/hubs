@@ -289,7 +289,7 @@ const mediaFramesQuery = defineQuery([MediaFrame]);
 export function mediaFramesSystem(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   const heldMediaTypes = mediaTypesOf(world, heldQuery(world));
-  const droppedEntities = droppedQuery(world);
+  const droppedEntities = droppedQuery(world).filter(eid => entityExists(world, eid));
   const mediaFrames = mediaFramesQuery(world);
 
   for (let i = 0; i < mediaFrames.length; i++) {

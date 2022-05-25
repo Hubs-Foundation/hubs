@@ -114,13 +114,13 @@ export function addObject3DComponent(world, eid, obj) {
   addComponent(APP.world, Object3DTag, eid);
   world.eid2obj.set(eid, obj);
   obj.eid = eid;
-  obj.addEventListener("removed", function() {
-    removeEntity(world, eid);
-    // TODO should probably happen in a system that looks for Object3DTag component removal
-    world.eid2obj.delete(eid);
+  // obj.addEventListener("removed", function() {
+  //   removeEntity(world, eid);
+  //   // TODO should probably happen in a system that looks for Object3DTag component removal
+  //   world.eid2obj.delete(eid);
 
-    obj.eid = null;
-  });
+  //   obj.eid = null;
+  // });
   return eid;
 }
 

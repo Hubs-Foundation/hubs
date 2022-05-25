@@ -1,7 +1,7 @@
 import Store from "./storage/store";
 import MediaSearchStore from "./storage/media-search-store";
 import qsTruthy from "./utils/qs_truthy";
-import { addEntity, createWorld, defineQuery, enterQuery, exitQuery, hasComponent, pipe } from "bitecs";
+import { addEntity, createWorld, defineQuery, enterQuery, hasComponent, pipe } from "bitecs";
 
 import {
   Networked,

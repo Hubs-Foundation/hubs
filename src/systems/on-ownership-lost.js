@@ -1,5 +1,5 @@
 const UNOWNED_INTERACTABLE = require("../constants").COLLISION_LAYERS.UNOWNED_INTERACTABLE;
-import { exitQuery, defineQuery, removeComponent, hasComponent } from "bitecs";
+import { exitQuery, defineQuery, removeComponent, hasComponent, entityExists } from "bitecs";
 import {
   Held,
   HeldHandLeft,
@@ -10,15 +10,16 @@ import {
   Rigidbody
 } from "../bit-components";
 
-const query = exitQuery(defineQuery([Owned]));
+const exitOwned = exitQuery(defineQuery([Owned]));
 const componentsToRemove = [Held, HeldHandRight, HeldHandLeft, HeldRemoteRight, HeldRemoteLeft];
 const kinematicOptions = { type: "kinematic", collisionFilterMask: UNOWNED_INTERACTABLE };
 export function onOwnershipLost(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
 
-  const entities = query(world);
+  const entities = exitOwned(world);
   for (let i = 0; i < entities.length; i++) {
     const eid = entities[i];
+    if (!entityExists(world, eid)) continue;
     for (let j = 0; j < componentsToRemove.length; j++) {
       const component = componentsToRemove[j];
       removeComponent(world, component, eid);

@@ -1,10 +1,21 @@
-import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { NetworkedMediaFrame, Networked, Owned, NetworkedTransform, AEntity } from "../bit-components";
 
 import { CameraPrefab } from "../network-schemas/interactable-camera";
 import { renderAsEntity } from "../utils/jsx-entity";
 
 const prefabs = new Map([["camera", CameraPrefab]]);
+
+export function takeOwnership(world, eid) {
+  // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame
+  if (hasComponent(world, AEntity, eid)) {
+    const el = world.eid2obj.get(eid).el;
+    !NAF.utils.isMine(el) && NAF.utils.takeOwnership(el);
+  } else {
+    addComponent(world, Owned, eid);
+    Networked.lastOwnerTime[eid] = Math.max(NAF.connection.getServerTime(), Networked.lastOwnerTime[eid] + 1);
+  }
+}
 
 const createMessageDatas = new Map();
 
@@ -42,6 +53,7 @@ export function createNetworkedEntityFromRemote(world, prefabName, initialData) 
 
 const networkedObjectsQuery = defineQuery([Networked]);
 const enteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
+const exitedNetworkedObjectsQuery = exitQuery(networkedObjectsQuery);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
 export const TEMPLATE_ID_LEGACY_NAF = 1;
@@ -83,17 +95,6 @@ const schemas = new Map([
   ]
 ]);
 const networkableComponents = [NetworkedMediaFrame, NetworkedTransform];
-
-export function takeOwnership(world, eid) {
-  // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame
-  if (hasComponent(world, AEntity, eid)) {
-    const el = world.eid2obj.get(eid).el;
-    !NAF.utils.isMine(el) && NAF.utils.takeOwnership(el);
-  } else {
-    addComponent(world, Owned, eid);
-    Networked.lastOwnerTime[eid] = Math.max(NAF.connection.getServerTime(), Networked.lastOwnerTime[eid] + 1);
-  }
-}
 
 const pendingMessages = [];
 NAF.connection.subscribeToDataChannel("nn", function(_, _dataType, data) {
@@ -162,8 +163,13 @@ export function applyNetworkUpdates(world) {
     }
 
     for (let j = 0; j < message.deletes.length; j += 1) {
-      const nid = message.deletes[j];
-      world.deletedNids.add(APP.getSid(nid));
+      const nid = APP.getSid(message.deletes[j]);
+      world.deletedNids.add(nid);
+      const eid = world.nid2eid.get(nid);
+      removeEntity(world, eid);
+      createMessageDatas.delete(eid);
+      world.nid2eid.delete(nid);
+      console.log("OK, deleting ", APP.getString(nid));
     }
   }
 
@@ -225,25 +231,25 @@ export function networkSendSystem(world) {
     }
   }
 
+  {
+    const entities = exitedNetworkedObjectsQuery(world);
+    for (let i = 0; i < entities.length; i++) {
+      const eid = entities[i];
+
+      if (createMessageDatas.has(eid)) {
+        createMessageDatas.delete(eid);
+        // TODO we are reading component data of a removed entity...
+        const nid = Networked.id[eid];
+        world.deletedNids.add(nid);
+        message.deletes.push(APP.getString(nid));
+        world.nid2eid.delete(nid);
+        console.log("OK, telling people to delete", APP.getString(nid));
+      }
+    }
+  }
+
   if (message.creates.length || message.updates.length || message.deletes.length) {
     // TODO we use NAF as a "dumb" transport here. This should happen in a better way
     NAF.connection.broadcastDataGuaranteed("nn", message);
   }
 }
-
-// function onPeerJoined(world, peer) {
-//   const entities = ownedNetworkObjectsQuery(world);
-//   for (let i = 0; i < entities.length; i++) {
-//     const eid = entities[i];
-//     const templateId = Networked.templateId[eid];
-//     if (templateId === TEMPLATE_ID_LEGACY_NAF) continue;
-//
-//     const schema = schemas[templateId];
-//     updates.push(world.eid2nid.get(eid));
-//     updates.push(Networked.lastOwnerTime[eid]);
-//     schema.serialize(world, eid, updates, { full: true });
-//   }
-//
-//   NAF.connection.sendDataGuaranteed(peer, message);
-// }
-//
