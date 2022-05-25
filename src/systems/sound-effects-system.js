@@ -17,7 +17,6 @@ import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
 import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
 import URL_SPEAKER_TONE from "../assets/sfx/tone.mp3";
 import { setMatrixWorld } from "../utils/three-utils";
-import { isSafari } from "../utils/detect-safari";
 import { SourceType } from "../components/audio-params";
 
 let soundEnum = 0;
@@ -142,7 +141,7 @@ export class SoundEffectsSystem {
     const audioBuffer = this.sounds.get(sound);
     if (!audioBuffer) return null;
 
-    const disablePositionalAudio = isSafari() || window.APP.store.state.preferences.disableLeftRightPanning;
+    const disablePositionalAudio = window.APP.store.state.preferences.disableLeftRightPanning;
     const positionalAudio = disablePositionalAudio
       ? new THREE.Audio(this.scene.audioListener)
       : new THREE.PositionalAudio(this.scene.audioListener);
