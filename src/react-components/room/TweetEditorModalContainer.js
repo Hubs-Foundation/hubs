@@ -4,7 +4,6 @@ import { TweetEditorModal } from "./TweetEditorModal";
 import { Modifier, EditorState } from "draft-js";
 import { createEditorStateWithText } from "draft-js-plugins-editor";
 import { fetchReticulumAuthenticated } from "../../utils/phoenix-utils";
-import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
 
 // Taken from draft-js-emoji
 const addEmoji = (emoji, editorState) => {
@@ -68,15 +67,6 @@ export function TweetEditorModalContainer({ initialTweet, mediaUrl, contentSubty
     [mediaUrl, editorState, onClose]
   );
 
-  const mediaThumbnailUrl = useMemo(
-    () => {
-      return contentSubtype && !contentSubtype.startsWith("video")
-        ? scaledThumbnailUrlFor(mediaUrl, 450, 255)
-        : mediaUrl;
-    },
-    [contentSubtype, mediaUrl]
-  );
-
   return (
     <TweetEditorModal
       editorState={editorState}
@@ -85,7 +75,7 @@ export function TweetEditorModalContainer({ initialTweet, mediaUrl, contentSubty
       sending={sending}
       onSend={sendTweet}
       onChange={setEditorState}
-      mediaThumbnailUrl={mediaThumbnailUrl}
+      mediaThumbnailUrl={mediaUrl}
       contentSubtype={contentSubtype}
     />
   );
