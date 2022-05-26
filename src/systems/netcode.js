@@ -97,8 +97,23 @@ const schemas = new Map([
 const networkableComponents = [NetworkedMediaFrame, NetworkedTransform];
 
 const pendingMessages = [];
+const pendingJoins = [];
+const pendingParts = [];
+
+// TODO messaging, joining, and leaving should not be using NAF
 NAF.connection.subscribeToDataChannel("nn", function(_, _dataType, data) {
   pendingMessages.push(data);
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+  document.body.addEventListener("clientConnected", function({ detail: { clientId } }) {
+    console.log("client joined", clientId);
+    pendingJoins.push(clientId);
+  });
+  document.body.addEventListener("clientDisconnected", function({ detail: { clientId } }) {
+    console.log("client left", clientId);
+    pendingParts.push(clientId);
+  });
 });
 
 export function applyNetworkUpdates(world) {
@@ -187,6 +202,22 @@ export function networkSendSystem(world) {
   if (performance.now() < nextNetworkTick) return;
 
   nextNetworkTick = performance.now() + TICK_RATE;
+
+  const ownedEntities = ownedNetworkObjectsQuery(world);
+
+  if (pendingJoins.length) {
+    const fullSyncMessage = {
+      creates: [],
+      updates: [],
+      deletes: []
+    };
+    // generate a full sync for all owned objects
+    // should probably factor out normal update code below to accept which entites to make create/update/remove messages for
+
+    for (const clientId of pendingJoins) {
+      // send message to all new clients
+    }
+  }
 
   const message = {
     creates: [],
