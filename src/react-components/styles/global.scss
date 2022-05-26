@@ -1,4 +1,3 @@
-
 @use "./theme.scss";
 @import "~normalize.css";
 
@@ -24,7 +23,7 @@
   --text5-color-hover: var(--text5-color);
   --text5-color-pressed: var(--text5-color);
   --text-inverted-color: #{theme.$white};
- 
+
 
   --link-color: #{theme.$blue};
   --link-color-hover: #{theme.$blue-hover};
@@ -97,7 +96,7 @@
   --basic-border-color: var(--border1-color);
 
   --disabled-text-color: var(--text4-color);
-  --disabled-bg-color:  var(--background3-color);
+  --disabled-bg-color: var(--background3-color);
   --disabled-icon-color: var(--text3-color);
 
   --radio-border-color: var(--border1-color);
@@ -162,7 +161,7 @@
   --overlay-outline-color: #{theme.$white};
 
   --toolbar-icon-color: var(--text5-color);
-  --toolbar-icon-selected-bg: var(--transparent); 
+  --toolbar-icon-selected-bg: var(--transparent);
   --toolbar-basic-icon-color: var(--text1-color);
   --toolbar-basic-selected-icon-color: var(--text1-color);
   --toolbar-basic-color: var(--secondary-color);
@@ -187,12 +186,12 @@
 }
 
 html {
-  height  : 100%;
+  height: 100%;
   overflow: hidden;
 }
 
 body {
-  height  : 100%;
+  height: 100%;
   overflow: auto;
   overscroll-behavior-y: none;
 }
@@ -205,7 +204,9 @@ html {
   line-height: 1;
 }
 
-*, *:before, *:after {
+*,
+*:before,
+*:after {
   box-sizing: inherit;
 }
 
@@ -250,7 +251,7 @@ ul {
  */
 
 html {
- font-family: theme.$font-family-default;
+  font-family: theme.$font-family-default;
 }
 
 textarea {
@@ -313,7 +314,7 @@ pre,
 code,
 kbd,
 samp {
- font-family: theme.$font-family-monospace;
+  font-family: theme.$font-family-monospace;
 }
 
 /**
@@ -358,7 +359,8 @@ label {
   font-weight: theme.$font-weight-bold;
 }
 
-body :focus, [type="button"]:focus {
+body :focus,
+[type="button"]:focus {
   outline: none;
 }
 
@@ -410,7 +412,9 @@ h5 {
   font-size: theme.$font-size-sm;
 }
 
-label, small, strong {
+label,
+small,
+strong {
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
 }
@@ -419,7 +423,9 @@ small {
   color: theme.$text2-color;
 }
 
-p, small, strong {
+p,
+small,
+strong {
   line-height: 1.25;
 }
 
@@ -467,4 +473,16 @@ summary {
   [fill] {
     fill: theme.$text1-color;
   }
+}
+
+.virtual-gamepad-controls__touchZone__RxPRi,
+.virtual-gamepad-controls__touchZone__RxPRi.virtual-gamepad-controls__left__1qnuE,
+.virtual-gamepad-controls__touchZone__RxPRi.virtual-gamepad-controls__right__3u-wL {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.virtual-gamepad-controls__touchZone__RxPRi.virtual-gamepad-controls__left__1qnuE .nipple,
+.virtual-gamepad-controls__touchZone__RxPRi.virtual-gamepad-controls__right__3u-wL .nipple {
+  pointer-events: auto !important;
 }
