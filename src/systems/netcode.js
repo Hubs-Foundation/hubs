@@ -265,13 +265,11 @@ export function networkSendSystem(world) {
   if (pendingParts.length) {
     // TODO: Everyone is doing this. Should we optimize this?
     const abandonedEntities = networkedObjectsQuery(world).filter(
-      eid =>
-        isNetworkInstantiated(eid) &&
-        pendingParts.filter(partingClientId => Networked.owner[eid] === partingClientId).length
+      eid => pendingParts.filter(partingClientId => Networked.owner[eid] === partingClientId).length
     );
     pendingParts.length = 0;
     abandonedEntities.forEach(eid => takeOwnership(world, eid));
-    const message = messageFor(world, abandonedEntities, abandonedEntities, [], true);
+    const message = messageFor(world, abandonedEntities.filter(isNetworkInstantiated), abandonedEntities, [], true);
     if (message.creates.length || message.updates.length || message.deletes.length) {
       NAF.connection.broadcastDataGuaranteed("nn", message);
     }
