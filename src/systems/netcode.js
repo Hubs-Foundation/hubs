@@ -243,6 +243,7 @@ function messageFor(world, created, updated, deleted, isFullSync) {
   }
   {
     deleted.forEach(eid => {
+      // TODO: We are reading component data of a deleted entity here.
       const nid = Networked.id[eid];
       message.deletes.push(APP.getString(nid));
     });
@@ -277,11 +278,7 @@ export function networkSendSystem(world) {
 
   const ownedEntities = ownedNetworkObjectsQuery(world);
   if (pendingJoins.length) {
-    const created = ownedEntities.filter(isNetworkInstantiated);
-    console.log("sending creates", created);
-    const updated = ownedEntities;
-    const deleted = [];
-    const message = messageFor(world, created, updated, deleted, true);
+    const message = messageFor(world, ownedEntities.filter(isNetworkInstantiated), ownedEntities, [], true);
     for (const clientId of pendingJoins) {
       // send message to all new clients
       NAF.connection.sendDataGuaranteed(APP.getString(clientId), "nn", message);
@@ -293,9 +290,8 @@ export function networkSendSystem(world) {
     const created = enteredNetworkedObjectsQuery(world).filter(
       eid => Networked.creator[eid] === APP.getSid(NAF.clientId) && isNetworkInstantiated(eid)
     );
-    const updated = ownedEntities;
     const deleted = exitedNetworkedObjectsQuery(world).filter(isNetworkInstantiated);
-    const message = messageFor(world, created, updated, deleted);
+    const message = messageFor(world, created, ownedEntities, deleted);
 
     if (message.creates.length || message.updates.length || message.deletes.length) {
       // TODO we use NAF as a "dumb" transport here. This should happen in a better way
