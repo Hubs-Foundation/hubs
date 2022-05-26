@@ -3,19 +3,30 @@ import { Object3DTag } from "../bit-components";
 
 const exitedObject3DQuery = exitQuery(defineQuery([Object3DTag]));
 
-// TODO this all feels quite messy and brittle
-// This makes some assumptions:
-// - We will not remove Object3DTags, instead we will remove thos entiteis entirely. This seems ok.
-// - When you directly remove an entity associated with an object3D it will be removed from the scene graph
-//  - It's children will have their entities removed but their scene graph will not be altered
+// TODO This feels messy and brittle
 //
-// TODO aframe entiteis get cleaned up in a bit of an odd way
-// since all of their entiteis are specifically removed, so they all get de-parented
+// This makes the assumption that we will not explicitly remove Object3DTag components.
+// Instead, they will only be removed when we call removeEntity.
+//
+// When we remove an entity with an Object3DTag:
+// - The associated object3D will be removed from the scene graph.
+// - The rest of the scene graph will be left intact.
+// - We will call removeEntity for all entities associated with the object3D's descendents.
+//
+// TODO AFRAME entities get cleaned up in an an odd way:
+//      When we remove an AFRAME entity, AFRAME will call `removeEntity` for all of its descendents,
+//      which means we will remove each descendent from its parent.
 export function removeObject3DSystem(world) {
   const entities = exitedObject3DQuery(world);
   for (let i = 0; i < entities.length; i++) {
     const eid = entities[i];
     const obj = world.eid2obj.get(eid);
+    if (!obj) {
+      // console.log(`No obj found for ${eid}`);
+      continue;
+    } else {
+      // console.log(`Removing obj for ${eid}`);
+    }
     obj.traverse(function(o) {
       if (o.eid) {
         removeEntity(world, o.eid);
@@ -26,7 +37,6 @@ export function removeObject3DSystem(world) {
     obj.removeFromParent();
   }
 
-  // we have already processed all the newly removed entiteis, run query again to "consume" them
+  // We already processed all the newly removed entities. Run query again to "consume" them.
   exitedObject3DQuery(world);
-}
 }
