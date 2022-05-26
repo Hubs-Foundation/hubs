@@ -12,6 +12,7 @@ const exitedObject3DQuery = exitQuery(defineQuery([Object3DTag]));
 // - The associated object3D will be removed from the scene graph.
 // - The rest of the scene graph will be left intact.
 // - We will call removeEntity for all entities associated with the object3D's descendents.
+// - The descendents won't be removed from their parents.
 //
 // TODO AFRAME entities get cleaned up in an an odd way:
 //      When we remove an AFRAME entity, AFRAME will call `removeEntity` for all of its descendents,
@@ -21,12 +22,6 @@ export function removeObject3DSystem(world) {
   for (let i = 0; i < entities.length; i++) {
     const eid = entities[i];
     const obj = world.eid2obj.get(eid);
-    if (!obj) {
-      // console.log(`No obj found for ${eid}`);
-      continue;
-    } else {
-      // console.log(`Removing obj for ${eid}`);
-    }
     obj.traverse(function(o) {
       if (o.eid) {
         removeEntity(world, o.eid);
