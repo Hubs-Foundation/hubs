@@ -20,32 +20,29 @@ export function takeOwnership(world, eid) {
 const createMessageDatas = new Map();
 
 export function createNetworkedEntity(world, prefabName, initialData) {
-  const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
-
-  createMessageDatas.set(eid, { prefabName, initialData });
-
-  addComponent(world, Networked, eid);
-  Networked.id[eid] = APP.getSid(NAF.utils.createNetworkId());
-  APP.world.nid2eid.set(Networked.id[eid], eid);
-  Networked.creator[eid] = APP.getSid(NAF.clientId);
-  Networked.owner[eid] = APP.getSid(NAF.clientId);
-
-  takeOwnership(world, eid);
-
-  const obj = world.eid2obj.get(eid);
-  AFRAME.scenes[0].object3D.add(obj);
-
-  console.log("Spawning network object", prefabName, obj, eid);
-
-  return eid;
+  const rootNid = NAF.utils.createNetworkId();
+  return createNetworkedEntityFromRemote(world, prefabName, initialData, rootNid, NAF.clientId, NAF.clientId);
 }
 
-export function createNetworkedEntityFromRemote(world, prefabName, initialData) {
+export function createNetworkedEntityFromRemote(world, prefabName, initialData, rootNid, creator, owner) {
   const eid = renderAsEntity(world, prefabs.get(prefabName)(initialData));
+  const obj = world.eid2obj.get(eid);
 
   createMessageDatas.set(eid, { prefabName, initialData });
 
-  const obj = world.eid2obj.get(eid);
+  let i = 0;
+  obj.traverse(function(o) {
+    if (o.eid && hasComponent(world, Networked, o.eid)) {
+      const eid = o.eid;
+      Networked.id[eid] = APP.getSid(i === 0 ? rootNid : `${rootNid}.${i}`);
+      APP.world.nid2eid.set(Networked.id[eid], eid);
+      Networked.creator[eid] = APP.getSid(creator);
+      Networked.owner[eid] = APP.getSid(owner);
+      if (NAF.clientId === creator) takeOwnership(world, eid);
+      i += 1;
+    }
+  });
+
   AFRAME.scenes[0].object3D.add(obj);
   console.log("Spawning network object", prefabName, obj, eid);
   return eid;
@@ -132,14 +129,8 @@ export function applyNetworkUpdates(world) {
       const owner = message.creates[j + 2];
       const { prefabName, initialData } = message.creates[j + 3];
 
-      const eid = createNetworkedEntityFromRemote(world, prefabName, initialData);
+      const eid = createNetworkedEntityFromRemote(world, prefabName, initialData, nid, creator, owner);
       console.log("got create message for", nid, eid);
-
-      addComponent(world, Networked, eid);
-      Networked.id[eid] = APP.getSid(nid);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = APP.getSid(creator);
-      Networked.owner[eid] = APP.getSid(owner);
     }
 
     for (let j = 0; j < message.updates.length; j++) {
@@ -156,7 +147,12 @@ export function applyNetworkUpdates(world) {
       const eid = world.nid2eid.get(nid);
 
       if (Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime) {
-        console.log("Received update from an old owner, skipping", updateMessage.nid);
+        console.log(
+          "Received update from an old owner, skipping",
+          updateMessage.nid,
+          Networked.lastOwnerTime[eid],
+          updateMessage.lastOwnerTime
+        );
         continue;
       }
 
@@ -226,10 +222,10 @@ export function networkSendSystem(world) {
   };
 
   {
-    const entities = enteredNetworkedObjectsQuery(world);
-    for (let i = 0; i < entities.length; i++) {
-      const eid = entities[i];
-      if (Networked.creator[eid] === APP.getSid(NAF.clientId)) {
+    const enteredNetworkObjects = enteredNetworkedObjectsQuery(world);
+    for (let i = 0; i < enteredNetworkObjects.length; i++) {
+      const eid = enteredNetworkObjects[i];
+      if (Networked.creator[eid] === APP.getSid(NAF.clientId) && createMessageDatas.has(eid)) {
         message.creates.push(APP.getString(Networked.id[eid]));
         message.creates.push(Networked.creator[eid]);
         message.creates.push(Networked.owner[eid]);
@@ -238,9 +234,8 @@ export function networkSendSystem(world) {
     }
   }
 
-  const entities = ownedNetworkObjectsQuery(world);
-  for (let i = 0; i < entities.length; i++) {
-    const eid = entities[i];
+  for (let i = 0; i < ownedEntities.length; i++) {
+    const eid = ownedEntities[i];
 
     const updateMessage = {
       nid: APP.getString(Networked.id[eid]),

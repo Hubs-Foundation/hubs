@@ -7,6 +7,7 @@ import {
   Holdable,
   HoldableButton,
   Logger,
+  Networked,
   NetworkedTransform,
   Object3DTag,
   OffersRemoteConstraint,
@@ -126,7 +127,7 @@ export function addObject3DComponent(world, eid, obj) {
 
 const createDefaultInflator = Component => {
   return (world, eid, componentProps) => {
-    addComponent(world, Component, eid);
+    addComponent(world, Component, eid, true);
     Object.keys(componentProps).forEach(propName => {
       Component[propName][eid] = componentProps[propName];
     });
@@ -190,6 +191,7 @@ const inflators = {
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
   "networked-transform": createDefaultInflator(NetworkedTransform),
+  networked: createDefaultInflator(Networked),
   logger: inflateLogger,
   "media-frame": inflateMediaFrame,
   object3D: addObject3DComponent,

@@ -266,7 +266,7 @@ export default {
   ]
 };
 
-import { textureLoader } from "../utils/media-utils";
+import { MediaType, textureLoader } from "../utils/media-utils";
 
 import buttonSrc from "../assets/hud/button.9.png";
 
@@ -308,7 +308,6 @@ function HoldableButton({ text, width, height, textureSrc = buttonSrc, ...props 
 }
 
 export function CameraPrefab() {
-  const cube = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial());
   const names = ["cancel", "next-duration", "prev-duration", "snap", "record", "stop", "capture-audio", "record"];
   const buttons = names.map((name, i) => {
     return <Button ref={createRef()} position={[0, i / 3, 0]} width={0.8} height={0.4} text={name} />;
@@ -316,15 +315,17 @@ export function CameraPrefab() {
 
   return (
     <entity
-      scale={[0.25, 0.25, 0.25]}
-      object3D={cube}
+      object3D={new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial())}
+      networked
       networked-transform
       cursor-raycastable
       remote-hover-target
       offers-remote-constraint
       holdable
       rigidbody
-    />
+    >
+      <entity position={[0, 1, 0]} media-frame={{ bounds: { x: 1, y: 1, z: 1 }, mediaType: "model" }} networked />
+    </entity>
   );
 
   // return (
