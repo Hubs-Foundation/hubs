@@ -252,6 +252,7 @@ export class PhysicsSystem {
   }
 
   removeBody(uuid) {
+    // TODO: Does anything enforce that shapes are removed before bodies? Does bullet care?
     const idx = this.bodyUuids.indexOf(uuid);
     if (this.bodyUuidToData.has(uuid) && idx !== -1) {
       delete this.indexToUuid[this.bodyUuidToData.get(uuid).index];
@@ -290,6 +291,8 @@ export class PhysicsSystem {
       } else {
         console.warn(`removeShapes called for shapesUuid: ${shapesUuid} on bodyUuid: ${bodyUuid} but shapes missing.`);
       }
+    } else {
+      console.warn(`Tried to remove shape for unknown body ${bodyUuid}`);
     }
   }
 

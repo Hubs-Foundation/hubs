@@ -114,7 +114,87 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 
+function messageFor(world, created, updated, deleted, isFullSync) {
+  const message = {
+    creates: [],
+    updates: [],
+    deletes: []
+  };
+
+  created.forEach(eid => {
+    message.creates.push(APP.getString(Networked.id[eid]));
+    message.creates.push(APP.getString(Networked.creator[eid]));
+    message.creates.push(APP.getString(Networked.owner[eid]));
+    message.creates.push(createMessageDatas.get(eid));
+  });
+
+  updated.forEach(eid => {
+    const updateMessage = {
+      nid: APP.getString(Networked.id[eid]),
+      lastOwnerTime: Networked.lastOwnerTime[eid],
+      owner: APP.getString(Networked.owner[eid]), // This should always be NAF.clientId. If it's not, something bad happened
+      creator: APP.getString(Networked.creator[eid]),
+      componentIds: [],
+      data: []
+    };
+
+    for (let j = 0; j < networkableComponents.length; j++) {
+      const Component = networkableComponents[j];
+      if (hasComponent(world, Component, eid)) {
+        updateMessage.componentIds.push(j);
+        schemas.get(Component).serialize(world, eid, updateMessage.data, isFullSync);
+      }
+    }
+
+    // TODO: If the owner/lastOwnerTime changed, we need to send this updateMessage
+    if (updateMessage.componentIds.length) {
+      message.updates.push(updateMessage);
+    }
+  });
+
+  deleted.forEach(eid => {
+    // TODO: We are reading component data of a deleted entity here.
+    const nid = Networked.id[eid];
+    message.deletes.push(APP.getString(nid));
+  });
+
+  return message;
+}
+
+function isNetworkInstantiated(eid) {
+  return createMessageDatas.has(eid);
+}
+
+const queuedBroadcasts = [];
 export function applyNetworkUpdates(world) {
+  {
+    // Clients that left
+    const networkedObjects = networkedObjectsQuery(world);
+    for (let i = 0; i < pendingParts.length; i++) {
+      const partingClientId = pendingParts[i];
+      const toCreate = networkedObjects.filter(
+        eid =>
+          isNetworkInstantiated(eid) &&
+          Networked.owner[eid] === partingClientId &&
+          Networked.creator[eid] !== partingClientId
+      );
+      const toDelete = networkedObjects.filter(
+        eid => isNetworkInstantiated(eid) && Networked.creator[eid] === partingClientId
+      );
+      // TODO: We are sending updates about things that may be deleted
+      const toUpdate = networkedObjects.filter(eid => Networked.owner[eid] === partingClientId);
+      toUpdate.forEach(eid => takeOwnership(world, eid));
+      const message = messageFor(world, toCreate, toUpdate, [], true);
+
+      if (message.creates.length || message.updates.length || message.deletes.length) {
+        queuedBroadcasts.push(message);
+      }
+
+      toDelete.forEach(eid => removeEntity(world, eid));
+    }
+    pendingParts.length = 0;
+  }
+
   const messagesToRevisit = {
     creates: [],
     updates: [],
@@ -144,16 +224,25 @@ export function applyNetworkUpdates(world) {
       const updateMessage = message.updates[j];
       const nid = APP.getSid(updateMessage.nid);
 
+      if (world.deletedNids.has(nid)) {
+        console.log(`Ignoring update for deleted entity ${updateMessage.nid}`);
+        continue;
+      }
+
       if (!world.nid2eid.has(nid)) {
         console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
         // TODO: What if we will NEVER be able to apply this update?
-        // messagesToRevisit.updates.push(updateMessage);
+        messagesToRevisit.updates.push(updateMessage);
         continue;
       }
 
       const eid = world.nid2eid.get(nid);
 
-      if (Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime) {
+      if (
+        Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime ||
+        (Networked.lastOwnerTime[eid] === updateMessage.lastOwnerTime &&
+          APP.getString(Networked.owner[eid]) < updateMessage.owner)
+      ) {
         console.log(
           "Received update from an old owner, skipping",
           updateMessage.nid,
@@ -163,10 +252,14 @@ export function applyNetworkUpdates(world) {
         continue;
       }
 
-      // TODO handle tiebreak
-      if (hasComponent(world, Owned, eid) && updateMessage.lastOwnerTime > Networked.lastOwnerTime[eid]) {
-        console.log("Lost ownership: ", updateMessage.nid);
-        removeComponent(world, Owned, eid);
+      if (hasComponent(world, Owned, eid)) {
+        if (updateMessage.owner === NAF.clientId) {
+          // TODO: Should it be valid that we can receive a message where we are told we are the owner now?
+          console.error("Got a message telling us we are the owner.");
+        } else {
+          console.log("Lost ownership: ", updateMessage.nid);
+          removeComponent(world, Owned, eid);
+        }
       }
 
       Networked.lastOwnerTime[eid] = updateMessage.lastOwnerTime;
@@ -184,6 +277,9 @@ export function applyNetworkUpdates(world) {
 
     for (let j = 0; j < message.deletes.length; j += 1) {
       const nid = APP.getSid(message.deletes[j]);
+      if (world.deletedNids.has(nid)) {
+        continue;
+      }
       world.deletedNids.add(nid);
       const eid = world.nid2eid.get(nid);
       removeEntity(world, eid);
@@ -201,81 +297,20 @@ export function applyNetworkUpdates(world) {
   // TODO If there's a scene owned object, we should take ownership of it
 }
 
-function messageFor(world, created, updated, deleted, isFullSync) {
-  const message = {
-    creates: [],
-    updates: [],
-    deletes: []
-  };
-
-  {
-    created.forEach(eid => {
-      message.creates.push(APP.getString(Networked.id[eid]));
-      message.creates.push(APP.getString(Networked.creator[eid]));
-      message.creates.push(APP.getString(Networked.owner[eid]));
-      message.creates.push(createMessageDatas.get(eid));
-    });
-  }
-
-  {
-    updated.forEach(eid => {
-      const updateMessage = {
-        nid: APP.getString(Networked.id[eid]),
-        lastOwnerTime: Networked.lastOwnerTime[eid],
-        owner: APP.getString(Networked.owner[eid]),
-        creator: APP.getString(Networked.creator[eid]),
-        componentIds: [],
-        data: []
-      };
-
-      for (let j = 0; j < networkableComponents.length; j++) {
-        const Component = networkableComponents[j];
-        if (hasComponent(world, Component, eid)) {
-          updateMessage.componentIds.push(j);
-          schemas.get(Component).serialize(world, eid, updateMessage.data, isFullSync);
-        }
-      }
-
-      if (updateMessage.componentIds.length) {
-        message.updates.push(updateMessage);
-      }
-    });
-  }
-  {
-    deleted.forEach(eid => {
-      // TODO: We are reading component data of a deleted entity here.
-      const nid = Networked.id[eid];
-      message.deletes.push(APP.getString(nid));
-    });
-  }
-
-  return message;
-}
-
-function isNetworkInstantiated(eid) {
-  return createMessageDatas.has(eid);
-}
-
-const TICK_RATE = 3000;
+const TICK_RATE = 1000 / 12;
 let nextNetworkTick = 0;
+
 export function networkSendSystem(world) {
   if (performance.now() < nextNetworkTick) return;
 
   nextNetworkTick = performance.now() + TICK_RATE;
 
-  if (pendingParts.length) {
-    // TODO: Everyone is doing this. Should we optimize this?
-    const abandonedEntities = networkedObjectsQuery(world).filter(
-      eid => pendingParts.filter(partingClientId => Networked.owner[eid] === partingClientId).length
-    );
-    pendingParts.length = 0;
-    abandonedEntities.forEach(eid => takeOwnership(world, eid));
-    const message = messageFor(world, abandonedEntities.filter(isNetworkInstantiated), abandonedEntities, [], true);
-    if (message.creates.length || message.updates.length || message.deletes.length) {
-      NAF.connection.broadcastDataGuaranteed("nn", message);
-    }
-  }
+  queuedBroadcasts.forEach(message => {
+    NAF.connection.broadcastDataGuaranteed("nn", message);
+  });
+  queuedBroadcasts.length = 0;
 
+  // Clients that joined
   const ownedEntities = ownedNetworkObjectsQuery(world);
   if (pendingJoins.length) {
     const message = messageFor(world, ownedEntities.filter(isNetworkInstantiated), ownedEntities, [], true);
@@ -288,11 +323,16 @@ export function networkSendSystem(world) {
 
   {
     const created = enteredNetworkedObjectsQuery(world).filter(
-      eid => Networked.creator[eid] === APP.getSid(NAF.clientId) && isNetworkInstantiated(eid)
+      eid => isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId)
     );
-    const deleted = exitedNetworkedObjectsQuery(world).filter(isNetworkInstantiated);
-    const message = messageFor(world, created, ownedEntities, deleted);
+    // TODO: Lots of people will send delete messages about the same object
+    const deleted = exitedNetworkedObjectsQuery(world).filter(eid => {
+      const nid = Networked.id[eid];
+      return !world.deletedNids.has(nid) && isNetworkInstantiated(eid);
+    });
+    const message = messageFor(world, created, ownedEntities, deleted, false);
 
+    // TODO: Need to send this message if network owner / ownertime changed.
     if (message.creates.length || message.updates.length || message.deletes.length) {
       // TODO we use NAF as a "dumb" transport here. This should happen in a better way
       NAF.connection.broadcastDataGuaranteed("nn", message);
@@ -307,3 +347,7 @@ export function networkSendSystem(world) {
     });
   }
 }
+
+// TODO: Handle disconnect and reconnect to the phoenix channel
+// TODO: Handle blocking and unblocking people
+// TODO: Handle permissions

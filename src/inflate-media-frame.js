@@ -58,8 +58,6 @@ export function inflateMediaFrame(world, eid, componentProps) {
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
 
   addComponent(world, Rigidbody, eid);
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-
   addComponent(world, PhysicsShape, eid);
   PhysicsShape.halfExtents[eid].set([
     componentProps.bounds.x / 2,

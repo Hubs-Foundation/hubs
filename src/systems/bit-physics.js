@@ -1,11 +1,16 @@
-import { defineQuery, enterQuery, hasComponent } from "bitecs";
+import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { Object3DTag, Rigidbody, PhysicsShape } from "../bit-components";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 // import { holdableButtonSystem } from "./holdable-button-system";
 
 const rigidbodyQuery = defineQuery([Rigidbody, Object3DTag]);
 const rigidbodyEnteredQuery = enterQuery(rigidbodyQuery);
+const rigidbodyExitedQuery = exitQuery(rigidbodyQuery);
+const shapeExitQuery = exitQuery(defineQuery([PhysicsShape]));
+
 export const physicsCompatSystem = world => {
+  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+
   const eids = rigidbodyEnteredQuery(world);
   for (let i = 0; i < eids.length; i++) {
     const eid = eids[i];
@@ -15,7 +20,6 @@ export const physicsCompatSystem = world => {
       continue;
     }
 
-    const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
     const obj = world.eid2obj.get(eid);
 
     // TODO these are all hardcoded values, RigidBody should actually have (some of?) these properties
@@ -40,6 +44,7 @@ export const physicsCompatSystem = world => {
     // TODO same deal for these, hardcoded, also we may want to support nested shapes
     if (hasComponent(world, PhysicsShape, eid)) {
       const halfExtents = PhysicsShape.halfExtents[eid];
+      PhysicsShape.bodyId[eid] = bodyId;
       const shapeId = physicsSystem.addShapes(bodyId, obj, {
         type: SHAPE.BOX,
         fit: FIT.MANUAL,
@@ -48,6 +53,27 @@ export const physicsCompatSystem = world => {
         offset: { x: 0, y: 0, z: 0 },
         orientation: { x: 0, y: 0, z: 0, w: 1 }
       });
+      PhysicsShape.shapeId[eid] = shapeId;
+    }
+  }
+
+  {
+    const eids = shapeExitQuery(world);
+    for (let i = 0; i < eids.length; i++) {
+      const eid = eids[i];
+      physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]);
+    }
+  }
+
+  {
+    const eids = rigidbodyExitedQuery(world);
+    for (let i = 0; i < eids.length; i++) {
+      const eid = eids[i];
+      if (entityExists(world, eid) && hasComponent(world, PhysicsShape, eid)) {
+        physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]);
+        // The PhysicsShape is still on this entity!
+      }
+      physicsSystem.removeBody(Rigidbody.bodyId[eid]);
     }
   }
 
