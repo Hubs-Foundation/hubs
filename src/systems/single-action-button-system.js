@@ -12,7 +12,6 @@ function interact(world, entities, path, interactor) {
     for (let i = 0; i < entities.length; i++) {
       const eid = entities[i];
       addComponent(world, Interacted, eid);
-      console.log("INteracted!@");
 
       // TODO: New systems should not listen for this event
       // Delete this when we're done interoping with old world systems

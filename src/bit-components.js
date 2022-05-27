@@ -75,3 +75,12 @@ export const Pinned = defineComponent();
 export const FloatyObject = defineComponent();
 
 export const Logger = defineComponent();
+export const CameraTool = defineComponent({
+  button_cancel: Types.eid,
+  button_next: Types.eid,
+  button_prev: Types.eid
+});
+
+window.$C = {
+  CameraTool
+};

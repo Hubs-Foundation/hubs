@@ -307,15 +307,35 @@ function HoldableButton({ text, width, height, textureSrc = buttonSrc, ...props 
   );
 }
 
+import { loadModel } from "../components/gltf-model-plus";
+import cameraModelSrc from "../assets/camera_tool.glb";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { cloneObject3D } from "../utils/three-utils";
+
+let model;
+(async () => {
+  model = await waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
+})();
+
 export function CameraPrefab() {
-  const names = ["cancel", "next-duration", "prev-duration", "snap", "record", "stop", "capture-audio", "record"];
-  const buttons = names.map((name, i) => {
-    return <Button ref={createRef()} position={[0, i / 3, 0]} width={0.8} height={0.4} text={name} />;
-  });
+  // const names = ["cancel", "next-duration", "prev-duration", "snap", "record", "stop", "capture-audio", "record"];
+  // const buttons = names.map((name, i) => {
+  //   return <Button ref={createRef()} position={[0, i / 3, 0]} width={0.8} height={0.4} text={name} />;
+  // });
+
+  // TODO: What if model didn't load yet?
+  const mesh = cloneObject3D(model.scene);
+
+  const button_cancel = createRef();
+  const button_next = createRef();
+  const button_prev = createRef();
+
+  const scale = 4;
 
   return (
     <entity
-      object3D={new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial())}
+      object3D={mesh}
+      scale={[scale, scale, scale]}
       networked
       networked-transform
       cursor-raycastable
@@ -323,7 +343,36 @@ export function CameraPrefab() {
       offers-remote-constraint
       holdable
       rigidbody
+      camera-tool={{
+        button_cancel,
+        button_next,
+        button_prev
+      }}
     >
+      <Button
+        ref={button_next}
+        scale={[1 / scale, 1 / scale, 1 / scale]}
+        position={[1 / scale, 1 / scale, 0]}
+        width={0.6}
+        height={0.3}
+        text={"Next"}
+      />
+      <Button
+        ref={button_cancel}
+        scale={[1 / scale, 1 / scale, 1 / scale]}
+        position={[0, 1 / scale, 0]}
+        width={0.6}
+        height={0.3}
+        text={"Cancel"}
+      />
+      <Button
+        ref={button_prev}
+        scale={[1 / scale, 1 / scale, 1 / scale]}
+        position={[-1 / scale, 1 / scale, 0]}
+        width={0.6}
+        height={0.3}
+        text={"Prev"}
+      />
       <entity position={[0, 1, 0]} media-frame={{ bounds: { x: 1, y: 1, z: 1 }, mediaType: "model" }} networked />
     </entity>
   );

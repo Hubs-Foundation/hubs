@@ -16,7 +16,8 @@ import {
   SingleActionButton,
   Slice9,
   Spin,
-  Text
+  Text,
+  CameraTool
 } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 function isValidChild(child) {
@@ -181,6 +182,25 @@ function inflateLogger(world, eid, data) {
   world.eid2loggerdata.set(eid, data);
 }
 
+function resolveRef(world, ref) {
+  if (ref.current === null) {
+    ref.current = addEntity(world);
+  }
+  return ref.current;
+}
+
+function inflateCameraTool(world, eid, data) {
+  addComponent(world, CameraTool, eid);
+
+  // TODO: Hack
+  // APP.cameraToolRefs = APP.cameraToolRefs || new Map();
+  // APP.cameraToolRefs.set(eid, data);
+
+  CameraTool.button_cancel[eid] = resolveRef(world, data.button_cancel);
+  CameraTool.button_next[eid] = resolveRef(world, data.button_next);
+  CameraTool.button_prev[eid] = resolveRef(world, data.button_prev);
+}
+
 const inflators = {
   spin: createDefaultInflator(Spin),
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
@@ -196,6 +216,7 @@ const inflators = {
   "media-frame": inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
+  "camera-tool": inflateCameraTool,
   water: () => {},
   text: inflateText,
   waypoint: () => {},
@@ -240,7 +261,7 @@ export function renderAsAframeEntity(entityDef, world) {
     });
     return el;
   } else if (entityDef.type === "entity") {
-    const eid = addEntity(world);
+    const eid = entityDef.ref ? resolveRef(world, entityDef.ref) : addEntity(world);
 
     Object.keys(entityDef.components).forEach(name => {
       if (!inflators[name]) {
@@ -264,9 +285,6 @@ export function renderAsAframeEntity(entityDef, world) {
     }
     if (entityDef.attrs.scale) {
       obj.scale.fromArray(entityDef.attrs.scale);
-    }
-    if (entityDef.ref) {
-      entityDef.ref.current = eid;
     }
     entityDef.children.forEach(child => {
       if (child.type === "a-entity") {
