@@ -144,7 +144,7 @@ export function HomePage() {
       {sortedPublicRooms.length > 0 && (
         <Container className={styles.roomsContainer}>
           <h3 className={styles.roomsHeading}>
-            <FormattedMessage id="home-page.public--rooms" defaultMessage="Public Rooms" />
+            <FormattedMessage id="home-page.public--rooms" defaultMessage="Worlds:" />
           </h3>
           <Column grow padding className={styles.rooms}>
             <MediaGrid center>
