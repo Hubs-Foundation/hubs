@@ -18,7 +18,8 @@ import {
   Spin,
   Text,
   CameraTool,
-  PhysicsShape
+  PhysicsShape,
+  TextButton
 } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 function isValidChild(child) {
@@ -136,6 +137,10 @@ const createDefaultInflator = Component => {
     addComponent(world, Component, eid, true);
     Object.keys(componentProps).forEach(propName => {
       const prop = Component[propName];
+      if (!prop) {
+        console.error(`${propName} is not a valid property of`, Component);
+        return;
+      }
       const value = componentProps[propName];
       prop[eid] = prop[$isEidType] ? resolveRef(world, value) : value;
     });
@@ -203,6 +208,7 @@ const inflators = {
   "offers-remote-constraint": createDefaultInflator(OffersRemoteConstraint),
   "single-action-button": createDefaultInflator(SingleActionButton),
   "holdable-button": createDefaultInflator(HoldableButton),
+  "text-button": createDefaultInflator(TextButton),
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
   "physics-shape": createDefaultInflator(PhysicsShape),

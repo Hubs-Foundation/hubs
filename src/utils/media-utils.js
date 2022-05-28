@@ -563,3 +563,18 @@ export function hasAudioTracks(el) {
     return false;
   }
 }
+
+export async function pixelsToPNG(pixels, width, height) {
+  const snapCanvas = document.createElement("canvas");
+  snapCanvas.width = width;
+  snapCanvas.height = height;
+  const context = snapCanvas.getContext("2d");
+
+  const imageData = context.createImageData(width, height);
+  imageData.data.set(pixels);
+  const bitmap = await createImageBitmap(imageData);
+  context.scale(1, -1);
+  context.drawImage(bitmap, 0, -height);
+  const blob = await new Promise(resolve => snapCanvas.toBlob(resolve));
+  return new File([blob], "snap.png", { type: "image/png" });
+}

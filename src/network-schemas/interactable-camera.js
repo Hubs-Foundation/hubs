@@ -271,6 +271,7 @@ import { MediaType, textureLoader } from "../utils/media-utils";
 import buttonSrc from "../assets/hud/button.9.png";
 
 function Button({ text, width, height, textureSrc = buttonSrc, ...props }) {
+  const labelRef = createRef();
   const texture = textureLoader.load(textureSrc);
   return (
     <entity
@@ -278,9 +279,11 @@ function Button({ text, width, height, textureSrc = buttonSrc, ...props }) {
       cursor-raycastable
       remote-hover-target
       single-action-button
+      text-button={{ labelRef }}
       {...props}
     >
       <entity
+        ref={labelRef}
         text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
         position={[0, 0, 0.01]}
       />
@@ -331,7 +334,7 @@ export function CameraPrefab() {
   // TODO: What if model didn't load yet?
   const mesh = cloneObject3D(model.scene);
 
-  const button_cancel = createRef();
+  const snapRef = createRef();
   const button_next = createRef();
   const button_prev = createRef();
 
@@ -365,7 +368,7 @@ export function CameraPrefab() {
       rigidbody
       physics-shape
       camera-tool={{
-        button_cancel,
+        snapRef,
         button_next,
         button_prev,
         screenRef,
@@ -399,12 +402,12 @@ export function CameraPrefab() {
         text={"Next"}
       />
       <Button
-        ref={button_cancel}
+        ref={snapRef}
         scale={[1 / scale, 1 / scale, 1 / scale]}
         position={[0, -0.1, 0.2]}
         width={0.6}
         height={0.3}
-        text={"Cancel"}
+        text={"Snap"}
       />
       <Button
         ref={button_prev}

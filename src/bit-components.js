@@ -61,6 +61,7 @@ export const HandCollisionTarget = defineComponent();
 export const OffersHandConstraint = defineComponent();
 export const TogglesHoveredActionSet = defineComponent();
 export const SingleActionButton = defineComponent();
+export const TextButton = defineComponent({ labelRef: Types.eid });
 export const HoldableButton = defineComponent();
 export const Pen = defineComponent();
 export const HoverMenuChild = defineComponent();
@@ -76,12 +77,14 @@ export const FloatyObject = defineComponent();
 
 export const Logger = defineComponent();
 export const CameraTool = defineComponent({
-  button_cancel: Types.eid,
   button_next: Types.eid,
   button_prev: Types.eid,
+  snapRef: Types.eid,
   screenRef: Types.eid,
   selfieScreenRef: Types.eid,
-  cameraRef: Types.eid
+  cameraRef: Types.eid,
+  snapTime: Types.f32,
+  state: Types.ui8
 });
 
 window.$C = {
