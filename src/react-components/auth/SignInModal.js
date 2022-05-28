@@ -103,7 +103,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
         {message ? (
           intl.formatMessage(message)
         ) : (
-          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
+          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="enter email to sign in :" />
         )}
       </p>
       <TextInputField
@@ -112,7 +112,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
         required
         value={email}
         onChange={onChangeEmail}
-        placeholder="example@example.com"
+        placeholder="user@metaverseplus.xyz"
       />
       <p>
         <small>
@@ -150,11 +150,11 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
           <small>
             <FormattedMessage
               id="sign-in-modal.newsletter-signup-question"
-              defaultMessage="Want Hubs news sent to your inbox?"
+              defaultMessage="MetaversePlus - Buiding Better Worlds"
             />
             <br />
             <a href="https://eepurl.com/gX_fH9" target="_blank" rel="noopener noreferrer">
-              <FormattedMessage id="sign-in-modal.newsletter-signup-link" defaultMessage="Subscribe for updates" />
+              <FormattedMessage id="sign-in-modal.newsletter-signup-link" defaultMessage="Subscribe?" />
             </a>
           </small>
         </p>
