@@ -78,7 +78,10 @@ export const Logger = defineComponent();
 export const CameraTool = defineComponent({
   button_cancel: Types.eid,
   button_next: Types.eid,
-  button_prev: Types.eid
+  button_prev: Types.eid,
+  screenRef: Types.eid,
+  selfieScreenRef: Types.eid,
+  cameraRef: Types.eid
 });
 
 window.$C = {

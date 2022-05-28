@@ -17,7 +17,8 @@ import {
   Slice9,
   Spin,
   Text,
-  CameraTool
+  CameraTool,
+  PhysicsShape
 } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 function isValidChild(child) {
@@ -126,11 +127,17 @@ export function addObject3DComponent(world, eid, obj) {
   return eid;
 }
 
+// TODO HACK gettting internal bitecs symbol, should expose an API to check a properties type
+const $isEidType = Object.getOwnPropertySymbols(CameraTool.screenRef).find(s => s.description === "isEidType");
+console.log($isEidType);
+
 const createDefaultInflator = Component => {
   return (world, eid, componentProps) => {
     addComponent(world, Component, eid, true);
     Object.keys(componentProps).forEach(propName => {
-      Component[propName][eid] = componentProps[propName];
+      const prop = Component[propName];
+      const value = componentProps[propName];
+      prop[eid] = prop[$isEidType] ? resolveRef(world, value) : value;
     });
   };
 };
@@ -189,18 +196,6 @@ function resolveRef(world, ref) {
   return ref.current;
 }
 
-function inflateCameraTool(world, eid, data) {
-  addComponent(world, CameraTool, eid);
-
-  // TODO: Hack
-  // APP.cameraToolRefs = APP.cameraToolRefs || new Map();
-  // APP.cameraToolRefs.set(eid, data);
-
-  CameraTool.button_cancel[eid] = resolveRef(world, data.button_cancel);
-  CameraTool.button_next[eid] = resolveRef(world, data.button_next);
-  CameraTool.button_prev[eid] = resolveRef(world, data.button_prev);
-}
-
 const inflators = {
   spin: createDefaultInflator(Spin),
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
@@ -210,13 +205,14 @@ const inflators = {
   "holdable-button": createDefaultInflator(HoldableButton),
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
+  "physics-shape": createDefaultInflator(PhysicsShape),
   "networked-transform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   logger: inflateLogger,
   "media-frame": inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
-  "camera-tool": inflateCameraTool,
+  "camera-tool": createDefaultInflator(CameraTool),
   water: () => {},
   text: inflateText,
   waypoint: () => {},

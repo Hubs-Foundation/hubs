@@ -317,6 +317,11 @@ let model;
   model = await waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
 })();
 
+const RENDER_WIDTH = 1280;
+const RENDER_HEIGHT = 720;
+
+import { Layers } from "../components/layers";
+
 export function CameraPrefab() {
   // const names = ["cancel", "next-duration", "prev-duration", "snap", "record", "stop", "capture-audio", "record"];
   // const buttons = names.map((name, i) => {
@@ -332,10 +337,25 @@ export function CameraPrefab() {
 
   const scale = 4;
 
+  const screenRef = createRef();
+  const selfieScreenRef = createRef();
+
+  const screenMaterial = new THREE.MeshBasicMaterial({ toneMapped: false });
+
+  const width = 0.28;
+  const aspect = 1280 / 720;
+  const screenGeometry = new THREE.PlaneBufferGeometry(width, width / aspect);
+
+  const cameraRef = createRef();
+  const camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
+  camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+  camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+  camera.rotation.set(0, Math.PI, 0);
+  camera.position.set(0, 0, 0.05);
+  camera.matrixNeedsUpdate = true;
+
   return (
     <entity
-      object3D={mesh}
-      scale={[scale, scale, scale]}
       networked
       networked-transform
       cursor-raycastable
@@ -343,16 +363,37 @@ export function CameraPrefab() {
       offers-remote-constraint
       holdable
       rigidbody
+      physics-shape
       camera-tool={{
         button_cancel,
         button_next,
-        button_prev
+        button_prev,
+        screenRef,
+        selfieScreenRef,
+        cameraRef
       }}
     >
+      <entity
+        object3D={new THREE.Mesh(screenGeometry, screenMaterial)}
+        ref={screenRef}
+        position={[0, 0, -0.042]}
+        rotation={[0, Math.PI, 0]}
+      />
+      <entity
+        ref={selfieScreenRef}
+        object3D={new THREE.Mesh(screenGeometry, screenMaterial)}
+        position={[0, 0.4, 0]}
+        scale={[-2, 2, 2]}
+      />
+
+      <entity object3D={mesh} scale={[2, 2, 2]} />
+
+      <entity ref={cameraRef} object3D={camera} position={[0, 0, 0.05]} rotation={[0, Math.PI, 0]} />
+
       <Button
         ref={button_next}
         scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[1 / scale, 1 / scale, 0]}
+        position={[1 / scale, -0.1, 0.2]}
         width={0.6}
         height={0.3}
         text={"Next"}
@@ -360,7 +401,7 @@ export function CameraPrefab() {
       <Button
         ref={button_cancel}
         scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[0, 1 / scale, 0]}
+        position={[0, -0.1, 0.2]}
         width={0.6}
         height={0.3}
         text={"Cancel"}
@@ -368,7 +409,7 @@ export function CameraPrefab() {
       <Button
         ref={button_prev}
         scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[-1 / scale, 1 / scale, 0]}
+        position={[-1 / scale, -0.1, 0.2]}
         width={0.6}
         height={0.3}
         text={"Prev"}
