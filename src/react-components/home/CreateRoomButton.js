@@ -17,7 +17,7 @@ export function CreateRoomButton() {
         createAndRedirectToNewHub(null, null, false);
       }}
     >
-      <FormattedMessage id="create-room-button" defaultMessage="Create Room" />
+      <FormattedMessage id="create-room-button" defaultMessage="create metaverse" />
     </Button>
   );
 }

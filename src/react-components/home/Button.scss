@@ -6,7 +6,7 @@
 }
 
 :local(.cta-button) {
-  font-size: 14pt;
+  font-size:24pt;
   width: 19em;
   margin-right: 1em;
 
@@ -16,7 +16,7 @@
 }
 
 :local(.secondary-button) {
-  display: flex;
+  display: inline-block;
   flex-direction: row;
   width: 250px;
   margin-top: 18px;

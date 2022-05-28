@@ -48,7 +48,7 @@
 }
 
 :local(.hero) {
-  display: flex;
+  display: inline-block;
   flex-direction: column;
   align-items: center;
   flex: 1;

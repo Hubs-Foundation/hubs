@@ -78,7 +78,7 @@ export function HomePage() {
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
-            {canCreateRooms && <CreateRoomButton />}
+
             <PWAButton />
           </div>
           <div className={styles.heroImageContainer}>
@@ -95,6 +95,11 @@ export function HomePage() {
           </div>
         </div>
       </Container>
+      <Container>
+          <Column center grow>
+            {canCreateRooms && <CreateRoomButton />}
+          </Column>
+        </Container>
       {configs.feature("show_feature_panels") && (
         <Container className={classNames(styles.features, styles.colLg, styles.centerLg)}>
           <Column padding gap="xl" className={styles.card}>
@@ -182,8 +187,8 @@ export function HomePage() {
       )}
       <Container>
         <Column center grow>
-          <Button thin preset="landing" as="a" href="/link">
-            <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
+          <Button thin preset="landing" as="a" href="/">
+            <FormattedMessage id="home-page.have-code" defaultMessage="MetaversePlus" />
           </Button>
         </Column>
       </Container>
