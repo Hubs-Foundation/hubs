@@ -451,6 +451,7 @@ function Home() {
   const closePopupNotification = () => {
     setIsOpenNotification(false);
   };
+
   if (isLoading) {
     return (
       <div className="loader-2">
