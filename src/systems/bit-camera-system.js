@@ -8,14 +8,17 @@ const RENDER_HEIGHT = 720;
 
 const CAMERA_STATE = {
   IDLE: 0,
-  SNAPPING: 1,
-  SNAP: 2,
-  RECORD_VIDEO: 3
+  COUNTDOWN_PHOTO: 1,
+  COUNTDOWN_VIDEO: 2,
+  SNAP_PHOTO: 3,
+  RECORDING_VIDEO: 4
 };
+
+const CAPTURE_DURATIONS = [3, 7, 15, 30, 60];
 
 const renderTargets = new Map();
 
-function click(eid) {
+function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
 }
 
@@ -76,6 +79,24 @@ function updateUI(world, camera) {
   const prevBtnObj = world.eid2obj.get(CameraTool.button_prev[camera]);
   nextBtnObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
   prevBtnObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
+
+  const countdownLblObj = world.eid2obj.get(CameraTool.countdownLblRef[camera]);
+  countdownLblObj.visible =
+    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
+    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO ||
+    CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO;
+  if (countdownLblObj.visible) {
+    const timeLeftSec = Math.ceil((CameraTool.snapTime[camera] - world.time.elapsed) / 1000);
+    countdownLblObj.text = timeLeftSec;
+    countdownLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
+  }
+
+  const captureDurLblObj = world.eid2obj.get(CameraTool.captureDurLblRef[camera]);
+  captureDurLblObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
+  if (captureDurLblObj.visible) {
+    captureDurLblObj.text = CAPTURE_DURATIONS[CameraTool.captureDurIdx[camera]];
+    captureDurLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
+  }
 }
 
 let snapPixels;
@@ -147,25 +168,37 @@ export function cameraSystem(world) {
 
   cameraToolQuery(world).forEach(camera => {
     if (CameraTool.state[camera] === CAMERA_STATE.IDLE) {
-      if (click(CameraTool.snapRef[camera])) {
-        console.log("Start Contdown then snap");
-        CameraTool.state[camera] = CAMERA_STATE.SNAPPING;
+      if (clicked(CameraTool.snapRef[camera])) {
+        CameraTool.state[camera] = CAMERA_STATE.COUNTDOWN_PHOTO;
         CameraTool.snapTime[camera] = world.time.elapsed + 3000;
       }
 
-      if (click(CameraTool.button_next[camera])) {
-        console.log("Button Next Pressed!");
+      if (clicked(CameraTool.recVideoRef[camera])) {
+        CameraTool.state[camera] = CAMERA_STATE.COUNTDOWN_VIDEO;
+        CameraTool.snapTime[camera] = world.time.elapsed + 3000;
       }
 
-      if (click(CameraTool.button_prev[camera])) {
-        console.log("Button Prev Pressed!");
+      if (clicked(CameraTool.button_next[camera])) {
+        CameraTool.captureDurIdx[camera] = (CameraTool.captureDurIdx[camera] + 1) % CAPTURE_DURATIONS.length;
       }
-    } else if (CameraTool.state[camera] === CAMERA_STATE.SNAPPING) {
-      if (click(CameraTool.snapRef[camera])) {
-        console.log("Cancel Snapping");
+
+      if (clicked(CameraTool.button_prev[camera])) {
+        CameraTool.captureDurIdx[camera] = (CameraTool.captureDurIdx[camera] - 1) % CAPTURE_DURATIONS.length;
+      }
+    } else if (
+      CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
+      CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO
+    ) {
+      if (clicked(CameraTool.snapRef[camera])) {
         CameraTool.state[camera] = CAMERA_STATE.IDLE;
       } else if (world.time.elapsed >= CameraTool.snapTime[camera]) {
-        CameraTool.state[camera] = CAMERA_STATE.SNAP;
+        if (CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO) {
+          CameraTool.state[camera] = CAMERA_STATE.RECORDING_VIDEO;
+          // setup video recording
+          CameraTool.snapTime[camera] = world.time.elapsed + CAPTURE_DURATIONS[CameraTool.captureDurIdx[camera]] * 1000;
+        } else {
+          CameraTool.state[camera] = CAMERA_STATE.SNAP_PHOTO;
+        }
       } else {
         // TODO nicer way to do this?
         const timeLeftSec = (CameraTool.snapTime[camera] - world.time.elapsed) / 1000;
@@ -183,10 +216,21 @@ export function cameraSystem(world) {
     // TODO limit camera FPS and/or limit how many cameras we render per frame
     updateRenderTarget(world, camera);
 
-    if (CameraTool.state[camera] === CAMERA_STATE.SNAP) {
+    if (CameraTool.state[camera] === CAMERA_STATE.SNAP_PHOTO) {
       console.log("Snap photo");
       captureSnapshot(world, camera);
       CameraTool.state[camera] = CAMERA_STATE.IDLE;
+    } else if (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO) {
+      // TODO capture video frame
+      if (clicked(CameraTool.snapRef[camera])) {
+        console.log("Cancel video");
+        CameraTool.state[camera] = CAMERA_STATE.IDLE;
+        // TODO cleanup video without saving
+      } else if (world.time.elapsed >= CameraTool.snapTime[camera]) {
+        console.log("done recording");
+        CameraTool.state[camera] = CAMERA_STATE.IDLE;
+        // TODO spawn and cleanup video
+      }
     }
 
     updateUI(world, camera);

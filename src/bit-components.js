@@ -80,11 +80,15 @@ export const CameraTool = defineComponent({
   button_next: Types.eid,
   button_prev: Types.eid,
   snapRef: Types.eid,
+  recVideoRef: Types.eid,
   screenRef: Types.eid,
   selfieScreenRef: Types.eid,
   cameraRef: Types.eid,
+  countdownLblRef: Types.eid,
+  captureDurLblRef: Types.eid,
   snapTime: Types.f32,
-  state: Types.ui8
+  state: Types.ui8,
+  captureDurIdx: Types.ui8
 });
 
 window.$C = {

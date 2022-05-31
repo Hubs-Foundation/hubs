@@ -132,8 +132,9 @@ export function addObject3DComponent(world, eid, obj) {
 const $isEidType = Object.getOwnPropertySymbols(CameraTool.screenRef).find(s => s.description === "isEidType");
 console.log($isEidType);
 
-const createDefaultInflator = Component => {
+const createDefaultInflator = (Component, defaults = {}) => {
   return (world, eid, componentProps) => {
+    componentProps = Object.assign({}, defaults, componentProps);
     addComponent(world, Component, eid, true);
     Object.keys(componentProps).forEach(propName => {
       const prop = Component[propName];
@@ -147,7 +148,14 @@ const createDefaultInflator = Component => {
   };
 };
 
+const textDefaults = {
+  textAlign: "center",
+  anchorX: "center",
+  anchorY: "middle"
+};
+
 function inflateText(world, eid, componentProps) {
+  componentProps = Object.assign({}, textDefaults, componentProps);
   addComponent(world, Text, eid);
   const text = new TroikaText();
   Object.entries(componentProps).forEach(([name, value]) => {
@@ -218,7 +226,7 @@ const inflators = {
   "media-frame": inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
-  "camera-tool": createDefaultInflator(CameraTool),
+  "camera-tool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   water: () => {},
   text: inflateText,
   waypoint: () => {},

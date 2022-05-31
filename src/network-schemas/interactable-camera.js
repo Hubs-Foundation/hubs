@@ -269,10 +269,10 @@ export default {
 import { MediaType, textureLoader } from "../utils/media-utils";
 
 import buttonSrc from "../assets/hud/button.9.png";
+const buttonTexture = textureLoader.load(buttonSrc);
 
-function Button({ text, width, height, textureSrc = buttonSrc, ...props }) {
+function Button({ text, width, height, texture = buttonTexture, ...props }) {
   const labelRef = createRef();
-  const texture = textureLoader.load(textureSrc);
   return (
     <entity
       slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
@@ -291,8 +291,7 @@ function Button({ text, width, height, textureSrc = buttonSrc, ...props }) {
   );
 }
 
-function HoldableButton({ text, width, height, textureSrc = buttonSrc, ...props }) {
-  const texture = textureLoader.load(textureSrc);
+function HoldableButton({ text, width, height, texture = buttonTexture, ...props }) {
   return (
     <entity
       slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
@@ -325,7 +324,7 @@ const RENDER_HEIGHT = 720;
 
 import { Layers } from "../components/layers";
 
-export function CameraPrefab() {
+export function CameraPrefab(_props) {
   // const names = ["cancel", "next-duration", "prev-duration", "snap", "record", "stop", "capture-audio", "record"];
   // const buttons = names.map((name, i) => {
   //   return <Button ref={createRef()} position={[0, i / 3, 0]} width={0.8} height={0.4} text={name} />;
@@ -335,8 +334,12 @@ export function CameraPrefab() {
   const mesh = cloneObject3D(model.scene);
 
   const snapRef = createRef();
+  const recVideoRef = createRef();
   const button_next = createRef();
   const button_prev = createRef();
+
+  const countdownLblRef = createRef();
+  const captureDurLblRef = createRef();
 
   const scale = 4;
 
@@ -357,6 +360,8 @@ export function CameraPrefab() {
   camera.position.set(0, 0, 0.05);
   camera.matrixNeedsUpdate = true;
 
+  const uiZ = 0.1;
+
   return (
     <entity
       networked
@@ -373,7 +378,10 @@ export function CameraPrefab() {
         button_prev,
         screenRef,
         selfieScreenRef,
-        cameraRef
+        cameraRef,
+        countdownLblRef,
+        captureDurLblRef,
+        recVideoRef
       }}
     >
       <entity
@@ -394,25 +402,39 @@ export function CameraPrefab() {
       <entity ref={cameraRef} object3D={camera} position={[0, 0, 0.05]} rotation={[0, Math.PI, 0]} />
 
       <Button
-        ref={button_next}
-        scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[1 / scale, -0.1, 0.2]}
-        width={0.6}
-        height={0.3}
-        text={"Next"}
-      />
-      <Button
         ref={snapRef}
         scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[0, -0.1, 0.2]}
+        position={[0, 0.1, uiZ]}
         width={0.6}
         height={0.3}
         text={"Snap"}
       />
+      <entity ref={countdownLblRef} text position={[0, 0.2, uiZ]} />
+
+      <Button
+        ref={button_next}
+        scale={[1 / scale, 1 / scale, 1 / scale]}
+        position={[1 / scale, -0.1, uiZ]}
+        width={0.6}
+        height={0.3}
+        text={"Next"}
+      />
+
+      <entity ref={captureDurLblRef} text position={[0, -0.2, uiZ]} />
+
+      <Button
+        ref={recVideoRef}
+        scale={[1 / scale, 1 / scale, 1 / scale]}
+        position={[0, -0.1, uiZ]}
+        width={0.6}
+        height={0.3}
+        text={"Rec"}
+      />
+
       <Button
         ref={button_prev}
         scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[-1 / scale, -0.1, 0.2]}
+        position={[-1 / scale, -0.1, uiZ]}
         width={0.6}
         height={0.3}
         text={"Prev"}
