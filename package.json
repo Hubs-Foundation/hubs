@@ -204,7 +204,7 @@
     "sass": "^1.26.10",
     "sass-loader": "^9.0.2",
     "selfsigned": "^1.10.2",
-    "shelljs": "^0.8.1",
+    "shelljs": "^0.8.5",
     "spritesheet-js": "github:mozillareality/spritesheet.js#hubs/master",
     "storybook-addon-designs": "^5.4.1",
     "style-loader": "^0.20.2",
