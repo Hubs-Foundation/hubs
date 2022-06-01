@@ -325,11 +325,6 @@ const RENDER_HEIGHT = 720;
 import { Layers } from "../components/layers";
 
 export function CameraPrefab(_props) {
-  // const names = ["cancel", "next-duration", "prev-duration", "snap", "record", "stop", "capture-audio", "record"];
-  // const buttons = names.map((name, i) => {
-  //   return <Button ref={createRef()} position={[0, i / 3, 0]} width={0.8} height={0.4} text={name} />;
-  // });
-
   // TODO: What if model didn't load yet?
   const mesh = cloneObject3D(model.scene);
 
@@ -371,7 +366,7 @@ export function CameraPrefab(_props) {
       offers-remote-constraint
       holdable
       rigidbody
-      physics-shape
+      physics-shape={{ halfExtents: [0.22, 0.14, 0.1] }}
       camera-tool={{
         snapRef,
         button_next,
@@ -439,7 +434,6 @@ export function CameraPrefab(_props) {
         height={0.3}
         text={"Prev"}
       />
-      <entity position={[0, 1, 0]} media-frame={{ bounds: { x: 1, y: 1, z: 1 }, mediaType: "model" }} networked />
     </entity>
   );
 
