@@ -71,12 +71,15 @@ function updateRenderTarget(world, camera) {
 }
 
 function updateUI(world, camera) {
-  const snapLblObj = world.eid2obj.get(TextButton.labelRef[CameraTool.snapRef[camera]]);
-  snapLblObj.text = CameraTool.state[camera] === CAMERA_STATE.IDLE ? "Snap" : "Cancel";
-  snapLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
-
+  const snapBtnObj = world.eid2obj.get(CameraTool.snapRef[camera]);
+  const cancelBtnObj = world.eid2obj.get(CameraTool.cancelRef[camera]);
   const nextBtnObj = world.eid2obj.get(CameraTool.button_next[camera]);
   const prevBtnObj = world.eid2obj.get(CameraTool.button_prev[camera]);
+  snapBtnObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
+  cancelBtnObj.visible =
+    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
+    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO ||
+    CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO;
   nextBtnObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
   prevBtnObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
 
@@ -185,11 +188,13 @@ export function cameraSystem(world) {
       if (clicked(CameraTool.button_prev[camera])) {
         CameraTool.captureDurIdx[camera] = (CameraTool.captureDurIdx[camera] - 1) % CAPTURE_DURATIONS.length;
       }
-    } else if (
+    }
+
+    if (
       CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
       CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO
     ) {
-      if (clicked(CameraTool.snapRef[camera])) {
+      if (clicked(CameraTool.cancelRef[camera])) {
         CameraTool.state[camera] = CAMERA_STATE.IDLE;
       } else if (world.time.elapsed >= CameraTool.snapTime[camera]) {
         if (CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO) {
@@ -200,11 +205,12 @@ export function cameraSystem(world) {
           CameraTool.state[camera] = CAMERA_STATE.SNAP_PHOTO;
         }
       } else {
-        // TODO nicer way to do this?
-        const timeLeftSec = (CameraTool.snapTime[camera] - world.time.elapsed) / 1000;
-        const timeLeftLastFrameSec = (CameraTool.snapTime[camera] - world.time.elapsed - world.time.delta) / 1000;
-        if (Math.ceil(timeLeftLastFrameSec) === Math.floor(timeLeftSec)) {
-          console.log(timeLeftSec, timeLeftLastFrameSec);
+        // Floating point imprecision: Add epsilon to elapsed time so that the countdown sound always plays on the same frame that we click
+        const elapsed = world.time.elapsed + 0.01;
+        const msRemaining = CameraTool.snapTime[camera] - elapsed;
+        const msRemainingLastFrame = CameraTool.snapTime[camera] - (elapsed - world.time.delta);
+        if (Math.floor(msRemaining / 1000) !== Math.floor(msRemainingLastFrame / 1000)) {
+          console.log(msRemainingLastFrame, msRemaining);
           AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_COUNTDOWN);
         }
       }
@@ -222,7 +228,7 @@ export function cameraSystem(world) {
       CameraTool.state[camera] = CAMERA_STATE.IDLE;
     } else if (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO) {
       // TODO capture video frame
-      if (clicked(CameraTool.snapRef[camera])) {
+      if (clicked(CameraTool.cancelRef[camera])) {
         console.log("Cancel video");
         CameraTool.state[camera] = CAMERA_STATE.IDLE;
         // TODO cleanup video without saving

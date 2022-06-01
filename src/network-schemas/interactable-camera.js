@@ -329,6 +329,7 @@ export function CameraPrefab(_props) {
   const mesh = cloneObject3D(model.scene);
 
   const snapRef = createRef();
+  const cancelRef = createRef();
   const recVideoRef = createRef();
   const button_next = createRef();
   const button_prev = createRef();
@@ -369,6 +370,7 @@ export function CameraPrefab(_props) {
       physics-shape={{ halfExtents: [0.22, 0.14, 0.1] }}
       camera-tool={{
         snapRef,
+        cancelRef,
         button_next,
         button_prev,
         screenRef,
@@ -396,6 +398,14 @@ export function CameraPrefab(_props) {
 
       <entity ref={cameraRef} object3D={camera} position={[0, 0, 0.05]} rotation={[0, Math.PI, 0]} />
 
+      <Button
+        ref={cancelRef}
+        scale={[1 / scale, 1 / scale, 1 / scale]}
+        position={[0, 0.1, uiZ]}
+        width={0.6}
+        height={0.3}
+        text={"Cancel"}
+      />
       <Button
         ref={snapRef}
         scale={[1 / scale, 1 / scale, 1 / scale]}

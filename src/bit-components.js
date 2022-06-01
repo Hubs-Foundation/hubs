@@ -80,6 +80,7 @@ export const CameraTool = defineComponent({
   button_next: Types.eid,
   button_prev: Types.eid,
   snapRef: Types.eid,
+  cancelRef: Types.eid,
   recVideoRef: Types.eid,
   screenRef: Types.eid,
   selfieScreenRef: Types.eid,
