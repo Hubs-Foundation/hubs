@@ -1,7 +1,3 @@
-import cameraSchema from "./network-schemas/interactable-camera";
-import { cubeSchema } from "./network-schemas/interactable-cube";
-import { mediaFrameSchema } from "./network-schemas/media-frame-schema";
-
 function registerNetworkSchemas() {
   const vectorRequiresUpdate = epsilon => {
     return () => {
@@ -20,8 +16,6 @@ function registerNetworkSchemas() {
       };
     };
   };
-
-  NAF.schemas.add(mediaFrameSchema);
 
   // Note: networked template ids are semantically important. We use the template suffix as a filter
   // for allowing and authorizing messages in reticulum.
@@ -237,9 +231,6 @@ function registerNetworkSchemas() {
       "networked-drawing"
     ]
   });
-
-  NAF.schemas.add(cameraSchema);
-  NAF.schemas.add(cubeSchema);
 
   NAF.schemas.add({
     template: "#template-waypoint-avatar",

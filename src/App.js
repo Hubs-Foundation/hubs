@@ -17,9 +17,11 @@ import {
   FloatyObject,
   AEntity
 } from "./bit-components";
-import cubeSchema from "./network-schemas/interactable-cube";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 import "./aframe-to-bit-components";
+
+import * as bitecs from "bitecs";
+window.$B = bitecs;
 
 Object.defineProperties(THREE.Object3D.prototype, {
   components: {
@@ -123,8 +125,6 @@ export class App {
       owned: Owned,
       AEntity
     };
-
-    this.world.networkSchemas = [cubeSchema];
   }
 
   getSid(str) {

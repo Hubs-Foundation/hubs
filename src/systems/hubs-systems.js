@@ -5,9 +5,8 @@ import { AnimationMixerSystem } from "../components/animation-mixer";
 import { UVScrollSystem } from "../components/uv-scroll";
 import { CursorTogglingSystem } from "./cursor-toggling-system";
 import { PhysicsSystem } from "./physics-system";
-// import { ConstraintsSystem } from "./constraints-system";
 import { TwoPointStretchingSystem } from "./two-point-stretching-system";
-import { SingleActionButtonSystem, HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
+import { HoldableButtonSystem, HoverButtonSystem } from "./button-systems";
 import { DrawingMenuSystem } from "./drawing-menu-system";
 import { HoverMenuSystem } from "./hover-menu-system";
 import { SuperSpawnerSystem } from "./super-spawner-system";
@@ -60,7 +59,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.cursorTargettingSystem = new CursorTargettingSystem();
     this.positionAtBorderSystem = new PositionAtBorderSystem();
     this.physicsSystem = new PhysicsSystem(this.el.object3D);
-    // this.constraintsSystem = new ConstraintsSystem(this.physicsSystem);
     this.twoPointStretchingSystem = new TwoPointStretchingSystem();
     this.holdableButtonSystem = new HoldableButtonSystem();
     this.hoverButtonSystem = new HoverButtonSystem();

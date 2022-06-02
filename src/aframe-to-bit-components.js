@@ -3,7 +3,9 @@ import {
   RemoteRight,
   RemoteLeft,
   HandRight,
-  HandLeft
+  HandLeft,
+  RemoteHoverTarget,
+  NotRemoteHoverTarget
 
   // CursorRaycastable,
   // HandCollisionTarget,
@@ -28,7 +30,10 @@ import {
   ["remote-right", RemoteRight],
   ["remote-left", RemoteLeft],
   ["hand-right", HandRight],
-  ["hand-left", HandLeft]
+  ["hand-left", HandLeft],
+  ["is-remote-hover-target", RemoteHoverTarget],
+  ["is-not-remote-hover-target", NotRemoteHoverTarget]
+
   // ["holdable", Holdable],
   // ["offers-remote-constraint", OffersRemoteConstraint],
   // ["hand-collision-target", HandCollisionTarget],

@@ -1,7 +1,7 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
 import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouch } from "./touchscreen/assignments";
-import { findRemoteHoverTarget } from "../../interactions";
+import { findRemoteHoverTarget } from "../../../components/cursor-controller";
 import { canMove } from "../../../utils/permissions-utils";
 import ResizeObserver from "resize-observer-polyfill";
 

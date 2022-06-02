@@ -12,7 +12,7 @@ import { paths } from "../systems/userinput/paths";
 import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
 
-function findRemoteHoverTarget(world, object3D) {
+export function findRemoteHoverTarget(world, object3D) {
   if (!object3D) return null;
   if (!object3D.eid) return findRemoteHoverTarget(world, object3D.parent);
   if (hasComponent(world, NotRemoteHoverTarget, object3D.eid)) return null;

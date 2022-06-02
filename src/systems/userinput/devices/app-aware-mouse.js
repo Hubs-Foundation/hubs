@@ -1,7 +1,7 @@
 import { sets } from "../sets";
 import { paths } from "../paths";
 import { Pose } from "../pose";
-import { findRemoteHoverTarget } from "../../interactions";
+import { findRemoteHoverTarget } from "../../../components/cursor-controller";
 import { canMove } from "../../../utils/permissions-utils";
 
 const calculateCursorPose = function(camera, coords, origin, direction, cursorPose) {
