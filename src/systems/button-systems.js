@@ -61,8 +61,8 @@ const hasButtonComponent = (function() {
 })();
 
 function getHoverableButton(hovered) {
-  if (!(hovered && hovered.el)) return null;
-  hovered = hovered.el;
+  if (!hovered) return null;
+
   if (
     hasButtonComponent(hovered.components) ||
     hovered.classList.contains("teleport-waypoint-icon") ||
