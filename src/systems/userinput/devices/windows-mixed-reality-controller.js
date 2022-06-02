@@ -4,7 +4,7 @@ import { copySittingToStandingTransform } from "./copy-sitting-to-standing-trans
 const ONES = new THREE.Vector3(1, 1, 1);
 const HAND_OFFSET = new THREE.Matrix4().compose(
   new THREE.Vector3(0, -0.017, 0.13),
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.MathUtils.DEG2RAD, 0, 0)),
   new THREE.Vector3(1, 1, 1)
 );
 const m = new THREE.Matrix4();

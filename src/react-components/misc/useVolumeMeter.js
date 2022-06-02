@@ -18,7 +18,7 @@ const calculateVolume = (analyser, levels) => {
 function updateVolume(analyser, meter) {
   const newRawVolume = calculateVolume(analyser, meter.levels);
 
-  const newPerceivedVolume = Math.log(THREE.Math.mapLinear(newRawVolume, 0, 1, 1, Math.E));
+  const newPerceivedVolume = Math.log(THREE.MathUtils.mapLinear(newRawVolume, 0, 1, 1, Math.E));
 
   meter.volume = newPerceivedVolume < MIN_VOLUME_THRESHOLD ? 0 : newPerceivedVolume;
 

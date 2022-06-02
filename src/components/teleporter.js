@@ -127,7 +127,7 @@ function parabolicCurve(p0, v0, t, out) {
 
 function isValidNormalsAngle(collisionNormal, referenceNormal, landingMaxAngle) {
   const angleNormals = referenceNormal.angleTo(collisionNormal);
-  return THREE.Math.RAD2DEG * angleNormals <= landingMaxAngle;
+  return THREE.MathUtils.RAD2DEG * angleNormals <= landingMaxAngle;
 }
 
 const checkLineIntersection = (function() {
@@ -357,7 +357,7 @@ AFRAME.registerComponent("teleporter", {
 
     // Torus.
     this.torus = new THREE.Mesh(
-      new THREE.TorusBufferGeometry(data.hitCylinderRadius, 0.01, 16, 18, 360 * THREE.Math.DEG2RAD),
+      new THREE.TorusBufferGeometry(data.hitCylinderRadius, 0.01, 16, 18, 360 * THREE.MathUtils.DEG2RAD),
       new THREE.MeshBasicMaterial({
         color: data.hitCylinderColor,
         side: THREE.DoubleSide,
@@ -366,7 +366,7 @@ AFRAME.registerComponent("teleporter", {
         depthTest: false
       })
     );
-    this.torus.rotation.x = 90 * THREE.Math.DEG2RAD;
+    this.torus.rotation.x = 90 * THREE.MathUtils.DEG2RAD;
     hitEntity.add(this.torus);
 
     // Cylinder.
@@ -391,13 +391,13 @@ AFRAME.registerComponent("teleporter", {
     this.cylinder.position.y = data.hitCylinderHeight / 2;
     // UV's for THREE Geometries assume flipY
     if (!CYLINDER_TEXTURE.flipY) {
-      this.cylinder.rotation.z = 180 * THREE.Math.DEG2RAD;
+      this.cylinder.rotation.z = 180 * THREE.MathUtils.DEG2RAD;
     }
     hitEntity.add(this.cylinder);
 
     // create another torus for animating when the hit destination is ready to go
     this.outerTorus = new THREE.Mesh(
-      new THREE.TorusBufferGeometry(data.outerRadius, 0.01, 16, 18, 360 * THREE.Math.DEG2RAD),
+      new THREE.TorusBufferGeometry(data.outerRadius, 0.01, 16, 18, 360 * THREE.MathUtils.DEG2RAD),
       new THREE.MeshBasicMaterial({
         color: data.hitCylinderColor,
         side: THREE.DoubleSide,
@@ -406,7 +406,7 @@ AFRAME.registerComponent("teleporter", {
         depthTest: false
       })
     );
-    this.outerTorus.rotation.x = 90 * THREE.Math.DEG2RAD;
+    this.outerTorus.rotation.x = 90 * THREE.MathUtils.DEG2RAD;
     hitEntity.add(this.outerTorus);
 
     return hitEntity;
