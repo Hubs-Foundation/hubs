@@ -19,7 +19,8 @@ import {
   Text,
   CameraTool,
   PhysicsShape,
-  TextButton
+  TextButton,
+  HoverButton
 } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 function isValidChild(child) {
@@ -184,7 +185,7 @@ import { updateSlice9Geometry } from "../update-slice9-geometry";
 
 function inflateSlice9(world, eid, { size, insets, texture }) {
   const geometry = (this.geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3));
-  const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+  const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false });
   console.log(material);
   const obj = new THREE.Mesh(geometry, material);
   addObject3DComponent(world, eid, obj);
@@ -217,6 +218,7 @@ const inflators = {
   "single-action-button": createDefaultInflator(SingleActionButton),
   "holdable-button": createDefaultInflator(HoldableButton),
   "text-button": createDefaultInflator(TextButton),
+  "hover-button": createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
   "physics-shape": createDefaultInflator(PhysicsShape),

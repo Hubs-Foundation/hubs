@@ -60,9 +60,12 @@ export const OffersRemoteConstraint = defineComponent();
 export const HandCollisionTarget = defineComponent();
 export const OffersHandConstraint = defineComponent();
 export const TogglesHoveredActionSet = defineComponent();
-export const SingleActionButton = defineComponent();
+
+export const HoverButton = defineComponent({ type: Types.ui8 });
 export const TextButton = defineComponent({ labelRef: Types.eid });
 export const HoldableButton = defineComponent();
+export const SingleActionButton = defineComponent();
+
 export const Pen = defineComponent();
 export const HoverMenuChild = defineComponent();
 export const Static = defineComponent();

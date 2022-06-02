@@ -71,6 +71,8 @@ function activateTheme() {
         `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
       );
   }
+
+  window.dispatchEvent(new CustomEvent("update_theme"));
 }
 
 const onStoreChanged = (function() {

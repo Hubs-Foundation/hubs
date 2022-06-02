@@ -1,11 +1,19 @@
-import { addComponent, removeComponent, defineQuery } from "bitecs";
-import { HoveredRemoteLeft, HoveredRemoteRight, Interacted, SingleActionButton } from "../bit-components";
+import { addComponent, removeComponent, defineQuery, hasComponent } from "bitecs";
+import {
+  HoverButton,
+  HoveredHandLeft,
+  HoveredHandRight,
+  HoveredRemoteLeft,
+  HoveredRemoteRight,
+  Interacted,
+  SingleActionButton,
+  Slice9,
+  TextButton
+} from "../bit-components";
+import { hasAnyComponent } from "../utils/bit-utils";
+import { getThemeColor } from "../utils/theme";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 import { paths } from "./userinput/paths";
-
-const interactedQuery = defineQuery([Interacted]);
-const rightRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteRight]);
-const leftRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteLeft]);
 
 function interact(world, entities, path, interactor) {
   if (AFRAME.scenes[0].systems.userinput.get(path)) {
@@ -23,7 +31,11 @@ function interact(world, entities, path, interactor) {
   }
 }
 
-export function singleActionButtonSystem(world) {
+const interactedQuery = defineQuery([Interacted]);
+const rightRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteRight]);
+const leftRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteLeft]);
+
+function singleActionButtonSystem(world) {
   // Clear the interactions from previous frames
   const interactedEnts = interactedQuery(world);
   for (let i = 0; i < interactedEnts.length; i++) {
@@ -37,17 +49,62 @@ export function singleActionButtonSystem(world) {
     return;
   }
 
-  const interaction = AFRAME.scenes[0].systems.interaction;
+  const interactorSettings = AFRAME.scenes[0].systems.interaction.options;
   interact(
     world,
     leftRemoteQuery(world),
     paths.actions.cursor.left.grab,
-    interaction.options.leftRemote.entity.object3D
+    interactorSettings.leftRemote.entity.object3D
   );
   interact(
     world,
     rightRemoteQuery(world),
     paths.actions.cursor.right.grab,
-    interaction.options.rightRemote.entity.object3D
+    interactorSettings.rightRemote.entity.object3D
   );
+}
+
+export const BUTTON_TYPES = {
+  DEFAULT: 0,
+  ACTION: 1
+};
+
+let buttonStyles = {};
+// TODO these colors come from what we are doing in theme.js for aframe mixins but they seem fishy
+function applyTheme() {
+  buttonStyles[BUTTON_TYPES.DEFAULT] = {
+    color: new THREE.Color(0xffffff),
+    hoverColor: new THREE.Color(0xaaaaaa),
+    textColor: new THREE.Color(getThemeColor("action-color")),
+    textHoverColor: new THREE.Color(getThemeColor("action-color-highlight"))
+  };
+  buttonStyles[BUTTON_TYPES.ACTION] = {
+    color: new THREE.Color(getThemeColor("action-color")),
+    hoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
+    textColor: new THREE.Color(0xffffff),
+    textHoverColor: new THREE.Color(0xffffff)
+  };
+}
+window.addEventListener("update_theme", applyTheme);
+applyTheme();
+
+const hoverComponents = [HoveredRemoteRight, HoveredRemoteLeft, HoveredHandRight, HoveredHandLeft];
+
+const hoverButtonsQuery = defineQuery([HoverButton]);
+function hoverButtonSystem(world) {
+  hoverButtonsQuery(world).forEach(function(eid) {
+    const obj = world.eid2obj.get(eid);
+    const isHovered = hasAnyComponent(world, hoverComponents, eid);
+    const style = buttonStyles[HoverButton.type[eid]];
+    obj.material.color.copy(isHovered ? style.hoverColor : style.color);
+    if (hasComponent(world, TextButton, eid)) {
+      const lbl = world.eid2obj.get(TextButton.labelRef[eid]);
+      lbl.color = isHovered ? style.textHoverColor : style.textColor;
+    }
+  });
+}
+
+export function buttonSystems(world) {
+  hoverButtonSystem(world);
+  singleActionButtonSystem(world);
 }

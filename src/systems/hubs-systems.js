@@ -40,7 +40,7 @@ import { floatyObjectSystem } from "./floaty-object-system";
 import { removeNetworkedObjectButtonSystem } from "./remove-networked-object-button-system";
 import { removeObject3DSystem } from "./remove-object3D-system";
 import { networkedTransformSystem } from "./networked-transform";
-import { singleActionButtonSystem } from "./single-action-button-system";
+import { buttonSystems } from "./single-action-button-system";
 import { constraintsSystem } from "./bit-constraints-system";
 import { loggerSystem } from "./logger-system";
 import { mediaFramesSystem } from "./bit-media-frames";
@@ -107,7 +107,7 @@ AFRAME.registerSystem("hubs-systems", {
 
     interactionSystem(world, this.cursorTargettingSystem, t, systems);
 
-    singleActionButtonSystem(world);
+    buttonSystems(world);
     constraintsSystem(world, systems.userinput);
     loggerSystem(world);
 

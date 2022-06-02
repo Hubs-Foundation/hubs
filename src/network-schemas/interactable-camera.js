@@ -271,15 +271,16 @@ import { MediaType, textureLoader } from "../utils/media-utils";
 import buttonSrc from "../assets/hud/button.9.png";
 const buttonTexture = textureLoader.load(buttonSrc);
 
-function Button({ text, width, height, texture = buttonTexture, ...props }) {
+function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TYPES.DEFAULT, ...props }) {
   const labelRef = createRef();
   return (
     <entity
       slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
       cursor-raycastable
       remote-hover-target
-      single-action-button
+      hover-button={{ type }}
       text-button={{ labelRef }}
+      single-action-button
       {...props}
     >
       <entity
@@ -323,10 +324,11 @@ const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 
 import { Layers } from "../components/layers";
+import { BUTTON_TYPES } from "../systems/single-action-button-system";
 
 export function CameraPrefab(_props) {
   // TODO: What if model didn't load yet?
-  const mesh = cloneObject3D(model.scene);
+  const cameraModel = cloneObject3D(model.scene);
 
   const snapRef = createRef();
   const cancelRef = createRef();
@@ -394,7 +396,7 @@ export function CameraPrefab(_props) {
         scale={[-2, 2, 2]}
       />
 
-      <entity object3D={mesh} scale={[2, 2, 2]} />
+      <entity object3D={cameraModel} scale={[2, 2, 2]} />
 
       <entity ref={cameraRef} object3D={camera} position={[0, 0, 0.05]} rotation={[0, Math.PI, 0]} />
 
@@ -412,6 +414,7 @@ export function CameraPrefab(_props) {
         position={[0, 0.1, uiZ]}
         width={0.6}
         height={0.3}
+        type={BUTTON_TYPES.ACTION}
         text={"Snap"}
       />
       <entity ref={countdownLblRef} text position={[0, 0.2, uiZ]} />
