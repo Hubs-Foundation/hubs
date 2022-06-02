@@ -198,14 +198,6 @@ AFRAME.registerComponent("stats-plus", {
       stats("FPS").frame();
       stats("physics").set(this.el.sceneEl.systems["hubs-systems"].physicsSystem.stepDuration);
 
-      const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
-      if (batchManagerSystem.batchingEnabled) {
-        const batchManager = batchManagerSystem.batchManager;
-        stats("batchdraws").set(batchManager.batches.length);
-        stats("batchinstances").set(batchManager.instanceCount);
-        stats("batchatlassize").set(batchManager.atlas.arrayDepth);
-      }
-
       stats().update();
     } else if (!this.inVR) {
       // Update the fps counter

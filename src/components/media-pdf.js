@@ -26,7 +26,6 @@ AFRAME.registerComponent("media-pdf", {
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
     index: { default: 0 },
-    batch: { default: false }
   },
 
   init() {
@@ -59,12 +58,6 @@ AFRAME.registerComponent("media-pdf", {
     this.localSnapCount++;
     const { entity } = addAndArrangeMedia(this.el, file, "photo-snapshot", this.localSnapCount, false, 1);
     entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
-  },
-
-  remove() {
-    if (this.data.batch && this.mesh) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
-    }
   },
 
   async update(oldData) {
@@ -130,10 +123,6 @@ AFRAME.registerComponent("media-pdf", {
     this.mesh.material.needsUpdate = true;
 
     scaleToAspectRatio(this.el, ratio);
-
-    if (texture !== errorTexture && this.data.batch) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
-    }
 
     if (this.el.components["media-pager"] && this.el.components["media-pager"].data.index !== this.data.index) {
       this.el.setAttribute("media-pager", { index: this.data.index });

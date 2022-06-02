@@ -74,7 +74,6 @@
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
     "@mozillareality/easing-functions": "^0.1.1",
-    "@mozillareality/three-batch-manager": "github:mozillareality/three-batch-manager#master",
     "@popperjs/core": "^2.4.4",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer",

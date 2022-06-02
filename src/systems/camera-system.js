@@ -176,28 +176,12 @@ firstPersonOnlyLayer.set(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
 const enableInspectLayer = function(o) {
   // Ignore first person only meshes
   if (o.layers.test(firstPersonOnlyLayer)) return;
-
-  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
-  const batch = batchManagerSystem.batchingEnabled && batchManagerSystem.batchManager.batchForMesh.get(o);
-  if (batch) {
-    batch.layers.enable(Layers.CAMERA_LAYER_INSPECT);
-    o.layers.enable(Layers.CAMERA_LAYER_BATCH_INSPECT);
-  } else {
-    o.layers.enable(Layers.CAMERA_LAYER_INSPECT);
-  }
+  o.layers.enable(Layers.CAMERA_LAYER_INSPECT);
 };
 const disableInspectLayer = function(o) {
   // Ignore first person only meshes
   if (o.layers.test(firstPersonOnlyLayer)) return;
-
-  const batchManagerSystem = AFRAME.scenes[0].systems["hubs-systems"].batchManagerSystem;
-  const batch = batchManagerSystem.batchingEnabled && batchManagerSystem.batchManager.batchForMesh.get(o);
-  if (batch) {
-    batch.layers.disable(Layers.CAMERA_LAYER_INSPECT);
-    o.layers.disable(Layers.CAMERA_LAYER_BATCH_INSPECT);
-  } else {
-    o.layers.disable(Layers.CAMERA_LAYER_INSPECT);
-  }
+  o.layers.disable(Layers.CAMERA_LAYER_INSPECT);
 };
 
 function getAudio(o) {

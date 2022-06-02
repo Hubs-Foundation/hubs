@@ -25,25 +25,6 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.uniforms = null;
     this.boundingBox = null;
 
-    // Used when the object is batched
-    const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
-    this.el.object3D.traverse(object => {
-      if (!object.material) return;
-      forEachMaterial(object, material => {
-        if (
-          !validMaterials.includes(material.type) ||
-          object.el.classList.contains("ui") ||
-          object.el.classList.contains("hud") ||
-          object.el.getAttribute("text-button")
-        )
-          return;
-
-        if (batchManagerSystem.batchingEnabled) {
-          batchManagerSystem.meshToEl.delete(object);
-        }
-      });
-    });
-
     const isMobile = AFRAME.utils.device.isMobile();
     const isMobileVR = AFRAME.utils.device.isMobileVR();
     this.isTouchscreen = isMobile && !isMobileVR;

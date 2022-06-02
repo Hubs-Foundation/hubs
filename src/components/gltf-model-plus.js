@@ -725,7 +725,6 @@ AFRAME.registerComponent("gltf-model-plus", {
     contentType: { type: "string" },
     useCache: { default: true },
     inflate: { default: false },
-    batch: { default: false },
     modelToWorldScale: { type: "number", default: 1 }
   },
 
@@ -745,9 +744,6 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   remove() {
-    if (this.data.batch && this.model) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
-    }
     if (this.data.useCache) {
       const src = resolveAsset(this.data.src);
       if (src) {
@@ -790,10 +786,6 @@ AFRAME.registerComponent("gltf-model-plus", {
       this.disposeLastInflatedEl();
 
       this.model = gltf.scene;
-
-      if (this.data.batch) {
-        this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.model);
-      }
 
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});

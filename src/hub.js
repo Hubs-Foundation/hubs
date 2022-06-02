@@ -20,7 +20,6 @@ console.log(
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
-import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
@@ -732,11 +731,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
-
-  // HACK - Trigger initial batch preparation with an invisible object
-  scene
-    .querySelector("#batch-prep")
-    .setAttribute("media-image", { batch: true, src: initialBatchImage, contentType: "image/png" });
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
