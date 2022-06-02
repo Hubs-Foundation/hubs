@@ -5,7 +5,8 @@ import {
   HandRight,
   HandLeft,
   RemoteHoverTarget,
-  NotRemoteHoverTarget
+  NotRemoteHoverTarget,
+  RemoveNetworkedEntityButton
 
   // CursorRaycastable,
   // HandCollisionTarget,
@@ -32,7 +33,8 @@ import {
   ["hand-right", HandRight],
   ["hand-left", HandLeft],
   ["is-remote-hover-target", RemoteHoverTarget],
-  ["is-not-remote-hover-target", NotRemoteHoverTarget]
+  ["is-not-remote-hover-target", NotRemoteHoverTarget],
+  ["remove-networked-object-button", RemoveNetworkedEntityButton]
 
   // ["holdable", Holdable],
   // ["offers-remote-constraint", OffersRemoteConstraint],

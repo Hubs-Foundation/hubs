@@ -1,46 +1,12 @@
-import Store from "./storage/store";
-import MediaSearchStore from "./storage/media-search-store";
-import qsTruthy from "./utils/qs_truthy";
-import { addEntity, createWorld, defineQuery, enterQuery, hasComponent, pipe } from "bitecs";
-
-import {
-  Networked,
-  Owned,
-  Spin,
-  Object3DTag,
-  RemoteHoverTarget,
-  CursorRaycastable,
-  Holdable,
-  OffersRemoteConstraint,
-  Rigidbody,
-  PhysicsShape,
-  FloatyObject,
-  AEntity
-} from "./bit-components";
-import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
-import "./aframe-to-bit-components";
-
 import * as bitecs from "bitecs";
-window.$B = bitecs;
+import { addEntity, createWorld, defineQuery, pipe } from "bitecs";
+import "./aframe-to-bit-components";
+import { AEntity, Networked, Object3DTag, Owned, Spin } from "./bit-components";
+import MediaSearchStore from "./storage/media-search-store";
+import Store from "./storage/store";
+import qsTruthy from "./utils/qs_truthy";
 
-Object.defineProperties(THREE.Object3D.prototype, {
-  components: {
-    get: function() {
-      // console.warn("Accessing 'components' on an Object3D");
-      return {};
-    }
-  },
-  classList: {
-    get: function() {
-      // console.warn("Accessing 'classlist' on an Object3D");
-      return {
-        contains() {
-          return false;
-        }
-      };
-    }
-  }
-});
+window.$B = bitecs;
 
 const timeSystem = world => {
   const { time } = world;
@@ -51,30 +17,6 @@ const timeSystem = world => {
   time.then = now;
   return world;
 };
-
-const spinQuery = defineQuery([Spin, Object3DTag]);
-const spinSystem = world => {
-  const ents = spinQuery(world);
-  for (let i = 0; i < ents.length; i++) {
-    const eid = ents[i];
-    const obj = world.eid2obj.get(eid);
-    const deltaSeconds = world.time.delta / 1000;
-    obj.rotation.x += Spin.x[eid] * deltaSeconds;
-    obj.rotation.y += Spin.y[eid] * deltaSeconds;
-    obj.rotation.z += Spin.z[eid] * deltaSeconds;
-    obj.matrixNeedsUpdate = true;
-  }
-
-  return world;
-};
-
-let lasteNetworkTick = 0;
-const networkedQuery = defineQuery([Networked]);
-
-const pipeline = pipe(
-  timeSystem,
-  spinSystem
-);
 
 export class App {
   constructor() {
@@ -208,7 +150,7 @@ export class App {
       // TODO pass this into systems that care about it (like input) once they are moved into this loop
       sceneEl.frame = xrFrame;
 
-      pipeline(APP.world);
+      timeSystem(APP.world);
 
       // Tick AFrame systems and components
       if (sceneEl.isPlaying) {
