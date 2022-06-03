@@ -12,6 +12,13 @@ import { themes } from "./styles/theme";
 import MediaDevicesManager from "../utils/media-devices-manager";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { Slider } from "./input/Slider";
+import {
+  addOrientationChangeListener,
+  removeOrientationChangeListener,
+  getMaxResolutionWidth,
+  getMaxResolutionHeight,
+  setMaxResolution
+} from "../utils/screen-orientation-utils";
 
 export const CLIPPING_THRESHOLD_MIN = 0.0;
 export const CLIPPING_THRESHOLD_MAX = 0.1;
@@ -271,16 +278,26 @@ export class MaxResolutionPreferenceItem extends Component {
   static propTypes = {
     store: PropTypes.object
   };
+
+  onOrientationChange = () => {
+    // Width and height should be swapped on screen orientation change
+    // then need to update.
+    this.forceUpdate();
+  };
+
+  componentDidMount() {
+    addOrientationChangeListener(this.onOrientationChange);
+  }
+
+  componentWillUnmount() {
+    removeOrientationChangeListener(this.onOrientationChange);
+  }
+
   render() {
     const onChange = () => {
       const numWidth = parseInt(document.getElementById("maxResolutionWidth").value);
       const numHeight = parseInt(document.getElementById("maxResolutionHeight").value);
-      this.props.store.update({
-        preferences: {
-          maxResolutionWidth: numWidth ? numWidth : 0,
-          maxResolutionHeight: numHeight ? numHeight : 0
-        }
-      });
+      setMaxResolution(this.props.store, numWidth ? numWidth : 0, numHeight ? numHeight : 0);
     };
     return (
       <div className={classNames(styles.maxResolutionPreferenceItem)}>
@@ -290,11 +307,7 @@ export class MaxResolutionPreferenceItem extends Component {
           type="number"
           step="1"
           min="0"
-          value={
-            this.props.store.state.preferences.maxResolutionWidth === undefined
-              ? window.screen.width
-              : this.props.store.state.preferences.maxResolutionWidth
-          }
+          value={getMaxResolutionWidth(this.props.store)}
           onClick={e => {
             e.preventDefault();
             e.target.focus();
@@ -309,11 +322,7 @@ export class MaxResolutionPreferenceItem extends Component {
           type="number"
           step="1"
           min="0"
-          value={
-            this.props.store.state.preferences.maxResolutionHeight === undefined
-              ? window.screen.height
-              : this.props.store.state.preferences.maxResolutionHeight
-          }
+          value={getMaxResolutionHeight(this.props.store)}
           onClick={e => {
             e.preventDefault();
             e.target.focus();
