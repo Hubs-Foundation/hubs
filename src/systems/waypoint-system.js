@@ -303,16 +303,21 @@ export class WaypointSystem {
     this.initialSpawnHappened = false;
     return this.nextMoveToSpawn;
   }
+  //onboard
   moveToWaypoint(waypointComponent, instant) {
-    this.releaseAnyOccupiedWaypoints();
-    waypointComponent.el.object3D.updateMatrices();
-    this.characterController.shouldLandWhenPossible = true;
-    this.characterController.enqueueWaypointTravelTo(
-      waypointComponent.el.object3D.matrixWorld,
-      !window.APP.store.state.preferences.animateWaypointTransitions || instant,
-      waypointComponent.data
-    );
+    this.characterController.lockToObject(waypointComponent.el.object3D);
   }
+  // moveToWaypoint(waypointComponent, instant) {
+  //   this.releaseAnyOccupiedWaypoints();
+  //   waypointComponent.el.object3D.updateMatrices();
+  //   this.characterController.shouldLandWhenPossible = true;
+  //   this.characterController.enqueueWaypointTravelTo(
+  //     waypointComponent.el.object3D.matrixWorld,
+  //     !window.APP.store.state.preferences.animateWaypointTransitions || instant,
+  //     waypointComponent.data
+  //   );
+  // }
+  //onboardend
   moveToUnoccupiableSpawnPoint() {
     const waypointComponent = this.getUnoccupiableSpawnPoint();
     if (waypointComponent) {

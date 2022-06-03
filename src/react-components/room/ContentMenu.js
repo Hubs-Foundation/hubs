@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { joinChildren } from "../misc/joinChildren";
 import styles from "./ContentMenu.scss";
 import { ReactComponent as ObjectsIcon } from "../icons/Objects.svg";
+import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
 import { ReactComponent as PeopleIcon } from "../icons/People.svg";
 import { FormattedMessage } from "react-intl";
 
@@ -48,6 +49,17 @@ export function PeopleMenuButton(props) {
 PeopleMenuButton.propTypes = {
   presencecount: PropTypes.number
 };
+
+export function ChatMenuButton(props) {
+  return (
+    <ContentMenuButton {...props}>
+      <ChatIcon />
+      <span>
+        <FormattedMessage id="content-menu.chat-menu-button" defaultMessage="Chat" />
+      </span>
+    </ContentMenuButton>
+  );
+}
 
 export function ContentMenu({ children }) {
   return <div className={styles.contentMenu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>;
