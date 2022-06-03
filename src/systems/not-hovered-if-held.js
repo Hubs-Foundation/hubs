@@ -30,7 +30,12 @@ export function dontHoverAndHold(world) {
 
 const queryDoubleHeldRight = defineQuery([HeldHandRight, HeldRemoteRight]);
 const queryDoubleHeldLeft = defineQuery([HeldHandLeft, HeldRemoteLeft]);
+const queryDoubleHoverRight = defineQuery([HoveredHandRight, HoveredRemoteRight]);
+const queryDoubleHoverLeft = defineQuery([HoveredHandLeft, HoveredRemoteLeft]);
 export function dontHoldWithHandAndRemote(world) {
   queryDoubleHeldLeft(world).forEach(eid => removeComponent(world, HeldRemoteLeft, eid));
   queryDoubleHeldRight(world).forEach(eid => removeComponent(world, HeldRemoteRight, eid));
+  // TODO this may not be needed because of CursorTogglingSystem
+  queryDoubleHoverLeft(world).forEach(eid => removeComponent(world, HoveredRemoteLeft, eid));
+  queryDoubleHoverRight(world).forEach(eid => removeComponent(world, HoveredRemoteRight, eid));
 }
