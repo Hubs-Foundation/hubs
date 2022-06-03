@@ -22,7 +22,7 @@ function findHandCollisionTargetForHand(world, hand) {
 }
 
 function hoverHand(world, interactor, hoveredQuery, Component) {
-  hoveredQuery(world).forEach(eid => removeComponent(world, HoveredHandLeft, eid));
+  hoveredQuery(world).forEach(eid => removeComponent(world, Component, eid));
   const collision = findHandCollisionTargetForHand(world, interactor);
   if (collision) addComponent(world, Component, collision);
 }

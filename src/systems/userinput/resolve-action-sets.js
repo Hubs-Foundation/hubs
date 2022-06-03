@@ -16,12 +16,23 @@ import {
   HoldableButton,
   Pen,
   OffersRemoteConstraint,
-  TogglesHoveredActionSet
+  TogglesHoveredActionSet,
+  CameraTool,
+  OffersHandConstraint,
+  AEntity
 } from "../../bit-components";
 import { hasComponent } from "bitecs";
 const debugUserInput = qsTruthy("dui");
 
 let leftTeleporter, rightTeleporter;
+
+function hc(world, Component, eid) {
+  return eid && hasComponent(world, Component, eid);
+}
+
+function hcAFRAME(world, componentName, eid) {
+  return eid && hasComponent(world, AEntity, eid) && !!world.eid2obj.get(eid).el.components[componentName];
+}
 
 export function resolveActionSets() {
   leftTeleporter =
@@ -34,180 +45,84 @@ export function resolveActionSets() {
       document.getElementById("player-right-controller").components.teleporter);
   if (!leftTeleporter || !rightTeleporter) return;
   const userinput = AFRAME.scenes[0].systems.userinput;
-  const { leftHand, rightHand, rightRemote, leftRemote } = AFRAME.scenes[0].systems.interaction.state;
 
   const world = APP.world;
-  // userinput.toggleSet(sets.leftHandHoldingInteractable, leftHand.held);
-  // userinput.toggleSet(sets.rightHandHoldingInteractable, rightHand.held);
-  // userinput.toggleSet(sets.leftCursorHoldingInteractable, leftRemote.held);
-  // userinput.toggleSet(sets.rightCursorHoldingInteractable, rightRemote.held);
-  userinput.toggleSet(sets.leftHandHoldingInteractable, anyEntityWith(world, HeldHandLeft));
-  userinput.toggleSet(sets.rightHandHoldingInteractable, anyEntityWith(world, HeldHandRight));
-  userinput.toggleSet(sets.leftCursorHoldingInteractable, anyEntityWith(world, HeldRemoteLeft));
-  userinput.toggleSet(sets.rightCursorHoldingInteractable, anyEntityWith(world, HeldRemoteRight));
 
-  userinput.toggleSet(sets.leftHandHoveringOnNothing, !anyEntityWith(world, HoveredHandLeft));
-  userinput.toggleSet(sets.rightHandHoveringOnNothing, !anyEntityWith(world, HoveredHandRight));
-  userinput.toggleSet(sets.leftCursorHoveringOnNothing, !anyEntityWith(world, HoveredRemoteLeft));
-  userinput.toggleSet(sets.rightCursorHoveringOnNothing, !anyEntityWith(world, HoveredRemoteRight));
+  const leftHandHovering = anyEntityWith(world, HoveredHandLeft);
+  const leftHandHolding = anyEntityWith(world, HeldHandLeft);
+  const leftRemoteHovering = anyEntityWith(world, HoveredRemoteLeft);
+  const leftRemoteHolding = anyEntityWith(world, HeldRemoteLeft);
+  const rightHandHovering = anyEntityWith(world, HoveredHandRight);
+  const rightHandHolding = anyEntityWith(world, HeldHandRight);
+  const rightRemoteHovering = anyEntityWith(world, HoveredRemoteRight);
+  const rightRemoteHolding = anyEntityWith(world, HeldRemoteRight);
 
-  userinput.toggleSet(
-    sets.leftHandHoveringOnPen,
-    anyEntityWith(world, HoveredHandLeft) && hasComponent(world, Pen, anyEntityWith(world, HoveredHandLeft))
-  );
-  userinput.toggleSet(
-    sets.rightHandHoveringOnPen,
-    anyEntityWith(world, HoveredHandRight) && hasComponent(world, Pen, anyEntityWith(world, HoveredHandRight))
-  );
-  userinput.toggleSet(
-    sets.leftCursorHoveringOnPen,
-    anyEntityWith(world, HoveredRemoteLeft) && hasComponent(world, Pen, anyEntityWith(world, HoveredRemoteLeft))
-  );
-  userinput.toggleSet(
-    sets.rightCursorHoveringOnPen,
-    anyEntityWith(world, HoveredRemoteRight) && hasComponent(world, Pen, anyEntityWith(world, HoveredRemoteRight))
-  );
+  userinput.toggleSet(sets.leftHandHoldingInteractable, leftHandHolding);
+  userinput.toggleSet(sets.rightHandHoldingInteractable, rightHandHolding);
+  userinput.toggleSet(sets.leftCursorHoldingInteractable, leftRemoteHolding);
+  userinput.toggleSet(sets.rightCursorHoldingInteractable, rightRemoteHolding);
 
-  userinput.toggleSet(
-    sets.leftHandHoveringOnCamera,
-    !leftHand.held && leftHand.hovered && leftHand.hovered.components["camera-tool"]
-  );
-  userinput.toggleSet(
-    sets.rightHandHoveringOnCamera,
-    !rightHand.held && rightHand.hovered && rightHand.hovered.components["camera-tool"]
-  );
-  userinput.toggleSet(
-    sets.leftCursorHoveringOnCamera,
-    !leftHand.held &&
-      !leftHand.hovered &&
-      !leftRemote.held &&
-      leftRemote.hovered &&
-      leftRemote.hovered.components["camera-tool"]
-  );
-  userinput.toggleSet(
-    sets.rightCursorHoveringOnCamera,
-    !rightHand.held &&
-      !rightHand.hovered &&
-      !rightRemote.held &&
-      rightRemote.hovered &&
-      rightRemote.hovered.components["camera-tool"]
-  );
+  userinput.toggleSet(sets.leftHandHoveringOnNothing, !leftHandHovering);
+  userinput.toggleSet(sets.rightHandHoveringOnNothing, !rightHandHovering);
+  userinput.toggleSet(sets.leftCursorHoveringOnNothing, !leftRemoteHovering);
+  userinput.toggleSet(sets.rightCursorHoveringOnNothing, !rightRemoteHovering);
+
+  userinput.toggleSet(sets.leftHandHoveringOnPen, hc(world, Pen, leftHandHovering));
+  userinput.toggleSet(sets.rightHandHoveringOnPen, hc(world, Pen, rightHandHovering));
+  userinput.toggleSet(sets.leftCursorHoveringOnPen, hc(world, Pen, leftRemoteHovering));
+  userinput.toggleSet(sets.rightCursorHoveringOnPen, hc(world, Pen, rightRemoteHovering));
+
+  userinput.toggleSet(sets.leftHandHoveringOnCamera, hc(world, CameraTool, leftHandHovering));
+  userinput.toggleSet(sets.rightHandHoveringOnCamera, hc(world, CameraTool, rightHandHovering));
+  userinput.toggleSet(sets.leftCursorHoveringOnCamera, hc(world, CameraTool, leftRemoteHovering));
+  userinput.toggleSet(sets.rightCursorHoveringOnCamera, hc(world, CameraTool, rightRemoteHovering));
 
   userinput.toggleSet(
     sets.leftHandHoveringOnInteractable,
-    !leftHand.held &&
-      leftHand.hovered &&
-      ((leftHand.hovered.components.tags && leftHand.hovered.components.tags.data.offersHandConstraint) ||
-        leftHand.hovered.components["super-spawner"])
+    hc(world, OffersHandConstraint, leftHandHovering) || hcAFRAME(world, "super-spawner", leftHandHovering)
   );
   userinput.toggleSet(
     sets.rightHandHoveringOnInteractable,
-    !rightHand.held &&
-      rightHand.hovered &&
-      ((rightHand.hovered.components.tags && rightHand.hovered.components.tags.data.offersHandConstraint) ||
-        rightHand.hovered.components["super-spawner"])
+    hc(world, OffersHandConstraint, rightHandHovering) || hcAFRAME(world, "super-spawner", rightHandHovering)
   );
-  // userinput.toggleSet(
-  //   sets.leftCursorHoveringOnInteractable,
-  //   !leftHand.held &&
-  //     !leftHand.hovered &&
-  //     !leftRemote.held &&
-  //     leftRemote.hovered &&
-  //     ((leftRemote.hovered.components.tags && leftRemote.hovered.components.tags.data.offersRemoteConstraint) ||
-  //       (leftRemote.hovered.components.tags && leftRemote.hovered.components.tags.data.togglesHoveredActionSet) ||
-  //       leftRemote.hovered.components["super-spawner"])
-  // );
   userinput.toggleSet(
     sets.leftCursorHoveringOnInteractable,
-    anyEntityWith(world, HoveredRemoteLeft) &&
-      (hasComponent(world, OffersRemoteConstraint, anyEntityWith(world, HoveredRemoteLeft)) ||
-        hasComponent(world, TogglesHoveredActionSet, anyEntityWith(world, HoveredRemoteLeft)))
+    hc(world, OffersRemoteConstraint, leftRemoteHovering) || hcAFRAME(world, "super-spawner", leftRemoteHovering)
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnInteractable,
-    anyEntityWith(world, HoveredRemoteRight) &&
-      (hasComponent(world, OffersRemoteConstraint, anyEntityWith(world, HoveredRemoteRight)) ||
-        hasComponent(world, TogglesHoveredActionSet, anyEntityWith(world, HoveredRemoteRight)))
+    hc(world, OffersRemoteConstraint, rightRemoteHovering) || hcAFRAME(world, "super-spawner", rightRemoteHovering)
   );
 
-  userinput.toggleSet(
-    sets.leftHandHoveringOnVideo,
-    !leftHand.held && leftHand.hovered && leftHand.hovered.components["media-video"]
-  );
-  userinput.toggleSet(
-    sets.rightHandHoveringOnVideo,
-    !rightHand.held && rightHand.hovered && rightHand.hovered.components["media-video"]
-  );
-  userinput.toggleSet(
-    sets.leftCursorHoveringOnVideo,
-    !leftHand.held &&
-      !leftHand.hovered &&
-      !leftRemote.held &&
-      leftRemote.hovered &&
-      leftRemote.hovered.components["media-video"]
-  );
-  userinput.toggleSet(
-    sets.rightCursorHoveringOnVideo,
-    !rightHand.held &&
-      !rightHand.hovered &&
-      !rightRemote.held &&
-      rightRemote.hovered &&
-      rightRemote.hovered.components["media-video"]
-  );
+  userinput.toggleSet(sets.leftHandHoveringOnVideo, hcAFRAME(world, "media-video", leftHandHovering));
+  userinput.toggleSet(sets.rightHandHoveringOnVideo, hcAFRAME(world, "media-video", rightHandHovering));
+  userinput.toggleSet(sets.leftCursorHoveringOnVideo, hcAFRAME(world, "media-video", leftRemoteHovering));
+  userinput.toggleSet(sets.rightCursorHoveringOnVideo, hcAFRAME(world, "media-video", rightRemoteHovering));
 
-  userinput.toggleSet(
-    sets.leftHandHoldingPen,
-    leftHand.held && leftHand.held.components.tags && leftHand.held.components.tags.data.isPen
-  );
-  userinput.toggleSet(
-    sets.rightHandHoldingPen,
-    rightHand.held && rightHand.held.components.tags && rightHand.held.components.tags.data.isPen
-  );
-  userinput.toggleSet(
-    sets.rightCursorHoldingPen,
-    !rightHand.held && !rightHand.hovered && rightRemote.held && isTagged(rightRemote.held, "isPen")
-  );
-  userinput.toggleSet(
-    sets.leftCursorHoldingPen,
-    !leftHand.held && !leftHand.hovered && leftRemote.held && isTagged(leftRemote.held, "isPen")
-  );
-  userinput.toggleSet(sets.leftHandHoldingCamera, leftHand.held && leftHand.held.components["camera-tool"]);
-  userinput.toggleSet(sets.rightHandHoldingCamera, rightHand.held && rightHand.held.components["camera-tool"]);
-  userinput.toggleSet(
-    sets.leftCursorHoldingCamera,
-    !leftHand.held && !leftHand.hovered && leftRemote.held && leftRemote.held.components["camera-tool"]
-  );
-  userinput.toggleSet(
-    sets.rightCursorHoldingCamera,
-    !rightHand.held && !rightHand.hovered && rightRemote.held && rightRemote.held.components["camera-tool"]
-  );
+  userinput.toggleSet(sets.leftHandHoldingPen, hc(world, Pen, leftHandHolding));
+  userinput.toggleSet(sets.rightHandHoldingPen, hc(world, Pen, rightHandHolding));
+  userinput.toggleSet(sets.leftCursorHoldingPen, hc(world, Pen, leftRemoteHolding));
+  userinput.toggleSet(sets.rightCursorHoldingPen, hc(world, Pen, rightRemoteHolding));
+
+  userinput.toggleSet(sets.leftHandHoldingCamera, hc(world, CameraTool, leftHandHolding));
+  userinput.toggleSet(sets.rightHandHoldingCamera, hc(world, CameraTool, rightHandHolding));
+  userinput.toggleSet(sets.leftCursorHoldingCamera, hc(world, CameraTool, leftRemoteHolding));
+  userinput.toggleSet(sets.rightCursorHoldingCamera, hc(world, CameraTool, rightRemoteHolding));
 
   userinput.toggleSet(
     sets.leftCursorHoveringOnUI,
-    anyEntityWith(world, HoveredRemoteLeft) &&
-      (hasComponent(world, SingleActionButton, anyEntityWith(world, HoveredRemoteLeft)) ||
-        hasComponent(world, HoldableButton, anyEntityWith(world, HoveredRemoteLeft)))
+    hc(world, SingleActionButton, leftRemoteHovering) || hc(world, HoldableButton, leftRemoteHovering)
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnUI,
-    anyEntityWith(world, HoveredRemoteRight) &&
-      (hasComponent(world, SingleActionButton, anyEntityWith(world, HoveredRemoteRight)) ||
-        hasComponent(world, HoldableButton, anyEntityWith(world, HoveredRemoteRight)))
+    hc(world, SingleActionButton, rightRemoteHovering) || hc(world, HoldableButton, rightRemoteHovering)
   );
 
-  userinput.toggleSet(sets.leftCursorHoldingNothing, !anyEntityWith(APP.world, HeldRemoteLeft));
-  userinput.toggleSet(sets.rightCursorHoldingNothing, !anyEntityWith(APP.world, HeldRemoteRight));
+  userinput.toggleSet(sets.leftCursorHoldingNothing, !leftRemoteHolding);
+  userinput.toggleSet(sets.rightCursorHoldingNothing, !rightRemoteHolding);
 
-  userinput.toggleSet(
-    sets.leftCursorHoldingUI,
-    anyEntityWith(APP.world, HeldRemoteLeft) &&
-      hasComponent(APP.world, HoldableButton, anyEntityWith(APP.world, HeldRemoteLeft))
-  );
-  userinput.toggleSet(
-    sets.rightCursorHoldingUI,
-    anyEntityWith(APP.world, HeldRemoteRight) &&
-      hasComponent(APP.world, HoldableButton, anyEntityWith(APP.world, HeldRemoteRight))
-  );
+  userinput.toggleSet(sets.leftCursorHoldingUI, hc(world, HoldableButton, leftRemoteHolding));
+  userinput.toggleSet(sets.rightCursorHoldingUI, hc(world, HoldableButton, rightRemoteHolding));
 
   userinput.toggleSet(sets.leftHandTeleporting, leftTeleporter.isTeleporting);
   userinput.toggleSet(sets.rightHandTeleporting, rightTeleporter.isTeleporting);
@@ -227,4 +142,19 @@ export function resolveActionSets() {
       AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT
     );
   }
+
+  // TODO remove debug
+  const interactorSettings = AFRAME.scenes[0].systems.interaction.options;
+  const leftHandObj = interactorSettings.leftHand.entity.object3D;
+  leftHandObj.el.setAttribute(
+    "text",
+    "value",
+    `${leftHandHovering} ${leftHandHolding}\n${leftRemoteHovering} ${leftRemoteHolding}`
+  );
+  const rightHandObj = interactorSettings.rightHand.entity.object3D;
+  rightHandObj.el.setAttribute(
+    "text",
+    "value",
+    `${rightHandHovering} ${rightHandHolding}\n${rightRemoteHovering} ${rightRemoteHolding}`
+  );
 }

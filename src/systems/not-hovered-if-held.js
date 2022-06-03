@@ -21,9 +21,16 @@ const queryRemoteRight = defineQuery([HoveredRemoteRight, HeldRemoteRight]);
 const queryRemoteLeft = defineQuery([HoveredRemoteLeft, HeldRemoteLeft]);
 const queryHandRight = defineQuery([HoveredHandRight, HeldHandRight]);
 const queryHandLeft = defineQuery([HoveredHandLeft, HeldHandLeft]);
-export function notHoveredIfHeld(world) {
+export function dontHoverAndHold(world) {
   removeHover(world, queryRemoteRight(world), HoveredRemoteRight);
   removeHover(world, queryRemoteLeft(world), HoveredRemoteLeft);
   removeHover(world, queryHandRight(world), HoveredHandRight);
   removeHover(world, queryHandLeft(world), HoveredHandLeft);
+}
+
+const queryDoubleHeldRight = defineQuery([HeldHandRight, HeldRemoteRight]);
+const queryDoubleHeldLeft = defineQuery([HeldHandLeft, HeldRemoteLeft]);
+export function dontHoldWithHandAndRemote(world) {
+  queryDoubleHeldLeft(world).forEach(eid => removeComponent(world, HeldRemoteLeft, eid));
+  queryDoubleHeldRight(world).forEach(eid => removeComponent(world, HeldRemoteRight, eid));
 }
