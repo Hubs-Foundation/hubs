@@ -11,7 +11,8 @@ import {
   HoveredHandRight,
   HeldHandRight,
   HoveredHandLeft,
-  HeldHandLeft
+  HeldHandLeft,
+  AEntity
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
 
@@ -25,9 +26,8 @@ const GRAB_HAND_LEFT = paths.actions.leftHand.grab;
 const DROP_HAND_LEFT = paths.actions.leftHand.drop;
 
 function hasPermissionToGrab(world, eid) {
-  const aframeEntity = world.eid2obj.get(eid).el;
-  if (!aframeEntity) return true;
-  return canMove(aframeEntity);
+  if (!hasComponent(world, AEntity, eid)) return true;
+  return canMove(world.eid2obj.get(eid).el);
 }
 
 function grab(world, userinput, queryHovered, held, grabPath) {

@@ -20,7 +20,9 @@ import {
   CameraTool,
   PhysicsShape,
   TextButton,
-  HoverButton
+  HoverButton,
+  HandCollisionTarget,
+  OffersHandConstraint
 } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 function isValidChild(child) {
@@ -214,7 +216,9 @@ const inflators = {
   spin: createDefaultInflator(Spin),
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
   "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
+  "hand-collision-target": createDefaultInflator(HandCollisionTarget),
   "offers-remote-constraint": createDefaultInflator(OffersRemoteConstraint),
+  "offers-hand-constraint": createDefaultInflator(OffersHandConstraint),
   "single-action-button": createDefaultInflator(SingleActionButton),
   "holdable-button": createDefaultInflator(HoldableButton),
   "text-button": createDefaultInflator(TextButton),

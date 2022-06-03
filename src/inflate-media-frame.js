@@ -3,6 +3,7 @@ import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape } from "./bit-
 import { addComponent } from "bitecs";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 import { MediaType } from "./utils/media-utils";
+import { COLLISION_LAYERS } from "./constants";
 
 export function inflateMediaFrame(world, eid, componentProps) {
   const guide = new THREE.Mesh(
@@ -58,6 +59,8 @@ export function inflateMediaFrame(world, eid, componentProps) {
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
 
   addComponent(world, Rigidbody, eid);
+  Rigidbody.collisionGroup[eid] = COLLISION_LAYERS.MEDIA_FRAMES;
+  Rigidbody.collisionMask[eid] = COLLISION_LAYERS.INTERACTABLES;
   addComponent(world, PhysicsShape, eid);
   PhysicsShape.halfExtents[eid].set([
     componentProps.bounds.x / 2,

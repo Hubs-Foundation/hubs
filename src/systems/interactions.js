@@ -133,7 +133,7 @@ AFRAME.registerSystem("interaction", {
     });
   },
 
-  tick2() {
+  updateLegacyState() {
     this.previousState.rightRemote.hovered = this.state.rightRemote.hovered;
     this.previousState.rightRemote.held = this.state.rightRemote.held;
     this.previousState.leftRemote.hovered = this.state.leftRemote.hovered;

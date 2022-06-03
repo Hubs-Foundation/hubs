@@ -4,6 +4,7 @@ import cameraModelSrc from "../assets/camera_tool.glb";
 import buttonSrc from "../assets/hud/button.9.png";
 import { loadModel } from "../components/gltf-model-plus";
 import { Layers } from "../components/layers";
+import { COLLISION_LAYERS } from "../constants";
 import { BUTTON_TYPES } from "../systems/single-action-button-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { createElementEntity, createRef } from "../utils/jsx-entity";
@@ -99,9 +100,11 @@ export function CameraPrefab(_props) {
       networked-transform
       cursor-raycastable
       remote-hover-target
+      hand-collision-target
       offers-remote-constraint
+      offers-hand-constraint
       holdable
-      rigidbody
+      rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physics-shape={{ halfExtents: [0.22, 0.14, 0.1] }}
       camera-tool={{
         snapRef,
