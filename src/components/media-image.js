@@ -161,11 +161,16 @@ AFRAME.registerComponent("media-image", {
           this.mesh.material.alphaTest = this.data.alphaCutoff;
           break;
         default:
-          this.mesh.material.transparent =
-            !this.data.batch ||
-            this.data.contentType.includes("image/gif") ||
-            !!(texture.image && texture.image.hasAlpha);
-          this.mesh.material.alphaTest = 0;
+          if (qsTruthy("force_alpha_clip")) {
+            this.mesh.material.transparent = false;
+            this.mesh.material.alphaTest = 0.5;
+          else {
+            this.mesh.material.transparent =
+              !this.data.batch ||
+              this.data.contentType.includes("image/gif") ||
+              !!(texture.image && texture.image.hasAlpha);
+            this.mesh.material.alphaTest = 0;
+          }
       }
     }
 
