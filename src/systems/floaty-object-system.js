@@ -14,75 +14,15 @@ import { FloatyObject, Held, Rigidbody } from "../bit-components";
 
 export const MakeStaticWhenAtRest = defineComponent();
 
-const heldFloatyObjectsQuery = defineQuery([FloatyObject, Rigidbody, Held]);
-const exitedHeldFloatyObjectsQuery = exitQuery(heldFloatyObjectsQuery);
-const enterHeldFloatyObjectsQuery = enterQuery(heldFloatyObjectsQuery);
-
-const makeStaticQuery = defineQuery([FloatyObject, Rigidbody, Not(Held), MakeStaticWhenAtRest]);
-
-export const floatyObjectSystem = world => {
+const makeStaticAtRestQuery = defineQuery([FloatyObject, Rigidbody, Not(Held), MakeStaticWhenAtRest]);
+function makeStaticAtRest(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-
-  {
-    const ents = enterHeldFloatyObjectsQuery(world);
-    for (let i = 0; i < ents.length; i++) {
-      const eid = ents[i];
-      const bodyId = Rigidbody.bodyId[eid];
-      const bodyData = physicsSystem.bodyUuidToData.get(bodyId);
-      Object.assign(bodyData.options, {
-        gravity: { x: 0, y: 0, z: 0 },
-        type: "dynamic",
-        collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES
-      });
-      physicsSystem.updateBody(bodyId, bodyData.options);
-    }
-  }
-
-  {
-    const ents = exitedHeldFloatyObjectsQuery(world).filter(eid => entityExists(world, eid));
-    for (let i = 0; i < ents.length; i++) {
-      const eid = ents[i];
-      if (!entityExists(world, eid)) continue;
-      if (!(hasComponent(world, FloatyObject, eid) && hasComponent(world, Rigidbody, eid))) continue;
-
-      const bodyId = Rigidbody.bodyId[eid];
-      const bodyData = physicsSystem.bodyUuidToData.get(bodyId);
-
-      if (bodyData.linearVelocity < 1.85) {
-        Object.assign(bodyData.options, {
-          gravity: { x: 0, y: 0, z: 0 },
-          angularDamping: 0.5, // What's the best amount of angular damping?
-          linearDamping: 0.95,
-          linearSleepingThreshold: 0.1,
-          angularSleepingThreshold: 0.1,
-          collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES
-        });
-        addComponent(world, MakeStaticWhenAtRest, eid);
-      } else {
-        Object.assign(bodyData.options, {
-          gravity: { x: 0, y: -2, z: 0 },
-          angularDamping: 0.01,
-          linearDamping: 0.01,
-          linearSleepingThreshold: 1.6,
-          angularSleepingThreshold: 2.5,
-          collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
-        });
-        removeComponent(world, MakeStaticWhenAtRest, eid);
-      }
-      physicsSystem.updateBody(bodyId, bodyData.options);
-    }
-  }
-
-  const makeStaticEnts = makeStaticQuery(world);
-
-  for (let i = 0; i < makeStaticEnts.length; i++) {
-    const eid = makeStaticEnts[i];
-
+  makeStaticAtRestQuery(world).forEach(eid => {
     const el = world.eid2obj.get(eid).el;
     const isMine = el.components.networked && NAF.utils.isMine(el);
     if (!isMine) {
       removeComponent(world, MakeStaticWhenAtRest, eid);
-      continue;
+      return;
     }
 
     const bodyId = Rigidbody.bodyId[eid];
@@ -99,7 +39,72 @@ export const floatyObjectSystem = world => {
       physicsSystem.updateBody(bodyId, bodyData.options);
       removeComponent(world, MakeStaticWhenAtRest, eid);
     }
-  }
+  });
+}
 
-  return world;
+export const FLOATY_OBJECT_FLAGS = {
+  MODIFY_GRAVITY_ON_RELEASE: 1 << 0,
+  REDUCE_ANGULAR_FLOAT: 1 << 1,
+  UNTHROWABLE: 1 << 2
+};
+
+const enteredFloatyObjectsQuery = enterQuery(defineQuery([FloatyObject]));
+const heldFloatyObjectsQuery = defineQuery([FloatyObject, Rigidbody, Held]);
+const exitedHeldFloatyObjectsQuery = exitQuery(heldFloatyObjectsQuery);
+const enterHeldFloatyObjectsQuery = enterQuery(heldFloatyObjectsQuery);
+export const floatyObjectSystem = world => {
+  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+
+  enteredFloatyObjectsQuery(world).forEach(eid => {
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], {
+      type: "kinematic",
+      gravity: { x: 0, y: 0, z: 0 }
+    });
+  });
+
+  enterHeldFloatyObjectsQuery(world).forEach(eid => {
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], {
+      gravity: { x: 0, y: 0, z: 0 },
+      type: "dynamic",
+      collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES
+    });
+  });
+
+  exitedHeldFloatyObjectsQuery(world).forEach(eid => {
+    if (!entityExists(world, eid) || !(hasComponent(world, FloatyObject, eid) && hasComponent(world, Rigidbody, eid)))
+      return;
+
+    const bodyId = Rigidbody.bodyId[eid];
+    const bodyData = physicsSystem.bodyUuidToData.get(bodyId);
+    if (FloatyObject.flags[eid] & FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE) {
+      if (bodyData.linearVelocity < 1.85) {
+        physicsSystem.updateBodyOptions(bodyId, {
+          gravity: { x: 0, y: 0, z: 0 },
+          angularDamping: FloatyObject.flags[eid] & FLOATY_OBJECT_FLAGS.REDUCE_ANGULAR_FLOAT ? 0.89 : 0.5,
+          linearDamping: 0.95,
+          linearSleepingThreshold: 0.1,
+          angularSleepingThreshold: 0.1,
+          collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES
+        });
+        addComponent(world, MakeStaticWhenAtRest, eid);
+      } else {
+        physicsSystem.updateBodyOptions(bodyId, {
+          gravity: { x: 0, y: FloatyObject.releaseGravity[eid], z: 0 },
+          angularDamping: 0.01,
+          linearDamping: 0.01,
+          linearSleepingThreshold: 1.6,
+          angularSleepingThreshold: 2.5,
+          collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
+        });
+        removeComponent(world, MakeStaticWhenAtRest, eid);
+      }
+    } else {
+      physicsSystem.updateBodyOptions(bodyId, {
+        collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE,
+        gravity: { x: 0, y: -9.8, z: 0 }
+      });
+    }
+  });
+
+  makeStaticAtRest(world);
 };
