@@ -2,7 +2,6 @@
 import apiRequest from './apiRequest';
 import {API_ROOT} from './../constants';
 
-
 class UserService {
 
     googleLogin(data){
@@ -48,7 +47,6 @@ class UserService {
     };
 
     login(data){
-        
         return fetch(`${API_ROOT}/v1/login`, {
             method: "POST",
             headers: {
@@ -62,15 +60,14 @@ class UserService {
         });
     };
 
-    check2Token(larchiveumToken,hubsToken){
-        return fetch(`${API_ROOT}/v1/users/check2Token`, {
+    checkToken(token){
+        return fetch(`${API_ROOT}/v1/users/checkToken`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                larchiveumToken: larchiveumToken,
-                hubsToken: hubsToken
+                token: token
             })
         })
         .then((res) => res.json())
@@ -116,8 +113,8 @@ class UserService {
         return apiRequest.post('v1/users/reSendVerifyMail', {email: email});
     }
 
-    checkToken(token){
-        return apiRequest.post('/v1/auth/users/checkToken', {access_token: token});
+    update(id, data){
+        return apiRequest.patch(`v1/auth/users/${id}`, data).then(response => response.data);
     }
 }
 

@@ -151,7 +151,6 @@ class AvatarEditor extends Component {
   uploadAvatar = async e => {
     this.setState({ uploading: true });
     if (true) {
-      debugger;
       console.log(avatar_url);
       let gltfUrl;
       const url = avatar_url; 

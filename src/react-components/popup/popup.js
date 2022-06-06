@@ -8,18 +8,7 @@ const Popup = props => {
     size: 'lg',
     content: <p>Wellcome to larchiveum</p>,
     closeButton: true,
-    actions: [
-      {
-        class: 'btn btn-seccondary',
-        text: 'Cancle',
-        callback: ()=>{}
-      },
-      {
-        class: 'btn btn-success',
-        text: 'Ok',
-        callback: ()=>{}
-      }
-    ]
+    actions: []
   }
 
   currentProps.data = props.data || currentProps.data;
@@ -45,7 +34,13 @@ const Popup = props => {
           </div>
           <div className="actions">
             {currentProps.actions.map((action)=>{
-              return <button className={action.class} onClick={()=>{action.callback(currentProps.data)}}>{action.text} </button>
+              if(!action.hidden){
+                return <button 
+                    className={action.class} 
+                    onClick={()=>{action.callback(currentProps.data)}} 
+                    disabled={action.disabled || false}
+                >{action.text}</button>
+              }
             })}
           </div>
         </div>

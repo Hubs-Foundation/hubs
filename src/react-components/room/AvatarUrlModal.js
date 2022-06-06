@@ -11,7 +11,6 @@ import { Column } from "../layout/Column";
 export function AvatarUrlModal({ onSubmit, onClose }) {
   const { handleSubmit, register } = useForm();
   const handleChange = () => {
-    debugger;
     console.log('handle change called');
     document.getElementById('btnSubmitAvatar').click();
   }

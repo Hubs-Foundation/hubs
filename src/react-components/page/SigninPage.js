@@ -38,13 +38,7 @@ class LoginForm extends React.Component{
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
-    
-    remove2Token(){
-        store.removeHub();
-        Store.removeUser();
-    }
   
-
     handleChange(e) {
         const { name, value } = e.target;
         this.setState({ [name]: value});
@@ -66,7 +60,8 @@ class LoginForm extends React.Component{
         else{
             UserService.login(data).then((res) => {
                 if(res.result == 'ok'){
-                    window.location = `/?page=warning-verify&email=${res.data.email}`;
+                    Store.setUser(res.data);
+                    window.location = `/`;
                 }
                 else
                 if(res.result == 'fail'){

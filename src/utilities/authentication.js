@@ -3,12 +3,11 @@ import StoreHub from "../storage/store";
 import UserService from '../utilities/apiServices/UserService'
 const store = new StoreHub();
 export function auth(){
-    const hubsToken = store.state?.credentials?.token;
-    const larchiveumToken = Store.getUser()?.token;
-    return UserService.check2Token(larchiveumToken, hubsToken).then((res) => {
+    const token = Store.getUser()?.token;
+    return UserService.checkToken(token).then((res) => {
         if(res.result == 'ok'){
         const email = Store.getUser()?.email;
-        if(!res.data.larchiveum || res.data.larchiveum.email != email)
+        if(!res.data.email != email)
         {
             window.location = '/?page=signin';
         }

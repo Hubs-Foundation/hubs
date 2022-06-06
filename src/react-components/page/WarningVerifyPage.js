@@ -15,10 +15,9 @@ function auth(){
     store.removeHub();
     Store.removeUser();
   }
-  const hubsToken = store.state?.credentials?.token;
-  const larchiveumToken = Store.getUser()?.token;
 
-  return UserService.check2Token(larchiveumToken, hubsToken).then((res) => {
+  const token = Store.getUser()?.token;
+  return UserService.checkToken(token).then((res) => {
     if(res.result == 'ok'){
       window.location = '/';
     }

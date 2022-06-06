@@ -113,7 +113,7 @@
     "lib-hubs": "github:mozillareality/lib-hubs#master",
     "linkify-it": "^2.0.3",
     "markdown-it": "^8.4.2",
-    "moment": "^2.29.2",
+    "moment": "^2.29.3",
     "moving-average": "^1.0.0",
     "networked-aframe": "github:mozillareality/networked-aframe#master",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",

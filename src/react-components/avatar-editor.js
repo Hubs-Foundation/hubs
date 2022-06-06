@@ -144,7 +144,6 @@ class AvatarEditor extends Component {
   };
 
   uploadAvatar = async e => {
-    debugger
     e.preventDefault();
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
       
