@@ -140,18 +140,13 @@ AFRAME.registerComponent("media-image", {
         case "opaque":
           this.mesh.material.transparent = false;
           break;
-        case "blend":
-          this.mesh.material.transparent = true;
-          this.mesh.material.alphaTest = 0;
-          break;
         case "mask":
           this.mesh.material.transparent = false;
           this.mesh.material.alphaTest = this.data.alphaCutoff;
           break;
+        case "blend":
         default:
-          this.mesh.material.transparent =
-            this.data.contentType.includes("image/gif") ||
-            !!(texture.image && texture.image.hasAlpha);
+          this.mesh.material.transparent = true;
           this.mesh.material.alphaTest = 0;
       }
     }
