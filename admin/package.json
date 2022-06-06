@@ -70,5 +70,8 @@
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.1.14",
     "worker-loader": "^2.0.0"
+  },
+  "overrides": {
+    "three": "github:mozillareality/three.js#hubs/master"
   }
 }
