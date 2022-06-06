@@ -1,3 +1,5 @@
+// TODO delete this file
+
 import { addAndArrangeMedia } from "../utils/media-utils";
 import { createImageBitmap } from "../utils/image-bitmap-utils";
 import { ObjectTypes } from "../object-types";
@@ -9,7 +11,6 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
 import anime from "animejs";
 import { Layers } from "./layers";
-import { refSchema } from "../utils/jsx-entity";
 const { detect } = require("detect-browser");
 
 const browser = detect();
@@ -96,14 +97,7 @@ AFRAME.registerComponent("camera-tool", {
     captureAudio: { default: false },
     isSnapping: { default: false },
     isRecording: { default: false },
-    label: { default: "" },
-
-    labelRef: refSchema,
-    snapButtonRef: refSchema,
-    snapMenuRef: refSchema,
-
-    screenRef: refSchema,
-    selfieScreenRef: refSchema
+    label: { default: "" }
   },
 
   init() {

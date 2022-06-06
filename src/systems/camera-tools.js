@@ -1,3 +1,5 @@
+// TODO delete this file
+//
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 const CAMERA_UPDATE_FRAME_DELAY = 10; // Update one camera every N'th frame

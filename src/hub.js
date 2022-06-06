@@ -111,7 +111,6 @@ import "./components/camera-focus-button";
 import "./components/unmute-video-button";
 import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
-import "./components/camera-tool";
 import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/action-to-remove";

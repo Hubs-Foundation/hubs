@@ -69,6 +69,7 @@ export class App {
     };
   }
 
+  // TODO nothing ever cleans these up
   getSid(str) {
     if (!this.str2sid.has(str)) {
       const sid = this.nextSid;
