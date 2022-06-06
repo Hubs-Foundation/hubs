@@ -5,7 +5,7 @@ import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
-import { renderAsAframeEntity } from "./utils/jsx-entity";
+import { renderAsEntity } from "./utils/jsx-entity";
 import { Networked, Owned } from "./bit-components";
 import { addComponent } from "bitecs";
 import { takeOwnership, TEMPLATE_ID_MEDIA_FRAME } from "./systems/netcode";
@@ -126,25 +126,17 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
 });
 
 import { createElementEntity } from "./utils/jsx-entity";
-import qsTruthy from "./utils/qs_truthy";
 /** @jsx createElementEntity */
-let netId = 1;
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, componentName, componentData, components) => {
-  const obj = renderAsAframeEntity(<entity media-frame={componentData} />, APP.world);
-  const eid = obj.eid;
+  const eid = renderAsEntity(APP.world, <entity media-frame={componentData} />);
 
   addComponent(APP.world, Networked, eid);
+  // TODO this nid needs correct parent context
   const netId = "parent1.media-frame-" + el.object3D.children[0].userData.gltfIndex;
   Networked.id[eid] = APP.getSid(netId);
   APP.world.nid2eid.set(Networked.id[eid], eid);
 
-  console.log(el.object3D);
-
-  // if (qsTruthy("host")) {
-  //   takeOwnership(APP.world, eid);
-  // }
-
-  el.object3D.add(obj);
+  el.object3D.add(APP.world.eid2obj.get(eid));
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {

@@ -12,7 +12,8 @@ import {
   Owned,
   Held,
   Rigidbody,
-  Networked
+  Networked,
+  AEntity
 } from "../bit-components";
 import { takeOwnership } from "./netcode";
 
@@ -20,16 +21,16 @@ const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
 const FULL_COLOR = 0x808080;
 
+// TODO currently only aframe entiteis can be placed in media frames
 function mediaTypeMaskFor(world, eid) {
-  const obj = world.eid2obj.get(eid);
-  if (!obj.el) return 0;
+  if (!hasComponent(world, AEntity, eid)) return 0;
 
+  const el = world.eid2obj.get(eid).el;
   let mediaTypeMask = 0;
-  // TODO AFRAME
-  mediaTypeMask |= obj.el.components["gltf-model-plus"] && MediaType.MODEL;
-  mediaTypeMask |= obj.el.components["media-video"] && MediaType.VIDEO;
-  mediaTypeMask |= obj.el.components["media-image"] && MediaType.IMAGE;
-  mediaTypeMask |= obj.el.components["media-pdf"] && MediaType.PDF;
+  mediaTypeMask |= el.components["gltf-model-plus"] && MediaType.MODEL;
+  mediaTypeMask |= el.components["media-video"] && MediaType.VIDEO;
+  mediaTypeMask |= el.components["media-image"] && MediaType.IMAGE;
+  mediaTypeMask |= el.components["media-pdf"] && MediaType.PDF;
   return mediaTypeMask;
 }
 

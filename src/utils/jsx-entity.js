@@ -5,7 +5,6 @@ import {
   CursorRaycastable,
   Holdable,
   HoldableButton,
-  Logger,
   Networked,
   NetworkedTransform,
   Object3DTag,
@@ -164,13 +163,6 @@ function inflateSlice9(world, eid, { size, insets, texture }) {
   updateSlice9Geometry(world, eid);
 }
 
-// TODO: Remove this component. Only used for debugging
-function inflateLogger(world, eid, data) {
-  addComponent(world, Logger, eid);
-  world.eid2loggerdata = world.eid2loggerdata || new Map();
-  world.eid2loggerdata.set(eid, data);
-}
-
 const inflators = {
   spin: createDefaultInflator(Spin),
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
@@ -187,7 +179,6 @@ const inflators = {
   "physics-shape": createDefaultInflator(PhysicsShape),
   "networked-transform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
-  logger: inflateLogger,
   "media-frame": inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,

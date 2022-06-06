@@ -79,7 +79,6 @@ export const Pinned = defineComponent();
 
 export const FloatyObject = defineComponent({ flags: Types.ui8, releaseGravity: Types.f32 });
 
-export const Logger = defineComponent();
 export const CameraTool = defineComponent({
   button_next: Types.eid,
   button_prev: Types.eid,
