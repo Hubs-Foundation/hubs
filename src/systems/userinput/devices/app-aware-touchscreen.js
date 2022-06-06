@@ -32,6 +32,7 @@ function isSingleActionButton(el) {
   return el.components.tags && el.components.tags.data.singleActionButton;
 }
 
+// TODO this needs to be reworked as findRemoteHoverTarget returns an eid now and cursor intersects non aframe entities
 function shouldMoveCursor(touch, rect, raycaster) {
   const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.state.rightRemote.held;
   if (isCursorGrabbing) {

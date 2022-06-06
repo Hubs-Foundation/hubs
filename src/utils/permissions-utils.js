@@ -1,4 +1,8 @@
 // Brief overview of client authorization can be found in the wiki:
+
+import { hasComponent } from "bitecs";
+import { HoldableButton } from "../bit-components";
+
 // https://github.com/mozilla/hubs/wiki/Hubs-authorization
 export function showHoverEffect(el) {
   const isFrozen = el.sceneEl.is("frozen");
@@ -23,9 +27,8 @@ export function canMove(entity) {
     entity && entity.components["super-spawner"] && entity.components["super-spawner"].data.template;
   const isEmojiSpawner = spawnerTemplate === "#interactable-emoji";
   const isEmoji = !!entity.components.emoji;
-  const isHoldableButton = entity.components.tags && entity.components.tags.data.holdableButton;
   return (
-    isHoldableButton ||
+    hasComponent(APP.world, HoldableButton, entity.eid) ||
     ((isEmoji || isEmojiSpawner
       ? window.APP.hubChannel.can("spawn_emoji")
       : window.APP.hubChannel.can("spawn_and_move_media")) &&
