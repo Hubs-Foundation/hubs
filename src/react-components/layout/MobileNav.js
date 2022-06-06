@@ -16,7 +16,7 @@ export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCo
     <>
       <div className={styles.navContainer}>
         <div className={styles.mobileNavWrapper}>
-          <Hamburger onClick={toggleNav} />
+          <br /> <br /> <br />
           <header className={`${navOpen ? `is-active ${cloud}` : "hide"}`}>
             <nav role="navigation">
               <ul>

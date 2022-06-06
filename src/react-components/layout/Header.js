@@ -30,6 +30,11 @@ export function Header({
       <Container as="div" className={styles.container}>
         <nav>
           <ul>
+            <li>
+              <a href="/" className={styles.homeLink}>
+                Home
+              </a>
+            </li>
             {enableSpoke && (
               <li>
                 <a href="/spoke">

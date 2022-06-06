@@ -30,11 +30,9 @@ export function EmailVerified({ origin }) {
         <FormattedMessage id="verify-modal.verification-complete" defaultMessage="Verification Complete" />
       </b>
       <p>
-        <FormattedMessage
-          id="verify-modal.close-window"
-          defaultMessage="Please close this browser window and return to {origin}."
-          values={{ origin }}
-        />
+        <a href="/">Continue to MetaversePlus</a>
+
+        <br />
       </p>
     </Column>
   );

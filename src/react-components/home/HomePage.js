@@ -3,7 +3,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import classNames from "classnames";
 import configs from "../../utils/configs";
 import { CreateRoomButton } from "./CreateRoomButton";
-import { PWAButton } from "./PWAButton";
+import { CreateEventButton } from "./CreateEventButton";
 import { useFavoriteRooms } from "./useFavoriteRooms";
 import { usePublicRooms } from "./usePublicRooms";
 import styles from "./HomePage.scss";
@@ -78,8 +78,6 @@ export function HomePage() {
           </div>
           <div className={styles.appInfo}>
             <div className={styles.appDescription}>{configs.translation("app-description")}</div>
-
-            <PWAButton />
           </div>
           <div className={styles.heroImageContainer}>
             <img
@@ -96,10 +94,13 @@ export function HomePage() {
         </div>
       </Container>
       <Container>
-          <Column center grow>
-            {canCreateRooms && <CreateRoomButton />}
-          </Column>
-        </Container>
+        <Column center grow>
+          {canCreateRooms && <CreateRoomButton />}
+        </Column>
+        <Column center grow>
+          {canCreateRooms && <CreateEventButton />}
+        </Column>
+      </Container>
       {configs.feature("show_feature_panels") && (
         <Container className={classNames(styles.features, styles.colLg, styles.centerLg)}>
           <Column padding gap="xl" className={styles.card}>
@@ -144,7 +145,7 @@ export function HomePage() {
       {sortedPublicRooms.length > 0 && (
         <Container className={styles.roomsContainer}>
           <h3 className={styles.roomsHeading}>
-            <FormattedMessage id="home-page.public--rooms" defaultMessage="Worlds:" />
+            <FormattedMessage id="home-page.public--rooms" defaultMessage="MetaRooms:" />
           </h3>
           <Column grow padding className={styles.rooms}>
             <MediaGrid center>
