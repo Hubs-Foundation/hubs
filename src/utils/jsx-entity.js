@@ -235,37 +235,3 @@ export function renderAsEntity(world, entityDef) {
   });
   return eid;
 }
-
-// TODO handle `object3d` component for Mesh, SkinnedMesh, and Cameras, fail on others Probably use GLTFExporter
-// function reduceNodes([siblingIndicies, prevNodes], entity) {
-//   const [childIndicies, nodes] = entity.children.reduce(reduceNodes, [[], prevNodes]);
-//   return [
-//     [...siblingIndicies, nodes.length],
-//     [
-//       ...nodes,
-//       {
-//         name: entity.attrs.name,
-//         position: entity.attrs.position,
-//         scale: entity.attrs.scale,
-//         rotation: entity.attrs.rotation,
-//         extensions: Object.keys(entity.components).length && {
-//           MOZ_hubs_components: entity.components
-//         },
-//         children: childIndicies
-//       }
-//     ]
-//   ];
-// }
-
-// export function renderAsGLTF(rootEntity) {
-//   const nodes = reduceNodes([[], []], rootEntity)[1];
-//   return {
-//     asset: {
-//       generator: "Hubs JSX",
-//       version: "2.0"
-//     },
-//     extensionsUsed: ["MOZ_hubs_components"],
-//     nodes,
-//     scene: nodes.length
-//   };
-// }
