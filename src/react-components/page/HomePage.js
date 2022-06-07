@@ -56,23 +56,16 @@ function Home() {
   });
 
   function auth() {
-    const remove2Token = () => {
-      store.removeHub();
-      Store.removeUser();
-    };
-
-    const hubsToken = store.state?.credentials?.token;
-    const larchiveumToken = Store.getUser()?.token;
-
-    return UserService.check2Token(larchiveumToken, hubsToken)
+    const token = Store.getUser()?.token;
+    UserService.checkToken(token)
       .then(res => {
         if (res.result == "ok") {
           const email = Store.getUser()?.email;
-          if (!(res.data.larchiveum && res.data.larchiveum.email == email && res.data.hubs)) {
-            remove2Token();
+          if (res.data.email != email) {
+            Store.removeUser();
           }
         } else {
-          remove2Token();
+          Store.removeUser();
         }
         setIsLoading(false);
       })
@@ -451,6 +444,7 @@ function Home() {
   const closePopupNotification = () => {
     setIsOpenNotification(false);
   };
+
   if (isLoading) {
     return (
       <div className="loader-2">
@@ -561,7 +555,11 @@ function Home() {
           </div>
           <div className="row_2">
             <div className="test">
-              <div className="title_list">List tour larchiveum</div>
+              <div className="row" style={{margin: '5vh 0'}}>
+                <a href="?page=profile">
+                    <button style={{fontSize: '17px', color: '#149BF3', fontWeight: 'bold', padding: '5px 10px', border: '2px solid #1cbeff', borderRadius: '5px'}}>Profile</button>
+                </a>
+              </div>
               <div className="sort">
                 <button className={isActiveSortASC ? "active" : ""} onClick={sortNewest}>
                   Newest

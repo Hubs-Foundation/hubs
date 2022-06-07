@@ -5,8 +5,8 @@ const expireCookies = 7;
 const API_ROOT = "https://api.larchiveum.link";
 const ENV = "https://api.larchiveum.link";
 
+// const APP_ROOT = "https://hubs.local:8080";
 const APP_ROOT = "https://larchiveum.link";
-//const APP_ROOT = "https://hubs.local:8080";
 
 const naverApp = {
   clientID: "pSh1Vk5d8Df3XZAURRC5",
@@ -20,7 +20,7 @@ const kakaoApp = {
 
 const facebookApp = {
   //clientID: '339289624917102',
-  clientID: "4835484659880198"
+  clientID: "573470851047401"
 };
 
 // WETOP

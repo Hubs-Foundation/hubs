@@ -38,13 +38,7 @@ class LoginForm extends React.Component{
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
-    
-    remove2Token(){
-        store.removeHub();
-        Store.removeUser();
-    }
   
-
     handleChange(e) {
         const { name, value } = e.target;
         this.setState({ [name]: value});
@@ -66,7 +60,8 @@ class LoginForm extends React.Component{
         else{
             UserService.login(data).then((res) => {
                 if(res.result == 'ok'){
-                    window.location = `/?page=warning-verify&email=${res.data.email}`;
+                    Store.setUser(res.data);
+                    window.location = `/`;
                 }
                 else
                 if(res.result == 'fail'){
@@ -141,7 +136,7 @@ class LoginForm extends React.Component{
                     <MesageError/>
                     <div id="alternativeLogin">
                         <label className="txt1">Or sign in with: <a href='/?page=signup' className='btn_signup'>Sign Up?</a></label>
-                        {/* <SigninSocial/> */}
+                        <SigninSocial/>
                         <label className="txt1 mt-3">If you forgot your password: <a href='/?page=forgot-password' className='btn_signup'>Forgot password</a></label>
                     </div>
                 </form>

@@ -12,7 +12,7 @@ import { ManagerPage } from "./react-components/page/ManagerPage";
 import { ForgotPasswordPage } from "./react-components/page/ForgotPasswordPage";
 import { ResetPasswordPage } from "./react-components/page/ResetPasswordPage";
 import { WarningVerifyPage } from "./react-components/page/WarningVerifyPage";
-
+import { ProfilePage } from "./react-components/page/ProfilePage";
 
 registerTelemetry("/home", "Hubs Home Page");
 
@@ -58,6 +58,11 @@ function Root() {
     case 'reset-password':
       return (
         <ResetPasswordPage/>
+      );
+
+    case 'profile':
+      return (
+        <ProfilePage props={{avarar: 'Avt', name: 'Name'}}/>
       );
       
     default:

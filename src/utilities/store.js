@@ -6,29 +6,27 @@ const store = new StoreHub();
 
 class Store {
   getUser() {
-    if (Cookies.get("saveUserInfo") && Cookies.get("saveUserInfo") != "") {
-      let str = Cookies.get("saveUserInfo");
-      let saveUserInfo = JSON.parse(str || "{}");
-      if (saveUserInfo && saveUserInfo.token) {
-        return saveUserInfo;
+    if (Cookies.get("_larchiveum_user") && Cookies.get("_larchiveum_user") != "") {
+      let str = Cookies.get("_larchiveum_user");
+      let user = JSON.parse(str || "{}");
+      if (user && user.token) {
+        return user;
       }
-    } else return null;
+    } 
+    return null;
   }
+  
   setUser(data) {
     if (data != undefined) {
-      Cookies.set("saveUserInfo", data, {
+      Cookies.set("_larchiveum_user", data, {
         expires: expireCookies,
         path: "/"
       });
     }
   }
-  removeUser() {
-    let str = Cookies.remove("saveUserInfo");
-  }
 
-  remove2Token() {
-    this.removeUser();
-    store.removeHub();
+  removeUser() {
+    let str = Cookies.remove("_larchiveum_user");
   }
 }
 

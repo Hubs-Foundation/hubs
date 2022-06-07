@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Cookies from "js-cookie";
+import Store from "../../utilities/store";
 import {API_ROOT} from './../constants';
 
 const service = axios.create({
@@ -9,8 +9,10 @@ const service = axios.create({
 
 service.interceptors.request.use(
     (config) => {
-        var v = Cookies.get('access_token');
-        // if(Cookies.get('access_token')) config.headers['access_token'] = Cookies.get('access_token');
+        const user = Store.getUser();
+        if(user){
+            config.headers['access_token'] = user.token;
+        }
         return config;
     },
     (error) => {

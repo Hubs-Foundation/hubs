@@ -95,16 +95,15 @@ function ManagerHome() {
   });
 
   function auth() {
-    const hubsToken = store.state?.credentials?.token;
-    const larchiveumToken = Store.getUser()?.token;
-    return UserService.check2Token(larchiveumToken, hubsToken)
+    const token = Store.getUser()?.token;
+    return UserService.checkToken(token)
       .then(res => {
         if (res.result == "ok") {
           const email = Store.getUser()?.email;
-          if (!res.data.larchiveum || res.data.larchiveum.email != email) {
+          if (!res.data.email != email) {
             setIsLoading(false);
             setIsLoadingF(false);
-          } else if (!res.data.hubs) {
+          } else if (!res.hubs) {
             window.location = "/?page=warning-verify";
           } else {
             setIsLoading(false);
