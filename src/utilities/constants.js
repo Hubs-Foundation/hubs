@@ -20,7 +20,7 @@ const kakaoApp = {
 
 const facebookApp = {
   //clientID: '339289624917102',
-  clientID: "4835484659880198"
+  clientID: "573470851047401"
 };
 
 // WETOP

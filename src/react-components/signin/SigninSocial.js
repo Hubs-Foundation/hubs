@@ -103,7 +103,7 @@ function SigninSocial() {
 
   return (
     <div id="iconGroup">
-      {/* <KakaoLogin
+      <KakaoLogin
         token={kakaoApp.clientID}
         onSuccess={signupWithKakao}
         render={(props) =><a onClick={props.onClick}><img src={kakaotalk}/></a>}
@@ -122,7 +122,7 @@ function SigninSocial() {
         fields="name,email,picture"
         callback={signupWithFacebook}
         render={(renderProps) =><a onClick={renderProps.onClick}><img src={facebook}/></a>}
-      /> */}
+      />
 
       <GoogleLogin
         clientId={googleApp.clientID}

@@ -136,7 +136,7 @@ class LoginForm extends React.Component{
                     <MesageError/>
                     <div id="alternativeLogin">
                         <label className="txt1">Or sign in with: <a href='/?page=signup' className='btn_signup'>Sign Up?</a></label>
-                        {/* <SigninSocial/> */}
+                        <SigninSocial/>
                         <label className="txt1 mt-3">If you forgot your password: <a href='/?page=forgot-password' className='btn_signup'>Forgot password</a></label>
                     </div>
                 </form>

@@ -29,6 +29,7 @@ export  function ProfilePage({props}) {
     const [isLoading, setIsLoading] = useState(true);
     const [isOpenPopupChangeAvatar, setIsOpenPopupChangeAvatar] = useState(false);
     const [isOpenPopupCreateAvatar, setIsOpenPopupCreateAvatar] = useState(false);
+    const [isOpenPopupChangeDisplayName, setIsOpenPopupChangeDisplayName] = useState(false);
 
     useEffect(() => {
         AvatarService.getListAvatar().then((response)=>{
@@ -129,70 +130,12 @@ export  function ProfilePage({props}) {
         localStorage.setItem('___hubs_store', JSON.stringify(store));
     }
 
-    const handleChangeAvatar = (avatar)=>{
-        const store = JSON.parse(localStorage.getItem('___hubs_store'));
-        const user = Store.getUser();
-
-        // -> check user
-        //      + if have user -> call API change update user
-        // -> set avatar -> save to local
-
-        // check user
-        if(user){
-            // + if have user -> call API change update user
-            UserService.update(user.id, {
-                avatarId: avatar.id
-            }).then((response)=>{
-                if(response.result == 'ok'){
-                    Store.setUser(response.data);
-                }
-            }).catch((error)=>{
-                console.log(error);
-            })
-        }
-       
-        //-> save to local
-        if(avatar.isCustomAvatar){
-            store.profile.avatarId = avatar.url;
-        }
-        else{
-            store.profile.avatarId = avatar.id;
-        }
-        localStorage.setItem('___hubs_store', JSON.stringify(store));
-
-        //-> set avatar
+    const handleResultAvatar = (avatar)=>{
         setAvatar({...avatar});
     }
 
-    const handleChangeDisplayName = (displayName)=>{
-        const store = JSON.parse(localStorage.getItem('___hubs_store'));
-        const user = Store.getUser();
-
-        // -> check user
-        //      + if have user -> call API change update user
-        // -> set displayName -> save to local
-
-        // check user
-        if(user){
-            // + if have user -> call API change update user
-            UserService.update(user.id, {
-                displayName: displayName
-            }).then((response)=>{
-                if(response.result == 'ok'){
-                    Store.setUser(response.data);
-                }
-            }).catch((error)=>{
-                console.log(error);
-            })
-        }
-       
-        //-> save to local
-        store.profile.displayName = displayName;
-        localStorage.setItem('___hubs_store', JSON.stringify(store));
-
-        //-> set displayName
+    const handleResultDisplayName = (displayName)=>{
         setDisplayName(displayName);
-
     }
 
     return (
@@ -235,7 +178,9 @@ export  function ProfilePage({props}) {
                         }}/>
                         <GeneralPreview props={{
                             displayName: displayName,
-                            handleChangeDisplayName: handleChangeDisplayName
+                            handleOpenPopupChangeDisplayName: ()=>{
+                                setIsOpenPopupChangeDisplayName(true);
+                            }
                         }}/>
                     </div>
                     {isOpenPopupChangeAvatar && (
@@ -245,7 +190,7 @@ export  function ProfilePage({props}) {
                             handleClose: ()=>{
                                 setIsOpenPopupChangeAvatar(false);
                             },
-                            handleChangeAvatar: handleChangeAvatar
+                            handleResult: handleResultAvatar
                         }}/>
                     )}
                     {isOpenPopupCreateAvatar && (
@@ -254,8 +199,20 @@ export  function ProfilePage({props}) {
                                 setIsOpenPopupCreateAvatar(false);
                             },
                             handleResult: (avatar)=>{
-                                handleChangeAvatar(avatar);
+                                handleResultAvatar(avatar);
                                 setIsOpenPopupCreateAvatar(false);
+                            },
+                        }}/>
+                    )}
+                    {isOpenPopupChangeDisplayName && (
+                        <PopupChangeDisplayName props={{
+                            displayName: displayName,
+                            handleClose: ()=>{
+                                setIsOpenPopupChangeDisplayName(false);
+                            },
+                            handleResult: (displayName)=>{
+                                handleResultDisplayName(displayName);
+                                setIsOpenPopupChangeDisplayName(false);
                             },
                         }}/>
                     )}
@@ -311,7 +268,6 @@ const AvatarPreview = ({props})=>{
             </div>
             <div style={{width: '100%', height: '10%', borderTop: '2px solid rgb(239, 239, 239)', display: 'flex', justifyContent: 'space-around', alignItems: 'center'}}>
                 <button onClick={handleOpenPopupChooseAvatar} style={{backgroundColor: '#1180ff', padding: '10px 20px', margin: '10px', color:'white', height: '40px', borderRadius: '5px'}}>Choose Avatar</button>
-                <button onClick={handleOpenPopupCreateAvatar} style={{backgroundColor: 'rgb(0 163 10)', padding: '10px 20px', margin: '10px', color:'white', height: '40px', borderRadius: '5px'}}>Create Avatar</button>
             </div>
         </div>
     );
@@ -319,9 +275,8 @@ const AvatarPreview = ({props})=>{
 
 const GeneralPreview = ({props})=>{
     const user = Store.getUser();
-    const [displayName, setDisplayName] = useState(props?.displayName || 'My displayName');
-    const [isSaving, setIsSaving] = useState(false);
-    const handleChangeDisplayName = props?.handleChangeDisplayName;
+    const displayName = props?.displayName || 'My displayName';
+    const handleOpenPopupChangeDisplayName = props?.handleOpenPopupChangeDisplayName;
 
     return (
         <div style={{float:'right', width: '45%', height: '100%', boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px'}}>
@@ -331,16 +286,13 @@ const GeneralPreview = ({props})=>{
             <div style={{width: '100%', height: '80%'}}>
                 <div style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <div style={{width: '80%', position: 'relative'}}>
-                        <span style={{height: '40px', width: '100%'}}> Display name</span>
-                        <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)} style={{height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}></input>
-                        <span style={{height: '40px', width: '100%', color: 'red'}}>* Only text, number</span>
+                        <span style={{height: '40px', width: '100%'}}> Display name :</span>
+                        <div type="text" style={{display: 'flex', alignItems: 'center', height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}>{displayName}</div>
                     </div>
                 </div>
             </div>
             <div style={{width: '100%', height: '10%', borderTop: '2px solid rgb(239, 239, 239)', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <button onClick={()=>{handleChangeDisplayName(displayName)}} style={{backgroundColor: '#1180ff', padding: '10px 20px', color:'white', height: '40px', borderRadius: '5px'}}>
-                    {(isSaving ? 'Saving ...' : 'Save')}
-                </button>
+                <button onClick={handleOpenPopupChangeDisplayName} style={{backgroundColor: '#1180ff', padding: '10px 20px', color:'white', height: '40px', borderRadius: '5px'}}>Change Display Name</button>
             </div>
         </div>
     );
@@ -351,8 +303,48 @@ const PopupChangeAvatar = ({props})=>{
     const [avatars, setAvatars] = useState([]);
     const [avatar, setAvatar] = useState(props?.avatar);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const handleClose = props?.handleClose;
-    const handleChangeAvatar = props?.handleChangeAvatar;
+    const handleResult = props?.handleResult;
+
+    const handleChangeAvatar = (avatar)=>{
+        setIsSaving(true);
+        const store = JSON.parse(localStorage.getItem('___hubs_store'));
+        const user = Store.getUser();
+        // -> set avatar -> save to local
+        // -> check user
+        //      + if have user -> call API change update user
+        
+
+        //-> save to local
+        if(avatar.isCustomAvatar){
+            store.profile.avatarId = avatar.url;
+        }
+        else{
+            store.profile.avatarId = avatar.id;
+        }
+        localStorage.setItem('___hubs_store', JSON.stringify(store));
+
+        // check user
+        if(user){
+            // + if have user -> call API change update user
+            UserService.update(user.id, {
+                avatarId: avatar.id
+            }).then((response)=>{
+                if(response.result == 'ok'){
+                    Store.setUser(response.data);
+                    handleResult(avatar);
+                    setIsSaving(false);
+                }
+            }).catch((error)=>{
+                console.log(error);
+            })
+        }
+        else{
+            handleResult(avatar);
+            setIsSaving(false);
+        }
+    }
 
     let selectedAvatar = avatar;
 
@@ -380,7 +372,7 @@ const PopupChangeAvatar = ({props})=>{
         for (const element of elements) {
             element.style.border = '1px solid gray';
         }
-        e.currentTarget.style.border = '2px solid blue';
+        e.currentTarget.style.border = '4px solid blue';
         selectedAvatar = avt;
     }
 
@@ -401,13 +393,13 @@ const PopupChangeAvatar = ({props})=>{
                     </div>
                 ) : (
                     <div>
-                        {avatars.map((avatar)=>{
+                        {avatars.map((avt)=>{
                             return(
-                                <div className="preview-avatar" onClick={(e)=>{handleSelectAvatar(e, avatar)}} style={{ height: '200px', margin: '2%', float: 'left', width: '21%', border: avatar.selected ? '2px solid blue' : '1px solid gray', backgroundColor: 'whitesmoke'}}>
-                                    {avatar.isCustomAvatar ? (
-                                        <model-viewer style={{width:'100%', height: '100%'}} src={avatar.url} camera-controls ></model-viewer>
+                                <div className="preview-avatar" onClick={(e)=>{handleSelectAvatar(e, avt)}} style={{ height: '200px', margin: '2%', float: 'left', width: '21%', border: (avt.id == avatar.id ? '4px solid blue' : '1px solid gray'), backgroundColor: 'whitesmoke'}}>
+                                    {avt.isCustomAvatar ? (
+                                        <model-viewer style={{width:'100%', height: '100%'}} src={avt.url} camera-controls ></model-viewer>
                                     ):(
-                                        <img style={{width:'100%', height: '100%'}} src={avatar.images.preview.url} camera-controls></img>
+                                        <img style={{width:'100%', height: '100%'}} src={avt.images.preview.url} camera-controls></img>
                                     )}
                                 </div>
                             )
@@ -427,7 +419,7 @@ const PopupChangeAvatar = ({props})=>{
                     }
                 },
                 {
-                    text: "Choose",
+                    text: (isSaving ? 'Saving...' : 'Choose'),
                     class: "btn2",
                     callback: () => {
                         handleConfirmSelectAvatar();
@@ -509,45 +501,62 @@ const PopupChangeDisplayName = ({props})=>{
     const handleClose = props?.handleClose;
     const handleResult = props?.handleResult;
 
-    const handleSelectAvatar = (e, avt)=>{
-        let elements = document.querySelectorAll('.preview-avatar');
-        for (const element of elements) {
-            element.style.border = '1px solid gray';
-        }
-        e.currentTarget.style.border = '2px solid blue';
-        selectedAvatar = avt;
+    const handleInputChange = (e)=>{
+        let value = e.target.value;
+        setDisplayName(value);
     }
 
-    const handleConfirmSelectAvatar = ()=>{
-        handleChangeAvatar(selectedAvatar);
-        handleClose();
+    const handleChangeDisplayName = ()=>{
+        setIsSaving(true);
+        const store = JSON.parse(localStorage.getItem('___hubs_store'));
+        const user = Store.getUser();
+
+        // -> save to local
+        // -> check user
+        //      + if have user -> call API change update user
+        // -> set displayName 
+
+        //-> save to local
+        store.profile.displayName = displayName;
+        localStorage.setItem('___hubs_store', JSON.stringify(store));
+
+        // check user
+        if(user){
+            // + if have user -> call API change update user
+            UserService.update(user.id, {
+                displayName: displayName
+            }).then((response)=>{
+                if(response.result == 'ok'){
+                    Store.setUser(response.data);
+                    handleResult(displayName);
+                    setIsSaving(false);
+                }
+            }).catch((error)=>{
+                console.log(error);
+            })
+        }
+        else{
+            handleResult(displayName);
+            setIsSaving(false);
+        }
     }
+
 
     return (
         <Popup
             size={"lg"}
-            title={<>Choose Avatar</>}
+            title={<>Change Display Name</>}
             content={
-                <div style={{width: '100%', overflowY: 'auto', whiteSpace: 'nowrap', maxHeight: '60vh', height: '60vh'}}>
-                { isLoading ? (
-                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
-                        <span> Loading ...</span>
+                <div style={{width: '100%', maxHeight: '60vh', height: '60vh'}}>
+                    <div style={{width: '100%', height: '80%'}}>
+                    <div style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        <div style={{width: '80%', position: 'relative'}}>
+                            <span style={{height: '40px', width: '100%'}}> Display name</span>
+                            <input type="text" value={displayName} onChange={handleInputChange} style={{display: 'flex', alignItems: 'center', height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}></input>
+                            <div style={{color: '#9d9d9d'}}>* Please enter a name consisting of 3 to 32 Korean characters, alphabets, numbers, hyphens(.), underscores(_), and titles(~)</div>
+                        </div>
                     </div>
-                ) : (
-                    <div>
-                        {avatars.map((avatar)=>{
-                            return(
-                                <div className="preview-avatar" onClick={(e)=>{handleSelectAvatar(e, avatar)}} style={{ height: '200px', margin: '2%', float: 'left', width: '21%', border: avatar.selected ? '2px solid blue' : '1px solid gray', backgroundColor: 'whitesmoke'}}>
-                                    {avatar.isCustomAvatar ? (
-                                        <model-viewer style={{width:'100%', height: '100%'}} src={avatar.url} camera-controls ></model-viewer>
-                                    ):(
-                                        <img style={{width:'100%', height: '100%'}} src={avatar.images.preview.url} camera-controls></img>
-                                    )}
-                                </div>
-                            )
-                        })}
-                    </div>
-                )}
+                </div>
                 </div>
             }
 
@@ -561,10 +570,10 @@ const PopupChangeDisplayName = ({props})=>{
                     }
                 },
                 {
-                    text: "Choose",
+                    text: (isSaving ? 'Saving ...' : 'Save'),
                     class: "btn2",
                     callback: () => {
-                        handleConfirmSelectAvatar();
+                        handleChangeDisplayName();
                     }
                 },
             ]}
