@@ -64,7 +64,7 @@ export function RoomEntryModal({
             <Button preset="accent2" onClick={onSpectate}>
               <ShowIcon />
               <span>
-                <FormattedMessage id="room-entry-modal.spectate-button" defaultMessage="Spectate" />
+                <FormattedMessage id="room-entry-modal.spectate-button" defaultMessage="Observe" />
               </span>
             </Button>
           )}

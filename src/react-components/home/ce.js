@@ -5,14 +5,13 @@ import { createAndRedirectToNewHub } from "../../utils/phoenix-utils";
 import { Button } from "../input/Button";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { AuthContext } from "../auth/AuthContext";
+import { jwt } from "jsonwebtoken";
 export function CreateEventButton() {
   const breakpoint = useCssBreakpoints();
   const auth = useContext(AuthContext);
 
   const email = auth.email;
-  const user = email.split("@");
-  const roomName = user[0] + "'s room " + Date.now();
-
+  const token = jwt.encode(email);
   return (
     <Button
       thick={breakpoint === "sm" || breakpoint === "md"}
@@ -20,7 +19,7 @@ export function CreateEventButton() {
       preset="landing"
       onClick={e => {
         e.preventDefault();
-        createAndRedirectToNewHub(roomName, "6JzWnLq", false);
+        createAndRedirectToNewHub(token, "6JzWnLq", false);
       }}
     >
       <FormattedMessage id="create-event-button" defaultMessage="Create Event" />
