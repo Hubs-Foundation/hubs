@@ -86,11 +86,9 @@ export function CameraPrefab(_props) {
 
   const cameraRef = createRef();
   const camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
+
   camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
   camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
-  camera.rotation.set(0, Math.PI, 0);
-  camera.position.set(0, 0, 0.05);
-  camera.matrixNeedsUpdate = true;
 
   const uiZ = 0.1;
 

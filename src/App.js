@@ -126,6 +126,7 @@ export class App {
     const camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.05, 10000);
 
     const audioListener = new THREE.AudioListener();
+    APP.audioListener = audioListener;
     camera.add(audioListener);
 
     const renderClock = new THREE.Clock();
