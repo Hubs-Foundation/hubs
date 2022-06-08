@@ -44,7 +44,7 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        displayName: { type: "string", pattern: "^[가-힣A-Za-z0-9_~ -]{2,32}$" },
+        displayName: { type: "string", pattern: "^[a-zA-Z가-힇ㄱ-ㅎㅏ-ㅣ一-龥0-9_~ -]{2,32}$" },
         avatarId: { type: "string" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }

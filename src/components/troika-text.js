@@ -56,7 +56,7 @@ AFRAME.registerComponent("text", {
     fontUrl: {
       type: "string",
       default:
-        "https://objectstorage.ap-seoul-1.oraclecloud.com/n/cnktf5inmdwm/b/bucket-20211102-1056/o/fonts%2FSpoqaHanSansNeo-Regular.woff"
+        "https://objectstorage.ap-seoul-1.oraclecloud.com/n/cnktf5inmdwm/b/bucket-20211102-1056/o/fonts%2F_NanumGothic.woff"
     },
     // This default value differs from the Troika default of 0.1, it most closely matches the size of our previous text component.
     fontSize: { type: "number", default: 0.075 },
