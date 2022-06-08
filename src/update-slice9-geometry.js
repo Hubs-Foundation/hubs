@@ -7,7 +7,6 @@ export function updateSlice9Geometry(world, eid) {
 
   const [width, height] = Slice9.size[eid];
   const [top, bottom, left, right] = Slice9.insets[eid];
-  console.log("Update geo", width, height, top, bottom, left, right, geometry);
 
   /*
       0--1------------------------------2--3
@@ -41,8 +40,6 @@ export function updateSlice9Geometry(world, eid) {
     top: top / textureHeight,
     bottom: bottom / textureHeight
   };
-
-  console.log(uv);
 
   setUV(1, uv.left, 1);
   setUV(2, uv.right, 1);

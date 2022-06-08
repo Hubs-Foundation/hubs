@@ -90,7 +90,6 @@ function createSchema(Component) {
         if (ArrayBuffer.isView(prop[eid])) {
           for (let i = 0; i < prop[eid].length; i++) {
             if (isFullSync || shadow[eid][i] !== prop[eid][i]) {
-              console.log("array changed");
               changedPids.push(pid);
               // TODO handle EID type and arrays of strings
               data.push(Array.from(prop[eid]));
@@ -100,7 +99,6 @@ function createSchema(Component) {
           shadow[eid].set(prop[eid]);
         } else {
           if (isFullSync || shadow[eid] !== prop[eid]) {
-            console.log("changed");
             changedPids.push(pid);
             // TODO handle EID type
             data.push(prop[$isStringType] ? APP.getString(prop[eid]) : prop[eid]);
