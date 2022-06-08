@@ -468,3 +468,16 @@ export function createHeadlessModelForSkinnedMesh(mesh) {
 
   return createErasedMesh(mesh, eraseBoneIndexes);
 }
+
+export const isFacingCamera = (function() {
+  const objWorldDir = new THREE.Vector3();
+  const objWorld = new THREE.Vector3();
+  const camWorld = new THREE.Vector3();
+  return function isFacingCamera(obj) {
+    const playerCamera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+    playerCamera.getWorldPosition(camWorld);
+    obj.getWorldPosition(objWorld);
+    obj.getWorldDirection(objWorldDir);
+    return objWorldDir.dot(objWorld.sub(camWorld)) < 0;
+  };
+})();

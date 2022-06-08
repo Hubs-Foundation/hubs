@@ -80,6 +80,11 @@ export const Pinned = defineComponent();
 export const FloatyObject = defineComponent({ flags: Types.ui8, releaseGravity: Types.f32 });
 
 export const CameraTool = defineComponent({
+  snapTime: Types.f32,
+  state: Types.ui8,
+  captureDurIdx: Types.ui8,
+
+  snapMenuRef: Types.eid,
   button_next: Types.eid,
   button_prev: Types.eid,
   snapRef: Types.eid,
@@ -89,10 +94,7 @@ export const CameraTool = defineComponent({
   selfieScreenRef: Types.eid,
   cameraRef: Types.eid,
   countdownLblRef: Types.eid,
-  captureDurLblRef: Types.eid,
-  snapTime: Types.f32,
-  state: Types.ui8,
-  captureDurIdx: Types.ui8
+  captureDurLblRef: Types.eid
 });
 
 window.$C = {
