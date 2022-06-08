@@ -424,6 +424,5 @@ export function networkSendSystem(world) {
   }
 }
 
-// TODO: Handle disconnect and reconnect to the phoenix channel
-// TODO: Handle blocking and unblocking people
-// TODO: Handle permissions
+// TODO: Handle reconnect
+// TODO: Handle blocking/unblocking. Does this already work?
