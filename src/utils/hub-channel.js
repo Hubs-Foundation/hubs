@@ -57,6 +57,16 @@ export default class HubChannel extends EventTarget {
     return this._permissions && this._permissions[permission];
   }
 
+  userCan(clientId, permission) {
+    const presenceState = this.presence.state[clientId];
+    if (!presenceState) {
+      console.warn(`userCan: Had no presence state for ${clientId}`);
+      return false;
+    }
+
+    return !!presenceState.metas[0].permissions[permission];
+  }
+
   // Returns true if the current session has the given permission, *or* will get the permission
   // if they sign in and become the creator.
   canOrWillIfCreator(permission) {

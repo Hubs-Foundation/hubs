@@ -48,6 +48,7 @@ export class App {
     // HACK: We are setting the network id of the world to zero
     this.world.nid2eid = new Map();
     this.world.deletedNids = new Set();
+    this.world.ignoredNids = new Set();
 
     this.str2sid = new Map([[null, 0]]);
     this.sid2str = new Map([[0, null]]);
