@@ -34,7 +34,9 @@ export const Slice9 = defineComponent({
 });
 
 export const NetworkedTransform = defineComponent({
-  position: [Types.f32, 3]
+  position: [Types.f32, 3],
+  rotation: [Types.f32, 4],
+  scale: [Types.f32, 3]
 });
 
 export const AEntity = defineComponent();
