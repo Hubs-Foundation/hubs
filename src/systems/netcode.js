@@ -54,44 +54,91 @@ const enteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
 const exitedNetworkedObjectsQuery = exitQuery(networkedObjectsQuery);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
-export const TEMPLATE_ID_LEGACY_NAF = 1;
-export const TEMPLATE_ID_MEDIA_FRAME = 2;
+// TODO HACK gettting internal bitecs symbol, should expose createShadow
+const $parentArray = Object.getOwnPropertySymbols(NetworkedMediaFrame.scale).find(s => s.description == "parentArray");
+const $storeFlattened = Object.getOwnPropertySymbols(NetworkedMediaFrame).find(s => s.description == "storeFlattened");
+export const createShadow = (store, key) => {
+  if (!ArrayBuffer.isView(store)) {
+    const shadowStore = store[$parentArray].slice(0);
+    store[key] = store.map((_, eid) => {
+      const { length } = store[eid];
+      const start = length * eid;
+      const end = start + length;
+      return shadowStore.subarray(start, end);
+    });
+  } else {
+    store[key] = store.slice(0);
+  }
+  return key;
+};
+
+// TODO this array encoding is silly, use a buffer once we are not sending JSON
+function createSchema(Component) {
+  const componentProps = Component[$storeFlattened];
+  const shadowSymbols = componentProps.map((prop, i) => {
+    return createShadow(prop, Symbol(`netshadow-${i}`));
+  });
+
+  return {
+    serialize(_world, eid, data, isFullSync = false) {
+      const changedPids = [];
+      data.push(changedPids);
+      for (let pid = 0; pid < componentProps.length; pid++) {
+        const prop = componentProps[pid];
+        const shadow = prop[shadowSymbols[pid]];
+        // if property is an array
+        if (ArrayBuffer.isView(prop[eid])) {
+          for (let i = 0; i < prop[eid].length; i++) {
+            if (isFullSync || shadow[eid][i] !== prop[eid][i]) {
+              console.log("array changed");
+              changedPids.push(pid);
+              // TODO handle EID type and arrays of strings
+              data.push(Array.from(prop[eid]));
+              break;
+            }
+          }
+          shadow[eid].set(prop[eid]);
+        } else {
+          if (isFullSync || shadow[eid] !== prop[eid]) {
+            console.log("changed");
+            changedPids.push(pid);
+            // TODO handle EID type
+            data.push(prop[$isStringType] ? APP.getString(prop[eid]) : prop[eid]);
+          }
+          shadow[eid] = prop[eid];
+        }
+      }
+      if (!changedPids.length) {
+        data.pop();
+        return false;
+      }
+      return true;
+    },
+    deserialize(_world, eid, data) {
+      const updatedPids = data[data.cursor++];
+      for (let i = 0; i < updatedPids.length; i++) {
+        const pid = updatedPids[i];
+        const prop = componentProps[pid];
+        const shadow = prop[shadowSymbols[pid]];
+        // TODO updating the shadow here is slightly odd. Should taking ownership do it?
+        if (ArrayBuffer.isView(prop[eid])) {
+          prop[eid].set(data[data.cursor++]);
+          shadow[eid].set(prop[eid]);
+        } else {
+          const val = data[data.cursor++];
+          prop[eid] = prop[$isStringType] ? APP.getSid(val) : val;
+          shadow[eid] = prop[eid];
+        }
+      }
+    }
+  };
+}
+
 const schemas = new Map([
-  [
-    NetworkedMediaFrame,
-    {
-      serialize(world, eid, data, isFullSync = false) {
-        // TODO: Just "serialize this component: NetworkedMediaFrame and determine changes"
-        data.push({
-          capturedNid: APP.getString(NetworkedMediaFrame.capturedNid[eid]),
-          scale: Array.from(NetworkedMediaFrame.scale[eid])
-        });
-      },
-
-      deserialize(world, frameEid, update) {
-        // TODO: Just "deserialize this component of a known shape: NetworkedMediaFrame"
-        NetworkedMediaFrame.capturedNid[frameEid] = APP.getSid(update.capturedNid);
-        NetworkedMediaFrame.scale[frameEid].set(update.scale);
-        return;
-      }
-    }
-  ],
-  [
-    NetworkedTransform,
-    {
-      serialize(world, eid, data, isFullSync = false) {
-        data.push({
-          position: Array.from(NetworkedTransform.position[eid])
-        });
-      },
-
-      deserialize(world, eid, update) {
-        NetworkedTransform.position[eid].set(update.position);
-        return;
-      }
-    }
-  ]
+  [NetworkedMediaFrame, createSchema(NetworkedMediaFrame)],
+  [NetworkedTransform, createSchema(NetworkedTransform)]
 ]);
+
 const networkableComponents = [NetworkedMediaFrame, NetworkedTransform];
 
 const pendingMessages = [];
@@ -141,8 +188,9 @@ function messageFor(world, created, updated, deleted, isFullSync) {
     for (let j = 0; j < networkableComponents.length; j++) {
       const Component = networkableComponents[j];
       if (hasComponent(world, Component, eid)) {
-        updateMessage.componentIds.push(j);
-        schemas.get(Component).serialize(world, eid, updateMessage.data, isFullSync);
+        if (schemas.get(Component).serialize(world, eid, updateMessage.data, isFullSync)) {
+          updateMessage.componentIds.push(j);
+        }
       }
     }
 
@@ -266,13 +314,14 @@ export function applyNetworkUpdates(world) {
       Networked.creator[eid] = APP.getSid(updateMessage.creator);
       Networked.owner[eid] = APP.getSid(updateMessage.owner);
 
-      let cursor = 0;
+      // TODO this is adding a property to an array
+      updateMessage.data.cursor = 0;
       for (let s = 0; s < updateMessage.componentIds.length; s++) {
         const componentId = updateMessage.componentIds[s];
         const schema = schemas.get(networkableComponents[componentId]);
-        schema.deserialize(world, eid, updateMessage.data[cursor]);
-        cursor += 1; // TODO we assume each serializer only writes 1 thing
+        schema.deserialize(world, eid, updateMessage.data);
       }
+      delete updateMessage.data.cursor;
     }
 
     for (let j = 0; j < message.deletes.length; j += 1) {

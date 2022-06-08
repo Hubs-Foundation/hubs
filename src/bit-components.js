@@ -1,5 +1,7 @@
 import { defineComponent, Types } from "bitecs";
 
+export const $isStringType = Symbol("isStringType");
+
 export const Networked = defineComponent({
   id: Types.ui32,
   creator: Types.ui32,
@@ -7,12 +9,17 @@ export const Networked = defineComponent({
 
   lastOwnerTime: Types.ui32
 });
+Networked.id[$isStringType] = true;
+Networked.creator[$isStringType] = true;
+Networked.owner[$isStringType] = true;
 
 export const Owned = defineComponent();
 export const NetworkedMediaFrame = defineComponent({
   capturedNid: Types.ui32,
   scale: [Types.f32, 3]
 });
+NetworkedMediaFrame.capturedNid[$isStringType] = true;
+
 export const MediaFrame = defineComponent({
   capturedNid: Types.ui32,
   scale: [Types.f32, 3],
