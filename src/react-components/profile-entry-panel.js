@@ -38,6 +38,15 @@ export default class ProfileEntryPanel extends Component {
     if (props.avatarId) {
       this.state.avatarId = props.avatarId;
     }
+    else{
+      let url = new URL(location.href);
+      if(url.searchParams.get('avatarId')){
+        this.state.avatarId = url.searchParams.get('avatarId');
+      }
+      if(url.searchParams.get('displayName')){
+        this.state.displayName = url.searchParams.get('displayName');
+      }
+    }
     this.props.store.addEventListener("statechanged", this.storeUpdated);
     this.scene = document.querySelector("a-scene");
   }

@@ -55,6 +55,8 @@ function Home() {
     sort: "startDate|desc" //format <attribute>|<order type>
   });
 
+  const user = Store.getUser();
+
   useEffect(
     () => {
       auth();
@@ -143,17 +145,33 @@ function Home() {
     }
   };
   const handleButtonVisitPublic = event => {
-    var idrooom = event.currentTarget.getAttribute("data-roomid");
-    console.log(idrooom);
-    if (idrooom == null || idrooom == "") {
-    } else {
+    let url = APP_ROOT;
+    var roomId = event.currentTarget.getAttribute("data-roomid");
+    if (roomId && roomId != "") {
       if (APP_ROOT === "https://larchiveum.link") {
-        window.location.href = APP_ROOT + "/" + idrooom;
+        url += "/" + roomId;
       } else {
-        window.location.href = APP_ROOT + "/hub.html?hub_id=" + idrooom;
+        url += "/hub.html?hub_id=" + roomId;
       }
     }
+
+    url = new URL(url);
+
+    if(user?.displayName){
+      url.searchParams.set('displayName', user.displayName);
+    }
+
+    if(user?.avatar){
+      url.searchParams.set('avatarId', user.avatar.url);
+    }
+    else
+    if(user?.avatarId){
+      url.searchParams.set('avatarId', user.avatarId);
+    }
+
+    window.open(url.href,'_blank');
   };
+
   const openPopupReservation = event => {
     var exhibitionId = event.currentTarget.getAttribute("data-id-exhibition");
     togglePopup(exhibitionId);
@@ -227,7 +245,7 @@ function Home() {
                 if(item.public || (!item.public && item.reservated)){
                   return (
                     <button
-                      className="signin-up btn-visit reserved"
+                      className="signin-up btn-visit"
                       onClick={handleButtonVisitPublic}
                       data-roomid={item.roomId}
                     >
@@ -248,7 +266,7 @@ function Home() {
                 else{
                   return (
                     <button
-                      className="signin-up btn-visit full"
+                      className="signin-up btn-visit reserved"
                       onClick={openPopupReservation}
                       data-id-exhibition={item.id}
                     >
@@ -257,16 +275,32 @@ function Home() {
                   );
                 }
               };
+
+              let StatusIcon = ()=>{
+                if(item.public){
+                  return (
+                    <div className="span3">
+                      <MdPublic size={37} color="#FFF" />
+                    </div>
+                  )
+                }
+                else
+                if(item.reservated){
+                  return (
+                    <div className="span3">
+                    <MdOutlineCheckCircleOutline size={37} color="#FFF" />
+                  </div>
+                  )
+                }
+                else{
+                  return <></>
+                }
+              }
               
               return <>
                 <div key={index} className={"items"}>
                   <img src={item?.room?.thumbnailUrl} alt="" />
-                  { item.public && (
-                    <div className="span3">
-                      <MdPublic size={37} color="#FFF" />
-                    </div>
-                  )}
-                  <ActionButton/>
+                  <StatusIcon/>
                   <div className="span1">{item?.room?.name}</div>
                   <div className="span2">
                     <p className="p-1">
@@ -278,6 +312,7 @@ function Home() {
                       <Moment format="YYYY-MM-DD">{item.startDate}</Moment>
                     </p>
                   </div>
+                  <ActionButton/>
                 </div>
               </>
             })}
@@ -453,9 +488,11 @@ function Home() {
           <div className="row_2">
             <div className="test">
               <div className="row" style={{margin: '5vh 0'}}>
+              { user && (
                 <a href="?page=profile">
-                    <button style={{fontSize: '17px', color: '#149BF3', fontWeight: 'bold', padding: '5px 10px', border: '2px solid #1cbeff', borderRadius: '5px'}}>Profile</button>
+                  <button style={{fontSize: '17px', color: '#149BF3', fontWeight: 'bold', padding: '5px 10px', border: '2px solid #1cbeff', borderRadius: '5px'}}>Profile</button>
                 </a>
+              )}
               </div>
               <div className="sort">
                 <button className={isActiveSortASC ? "active" : ""} onClick={sortNewest}>
