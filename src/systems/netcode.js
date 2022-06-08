@@ -105,14 +105,14 @@ function createSchema(Component) {
               break;
             }
           }
-          shadow[eid].set(prop[eid]);
+          if (!isFullSync) shadow[eid].set(prop[eid]);
         } else {
           if (isFullSync || shadow[eid] !== prop[eid]) {
             changedPids.push(pid);
             // TODO handle EID type
             data.push(prop[$isStringType] ? APP.getString(prop[eid]) : prop[eid]);
           }
-          shadow[eid] = prop[eid];
+          if (!isFullSync) shadow[eid] = prop[eid];
         }
       }
       if (!changedPids.length) {
