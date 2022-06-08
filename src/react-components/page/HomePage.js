@@ -55,6 +55,22 @@ function Home() {
     sort: "startDate|desc" //format <attribute>|<order type>
   });
 
+  useEffect(
+    () => {
+      auth();
+      // redirect to verify page
+      const qs = new URLSearchParams(location.search);
+      if (qs.has("auth_topic")) {
+        const redirectUrl = new URL("/verify", window.location);
+        redirectUrl.search = location.search;
+        window.location = redirectUrl;
+      }
+
+      getAllExhibitions();
+    },
+    [filterExhibitionList.page, filterExhibitionList.sort]
+  );
+
   function auth() {
     const token = Store.getUser()?.token;
     UserService.checkToken(token)
@@ -78,22 +94,6 @@ function Home() {
     setIsOpen(!isOpen);
     setCurrentExhibitionId(exhibitionId);
   };
-
-  useEffect(
-    () => {
-      auth();
-      // redirect to verify page
-      const qs = new URLSearchParams(location.search);
-      if (qs.has("auth_topic")) {
-        const redirectUrl = new URL("/verify", window.location);
-        redirectUrl.search = location.search;
-        window.location = redirectUrl;
-      }
-
-      getAllExhibitions();
-    },
-    [filterExhibitionList.page, filterExhibitionList.sort]
-  );
 
   const getAllExhibitions = () => {
     var data = filterExhibitionList;
@@ -156,7 +156,6 @@ function Home() {
   };
   const openPopupReservation = event => {
     var exhibitionId = event.currentTarget.getAttribute("data-id-exhibition");
-    //console.log(exhibitionId, access_token);
     togglePopup(exhibitionId);
   };
 
@@ -208,181 +207,79 @@ function Home() {
         {exhibitionsLoaded ? (
           <>
             {exhibitions.data.map((item, index) => {
-              const ButtonVisit = () => {
-                var today = new Date().setHours(0, 0, 0, 0);
-                var startday = new Date(item.startDate).setHours(0, 0, 0, 0);
-                if (Store.getUser()) {
-                  if (item.public == 1) {
-                    if (today <= startday) {
-                      return (
-                        <>
-                          <div className="span3">
-                            <MdPublic size={37} color="#FFF" />
-                          </div>
-                          <button
-                            className="signin-up btn-visit nt-time-yet"
-                            onClick={() => {
-                              openPopupNotification(item);
-                            }}
-                            data-id-exhibition={item.id}
-                          >
-                            It's not time yet
-                          </button>
-                        </>
-                      );
-                    } else if (today > startday) {
-                      return (
-                        <>
-                          <div className="span3">
-                            <MdPublic size={37} color="#FFF" />
-                          </div>
-                          <button
-                            className="signin-up btn-visit reserved"
-                            onClick={handleButtonVisit}
-                            data-roomid={item.roomId}
-                          >
-                            ENTER
-                          </button>
-                        </>
-                      );
-                    } else {
-                      return (
-                        <>
-                          <div className="span3">
-                            <MdPublic size={37} color="#FFF" />
-                          </div>
-                          <button className="signin-up btn-visit full">The room is full</button>
-                        </>
-                      );
-                    }
-                  } else {
-                    if (item.reservated == true) {
-                      if (today < startday) {
-                        return (
-                          <>
-                            <button
-                              className="signin-up btn-visit nt-time-yet"
-                              onClick={() => {
-                                openPopupNotification(item);
-                              }}
-                              data-id-exhibition={item.id}
-                            >
-                              It's not time yet
-                            </button>
-                          </>
-                        );
-                      } else {
-                        return (
-                          <>
-                            <div className="span3">
-                              <MdOutlineCheckCircleOutline size={37} color="#FFF" />
-                            </div>
-                            <button
-                              className="signin-up btn-visit reserved"
-                              onClick={handleButtonVisit}
-                              data-roomid={item.roomId}
-                            >
-                              ENTER
-                            </button>
-                          </>
-                        );
-                      }
-                    } else {
-                      if (today > startday) {
-                        return (
-                          <button
-                            className="signin-up btn-visit reserved"
-                            onClick={handleButtonVisit}
-                            data-roomid={item.roomId}
-                          >
-                            ENTER
-                          </button>
-                        );
-                      } else if (today <= startday) {
-                        if (item.reservationCount < item.maxSize) {
-                          return (
-                            <button
-                              className="signin-up btn-visit"
-                              onClick={openPopupReservation}
-                              data-id-exhibition={item.id}
-                            >
-                              reserve
-                            </button>
-                          );
-                        } else {
-                          return <button className="signin-up btn-visit full">The room is full</button>;
-                        }
-                      }
-                    }
-                  }
-                } else {
-                  if (item.public == 1) {
-                    if (today > startday) {
-                      return (
-                        <>
-                          <div className="span3">
-                            <MdPublic size={37} color="#FFF" />
-                          </div>
-                          <button
-                            className="signin-up btn-visit reserved"
-                            onClick={handleButtonVisitPublic}
-                            data-roomid={item.roomId}
-                          >
-                            ENTER
-                          </button>
-                        </>
-                      );
-                    } else {
-                      return (
-                        <>
-                          <div className="span3">
-                            <MdPublic size={37} color="#FFF" />
-                          </div>
-                          <button className="signin-up btn-visit nt-time-yet" onClick={handleButtonVisit}>
-                            It's not time yet
-                          </button>
-                        </>
-                      );
-                    }
-                  } else {
-                    return (
-                      <button className="signin-up btn-visit" onClick={handleButtonVisit}>
-                        Login to visit
-                      </button>
-                    );
-                  }
-                }
-              };
-              if (item.room) {
-                if (item.closed != 1) {
+              let user = Store.getUser();
+              let today = new Date().setHours(0, 0, 0, 0);
+              let startDate = new Date(item.startDate).setHours(0, 0, 0, 0);
+
+              let ActionButton = ()=>{
+                if(today < startDate){
                   return (
-                    <div key={index} className={"items"}>
-                      <img src={item?.room?.thumbnailUrl} alt="" />
-                      <ButtonVisit />
-                      <div className="span1">{item?.room?.name}</div>
-                      <div className="span2">
-                        <p className="p-1">
-                          <MdPeopleAlt />
-                          {item.reservationCount}/{item.maxSize}
-                        </p>
-                        <p className="p-1">
-                          <MdCalendarToday />
-                          <Moment format="YYYY-MM-DD">{item.startDate}</Moment>
-                        </p>
-                      </div>
-                    </div>
+                    <button
+                      className="signin-up btn-visit nt-time-yet"
+                      onClick={() => { openPopupNotification(item) }}
+                      data-id-exhibition={item.id}
+                    >
+                      Open on {moment(item.startDate).format('MMMM Do')}
+                    </button>
+                  )
+                }
+                else
+                if(item.public || (!item.public && item.reservated)){
+                  return (
+                    <button
+                      className="signin-up btn-visit reserved"
+                      onClick={handleButtonVisitPublic}
+                      data-roomid={item.roomId}
+                    >
+                      ENTER
+                    </button>
                   );
                 }
-              }
-              // else {
-              //                 return (
-              //                   <div key={index} className={"items"}>
-              //                     <img src={defaultImage} alt="" />
-              //                     {/* <ButtonVisit/> */}
-              //                     <div className="span1-1">This room is currently unavailable</div>
-              //                   </div>
-              //                 );
-              //               }
+                else
+                if(item.reservationCount >= item.maxSize){
+                  return (
+                    <button
+                      className="signin-up btn-visit full"
+                    >
+                      EXHIBITION FULL
+                    </button>
+                  );
+                }
+                else{
+                  return (
+                    <button
+                      className="signin-up btn-visit full"
+                      onClick={openPopupReservation}
+                      data-id-exhibition={item.id}
+                    >
+                      RESERVE
+                    </button>
+                  );
+                }
+              };
+              
+              return <>
+                <div key={index} className={"items"}>
+                  <img src={item?.room?.thumbnailUrl} alt="" />
+                  { item.public && (
+                    <div className="span3">
+                      <MdPublic size={37} color="#FFF" />
+                    </div>
+                  )}
+                  <ActionButton/>
+                  <div className="span1">{item?.room?.name}</div>
+                  <div className="span2">
+                    <p className="p-1">
+                      <MdPeopleAlt />
+                      {item.reservationCount}/{item.maxSize}
+                    </p>
+                    <p className="p-1">
+                      <MdCalendarToday />
+                      <Moment format="YYYY-MM-DD">{item.startDate}</Moment>
+                    </p>
+                  </div>
+                </div>
+              </>
             })}
           </>
         ) : (
