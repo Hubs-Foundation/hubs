@@ -17,6 +17,7 @@ function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TY
   const labelRef = createRef();
   return (
     <entity
+      name="Button"
       slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
       cursor-raycastable
       remote-hover-target
@@ -64,6 +65,8 @@ export function CameraPrefab(_props) {
   // TODO: What if model didn't load yet?
   const cameraModel = cloneObject3D(model.scene);
 
+  const snapMenuRef = createRef();
+
   const snapRef = createRef();
   const cancelRef = createRef();
   const recVideoRef = createRef();
@@ -94,6 +97,7 @@ export function CameraPrefab(_props) {
 
   return (
     <entity
+      name="Camera Tool"
       networked
       networked-transform
       cursor-raycastable
@@ -114,16 +118,19 @@ export function CameraPrefab(_props) {
         cameraRef,
         countdownLblRef,
         captureDurLblRef,
-        recVideoRef
+        recVideoRef,
+        snapMenuRef
       }}
     >
       <entity
+        name="Screen"
         object3D={new THREE.Mesh(screenGeometry, screenMaterial)}
         ref={screenRef}
         position={[0, 0, -0.042]}
         rotation={[0, Math.PI, 0]}
       />
       <entity
+        name="Selfie Screen"
         ref={selfieScreenRef}
         object3D={new THREE.Mesh(screenGeometry, screenMaterial)}
         position={[0, 0.4, 0]}
@@ -132,55 +139,63 @@ export function CameraPrefab(_props) {
 
       <entity object3D={cameraModel} scale={[2, 2, 2]} />
 
-      <entity ref={cameraRef} object3D={camera} position={[0, 0, 0.05]} rotation={[0, Math.PI, 0]} />
-
-      <Button
-        ref={cancelRef}
-        scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[0, 0.1, uiZ]}
-        width={0.6}
-        height={0.3}
-        text={"Cancel"}
-      />
-      <Button
-        ref={snapRef}
-        scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[0, 0.1, uiZ]}
-        width={0.6}
-        height={0.3}
-        type={BUTTON_TYPES.ACTION}
-        text={"Snap"}
-      />
-      <entity ref={countdownLblRef} text position={[0, 0.2, uiZ]} />
-
-      <Button
-        ref={button_next}
-        scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[1 / scale, -0.1, uiZ]}
-        width={0.6}
-        height={0.3}
-        text={"Next"}
+      <entity
+        name="Camera Model"
+        ref={cameraRef}
+        object3D={camera}
+        position={[0, 0, 0.05]}
+        rotation={[0, Math.PI, 0]}
       />
 
-      <entity ref={captureDurLblRef} text position={[0, -0.2, uiZ]} />
+      <entity name="Snap Menu" ref={snapMenuRef}>
+        <entity ref={countdownLblRef} text position={[0, 0.2, uiZ]} />
+        <entity ref={captureDurLblRef} text position={[0, -0.2, uiZ]} />
 
-      <Button
-        ref={recVideoRef}
-        scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[0, -0.1, uiZ]}
-        width={0.6}
-        height={0.3}
-        text={"Rec"}
-      />
+        <Button
+          ref={cancelRef}
+          scale={[1 / scale, 1 / scale, 1 / scale]}
+          position={[0, 0.1, uiZ]}
+          width={0.6}
+          height={0.3}
+          text={"Cancel"}
+        />
+        <Button
+          ref={snapRef}
+          scale={[1 / scale, 1 / scale, 1 / scale]}
+          position={[0, 0.1, uiZ]}
+          width={0.6}
+          height={0.3}
+          type={BUTTON_TYPES.ACTION}
+          text={"Snap"}
+        />
 
-      <Button
-        ref={button_prev}
-        scale={[1 / scale, 1 / scale, 1 / scale]}
-        position={[-1 / scale, -0.1, uiZ]}
-        width={0.6}
-        height={0.3}
-        text={"Prev"}
-      />
+        <Button
+          ref={button_next}
+          scale={[1 / scale, 1 / scale, 1 / scale]}
+          position={[1 / scale, -0.1, uiZ]}
+          width={0.6}
+          height={0.3}
+          text={"Next"}
+        />
+
+        <Button
+          ref={recVideoRef}
+          scale={[1 / scale, 1 / scale, 1 / scale]}
+          position={[0, -0.1, uiZ]}
+          width={0.6}
+          height={0.3}
+          text={"Rec"}
+        />
+
+        <Button
+          ref={button_prev}
+          scale={[1 / scale, 1 / scale, 1 / scale]}
+          position={[-1 / scale, -0.1, uiZ]}
+          width={0.6}
+          height={0.3}
+          text={"Prev"}
+        />
+      </entity>
     </entity>
   );
 }
