@@ -59,8 +59,8 @@ export function createNetworkedEntity(world, prefabName, initialData) {
 }
 
 const networkedObjectsQuery = defineQuery([Networked]);
-const enteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
-const exitedNetworkedObjectsQuery = exitQuery(networkedObjectsQuery);
+const sendEnteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
+const sendExitedNetworkedObjectsQuery = exitQuery(networkedObjectsQuery);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
 // TODO HACK gettting internal bitecs symbol, should expose createShadow
@@ -154,7 +154,6 @@ const pendingParts = [];
 
 // TODO messaging, joining, and leaving should not be using NAF
 NAF.connection.subscribeToDataChannel("nn", function(fromClientId, _dataType, data) {
-  console.log("[NET]", fromClientId, data);
   data.fromClientId = fromClientId;
   pendingMessages.push(data);
 });
@@ -234,36 +233,38 @@ function spawnAllowed(creator, prefabName) {
   return !perm || APP.hubChannel.userCan(creator, perm);
 }
 
-const queuedBroadcasts = [];
+const pendingUpdatesForNid = new Map();
+
+const rcvEnteredNetworkedObjectsQuery = enterQuery(defineQuery([Networked]));
 export function applyNetworkUpdates(world) {
   // When a user leaves:
-  // - locally delete all the entities they network instantiated
-  // - everyone attempts to take ownership of any objects they owned
+  // - locally delete all the entities that user network instantiated
+  // - everyone attempts to take ownership of any objects that user owned
   {
     const networkedObjects = networkedObjectsQuery(world);
     pendingParts.forEach(partingClientId => {
-      // ignore entities the parting user created as they are about to be deleted
-      const toUpdate = networkedObjects.filter(
-        eid => Networked.owner[eid] === partingClientId && Networked.creator[eid] !== partingClientId
-      );
-      toUpdate.forEach(eid => takeOwnership(world, eid));
-
-      // TODO since we now own these objects we will already send a message about them. Do we even need to send this message?
-      const message = messageFor(world, [], toUpdate, [], true);
-      if (message) queuedBroadcasts.push(message); // queue to send as part of the next network update
-
       networkedObjects
         .filter(eid => isNetworkInstantiated(eid) && Networked.creator[eid] === partingClientId)
         .forEach(eid => removeEntity(world, eid));
+
+      // ignore entities the parting user created as they were just deleted
+      networkedObjects
+        .filter(eid => Networked.owner[eid] === partingClientId && Networked.creator[eid] !== partingClientId)
+        .forEach(eid => takeOwnership(world, eid));
     });
     pendingParts.length = 0;
   }
 
-  const messagesToRevisit = {
-    creates: [],
-    updates: [],
-    deletes: []
-  };
+  // If we were hanging onto updates for any newly created non network instantiated entities
+  // we can now apply them. Network instantiated entities are handled when processing creates.
+  rcvEnteredNetworkedObjectsQuery(world).forEach(eid => {
+    const nid = Networked.id[eid];
+    if (pendingUpdatesForNid.has(nid)) {
+      console.log("had pending updates for", APP.getString(nid), pendingUpdatesForNid.get(nid));
+      pendingMessages.unshift({ creates: [], updates: pendingUpdatesForNid.get(nid), deletes: [] });
+      pendingUpdatesForNid.delete(nid);
+    }
+  });
 
   for (let i = 0; i < pendingMessages.length; i++) {
     const message = pendingMessages[i];
@@ -286,6 +287,13 @@ export function applyNetworkUpdates(world) {
       } else {
         const eid = createNetworkedEntityFromRemote(world, prefabName, initialData, nidString, creator, creator);
         console.log("got create message for", nidString, eid);
+
+        // If we were hanging onto updates for this nid we can now apply them. And they should be processed before other updates.
+        if (pendingUpdatesForNid.has(nid)) {
+          console.log("had pending updates for", nidString, pendingUpdatesForNid.get(nid));
+          Array.prototype.unshift.apply(message.updates, pendingUpdatesForNid.get(nid));
+          pendingUpdatesForNid.delete(nid);
+        }
       }
     }
 
@@ -306,8 +314,11 @@ export function applyNetworkUpdates(world) {
       if (!world.nid2eid.has(nid)) {
         console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
         // TODO: What if we will NEVER be able to apply this update?
-        // TODO instead of requeuing it we should just store it in a map and apply it when we create it
-        messagesToRevisit.updates.push(updateMessage);
+        // TODO would be nice if we could squash these updates
+        const updates = pendingUpdatesForNid.get(nid) || [];
+        updates.push(updateMessage);
+        pendingUpdatesForNid.set(nid, updates);
+        console.log(pendingUpdatesForNid);
         continue;
       }
 
@@ -367,10 +378,6 @@ export function applyNetworkUpdates(world) {
 
   pendingMessages.length = 0;
 
-  if (messagesToRevisit.updates.length) {
-    pendingMessages.push(messagesToRevisit);
-  }
-
   // TODO If there's a scene owned object, we should take ownership of it
 }
 
@@ -379,13 +386,7 @@ let nextNetworkTick = 0;
 
 export function networkSendSystem(world) {
   if (performance.now() < nextNetworkTick) return;
-
   nextNetworkTick = performance.now() + TICK_RATE;
-
-  queuedBroadcasts.forEach(message => {
-    NAF.connection.broadcastDataGuaranteed("nn", message);
-  });
-  queuedBroadcasts.length = 0;
 
   // Tell joining users about objects I network instantiated, and full updates for objects I own
   {
@@ -406,9 +407,9 @@ export function networkSendSystem(world) {
 
   // Tell everyone about objects I created, objects I own, and objects that were deleted
   {
-    const created = enteredNetworkedObjectsQuery(world).filter(isNetworkInstantiatedByMe);
+    const created = sendEnteredNetworkedObjectsQuery(world).filter(isNetworkInstantiatedByMe);
     // TODO: Lots of people will send delete messages about the same object
-    const deleted = exitedNetworkedObjectsQuery(world).filter(eid => {
+    const deleted = sendExitedNetworkedObjectsQuery(world).filter(eid => {
       return !world.deletedNids.has(Networked.id[eid]) && isNetworkInstantiated(eid);
     });
 
