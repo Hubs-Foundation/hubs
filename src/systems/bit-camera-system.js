@@ -1,7 +1,7 @@
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
 import { CameraTool, Interacted } from "../bit-components";
-import { addMedia, pixelsToPNG } from "../utils/media-utils";
-import { RenderTargetRecorder } from "../utils/render-target-recorder";
+import { addMedia } from "../utils/media-utils";
+import { RenderTargetRecorder, pixelsToPNG } from "../utils/render-target-recorder";
 import { isFacingCamera } from "../utils/three-utils";
 import { SOUND_CAMERA_TOOL_COUNTDOWN, SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "./sound-effects-system";
 
@@ -333,3 +333,5 @@ export function cameraSystem(world) {
     updateUI(world, camera);
   });
 }
+
+// TODO focus/track
