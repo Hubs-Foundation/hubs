@@ -7,7 +7,7 @@ const SYNC_DURATION_MS = 5000;
 //
 // This component, when added, will re-send a isFirstSync message for the networked object is it attached to
 // every SYNC_DURATION_MS milliseconds.
-AFRAME.registerComponent("xx-periodic-full-syncs", {
+AFRAME.registerComponent("periodic-full-syncs", {
   init() {
     this.lastSync = 0;
   },
