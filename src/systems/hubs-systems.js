@@ -32,7 +32,7 @@ import { EnvironmentSystem } from "./environment-system";
 import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 
 // new world
-import { networkSendSystem, applyNetworkUpdates } from "./netcode";
+import { networkSendSystem, networkReceiveSystem } from "./netcode";
 import { onOwnershipLost } from "./on-ownership-lost";
 import { interactionSystem } from "./bit-interaction-system";
 import { floatyObjectSystem } from "./floaty-object-system";
@@ -92,7 +92,7 @@ AFRAME.registerSystem("hubs-systems", {
     if (!this.DOMContentDidLoad) return;
     const world = APP.world;
 
-    applyNetworkUpdates(world);
+    networkReceiveSystem(world);
     onOwnershipLost(world);
 
     physicsCompatSystem(APP.world);

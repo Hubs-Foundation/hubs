@@ -154,7 +154,7 @@ function spawnAllowed(creator, prefabName) {
 const pendingUpdatesForNid = new Map();
 
 const rcvEnteredNetworkedObjectsQuery = enterQuery(defineQuery([Networked]));
-export function applyNetworkUpdates(world) {
+export function networkReceiveSystem(world) {
   // When a user leaves:
   // - locally delete all the entities that user network instantiated
   // - everyone attempts to take ownership of any objects that user owned
