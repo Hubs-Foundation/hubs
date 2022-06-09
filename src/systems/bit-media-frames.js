@@ -43,6 +43,16 @@ function isAncestor(a, b) {
   return false;
 }
 
+function inOtherFrame(world, ignoredFrame, eid) {
+  const frames = mediaFramesQuery(world);
+  for (const frame of frames) {
+    if (frame === ignoredFrame) continue;
+    if (MediaFrame.capturedNid[frame] === Networked.id[eid] || MediaFrame.previewingNid[frame] === Networked.id[eid])
+      return true;
+  }
+  return false;
+}
+
 function getCapturableEntity(world, frame) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   const collisions = physicsSystem.getCollisions(Rigidbody.bodyId[frame]);
@@ -51,7 +61,8 @@ function getCapturableEntity(world, frame) {
     const bodyData = physicsSystem.bodyUuidToData.get(collisions[i]);
     if (
       MediaFrame.mediaType[frame] & mediaTypeMaskFor(world, bodyData.object3D.eid) &&
-      !isAncestor(bodyData.object3D, frameObj)
+      !isAncestor(bodyData.object3D, frameObj) &&
+      !inOtherFrame(world, frame, bodyData.object3D.eid)
     ) {
       return bodyData.object3D.eid;
     }
@@ -220,6 +231,7 @@ function showPreview(world, frame, capturable) {
   const cloneObj = world.eid2obj.get(clone);
   cloneObj.visible = true;
   MediaFrame.preview[frame] = clone;
+  MediaFrame.previewingNid[frame] = Networked.id[capturable];
   snapToFrame(world, frame, clone, cloneObj);
 
   // If there is a mixer, we need to re-sync the animations
@@ -247,6 +259,7 @@ function hidePreview(world, frame) {
   // TODO: Remove from scene graph?
   previewObj.visible = false;
   MediaFrame.preview[frame] = 0;
+  MediaFrame.previewingNid[frame] = 0;
 }
 
 const zero = [0, 0, 0];
@@ -316,7 +329,12 @@ export function mediaFramesSystem(world) {
       //           so I immediately think the frame should be emptied.
     } else if (!NetworkedMediaFrame.capturedNid[frame]) {
       const capturable = getCapturableEntity(world, frame);
-      if (capturable && hasComponent(world, Owned, capturable) && !hasComponent(world, Held, capturable)) {
+      if (
+        capturable &&
+        hasComponent(world, Owned, capturable) &&
+        !hasComponent(world, Held, capturable) &&
+        !inOtherFrame(world, frame, capturable)
+      ) {
         takeOwnership(world, frame);
         NetworkedMediaFrame.capturedNid[frame] = Networked.id[capturable];
         const obj = world.eid2obj.get(capturable);

@@ -25,7 +25,8 @@ export const MediaFrame = defineComponent({
   scale: [Types.f32, 3],
   mediaType: Types.ui8,
   bounds: [Types.f32, 3],
-  preview: Types.eid
+  preview: Types.eid,
+  previewingNid: Types.eid
 });
 export const Text = defineComponent();
 export const Slice9 = defineComponent({
