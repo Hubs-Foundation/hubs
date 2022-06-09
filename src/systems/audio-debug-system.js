@@ -4,8 +4,9 @@ import audioDebugFrag from "./audio-debug.frag";
 import { DistanceModelType } from "../components/audio-params";
 import { getWebGLVersion } from "../utils/webgl";
 import { getMeshes } from "../utils/aframe-utils";
+import { isSafari } from "../utils/detect-safari";
 
-const MAX_DEBUG_SOURCES = 64;
+const MAX_DEBUG_SOURCES = isSafari() ? 24 : 64;
 
 const fakePanner = {
   distanceModel: DistanceModelType.Inverse,
