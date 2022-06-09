@@ -48,7 +48,7 @@ export const FLOATY_OBJECT_FLAGS = {
   UNTHROWABLE: 1 << 2
 };
 
-const enteredFloatyObjectsQuery = enterQuery(defineQuery([FloatyObject]));
+const enteredFloatyObjectsQuery = enterQuery(defineQuery([FloatyObject, Rigidbody]));
 const heldFloatyObjectsQuery = defineQuery([FloatyObject, Rigidbody, Held]);
 const exitedHeldFloatyObjectsQuery = exitQuery(heldFloatyObjectsQuery);
 const enterHeldFloatyObjectsQuery = enterQuery(heldFloatyObjectsQuery);
@@ -56,7 +56,6 @@ export const floatyObjectSystem = world => {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
 
   enteredFloatyObjectsQuery(world).forEach(eid => {
-    // TODO there seems to be a race here
     physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], {
       type: "kinematic",
       gravity: { x: 0, y: 0, z: 0 }
