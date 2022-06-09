@@ -1,7 +1,7 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { NetworkedMediaFrame, Networked, Owned, NetworkedTransform, AEntity, $isStringType } from "../bit-components";
-
+import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, Owned } from "../bit-components";
 import { CameraPrefab } from "../network-schemas/interactable-camera";
+import { defineNetworkSchema } from "../utils/bit-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 
 const prefabs = new Map([
@@ -59,94 +59,13 @@ export function createNetworkedEntity(world, prefabName, initialData) {
 }
 
 const networkedObjectsQuery = defineQuery([Networked]);
-const sendEnteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
-const sendExitedNetworkedObjectsQuery = exitQuery(networkedObjectsQuery);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
-// TODO HACK gettting internal bitecs symbol, should expose createShadow
-const $parentArray = Object.getOwnPropertySymbols(NetworkedMediaFrame.scale).find(s => s.description == "parentArray");
-const $storeFlattened = Object.getOwnPropertySymbols(NetworkedMediaFrame).find(s => s.description == "storeFlattened");
-export const createShadow = (store, key) => {
-  if (!ArrayBuffer.isView(store)) {
-    const shadowStore = store[$parentArray].slice(0);
-    store[key] = store.map((_, eid) => {
-      const { length } = store[eid];
-      const start = length * eid;
-      const end = start + length;
-      return shadowStore.subarray(start, end);
-    });
-  } else {
-    store[key] = store.slice(0);
-  }
-  return key;
-};
-
-// TODO this array encoding is silly, use a buffer once we are not sending JSON
-function createSchema(Component) {
-  const componentProps = Component[$storeFlattened];
-  const shadowSymbols = componentProps.map((prop, i) => {
-    return createShadow(prop, Symbol(`netshadow-${i}`));
-  });
-
-  return {
-    serialize(_world, eid, data, isFullSync = false) {
-      const changedPids = [];
-      data.push(changedPids);
-      for (let pid = 0; pid < componentProps.length; pid++) {
-        const prop = componentProps[pid];
-        const shadow = prop[shadowSymbols[pid]];
-        // if property is an array
-        if (ArrayBuffer.isView(prop[eid])) {
-          for (let i = 0; i < prop[eid].length; i++) {
-            if (isFullSync || shadow[eid][i] !== prop[eid][i]) {
-              changedPids.push(pid);
-              // TODO handle EID type and arrays of strings
-              data.push(Array.from(prop[eid]));
-              break;
-            }
-          }
-          if (!isFullSync) shadow[eid].set(prop[eid]);
-        } else {
-          if (isFullSync || shadow[eid] !== prop[eid]) {
-            changedPids.push(pid);
-            // TODO handle EID type
-            data.push(prop[$isStringType] ? APP.getString(prop[eid]) : prop[eid]);
-          }
-          if (!isFullSync) shadow[eid] = prop[eid];
-        }
-      }
-      if (!changedPids.length) {
-        data.pop();
-        return false;
-      }
-      return true;
-    },
-    deserialize(_world, eid, data) {
-      const updatedPids = data[data.cursor++];
-      for (let i = 0; i < updatedPids.length; i++) {
-        const pid = updatedPids[i];
-        const prop = componentProps[pid];
-        const shadow = prop[shadowSymbols[pid]];
-        // TODO updating the shadow here is slightly odd. Should taking ownership do it?
-        if (ArrayBuffer.isView(prop[eid])) {
-          prop[eid].set(data[data.cursor++]);
-          shadow[eid].set(prop[eid]);
-        } else {
-          const val = data[data.cursor++];
-          prop[eid] = prop[$isStringType] ? APP.getSid(val) : val;
-          shadow[eid] = prop[eid];
-        }
-      }
-    }
-  };
-}
-
 const schemas = new Map([
-  [NetworkedMediaFrame, createSchema(NetworkedMediaFrame)],
-  [NetworkedTransform, createSchema(NetworkedTransform)]
+  [NetworkedMediaFrame, defineNetworkSchema(NetworkedMediaFrame)],
+  [NetworkedTransform, defineNetworkSchema(NetworkedTransform)]
 ]);
-
-const networkableComponents = [NetworkedMediaFrame, NetworkedTransform];
+const networkableComponents = Array.from(schemas.keys());
 
 const pendingMessages = [];
 const pendingJoins = [];
@@ -229,7 +148,6 @@ function isNetworkInstantiatedByMe(eid) {
 
 function spawnAllowed(creator, prefabName) {
   const perm = prefabs.get(prefabName).permission;
-  console.log("checking perms for ", prefabName, perm);
   return !perm || APP.hubChannel.userCan(creator, perm);
 }
 
@@ -383,6 +301,9 @@ export function applyNetworkUpdates(world) {
 
 const TICK_RATE = 1000 / 12;
 let nextNetworkTick = 0;
+
+const sendEnteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
+const sendExitedNetworkedObjectsQuery = exitQuery(networkedObjectsQuery);
 
 export function networkSendSystem(world) {
   if (performance.now() < nextNetworkTick) return;
