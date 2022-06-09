@@ -213,7 +213,7 @@ export function renderAsEntity(world, entityDef) {
     obj.scale.fromArray(entityDef.attrs.scale);
   }
   if (entityDef.attrs.name) {
-    obj.scale.name = entityDef.attrs.name;
+    obj.name = entityDef.attrs.name;
   }
   entityDef.children.forEach(child => {
     if (child.type === "a-entity") {
