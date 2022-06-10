@@ -126,7 +126,7 @@ export class RenderTargetRecorder {
 
   cancel() {
     this.mediaRecorder.ondataavailable = null;
-    this.mmediaRecorder.stop();
+    this.mediaRecorder.stop();
     this.chunks.length = 0;
   }
 }

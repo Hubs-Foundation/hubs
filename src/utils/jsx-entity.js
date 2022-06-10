@@ -36,7 +36,7 @@ function isValidChild(child) {
   return true;
 }
 
-const reservedAttrs = ["position", "rotation", "scale", "visible", "name"];
+const reservedAttrs = ["position", "rotation", "scale", "visible", "name", "layers"];
 
 class Ref {
   constructor() {
@@ -56,7 +56,7 @@ function resolveRef(world, ref) {
 export function createElementEntity(tag, attrs, ...children) {
   attrs = attrs || {};
   if (typeof tag === "function") {
-    return tag(attrs);
+    return tag(attrs, children);
   } else if (tag === "entity") {
     const outputAttrs = {};
     const components = [];
@@ -214,6 +214,10 @@ export function renderAsEntity(world, entityDef) {
   }
   if (entityDef.attrs.name) {
     obj.name = entityDef.attrs.name;
+  }
+  if (entityDef.attrs.layers) {
+    obj.layers.mask = entityDef.attrs.layers;
+    console.log("storing layers", obj.layers.mask, entityDef.attrs.layers);
   }
   entityDef.children.forEach(child => {
     if (child.type === "a-entity") {

@@ -24,10 +24,12 @@ function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TY
       hover-button={{ type }}
       text-button={{ labelRef }}
       single-action-button
+      layers={1 << Layers.CAMERA_LAYER_UI}
       {...props}
     >
       <entity
         ref={labelRef}
+        layers={1 << Layers.CAMERA_LAYER_UI}
         text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
         position={[0, 0, 0.01]}
       />
@@ -35,22 +37,9 @@ function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TY
   );
 }
 
-function HoldableButton({ text, width, height, texture = buttonTexture, ...props }) {
-  return (
-    <entity
-      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
-      cursor-raycastable
-      remote-hover-target
-      holdable
-      holdable-button
-      {...props}
-    >
-      <entity
-        text={{ value: text, color: "#cc22cc", textAlign: "center", anchorX: "center", anchorY: "middle" }}
-        position={[0, 0, 0.01]}
-      />
-    </entity>
-  );
+function Label({ text, ...props }, ...children) {
+  const value = children.join("\n");
+  return <entity name="Label" text={{ value, ...text }} layers={1 << Layers.CAMERA_LAYER_UI} {...props} />;
 }
 
 let model;
@@ -93,7 +82,8 @@ export function CameraPrefab(_props) {
   camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
   camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
 
-  const uiZ = 0.1;
+  const buttonHeight = 0.2;
+  const buttonScale = [0.4, 0.4, 0.4];
 
   return (
     <entity
@@ -147,55 +137,55 @@ export function CameraPrefab(_props) {
         rotation={[0, Math.PI, 0]}
       />
 
-      <entity name="Snap Menu" ref={snapMenuRef}>
-        <entity ref={countdownLblRef} text position={[0, 0.2, uiZ]} />
-        <entity ref={captureDurLblRef} text position={[0, -0.2, uiZ]} />
+      <entity name="Snap Menu" ref={snapMenuRef} position={[0, 0, 0.1]}>
+        <Label ref={countdownLblRef} position={[0, 0, 0.02]} />
+        <Label ref={captureDurLblRef} position={[0, -0.2, 0]} />
 
         <Button
           ref={cancelRef}
-          scale={[1 / scale, 1 / scale, 1 / scale]}
-          position={[0, 0.1, uiZ]}
-          width={0.6}
-          height={0.3}
+          scale={buttonScale}
+          position={[0, 0.1, 0]}
+          width={0.4}
+          height={buttonHeight}
           text={"Cancel"}
         />
         <Button
           ref={snapRef}
-          scale={[1 / scale, 1 / scale, 1 / scale]}
-          position={[0, 0.1, uiZ]}
-          width={0.6}
-          height={0.3}
+          scale={buttonScale}
+          position={[0, 0.1, 0]}
+          width={0.4}
+          height={buttonHeight}
           type={BUTTON_TYPES.ACTION}
-          text={"Snap"}
-        />
-
-        <Button
-          ref={button_next}
-          scale={[1 / scale, 1 / scale, 1 / scale]}
-          position={[1 / scale, -0.1, uiZ]}
-          width={0.6}
-          height={0.3}
-          text={"Next"}
-        />
-
-        <Button
-          ref={recVideoRef}
-          scale={[1 / scale, 1 / scale, 1 / scale]}
-          position={[0, -0.1, uiZ]}
-          width={0.6}
-          height={0.3}
-          text={"Rec"}
+          text={"Photo"}
         />
 
         <Button
           ref={button_prev}
-          scale={[1 / scale, 1 / scale, 1 / scale]}
-          position={[-1 / scale, -0.1, uiZ]}
-          width={0.6}
-          height={0.3}
-          text={"Prev"}
+          scale={buttonScale}
+          position={[-0.16, -0.1, 0]}
+          width={buttonHeight}
+          height={buttonHeight}
+          text={"<"}
+        />
+        <Button
+          ref={recVideoRef}
+          scale={buttonScale}
+          position={[0, -0.1, 0]}
+          width={0.4}
+          height={buttonHeight}
+          type={BUTTON_TYPES.ACTION}
+          text={"Video"}
+        />
+        <Button
+          scale={buttonScale}
+          ref={button_next}
+          position={[0.16, -0.1, 0]}
+          width={buttonHeight}
+          height={buttonHeight}
+          text={">"}
         />
       </entity>
+      <entity media-frame position={[0, 1, 0]} />
     </entity>
   );
 }

@@ -142,39 +142,43 @@ function updateRenderTarget(world, camera) {
 }
 
 function updateUI(world, camera) {
-  const playerInFrontOfCamera = isFacingCamera(world.eid2obj.get(camera));
   const snapMenuObj = world.eid2obj.get(CameraTool.snapMenuRef[camera]);
+  const snapBtnObj = world.eid2obj.get(CameraTool.snapRef[camera]);
+  const recBtnObj = world.eid2obj.get(CameraTool.recVideoRef[camera]);
+  const cancelBtnObj = world.eid2obj.get(CameraTool.cancelRef[camera]);
+  const nextBtnObj = world.eid2obj.get(CameraTool.button_next[camera]);
+  const prevBtnObj = world.eid2obj.get(CameraTool.button_prev[camera]);
+  const countdownLblObj = world.eid2obj.get(CameraTool.countdownLblRef[camera]);
+  const captureDurLblObj = world.eid2obj.get(CameraTool.captureDurLblRef[camera]);
+
+  const isIdle = CameraTool.state[camera] === CAMERA_STATE.IDLE;
+  const isCounting =
+    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
+    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO ||
+    CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO;
+
+  const playerInFrontOfCamera = isFacingCamera(world.eid2obj.get(camera));
+
   const yRot = playerInFrontOfCamera ? 0 : Math.PI;
   if (snapMenuObj.rotation.y !== yRot) {
     snapMenuObj.rotation.y = yRot;
     snapMenuObj.matrixNeedsUpdate = true;
   }
 
-  const snapBtnObj = world.eid2obj.get(CameraTool.snapRef[camera]);
-  const cancelBtnObj = world.eid2obj.get(CameraTool.cancelRef[camera]);
-  const nextBtnObj = world.eid2obj.get(CameraTool.button_next[camera]);
-  const prevBtnObj = world.eid2obj.get(CameraTool.button_prev[camera]);
-  snapBtnObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
-  cancelBtnObj.visible =
-    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
-    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO ||
-    CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO;
-  nextBtnObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
-  prevBtnObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
+  snapBtnObj.visible = isIdle;
+  recBtnObj.visible = isIdle;
+  nextBtnObj.visible = isIdle;
+  prevBtnObj.visible = isIdle;
+  captureDurLblObj.visible = isIdle;
+  cancelBtnObj.visible = isCounting;
+  countdownLblObj.visible = isCounting;
 
-  const countdownLblObj = world.eid2obj.get(CameraTool.countdownLblRef[camera]);
-  countdownLblObj.visible =
-    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
-    CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO ||
-    CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO;
   if (countdownLblObj.visible) {
     const timeLeftSec = Math.ceil((CameraTool.snapTime[camera] - world.time.elapsed) / 1000);
     countdownLblObj.text = timeLeftSec;
     countdownLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
   }
 
-  const captureDurLblObj = world.eid2obj.get(CameraTool.captureDurLblRef[camera]);
-  captureDurLblObj.visible = CameraTool.state[camera] === CAMERA_STATE.IDLE;
   if (captureDurLblObj.visible) {
     captureDurLblObj.text = CAPTURE_DURATIONS[CameraTool.captureDurIdx[camera]];
     captureDurLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
@@ -269,7 +273,8 @@ export function cameraSystem(world) {
       }
 
       if (clicked(CameraTool.button_prev[camera])) {
-        CameraTool.captureDurIdx[camera] = (CameraTool.captureDurIdx[camera] - 1) % CAPTURE_DURATIONS.length;
+        CameraTool.captureDurIdx[camera] =
+          CameraTool.captureDurIdx[camera] === 0 ? CAPTURE_DURATIONS.length - 1 : CameraTool.captureDurIdx[camera] - 1;
       }
     }
 
