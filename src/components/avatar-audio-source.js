@@ -96,13 +96,24 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
 
-    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
+    let { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;
     this.onPreferenceChanged = () => {
-      const newPref = APP.store.state.preferences.disableLeftRightPanning;
-      const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && !this.isCreatingAudio;
-      disableLeftRightPanningPref = newPref;
+      const newDisableLeftRightPanning = APP.store.state.preferences.disableLeftRightPanning;
+      const newAudioPanningQuality = APP.store.state.preferences.audioPanningQuality;
+
+      const shouldRecreateAudio = disableLeftRightPanning !== newDisableLeftRightPanning && !this.isCreatingAudio;
+      const shouldUpdateAudioSettings = audioPanningQuality !== newAudioPanningQuality;
+
+      disableLeftRightPanning = newDisableLeftRightPanning;
+      audioPanningQuality = newAudioPanningQuality;
+
       if (shouldRecreateAudio) {
         this.createAudio();
+      } else if (shouldUpdateAudioSettings) {
+        // updateAudioSettings() is called in this.createAudio()
+        // so no need to call it if shouldRecreateAudio is true.
+        const audio = this.el.getObject3D(this.attrName);
+        updateAudioSettings(this.el, audio);
       }
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);

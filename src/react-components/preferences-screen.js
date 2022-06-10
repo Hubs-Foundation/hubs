@@ -476,6 +476,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.show-audio-debug-panel",
     defaultMessage: "Show Audio Debug Panel"
   },
+  audioPanningQuality: {
+    id: "preferences-screen.preference.audio-panning-quality",
+    defaultMessage: "Panning quality"
+  },
   enableAudioClipping: {
     id: "preferences-screen.preference.enable-audio-clipping",
     defaultMessage: "Enable Audio Clipping"
@@ -1070,6 +1074,26 @@ class PreferencesScreen extends Component {
           {
             key: "showAudioDebugPanel",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "audioPanningQuality",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: [
+              {
+                value: "High",
+                text: intl.formatMessage({
+                  id: "preferences-screen.audio-panning-quality.high",
+                  defaultMessage: "High"
+                })
+              },
+              {
+                value: "Low",
+                text: intl.formatMessage({
+                  id: "preferences-screen.audio-panning-quality.low",
+                  defaultMessage: "Low"
+                })
+              }
+            ]
           }
         ]
       ],

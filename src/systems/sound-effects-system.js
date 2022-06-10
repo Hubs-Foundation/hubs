@@ -18,6 +18,7 @@ import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
 import URL_SPEAKER_TONE from "../assets/sfx/tone.mp3";
 import { setMatrixWorld } from "../utils/three-utils";
 import { SourceType } from "../components/audio-params";
+import { getOverriddenPanningModelType } from "../update-audio-settings";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;
@@ -147,6 +148,12 @@ export class SoundEffectsSystem {
       : new THREE.PositionalAudio(this.scene.audioListener);
     positionalAudio.setBuffer(audioBuffer);
     positionalAudio.loop = loop;
+    if (!disablePositionalAudio) {
+      const overriddenPanningModelType = getOverriddenPanningModelType();
+      if (overriddenPanningModelType !== null) {
+        positionalAudio.panner.panningModel = overriddenPanningModelType;
+      }
+    }
     this.pendingPositionalAudios.push(positionalAudio);
     this.scene.systems["hubs-systems"].audioSystem.addAudio({
       sourceType: SourceType.SFX,
