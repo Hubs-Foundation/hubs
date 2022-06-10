@@ -21,7 +21,10 @@ const isOculusBrowser = navigator.userAgent.match(/Oculus/);
 // TODO ported from old camera system. Do we still want these restrictions?
 const CAPTURE_WIDTH = isMobileVR && !isOculusBrowser ? 640 : 1280;
 const CAPTURE_HEIGHT = isMobileVR && !isOculusBrowser ? 360 : 720;
+
 const VIDEO_FPS = 25;
+const VIEWFINDER_UPDATE_RATE = 1000 / 6;
+const VIDEO_UPDATE_RATE = 1000 / VIDEO_FPS;
 
 const CAMERA_STATE = {
   IDLE: 0,
@@ -120,7 +123,7 @@ function updateRenderTarget(world, camera) {
   const tmpVRFlag = renderer.xr.enabled;
   renderer.xr.enabled = false;
 
-  // TODO we are doing this because aframe usees this hook for tock.
+  // TODO we are doing this because aframe uses this hook for tock.
   // Namely to capture what camera was rendering. We don't actually use that in any of our tocks.
   // Also tock can likely go away as a concept since we can just direclty order things after render in raf if we want to.
   const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
@@ -132,7 +135,10 @@ function updateRenderTarget(world, camera) {
   const tmpAutoUpdate = sceneEl.object3D.autoUpdate;
   sceneEl.object3D.autoUpdate = false;
 
-  renderer.setRenderTarget(renderTargets.get(camera));
+  const renderTarget = renderTargets.get(camera);
+  renderTarget.lastUpdated = world.time.elapsed;
+
+  renderer.setRenderTarget(renderTarget);
   renderer.render(sceneEl.object3D, world.eid2obj.get(CameraTool.cameraRef[camera]));
   renderer.setRenderTarget(null);
 
@@ -166,10 +172,12 @@ function updateUI(world, camera) {
   }
 
   snapBtnObj.visible = isIdle;
-  recBtnObj.visible = isIdle;
-  nextBtnObj.visible = isIdle;
-  prevBtnObj.visible = isIdle;
-  captureDurLblObj.visible = isIdle;
+
+  recBtnObj.visible = allowVideo && isIdle;
+  captureDurLblObj.visible = allowVideo && isIdle;
+  nextBtnObj.visible = allowVideo && isIdle;
+  prevBtnObj.visible = allowVideo && isIdle;
+
   cancelBtnObj.visible = isCounting;
   countdownLblObj.visible = isCounting;
 
@@ -234,6 +242,8 @@ export function cameraSystem(world) {
       stencil: false
     });
 
+    renderTarget.lastUpdated = 0;
+
     // Bit of a hack here to only update the renderTarget when the screens are in view
     // renderTarget.texture.isVideoTexture = true;
     // renderTarget.texture.update = () => {
@@ -256,7 +266,7 @@ export function cameraSystem(world) {
     renderTargets.delete(eid);
   });
 
-  cameraToolQuery(world).forEach(camera => {
+  cameraToolQuery(world).forEach((camera, i, allCameras) => {
     if (CameraTool.state[camera] === CAMERA_STATE.IDLE) {
       if (clicked(CameraTool.snapRef[camera])) {
         CameraTool.state[camera] = CAMERA_STATE.COUNTDOWN_PHOTO;
@@ -303,7 +313,6 @@ export function cameraSystem(world) {
         const msRemaining = CameraTool.snapTime[camera] - elapsed;
         const msRemainingLastFrame = CameraTool.snapTime[camera] - (elapsed - world.time.delta);
         if (Math.floor(msRemaining / 1000) !== Math.floor(msRemainingLastFrame / 1000)) {
-          console.log(msRemainingLastFrame, msRemaining);
           AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_COUNTDOWN);
         }
       }
@@ -312,26 +321,31 @@ export function cameraSystem(world) {
     // TODO we previously did this in tock() since we wanted to run it late in the frame
     // We actually want to run this before the normal scene render otherwise the camera view is a frame behind.
     // This is not really a big deal since we also run the camera at a lower FPS anyway
-    // TODO limit camera FPS and/or limit how many cameras we render per frame
-    updateRenderTarget(world, camera);
+    const lastUpdated = renderTargets.get(camera).lastUpdated;
+    const elapsed = world.time.elapsed;
+
+    // Update render target when taking a photo, recording a video, or round robbin at VIEWFINDER_UPDATE_RATE
+    if (
+      CameraTool.state[camera] === CAMERA_STATE.SNAP_PHOTO ||
+      (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO && elapsed > lastUpdated + VIDEO_UPDATE_RATE) ||
+      (world.time.tick % allCameras.length === i && elapsed > lastUpdated + VIEWFINDER_UPDATE_RATE)
+    ) {
+      updateRenderTarget(world, camera);
+      if (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO) {
+        videoRecorders.get(camera).captureFrame(renderTargets.get(camera));
+      }
+    }
 
     if (CameraTool.state[camera] === CAMERA_STATE.SNAP_PHOTO) {
-      console.log("Snap photo");
       captureSnapshot(world, camera);
       CameraTool.state[camera] = CAMERA_STATE.IDLE;
     } else if (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO) {
       if (clicked(CameraTool.cancelRef[camera])) {
-        console.log("Cancel video");
         endRecording(world, camera, true);
         CameraTool.state[camera] = CAMERA_STATE.IDLE;
       } else if (world.time.elapsed >= CameraTool.snapTime[camera]) {
-        console.log("done recording");
         endRecording(world, camera, false);
         CameraTool.state[camera] = CAMERA_STATE.IDLE;
-      } else {
-        // TODO should only copy at VIDEO_FPS
-        // also use CanvasCaptureMediaStreamTrack to sync when available
-        videoRecorders.get(camera).captureFrame(renderTargets.get(camera));
       }
     }
 

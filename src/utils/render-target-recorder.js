@@ -3,6 +3,8 @@ const browser = detect();
 
 const isFirefox = browser.name === "firefox";
 
+const supportsCaptureStreamTrack = typeof window.CanvasCaptureMediaStreamTrack !== "undefined";
+
 function blitFramebuffer(renderer, src, srcX0, srcY0, srcX1, srcY1, dest, dstX0, dstY0, dstX1, dstY1) {
   const gl = renderer.getContext();
 
@@ -63,7 +65,8 @@ export class RenderTargetRecorder {
     // this.videoPixels = new Uint8Array(captureWidth * captureHeight * 4);
     // this.videoImageData.data.set(this.videoPixels);
 
-    const stream = videoCanvas.captureStream(fps);
+    const stream = videoCanvas.captureStream(supportsCaptureStreamTrack ? 0 : fps);
+    this.videoTrack = stream.getVideoTracks()[0];
 
     if (srcAudioTrack) {
       stream.addTrack(srcAudioTrack);
@@ -107,6 +110,9 @@ export class RenderTargetRecorder {
     );
     // this.videoImageData.data.set(this.videoPixels);
     this.videoContext.putImageData(this.videoImageData, 0, 0);
+    if (supportsCaptureStreamTrack) {
+      this.videoTrack.requestFrame();
+    }
   }
 
   save() {

@@ -65,8 +65,6 @@ export function CameraPrefab(_props) {
   const countdownLblRef = createRef();
   const captureDurLblRef = createRef();
 
-  const scale = 4;
-
   const screenRef = createRef();
   const selfieScreenRef = createRef();
 
