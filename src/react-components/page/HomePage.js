@@ -129,22 +129,6 @@ function Home() {
   };
 
   const handleButtonVisit = event => {
-    if (Store.getUser()) {
-      var idrooom = event.currentTarget.getAttribute("data-roomid");
-      console.log(idrooom);
-      if (idrooom == null || idrooom == "") {
-      } else {
-        if (APP_ROOT === "https://larchiveum.link") {
-          window.location.href = APP_ROOT + "/" + idrooom;
-        } else {
-          window.location.href = APP_ROOT + "/hub.html?hub_id=" + idrooom;
-        }
-      }
-    } else {
-      window.location = "/?page=signin";
-    }
-  };
-  const handleButtonVisitPublic = event => {
     let url = APP_ROOT;
     var roomId = event.currentTarget.getAttribute("data-roomid");
     if (roomId && roomId != "") {
@@ -231,22 +215,35 @@ function Home() {
 
               let ActionButton = ()=>{
                 if(today < startDate){
-                  return (
-                    <button
-                      className="signin-up btn-visit nt-time-yet"
-                      onClick={() => { openPopupNotification(item) }}
-                      data-id-exhibition={item.id}
-                    >
-                      Open on {moment(item.startDate).format('MMMM Do')}
-                    </button>
-                  )
+                  if(item.reservated){
+                    return (
+                      <button
+                        className="signin-up btn-visit nt-time-yet"
+                        onClick={() => { openPopupNotification(item) }}
+                        data-id-exhibition={item.id}
+                      >
+                        Open on {moment(item.startDate).format('MMMM Do')}
+                      </button>
+                    )
+                  }
+                  else{
+                    return (
+                      <button
+                        className="signin-up btn-visit reserved"
+                        onClick={openPopupReservation}
+                        data-id-exhibition={item.id}
+                      >
+                        RESERVE
+                      </button>
+                    );
+                  }
                 }
                 else
                 if(item.public || (!item.public && item.reservated)){
                   return (
                     <button
                       className="signin-up btn-visit"
-                      onClick={handleButtonVisitPublic}
+                      onClick={handleButtonVisit}
                       data-roomid={item.roomId}
                     >
                       ENTER
@@ -260,17 +257,6 @@ function Home() {
                       className="signin-up btn-visit full"
                     >
                       EXHIBITION FULL
-                    </button>
-                  );
-                }
-                else{
-                  return (
-                    <button
-                      className="signin-up btn-visit reserved"
-                      onClick={openPopupReservation}
-                      data-id-exhibition={item.id}
-                    >
-                      RESERVE
                     </button>
                   );
                 }
