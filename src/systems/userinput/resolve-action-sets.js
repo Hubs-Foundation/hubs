@@ -144,17 +144,17 @@ export function resolveActionSets() {
   }
 
   // TODO remove debug
-  const interactorSettings = AFRAME.scenes[0].systems.interaction.options;
-  const leftHandObj = interactorSettings.leftHand.entity.object3D;
-  leftHandObj.el.setAttribute(
-    "text",
-    "value",
-    `${leftHandHovering} ${leftHandHolding}\n${leftRemoteHovering} ${leftRemoteHolding}`
-  );
-  const rightHandObj = interactorSettings.rightHand.entity.object3D;
-  rightHandObj.el.setAttribute(
-    "text",
-    "value",
-    `${rightHandHovering} ${rightHandHolding}\n${rightRemoteHovering} ${rightRemoteHolding}`
-  );
+  // const interactorSettings = AFRAME.scenes[0].systems.interaction.options;
+  // const leftHandObj = interactorSettings.leftHand.entity.object3D;
+  // leftHandObj.el.setAttribute(
+  //   "text",
+  //   "value",
+  //   `${leftHandHovering} ${leftHandHolding}\n${leftRemoteHovering} ${leftRemoteHolding}`
+  // );
+  // const rightHandObj = interactorSettings.rightHand.entity.object3D;
+  // rightHandObj.el.setAttribute(
+  //   "text",
+  //   "value",
+  //   `${rightHandHovering} ${rightHandHolding}\n${rightRemoteHovering} ${rightRemoteHolding}`
+  // );
 }

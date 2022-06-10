@@ -40,7 +40,6 @@ export const physicsCompatSystem = world => {
       collisionFilterMask: Rigidbody.collisionMask[eid]
     });
     Rigidbody.bodyId[eid] = bodyId;
-    console.log("Setup rigidbody", eid, Rigidbody.collisionGroup[eid], Rigidbody.collisionMask[eid]);
 
     // TODO same deal for these, hardcoded, also we may want to support nested shapes
     if (hasComponent(world, PhysicsShape, eid)) {
