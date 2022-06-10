@@ -111,18 +111,18 @@ const snapToFrame = (() => {
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
     targetObj.matrixWorld.decompose(targetPos, targetQuat, targetScale);
 
-    setMatrixWorld(
-      targetObj,
-      m4.compose(
-        targetPos,
-        frameQuat.identity(), // Reset rotation for correct box calculation
-        targetScale
-      )
-    );
+    // setMatrixWorld(
+    //   targetObj,
+    //   m4.compose(
+    //     targetPos,
+    //     frameQuat.identity(), // Reset rotation for correct box calculation
+    //     targetScale
+    //   )
+    // );
 
     // TODO: BUG Why do we have to traverse the mesh and update all the matrices?
     //           Does box.setFromObject not correctly account for out-of-date matrices?
-    meshToFit.traverse(o => o.updateMatrices());
+    // meshToFit.traverse(o => o.updateMatrices());
 
     // TODO: Why doesn't updating the mesh alone work?
     // meshToFit.updateMatrices();
@@ -133,8 +133,8 @@ const snapToFrame = (() => {
     setMatrixWorld(
       targetObj,
       m4.compose(
-        targetPos.copy(framePos),
-        targetQuat.copy(frameQuat),
+        framePos,
+        frameQuat,
         targetScale.multiplyScalar(
           scaleForAspectFit(MediaFrame.bounds[frame], box.setFromObject(meshToFit).getSize(size))
         )
@@ -310,15 +310,16 @@ export function mediaFramesSystem(world) {
     const frame = mediaFrames[i];
 
     const captured = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
+    const colliding = captured && isColliding(world, frame, captured);
 
-    if (captured && hasComponent(world, Owned, captured) && droppedEntities.includes(captured)) {
+    if (captured && hasComponent(world, Owned, captured) && !hasComponent(world, Held, captured) && colliding) {
       snapToFrame(world, frame, captured, world.eid2obj.get(captured).el.getObject3D("mesh"));
       physicsSystem.updateBodyOptions(Rigidbody.bodyId[captured], { type: "kinematic" });
     } else if (
       (hasComponent(world, Owned, frame) &&
         MediaFrame.capturedNid[frame] &&
         world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
-      (captured && hasComponent(world, Owned, captured) && !isColliding(world, frame, captured))
+      (captured && hasComponent(world, Owned, captured) && !colliding)
     ) {
       takeOwnership(world, frame);
       NetworkedMediaFrame.capturedNid[frame] = 0;
