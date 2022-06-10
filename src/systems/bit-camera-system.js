@@ -1,9 +1,17 @@
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
-import { CameraTool, Interacted } from "../bit-components";
+import {
+  CameraTool,
+  HeldHandLeft,
+  HeldHandRight,
+  HeldRemoteLeft,
+  HeldRemoteRight,
+  Interacted
+} from "../bit-components";
 import { addMedia } from "../utils/media-utils";
-import { RenderTargetRecorder, pixelsToPNG } from "../utils/render-target-recorder";
+import { pixelsToPNG, RenderTargetRecorder } from "../utils/render-target-recorder";
 import { isFacingCamera } from "../utils/three-utils";
 import { SOUND_CAMERA_TOOL_COUNTDOWN, SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "./sound-effects-system";
+import { paths } from "./userinput/paths";
 
 // Prefer h264 if available due to faster decoding speec on most platforms
 const videoCodec = ["h264", "vp9,opus", "vp8,opus", "vp9", "vp8"].find(
@@ -41,6 +49,17 @@ const videoRecorders = new Map();
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
+}
+
+function grabberPressedSnapAction(world, camera) {
+  const userinput = AFRAME.scenes[0].systems.userinput;
+  return (
+    (hasComponent(world, HeldRemoteLeft, camera) && userinput.get(paths.actions.cursor.left.takeSnapshot)) ||
+    (hasComponent(world, HeldRemoteRight, camera) && userinput.get(paths.actions.cursor.right.takeSnapshot)) ||
+    (hasComponent(world, HeldHandLeft, camera) && userinput.get(paths.actions.leftHand.takeSnapshot)) ||
+    (hasComponent(world, HeldHandRight, camera) && userinput.get(paths.actions.rightHand.takeSnapshot))
+    // userinput.get(paths.actions.takeSnapshot)
+  );
 }
 
 function createRecorder(captureAudio) {
@@ -267,7 +286,7 @@ export function cameraSystem(world) {
 
   cameraToolQuery(world).forEach((camera, i, allCameras) => {
     if (CameraTool.state[camera] === CAMERA_STATE.IDLE) {
-      if (clicked(CameraTool.snapRef[camera])) {
+      if (clicked(CameraTool.snapRef[camera]) || grabberPressedSnapAction(world, camera)) {
         CameraTool.state[camera] = CAMERA_STATE.COUNTDOWN_PHOTO;
         CameraTool.snapTime[camera] = world.time.elapsed + 3000;
       }
