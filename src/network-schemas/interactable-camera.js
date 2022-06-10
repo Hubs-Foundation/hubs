@@ -199,6 +199,7 @@ export function CubeMediaFramePrefab() {
       offers-remote-constraint
       offers-hand-constraint
       floaty-object
+      destroy-at-extreme-distance
       holdable
       rigidbody={{
         gravity: -9.8,

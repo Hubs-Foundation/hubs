@@ -6,7 +6,8 @@ import {
   HandLeft,
   RemoteHoverTarget,
   NotRemoteHoverTarget,
-  RemoveNetworkedEntityButton
+  RemoveNetworkedEntityButton,
+  DestroyAtExtremeDistance
 } from "./bit-components";
 
 [
@@ -16,7 +17,8 @@ import {
   ["hand-left", HandLeft],
   ["is-remote-hover-target", RemoteHoverTarget],
   ["is-not-remote-hover-target", NotRemoteHoverTarget],
-  ["remove-networked-object-button", RemoveNetworkedEntityButton]
+  ["remove-networked-object-button", RemoveNetworkedEntityButton],
+  ["destroy-at-extreme-distances", DestroyAtExtremeDistance]
 ].forEach(([aframeComponentName, bitecsComponent]) => {
   AFRAME.registerComponent(aframeComponentName, {
     init: function() {

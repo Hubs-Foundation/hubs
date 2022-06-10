@@ -92,6 +92,7 @@ export const Rigidbody = defineComponent({
 export const PhysicsShape = defineComponent({ bodyId: Types.ui16, shapeId: Types.ui16, halfExtents: [Types.f32, 3] });
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
+export const DestroyAtExtremeDistance = defineComponent();
 
 export const FloatyObject = defineComponent({ flags: Types.ui8, releaseGravity: Types.f32 });
 

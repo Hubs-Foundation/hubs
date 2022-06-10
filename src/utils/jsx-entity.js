@@ -21,7 +21,8 @@ import {
   HoverButton,
   HandCollisionTarget,
   OffersHandConstraint,
-  FloatyObject
+  FloatyObject,
+  DestroyAtExtremeDistance
 } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 
@@ -179,6 +180,7 @@ const inflators = {
   rigidbody: createDefaultInflator(Rigidbody),
   "physics-shape": createDefaultInflator(PhysicsShape),
   "floaty-object": createDefaultInflator(FloatyObject),
+  "destroy-at-extreme-distance": createDefaultInflator(DestroyAtExtremeDistance),
   "networked-transform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   "media-frame": inflateMediaFrame,

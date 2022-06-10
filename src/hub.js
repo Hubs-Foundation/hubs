@@ -109,7 +109,6 @@ import "./components/close-mirrored-media-button";
 import "./components/drop-object-button";
 import "./components/camera-focus-button";
 import "./components/unmute-video-button";
-import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
 import "./components/emit-state-change";
 import "./components/action-to-event";
