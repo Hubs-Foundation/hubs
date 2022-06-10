@@ -253,6 +253,11 @@
 				pointer-events: none;
 			}
 		}
+
+		&.signin {
+			opacity: 1;
+			background: linear-gradient(176deg, rgba(170, 61, 244, 1) 0%, rgb(218, 71, 31) 100%);
+		}
 	}
 
 	.span1 {

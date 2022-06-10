@@ -129,6 +129,7 @@ function Home() {
   };
 
   const handleButtonVisit = event => {
+    let user = Store.getUser();
     let url = APP_ROOT;
     var roomId = event.currentTarget.getAttribute("data-roomid");
     if (roomId && roomId != "") {
@@ -180,6 +181,11 @@ function Home() {
     });
   };
 
+  const handleButtonLogin = event => {
+    window.location.href = APP_ROOT +'?page=signin';
+  };
+
+
   const changePages = page => {
     setfilterExhibitionList({
       ...filterExhibitionList,
@@ -214,32 +220,32 @@ function Home() {
               let startDate = new Date(item.startDate).setHours(0, 0, 0, 0);
 
               let ActionButton = ()=>{
-                if(today < startDate){
-                  if(item.reservated){
-                    return (
-                      <button
-                        className="signin-up btn-visit nt-time-yet"
-                        onClick={() => { openPopupNotification(item) }}
-                        data-id-exhibition={item.id}
-                      >
-                        Open on {moment(item.startDate).format('MMMM Do')}
-                      </button>
-                    )
-                  }
-                  else{
-                    return (
-                      <button
-                        className="signin-up btn-visit reserved"
-                        onClick={openPopupReservation}
-                        data-id-exhibition={item.id}
-                      >
-                        RESERVE
-                      </button>
-                    );
-                  }
+
+                if(startDate > today && (item.public || item.reservated)){
+                  return (
+                    <button
+                      className="signin-up btn-visit nt-time-yet"
+                      onClick={() => { openPopupNotification(item) }}
+                      data-id-exhibition={item.id}
+                    >
+                      Will open on {moment(item.startDate).format('MMMM DD')}
+                    </button>
+                  )
                 }
-                else
-                if(item.public || (!item.public && item.reservated)){
+
+                if(user && !item.reservated && !item.public && item.reservationCount < item.maxSize){
+                  return (
+                    <button
+                      className="signin-up btn-visit reserved"
+                      onClick={openPopupReservation}
+                      data-id-exhibition={item.id}
+                    >
+                      RESERVE
+                    </button>
+                  );
+                }
+
+                if(startDate <= today && (item.public || item.reservated)){
                   return (
                     <button
                       className="signin-up btn-visit"
@@ -250,8 +256,8 @@ function Home() {
                     </button>
                   );
                 }
-                else
-                if(item.reservationCount >= item.maxSize){
+
+                if(user && !item.reservated && item.reservationCount >= item.maxSize ){
                   return (
                     <button
                       className="signin-up btn-visit full"
@@ -260,6 +266,19 @@ function Home() {
                     </button>
                   );
                 }
+
+                if(!user && !item.public){
+                  return (
+                    <button
+                      className="signin-up btn-visit signin"
+                      onClick={handleButtonLogin}
+                    >
+                      Sign In
+                    </button>
+                  );
+                }
+
+                return <></>
               };
 
               let StatusIcon = ()=>{
