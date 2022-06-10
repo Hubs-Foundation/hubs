@@ -15,6 +15,7 @@ const timeSystem = world => {
   time.delta = delta;
   time.elapsed += delta;
   time.then = now;
+  time.tick++;
   return world;
 };
 
@@ -139,7 +140,8 @@ export class App {
     APP.world.time = {
       delta: 0,
       elapsed: 0,
-      then: performance.now()
+      then: performance.now(),
+      tick: 0
     };
 
     APP.world.scene = sceneEl.object3D;
