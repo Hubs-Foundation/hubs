@@ -8,7 +8,6 @@ import { updateAudioSettings } from "./update-audio-settings";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { Networked, Owned } from "./bit-components";
 import { addComponent } from "bitecs";
-import { takeOwnership, TEMPLATE_ID_MEDIA_FRAME } from "./systems/netcode";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
@@ -125,19 +124,26 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
   el.setAttribute("waypoint", componentData);
 });
 
+import { findAncestorWithComponent } from "./utils/scene-graph";
 import { createElementEntity } from "./utils/jsx-entity";
-/** @jsx createElementEntity */
-AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, componentName, componentData, components) => {
-  const eid = renderAsEntity(APP.world, <entity media-frame={componentData} />);
+/** @jsx createElementEntity */ createElementEntity;
 
-  addComponent(APP.world, Networked, eid);
-  // TODO this nid needs correct parent context
-  const netId = "parent1.media-frame-" + el.object3D.children[0].userData.gltfIndex;
-  Networked.id[eid] = APP.getSid(netId);
-  APP.world.nid2eid.set(Networked.id[eid], eid);
+AFRAME.GLTFModelPlus.registerComponent(
+  "media-frame",
+  "media-frame",
+  (el, _componentName, componentData, _components) => {
+    const eid = renderAsEntity(APP.world, <entity media-frame={componentData} />);
 
-  el.object3D.add(APP.world.eid2obj.get(eid));
-});
+    addComponent(APP.world, Networked, eid);
+
+    const networkedEl = findAncestorWithComponent(el, "networked");
+    let rootNid = (networkedEl && networkedEl.components.networked.data.networkId) || "scene";
+    Networked.id[eid] = APP.getSid(`${rootNid}.${el.object3D.children[0].userData.gltfIndex}`);
+    APP.world.nid2eid.set(Networked.id[eid], eid);
+
+    el.object3D.add(APP.world.eid2obj.get(eid));
+  }
+);
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
   if (componentData.id) {
