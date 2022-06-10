@@ -22,6 +22,7 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
+import { removeEntity } from "bitecs";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -418,14 +419,18 @@ export default class SceneEntryManager {
 
   _setupCamera = () => {
     this.scene.addEventListener("action_toggle_camera", () => {
-      const avatarPov = document.querySelector("#avatar-pov-node").object3D;
-
       console.log("toggle camera");
-      const eid = createNetworkedEntity(APP.world, "camera");
-      const obj = APP.world.eid2obj.get(eid);
-      obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
-      // if (!this.hubChannel.can("spawn_camera")) return;
-      // const myCamera = this.scene.systems["camera-tools"].getMyCamera();
+      if (window.cameraEID) {
+        removeEntity(APP.world, window.cameraEID);
+        window.cameraEID = 0;
+      } else {
+        const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+        const eid = createNetworkedEntity(APP.world, "camera");
+        const obj = APP.world.eid2obj.get(eid);
+        obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+        obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+        window.cameraEID = eid;
+      }
     });
 
     this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
