@@ -136,6 +136,7 @@ function updateRenderTarget(world, camera) {
   sceneEl.object3D.autoUpdate = false;
 
   const renderTarget = renderTargets.get(camera);
+  renderTarget.needsUpdate = false;
   renderTarget.lastUpdated = world.time.elapsed;
 
   renderer.setRenderTarget(renderTarget);
@@ -245,12 +246,10 @@ export function cameraSystem(world) {
     renderTarget.lastUpdated = 0;
 
     // Bit of a hack here to only update the renderTarget when the screens are in view
-    // renderTarget.texture.isVideoTexture = true;
-    // renderTarget.texture.update = () => {
-    // if (this.showCameraViewfinder) {
-    //   this.viewfinderInViewThisFrame = true;
-    // }
-    // };
+    renderTarget.texture.isVideoTexture = true;
+    renderTarget.texture.update = () => {
+      renderTarget.needsUpdate = true;
+    };
 
     const screenObj = world.eid2obj.get(CameraTool.screenRef[eid]);
     const selfieScreenObj = world.eid2obj.get(CameraTool.selfieScreenRef[eid]);
@@ -321,14 +320,17 @@ export function cameraSystem(world) {
     // TODO we previously did this in tock() since we wanted to run it late in the frame
     // We actually want to run this before the normal scene render otherwise the camera view is a frame behind.
     // This is not really a big deal since we also run the camera at a lower FPS anyway
-    const lastUpdated = renderTargets.get(camera).lastUpdated;
+    const renderTarget = renderTargets.get(camera);
     const elapsed = world.time.elapsed;
 
-    // Update render target when taking a photo, recording a video, or round robbin at VIEWFINDER_UPDATE_RATE
+    // Update render target at a specific when taking a photo, recording a video, or round robbin for cameras in view
     if (
       CameraTool.state[camera] === CAMERA_STATE.SNAP_PHOTO ||
-      (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO && elapsed > lastUpdated + VIDEO_UPDATE_RATE) ||
-      (world.time.tick % allCameras.length === i && elapsed > lastUpdated + VIEWFINDER_UPDATE_RATE)
+      (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO &&
+        elapsed > renderTarget.lastUpdated + VIDEO_UPDATE_RATE) ||
+      (renderTarget.needsUpdate &&
+        world.time.tick % allCameras.length === i &&
+        elapsed > renderTarget.lastUpdated + VIEWFINDER_UPDATE_RATE)
     ) {
       updateRenderTarget(world, camera);
       if (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO) {
