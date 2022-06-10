@@ -154,6 +154,20 @@ function updateRenderTarget(world, camera) {
   const tmpAutoUpdate = sceneEl.object3D.autoUpdate;
   sceneEl.object3D.autoUpdate = false;
 
+  const bubbleSystem = AFRAME.scenes[0].systems["personal-space-bubble"];
+  const boneVisibilitySystem = AFRAME.scenes[0].systems["hubs-systems"].boneVisibilitySystem;
+
+  if (bubbleSystem) {
+    for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
+      bubbleSystem.invaders[i].disable();
+    }
+    // HACK, bone visibility typically takes a tick to update, but since we want to be able
+    // to have enable() and disable() be reflected this frame, we need to do it immediately.
+    boneVisibilitySystem.tick();
+    // scene.autoUpdate will be false so explicitly update the world matrices
+    boneVisibilitySystem.updateMatrices();
+  }
+
   const renderTarget = renderTargets.get(camera);
   renderTarget.needsUpdate = false;
   renderTarget.lastUpdated = world.time.elapsed;
@@ -165,6 +179,16 @@ function updateRenderTarget(world, camera) {
   renderer.xr.enabled = tmpVRFlag;
   sceneEl.object3D.onAfterRender = tmpOnAfterRender;
   sceneEl.object3D.autoUpdate = tmpAutoUpdate;
+
+  if (bubbleSystem) {
+    for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
+      bubbleSystem.invaders[i].enable();
+    }
+    // HACK, bone visibility typically takes a tick to update, but since we want to be able
+    // to have enable() and disable() be reflected this frame, we need to do it immediately.
+    boneVisibilitySystem.tick();
+    boneVisibilitySystem.updateMatrices();
+  }
 }
 
 function updateUI(world, camera) {
