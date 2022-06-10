@@ -183,6 +183,35 @@ export function CameraPrefab(_props) {
           text={">"}
         />
       </entity>
+    </entity>
+  );
+}
+
+export function CubeMediaFramePrefab() {
+  return (
+    <entity
+      name="Media Frame"
+      networked
+      networked-transform
+      cursor-raycastable
+      remote-hover-target
+      hand-collision-target
+      offers-remote-constraint
+      offers-hand-constraint
+      floaty-object
+      holdable
+      rigidbody={{
+        gravity: -9.8,
+        collisionGroup: COLLISION_LAYERS.INTERACTABLES,
+        collisionMask:
+          COLLISION_LAYERS.HANDS |
+          COLLISION_LAYERS.ENVIRONMENT |
+          COLLISION_LAYERS.INTERACTABLES |
+          COLLISION_LAYERS.AVATAR
+      }}
+      physics-shape={{ halfExtents: [0.5, 0.5, 0.5] }}
+      object3D={new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial())}
+    >
       <entity media-frame position={[0, 1, 0]} />
     </entity>
   );

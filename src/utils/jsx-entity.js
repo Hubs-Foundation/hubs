@@ -20,7 +20,8 @@ import {
   TextButton,
   HoverButton,
   HandCollisionTarget,
-  OffersHandConstraint
+  OffersHandConstraint,
+  FloatyObject
 } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 
@@ -149,6 +150,7 @@ function inflateText(world, eid, componentProps) {
 }
 
 import { updateSlice9Geometry } from "../update-slice9-geometry";
+import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 
 function inflateSlice9(world, eid, { size, insets, texture }) {
   const geometry = (this.geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3));
@@ -176,6 +178,7 @@ const inflators = {
   holdable: createDefaultInflator(Holdable),
   rigidbody: createDefaultInflator(Rigidbody),
   "physics-shape": createDefaultInflator(PhysicsShape),
+  "floaty-object": createDefaultInflator(FloatyObject),
   "networked-transform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   "media-frame": inflateMediaFrame,

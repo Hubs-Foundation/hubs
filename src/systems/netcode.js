@@ -1,18 +1,20 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, Owned } from "../bit-components";
-import { CameraPrefab } from "../network-schemas/interactable-camera";
+import { CameraPrefab, CubeMediaFramePrefab } from "../network-schemas/interactable-camera";
 import { defineNetworkSchema } from "../utils/bit-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 
-const prefabs = new Map([
-  [
-    "camera",
-    {
+const prefabs = new Map(
+  Object.entries({
+    camera: {
       permission: "spawn_camera",
       template: CameraPrefab
+    },
+    cube: {
+      template: CubeMediaFramePrefab
     }
-  ]
-]);
+  })
+);
 
 export function takeOwnership(world, eid) {
   // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame

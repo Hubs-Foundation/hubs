@@ -10,7 +10,7 @@ import {
   Not,
   entityExists
 } from "bitecs";
-import { FloatyObject, Held, Rigidbody } from "../bit-components";
+import { FloatyObject, Held, Owned, Rigidbody } from "../bit-components";
 
 export const MakeStaticWhenAtRest = defineComponent();
 
@@ -18,8 +18,7 @@ const makeStaticAtRestQuery = defineQuery([FloatyObject, Rigidbody, Not(Held), M
 function makeStaticAtRest(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   makeStaticAtRestQuery(world).forEach(eid => {
-    const el = world.eid2obj.get(eid).el;
-    const isMine = el.components.networked && NAF.utils.isMine(el);
+    const isMine = hasComponent(world, Owned, eid);
     if (!isMine) {
       removeComponent(world, MakeStaticWhenAtRest, eid);
       return;

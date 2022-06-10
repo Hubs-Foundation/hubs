@@ -82,7 +82,13 @@ export const Static = defineComponent();
 export const Inspectable = defineComponent();
 export const PreventAudioBoost = defineComponent();
 export const IgnoreSpaceBubble = defineComponent();
-export const Rigidbody = defineComponent({ bodyId: Types.ui16, collisionGroup: Types.ui32, collisionMask: Types.ui32 });
+export const Rigidbody = defineComponent({
+  bodyId: Types.ui16,
+  collisionGroup: Types.ui32,
+  collisionMask: Types.ui32,
+  flags: Types.ui8,
+  gravity: Types.f32
+});
 export const PhysicsShape = defineComponent({ bodyId: Types.ui16, shapeId: Types.ui16, halfExtents: [Types.f32, 3] });
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();

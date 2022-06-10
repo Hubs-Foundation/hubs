@@ -10,6 +10,7 @@ import {
   Rigidbody
 } from "../bit-components";
 
+// TODO this seems wrong, nothing sets it back unless its a floaty object
 const exitOwned = exitQuery(defineQuery([Owned]));
 const componentsToRemove = [Held, HeldHandRight, HeldHandLeft, HeldRemoteRight, HeldRemoteLeft];
 const kinematicOptions = { type: "kinematic", collisionFilterMask: UNOWNED_INTERACTABLE };

@@ -8,6 +8,10 @@ const rigidbodyEnteredQuery = enterQuery(rigidbodyQuery);
 const rigidbodyExitedQuery = exitQuery(rigidbodyQuery);
 const shapeExitQuery = exitQuery(defineQuery([PhysicsShape]));
 
+export const RIGIDBODY_FLAGS = {
+  DISABLE_COLLISIONS: 1 << 0
+};
+
 export const physicsCompatSystem = world => {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
 
@@ -25,7 +29,7 @@ export const physicsCompatSystem = world => {
     // TODO these are all hardcoded values, RigidBody should actually have (some of?) these properties
     const bodyId = physicsSystem.addBody(obj, {
       mass: 1,
-      gravity: { x: 0, y: 0, z: 0 },
+      gravity: { x: 0, y: Rigidbody.gravity[eid], z: 0 },
       linearDamping: 0.01,
       angularDamping: 0.01,
       linearSleepingThreshold: 1.6,
@@ -35,7 +39,7 @@ export const physicsCompatSystem = world => {
       emitCollisionEvents: false,
       scaleAutoUpdate: false,
       type: "kinematic",
-      disableCollision: true,
+      disableCollision: Rigidbody.flags[eid] & RIGIDBODY_FLAGS.DISABLE_COLLISIONS,
       collisionFilterGroup: Rigidbody.collisionGroup[eid],
       collisionFilterMask: Rigidbody.collisionMask[eid]
     });

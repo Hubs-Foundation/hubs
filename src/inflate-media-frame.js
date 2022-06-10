@@ -1,11 +1,16 @@
 import { addObject3DComponent } from "./utils/jsx-entity";
-import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape } from "./bit-components";
-import { addComponent } from "bitecs";
-import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
+import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape, Networked } from "./bit-components";
+import { addComponent, hasComponent } from "bitecs";
 import { MediaType } from "./utils/media-utils";
 import { COLLISION_LAYERS } from "./constants";
+import { RIGIDBODY_FLAGS } from "./systems/bit-physics";
 
+const defaults = {
+  bounds: { x: 1, y: 1, z: 1 },
+  mediaType: "all"
+};
 export function inflateMediaFrame(world, eid, componentProps) {
+  componentProps = Object.assign({}, defaults, componentProps);
   const guide = new THREE.Mesh(
     new THREE.BoxGeometry(componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z),
     new THREE.ShaderMaterial({
@@ -48,6 +53,8 @@ export function inflateMediaFrame(world, eid, componentProps) {
   addComponent(world, MediaFrame, eid, true);
   addComponent(world, NetworkedMediaFrame, eid, true);
 
+  if (!hasComponent(world, Networked, eid)) addComponent(world, Networked, eid);
+
   MediaFrame.mediaType[eid] = {
     all: MediaType.ALL,
     "all-2d": MediaType.ALL_2D,
@@ -61,6 +68,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
   addComponent(world, Rigidbody, eid);
   Rigidbody.collisionGroup[eid] = COLLISION_LAYERS.MEDIA_FRAMES;
   Rigidbody.collisionMask[eid] = COLLISION_LAYERS.INTERACTABLES;
+  Rigidbody.flags[eid] = RIGIDBODY_FLAGS.DISABLE_COLLISIONS;
   addComponent(world, PhysicsShape, eid);
   PhysicsShape.halfExtents[eid].set([
     componentProps.bounds.x / 2,

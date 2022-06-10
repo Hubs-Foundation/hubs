@@ -11,9 +11,19 @@ export function networkedTransformSystem(world) {
     const eid = ents[i];
     const obj = world.eid2obj.get(eid);
     if (hasComponent(world, Owned, eid)) {
-      obj.position.toArray(NetworkedTransform.position[eid]);
-      obj.quaternion.toArray(NetworkedTransform.rotation[eid]);
-      obj.scale.toArray(NetworkedTransform.scale[eid]);
+      tmpVec.fromArray(NetworkedTransform.position[eid]);
+      if (!tmpVec.near(obj.position, 0.001)) {
+        obj.position.toArray(NetworkedTransform.position[eid]);
+      }
+      tmpQuat.fromArray(NetworkedTransform.rotation[eid]);
+      // TODO does it even make sense to check "near" in this way?
+      if (!tmpQuat.near(obj.quaternion, 0.001)) {
+        obj.quaternion.toArray(NetworkedTransform.rotation[eid]);
+      }
+      tmpVec.fromArray(NetworkedTransform.scale[eid]);
+      if (!tmpVec.near(obj.scale, 0.001)) {
+        obj.scale.toArray(NetworkedTransform.scale[eid]);
+      }
     } else {
       tmpVec.fromArray(NetworkedTransform.position[eid]);
       if (!tmpVec.near(obj.position)) {
