@@ -1,0 +1,12 @@
+name: hubs 
+on:
+  schdule:
+    - cron: 0 23 1 * *
+  workflow_dispatch: 
+jobs: 
+  hcpkgrelease:
+  uses: mozilla/hubs-ops/.github/workflows/hc_release.yaml
+  with: 
+    releasing_branch: qa-test
+    main_branch: main
+  
