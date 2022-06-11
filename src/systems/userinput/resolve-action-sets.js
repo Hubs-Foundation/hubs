@@ -87,11 +87,15 @@ export function resolveActionSets() {
   );
   userinput.toggleSet(
     sets.leftCursorHoveringOnInteractable,
-    hc(world, OffersRemoteConstraint, leftRemoteHovering) || hcAFRAME(world, "super-spawner", leftRemoteHovering)
+    hc(world, OffersRemoteConstraint, leftRemoteHovering) ||
+      hc(world, TogglesHoveredActionSet, leftRemoteHovering) ||
+      hcAFRAME(world, "super-spawner", leftRemoteHovering)
   );
   userinput.toggleSet(
     sets.rightCursorHoveringOnInteractable,
-    hc(world, OffersRemoteConstraint, rightRemoteHovering) || hcAFRAME(world, "super-spawner", rightRemoteHovering)
+    hc(world, OffersRemoteConstraint, rightRemoteHovering) ||
+      hc(world, TogglesHoveredActionSet, rightRemoteHovering) ||
+      hcAFRAME(world, "super-spawner", rightRemoteHovering)
   );
 
   userinput.toggleSet(sets.leftHandHoveringOnVideo, hcAFRAME(world, "media-video", leftHandHovering));
