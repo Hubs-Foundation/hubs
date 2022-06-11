@@ -8,35 +8,28 @@ import {
   getMaxResolutionHeight
 } from "../../utils/screen-orientation-utils";
 
-// Modified from AFrame
-function getRenderResolution(canvasRect, maxResolution, isVR) {
+function calculateRendererSize(canvasRect, maxResolution, isVR) {
+  if (isVR) {
+    return canvasRect;
+  }
+
+  // canvasRect values are CSS pixels based while
+  // maxResolution values are physical pixels based (CSS pixels * pixel ratio).
+  // Convert maxResolution values to CSS pixels based.
   const pixelRatio = window.devicePixelRatio;
+  const maxWidth = maxResolution.width / pixelRatio;
+  const maxHeight = maxResolution.height / pixelRatio;
 
-  if (!maxResolution || isVR || (maxResolution.width === -1 && maxResolution.height === -1)) {
+  if (canvasRect.width <= maxWidth && canvasRect.height <= maxHeight) {
     return canvasRect;
   }
 
-  if (canvasRect.width * pixelRatio < maxResolution.width && canvasRect.height * pixelRatio < maxResolution.height) {
-    return canvasRect;
-  }
+  const conversionRatio = Math.min(maxWidth / canvasRect.width, maxHeight / canvasRect.height);
 
-  const aspectRatio = canvasRect.width / canvasRect.height;
-
-  if (canvasRect.width * pixelRatio > maxResolution.width && maxResolution.width !== -1) {
-    return {
-      width: Math.round(maxResolution.width / pixelRatio),
-      height: Math.round(maxResolution.width / aspectRatio / pixelRatio)
-    };
-  }
-
-  if (canvasRect.height * pixelRatio > maxResolution.height && maxResolution.height !== -1) {
-    return {
-      height: Math.round(maxResolution.height / pixelRatio),
-      width: Math.round((maxResolution.height * aspectRatio) / pixelRatio)
-    };
-  }
-
-  return canvasRect;
+  return {
+    width: Math.round(canvasRect.width * conversionRatio),
+    height: Math.round(canvasRect.height * conversionRatio)
+  };
 }
 
 export function useResizeViewport(viewportRef, store, scene) {
@@ -82,15 +75,15 @@ export function useResizeViewport(viewportRef, store, scene) {
 
         const canvasRect = entries[0].contentRect;
 
-        const resolution = getRenderResolution(canvasRect, maxResolution, isVRPresenting);
+        const rendererSize = calculateRendererSize(canvasRect, maxResolution, isVRPresenting);
 
         const canvas = scene.canvas;
         canvas.style.width = canvasRect.width + "px";
         canvas.style.height = canvasRect.height + "px";
 
-        scene.renderer.setSize(resolution.width, resolution.height, false);
+        scene.renderer.setSize(rendererSize.width, rendererSize.height, false);
 
-        scene.camera.aspect = resolution.width / resolution.height;
+        scene.camera.aspect = rendererSize.width / rendererSize.height;
         scene.camera.updateProjectionMatrix();
 
         // Resizing the canvas clears it, so render immediately after resize to prevent flicker.

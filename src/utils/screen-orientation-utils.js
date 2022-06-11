@@ -33,7 +33,7 @@ const isNaturalOrientation = () => {
   return getAngle() % 180 === 0;
 };
 
-// Return the screen width based on the current screen orientation
+// Return the screen width in CSS pixels based on the current screen orientation
 const getScreenWidth = () => {
   // Is seems screen.width value is based on the natural screen orientation on iOS
   // while it is based on the current screen orientation on Android (and other devices?).
@@ -43,7 +43,7 @@ const getScreenWidth = () => {
   return screen.width;
 };
 
-// Return the screen height based on the current screen orientation
+// Return the screen height in CSS pixels based on the current screen orientation
 const getScreenHeight = () => {
   // Is seems screen.height value is based on the natural screen orientation on iOS
   // while it is based on the current screen orientation on Android (and other devices?).
@@ -53,8 +53,22 @@ const getScreenHeight = () => {
   return screen.height;
 };
 
+// Physical pixels screen resolution width
+// (screen.width * window.devicePixelRatio) seems to be too huge and
+// can cause bad performance impact. So use CSS pixels screen width
+// (screen.width) by default for now.
+const getDefaultMaxResolutionWidth = () => {
+  return getScreenWidth();
+};
+
+// See the comment above
+const getDefaultMaxResolutionHeight = () => {
+  return getScreenHeight();
+};
+
 // Take width and height based on the current screen orientation and
-// store them based on natural orientation
+// store them based on natural orientation.
+// Width and height paremeters must be in physical pixels.
 export const setMaxResolution = (store, width, height) => {
   store.update({
     preferences: {
@@ -64,16 +78,18 @@ export const setMaxResolution = (store, width, height) => {
   });
 };
 
-// Return width based on the current screen orientation
+// Return max resolution width in physical pixels
+// based on the current screen orientation
 export const getMaxResolutionWidth = store => {
   const preferences = store.state.preferences;
   const width = isNaturalOrientation() ? preferences.maxResolutionWidth : preferences.maxResolutionHeight;
-  return width !== undefined ? width : getScreenWidth();
+  return width !== undefined ? width : getDefaultMaxResolutionWidth();
 };
 
-// Return height based on the current screen orientation
+// Return max resolution height in physical pixels
+// based on the current screen orientation
 export const getMaxResolutionHeight = store => {
   const preferences = store.state.preferences;
   const height = isNaturalOrientation() ? preferences.maxResolutionHeight : preferences.maxResolutionWidth;
-  return height !== undefined ? height : getScreenHeight();
+  return height !== undefined ? height : getDefaultMaxResolutionHeight();
 };
