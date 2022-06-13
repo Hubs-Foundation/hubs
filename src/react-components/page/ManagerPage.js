@@ -95,20 +95,15 @@ function ManagerHome() {
   });
 
   function auth() {
-    const token = Store.getUser()?.token;
-    return UserService.checkToken(token)
+    const user = Store.getUser();
+    return UserService.checkToken(user?.token)
       .then(res => {
         if (res.result == "ok") {
-          const email = Store.getUser()?.email;
-          if (!res.data.email != email) {
-            setIsLoading(false);
-            setIsLoadingF(false);
-          } else if (!res.hubs) {
-            window.location = "/?page=warning-verify";
-          } else {
-            setIsLoading(false);
-            setIsLoadingF(false);
+          if (res.data.id != user?.id) {
+            Store.removeUser();
           }
+          setIsLoading(false);
+          setIsLoadingF(false);
         } else {
           setIsLoading(false);
           setIsLoadingF(false);
@@ -129,8 +124,8 @@ function ManagerHome() {
 
   useEffect(
     () => {
-    const userInfo = Store.getUser();
-      if (userInfo.type == 5) {
+      const user = Store.getUser();
+      if (user?.type == 5) {
         getAllProjects();
       }
     },
@@ -138,9 +133,9 @@ function ManagerHome() {
   );
 
   const getAllExhibitions = () => {
-    const Auth = Store.getUser();
+    const user = Store.getUser();
     var data = filterExhibitionList;
-    if (Auth) {
+    if (user) {
       ExhibitionsService.getAllWithAuthExhibitions(data).then(res => {
         if (res.result == "ok") {
           setExhibitions(res.data);
@@ -930,7 +925,7 @@ function ManagerHome() {
                 );
               } else {
                 return (
-                  <div className={"items"}>
+                  <div key={index}  className={"items"}>
                     <span className="name-tour">This room is currently unavailable</span>
                     <img src={defaultImage1} alt="" />
                     <div className="content">
@@ -1043,8 +1038,8 @@ function ManagerHome() {
   };
 
   const AccountPermision = () => {
-    const userInfo = Store.getUser();
-    if (userInfo && userInfo.type >= 3) {
+    const user = Store.getUser();
+    if (user?.type >= 3) {
       return (
         <div className="title">
           <div className="col">

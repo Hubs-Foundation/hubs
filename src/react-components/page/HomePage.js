@@ -78,8 +78,8 @@ function Home() {
     UserService.checkToken(token)
       .then(res => {
         if (res.result == "ok") {
-          const email = Store.getUser()?.email;
-          if (res.data.email != email) {
+          const user = Store.getUser();
+          if (res.data.id != user?.id) {
             Store.removeUser();
           }
         } else {

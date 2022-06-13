@@ -1,30 +1,26 @@
 import Store from "../utilities/store";
-import StoreHub from "../storage/store";
 import UserService from '../utilities/apiServices/UserService'
-const store = new StoreHub();
+
 export function auth(){
-    const token = Store.getUser()?.token;
-    return UserService.checkToken(token).then((res) => {
+    const user = Store.getUser();
+    return UserService.checkToken(user?.token).then((res) => {
         if(res.result == 'ok'){
-        const email = Store.getUser()?.email;
-        if(!res.data.email != email)
-        {
-            window.location = '/?page=signin';
-        }
-        else if(!res.data.hubs){
-            window.location = '/?page=warning-verify';
-        }
-        else
-        {
-            //loading false
-            return true;
-        }
+            if(!res.data.id != user?.id)
+            {  
+                Store.removeUser();
+                window.location = '/?page=signin';
+            }
+            else
+            {
+                return true;
+            }
         }
         else{
+            Store.removeUser();
             window.location = '/?page=signin';
         }
     }).catch(() => {
+        Store.removeUser();
         window.location = '/?page=signin';
     });
-    
 }
