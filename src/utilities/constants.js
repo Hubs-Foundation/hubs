@@ -9,7 +9,6 @@ const ENV = "https://api.larchiveum.link";
 const APP_ROOT = "https://larchiveum.link";
 
 
-
 const naverApp = {
   clientID: "pSh1Vk5d8Df3XZAURRC5",
   appSecret: "D0izmHYDqf"
@@ -27,8 +26,8 @@ const facebookApp = {
 };
 
 const googleApp = {
-  clientID: "58132589047-k1el1pt544kf47oc1pgqsr6qa1st887u.apps.googleusercontent.com",
-  clientSecret: "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"
+  clientID: "488939673360-f1f4k8mvlhbhr6cdc3dk912i0d2snn2d.apps.googleusercontent.com",
+  clientSecret: "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"
 };
 
 export { expireCookies, naverApp, kakaoApp, facebookApp, googleApp, API_ROOT, APP_ROOT, ENV };
