@@ -127,6 +127,7 @@ function SigninSocial() {
       <GoogleLogin
         clientId={googleApp.clientID}
         onSuccess={signupWithGoogle}
+        onFailure={(err)=>{ console.log(err)}}
         render={(props) =><a onClick={props.onClick}><img src={google}/></a>}
         cookiePolicy={'single_host_origin'}
       />

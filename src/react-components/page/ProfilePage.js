@@ -227,7 +227,7 @@ const Header = () => {
 
     const handleLogout = () => {
         Store.removeUser();
-        window.location.reload();
+        window.location.href = '/';
     };
 
     return (
