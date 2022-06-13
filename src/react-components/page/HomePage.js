@@ -330,10 +330,10 @@ function Home() {
   };
 
   const UIAuth = () => {
-    const userInfo = Store.getUser();
-    if (userInfo) {
+    const user = Store.getUser();
+    if (user) {
       const ManagerBtn = () => {
-        if (userInfo.type >= 3) {
+        if (user.type >= 3) {
           return (
             <a className="manager" href={APP_ROOT + "/?page=manager"}>
               {" "}
@@ -347,7 +347,7 @@ function Home() {
       return (
         <span className="display-name">
           <ManagerBtn />
-          <span className="nameA"> {userInfo.displayName || userInfo.email} </span> |{" "}
+          <span className="nameA"> {user.displayName || user.email} </span> |{" "}
           <a className="logout_btn" onClick={handleRemoveCookie}>
             Logout
           </a>

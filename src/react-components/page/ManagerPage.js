@@ -783,8 +783,8 @@ function ManagerHome() {
   )};
 
   const renderTabs = () => {
-    const userInfo = Store.getUser();
-      if (userInfo.type == 5) {
+    const user = Store.getUser();
+      if (user?.type == 5) {
         return (
         <div className="tabs-Admin">
           <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >LIST ROOM</button>  
@@ -1001,28 +1001,25 @@ function ManagerHome() {
                   count_Model++;
               })
               return(
-                <>
-                  <div key={index} className={"items"}>
-                    <span className="name-tour">{item?.name}</span>
-                    <img src={item?.thumbnail_url} alt="" />
-                    <div className="content">
-                      <div>
-                        <span className="text-bold">{item?.name}</span>
-                        <div className="d-flex-icon">
-                          <span>{count_Image}<FaVideo className="icon"/></span>
-                          <span>{count_Video}<FaRegImage className="icon"/></span>
-                          <span>{count_Model}<FaCodepen className="icon"/></span>
-                        </div>
+                <div key={item.id} className={"items"}>
+                  <span className="name-tour">{item?.name}</span>
+                  <img src={item?.thumbnail_url} alt="" />
+                  <div className="content">
+                    <div>
+                      <span className="text-bold">{item?.name}</span>
+                      <div className="d-flex-icon">
+                        <span>{count_Image}<FaVideo className="icon"/></span>
+                        <span>{count_Video}<FaRegImage className="icon"/></span>
+                        <span>{count_Model}<FaCodepen className="icon"/></span>
                       </div>
                     </div>
-                    <div className="btn-action">
-                      <FaListOl className="btn-list-object" onClick={() => {  openPopupCustomObject(item.id);}}/>
-                    </div>
                   </div>
-                </>
+                  <div className="btn-action">
+                    <FaListOl className="btn-list-object" onClick={() => {  openPopupCustomObject(item.id);}}/>
+                  </div>
+                </div>
               )
             })}
-       
           </>
 
         ) : (
@@ -1064,9 +1061,9 @@ function ManagerHome() {
   };
 
   const IAuth = () => {
-    const userInfo = Store.getUser();
+    const user = Store.getUser();
     const MasterAdmin = () => {
-      if (userInfo.type == 5) {
+      if (user?.type == 5) {
         return (
           <>
             <a className="gotospoke" href={APP_ROOT + "/spoke"}>
@@ -1083,11 +1080,11 @@ function ManagerHome() {
         return <></>;
       }
     };
-    if (userInfo) {
+    if (user) {
       return (
         <span className="display-name">
           <MasterAdmin />
-          <span className="nameA">{userInfo.displayName || userInfo.email}</span> |{" "}
+          <span className="nameA">{user.displayName || user.email}</span> |{" "}
           <a className="gotohome" href="/">
             {" "}
             Home

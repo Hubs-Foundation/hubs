@@ -11,8 +11,7 @@ const store = new StoreHub();
 window.APP = { store };
 
 function auth(){
-  const remove2Token = ()=>{
-    store.removeHub();
+  const removeToken = ()=>{
     Store.removeUser();
   }
 
@@ -22,7 +21,7 @@ function auth(){
       window.location = '/';
     }
     else{
-      remove2Token();
+      removeToken();
     }
   }).catch((error) => {
     console.log('catch');

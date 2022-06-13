@@ -42,10 +42,6 @@ class SignUpForm extends React.Component{
         const { name, value } = e.target;
         this.setState({ [name]: value });
     }
-    remove2Token =()=> {
-        store.removeHub();
-        Store.removeUser();
-    }
 
     handleSubmit(e) {
         e.preventDefault();
@@ -73,7 +69,7 @@ class SignUpForm extends React.Component{
             UserService.signupWithEmail(data).then((res) => {
                 this.setState({ disabled : true });
                 if(res.result == 'ok'){
-                    remove2Token();
+                    Store.removeUser();
                     window.location = `/?page=warning-verify&email=${res.data.email}`;
                 }
                 else

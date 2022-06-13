@@ -43,10 +43,6 @@ class ForgotPassword extends React.Component{
         const { name, value } = e.target;
         this.setState({ [name]: value });
     }
-    remove2Token =()=> {
-        store.removeHub();
-        Store.removeUser();
-    }
 
     handleSubmit(e) {
         e.preventDefault();

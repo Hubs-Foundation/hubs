@@ -138,7 +138,7 @@ function Root() {
                 if(item.room)
                 {
                   return (
-                    <div key={index} className={'items'}>
+                    <div key={item.id} className={'items'}>
                         <span className='name-tour'>{item.name}</span>
                         <img src={getSceneThumnail(item ? item.sceneId : undefined)} alt=""/>
                         <div className="content">
@@ -166,7 +166,7 @@ function Root() {
                 else
                 {
                   return (
-                    <div className={'items'}>
+                    <div key={item.id} className={'items'}>
                         <span className='name-tour'>This room is currently unavailable</span>
                         <img src={defaultImage1} alt=""/>
                         <div className="content">
@@ -202,13 +202,12 @@ function Root() {
   }
 
   const IAuth =()=> {  
-    const userInfo = Store.getUser();
-    if(userInfo){
+    const user = Store.getUser();
+    if(user){
       return(
-        
         <span className="display-name">
           <a className="gotoadmin" href={APP_ROOT + '/admin'}><FaCog className='icon-setting-admin'/> Admin </a>
-          <span className="nameA">{userInfo.displayName || userInfo.email}</span> / <a className="gotohome" href='/'>Back Home </a>
+          <span className="nameA">{user.displayName || user.email}</span> / <a className="gotohome" href='/'>Back Home </a>
         </span>
       ) 
     }
@@ -226,8 +225,8 @@ function Root() {
   }
 
   const AccountPermision =()=> {  
-    const userInfo = Store.getUser();
-    if(userInfo && userInfo.type >= 3){
+    const user = Store.getUser();
+    if(user?.type >= 3){
       return(
         <div className="title" >List Tour Larchiveum
           <button className="btn btn-create" onClick={()=>{openPopupExhibition(),setExhibitionType('create')}} ><img src={AddIcon}/></button>
