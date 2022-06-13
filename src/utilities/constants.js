@@ -22,14 +22,9 @@ const kakaoApp = {
 
 const facebookApp = {
   //clientID: '339289624917102',
-  clientID: "573470851047401"
+  //clientID: "573470851047401"
+  clientID: "1205037390232954"
 };
-
-// WETOP
-// const googleApp = {
-//     clientID: "58132589047-m5tdln5da7dho7gb7mnp7kqitdnv5dvq.apps.googleusercontent.com",
-//     clientSecret: "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"
-// }
 
 const googleApp = {
   clientID: "58132589047-k1el1pt544kf47oc1pgqsr6qa1st887u.apps.googleusercontent.com",
