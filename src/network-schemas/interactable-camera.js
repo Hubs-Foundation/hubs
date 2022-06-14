@@ -45,13 +45,13 @@ function Label({ text, ...props }, ...children) {
 let model;
 (async () => {
   model = await waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
+  // TODO: What if model didn't load by the time we need it?
 })();
 
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 
 export function CameraPrefab(_props) {
-  // TODO: What if model didn't load yet?
   const cameraModel = cloneObject3D(model.scene);
 
   const snapMenuRef = createRef();
@@ -82,6 +82,8 @@ export function CameraPrefab(_props) {
 
   const buttonHeight = 0.2;
   const buttonScale = [0.4, 0.4, 0.4];
+
+  const uiZ = 0.1;
 
   return (
     <entity
@@ -135,14 +137,14 @@ export function CameraPrefab(_props) {
         rotation={[0, Math.PI, 0]}
       />
 
-      <entity name="Snap Menu" ref={snapMenuRef} position={[0, 0, 0.1]}>
-        <Label ref={countdownLblRef} position={[0, 0, 0.02]} />
-        <Label ref={captureDurLblRef} position={[0, -0.2, 0]} />
+      <entity name="Snap Menu" ref={snapMenuRef}>
+        <Label ref={countdownLblRef} position={[0, 0, uiZ + 0.02]} />
+        <Label ref={captureDurLblRef} position={[0, -0.2, uiZ]} />
 
         <Button
           ref={cancelRef}
           scale={buttonScale}
-          position={[0, 0.1, 0]}
+          position={[0, 0.1, uiZ]}
           width={0.4}
           height={buttonHeight}
           text={"Cancel"}
@@ -150,7 +152,7 @@ export function CameraPrefab(_props) {
         <Button
           ref={snapRef}
           scale={buttonScale}
-          position={[0, 0.1, 0]}
+          position={[0, 0.1, uiZ]}
           width={0.4}
           height={buttonHeight}
           type={BUTTON_TYPES.ACTION}
@@ -160,7 +162,7 @@ export function CameraPrefab(_props) {
         <Button
           ref={button_prev}
           scale={buttonScale}
-          position={[-0.16, -0.1, 0]}
+          position={[-0.16, -0.1, uiZ]}
           width={buttonHeight}
           height={buttonHeight}
           text={"<"}
@@ -168,7 +170,7 @@ export function CameraPrefab(_props) {
         <Button
           ref={recVideoRef}
           scale={buttonScale}
-          position={[0, -0.1, 0]}
+          position={[0, -0.1, uiZ]}
           width={0.4}
           height={buttonHeight}
           type={BUTTON_TYPES.ACTION}
@@ -177,7 +179,7 @@ export function CameraPrefab(_props) {
         <Button
           scale={buttonScale}
           ref={button_next}
-          position={[0.16, -0.1, 0]}
+          position={[0.16, -0.1, uiZ]}
           width={buttonHeight}
           height={buttonHeight}
           text={">"}

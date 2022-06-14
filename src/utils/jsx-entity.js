@@ -222,7 +222,6 @@ export function renderAsEntity(world, entityDef) {
   }
   if (entityDef.attrs.layers) {
     obj.layers.mask = entityDef.attrs.layers;
-    console.log("storing layers", obj.layers.mask, entityDef.attrs.layers);
   }
   entityDef.children.forEach(child => {
     if (child.type === "a-entity") {
