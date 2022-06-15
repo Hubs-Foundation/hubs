@@ -66,6 +66,16 @@ const getDefaultMaxResolutionHeight = () => {
   return getScreenHeight();
 };
 
+// Return the screen resolution width in physical pixels based on the current screen orientation
+export const getScreenResolutionWidth = () => {
+  return getScreenWidth() * window.devicePixelRatio;
+};
+
+// Return the screen resolution height in physical pixels based on the current screen orientation
+export const getScreenResolutionHeight = () => {
+  return getScreenHeight() * window.devicePixelRatio;
+};
+
 // Take width and height based on the current screen orientation and
 // store them based on natural orientation.
 // Width and height paremeters must be in physical pixels.

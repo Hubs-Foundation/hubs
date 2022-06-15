@@ -17,6 +17,8 @@ import {
   removeOrientationChangeListener,
   getMaxResolutionWidth,
   getMaxResolutionHeight,
+  getScreenResolutionWidth,
+  getScreenResolutionHeight,
   setMaxResolution
 } from "../utils/screen-orientation-utils";
 
@@ -294,40 +296,38 @@ export class MaxResolutionPreferenceItem extends Component {
   }
 
   render() {
-    const onChange = () => {
-      const numWidth = parseInt(document.getElementById("maxResolutionWidth").value);
-      const numHeight = parseInt(document.getElementById("maxResolutionHeight").value);
-      setMaxResolution(this.props.store, numWidth ? numWidth : 0, numHeight ? numHeight : 0);
+    const onChange = multiplier => {
+      setMaxResolution(
+        this.props.store,
+        Math.floor(getScreenResolutionWidth() * multiplier),
+        Math.floor(getScreenResolutionHeight() * multiplier)
+      );
     };
     return (
       <div className={classNames(styles.maxResolutionPreferenceItem)}>
         <input
-          id="maxResolutionWidth"
           tabIndex="0"
           type="number"
           step="1"
           min="0"
           value={getMaxResolutionWidth(this.props.store)}
-          onClick={e => {
-            e.preventDefault();
-            e.target.focus();
-            e.target.select();
-          }}
-          onChange={onChange}
+          readOnly={true}
         />
         &nbsp;{"x"}&nbsp;
         <input
-          id="maxResolutionHeight"
           tabIndex="0"
           type="number"
           step="1"
           min="0"
           value={getMaxResolutionHeight(this.props.store)}
-          onClick={e => {
-            e.preventDefault();
-            e.target.focus();
-            e.target.select();
-          }}
+          readOnly={true}
+        />
+        &nbsp;
+        <Slider
+          step={0.1}
+          min={0.1}
+          max={1.0}
+          value={getMaxResolutionWidth(this.props.store) / getScreenResolutionWidth()}
           onChange={onChange}
         />
       </div>
