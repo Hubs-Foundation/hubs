@@ -4,6 +4,7 @@ import { addComponent, hasComponent } from "bitecs";
 import { MediaType } from "./utils/media-utils";
 import { COLLISION_LAYERS } from "./constants";
 import { RIGIDBODY_FLAGS } from "./systems/bit-physics";
+import { Layers } from "./components/layers";
 
 const defaults = {
   bounds: { x: 1, y: 1, z: 1 },
@@ -47,6 +48,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
       side: THREE.DoubleSide
     })
   );
+  guide.layers.set(Layers.CAMERA_LAYER_UI);
   // TODO: This is a hack around the physics system addBody call requiring its body to have parent
   guide.parent = new THREE.Group();
   addObject3DComponent(world, eid, guide);
