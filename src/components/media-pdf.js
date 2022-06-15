@@ -25,7 +25,7 @@ AFRAME.registerComponent("media-pdf", {
     src: { type: "string" },
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
-    index: { default: 0 },
+    index: { default: 0 }
   },
 
   init() {

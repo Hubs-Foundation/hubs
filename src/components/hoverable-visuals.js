@@ -1,4 +1,3 @@
-import { forEachMaterial } from "../utils/material-utils";
 import { showHoverEffect } from "../utils/permissions-utils";
 
 const interactorOneTransform = [];

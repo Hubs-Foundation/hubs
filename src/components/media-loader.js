@@ -15,7 +15,6 @@ import {
   isLocalHubsAvatarUrl
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
-import qsTruthy from "../utils/qs_truthy";
 
 import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 import { SOUND_MEDIA_LOADING, SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
