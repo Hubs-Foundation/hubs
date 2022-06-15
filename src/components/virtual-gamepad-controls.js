@@ -5,6 +5,8 @@ function insertAfter(el, referenceEl) {
   referenceEl.parentNode.insertBefore(el, referenceEl.nextSibling);
 }
 
+const ROTATION_SPEED = 0.025;
+
 /**
  * Instantiates 2D virtual gamepads and emits associated events.
  * @namespace user-input
@@ -173,10 +175,9 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     // Set pitch and yaw angles on right stick move
     const angle = joystick.angle.radian;
     const force = joystick.force < 1 ? joystick.force : 1;
-    const turnStrength = 0.05;
     this.rotating = true;
-    this.lookDy = -Math.cos(angle) * force * turnStrength;
-    this.lookDx = Math.sin(angle) * force * turnStrength;
+    this.lookDy = -Math.cos(angle) * force * ROTATION_SPEED;
+    this.lookDx = Math.sin(angle) * force * ROTATION_SPEED;
   },
 
   onLookJoystickEnd() {
