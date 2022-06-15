@@ -10,8 +10,8 @@ import {
 import { addMedia } from "../utils/media-utils";
 import { pixelsToPNG, RenderTargetRecorder } from "../utils/render-target-recorder";
 import { isFacingCamera } from "../utils/three-utils";
-import { SOUND_CAMERA_TOOL_COUNTDOWN, SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "./sound-effects-system";
-import { paths } from "./userinput/paths";
+import { SOUND_CAMERA_TOOL_COUNTDOWN, SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
+import { paths } from "../systems/userinput/paths";
 
 // Prefer h264 if available due to faster decoding speec on most platforms
 const videoCodec = ["h264", "vp9,opus", "vp8,opus", "vp9", "vp8"].find(
@@ -275,7 +275,7 @@ const cameraToolQuery = defineQuery([CameraTool]);
 const cameraToolEnterQuery = enterQuery(cameraToolQuery);
 const cameraToolExitQuery = exitQuery(cameraToolQuery);
 
-export function cameraSystem(world) {
+export function cameraToolSystem(world) {
   cameraToolEnterQuery(world).forEach(function(eid) {
     const renderTarget = new THREE.WebGLRenderTarget(RENDER_WIDTH, RENDER_HEIGHT, {
       format: THREE.RGBAFormat,
