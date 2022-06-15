@@ -79,6 +79,9 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     if (!isChanged) {
       return;
     }
+    if ((newEnableLeft || newEnableRight) && !this.mockJoystickContainer.parentNode) {
+      insertAfter(this.mockJoystickContainer, this.el.sceneEl.canvas);
+    }
     if (!this.enableLeft && newEnableLeft) {
       this.createLeftStick();
     } else if (this.enableLeft && !newEnableLeft) {
@@ -112,12 +115,8 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
       this.rightMockSmall.classList.remove(styles.hidden);
       this.rightStick.on("start", this.onFirstInteraction);
     }
-    if ((this.enableLeft || this.enableRight) && !this.mockJoystickContainer.parentNode) {
-      insertAfter(this.mockJoystickContainer, this.el.sceneEl.canvas);
-    }
-    if (!this.enableLeft && !this.enableRight) {
-      this.mockJoystickContainer.parentNode &&
-        this.mockJoystickContainer.parentNode.removeChild(this.mockJoystickContainer);
+    if (!this.enableLeft && !this.enableRight && this.mockJoystickContainer.parentNode) {
+      this.mockJoystickContainer.parentNode.removeChild(this.mockJoystickContainer);
     }
   },
 
