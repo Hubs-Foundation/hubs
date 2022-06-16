@@ -12,6 +12,7 @@ import { pixelsToPNG, RenderTargetRecorder } from "../utils/render-target-record
 import { isFacingCamera } from "../utils/three-utils";
 import { SOUND_CAMERA_TOOL_COUNTDOWN, SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { paths } from "../systems/userinput/paths";
+import { ObjectTypes } from "../object-types";
 
 // Prefer h264 if available due to faster decoding speec on most platforms
 const videoCodec = ["h264", "vp9,opus", "vp8,opus", "vp9", "vp8"].find(
@@ -96,41 +97,7 @@ function endRecording(world, eid, cancel) {
     recorder.cancel();
   } else {
     recorder.save().then(file => {
-      const { entity, orientation } = addMedia(file, "#interactable-media", undefined, "video-camera", false);
-
-      const cameraObj = world.eid2obj.get(eid);
-      entity.object3D.position.copy(cameraObj.localToWorld(new THREE.Vector3(0, -0.5, 0)));
-
-      AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
-
-      // const { entity, orientation } = addAndArrangeMedia(
-      //   this.el,
-      //   new File([blob], "capture", { type: mimeType.split(";")[0] }), // Drop codec
-      //   "video-camera",
-      //   this.localSnapCount,
-      //   !!this.playerIsBehindCamera
-      // );
-
-      // entity.addEventListener(
-      //   "video-loaded",
-      //   () => {
-      //     // If we were recording audio, then pause the video immediately after starting.
-
-      //     // Or, to limit the # of concurrent videos playing, if it was a short clip, let it loop
-      //     // a few times and then pause it.
-      //     if (captureAudio || recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
-      //       setTimeout(() => {
-      //         if (!NAF.utils.isMine(entity) && !NAF.utils.takeOwnership(entity)) return;
-      //         entity.components["media-video"].tryUpdateVideoPlaybackState(true);
-      //       }, captureAudio ? 0 : recordingDuration * VIDEO_LOOPS + 100);
-      //     }
-      //   },
-      //   { once: true }
-      // );
-
-      // this.localSnapCount++;
-
-      // orientation.then(() => this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA }));
+      spawnCameraFile(world.eid2obj.get(camera), file, "video");
     });
   }
   videoRecorders.delete(eid);
@@ -239,38 +206,50 @@ function updateUI(world, camera) {
   }
 }
 
+function spawnCameraFile(cameraObj, file, type) {
+  const { entity } = addMedia(file, "#interactable-media", undefined, `${type}-camera`, false);
+  entity.addEventListener(
+    "media_resolved",
+    () => {
+      AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
+      // TODO animate and orient around camera
+      entity.object3D.position.copy(cameraObj.localToWorld(new THREE.Vector3(0, -0.5, 0)));
+      entity.object3D.quaternion.copy(cameraObj.quaternion);
+      entity.object3D.matrixNeedsUpdate = true;
+      APP.hubChannel.sendMessage({ src: entity.components["media-loader"].data.src }, type);
+      APP.hubChannel.sendObjectSpawnedEvent(ObjectTypes.CAMERA);
+    },
+    { once: true }
+  );
+
+  // entity.addEventListener(
+  //   "video-loaded",
+  //   () => {
+  //     // If we were recording audio, then pause the video immediately after starting.
+
+  //     // Or, to limit the # of concurrent videos playing, if it was a short clip, let it loop
+  //     // a few times and then pause it.
+  //     if (captureAudio || recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
+  //       setTimeout(() => {
+  //         if (!NAF.utils.isMine(entity) && !NAF.utils.takeOwnership(entity)) return;
+  //         entity.components["media-video"].tryUpdateVideoPlaybackState(true);
+  //       }, captureAudio ? 0 : recordingDuration * VIDEO_LOOPS + 100);
+  //     }
+  //   },
+  //   { once: true }
+  // );
+}
+
 let snapPixels;
 function captureSnapshot(world, camera) {
-  const sceneEl = AFRAME.scenes[0];
-  const renderer = AFRAME.scenes[0].renderer;
-
-  const cameraObj = world.eid2obj.get(camera);
-
   if (!snapPixels) {
     snapPixels = new Uint8Array(RENDER_WIDTH * RENDER_HEIGHT * 4);
   }
-
+  const renderer = AFRAME.scenes[0].renderer;
   renderer.readRenderTargetPixels(renderTargets.get(camera), 0, 0, RENDER_WIDTH, RENDER_HEIGHT, snapPixels);
-
   pixelsToPNG(snapPixels, RENDER_WIDTH, RENDER_HEIGHT).then(file => {
-    const { entity, orientation } = addMedia(file, "#interactable-media", undefined, "photo-camera", false);
-
-    entity.object3D.position.copy(cameraObj.localToWorld(new THREE.Vector3(0, -0.5, 0)));
-
-    // const { orientation } = addAndArrangeMedia(
-    //   this.el,
-    //   file,
-    //   "photo-camera",
-    //   this.localSnapCount,
-    //   !!this.playerIsBehindCamera
-    // );
-
-    // orientation.then(() => {
-    //   this.el.sceneEl.emit("object_spawned", { objectType: ObjectTypes.CAMERA });
-    // });
+    spawnCameraFile(world.eid2obj.get(camera), file, "photo");
   });
-  sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
-  // this.localSnapCount++;
 }
 
 const cameraToolQuery = defineQuery([CameraTool]);
@@ -289,6 +268,7 @@ export function cameraToolSystem(world) {
     });
 
     renderTarget.lastUpdated = 0;
+    renderTarget.needsUpdate = true;
 
     // Bit of a hack here to only update the renderTarget when the screens are in view
     renderTarget.texture.isVideoTexture = true;
