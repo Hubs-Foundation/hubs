@@ -8,7 +8,7 @@ export function CreateRoomButton() {
   const breakpoint = useCssBreakpoints();
 
   return (
-    <Button
+    <Button style={{backgroundColor: "#ff1100" ,  borderRadius: "30px", border: "none" }}
       thick={breakpoint === "sm" || breakpoint === "md"}
       xl={breakpoint !== "sm" && breakpoint !== "md"}
       preset="landing"

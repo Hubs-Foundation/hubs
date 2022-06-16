@@ -1,0 +1,53 @@
+Form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0 20px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    color:rgba(0, 0, 0, 0.1);
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.25px;
+    text-align: left;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+h1 {
+    font-size: 24px;
+    color: #eee;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.25px;
+    text-align: center;
+    text-transform: none;
+    margin: 0 0 20px;
+}
+
+Field {
+    background-color: #eee;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    color: #333;
+    display: block;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+
+    margin: 0 0 20px;
+    padding: 10px;
+    width: 100%;
+    -webkit-font-smoothing: antialiased;
+    
+}

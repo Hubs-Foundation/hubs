@@ -25,7 +25,7 @@
   
   img {
     width: 100%;
-    align-self: flex-start;
+    align-self: auto;
   }
 
   @media (min-width: theme.$breakpoint-lg) {
@@ -62,7 +62,7 @@
 
   img {
     @media (min-width: theme.$breakpoint-lg) {
-      border-radius: 16px;
+      border-radius:0px;
     }
   }
 }
@@ -72,10 +72,10 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1px;
 
   & > * {
-    margin-bottom: 20px;
+    margin-bottom: 1px;
   }
   
   @media (min-width: theme.$breakpoint-lg) {
@@ -145,25 +145,26 @@
   
   img {
     width: 100%;
-    border-radius: 12px;
+ 
   }
 }
 
 :local(.rooms-container) {
-  margin-top: 120px !important;
+  margin-top: 60px !important;
+  background-color: #13141d!important;
   display: flex;
   flex-direction: column;
 }
 
 :local(.rooms-heading) {
-  margin-left: 40px;
-  font-size: 24px;
-  margin-bottom: 16px;
+
+  font-size: 34px;
+  margin-bottom: 6px;
 }
  
 :local(.rooms) {
-  background-color: theme.$background2-color;
-  border-radius: 16px;
+  background-color: #13141d!important;
+  border-radius: 0px;
 }
 
 :local(.row) {
