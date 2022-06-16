@@ -167,7 +167,6 @@ import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/auto-pixel-ratio";
 import "./systems/idle-detector";
-import "./systems/camera-tools";
 import "./systems/pen-tools";
 import "./systems/userinput/userinput";
 import "./systems/userinput/userinput-debug";

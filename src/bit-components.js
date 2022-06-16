@@ -100,6 +100,7 @@ export const CameraTool = defineComponent({
   snapTime: Types.f32,
   state: Types.ui8,
   captureDurIdx: Types.ui8,
+  trackTarget: Types.eid,
 
   snapMenuRef: Types.eid,
   button_next: Types.eid,
@@ -113,6 +114,7 @@ export const CameraTool = defineComponent({
   countdownLblRef: Types.eid,
   captureDurLblRef: Types.eid
 });
+export const MyCameraTool = defineComponent();
 
 window.$C = {
   CameraTool

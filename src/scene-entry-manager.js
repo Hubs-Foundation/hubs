@@ -22,7 +22,9 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
-import { removeEntity } from "bitecs";
+import { addComponent, removeEntity } from "bitecs";
+import { MyCameraTool } from "./bit-components";
+import { anyEntityWith } from "./utils/bit-utils";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -419,17 +421,20 @@ export default class SceneEntryManager {
 
   _setupCamera = () => {
     this.scene.addEventListener("action_toggle_camera", () => {
-      console.log("toggle camera");
-      if (window.cameraEID) {
-        removeEntity(APP.world, window.cameraEID);
-        window.cameraEID = 0;
+      const myCam = anyEntityWith(APP.world, MyCameraTool);
+      if (myCam) {
+        removeEntity(APP.world, myCam);
+        this.scene.removeState("camera");
       } else {
         const avatarPov = document.querySelector("#avatar-pov-node").object3D;
         const eid = createNetworkedEntity(APP.world, "camera");
+        addComponent(APP.world, MyCameraTool, eid);
+
         const obj = APP.world.eid2obj.get(eid);
         obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
         obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
-        window.cameraEID = eid;
+
+        this.scene.addState("camera");
       }
     });
 

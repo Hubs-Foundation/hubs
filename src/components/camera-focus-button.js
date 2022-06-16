@@ -1,4 +1,8 @@
+import { CameraTool, MyCameraTool } from "../bit-components";
+import { anyEntityWith } from "../utils/bit-utils";
 import { findComponentsInNearestAncestor } from "../utils/scene-graph";
+
+const tmpPos = new THREE.Vector3();
 AFRAME.registerComponent("camera-focus-button", {
   schema: {
     track: { default: false },
@@ -6,8 +10,6 @@ AFRAME.registerComponent("camera-focus-button", {
   },
 
   init() {
-    this.cameraSystem = this.el.sceneEl.systems["camera-tools"];
-
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       if (this.data.selector) {
         this.targetEl = networkedEl.querySelector(this.data.selector);
@@ -17,10 +19,16 @@ AFRAME.registerComponent("camera-focus-button", {
     });
 
     this.onClick = () => {
-      const myCamera = this.cameraSystem.getMyCamera();
-      if (!myCamera) return;
+      const myCam = anyEntityWith(APP.world, MyCameraTool);
+      if (!myCam) return;
 
-      myCamera.components["camera-tool"].focus(this.targetEl, this.data.track);
+      if (this.data.track) {
+        const tracking = CameraTool.trackTarget[myCam];
+        CameraTool.trackTarget[myCam] = tracking === this.targetEl.eid ? 0 : this.targetEl.eid;
+      } else {
+        this.targetEl.object3D.getWorldPosition(tmpPos);
+        APP.world.eid2obj.get(myCam).lookAt(tmpPos);
+      }
     };
 
     this.menuPlacementRoots = findComponentsInNearestAncestor(this.el, "position-at-border");
@@ -28,10 +36,9 @@ AFRAME.registerComponent("camera-focus-button", {
 
   tick() {
     const isVisible = this.el.object3D.visible;
-    const shouldBeVisible = !!(this.cameraSystem && this.cameraSystem.getMyCamera());
-
+    const shouldBeVisible = !!anyEntityWith(APP.world, MyCameraTool);
     if (isVisible !== shouldBeVisible) {
-      this.el.setAttribute("visible", shouldBeVisible);
+      this.el.object3D.visible = shouldBeVisible;
       for (let i = 0; i < this.menuPlacementRoots.length; i++) {
         this.menuPlacementRoots[i].markDirty();
       }

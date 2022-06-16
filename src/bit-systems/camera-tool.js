@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import {
   CameraTool,
   HeldHandLeft,
@@ -46,6 +46,8 @@ const CAPTURE_DURATIONS = [3, 7, 15, 30, 60];
 
 const renderTargets = new Map();
 const videoRecorders = new Map();
+
+const tmpVec3 = new THREE.Vector3();
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -309,6 +311,15 @@ export function cameraToolSystem(world) {
   });
 
   cameraToolQuery(world).forEach((camera, i, allCameras) => {
+    if (CameraTool.trackTarget[camera]) {
+      if (entityExists(world, CameraTool.trackTarget[camera])) {
+        world.eid2obj.get(CameraTool.trackTarget[camera]).getWorldPosition(tmpVec3);
+        world.eid2obj.get(camera).lookAt(tmpVec3);
+      } else {
+        CameraTool.trackTarget[camera] = 0;
+      }
+    }
+
     if (CameraTool.state[camera] === CAMERA_STATE.IDLE) {
       if (clicked(CameraTool.snapRef[camera]) || grabberPressedSnapAction(world, camera)) {
         CameraTool.state[camera] = CAMERA_STATE.COUNTDOWN_PHOTO;
