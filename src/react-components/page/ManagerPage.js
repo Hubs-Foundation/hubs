@@ -85,7 +85,8 @@ function ManagerHome() {
   const [filterExhibitionList, setfilterExhibitionList] = useState({
     page: 1,
     pageSize: 4,
-    sort: "id|desc" //format <attribute>|<order type>
+    sort: "id|desc", //format <attribute>|<order type>
+    isAdmin: 1,
   });
 
   const [filterProjectList, setfilterProjectList] = useState({
@@ -910,7 +911,7 @@ function ManagerHome() {
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
                           <span className="ml-1">
-                            <Moment format="YYYY-MM-DD">{item.startDate}</Moment>
+                          <Moment format="YYYY-MM-DD">{item.startDate}</Moment>  <span style={{padding: '0 10px'}}>to</span> <Moment format="YYYY-MM-DD">{item.endDate}</Moment>
                           </span>
                         </div>
                       </div>

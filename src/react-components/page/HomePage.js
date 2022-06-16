@@ -314,7 +314,7 @@ function Home() {
                     </p>
                     <p className="p-1">
                       <MdCalendarToday />
-                      <Moment format="YYYY-MM-DD">{item.startDate}</Moment>
+                      <Moment format="YYYY-MM-DD">{item.startDate}</Moment>  <span style={{padding: '0 10px'}}>to</span> <Moment format="YYYY-MM-DD">{item.endDate}</Moment>
                     </p>
                   </div>
                   <ActionButton/>
