@@ -22,17 +22,25 @@ const DEFAULT_COLORS = {
   "nametag-border-color-raised-hand": "#FFCD74"
 };
 
+// Note: duplicated logic in react-components/styles/theme.js
+const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+let isDarkMode = darkmodeQuery.matches;
+darkmodeQuery.addEventListener("change", event => {
+  isDarkMode = event.matches;
+});
+
 function getThemeColor(name) {
+  const themes = configs.APP_CONFIG?.theme?.themes;
+
   const themeId = window.APP?.store?.state?.preferences?.theme;
 
   const theme =
-    (themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId)) ||
-    configs.APP_CONFIG?.theme?.themes?.find(theme => theme.default === true);
-  if (theme?.variables?.[name]) {
-    return theme.variables[name];
-  }
+    themes &&
+    ((themeId && themes.find(t => t.id === themeId)) ||
+      (isDarkMode && themes.find(t => t.darkModeDefault)) ||
+      themes.find(t => t.default === true));
 
-  return DEFAULT_COLORS[name];
+  return theme?.variables?.[name] || DEFAULT_COLORS[name];
 }
 
 function activateTheme() {
