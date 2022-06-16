@@ -220,8 +220,11 @@ export function renderAsEntity(world, entityDef) {
   if (entityDef.attrs.name) {
     obj.name = entityDef.attrs.name;
   }
-  if (entityDef.attrs.layers) {
+  if (entityDef.attrs.layers !== undefined) {
     obj.layers.mask = entityDef.attrs.layers;
+  }
+  if (entityDef.attrs.visible !== undefined) {
+    obj.visible = entityDef.attrs.visible;
   }
   entityDef.children.forEach(child => {
     if (child.type === "a-entity") {
