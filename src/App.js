@@ -1,5 +1,5 @@
 import * as bitecs from "bitecs";
-import { addEntity, createWorld, defineQuery, pipe } from "bitecs";
+import { addEntity, createWorld } from "bitecs";
 import "./aframe-to-bit-components";
 import { AEntity, Networked, Object3DTag, Owned, Spin } from "./bit-components";
 import MediaSearchStore from "./storage/media-search-store";
