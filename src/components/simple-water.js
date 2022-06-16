@@ -335,6 +335,10 @@ AFRAME.registerComponent("simple-water", {
   },
 
   remove() {
+    const mesh = this.el.getObject3D("mesh");
+    mesh.geometry.dispose();
+    // mesh.material.normalMap.dispose(); // the texture may be used by another component
+    mesh.material.dispose();
     this.el.removeObject3D("mesh");
   }
 });
