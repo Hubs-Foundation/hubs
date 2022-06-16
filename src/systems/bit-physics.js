@@ -1,9 +1,9 @@
-import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeComponent } from "bitecs";
-import { Object3DTag, Rigidbody, PhysicsShape } from "../bit-components";
+import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not, removeComponent } from "bitecs";
+import { Object3DTag, Rigidbody, PhysicsShape, AEntity } from "../bit-components";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 // import { holdableButtonSystem } from "./holdable-button-system";
 
-const rigidbodyQuery = defineQuery([Rigidbody, Object3DTag]);
+const rigidbodyQuery = defineQuery([Rigidbody, Object3DTag, Not(AEntity)]);
 const rigidbodyEnteredQuery = enterQuery(rigidbodyQuery);
 const rigidbodyExitedQuery = exitQuery(rigidbodyQuery);
 const shapeExitQuery = exitQuery(defineQuery([PhysicsShape]));
@@ -18,11 +18,6 @@ export const physicsCompatSystem = world => {
   const eids = rigidbodyEnteredQuery(world);
   for (let i = 0; i < eids.length; i++) {
     const eid = eids[i];
-
-    // TODO body-helper aframe component handles this for aframe entities so we skip it here
-    if (Rigidbody.bodyId[eid]) {
-      continue;
-    }
 
     const obj = world.eid2obj.get(eid);
 
