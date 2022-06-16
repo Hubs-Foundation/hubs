@@ -183,6 +183,7 @@ function ManagerHome() {
         description: exhibition?.room?.description,
         sceneId: exhibition.sceneId,
         startDate: moment(exhibition.startDate).format("YYYY-MM-DD"),
+        endDate: moment(exhibition.endDate).format("YYYY-MM-DD"),
         public: exhibition.public,
         maxSize: exhibition.maxSize
       });
@@ -500,6 +501,10 @@ function ManagerHome() {
         toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
       } else if (res.result == "fail" && res.error == "invalid_startDate") {
         toast.error("You must select the start date !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_endDate") {
+        toast.error("You must select the end date !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_date") {
+        toast.error("The end day must be after the start day !", { autoClose: 5000 });
       } else {
         toast.error("System error Please try again later !", { autoClose: 5000 });
       }
@@ -520,13 +525,17 @@ function ManagerHome() {
       } else if (res.result == "fail" && res.error == "verify_token_fail") {
         toast.error("You do not have permission to change or create !", { autoClose: 5000 });
       } else if (res.result == "fail" && res.error == "create_exhibition_error") {
-        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people!", { autoClose: 5000 });
+        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people !", { autoClose: 5000 });
       } else if (res.result == "fail" && res.error == "invalid_name") {
         toast.error("name should be length 4-255 !", { autoClose: 5000 });
       } else if (res.result == "fail" && res.error == "invalid_maxSize") {
         toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
       } else if (res.result == "fail" && res.error == "invalid_startDate") {
         toast.error("You must select the start date !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_endDate") {
+        toast.error("You must select the end date !", { autoClose: 5000 });
+      } else if (res.result == "fail" && res.error == "invalid_date") {
+        toast.error("The end day must be after the start day !", { autoClose: 5000 });
       } else {
         toast.error("System error Please try again later !", { autoClose: 5000 });
       }
@@ -1138,7 +1147,7 @@ function ManagerHome() {
               content={
                 <>
                   <form className="create100-form validate-form d-flex" name="form">
-                    <div className="w-60">
+                    <div style={{width: '50%', padding: '10px'}}>
                       <div className="p-t-13 p-b-9">
                         <span className="txt1">Name Exhibition</span>
                       </div>
@@ -1164,29 +1173,30 @@ function ManagerHome() {
                           onChange={handleChange}
                           placeholder="Description about tour"
                           rows="10"
+                          style={{height: '205px'}}
                         />
                         <span className="focus-input100" />
                       </div>
-                      <div className="p-t-13 p-b-9">
-                        <span className="txt1">Public</span>
-                      </div>
-                      <label className="switch">
-                        <input
-                          type="checkbox"
-                          name="public"
-                          checked={exhibition ? exhibition.public : undefined}
-                          onChange={handleChange}
-                        />
-                        <span className="slider" />
-                      </label>
-                    </div>
-                    <div className="w-40">
-                      <div className="d-flex-form">
-                        <div className="item-input">
+                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <div style={{width: '40%'}}>
                           <div className="p-t-13 p-b-9">
+                            <span className="txt1" style={{fontSize: '13px'}}>Public</span>
+                          </div>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              name="public"
+                              checked={exhibition ? exhibition.public : undefined}
+                              onChange={handleChange}
+                            />
+                            <span className="slider" />
+                          </label>
+                        </div>
+                        <div style={{width: '60%', paddingTop: '10px'}}>
+                          <div style={{float: 'left', height: '50px', width: '40%', display: 'flex', alignItems: 'center', justifyContent: 'right', paddingRight: '10px'}}>
                             <span className="txt1">Max Size</span>
                           </div>
-                          <div className="wrap-input100 validate-input">
+                          <div className="wrap-input100 validate-input"  style={{float: 'left', width: '60%'}}>
                             <input
                               className="input100"
                               type="number"
@@ -1199,7 +1209,11 @@ function ManagerHome() {
                             <span className="focus-input100" />
                           </div>
                         </div>
-                        <div className="item-input">
+                      </div>
+                    </div>
+                    <div style={{width: '50%', padding: '5px'}}>
+                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <div className="item-input" style={{width: '48%'}}>
                           <div className="p-t-13 p-b-9">
                             <span className="txt1">Start day</span>
                           </div>
@@ -1210,6 +1224,22 @@ function ManagerHome() {
                               name="startDate"
                               placeholder="dd-mm-yyyy"
                               value={exhibition ? exhibition.startDate : undefined}
+                              onChange={handleChange}
+                            />
+                            <span className="focus-input100" />
+                          </div>
+                        </div>
+                        <div className="item-input" style={{width: '48%'}}>
+                          <div className="p-t-13 p-b-9">
+                            <span className="txt1">End day</span>
+                          </div>
+                          <div className="wrap-input100 validate-input">
+                            <input
+                              className="input100"
+                              type="date"
+                              name="endDate"
+                              placeholder="dd-mm-yyyy"
+                              value={exhibition ? exhibition.endDate : undefined}
                               onChange={handleChange}
                             />
                             <span className="focus-input100" />
