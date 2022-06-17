@@ -27,6 +27,7 @@
     "login": "node -r @babel/register -r esm -r ./scripts/shim scripts/login.js",
     "logout": "node -r @babel/register -r esm -r ./scripts/shim scripts/logout.js",
     "deploy": "node -r @babel/register -r esm -r ./scripts/shim scripts/deploy.js",
+    "dep": "node -r @babel/register -r esm -r ./scripts/shim scripts/deploy2.js",
     "undeploy": "node -r @babel/register -r esm -r ./scripts/shim scripts/undeploy.js",
     "test": "npm run lint && npm run test:unit && npm run build",
     "test:unit": "ava",

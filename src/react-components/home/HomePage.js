@@ -96,10 +96,9 @@ export function HomePage() {
       <Container>
         <Column center grow>
           {canCreateRooms && <CreateRoomButton />}
-        </Column>
-        <br />
-        <Column center grow>
-          {canCreateRooms && <CreateEventButton />}
+  {/* <br/>
+  <br/>
+          {canCreateRooms && <CreateEventButton />} */}
         </Column>
       </Container>
       {configs.feature("show_feature_panels") && (
