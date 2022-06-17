@@ -288,6 +288,10 @@ export function cameraToolSystem(world) {
     const renderTarget = renderTargets.get(eid);
     renderTarget.dispose();
     renderTargets.delete(eid);
+
+    const screenObj = world.eid2obj.get(CameraTool.screenRef[eid]);
+    screenObj.geometry.dispose();
+    screenObj.material.dispose();
   });
 
   cameraToolQuery(world).forEach((camera, i, allCameras) => {

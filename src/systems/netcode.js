@@ -50,7 +50,6 @@ export function createNetworkedEntityFromRemote(world, prefabName, initialData, 
   });
 
   AFRAME.scenes[0].object3D.add(obj);
-  console.log("Spawning network object", prefabName, obj, eid);
   return eid;
 }
 

@@ -53,7 +53,7 @@ class GLTFCache {
     }
   }
 }
-const gltfCache = new GLTFCache();
+export const gltfCache = new GLTFCache();
 const inflightGltfs = new Map();
 
 const extractZipFile = promisifyWorker(new SketchfabZipWorker());

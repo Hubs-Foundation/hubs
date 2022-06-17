@@ -154,7 +154,7 @@ import { updateSlice9Geometry } from "../update-slice9-geometry";
 import { loadModel } from "../components/gltf-model-plus";
 
 function inflateSlice9(world, eid, { size, insets, texture }) {
-  const geometry = (this.geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3));
+  const geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3);
   const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false });
   const obj = new THREE.Mesh(geometry, material);
   addObject3DComponent(world, eid, obj);

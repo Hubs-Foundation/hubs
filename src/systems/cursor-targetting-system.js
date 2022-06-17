@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery } from "bitecs";
+import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { CursorRaycastable } from "../bit-components";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
@@ -22,6 +22,7 @@ AFRAME.registerComponent("overwrite-raycast-as-noop", {
 
 const cursorRaycastableQuery = defineQuery([CursorRaycastable]);
 const enteredCursorRaycastableQuery = enterQuery(cursorRaycastableQuery);
+const exitedCurserRaycastableQuery = exitQuery(cursorRaycastableQuery);
 
 export class CursorTargettingSystem {
   constructor() {
@@ -43,7 +44,11 @@ export class CursorTargettingSystem {
   }
 
   tick(t) {
-    if (this.dirty || enteredCursorRaycastableQuery(APP.world).length) {
+    if (
+      this.dirty ||
+      enteredCursorRaycastableQuery(APP.world).length ||
+      exitedCurserRaycastableQuery(APP.world).length
+    ) {
       this.populateEntities(this.targets);
       this.dirty = false;
     }
