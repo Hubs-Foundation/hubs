@@ -1,25 +1,20 @@
 import { defineQuery, exitQuery, removeEntity } from "bitecs";
-import { GLTFModel, Object3DTag, Slice9, Text } from "../bit-components";
+import { GLTFModel, MediaFrame, Object3DTag, Slice9, Text } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 
-const exitedGTLFQuery = exitQuery(defineQuery([GLTFModel]));
-function cleanupGLTFs(world) {
-  exitedGTLFQuery(world).forEach(eid => gltfCache.release(world.eid2obj.get(eid).userData.gltfSrc));
+function cleanupObjOnExit(Component, f) {
+  const query = exitQuery(defineQuery([Component]));
+  return function(world) {
+    query(world).forEach(eid => f(world.eid2obj.get(eid)));
+  };
 }
 
-const exitedSlice9Query = exitQuery(defineQuery([Slice9]));
-function cleanupSlice9s(world) {
-  // TODO slice9's currently all share textures so we can't easily dispose of them here
-  // with three 136's Source API we can just have them each have their own Texture instace
-  // and the new Source concept will deal with deduping and disposing of no longer referenced things.
-  // That said, we likely will never actually dispose of the slice9 textures anyway since they are used in UI.
-  exitedSlice9Query(world).forEach(eid => world.eid2obj.get(eid).geometry.dispose());
-}
-
-const exitedTextQuery = exitQuery(defineQuery([Text]));
-function cleanupTexts(world) {
-  exitedTextQuery(world).forEach(eid => world.eid2obj.get(eid).dispose());
-}
+// NOTE we don't dispose of slice9's textures here, its non trivial since they are shared.
+// We want to keep them loaded anyway since we only have a few and want them to load instantly.
+const cleanupSlice9s = cleanupObjOnExit(Slice9, obj => obj.geometry.dispose());
+const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => gltfCache.release(obj.userData.gltfSrc));
+const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
+const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
 
 // TODO This feels messy and brittle
 //
@@ -55,6 +50,7 @@ export function removeObject3DSystem(world) {
   cleanupGLTFs(world);
   cleanupSlice9s(world);
   cleanupTexts(world);
+  cleanupMediaFrames(world);
 
   // Finally remove all the entiteis we just removed from the eid2obj map
   entities.forEach(removeFromMap);

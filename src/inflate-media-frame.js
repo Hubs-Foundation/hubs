@@ -13,7 +13,7 @@ const defaults = {
 export function inflateMediaFrame(world, eid, componentProps) {
   componentProps = Object.assign({}, defaults, componentProps);
   const guide = new THREE.Mesh(
-    new THREE.BoxGeometry(componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z),
+    new THREE.BoxBufferGeometry(componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z),
     new THREE.ShaderMaterial({
       uniforms: {
         color: { value: new THREE.Color(0x2f80ed) }
