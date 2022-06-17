@@ -45,7 +45,7 @@ export const NetworkedTransform = defineComponent({
 
 export const AEntity = defineComponent();
 export const Object3DTag = defineComponent();
-export const Spin = defineComponent({ x: Types.f32, y: Types.f32, z: Types.f32 });
+export const GLTFModel = defineComponent();
 export const CursorRaycastable = defineComponent();
 export const RemoteHoverTarget = defineComponent();
 export const NotRemoteHoverTarget = defineComponent();

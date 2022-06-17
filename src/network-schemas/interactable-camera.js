@@ -2,14 +2,11 @@
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 import buttonSrc from "../assets/hud/button.9.png";
-import { loadModel } from "../components/gltf-model-plus";
 import { Layers } from "../components/layers";
 import { COLLISION_LAYERS } from "../constants";
 import { BUTTON_TYPES } from "../systems/single-action-button-system";
-import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { createElementEntity, createRef } from "../utils/jsx-entity";
 import { textureLoader } from "../utils/media-utils";
-import { cloneObject3D } from "../utils/three-utils";
 
 const buttonTexture = textureLoader.load(buttonSrc);
 
@@ -42,18 +39,10 @@ function Label({ text, ...props }, ...children) {
   return <entity name="Label" text={{ value, ...text }} layers={1 << Layers.CAMERA_LAYER_UI} {...props} />;
 }
 
-let model;
-(async () => {
-  model = await waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
-  // TODO: What if model didn't load by the time we need it?
-})();
-
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 
 export function CameraPrefab(_props) {
-  const cameraModel = cloneObject3D(model.scene);
-
   const snapMenuRef = createRef();
 
   const snapRef = createRef();
@@ -127,15 +116,9 @@ export function CameraPrefab(_props) {
         scale={[-2, 2, 2]}
       />
 
-      <entity object3D={cameraModel} scale={[2, 2, 2]} />
+      <entity name="Camera Model" model={{ src: cameraModelSrc }} scale={[2, 2, 2]} />
 
-      <entity
-        name="Camera Model"
-        ref={cameraRef}
-        object3D={camera}
-        position={[0, 0, 0.05]}
-        rotation={[0, Math.PI, 0]}
-      />
+      <entity ref={cameraRef} object3D={camera} position={[0, 0, 0.05]} rotation={[0, Math.PI, 0]} />
 
       <entity name="Snap Menu" ref={snapMenuRef}>
         <Label ref={countdownLblRef} position={[0, 0, uiZ + 0.02]} />

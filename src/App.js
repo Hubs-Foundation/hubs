@@ -1,7 +1,7 @@
 import * as bitecs from "bitecs";
 import { addEntity, createWorld } from "bitecs";
 import "./aframe-to-bit-components";
-import { AEntity, Networked, Object3DTag, Owned, Spin } from "./bit-components";
+import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
 import MediaSearchStore from "./storage/media-search-store";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
