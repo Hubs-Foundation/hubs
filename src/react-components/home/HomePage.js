@@ -21,6 +21,8 @@ import { SignInButton } from "./SignInButton";
 import { AppLogo } from "../misc/AppLogo";
 import { isHmc } from "../../utils/isHmc";
 import maskEmail from "../../utils/mask-email";
+import { Footer } from "../layout/Footer2";
+
 
 export function HomePage() {
   const auth = useContext(AuthContext);
@@ -54,7 +56,7 @@ export function HomePage() {
   const canCreateRooms = !configs.feature("disable_room_creation") || auth.isAdmin;
   const email = auth.email;
   return (
-    <PageContainer className={styles.homePage}>
+    <><PageContainer className={styles.homePage}>
       <Container>
         <div className={styles.hero}>
           {auth.isSignedIn ? (
@@ -63,8 +65,7 @@ export function HomePage() {
                 <FormattedMessage
                   id="header.signed-in-as"
                   defaultMessage="Signed in as {email}"
-                  values={{ email: maskEmail(email) }}
-                />
+                  values={{ email: maskEmail(email) }} />
               </span>
               <a href="#" onClick={auth.signOut} className={styles.mobileSignOut}>
                 <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
@@ -88,17 +89,16 @@ export function HomePage() {
                 },
                 { appName: configs.translation("app-name") }
               )}
-              src={configs.image("home_background")}
-            />
+              src={configs.image("home_background")} />
           </div>
         </div>
       </Container>
       <Container>
         <Column center grow>
           {canCreateRooms && <CreateRoomButton />}
-          </Column>
-          <br/>
-          <Column center grow>
+        </Column>
+        <br />
+        <Column center grow>
           {canCreateRooms && <CreateEventButton />}
         </Column>
       </Container>
@@ -113,8 +113,7 @@ export function HomePage() {
               <FormattedMessage
                 id="home-page.rooms-blurb"
                 defaultMessage="Share virtual spaces with your friends, co-workers, and communities. When you create a room with MetaVerse+, you’ll have a private virtual meeting space that you can instantly share <b>- no downloads or VR headset necessary.</b>"
-                values={{ b: wrapInBold }}
-              />
+                values={{ b: wrapInBold }} />
             </p>
           </Column>
           <Column padding gap="xl" className={styles.card}>
@@ -125,8 +124,7 @@ export function HomePage() {
             <p>
               <FormattedMessage
                 id="home-page.communicate-blurb"
-                defaultMessage="Choose an avatar to represent you, put on your headphones, and jump right in. Metaverse+ makes it easy to stay connected with voice and text chat to other people in your private room."
-              />
+                defaultMessage="Choose an avatar to represent you, put on your headphones, and jump right in. Metaverse+ makes it easy to stay connected with voice and text chat to other people in your private room." />
             </p>
           </Column>
           <Column padding gap="xl" className={styles.card}>
@@ -137,8 +135,7 @@ export function HomePage() {
             <p>
               <FormattedMessage
                 id="home-page.media-blurb"
-                defaultMessage="Share content with others in your room by dragging and dropping photos, videos, PDF files, links, and 3D models into your space."
-              />
+                defaultMessage="Share content with others in your room by dragging and dropping photos, videos, PDF files, links, and 3D models into your space." />
             </p>
           </Column>
         </Container>
@@ -155,10 +152,7 @@ export function HomePage() {
                   <MediaTile
                     key={room.id}
                     entry={room}
-                    processThumbnailUrl={(entry, width, height) =>
-                      scaledThumbnailUrlFor(entry.images.preview.url, width, height)
-                    }
-                  />
+                    processThumbnailUrl={(entry, width, height) => scaledThumbnailUrlFor(entry.images.preview.url, width, height)} />
                 );
               })}
             </MediaGrid>
@@ -177,28 +171,30 @@ export function HomePage() {
                   <MediaTile
                     key={room.id}
                     entry={room}
-                    processThumbnailUrl={(entry, width, height) =>
-                      scaledThumbnailUrlFor(entry.images.preview.url, width, height)
-                    }
-                  />
+                    processThumbnailUrl={(entry, width, height) => scaledThumbnailUrlFor(entry.images.preview.url, width, height)} />
                 );
               })}
             </MediaGrid>
           </Column>
         </Container>
       )}
-      <Container>
+      {/* <Container>
         <Column center grow>
           <Button thin preset="landing" as="a" href="/">
             <FormattedMessage id="home-page.have-code" defaultMessage="MetaversePlus" />
           </Button>
         </Column>
-      </Container>
+      </Container> */}
       {isHmc() ? (
         <Column center>
           <SocialBar />
+
         </Column>
       ) : null}
-    </PageContainer>
+
+    </PageContainer><div>
+        <Footer />
+      </div></>
+
   );
 }

@@ -2,9 +2,9 @@
 
 footer {
   display: block;
-  background-color: theme.$background2-color;
+  background-color: #13141d!important;
   font-size: theme.$font-size-md;
-  padding: 20px;
+  padding: 0px;
 
   @media(min-width: theme.$breakpoint-lg) {
     padding: 0;
@@ -56,7 +56,7 @@ footer {
   align-items: center;
 
   @media(min-width: theme.$breakpoint-lg) {
-    height: 80px;
+    height: 380px;
     flex-direction: row;
     align-items: inherit;
   }
@@ -75,7 +75,7 @@ footer {
 }
 
 :local(.company-logo) {
-  height: 49px;
+  height: 149px;
 
   @media(min-width: theme.$breakpoint-lg) {
     margin-left: 18px;

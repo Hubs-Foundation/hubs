@@ -11,19 +11,19 @@ import { ReactComponent as Youtube } from "../icons/SocialYoutube.svg";
 export function SocialBar({ mobile }) {
   return (
     <Container className={mobile ? styles.mobileSocialBar : styles.socialBarContainer}>
-      <a target="_blank" rel="noopener noreferrer" href="https://discord.com/invite/dFJncWwHun">
+      <a target="_blank" rel="noopener noreferrer" href="https://discord.com/">
         <Discord />
       </a>
-      <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/MozillaHubs">
+      <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/">
         <Twitter />
       </a>
-      <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/c/MozillaHubs">
+      <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/c/">
         <Youtube />
       </a>
-      <a target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/mozillahubs">
+      <a target="_blank" rel="noopener noreferrer" href="https://www.twitch.tv/">
         <Twitch />
       </a>
-      <a target="_blank" rel="noopener noreferrer" href="https://vimeo.com/mozillahubs">
+      <a target="_blank" rel="noopener noreferrer" href="https://vimeo.com/">
         <Vimeo />
       </a>
     </Container>
