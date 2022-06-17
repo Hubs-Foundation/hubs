@@ -24,7 +24,19 @@ import {
   FloatyObject,
   DestroyAtExtremeDistance
 } from "../bit-components";
-import { Text as TroikaText } from "troika-three-text";
+import { Text as TroikaText, preloadFont } from "troika-three-text";
+
+// TODO we should do this in a more explicit spot for "preloading" during the loading screen
+console.time("fontLoad");
+preloadFont(
+  {
+    characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789"
+  },
+  function() {
+    console.log("font preloaded");
+    console.timeEnd("fontLoad");
+  }
+);
 
 function isValidChild(child) {
   if (child === undefined) {

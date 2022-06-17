@@ -2,6 +2,7 @@
 
 import cameraModelSrc from "../assets/camera_tool.glb";
 import buttonSrc from "../assets/hud/button.9.png";
+import { loadModel } from "../components/gltf-model-plus";
 import { Layers } from "../components/layers";
 import { COLLISION_LAYERS } from "../constants";
 import { BUTTON_TYPES } from "../systems/single-action-button-system";
@@ -41,6 +42,10 @@ function Label({ text, ...props }, ...children) {
 
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
+
+// Pre load and upload camera model, and intentionally never "release" it from the cache.
+// TODO we should do this in a more explicit spot for "preloading" during the loading screen
+loadModel(cameraModelSrc, null, true);
 
 export function CameraPrefab(_props) {
   const snapMenuRef = createRef();
