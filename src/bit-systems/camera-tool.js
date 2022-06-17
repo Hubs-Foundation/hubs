@@ -5,7 +5,10 @@ import {
   HeldHandRight,
   HeldRemoteLeft,
   HeldRemoteRight,
-  Interacted
+  HoveredRemoteRight,
+  Interacted,
+  RemoteRight,
+  Rigidbody
 } from "../bit-components";
 import { addMedia } from "../utils/media-utils";
 import { pixelsToPNG, RenderTargetRecorder } from "../utils/render-target-recorder";
@@ -13,6 +16,7 @@ import { isFacingCamera } from "../utils/three-utils";
 import { SOUND_CAMERA_TOOL_COUNTDOWN, SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { paths } from "../systems/userinput/paths";
 import { ObjectTypes } from "../object-types";
+import { anyEntityWith } from "../utils/bit-utils";
 
 // Prefer h264 if available due to faster decoding speec on most platforms
 const videoCodec = ["h264", "vp9,opus", "vp8,opus", "vp9", "vp8"].find(
@@ -252,6 +256,26 @@ function captureSnapshot(world, camera) {
   });
 }
 
+// TODO this should be its own thing, not hardcoded to camera tools or mouse bindings
+function rotateWithRightClick(world, camera) {
+  const userinput = AFRAME.scenes[0].systems.userinput;
+  const transformSystem = AFRAME.scenes[0].systems["transform-selected-object"];
+  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+  if (
+    !transformSystem.transforming &&
+    hasComponent(world, HoveredRemoteRight, camera) &&
+    userinput.get(paths.device.mouse.buttonRight)
+  ) {
+    const rightCursor = anyEntityWith(world, RemoteRight);
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[camera], { type: "kinematic" });
+    transformSystem.startTransform(world.eid2obj.get(camera), world.eid2obj.get(rightCursor), {
+      mode: "cursor"
+    });
+  } else if (transformSystem.target?.eid === camera && !userinput.get(paths.device.mouse.buttonRight)) {
+    transformSystem.stopTransform();
+  }
+}
+
 const cameraToolQuery = defineQuery([CameraTool]);
 const cameraToolEnterQuery = enterQuery(cameraToolQuery);
 const cameraToolExitQuery = exitQuery(cameraToolQuery);
@@ -295,6 +319,8 @@ export function cameraToolSystem(world) {
   });
 
   cameraToolQuery(world).forEach((camera, i, allCameras) => {
+    rotateWithRightClick(world, camera);
+
     if (CameraTool.trackTarget[camera]) {
       if (entityExists(world, CameraTool.trackTarget[camera])) {
         world.eid2obj.get(CameraTool.trackTarget[camera]).getWorldPosition(tmpVec3);

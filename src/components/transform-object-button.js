@@ -279,7 +279,7 @@ AFRAME.registerSystem("transform-selected-object", {
       .applyQuaternion(q.copy(plane.quaternion).invert())
       .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
     if (this.mode === TRANSFORM_MODE.CURSOR) {
-      const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.transformModifier);
+      const modify = !AFRAME.scenes[0].systems.userinput.get(paths.actions.transformModifier);
 
       this.dyAll = this.dyStore + finalProjectedVec.y;
       this.dyApplied = modify ? this.dyAll : Math.round(this.dyAll / STEP_LENGTH) * STEP_LENGTH;
