@@ -95,8 +95,8 @@ function createRecorder(captureAudio) {
   );
 }
 
-function endRecording(world, eid, cancel) {
-  const recorder = videoRecorders.get(eid);
+function endRecording(world, camera, cancel) {
+  const recorder = videoRecorders.get(camera);
   if (cancel) {
     recorder.cancel();
   } else {
@@ -104,7 +104,7 @@ function endRecording(world, eid, cancel) {
       spawnCameraFile(world.eid2obj.get(camera), file, "video");
     });
   }
-  videoRecorders.delete(eid);
+  videoRecorders.delete(camera);
   APP.hubChannel.endRecording();
 }
 
