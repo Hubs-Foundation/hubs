@@ -257,5 +257,9 @@ AFRAME.registerComponent("slice9", {
     }
 
     this.setMap(null);
+  },
+
+  remove() {
+    this.geometry?.dispose();
   }
 });
