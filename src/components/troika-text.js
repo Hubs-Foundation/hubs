@@ -95,7 +95,7 @@ AFRAME.registerComponent("text", {
     const mesh = this.troikaTextMesh;
 
     // Update the text mesh
-    mesh.text = data.value || "";
+    mesh.text = (data.value || "").replace(/\\n/g, "\n").replace(/\\t/g, "\t");
     mesh.textAlign = data.textAlign;
     mesh.anchorX = data.anchorX;
     mesh.anchorY = data.anchorY;
