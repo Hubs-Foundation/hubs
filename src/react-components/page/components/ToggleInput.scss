@@ -1,0 +1,115 @@
+.toggle-input {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+
+    input {
+        outline: none;
+        border: none;
+
+        &:checked {
+            &+.track {
+                background-color: #2196F3;
+
+                &:before {
+                    -webkit-transform: translateX(26px);
+                    -ms-transform: translateX(26px);
+                    transform: translateX(26px);
+                }
+            }
+        }
+
+        &:focus {
+            &+.track {
+                box-shadow: 0 0 1px #2196F3;
+            }
+
+            &::-webkit-input-placeholder {
+                color: transparent;
+            }
+
+            &:-moz-placeholder {
+                color: transparent;
+            }
+
+            &::-moz-placeholder {
+                color: transparent;
+            }
+
+            &:-ms-input-placeholder {
+                color: transparent;
+            }
+        }
+
+    }
+
+    .track {
+        height: 100%;
+        width: 100%;
+        background-color: #ccc;
+        border-radius: 30px;
+        cursor: pointer;
+    }
+
+    .button {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        height: 26px;
+        width: 26px;
+        border-radius: 26px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+}
+
+// :local(.toggle-input) {
+//     display: flex;
+//     align-items: center;
+//     cursor: pointer;
+//     user-select: none;
+
+//     input {
+//         position: absolute;
+//         width: 0;
+//         height: 0;
+//         opacity: 0;
+//     }
+
+//     &:focus-within :local(.track) {
+//         border-color: green;
+//         box-shadow: 0 0 0 2px green;
+//     }
+// }
+
+// :local(.disabled) {
+//     opacity: 0.5;
+//     cursor: not-allowed;
+// }
+
+// :local(.track) {
+//     position: relative;
+//     width: 44px;
+//     height: 24px;
+//     border: 1px solid blue;
+//     border-radius: 44px;
+// }
+
+// :local(.button) {
+//     position: absolute;
+//     top: 1px;
+//     left: 1px;
+//     width: 20px;
+//     height: 20px;
+//     border-radius: 20px;
+//     background-color: blue;
+// }
+
+// :local(.toggle-input) input:checked+ :local(.track) :local(.button) {
+//     left: auto;
+//     right: 1px;
+//     background-color: green;
+// }

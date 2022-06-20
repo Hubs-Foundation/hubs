@@ -28,6 +28,7 @@ import UserService from "../../utilities/apiServices/UserService";
 import e from "cors";
 import { counter } from "@fortawesome/fontawesome-svg-core";
 import { object } from "prop-types";
+import { ToggleInput } from "./components/ToggleInput";
 
 const store = new StoreHub();
 
@@ -186,10 +187,18 @@ function ManagerHome() {
         startDate: moment(exhibition.startDate).format("YYYY-MM-DD"),
         endDate: moment(exhibition.endDate).format("YYYY-MM-DD"),
         public: exhibition.public,
-        maxSize: exhibition.maxSize
+        maxSize: exhibition.maxSize,
+        enableFly: exhibition.enableFly,
+        enablePinObjects: exhibition.enablePinObjects,
+        enableSpawnAndMoveMedia: exhibition.enableSpawnAndMoveMedia,
+        enableSpawnCamera: exhibition.enableSpawnCamera,
+        enableSpawnDrawing: exhibition.enableSpawnDrawing,
+        enableSpawnEmoji: exhibition.enableSpawnEmoji,
       });
     } else {
-      setExhibition(null);
+      setExhibition({
+        maxSize: 1
+      });
     }
     setIsOpenExhibition(true);
   };
@@ -393,8 +402,13 @@ function ManagerHome() {
   };
 
   const handleChange = evt => {
+    const name = evt.target.name;
     const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
-    setExhibition({ ...exhibition, [evt.target.name]: value });
+    if(name == 'enableSpawnAndMoveMedia' && value == false){
+      exhibition.enableSpawnCamera = false;
+      exhibition.enablePinObjects = false;
+    }
+    setExhibition({ ...exhibition, [name]: value });
   };
 
   const handleChangeable = (object,evt) => {
@@ -1147,110 +1161,243 @@ function ManagerHome() {
               title={exhibitionType == "edit" ? <>Edit Exhibition </> : <> Create Exhibition</>}
               content={
                 <>
-                  <form className="create100-form validate-form d-flex" name="form">
-                    <div style={{width: '50%', padding: '10px'}}>
-                      <div className="p-t-13 p-b-9">
-                        <span className="txt1">Name Exhibition</span>
-                      </div>
-                      <div className="wrap-input100 validate-input">
-                        <input
-                          className="input100"
-                          type="text"
-                          name="name"
-                          value={exhibition ? exhibition.name : undefined}
-                          onChange={handleChange}
-                          placeholder="Name Tour"
-                        />
-                        <span className="focus-input100" />
-                      </div>
-                      <div className="p-t-13 p-b-9">
-                        <span className="txt1">Description</span>
-                      </div>
-                      <div className="wrap-input100 validate-input">
-                        <textarea
-                          className="textarea100"
-                          name="description"
-                          value={exhibition ? exhibition.description : undefined}
-                          onChange={handleChange}
-                          placeholder="Description about tour"
-                          rows="10"
-                          style={{height: '205px'}}
-                        />
-                        <span className="focus-input100" />
-                      </div>
-                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <div style={{width: '40%'}}>
-                          <div className="p-t-13 p-b-9">
-                            <span className="txt1" style={{fontSize: '13px'}}>Public</span>
+                  <form className="create100-form validate-form" name="form" style={{maxHeight: "60vh", overflowY: "scroll"}}>
+                    <div className="d-flex">
+                      <div style={{width: '50%', padding: '10px'}}>
+                        <div className="p-t-13 p-b-9">
+                          <span className="txt1">Name Exhibition</span>
+                        </div>
+                        <div className="wrap-input100 validate-input">
+                          <input
+                            className="input100"
+                            type="text"
+                            name="name"
+                            value={exhibition ? exhibition.name : undefined}
+                            onChange={handleChange}
+                            placeholder="Name Tour"
+                          />
+                          <span className="focus-input100" />
+                        </div>
+                        <div className="p-t-13 p-b-9">
+                          <span className="txt1">Description</span>
+                        </div>
+                        <div className="wrap-input100 validate-input">
+                          <textarea
+                            className="textarea100"
+                            name="description"
+                            value={exhibition ? exhibition.description : undefined}
+                            onChange={handleChange}
+                            placeholder="Description about tour"
+                            rows="10"
+                            style={{height: '205px'}}
+                          />
+                          <span className="focus-input100" />
+                        </div>
+                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                          <div style={{width: '40%'}}>
+                            <div className="p-t-13 p-b-9">
+                              <span className="txt1" style={{fontSize: '13px'}}>Public</span>
+                            </div>
+                            <label className="switch">
+                              <input
+                                type="checkbox"
+                                name="public"
+                                checked={exhibition ? exhibition.public : undefined}
+                                onChange={handleChange}
+                              />
+                              <span className="slider round" />
+                            </label>
                           </div>
+                          <div style={{width: '60%', paddingTop: '10px'}}>
+                            <div style={{float: 'left', height: '50px', width: '40%', display: 'flex', alignItems: 'center', justifyContent: 'right', paddingRight: '10px'}}>
+                              <span className="txt1">Max Size</span>
+                            </div>
+                            <div className="wrap-input100 validate-input"  style={{float: 'left', width: '60%'}}>
+                              <input
+                                className="input100"
+                                type="number"
+                                min={0}
+                                max={50}
+                                name="maxSize"
+                                value={exhibition ? exhibition.maxSize : 1}
+                                onChange={handleChange}
+                              />
+                              <span className="focus-input100" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{width: '50%', padding: '10px'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                          <div className="item-input" style={{width: '48%'}}>
+                            <div className="p-t-13 p-b-9">
+                              <span className="txt1">Start day</span>
+                            </div>
+                            <div className="wrap-input100 validate-input">
+                              <input
+                                className="input100"
+                                type="date"
+                                name="startDate"
+                                placeholder="dd-mm-yyyy"
+                                value={exhibition ? exhibition.startDate : undefined}
+                                onChange={handleChange}
+                              />
+                              <span className="focus-input100" />
+                            </div>
+                          </div>
+                          <div className="item-input" style={{width: '48%'}}>
+                            <div className="p-t-13 p-b-9">
+                              <span className="txt1">End day</span>
+                            </div>
+                            <div className="wrap-input100 validate-input">
+                              <input
+                                className="input100"
+                                type="date"
+                                name="endDate"
+                                placeholder="dd-mm-yyyy"
+                                value={exhibition ? exhibition.endDate : undefined}
+                                onChange={handleChange}
+                              />
+                              <span className="focus-input100" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-t-13 p-b-9">
+                          <span className="txt1">List Scene</span>
+                        </div>
+                        <ListScenes />
+                      </div>
+                    </div>
+                    <div style={{width: '100%', padding: '10px'}}>
+                      <span className="txt1">Room Member Permissions</span>
+                      <div style={{position: 'relative', width: '100%', height: '40px', marginTop: '10px'}}>
+                        <div style={{width: '150px', float: 'left'}}>
+                          {/* <ToggleInput 
+                            checked={exhibition?.enableSpawnAndMoveMedia}
+                            name="enableSpawnAndMoveMedia"
+                            onChange={handleChange}
+                          /> */}
                           <label className="switch">
                             <input
                               type="checkbox"
-                              name="public"
-                              checked={exhibition ? exhibition.public : undefined}
+                              name="enableSpawnAndMoveMedia"
+                              checked={exhibition ? exhibition.enableSpawnAndMoveMedia : false}
                               onChange={handleChange}
                             />
-                            <span className="slider" />
+                            <span className="slider round" />
                           </label>
                         </div>
-                        <div style={{width: '60%', paddingTop: '10px'}}>
-                          <div style={{float: 'left', height: '50px', width: '40%', display: 'flex', alignItems: 'center', justifyContent: 'right', paddingRight: '10px'}}>
-                            <span className="txt1">Max Size</span>
-                          </div>
-                          <div className="wrap-input100 validate-input"  style={{float: 'left', width: '60%'}}>
+                        <div style={{float: 'left'}}>
+                          <span>Create and move objects </span>
+                        </div> 
+                      </div>
+                      <div style={{position: 'relative', width: '100%', height: '40px'}}>
+                        <div style={{width: '150px', float: 'left', paddingLeft: '50px'}}>
+                          {/* <ToggleInput
+                            checked={exhibition?.enableSpawnCamera}
+                            name="enableSpawnCamera"
+                            onChange={handleChange}
+                          /> */}
+                          <label className="switch">
                             <input
-                              className="input100"
-                              type="number"
-                              min={0}
-                              max={50}
-                              name="maxSize"
-                              value={exhibition ? exhibition.maxSize : 1}
+                              type="checkbox"
+                              name="enableSpawnCamera"
+                              disabled={!exhibition?.enableSpawnAndMoveMedia}
+                              checked={exhibition ? exhibition.enableSpawnCamera : false}
                               onChange={handleChange}
                             />
-                            <span className="focus-input100" />
-                          </div>
+                            <span className="slider round" />
+                          </label>
                         </div>
+                        <div style={{float: 'left'}}>
+                          <span>Create cameras </span>
+                        </div> 
                       </div>
-                    </div>
-                    <div style={{width: '50%', padding: '5px'}}>
-                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <div className="item-input" style={{width: '48%'}}>
-                          <div className="p-t-13 p-b-9">
-                            <span className="txt1">Start day</span>
-                          </div>
-                          <div className="wrap-input100 validate-input">
+                      <div style={{position: 'relative', width: '100%', height: '40px'}}>
+                        <div style={{width: '150px', float: 'left', paddingLeft: '50px'}}>
+                          {/* <ToggleInput
+                            checked={exhibition?.enablePinObjects}
+                            name="enablePinObjects"
+                            onChange={handleChange}
+                          /> */}
+                          <label className="switch">
                             <input
-                              className="input100"
-                              type="date"
-                              name="startDate"
-                              placeholder="dd-mm-yyyy"
-                              value={exhibition ? exhibition.startDate : undefined}
+                              type="checkbox"
+                              name="enablePinObjects"
+                              disabled={!exhibition?.enableSpawnAndMoveMedia}
+                              checked={exhibition ? exhibition.enablePinObjects : false}
                               onChange={handleChange}
                             />
-                            <span className="focus-input100" />
-                          </div>
+                            <span className="slider round" />
+                          </label>
                         </div>
-                        <div className="item-input" style={{width: '48%'}}>
-                          <div className="p-t-13 p-b-9">
-                            <span className="txt1">End day</span>
-                          </div>
-                          <div className="wrap-input100 validate-input">
+                        <div style={{float: 'left'}}>
+                          <span>Pin objects </span>
+                        </div> 
+                      </div>
+                      <div style={{position: 'relative', width: '100%', height: '40px'}}>
+                        <div style={{width: '150px', float: 'left'}}>
+                          {/* <ToggleInput
+                            checked={exhibition?.enableSpawnDrawing}
+                            name="enableSpawnDrawing"
+                            onChange={handleChange}
+                          /> */}
+                          <label className="switch">
                             <input
-                              className="input100"
-                              type="date"
-                              name="endDate"
-                              placeholder="dd-mm-yyyy"
-                              value={exhibition ? exhibition.endDate : undefined}
+                              type="checkbox"
+                              name="enableSpawnDrawing"
+                              checked={exhibition ? exhibition.enableSpawnDrawing : false}
                               onChange={handleChange}
                             />
-                            <span className="focus-input100" />
-                          </div>
+                            <span className="slider round" />
+                          </label>
                         </div>
+                        <div style={{float: 'left'}}>
+                          <span>Create drawings </span>
+                        </div> 
                       </div>
-                      <div className="p-t-13 p-b-9">
-                        <span className="txt1">List Scene</span>
+                      <div style={{position: 'relative', width: '100%', height: '40px'}}>
+                        <div style={{width: '150px', float: 'left'}}>
+                          {/* <ToggleInput
+                            checked={exhibition?.enableSpawnEmoji}
+                            name="enableSpawnEmoji"
+                            onChange={handleChange}
+                          /> */}
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              name="enableSpawnEmoji"
+                              checked={exhibition ? exhibition.enableSpawnEmoji : false}
+                              onChange={handleChange}
+                            />
+                            <span className="slider round" />
+                          </label>
+                        </div>
+                        <div style={{float: 'left'}}>
+                          <span>Create emoji </span>
+                        </div> 
                       </div>
-                      <ListScenes />
+                      <div style={{position: 'relative', width: '100%', height: '40px'}}>
+                        <div style={{width: '150px', float: 'left'}}>
+                          {/* <ToggleInput
+                            checked={exhibition?.enableFly}
+                            name="enableFly"
+                            onChange={handleChange}
+                          /> */}
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              name="enableFly"
+                              checked={exhibition ? exhibition.enableFly : false}
+                              onChange={handleChange}
+                            />
+                            <span className="slider round" />
+                          </label>
+                        </div>
+                        <div style={{float: 'left'}}>
+                          <span>Allow fly</span>
+                        </div> 
+                      </div>
                     </div>
                   </form>
                 </>
