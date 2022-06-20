@@ -21,7 +21,8 @@ import { SignInButton } from "./SignInButton";
 import { AppLogo } from "../misc/AppLogo";
 import { isHmc } from "../../utils/isHmc";
 import maskEmail from "../../utils/mask-email";
-import { Footer } from "../layout/Footer2";
+// import { Footer } from "../layout/Footer2";
+import footerSVG from "../../assets/images/footer.svg";
 
 
 export function HomePage() {
@@ -77,9 +78,7 @@ export function HomePage() {
           <div className={styles.logoContainer}>
             <AppLogo />
           </div>
-          <div className={styles.appInfo}>
-            <div className={styles.appDescription}>{configs.translation("app-description")}</div>
-          </div>
+     
           <div className={styles.heroImageContainer}>
             <img
               alt={intl.formatMessage(
@@ -142,7 +141,7 @@ export function HomePage() {
       {sortedPublicRooms.length > 0 && (
         <Container className={styles.roomsContainer}>
           <h3 className={styles.roomsHeading}>
-            <FormattedMessage id="home-page.public--rooms" defaultMessage="METAROOMS" />
+            <FormattedMessage id="home-page.public--rooms" defaultMessage="ROOMS" />
           </h3>
           <Column grow padding className={styles.rooms}>
             <MediaGrid center>
@@ -191,9 +190,9 @@ export function HomePage() {
         </Column>
       ) : null}
 
-    </PageContainer><div>
-        <Footer />
-      </div></>
+    </PageContainer>
+    <img src={footerSVG} alt="Metaverse+" />
+    </>
 
   );
 }

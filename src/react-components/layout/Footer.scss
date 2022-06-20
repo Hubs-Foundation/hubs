@@ -5,6 +5,8 @@ footer {
   background-color: #13141d!important;
   font-size: theme.$font-size-md;
   padding: 0px;
+  margin-top: -20px !important;
+
 
   @media(min-width: theme.$breakpoint-lg) {
     padding: 0;
@@ -56,7 +58,7 @@ footer {
   align-items: center;
 
   @media(min-width: theme.$breakpoint-lg) {
-    height: 380px;
+    height: 20px;
     flex-direction: row;
     align-items: inherit;
   }

@@ -68,7 +68,7 @@ header {
   align-items: center;
 
   @media(min-width: theme.$breakpoint-lg) {
-    height: 140px;
+    height: 80px;
     flex-direction: row;
     align-items: inherit;
   }
