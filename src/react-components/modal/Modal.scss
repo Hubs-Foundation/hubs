@@ -5,14 +5,14 @@
   display: flex;
   flex-direction: column;
   height: max-content;
-  background-color: rgba(0, 0, 0, 0.407);
-  
-  border: 1px solid theme.$border1-color;
-  border-radius: theme.$border-radius-regular;
+  background-color: rgba(0, 0, 0, 0.486);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   margin: 24px;
+  
   z-index: 1;
   width: 100%;
-  max-width: 460px;
+  max-width: 660px;
 }
 
 :local(.header) {

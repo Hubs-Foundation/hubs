@@ -4,12 +4,13 @@
   height: 96px;
   display: flex;
   padding: 12px;
-  background-color: theme.$background1-color;
-  border-top: 1px solid theme.$border1-color;
-
+  background-color: #000;
+  margin-top: -100px;
+  z-index: 1;
+ 
   @media (min-width: theme.$breakpoint-lg) {
     padding: 12px 24px;
-    justify-content: space-between;
+    justify-content: center;
   }
 }
 

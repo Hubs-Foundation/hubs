@@ -26,6 +26,8 @@
   height: 100%;
   overflow: hidden;
   width: 450px;
+  background-color: transparent;
+  backdrop-filter: blur(8px);
 
   @media(max-width: theme.$breakpoint-lg - 1), (max-height: theme.$breakpoint-vr - 1) {
     position: fixed;
