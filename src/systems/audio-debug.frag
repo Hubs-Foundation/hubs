@@ -121,17 +121,17 @@ void main() {
     // Draw inner cone
     float innerAngle = coneInnerAngle[i] * kDegToRad * kInvPi * 0.5;
     float innerStartAngle = startOffset[i] + innerAngle * 0.5;
-    vec4 innerLayer = circle(center[i], distance[i], innerAngle, 10000.0, 1.0, colorInner, innerStartAngle, 1.0);
+    vec4 innerLayer = circle(center[i], distance[i], innerAngle, 10000.0, 1.0, colorInner, innerStartAngle, .001);
     innerLayer = draw_att(distance[i], attenuation, innerLayer);
     background = mix(background, innerLayer, innerLayer.a * clampedGain[i]);
 
     // Draw outer cone
     float outerAngle = coneOuterAngle[i] * kDegToRad * kInvPi * 0.5;
     float outerAngleDiffHalf = (outerAngle - innerAngle) * 0.5;
-    vec4 outerLayer1 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle + outerAngleDiffHalf, 1.0);
+    vec4 outerLayer1 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle + outerAngleDiffHalf, .001);
     outerLayer1 = draw_att(distance[i], attenuation, outerLayer1);
     background = mix(background, outerLayer1, outerLayer1.a * clampedGain[i]);
-    vec4 outerLayer2 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle - innerAngle, 1.0);
+    vec4 outerLayer2 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle - innerAngle, .001);
     outerLayer2 = draw_att(distance[i], attenuation, outerLayer2);
     background = mix(background, outerLayer2, outerLayer2.a * (clipped[i] ? 0.0 : 1.0) * clampedGain[i]);
   }
