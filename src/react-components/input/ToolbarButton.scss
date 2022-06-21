@@ -25,8 +25,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid theme.$transparent;
-  background-color: #ac19da;
+  border: 2px solid #ac1414 !important;
+  background-color:  #b71556c3 !important;
 
   transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
 
@@ -520,12 +520,12 @@
 
 :local(.accent4) {
   :local(.icon-container) {
-    background-color: theme.$accent4-color;
-    border-color: theme.$accent4-border-color;
+    background-color:#ac19da;
+    border-color: #ac19da;
   }
 
   &:hover :local(.icon-container) {
-    background-color: theme.$accent4-color-hover;
+    background-color: #4f0c63;
   }
 
   &:active :local(.icon-container) {

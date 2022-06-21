@@ -79,13 +79,13 @@ export const RoomToolbar = () => (
 
 export const EntryToolbar = () => (
   <RoomLayout
-    toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" />}
+    toolbarLeft={<ToolbarButton icon={<InviteIcon />} label="Invite" preset="accent4" />}
     toolbarCenter={
       <>
         <ToolbarButton icon={<InviteIcon />} label="Invite" preset="basic" className={styleUtils.hideLg} />
         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" />
       </>
     }
-    toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />}
+    toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="accent4" />}
   />
 );
