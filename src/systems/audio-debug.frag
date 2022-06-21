@@ -48,28 +48,21 @@ float att_exponential(float x, float rolloff, float dref) {
   return pow((max(x, dref)/dref),-rolloff);
 }
 
-vec4 circle(vec2 center, float d, float len, float radius, float holeRadius, vec3 color, float offset) {  
-  // Define how blurry the circle should be. 
-  // A value of 1.0 means 'sharp', larger values
-  // will increase the bluriness.
-  float bluriness = 1.0;
-  
+vec4 circle(vec2 center, float d, float len, float radius, float holeRadius, vec3 color, float offset, float blurriness) {  
   // Calculate angle, so we can draw segments, too.
   float angle = atan( center.x, center.y ) * kInvPi * 0.5;
   angle = fract( angle + offset);
   
   // Create an anti-aliased circle.
-  float wd = bluriness * fwidth( d );
-  float circle = smoothstep( radius + wd, radius - wd, d );
+  float circle = smoothstep( radius + blurriness, radius - blurriness, d );
   
   // Optionally, you could create a hole in it:
   float inner = holeRadius;
-  circle -= smoothstep( inner + wd, inner - wd, d );
+  circle -= smoothstep( inner + blurriness, inner - blurriness, d );
   
   // Or only draw a portion (segment) of the circle.
-  float wa = bluriness * fwidth( angle );
-  float segment = smoothstep( len + wa, len - wa, angle );
-  segment *= smoothstep( 0.0, 2.0 * wa, angle );
+  float segment = smoothstep( len + blurriness, len - blurriness, angle );
+  segment *= smoothstep( 0.0, 2.0 * blurriness, angle );
   circle *= mix( segment, 1.0, step( 1.0, len ) );
       
   // Let's define the circle's color now.
@@ -128,31 +121,31 @@ void main() {
     // Draw inner cone
     float innerAngle = coneInnerAngle[i] * kDegToRad * kInvPi * 0.5;
     float innerStartAngle = startOffset[i] + innerAngle * 0.5;
-    vec4 innerLayer = circle(center[i], distance[i], innerAngle, 10000.0, 1.0, colorInner, innerStartAngle);
+    vec4 innerLayer = circle(center[i], distance[i], innerAngle, 10000.0, 1.0, colorInner, innerStartAngle, 1.0);
     innerLayer = draw_att(distance[i], attenuation, innerLayer);
     background = mix(background, innerLayer, innerLayer.a * clampedGain[i]);
 
     // Draw outer cone
     float outerAngle = coneOuterAngle[i] * kDegToRad * kInvPi * 0.5;
     float outerAngleDiffHalf = (outerAngle - innerAngle) * 0.5;
-    vec4 outerLayer1 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle + outerAngleDiffHalf);
+    vec4 outerLayer1 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle + outerAngleDiffHalf, 1.0);
     outerLayer1 = draw_att(distance[i], attenuation, outerLayer1);
     background = mix(background, outerLayer1, outerLayer1.a * clampedGain[i]);
-    vec4 outerLayer2 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle - innerAngle);
+    vec4 outerLayer2 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle - innerAngle, 1.0);
     outerLayer2 = draw_att(distance[i], attenuation, outerLayer2);
     background = mix(background, outerLayer2, outerLayer2.a * (clipped[i] ? 0.0 : 1.0) * clampedGain[i]);
   }
 
   for (int i=0; i<count; i++) {
     // Draw base
-    vec4 baseLayer = circle(center[i], distance[i], 1.0, 1.0, 0.1, vec3(0.5, 0.5, 0.5), 0.0);
+    vec4 baseLayer = circle(center[i], distance[i], 1.0, 1.0, 0.1, vec3(0.5, 0.5, 0.5), 0.0, .001);
     background = mix(background, baseLayer, baseLayer.a);
 
     // Draw gain
-    vec4 gainLayer = circle(center[i], distance[i], clampedGain[i], 1.0, 0.5, colorGain, startOffset[i]);
+    vec4 gainLayer = circle(center[i], distance[i], clampedGain[i], 1.0, 0.5, colorGain, startOffset[i], .001);
     background = mix(background, gainLayer, gainLayer.a);
     if (gain[i] > 1.0) {
-      vec4 overGainLayer = circle(center[i], distance[i], gain[i] -  clampedGain[i], 1.0, 0.5, vec3(1.0, 0.0, 0.0), startOffset[i]);
+      vec4 overGainLayer = circle(center[i], distance[i], gain[i] -  clampedGain[i], 1.0, 0.5, vec3(1.0, 0.0, 0.0), startOffset[i], .001);
       background = mix(background, overGainLayer, overGainLayer.a);
     }
   } 
