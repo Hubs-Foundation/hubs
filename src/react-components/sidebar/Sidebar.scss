@@ -1,16 +1,16 @@
 @use "../styles/theme.scss";
 
 :local(.sidebar) {
-  position: relative;
+  position: fixed;
   display: flex;
+  right: 0;
+  
   flex-direction: column;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.268);
   backdrop-filter: blur(8px);
   pointer-events: auto;
   overflow-wrap: break-word;
-  color: #eee;
-  
   
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     border-left: 1px solid theme.$border1-color;

@@ -11,7 +11,12 @@
   right: 0;
   bottom: 0;
   top: 0;
-  background: theme.$loading-screen-background;
+  background: #000;
+  backdrop-filter: blur(10px);
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+
 
   font-size: theme.$font-size-sm;
 
@@ -28,8 +33,8 @@
   // Keep arbitrary-sized logos from making the page jump on load
   position: absolute;
   transform: translateY(calc(-100% - 20px));
-  max-width: 260px;
-  max-height: 140px;
+  max-width: 425px;
+
 }
 
 :local(.bottom) {

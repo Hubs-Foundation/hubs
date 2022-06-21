@@ -103,8 +103,8 @@ button:local(.more-menu-item-target) {
   height: 48px;
   border-radius: 48px;
   color: theme.$button-text-color;
-  background-color: theme.$button-bg-color;
-  border: 1px solid theme.$button-border-color;
+  background-color: transparent;
+  border: 1px solid rgba(255, 0, 0, 0.564);
   display: flex;
   justify-content: center;
   align-items: center;
