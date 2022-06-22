@@ -1,6 +1,6 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, Owned } from "../bit-components";
-import { CameraPrefab, CubeMediaFramePrefab } from "../network-schemas/interactable-camera";
+import { CameraPrefab, CubeMediaFramePrefab } from "../network-prefabs/camera-tool";
 import { defineNetworkSchema } from "../utils/bit-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 
