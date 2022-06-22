@@ -1,6 +1,7 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import {
   CameraTool,
+  Held,
   HeldHandLeft,
   HeldHandRight,
   HeldRemoteLeft,
@@ -173,12 +174,19 @@ function updateUI(world, camera) {
   const prevBtnObj = world.eid2obj.get(CameraTool.button_prev[camera]);
   const countdownLblObj = world.eid2obj.get(CameraTool.countdownLblRef[camera]);
   const captureDurLblObj = world.eid2obj.get(CameraTool.captureDurLblRef[camera]);
+  const screenObj = world.eid2obj.get(CameraTool.screenRef[camera]);
+  const selfieScreenObj = world.eid2obj.get(CameraTool.selfieScreenRef[camera]);
 
   const isIdle = CameraTool.state[camera] === CAMERA_STATE.IDLE;
   const isCounting =
     CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
     CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_VIDEO ||
     CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO;
+
+  const inVR = AFRAME.scenes[0].is("vr-mode");
+  const showViewfinder = !inVR || (hasComponent(world, Held, camera) || !isIdle);
+  screenObj.visible = showViewfinder;
+  selfieScreenObj.visible = showViewfinder;
 
   const playerInFrontOfCamera = isFacingCamera(world.eid2obj.get(camera));
 
@@ -418,5 +426,3 @@ export function cameraToolSystem(world) {
     updateUI(world, camera);
   });
 }
-
-// TODO focus/track
