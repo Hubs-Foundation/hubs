@@ -26,7 +26,7 @@ export const defaultTheme = "default";
 export const themes = config?.theme?.themes || [];
 
 function useDarkMode() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {
     const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
