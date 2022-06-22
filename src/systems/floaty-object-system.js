@@ -41,14 +41,12 @@ function makeStaticAtRest(world) {
   });
 }
 
-const makeKinematicOnReleaseExitQuery = defineQuery([Rigidbody, Not(Held), MakeKinematicOnRelease]);
+const makeKinematicOnReleaseExitQuery = exitQuery(defineQuery([Rigidbody, Held, MakeKinematicOnRelease]));
 function makeKinematicOnRelease(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   makeKinematicOnReleaseExitQuery(world).forEach(eid => {
     if (!entityExists(world, eid) || !hasComponent(world, Owned, eid)) return;
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], {
-      type: "kinematic"
-    });
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], { type: "kinematic" });
   });
 }
 
