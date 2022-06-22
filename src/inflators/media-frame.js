@@ -1,17 +1,17 @@
-import { addObject3DComponent } from "./utils/jsx-entity";
-import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape, Networked } from "./bit-components";
+import { addObject3DComponent } from "../utils/jsx-entity";
+import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape, Networked } from "../bit-components";
 import { addComponent, hasComponent } from "bitecs";
-import { MediaType } from "./utils/media-utils";
-import { COLLISION_LAYERS } from "./constants";
-import { RIGIDBODY_FLAGS } from "./systems/bit-physics";
-import { Layers } from "./components/layers";
+import { MediaType } from "../utils/media-utils";
+import { COLLISION_LAYERS } from "../constants";
+import { RIGIDBODY_FLAGS } from "../systems/bit-physics";
+import { Layers } from "../components/layers";
 
-const defaults = {
+const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
   mediaType: "all"
 };
 export function inflateMediaFrame(world, eid, componentProps) {
-  componentProps = Object.assign({}, defaults, componentProps);
+  componentProps = Object.assign({}, DEFAULTS, componentProps);
   const guide = new THREE.Mesh(
     new THREE.BoxBufferGeometry(componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z),
     new THREE.ShaderMaterial({

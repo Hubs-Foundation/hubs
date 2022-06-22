@@ -1,43 +1,33 @@
-import { inflateMirror } from "../inflate-mirror";
-import { inflateMediaFrame } from "../inflate-media-frame";
-import { THREE_SIDES } from "../components/troika-text";
+import { addComponent, addEntity, hasComponent } from "bitecs";
+import { preloadFont } from "troika-three-text";
 import {
+  CameraTool,
   CursorRaycastable,
+  DestroyAtExtremeDistance,
+  FloatyObject,
+  HandCollisionTarget,
   Holdable,
   HoldableButton,
+  HoverButton,
+  MakeKinematicOnRelease,
   Networked,
   NetworkedTransform,
   Object3DTag,
-  GLTFModel,
+  OffersHandConstraint,
   OffersRemoteConstraint,
+  PhysicsShape,
   RemoteHoverTarget,
   Rigidbody,
   SingleActionButton,
-  Slice9,
-  Text,
-  CameraTool,
-  PhysicsShape,
-  TextButton,
-  HoverButton,
-  HandCollisionTarget,
-  OffersHandConstraint,
-  FloatyObject,
-  DestroyAtExtremeDistance,
-  MakeKinematicOnRelease
+  TextButton
 } from "../bit-components";
-import { Text as TroikaText, preloadFont } from "troika-three-text";
+import { inflateMediaFrame } from "../inflators/media-frame";
+import { inflateModel } from "../inflators/model";
+import { inflateSlice9 } from "../inflators/slice9";
+import { inflateText } from "../inflators/text";
 
 // TODO we should do this in a more explicit spot for "preloading" during the loading screen
-console.time("fontLoad");
-preloadFont(
-  {
-    characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789"
-  },
-  function() {
-    console.log("font preloaded");
-    console.timeEnd("fontLoad");
-  }
-);
+preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }, function() {});
 
 function isValidChild(child) {
   if (child === undefined) {
@@ -99,8 +89,6 @@ export function createElementEntity(tag, attrs, ...children) {
   }
 }
 
-import { hasComponent, addComponent, addEntity, removeEntity } from "bitecs";
-
 export function addObject3DComponent(world, eid, obj) {
   if (hasComponent(APP.world, Object3DTag, eid)) {
     throw new Error("Tried to an object3D tag to an entity that already has one");
@@ -131,66 +119,6 @@ const createDefaultInflator = (Component, defaults = {}) => {
   };
 };
 
-const textDefaults = {
-  textAlign: "center",
-  anchorX: "center",
-  anchorY: "middle"
-};
-
-function inflateText(world, eid, componentProps) {
-  componentProps = Object.assign({}, textDefaults, componentProps);
-  addComponent(world, Text, eid);
-  const text = new TroikaText();
-  Object.entries(componentProps).forEach(([name, value]) => {
-    switch (name) {
-      case "value":
-        text.text = value;
-        break;
-      case "side":
-        text.material.side = THREE_SIDES[value];
-        break;
-      case "opacity":
-        text.material.side = value;
-        break;
-      case "fontUrl":
-        text.font = value;
-        break;
-      default:
-        text[name] = value;
-    }
-  });
-  text.sync();
-  addObject3DComponent(world, eid, text);
-}
-
-import { updateSlice9Geometry } from "../update-slice9-geometry";
-import { loadModel } from "../components/gltf-model-plus";
-
-function inflateSlice9(world, eid, { size, insets, texture }) {
-  const geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3);
-  const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false });
-  const obj = new THREE.Mesh(geometry, material);
-  addObject3DComponent(world, eid, obj);
-
-  addComponent(world, Slice9, eid);
-  Slice9.insets[eid].set(insets);
-  Slice9.size[eid].set(size);
-  updateSlice9Geometry(world, eid);
-}
-
-function inflateModel(world, eid, { src }) {
-  const obj = new THREE.Group();
-  addObject3DComponent(world, eid, obj);
-  loadModel(src, null, true).then(gltf => {
-    // TODO inflating componetns and create animaition mixers
-    const modelEid = addEntity(world);
-    addObject3DComponent(world, modelEid, gltf.scene);
-    addComponent(world, GLTFModel, modelEid);
-    gltf.scene.userData.gltfSrc = src;
-    obj.add(gltf.scene);
-  });
-}
-
 const inflators = {
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
   "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
@@ -209,12 +137,13 @@ const inflators = {
   "destroy-at-extreme-distance": createDefaultInflator(DestroyAtExtremeDistance),
   "networked-transform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
+  "camera-tool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
+
+  // inflators that create Object3Ds
   "media-frame": inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
-  "camera-tool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   text: inflateText,
-  mirror: inflateMirror,
   model: inflateModel
 };
 
