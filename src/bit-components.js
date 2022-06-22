@@ -98,6 +98,7 @@ export const Pinned = defineComponent();
 export const DestroyAtExtremeDistance = defineComponent();
 
 export const FloatyObject = defineComponent({ flags: Types.ui8, releaseGravity: Types.f32 });
+export const MakeKinematicOnRelease = defineComponent();
 
 export const CameraTool = defineComponent({
   snapTime: Types.f32,

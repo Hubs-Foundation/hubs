@@ -10,7 +10,7 @@ import {
   Not,
   entityExists
 } from "bitecs";
-import { FloatyObject, Held, Owned, Rigidbody } from "../bit-components";
+import { FloatyObject, Held, Owned, Rigidbody, MakeKinematicOnRelease } from "../bit-components";
 
 export const MakeStaticWhenAtRest = defineComponent();
 
@@ -38,6 +38,17 @@ function makeStaticAtRest(world) {
       physicsSystem.updateBody(bodyId, bodyData.options);
       removeComponent(world, MakeStaticWhenAtRest, eid);
     }
+  });
+}
+
+const makeKinematicOnReleaseExitQuery = defineQuery([Rigidbody, Not(Held), MakeKinematicOnRelease]);
+function makeKinematicOnRelease(world) {
+  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+  makeKinematicOnReleaseExitQuery(world).forEach(eid => {
+    if (!entityExists(world, eid) || !hasComponent(world, Owned, eid)) return;
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], {
+      type: "kinematic"
+    });
   });
 }
 
@@ -106,4 +117,5 @@ export const floatyObjectSystem = world => {
   });
 
   makeStaticAtRest(world);
+  makeKinematicOnRelease(world);
 };

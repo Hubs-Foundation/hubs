@@ -89,6 +89,7 @@ export function CameraPrefab(_props) {
       hand-collision-target
       offers-remote-constraint
       offers-hand-constraint
+      make-kinematic-on-release
       holdable
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physics-shape={{ halfExtents: [0.22, 0.14, 0.1] }}

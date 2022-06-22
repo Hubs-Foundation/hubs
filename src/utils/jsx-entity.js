@@ -22,7 +22,8 @@ import {
   HandCollisionTarget,
   OffersHandConstraint,
   FloatyObject,
-  DestroyAtExtremeDistance
+  DestroyAtExtremeDistance,
+  MakeKinematicOnRelease
 } from "../bit-components";
 import { Text as TroikaText, preloadFont } from "troika-three-text";
 
@@ -204,6 +205,7 @@ const inflators = {
   rigidbody: createDefaultInflator(Rigidbody),
   "physics-shape": createDefaultInflator(PhysicsShape),
   "floaty-object": createDefaultInflator(FloatyObject),
+  "make-kinematic-on-release": createDefaultInflator(MakeKinematicOnRelease),
   "destroy-at-extreme-distance": createDefaultInflator(DestroyAtExtremeDistance),
   "networked-transform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
