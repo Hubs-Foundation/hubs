@@ -75,13 +75,4 @@ AFRAME.registerComponent("tags", {
       }
     });
   }
-
-  // TODO is this behaviour still needed?
-  // remove() {
-  //   const interaction = this.el.sceneEl.systems.interaction;
-  //   if (interaction.isHeld(this.el.object3D)) {
-  //     interaction.release(this.el.object3D);
-  //     this.el.sceneEl.systems["hubs-systems"].constraintsSystem.release(this.el);
-  //   }
-  // }
 });
