@@ -4,8 +4,7 @@
   height: 96px;
   display: flex;
   padding: 12px;
-  background-color: theme.$background1-color;
-  border-top: 1px solid theme.$border1-color;
+  pointer-events: none;
 
   @media (min-width: theme.$breakpoint-lg) {
     padding: 12px 24px;

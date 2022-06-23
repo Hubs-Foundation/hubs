@@ -40,29 +40,39 @@
   --cancel-color-pressed: #{theme.$red-pressed};
 
   --accent1-color: #{theme.$red};
-  --accent1-border-color: var(--accent1-color);
   --accent1-color-hover: #{theme.$red-hover};
   --accent1-color-pressed: #{theme.$red-pressed};
+  --accent1-border-color: var(--basic-border-color);
+  --accent1-border-color-hover: var(--accent1-border-color);
+  --accent1-border-color-pressed: var(--accent1-border-color);
 
   --accent2-color: #{theme.$orange};
-  --accent2-border-color: var(--accent2-color);
   --accent2-color-hover: #{theme.$orange-hover};
   --accent2-color-pressed: #{theme.$orange-pressed};
+  --accent2-border-color: var(--basic-border-color);
+  --accent2-border-color-hover: var(--accent2-border-color);
+  --accent2-border-color-pressed: var(--accent2-border-color);
 
   --accent3-color: #{theme.$green};
-  --accent3-border-color: var(--accent3-color);
   --accent3-color-hover: #{theme.$green-hover};
   --accent3-color-pressed: #{theme.$green-pressed};
+  --accent3-border-color: var(--basic-border-color);
+  --accent3-border-color-hover: var(--accent3-border-color);
+  --accent3-border-color-pressed: var(--accent3-border-color);
 
   --accent4-color: #{theme.$blue};
-  --accent4-border-color: var(--accent4-color);
   --accent4-color-hover: #{theme.$blue-hover};
   --accent4-color-pressed: #{theme.$blue-pressed};
+  --accent4-border-color: var(--basic-border-color);
+  --accent4-border-color-hover: var(--accent4-border-color);
+  --accent4-border-color-pressed: var(--accent4-border-color);
 
   --accent5-color: #{theme.$purple};
-  --accent5-border-color: var(--accent5-color);
   --accent5-color-hover: #{theme.$purple-hover};
   --accent5-color-pressed: #{theme.$purple-pressed};
+  --accent5-border-color: var(--basic-border-color);
+  --accent5-border-color-hover: var(--accent5-border-color);
+  --accent5-border-color-pressed: var(--accent5-border-color);
 
   --accent6-color: #{theme.$black};
   --accent6-color-hover: #{theme.$black-hover};
@@ -162,18 +172,27 @@
   --overlay-outline-color: #{theme.$white};
 
   --toolbar-icon-color: var(--text5-color);
-  --toolbar-icon-selected-bg: var(--transparent); 
+  --toolbar-icon-selected-bg: var(--toolbar-basic-color);
   --toolbar-basic-icon-color: var(--text1-color);
   --toolbar-basic-selected-icon-color: var(--text1-color);
-  --toolbar-basic-color: var(--secondary-color);
-  --toolbar-basic-color-hover: var(--secondary-color-hover);
-  --toolbar-basic-color-pressed: var(--secondary-color-pressed);
+  --toolbar-basic-color: var(--basic-color);
+  --toolbar-basic-color-hover: var(--basic-color-hover);
+  --toolbar-basic-color-pressed: var(--basic-color-pressed);
   --toolbar-basic-border-color: var(--basic-border-color);
+  --toolbar-basic-border-color-hover: var(--toolbar-basic-border-color);
+  --toolbar-basic-border-color-pressed: var(--toolbar-basic-border-color);
   --toolbar-label-accent1: var(--accent1-color);
   --toolbar-label-accent2: var(--accent2-color);
   --toolbar-label-accent3: var(--accent3-color);
   --toolbar-label-accent4: var(--accent4-color);
   --toolbar-label-accent5: var(--accent5-color);
+
+  --toolbar-accept-color: #{theme.$green};
+  --toolbar-accept-color-hover: #{theme.$green-hover};
+  --toolbar-accept-color-pressed: #{theme.$green-pressed};
+  --toolbar-accept-border-color: var(--toolbar-basic-border-color);
+  --toolbar-accept-border-color-hover: var(--toolbar-accept-border-color);
+  --toolbar-accept-border-color-pressed: var(--toolbar-accept-border-color);
 
   --tile-text-color: var(--text4-color);
   --tile-bg-color: var(--secondary-color);

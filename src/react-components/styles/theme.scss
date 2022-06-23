@@ -127,29 +127,39 @@ $cancel-color-hover: var(--cancel-color-hover);
 $cancel-color-pressed: var(--cancel-color-pressed);
 
 $accent1-color: var(--accent1-color);
-$accent1-border-color: var(--accent1-border-color);
 $accent1-color-hover: var(--accent1-color-hover);
 $accent1-color-pressed: var(--accent1-color-pressed);
+$accent1-border-color: var(--accent1-border-color);
+$accent1-border-color-hover: var(--accent1-border-color-hover);
+$accent1-border-color-pressed: var(--accent1-border-color-pressed);
 
 $accent2-color: var(--accent2-color);
-$accent2-border-color: var(--accent2-border-color);
 $accent2-color-hover: var(--accent2-color-hover);
 $accent2-color-pressed: var(--accent2-color-pressed);
+$accent2-border-color: var(--accent2-border-color);
+$accent2-border-color-hover: var(--accent2-border-color-hover);
+$accent2-border-color-pressed: var(--accent2-border-color-pressed);
 
 $accent3-color: var(--accent3-color);
 $accent3-color-hover: var(--accent3-color-hover);
 $accent3-color-pressed: var(--accent3-color-pressed);
 $accent3-border-color: var(--accent3-border-color);
+$accent3-border-color-hover: var(--accent3-border-color-hover);
+$accent3-border-color-pressed: var(--accent3-border-color-pressed);
 
 $accent4-color: var(--accent4-color);
-$accent4-border-color: var(--accent4-border-color);
 $accent4-color-hover: var(--accent4-color-hover);
 $accent4-color-pressed: var(--accent4-color-pressed);
+$accent4-border-color: var(--accent4-border-color);
+$accent4-border-color-hover: var(--accent4-border-color-hover);
+$accent4-border-color-pressed: var(--accent4-border-color-pressed);
 
 $accent5-color: var(--accent5-color);
-$accent5-border-color: var(--accent5-border-color);
 $accent5-color-hover: var(--accent5-color-hover);
 $accent5-color-pressed: var(--accent5-color-pressed);
+$accent5-border-color: var(--accent5-border-color);
+$accent5-border-color-hover: var(--accent5-border-color-hover);
+$accent5-border-color-pressed: var(--accent5-border-color-pressed);
 
 $accent6-color: var(--accent6-color);
 $accent6-color-hover: var(--accent6-color-hover);
@@ -256,11 +266,20 @@ $toolbar-basic-color: var(--toolbar-basic-color);
 $toolbar-basic-color-hover: var(--toolbar-basic-color-hover);
 $toolbar-basic-color-pressed: var(--toolbar-basic-color-pressed);
 $toolbar-basic-border-color: var(--toolbar-basic-border-color);
+$toolbar-basic-border-color-hover: var(--toolbar-basic-border-color-hover);
+$toolbar-basic-border-color-pressed: var(--toolbar-basic-border-color-pressed);
 $toolbar-label-accent1: var(--toolbar-label-accent1);
 $toolbar-label-accent2: var(--toolbar-label-accent2);
 $toolbar-label-accent3: var(--toolbar-label-accent3);
 $toolbar-label-accent4: var(--toolbar-label-accent4);
 $toolbar-label-accent5: var(--toolbar-label-accent5);
+
+$toolbar-accept-color: var(--toolbar-accept-color);
+$toolbar-accept-color-hover: var(--toolbar-accept-color-hover);
+$toolbar-accept-color-pressed: var(--toolbar-accept-color-pressed);
+$toolbar-accept-border-color: var(--toolbar-accept-border-color);
+$toolbar-accept-border-color-hover: var(--toolbar-accept-border-color-hover);
+$toolbar-accept-border-color-pressed: var(--toolbar-accept-border-color-pressed);
 
 $tile-text-color: var(--tile-text-color);
 $tile-bg-color: var(--tile-bg-color);
