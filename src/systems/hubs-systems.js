@@ -42,7 +42,6 @@ import { networkedTransformSystem } from "./networked-transform";
 import { buttonSystems } from "./single-action-button-system";
 import { constraintsSystem } from "./bit-constraints-system";
 import { mediaFramesSystem } from "./bit-media-frames";
-import { mediaFrameAnimationMixerSystem } from "./bit-media-frame-animation-mixers";
 import { cameraToolSystem } from "../bit-systems/camera-tool";
 // import { holdableButtonSystem } from "./holdable-button-system";
 import { physicsCompatSystem } from "./bit-physics";
@@ -147,7 +146,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
     mediaFramesSystem(world);
-    mediaFrameAnimationMixerSystem(world); // TODO: Remove
     this.audioZonesSystem.tick(this.el);
     this.gainSystem.tick();
     this.nameTagSystem.tick();

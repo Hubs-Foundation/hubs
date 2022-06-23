@@ -66,9 +66,6 @@ export const HeldHandLeft = defineComponent();
 export const HeldRemoteRight = defineComponent();
 export const HeldRemoteLeft = defineComponent();
 export const Held = defineComponent();
-export const MediaFramePreviewClone = defineComponent({
-  preview: Types.eid
-});
 export const OffersRemoteConstraint = defineComponent();
 export const HandCollisionTarget = defineComponent();
 export const OffersHandConstraint = defineComponent();
