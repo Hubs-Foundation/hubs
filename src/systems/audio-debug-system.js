@@ -20,16 +20,16 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   init() {
-    this.max_debug_sources = 64;
+    this.maxDebugSources = 64;
     this.unsupported = false;
     const webGLVersion = getWebGLVersion(this.el.sceneEl.renderer);
     if (webGLVersion < "2.0") {
       this.unsupported = true;
     } else {
       const gl = this.el.sceneEl.renderer.getContext();
-      const max_f_vectors = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
+      const maxUniformVectors = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
       // 10 is the number of uniform vectors in the shader. If we update that, this number must be updated accordingly.
-      this.max_debug_sources = Math.min(Math.floor(max_f_vectors / 10), this.max_debug_sources);
+      this.maxDebugSources = Math.min(Math.floor(maxUniformVectors / 10), this.maxDebugSources);
     }
 
     window.APP.store.addEventListener("statechanged", this.updateState.bind(this));
@@ -64,27 +64,27 @@ AFRAME.registerSystem("audio-debug", {
     this.material.side = THREE.FrontSide;
     this.material.transparent = true;
     this.material.uniforms.count.value = 0;
-    this.material.defines.MAX_DEBUG_SOURCES = this.max_debug_sources;
+    this.material.defines.MAX_DEBUG_SOURCES = this.maxDebugSources;
 
-    this.sourcePositions = new Array(this.max_debug_sources);
+    this.sourcePositions = new Array(this.maxDebugSources);
     this.sourcePositions.fill(new THREE.Vector3());
-    this.sourceOrientations = new Array(this.max_debug_sources);
+    this.sourceOrientations = new Array(this.maxDebugSources);
     this.sourceOrientations.fill(new THREE.Vector3());
-    this.distanceModels = new Array(this.max_debug_sources);
+    this.distanceModels = new Array(this.maxDebugSources);
     this.distanceModels.fill(0);
-    this.maxDistances = new Array(this.max_debug_sources);
+    this.maxDistances = new Array(this.maxDebugSources);
     this.maxDistances.fill(0.0);
-    this.refDistances = new Array(this.max_debug_sources);
+    this.refDistances = new Array(this.maxDebugSources);
     this.refDistances.fill(0.0);
-    this.rolloffFactors = new Array(this.max_debug_sources);
+    this.rolloffFactors = new Array(this.maxDebugSources);
     this.rolloffFactors.fill(0.0);
-    this.coneInnerAngles = new Array(this.max_debug_sources);
+    this.coneInnerAngles = new Array(this.maxDebugSources);
     this.coneInnerAngles.fill(0.0);
-    this.coneOuterAngles = new Array(this.max_debug_sources);
+    this.coneOuterAngles = new Array(this.maxDebugSources);
     this.coneOuterAngles.fill(0.0);
-    this.gains = new Array(this.max_debug_sources);
+    this.gains = new Array(this.maxDebugSources);
     this.gains.fill(0.0);
-    this.clipped = new Array(this.max_debug_sources);
+    this.clipped = new Array(this.maxDebugSources);
     this.clipped.fill(0.0);
   },
 
@@ -115,7 +115,7 @@ AFRAME.registerSystem("audio-debug", {
 
       let sourceNum = 0;
       for (const [el, audio] of APP.audios.entries()) {
-        if (sourceNum >= this.max_debug_sources) continue;
+        if (sourceNum >= this.maxDebugSources) continue;
         if (APP.isAudioPaused.has(el)) continue;
 
         audio.getWorldPosition(sourcePos);
