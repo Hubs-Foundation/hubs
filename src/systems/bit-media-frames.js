@@ -2,7 +2,16 @@
 // A scene with media-frames
 
 import { addEntity, defineQuery, entityExists, hasComponent, removeEntity } from "bitecs";
-import { AEntity, Held, MediaFrame, Networked, NetworkedMediaFrame, Owned, Rigidbody } from "../bit-components";
+import {
+  AEntity,
+  Held,
+  MediaFrame,
+  MediaLoading,
+  Networked,
+  NetworkedMediaFrame,
+  Owned,
+  Rigidbody
+} from "../bit-components";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
 import { MediaType } from "../utils/media-utils";
@@ -51,12 +60,14 @@ function getCapturableEntity(world, frame) {
   const frameObj = world.eid2obj.get(frame);
   for (let i = 0; i < collisions.length; i++) {
     const bodyData = physicsSystem.bodyUuidToData.get(collisions[i]);
+    const eid = bodyData.object3D.eid;
     if (
-      MediaFrame.mediaType[frame] & mediaTypeMaskFor(world, bodyData.object3D.eid) &&
-      !isAncestor(bodyData.object3D, frameObj) &&
-      !inOtherFrame(world, frame, bodyData.object3D.eid)
+      MediaFrame.mediaType[frame] & mediaTypeMaskFor(world, eid) &&
+      !hasComponent(world, MediaLoading, eid) &&
+      !inOtherFrame(world, frame, eid) &&
+      !isAncestor(bodyData.object3D, frameObj)
     ) {
-      return bodyData.object3D.eid;
+      return eid;
     }
   }
   return null;
@@ -188,7 +199,6 @@ function cloneForPreview(world, eid) {
   return addObject3DComponent(world, addEntity(world), cloneObj);
 }
 
-// TODO: If the preview is created while loading, then we just cached a loading cube clone
 function showPreview(world, frame, capturable) {
   const clone = cloneForPreview(world, capturable);
   MediaFrame.preview[frame] = clone;
