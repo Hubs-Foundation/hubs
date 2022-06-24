@@ -23,7 +23,7 @@ import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
-import { addComponent, removeComponent } from "bitecs";
+import { addComponent, entityExists, removeComponent } from "bitecs";
 import { MediaLoading } from "../bit-components";
 
 let loadingObject;
@@ -289,7 +289,9 @@ AFRAME.registerComponent("media-loader", {
       this.contentBounds = getBox(this.el, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
 
       el.emit("media-loaded");
-      removeComponent(APP.world, MediaLoading, el.eid);
+      if (el.eid && entityExists(APP.world, el.eid)) {
+        removeComponent(APP.world, MediaLoading, el.eid);
+      }
     };
 
     if (this.data.animate) {
