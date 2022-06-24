@@ -9,7 +9,8 @@ import {
   HoveredRemoteRight,
   Interacted,
   RemoteRight,
-  Rigidbody
+  Rigidbody,
+  TextButton
 } from "../bit-components";
 import { addMedia } from "../utils/media-utils";
 import { pixelsToPNG, RenderTargetRecorder } from "../utils/render-target-recorder";
@@ -52,6 +53,7 @@ const CAPTURE_DURATIONS = [3, 7, 15, 30, 60];
 
 const renderTargets = new Map();
 const videoRecorders = new Map();
+let captureAudio = false;
 
 const tmpVec3 = new THREE.Vector3();
 
@@ -82,7 +84,7 @@ function createRecorder(captureAudio) {
       // NOTE audio is not captured from camera vantage point for now.
       APP.audioListener.getInput().connect(destination);
     }
-    context.createMediaStreamSource(APP.dialog._micProducer?.track).connect(destination);
+    context.createMediaStreamSource(new MediaStream([APP.dialog._micProducer?.track])).connect(destination);
     srcAudioTrack = destination.stream.getAudioTracks()[0];
   }
 
@@ -177,6 +179,9 @@ function updateUI(world, camera) {
   const screenObj = world.eid2obj.get(CameraTool.screenRef[camera]);
   const selfieScreenObj = world.eid2obj.get(CameraTool.selfieScreenRef[camera]);
 
+  const sndToggleBtnObj = world.eid2obj.get(CameraTool.sndToggleRef[camera]);
+  const sndToggleLblObj = world.eid2obj.get(TextButton.labelRef[CameraTool.sndToggleRef[camera]]);
+
   const isIdle = CameraTool.state[camera] === CAMERA_STATE.IDLE;
   const isCounting =
     CameraTool.state[camera] === CAMERA_STATE.COUNTDOWN_PHOTO ||
@@ -202,6 +207,7 @@ function updateUI(world, camera) {
   captureDurLblObj.visible = allowVideo && isIdle;
   nextBtnObj.visible = allowVideo && isIdle;
   prevBtnObj.visible = allowVideo && isIdle;
+  sndToggleBtnObj.visible = allowVideo && isIdle;
 
   cancelBtnObj.visible = isCounting;
   countdownLblObj.visible = isCounting;
@@ -216,10 +222,16 @@ function updateUI(world, camera) {
     captureDurLblObj.text = CAPTURE_DURATIONS[CameraTool.captureDurIdx[camera]];
     captureDurLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
   }
+
+  if (sndToggleBtnObj.visible) {
+    sndToggleLblObj.text = captureAudio ? "Sound ON" : "Sound OFF";
+    sndToggleLblObj.sync();
+  }
 }
 
 function spawnCameraFile(cameraObj, file, type) {
-  const { entity } = addMedia(file, "#interactable-media", undefined, `${type}-camera`, false);
+  const opts = type === "video" ? { videoPaused: true } : {};
+  const { entity } = addMedia(file, "#interactable-media", undefined, `${type}-camera`, false, false, true, opts);
   entity.addEventListener(
     "media_resolved",
     () => {
@@ -233,23 +245,6 @@ function spawnCameraFile(cameraObj, file, type) {
     },
     { once: true }
   );
-
-  // entity.addEventListener(
-  //   "video-loaded",
-  //   () => {
-  //     // If we were recording audio, then pause the video immediately after starting.
-
-  //     // Or, to limit the # of concurrent videos playing, if it was a short clip, let it loop
-  //     // a few times and then pause it.
-  //     if (captureAudio || recordingDuration <= MAX_DURATION_TO_LIMIT_LOOPS * 1000) {
-  //       setTimeout(() => {
-  //         if (!NAF.utils.isMine(entity) && !NAF.utils.takeOwnership(entity)) return;
-  //         entity.components["media-video"].tryUpdateVideoPlaybackState(true);
-  //       }, captureAudio ? 0 : recordingDuration * VIDEO_LOOPS + 100);
-  //     }
-  //   },
-  //   { once: true }
-  // );
 }
 
 let snapPixels;
@@ -357,6 +352,10 @@ export function cameraToolSystem(world) {
         CameraTool.captureDurIdx[camera] =
           CameraTool.captureDurIdx[camera] === 0 ? CAPTURE_DURATIONS.length - 1 : CameraTool.captureDurIdx[camera] - 1;
       }
+
+      if (clicked(CameraTool.sndToggleRef[camera])) {
+        captureAudio = !captureAudio;
+      }
     }
 
     if (
@@ -370,7 +369,7 @@ export function cameraToolSystem(world) {
           CameraTool.snapTime[camera] = world.time.elapsed + CAPTURE_DURATIONS[CameraTool.captureDurIdx[camera]] * 1000;
           CameraTool.state[camera] = CAMERA_STATE.RECORDING_VIDEO;
 
-          const recorder = createRecorder(false);
+          const recorder = createRecorder(captureAudio);
           videoRecorders.set(camera, recorder);
           recorder.start();
 

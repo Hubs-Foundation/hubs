@@ -115,7 +115,8 @@ export const CameraTool = defineComponent({
   selfieScreenRef: Types.eid,
   cameraRef: Types.eid,
   countdownLblRef: Types.eid,
-  captureDurLblRef: Types.eid
+  captureDurLblRef: Types.eid,
+  sndToggleRef: Types.eid
 });
 export const MyCameraTool = defineComponent();
 

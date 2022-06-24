@@ -55,6 +55,7 @@ export function CameraPrefab(_props) {
   const recVideoRef = createRef();
   const button_next = createRef();
   const button_prev = createRef();
+  const sndToggleRef = createRef();
 
   const countdownLblRef = createRef();
   const captureDurLblRef = createRef();
@@ -76,6 +77,7 @@ export function CameraPrefab(_props) {
 
   const buttonHeight = 0.2;
   const buttonScale = [0.4, 0.4, 0.4];
+  const smallButtonScale = [0.2, 0.2, 0.2];
 
   const uiZ = 0.1;
 
@@ -104,7 +106,8 @@ export function CameraPrefab(_props) {
         countdownLblRef,
         captureDurLblRef,
         recVideoRef,
-        snapMenuRef
+        snapMenuRef,
+        sndToggleRef
       }}
     >
       <entity
@@ -127,8 +130,8 @@ export function CameraPrefab(_props) {
       <entity ref={cameraRef} object3D={camera} position={[0, 0, 0.05]} rotation={[0, Math.PI, 0]} />
 
       <entity name="Snap Menu" ref={snapMenuRef}>
-        <Label ref={countdownLblRef} position={[0, 0, uiZ + 0.02]} />
-        <Label ref={captureDurLblRef} position={[0, -0.2, uiZ]} />
+        <Label ref={countdownLblRef} position={[0, 0, uiZ + 0.002]} />
+        <Label ref={captureDurLblRef} position={[0, 0, uiZ + 0.002]} />
 
         <Button
           ref={cancelRef}
@@ -150,8 +153,8 @@ export function CameraPrefab(_props) {
 
         <Button
           ref={button_prev}
-          scale={buttonScale}
-          position={[-0.16, -0.1, uiZ]}
+          scale={smallButtonScale}
+          position={[-0.082, 0, uiZ]}
           width={buttonHeight}
           height={buttonHeight}
           text={"<"}
@@ -166,12 +169,21 @@ export function CameraPrefab(_props) {
           text={"Video"}
         />
         <Button
-          scale={buttonScale}
           ref={button_next}
-          position={[0.16, -0.1, uiZ]}
+          scale={smallButtonScale}
+          position={[0.082, 0, uiZ]}
           width={buttonHeight}
           height={buttonHeight}
           text={">"}
+        />
+
+        <Button
+          ref={sndToggleRef}
+          scale={smallButtonScale}
+          position={[0, -0.17, uiZ]}
+          width={0.6}
+          height={buttonHeight}
+          text={"Sound OFF"}
         />
       </entity>
     </entity>
