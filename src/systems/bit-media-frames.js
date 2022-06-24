@@ -90,57 +90,28 @@ const snapToFrame = (() => {
   const framePos = new THREE.Vector3();
   const frameQuat = new THREE.Quaternion();
   const frameScale = new THREE.Vector3();
-  const targetPos = new THREE.Vector3();
-  const targetQuat = new THREE.Quaternion();
-  const targetScale = new THREE.Vector3();
   const m4 = new THREE.Matrix4();
-  const box = new THREE.Box3();
-  const size = new THREE.Vector3();
 
   function scaleForAspectFit(containerSize, itemSize) {
     return Math.min(containerSize[0] / itemSize.x, containerSize[1] / itemSize.y, containerSize[2] / itemSize.z);
   }
 
-  // Explicitly pass which mesh you want to fit into the frame,
-  // because in the case of the preview the target eid is associated with the mesh,
-  // but in the case of snapping the object, the target eid is associated with a parent of the mesh,
-  // which also has children (including menu objects).
-  return function snapToFrame(world, frame, target, meshToFit) {
+  return function snapToFrame(world, frame, target) {
     const frameObj = world.eid2obj.get(frame);
     const targetObj = world.eid2obj.get(target);
+
     frameObj.updateMatrices();
-    targetObj.updateMatrices();
-
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
-    targetObj.matrixWorld.decompose(targetPos, targetQuat, targetScale);
 
-    // setMatrixWorld(
-    //   targetObj,
-    //   m4.compose(
-    //     targetPos,
-    //     frameQuat.identity(), // Reset rotation for correct box calculation
-    //     targetScale
-    //   )
-    // );
-
-    // TODO: BUG Why do we have to traverse the mesh and update all the matrices?
-    //           Does box.setFromObject not correctly account for out-of-date matrices?
-    // meshToFit.traverse(o => o.updateMatrices());
-
-    // TODO: Why doesn't updating the mesh alone work?
-    // meshToFit.updateMatrices();
-
-    // TODO: Why doesn't updating the target object alone work?
-    // targetObj.updateMatrices();
+    // TODO we only allow capturing media-loader so rely on its bounds calculations for now
+    let contentBounds = targetObj.el.components["media-loader"].contentBounds;
 
     setMatrixWorld(
       targetObj,
       m4.compose(
         framePos,
         frameQuat,
-        targetScale.multiplyScalar(
-          scaleForAspectFit(MediaFrame.bounds[frame], box.setFromObject(meshToFit).getSize(size))
-        )
+        frameScale.multiplyScalar(scaleForAspectFit(MediaFrame.bounds[frame], contentBounds))
       )
     );
   };
@@ -165,7 +136,8 @@ function setMatrixScale(obj, scaleArray) {
 
 function cloneForPreview(world, eid) {
   // TODO We assume capturable object is an AFRAME entity
-  const mesh = world.eid2obj.get(eid).el.getObject3D("mesh");
+  const el = world.eid2obj.get(eid).el;
+  const mesh = el.getObject3D("mesh");
   const meshClone = cloneObject3D(mesh, false);
   meshClone.traverse(node => {
     updateMaterials(node, function(srcMat) {
@@ -193,6 +165,7 @@ function cloneForPreview(world, eid) {
   meshClone.matrixNeedsUpdate = true;
 
   const cloneObj = new THREE.Group();
+  cloneObj.el = el; // We rely on media-loader component for bounds
   cloneObj.add(meshClone);
   AFRAME.scenes[0].object3D.add(cloneObj);
 
@@ -203,7 +176,7 @@ function showPreview(world, frame, capturable) {
   const clone = cloneForPreview(world, capturable);
   MediaFrame.preview[frame] = clone;
   MediaFrame.previewingNid[frame] = Networked.id[capturable];
-  snapToFrame(world, frame, clone, world.eid2obj.get(clone));
+  snapToFrame(world, frame, clone);
 }
 
 function hidePreview(world, frame) {
@@ -263,7 +236,7 @@ export function mediaFramesSystem(world) {
     const colliding = captured && isColliding(world, frame, captured);
 
     if (captured && hasComponent(world, Owned, captured) && !hasComponent(world, Held, captured) && colliding) {
-      snapToFrame(world, frame, captured, world.eid2obj.get(captured).el.getObject3D("mesh"));
+      snapToFrame(world, frame, captured);
       physicsSystem.updateBodyOptions(Rigidbody.bodyId[captured], { type: "kinematic" });
     } else if (
       (hasComponent(world, Owned, frame) &&
@@ -291,7 +264,7 @@ export function mediaFramesSystem(world) {
         const obj = world.eid2obj.get(capturable);
         obj.updateMatrices();
         tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
-        snapToFrame(world, frame, capturable, world.eid2obj.get(capturable).el.getObject3D("mesh"));
+        snapToFrame(world, frame, capturable);
         physicsSystem.updateBodyOptions(Rigidbody.bodyId[capturable], { type: "kinematic" });
       }
     }
