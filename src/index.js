@@ -13,6 +13,7 @@ import { ForgotPasswordPage } from "./react-components/page/ForgotPasswordPage";
 import { ResetPasswordPage } from "./react-components/page/ResetPasswordPage";
 import { WarningVerifyPage } from "./react-components/page/WarningVerifyPage";
 import { ProfilePage } from "./react-components/page/ProfilePage";
+import { CallbackNaverOAuthPage } from "./react-components/page/CallbackNaverOAuthPage";
 
 registerTelemetry("/home", "Hubs Home Page");
 
@@ -64,7 +65,11 @@ function Root() {
       return (
         <ProfilePage props={{avarar: 'Avt', name: 'Name'}}/>
       );
-      
+
+    case 'callback-naver-oauth':
+        return (
+          <CallbackNaverOAuthPage/>
+        );
     default:
       return (
         <HomePage />

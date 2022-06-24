@@ -10,13 +10,13 @@ const APP_ROOT = "https://larchiveum.link";
 
 
 const naverApp = {
-  clientID: "pSh1Vk5d8Df3XZAURRC5",
-  appSecret: "D0izmHYDqf"
+  clientID: "QPIOm41T66AJMeNwzeBI",
+  appSecret: "7actnLYjGi"
 };
 
 const kakaoApp = {
-  clientID: "652860",
-  jsKey: "35ee404cd4d922e351cddaedcd7e51ff"
+  clientID: "760953",
+  jsKey: "698ea6399ce6667e16f2a4b9de93ddaf"
 };
 
 const facebookApp = {

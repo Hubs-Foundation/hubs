@@ -32,6 +32,20 @@ class UserService {
         });
     };
 
+    naverLogin(data){
+        return fetch(`${API_ROOT}/v1/fblogin`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        })
+        .then((res) => res.json())
+        .catch((error) => {
+            console.log(error)
+        });
+    };
+
     signupWithEmail(data){
         return fetch(`${API_ROOT}/v1/users`, {
             method: "POST",

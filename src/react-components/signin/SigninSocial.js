@@ -3,15 +3,16 @@ import google from "./../../assets/images/google.png";
 import kakaotalk from "./../../assets/images/kakao-talk.png";
 import naver from "./../../assets/images/naver.png";
 import facebook from "./../../assets/images/facebook.png";
-// refresh token
+
 import KakaoLogin from "react-kakao-login";
 import NaverLogin from 'react-naver-login';
 import GoogleLogin from 'react-google-login';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import UserService from '../../utilities/apiServices/UserService'
-import {naverApp,kakaoApp,facebookApp,googleApp} from '../../utilities/constants'
+import {naverApp,kakaoApp,facebookApp,googleApp, APP_ROOT} from '../../utilities/constants'
 import Store from '../../utilities/store';
 import {toast } from 'react-toastify';
+
 
 function SigninSocial() {
   toast.configure();
@@ -81,8 +82,9 @@ function SigninSocial() {
   }
 
   const signupWithNaver = (response) => {
+    debugger
     try {
-      const data = { nvtoken: response.access_token };
+      const data = { fbtoken: response.accessToken };
       UserService.naverLogin(data).then((response) => {
         Store.setUser(response.data);
         const checkAuth = Store.getUser();
@@ -106,13 +108,15 @@ function SigninSocial() {
       <KakaoLogin
         token={kakaoApp.clientID}
         onSuccess={signupWithKakao}
+        onFailure={(err)=>{console.log("Kakao Login Error: ", err)}}
         render={(props) =><a onClick={props.onClick}><img src={kakaotalk}/></a>}
       />
 
       <NaverLogin 
         clientId={naverApp.clientID}
-        callbackUrl={signupWithNaver}
+        callbackUrl={APP_ROOT + '?page=callback-naver-oauth'}
         onSuccess={signupWithNaver}
+        onFailure={(err)=>{console.log("Naver Login Error: ", err)}}
         render={(props) =><a onClick={props.onClick} className='naver-btn'><img src={naver}/></a>}
       />
 
@@ -127,7 +131,7 @@ function SigninSocial() {
       <GoogleLogin
         clientId={googleApp.clientID}
         onSuccess={signupWithGoogle}
-        onFailure={(err)=>{ console.log(err)}}
+        onFailure={(err)=>{console.log("Google Login Error: ", err)}}
         render={(props) =><a onClick={props.onClick}><img src={google}/></a>}
         cookiePolicy={'single_host_origin'}
       />
