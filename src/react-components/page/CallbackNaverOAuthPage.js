@@ -1,8 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from 'react-toastify';
+import Store from '../../utilities/store';
 import UserService from '../../utilities/apiServices/UserService'
 
+toast.configure();
+
 export  function CallbackNaverOAuthPage(props) {
+
+    const [error, setError] = useState(null);
+
     useEffect(() => {
         let hash = location.hash;
         if(hash && hash !== 'error' && hash.length > 0) {
@@ -16,20 +22,17 @@ export  function CallbackNaverOAuthPage(props) {
             */
             const data = { nvtoken: obj.access_token };
             UserService.naverLogin(data).then((response) => {
-                Store.setUser(response.data);
-                const checkAuth = Store.getUser();
-                if(checkAuth)
-                {
-                  window.location = '/'
+                if(response.result == 'ok'){
+                    Store.setUser(response.data);
+                    window.opener.window.location.href = '/';
+                    window.close();
                 }
                 else{
-                  toast.error('Login failed !', {autoClose: 5000})
+                    setError(response.error);
                 }
             }).catch((error) => {
-                console.log(error);
+                setError(error);
             });
-            
-            open(location, '_self').close();
         }
         else {
             console.log("Error");
@@ -37,6 +40,12 @@ export  function CallbackNaverOAuthPage(props) {
     },[]);
 
     return (
-        <span>Authenticating...</span>
+        <>
+        {!error ? (
+            <span>Authenticating...</span>
+        ):(
+            <span>Authentication Error: {error.toString()}</span>
+        )}
+        </>
     )
 }

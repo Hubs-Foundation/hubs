@@ -33,7 +33,7 @@ class UserService {
     };
 
     naverLogin(data){
-        return fetch(`${API_ROOT}/v1/fblogin`, {
+        return fetch(`${API_ROOT}/v1/nvlogin`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
