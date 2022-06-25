@@ -186,7 +186,7 @@
     "html-webpack-plugin": "^4.2.0",
     "htmlhint": "^0.11.0",
     "internal-ip": "^6.1.0",
-    "jsdom": "^15.1.1",
+    "jsdom": "^16.5.0",
     "localstorage-memory": "^1.0.3",
     "mediasoup-client": "^3.6.29",
     "mini-css-extract-plugin": "^0.8.0",
