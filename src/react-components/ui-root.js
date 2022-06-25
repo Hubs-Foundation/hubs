@@ -1090,6 +1090,7 @@ class UIRoot extends Component {
 
     const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin();
     const canCloseRoom = this.props.hubChannel && !!this.props.hubChannel.canOrWillIfCreator("close_hub");
+    const canChat = this.props.hub.user_data === null ? true : (this.props.hub.user_data.block_chat !== undefined && !this.props.hub.user_data.block_chat);
     const isModerator = this.props.hubChannel && this.props.hubChannel.canOrWillIfCreator("kick_users") && !isMobileVR;
 
     const moreMenu = [
@@ -1430,7 +1431,7 @@ class UIRoot extends Component {
                 sidebar={
                   this.state.sidebarId ? (
                     <>
-                      {this.state.sidebarId === "chat" && (
+                      {this.state.sidebarId === "chat" && canChat && (
                         <ChatSidebarContainer
                           presences={this.props.presences}
                           occupantCount={this.occupantCount()}
@@ -1569,7 +1570,9 @@ class UIRoot extends Component {
                         )}
                       </>
                     )}
-                    <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
+                    {canChat && (
+                      <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
+                    )}
                     {entered &&
                       isMobileVR && (
                         <ToolbarButton

@@ -195,6 +195,16 @@ export function RoomSettingsSidebar({
               label={<FormattedMessage id="room-settings-sidebar.fly" defaultMessage="Allow flying" />}
               ref={register}
             />
+            <ToggleInput
+              name="user_data.block_access"
+              label={<FormattedMessage id="user_data.block_access" defaultMessage="Block access" />}
+              ref={register}
+            />
+            <ToggleInput
+              name="user_data.block_chat"
+              label={<FormattedMessage id="user_data.block_chat" defaultMessage="Block chat" />}
+              ref={register}
+            />
           </div>
         </InputField>
         <ApplyButton type="submit" />
