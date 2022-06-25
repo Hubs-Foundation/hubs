@@ -69,8 +69,8 @@ export default class HubChannel extends EventTarget {
     if (this.canOrWillIfCreator("update_hub")) return true;
 
     if(hub.user_data !== null ) {
-                       if(hub.user_data.block_access !== undefined && hub.user_data.block_access)  return false;
-               }
+    	if(hub.user_data.block_access !== undefined && hub.user_data.block_access)  return false;
+    }
 
     const roomEntrySlotCount = Object.values(this.presence.state).reduce((acc, { metas }) => {
       const meta = metas[metas.length - 1];
