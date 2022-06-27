@@ -99,6 +99,8 @@ AFRAME.registerComponent("media-video", {
     this.onSnapImageLoaded = () => (this.isSnapping = false);
     this.hasAudioTracks = false;
 
+    this.mediaEl = null;
+
     this.el.setAttribute("hover-menu__video", { template: "#video-hover-menu", isFlat: true });
     this.el.components["hover-menu__video"].getHoverMenu().then(menu => {
       // If we got removed while waiting, do nothing.
@@ -518,7 +520,7 @@ AFRAME.registerComponent("media-video", {
       };
 
       const videoEl = createVideoOrAudioEl("video");
-
+      this.mediaEl = videoEl;
       let texture, audioEl, isReady;
       if (contentType.startsWith("audio/")) {
         // We want to treat audio almost exactly like video, so we mock a video texture with an image property.
@@ -691,6 +693,7 @@ AFRAME.registerComponent("media-video", {
           // If there's an audio src, create an audio element to play it that we keep in sync
           // with the video while this component is active.
           audioEl = createVideoOrAudioEl("audio");
+          this.mediaEl = audioEl;
           audioEl.src = this.data.audioSrc;
           audioEl.onerror = failLoad;
 
@@ -810,6 +813,11 @@ AFRAME.registerComponent("media-video", {
   cleanUp() {
     if (this.videoTexture && !this.data.linkedVideoTexture) {
       disposeTexture(this.videoTexture);
+    }
+    if (this.mediaEl) {
+      // Reset to avoid circular dependency on captured failLoad function
+      this.mediaEl.onerror = null;
+      this.mediaEl = null;
     }
   },
 
