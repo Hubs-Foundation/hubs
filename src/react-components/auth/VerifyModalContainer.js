@@ -1,13 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
-import async from "async";
 import { AuthContext } from "./AuthContext";
 import { VerifyModal, VerificationError, EmailVerified, VerifyingEmail } from "./VerifyModal";
-import UserService from "../../utilities/apiServices/UserService";
-import Store from '../../utilities/store';
-import StoreHub from "../../storage/store";
-import hubChannel from './../../utils/hub-channel'
 
-const store = new StoreHub();
 const VerificationStep = {
   verifying: "verifying",
   complete: "complete",
@@ -16,91 +10,52 @@ const VerificationStep = {
 
 function useVerify() {
   const [step, setStep] = useState(VerificationStep.verifying);
-  const [larchiveumMessage, setLarchiveumMessage] = useState('');
-  const [hubMessage, setHubMessage] = useState('');
+  const [error, setError] = useState();
   const { verify } = useContext(AuthContext);
 
   useEffect(
-    
     () => {
+      const verifyAsync = async () => {
+        try {
+          const qs = new URLSearchParams(location.search);
 
-      async.parallel([
-        (cb) => {
-          const param = (new URLSearchParams(location.href)).get('auth_topic') || '';
-          const token = param.replace('auth:', '');
+          const authParams = {
+            topic: qs.get("auth_topic"),
+            token: qs.get("auth_token"),
+            origin: qs.get("auth_origin"),
+            payload: qs.get("auth_payload")
+          };
 
-          UserService.verifyUser(token)
-            .then((res)=>{
-              Store.setUser(res.data.data);
-              cb(null, res);
-            })
-            .catch((error)=>{
-              setLarchiveumMessage("Larchiveum singin error");
-              cb(null, null);
-            });
-        },
-        async (cb) => {
-          try {
-            const qs = new URLSearchParams(location.search);
-            const authParams = {
-              topic: qs.get("auth_topic"),
-              token: qs.get("auth_token"),
-              origin: qs.get("auth_origin"),
-              payload: qs.get("auth_payload")
-            };
-            store.removeHub();
-            await verify(authParams);
-            cb(null, true);
-          } catch (error) {
-            setHubMessage("Hubs signin error");
-            cb(null, true);
-          }
-        }
-      ], (err, [larchiveum, hubs])=>{
-        if(larchiveum && hubs){
+          await verify(authParams);
           setStep(VerificationStep.complete);
-        }
-        else{
+        } catch (error) {
           setStep(VerificationStep.error);
+          setError(error);
         }
-      })
+      };
+
+      verifyAsync();
     },
     [verify]
   );
 
-  return { step, larchiveumMessage, hubMessage };
+  return { step, error };
 }
 
 export function VerifyModalContainer() {
-  const { step, larchiveumMessage, hubMessage } = useVerify();
+  const { step, error } = useVerify();
 
   let content;
 
-  if (step === VerificationStep.complete) {
-    content = <center>
-      <br></br><br></br><br></br><br></br>
-      <b>Verifying Email Complete</b>
-      <div className="d-flex center-flex"><a className="btn btn-backhome" href="/">Back Home</a></div>
-    </center>
-  }
-  else 
   if (step === VerificationStep.error) {
-    content = <center>
-      <br></br><br></br>
-      <b>Verifying Email Error</b>
-      <br></br><br></br><br></br><br></br>
-      <p>{larchiveumMessage}</p>
-      <br></br>
-      <p>{hubMessage}</p>
-      <div className="d-flex center-flex margin-bottom20px"><a className="btn btn-backhome" href="/">Back Home</a></div>
-    </center>
+    content = <VerificationError error={error} />;
+  } else if (step === VerificationStep.complete) {
+    const qs = new URLSearchParams(location.search);
+    const origin = qs.get("auth_origin");
+    content = <EmailVerified origin={origin} />;
   } else {
-    content = <VerifyingEmail/>;
+    content = <VerifyingEmail />;
   }
 
-  return (
-    <VerifyModal>
-      {content}
-    </VerifyModal>
-  );
+  return <VerifyModal>{content}</VerifyModal>;
 }
