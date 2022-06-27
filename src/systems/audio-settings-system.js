@@ -14,6 +14,7 @@ export class AudioSettingsSystem {
   }
 
   onSceneReset = () => {
+    APP.audioOverrides = new Map();
     APP.sceneAudioDefaults.delete(SourceType.AVATAR_AUDIO_SOURCE);
     APP.sceneAudioDefaults.delete(SourceType.MEDIA_VIDEO);
     for (const [el, audio] of APP.audios.entries()) {
