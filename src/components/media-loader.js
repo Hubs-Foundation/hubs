@@ -701,6 +701,7 @@ AFRAME.registerComponent("media-pager", {
     if (this.networkedEl) {
       this.networkedEl.removeEventListener("pinned", this.update);
       this.networkedEl.removeEventListener("unpinned", this.update);
+      this.networkedEl = null;
     }
 
     window.APP.hubChannel.removeEventListener("permissions_updated", this.update);

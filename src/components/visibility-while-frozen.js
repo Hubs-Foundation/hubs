@@ -151,6 +151,10 @@ AFRAME.registerComponent("visibility-while-frozen", {
       this.hoverable.object3D.addEventListener("hovered", this.updateVisibility);
       this.hoverable.object3D.addEventListener("unhovered", this.updateVisibility);
     }
+  },
+
+  remove() {
+    this.networkedEl = null;
   }
 });
 

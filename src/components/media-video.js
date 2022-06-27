@@ -858,6 +858,8 @@ AFRAME.registerComponent("media-video", {
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
     this.el.addEventListener("audio_type_changed", this.setupAudio);
+
+    this.networkedEl = null;
   },
 
   removeAudio() {

@@ -18,5 +18,9 @@ AFRAME.registerComponent("action-to-remove", {
     if (this.data.requireOwnership && this.networkedEl && !NAF.utils.isMine(this.networkedEl)) return;
 
     this.el.parentNode.removeChild(this.el);
+  },
+
+  remove() {
+    this.networkedEl = null;
   }
 });

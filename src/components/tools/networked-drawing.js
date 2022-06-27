@@ -125,6 +125,8 @@ AFRAME.registerComponent("networked-drawing", {
     drawingManager.destroyDrawing(this);
 
     AFRAME.scenes[0].systems["hubs-systems"].drawingMenuSystem.unregisterDrawingMenu(this.el);
+
+    this.networkedEl = null;
   },
 
   tick(t) {

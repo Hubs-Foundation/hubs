@@ -52,5 +52,9 @@ AFRAME.registerComponent("visibility-on-content-types", {
       (mediaLoader.data.contentSubtype && mediaLoader.data.contentSubtype === this.data.contentSubtype);
     const matches = !!(matchesType && matchesSubtype);
     this.el.object3D.visible = this.data.visible ? matches : !matches;
+  },
+
+  remove() {
+    this.networkedEl = null;
   }
 });

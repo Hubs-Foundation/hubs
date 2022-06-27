@@ -168,5 +168,9 @@ AFRAME.registerComponent("scale-button", {
     this.objectMatrix.copy(this.objectToScale.matrixWorld);
     this.objectMatrix.scale(this.deltaScale);
     setMatrixWorld(this.objectToScale, this.objectMatrix);
+  },
+
+  remove() {
+    this.networkedEl = null;
   }
 });
