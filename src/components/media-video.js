@@ -837,6 +837,7 @@ AFRAME.registerComponent("media-video", {
     if (this.networkedEl) {
       this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
       this.networkedEl.removeEventListener("unpinned", this.updateHoverMenu);
+      this.networkedEl = null;
     }
 
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateHoverMenu);
@@ -859,7 +860,6 @@ AFRAME.registerComponent("media-video", {
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
     this.el.addEventListener("audio_type_changed", this.setupAudio);
 
-    this.networkedEl = null;
   },
 
   removeAudio() {
