@@ -31,7 +31,7 @@ export function Header({
         <nav>
           <ul>
             <li>
-              <a href="/" className={styles.homeLink}>
+              <a href="/" >
                 Home
               </a>
             </li>

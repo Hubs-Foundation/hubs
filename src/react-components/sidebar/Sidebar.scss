@@ -1,14 +1,11 @@
 @use "../styles/theme.scss";
 
 :local(.sidebar) {
-  position: fixed;
+  position: relative;
   display: flex;
-  right: 0;
-  
   flex-direction: column;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.268);
-  backdrop-filter: blur(8px);
+  background-color: transparent;
   pointer-events: auto;
   overflow-wrap: break-word;
   
@@ -21,6 +18,7 @@
   display: flex;
   height: 48px;
   flex-shrink: 0;
+  border-bottom: 1px solid theme.$border1-color;
   align-items: center;
   justify-content: center;
 }
