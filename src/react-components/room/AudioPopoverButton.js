@@ -57,6 +57,7 @@ export const AudioPopoverButton = ({
             ref={triggerRef}
             icon={<ArrowIcon />}
             preset="basic"
+            
             selected={popoverVisible}
             onClick={togglePopover}
             type={"left"}
