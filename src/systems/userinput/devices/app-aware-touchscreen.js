@@ -4,6 +4,17 @@ import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouc
 import { findRemoteHoverTarget } from "../../../components/cursor-controller";
 import { canMove } from "../../../utils/permissions-utils";
 import ResizeObserver from "resize-observer-polyfill";
+import { hasComponent } from "bitecs";
+import {
+  AEntity,
+  HeldRemoteRight,
+  OffersRemoteConstraint,
+  Pinnable,
+  Pinned,
+  SingleActionButton,
+  Static
+} from "../../../bit-components";
+import { anyEntityWith } from "../../../utils/bit-utils";
 
 const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
@@ -28,16 +39,11 @@ const getPlayerCamera = function() {
   return AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
 };
 
-function isSingleActionButton(el) {
-  return el.components.tags && el.components.tags.data.singleActionButton;
-}
-
-// TODO this needs to be reworked as findRemoteHoverTarget returns an eid now and cursor intersects non aframe entities
 function shouldMoveCursor(touch, rect, raycaster) {
-  const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.state.rightRemote.held;
-  if (isCursorGrabbing) {
-    return true;
-  }
+  const isCursorGrabbing = anyEntityWith(APP.world, HeldRemoteRight);
+  if (isCursorGrabbing) return false;
+
+  // Check if this touch might result in an interact or grab eventually
   const rawIntersections = [];
   raycaster.setFromCamera(
     {
@@ -51,27 +57,28 @@ function shouldMoveCursor(touch, rect, raycaster) {
     true,
     rawIntersections
   );
-  const intersection = rawIntersections.find(x => x.object.el);
-  const isInteractable =
-    intersection &&
-    intersection.object.el.matches(
-      ".interactable, .interactable *, .occupiable-waypoint-icon, .teleport-waypoint-icon"
-    );
-  const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
-  const isPinned =
-    remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
-  const isFrozen = AFRAME.scenes[0].is("frozen");
+  const intersection = rawIntersections[0];
+  const remoteHoverTarget = intersection && findRemoteHoverTarget(APP.world, intersection.object);
+  if (!remoteHoverTarget) return false;
 
-  const template =
-    remoteHoverTarget && remoteHoverTarget.components.networked && remoteHoverTarget.components.networked.data.template;
-  const isStaticControlledMedia = template && template === "#static-controlled-media";
-  const isStaticMedia = template && template === "#static-media";
+  const isSingleActionButton = hasComponent(APP.world, SingleActionButton, remoteHoverTarget);
+
+  const isInteractable =
+    hasComponent(APP.world, OffersRemoteConstraint, remoteHoverTarget) ||
+    (hasComponent(APP.world, AEntity, remoteHoverTarget) &&
+      APP.world.eid2obj
+        .get(remoteHoverTarget)
+        .el.matches(".interactable, .interactable *, .occupiable-waypoint-icon, .teleport-waypoint-icon"));
+
+  const isPinned =
+    hasComponent(APP.world, Pinnable, remoteHoverTarget) && hasComponent(APP.world, Pinned, remoteHoverTarget);
+  const isSceneFrozen = AFRAME.scenes[0].is("frozen");
+
+  // TODO isStatic is likely a superfluous check for things matched via OffersRemoteConstraint
+  const isStatic = hasComponent(APP.world, Static, remoteHoverTarget);
   return (
-    isInteractable &&
-    (isFrozen || !isPinned) &&
-    !isStaticControlledMedia &&
-    !isStaticMedia &&
-    (remoteHoverTarget && (canMove(remoteHoverTarget) || isSingleActionButton(remoteHoverTarget)))
+    isSingleActionButton || (isInteractable && (isSceneFrozen || !isPinned) && !isStatic)
+    //&& (remoteHoverTarget && canMove(remoteHoverTarget))
   );
 }
 
@@ -106,7 +113,7 @@ export class AppAwareTouchscreenDevice {
           // If grab was being delayed, we should fire the initial grab and also delay the unassignment
           // to ensure we write at least two frames with the grab down (since the action set will change)
           // and otherwise we'd not see the falling xform.
-          if (assignment.framesUntilGrab >= 0) {
+          if (assignment.framesUntilGrab > 0) {
             assignment.framesUntilUnassign = assignment.framesUntilGrab + 2;
           } else {
             unassign(assignment.touch, assignment.job, this.assignments);
@@ -337,6 +344,11 @@ export class AppAwareTouchscreenDevice {
 
       const assignment = findByJob(MOVE_CURSOR_JOB, this.assignments) || findByJob(MOVE_CAMERA_JOB, this.assignments);
       frame.setPose(path.cursorPose, assignment.cursorPose);
+      this.lastPose = assignment.cursorPose;
+    } else if (this.lastPose) {
+      // TODO Without this there is no way to hover objects on mobile. This is fishy though
+      // and more fishy is that previously we were not doing this but somehow hovers were still working.
+      frame.setPose(path.cursorPose, this.lastPose);
     }
 
     frame.setValueType(path.isTouchingGrabbable, false);
