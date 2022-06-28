@@ -62,7 +62,8 @@ function SigninSocial() {
 
   const signupWithKakao = (response) => {
     try {
-      const data = { kktoken: response.access_token };
+      console.log("Kakao login: ", response);
+      const data = { kktoken: response.response.access_token };
       UserService.kakaoLogin(data).then((response) => {
         Store.setUser(response.data);
         const checkAuth = Store.getUser();
@@ -106,7 +107,7 @@ function SigninSocial() {
   return (
     <div id="iconGroup">
       <KakaoLogin
-        token={kakaoApp.clientID}
+        token={kakaoApp.jsKey}
         onSuccess={signupWithKakao}
         onFailure={(err)=>{console.log("Kakao Login Error: ", err)}}
         render={(props) =><a onClick={props.onClick}><img src={kakaotalk}/></a>}

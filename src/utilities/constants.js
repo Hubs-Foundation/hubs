@@ -16,12 +16,10 @@ const naverApp = {
 
 const kakaoApp = {
   clientID: "760953",
-  jsKey: "698ea6399ce6667e16f2a4b9de93ddaf"
+  jsKey: "698ea6399ce6667e16f2a4b9de93ddaf",
 };
 
 const facebookApp = {
-  //clientID: '339289624917102',
-  //clientID: "573470851047401"
   clientID: "1205037390232954"
 };
 
