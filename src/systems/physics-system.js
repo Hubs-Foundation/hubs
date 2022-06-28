@@ -247,6 +247,7 @@ export class PhysicsSystem {
     }
   }
 
+  // TODO inline updateBody
   updateBodyOptions(bodyId, options) {
     this.workerHelpers.updateBody(bodyId, Object.assign(this.bodyUuidToData.get(bodyId).options, options));
   }

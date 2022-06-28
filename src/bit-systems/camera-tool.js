@@ -394,7 +394,7 @@ export function cameraToolSystem(world) {
     const renderTarget = renderTargets.get(camera);
     const elapsed = world.time.elapsed;
 
-    // Update render target at a specific when taking a photo, recording a video, or round robbin for cameras in view
+    // Update render target when taking a photo, recording a video, or round robbin for cameras in view
     if (
       CameraTool.state[camera] === CAMERA_STATE.SNAP_PHOTO ||
       (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO &&

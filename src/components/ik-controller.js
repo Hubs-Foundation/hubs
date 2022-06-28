@@ -343,12 +343,12 @@ AFRAME.registerComponent("ik-controller", {
 
       if (!this.isInView) {
         const world = APP.world;
-        // Check in-game cameras if rendering to viewfinder
+        // Check camera tools if they are rendering to viewfinder
         const cameraTools = cameraToolsQuery(world);
         for (const eid of cameraTools) {
           const screenObj = world.eid2obj.get(CameraTool.screenRef[eid]);
           const cameraObj = world.eid2obj.get(CameraTool.cameraRef[eid]);
-          this.isInView = this.isInView || (screenObj.visible && isInViewOfCamera(cameraObj, tmpPos));
+          this.isInView = screenObj.visible && isInViewOfCamera(cameraObj, tmpPos);
           if (this.isInView) break;
         }
       }

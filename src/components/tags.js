@@ -31,19 +31,10 @@ const tag2ecs = {
   ignoreSpaceBubble: IgnoreSpaceBubble
 };
 
+// TODO usages of this should be replaced with direct hasComponent calls
+// but this also has additional logic to check for non existant object
 export function isTagged(elOrObject3D, tag) {
   return elOrObject3D && hasComponent(APP.world, tag2ecs[tag], elOrObject3D.eid);
-}
-
-export function setTag(elOrObject3D, tag, value = true) {
-  const eid = elOrObject3D.eid;
-  const Component = tag2ecs[tag];
-  if (value) {
-    addComponent(APP.world, Component, eid);
-  } else {
-    removeComponent(APP.world, Component, eid);
-  }
-  return !!value;
 }
 
 AFRAME.registerComponent("tags", {
@@ -67,12 +58,8 @@ AFRAME.registerComponent("tags", {
       console.warn("Do not edit tags with .setAttribute");
     }
     this.didUpdateOnce = true;
-
-    const eid = this.el.eid;
-    Object.entries(this.data).forEach(function([tagName, isSet]) {
-      if (isSet) {
-        addComponent(APP.world, tag2ecs[tagName], eid);
-      }
+    Object.entries(this.data).forEach(([tagName, isSet]) => {
+      if (isSet) addComponent(APP.world, tag2ecs[tagName], this.el.eid);
     });
   }
 });
