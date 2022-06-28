@@ -19,7 +19,7 @@ export default class HubsTextureLoader extends THREE.TextureLoader {
     texture.onUpdate = function() {
       // Delete texture data once it has been uploaded to the GPU
       texture.image.close && texture.image.close();
-      delete texture.image;
+      texture.image = null;
     };
 
     return texture;
