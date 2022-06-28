@@ -67,7 +67,7 @@ export function createElementEntity(tag, attrs, ...children) {
     const components = [];
     let ref = null;
 
-    for (let attr in attrs) {
+    for (const attr in attrs) {
       if (reservedAttrs.includes(attr)) {
         outputAttrs[attr] = attrs[attr];
       } else if (attr === "ref") {

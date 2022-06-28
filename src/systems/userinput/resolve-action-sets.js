@@ -1,7 +1,6 @@
 import { sets } from "./sets";
 import { CAMERA_MODE_INSPECT } from "../camera-system";
 import qsTruthy from "../../utils/qs_truthy";
-import { isTagged } from "../../components/tags";
 import { anyEntityWith } from "../../utils/bit-utils";
 import {
   HeldRemoteRight,

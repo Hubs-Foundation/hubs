@@ -1,4 +1,4 @@
-/* global AFRAME NAF */
+/* global AFRAME */
 import { paths } from "./userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { isTagged } from "../components/tags";

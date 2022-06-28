@@ -28,7 +28,7 @@ AFRAME.registerComponent("layers", {
     this.update = this.update.bind(this);
     this.el.addEventListener("object3dset", this.update);
   },
-  update(oldData) {
+  update() {
     const obj = this.el.object3D;
     if (this.data.recursive) {
       obj.traverse(o => (o.layers.mask = this.data.mask));

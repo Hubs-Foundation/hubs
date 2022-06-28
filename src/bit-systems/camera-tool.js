@@ -72,6 +72,24 @@ function grabberPressedSnapAction(world, camera) {
   );
 }
 
+function spawnCameraFile(cameraObj, file, type) {
+  const opts = type === "video" ? { videoPaused: true } : {};
+  const { entity } = addMedia(file, "#interactable-media", undefined, `${type}-camera`, false, false, true, opts);
+  entity.addEventListener(
+    "media_resolved",
+    () => {
+      AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
+      // TODO animate and orient around camera
+      entity.object3D.position.copy(cameraObj.localToWorld(new THREE.Vector3(0, -0.5, 0)));
+      entity.object3D.quaternion.copy(cameraObj.quaternion);
+      entity.object3D.matrixNeedsUpdate = true;
+      APP.hubChannel.sendMessage({ src: entity.components["media-loader"].data.src }, type);
+      APP.hubChannel.sendObjectSpawnedEvent(ObjectTypes.CAMERA);
+    },
+    { once: true }
+  );
+}
+
 function createRecorder(captureAudio) {
   let srcAudioTrack;
   // NOTE: if we don't have a self audio track, we can end up generating an empty video (browser bug?)
@@ -227,24 +245,6 @@ function updateUI(world, camera) {
     sndToggleLblObj.text = captureAudio ? "Sound ON" : "Sound OFF";
     sndToggleLblObj.sync();
   }
-}
-
-function spawnCameraFile(cameraObj, file, type) {
-  const opts = type === "video" ? { videoPaused: true } : {};
-  const { entity } = addMedia(file, "#interactable-media", undefined, `${type}-camera`, false, false, true, opts);
-  entity.addEventListener(
-    "media_resolved",
-    () => {
-      AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_CAMERA_TOOL_TOOK_SNAPSHOT);
-      // TODO animate and orient around camera
-      entity.object3D.position.copy(cameraObj.localToWorld(new THREE.Vector3(0, -0.5, 0)));
-      entity.object3D.quaternion.copy(cameraObj.quaternion);
-      entity.object3D.matrixNeedsUpdate = true;
-      APP.hubChannel.sendMessage({ src: entity.components["media-loader"].data.src }, type);
-      APP.hubChannel.sendObjectSpawnedEvent(ObjectTypes.CAMERA);
-    },
-    { once: true }
-  );
 }
 
 let snapPixels;

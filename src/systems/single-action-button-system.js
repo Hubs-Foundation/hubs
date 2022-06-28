@@ -7,7 +7,6 @@ import {
   HoveredRemoteRight,
   Interacted,
   SingleActionButton,
-  Slice9,
   TextButton
 } from "../bit-components";
 import { hasAnyComponent } from "../utils/bit-utils";
@@ -69,7 +68,7 @@ export const BUTTON_TYPES = {
   ACTION: 1
 };
 
-let buttonStyles = {};
+const buttonStyles = {};
 // TODO these colors come from what we are doing in theme.js for aframe mixins but they seem fishy
 function applyTheme() {
   buttonStyles[BUTTON_TYPES.DEFAULT] = {

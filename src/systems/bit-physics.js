@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not, removeComponent } from "bitecs";
+import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } from "bitecs";
 import { Object3DTag, Rigidbody, PhysicsShape, AEntity } from "../bit-components";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 // import { holdableButtonSystem } from "./holdable-button-system";

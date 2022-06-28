@@ -2,7 +2,7 @@ import { paths } from "../paths";
 import { Pose } from "../pose";
 import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouch } from "./touchscreen/assignments";
 import { findRemoteHoverTarget } from "../../../components/cursor-controller";
-import { canMove } from "../../../utils/permissions-utils";
+// import { canMove } from "../../../utils/permissions-utils";
 import ResizeObserver from "resize-observer-polyfill";
 import { hasComponent } from "bitecs";
 import {
@@ -78,6 +78,7 @@ function shouldMoveCursor(touch, rect, raycaster) {
   const isStatic = hasComponent(APP.world, Static, remoteHoverTarget);
   return (
     isSingleActionButton || (isInteractable && (isSceneFrozen || !isPinned) && !isStatic)
+    // TODO check canMove
     //&& (remoteHoverTarget && canMove(remoteHoverTarget))
   );
 }

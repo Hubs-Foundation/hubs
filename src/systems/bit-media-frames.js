@@ -22,6 +22,8 @@ const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
 const FULL_COLOR = 0x808080;
 
+const mediaFramesQuery = defineQuery([MediaFrame]);
+
 // TODO currently only aframe entiteis can be placed in media frames
 function mediaTypeMaskFor(world, eid) {
   if (!hasComponent(world, AEntity, eid)) return 0;
@@ -104,7 +106,7 @@ const snapToFrame = (() => {
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
 
     // TODO we only allow capturing media-loader so rely on its bounds calculations for now
-    let contentBounds = targetObj.el.components["media-loader"].contentBounds;
+    const contentBounds = targetObj.el.components["media-loader"].contentBounds;
 
     setMatrixWorld(
       targetObj,
@@ -222,7 +224,6 @@ function mediaTypesOf(world, entities) {
 
 const heldQuery = defineQuery([Held]);
 // const droppedQuery = exitQuery(heldQuery);
-const mediaFramesQuery = defineQuery([MediaFrame]);
 export function mediaFramesSystem(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   const heldMediaTypes = mediaTypesOf(world, heldQuery(world));

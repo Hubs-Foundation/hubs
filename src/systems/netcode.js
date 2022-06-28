@@ -53,6 +53,11 @@ export function createNetworkedEntityFromRemote(world, prefabName, initialData, 
   return eid;
 }
 
+function spawnAllowed(creator, prefabName) {
+  const perm = prefabs.get(prefabName).permission;
+  return !perm || APP.hubChannel.userCan(creator, perm);
+}
+
 export function createNetworkedEntity(world, prefabName, initialData) {
   if (!spawnAllowed(NAF.clientId, prefabName)) throw new Error(`You do not have permission to spawn ${prefabName}`);
   const rootNid = NAF.utils.createNetworkId();
@@ -145,11 +150,6 @@ function isNetworkInstantiated(eid) {
 
 function isNetworkInstantiatedByMe(eid) {
   return isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId);
-}
-
-function spawnAllowed(creator, prefabName) {
-  const perm = prefabs.get(prefabName).permission;
-  return !perm || APP.hubChannel.userCan(creator, perm);
 }
 
 const pendingUpdatesForNid = new Map();

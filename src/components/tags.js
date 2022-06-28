@@ -1,4 +1,4 @@
-import { addComponent, hasComponent, removeComponent } from "bitecs";
+import { addComponent, hasComponent } from "bitecs";
 import {
   Holdable,
   OffersRemoteConstraint,

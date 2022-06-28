@@ -11,6 +11,7 @@ import { textureLoader } from "../utils/media-utils";
 
 const buttonTexture = textureLoader.load(buttonSrc);
 
+// eslint-disable-next-line react/prop-types
 function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TYPES.DEFAULT, ...props }) {
   const labelRef = createRef();
   return (
@@ -35,6 +36,7 @@ function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TY
   );
 }
 
+// eslint-disable-next-line react/prop-types
 function Label({ text, ...props }, ...children) {
   const value = children.join("\n");
   return <entity name="Label" text={{ value, ...text }} layers={1 << Layers.CAMERA_LAYER_UI} {...props} />;
@@ -47,7 +49,7 @@ const RENDER_HEIGHT = 720;
 // TODO we should do this in a more explicit spot for "preloading" during the loading screen
 loadModel(cameraModelSrc, null, true);
 
-export function CameraPrefab(_props) {
+export function CameraPrefab() {
   const snapMenuRef = createRef();
 
   const snapRef = createRef();

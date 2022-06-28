@@ -6,7 +6,7 @@ const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
 import { renderAsEntity } from "./utils/jsx-entity";
-import { Networked, Owned } from "./bit-components";
+import { Networked } from "./bit-components";
 import { addComponent } from "bitecs";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
@@ -128,22 +128,18 @@ import { findAncestorWithComponent } from "./utils/scene-graph";
 import { createElementEntity } from "./utils/jsx-entity";
 /** @jsx createElementEntity */ createElementEntity;
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "media-frame",
-  "media-frame",
-  (el, _componentName, componentData, _components) => {
-    const eid = renderAsEntity(APP.world, <entity media-frame={componentData} />);
+AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _componentName, componentData) => {
+  const eid = renderAsEntity(APP.world, <entity media-frame={componentData} />);
 
-    addComponent(APP.world, Networked, eid);
+  addComponent(APP.world, Networked, eid);
 
-    const networkedEl = findAncestorWithComponent(el, "networked");
-    let rootNid = (networkedEl && networkedEl.components.networked.data.networkId) || "scene";
-    Networked.id[eid] = APP.getSid(`${rootNid}.${el.object3D.children[0].userData.gltfIndex}`);
-    APP.world.nid2eid.set(Networked.id[eid], eid);
+  const networkedEl = findAncestorWithComponent(el, "networked");
+  const rootNid = (networkedEl && networkedEl.components.networked.data.networkId) || "scene";
+  Networked.id[eid] = APP.getSid(`${rootNid}.${el.object3D.children[0].userData.gltfIndex}`);
+  APP.world.nid2eid.set(Networked.id[eid], eid);
 
-    el.object3D.add(APP.world.eid2obj.get(eid));
-  }
-);
+  el.object3D.add(APP.world.eid2obj.get(eid));
+});
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
   if (componentData.id) {
