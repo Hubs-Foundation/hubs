@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect }  from 'react';
 import google from "./../../assets/images/google.png";
 import kakaotalk from "./../../assets/images/kakao-talk.png";
 import naver from "./../../assets/images/naver.png";
@@ -11,49 +11,56 @@ import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props
 import UserService from '../../utilities/apiServices/UserService'
 import {naverApp,kakaoApp,facebookApp,googleApp, APP_ROOT} from '../../utilities/constants'
 import Store from '../../utilities/store';
-import {toast } from 'react-toastify';
+import { toast } from 'react-toastify';
+import { gapi } from 'gapi-script';
 
 
 function SigninSocial() {
+
   toast.configure();
+
+  // useEffect(() => {
+  //   gapi.load('client:auth2', ()=>{
+  //     gapi.client.init({
+  //       clientID: googleApp.clientID,
+  //       scope: ""
+  //     })
+  //   })
+  // }, []);
+
   const signupWithGoogle = (response) => {
-    console.log(response);
+    console.log("Google Login Success :", response);
     try {
-      let data ={ggtoken:response.tokenId};
-      console.log(data)
+      let data = { ggtoken : response.tokenId };
       UserService.googleLogin(data).then((response) => {
-        Store.setUser(response.data);
-        const checkAuth = Store.getUser();
-        if(checkAuth)
-        {
+        if(response.result === 'ok'){
+          Store.setUser(response.data);
           window.location = '/'
         }
         else{
           toast.error('Login failed !', {autoClose: 5000})
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
-    }catch(err) {
-        console.log(err);
+    }catch(error) {
+        console.error(error);
     } 
   }
 
   const signupWithFacebook = (response) => {
     try {
       const data = { fbtoken: response.accessToken };
-      UserService.facebookLogin(data).then((response) => {
-        Store.setUser(response.data);
-        const checkAuth = Store.getUser();
-        if(checkAuth)
-        {
+      UserService.facebookLogin(data).then((response) =>  {
+        if(response.result === 'ok'){
+          Store.setUser(response.data);
           window.location = '/'
         }
         else{
           toast.error('Login failed !', {autoClose: 5000})
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     }catch(err) {
         console.log(err);
@@ -62,20 +69,17 @@ function SigninSocial() {
 
   const signupWithKakao = (response) => {
     try {
-      console.log("Kakao login: ", response);
       const data = { kktoken: response.response.access_token };
-      UserService.kakaoLogin(data).then((response) => {
-        Store.setUser(response.data);
-        const checkAuth = Store.getUser();
-        if(checkAuth)
-        {
+      UserService.kakaoLogin(data).then((response) =>  {
+        if(response.result === 'ok'){
+          Store.setUser(response.data);
           window.location = '/'
         }
         else{
           toast.error('Login failed !', {autoClose: 5000})
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     }catch(err) {
         console.log(err);
@@ -86,18 +90,16 @@ function SigninSocial() {
     debugger
     try {
       const data = { fbtoken: response.accessToken };
-      UserService.naverLogin(data).then((response) => {
-        Store.setUser(response.data);
-        const checkAuth = Store.getUser();
-        if(checkAuth)
-        {
+      UserService.naverLogin(data).then((response) =>  {
+        if(response.result === 'ok'){
+          Store.setUser(response.data);
           window.location = '/'
         }
         else{
           toast.error('Login failed !', {autoClose: 5000})
         }
       }).catch((error) => {
-        console.log(error);
+        console.error(error);
       });
     }catch(err) {
         console.log(err);
@@ -135,6 +137,7 @@ function SigninSocial() {
         onFailure={(err)=>{console.log("Google Login Error: ", err)}}
         render={(props) =><a onClick={props.onClick}><img src={google}/></a>}
         cookiePolicy={'single_host_origin'}
+        //isSignedIn={true}
       />
     </div>
   );

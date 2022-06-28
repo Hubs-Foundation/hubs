@@ -40,12 +40,12 @@ export  function CallbackNaverOAuthPage(props) {
     },[]);
 
     return (
-        <>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
         {!error ? (
             <span>Authenticating...</span>
         ):(
             <span>Authentication Error: {error.toString()}</span>
         )}
-        </>
+        </div>
     )
 }
