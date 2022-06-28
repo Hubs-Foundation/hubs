@@ -170,7 +170,7 @@ export function MicSetupModal({
               )}
           </div>
         </div>
-        <Button preset="primary" onClick={onEnterRoom}>
+        <Button  preset="accent4" onClick={onEnterRoom}>
           <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
         </Button>
       </Column>

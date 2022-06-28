@@ -10,23 +10,25 @@
 
   label {
     cursor: pointer;
-    color: theme.$text1-color;
+    color: #eae0e0 !important;
     margin-top: 8px;
-    margin-bottom: 3px;
+    margin-bottom: 6px;
     white-space: nowrap;
+    font-size: 14px !important;
+
   }
 }
 
 :local(.icon-container) {
   position: relative;
   border-radius: 9999px;
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #ac1414 !important;
-  background-color:  #b71556c3 !important;
+  border: 2px solid #9a190f70 !important;
+  background-color: #ed20233c !important;
 
   transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
 
@@ -680,10 +682,9 @@
 
 :local(.left) {
   :local(.icon-container) {
-    width: 48px;
-    border-radius: 0px;
-    border-top-left-radius: 9999px;
-    border-bottom-left-radius: 9999px;
+    margin-bottom: 10px;
+    border-radius: 50px
+
   } 
 }
 
@@ -695,9 +696,8 @@
 
 :local(.right) {
   :local(.icon-container) {
-    width: 48px;
-    border-radius: 0px;
-    border-top-right-radius: 9999px;
-    border-bottom-right-radius: 9999px;
+     margin-top: 8px;
+    border-radius: 50px;
+
   }
 }

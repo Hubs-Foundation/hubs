@@ -2,17 +2,17 @@
 
 :local(.modal) {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   height: max-content;
-  background-color: rgba(0, 0, 0, 0.486);
+  background-color: rgba(0, 0, 0, 0.121);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   margin: 24px;
   
   z-index: 1;
   width: 100%;
-  max-width: 660px;
+  max-width: 750px;
 }
 
 :local(.header) {
@@ -39,7 +39,6 @@
   min-height: 200px;
   display: flex;
   flex: 1;
-  flex-direction: column;
 }
 
 :local(.sm-fullscreen) {

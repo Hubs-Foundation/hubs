@@ -63,6 +63,7 @@ export const AudioPopoverButton = ({
             className={popoverVisible ? styles.arrowButton : styles.arrowButtonSelected}
             title={"Audio Settings"}
           />
+          <p style={{ color: "color: #d2c3c3", fontSize: "14px" }}>Settings</p>
           <ToolbarButton
             ref={micButtonRef}
             icon={isMicrophoneMuted || !isMicrophoneEnabled ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}

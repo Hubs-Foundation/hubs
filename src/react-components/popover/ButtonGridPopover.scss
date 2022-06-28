@@ -3,12 +3,12 @@
 
 :local(.button-grid-popover) {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  gap: 22px;
   padding: 16px;
 
   &:not(:local(.fullscreen)) {
-    max-width: 224px;
+    max-width: 324px;
     padding-top: 0;
   }
 }

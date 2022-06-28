@@ -21,9 +21,9 @@
 :local(.content-menu-button) {
   display: flex;
   flex-direction: row;
-  border: none;
-  border-radius: 8px;
-  background-color: theme.$transparent;
+  border: 1px solid #ff11004c;
+  border-radius: 12px;
+  background-color:  #000;
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
   align-items: center;
@@ -39,10 +39,12 @@
 
   &:hover {
     background-color: theme.$button-bg-color-hover;
+    border: 2px solid #ff1100;
   }
 
   &:active {
-    background-color: theme.$button-bg-color-pressed;
+    background-color: #000;
+
   }
 
   svg {

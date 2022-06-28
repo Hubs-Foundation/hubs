@@ -1231,61 +1231,61 @@ class UIRoot extends Component {
               )
           }
         ].filter(item => item)
-      },
-      {
-        id: "support",
-        label: <FormattedMessage id="more-menu.support" defaultMessage="Support" />,
-        items: [
-          configs.feature("show_community_link") && {
-            id: "community",
-            label: <FormattedMessage id="more-menu.community" defaultMessage="Community" />,
-            icon: DiscordIcon,
-            href: configs.link("community", "https://discord.gg/dFJncWwHun")
-          },
-          configs.feature("show_issue_report_link") && {
-            id: "report-issue",
-            label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue" />,
-            icon: WarningCircleIcon,
-            href: configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")
-          },
-          entered && {
-            id: "start-tour",
-            label: <FormattedMessage id="more-menu.start-tour" defaultMessage="***" />,
-            icon: SupportIcon,
-            onClick: () => this.props.scene.systems.tips.resetTips()
-          },
-          configs.feature("show_docs_link") && {
-            id: "help",
-            label: <FormattedMessage id="more-menu.help" defaultMessage="Help" />,
-            icon: SupportIcon,
-            href: configs.link("docs", "https://hubs.mozilla.com/docs")
-          },
-          configs.feature("show_controls_link") && {
-            id: "controls",
-            label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls" />,
-            icon: SupportIcon,
-            href: configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")
-          },
-          configs.feature("show_whats_new_link") && {
-            id: "whats-new",
-            label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New" />,
-            icon: SupportIcon,
-            href: "/whats-new"
-          },
-          configs.feature("show_terms") && {
-            id: "tos",
-            label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service" />,
-            icon: TextDocumentIcon,
-            href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
-          },
-          configs.feature("show_privacy") && {
-            id: "privacy",
-            label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice" />,
-            icon: ShieldIcon,
-            href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
-          }
-        ].filter(item => item)
       }
+      // {
+      //   id: "support",
+      //   label: <FormattedMessage id="more-menu.support" defaultMessage="XXx" />,
+      //   items: [
+      //     configs.feature("show_community_link") && {
+      //       id: "community",
+      //       label: <FormattedMessage id="more-menu.community" defaultMessage="Community" />,
+      //       icon: DiscordIcon,
+      //       href: configs.link("community", "https://discord.gg/dFJncWwHun")
+      //     },
+      //     configs.feature("show_issue_report_link") && {
+      //       id: "report-issue",
+      //       label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue" />,
+      //       icon: WarningCircleIcon,
+      //       href: configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")
+      //     },
+      //     entered && {
+      //       id: "start-tour",
+      //       label: <FormattedMessage id="more-menu.start-tour" defaultMessage="***" />,
+      //       icon: SupportIcon,
+      //       onClick: () => this.props.scene.systems.tips.resetTips()
+      //     },
+      //     configs.feature("show_docs_link") && {
+      //       id: "help",
+      //       label: <FormattedMessage id="more-menu.help" defaultMessage="Help" />,
+      //       icon: SupportIcon,
+      //       href: configs.link("docs", "https://hubs.mozilla.com/docs")
+      //     },
+      //     configs.feature("show_controls_link") && {
+      //       id: "controls",
+      //       label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls" />,
+      //       icon: SupportIcon,
+      //       href: configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")
+      //     },
+      //     configs.feature("show_whats_new_link") && {
+      //       id: "whats-new",
+      //       label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New" />,
+      //       icon: SupportIcon,
+      //       href: "/whats-new"
+      //     },
+      //     configs.feature("show_terms") && {
+      //       id: "tos",
+      //       label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service" />,
+      //       icon: TextDocumentIcon,
+      //       href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
+      //     },
+      //     configs.feature("show_privacy") && {
+      //       id: "privacy",
+      //       label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice" />,
+      //       icon: ShieldIcon,
+      //       href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+      //     }
+      //   ].filter(item => item)
+      // }
     ];
 
     return (
