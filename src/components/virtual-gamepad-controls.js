@@ -128,7 +128,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     insertAfter(this.rightTouchZone, this.mockJoystickContainer);
     this.rightStick = nipplejs.create({
       mode: "static",
-      position: {left: "50%", top: "50%"},
+      position: { left: "50%", top: "50%" },
       zone: this.rightTouchZone,
       color: "white",
       fadeTime: 0
@@ -148,7 +148,7 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     insertAfter(this.leftTouchZone, this.mockJoystickContainer);
     this.leftStick = nipplejs.create({
       mode: "static",
-      position: {left: "50%", top: "50%"},
+      position: { left: "50%", top: "50%" },
       zone: this.leftTouchZone,
       color: "white",
       fadeTime: 0
