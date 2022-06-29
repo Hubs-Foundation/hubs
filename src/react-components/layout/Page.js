@@ -35,7 +35,7 @@ export function Page({
 }) {
   return (
     <>
-      <Banner/>
+      {isHmc ? <Banner/> : null}
       <Header
         showCloud={showCloud}
         enableSpoke={enableSpoke}
