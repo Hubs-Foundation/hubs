@@ -254,14 +254,7 @@ const Banner = () => {
                   defaultMessage="{message}"
                   id="banner.expand-body"
                   values={{
-                    message: (
-                      <>
-                          We&apos;re working on a new service that makes it easier than ever to deploy a Hub of your own.
-                          <br/>
-                          Sign up here to be the first to know about our new service, as well as the latest Hubs news,
-                          product features and offerings. We can&apos;t wait to show you what we&apos;ve been working on!
-                      </>
-                    )
+                    message:<>We&apos;re working on a new service that makes it easier than ever to deploy a Hub of your own. Sign up here to be the first to know about our new service, as well as the latest Hubs news, product features and offerings. We can&apos;t wait to show you what we&apos;ve been working on!</>
                   }}
                 />
               </div>
