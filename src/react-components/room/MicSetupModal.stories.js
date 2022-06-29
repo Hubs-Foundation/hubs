@@ -2,9 +2,21 @@ import React from "react";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { RoomLayout } from "../layout/RoomLayout";
 import { MicSetupModal } from "./MicSetupModal";
+import { LevelBar } from "../misc/LevelBar";
+import styles from "./MicSetupModal.scss";
+import PropTypes from "prop-types";
 
 const micOptions = ["Microphone 1", "Microphone 2 long text", "Microphone 3 even much much longer text"];
-const speakerOptions = ["Speaker 1", "Speaker 2 long text", "Speaker 3 event much much longer text"];
+const speakerOptions = [
+  "Speaker 1",
+  "Speaker 2",
+  "Speaker 3",
+  "Speaker 4",
+  "Speaker 5",
+  "Speaker 6",
+  "Speaker long text",
+  "Speaker event much much longer text"
+];
 const permissionOptions = [PermissionStatus.PROMPT, PermissionStatus.GRANTED, PermissionStatus.DENIED];
 
 export default {
@@ -79,57 +91,94 @@ export default {
   }
 };
 
-const Template = args => <RoomLayout viewport={<MicSetupModal {...args} />} />;
+function getMicOptions(micId) {
+  return {
+    value: micId,
+    options: micOptions.map(option => {
+      return {
+        label: option,
+        value: option
+      };
+    })
+  };
+}
+
+function getSpeakerOptions(speakerId) {
+  return {
+    value: speakerId,
+    options: speakerOptions.map(option => {
+      return {
+        label: option,
+        value: option
+      };
+    })
+  };
+}
+
+const Template = ({ selectedMicrophone, selectedSpeaker, ...rest }) => {
+  return (
+    <RoomLayout
+      viewport={
+        <MicSetupModal
+          microphoneOptions={getMicOptions(selectedMicrophone)}
+          speakerOptions={getSpeakerOptions(selectedSpeaker)}
+          micLevelBar={<LevelBar className={styles.levelBar} />}
+          speakerLevelBar={<LevelBar className={styles.levelBar} />}
+          {...rest}
+        />
+      }
+    />
+  );
+};
+
+Template.propTypes = {
+  selectedMicrophone: PropTypes.string,
+  selectedSpeaker: PropTypes.string
+};
 
 export const Prompt = Template.bind({});
 
 Prompt.args = {
-  selectedMicrophone: micOptions[0],
   isMicrophoneEnabled: true,
-  microphoneOptions: micOptions,
-  micLevel: 0.5,
+  selectedMicrophone: micOptions[0],
   selectedSpeaker: speakerOptions[0],
-  speakerOptions: speakerOptions,
-  speakerLevel: 0.5,
   isMicrophoneMuted: false,
-  permissionStatus: PermissionStatus.PROMPT
+  permissionStatus: PermissionStatus.PROMPT,
+  isAudioInputSelectAvailable: true,
+  isAudioOutputSelectAvailable: true
 };
 
 export const Granted = Template.bind({});
 
 Granted.args = {
-  selectedMicrophone: micOptions[0],
   isMicrophoneEnabled: true,
-  microphoneOptions: micOptions,
-  micLevel: 0.5,
+  selectedMicrophone: micOptions[0],
   selectedSpeaker: speakerOptions[0],
-  speakerOptions: speakerOptions,
-  speakerLevel: 0.5,
   isMicrophoneMuted: false,
-  permissionStatus: PermissionStatus.GRANTED
+  permissionStatus: PermissionStatus.GRANTED,
+  isAudioInputSelectAvailable: true,
+  isAudioOutputSelectAvailable: true
 };
 
 export const Denied = Template.bind({});
 
 Denied.args = {
-  selectedMicrophone: micOptions[0],
   isMicrophoneEnabled: true,
-  microphoneOptions: micOptions,
-  micLevel: 0.5,
+  selectedMicrophone: micOptions[0],
   selectedSpeaker: speakerOptions[0],
-  speakerOptions: speakerOptions,
-  speakerLevel: 0.5,
   isMicrophoneMuted: false,
-  permissionStatus: PermissionStatus.DENIED
+  permissionStatus: PermissionStatus.DENIED,
+  isAudioInputSelectAvailable: true,
+  isAudioOutputSelectAvailable: true
 };
 
 export const NoSpeakers = Template.bind({});
 
 NoSpeakers.args = {
-  selectedMicrophone: micOptions[0],
   isMicrophoneEnabled: true,
-  microphoneOptions: micOptions,
-  micLevel: 0.5,
+  selectedMicrophone: micOptions[0],
   isMicrophoneMuted: false,
-  permissionStatus: PermissionStatus.GRANTED
+  permissionStatus: PermissionStatus.GRANTED,
+  isAudioInputSelectAvailable: true,
+  isAudioOutputSelectAvailable: false
 };

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import MovingAverage from "moving-average";
 
 const MIN_VOLUME_THRESHOLD = 0.08;
@@ -27,10 +27,9 @@ function updateVolume(analyser, meter) {
   meter.prevVolume = meter.volume;
 }
 
-export function useVolumeMeter({ analyser, updateRate = 50 }) {
+export function useVolumeMeter({ analyser, update, updateRate = 50 }) {
   const movingAvgRef = useRef();
   const meterRef = useRef({ levels: [], volume: 0, prevVolume: 0, max: 0 });
-  const [volume, setVolume] = useState(0);
 
   useEffect(
     () => {
@@ -41,6 +40,7 @@ export function useVolumeMeter({ analyser, updateRate = 50 }) {
       analyser.fftSize = 32;
       meterRef.current.levels = new Uint8Array(analyser.fftSize);
 
+      let prevVolume = 0;
       const timout = setInterval(() => {
         updateVolume(analyser, meterRef.current);
 
@@ -51,16 +51,15 @@ export function useVolumeMeter({ analyser, updateRate = 50 }) {
         movingAvgRef.current.push(Date.now(), meterRef.current.volume);
         const average = movingAvgRef.current.movingAverage();
         const nextVolume = meterRef.current.max === 0 ? 0 : average / meterRef.current.max;
-
-        setVolume(prevVolume => Math.max(Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume, 0.1));
+        const volume = Math.max(Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume, 0.1);
+        prevVolume = volume;
+        update(volume);
       }, updateRate);
 
       return () => {
         clearInterval(timout);
       };
     },
-    [analyser, updateRate]
+    [analyser, update, updateRate]
   );
-
-  return { volume };
 }
