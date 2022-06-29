@@ -5,8 +5,8 @@ on:
   workflow_dispatch: 
 jobs: 
   hcpkgrelease:
-  uses: mozilla/hubs-ops/.github/workflows/hc_release.yaml
-  with: 
+  uses: mozilla/hubs-ops/.github/workflows/hc_release.yaml@workflow_changes
+   with: 
     releasing_branch: qa-test
     main_branch: main
   
