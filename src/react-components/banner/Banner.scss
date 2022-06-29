@@ -1,0 +1,173 @@
+@use "../styles/theme.scss";
+
+:local(.down_arrow) {
+  transform: rotate(180deg);
+}
+
+:local(.banner_wrapper) {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(#000000, 0.3);
+  order: -2;
+}
+
+:local(.banner_container) {
+  max-width: 960px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: left;
+  flex-direction: column;
+  padding: 16px;
+
+  @media(min-width: theme.$breakpoint-md) {
+    align-items: center;
+    flex-direction: row;
+    padding: 16px 0;
+    margin: 0 16px;
+  }
+
+  @media(min-width: theme.$breakpoint-xl) {
+    max-width: 1140px;
+  }
+}
+
+:local(.branding_container) {
+  margin-bottom: 16px;
+
+  h2 {
+    margin-bottom: 4px;
+    font-size: 18px;
+  }
+
+  p {
+    font-size: 14px;
+  }
+
+  @media(min-width: theme.$breakpoint-md) {
+    margin-bottom: 0px;
+  }
+}
+
+:local(.logo) {
+  width: 80px;
+  margin-bottom: 10px;
+}
+
+:local(.expand_wrapper) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: theme.$background1-color;
+  box-shadow: 0 3px 8px rgba(#000000, 0.3);
+  z-index: 2;
+  padding: 24px 0 48px;
+  display: flex;
+  justify-content: center;
+}
+
+:local(.expand_container) {
+  max-width: 960px;
+}
+
+:local(.expand_header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 16px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    margin-bottom: 24px;
+    padding: 0 20px;
+  }
+
+}
+
+:local(.expand_contents) {
+  display: flex;
+  flex-direction: column;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    flex-direction: row;
+  }
+}
+
+:local(.checkbox_label) {
+  margin-left: 0 !important;
+}
+
+:local(.expand_title) {
+  font-size: 20px;
+  margin-bottom: 0px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    font-size: 32px;
+  }
+}
+
+:local(.expand_form) {
+  width: 320px;
+}
+
+:local(.expand_messaging),
+:local(.expand_form) {
+  padding: 14px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    padding: 0 20px;
+    width: 50%;
+  }
+}
+
+:local(.expand_messaging) {
+  p {
+    margin-bottom: 20px;
+    line-height: 20px;
+  }
+}
+
+
+:local(.expand_actions) {
+  display: flex;
+
+  button[type="submit"] {
+    margin-right: 10px;
+  }
+}
+
+:local(.expand_form_field) {
+  margin-bottom: 24px;
+}
+
+:local(.message_wrapper) {
+  display: flex;
+}
+
+:local(.error_icon) {
+  margin-right: 20px;
+}
+
+:local(.message_title) {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+:local(.message_body) {
+  font-size: 12px;
+  margin-bottom: 16px;
+  width: 220px;
+}
+
+:local(.success_image) {
+  height: 75px;
+  width: 75px;
+  margin-right: 20px;
+
+  @media(min-width: theme.$breakpoint-sm) {
+    height: 134px;
+    width: 134px;
+  }
+}
