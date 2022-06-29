@@ -113,7 +113,7 @@ const Banner = () => {
   const Label = () => {
     return (
       <>
-        I'm okay with Mozilla handling my info as explained in this{" "}
+        I&apos;m okay with Mozilla handling my info as explained in this{" "}
         <a href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md" rel="noopener noreferrer" target="_blank">
           Privacy Notice
         </a>
@@ -256,13 +256,10 @@ const Banner = () => {
                   values={{
                     message: (
                       <>
-                        <p>
-                          We're working on a new service that makes it easier than ever to deploy a Hub of your own.
-                        </p>
-                        <p>
+                          We&apos;re working on a new service that makes it easier than ever to deploy a Hub of your own.
+                          <br/>
                           Sign up here to be the first to know about our new service, as well as the latest Hubs news,
-                          product features and offerings. We can't wait to show you what we've been working on!
-                        </p>
+                          product features and offerings. We can&apos;t wait to show you what we&apos;ve been working on!
                       </>
                     )
                   }}
