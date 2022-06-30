@@ -61,6 +61,9 @@ AFRAME.registerComponent("avatar-audio-source", {
     } else {
       audio = new THREE.Audio(audioListener);
     }
+    // Default to being quiet so it fades in when volume is set by audio systems
+    audio.gain.gain.value = 0;
+
     this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: audio });
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
