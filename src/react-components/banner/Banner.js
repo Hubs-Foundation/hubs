@@ -14,7 +14,7 @@ import cone from "../../assets/images/cone.png";
 
 const Banner = () => {
   const [email, setEmail] = useState("");
-  const [confirm, setConfirm] = useState(true);
+  const [confirm, setConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [responseStatus, setResponseStatus] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -41,22 +41,19 @@ const Banner = () => {
   };
 
   /**
-   * On XHR Load
+   * On AJAX Resp
    * @param {Basket Response} resp
    * @returns
    */
-  const onload = resp => {
+  const handleResponse = resp => {
+    const { status, statusText } = resp;
     // Check Target Status
-    const status = resp.target.status;
     if (status !== 200 || status > 300 || status < 200) {
       newsletterError();
       return;
     }
 
-    // Check Response Status
-    let response = resp.target.response;
-    typeof response !== "object" ? (response = JSON.parse(response)) : "";
-    if (response.status !== "ok") {
+    if (statusText !== "OK") {
       newsletterError();
       return;
     }
@@ -66,27 +63,31 @@ const Banner = () => {
   };
 
   const onSubmit = async data => {
-    // Note: this is a pattern that was suggesed by the basket creator
     const url = "https://basket.mozilla.org/news/subscribe/";
-    const xhr = new XMLHttpRequest();
-    const params =
+    const body =
       "email=" +
       encodeURIComponent(data.email) +
+      "&format=" +
+      encodeURIComponent(data.email_format) +
       "&newsletters=" +
       "hubs" +
       "&lang=" +
-      encodeURIComponent(navigator.languages[0]) +
+      encodeURIComponent(navigator.language) +
       "&source_url=" +
-      encodeURIComponent(window.location);
+      encodeURIComponent(window.location.origin);
 
-    xhr.onload = onload;
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-    xhr.timeout = 5000;
-    xhr.ontimeout = newsletterError;
-    xhr.responseType = "json";
-    xhr.send(params);
+    try {
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: body
+      }).then(handleResponse);
+    } catch (error) {
+      console.error(error);
+      newsletterError();
+    }
   };
 
   /**
@@ -114,7 +115,7 @@ const Banner = () => {
     return (
       <>
         I&apos;m okay with Mozilla handling my info as explained in this{" "}
-        <a href="https://github.com/mozilla/hubs/blob/master/PRIVACY.md" rel="noopener noreferrer" target="_blank">
+        <a href="https://www.mozilla.org/en-US/privacy/websites/" rel="noopener noreferrer" target="_blank">
           Privacy Notice
         </a>
       </>
@@ -137,7 +138,11 @@ const Banner = () => {
   const Success = () => {
     return (
       <div className={styles.message_wrapper}>
-        <img src={cone} className={styles.success_image} />
+        <img
+          src={cone}
+          className={styles.success_image}
+          alt={<FormattedMessage defaultMessage="celebrate" id="banner.celebrate-alt" />}
+        />
         <div>
           <h3 className={styles.message_title}>
             <FormattedMessage defaultMessage="You're on the list" id="banner.success-title" />
@@ -169,7 +174,11 @@ const Banner = () => {
     return (
       <div className={styles.message_wrapper}>
         <div>
-          <img src={warning_icon} className={styles.error_icon} />
+          <img
+            src={warning_icon}
+            className={styles.error_icon}
+            alt={<FormattedMessage defaultMessage="warning" id="banner.warning-alt" />}
+          />
         </div>
         <div>
           <h3 className={styles.message_title}>
@@ -238,7 +247,7 @@ const Banner = () => {
           <div className={styles.expand_container}>
             <div className={styles.expand_header}>
               <h2 className={styles.expand_title}>
-                <FormattedMessage defaultMessage="Join the next evolution of Hubs!" id="banner.expand_title" />
+                <FormattedMessage defaultMessage="Join the next evolution of Hubs!" id="banner.expand-title" />
               </h2>
               <CloseButton
                 onClick={() => {
@@ -254,7 +263,13 @@ const Banner = () => {
                   defaultMessage="{message}"
                   id="banner.expand-body"
                   values={{
-                    message:<>We&apos;re working on a new service that makes it easier than ever to deploy a Hub of your own. Sign up here to be the first to know about our new service, as well as the latest Hubs news, product features and offerings. We can&apos;t wait to show you what we&apos;ve been working on!</>
+                    message: (
+                      <>
+                        We&apos;re working on a new service that makes it easier than ever to deploy a Hub of your own.
+                        Sign up here to be the first to know about our new service, as well as the latest Hubs news,
+                        product features and offerings. We can&apos;t wait to show you what we&apos;ve been working on!
+                      </>
+                    )
                   }}
                 />
               </div>
@@ -269,17 +284,30 @@ const Banner = () => {
                       ref={register}
                       name="email"
                       type="email"
-                      label={<FormattedMessage id="email-address" defaultMessage="Email Address" />}
+                      label={<FormattedMessage id="banner.email-address" defaultMessage="Email Address" />}
                       required
                       value={email}
                       onChange={onChangeEmail}
-                      placeholder="example@example.com"
+                      placeholder="name@email.com"
                       className={styles.expand_form_field}
                     />
 
-                    <RadioInputField className={styles.expand_form_field} label="Format">
-                      <RadioInputOption name="email_format" value="html" label="HTML" ref={register} />
-                      <RadioInputOption name="email_format" value="text" label="Text" ref={register} />
+                    <RadioInputField
+                      className={styles.expand_form_field}
+                      label={<FormattedMessage id="banner.format-label" defaultMessage="Format" />}
+                    >
+                      <RadioInputOption
+                        name="email_format"
+                        value="html"
+                        label={<FormattedMessage id="banner.format-html" defaultMessage="HTML" />}
+                        ref={register}
+                      />
+                      <RadioInputOption
+                        name="email_format"
+                        value="text"
+                        label={<FormattedMessage id="banner.format-text" defaultMessage="Text" />}
+                        ref={register}
+                      />
                     </RadioInputField>
 
                     <CheckboxInput
