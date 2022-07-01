@@ -242,6 +242,8 @@ AFRAME.registerComponent("zone-audio-source", {
         const avatar = playerInfo.el;
 
         if (this.data.onlyMods && !playerInfo.can("amplify_audio")) continue;
+        // don't use avatar-rig if not entering scene yet.
+        if (avatar.id === "avatar-rig" && !this.el.sceneEl.is("entered")) continue;
 
         const distanceSquared = avatar.object3D.position.distanceToSquared(tmpWorldPos);
         if (distanceSquared < this.boundingRadiusSquared) {
