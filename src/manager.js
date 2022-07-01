@@ -507,7 +507,7 @@ function Root() {
 
         <div className='manager-page'>
           <div className="row_1">
-            <span className="text_1">Manager Larchiveum</span>
+            <a href="/"><span className="text_1"> Larchiveum </span></a> 
             <IAuth/>
           </div>
 

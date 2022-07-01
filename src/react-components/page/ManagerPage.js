@@ -22,15 +22,12 @@ import defaultImage1 from "../../assets/larchiveum/siri.gif";
 import Pagination from "../../react-components/pagination/pagination";
 import { APP_ROOT } from "../../utilities/constants";
 import { FaUserFriends, FaRegCalendarAlt, FaLink, FaTools ,FaVideo,FaRegImage,FaCodepen,FaListOl} from "react-icons/fa";
-import { Manager } from "react-popper-2";
-import StoreHub from "../../storage/store";
 import UserService from "../../utilities/apiServices/UserService";
-import e from "cors";
-import { counter } from "@fortawesome/fontawesome-svg-core";
 import { object } from "prop-types";
 import { ToggleInput } from "./components/ToggleInput";
+import Language from './languages/language';
+import { useTranslation } from 'react-i18next';
 
-const store = new StoreHub();
 
 registerTelemetry("/manager", "Hubs Home Page");
 
@@ -40,6 +37,7 @@ export function ManagerPage() {
 
 function ManagerHome() {
   toast.configure();
+  const { t } = useTranslation();
   const [scenes, setScenes] = useState([]);
   const [exhibitionsLoaded, setExhibitionsLoaded] = useState(false);
   const [projectsLoaded, setProjectsLoaded] = useState(true);
@@ -52,8 +50,8 @@ function ManagerHome() {
   const [isOpenMedia, setIsOpenMedia] = useState(false);
   const [isOpenObject, setIsOpenObject] = useState(false);
   const [isDeleteRoom, setIsDeleteRoom] = useState(false);
-  const [isOpenToggle, setIsOpenToggle] = useState(false);
-  const [isOpenSpoke, setIsOpenSpoke] = useState(false);
+  const [isOpenPopupConfirmChangePublic, setIsOpenPopupConfirmChangePublic] = useState(false);
+  const [isOpenPopupChangeMediaURLGuide, setIsOpenPopupChangeMediaURLGuide] = useState(false);
   const [exhibition, setExhibition] = useState(undefined);
   const [exhibitionType, setExhibitionType] = useState("create");
   const [exhibitionId, setExhibitionId] = useState(undefined);
@@ -62,6 +60,7 @@ function ManagerHome() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListRoom, setIsListRoom] = useState(true);
   const [isListProject, setIsListProject] = useState(false);
+  const [language, setLanguage] = useState('en');
 
   const [exhibitions, setExhibitions] = useState({
     data: [],
@@ -120,19 +119,26 @@ function ManagerHome() {
     () => {
       auth();
       getAllExhibitions();
-    },
-    [filterExhibitionList.page]
-  );
-
-  useEffect(
-    () => {
       const user = Store.getUser();
       if (user?.type == 5) {
         getAllProjects();
       }
+
+      let lang = Language.getLanguage();
+      setLanguage(lang);
     },
-    [filterProjectList.page]
+    [filterExhibitionList.page]
   );
+
+  // useEffect(
+  //   () => {
+  //     const user = Store.getUser();
+  //     if (user?.type == 5) {
+  //       getAllProjects();
+  //     }
+  //   },
+  //   [filterProjectList.page]
+  // );
 
   const getAllExhibitions = () => {
     const user = Store.getUser();
@@ -209,26 +215,36 @@ function ManagerHome() {
 
   const openPopupPublic = exhibitionId => {
     setExhibitionId(exhibitionId);
-    setIsOpenToggle(true);
+    setIsOpenPopupConfirmChangePublic(true);
   };
 
   const closePopupPublic = () => {
-    setIsOpenToggle(false);
+    setIsOpenPopupConfirmChangePublic(false);
   };
 
   // const openPopupSpoke = ProjectId => {
   //   setExhibitionId(ProjectId);
-  //   setIsOpenSpoke(true);
+  //   setIsOpenPopupChangeMediaURLGuide(true);
   // };
 
-  
+  const handleChangeLanguage = (event) => {
+    let lang = event.target.value;
+    setLanguage(lang);
+    Language.setLanguage(lang);
+  };
+
+  const handleSignOut = () => {
+    Store.removeUser();
+    window.location.href = '/';
+  };
+
   const handelSpoke = () => {
     window.open(APP_ROOT + "/spoke/projects/" + projectId , '_blank');
-    setIsOpenSpoke(false);
+    setIsOpenPopupChangeMediaURLGuide(false);
   };
 
   const closePopupSpoke = () => {
-    setIsOpenSpoke(false);
+    setIsOpenPopupChangeMediaURLGuide(false);
   };
   
   const openPopupCloseRoom = exhibitionId => {
@@ -340,7 +356,7 @@ function ManagerHome() {
     });
   }
 
-  const handelOpenSpoke =()=>{
+  const handelOpenPopupChangeMediaURLGuide =()=>{
     setIconLoaded(true);
     let list_uuid = [];
      list_uuid = objects.data.map((item) => {
@@ -356,7 +372,7 @@ function ManagerHome() {
       if (res.result == "ok") {
         setIconLoaded(false);
         closePopupCustomObject();
-        setIsOpenSpoke(true);
+        setIsOpenPopupChangeMediaURLGuide(true);
       } else if (res.result == "fail" && res.error == "invalid_list_changeable_object_uuid") {
         toast.error("List changeable object uuid incorrect", { autoClose: 5000 });
       }
@@ -479,7 +495,7 @@ function ManagerHome() {
             value={exhibition ? exhibition.sceneId : undefined}
             onChange={handleChangeSceneThubmnail}
           >
-            <option>---Choose Scene---</option>
+            <option>---{t('manager.POPUP_EXHIBITION__LIST_SCENE_DEFAULT_OPTION')}---</option>
             {scenes.map((item, index) => {
               return (
                 <option key={index} value={item.id}>
@@ -491,7 +507,7 @@ function ManagerHome() {
           <span className="focus-input100" />
         </div>
         <div className="p-t-13 p-b-9">
-          <span className="txt1">Scene Thubmnail</span>
+          <span className="txt1">{t('manager.POPUP_EXHIBITION__SCENE_THUMBNAIL')}</span>
         </div>
         <img className="f-image-thumbnail" src={getSceneThumnail(exhibition ? exhibition.sceneId : undefined)} alt="" />
       </>
@@ -566,7 +582,7 @@ function ManagerHome() {
             toast.success("Change status success !", { autoClose: 5000 });
           }
         });
-        setIsOpenToggle(!isOpenToggle);
+        setIsOpenPopupConfirmChangePublic(!isOpenPopupConfirmChangePublic);
       } else if (res.result == "fail" && res.error == "invalid_id") {
         toast.error("exhibition id is incorrect !", { autoClose: 5000 });
       } else {
@@ -810,10 +826,21 @@ function ManagerHome() {
     const user = Store.getUser();
       if (user?.type == 5) {
         return (
-        <div className="tabs-Admin">
-          <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >LIST ROOM</button>  
-          <button className={isListProject ? "active" : ""} onClick={ActionListProject}>PROJECT</button>  
-        </div>
+        <>
+          <div style={{padding: '20px 0px 0px 0px', overflow: 'hidden'}}>
+            <div style={{float: 'right'}}>
+              <span> {t('manager.LANGUAGE')} </span>
+              <select value={language} onChange={handleChangeLanguage}>
+                <option value="en">English</option>
+                <option value="ko">Korean</option>
+              </select>
+            </div>
+          </div>
+          <div className="tabs-Admin">
+            <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >{t('manager.LIST_EXHIBITION')}</button>  
+            <button className={isListProject ? "active" : ""} onClick={ActionListProject}>{t('manager.LIST_PROJECT')}</button>  
+          </div>
+        </>
         );
       }
   };
@@ -823,7 +850,7 @@ function ManagerHome() {
       <>
         {exhibitionsLoaded ? (
           <>
-            List Tour Larchiveum
+            {t('manager.LIST_EXHIBITION')}
             <button
                 className="btn btn-create"
                 onClick={() => {
@@ -843,7 +870,7 @@ function ManagerHome() {
                       }}
                       data-id-exhibition={item.id}
                     >
-                      Private
+                      {t('manager.PRIVATE')}
                     </button>
                   );
                 } else {
@@ -855,7 +882,7 @@ function ManagerHome() {
                       }}
                       data-id-exhibition={item.id}
                     >
-                      Public
+                      {t('manager.PUBLIC')}
                     </button>
                   );
                 }
@@ -871,7 +898,7 @@ function ManagerHome() {
                       }}
                       data-id-exhibition={item.id}
                     >
-                      Open Room
+                      {t('manager.OPEN_EXHIBITION')}
                     </button>
                   );
                 } else {
@@ -883,7 +910,7 @@ function ManagerHome() {
                       }}
                       data-id-exhibition={item.id}
                     >
-                      Close room
+                       {t('manager.CLOSE_EXHIBITION')}
                     </button>
                   );
                 }
@@ -939,7 +966,7 @@ function ManagerHome() {
                         }}
                         data-id-exhibition={item.id}
                       >
-                        Edit
+                        {t('manager.EDIT')}
                       </button>
                       <ClosedButton />
                     </div>
@@ -960,12 +987,12 @@ function ManagerHome() {
                         <FaLink className="IconFa" /> :{" "}
                         <span className="ml-1">
                           <a href="#" target="_blank">
-                            NAN
+                            ...
                           </a>
                         </span>
                       </div>
                       <div className="d-flex">
-                        <FaUserFriends className="IconFa" /> : <span className="ml-1">NAN/NAN</span>
+                        <FaUserFriends className="IconFa" /> : <span className="ml-1">.../...</span>
                       </div>
                       <div>
                         <div className="d-flex">
@@ -984,7 +1011,7 @@ function ManagerHome() {
                         }}
                         data-id-exhibition={item.id}
                       >
-                        Delete
+                        {t('manager.DELETE')}
                       </button>
                     </div>
                   </div>
@@ -1010,7 +1037,7 @@ function ManagerHome() {
       <>
         {projectsLoaded ? (
           <>
-            List Project Larchiveum
+            {t('manager.LIST_PROJECT')}
             {projects.data.map((item, index) => {
               let count_Image=0;
               let count_Video=0;
@@ -1074,13 +1101,8 @@ function ManagerHome() {
         </div>
       );
     } else {
-      return (
-        <div className="title">
-          <div className="title_access_err">
-            You do not have access <br /> Please login with an account manager to use this service
-          </div>
-        </div>
-      );
+      window.location.href = '/';
+      return <></>;
     }
   };
 
@@ -1090,14 +1112,8 @@ function ManagerHome() {
       if (user?.type == 5) {
         return (
           <>
-            <a className="gotospoke" href={APP_ROOT + "/spoke"}>
-              {" "}
-              Spoke{" "}
-            </a>
-            <a className="gotoadmin" href={APP_ROOT + "/admin"}>
-              {" "}
-              Admin{" "}
-            </a>
+            <a className="gotospoke" href={APP_ROOT + "/spoke"}>{t('manager.SPOKE')}</a>
+            <a className="gotoadmin" href={APP_ROOT + "/admin"}>{t('manager.ADMIN')}</a>
           </>
         );
       } else {
@@ -1109,9 +1125,8 @@ function ManagerHome() {
         <span className="display-name">
           <MasterAdmin />
           <span className="nameA">{user.displayName || user.email}</span> |{" "}
-          <a className="gotohome" href="/">
-            {" "}
-            Home
+          <a className="gotohome" onClick={handleSignOut}>
+            {t('manager.SIGN_OUT')}
           </a>
         </span>
       );
@@ -1158,14 +1173,14 @@ function ManagerHome() {
           {isOpenExhibition && (
             <Popup
               size={"xl"}
-              title={exhibitionType == "edit" ? <>Edit Exhibition </> : <> Create Exhibition</>}
+              title={exhibitionType == "edit" ? <> {t('manager.POPUP_EXHIBITION__EDIT_TITLE')} </> : <> {t('manager.POPUP_EXHIBITION__CREATE_TITLE')}</>}
               content={
                 <>
                   <form className="create100-form validate-form" name="form" style={{maxHeight: "60vh", overflowY: "scroll"}}>
                     <div className="d-flex">
                       <div style={{width: '50%', padding: '10px'}}>
                         <div className="p-t-13 p-b-9">
-                          <span className="txt1">Name Exhibition</span>
+                          <span className="txt1">{t('manager.POPUP_EXHIBITION__NAME_LABEL')}</span>
                         </div>
                         <div className="wrap-input100 validate-input">
                           <input
@@ -1174,12 +1189,12 @@ function ManagerHome() {
                             name="name"
                             value={exhibition ? exhibition.name : undefined}
                             onChange={handleChange}
-                            placeholder="Name Tour"
+                            placeholder={t('manager.POPUP_EXHIBITION__NAME_PLACEHOLDER')}
                           />
                           <span className="focus-input100" />
                         </div>
                         <div className="p-t-13 p-b-9">
-                          <span className="txt1">Description</span>
+                          <span className="txt1">{t('manager.POPUP_EXHIBITION__DESCRIPTION_LABEL')}</span>
                         </div>
                         <div className="wrap-input100 validate-input">
                           <textarea
@@ -1187,7 +1202,7 @@ function ManagerHome() {
                             name="description"
                             value={exhibition ? exhibition.description : undefined}
                             onChange={handleChange}
-                            placeholder="Description about tour"
+                            placeholder={t('manager.POPUP_EXHIBITION__DESCRIPTION_PLACEHOLDER')}
                             rows="10"
                             style={{height: '205px'}}
                           />
@@ -1196,7 +1211,7 @@ function ManagerHome() {
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <div style={{width: '40%'}}>
                             <div className="p-t-13 p-b-9">
-                              <span className="txt1" style={{fontSize: '13px'}}>Public</span>
+                              <span className="txt1" style={{fontSize: '13px'}}>{t('manager.POPUP_EXHIBITION__PUBLIC')}</span>
                             </div>
                             <label className="switch">
                               <input
@@ -1210,7 +1225,7 @@ function ManagerHome() {
                           </div>
                           <div style={{width: '60%', paddingTop: '10px'}}>
                             <div style={{float: 'left', height: '50px', width: '40%', display: 'flex', alignItems: 'center', justifyContent: 'right', paddingRight: '10px'}}>
-                              <span className="txt1">Max Size</span>
+                              <span className="txt1">{t('manager.POPUP_EXHIBITION__MAX_SIZE')}</span>
                             </div>
                             <div className="wrap-input100 validate-input"  style={{float: 'left', width: '60%'}}>
                               <input
@@ -1231,7 +1246,7 @@ function ManagerHome() {
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <div className="item-input" style={{width: '48%'}}>
                             <div className="p-t-13 p-b-9">
-                              <span className="txt1">Start day</span>
+                              <span className="txt1">{t('manager.POPUP_EXHIBITION__START_DATE_LABEL')}</span>
                             </div>
                             <div className="wrap-input100 validate-input">
                               <input
@@ -1247,7 +1262,7 @@ function ManagerHome() {
                           </div>
                           <div className="item-input" style={{width: '48%'}}>
                             <div className="p-t-13 p-b-9">
-                              <span className="txt1">End day</span>
+                              <span className="txt1">{t('manager.POPUP_EXHIBITION__END_DATE_LABEL')}</span>
                             </div>
                             <div className="wrap-input100 validate-input">
                               <input
@@ -1263,13 +1278,13 @@ function ManagerHome() {
                           </div>
                         </div>
                         <div className="p-t-13 p-b-9">
-                          <span className="txt1">List Scene</span>
+                          <span className="txt1">{t('manager.POPUP_EXHIBITION__LIST_SCENE_LABEL')}</span>
                         </div>
                         <ListScenes />
                       </div>
                     </div>
                     <div style={{width: '100%', padding: '10px'}}>
-                      <span className="txt1">Room Member Permissions</span>
+                      <span className="txt1">{t('manager.POPUP_EXHIBITION__ROOM_MEMBER_PERMISSIONS')}</span>
                       <div style={{position: 'relative', width: '100%', height: '40px', marginTop: '10px'}}>
                         <div style={{width: '150px', float: 'left'}}>
                           {/* <ToggleInput 
@@ -1288,7 +1303,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Create and move objects </span>
+                          <span>{t('manager.POPUP_EXHIBITION__CREATE_AND_MOVE_OBJECTS')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1310,7 +1325,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Create cameras </span>
+                          <span>{t('manager.POPUP_EXHIBITION__CREATE_CAMERAS')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1332,7 +1347,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Pin objects </span>
+                          <span>{t('manager.POPUP_EXHIBITION__PIN_OBJECTS')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1353,7 +1368,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Create drawings </span>
+                          <span>{t('manager.POPUP_EXHIBITION__CREATE_DRAWINGS')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1374,7 +1389,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Create emoji </span>
+                          <span>{t('manager.POPUP_EXHIBITION__CREATE_EMOJI')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1395,7 +1410,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Allow fly</span>
+                          <span>{t('manager.POPUP_EXHIBITION__ALLOW_FLY')}</span>
                         </div> 
                       </div>
                     </div>
@@ -1404,14 +1419,14 @@ function ManagerHome() {
               }
               actions={[
                 {
-                  text: exhibitionType == "edit" ? "Edit" : "Create",
+                  text: exhibitionType == "edit" ? t('manager.POPUP_EXHIBITION__EDIT') : t('manager.POPUP_EXHIBITION__CREATE'),
                   class: "btn-handle",
                   callback: () => {
                     exhibitionType == "edit" ? handleEdit() : handleCreate();
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_EXHIBITION__CANCEL'),
                   class: "btn-cancle",
                   callback: () => {
                     closePopupExhibition();
@@ -1424,28 +1439,25 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenToggle && (
+          {isOpenPopupConfirmChangePublic && (
             <Popup
-              title={<>Change public status</>}
+              title={<>{t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__TITLE')}</>}
               size={"sm"}
               content={
-                <>
-                  <br />
-                  Are you sure Change this public status ?
-                  <br />
-                  <br />
-                </>
+                <div>
+                  {t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__MESSAGE')}
+                </div>
               }
               actions={[
                 {
-                  text: "Change",
+                  text: t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__CHANGE'),
                   class: "btn1",
                   callback: () => {
                     handelTogglePublic(exhibitionId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     closePopupPublic();
@@ -1456,32 +1468,32 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenSpoke && (
+          {isOpenPopupChangeMediaURLGuide && (
             <Popup
-              title={<>Go to page Spoke</>}
+              title={<>{t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__TITLE')}</>}
               size={"sm"}
               content={
                 <>
-                  To continue the process, follow these steps:
+                  {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT')}
                   <ul>
-                    <li>- Go to spoke using the "Goto Spoke" button below </li>
-                    <li>- Click "Publish Scene" button on top toolbar</li>
-                    <li>- After the popup opens, select "Save Project"</li>
-                    <li>- After the popup opens, select "Save and Publish"</li>
-                    <li>- Finally, select "Save Scene" to finish</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_1')}</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_2')}</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_3')}</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_4')}</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_5')}</li>
                   </ul>
                 </>
               }
               actions={[
                 {
-                  text: "Goto Spoke",
+                  text: t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__GO_TO_SPOKE'),
                   class: "btn1",
                   callback: () => {
                     handelSpoke(projectId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     closePopupSpoke();
@@ -1645,7 +1657,7 @@ function ManagerHome() {
                   text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
                   class: "btn-handle",
                   callback: () => {
-                    handelOpenSpoke();
+                    handelOpenPopupChangeMediaURLGuide();
                   }
             
                 },
@@ -1665,7 +1677,7 @@ function ManagerHome() {
   
           <div className="manager-page">
             <div className="row_1">
-              <span className="text_1">Manager Larchiveum</span>
+              <a href="/"><span className="text_1">Larchiveum</span></a>
               <IAuth />
             </div>
   

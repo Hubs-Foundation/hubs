@@ -12,18 +12,22 @@ const Pagination = props => {
 		if (page === pagination.currentPage) return;
 		callFetchList(page);
 	};
+
 	const firstPage = () => {
         if(pagination.currentPage === 1) return;
         changePage(1);
     }
+
 	const nextPage = () => {
         if(pagination.currentPage === pagination.totalPage) return;
         changePage(pagination.currentPage + 1);
     }
+
     const prePage = () => {
         if(pagination.currentPage === 1) return;
         changePage(pagination.currentPage - 1);
     }
+
     const lastPage = () => {
         if(pagination.currentPage === pagination.totalPage) return;
         changePage(pagination.totalPage);
@@ -38,8 +42,6 @@ const Pagination = props => {
         // if(pagination.currentPage) return;
         changePage(pagination.currentPage + 2);
     }
-
-
 
 	const renderPageSetting = () => {
 		if (!pagination) return;
@@ -106,7 +108,6 @@ const Pagination = props => {
 		}
 		return listPageElement;
 	};
-
 
 	return (
 		<div className="WRAP_PAGINATION d-flex align-items-center justify-content-center">

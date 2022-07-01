@@ -36,7 +36,8 @@
 
 		.text_1 {
 			color: #4F58FD;
-			font-size: 40px;
+			font-size: 30px;
+			font-weight: 600;
 
 			img {
 				position: absolute;
@@ -137,11 +138,11 @@
 		grid-template-columns: 1fr 1fr 1fr;
 	}
 
-	.sort {
+	.tools {
 		padding: 5px 20px;
-		font-size: 22px;
 
 		button {
+			font-size: 17px;
 			font-weight: bold;
 			margin-right: 15px;
 			color: #666;
@@ -463,9 +464,8 @@
 		color: #149BF3;
 	}
 
-	.background-homepage .sort {
+	.background-homepage .tools {
 		padding: 5px 20px;
-		font-size: 17px;
 	}
 
 	.background-homepage a.manager {
