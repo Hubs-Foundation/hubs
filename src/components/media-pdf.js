@@ -4,8 +4,10 @@ import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { errorTexture } from "../utils/error-texture";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import { addAndArrangeMedia } from "../utils/media-utils";
+import { isIOS as detectIOS } from "../utils/is-mobile";
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
+const isIOS = detectIOS();
 
 /**
  * Warning! This require statement is fragile!
@@ -87,7 +89,16 @@ AFRAME.registerComponent("media-pdf", {
       const page = await this.pdf.getPage(index + 1);
       if (src !== this.data.src || index !== this.data.index) return;
 
-      const viewport = page.getViewport({ scale: 3 });
+      let scale = 3;
+      if (isIOS) {
+        //   https://github.com/mozilla/hubs/issues/5295
+        const IOS_TEXTURE_MAX_WIDTH = 2048;
+        const IOS_TEXTURE_MAX_HEIGHT = 2048;
+        const { width, height } = page.getViewport({ scale: 1 } );
+        scale = Math.min(IOS_TEXTURE_MAX_WIDTH / width, IOS_TEXTURE_MAX_HEIGHT / height);
+        scale = Math.floor(scale / 0.5) * 0.5;
+      }
+      const viewport = page.getViewport({ scale });
       const pw = viewport.width;
       const ph = viewport.height;
       texture = this.texture;
