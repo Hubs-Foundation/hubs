@@ -38,7 +38,7 @@ export function LoadingScreenContainer({ onLoaded, scene }) {
           {
             // eslint-disable-next-line react/display-name
             a: chunks => (
-              <a href="/whats-new" target="_blank">
+              <a href="/creator" target="_blank">
                 {chunks}
               </a>
             )

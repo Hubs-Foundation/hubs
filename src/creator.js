@@ -15,7 +15,7 @@ import registerTelemetry from "./telemetry";
 import { FormattedMessage } from "react-intl";
 import { ThemeProvider } from "./react-components/styles/theme";
 
-registerTelemetry("/cloud", "Hubs Cloud Landing Page");
+registerTelemetry("/creator", "c");
 
 function HubsCloudPage() {
   return (
@@ -28,7 +28,7 @@ function HubsCloudPage() {
             </h1>
           </div>
           <div className={classNames(styles.heroMedia, styles.centerLg)}>
-          <iframe  src="https://avatarcreator.netlify.app/"  width="100vw" height="100vh" title=" " frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe src="./avatarcreator.html" title="Avatar Creator" />
           </div>
         </Container>
       </div>

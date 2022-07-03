@@ -290,8 +290,8 @@ module.exports = async (env, argv) => {
       fs: "empty"
     },
     entry: {
-      support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
+      creator: path.join(__dirname, "src", "creator.js"),
       hub: path.join(__dirname, "src", "hub.js"),
       scene: path.join(__dirname, "src", "scene.js"),
       avatar: path.join(__dirname, "src", "avatar.js"),
@@ -301,7 +301,7 @@ module.exports = async (env, argv) => {
       signin: path.join(__dirname, "src", "signin.js"),
       verify: path.join(__dirname, "src", "verify.js"),
       tokens: path.join(__dirname, "src", "tokens.js"),
-      "whats-new": path.join(__dirname, "src", "whats-new.js"),
+      "creator": path.join(__dirname, "src", "creator.js"),
       "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
     },
     output: {
@@ -325,7 +325,8 @@ module.exports = async (env, argv) => {
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
           { from: /^\/tokens/, to: "/tokens.html" },
-          { from: /^\/whats-new/, to: "/whats-new.html" }
+          { from: /^\/creator/, to: "/creator.html" },
+  
         ]
       },
       before: function(app) {
@@ -597,7 +598,10 @@ module.exports = async (env, argv) => {
         filename: "discord.html"
       }),
       htmlPagePlugin({
-        filename: "whats-new.html",
+        filename: "creator.html"
+      }),
+      htmlPagePlugin({
+        filename: "creator.html",
         inject: "head"
       }),
       htmlPagePlugin({

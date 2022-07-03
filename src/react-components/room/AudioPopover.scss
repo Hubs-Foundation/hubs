@@ -18,10 +18,7 @@
 
 :local(.buttons-container) {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 8px;
+  align-items: self-start;
 }
 
 :local(.icon-enabled) {

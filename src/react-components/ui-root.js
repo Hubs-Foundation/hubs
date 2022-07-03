@@ -1267,10 +1267,10 @@ class UIRoot extends Component {
       //       href: configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")
       //     },
       //     configs.feature("show_whats_new_link") && {
-      //       id: "whats-new",
-      //       label: <FormattedMessage id="more-menu.whats-new" defaultMessage="What's New" />,
+      //       id: "creator",
+      //       label: <FormattedMessage id="more-menu.creator" defaultMessage="What's New" />,
       //       icon: SupportIcon,
-      //       href: "/whats-new"
+      //       href: "/creator"
       //     },
       //     configs.feature("show_terms") && {
       //       id: "tos",

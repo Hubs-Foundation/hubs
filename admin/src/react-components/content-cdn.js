@@ -158,7 +158,7 @@ class ContentCDNComponent extends Component {
       try {
         // Need to CORS-proxy the CORS-proxy because CSP will block us otherwise!
         const res = await fetch(
-          `https://${configs.CORS_PROXY_SERVER}/https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/whats-new.html`
+          `https://${configs.CORS_PROXY_SERVER}/https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/creator.html`
         );
 
         if (!res.ok) {
@@ -361,7 +361,7 @@ class ContentCDNComponent extends Component {
                       </a>{" "}
                       should show the Mozilla homepage, and&nbsp;
                       <a
-                        href={`https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/whats-new.html`}
+                        href={`https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/creator.html`}
                         rel="noopener noreferrer"
                         target="_blank"
                       >

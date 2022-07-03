@@ -1,55 +1,62 @@
 @use "../../react-components/styles/theme.scss";
 
 :local(.hero) {
-  background-color: theme.$background2-color;
-
-  h1 {
-    margin-bottom: 20px;
-  }
+  background-color: #13141d !important;
 
   iframe {
-    margin-bottom: 20px;
+
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height: 100%;
+
   }
 
-  & > section {
-    display: flex; 
-    padding: 32px;
+  &>section {
+    display: flex;
+
   }
 }
 
 :local(.hero-media) {
   flex: 8;
 
-  & > * {
-    height: 240px;
-    width: 100%;
+  &>* {
+
+    width: 100vw;
+    height: 100vh;
 
     @media(min-width: theme.$breakpoint-sm) {
-      height: 300px;
+      width: 100vw;
+      height: 100vh;
     }
 
     @media(min-width: theme.$breakpoint-md) {
-      height: 360px;
+      width: 100vw;
+      height: 100vh;
     }
 
     @media(min-width: theme.$breakpoint-lg) {
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
     }
   }
 
   @media(min-width: theme.$breakpoint-lg) {
-    margin-right: 40px;
+    width: 100vw;
+    width: 100vw;
+
   }
 }
 
 :local(.hero-content) {
   flex: 10;
 
-  & > * {
+  &>* {
     margin-bottom: theme.$spacing-md;
   }
 
-  & > :last-child {
+  &> :last-child {
     margin-bottom: 0;
   }
 }
@@ -57,17 +64,17 @@
 :local(.features) {
   display: flex;
   padding: 5px;
-  
-  & > * {
+
+  &>* {
     margin: theme.$spacing-md;
   }
 
   :local(.center) {
-    & > * {
+    &>* {
       margin-bottom: theme.$spacing-md;
     }
-  
-    & > :last-child {
+
+    &> :last-child {
       margin-bottom: 0;
     }
   }
@@ -90,13 +97,14 @@
   display: flex;
   justify-content: space-evenly !important;
 
-  & > * {
+  &>* {
     margin: theme.$spacing-sm;
   }
 }
 
 :local(.col-lg) {
   flex-direction: column;
+  height: 100vh;
 
   @media(min-width: theme.$breakpoint-lg) {
     flex-direction: row;

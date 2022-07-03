@@ -10,11 +10,11 @@
 
   label {
     cursor: pointer;
-    color: #eae0e0 !important;
+    color: #bbbbbb !important;
     margin-top: 8px;
     margin-bottom: 6px;
     white-space: nowrap;
-    font-size: 14px !important;
+    font-size: 12px !important;
 
   }
 }
@@ -22,13 +22,12 @@
 :local(.icon-container) {
   position: relative;
   border-radius: 9999px;
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #9a190f70 !important;
-  background-color: #ed20233c !important;
+  background: linear-gradient(83.59deg, rgba(69, 108, 231, 0.8) -19.49%, rgba(232, 42, 59, 0.8) 129.39%);
 
   transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
 
@@ -682,9 +681,10 @@
 
 :local(.left) {
   :local(.icon-container) {
-    margin-bottom: 10px;
-    border-radius: 50px
-
+    width: 48px;
+    border-radius: 0px;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
   } 
 }
 
@@ -696,8 +696,9 @@
 
 :local(.right) {
   :local(.icon-container) {
-     margin-top: 8px;
-    border-radius: 50px;
-
+    width: 48px;
+    border-radius: 0px;
+    border-top-right-radius: 9999px;
+    border-bottom-right-radius: 9999px;
   }
 }

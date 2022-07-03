@@ -683,7 +683,7 @@ class AvatarEditor extends Component {
                         <a
                           target="_blank"
                           rel="noopener noreferrer"
-                          href="https://github.com/MozillaReality/hubs-avatar-pipelines"
+                          href="/cloud"
                         >
                           {chunks}
                         </a>

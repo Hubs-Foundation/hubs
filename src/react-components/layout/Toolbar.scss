@@ -1,35 +1,28 @@
 @use '../styles/theme';
 
 :local(.toolbar) {
-  width: 96px;
+  height: 96px;
   display: flex;
   padding: 12px;
-  color: #d2c3c3 !important;
-  background-color: #1e1c1c !important;
-  margin-top: -44%;
-  z-index: 1;
-  flex-direction: column-reverse;
-  margin-bottom: auto;
-  border-radius: 50px;
+  background-color: transparent;
 
 
   @media (min-width: theme.$breakpoint-lg) {
     padding: 12px 24px;
-    justify-content: center;
+    justify-content: space-between;
+    margin-top: -96px;
   }
 }
 
 :local(.content) {
-
+  display: flex;
   flex: 1;
   justify-content: space-around;
 
   @media (min-width: theme.$breakpoint-lg) {
     flex: 0;
-    width: 66px;
 
-
-    &>* {
+    & > * {
       margin-right: 24px;
     }
 
