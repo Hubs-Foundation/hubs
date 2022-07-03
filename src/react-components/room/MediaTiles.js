@@ -78,7 +78,7 @@ function BaseTile({ as: TileComponent, className, name, description, tall, wide,
       {(name || description) && (
         <div className={styles.info}>
           <b>{name}</b>
-          {description && <small className={styles.description}>{"Metaverseplse"}</small>}
+          {description && <small className={styles.description}>{"Metaverseplus"}</small>}
         </div>
       )}
     </TileComponent>
