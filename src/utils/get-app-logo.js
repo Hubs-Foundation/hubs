@@ -5,7 +5,7 @@ import { getColorSchemePref } from "./get-color-scheme-pref";
 function getCurrentTheme() {
   if (!Array.isArray(themes)) return;
 
-  const preferredThemeId = APP.store?.state?.preferences?.theme;
+  const preferredThemeId = window.APP.store?.state?.preferences?.theme;
   if (preferredThemeId) {
     return themes.find(t => t.id === preferredThemeId);
   } else {
@@ -15,6 +15,6 @@ function getCurrentTheme() {
 
 export function getAppLogo() {
   const theme = getCurrentTheme();
-  const shouldUseDarkLogo = theme && theme.darkModeDefault;
+  const shouldUseDarkLogo = !!(theme && theme.darkModeDefault);
   return (shouldUseDarkLogo && configs.image("logo_dark")) || configs.image("logo");
 }

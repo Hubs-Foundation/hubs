@@ -9,7 +9,7 @@ import useAvatar from "./useAvatar";
 import { MediaDevicesEvents, MediaDevices } from "../../utils/media-devices-utils";
 
 function useShare(scene, hubChannel) {
-  const mediaDevicesManager = window.APP.mediaDevicesManager;
+  const mediaDevicesManager = APP.mediaDevicesManager;
   const [sharingSource, setSharingSource] = useState(null);
   const [canShareCamera, setCanShareCamera] = useState(false);
   const [canShareScreen, setCanShareScreen] = useState(false);
@@ -91,7 +91,7 @@ function useShare(scene, hubChannel) {
   const toggleShareScreen = useCallback(
     () => {
       if (sharingSource) {
-        scene.emit(MediaDevicesEvents.V);
+        scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
       } else {
         scene.emit("action_share_screen");
       }

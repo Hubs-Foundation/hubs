@@ -20,7 +20,6 @@ console.log(
 import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
-import initialBatchImage from "./assets/images/warning_icon.png";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
 import "aframe";
@@ -42,9 +41,7 @@ patchWebGLRenderingContext();
 require("three/examples/js/loaders/GLTFLoader");
 
 import "networked-aframe/src/index";
-import "aframe-rounded";
 import "webrtc-adapter";
-import "aframe-slice9-component";
 import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
@@ -66,7 +63,6 @@ import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECT
 import "./change-hub";
 
 import "./components/scene-components";
-import "./components/scale-in-screen-space";
 import "./components/mute-mic";
 import "./components/bone-mute-state-indicator";
 import "./components/bone-visibility";
@@ -81,6 +77,7 @@ import "./components/hoverable-visuals";
 import "./components/hover-visuals";
 import "./components/offset-relative-to";
 import "./components/player-info";
+import "./components/name-tag";
 import "./components/debug";
 import "./components/hand-poses";
 import "./components/hud-controller";
@@ -121,7 +118,6 @@ import "./components/action-to-event";
 import "./components/action-to-remove";
 import "./components/emit-scene-event-on-remove";
 import "./components/follow-in-fov";
-import "./components/matrix-auto-update";
 import "./components/clone-media-button";
 import "./components/open-media-button";
 import "./components/refresh-media-button";
@@ -132,7 +128,6 @@ import "./components/scale-button";
 import "./components/hover-menu";
 import "./components/disable-frustum-culling";
 import "./components/teleporter";
-import "./components/set-active-camera";
 import "./components/track-pose";
 import "./components/replay";
 import "./components/visibility-by-path";
@@ -145,6 +140,7 @@ import "./components/optional-alternative-to-not-hide";
 import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
+import "./components/mirror";
 
 import ReactDOM from "react-dom";
 import React from "react";
@@ -205,7 +201,7 @@ window.APP.RENDER_ORDER = {
 };
 
 const store = window.APP.store;
-store.update({ preferences: { shouldPromptForRefresh: undefined } }); // Clear flag that prompts for refresh from preference screen
+store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 30; // Above this # of occupants, we stop posting join/leaves/renames
@@ -685,7 +681,7 @@ async function runBotMode(scene, entryManager) {
   };
 
   while (!NAF.connection.isConnected()) await nextTick();
-  entryManager.enterSceneWhenLoaded(false);
+  entryManager.enterSceneWhenLoaded(false, false);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -735,12 +731,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
-  scene.renderer.debug.checkShaderErrors = false;
-
-  // HACK - Trigger initial batch preparation with an invisible object
-  scene
-    .querySelector("#batch-prep")
-    .setAttribute("media-image", { batch: true, src: initialBatchImage, contentType: "image/png" });
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
@@ -776,7 +766,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const audioSystem = scene.systems["hubs-systems"].audioSystem;
-  window.APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);
+  APP.mediaDevicesManager = new MediaDevicesManager(scene, store, audioSystem);
 
   const performConditionalSignIn = async (predicate, action, signInMessage, onFailure) => {
     if (predicate()) return action();
@@ -1170,7 +1160,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles: meta.roles,
       permissions: meta.permissions,
       streaming: meta.streaming,
-      recording: meta.recording
+      recording: meta.recording,
+      hand_raised: meta.hand_raised,
+      typing: meta.typing
     });
   });
   events.on(`hub:join`, ({ key, meta }) => {
@@ -1237,7 +1229,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles: current.roles,
       permissions: current.permissions,
       streaming: current.streaming,
-      recording: current.recording
+      recording: current.recording,
+      hand_raised: current.hand_raised,
+      typing: current.typing
     });
   });
 

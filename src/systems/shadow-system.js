@@ -1,7 +1,7 @@
-import { traverseAnimationTargets } from "../utils/three-utils";
+import { updateMaterials } from "../utils/material-utils.js";
 
 const frustumBox = new THREE.Box3();
-const inverseLightMatrixWorld = new THREE.Matrix4();
+const inverseShadowCameraMatrixWorld = new THREE.Matrix4();
 const tempBox = new THREE.Box3();
 const FRUSTUM_PADDING = 1;
 const NEAR_CLIPPING_PLANE = -500;
@@ -64,10 +64,12 @@ function resizeShadowCameraFrustum(light, boundingBox) {
   verts[7].set(max.x, max.y, max.z);
 
   light.updateMatrices();
-  inverseLightMatrixWorld.copy(light.matrixWorld).invert();
+  light.target.updateMatrices();
+  light.shadow.updateMatrices(light);
+  inverseShadowCameraMatrixWorld.copy(light.shadow.camera.matrixWorld).invert();
 
   for (let i = 0; i < verts.length; i++) {
-    verts[i].applyMatrix4(inverseLightMatrixWorld);
+    verts[i].applyMatrix4(inverseShadowCameraMatrixWorld);
     frustumBox.expandByPoint(verts[i]);
   }
 
@@ -88,46 +90,50 @@ function resizeShadowCameraFrustum(light, boundingBox) {
 
 export class ShadowSystem {
   constructor(sceneEl) {
-    this.needsUpdate = false;
-    this.dynamicShadowsEnabled = window.APP.store.state.preferences.enableDynamicShadows;
     this.sceneEl = sceneEl;
-    this.onEnvironmentSceneLoaded = this.onEnvironmentSceneLoaded.bind(this);
-    this.sceneEl.addEventListener("environment-scene-loaded", this.onEnvironmentSceneLoaded);
     this.shadowCameraBoundingBox = new THREE.Box3();
+    this.previousShadowsEnabled = this.realtimeShadowsEnabled = null;
+
+    // Defaults previously in hub.html
+    sceneEl.renderer.shadowMap.enabled = false;
+    sceneEl.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    sceneEl.renderer.shadowMap.autoUpdate = true;
+
+    window.APP.store.addEventListener("statechanged", this.updatePrefs.bind(this));
+    this.updatePrefs();
   }
 
-  onEnvironmentSceneLoaded({ detail: environmentObject3D }) {
-    this.environmentObject3D = environmentObject3D;
-    this.needsUpdate = true;
-    this.sceneEl.renderer.shadowMap.autoUpdate = this.dynamicShadowsEnabled;
+  updatePrefs() {
+    this.realtimeShadowsEnabled =
+      window.APP.store.state.preferences.enableDynamicShadows === true &&
+      window.APP.store.materialQualitySetting !== "low";
+    if (this.previousShadowsEnabled !== this.realtimeShadowsEnabled) {
+      this.sceneEl.renderer.shadowMap.enabled = this.realtimeShadowsEnabled;
+
+      // If scene has already rendered, materials which can receive shadows must be updated.
+      if (this.sceneEl.hasLoaded) {
+        this.sceneEl.object3D.traverse(node => {
+          if (node.receiveShadow && node.material) {
+            updateMaterials(node, material => {
+              material.needsUpdate = true;
+              return material;
+            });
+          }
+        });
+      }
+    }
+    this.previousShadowsEnabled = this.realtimeShadowsEnabled;
   }
 
   tick() {
-    const environmentObject3D = this.environmentObject3D;
-
-    if (!this.needsUpdate || window.APP.store.materialQualitySetting === "low" || !environmentObject3D) {
+    if (!this.realtimeShadowsEnabled) {
       return;
     }
-
-    if (!this.dynamicShadowsEnabled) {
-      traverseAnimationTargets(environmentObject3D, environmentObject3D.animations, animatedNode => {
-        animatedNode.traverse(child => {
-          child.castShadow = false;
-          child.receiveShadow = false;
-        });
-      });
-    }
-
-    computeShadowCameraBoundingBox(environmentObject3D, this.shadowCameraBoundingBox);
-
-    environmentObject3D.traverse(object3D => {
+    computeShadowCameraBoundingBox(this.sceneEl.object3D, this.shadowCameraBoundingBox);
+    this.sceneEl.object3D.traverse(object3D => {
       if (object3D.isDirectionalLight) {
         resizeShadowCameraFrustum(object3D, this.shadowCameraBoundingBox);
       }
     });
-
-    this.sceneEl.renderer.shadowMap.needsUpdate = true;
-
-    this.needsUpdate = false;
   }
 }

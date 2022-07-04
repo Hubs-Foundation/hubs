@@ -13,7 +13,7 @@ export function willRequireUserGesture() {
 }
 
 export async function showFullScreenIfAvailable() {
-  if (shouldShowFullScreen()) {
+  if (shouldShowFullScreen() && !screenfull.isFullscreen) {
     hasEnteredFullScreenThisSession = true;
     await screenfull.request();
   }

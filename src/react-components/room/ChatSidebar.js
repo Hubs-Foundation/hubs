@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { useEffect, useRef, forwardRef } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { Sidebar } from "../sidebar/Sidebar";
@@ -33,18 +33,42 @@ export function SendMessageButton(props) {
   );
 }
 
-export function EmojiPickerPopoverButton({ onSelectEmoji }) {
+// Memoize EmojiPickerPopoverButton since we don't want it re-rendering
+// the EmojiPicker unnecessarily.
+export const EmojiPickerPopoverButton = React.memo(({ onSelectEmoji }) => {
+  // We're using a ref here, since we don't want to re-render anything, but we
+  // do want to know if the Shift key is down when an emoji is selected.
+  const shiftKeyDown = useRef(false);
+
+  useEffect(() => {
+    const onKeyDown = e => {
+      if (e.key === "Shift") shiftKeyDown.current = true;
+    };
+    const onKeyUp = e => {
+      if (e.key === "Shift") shiftKeyDown.current = false;
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, []);
+
   return (
     <Popover
       title=""
-      content={props => (
+      content={({ closePopover }) => (
         <EmojiPicker
           onSelect={emoji => {
-            onSelectEmoji(emoji);
-            // eslint-disable-next-line react/prop-types
-            props.closePopover();
+            const keepPickerOpen = shiftKeyDown.current;
+            onSelectEmoji({ emoji, pickerRemainedOpen: keepPickerOpen });
+            // Keep the picker open if the Shift key was held down to allow
+            // for multiple emoji selections.
+            if (!keepPickerOpen) closePopover();
           }}
-          {...props}
         />
       )}
       placement="top"
@@ -57,7 +81,7 @@ export function EmojiPickerPopoverButton({ onSelectEmoji }) {
       )}
     </Popover>
   );
-}
+});
 
 EmojiPickerPopoverButton.propTypes = {
   onSelectEmoji: PropTypes.func.isRequired

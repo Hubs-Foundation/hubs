@@ -470,7 +470,7 @@ AFRAME.registerComponent("skybox", {
     }
 
     // TODO Remove or rework medium quality mode
-    if (window.APP.store.materialQualitySetting === "medium") {
+    if (window.APP.store.state.preferences.materialQualitySetting === "medium") {
       // This extra ambient light is here to normalize lighting with the MeshStandardMaterial.
       // Without it, objects are significantly darker in brighter environments.
       // It's kept to a low value to not wash out objects in very dark environments.

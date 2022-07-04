@@ -17,7 +17,6 @@ AFRAME.registerComponent("media-image", {
     version: { type: "number" },
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
-    batch: { default: false },
     alphaMode: { type: "string", default: undefined },
     alphaCutoff: { type: "number" }
   },
@@ -27,9 +26,6 @@ AFRAME.registerComponent("media-image", {
   },
 
   remove() {
-    if (this.data.batch && this.mesh) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
-    }
     if (this.currentSrcIsRetained) {
       textureCache.release(this.data.src, this.data.version);
       this.currentSrcIsRetained = false;
@@ -39,8 +35,6 @@ AFRAME.registerComponent("media-image", {
   async update(oldData) {
     let texture;
     let ratio = 1;
-
-    const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
 
     try {
       const { src, version, contentType } = this.data;
@@ -110,12 +104,6 @@ AFRAME.registerComponent("media-image", {
 
     const projection = this.data.projection;
 
-    if (this.mesh && this.data.batch) {
-      // This is a no-op if the mesh was just created.
-      // Otherwise we want to ensure the texture gets updated.
-      batchManagerSystem.removeObject(this.mesh);
-    }
-
     if (!this.mesh || projection !== oldData.projection) {
       const material = new THREE.MeshBasicMaterial();
       material.toneMapped = false;
@@ -147,24 +135,18 @@ AFRAME.registerComponent("media-image", {
     if (texture == errorTexture) {
       this.mesh.material.transparent = true;
     } else {
-      // if transparency setting isnt explicitly defined, default to on for all non batched things, gifs, and basis textures with alpha
+      // if transparency setting isnt explicitly defined, default to on for all gifs, and basis textures with alpha
       switch (this.data.alphaMode) {
         case "opaque":
           this.mesh.material.transparent = false;
-          break;
-        case "blend":
-          this.mesh.material.transparent = true;
-          this.mesh.material.alphaTest = 0;
           break;
         case "mask":
           this.mesh.material.transparent = false;
           this.mesh.material.alphaTest = this.data.alphaCutoff;
           break;
+        case "blend":
         default:
-          this.mesh.material.transparent =
-            !this.data.batch ||
-            this.data.contentType.includes("image/gif") ||
-            !!(texture.image && texture.image.hasAlpha);
+          this.mesh.material.transparent = true;
           this.mesh.material.alphaTest = 0;
       }
     }
@@ -174,10 +156,6 @@ AFRAME.registerComponent("media-image", {
 
     if (projection === "flat") {
       scaleToAspectRatio(this.el, ratio);
-    }
-
-    if (texture !== errorTexture && this.data.batch && !texture.isCompressedTexture) {
-      batchManagerSystem.addObject(this.mesh);
     }
 
     this.el.emit("image-loaded", { src: this.data.src, projection: projection });

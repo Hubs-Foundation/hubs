@@ -22,9 +22,15 @@ export const DistanceModelType = {
   Exponential: "exponential"
 };
 
+export const PanningModelType = Object.freeze({
+  HRTF: "HRTF",
+  EqualPower: "equalpower"
+});
+
 export const AvatarAudioDefaults = Object.freeze({
   audioType: AudioType.PannerNode,
   distanceModel: DistanceModelType.Inverse,
+  panningModel: PanningModelType.HRTF,
   rolloffFactor: 5,
   refDistance: 5,
   maxDistance: 10000,
@@ -37,6 +43,7 @@ export const AvatarAudioDefaults = Object.freeze({
 export const MediaAudioDefaults = Object.freeze({
   audioType: AudioType.PannerNode,
   distanceModel: DistanceModelType.Inverse,
+  panningModel: PanningModelType.HRTF,
   rolloffFactor: 5,
   refDistance: 5,
   maxDistance: 10000,
@@ -49,6 +56,7 @@ export const MediaAudioDefaults = Object.freeze({
 export const TargetAudioDefaults = Object.freeze({
   audioType: AudioType.PannerNode,
   distanceModel: DistanceModelType.Inverse,
+  panningModel: PanningModelType.HRTF,
   rolloffFactor: 5,
   refDistance: 8,
   maxDistance: 10000,

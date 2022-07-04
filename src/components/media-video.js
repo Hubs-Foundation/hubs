@@ -157,25 +157,27 @@ AFRAME.registerComponent("media-video", {
         this.updatePlaybackState();
       });
 
-    // from a-sound
-    const sceneEl = this.el.sceneEl;
-    sceneEl.audioListener = sceneEl.audioListener || new THREE.AudioListener();
-    if (sceneEl.camera) {
-      sceneEl.camera.add(sceneEl.audioListener);
-    }
-    sceneEl.addEventListener("camera-set-active", function(evt) {
-      evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
-    });
-
-    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
+    let { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;
     this.onPreferenceChanged = () => {
-      const newPref = APP.store.state.preferences.disableLeftRightPanning;
-      const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && this.audio && this.mediaElementAudioSource;
-      disableLeftRightPanningPref = newPref;
+      const newDisableLeftRightPanning = APP.store.state.preferences.disableLeftRightPanning;
+      const newAudioPanningQuality = APP.store.state.preferences.audioPanningQuality;
+
+      const shouldRecreateAudio =
+        disableLeftRightPanning !== newDisableLeftRightPanning && this.audio && this.mediaElementAudioSource;
+      const shouldUpdateAudioSettings = audioPanningQuality !== newAudioPanningQuality;
+
+      disableLeftRightPanning = newDisableLeftRightPanning;
+      audioPanningQuality = newAudioPanningQuality;
+
       if (shouldRecreateAudio) {
         this.setupAudio();
+      } else if (shouldUpdateAudioSettings) {
+        // updateAudioSettings() is called in this.setupAudio()
+        // so no need to call it if shouldRecreateAudio is true.
+        updateAudioSettings(this.el, this.audio);
       }
     };
+
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
     this.el.addEventListener("audio_type_changed", this.setupAudio);
   },

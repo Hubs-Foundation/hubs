@@ -42,7 +42,6 @@ const calculateDisplacementToDesiredPOV = (function() {
  * The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
  * @namespace avatar
  */
-const SNAP_ROTATION_RADIAN = THREE.Math.DEG2RAD * 45;
 const BASE_SPEED = 3.2; //TODO: in what units?
 export class CharacterControllerSystem {
   constructor(scene) {
@@ -246,16 +245,10 @@ export class CharacterControllerSystem {
       const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
       if (snapRotateLeft) {
-        this.dXZ +=
-          preferences.snapRotationDegrees === undefined
-            ? SNAP_ROTATION_RADIAN
-            : (preferences.snapRotationDegrees * Math.PI) / 180;
+        this.dXZ += (preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateRight) {
-        this.dXZ -=
-          preferences.snapRotationDegrees === undefined
-            ? SNAP_ROTATION_RADIAN
-            : (preferences.snapRotationDegrees * Math.PI) / 180;
+        this.dXZ -= (preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateLeft || snapRotateRight) {
         this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
@@ -290,7 +283,7 @@ export class CharacterControllerSystem {
         const triedToMove = this.relativeMotion.lengthSq() > 0.000001;
 
         if (triedToMove) {
-          const speedModifier = preferences.movementSpeedModifier || 1;
+          const speedModifier = preferences.movementSpeedModifier;
           calculateDisplacementToDesiredPOV(
             snapRotatedPOV,
             this.fly || !navMeshExists,

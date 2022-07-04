@@ -283,7 +283,7 @@ AFRAME.registerComponent("simple-water", {
       waterNormalMap = new HubsTextureLoader().load(waterNormalsUrl);
     }
 
-    const usePhongShader = window.APP.store.materialQualitySetting !== "high";
+    const usePhongShader = window.APP.store.state.preferences.materialQualitySetting !== "high";
     this.water = new SimpleWater(waterNormalMap, undefined, usePhongShader);
     this.el.setObject3D("mesh", this.water);
   },

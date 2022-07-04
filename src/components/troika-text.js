@@ -7,6 +7,12 @@ import { Text } from "troika-three-text";
 // Mark this type of object so we can filter in from our shader patching
 Text.prototype.isTroikaText = true;
 
+const THREE_SIDES = {
+  front: THREE.FrontSide,
+  back: THREE.BackSide,
+  double: THREE.DoubleSide
+};
+
 function numberOrPercent(defaultValue) {
   return {
     default: defaultValue,
@@ -52,7 +58,7 @@ AFRAME.registerComponent("text", {
     depthOffset: { type: "number", default: 0 },
     direction: { type: "string", default: "auto", oneOf: ["auto", "ltr", "rtl"] },
     fillOpacity: { type: "number", default: 1 },
-    // This is different from the Troika preoperty name, Using "fontUrl" to prevent conflict with previous "font" p=roperty and to allow us to make named fonts later
+    // This is different from the Troika preoperty name, Using "fontUrl" to prevent conflict with previous "font" property and to allow us to make named fonts later
     fontUrl: { type: "string" },
     // This default value differs from the Troika default of 0.1, it most closely matches the size of our previous text component.
     fontSize: { type: "number", default: 0.075 },
@@ -100,7 +106,7 @@ AFRAME.registerComponent("text", {
     mesh.anchorX = data.anchorX;
     mesh.anchorY = data.anchorY;
     mesh.color = data.color;
-    mesh.material.side = data.side;
+    mesh.material.side = THREE_SIDES[data.side];
     mesh.material.opacity = data.opacity;
     mesh.curveRadius = data.curveRadius;
     mesh.depthOffset = data.depthOffset || 0;
@@ -124,7 +130,9 @@ AFRAME.registerComponent("text", {
     mesh.textIndent = data.textIndent;
     mesh.whiteSpace = data.whiteSpace;
     mesh.maxWidth = data.maxWidth;
-    mesh.sync();
+    mesh.sync(() => {
+      this.el.emit("text-updated", this);
+    });
   },
 
   /**
@@ -134,5 +142,17 @@ AFRAME.registerComponent("text", {
   remove: function() {
     // Free memory
     this.troikaTextMesh.dispose();
-  }
+  },
+
+  getSize: (function() {
+    const size = new THREE.Vector3();
+    return function(outSize) {
+      this.troikaTextMesh.geometry.boundingBox.getSize(size);
+      outSize.set(
+        size.x * this.troikaTextMesh.scale.x,
+        size.y * this.troikaTextMesh.scale.y,
+        size.z * this.troikaTextMesh.scale.z
+      );
+    };
+  })()
 });

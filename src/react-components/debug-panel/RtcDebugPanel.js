@@ -256,7 +256,7 @@ export default class RtcDebugPanel extends Component {
   };
 
   storeUpdated = () => {
-    const showPanel = this.props.store.state.preferences["showRtcDebugPanel"];
+    const showPanel = this.props.store.state.preferences.showRtcDebugPanel;
     this.setState({ showPanel: showPanel });
   };
 

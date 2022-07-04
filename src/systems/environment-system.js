@@ -34,7 +34,13 @@ const defaultEnvSettings = {
   physicallyCorrectLights: true,
   envMapTexture: null,
   backgroundTexture: null,
-  backgroundColor: new THREE.Color("#000000")
+  backgroundColor: new THREE.Color("#000000"),
+
+  fogType: null,
+  fogColor: new THREE.Color("#ffffff"),
+  fogDensity: 0.00025,
+  fogFar: 1000,
+  fogNear: 1
 };
 
 let blenderLUTPromise; // lazy loaded
@@ -192,6 +198,25 @@ export class EnvironmentSystem {
       this.prevEnvMapTextureUUID = null;
     }
 
+    if (this.scene.fog?.name !== settings.fogType) {
+      if (settings.fogType === "linear") {
+        this.scene.fog = new THREE.Fog(settings.fogColor, settings.fogNear, settings.fogFar);
+      } else if (settings.fogType === "exponential") {
+        this.scene.fog = new THREE.FogExp2(settings.fogColor, settings.fogDensity);
+      } else {
+        this.scene.fog = null;
+      }
+      materialsNeedUpdate = true;
+    } else if (settings.fogType) {
+      this.scene.fog.color.copy(settings.fogColor);
+      if (settings.fogType === "linear") {
+        this.scene.fog.near = settings.fogNear;
+        this.scene.fog.far = settings.fogFar;
+      } else if (settings.fogType === "exponential") {
+        this.scene.fog.density = settings.fogDensity;
+      }
+    }
+
     if (materialsNeedUpdate) {
       if (this.debugMode) console.log("materials need updating");
       this.scene.traverse(o => {
@@ -211,7 +236,13 @@ AFRAME.registerComponent("environment-settings", {
   schema: {
     toneMapping: { default: defaultEnvSettings.toneMapping, oneOf: Object.values(toneMappingOptions) },
     toneMappingExposure: { default: defaultEnvSettings.toneMappingExposure },
-    backgroundColor: { type: "color", default: defaultEnvSettings.background }
+    backgroundColor: { type: "color", default: defaultEnvSettings.background },
+
+    fogType: { type: "string", default: defaultEnvSettings.fogType },
+    fogColor: { type: "color", default: defaultEnvSettings.fogColor },
+    fogDensity: { type: "number", default: defaultEnvSettings.fogDensity },
+    fogNear: { type: "number", default: defaultEnvSettings.forNear },
+    fogFar: { type: "number", default: defaultEnvSettings.fogFar }
   }
 });
 

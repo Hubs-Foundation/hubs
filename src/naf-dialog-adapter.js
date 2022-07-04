@@ -780,6 +780,7 @@ export class DialogAdapter extends EventEmitter {
             // stopTracks = false because otherwise the track will end during a temporary disconnect
             this._micProducer = await this._sendTransport.produce({
               track,
+              pause: !this._micShouldBeEnabled,
               stopTracks: false,
               codecOptions: { opusStereo: false, opusDtx: true },
               zeroRtpOnPause: true,
@@ -790,10 +791,6 @@ export class DialogAdapter extends EventEmitter {
               this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
               this._micProducer = null;
             });
-
-            if (!this._micShouldBeEnabled) {
-              this._micProducer.pause();
-            }
 
             this.emit("mic-state-changed", { enabled: this.isMicEnabled });
           }
@@ -908,10 +905,6 @@ export class DialogAdapter extends EventEmitter {
     } else {
       this.enableMicrophone(true);
     }
-  }
-
-  set micShouldBeEnabled(enabled) {
-    this._micShouldBeEnabled = enabled;
   }
 
   enableMicrophone(enabled) {
