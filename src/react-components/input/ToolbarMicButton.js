@@ -6,30 +6,25 @@ import { useVolumeMeter } from "../misc/useVolumeMeter";
 
 export function ToolbarMicButton({ scene, ...rest }) {
   const ref = useRef();
-  const setRef = useCallback(
-    node => {
-      ref.current = node;
-    },
-    [ref]
-  );
-  const update = useCallback(
-    level => {
-      const node = ref.current;
-      if (node) {
-        const rect = node.querySelector("rect");
-        if (level <= 0.1) {
-          rect.setAttribute("height", 0);
-        } else if (level < 0.3) {
-          rect.setAttribute("y", 8);
-          rect.setAttribute("height", 4);
-        } else {
-          rect.setAttribute("y", 4);
-          rect.setAttribute("height", 8);
-        }
+  const setRef = useCallback(node => {
+    if (node) {
+      ref.current = node.querySelector("rect");
+    }
+  }, []);
+  const update = useCallback(level => {
+    const rect = ref.current;
+    if (rect) {
+      if (level <= 0.1) {
+        rect.setAttribute("height", 0);
+      } else if (level < 0.3) {
+        rect.setAttribute("y", 8);
+        rect.setAttribute("height", 4);
+      } else {
+        rect.setAttribute("y", 4);
+        rect.setAttribute("height", 8);
       }
-    },
-    [ref]
-  );
+    }
+  }, []);
   useVolumeMeter({
     analyser: scene.systems["hubs-systems"].audioSystem.outboundAnalyser,
     update
