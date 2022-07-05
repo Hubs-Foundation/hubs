@@ -28,7 +28,6 @@ import { ToggleInput } from "./components/ToggleInput";
 import Language from './languages/language';
 import { useTranslation } from 'react-i18next';
 
-
 registerTelemetry("/manager", "Hubs Home Page");
 
 export function ManagerPage() {
@@ -45,13 +44,13 @@ function ManagerHome() {
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [iconLoaded, setIconLoaded] = useState(false);
   const [isOpenExhibition, setIsOpenExhibition] = useState(false);
-  const [isCloseRoom, setIsCloseRoom] = useState(false);
-  const [isOpenRoom, setIsOpenRoom] = useState(false);
-  const [isOpenMedia, setIsOpenMedia] = useState(false);
-  const [isOpenObject, setIsOpenObject] = useState(false);
-  const [isDeleteRoom, setIsDeleteRoom] = useState(false);
+  const [isOpenPopupConfirmCloseExhibition, setIsOpenPopupConfirmCloseExhibition] = useState(false);
+  const [isOpenPopupConfirmOpenExhibition, setIsOpenPopupConfirmOpenExhibition] = useState(false);
+  const [isOpenPopupConfirmDeleteExhibition, setIsOpenPopupConfirmDeleteExhibition] = useState(false);
   const [isOpenPopupConfirmChangePublic, setIsOpenPopupConfirmChangePublic] = useState(false);
   const [isOpenPopupChangeMediaURLGuide, setIsOpenPopupChangeMediaURLGuide] = useState(false);
+  const [isOpenPopupMedia, setIsOpenPopupMedia] = useState(false);
+  const [isOpenPopupObject, setIsOpenPopupObject] = useState(false);
   const [exhibition, setExhibition] = useState(undefined);
   const [exhibitionType, setExhibitionType] = useState("create");
   const [exhibitionId, setExhibitionId] = useState(undefined);
@@ -115,6 +114,7 @@ function ManagerHome() {
         setIsLoadingF(false);
       });
   }
+
   useEffect(
     () => {
       auth();
@@ -130,15 +130,15 @@ function ManagerHome() {
     [filterExhibitionList.page]
   );
 
-  // useEffect(
-  //   () => {
-  //     const user = Store.getUser();
-  //     if (user?.type == 5) {
-  //       getAllProjects();
-  //     }
-  //   },
-  //   [filterProjectList.page]
-  // );
+  useEffect(
+    () => {
+      const user = Store.getUser();
+      if (user?.type == 5) {
+        getAllProjects();
+      }
+    },
+    [filterProjectList.page]
+  );
 
   const getAllExhibitions = () => {
     const user = Store.getUser();
@@ -150,8 +150,8 @@ function ManagerHome() {
           setExhibitionsLoaded(true);
           setIsLoading(false);
           setIsLoadingF(false);
-        } else if (res.result == "fail" && res.error == "get_exhibitions_fail") {
-          toast.error("Get Exhibitions fail !", { autoClose: 1000 });
+        } else {
+          toast.error(t('manage.GET_EXHIBITIONS_ERROR'), { autoClose: 1000 });
           setIsLoading(false);
           setIsLoadingF(false);
         }
@@ -159,8 +159,8 @@ function ManagerHome() {
       ExhibitionsService.getAllScenes().then(res => {
         if (res.result == "ok") {
           setScenes(res.data);
-        } else if (res.result == "fail" && res.error == "get_exhibitions_fail") {
-          toast.error("Get Exhibitions fail !", { autoClose: 1000 });
+        } else{
+          toast.error(t('manage.GET_SCENES_ERROR'), { autoClose: 1000 });
         }
       });
     }
@@ -175,8 +175,8 @@ function ManagerHome() {
           setProjects(res.data);
           setProjectsLoaded(true);
           setIsLoading(false);
-        } else if (res.result == "fail") {
-          toast.error("Get Projects fail !", { autoClose: 1000 });
+        } else {
+          toast.error(t('manage.GET_PROJECTS_ERROR'), { autoClose: 1000 });
           setIsLoading(false);
         }
       });
@@ -249,25 +249,25 @@ function ManagerHome() {
   
   const openPopupCloseRoom = exhibitionId => {
     setExhibitionId(exhibitionId);
-    setIsCloseRoom(true);
+    setIsOpenPopupConfirmCloseExhibition(true);
   };
 
   const closePopupCloseRoom = () => {
-    setIsCloseRoom(false);
+    setIsOpenPopupConfirmCloseExhibition(false);
   };
 
   const openPopupOpenRoom = exhibitionId => {
     setExhibitionId(exhibitionId);
-    setIsOpenRoom(true);
+    setIsOpenPopupConfirmOpenExhibition(true);
   };
 
   const closePopupOpenRoom = () => {
-    setIsOpenRoom(false);
+    setIsOpenPopupConfirmOpenExhibition(false);
   };
 
   const openDeleteRoom = exhibitionId => {
     setExhibitionId(exhibitionId);
-    setIsDeleteRoom(true);
+    setIsOpenPopupConfirmDeleteExhibition(true);
   };
 
   const openPopupCustomMedia = exhibitionId => {
@@ -277,25 +277,17 @@ function ManagerHome() {
         if (res.result == "ok") {
           setMedias(res.data);
           setMediaLoaded(true);
-        } else if (res.result == "fail" && res.error == "verify_token_fail") {
-          toast.error("Invalid token !", { autoClose: 3000 });
-          closePopupCustomMedia();
-        }
-        else if (res.result == "fail" && res.error == "wrong_exhibition") {
-          toast.error("Wrong Exhibition !", { autoClose: 3000 });
-          closePopupCustomMedia();
-        }
-       else if (res.result == "fail" && res.error == "get_list_object_fail") {
-          toast.error("Get List Object fail !", { autoClose: 3000 });
+        } else {
+          toast.error(t('manage.GET_MEDIAS_ERROR'), { autoClose: 3000 });
           closePopupCustomMedia();
         }
       });
     }
-    setIsOpenMedia(true);
+    setIsOpenPopupMedia(true);
   };
 
   const closePopupCustomMedia = () => {
-    setIsOpenMedia(false);
+    setIsOpenPopupMedia(false);
     setMedias(
       {    
         data: [],
@@ -311,21 +303,17 @@ function ManagerHome() {
         if (res.result == "ok") {
           setObjects(res.data);
           setObjectLoaded(true);
-        } else if (res.result == "fail" && res.error == "verify_token_fail") {
-          toast.error("Invalid token !", { autoClose: 1000 });
-          closePopupCustomObject();
-        }
-        else if (res.result == "fail" && res.error == "wrong_exhibition") {
-          toast.error("Wrong Exhibition !", { autoClose: 1000 });
+        } else {
+          toast.error(t('manager.GET_OBJECTS_ERROR'), { autoClose: 1000 });
           closePopupCustomObject();
         }
       });
     }
-    setIsOpenObject(true);
+    setIsOpenPopupObject(true);
   };
 
   const closePopupCustomObject = () => {
-    setIsOpenObject(false);
+    setIsOpenPopupObject(false);
     setObjects(
       {    
         data: [],
@@ -345,14 +333,12 @@ function ManagerHome() {
     const dataString = JSON.stringify(data);
     MediaService.updateMediaMany(dataString).then(res => {
       if (res.result == "ok") {
-        toast.success("update medias success ", { autoClose: 5000 });
+        toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
         setIconLoaded(false);
-      } else if (res.result == "fail" && res.error == "invalid_list_media") {
-        toast.error("format of list media is incorrect ", { autoClose: 5000 });
+      } {
+        toast.error(t('manager.UPDATE_MEDIAS_ERROR'), { autoClose: 5000 });
       }
-      else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("Wrong token !", { autoClose: 5000 });
-      }
+      
     });
   }
 
@@ -373,18 +359,16 @@ function ManagerHome() {
         setIconLoaded(false);
         closePopupCustomObject();
         setIsOpenPopupChangeMediaURLGuide(true);
-      } else if (res.result == "fail" && res.error == "invalid_list_changeable_object_uuid") {
-        toast.error("List changeable object uuid incorrect", { autoClose: 5000 });
-      }
-      else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("Wrong token !", { autoClose: 5000 });
+        toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
+      } else {
+        toast.error(t('manager.UPDATE_CHANGEABLE_OBJECTS_ERROR'), { autoClose: 5000 });
       }
     });
 
   }
 
   const deleteRoom = () => {
-    setIsDeleteRoom(false);
+    setIsOpenPopupConfirmDeleteExhibition(false);
   };
 
   const ActionListRoom = () => {
@@ -518,26 +502,12 @@ function ManagerHome() {
     const data = exhibition;
     ExhibitionsService.postCreateOne(data).then(res => {
       if (res.result == "ok") {
-        toast.success("Create new tour success !", { autoClose: 5000 });
+        toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
         setIsOpenExhibition(false);
         // setExhibitions([...exhibitions, res.data]);
         window.location.reload();
-      } else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("You do not have permission to change or create !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "create_exhibition_error") {
-        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_name") {
-        toast.error("name should be length 4-255 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_maxSize") {
-        toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_startDate") {
-        toast.error("You must select the start date !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_endDate") {
-        toast.error("You must select the end date !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_date") {
-        toast.error("The end day must be after the start day !", { autoClose: 5000 });
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.CREATE_OR_UPDATE_EXHIBITION_ERROR__' + res.error.toUpperCase()), { autoClose: 5000 });
       }
     });
   };
@@ -548,27 +518,13 @@ function ManagerHome() {
       if (res.result == "ok") {
         exhibitions.data.forEach(exhibition => {
           if (exhibition.id == res.data.id) {
-            toast.success("Edit Exhibition success !", { autoClose: 5000 });
+            toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
             setIsOpenExhibition(false);
             getAllExhibitions();
           }
         });
-      } else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("You do not have permission to change or create !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "create_exhibition_error") {
-        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_name") {
-        toast.error("name should be length 4-255 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_maxSize") {
-        toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_startDate") {
-        toast.error("You must select the start date !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_endDate") {
-        toast.error("You must select the end date !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_date") {
-        toast.error("The end day must be after the start day !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+      } {
+        toast.error(t('manager.CREATE_OR_UPDATE_EXHIBITION_ERROR__' + res.error.toUpperCase()), { autoClose: 5000 });
       }
     });
   };
@@ -579,14 +535,12 @@ function ManagerHome() {
         exhibitions.data.forEach(exhibition => {
           if (exhibition.id == exhibitionId) {
             exhibition.public = res.data.public;
-            toast.success("Change status success !", { autoClose: 5000 });
+            toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
           }
         });
         setIsOpenPopupConfirmChangePublic(!isOpenPopupConfirmChangePublic);
-      } else if (res.result == "fail" && res.error == "invalid_id") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+      } else{
+        toast.error(t('manager.CHANGE_EXHIBITION_PUBLIC_ERROR'), { autoClose: 5000 });
       }
     });
   };
@@ -594,13 +548,11 @@ function ManagerHome() {
   const handelToggleDeleteRoom = exhibitionId => {
     ExhibitionsService.deleteOneExhibition(exhibitionId).then(res => {
       if (res.result == "ok") {
-        toast.success("Delete success !", { autoClose: 5000 });
-        setIsDeleteRoom(!isDeleteRoom);
+        toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
+        setIsOpenPopupConfirmDeleteExhibition(!isOpenPopupConfirmDeleteExhibition);
         getAllExhibitions();
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.DELETE_EXHIBITION_ERROR'), { autoClose: 5000 });
       }
     });
   };
@@ -611,14 +563,12 @@ function ManagerHome() {
         exhibitions.data.forEach(exhibition => {
           if (exhibition.id == exhibitionId) {
             exhibition.closed = res.data.closed;
-            toast.success("Change status success !", { autoClose: 5000 });
+            toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
           }
         });
-        setIsCloseRoom(!isCloseRoom);
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
+        setIsOpenPopupConfirmCloseExhibition(!isOpenPopupConfirmCloseExhibition);
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.CLOSE_EXHIBITION_ERROR'), { autoClose: 5000 });
       }
     });
   };
@@ -629,14 +579,12 @@ function ManagerHome() {
         exhibitions.data.forEach(exhibition => {
           if (exhibition.id == exhibitionId) {
             exhibition.closed = res.data.closed;
-            toast.success("Change status success !", { autoClose: 5000 });
+            toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
           }
         });
-        setIsOpenRoom(!isOpenRoom);
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
-      } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        setIsOpenPopupConfirmOpenExhibition(!isOpenPopupConfirmOpenExhibition);
+      }{
+        toast.error(t('manager.OPEN_EXHIBITION_ERROR'), { autoClose: 5000 });
       }
     });
   };
@@ -706,10 +654,10 @@ function ManagerHome() {
                         <span className="focus-input100"/>
                       </div>
                       {item?.check != "cheking" ? "" :
-                        <span>Checking the url</span>
+                        <span>{t('manager.POPUP_MEDIA__URL_CORRECT')}</span>
                       }
                       {item?.check != "fail" ? "" :
-                        <span>The URL is not correct</span>
+                        <span>{t('manager.POPUP_MEDIA__URL_INCORRECT')}</span>
                       }
                     </div>
                   </div>
@@ -807,9 +755,8 @@ function ManagerHome() {
                           checked={item?.changeable}
                           onChange={(e) => handleChangeable(item, e)}
                         />
-                        <span className="textCheckbox">URL Changeable</span>
+                        <span className="textCheckbox">{t('manager.POPUP_OBJECT__URL_CHANEABLE')}</span>
                       </label>
-          
                     </div>
                   </div>
                 )
@@ -918,7 +865,6 @@ function ManagerHome() {
 
               if (item.room) {
                 return (
-                <>
                   <div key={index} className={"items"}>
                     <span className="name-tour">{item.name}</span>
                     <img src={getSceneThumnail(item ? item.sceneId : undefined)} alt="" />
@@ -971,17 +917,15 @@ function ManagerHome() {
                       <ClosedButton />
                     </div>
                   </div>
-                </>
-
                 );
               } else {
                 return (
                   <div key={index}  className={"items"}>
-                    <span className="name-tour">This room is currently unavailable</span>
+                    <span className="name-tour">{t('manager.EXHIBITION_UNAVAILABLE')}</span>
                     <img src={defaultImage1} alt="" />
                     <div className="content">
                       <div>
-                        <span className="text-bold">This room is currently unavailable</span>
+                        <span className="text-bold">{t('manager.EXHIBITION_UNAVAILABLE')}</span>
                       </div>
                       <div className="d-flex">
                         <FaLink className="IconFa" /> :{" "}
@@ -1072,7 +1016,6 @@ function ManagerHome() {
               )
             })}
           </>
-
         ) : (
           <></>
         )}
@@ -1444,7 +1387,7 @@ function ManagerHome() {
               title={<>{t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__TITLE')}</>}
               size={"sm"}
               content={
-                <div>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                   {t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__MESSAGE')}
                 </div>
               }
@@ -1504,28 +1447,25 @@ function ManagerHome() {
             />
           )}    
   
-          {isCloseRoom && (
+          {isOpenPopupConfirmCloseExhibition && (
             <Popup
-              title={<>Close room</>}
+              title={<>{t('manager.POPUP_CONFRIM_CLOSE_EXHIBITION__TITLE')}</>}
               size={"sm"}
               content={
-                <>
-                  <br />
-                  Are you sure to close this room? People will not be able to access when you close the room ?
-                  <br />
-                  <br />
-                </>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                  {t('manager.POPUP_CONFRIM_CLOSE_EXHIBITION__MESSAGE')}
+                </div>
               }
               actions={[
                 {
-                  text: "Close Room",
+                  text: t('manager.POPUP_CONFRIM_CLOSE_EXHIBITION__CLOSE'),
                   class: "btn1",
                   callback: () => {
                     handelCloseRoom(exhibitionId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_CONFRIM_CLOSE_EXHIBITION__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     closePopupCloseRoom();
@@ -1536,28 +1476,25 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenRoom && (
+          {isOpenPopupConfirmOpenExhibition && (
             <Popup
-              title={<>Open room</>}
+              title={<>{t('manager.POPUP_CONFRIM_OPEN_EXHIBITION__TITLE')}</>}
               size={"sm"}
               content={
-                <>
-                  <br />
-                  Are you sure to open this room? People will can access to the room ?
-                  <br />
-                  <br />
-                </>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                  {t('manager.POPUP_CONFRIM_OPEN_EXHIBITION__MESSAGE')}
+                </div>
               }
               actions={[
                 {
-                  text: "Open Room",
+                  text:  t('manager.POPUP_CONFRIM_OPEN_EXHIBITION__CLOSE'),
                   class: "btn1",
                   callback: () => {
                     handelOpenRoom(exhibitionId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text:  t('manager.POPUP_CONFRIM_OPEN_EXHIBITION__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     closePopupOpenRoom();
@@ -1568,28 +1505,25 @@ function ManagerHome() {
             />
           )}
   
-          {isDeleteRoom && (
+          {isOpenPopupConfirmDeleteExhibition && (
             <Popup
-              title={<>Delete room</>}
+              title={<>{t('manager.POPUP_CONFRIM_DELETE_EXHIBITION__TITLE')}</>}
               size={"sm"}
               content={
-                <>
-                  <br />
-                  Are you sure to delete this room? People will not be able to access when you close the room ?
-                  <br />
-                  <br />
-                </>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                  {t('manager.POPUP_CONFRIM_DELETE_EXHIBITION__MESSAGE')}
+                </div>
               }
               actions={[
                 {
-                  text: "Delete Room",
+                  text: t('manager.POPUP_CONFRIM_DELETE_EXHIBITION__DELETE'),
                   class: "btn1",
                   callback: () => {
                     handelToggleDeleteRoom(exhibitionId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_CONFRIM_DELETE_EXHIBITION__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     deleteRoom();
@@ -1600,10 +1534,10 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenMedia && (
+          {isOpenPopupMedia && (
             <Popup
               size={"xl"}
-              title={"Custom Media"}
+              title={t('manager.POPUP_MEDIA__TITLE')}
               content={
                 <>
                   <form className="create100-form validate-form d-flex form-custom-media" name="form">
@@ -1617,14 +1551,14 @@ function ManagerHome() {
               }
               actions={[
                 {
-                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
+                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span> {t('manager.POPUP_MEDIA__SAVE')} </span>,
                   class: "btn-handle",
                   callback: () => {
                     handelSaveMediaURL();
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_MEDIA__CANCEL'),
                   class: "btn-cancle",
                   callback: () => {
                     closePopupCustomMedia();
@@ -1637,7 +1571,7 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenObject && (
+          {isOpenPopupObject && (
             <Popup
               size={"xl"}
               title={"List Object"}
@@ -1654,7 +1588,7 @@ function ManagerHome() {
               }
               actions={[
                 {
-                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
+                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>{t('manager.POPUP_OBJECT__SAVE')}</span>,
                   class: "btn-handle",
                   callback: () => {
                     handelOpenPopupChangeMediaURLGuide();
@@ -1662,7 +1596,7 @@ function ManagerHome() {
             
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_OBJECT__CANCEL'),
                   class: "btn-cancle",
                   callback: () => {
                     closePopupCustomObject();

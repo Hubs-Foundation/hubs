@@ -33,10 +33,10 @@ const Popup = props => {
               {currentProps.content}
           </div>
           <div className="actions">
-            {currentProps.actions.map((action)=>{
+            {currentProps.actions.map((action, i)=>{
               if(!action.hidden){
-                return <button 
-                    className={action.class} 
+                return <button key={i}
+                    className={action.class}
                     onClick={()=>{action.callback(currentProps.data)}} 
                     disabled={action.disabled || false}
                 >{action.text}</button>
