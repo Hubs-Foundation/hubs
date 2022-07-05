@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { ToolbarButton } from "../input/ToolbarButton";
@@ -6,11 +6,11 @@ import { useVolumeMeter } from "../misc/useVolumeMeter";
 
 export function ToolbarMicButton({ scene, ...rest }) {
   const ref = useRef();
-  const setRef = useCallback(node => {
+  const setRef = node => {
     if (node) {
       ref.current = node.querySelector("rect");
     }
-  }, []);
+  };
   const update = useCallback(level => {
     const rect = ref.current;
     if (rect) {
