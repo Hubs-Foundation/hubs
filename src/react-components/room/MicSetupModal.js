@@ -12,11 +12,9 @@ import { SelectInputField } from "../input/SelectInputField";
 import { ToggleInput } from "../input/ToggleInput";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
-import { LevelBar } from "../misc/LevelBar";
 import { Popover } from "../popover/Popover";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { Spinner } from "../misc/Spinner";
-import MediaDevicesManager from "../../utils/media-devices-manager";
 
 export function MicSetupModal({
   className,
@@ -25,14 +23,16 @@ export function MicSetupModal({
   speakerOptions,
   onChangeSpeaker,
   isMicrophoneEnabled,
-  micLevel,
-  speakerLevel,
   onPlaySound,
   isMicrophoneMuted,
   onChangeMicrophoneMuted,
   onEnterRoom,
   onBack,
   permissionStatus,
+  isAudioInputSelectAvailable,
+  isAudioOutputSelectAvailable,
+  micLevelBar,
+  speakerLevelBar,
   ...rest
 }) {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
@@ -59,18 +59,13 @@ export function MicSetupModal({
                     <Spinner />
                   </div>
                 )}
-                {permissionStatus === PermissionStatus.GRANTED && !isMicrophoneMuted ? (
+                {permissionStatus === PermissionStatus.GRANTED && isMicrophoneEnabled && !isMicrophoneMuted ? (
                   <MicrophoneIcon className={iconStyle} />
                 ) : (
                   <MicrophoneMutedIcon className={iconStyle} />
                 )}
               </div>
-              {permissionStatus === PermissionStatus.GRANTED && (
-                <LevelBar
-                  className={styles.levelBar}
-                  level={!isMicrophoneEnabled || isMicrophoneMuted ? 0 : micLevel}
-                />
-              )}
+              {permissionStatus === PermissionStatus.GRANTED && <> {micLevelBar}</>}
             </div>
             <div className={styles.actionContainer}>
               {permissionStatus === PermissionStatus.GRANTED ? (
@@ -130,7 +125,7 @@ export function MicSetupModal({
               )}
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
-              MediaDevicesManager.isAudioInputSelectEnabled && (
+              isAudioInputSelectAvailable && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
                     <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
@@ -147,7 +142,7 @@ export function MicSetupModal({
           <div className={styles.audioIoContainer}>
             <div className={styles.iconContainer}>
               <VolumeOffIcon className={styles.iconEnabled} style={{ marginRight: "5px" }} />
-              <LevelBar className={styles.levelBar} level={speakerLevel} />
+              <> {speakerLevelBar} </>
             </div>
             <div className={styles.actionContainer}>
               <Button preset="basic" onClick={onPlaySound} sm>
@@ -155,7 +150,7 @@ export function MicSetupModal({
               </Button>
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
-              MediaDevicesManager.isAudioOutputSelectEnabled && (
+              isAudioOutputSelectAvailable && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
                     <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
@@ -181,8 +176,8 @@ export function MicSetupModal({
 MicSetupModal.propTypes = {
   className: PropTypes.string,
   onPlaySound: PropTypes.func,
-  micLevel: PropTypes.number,
-  speakerLevel: PropTypes.number,
+  micLevelBar: PropTypes.node,
+  speakerLevelBar: PropTypes.node,
   isMicrophoneEnabled: PropTypes.bool,
   isMicrophoneMuted: PropTypes.bool,
   onChangeMicrophoneMuted: PropTypes.func,
@@ -192,11 +187,11 @@ MicSetupModal.propTypes = {
   onChangeSpeaker: PropTypes.func,
   onEnterRoom: PropTypes.func,
   onBack: PropTypes.func,
-  permissionStatus: PropTypes.string
+  permissionStatus: PropTypes.string,
+  isAudioInputSelectAvailable: PropTypes.bool,
+  isAudioOutputSelectAvailable: PropTypes.bool
 };
 
 MicSetupModal.defaultProps = {
-  micLevel: 0,
-  speakerLevel: 0,
   permissionStatus: PermissionStatus.PROMPT
 };

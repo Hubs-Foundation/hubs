@@ -2,6 +2,13 @@ import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
 import { AudioPopoverButton } from "./AudioPopoverButton";
 import { AudioPopoverContent } from "./AudioPopoverContent";
+import { LevelBar } from "../misc/LevelBar";
+import styles from "./AudioPopover.scss";
+import PropTypes from "prop-types";
+import { ToolbarButton } from "../input/ToolbarButton";
+import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
+import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
+import { FormattedMessage } from "react-intl";
 
 const micOptions = ["Microphone 1", "Microphone 2 long text", "Microphone 3 even much much longer text"];
 const speakerOptions = [
@@ -58,65 +65,85 @@ export default {
         options: speakerOptions
       },
       defaultValue: speakerOptions[0]
-    },
-    micLevel: {
-      control: {
-        type: "number",
-        min: 0,
-        max: 1,
-        step: 0.1
-      }
-    },
-    speakerLevel: {
-      control: {
-        type: "number",
-        min: 0,
-        max: 1,
-        step: 0.1
-      }
     }
   }
 };
+
+function getMicOptions(micId) {
+  return {
+    value: micId,
+    options: micOptions.map(option => {
+      return {
+        label: option,
+        value: option
+      };
+    })
+  };
+}
+
+function getSpeakerOptions(speakerId) {
+  return {
+    value: speakerId,
+    options: speakerOptions.map(option => {
+      return {
+        label: option,
+        value: option
+      };
+    })
+  };
+}
 
 const Template = args => (
   <RoomLayout
     toolbarCenter={
       <AudioPopoverButton
+        initiallyVisible
         content={
           <AudioPopoverContent
+            microphoneOptions={getMicOptions(args.selectedMicrophone)}
+            speakerOptions={getSpeakerOptions(args.selectedSpeaker)}
+            micLevelBar={<LevelBar className={styles.levelBar} />}
+            speakerLevelBar={<LevelBar className={styles.levelBar} />}
             selectedMicrophone={args.selectedMicrophone}
             isMicrophoneEnabled={args.isMicrophoneEnabled}
-            microphoneOptions={args.microphoneOptions}
-            micLevel={args.micLevel}
             selectedSpeaker={args.selectedSpeaker}
-            speakerOptions={args.speakerOptions}
-            speakerLevel={args.speakerLevel}
             isMicrophoneMuted={args.isMicrophoneMuted}
             permissionStatus={args.permissionStatus}
             onChangeMicrophone={args.onChangeMicrophone}
             onChangeMicrophoneMuted={args.onChangeMicrophoneMuted}
             onChangeSpeaker={args.onChangeSpeaker}
             onPlaySound={args.onPlaySound}
+            isAudioInputSelectAvailable={args.isAudioInputSelectAvailable}
+            isAudioOutputSelectAvailable={args.isAudioOutputSelectAvailable}
           />
         }
-        initiallyVisible
-        isMicrophoneEnabled={args.isMicrophoneEnabled}
-        isMicrophoneMuted={args.isMicrophoneMuted}
-        onChangeMicrophoneMuted={args.onChangeMicrophoneMuted}
+        micButton={
+          <ToolbarButton
+            icon={args.isMicrophoneMuted || !args.isMicrophoneEnabled ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
+            label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}
+            preset="basic"
+            onClick={args.onChangeMicrophoneMuted}
+            statusColor={args.isMicrophoneMuted || !args.isMicrophoneEnabled ? "disabled" : "enabled"}
+            type={"right"}
+          />
+        }
       />
     }
   />
 );
+
+Template.propTypes = {
+  selectedMicrophone: PropTypes.string,
+  selectedSpeaker: PropTypes.string
+};
 
 export const Base = Template.bind({});
 
 Base.args = {
   selectedMicrophone: micOptions[0],
   isMicrophoneEnabled: true,
-  microphoneOptions: micOptions,
-  micLevel: 0.5,
   selectedSpeaker: speakerOptions[0],
-  speakerOptions: speakerOptions,
-  speakerLevel: 0.5,
-  isMicrophoneMuted: false
+  isMicrophoneMuted: false,
+  isAudioInputSelectAvailable: true,
+  isAudioOutputSelectAvailable: true
 };
