@@ -10,6 +10,8 @@ export const AudioZoneShape = {
   Sphere: "sphere"
 };
 
+const EPSILON = 0.00000000001;
+
 AFRAME.registerComponent("audio-zone", {
   schema: {
     enabled: { default: true },
@@ -24,7 +26,7 @@ AFRAME.registerComponent("audio-zone", {
     if (this.data.shape === AudioZoneShape.Box) {
       geo = new THREE.BoxGeometry();
     } else {
-      geo = new THREE.SphereGeometry();
+      geo = new THREE.SphereGeometry(1, 8, 8);
     }
     this.debugMesh = new THREE.LineSegments(new THREE.EdgesGeometry(geo), debugMaterial);
     this.el.object3D.add(this.debugMesh);
@@ -52,9 +54,11 @@ AFRAME.registerComponent("audio-zone", {
   tick: (() => {
     const quat = new THREE.Quaternion();
     return function() {
-      this.el.object3D.quaternion.set(0, 0, 0, 1);
-      this.el.object3D.quaternion.multiply(this.el.object3D.parent.getWorldQuaternion(quat).inverse());
-      this.el.object3D.updateMatrix();
+      this.el.object3D.parent.getWorldQuaternion(quat).invert();
+      if (!this.el.object3D.quaternion.near(quat, EPSILON)) {
+        this.el.object3D.quaternion.copy(quat);
+        this.el.object3D.updateMatrix();
+      }
     };
   })(),
 
@@ -65,7 +69,9 @@ AFRAME.registerComponent("audio-zone", {
   getBoundingBox: (function() {
     const bbaa = new THREE.Box3();
     return function() {
-      this.debugMesh.geometry.computeBoundingBox();
+      if (this.debugMesh.geometry.boundingBox === null) {
+        this.debugMesh.geometry.computeBoundingBox();
+      }
       return bbaa.copy(this.debugMesh.geometry.boundingBox).applyMatrix4(this.el.object3D.matrixWorld);
     };
   })(),
@@ -73,7 +79,9 @@ AFRAME.registerComponent("audio-zone", {
   getBoundingSphere: (function() {
     const bbaa = new THREE.Sphere();
     return function() {
-      this.debugMesh.geometry.computeBoundingSphere();
+      if (this.debugMesh.geometry.boundingSphere === null) {
+        this.debugMesh.geometry.computeBoundingSphere();
+      }
       return bbaa.copy(this.debugMesh.geometry.boundingSphere).applyMatrix4(this.el.object3D.matrixWorld);
     };
   })(),
