@@ -149,7 +149,7 @@ const Banner = () => {
           </h3>
           <p className={styles.message_body}>
             <FormattedMessage
-              defaultMessage="Keep an eye out for product updates and an invite to join us as a tester in August."
+              defaultMessage="Keep an eye out for product updates and an invite to join us as a tester."
               id="banner.success-message"
             />
           </p>
