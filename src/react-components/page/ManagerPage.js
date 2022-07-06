@@ -124,8 +124,7 @@ function ManagerHome() {
         getAllProjects();
       }
 
-      let lang = Language.getLanguage();
-      setLanguage(lang);
+      setLanguage(Language.getLanguage());
     },
     [filterExhibitionList.page]
   );
@@ -903,8 +902,10 @@ function ManagerHome() {
                       <div>
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
-                          <span className="ml-1"> {moment.utc(item.startDate).local().format("LLL")} <span style={{padding: '0 10px'}}>to</span> 
-                          <Moment format="YYYY-MM-DD hh:mma">{item.endDate}</Moment>
+                          <span className="ml-1">
+                          {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
+                          <span style={{padding: '0 10px'}}> {t('manager.TO')} </span> 
+                          {moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT")}
                           </span>
                         </div>
                       </div>
@@ -948,7 +949,7 @@ function ManagerHome() {
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
                           <span className="ml-1">
-                            <Moment format="YYYY-MM-DD hh:mma">{item.startDate}</Moment>
+                            {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
                           </span>
                         </div>
                       </div>

@@ -34,6 +34,7 @@
         "CLOSE_EXHIBITION": "전시회 닫기",
         "OPEN_EXHIBITION": "열린 전시회",
         "EXHIBITION_UNAVAILABLE": "전시 불가",
+        "TO": "에게",
         "POPUP_EXHIBITION__EDIT_TITLE": "편집 전시회",
         "POPUP_EXHIBITION__CREATE_TITLE": "전시회 만들기",
         "POPUP_EXHIBITION__NAME_LABEL": "이름",

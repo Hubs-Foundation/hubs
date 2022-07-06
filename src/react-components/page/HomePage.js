@@ -324,7 +324,7 @@ function Home() {
                     </p>
                     <p className="p-1">
                       <MdCalendarToday />
-                      <Moment format="YYYY-MM-DD hh:mma">{item.startDate}</Moment>  <span style={{padding: '0 10px'}}>to</span> <Moment format="YYYY-MM-DD hh:mma">{item.endDate}</Moment>
+                      {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
                     </p>
                   </div>
                   <ActionButton/>
