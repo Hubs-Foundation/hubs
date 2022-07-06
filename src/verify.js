@@ -19,17 +19,17 @@ function Root() {
   return (
     <div className='manager-page  height-100vh'>
       <div className="row_1">
-            <span className="text_1">Larchiveum</span>
-          </div>
-          <div className="row_2 paddingtop25vh">
-            <WrappedIntlProvider>
-              <AuthContextProvider store={store}>
-                  <Center>
-                    <VerifyModalContainer />
-                  </Center>
-                </AuthContextProvider>
-            </WrappedIntlProvider>
-          </div>
+        <a href="/"><span className="text_1"> Larchiveum </span></a> 
+      </div>
+      <div className="row_2 paddingtop25vh">
+        <WrappedIntlProvider>
+          <AuthContextProvider store={store}>
+              <Center>
+                <VerifyModalContainer />
+              </Center>
+            </AuthContextProvider>
+        </WrappedIntlProvider>
+      </div>
     </div>
   );
 }

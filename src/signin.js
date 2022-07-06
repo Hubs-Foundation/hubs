@@ -22,11 +22,9 @@ function Root() {
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
         <AuthContextProvider store={store}>
-          <PageContainer>
             <Center>
               <SignInModalContainer />
             </Center>
-          </PageContainer>
         </AuthContextProvider>
       </ThemeProvider>
     </WrappedIntlProvider>

@@ -1058,12 +1058,20 @@ function ManagerHome() {
 
   const IAuth = () => {
     const user = Store.getUser();
+
+    function checkCredentials() {  
+      if(window?.APP?.store?.state?.credentials?.email && window?.APP?.store?.state?.credentials?.token){
+        return true;
+      }
+      return false;
+    }
+
     const MasterAdmin = () => {
       if (user?.type == 5) {
         return (
           <>
-            <a className="gotospoke" href={APP_ROOT + "/spoke"}>{t('manager.SPOKE')}</a>
-            <a className="gotoadmin" href={APP_ROOT + "/admin"}>{t('manager.ADMIN')}</a>
+            <a className="gotospoke" href={checkCredentials() ? "/spoke" : "/signin"}>{t('manager.SPOKE')}</a>
+            <a className="gotoadmin" href={checkCredentials() ? "/admin" : "/signin"}>{t('manager.ADMIN')}</a>
           </>
         );
       } else {

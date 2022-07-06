@@ -3,9 +3,10 @@ import PropTypes from "prop-types";
 import { CloseButton } from "../input/CloseButton";
 import { Modal } from "../modal/Modal";
 import { FormattedMessage, useIntl, defineMessages } from "react-intl";
-import { CancelButton, NextButton, ContinueButton } from "../input/Button";
+import { CancelButton, NextButton, ContinueButton, Button} from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
+import { Row } from "../layout/Row";
 import { LegalMessage } from "./LegalMessage";
 
 export const SignInStep = {
@@ -107,7 +108,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
         {message ? (
           intl.formatMessage(message)
         ) : (
-          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
+          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please enter email of Hubs Administrator" />
         )}
       </p>
       <TextInputField
@@ -201,7 +202,7 @@ SignInComplete.propTypes = {
 export function SignInModal({ closeable, onClose, children, ...rest }) {
   return (
     <Modal
-      title={<FormattedMessage id="sign-in-modal.title" defaultMessage="Sign In" />}
+      title={<FormattedMessage id="sign-in-modal.title" defaultMessage="Sign In Hubs Cloud" />}
       beforeTitle={closeable && <CloseButton onClick={onClose} />}
       {...rest}
     >

@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import { Spinner } from "../misc/Spinner";
 import { Modal } from "../modal/Modal";
 import { Column } from "../layout/Column";
+import { Button } from "../../react-components/input/Button";
 import { FormattedMessage } from "react-intl";
+
 
 export const VerificationStep = {
   verifying: "verifying",
@@ -36,6 +38,9 @@ export function EmailVerified({ origin }) {
           values={{ origin }}
         />
       </p>
+      <Button as="a" preset="primary" href="/?page=manager">
+        <FormattedMessage id="hubs-cloud-page.hero-button.back-home" defaultMessage="Back" />
+      </Button>
     </Column>
   );
 }
@@ -55,6 +60,9 @@ export function VerificationError({ error }) {
           <FormattedMessage id="verify-modal.unknown-error" defaultMessage="Unknown Error" />
         )}
       </p>
+      <Button as="a" preset="primary" href="/signin">
+        <FormattedMessage id="hubs-cloud-page.hero-button.try-again" defaultMessage="Try again" />
+      </Button>
     </Column>
   );
 }

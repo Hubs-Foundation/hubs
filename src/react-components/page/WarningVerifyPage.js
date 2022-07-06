@@ -80,7 +80,7 @@ function WarningVerify() {
     return (
         <div className='manager-page height-100vh'>
         <div className="row_1">
-          <span className="text_1">Larchiveum</span>
+          <a href="/"><span className="text_1"> Larchiveum </span></a> 
         </div>
         <div className="row_2">
             <b className="warning-content">
