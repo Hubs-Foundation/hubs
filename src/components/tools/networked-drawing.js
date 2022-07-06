@@ -51,7 +51,7 @@ AFRAME.registerComponent("networked-drawing", {
     this.networkBufferInitialized = false;
 
     const options = {
-      vertexColors: THREE.VertexColors
+      vertexColors: true
     };
 
     this.color = new THREE.Color();
