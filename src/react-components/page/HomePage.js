@@ -233,7 +233,8 @@ function Home() {
 
                 if(startDate > today && (item.public || item.reservated)){
                   return (
-                    <button
+                    <button 
+                      key={'will-open-on'}
                       className="signin-up btn-visit nt-time-yet"
                       onClick={() => { openPopupNotification(item) }}
                       data-id-exhibition={item.id}
@@ -246,6 +247,7 @@ function Home() {
                 if(user && !item.reservated && !item.public && item.reservationCount < item.maxSize){
                   return (
                     <button
+                      key={'reservation'}
                       className="signin-up btn-visit reserved"
                       onClick={openPopupReservation}
                       data-id-exhibition={item.id}
@@ -258,6 +260,7 @@ function Home() {
                 if(startDate <= today && (item.public || item.reservated)){
                   return (
                     <button
+                      key={'enter'}
                       className="signin-up btn-visit"
                       onClick={handleButtonVisit}
                       data-roomid={item.roomId}
@@ -270,6 +273,7 @@ function Home() {
                 if(user && !item.reservated && item.reservationCount >= item.maxSize ){
                   return (
                     <button
+                      key={'exhibition-full'}
                       className="signin-up btn-visit full"
                     >
                       {t('home.EXHIBITION_FULL')}
@@ -280,6 +284,7 @@ function Home() {
                 if(!user && !item.public){
                   return (
                     <button
+                      key={'signin'}
                       className="signin-up btn-visit signin"
                       onClick={handleButtonLogin}
                     >
@@ -301,7 +306,7 @@ function Home() {
                 }
                 else
                 if(item.reservated){
-                  return (
+                  return ( 
                     <div className="span3">
                     <MdOutlineCheckCircleOutline size={37} color="#FFF" />
                   </div>
@@ -394,28 +399,29 @@ function Home() {
   if (isLoading) {
     return (
       <div className="loader-2">
-      <div className="loader">
-          <svg viewBox="0 0 80 80">
-              <circle id="test" cx="40" cy="40" r="32"></circle>
-          </svg>
+        <div className="loader">
+            <svg viewBox="0 0 80 80">
+                <circle id="test" cx="40" cy="40" r="32"></circle>
+            </svg>
+        </div>
+        <div className="loader triangle">
+            <svg viewBox="0 0 86 80">
+                <polygon points="43 8 79 72 7 72"></polygon>
+            </svg>
+        </div>
+        <div className="loader">
+            <svg viewBox="0 0 80 80">
+                <rect x="8" y="8" width="64" height="64"></rect>
+            </svg>
+        </div>
       </div>
-      <div className="loader triangle">
-          <svg viewBox="0 0 86 80">
-              <polygon points="43 8 79 72 7 72"></polygon>
-          </svg>
-      </div>
-      <div className="loader">
-          <svg viewBox="0 0 80 80">
-              <rect x="8" y="8" width="64" height="64"></rect>
-          </svg>
-      </div>
-    </div>
     );
   } else {
     return (
       <>
         {isOpen && (
           <Popup
+            key={'popup-confirm-reservation'}
             size={"sm"}
             title={<>{t('home.POPUP_CONFIRM_RESERVATION__TITLE')}</>}
             content={
@@ -447,6 +453,7 @@ function Home() {
 
         {isOpenNotification && (
           <Popup
+            key={'popup-exhibition-not-open-yet'}
             size={"lg"}
             title={<>{t('home.POPUP_EXHIBITION_NOT_OPEN_YET__TTILE')}</>}
             content={

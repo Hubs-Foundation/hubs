@@ -66,7 +66,7 @@ const Pagination = props => {
 		// page numbers
 		for (let i = pagination.beginPage; i <= pagination.endPage; i++) {
 			elements.push(
-				<div key={i} className={(i < pagination.currentPage ? 'pre-page' : (i >  pagination.currentPage ? 'next-page' : 'current-page'))} onClick={i === pagination.currentPage ? null : () => changePage(i)}>
+				<div key={'page-'+i} className={(i < pagination.currentPage ? 'pre-page' : (i >  pagination.currentPage ? 'next-page' : 'current-page'))} onClick={i === pagination.currentPage ? null : () => changePage(i)}>
 					<span>{i}</span>
 				</div>
 			);
