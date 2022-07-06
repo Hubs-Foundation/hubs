@@ -37,14 +37,8 @@ export function disposeNode(node) {
   }
 
   if (node.material) {
-    let materialArray;
-    if (node.material instanceof THREE.MeshFaceMaterial || node.material instanceof THREE.MultiMaterial) {
-      materialArray = node.material.materials;
-    } else if (node.material instanceof Array) {
-      materialArray = node.material;
-    }
-    if (materialArray) {
-      materialArray.forEach(disposeMaterial);
+    if (Array.isArray(node.material)) {
+      node.material.forEach(disposeMaterial);
     } else {
       disposeMaterial(node.material);
     }
@@ -310,7 +304,7 @@ export const calculateViewingDistance = (function() {
   return function calculateViewingDistance(fov, aspect, box, center, vrMode) {
     const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
     const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
-    const halfVertFOV = THREE.Math.degToRad(fov / 2);
+    const halfVertFOV = THREE.MathUtils.degToRad(fov / 2);
     const halfHorFOV = Math.atan(Math.tan(halfVertFOV) * aspect) * (vrMode ? 0.5 : 1);
     const margin = 1.05;
     const length1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));

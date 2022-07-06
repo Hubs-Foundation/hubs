@@ -1,4 +1,4 @@
-import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
+import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
 import qsTruthy from "../utils/qs_truthy";
 
 import { LUTCubeLoader } from "three/examples/jsm/loaders/LUTCubeLoader";
@@ -17,11 +17,8 @@ const toneMappingOptions = {
 const outputEncodingOptions = {
   LinearEncoding: "LinearEncoding",
   sRGBEncoding: "sRGBEncoding",
-  GammaEncoding: "GammaEncoding",
   GBEEncoding: "GBEEncoding",
-  LogLuvEncoding: "LogLuvEncoding",
   GBM7Encoding: "GBM7Encoding",
-  RGBM16Encoding: "RGBM16Encoding",
   GBDEncoding: "GBDEncoding",
   BasicDepthPacking: "BasicDepthPacking",
   GBADepthPacking: "GBADepthPackig"

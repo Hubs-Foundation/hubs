@@ -154,7 +154,7 @@ AFRAME.registerComponent("cursor-controller", {
       const cursorModDelta =
         userinput.get(left ? paths.actions.cursor.left.modDelta : paths.actions.cursor.right.modDelta) || 0;
       if (isGrabbing && !userinput.activeSets.includes(left ? sets.leftCursorHoldingUI : sets.rightCursorHoldingUI)) {
-        this.distance = THREE.Math.clamp(this.distance - cursorModDelta, minDistance, far * playerScale);
+        this.distance = THREE.MathUtils.clamp(this.distance - cursorModDelta, minDistance, far * playerScale);
       }
       cursor.object3D.position.copy(cursorPose.position).addScaledVector(cursorPose.direction, this.distance);
       // The cursor will always be oriented towards the player about its Y axis, so objects held by the cursor will rotate towards the player.

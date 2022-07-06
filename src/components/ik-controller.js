@@ -79,7 +79,7 @@ AFRAME.registerComponent("ik-controller", {
     rightHand: { type: "string", default: "RightHand" },
     chest: { type: "string", default: "Spine" },
     rotationSpeed: { default: 8 },
-    maxLerpAngle: { default: 90 * THREE.Math.DEG2RAD },
+    maxLerpAngle: { default: 90 * THREE.MathUtils.DEG2RAD },
     alwaysUpdate: { type: "boolean", default: false }
   },
 

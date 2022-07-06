@@ -448,6 +448,19 @@ module.exports = async (env, argv) => {
           loader: "babel-loader"
         },
         {
+          test: [path.resolve(
+            __dirname,
+            "node_modules",
+            "three",
+            "examples",
+            "jsm",
+            "exporters",
+            "GLTFExporter.js"
+	  )],
+          loader: "babel-loader",
+          options: legacyBabelConfig
+        },
+        {
           test: /\.(scss|css)$/,
           use: [
             {
