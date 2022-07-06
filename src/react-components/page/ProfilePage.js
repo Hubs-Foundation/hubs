@@ -4,8 +4,6 @@ import registerTelemetry from "../../telemetry";
 import "../../utils/theme";
 import "../../react-components/styles/global.scss";
 import "../../assets/stylesheets/globals.scss";
-import "../../assets/login/signin.scss";
-import "../../assets/login/utils.scss";
 import { APP_ROOT } from "../../utilities/constants";
 import SigninSocial from '../signin/SigninSocial';
 import UserService from '../../utilities/apiServices/UserService'
@@ -18,11 +16,16 @@ import { AuthContext } from "../auth/AuthContext";
 import hubChannel from '../../utils/hub-channel'
 import { left } from "@popperjs/core";
 import async from "async";
+import { toast } from "react-toastify";
+import Validator from '../../utilities/validator';
 import moment from 'moment';
 import Language from './languages/language';
 import { useTranslation } from 'react-i18next';
 
+toast.configure();
+
 export  function ProfilePage({props}) {
+     toast.configure();
     const user = Store.getUser();
     const { t } = useTranslation();
 
@@ -34,7 +37,7 @@ export  function ProfilePage({props}) {
     const [isLoading, setIsLoading] = useState(true);
     const [isOpenPopupChangeAvatar, setIsOpenPopupChangeAvatar] = useState(false);
     const [isOpenPopupCreateAvatar, setIsOpenPopupCreateAvatar] = useState(false);
-    const [isOpenPopupChangeDisplayName, setIsOpenPopupChangeDisplayName] = useState(false);
+    // const [isOpenPopupChangeDisplayName, setIsOpenPopupChangeDisplayName] = useState(false);
 
     useEffect(() => {
         AvatarService.getListAvatar().then((response)=>{
@@ -197,9 +200,7 @@ export  function ProfilePage({props}) {
                         }}/>
                         <GeneralPreview props={{
                             displayName: displayName,
-                            handleOpenPopupChangeDisplayName: ()=>{
-                                setIsOpenPopupChangeDisplayName(true);
-                            }
+                            handleChange: handleResultDisplayName
                         }}/>
                     </div>
                     {isOpenPopupChangeAvatar && (
@@ -223,7 +224,7 @@ export  function ProfilePage({props}) {
                             },
                         }}/>
                     )}
-                    {isOpenPopupChangeDisplayName && (
+                    {/* {isOpenPopupChangeDisplayName && (
                         <PopupChangeDisplayName props={{
                             displayName: displayName,
                             handleClose: ()=>{
@@ -234,7 +235,7 @@ export  function ProfilePage({props}) {
                                 setIsOpenPopupChangeDisplayName(false);
                             },
                         }}/>
-                    )}
+                    )} */}
                 </>
             )}
         </div>
@@ -243,6 +244,7 @@ export  function ProfilePage({props}) {
 
 const Header = () => {
     const user = Store.getUser();
+    const { t } = useTranslation();
 
     const handleLogout = () => {
         Store.removeUser();
@@ -266,6 +268,8 @@ const Header = () => {
 
 const AvatarPreview = ({props})=>{
     const user = Store.getUser();
+    const { t } = useTranslation();
+
     const avatar = props?.avatar;
     const handleOpenPopupChooseAvatar = props?.handleOpenPopupChooseAvatar;
     const handleOpenPopupCreateAvatar = props?.handleOpenPopupCreateAvatar;
@@ -289,8 +293,62 @@ const AvatarPreview = ({props})=>{
 
 const GeneralPreview = ({props})=>{
     const user = Store.getUser();
-    const displayName = props?.displayName || 'My displayName';
-    const handleOpenPopupChangeDisplayName = props?.handleOpenPopupChangeDisplayName;
+    const { t } = useTranslation();
+    const [displayName, setDisplayName] = useState(props?.displayName);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isValidated, setIsValidated] = useState(true);
+
+    const handleInputChange = (e)=>{
+        let value = e.target.value;
+        setDisplayName(value);
+
+        if(Validator.validDisplayName(value)){
+            setIsValidated(true);
+        }
+        else{
+            setIsValidated(false);
+        }
+    }
+
+    const handleChangeDisplayName = ()=>{
+        setIsSaving(true);
+        const store = JSON.parse(localStorage.getItem('___hubs_store'));
+        const user = Store.getUser();
+
+        // -> save to local
+        // -> check user
+        //      + if have user -> call API change update user
+        // -> set displayName 
+
+        //-> save to local
+        store.profile.displayName = displayName;
+        localStorage.setItem('___hubs_store', JSON.stringify(store));
+
+        // check user
+        if(user){
+            // + if have user -> call API change update user
+            UserService.update(user.id, {
+                displayName: displayName
+            }).then((response)=>{
+                if(response.result == 'ok'){
+                    Store.setUser(response.data);
+                    if(props?.handleChange){
+                        props.handleChange(displayName);
+                    }
+                } else {
+                    toast.error(t('profile.GENERAL_PANEL__ERROR'), { autoClose: 3000 });
+                }
+                setIsSaving(false);
+            }).catch((error)=>{
+                toast.error(t('profile.GENERAL_PANEL__ERROR'), { autoClose: 3000 });
+                setIsSaving(false);
+            })
+        }
+        else{
+            handleResult(displayName);
+            setIsSaving(false);
+        }
+    }
 
     return (
         <div style={{float:'right', width: '45%', height: '100%', boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px'}}>
@@ -301,12 +359,17 @@ const GeneralPreview = ({props})=>{
                 <div style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <div style={{width: '80%', position: 'relative'}}>
                         <span style={{height: '40px', width: '100%'}}> Display name :</span>
-                        <div type="text" style={{display: 'flex', alignItems: 'center', height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}>{displayName}</div>
+                        <input type="text" value={displayName} onChange={handleInputChange} style={{display: 'flex', alignItems: 'center', height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}></input>
+                        {!isValidated ? (
+                            <div style={{color: 'rgb(245 80 80)'}}>{t('profile.GENERAL_PANEL__DISPLAY_NAME_NOTE')}</div>
+                        ):''}
                     </div>
                 </div>
             </div>
             <div style={{width: '100%', height: '10%', borderTop: '2px solid rgb(239, 239, 239)', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <button onClick={handleOpenPopupChangeDisplayName} style={{backgroundColor: '#1180ff', padding: '10px 20px', color:'white', height: '40px', borderRadius: '5px'}}>{t('profile.GENERAL_PANEL__CHANGE_DISPLAY_NAME')}</button>
+                <button onClick={handleChangeDisplayName} disabled={isSaving || !isValidated} style={{opacity: (isSaving || !isValidated ? '0.5' : '1'), backgroundColor: '#1180ff', padding: '10px 20px', color:'white', height: '40px', borderRadius: '5px'}}>
+                    {t('profile.GENERAL_PANEL__SAVE')}
+                </button> 
             </div>
         </div>
     );
@@ -314,6 +377,8 @@ const GeneralPreview = ({props})=>{
 
 const PopupChangeAvatar = ({props})=>{
     const user = Store.getUser();
+    const { t } = useTranslation();
+
     const [avatars, setAvatars] = useState([]);
     const [avatar, setAvatar] = useState(props?.avatar);
     const [isLoading, setIsLoading] = useState(true);
@@ -447,6 +512,8 @@ const PopupChangeAvatar = ({props})=>{
 
 const PopupCreateAvatar = ({props})=>{
     const user = Store.getUser();
+    const { t } = useTranslation();
+
     const [avatarUrl, setAvatarUrl] = useState(null);
     const [isHiddenCreateButton, setIsHiddenCreateButton] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -509,92 +576,94 @@ const PopupCreateAvatar = ({props})=>{
     );
 };
 
-const PopupChangeDisplayName = ({props})=>{
-    const user = Store.getUser();
-    const [displayName, setDisplayName] = useState(props?.displayName);
-    const [isSaving, setIsSaving] = useState(false);
-    const handleClose = props?.handleClose;
-    const handleResult = props?.handleResult;
+// const PopupChangeDisplayName = ({props})=>{
+//     const user = Store.getUser();
+//     const { t } = useTranslation();
 
-    const handleInputChange = (e)=>{
-        let value = e.target.value;
-        setDisplayName(value);
-    }
+//     const [displayName, setDisplayName] = useState(props?.displayName);
+//     const [isSaving, setIsSaving] = useState(false);
+//     const handleClose = props?.handleClose;
+//     const handleResult = props?.handleResult;
 
-    const handleChangeDisplayName = ()=>{
-        setIsSaving(true);
-        const store = JSON.parse(localStorage.getItem('___hubs_store'));
-        const user = Store.getUser();
+//     const handleInputChange = (e)=>{
+//         let value = e.target.value;
+//         setDisplayName(value);
+//     }
 
-        // -> save to local
-        // -> check user
-        //      + if have user -> call API change update user
-        // -> set displayName 
+//     const handleChangeDisplayName = ()=>{
+//         setIsSaving(true);
+//         const store = JSON.parse(localStorage.getItem('___hubs_store'));
+//         const user = Store.getUser();
 
-        //-> save to local
-        store.profile.displayName = displayName;
-        localStorage.setItem('___hubs_store', JSON.stringify(store));
+//         // -> save to local
+//         // -> check user
+//         //      + if have user -> call API change update user
+//         // -> set displayName 
 
-        // check user
-        if(user){
-            // + if have user -> call API change update user
-            UserService.update(user.id, {
-                displayName: displayName
-            }).then((response)=>{
-                if(response.result == 'ok'){
-                    Store.setUser(response.data);
-                    handleResult(displayName);
-                    setIsSaving(false);
-                }
-            }).catch((error)=>{
-                console.log(error);
-            })
-        }
-        else{
-            handleResult(displayName);
-            setIsSaving(false);
-        }
-    }
+//         //-> save to local
+//         store.profile.displayName = displayName;
+//         localStorage.setItem('___hubs_store', JSON.stringify(store));
+
+//         // check user
+//         if(user){
+//             // + if have user -> call API change update user
+//             UserService.update(user.id, {
+//                 displayName: displayName
+//             }).then((response)=>{
+//                 if(response.result == 'ok'){
+//                     Store.setUser(response.data);
+//                     handleResult(displayName);
+//                     setIsSaving(false);
+//                 }
+//             }).catch((error)=>{
+//                 console.log(error);
+//             })
+//         }
+//         else{
+//             handleResult(displayName);
+//             setIsSaving(false);
+//         }
+//     }
 
 
-    return (
-        <Popup
-            size={"lg"}
-            title={<>{t('profile.POPUP_CHANGE_DISPLAY_NAME__TITLE')}</>}
-            content={
-                <div style={{width: '100%', maxHeight: '60vh', height: '60vh'}}>
-                    <div style={{width: '100%', height: '80%'}}>
-                        <div style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                            <div style={{width: '80%', position: 'relative'}}>
-                                <span style={{height: '40px', width: '100%'}}> {t('profile.POPUP_CHANGE_DISPLAY_NAME__DISPLAY_NAME_LABEL')}</span>
-                                <input type="text" value={displayName} onChange={handleInputChange} style={{display: 'flex', alignItems: 'center', height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}></input>
-                                <div style={{color: '#9d9d9d'}}>{t('profile.POPUP_CHANGE_DISPLAY_NAME__DISPLAY_NAME_NOTE')}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
+//     return (
+//         <Popup
+//             size={"lg"}
+//             title={<>{t('profile.POPUP_CHANGE_DISPLAY_NAME__TITLE')}</>}
+//             content={
+//                 <div style={{width: '100%', maxHeight: '60vh', height: '60vh'}}>
+//                     <div style={{width: '100%', height: '80%'}}>
+//                         <div style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+//                             <div style={{width: '80%', position: 'relative'}}>
+//                                 <span style={{height: '40px', width: '100%'}}> {t('profile.POPUP_CHANGE_DISPLAY_NAME__DISPLAY_NAME_LABEL')}</span>
+//                                 <input type="text" value={displayName} onChange={handleInputChange} style={{display: 'flex', alignItems: 'center', height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}></input>
+//                                 <div style={{color: '#9d9d9d'}}>{t('profile.POPUP_CHANGE_DISPLAY_NAME__DISPLAY_NAME_NOTE')}</div>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </div>
+//             }
 
-            handleClose={handleClose}
-            actions={[
-                {
-                    text: (isSaving ? t('profile.POPUP_CHANGE_DISPLAY_NAME__SAVING') : t('profile.POPUP_CHANGE_DISPLAY_NAME__SAVE')),
-                    class: "btn2",
-                    callback: () => {
-                        handleChangeDisplayName();
-                    }
-                },
-                {
-                    text: t('profile.POPUP_CHANGE_DISPLAY_NAME__CANCEL'),
-                    class: "btn2",
-                    callback: () => {
-                        handleClose(false);
-                    }
-                },
-            ]}
-        />
-    );
-};
+//             handleClose={handleClose}
+//             actions={[
+//                 {
+//                     text: (isSaving ? t('profile.POPUP_CHANGE_DISPLAY_NAME__SAVING') : t('profile.POPUP_CHANGE_DISPLAY_NAME__SAVE')),
+//                     class: "btn2",
+//                     callback: () => {
+//                         handleChangeDisplayName();
+//                     }
+//                 },
+//                 {
+//                     text: t('profile.POPUP_CHANGE_DISPLAY_NAME__CANCEL'),
+//                     class: "btn2",
+//                     callback: () => {
+//                         handleClose(false);
+//                     }
+//                 },
+//             ]}
+//         />
+//     );
+// };
 
 
 

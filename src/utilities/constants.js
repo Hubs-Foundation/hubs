@@ -25,4 +25,12 @@ const googleApp = {
   clientSecret: "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"
 };
 
-export { expireCookies, naverApp, kakaoApp, facebookApp, googleApp, API_ROOT, APP_ROOT};
+export { 
+  expireCookies, 
+  naverApp, 
+  kakaoApp, 
+  facebookApp, 
+  googleApp, 
+  API_ROOT, 
+  APP_ROOT
+};
