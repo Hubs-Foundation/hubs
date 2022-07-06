@@ -13,7 +13,7 @@ import Popup from "../../react-components/popup/popup";
 import AddIcon from "../../assets/larchiveum/add_black_24dp.svg";
 import Moment from "react-moment";
 import "reactjs-popup/dist/index.css";
-import * as moment from "moment";
+import moment from "moment-timezone";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import defaultImage from "../../assets/larchiveum/default-image.png";
@@ -22,15 +22,11 @@ import defaultImage1 from "../../assets/larchiveum/siri.gif";
 import Pagination from "../../react-components/pagination/pagination";
 import { APP_ROOT } from "../../utilities/constants";
 import { FaUserFriends, FaRegCalendarAlt, FaLink, FaTools ,FaVideo,FaRegImage,FaCodepen,FaListOl} from "react-icons/fa";
-import { Manager } from "react-popper-2";
-import StoreHub from "../../storage/store";
 import UserService from "../../utilities/apiServices/UserService";
-import e from "cors";
-import { counter } from "@fortawesome/fontawesome-svg-core";
 import { object } from "prop-types";
 import { ToggleInput } from "./components/ToggleInput";
-
-const store = new StoreHub();
+import Language from './languages/language';
+import { useTranslation } from 'react-i18next';
 
 registerTelemetry("/manager", "Hubs Home Page");
 
@@ -40,6 +36,7 @@ export function ManagerPage() {
 
 function ManagerHome() {
   toast.configure();
+  const { t } = useTranslation();
   const [scenes, setScenes] = useState([]);
   const [exhibitionsLoaded, setExhibitionsLoaded] = useState(false);
   const [projectsLoaded, setProjectsLoaded] = useState(true);
@@ -47,13 +44,13 @@ function ManagerHome() {
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [iconLoaded, setIconLoaded] = useState(false);
   const [isOpenExhibition, setIsOpenExhibition] = useState(false);
-  const [isCloseRoom, setIsCloseRoom] = useState(false);
-  const [isOpenRoom, setIsOpenRoom] = useState(false);
-  const [isOpenMedia, setIsOpenMedia] = useState(false);
-  const [isOpenObject, setIsOpenObject] = useState(false);
-  const [isDeleteRoom, setIsDeleteRoom] = useState(false);
-  const [isOpenToggle, setIsOpenToggle] = useState(false);
-  const [isOpenSpoke, setIsOpenSpoke] = useState(false);
+  const [isOpenPopupConfirmCloseExhibition, setIsOpenPopupConfirmCloseExhibition] = useState(false);
+  const [isOpenPopupConfirmOpenExhibition, setIsOpenPopupConfirmOpenExhibition] = useState(false);
+  const [isOpenPopupConfirmDeleteExhibition, setIsOpenPopupConfirmDeleteExhibition] = useState(false);
+  const [isOpenPopupConfirmChangePublic, setIsOpenPopupConfirmChangePublic] = useState(false);
+  const [isOpenPopupChangeMediaURLGuide, setIsOpenPopupChangeMediaURLGuide] = useState(false);
+  const [isOpenPopupMedia, setIsOpenPopupMedia] = useState(false);
+  const [isOpenPopupObject, setIsOpenPopupObject] = useState(false);
   const [exhibition, setExhibition] = useState(undefined);
   const [exhibitionType, setExhibitionType] = useState("create");
   const [exhibitionId, setExhibitionId] = useState(undefined);
@@ -62,6 +59,7 @@ function ManagerHome() {
   const [isLoading, setIsLoading] = useState(false);
   const [isListRoom, setIsListRoom] = useState(true);
   const [isListProject, setIsListProject] = useState(false);
+  const [language, setLanguage] = useState('en');
 
   const [exhibitions, setExhibitions] = useState({
     data: [],
@@ -116,10 +114,17 @@ function ManagerHome() {
         setIsLoadingF(false);
       });
   }
+
   useEffect(
     () => {
       auth();
       getAllExhibitions();
+      const user = Store.getUser();
+      if (user?.type == 5) {
+        getAllProjects();
+      }
+
+      setLanguage(Language.getLanguage());
     },
     [filterExhibitionList.page]
   );
@@ -144,8 +149,8 @@ function ManagerHome() {
           setExhibitionsLoaded(true);
           setIsLoading(false);
           setIsLoadingF(false);
-        } else if (res.result == "fail" && res.error == "get_exhibitions_fail") {
-          toast.error("Get Exhibitions fail !", { autoClose: 1000 });
+        } else {
+          toast.error(t('manage.GET_EXHIBITIONS_ERROR'), { autoClose: 1000 });
           setIsLoading(false);
           setIsLoadingF(false);
         }
@@ -153,8 +158,8 @@ function ManagerHome() {
       ExhibitionsService.getAllScenes().then(res => {
         if (res.result == "ok") {
           setScenes(res.data);
-        } else if (res.result == "fail" && res.error == "get_exhibitions_fail") {
-          toast.error("Get Exhibitions fail !", { autoClose: 1000 });
+        } else{
+          toast.error(t('manage.GET_SCENES_ERROR'), { autoClose: 1000 });
         }
       });
     }
@@ -169,8 +174,8 @@ function ManagerHome() {
           setProjects(res.data);
           setProjectsLoaded(true);
           setIsLoading(false);
-        } else if (res.result == "fail") {
-          toast.error("Get Projects fail !", { autoClose: 1000 });
+        } else {
+          toast.error(t('manage.GET_PROJECTS_ERROR'), { autoClose: 1000 });
           setIsLoading(false);
         }
       });
@@ -184,8 +189,8 @@ function ManagerHome() {
         name: exhibition?.room?.name,
         description: exhibition?.room?.description,
         sceneId: exhibition.sceneId,
-        startDate: moment(exhibition.startDate).format("YYYY-MM-DD"),
-        endDate: moment(exhibition.endDate).format("YYYY-MM-DD"),
+        startDate: exhibition.startDate,
+        endDate: exhibition.endDate,
         public: exhibition.public,
         maxSize: exhibition.maxSize,
         enableFly: exhibition.enableFly,
@@ -209,49 +214,59 @@ function ManagerHome() {
 
   const openPopupPublic = exhibitionId => {
     setExhibitionId(exhibitionId);
-    setIsOpenToggle(true);
+    setIsOpenPopupConfirmChangePublic(true);
   };
 
   const closePopupPublic = () => {
-    setIsOpenToggle(false);
+    setIsOpenPopupConfirmChangePublic(false);
   };
 
   // const openPopupSpoke = ProjectId => {
   //   setExhibitionId(ProjectId);
-  //   setIsOpenSpoke(true);
+  //   setIsOpenPopupChangeMediaURLGuide(true);
   // };
 
-  
+  const handleChangeLanguage = (event) => {
+    let lang = event.target.value;
+    setLanguage(lang);
+    Language.setLanguage(lang);
+  };
+
+  const handleSignOut = () => {
+    Store.removeUser();
+    window.location.href = '/';
+  };
+
   const handelSpoke = () => {
     window.open(APP_ROOT + "/spoke/projects/" + projectId , '_blank');
-    setIsOpenSpoke(false);
+    setIsOpenPopupChangeMediaURLGuide(false);
   };
 
   const closePopupSpoke = () => {
-    setIsOpenSpoke(false);
+    setIsOpenPopupChangeMediaURLGuide(false);
   };
   
   const openPopupCloseRoom = exhibitionId => {
     setExhibitionId(exhibitionId);
-    setIsCloseRoom(true);
+    setIsOpenPopupConfirmCloseExhibition(true);
   };
 
   const closePopupCloseRoom = () => {
-    setIsCloseRoom(false);
+    setIsOpenPopupConfirmCloseExhibition(false);
   };
 
   const openPopupOpenRoom = exhibitionId => {
     setExhibitionId(exhibitionId);
-    setIsOpenRoom(true);
+    setIsOpenPopupConfirmOpenExhibition(true);
   };
 
   const closePopupOpenRoom = () => {
-    setIsOpenRoom(false);
+    setIsOpenPopupConfirmOpenExhibition(false);
   };
 
   const openDeleteRoom = exhibitionId => {
     setExhibitionId(exhibitionId);
-    setIsDeleteRoom(true);
+    setIsOpenPopupConfirmDeleteExhibition(true);
   };
 
   const openPopupCustomMedia = exhibitionId => {
@@ -261,25 +276,17 @@ function ManagerHome() {
         if (res.result == "ok") {
           setMedias(res.data);
           setMediaLoaded(true);
-        } else if (res.result == "fail" && res.error == "verify_token_fail") {
-          toast.error("Invalid token !", { autoClose: 3000 });
-          closePopupCustomMedia();
-        }
-        else if (res.result == "fail" && res.error == "wrong_exhibition") {
-          toast.error("Wrong Exhibition !", { autoClose: 3000 });
-          closePopupCustomMedia();
-        }
-       else if (res.result == "fail" && res.error == "get_list_object_fail") {
-          toast.error("Get List Object fail !", { autoClose: 3000 });
+        } else {
+          toast.error(t('manage.GET_MEDIAS_ERROR'), { autoClose: 3000 });
           closePopupCustomMedia();
         }
       });
     }
-    setIsOpenMedia(true);
+    setIsOpenPopupMedia(true);
   };
 
   const closePopupCustomMedia = () => {
-    setIsOpenMedia(false);
+    setIsOpenPopupMedia(false);
     setMedias(
       {    
         data: [],
@@ -295,21 +302,17 @@ function ManagerHome() {
         if (res.result == "ok") {
           setObjects(res.data);
           setObjectLoaded(true);
-        } else if (res.result == "fail" && res.error == "verify_token_fail") {
-          toast.error("Invalid token !", { autoClose: 1000 });
-          closePopupCustomObject();
-        }
-        else if (res.result == "fail" && res.error == "wrong_exhibition") {
-          toast.error("Wrong Exhibition !", { autoClose: 1000 });
+        } else {
+          toast.error(t('manager.GET_OBJECTS_ERROR'), { autoClose: 1000 });
           closePopupCustomObject();
         }
       });
     }
-    setIsOpenObject(true);
+    setIsOpenPopupObject(true);
   };
 
   const closePopupCustomObject = () => {
-    setIsOpenObject(false);
+    setIsOpenPopupObject(false);
     setObjects(
       {    
         data: [],
@@ -329,18 +332,16 @@ function ManagerHome() {
     const dataString = JSON.stringify(data);
     MediaService.updateMediaMany(dataString).then(res => {
       if (res.result == "ok") {
-        toast.success("update medias success ", { autoClose: 5000 });
+        toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
         setIconLoaded(false);
-      } else if (res.result == "fail" && res.error == "invalid_list_media") {
-        toast.error("format of list media is incorrect ", { autoClose: 5000 });
+      } else {
+        toast.error(t('manager.UPDATE_MEDIAS_ERROR'), { autoClose: 5000 });
       }
-      else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("Wrong token !", { autoClose: 5000 });
-      }
+      
     });
   }
 
-  const handelOpenSpoke =()=>{
+  const handelOpenPopupChangeMediaURLGuide =()=>{
     setIconLoaded(true);
     let list_uuid = [];
      list_uuid = objects.data.map((item) => {
@@ -356,19 +357,17 @@ function ManagerHome() {
       if (res.result == "ok") {
         setIconLoaded(false);
         closePopupCustomObject();
-        setIsOpenSpoke(true);
-      } else if (res.result == "fail" && res.error == "invalid_list_changeable_object_uuid") {
-        toast.error("List changeable object uuid incorrect", { autoClose: 5000 });
-      }
-      else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("Wrong token !", { autoClose: 5000 });
+        setIsOpenPopupChangeMediaURLGuide(true);
+        toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
+      } else {
+        toast.error(t('manager.UPDATE_CHANGEABLE_OBJECTS_ERROR'), { autoClose: 5000 });
       }
     });
 
   }
 
   const deleteRoom = () => {
-    setIsDeleteRoom(false);
+    setIsOpenPopupConfirmDeleteExhibition(false);
   };
 
   const ActionListRoom = () => {
@@ -403,7 +402,13 @@ function ManagerHome() {
 
   const handleChange = evt => {
     const name = evt.target.name;
-    const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
+    let value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
+
+    // convert datetime-local to utc
+    if(name === 'startDate' || name === 'endDate'){
+      value = moment(value).tz(moment.locale()).utc().format();
+    }
+
     if(name == 'enableSpawnAndMoveMedia' && value == false){
       exhibition.enableSpawnCamera = false;
       exhibition.enablePinObjects = false;
@@ -479,7 +484,7 @@ function ManagerHome() {
             value={exhibition ? exhibition.sceneId : undefined}
             onChange={handleChangeSceneThubmnail}
           >
-            <option>---Choose Scene---</option>
+            <option>---{t('manager.POPUP_EXHIBITION__LIST_SCENE_DEFAULT_OPTION')}---</option>
             {scenes.map((item, index) => {
               return (
                 <option key={index} value={item.id}>
@@ -491,7 +496,7 @@ function ManagerHome() {
           <span className="focus-input100" />
         </div>
         <div className="p-t-13 p-b-9">
-          <span className="txt1">Scene Thubmnail</span>
+          <span className="txt1">{t('manager.POPUP_EXHIBITION__SCENE_THUMBNAIL')}</span>
         </div>
         <img className="f-image-thumbnail" src={getSceneThumnail(exhibition ? exhibition.sceneId : undefined)} alt="" />
       </>
@@ -502,26 +507,12 @@ function ManagerHome() {
     const data = exhibition;
     ExhibitionsService.postCreateOne(data).then(res => {
       if (res.result == "ok") {
-        toast.success("Create new tour success !", { autoClose: 5000 });
+        toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
         setIsOpenExhibition(false);
         // setExhibitions([...exhibitions, res.data]);
         window.location.reload();
-      } else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("You do not have permission to change or create !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "create_exhibition_error") {
-        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_name") {
-        toast.error("name should be length 4-255 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_maxSize") {
-        toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_startDate") {
-        toast.error("You must select the start date !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_endDate") {
-        toast.error("You must select the end date !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_date") {
-        toast.error("The end day must be after the start day !", { autoClose: 5000 });
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.CREATE_OR_UPDATE_EXHIBITION_ERROR__' + res.error.toUpperCase()), { autoClose: 5000 });
       }
     });
   };
@@ -532,27 +523,13 @@ function ManagerHome() {
       if (res.result == "ok") {
         exhibitions.data.forEach(exhibition => {
           if (exhibition.id == res.data.id) {
-            toast.success("Edit Exhibition success !", { autoClose: 5000 });
+            toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
             setIsOpenExhibition(false);
             getAllExhibitions();
           }
         });
-      } else if (res.result == "fail" && res.error == "verify_token_fail") {
-        toast.error("You do not have permission to change or create !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "create_exhibition_error") {
-        toast.error("The number of people in 1 room exceeds the allowed limit of 50 people !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_name") {
-        toast.error("name should be length 4-255 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_maxSize") {
-        toast.error("the number of people in the room cannot be less than 1 !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_startDate") {
-        toast.error("You must select the start date !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_endDate") {
-        toast.error("You must select the end date !", { autoClose: 5000 });
-      } else if (res.result == "fail" && res.error == "invalid_date") {
-        toast.error("The end day must be after the start day !", { autoClose: 5000 });
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.CREATE_OR_UPDATE_EXHIBITION_ERROR__' + res.error.toUpperCase()), { autoClose: 5000 });
       }
     });
   };
@@ -563,14 +540,12 @@ function ManagerHome() {
         exhibitions.data.forEach(exhibition => {
           if (exhibition.id == exhibitionId) {
             exhibition.public = res.data.public;
-            toast.success("Change status success !", { autoClose: 5000 });
+            toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
           }
         });
-        setIsOpenToggle(!isOpenToggle);
-      } else if (res.result == "fail" && res.error == "invalid_id") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
+        setIsOpenPopupConfirmChangePublic(!isOpenPopupConfirmChangePublic);
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.CHANGE_EXHIBITION_PUBLIC_ERROR'), { autoClose: 5000 });
       }
     });
   };
@@ -578,13 +553,11 @@ function ManagerHome() {
   const handelToggleDeleteRoom = exhibitionId => {
     ExhibitionsService.deleteOneExhibition(exhibitionId).then(res => {
       if (res.result == "ok") {
-        toast.success("Delete success !", { autoClose: 5000 });
-        setIsDeleteRoom(!isDeleteRoom);
+        toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
+        setIsOpenPopupConfirmDeleteExhibition(!isOpenPopupConfirmDeleteExhibition);
         getAllExhibitions();
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.DELETE_EXHIBITION_ERROR'), { autoClose: 5000 });
       }
     });
   };
@@ -595,14 +568,12 @@ function ManagerHome() {
         exhibitions.data.forEach(exhibition => {
           if (exhibition.id == exhibitionId) {
             exhibition.closed = res.data.closed;
-            toast.success("Change status success !", { autoClose: 5000 });
+            toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
           }
         });
-        setIsCloseRoom(!isCloseRoom);
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
+        setIsOpenPopupConfirmCloseExhibition(!isOpenPopupConfirmCloseExhibition);
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.CLOSE_EXHIBITION_ERROR'), { autoClose: 5000 });
       }
     });
   };
@@ -613,14 +584,12 @@ function ManagerHome() {
         exhibitions.data.forEach(exhibition => {
           if (exhibition.id == exhibitionId) {
             exhibition.closed = res.data.closed;
-            toast.success("Change status success !", { autoClose: 5000 });
+            toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
           }
         });
-        setIsOpenRoom(!isOpenRoom);
-      } else if (res.result == "fail" && res.error == "wrong_exhibition") {
-        toast.error("exhibition id is incorrect !", { autoClose: 5000 });
+        setIsOpenPopupConfirmOpenExhibition(!isOpenPopupConfirmOpenExhibition);
       } else {
-        toast.error("System error Please try again later !", { autoClose: 5000 });
+        toast.error(t('manager.OPEN_EXHIBITION_ERROR'), { autoClose: 5000 });
       }
     });
   };
@@ -690,10 +659,10 @@ function ManagerHome() {
                         <span className="focus-input100"/>
                       </div>
                       {item?.check != "cheking" ? "" :
-                        <span>Checking the url</span>
+                        <span>{t('manager.POPUP_MEDIA__URL_CORRECT')}</span>
                       }
                       {item?.check != "fail" ? "" :
-                        <span>The URL is not correct</span>
+                        <span>{t('manager.POPUP_MEDIA__URL_INCORRECT')}</span>
                       }
                     </div>
                   </div>
@@ -791,9 +760,8 @@ function ManagerHome() {
                           checked={item?.changeable}
                           onChange={(e) => handleChangeable(item, e)}
                         />
-                        <span className="textCheckbox">URL Changeable</span>
+                        <span className="textCheckbox">{t('manager.POPUP_OBJECT__URL_CHANEABLE')}</span>
                       </label>
-          
                     </div>
                   </div>
                 )
@@ -810,10 +778,21 @@ function ManagerHome() {
     const user = Store.getUser();
       if (user?.type == 5) {
         return (
-        <div className="tabs-Admin">
-          <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >LIST ROOM</button>  
-          <button className={isListProject ? "active" : ""} onClick={ActionListProject}>PROJECT</button>  
-        </div>
+        <>
+          <div style={{padding: '20px 0px 0px 0px', overflow: 'hidden'}}>
+            <div style={{float: 'right'}}>
+              <span> {t('manager.LANGUAGE')} </span>
+              <select value={language} onChange={handleChangeLanguage}>
+                <option value="en">English</option>
+                <option value="ko">Korean</option>
+              </select>
+            </div>
+          </div>
+          <div className="tabs-Admin">
+            <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >{t('manager.LIST_EXHIBITION')}</button>  
+            <button className={isListProject ? "active" : ""} onClick={ActionListProject}>{t('manager.LIST_PROJECT')}</button>  
+          </div>
+        </>
         );
       }
   };
@@ -823,7 +802,7 @@ function ManagerHome() {
       <>
         {exhibitionsLoaded ? (
           <>
-            List Tour Larchiveum
+            {t('manager.LIST_EXHIBITION')}
             <button
                 className="btn btn-create"
                 onClick={() => {
@@ -843,7 +822,7 @@ function ManagerHome() {
                       }}
                       data-id-exhibition={item.id}
                     >
-                      Private
+                      {t('manager.PRIVATE')}
                     </button>
                   );
                 } else {
@@ -855,7 +834,7 @@ function ManagerHome() {
                       }}
                       data-id-exhibition={item.id}
                     >
-                      Public
+                      {t('manager.PUBLIC')}
                     </button>
                   );
                 }
@@ -871,7 +850,7 @@ function ManagerHome() {
                       }}
                       data-id-exhibition={item.id}
                     >
-                      Open Room
+                      {t('manager.OPEN_EXHIBITION')}
                     </button>
                   );
                 } else {
@@ -883,7 +862,7 @@ function ManagerHome() {
                       }}
                       data-id-exhibition={item.id}
                     >
-                      Close room
+                       {t('manager.CLOSE_EXHIBITION')}
                     </button>
                   );
                 }
@@ -891,7 +870,6 @@ function ManagerHome() {
 
               if (item.room) {
                 return (
-                <>
                   <div key={index} className={"items"}>
                     <span className="name-tour">{item.name}</span>
                     <img src={getSceneThumnail(item ? item.sceneId : undefined)} alt="" />
@@ -925,7 +903,9 @@ function ManagerHome() {
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
                           <span className="ml-1">
-                          <Moment format="YYYY-MM-DD">{item.startDate}</Moment>  <span style={{padding: '0 10px'}}>to</span> <Moment format="YYYY-MM-DD">{item.endDate}</Moment>
+                          {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
+                          <span style={{padding: '0 10px'}}> {t('manager.TO')} </span> 
+                          {moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT")}
                           </span>
                         </div>
                       </div>
@@ -939,39 +919,37 @@ function ManagerHome() {
                         }}
                         data-id-exhibition={item.id}
                       >
-                        Edit
+                        {t('manager.EDIT')}
                       </button>
                       <ClosedButton />
                     </div>
                   </div>
-                </>
-
                 );
               } else {
                 return (
                   <div key={index}  className={"items"}>
-                    <span className="name-tour">This room is currently unavailable</span>
+                    <span className="name-tour">{t('manager.EXHIBITION_UNAVAILABLE')}</span>
                     <img src={defaultImage1} alt="" />
                     <div className="content">
                       <div>
-                        <span className="text-bold">This room is currently unavailable</span>
+                        <span className="text-bold">{t('manager.EXHIBITION_UNAVAILABLE')}</span>
                       </div>
                       <div className="d-flex">
                         <FaLink className="IconFa" /> :{" "}
                         <span className="ml-1">
                           <a href="#" target="_blank">
-                            NAN
+                            ...
                           </a>
                         </span>
                       </div>
                       <div className="d-flex">
-                        <FaUserFriends className="IconFa" /> : <span className="ml-1">NAN/NAN</span>
+                        <FaUserFriends className="IconFa" /> : <span className="ml-1">.../...</span>
                       </div>
                       <div>
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
                           <span className="ml-1">
-                            <Moment format="YYYY-MM-DD">{item.startDate}</Moment>
+                            {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
                           </span>
                         </div>
                       </div>
@@ -984,7 +962,7 @@ function ManagerHome() {
                         }}
                         data-id-exhibition={item.id}
                       >
-                        Delete
+                        {t('manager.DELETE')}
                       </button>
                     </div>
                   </div>
@@ -1010,7 +988,7 @@ function ManagerHome() {
       <>
         {projectsLoaded ? (
           <>
-            List Project Larchiveum
+            {t('manager.LIST_PROJECT')}
             {projects.data.map((item, index) => {
               let count_Image=0;
               let count_Video=0;
@@ -1045,7 +1023,6 @@ function ManagerHome() {
               )
             })}
           </>
-
         ) : (
           <></>
         )}
@@ -1074,13 +1051,8 @@ function ManagerHome() {
         </div>
       );
     } else {
-      return (
-        <div className="title">
-          <div className="title_access_err">
-            You do not have access <br /> Please login with an account manager to use this service
-          </div>
-        </div>
-      );
+      window.location.href = '/';
+      return <></>;
     }
   };
 
@@ -1090,14 +1062,8 @@ function ManagerHome() {
       if (user?.type == 5) {
         return (
           <>
-            <a className="gotospoke" href={APP_ROOT + "/spoke"}>
-              {" "}
-              Spoke{" "}
-            </a>
-            <a className="gotoadmin" href={APP_ROOT + "/admin"}>
-              {" "}
-              Admin{" "}
-            </a>
+            <a className="gotospoke" href={APP_ROOT + "/spoke"}>{t('manager.SPOKE')}</a>
+            <a className="gotoadmin" href={APP_ROOT + "/admin"}>{t('manager.ADMIN')}</a>
           </>
         );
       } else {
@@ -1109,9 +1075,8 @@ function ManagerHome() {
         <span className="display-name">
           <MasterAdmin />
           <span className="nameA">{user.displayName || user.email}</span> |{" "}
-          <a className="gotohome" href="/">
-            {" "}
-            Home
+          <a className="gotohome" onClick={handleSignOut}>
+            {t('manager.SIGN_OUT')}
           </a>
         </span>
       );
@@ -1158,14 +1123,14 @@ function ManagerHome() {
           {isOpenExhibition && (
             <Popup
               size={"xl"}
-              title={exhibitionType == "edit" ? <>Edit Exhibition </> : <> Create Exhibition</>}
+              title={exhibitionType == "edit" ? <> {t('manager.POPUP_EXHIBITION__EDIT_TITLE')} </> : <> {t('manager.POPUP_EXHIBITION__CREATE_TITLE')}</>}
               content={
                 <>
                   <form className="create100-form validate-form" name="form" style={{maxHeight: "60vh", overflowY: "scroll"}}>
                     <div className="d-flex">
-                      <div style={{width: '50%', padding: '10px'}}>
+                      <div style={{width: '40%', padding: '10px'}}>
                         <div className="p-t-13 p-b-9">
-                          <span className="txt1">Name Exhibition</span>
+                          <span className="txt1">{t('manager.POPUP_EXHIBITION__NAME_LABEL')}</span>
                         </div>
                         <div className="wrap-input100 validate-input">
                           <input
@@ -1174,12 +1139,12 @@ function ManagerHome() {
                             name="name"
                             value={exhibition ? exhibition.name : undefined}
                             onChange={handleChange}
-                            placeholder="Name Tour"
+                            placeholder={t('manager.POPUP_EXHIBITION__NAME_PLACEHOLDER')}
                           />
                           <span className="focus-input100" />
                         </div>
                         <div className="p-t-13 p-b-9">
-                          <span className="txt1">Description</span>
+                          <span className="txt1">{t('manager.POPUP_EXHIBITION__DESCRIPTION_LABEL')}</span>
                         </div>
                         <div className="wrap-input100 validate-input">
                           <textarea
@@ -1187,7 +1152,7 @@ function ManagerHome() {
                             name="description"
                             value={exhibition ? exhibition.description : undefined}
                             onChange={handleChange}
-                            placeholder="Description about tour"
+                            placeholder={t('manager.POPUP_EXHIBITION__DESCRIPTION_PLACEHOLDER')}
                             rows="10"
                             style={{height: '205px'}}
                           />
@@ -1196,7 +1161,7 @@ function ManagerHome() {
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <div style={{width: '40%'}}>
                             <div className="p-t-13 p-b-9">
-                              <span className="txt1" style={{fontSize: '13px'}}>Public</span>
+                              <span className="txt1" style={{fontSize: '13px'}}>{t('manager.POPUP_EXHIBITION__PUBLIC')}</span>
                             </div>
                             <label className="switch">
                               <input
@@ -1210,7 +1175,7 @@ function ManagerHome() {
                           </div>
                           <div style={{width: '60%', paddingTop: '10px'}}>
                             <div style={{float: 'left', height: '50px', width: '40%', display: 'flex', alignItems: 'center', justifyContent: 'right', paddingRight: '10px'}}>
-                              <span className="txt1">Max Size</span>
+                              <span className="txt1">{t('manager.POPUP_EXHIBITION__MAX_SIZE')}</span>
                             </div>
                             <div className="wrap-input100 validate-input"  style={{float: 'left', width: '60%'}}>
                               <input
@@ -1227,19 +1192,19 @@ function ManagerHome() {
                           </div>
                         </div>
                       </div>
-                      <div style={{width: '50%', padding: '10px'}}>
+                      <div style={{width: '60%', padding: '10px'}}>
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <div className="item-input" style={{width: '48%'}}>
                             <div className="p-t-13 p-b-9">
-                              <span className="txt1">Start day</span>
+                              <span className="txt1">{t('manager.POPUP_EXHIBITION__START_DATE_LABEL')}</span>
                             </div>
                             <div className="wrap-input100 validate-input">
                               <input
                                 className="input100"
-                                type="date"
+                                type="datetime-local"
                                 name="startDate"
                                 placeholder="dd-mm-yyyy"
-                                value={exhibition ? exhibition.startDate : undefined}
+                                value={exhibition ? moment.utc(exhibition.startDate).local().format("YYYY-MM-DDTHH:mm") : undefined}
                                 onChange={handleChange}
                               />
                               <span className="focus-input100" />
@@ -1247,15 +1212,15 @@ function ManagerHome() {
                           </div>
                           <div className="item-input" style={{width: '48%'}}>
                             <div className="p-t-13 p-b-9">
-                              <span className="txt1">End day</span>
+                              <span className="txt1">{t('manager.POPUP_EXHIBITION__END_DATE_LABEL')}</span>
                             </div>
                             <div className="wrap-input100 validate-input">
                               <input
                                 className="input100"
-                                type="date"
+                                type="datetime-local"
                                 name="endDate"
                                 placeholder="dd-mm-yyyy"
-                                value={exhibition ? exhibition.endDate : undefined}
+                                value={exhibition ? moment.utc(exhibition.endDate).local().format("YYYY-MM-DDTHH:mm") : undefined}
                                 onChange={handleChange}
                               />
                               <span className="focus-input100" />
@@ -1263,13 +1228,13 @@ function ManagerHome() {
                           </div>
                         </div>
                         <div className="p-t-13 p-b-9">
-                          <span className="txt1">List Scene</span>
+                          <span className="txt1">{t('manager.POPUP_EXHIBITION__LIST_SCENE_LABEL')}</span>
                         </div>
                         <ListScenes />
                       </div>
                     </div>
                     <div style={{width: '100%', padding: '10px'}}>
-                      <span className="txt1">Room Member Permissions</span>
+                      <span className="txt1">{t('manager.POPUP_EXHIBITION__ROOM_MEMBER_PERMISSIONS')}</span>
                       <div style={{position: 'relative', width: '100%', height: '40px', marginTop: '10px'}}>
                         <div style={{width: '150px', float: 'left'}}>
                           {/* <ToggleInput 
@@ -1288,7 +1253,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Create and move objects </span>
+                          <span>{t('manager.POPUP_EXHIBITION__CREATE_AND_MOVE_OBJECTS')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1310,7 +1275,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Create cameras </span>
+                          <span>{t('manager.POPUP_EXHIBITION__CREATE_CAMERAS')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1332,7 +1297,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Pin objects </span>
+                          <span>{t('manager.POPUP_EXHIBITION__PIN_OBJECTS')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1353,7 +1318,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Create drawings </span>
+                          <span>{t('manager.POPUP_EXHIBITION__CREATE_DRAWINGS')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1374,7 +1339,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Create emoji </span>
+                          <span>{t('manager.POPUP_EXHIBITION__CREATE_EMOJI')}</span>
                         </div> 
                       </div>
                       <div style={{position: 'relative', width: '100%', height: '40px'}}>
@@ -1395,7 +1360,7 @@ function ManagerHome() {
                           </label>
                         </div>
                         <div style={{float: 'left'}}>
-                          <span>Allow fly</span>
+                          <span>{t('manager.POPUP_EXHIBITION__ALLOW_FLY')}</span>
                         </div> 
                       </div>
                     </div>
@@ -1404,14 +1369,14 @@ function ManagerHome() {
               }
               actions={[
                 {
-                  text: exhibitionType == "edit" ? "Edit" : "Create",
+                  text: exhibitionType == "edit" ? t('manager.POPUP_EXHIBITION__EDIT') : t('manager.POPUP_EXHIBITION__CREATE'),
                   class: "btn-handle",
                   callback: () => {
                     exhibitionType == "edit" ? handleEdit() : handleCreate();
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_EXHIBITION__CANCEL'),
                   class: "btn-cancle",
                   callback: () => {
                     closePopupExhibition();
@@ -1424,28 +1389,25 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenToggle && (
+          {isOpenPopupConfirmChangePublic && (
             <Popup
-              title={<>Change public status</>}
+              title={<>{t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__TITLE')}</>}
               size={"sm"}
               content={
-                <>
-                  <br />
-                  Are you sure Change this public status ?
-                  <br />
-                  <br />
-                </>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                  {t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__MESSAGE')}
+                </div>
               }
               actions={[
                 {
-                  text: "Change",
+                  text: t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__CHANGE'),
                   class: "btn1",
                   callback: () => {
                     handelTogglePublic(exhibitionId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_CONFRIM_CHANGE_PUBLIC__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     closePopupPublic();
@@ -1456,32 +1418,32 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenSpoke && (
+          {isOpenPopupChangeMediaURLGuide && (
             <Popup
-              title={<>Go to page Spoke</>}
+              title={<>{t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__TITLE')}</>}
               size={"sm"}
               content={
                 <>
-                  To continue the process, follow these steps:
+                  {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT')}
                   <ul>
-                    <li>- Go to spoke using the "Goto Spoke" button below </li>
-                    <li>- Click "Publish Scene" button on top toolbar</li>
-                    <li>- After the popup opens, select "Save Project"</li>
-                    <li>- After the popup opens, select "Save and Publish"</li>
-                    <li>- Finally, select "Save Scene" to finish</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_1')}</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_2')}</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_3')}</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_4')}</li>
+                    <li>- {t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CONTENT_STEP_5')}</li>
                   </ul>
                 </>
               }
               actions={[
                 {
-                  text: "Goto Spoke",
+                  text: t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__GO_TO_SPOKE'),
                   class: "btn1",
                   callback: () => {
                     handelSpoke(projectId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_CHANGE_MEDIA_URL_GUIDE__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     closePopupSpoke();
@@ -1492,28 +1454,25 @@ function ManagerHome() {
             />
           )}    
   
-          {isCloseRoom && (
+          {isOpenPopupConfirmCloseExhibition && (
             <Popup
-              title={<>Close room</>}
+              title={<>{t('manager.POPUP_CONFRIM_CLOSE_EXHIBITION__TITLE')}</>}
               size={"sm"}
               content={
-                <>
-                  <br />
-                  Are you sure to close this room? People will not be able to access when you close the room ?
-                  <br />
-                  <br />
-                </>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                  {t('manager.POPUP_CONFRIM_CLOSE_EXHIBITION__MESSAGE')}
+                </div>
               }
               actions={[
                 {
-                  text: "Close Room",
+                  text: t('manager.POPUP_CONFRIM_CLOSE_EXHIBITION__CLOSE'),
                   class: "btn1",
                   callback: () => {
                     handelCloseRoom(exhibitionId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_CONFRIM_CLOSE_EXHIBITION__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     closePopupCloseRoom();
@@ -1524,28 +1483,25 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenRoom && (
+          {isOpenPopupConfirmOpenExhibition && (
             <Popup
-              title={<>Open room</>}
+              title={<>{t('manager.POPUP_CONFRIM_OPEN_EXHIBITION__TITLE')}</>}
               size={"sm"}
               content={
-                <>
-                  <br />
-                  Are you sure to open this room? People will can access to the room ?
-                  <br />
-                  <br />
-                </>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                  {t('manager.POPUP_CONFRIM_OPEN_EXHIBITION__MESSAGE')}
+                </div>
               }
               actions={[
                 {
-                  text: "Open Room",
+                  text:  t('manager.POPUP_CONFRIM_OPEN_EXHIBITION__CLOSE'),
                   class: "btn1",
                   callback: () => {
                     handelOpenRoom(exhibitionId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text:  t('manager.POPUP_CONFRIM_OPEN_EXHIBITION__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     closePopupOpenRoom();
@@ -1556,28 +1512,25 @@ function ManagerHome() {
             />
           )}
   
-          {isDeleteRoom && (
+          {isOpenPopupConfirmDeleteExhibition && (
             <Popup
-              title={<>Delete room</>}
+              title={<>{t('manager.POPUP_CONFRIM_DELETE_EXHIBITION__TITLE')}</>}
               size={"sm"}
               content={
-                <>
-                  <br />
-                  Are you sure to delete this room? People will not be able to access when you close the room ?
-                  <br />
-                  <br />
-                </>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                  {t('manager.POPUP_CONFRIM_DELETE_EXHIBITION__MESSAGE')}
+                </div>
               }
               actions={[
                 {
-                  text: "Delete Room",
+                  text: t('manager.POPUP_CONFRIM_DELETE_EXHIBITION__DELETE'),
                   class: "btn1",
                   callback: () => {
                     handelToggleDeleteRoom(exhibitionId);
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_CONFRIM_DELETE_EXHIBITION__CANCEL'),
                   class: "btn2",
                   callback: () => {
                     deleteRoom();
@@ -1588,10 +1541,10 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenMedia && (
+          {isOpenPopupMedia && (
             <Popup
               size={"xl"}
-              title={"Custom Media"}
+              title={t('manager.POPUP_MEDIA__TITLE')}
               content={
                 <>
                   <form className="create100-form validate-form d-flex form-custom-media" name="form">
@@ -1605,14 +1558,14 @@ function ManagerHome() {
               }
               actions={[
                 {
-                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
+                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span> {t('manager.POPUP_MEDIA__SAVE')} </span>,
                   class: "btn-handle",
                   callback: () => {
                     handelSaveMediaURL();
                   }
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_MEDIA__CANCEL'),
                   class: "btn-cancle",
                   callback: () => {
                     closePopupCustomMedia();
@@ -1625,7 +1578,7 @@ function ManagerHome() {
             />
           )}
   
-          {isOpenObject && (
+          {isOpenPopupObject && (
             <Popup
               size={"xl"}
               title={"List Object"}
@@ -1642,15 +1595,15 @@ function ManagerHome() {
               }
               actions={[
                 {
-                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>save</span>,
+                  text: iconLoaded ? <div className="lds-dual-ring"></div> : <span>{t('manager.POPUP_OBJECT__SAVE')}</span>,
                   class: "btn-handle",
                   callback: () => {
-                    handelOpenSpoke();
+                    handelOpenPopupChangeMediaURLGuide();
                   }
             
                 },
                 {
-                  text: "Cancel",
+                  text: t('manager.POPUP_OBJECT__CANCEL'),
                   class: "btn-cancle",
                   callback: () => {
                     closePopupCustomObject();
@@ -1665,7 +1618,7 @@ function ManagerHome() {
   
           <div className="manager-page">
             <div className="row_1">
-              <span className="text_1">Manager Larchiveum</span>
+              <a href="/"><span className="text_1">Larchiveum</span></a>
               <IAuth />
             </div>
   

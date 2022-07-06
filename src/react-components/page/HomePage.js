@@ -5,9 +5,8 @@ import "../../utils/theme";
 import "../../react-components/styles/global.scss";
 import "../../assets/larchiveum/style.scss";
 import "../../assets/larchiveum/loading.scss";
-import * as moment from "moment";
+import moment from "moment-timezone";
 import Store from "../../utilities/store";
-import StoreHub from "../../storage/store";
 import ExhibitionsService from "../../utilities/apiServices/ExhibitionsService";
 import ReserveService from "../../utilities/apiServices/ReserveService";
 import Popup from "../../react-components/popup/popup";
@@ -19,6 +18,8 @@ import "reactjs-popup/dist/index.css";
 import UserService from "../../utilities/apiServices/UserService";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Language from './languages/language';
+import { useTranslation } from 'react-i18next';
 // ICON
 import {
   MdPublic,
@@ -27,7 +28,6 @@ import {
   MdOutlineCheckCircleOutline,
 } from "react-icons/md";
 
-const store = new StoreHub();
 
 registerTelemetry("/home", "Hubs Home Page");
 
@@ -54,11 +54,14 @@ function Home() {
     pageSize: 9,
     sort: "startDate|desc" //format <attribute>|<order type>
   });
+  const [language, setLanguage] = useState('en');
 
   const user = Store.getUser();
-
+  const { t } = useTranslation();
+ 
   useEffect(
     () => {
+
       auth();
       // redirect to verify page
       const qs = new URLSearchParams(location.search);
@@ -67,8 +70,11 @@ function Home() {
         redirectUrl.search = location.search;
         window.location = redirectUrl;
       }
-
       getAllExhibitions();
+
+      let lang = Language.getLanguage();
+      //Language.setLanguage(lang);
+      setLanguage(lang);
     },
     [filterExhibitionList.page, filterExhibitionList.sort]
   );
@@ -122,8 +128,7 @@ function Home() {
     }
   };
 
-  const handleRemoveCookie = () => {
-    store.removeHub();
+  const handleSignOut = () => {
     Store.removeUser();
     window.location.reload();
   };
@@ -181,10 +186,15 @@ function Home() {
     });
   };
 
-  const handleButtonLogin = event => {
-    window.location.href = APP_ROOT +'?page=signin';
+  const handleButtonLogin = (event) => {
+    window.location.href = '/?page=signin';
   };
 
+  const handleChangeLanguage = (event) => {
+    let lang = event.target.value;
+    setLanguage(lang);
+    Language.setLanguage(lang);
+  };
 
   const changePages = page => {
     setfilterExhibitionList({
@@ -228,7 +238,7 @@ function Home() {
                       onClick={() => { openPopupNotification(item) }}
                       data-id-exhibition={item.id}
                     >
-                      Will open on {moment(item.startDate).format('MMMM DD')}
+                      {t('home.WILL_OPEN_ON')} {moment(item.startDate).format('MMMM DD')}
                     </button>
                   )
                 }
@@ -240,7 +250,7 @@ function Home() {
                       onClick={openPopupReservation}
                       data-id-exhibition={item.id}
                     >
-                      RESERVE
+                      {t('home.MAKE_RESERVATION')}
                     </button>
                   );
                 }
@@ -252,7 +262,7 @@ function Home() {
                       onClick={handleButtonVisit}
                       data-roomid={item.roomId}
                     >
-                      ENTER
+                      {t('home.ENTER')}
                     </button>
                   );
                 }
@@ -262,7 +272,7 @@ function Home() {
                     <button
                       className="signin-up btn-visit full"
                     >
-                      EXHIBITION FULL
+                      {t('home.EXHIBITION_FULL')}
                     </button>
                   );
                 }
@@ -273,7 +283,7 @@ function Home() {
                       className="signin-up btn-visit signin"
                       onClick={handleButtonLogin}
                     >
-                      Sign In
+                      {t('home.SIGN_IN')}
                     </button>
                   );
                 }
@@ -314,7 +324,7 @@ function Home() {
                     </p>
                     <p className="p-1">
                       <MdCalendarToday />
-                      <Moment format="YYYY-MM-DD">{item.startDate}</Moment>  <span style={{padding: '0 10px'}}>to</span> <Moment format="YYYY-MM-DD">{item.endDate}</Moment>
+                      {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
                     </p>
                   </div>
                   <ActionButton/>
@@ -335,9 +345,8 @@ function Home() {
       const ManagerBtn = () => {
         if (user.type >= 3) {
           return (
-            <a className="manager" href={APP_ROOT + "/?page=manager"}>
-              {" "}
-              Manager{" "}
+            <a className="manager" href="/?page=manager">
+              {t('home.MANAGER')}
             </a>
           );
         } else {
@@ -348,15 +357,15 @@ function Home() {
         <span className="display-name">
           <ManagerBtn />
           <span className="nameA"> {user.displayName || user.email} </span> |{" "}
-          <a className="logout_btn" onClick={handleRemoveCookie}>
-            Logout
+          <a className="logout_btn" onClick={handleSignOut}>
+           {t('home.SIGN_OUT')}
           </a>
         </span>
       );
     } else {
       return (
         <a href="/?page=signin" className="signin-up">
-          SignIn/SignUp
+          {t('home.SIGN_IN')} / {t('home.SIGN_UP')}
         </a>
       );
     }
@@ -369,7 +378,7 @@ function Home() {
         description: exhibitionNoti?.room?.description,
         sceneId: exhibitionNoti.sceneId,
         thumbnailUrl: exhibitionNoti?.room?.thumbnailUrl,
-        startDate: moment(exhibitionNoti.startDate).format("YYYY-MM-DD"),
+        startDate: moment(exhibitionNoti.startDate).format("YYYY-MM-DD hh:mma"),
         maxSize: exhibitionNoti.maxSize
       });
     } else {
@@ -408,25 +417,24 @@ function Home() {
         {isOpen && (
           <Popup
             size={"sm"}
-            title={<>Reserve</>}
+            title={<>{t('home.POPUP_CONFIRM_RESERVATION__TITLE')}</>}
             content={
               <>
                 <br />
-                Are you sure you want to make a reservation?
-                <br />
+                <div style={{textAlign: "center"}}>{t('home.POPUP_CONFIRM_RESERVATION__MESSAGE')}</div>
                 <br />
               </>
             }
             actions={[
               {
-                text: "Reserve",
+                text: t('home.POPUP_CONFIRM_RESERVATION__YES'),
                 class: "btn1",
                 callback: () => {
                   handleReservate();
                 }
               },
               {
-                text: "Cancle",
+                text: t('home.POPUP_CONFIRM_RESERVATION__CANCEL'),
                 class: "btn2",
                 callback: () => {
                   togglePopup();
@@ -440,40 +448,17 @@ function Home() {
         {isOpenNotification && (
           <Popup
             size={"lg"}
-            title={<>Notification</>}
+            title={<>{t('home.POPUP_EXHIBITION_NOT_OPEN_YET__TTILE')}</>}
             content={
               <>
                 <div className="info-room">
-                  <p className="noti-title">It's not time to attend, please come back later</p>
-
-                  <div className="d-flex">
-                    <div className="w-40">
-                      <img src={exhibitionNoti ? exhibitionNoti.thumbnailUrl : defaultImage} />
-                    </div>
-                    <div className="w-60">
-                      <p>
-                        <span className="text-bold">Name : </span> {exhibitionNoti ? exhibitionNoti.name : undefined}
-                      </p>
-                      <p>
-                        <span className="text-bold">start Date : </span>{" "}
-                        {exhibitionNoti ? exhibitionNoti.startDate : undefined}
-                      </p>
-                      <p>
-                        <span className="text-bold">Room Size : </span>{" "}
-                        {exhibitionNoti ? exhibitionNoti.maxSize : undefined}
-                      </p>
-                      <p>
-                        <span className="text-bold">Description : </span>{" "}
-                        {exhibitionNoti ? exhibitionNoti.description : undefined}
-                      </p>
-                    </div>
-                  </div>
+                  <p className="noti-title">{t('home.POPUP_EXHIBITION_NOT_OPEN_YET__MESSAGE')}</p>
                 </div>
               </>
             }
             actions={[
               {
-                text: "Cancle",
+                text: t('home.POPUP_EXHIBITION_NOT_OPEN_YET__CLOSE'),
                 class: "btn2",
                 callback: () => {
                   closePopupNotification();
@@ -486,7 +471,7 @@ function Home() {
 
         <div className="background-homepage">
           <div className="row_1">
-            <span className="text_1"> Larchiveum</span>
+            <a href="/"><span className="text_1"> Larchiveum </span></a> 
             {/* <img src={LogoCompany}/> */}
             <UIAuth />
           </div>
@@ -495,17 +480,26 @@ function Home() {
               <div className="row" style={{margin: '5vh 0'}}>
               { user && (
                 <a href="?page=profile">
-                  <button style={{fontSize: '17px', color: '#149BF3', fontWeight: 'bold', padding: '5px 10px', border: '2px solid #1cbeff', borderRadius: '5px'}}>Profile</button>
+                  <button style={{fontSize: '17px', color: '#149BF3', fontWeight: 'bold', padding: '5px 10px', border: '2px solid #1cbeff', borderRadius: '5px'}}>{t('home.PROFILE')}</button>
                 </a>
               )}
               </div>
-              <div className="sort">
-                <button className={isActiveSortASC ? "active" : ""} onClick={sortNewest}>
-                  Newest
-                </button>
-                <button className={isActiveSortDESC ? "active" : ""} onClick={sortOldest}>
-                  Oldest
-                </button>
+              <div className="tools">
+                <div style={{float: 'left'}}>
+                  <button className={isActiveSortASC ? "active" : ""} onClick={sortNewest}>
+                    {t('home.NEWEST')}
+                  </button>
+                  <button className={isActiveSortDESC ? "active" : ""} onClick={sortOldest}>
+                    {t('home.OLDEST')}
+                  </button>
+                </div>
+                <div style={{float: 'right'}}>
+                  <span> {t('home.LANGUAGE')} </span>
+                  <select value={language} onChange={handleChangeLanguage}>
+                    <option value="en">English</option>
+                    <option value="ko">Korean</option>
+                  </select>
+                </div>
               </div>
               <div className="col">{renderExhibitions()}</div>
               <div className="">

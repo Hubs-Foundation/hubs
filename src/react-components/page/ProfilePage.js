@@ -19,12 +19,17 @@ import hubChannel from '../../utils/hub-channel'
 import { left } from "@popperjs/core";
 import async from "async";
 import moment from 'moment';
+import Language from './languages/language';
+import { useTranslation } from 'react-i18next';
 
 export  function ProfilePage({props}) {
     const user = Store.getUser();
+    const { t } = useTranslation();
+
     const [avatars, setAvatars] = useState([]);
     const [avatar, setAvatar] = useState(null);
     const [displayName, setDisplayName] = useState(null);
+    const [language, setLanguage] = useState('en');
     
     const [isLoading, setIsLoading] = useState(true);
     const [isOpenPopupChangeAvatar, setIsOpenPopupChangeAvatar] = useState(false);
@@ -36,6 +41,7 @@ export  function ProfilePage({props}) {
             if (response.result == "ok") {
                 let avatars = response.data;
                 loadFromLocalStorage(avatars);
+                setLanguage(Language.getLanguage());
                 setIsLoading(false);
             } else {
                 alert('Get list avatar fail')
@@ -138,6 +144,12 @@ export  function ProfilePage({props}) {
         setDisplayName(displayName);
     }
 
+    const handleChangeLanguage = (event) => {
+        let lang = event.target.value;
+        setLanguage(lang);
+        Language.setLanguage(lang);
+    };
+
     return (
         <div className="background-homepage" style={{width: '100%', height: '100%'}}>
             { isLoading ? (
@@ -161,10 +173,17 @@ export  function ProfilePage({props}) {
             ):(
                 <>
                     <Header />
-                    <div className="row" style={{margin: '5vh 10%'}}>
+                    <div style={{margin: '5vh 10%'}}>
                         <a href="/">
-                            <button style={{fontSize: '17px', color: '#149BF3', fontWeight: 'bold', padding: '5px 10px', border: '2px solid #1cbeff', borderRadius: '5px'}}>Back</button>
+                            <button style={{fontSize: '17px', color: '#149BF3', fontWeight: 'bold', padding: '5px 10px', border: '2px solid #1cbeff', borderRadius: '5px'}}>{t('profile.BACK')}</button>
                         </a>
+                        <div style={{float: 'right'}}>
+                            <span> {t('profile.LANGUAGE')} </span>
+                            <select value={language} onChange={handleChangeLanguage}>
+                                <option value="en">English</option>
+                                <option value="ko">Korean</option>
+                            </select>
+                        </div>
                     </div>
                     <div className="row" style={{margin: '5vh 10% 5vh 10%', height: '60vh'}}>
                         <AvatarPreview props={{
@@ -232,19 +251,14 @@ const Header = () => {
 
     return (
         <div className="row_1">
-            <span className="text_1"> Larchiveum</span>
+            <a href="/"><span className="text_1">Larchiveum</span></a>
             { user ? (
                 <span className="display-name">
-                    {user.type >= 3 && (
-                    <a className="manager" href={APP_ROOT + "/?page=manager"}>Manager</a>   
-                    )}
                     <span className="nameA"> {user.displayName || user.email} </span> |{" "}
-                    <a className="logout_btn" onClick={handleLogout}> Logout </a>
+                    <a className="logout_btn" onClick={handleLogout}> Sign out </a>
                 </span>
             ):(
-                <a href={APP_ROOT + "/?page=signin"} className="signin-up">
-                    SignIn/SignUp
-                </a>
+                <></>
             )}
         </div>
     );
@@ -259,7 +273,7 @@ const AvatarPreview = ({props})=>{
     return (
         <div style={{float:'left', width: '45%', height: '100%', boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px'}}>
             <div style={{width: '100%', height: '10%', backgroundColor: '#efefef',  display: 'flex', justifyContent: 'center', justifyItems: 'center'}}>
-                <button>Avatar</button>
+                <button>{t('profile.AVATAR_PANEL__TITLE')}</button>
             </div>
             <div style={{width: '100%', height: '80%'}}>
                 <div style={{height: '100%'}}>
@@ -267,7 +281,7 @@ const AvatarPreview = ({props})=>{
                 </div>
             </div>
             <div style={{width: '100%', height: '10%', borderTop: '2px solid rgb(239, 239, 239)', display: 'flex', justifyContent: 'space-around', alignItems: 'center'}}>
-                <button onClick={handleOpenPopupChooseAvatar} style={{backgroundColor: '#1180ff', padding: '10px 20px', margin: '10px', color:'white', height: '40px', borderRadius: '5px'}}>Choose Avatar</button>
+                <button onClick={handleOpenPopupChooseAvatar} style={{backgroundColor: '#1180ff', padding: '10px 20px', margin: '10px', color:'white', height: '40px', borderRadius: '5px'}}>{t('profile.AVATAR_PANEL__CHOOSE_AVATAR')}</button>
             </div>
         </div>
     );
@@ -281,7 +295,7 @@ const GeneralPreview = ({props})=>{
     return (
         <div style={{float:'right', width: '45%', height: '100%', boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px'}}>
             <div style={{width: '100%', height: '10%', backgroundColor: '#efefef', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <button>General Infomation</button>
+                <button>{t('profile.GENERAL_PANEL__TITLE')}</button>
             </div>
             <div style={{width: '100%', height: '80%'}}>
                 <div style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
@@ -292,7 +306,7 @@ const GeneralPreview = ({props})=>{
                 </div>
             </div>
             <div style={{width: '100%', height: '10%', borderTop: '2px solid rgb(239, 239, 239)', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <button onClick={handleOpenPopupChangeDisplayName} style={{backgroundColor: '#1180ff', padding: '10px 20px', color:'white', height: '40px', borderRadius: '5px'}}>Change Display Name</button>
+                <button onClick={handleOpenPopupChangeDisplayName} style={{backgroundColor: '#1180ff', padding: '10px 20px', color:'white', height: '40px', borderRadius: '5px'}}>{t('profile.GENERAL_PANEL__CHANGE_DISPLAY_NAME')}</button>
             </div>
         </div>
     );
@@ -383,23 +397,24 @@ const PopupChangeAvatar = ({props})=>{
 
     return (
         <Popup
+            key={'popup-change-avatar'}
             size={"lg"}
-            title={<>Choose Avatar</>}
+            title={<>{t('profile.POPUP_CHANGE_AVATAR__TITLE')}</>}
             content={
                 <div style={{width: '100%', overflowY: 'auto', whiteSpace: 'nowrap', maxHeight: '60vh', height: '60vh'}}>
                 { isLoading ? (
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
-                        <span> Loading ...</span>
+                        <span>{t('profile.POPUP_CHANGE_AVATAR__LOADING')}</span>
                     </div>
                 ) : (
                     <div>
                         {avatars.map((avt)=>{
                             return(
-                                <div className="preview-avatar" onClick={(e)=>{handleSelectAvatar(e, avt)}} style={{ height: '200px', margin: '2%', float: 'left', width: '21%', border: (avt.id == avatar.id ? '4px solid blue' : '1px solid gray'), backgroundColor: 'whitesmoke'}}>
+                                <div key={avt.id} className="preview-avatar" onClick={(e)=>{handleSelectAvatar(e, avt)}} style={{ height: '200px', margin: '2%', float: 'left', width: '21%', border: (avt.id == avatar.id ? '4px solid blue' : '1px solid gray'), backgroundColor: 'whitesmoke'}}>
                                     {avt.isCustomAvatar ? (
-                                        <model-viewer style={{width:'100%', height: '100%'}} src={avt.url} camera-controls ></model-viewer>
+                                        <model-viewer style={{width:'100%', height: '100%'}} src={avt.url}></model-viewer>
                                     ):(
-                                        <img style={{width:'100%', height: '100%'}} src={avt.images.preview.url} camera-controls></img>
+                                        <img style={{width:'100%', height: '100%'}} src={avt.images.preview.url}></img>
                                     )}
                                 </div>
                             )
@@ -412,17 +427,17 @@ const PopupChangeAvatar = ({props})=>{
             handleClose={handleClose}
             actions={[
                 {
-                    text: "Cancle",
-                    class: "btn2",
-                    callback: () => {
-                        handleClose(false);
-                    }
-                },
-                {
-                    text: (isSaving ? 'Saving...' : 'Choose'),
+                    text: (isSaving ? t('profile.POPUP_CHANGE_AVATAR__SAVING') : t('profile.POPUP_CHANGE_AVATAR__SAVE')),
                     class: "btn2",
                     callback: () => {
                         handleConfirmSelectAvatar();
+                    }
+                },
+                {
+                    text: t('profile.POPUP_CHANGE_AVATAR__CANCEL') ,
+                    class: "btn2",
+                    callback: () => {
+                        handleClose(false);
                     }
                 },
             ]}
@@ -545,35 +560,35 @@ const PopupChangeDisplayName = ({props})=>{
     return (
         <Popup
             size={"lg"}
-            title={<>Change Display Name</>}
+            title={<>{t('profile.POPUP_CHANGE_DISPLAY_NAME__TITLE')}</>}
             content={
                 <div style={{width: '100%', maxHeight: '60vh', height: '60vh'}}>
                     <div style={{width: '100%', height: '80%'}}>
-                    <div style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        <div style={{width: '80%', position: 'relative'}}>
-                            <span style={{height: '40px', width: '100%'}}> Display name</span>
-                            <input type="text" value={displayName} onChange={handleInputChange} style={{display: 'flex', alignItems: 'center', height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}></input>
-                            <div style={{color: '#9d9d9d'}}>* Please enter a name consisting of 3 to 32 Korean characters, alphabets, numbers, hyphens(.), underscores(_), and titles(~)</div>
+                        <div style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                            <div style={{width: '80%', position: 'relative'}}>
+                                <span style={{height: '40px', width: '100%'}}> {t('profile.POPUP_CHANGE_DISPLAY_NAME__DISPLAY_NAME_LABEL')}</span>
+                                <input type="text" value={displayName} onChange={handleInputChange} style={{display: 'flex', alignItems: 'center', height: '40px', width: '100%', border: '2px solid #b1b1ff', padding: '0px 20px', margin: '10px 0px', borderRadius: '3px'}}></input>
+                                <div style={{color: '#9d9d9d'}}>{t('profile.POPUP_CHANGE_DISPLAY_NAME__DISPLAY_NAME_NOTE')}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
                 </div>
             }
 
             handleClose={handleClose}
             actions={[
                 {
-                    text: "Cancle",
-                    class: "btn2",
-                    callback: () => {
-                        handleClose(false);
-                    }
-                },
-                {
-                    text: (isSaving ? 'Saving ...' : 'Save'),
+                    text: (isSaving ? t('profile.POPUP_CHANGE_DISPLAY_NAME__SAVING') : t('profile.POPUP_CHANGE_DISPLAY_NAME__SAVE')),
                     class: "btn2",
                     callback: () => {
                         handleChangeDisplayName();
+                    }
+                },
+                {
+                    text: t('profile.POPUP_CHANGE_DISPLAY_NAME__CANCEL'),
+                    class: "btn2",
+                    callback: () => {
+                        handleClose(false);
                     }
                 },
             ]}
