@@ -562,6 +562,12 @@ class GLTFHubsLightMapExtension {
       const lightMap = results[1];
       material.lightMap = lightMap;
       material.lightMapIntensity = extensionDef.intensity !== undefined ? extensionDef.intensity : 1;
+
+      // See https://github.com/mrdoob/three.js/pull/23613
+      if (material.isMeshBasicMaterial) {
+        material.lightMapIntensity *= Math.PI;
+      }
+
       return material;
     });
   }
