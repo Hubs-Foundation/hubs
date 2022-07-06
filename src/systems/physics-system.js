@@ -108,7 +108,7 @@ export class PhysicsSystem {
       this.debugGeometry.addAttribute("position", new THREE.BufferAttribute(debugVertices, 3));
       this.debugGeometry.addAttribute("color", new THREE.BufferAttribute(debugColors, 3));
       const debugMaterial = new THREE.LineBasicMaterial({
-        vertexColors: THREE.VertexColors,
+        vertexColors: true,
         depthTest: true
       });
       this.debugMesh = new THREE.LineSegments(this.debugGeometry, debugMaterial);
