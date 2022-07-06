@@ -14,12 +14,12 @@
   font-family: monospace;
   cursor: pointer;
   position: absolute;
-  bottom: 96px;
-  right: 2px;
+  bottom: 222px;
+  right: 222px;
   padding: 4px 8px;
   color: #ffffff;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-  font-size: 10px;
+  font-size: 40px;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;

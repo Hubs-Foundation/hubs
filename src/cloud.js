@@ -25,7 +25,7 @@ function HubsCloudPage() {
       <div className={styles.hero}>
         <Container className={styles.colLg}>
           <iframe
-            src="https://avatarcreator.netlify.app/"
+            src="https://metaverseplus.readyplayer.me/"
             title=" "
             frameborder="0"
             width="100%"
