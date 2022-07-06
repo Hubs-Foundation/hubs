@@ -803,6 +803,13 @@ function ManagerHome() {
         {exhibitionsLoaded ? (
           <>
             {t('manager.LIST_EXHIBITION')}
+            <div style={{float: 'right', fontFamily: '"Poppins", sans-serif', fontSize: '16px', color: 'black'}}>
+              <span> {t('manager.LANGUAGE')} </span>
+              <select value={language} onChange={handleChangeLanguage}>
+                <option value="en">English</option>
+                <option value="ko">Korean</option>
+              </select>
+            </div>
             <button
                 className="btn btn-create"
                 onClick={() => {

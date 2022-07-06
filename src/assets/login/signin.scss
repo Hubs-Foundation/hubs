@@ -76,7 +76,7 @@ textarea {
 
 textarea:focus,
 input:focus {
-	border-color: transparent !important;
+	border-color: transparent;
 }
 
 input:focus::-webkit-input-placeholder {
