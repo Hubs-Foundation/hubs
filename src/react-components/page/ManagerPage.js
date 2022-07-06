@@ -13,7 +13,7 @@ import Popup from "../../react-components/popup/popup";
 import AddIcon from "../../assets/larchiveum/add_black_24dp.svg";
 import Moment from "react-moment";
 import "reactjs-popup/dist/index.css";
-import * as moment from "moment";
+import moment from "moment-timezone";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import defaultImage from "../../assets/larchiveum/default-image.png";
@@ -190,8 +190,8 @@ function ManagerHome() {
         name: exhibition?.room?.name,
         description: exhibition?.room?.description,
         sceneId: exhibition.sceneId,
-        startDate: moment(exhibition.startDate).format("YYYY-MM-DD"),
-        endDate: moment(exhibition.endDate).format("YYYY-MM-DD"),
+        startDate: exhibition.startDate,
+        endDate: exhibition.endDate,
         public: exhibition.public,
         maxSize: exhibition.maxSize,
         enableFly: exhibition.enableFly,
@@ -335,7 +335,7 @@ function ManagerHome() {
       if (res.result == "ok") {
         toast.success(t('manager.MESSAGE_SUCCESS'), { autoClose: 5000 });
         setIconLoaded(false);
-      } {
+      } else {
         toast.error(t('manager.UPDATE_MEDIAS_ERROR'), { autoClose: 5000 });
       }
       
@@ -403,7 +403,13 @@ function ManagerHome() {
 
   const handleChange = evt => {
     const name = evt.target.name;
-    const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
+    let value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
+
+    // convert datetime-local to utc
+    if(name === 'startDate' || name === 'endDate'){
+      value = moment(value).tz(moment.locale()).utc().format();
+    }
+
     if(name == 'enableSpawnAndMoveMedia' && value == false){
       exhibition.enableSpawnCamera = false;
       exhibition.enablePinObjects = false;
@@ -523,7 +529,7 @@ function ManagerHome() {
             getAllExhibitions();
           }
         });
-      } {
+      } else {
         toast.error(t('manager.CREATE_OR_UPDATE_EXHIBITION_ERROR__' + res.error.toUpperCase()), { autoClose: 5000 });
       }
     });
@@ -539,7 +545,7 @@ function ManagerHome() {
           }
         });
         setIsOpenPopupConfirmChangePublic(!isOpenPopupConfirmChangePublic);
-      } else{
+      } else {
         toast.error(t('manager.CHANGE_EXHIBITION_PUBLIC_ERROR'), { autoClose: 5000 });
       }
     });
@@ -583,7 +589,7 @@ function ManagerHome() {
           }
         });
         setIsOpenPopupConfirmOpenExhibition(!isOpenPopupConfirmOpenExhibition);
-      }{
+      } else {
         toast.error(t('manager.OPEN_EXHIBITION_ERROR'), { autoClose: 5000 });
       }
     });
@@ -897,8 +903,8 @@ function ManagerHome() {
                       <div>
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
-                          <span className="ml-1">
-                          <Moment format="YYYY-MM-DD">{item.startDate}</Moment>  <span style={{padding: '0 10px'}}>to</span> <Moment format="YYYY-MM-DD">{item.endDate}</Moment>
+                          <span className="ml-1"> {moment.utc(item.startDate).local().format("LLL")} <span style={{padding: '0 10px'}}>to</span> 
+                          <Moment format="YYYY-MM-DD hh:mma">{item.endDate}</Moment>
                           </span>
                         </div>
                       </div>
@@ -942,7 +948,7 @@ function ManagerHome() {
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
                           <span className="ml-1">
-                            <Moment format="YYYY-MM-DD">{item.startDate}</Moment>
+                            <Moment format="YYYY-MM-DD hh:mma">{item.startDate}</Moment>
                           </span>
                         </div>
                       </div>
@@ -1121,7 +1127,7 @@ function ManagerHome() {
                 <>
                   <form className="create100-form validate-form" name="form" style={{maxHeight: "60vh", overflowY: "scroll"}}>
                     <div className="d-flex">
-                      <div style={{width: '50%', padding: '10px'}}>
+                      <div style={{width: '40%', padding: '10px'}}>
                         <div className="p-t-13 p-b-9">
                           <span className="txt1">{t('manager.POPUP_EXHIBITION__NAME_LABEL')}</span>
                         </div>
@@ -1185,7 +1191,7 @@ function ManagerHome() {
                           </div>
                         </div>
                       </div>
-                      <div style={{width: '50%', padding: '10px'}}>
+                      <div style={{width: '60%', padding: '10px'}}>
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <div className="item-input" style={{width: '48%'}}>
                             <div className="p-t-13 p-b-9">
@@ -1194,10 +1200,10 @@ function ManagerHome() {
                             <div className="wrap-input100 validate-input">
                               <input
                                 className="input100"
-                                type="date"
+                                type="datetime-local"
                                 name="startDate"
                                 placeholder="dd-mm-yyyy"
-                                value={exhibition ? exhibition.startDate : undefined}
+                                value={exhibition ? moment.utc(exhibition.startDate).local().format("YYYY-MM-DDTHH:mm") : undefined}
                                 onChange={handleChange}
                               />
                               <span className="focus-input100" />
@@ -1210,10 +1216,10 @@ function ManagerHome() {
                             <div className="wrap-input100 validate-input">
                               <input
                                 className="input100"
-                                type="date"
+                                type="datetime-local"
                                 name="endDate"
                                 placeholder="dd-mm-yyyy"
-                                value={exhibition ? exhibition.endDate : undefined}
+                                value={exhibition ? moment.utc(exhibition.endDate).local().format("YYYY-MM-DDTHH:mm") : undefined}
                                 onChange={handleChange}
                               />
                               <span className="focus-input100" />

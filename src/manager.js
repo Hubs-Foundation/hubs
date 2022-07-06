@@ -90,7 +90,7 @@ function Root() {
         name: exhibition?.room?.name,
         description: exhibition?.room?.description,
         sceneId: exhibition.sceneId,
-        startDate: moment(exhibition.startDate).format('YYYY-MM-DD'),
+        startDate: exhibition.startDate,
         public: exhibition.public,
         maxSize: exhibition.maxSize,
       });
@@ -149,7 +149,7 @@ function Root() {
                                 <div className='d-flex'>
                                     <FaRegCalendarAlt className='IconFa'/> :  
                                     <span className='ml-1'>
-                                        <Moment format="YYYY-MM-DD">
+                                        <Moment format="YYYY-MM-DD hh:mma">
                                             {item.startDate}
                                         </Moment>
                                     </span>
@@ -177,7 +177,7 @@ function Root() {
                                 <div className='d-flex'>
                                     <FaRegCalendarAlt className='IconFa'/> :  
                                     <span className='ml-1'>
-                                        <Moment format="YYYY-MM-DD">
+                                        <Moment format="YYYY-MM-DD hh:mma">
                                             {item.startDate}
                                         </Moment>
                                     </span>

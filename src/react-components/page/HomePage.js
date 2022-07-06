@@ -5,7 +5,7 @@ import "../../utils/theme";
 import "../../react-components/styles/global.scss";
 import "../../assets/larchiveum/style.scss";
 import "../../assets/larchiveum/loading.scss";
-import * as moment from "moment";
+import moment from "moment-timezone";
 import Store from "../../utilities/store";
 import ExhibitionsService from "../../utilities/apiServices/ExhibitionsService";
 import ReserveService from "../../utilities/apiServices/ReserveService";
@@ -324,7 +324,7 @@ function Home() {
                     </p>
                     <p className="p-1">
                       <MdCalendarToday />
-                      <Moment format="YYYY-MM-DD">{item.startDate}</Moment>  <span style={{padding: '0 10px'}}>to</span> <Moment format="YYYY-MM-DD">{item.endDate}</Moment>
+                      <Moment format="YYYY-MM-DD hh:mma">{item.startDate}</Moment>  <span style={{padding: '0 10px'}}>to</span> <Moment format="YYYY-MM-DD hh:mma">{item.endDate}</Moment>
                     </p>
                   </div>
                   <ActionButton/>
@@ -378,7 +378,7 @@ function Home() {
         description: exhibitionNoti?.room?.description,
         sceneId: exhibitionNoti.sceneId,
         thumbnailUrl: exhibitionNoti?.room?.thumbnailUrl,
-        startDate: moment(exhibitionNoti.startDate).format("YYYY-MM-DD"),
+        startDate: moment(exhibitionNoti.startDate).format("YYYY-MM-DD hh:mma"),
         maxSize: exhibitionNoti.maxSize
       });
     } else {
