@@ -1,0 +1,1 @@
+Moved to https://www.mozilla.org/en-US/privacy/hubs/

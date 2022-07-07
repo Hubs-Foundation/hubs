@@ -1,0 +1,1 @@
+Moved to https://www.mozilla.org/en-US/about/legal/terms/hubs/
