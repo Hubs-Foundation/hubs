@@ -218,6 +218,9 @@ const Banner = () => {
   };
 
   return (
+    <>
+    <div className={styles.banner_gradient}>
+      </div>
     <div className={styles.banner_wrapper}>
       <div className={styles.banner_container}>
         {/* BRANDING  */}
@@ -366,6 +369,7 @@ const Banner = () => {
         ""
       )}
     </div>
+    </>
   );
 };
 
