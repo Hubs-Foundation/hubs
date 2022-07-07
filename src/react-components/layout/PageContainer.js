@@ -5,6 +5,7 @@ import { AuthContext } from "../auth/AuthContext";
 import configs from "../../utils/configs";
 import { useAccessibleOutlineStyle } from "../input/useAccessibleOutlineStyle";
 import { isHmc } from "../../utils/isHmc";
+import { TERMS, PRIVACY } from "../../constants";
 
 export function PageContainer({ children, ...rest }) {
   const auth = useContext(AuthContext);
@@ -26,9 +27,9 @@ export function PageContainer({ children, ...rest }) {
       hidePoweredBy={configs.feature("hide_powered_by")}
       showWhatsNewLink={configs.feature("show_whats_new_link")}
       showTerms={configs.feature("show_terms")}
-      termsUrl={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+      termsUrl={configs.link("terms_of_use", TERMS)}
       showPrivacy={configs.feature("show_privacy")}
-      privacyUrl={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+      privacyUrl={configs.link("privacy_notice", PRIVACY)}
       showCompanyLogo={configs.feature("show_company_logo")}
       companyLogoUrl={configs.image("company_logo")}
       showDiscordBotLink={configs.feature("show_discord_bot_link")}
