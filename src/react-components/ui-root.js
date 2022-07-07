@@ -94,6 +94,7 @@ import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
+import { TERMS, PRIVACY } from "../constants";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1276,13 +1277,13 @@ class UIRoot extends Component {
             id: "tos",
             label: <FormattedMessage id="more-menu.tos" defaultMessage="Terms of Service" />,
             icon: TextDocumentIcon,
-            href: configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")
+            href: configs.link("terms_of_use", TERMS)
           },
           configs.feature("show_privacy") && {
             id: "privacy",
             label: <FormattedMessage id="more-menu.privacy" defaultMessage="Privacy Notice" />,
             icon: ShieldIcon,
-            href: configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")
+            href: configs.link("privacy_notice", PRIVACY)
           }
         ].filter(item => item)
       }
