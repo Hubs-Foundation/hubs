@@ -48,7 +48,7 @@ const Banner = () => {
   const handleResponse = resp => {
     const { status, statusText } = resp;
 
-    if (status !== 200 || status > 300 || status < 200) {
+    if (status !== 200) {
       newsletterError();
       return;
     }
