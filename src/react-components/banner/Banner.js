@@ -6,7 +6,7 @@ import { CloseButton } from "../input/CloseButton";
 import { useForm } from "react-hook-form";
 import styles from "./Banner.scss";
 import { ReactComponent as ArrowIcon } from "../icons/Arrow.svg";
-import warning_icon from "../../assets/images/warning_icon.png";
+import critical from "../../assets/images/critical.png";
 import { TextInputField } from "../input/TextInputField";
 import { CheckboxInput } from "../input/CheckboxInput";
 import { FormattedMessage } from "react-intl";
@@ -155,6 +155,7 @@ const Banner = () => {
           </p>
           <Button
             preset="primary"
+            className={styles.primary_override}
             onClick={() => {
               setIsExpanded(false);
             }}
@@ -175,13 +176,13 @@ const Banner = () => {
       <div className={styles.message_wrapper}>
         <div>
           <img
-            src={warning_icon}
+            src={critical}
             className={styles.error_icon}
             alt={<FormattedMessage defaultMessage="warning" id="banner.warning-alt" />}
           />
         </div>
         <div>
-          <h3 className={styles.message_title}>
+          <h3 className={styles.error_message_title}>
             <FormattedMessage defaultMessage="We ran into a problem" id="banner.error-title" />
           </h3>
 
@@ -204,6 +205,7 @@ const Banner = () => {
           </p>
           <Button
             preset="primary"
+            className={styles.primary_override}
             onClick={() => {
               setIsExpanded(false);
             }}
@@ -230,6 +232,7 @@ const Banner = () => {
 
         <Button
           preset="primary"
+          className={styles.primary_override}
           onClick={() => {
             setIsExpanded(true);
           }}
@@ -246,7 +249,7 @@ const Banner = () => {
         <div className={styles.expand_wrapper}>
           <div className={styles.expand_container}>
             <div className={styles.expand_header}>
-              <h2 className={styles.expand_title}>
+              <h2>
                 <FormattedMessage defaultMessage="Join the next evolution of Hubs!" id="banner.expand-title" />
               </h2>
               <CloseButton
@@ -259,19 +262,36 @@ const Banner = () => {
             <div className={styles.expand_contents}>
               {/* MESSAGING  */}
               <div className={styles.expand_messaging}>
-                <FormattedMessage
-                  defaultMessage="{message}"
-                  id="banner.expand-body"
-                  values={{
-                    message: (
-                      <>
-                        We&apos;re working on a new service that makes it easier than ever to deploy a Hub of your own.
-                        Sign up here to be the first to know about our new service, as well as the latest Hubs news,
-                        product features and offerings. We can&apos;t wait to show you what we&apos;ve been working on!
-                      </>
-                    )
-                  }}
-                />
+                <p>
+                  <FormattedMessage
+                    defaultMessage="{message}"
+                    id="banner.expand-body"
+                    values={{
+                      message: (
+                        <>
+                          We&apos;re working on a new service that makes it easier than ever to deploy a Hub of your
+                          own.
+                        </>
+                      )
+                    }}
+                  />
+                </p>
+
+                <p>
+                  <FormattedMessage
+                    defaultMessage="{message}"
+                    id="banner.expand-body-two"
+                    values={{
+                      message: (
+                        <>
+                          Sign up here to get updates on what is new with Hubs and we will keep you up to date with the
+                          latest news, updates, and product offerings. We can&apos;t wait to show you what we have been
+                          working on!
+                        </>
+                      )
+                    }}
+                  />
+                </p>
               </div>
 
               {/* FORM  */}
@@ -279,7 +299,7 @@ const Banner = () => {
                 {submitted ? (
                   <Messaging status={responseStatus} />
                 ) : (
-                  <div>
+                  <div className={styles.expand_form_fields}>
                     <TextInputField
                       ref={register}
                       name="email"
@@ -297,12 +317,14 @@ const Banner = () => {
                       label={<FormattedMessage id="banner.format-label" defaultMessage="Format" />}
                     >
                       <RadioInputOption
+                        className={styles.radio_override}
                         name="email_format"
                         value="html"
                         label={<FormattedMessage id="banner.format-html" defaultMessage="HTML" />}
                         ref={register}
                       />
                       <RadioInputOption
+                        className={styles.radio_override}
                         name="email_format"
                         value="text"
                         label={<FormattedMessage id="banner.format-text" defaultMessage="Text" />}
@@ -311,7 +333,7 @@ const Banner = () => {
                     </RadioInputField>
 
                     <CheckboxInput
-                      className={styles.expand_form_field}
+                      className={styles.expand_checkbox_field}
                       labelClassName={styles.checkbox_label}
                       tabIndex="0"
                       type="checkbox"
@@ -322,10 +344,11 @@ const Banner = () => {
 
                     {/* ACTIONS  */}
                     <div className={styles.expand_actions}>
-                      <Button type="submit" preset="primary" disabled={!confirm}>
+                      <Button type="submit" preset="primary" className={styles.primary_override} disabled={!confirm}>
                         <FormattedMessage defaultMessage="Join the Mailing List" id="banner.form-cta" />
                       </Button>
                       <Button
+                        className={styles.clear_override}
                         onClick={() => {
                           setIsExpanded(false);
                         }}
