@@ -127,9 +127,8 @@ AFRAME.registerComponent("camera-tool", {
     });
     material.toneMapped = false;
 
-    // Bit of a hack here to only update the renderTarget when the screens are in view
-    material.map.isVideoTexture = true;
-    material.map.update = () => {
+    // Only update the renderTarget when the screens are in view
+    const onBeforeRender = () => {
       if (this.showCameraViewfinder) {
         this.viewfinderInViewThisFrame = true;
       }
@@ -195,12 +194,14 @@ AFRAME.registerComponent("camera-tool", {
       this.screen = new THREE.Mesh(geometry, material);
       this.screen.rotation.set(0, Math.PI, 0);
       this.screen.position.set(0, 0, -0.042);
+      this.screen.onBeforeRender = onBeforeRender;
       this.screen.matrixNeedsUpdate = true;
       this.el.setObject3D("screen", this.screen);
 
       this.selfieScreen = new THREE.Mesh(geometry, material);
       this.selfieScreen.position.set(0, 0.4, 0);
       this.selfieScreen.scale.set(-2, 2, 2);
+      this.selfieScreen.onBeforeRender = onBeforeRender;
       this.selfieScreen.matrixNeedsUpdate = true;
       this.el.setObject3D("selfieScreen", this.selfieScreen);
 
