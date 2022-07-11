@@ -40,6 +40,6 @@ RoomSignInModalContainer.propTypes = {
   onClose: PropTypes.func,
   onSubmitEmail: PropTypes.func,
   step: PropTypes.string,
-  message: PropTypes.string,
+  message: PropTypes.object,
   onContinue: PropTypes.func
 };
