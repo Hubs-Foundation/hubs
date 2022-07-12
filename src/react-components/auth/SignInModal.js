@@ -190,7 +190,7 @@ export function SignInComplete({ message, onContinue }) {
 }
 
 SignInComplete.propTypes = {
-  message: PropTypes.string.isRequired,
+  message: PropTypes.string,
   onContinue: PropTypes.func.isRequired
 };
 
