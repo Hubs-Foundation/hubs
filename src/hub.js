@@ -777,7 +777,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       showSignInDialog: true,
       signInMessage,
       onContinueAfterSignIn: async () => {
-        remountUI({ showSignInDialog: false });
+        remountUI({ showSignInDialog: false, onContinueAfterSignIn: null });
         let actionError = null;
         if (predicate()) {
           try {
