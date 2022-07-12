@@ -52,7 +52,7 @@ function Home() {
   const [filterExhibitionList, setfilterExhibitionList] = useState({
     page: 1,
     pageSize: 9,
-    sort: "startDate|desc" //format <attribute>|<order type>
+    sort: "startDate|desc", //format <attribute>|<order type>,
   });
   const [language, setLanguage] = useState('en');
 
@@ -104,9 +104,9 @@ function Home() {
   };
 
   const getAllExhibitions = () => {
-    var data = filterExhibitionList;
-    const Auth = Store.getUser();
-    if (Auth) {
+    const user = Store.getUser();
+    const data = filterExhibitionList;
+    if (user) {
       ExhibitionsService.getAllWithAuthExhibitions(data).then(res => {
         if (res.result == "ok") {
           setExhibitions(res.data);
@@ -226,12 +226,13 @@ function Home() {
           <>
             {exhibitions.data.map((item, index) => {
               let user = Store.getUser();
-              let today = new Date().setHours(0, 0, 0, 0);
-              let startDate = new Date(item.startDate).setHours(0, 0, 0, 0);
+              let today = new Date();
+              let startDate = item.startDate ? new Date(item.startDate) : null;
+              let endDate = item.endDate ? new Date(item.endDate) : null;
 
               let ActionButton = ()=>{
 
-                if(startDate > today && (item.public || item.reservated)){
+                if(startDate && startDate > today && (item.public || item.reservated)){
                   return (
                     <button 
                       key={'will-open-on'}
@@ -257,7 +258,7 @@ function Home() {
                   );
                 }
 
-                if(startDate <= today && (item.public || item.reservated)){
+                if(!startDate || (startDate <= today && (item.public || item.reservated))){
                   return (
                     <button
                       key={'enter'}
@@ -329,7 +330,11 @@ function Home() {
                     </p>
                     <p className="p-1">
                       <MdCalendarToday />
-                      {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
+                      {item.startDate ? moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT") : `<${t('home.NOT_SET')}>`} {' (start)'}
+                    </p>
+                    <p className="p-1">
+                      <MdCalendarToday />
+                      {item.endDate ? moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT") : `<${t('home.NOT_SET')}>`} {' (end)'}
                     </p>
                   </div>
                   <ActionButton/>

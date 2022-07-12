@@ -416,7 +416,10 @@ function ManagerHome() {
   const handleChangeDatetime = evt => {
     const name = evt.name;
     const value = evt.value;
-    const utc = moment(value).tz(moment.tz.guess()).utc().format();
+    let utc = undefined;
+    if(value){
+      utc = moment(value).tz(moment.tz.guess()).utc().format();
+    }
     setExhibition({ ...exhibition, [name]: utc });
   };
 
@@ -783,15 +786,6 @@ function ManagerHome() {
       if (user?.type == 5) {
         return (
         <>
-          {/* <div style={{padding: '20px 0px 0px 0px', overflow: 'hidden'}}>
-            <div style={{float: 'right'}}>
-              <span> {t('manager.LANGUAGE')} </span>
-              <select value={language} onChange={handleChangeLanguage}>
-                <option value="en">English</option>
-                <option value="ko">Korean</option>
-              </select>
-            </div>
-          </div> */}
           <div className="tabs-Admin">
             <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >{t('manager.LIST_EXHIBITION')}</button>  
             <button className={isListProject ? "active" : ""} onClick={ActionListProject}>{t('manager.LIST_PROJECT')}</button>  
@@ -915,9 +909,9 @@ function ManagerHome() {
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
                           <span className="ml-1">
-                          {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
-                          <span style={{padding: '0 10px'}}> {t('manager.TO')} </span> 
-                          {moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT")}
+                          {item.startDate ? moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT") : `<${t('manager.NOT_SET')}>`}
+                          <span style={{padding: '0 10px'}}> {'-'} </span> 
+                          {item.endDate ? moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT") : `<${t('manager.NOT_SET')}>`}
                           </span>
                         </div>
                       </div>

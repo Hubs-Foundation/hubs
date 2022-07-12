@@ -1,5 +1,6 @@
 import {API_ROOT} from '../constants';
 import Store from '../store';
+import moment from "moment-timezone";
 
 class ExhibitionsService {
     getAllExhibitions(data){
@@ -17,7 +18,7 @@ class ExhibitionsService {
     };
 
     getAllWithAuthExhibitions(data){
-        return fetch(`${API_ROOT}/v1/auth/exhibitions?page=${data.page?data.page:1}&pageSize=${data.pageSize?data.pageSize:15}&sort=${data.sort?data.sort:''}&isAdmin=${data.isAdmin?data.isAdmin:''}`, {
+        return fetch(`${API_ROOT}/v1/auth/exhibitions?page=${data.page?data.page:1}&pageSize=${data.pageSize?data.pageSize:15}&sort=${data.sort?data.sort:''}&timezone=${moment.tz.guess()}&isAdmin=${data.isAdmin?data.isAdmin:''}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
