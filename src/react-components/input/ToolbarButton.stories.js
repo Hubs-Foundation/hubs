@@ -71,7 +71,7 @@ export const RoomToolbar = () => (
     toolbarRight={
       <>
         <ToolbarButton icon={<LeaveIcon />} label="Leave" preset="accent1" />
-        <ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />
+        <ToolbarButton icon={<MoreIcon />} label="More" preset="basic" />
       </>
     }
   />
@@ -86,6 +86,6 @@ export const EntryToolbar = () => (
         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" />
       </>
     }
-    toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="transparent" />}
+    toolbarRight={<ToolbarButton icon={<MoreIcon />} label="More" preset="basic" />}
   />
 );
