@@ -129,6 +129,7 @@
     "react": "^16.14.0",
     "react-addons-linked-state-mixin": "^15.6.2",
     "react-bootstrap": "^2.4.0",
+    "react-datetime": "^3.1.1",
     "react-dom": "^16.14.0",
     "react-emoji-render": "^0.4.6",
     "react-facebook-login": "^4.1.1",

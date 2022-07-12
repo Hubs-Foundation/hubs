@@ -5,6 +5,7 @@ import "../../utils/theme";
 import "../../react-components/styles/global.scss";
 import "../../assets/larchiveum/manager.scss";
 import "../../assets/larchiveum/loading.scss";
+import "react-datetime/css/react-datetime.css"
 import Store from "../../utilities/store";
 import ExhibitionsService from "../../utilities/apiServices/ExhibitionsService";
 import MediaService from "../../utilities/apiServices/MediaService";
@@ -27,6 +28,7 @@ import { object } from "prop-types";
 import { ToggleInput } from "./components/ToggleInput";
 import Language from './languages/language';
 import { useTranslation } from 'react-i18next';
+import Datetime from "react-datetime"
 
 registerTelemetry("/manager", "Hubs Home Page");
 
@@ -202,7 +204,7 @@ function ManagerHome() {
       });
     } else {
       setExhibition({
-        maxSize: 1
+        maxSize: 5,
       });
     }
     setIsOpenExhibition(true);
@@ -402,18 +404,23 @@ function ManagerHome() {
 
   const handleChange = evt => {
     const name = evt.target.name;
-    let value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
-
-    // convert datetime-local to utc
-    if(name === 'startDate' || name === 'endDate'){
-      value = moment(value).tz(moment.locale()).utc().format();
-    }
+    const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
 
     if(name == 'enableSpawnAndMoveMedia' && value == false){
       exhibition.enableSpawnCamera = false;
       exhibition.enablePinObjects = false;
     }
     setExhibition({ ...exhibition, [name]: value });
+  };
+
+  const handleChangeDatetime = evt => {
+    const name = evt.name;
+    const value = evt.value;
+    let utc = undefined;
+    if(value){
+      utc = moment(value).tz(moment.tz.guess()).utc().format();
+    }
+    setExhibition({ ...exhibition, [name]: utc });
   };
 
   const handleChangeable = (object,evt) => {
@@ -779,15 +786,6 @@ function ManagerHome() {
       if (user?.type == 5) {
         return (
         <>
-          <div style={{padding: '20px 0px 0px 0px', overflow: 'hidden'}}>
-            <div style={{float: 'right'}}>
-              <span> {t('manager.LANGUAGE')} </span>
-              <select value={language} onChange={handleChangeLanguage}>
-                <option value="en">English</option>
-                <option value="ko">Korean</option>
-              </select>
-            </div>
-          </div>
           <div className="tabs-Admin">
             <button className={isListRoom ? "active" : ""} onClick={ActionListRoom} >{t('manager.LIST_EXHIBITION')}</button>  
             <button className={isListProject ? "active" : ""} onClick={ActionListProject}>{t('manager.LIST_PROJECT')}</button>  
@@ -813,7 +811,8 @@ function ManagerHome() {
             <button
                 className="btn btn-create"
                 onClick={() => {
-                  openPopupExhibition(), setExhibitionType("create");
+                  openPopupExhibition();
+                  setExhibitionType('create');
                 }}
               >
               <img src={AddIcon} />
@@ -910,9 +909,9 @@ function ManagerHome() {
                         <div className="d-flex">
                           <FaRegCalendarAlt className="IconFa" /> :
                           <span className="ml-1">
-                          {moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")}
-                          <span style={{padding: '0 10px'}}> {t('manager.TO')} </span> 
-                          {moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT")}
+                          {item.startDate ? moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT") : `<${t('manager.NOT_SET')}>`}
+                          <span style={{padding: '0 10px'}}> {'-'} </span> 
+                          {item.endDate ? moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT") : `<${t('manager.NOT_SET')}>`}
                           </span>
                         </div>
                       </div>
@@ -922,7 +921,8 @@ function ManagerHome() {
                       <button
                         className="btn btn-edit"
                         onClick={() => {
-                          openPopupExhibition(item), setExhibitionType("edit");
+                          openPopupExhibition(item)
+                          setExhibitionType('edit');
                         }}
                         data-id-exhibition={item.id}
                       >
@@ -996,6 +996,13 @@ function ManagerHome() {
         {projectsLoaded ? (
           <>
             {t('manager.LIST_PROJECT')}
+            <div style={{float: 'right', fontFamily: '"Poppins", sans-serif', fontSize: '16px', color: 'black'}}>
+              <span> {t('manager.LANGUAGE')} </span>
+              <select value={language} onChange={handleChangeLanguage}>
+                <option value="en">English</option>
+                <option value="ko">Korean</option>
+              </select>
+            </div>
             {projects.data.map((item, index) => {
               let count_Image=0;
               let count_Video=0;
@@ -1138,7 +1145,7 @@ function ManagerHome() {
           {isOpenExhibition && (
             <Popup
               size={"xl"}
-              title={exhibitionType == "edit" ? <> {t('manager.POPUP_EXHIBITION__EDIT_TITLE')} </> : <> {t('manager.POPUP_EXHIBITION__CREATE_TITLE')}</>}
+              title={exhibitionType == 'edit' ? <> {t('manager.POPUP_EXHIBITION__EDIT_TITLE')} </> : <> {t('manager.POPUP_EXHIBITION__CREATE_TITLE')}</>}
               content={
                 <>
                   <form className="create100-form validate-form" name="form" style={{maxHeight: "60vh", overflowY: "scroll"}}>
@@ -1199,7 +1206,7 @@ function ManagerHome() {
                                 min={0}
                                 max={50}
                                 name="maxSize"
-                                value={exhibition ? exhibition.maxSize : 1}
+                                value={exhibition ? exhibition.maxSize : 5}
                                 onChange={handleChange}
                               />
                               <span className="focus-input100" />
@@ -1214,13 +1221,17 @@ function ManagerHome() {
                               <span className="txt1">{t('manager.POPUP_EXHIBITION__START_DATE_LABEL')}</span>
                             </div>
                             <div className="wrap-input100 validate-input">
-                              <input
-                                className="input100"
-                                type="datetime-local"
-                                name="startDate"
-                                placeholder="dd-mm-yyyy"
-                                value={exhibition ? moment.utc(exhibition.startDate).local().format("YYYY-MM-DDTHH:mm") : undefined}
-                                onChange={handleChange}
+                              <Datetime
+                                key={"input-start-date"}
+                                value={exhibition?.startDate ? moment.utc(exhibition.startDate).local().format("MM/DD/YYYY hh:mm a") : undefined}
+                                onChange={(value) =>{handleChangeDatetime({
+                                  name: 'startDate', 
+                                  value: value
+                                })}}
+                                timeFormat={true}
+                                displayTimeZone={moment.tz.guess()}
+                                closeOnSelect={true}
+                                inputProps={{ placeholder: "MM/DD/YYYY hh:mm a", className:"input100", name: "startDate"}}
                               />
                               <span className="focus-input100" />
                             </div>
@@ -1230,13 +1241,17 @@ function ManagerHome() {
                               <span className="txt1">{t('manager.POPUP_EXHIBITION__END_DATE_LABEL')}</span>
                             </div>
                             <div className="wrap-input100 validate-input">
-                              <input
-                                className="input100"
-                                type="datetime-local"
-                                name="endDate"
-                                placeholder="dd-mm-yyyy"
-                                value={exhibition ? moment.utc(exhibition.endDate).local().format("YYYY-MM-DDTHH:mm") : undefined}
-                                onChange={handleChange}
+                              <Datetime
+                                key={"input-end-date"}
+                                value={exhibition?.endDate ? moment.utc(exhibition.endDate).local().format("MM/DD/YYYY hh:mm a") : undefined}
+                                onChange={(value) =>{handleChangeDatetime({
+                                  name: 'endDate', 
+                                  value: value
+                                })}}
+                                timeFormat={true}
+                                displayTimeZone={moment.tz.guess()}
+                                closeOnSelect={true}
+                                inputProps={{ placeholder: "MM/DD/YYYY hh:mm a", className:"input100", name: "endDate"}}
                               />
                               <span className="focus-input100" />
                             </div>
@@ -1384,10 +1399,10 @@ function ManagerHome() {
               }
               actions={[
                 {
-                  text: exhibitionType == "edit" ? t('manager.POPUP_EXHIBITION__EDIT') : t('manager.POPUP_EXHIBITION__CREATE'),
+                  text: exhibitionType == 'edit' ? t('manager.POPUP_EXHIBITION__EDIT') : t('manager.POPUP_EXHIBITION__CREATE'),
                   class: "btn-handle",
                   callback: () => {
-                    exhibitionType == "edit" ? handleEdit() : handleCreate();
+                    exhibitionType == 'edit' ? handleEdit() : handleCreate();
                   }
                 },
                 {
