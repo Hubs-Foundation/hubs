@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
 let config = process.env.APP_CONFIG;
@@ -25,8 +25,15 @@ export const defaultTheme = "default";
 
 export const themes = config?.theme?.themes || [];
 
-function useDarkMode() {
+export function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);
+
+  const changeListener = useCallback(
+    event => {
+      setDarkMode(event.matches);
+    },
+    [setDarkMode]
+  );
 
   useEffect(() => {
     const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -39,14 +46,18 @@ function useDarkMode() {
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
     // We may remove this workaround when no one will use Safari 13 or before.
     if (darkmodeQuery.addEventListener) {
-      darkmodeQuery.addEventListener("change", event => {
-        setDarkMode(event.matches);
-      });
+      darkmodeQuery.addEventListener("change", changeListener);
     } else {
-      darkmodeQuery.addListener(event => {
-        setDarkMode(event.matches);
-      });
+      darkmodeQuery.addListener(changeListener);
     }
+
+    return () => {
+      if (darkmodeQuery.removeEventListener) {
+        darkmodeQuery.removeEventListener("change", changeListener);
+      } else {
+        darkmodeQuery.removeListener(changeListener);
+      }
+    };
   }, []);
 
   return darkMode;
