@@ -2,7 +2,7 @@
 # this dockerfile produces image/container that serves customly packaged hubs and admin static files
 # the result container should serve reticulum as "hubs_page_origin" and "admin_page_origin" on (path) "/hubs/pages"
 ###
-from node:16.13 as builder
+from node:16.16 as builder
 run mkdir -p /hubs/admin/ && cd /hubs
 copy package.json ./
 copy package-lock.json ./
