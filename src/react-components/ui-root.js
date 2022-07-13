@@ -144,9 +144,8 @@ class UIRoot extends Component {
     subscriptions: PropTypes.object,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
-    signInMessage: PropTypes.string,
+    signInMessage: PropTypes.object,
     onContinueAfterSignIn: PropTypes.func,
-    onSignInDialogVisibilityChanged: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     onAvatarSaved: PropTypes.func,
@@ -401,11 +400,7 @@ class UIRoot extends Component {
   };
 
   showContextualSignInDialog = () => {
-    const { signInMessage, authChannel } = this.props;
-    const onCallback = () => {
-      const { onContinueAfterSignIn } = this.props;
-      (onContinueAfterSignIn && onContinueAfterSignIn()) || this.closeDialog();
-    };
+    const { signInMessage, authChannel, onContinueAfterSignIn } = this.props;
     this.showNonHistoriedDialog(RoomSignInModalContainer, {
       step: SignInStep.submit,
       message: signInMessage,
@@ -414,7 +409,7 @@ class UIRoot extends Component {
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
-          onClose: onCallback
+          onClose: onContinueAfterSignIn || this.closeDialog
         });
 
         await authComplete;
@@ -422,11 +417,11 @@ class UIRoot extends Component {
         this.setState({ signedIn: true });
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
-          onClose: onCallback,
-          onContinue: onCallback
+          onClose: onContinueAfterSignIn || this.closeDialog,
+          onContinue: onContinueAfterSignIn || this.closeDialog
         });
       },
-      onClose: onCallback
+      onClose: onContinueAfterSignIn || this.closeDialog
     });
   };
 
@@ -649,9 +644,6 @@ class UIRoot extends Component {
       this.setState({ dialog: null });
     }
 
-    const { onSignInDialogVisibilityChanged } = this.props;
-    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(false);
-
     if (isIn2DInterstitial()) {
       exit2DInterstitialAndEnterVR();
     } else {
@@ -660,8 +652,6 @@ class UIRoot extends Component {
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
-    const { onSignInDialogVisibilityChanged } = this.props;
-    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(true);
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
