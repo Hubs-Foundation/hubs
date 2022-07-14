@@ -3,12 +3,17 @@ import { createImageBitmap } from "../utils/image-bitmap-utils";
 import { ObjectTypes } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT, SOUND_CAMERA_TOOL_COUNTDOWN } from "../systems/sound-effects-system";
-import { getAudioFeedbackScale } from "./audio-feedback";
 import { cloneObject3D } from "../utils/three-utils";
 import { loadModel } from "./gltf-model-plus";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import cameraModelSrc from "../assets/camera_tool.glb";
 import anime from "animejs";
+import { Layers } from "./layers";
+const { detect } = require("detect-browser");
+
+const browser = detect();
+
+const isFirefox = browser.name === "firefox";
 
 const cameraModelPromise = waitForDOMContentLoaded().then(() => loadModel(cameraModelSrc));
 
@@ -110,6 +115,8 @@ AFRAME.registerComponent("camera-tool", {
     });
 
     this.camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
+    this.camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
+    this.camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
     this.camera.rotation.set(0, Math.PI, 0);
     this.camera.position.set(0, 0, 0.05);
     this.camera.matrixNeedsUpdate = true;
@@ -118,6 +125,7 @@ AFRAME.registerComponent("camera-tool", {
     const material = new THREE.MeshBasicMaterial({
       map: this.renderTarget.texture
     });
+    material.toneMapped = false;
 
     // Bit of a hack here to only update the renderTarget when the screens are in view
     material.map.isVideoTexture = true;
@@ -183,11 +191,6 @@ AFRAME.registerComponent("camera-tool", {
 
       const width = 0.28;
       const geometry = new THREE.PlaneBufferGeometry(width, width / this.camera.aspect);
-
-      const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-      if (environmentMapComponent) {
-        environmentMapComponent.applyEnvironmentMap(this.el.object3D);
-      }
 
       this.screen = new THREE.Mesh(geometry, material);
       this.screen.rotation.set(0, Math.PI, 0);
@@ -336,9 +339,7 @@ AFRAME.registerComponent("camera-tool", {
     this.label.object3D.visible = !!label && !isRecordingUnbound;
     const showActionLabelBackground = this.label.object3D.visible && this.data.isRecording && !isRecordingUnbound;
 
-    if (label) {
-      this.label.setAttribute("text", { value: label, color: showActionLabelBackground ? "#fafafa" : "#ff3464" });
-    }
+    this.label.setAttribute("text", { value: label, color: showActionLabelBackground ? "#fafafa" : "#ff3464" });
 
     this.labelActionBackground.object3D.visible = showActionLabelBackground;
     this.labelBackground.object3D.visible = this.label.object3D.visible && !showActionLabelBackground;
@@ -375,21 +376,25 @@ AFRAME.registerComponent("camera-tool", {
     const stream = new MediaStream();
     const track = this.videoCanvas.captureStream(VIDEO_FPS).getVideoTracks()[0];
 
-    // HACK: FF 73+ seems to fail to decode videos with no audio track, so we always include a silent track.
-    // Note that chrome won't generate the video without some data flowing to the track, hence the oscillator.
+    // This adds hacks for current browser issues with media recordings when audio tracks are muted or missing.
     const attachBlankAudio = () => {
-      const context = THREE.AudioContext.getContext();
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      const destination = context.createMediaStreamDestination();
-      gain.gain.setValueAtTime(0.0001, context.currentTime);
-      oscillator.connect(destination);
-      gain.connect(destination);
-      stream.addTrack(destination.stream.getAudioTracks()[0]);
+      // Chrome has issues when the audio tracks are silent so we only do this for FF.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=1223382
+      if (isFirefox) {
+        // FF 73+ seems to fail to decode videos with no audio track, so we always include a silent track.
+        const context = THREE.AudioContext.getContext();
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        const destination = context.createMediaStreamDestination();
+        gain.gain.setValueAtTime(0.0001, context.currentTime);
+        oscillator.connect(destination);
+        gain.connect(destination);
+        stream.addTrack(destination.stream.getAudioTracks()[0]);
+      }
     };
 
     if (this.data.captureAudio) {
-      const selfAudio = await NAF.connection.adapter.getMediaStream(NAF.clientId, "audio");
+      const selfAudio = await APP.dialog.getMediaStream(NAF.clientId, "audio");
 
       // NOTE: if we don't have a self audio track, we can end up generating an empty video (browser bug?)
       // if no audio comes through on the listener source. (Eg the room is otherwise silent.)
@@ -490,6 +495,7 @@ AFRAME.registerComponent("camera-tool", {
       if (cancel) {
         this.videoRecorder.onstop = () => {};
         this.videoRecorder._free();
+        this.el.sceneEl.emit("action_camera_recording_ended");
       }
 
       this.videoRecorder.stop();
@@ -502,8 +508,8 @@ AFRAME.registerComponent("camera-tool", {
     clearInterval(this.videoCountdownInterval);
 
     this.videoCountdownInterval = null;
-    this.el.setAttribute("camera-tool", "label", "");
-    this.el.setAttribute("camera-tool", { isRecording: false, isSnapping: false });
+
+    this.el.setAttribute("camera-tool", { label: " ", isRecording: false, isSnapping: false });
   },
 
   tick() {
@@ -573,7 +579,6 @@ AFRAME.registerComponent("camera-tool", {
       const sceneEl = this.el.sceneEl;
       const renderer = this.renderer || sceneEl.renderer;
       const now = performance.now();
-      const playerHead = this.cameraSystem.playerHead;
 
       // Perform lookAt in tock so it will re-orient after grabs, etc.
       if (this.trackTarget) {
@@ -593,24 +598,6 @@ AFRAME.registerComponent("camera-tool", {
         this.takeSnapshotNextTick ||
         (this.updateRenderTargetNextTick && (this.viewfinderInViewThisFrame || this.videoRecorder))
       ) {
-        if (playerHead) {
-          // We want to scale our own head in between frames now that we're taking a video/photo.
-          let scale = 1;
-          // TODO: The local-audio-analyser has the non-networked media stream, which is active
-          // even while the user is muted. This should be looking at a different analyser that
-          // has the networked media stream instead.
-          const analyser = this.el.sceneEl.systems["local-audio-analyser"];
-
-          if (analyser && playerHead.el.components["scale-audio-feedback"]) {
-            scale = getAudioFeedbackScale(this.el.object3D, playerHead, 1, 2, analyser.volume);
-          }
-
-          playerHead.visible = true;
-          playerHead.scale.set(scale, scale, scale);
-          playerHead.updateMatrices(true, true);
-          playerHead.updateMatrixWorld(true, true);
-        }
-
         let playerHudWasVisible = false;
 
         if (this.playerHud) {
@@ -635,13 +622,13 @@ AFRAME.registerComponent("camera-tool", {
           boneVisibilitySystem.tick();
         }
 
-        const tmpVRFlag = renderer.vr.enabled;
+        const tmpVRFlag = renderer.xr.enabled;
         const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
         delete sceneEl.object3D.onAfterRender;
-        renderer.vr.enabled = false;
+        renderer.xr.enabled = false;
 
         if (allowVideo && this.videoRecorder && !this.videoRenderTarget) {
-          // Create a separate render target for video becuase we need to flip and (sometimes) downscale it before
+          // Create a separate render target for video because we need to flip and (sometimes) downscale it before
           // encoding it to video.
           this.videoRenderTarget = new THREE.WebGLRenderTarget(CAPTURE_WIDTH, CAPTURE_HEIGHT, {
             format: THREE.RGBAFormat,
@@ -660,14 +647,8 @@ AFRAME.registerComponent("camera-tool", {
         renderer.render(sceneEl.object3D, this.camera);
         renderer.setRenderTarget(null);
 
-        renderer.vr.enabled = tmpVRFlag;
+        renderer.xr.enabled = tmpVRFlag;
         sceneEl.object3D.onAfterRender = tmpOnAfterRender;
-        if (playerHead) {
-          playerHead.visible = false;
-          playerHead.scale.set(0.00000001, 0.00000001, 0.00000001);
-          playerHead.updateMatrices(true, true);
-          playerHead.updateMatrixWorld(true, true);
-        }
 
         if (this.playerHud) {
           this.playerHud.visible = playerHudWasVisible;

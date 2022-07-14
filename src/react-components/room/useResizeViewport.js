@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 // ResizeObserver not currently supported in Firefox Android
 import ResizeObserver from "resize-observer-polyfill";
 
-const DEFAULT_MAX_RESOLUTION = 1920;
-
 // Modified from AFrame
 function getRenderResolution(canvasRect, maxResolution, isVR) {
   const pixelRatio = window.devicePixelRatio;
@@ -37,18 +35,17 @@ function getRenderResolution(canvasRect, maxResolution, isVR) {
 
 export function useResizeViewport(viewportRef, store, scene) {
   const [maxResolution, setMaxResolution] = useState({
-    width: DEFAULT_MAX_RESOLUTION,
-    height: DEFAULT_MAX_RESOLUTION
+    width: window.screen.width,
+    height: window.screen.height
   });
 
   useEffect(
     () => {
       function onStoreChanged() {
         const { maxResolutionWidth, maxResolutionHeight } = store.state.preferences;
-
         setMaxResolution({
-          width: maxResolutionWidth === undefined ? DEFAULT_MAX_RESOLUTION : maxResolutionWidth,
-          height: maxResolutionHeight === undefined ? DEFAULT_MAX_RESOLUTION : maxResolutionHeight
+          width: maxResolutionWidth === undefined ? window.screen.width : maxResolutionWidth,
+          height: maxResolutionHeight === undefined ? window.screen.height : maxResolutionHeight
         });
       }
 
@@ -66,8 +63,8 @@ export function useResizeViewport(viewportRef, store, scene) {
   useEffect(
     () => {
       const observer = new ResizeObserver(entries => {
-        const isPresenting = scene.renderer.vr.isPresenting();
-        const isVRPresenting = scene.renderer.vr.enabled && isPresenting;
+        const isPresenting = scene.renderer.xr.isPresenting;
+        const isVRPresenting = scene.renderer.xr.enabled && isPresenting;
 
         // Do not update renderer, if a camera or a canvas have not been injected.
         // In VR mode, three handles canvas resize based on the dimensions returned by

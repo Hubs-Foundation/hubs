@@ -3,15 +3,17 @@ import PropTypes from "prop-types";
 import { Page } from "./Page";
 import { AuthContext } from "../auth/AuthContext";
 import configs from "../../utils/configs";
+import { getAppLogo } from "../../utils/get-app-logo";
 import { useAccessibleOutlineStyle } from "../input/useAccessibleOutlineStyle";
 
 export function PageContainer({ children, ...rest }) {
   const auth = useContext(AuthContext);
   useAccessibleOutlineStyle();
-
+  //using show cloud as a proxy for if we are on hmc
+  const isHmc = configs.feature("show_cloud");
   return (
     <Page
-      appLogo={configs.image("logo")}
+      appLogo={getAppLogo()}
       showCloud={configs.feature("show_cloud")}
       enableSpoke={configs.feature("enable_spoke")}
       editorName={configs.translation("editor-name")}
@@ -34,6 +36,7 @@ export function PageContainer({ children, ...rest }) {
       companyLogoUrl={configs.image("company_logo")}
       showDiscordBotLink={configs.feature("show_discord_bot_link")}
       appName={configs.translation("app-name")}
+      isHmc={isHmc}
       {...rest}
     >
       {children}

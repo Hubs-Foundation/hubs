@@ -14,13 +14,20 @@ const DEFAULT_COLORS = {
   "action-subtitle-color": "#F0F0F0",
   "notice-background-color": "#2F80ED",
   "notice-text-color": "#FFFFFF",
-  "favorited-color": "#FFC000"
+  "favorited-color": "#FFC000",
+  "nametag-color": "#000000",
+  "nametag-volume-color": "#7ED320",
+  "nametag-text-color": "#FFFFFF",
+  "nametag-border-color": "#7ED320",
+  "nametag-border-color-raised-hand": "#FFCD74"
 };
 
 function getThemeColor(name) {
   const themeId = window.APP?.store?.state?.preferences?.theme;
 
-  const theme = themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId);
+  const theme =
+    (themeId && configs.APP_CONFIG?.theme?.themes?.find(theme => theme.id === themeId)) ||
+    configs.APP_CONFIG?.theme?.themes?.find(theme => theme.default === true);
   if (theme?.variables?.[name]) {
     return theme.variables[name];
   }

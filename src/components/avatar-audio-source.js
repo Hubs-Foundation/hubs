@@ -1,3 +1,5 @@
+import { SourceType, AudioType } from "./audio-params";
+import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
@@ -31,7 +33,7 @@ async function getMediaStream(el) {
     console.error(INFO_INIT_FAILED, INFO_NO_OWNER);
     return null;
   }
-  const stream = await NAF.connection.adapter.getMediaStream(peerId).catch(e => {
+  const stream = await APP.dialog.getMediaStream(peerId).catch(e => {
     console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
   });
   if (!stream) {
@@ -40,42 +42,26 @@ async function getMediaStream(el) {
   return stream;
 }
 
-function setPositionalAudioProperties(audio, settings) {
-  audio.setDistanceModel(settings.distanceModel);
-  audio.setMaxDistance(settings.maxDistance);
-  audio.setRefDistance(settings.refDistance);
-  audio.setRolloffFactor(settings.rolloffFactor);
-  audio.setDirectionalCone(settings.innerAngle, settings.outerAngle, settings.outerGain);
-}
-
 AFRAME.registerComponent("avatar-audio-source", {
-  schema: {
-    positional: { default: true },
-    distanceModel: {
-      default: "inverse",
-      oneOf: ["linear", "inverse", "exponential"]
-    },
-    maxDistance: { default: 10000 },
-    refDistance: { default: 1 },
-    rolloffFactor: { default: 1 },
-
-    innerAngle: { default: 360 },
-    outerAngle: { default: 0 },
-    outerGain: { default: 0 }
-  },
-
   createAudio: async function() {
+    this.removeAudio();
+
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
     this.isCreatingAudio = false;
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
+    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
+    const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
-    const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
-    if (this.data.positional) {
-      setPositionalAudioProperties(audio, this.data);
+    let audio = this.el.getObject3D(this.attrName);
+    if (audioType === AudioType.PannerNode) {
+      audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      audio = new THREE.Audio(audioListener);
     }
+    this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: audio });
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
       createSilentAudioEl(stream); // TODO: Do the audio els need to get cleaned up?
@@ -88,22 +74,39 @@ AFRAME.registerComponent("avatar-audio-source", {
     audio.setNodeSource(destinationSource);
     this.el.setObject3D(this.attrName, audio);
     this.el.emit("sound-source-set", { soundSource: destinationSource });
+
+    APP.audios.set(this.el, audio);
+    updateAudioSettings(this.el, audio);
   },
 
-  destroyAudio() {
+  removeAudio() {
     const audio = this.el.getObject3D(this.attrName);
-    if (!audio) return;
-
-    audio.disconnect();
-    this.el.removeObject3D(this.attrName);
+    if (audio) {
+      this.audioSystem.removeAudio({ node: audio });
+      this.el.removeObject3D(this.attrName);
+    }
   },
 
   init() {
-    this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.registerAvatarAudioSource(this);
+    this.createAudio = this.createAudio.bind(this);
+
+    this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
-    NAF.connection.adapter.on("stream_updated", this._onStreamUpdated, this);
+    APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
+
+    let disableLeftRightPanningPref = APP.store.state.preferences.disableLeftRightPanning;
+    this.onPreferenceChanged = () => {
+      const newPref = APP.store.state.preferences.disableLeftRightPanning;
+      const shouldRecreateAudio = disableLeftRightPanningPref !== newPref && !this.isCreatingAudio;
+      disableLeftRightPanningPref = newPref;
+      if (shouldRecreateAudio) {
+        this.createAudio();
+      }
+    };
+    APP.store.addEventListener("statechanged", this.onPreferenceChanged);
+    this.el.addEventListener("audio_type_changed", this.createAudio);
   },
 
   async _onStreamUpdated(peerId, kind) {
@@ -115,7 +118,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     getOwnerId(this.el).then(async ownerId => {
       if (ownerId === peerId && kind === "audio") {
         // The audio stream for this peer has been updated
-        const newStream = await NAF.connection.adapter.getMediaStream(peerId, "audio").catch(e => {
+        const newStream = await APP.dialog.getMediaStream(peerId, "audio").catch(e => {
           console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
         });
 
@@ -128,34 +131,26 @@ AFRAME.registerComponent("avatar-audio-source", {
     });
   },
 
-  update(oldData) {
-    if (this.isCreatingAudio) return;
-
-    const audio = this.el.getObject3D(this.attrName);
-    if (!audio) return;
-
-    const shouldRecreateAudio = oldData.positional !== this.data.positional;
-    if (shouldRecreateAudio) {
-      this.destroyAudio();
-      this.createAudio();
-    } else if (this.data.positional) {
-      setPositionalAudioProperties(audio, this.data);
-    }
-  },
-
   remove: function() {
-    this.el.sceneEl.systems["hubs-systems"].audioSettingsSystem.unregisterAvatarAudioSource(this);
-    NAF.connection.adapter.off("stream_updated", this._onStreamUpdated);
-    this.destroyAudio();
+    APP.dialog.off("stream_updated", this._onStreamUpdated);
+
+    window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
+    this.el.removeEventListener("audio_type_changed", this.createAudio);
+
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
+    APP.supplementaryAttenuation.delete(this.el);
+
+    this.removeAudio();
   }
 });
 
 function createWhiteNoise(audioContext, gain) {
   const bufferSize = 2 * audioContext.sampleRate,
     noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate),
-    output = noiseBuffer.getChannelData(0);
+    gainFilter = noiseBuffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
-    output[i] = (Math.random() * 2 - 1) * gain;
+    gainFilter[i] = (Math.random() * 2 - 1) * gain;
   }
 
   const whiteNoise = audioContext.createBufferSource();
@@ -185,7 +180,7 @@ AFRAME.registerComponent("zone-audio-source", {
   init() {
     const audioListener = this.el.sceneEl.audioListener;
     const ctx = audioListener.context;
-    this.output = ctx.createGain();
+    this.gainFilter = ctx.createGain();
     if (this.data.debug) {
       this.whiteNoise = createWhiteNoise(ctx, 0.01);
       this.setInput(this.whiteNoise);
@@ -207,18 +202,18 @@ AFRAME.registerComponent("zone-audio-source", {
 
   setInput(newInput) {
     if (this.input) {
-      this.input.disconnect(this.output);
+      this.input.disconnect(this.gainFilter);
       this.input = null;
     }
 
     if (newInput) {
-      newInput.connect(this.output);
+      newInput.connect(this.gainFilter);
       this.input = newInput;
     }
   },
 
-  getAudioOutput() {
-    return this.output;
+  getGainFilter() {
+    return this.gainFilter;
   },
 
   tick() {
@@ -266,53 +261,50 @@ AFRAME.registerComponent("zone-audio-source", {
  */
 AFRAME.registerComponent("audio-target", {
   schema: {
-    positional: { default: true },
-
-    distanceModel: {
-      default: "inverse",
-      oneOf: ["linear", "inverse", "exponential"]
-    },
-    maxDistance: { default: 10000 },
-    refDistance: { default: 8 },
-    rolloffFactor: { default: 5 },
-
-    innerAngle: { default: 170 },
-    outerAngle: { default: 300 },
-    outerGain: { default: 0.3 },
-
     minDelay: { default: 0.01 },
     maxDelay: { default: 0.13 },
-    gain: { default: 1.0 },
-
     srcEl: { type: "selector" },
-
     debug: { default: false }
   },
 
   init() {
+    this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
     this.createAudio();
     // TODO this is to ensure targets and sources loaded at the same time don't have
     // an order depndancy but this should be done in a more robust way
     setTimeout(() => {
       this.connectAudio();
     }, 0);
+    this.el.setAttribute("audio-zone-source");
+
+    this.createAudio = this.createAudio.bind(this);
+    this.el.addEventListener("audio_type_changed", this.createAudio);
   },
 
   remove: function() {
-    this.destroyAudio();
+    APP.supplementaryAttenuation.delete(this.el);
+    APP.audios.delete(this.el);
+    APP.sourceType.delete(this.el);
+
+    this.removeAudio();
+
+    this.el.removeAttribute("audio-zone-source");
+    this.el.removeEventListener("audio_type_changed", this.createAudio);
   },
 
   createAudio: function() {
+    this.removeAudio();
+
+    APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const audioListener = this.el.sceneEl.audioListener;
-    const audio = this.data.positional ? new THREE.PositionalAudio(audioListener) : new THREE.Audio(audioListener);
-
-    if (this.data.debug && this.data.positional) {
-      setPositionalAudioProperties(audio, this.data);
-      const helper = new THREE.PositionalAudioHelper(audio, this.data.refDistance, 16, 16);
-      audio.add(helper);
+    const { audioType } = getCurrentAudioSettings(this.el);
+    let audio = this.el.getObject3D(this.attrName);
+    if (audioType === AudioType.PannerNode) {
+      audio = new THREE.PositionalAudio(audioListener);
+    } else {
+      audio = new THREE.Audio(audioListener);
     }
-
-    audio.setVolume(this.data.gain);
+    this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: audio });
 
     if (this.data.maxDelay > 0) {
       const delayNode = audio.context.createDelay(this.data.maxDelay);
@@ -323,25 +315,31 @@ AFRAME.registerComponent("audio-target", {
     this.el.setObject3D(this.attrName, audio);
     audio.matrixNeedsUpdate = true;
     audio.updateMatrixWorld();
-    this.audio = audio;
+
+    audio.updateMatrixWorld();
+    APP.audios.set(this.el, audio);
+    updateAudioSettings(this.el, audio);
   },
 
   connectAudio() {
     const srcEl = this.data.srcEl;
     const srcZone = srcEl && srcEl.components["zone-audio-source"];
-    const node = srcZone && srcZone.getAudioOutput();
+    const node = srcZone && srcZone.getGainFilter();
     if (node) {
-      this.audio.setNodeSource(node);
+      const audio = this.el.getObject3D(this.attrName);
+      if (audio) {
+        audio.setNodeSource(node);
+      }
     } else {
       console.warn(`Failed to get audio from source for ${this.el.className}`, srcEl);
     }
   },
 
-  destroyAudio() {
+  removeAudio() {
     const audio = this.el.getObject3D(this.attrName);
-    if (!audio) return;
-
-    audio.disconnect();
-    this.el.removeObject3D(this.attrName);
+    if (audio) {
+      this.audioSystem.removeAudio({ node: this.audio });
+      this.el.removeObject3D(this.attrName);
+    }
   }
 });

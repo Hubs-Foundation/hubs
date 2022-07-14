@@ -22,6 +22,7 @@ import StateRoute from "./state-route.js";
 import { getPresenceProfileForSession, hubUrl } from "../utils/phoenix-utils";
 import { getMicrophonePresences } from "../utils/microphone-presence";
 import { getCurrentStreamer } from "../utils/component-utils";
+import { isIOS } from "../utils/is-mobile";
 
 import ProfileEntryPanel from "./profile-entry-panel";
 import MediaBrowserContainer from "./media-browser";
@@ -45,7 +46,6 @@ import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { ToolbarButton } from "./input/ToolbarButton";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
-import { MicPermissionsModal } from "./room/MicPermissionsModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
@@ -76,7 +76,7 @@ import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
-import { VoiceButtonContainer } from "./room/VoiceButtonContainer";
+import { AudioPopoverContainer } from "./room/AudioPopoverContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
@@ -93,6 +93,7 @@ import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
+import { MediaDevicesEvents } from "../utils/media-devices-utils";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -140,11 +141,11 @@ class UIRoot extends Component {
     presences: PropTypes.object,
     sessionId: PropTypes.string,
     subscriptions: PropTypes.object,
-    initialIsSubscribed: PropTypes.bool,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     signInMessage: PropTypes.string,
     onContinueAfterSignIn: PropTypes.func,
+    onSignInDialogVisibilityChanged: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
     onMediaSearchResultEntrySelected: PropTypes.func,
     onAvatarSaved: PropTypes.func,
@@ -196,7 +197,8 @@ class UIRoot extends Component {
     objectInfo: null,
     objectSrc: "",
     sidebarId: null,
-    presenceCount: 0
+    presenceCount: 0,
+    chatInputEffect: () => {}
   };
 
   constructor(props) {
@@ -206,7 +208,7 @@ class UIRoot extends Component {
 
     // An exit handler that discards event arguments and can be cleaned up.
     this.exitEventHandler = () => this.props.exitScene();
-    this.mediaDevicesManager = window.APP.mediaDevicesManager;
+    this.mediaDevicesManager = APP.mediaDevicesManager;
   }
 
   componentDidUpdate(prevProps) {
@@ -232,8 +234,22 @@ class UIRoot extends Component {
         window.setTimeout(() => {
           if (!this.props.isBotMode) {
             try {
-              this.props.scene.renderer.compileAndUploadMaterials(this.props.scene.object3D, this.props.scene.camera);
-            } catch {
+              this.props.scene.renderer.compile(this.props.scene.object3D, this.props.scene.camera);
+              this.props.scene.object3D.traverse(obj => {
+                if (!obj.material) {
+                  return;
+                }
+                const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                for (const material of materials) {
+                  for (const prop in material) {
+                    if (material[prop] && material[prop].isTexture) {
+                      this.props.scene.renderer.initTexture(material[prop]);
+                    }
+                  }
+                }
+              });
+            } catch (e) {
+              console.error(e);
               this.props.exitScene(ExitReason.sceneError); // https://github.com/mozilla/hubs/issues/1950
             }
           }
@@ -261,7 +277,7 @@ class UIRoot extends Component {
   }
 
   onConcurrentLoad = () => {
-    if (qsTruthy("allow_multi") || this.props.store.state.preferences["allowMultipleHubsInstances"]) return;
+    if (qsTruthy("allow_multi") || this.props.store.state.preferences.allowMultipleHubsInstances) return;
     this.startAutoExitTimer(AutoExitReason.concurrentSession);
   };
 
@@ -269,7 +285,7 @@ class UIRoot extends Component {
     if (
       this.props.disableAutoExitOnIdle ||
       this.state.isStreaming ||
-      this.props.store.state.preferences["disableIdleDetection"]
+      this.props.store.state.preferences.disableIdleDetection
     )
       return;
     this.startAutoExitTimer(AutoExitReason.idle);
@@ -285,6 +301,7 @@ class UIRoot extends Component {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
+    window.addEventListener("focus_chat", this.onFocusChat);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -348,6 +365,7 @@ class UIRoot extends Component {
       this.props.scene.addEventListener(
         "loading_finished",
         () => {
+          console.log("Loading has finished. Checking for forced room entry");
           setTimeout(() => this.handleForceEntry(), 1000);
         },
         { once: true }
@@ -374,6 +392,7 @@ class UIRoot extends Component {
     window.removeEventListener("concurrentload", this.onConcurrentLoad);
     window.removeEventListener("idle_detected", this.onIdleDetected);
     window.removeEventListener("activity_detected", this.onActivityDetected);
+    window.removeEventListener("focus_chat", this.onFocusChat);
   }
 
   storeUpdated = () => {
@@ -381,8 +400,11 @@ class UIRoot extends Component {
   };
 
   showContextualSignInDialog = () => {
-    const { signInMessage, authChannel, onContinueAfterSignIn } = this.props;
-
+    const { signInMessage, authChannel } = this.props;
+    const onCallback = () => {
+      const { onContinueAfterSignIn } = this.props;
+      (onContinueAfterSignIn && onContinueAfterSignIn()) || this.closeDialog();
+    };
     this.showNonHistoriedDialog(RoomSignInModalContainer, {
       step: SignInStep.submit,
       message: signInMessage,
@@ -391,7 +413,7 @@ class UIRoot extends Component {
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
-          onClose: onContinueAfterSignIn || this.closeDialog
+          onClose: onCallback
         });
 
         await authComplete;
@@ -399,11 +421,11 @@ class UIRoot extends Component {
         this.setState({ signedIn: true });
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.complete,
-          onClose: onContinueAfterSignIn || this.closeDialog,
-          onContinue: onContinueAfterSignIn || this.closeDialog
+          onClose: onCallback,
+          onContinue: onCallback
         });
       },
-      onClose: onContinueAfterSignIn || this.closeDialog
+      onClose: onCallback
     });
   };
 
@@ -430,6 +452,7 @@ class UIRoot extends Component {
   };
 
   onLoadingFinished = () => {
+    console.log("UI root loading has finished");
     this.setState({ noMoreLoadingUpdates: true });
     this.props.scene.emit("loading_finished");
 
@@ -439,6 +462,7 @@ class UIRoot extends Component {
   };
 
   onSceneLoaded = () => {
+    console.log("UI root scene has loaded");
     this.setState({ sceneLoaded: true });
   };
 
@@ -454,16 +478,12 @@ class UIRoot extends Component {
     this.setState({ showVideoShareFailed: true });
   };
 
-  toggleMute = () => {
-    this.props.scene.emit("action_mute");
-  };
-
   shareVideo = mediaSource => {
     this.props.scene.emit(`action_share_${mediaSource}`);
   };
 
   endShareVideo = () => {
-    this.props.scene.emit("action_end_video_sharing");
+    this.props.scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
   };
 
   spawnPen = () => {
@@ -478,6 +498,8 @@ class UIRoot extends Component {
   };
 
   handleForceEntry = () => {
+    console.log("Forced entry type: " + this.props.forcedVREntryType);
+
     if (!this.props.forcedVREntryType) return;
 
     if (this.props.forcedVREntryType.startsWith("daydream")) {
@@ -534,22 +556,24 @@ class UIRoot extends Component {
 
     if (hasGrantedMic) {
       if (!this.mediaDevicesManager.isMicShared) {
-        await this.mediaDevicesManager.startLastUsedMicShare();
+        await this.mediaDevicesManager.startMicShare({});
       }
       this.beginOrSkipAudioSetup();
     } else {
       this.onRequestMicPermission();
-      this.pushHistoryState("entry_step", "mic_grant");
+      this.pushHistoryState("entry_step", "audio");
     }
 
     this.setState({ waitingOnAudio: false });
   };
 
   enter2D = async () => {
+    console.log("Entering in 2D mode");
     await this.performDirectEntryFlow(false);
   };
 
   enterVR = async () => {
+    console.log("Entering in VR mode");
     if (this.props.forcedVREntryType || this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.maybe) {
       await this.performDirectEntryFlow(true);
     } else {
@@ -558,38 +582,28 @@ class UIRoot extends Component {
   };
 
   enterDaydream = async () => {
+    console.log("Entering in Daydream mode");
     await this.performDirectEntryFlow(true);
   };
 
-  micDeviceChanged = async deviceId => {
-    this.mediaDevicesManager.startMicShare(deviceId);
-  };
-
   onRequestMicPermission = async () => {
-    // TODO: Show an error state if getting the microphone permissions fails
-    await this.mediaDevicesManager.startLastUsedMicShare();
-    this.beginOrSkipAudioSetup();
+    await this.mediaDevicesManager.startMicShare({});
   };
 
   beginOrSkipAudioSetup = () => {
-    console.log(this.props.forcedVREntryType);
     const skipAudioSetup = this.props.forcedVREntryType && this.props.forcedVREntryType.endsWith("_now");
-
     if (skipAudioSetup) {
+      console.log(`Skipping audio setup (forcedVREntryType = ${this.props.forcedVREntryType})`);
       this.onAudioReadyButton();
     } else {
+      console.log(`Starting audio setup`);
       this.pushHistoryState("entry_step", "audio");
     }
   };
 
   shouldShowFullScreen = () => {
     // Disable full screen on iOS, since Safari's fullscreen mode does not let you prevent native pinch-to-zoom gestures.
-    return (
-      (isMobile || AFRAME.utils.device.isMobileVR()) &&
-      !AFRAME.utils.device.isIOS() &&
-      !this.state.enterInVR &&
-      screenfull.enabled
-    );
+    return (isMobile || AFRAME.utils.device.isMobileVR()) && !isIOS() && !this.state.enterInVR && screenfull.enabled;
   };
 
   onAudioReadyButton = async () => {
@@ -600,10 +614,7 @@ class UIRoot extends Component {
     // Push the new history state before going into VR, otherwise menu button will take us back
     clearHistoryState(this.props.history);
 
-    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
-    this.props.store.update({
-      settings: { micMuted: false }
-    });
+    const muteOnEntry = this.props.store.state.preferences.muteMicOnEntry;
     await this.props.enterScene(this.state.enterInVR, muteOnEntry);
 
     this.setState({ entered: true, entering: false, showShareDialog: false });
@@ -635,9 +646,10 @@ class UIRoot extends Component {
   closeDialog = () => {
     if (this.state.dialog) {
       this.setState({ dialog: null });
-    } else {
-      this.props.history.goBack();
     }
+
+    const { onSignInDialogVisibilityChanged } = this.props;
+    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(false);
 
     if (isIn2DInterstitial()) {
       exit2DInterstitialAndEnterVR();
@@ -647,6 +659,8 @@ class UIRoot extends Component {
   };
 
   showNonHistoriedDialog = (DialogClass, props = {}) => {
+    const { onSignInDialogVisibilityChanged } = this.props;
+    onSignInDialogVisibilityChanged && onSignInDialogVisibilityChanged(true);
     this.setState({
       dialog: <DialogClass {...{ onClose: this.closeDialog, ...props }} />
     });
@@ -718,6 +732,7 @@ class UIRoot extends Component {
         () => {
           this.showNonHistoriedDialog(TweetModalContainer, {
             hubChannel: this.props.hubChannel,
+            isAdmin: configs.isAdmin(),
             ...detail
           });
         },
@@ -740,7 +755,7 @@ class UIRoot extends Component {
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
-    this.setState({ sidebarId, selectedUserId: null, ...otherState });
+    this.setState({ sidebarId, chatInputEffect: () => {}, selectedUserId: null, ...otherState });
   }
 
   toggleSidebar(sidebarId, otherState) {
@@ -754,6 +769,15 @@ class UIRoot extends Component {
       };
     });
   }
+
+  onFocusChat = e => {
+    this.setSidebar("chat", {
+      chatInputEffect: input => {
+        input.focus();
+        input.value = e.detail.prefix;
+      }
+    });
+  };
 
   renderInterstitialPrompt = () => {
     return (
@@ -801,7 +825,7 @@ class UIRoot extends Component {
                 this.pushHistoryState("entry_step", "profile");
               } else {
                 this.onRequestMicPermission();
-                this.pushHistoryState("entry_step", "mic_grant");
+                this.pushHistoryState("entry_step", "audio");
               }
             } else {
               this.handleForceEntry();
@@ -866,17 +890,10 @@ class UIRoot extends Component {
   };
 
   renderAudioSetupPanel = () => {
-    const muteOnEntry = this.props.store.state.preferences["muteMicOnEntry"] || false;
     // TODO: Show HMD mic not chosen warning
     return (
       <MicSetupModalContainer
         scene={this.props.scene}
-        selectedMicrophone={this.mediaDevicesManager.selectedMicDeviceId}
-        microphoneOptions={this.mediaDevicesManager.micDevices}
-        onChangeMicrophone={this.micDeviceChanged}
-        microphoneEnabled={this.mediaDevicesManager.isMicShared}
-        microphoneMuted={muteOnEntry}
-        onChangeMicrophoneMuted={() => this.props.store.update({ preferences: { muteMicOnEntry: !muteOnEntry } })}
         onEnterRoom={this.onAudioReadyButton}
         onBack={() => this.props.history.goBack()}
       />
@@ -995,7 +1012,8 @@ class UIRoot extends Component {
     const entered = this.state.entered;
     const watching = this.state.watching;
     const enteredOrWatching = entered || watching;
-    const showRtcDebugPanel = this.props.store.state.preferences["showRtcDebugPanel"];
+    const showRtcDebugPanel = this.props.store.state.preferences.showRtcDebugPanel;
+    const showAudioDebugPanel = this.props.store.state.preferences.showAudioDebugPanel;
     const displayNameOverride = this.props.hubIsBound
       ? getPresenceProfileForSession(this.props.presences, this.props.sessionId).displayName
       : null;
@@ -1020,9 +1038,6 @@ class UIRoot extends Component {
           <StateRoute stateKey="entry_step" stateValue="device" history={this.props.history}>
             {this.renderDevicePanel()}
           </StateRoute>
-          <StateRoute stateKey="entry_step" stateValue="mic_grant" history={this.props.history}>
-            <MicPermissionsModal onBack={() => this.props.history.goBack()} />
-          </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
           </StateRoute>
@@ -1041,7 +1056,7 @@ class UIRoot extends Component {
                     this.handleForceEntry();
                   } else {
                     this.onRequestMicPermission();
-                    this.pushHistoryState("entry_step", "mic_grant");
+                    this.pushHistoryState("entry_step", "audio");
                   }
                 }}
                 showBackButton
@@ -1082,9 +1097,15 @@ class UIRoot extends Component {
     const moreMenu = [
       {
         id: "user",
-        label:
-          "You" +
-          (this.state.signedIn ? ` (Signed in as: ${maskEmail(this.props.store.state.credentials.email)})` : ""),
+        label: !this.state.signedIn ? (
+          <FormattedMessage id="more-menu.not-signed-in" defaultMessage="You are not signed in" />
+        ) : (
+          <FormattedMessage
+            id="more-menu.you-signed-in-as"
+            defaultMessage="Signed in as: {email}"
+            values={{ email: maskEmail(this.props.store.state.credentials.email) }}
+          />
+        ),
         items: [
           this.state.signedIn
             ? {
@@ -1134,7 +1155,7 @@ class UIRoot extends Component {
           },
           {
             id: "preferences",
-            label: "Preferences",
+            label: <FormattedMessage id="more-menu.preferences" defaultMessage="Preferences" />,
             icon: SettingsIcon,
             onClick: () => this.setState({ showPrefs: true })
           }
@@ -1356,7 +1377,7 @@ class UIRoot extends Component {
                         <PeopleMenuButton
                           active={this.state.sidebarId === "people"}
                           onClick={() => this.toggleSidebar("people")}
-                          presenceCount={this.state.presenceCount}
+                          presencecount={this.state.presenceCount}
                         />
                       </ContentMenu>
                     )}
@@ -1395,13 +1416,15 @@ class UIRoot extends Component {
                       scene={this.props.scene}
                       store={this.props.store}
                     />
-                    {showRtcDebugPanel && (
+                    {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
                         history={this.props.history}
                         store={window.APP.store}
                         scene={this.props.scene}
                         presences={this.props.presences}
                         sessionId={this.props.sessionId}
+                        showRtcDebug={showRtcDebugPanel}
+                        showAudioDebug={showAudioDebugPanel}
                       />
                     )}
                   </>
@@ -1416,6 +1439,7 @@ class UIRoot extends Component {
                           canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
                           scene={this.props.scene}
                           onClose={() => this.setSidebar(null)}
+                          inputEffect={this.state.chatInputEffect}
                         />
                       )}
                       {this.state.sidebarId === "objects" && (
@@ -1531,10 +1555,7 @@ class UIRoot extends Component {
                     )}
                     {entered && (
                       <>
-                        <VoiceButtonContainer
-                          scene={this.props.scene}
-                          microphoneEnabled={this.mediaDevicesManager.isMicShared}
-                        />
+                        <AudioPopoverContainer scene={this.props.scene} />
                         <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                         <PlacePopoverContainer
                           scene={this.props.scene}
@@ -1542,7 +1563,12 @@ class UIRoot extends Component {
                           mediaSearchStore={this.props.mediaSearchStore}
                           showNonHistoriedDialog={this.showNonHistoriedDialog}
                         />
-                        {this.props.hubChannel.can("spawn_emoji") && <ReactionPopoverContainer />}
+                        {this.props.hubChannel.can("spawn_emoji") && (
+                          <ReactionPopoverContainer
+                            scene={this.props.scene}
+                            initialPresence={getPresenceProfileForSession(this.props.presences, this.props.sessionId)}
+                          />
+                        )}
                       </>
                     )}
                     <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />

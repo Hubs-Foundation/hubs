@@ -27,9 +27,9 @@ export class ScaleInScreenSpaceSystem {
           parent.updateMatrices();
           parentScale.setFromMatrixScale(parent.matrixWorld);
           component.el.object3D.scale.set(
-            (1 / parentScale.x) * (component.data.baseScale.x + distance * component.data.addedScale.x),
-            (1 / parentScale.y) * (component.data.baseScale.y + distance * component.data.addedScale.y),
-            (1 / parentScale.z) * (component.data.baseScale.z + distance * component.data.addedScale.z)
+            (1 / parentScale.x) * (component.data.baseScale.x + distance * component.preferredScale.x),
+            (1 / parentScale.y) * (component.data.baseScale.y + distance * component.preferredScale.y),
+            (1 / parentScale.z) * (component.data.baseScale.z + distance * component.preferredScale.z)
           );
         }
         component.el.object3D.matrixNeedsUpdate = true;

@@ -84,12 +84,9 @@ export const xforms = {
     frame.setVector2(dest.value, 0, 0);
   },
   poseFromCameraProjection: function() {
-    let camera;
     const pose = new Pose();
     return function poseFromCameraProjection(frame, src, dest) {
-      if (!camera) {
-        camera = document.getElementById("viewing-camera").components.camera.camera;
-      }
+      const camera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
       const value = frame.get(src.value);
       frame.setPose(dest.value, pose.fromCameraProjection(camera, value[0], value[1]));
     };

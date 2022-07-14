@@ -54,12 +54,15 @@ export function disposeNode(node) {
 const IDENTITY = new THREE.Matrix4().identity();
 export function setMatrixWorld(object3D, m) {
   if (!object3D.matrixIsModified) {
-    object3D.applyMatrix(IDENTITY); // hack around our matrix optimizations
+    object3D.applyMatrix4(IDENTITY); // hack around our matrix optimizations
   }
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {
     object3D.parent.updateMatrices();
-    object3D.matrix = object3D.matrix.getInverse(object3D.parent.matrixWorld).multiply(object3D.matrixWorld);
+    object3D.matrix = object3D.matrix
+      .copy(object3D.parent.matrixWorld)
+      .invert()
+      .multiply(object3D.matrixWorld);
   } else {
     object3D.matrix.copy(object3D.matrixWorld);
   }
@@ -220,7 +223,7 @@ export const interpolateAffine = (function() {
   return function(startMat4, endMat4, progress, outMat4) {
     start.quaternion.setFromRotationMatrix(mat4.extractRotation(startMat4));
     end.quaternion.setFromRotationMatrix(mat4.extractRotation(endMat4));
-    THREE.Quaternion.slerp(start.quaternion, end.quaternion, interpolated.quaternion, progress);
+    interpolated.quaternion.slerpQuaternions(start.quaternion, end.quaternion, progress);
     interpolated.position.lerpVectors(
       start.position.setFromMatrixColumn(startMat4, 3),
       end.position.setFromMatrixColumn(endMat4, 3),
@@ -287,7 +290,10 @@ export const calculateCameraTransformForWaypoint = (function() {
   const detachFromWorldUp = new THREE.Matrix4();
   return function calculateCameraTransformForWaypoint(cameraTransform, waypointTransform, outMat4) {
     affixToWorldUp(cameraTransform, upAffixedCameraTransform);
-    detachFromWorldUp.getInverse(upAffixedCameraTransform).multiply(cameraTransform);
+    detachFromWorldUp
+      .copy(upAffixedCameraTransform)
+      .invert()
+      .multiply(cameraTransform);
     affixToWorldUp(waypointTransform, upAffixedWaypointTransform);
     outMat4.copy(upAffixedWaypointTransform).multiply(detachFromWorldUp);
   };
@@ -330,30 +336,128 @@ export const childMatch = (function() {
   // transform the parent such that its child matches the target
   return function childMatch(parent, child, target) {
     parent.updateMatrices();
-    inverseParentWorld.getInverse(parent.matrixWorld);
+    inverseParentWorld.copy(parent.matrixWorld).invert();
     child.updateMatrices();
     childRelativeToParent.multiplyMatrices(inverseParentWorld, child.matrixWorld);
-    childInverse.getInverse(childRelativeToParent);
+    childInverse.copy(childRelativeToParent).invert();
     newParentMatrix.multiplyMatrices(target, childInverse);
     setMatrixWorld(parent, newParentMatrix);
   };
 })();
 
-export function traverseAnimationTargets(rootObject, animations, callback) {
-  if (animations && animations.length > 0) {
-    for (const animation of animations) {
-      for (const track of animation.tracks) {
-        const { nodeName } = THREE.PropertyBinding.parseTrackName(track.name);
-        let animatedNode = rootObject.getObjectByProperty("uuid", nodeName);
-
-        if (!animatedNode) {
-          animatedNode = rootObject.getObjectByName(nodeName);
-        }
-
-        if (animatedNode) {
-          callback(animatedNode);
-        }
-      }
+export function createPlaneBufferGeometry(width, height, widthSegments, heightSegments, flipY = true) {
+  const geometry = new THREE.PlaneBufferGeometry(width, height, widthSegments, heightSegments);
+  // Three.js seems to assume texture flipY is true for all its built in geometry
+  // but we turn this off on our texture loader since createImageBitmap in Firefox
+  // does not support flipping. Then we flip the uv for flipY = false texture.
+  if (flipY === false) {
+    const uv = geometry.getAttribute("uv");
+    for (let i = 0; i < uv.count; i++) {
+      uv.setY(i, 1.0 - uv.getY(i));
     }
   }
+  return geometry;
+}
+
+import { Layers } from "../components/layers";
+
+// This code is from three-vrm. We will likely be using that in the future and this inlined code can go away
+function excludeTriangles(triangles, bws, skinIndex, exclude) {
+  let count = 0;
+  if (bws != null && bws.length > 0) {
+    for (let i = 0; i < triangles.length; i += 3) {
+      const a = triangles[i];
+      const b = triangles[i + 1];
+      const c = triangles[i + 2];
+      const bw0 = bws[a];
+      const skin0 = skinIndex[a];
+
+      if (bw0[0] > 0 && exclude.includes(skin0[0])) continue;
+      if (bw0[1] > 0 && exclude.includes(skin0[1])) continue;
+      if (bw0[2] > 0 && exclude.includes(skin0[2])) continue;
+      if (bw0[3] > 0 && exclude.includes(skin0[3])) continue;
+
+      const bw1 = bws[b];
+      const skin1 = skinIndex[b];
+      if (bw1[0] > 0 && exclude.includes(skin1[0])) continue;
+      if (bw1[1] > 0 && exclude.includes(skin1[1])) continue;
+      if (bw1[2] > 0 && exclude.includes(skin1[2])) continue;
+      if (bw1[3] > 0 && exclude.includes(skin1[3])) continue;
+
+      const bw2 = bws[c];
+      const skin2 = skinIndex[c];
+      if (bw2[0] > 0 && exclude.includes(skin2[0])) continue;
+      if (bw2[1] > 0 && exclude.includes(skin2[1])) continue;
+      if (bw2[2] > 0 && exclude.includes(skin2[2])) continue;
+      if (bw2[3] > 0 && exclude.includes(skin2[3])) continue;
+
+      triangles[count++] = a;
+      triangles[count++] = b;
+      triangles[count++] = c;
+    }
+  }
+  return count;
+}
+
+function createErasedMesh(src, erasingBonesIndex) {
+  const dst = new THREE.SkinnedMesh(src.geometry.clone(), src.material);
+  dst.name = `${src.name}(headless)`;
+  dst.frustumCulled = src.frustumCulled;
+  dst.layers.set(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
+
+  const geometry = dst.geometry;
+
+  const skinIndexAttr = geometry.getAttribute("skinIndex").array;
+  const skinIndex = [];
+  for (let i = 0; i < skinIndexAttr.length; i += 4) {
+    skinIndex.push([skinIndexAttr[i], skinIndexAttr[i + 1], skinIndexAttr[i + 2], skinIndexAttr[i + 3]]);
+  }
+
+  const skinWeightAttr = geometry.getAttribute("skinWeight").array;
+  const skinWeight = [];
+  for (let i = 0; i < skinWeightAttr.length; i += 4) {
+    skinWeight.push([skinWeightAttr[i], skinWeightAttr[i + 1], skinWeightAttr[i + 2], skinWeightAttr[i + 3]]);
+  }
+
+  const index = geometry.getIndex();
+  if (!index) {
+    throw new Error("The geometry doesn't have an index buffer");
+  }
+  const oldTriangles = Array.from(index.array);
+
+  const count = excludeTriangles(oldTriangles, skinWeight, skinIndex, erasingBonesIndex);
+  const newTriangle = [];
+  for (let i = 0; i < count; i++) {
+    newTriangle[i] = oldTriangles[i];
+  }
+  geometry.setIndex(newTriangle);
+
+  if (src.onBeforeRender) {
+    dst.onBeforeRender = src.onBeforeRender;
+  }
+
+  dst.bind(new THREE.Skeleton(src.skeleton.bones, src.skeleton.boneInverses), new THREE.Matrix4());
+
+  return dst;
+}
+
+function isEraseTarget(bone) {
+  return bone.name === "Head" || (bone.parent && isEraseTarget(bone.parent));
+}
+
+export function createHeadlessModelForSkinnedMesh(mesh) {
+  const eraseBoneIndexes = [];
+  mesh.skeleton.bones.forEach((bone, index) => {
+    if (isEraseTarget(bone)) eraseBoneIndexes.push(index);
+  });
+
+  if (!eraseBoneIndexes.length) {
+    mesh.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+    mesh.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
+    return;
+  }
+
+  mesh.layers.set(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+
+  return createErasedMesh(mesh, eraseBoneIndexes);
 }

@@ -3,7 +3,7 @@ import configs from "./configs";
 
 const nonCorsProxyDomains = (configs.NON_CORS_PROXY_DOMAINS || "").split(",");
 if (configs.CORS_PROXY_SERVER) {
-  nonCorsProxyDomains.push(configs.CORS_PROXY_SERVER);
+  nonCorsProxyDomains.push(configs.CORS_PROXY_SERVER.split(":")[0]);
 }
 nonCorsProxyDomains.push(document.location.hostname);
 
@@ -102,6 +102,8 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
 // Note this file is configured in webpack.config.js to be handled with file-loader, so this will be a string containing the file path
 import basisJsUrl from "three/examples/js/libs/basis/basis_transcoder.js";
 import basisWasmUrl from "three/examples/js/libs/basis/basis_transcoder.wasm";
+import dracoWrapperJsUrl from "three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js";
+import dracoWasmUrl from "three/examples/js/libs/draco/gltf/draco_decoder.wasm";
 
 export const rewriteBasisTranscoderUrls = function(url) {
   if (url === "basis_transcoder.js") {
@@ -118,6 +120,10 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
     return basisJsUrl;
   } else if (url === "basis_transcoder.wasm") {
     return basisWasmUrl;
+  } else if (url === "draco_wasm_wrapper.js") {
+    return dracoWrapperJsUrl;
+  } else if (url === "draco_decoder.wasm") {
+    return dracoWasmUrl;
   }
 
   if (typeof url !== "string" || url === "") return "";

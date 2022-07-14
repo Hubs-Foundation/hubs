@@ -18,3 +18,46 @@ export const All = () => (
     <Button>Really Really Long Button Name</Button>
   </Column>
 );
+
+export const Sizes = () => (
+  <Column padding>
+    <Button preset="primary" sm>
+      Small
+    </Button>
+    <Button preset="primary" lg>
+      Large? (lg)
+    </Button>
+    <Button preset="primary" xl>
+      xlarge
+    </Button>
+    <Button preset="primary" thin>
+      thin
+    </Button>
+    <Button disabled>Disabled</Button>
+  </Column>
+);
+
+export const Tokens = () => (
+  <Column padding>
+    <Button preset="primary" sm thin>
+      Create Token
+    </Button>
+    <Button disabled sm thin>
+      Revoke all
+    </Button>
+  </Column>
+);
+
+export const Landing = () => (
+  <Column padding>
+    <Button preset="signin" thick>
+      Sign in/Sign up
+    </Button>
+    <Button preset="landing" thick>
+      Get Started
+    </Button>
+    <Button preset="landing" thin>
+      Have a room code?
+    </Button>
+  </Column>
+);

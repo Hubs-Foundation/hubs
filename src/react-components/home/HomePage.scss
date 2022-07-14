@@ -3,7 +3,7 @@
 :local(.home-page) {
   flex: 1;
   background-size: cover;
-  padding: 1.5em;
+  padding: 0;
   flex-direction: column;
   align-items: center;
 
@@ -21,8 +21,8 @@
   display: flex;
   justify-content: center;
   padding: 20px;
-  width: 250px;
-
+  width: 150px;
+  
   img {
     width: 100%;
     align-self: flex-start;
@@ -31,6 +31,20 @@
   @media (min-width: theme.$breakpoint-lg) {
     display: none;
   }
+}
+
+:local(.sign-in-container) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  @media(min-width: theme.$breakpoint-lg) {
+    display: none;
+  }
+}
+
+:local(.mobile-sign-out) {
+  padding: 0.5rem;
 }
 
 :local(.hero) {
@@ -45,8 +59,11 @@
 }
 
 :local(.hero-image-container) {
+
   img {
-    border-radius: 16px;
+    @media (min-width: theme.$breakpoint-lg) {
+      border-radius: 16px;
+    }
   }
 }
 
@@ -79,7 +96,7 @@
   font-size: theme.$font-size-lg;
   font-weight: theme.$font-weight-medium;
   text-align: center;
-  margin: 0 48px 20px 48px;
+  margin: 0 24px 20px 24px;
   line-height: 1.25;
 
   @media (min-width: theme.$breakpoint-lg) {
