@@ -119,7 +119,3 @@ export const CameraTool = defineComponent({
   sndToggleRef: Types.eid
 });
 export const MyCameraTool = defineComponent();
-
-window.$C = {
-  CameraTool
-};

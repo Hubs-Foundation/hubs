@@ -46,7 +46,6 @@ export class App {
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map(); // eid -> Object3D
 
-    // HACK: We are setting the network id of the world to zero
     this.world.nid2eid = new Map();
     this.world.deletedNids = new Set();
     this.world.ignoredNids = new Set();

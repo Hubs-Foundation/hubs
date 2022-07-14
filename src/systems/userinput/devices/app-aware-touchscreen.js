@@ -347,8 +347,8 @@ export class AppAwareTouchscreenDevice {
       frame.setPose(path.cursorPose, assignment.cursorPose);
       this.lastPose = assignment.cursorPose;
     } else if (this.lastPose) {
-      // TODO Without this there is no way to hover objects on mobile. This is fishy though
-      // and more fishy is that previously we were not doing this but somehow hovers were still working.
+      // TODO We want to be able to "hover" on things with the touchscreen so we keep the cursor at its last know position
+      // This is not ideal but its also unclear what the "right" interaction for this should be on a touchscreen.
       frame.setPose(path.cursorPose, this.lastPose);
     }
 
