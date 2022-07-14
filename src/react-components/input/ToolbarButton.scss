@@ -12,11 +12,8 @@
     cursor: pointer;
     color: theme.$text1-color;
     margin-top: 8px;
-    margin-bottom: 1px;
+    margin-bottom: 3px;
     white-space: nowrap;
-    background-color: theme.$background1-color;
-    padding: 2px 4px 2px 4px;
-    border-radius: 9999px;
   }
 }
 
@@ -32,7 +29,6 @@
   background-color: theme.$transparent;
 
   transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
-  pointer-events: auto;
 
   svg {
     *[stroke=\#000] {
@@ -52,10 +48,10 @@
   height: 96px;
 }
 
-:local(.basic) {
+:local(.basic), :local(.transparent) {
   :local(.icon-container) {
     border-color: theme.$toolbar-basic-border-color;
-    background-color: theme.$toolbar-basic-color;
+    background-color: transparent;
     svg {
       *[stroke=\#000] {
         stroke: theme.$toolbar-basic-icon-color;
@@ -68,18 +64,18 @@
   }  
 
   &:hover :local(.icon-container) {
-    border: 1px solid theme.$toolbar-basic-border-color-hover;
-    background-color: theme.$toolbar-basic-color-hover;
+    border: 1px solid theme.$toolbar-basic-border-color;
+    background-color: theme.$basic-color-hover;
   }
 
   &:active :local(.icon-container) {
-    border-color: theme.$toolbar-basic-border-color-pressed;
-    background-color: theme.$toolbar-basic-color-pressed;
+    border-color: theme.$basic-color-pressed;
+    background-color: theme.$basic-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$toolbar-basic-border-color;
+      border-color: transparent;
       background-color: theme.$toolbar-icon-selected-bg;
     }
     svg {
@@ -110,7 +106,7 @@
   }
 }
 
-:local(.icon-container) {
+:local(.transparent) :local(.icon-container) {
   border-color: theme.$transparent;
 }
 
@@ -185,30 +181,30 @@
 
 :local(.accept) {
   :local(.icon-container) {
-    background-color: theme.$toolbar-accept-color;
-    border-color: theme.$toolbar-accept-border-color;
+    background-color: theme.$accept-color;
+    border-color: theme.$accept-border-color;
   }  
 
   &:hover :local(.icon-container) {
-    background-color: theme.$toolbar-accept-color-hover;
+    background-color: theme.$accept-color-hover;
   }
 
   &:active :local(.icon-container) {
-    background-color: theme.$toolbar-accept-color-pressed;
+    background-color: theme.$accept-color-pressed;
   }
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$toolbar-accept-color;
+      border-color: theme.$accept-color;
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
         *[stroke=\#000] {
-          stroke: theme.$toolbar-accept-color;
+          stroke: theme.$accept-color;
         }
     
         *[fill=\#000] {
-          fill: theme.$toolbar-accept-color;
+          fill: theme.$accept-color;
         }
       }
     }
@@ -219,15 +215,15 @@
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$toolbar-accept-border-color-hover;
+        border-color: theme.$accept-color-hover;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$toolbar-accept-color-hover;
+            stroke: theme.$accept-color-hover;
           }
       
           *[fill=\#000] {
-            fill: theme.$toolbar-accept-color-hover;
+            fill: theme.$accept-color-hover;
           }
         }
       }
@@ -235,15 +231,15 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$toolbar-accept-border-color-pressed;
+        border-color: theme.$accept-color-pressed;
 
         svg {
           *[stroke=\#000] {
-            stroke: theme.$toolbar-accept-color-pressed;
+            stroke: theme.$accept-color-pressed;
           }
       
           *[fill=\#000] {
-            fill: theme.$toolbar-accept-color-pressed;
+            fill: theme.$accept-color-pressed;
           }
         }
       }
@@ -334,7 +330,7 @@
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$accent1-border-color;
+      border-color: theme.$accent1-color;
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
@@ -354,7 +350,7 @@
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$accent1-border-color-hover;
+        border-color: theme.$accent1-color-hover;
 
         svg {
           *[stroke=\#000] {
@@ -370,7 +366,7 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$accent1-border-color-pressed;
+        border-color: theme.$accent1-color-pressed;
 
         svg {
           *[stroke=\#000] {
@@ -402,7 +398,7 @@
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$accent2-border-color;
+      border-color: theme.$accent2-color;
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
@@ -422,7 +418,7 @@
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$accent2-border-color-hover;
+        border-color: theme.$accent2-color-hover;
 
         svg {
           *[stroke=\#000] {
@@ -438,7 +434,7 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$accent2-border-color-pressed;
+        border-color: theme.$accent2-color-pressed;
 
         svg {
           *[stroke=\#000] {
@@ -470,7 +466,7 @@
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$accent3-border-color;
+      border-color: theme.$accent3-color;
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
@@ -490,7 +486,7 @@
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$accent3-border-color-hover;
+        border-color: theme.$accent3-color-hover;
 
         svg {
           *[stroke=\#000] {
@@ -506,7 +502,7 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$accent3-border-color-pressed;
+        border-color: theme.$accent3-color-pressed;
 
         svg {
           *[stroke=\#000] {
@@ -538,7 +534,7 @@
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$accent4-border-color;
+      border-color: theme.$accent4-color;
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
@@ -558,7 +554,7 @@
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$accent4-border-color-hover;
+        border-color: theme.$accent4-color-hover;
 
         svg {
           *[stroke=\#000] {
@@ -574,7 +570,7 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$accent4-border-color-pressed;
+        border-color: theme.$accent4-color-pressed;
 
         svg {
           *[stroke=\#000] {
@@ -606,7 +602,7 @@
 
   &:local(.selected) {
     :local(.icon-container) {
-      border-color: theme.$accent5-border-color;
+      border-color: theme.$accent5-color;
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
@@ -626,7 +622,7 @@
 
     &:hover {
       :local(.icon-container) {
-        border-color: theme.$accent5-border-color-hover;
+        border-color: theme.$accent5-color-hover;
 
         svg {
           *[stroke=\#000] {
@@ -642,7 +638,7 @@
   
     &:active {
       :local(.icon-container) {
-        border-color: theme.$accent5-border-color-pressed;
+        border-color: theme.$accent5-color-pressed;
         svg {
           *[stroke=\#000] {
             stroke: theme.$accent5-color-pressed;
