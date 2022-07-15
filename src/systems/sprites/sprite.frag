@@ -13,14 +13,12 @@ uniform bool hubs_HighlightInteractorTwo;
 uniform vec3 hubs_InteractorTwoPos;
 uniform float hubs_Time;
 
-#define GAMMA_FACTOR 2.2
-
-vec4 LinearToGamma( in vec4 value, in float gammaFactor ) {
-  return vec4( pow( value.rgb, vec3( 1.0 / gammaFactor ) ), value.a );
+vec4 LinearTosRGB( in vec4 value ) {
+    return vec4( mix( pow( value.rgb, vec3( 0.41666 ) ) * 1.055 - vec3( 0.055 ), value.rgb * 12.92, vec3( lessThanEqual( value.rgb, vec3( 0.0031308 ) ) ) ), value.a );
 }
 
 vec4 linearToOutputTexel( vec4 value ) {
-  return LinearToGamma( value, float( GAMMA_FACTOR ) );
+  return LinearTosRGB( value );
 }
 
 void main() {
@@ -37,6 +35,6 @@ void main() {
     }
     ratio = min(1.0, ratio);
 
-    vec4 highlightColor = linearToOutputTexel(vec4(0.184, 0.499, 0.933, 1.0));
-    gl_FragColor = vec4((texColor.rgb * (1.0 - ratio)) + (highlightColor.rgb * ratio), texColor.a);
+    vec4 highlightColor = vec4(0.184, 0.499, 0.933, 1.0);
+    gl_FragColor = linearToOutputTexel(vec4((texColor.rgb * (1.0 - ratio)) + (highlightColor.rgb * ratio), texColor.a));
 }

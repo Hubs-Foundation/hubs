@@ -11,11 +11,10 @@ import styles from "./RoomEntryModal.scss";
 import styleUtils from "../styles/style-utils.scss";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { Column } from "../layout/Column";
+import { AppLogo } from "../misc/AppLogo";
 import { FormattedMessage } from "react-intl";
 
 export function RoomEntryModal({
-  appName,
-  logoSrc,
   className,
   roomName,
   showJoinRoom,
@@ -35,7 +34,7 @@ export function RoomEntryModal({
         {breakpoint !== "sm" &&
           breakpoint !== "md" && (
             <div className={styles.logoContainer}>
-              <img src={logoSrc} alt={appName} />
+              <AppLogo />
             </div>
           )}
         <div className={styles.roomName}>
@@ -88,8 +87,6 @@ export function RoomEntryModal({
 }
 
 RoomEntryModal.propTypes = {
-  appName: PropTypes.string,
-  logoSrc: PropTypes.string,
   className: PropTypes.string,
   roomName: PropTypes.string.isRequired,
   showJoinRoom: PropTypes.bool,

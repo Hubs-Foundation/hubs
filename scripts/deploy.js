@@ -1,7 +1,7 @@
 import { createReadStream, readFileSync, existsSync, unlinkSync } from "fs";
 import { exec } from "child_process";
 import rmdir from "rimraf";
-import ncp from "ncp";
+import { copy } from "fs-extra";
 import tar from "tar";
 import ora from "ora";
 import FormData from "form-data";
@@ -48,7 +48,7 @@ const getTs = (() => {
 
   const env = Object.assign(process.env, buildEnv);
 
-  for (const d in ["./dist", "./admin/dist"]) {
+  for (const d of ["./dist", "./admin/dist"]) {
     rmdir(d, err => {
       if (err) {
         console.error(err);
@@ -90,12 +90,11 @@ const getTs = (() => {
   });
 
   await new Promise(res => {
-    ncp("./admin/dist", "./dist", err => {
+    copy("./admin/dist", "./dist", err => {
       if (err) {
         console.error(err);
         process.exit(1);
       }
-
       res();
     });
   });

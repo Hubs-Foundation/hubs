@@ -117,6 +117,16 @@ button:local(.more-menu-item-target) {
     background-color: theme.$button-bg-color-pressed;
   }
 
+  svg {
+    *[stroke=\#000] {
+      stroke: theme.$text1-color;
+    }
+
+    *[fill=\#000] {
+      fill: theme.$text1-color;
+    }
+  }
+
   @media(min-width: theme.$breakpoint-lg) {
     display: none;
   }

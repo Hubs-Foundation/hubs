@@ -1,8 +1,14 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
+import { getColorSchemePref } from "../utils/get-color-scheme-pref";
 import classNames from "classnames";
-import "three/examples/js/controls/OrbitControls";
+
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/controls/OrbitControls");
+require("three/examples/js/loaders/GLTFLoader");
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
@@ -34,8 +40,7 @@ function createRenderer(canvas, alpha = false, useDevicePixelRatio = true) {
   });
 
   const renderer = new THREE.WebGLRenderer({ alpha, canvas, context, forceWebVR: true });
-  renderer.gammaOutput = true;
-  renderer.gammaFactor = 2.2;
+  renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.physicallyCorrectLights = true;
   if (useDevicePixelRatio) {
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -48,16 +53,24 @@ const createImageBitmapFromURL = url =>
     .then(r => r.blob())
     .then(createImageBitmap);
 
-const ORBIT_ANGLE = new THREE.Euler(-30 * THREE.Math.DEG2RAD, 30 * THREE.Math.DEG2RAD, 0);
+const ORBIT_ANGLE = new THREE.Euler(-30 * THREE.MathUtils.DEG2RAD, 30 * THREE.MathUtils.DEG2RAD, 0);
 const DEFAULT_MARGIN = 1;
 
 function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
   const halfYExtents = Math.max(box.max.y - center.y, center.y - box.min.y);
-  const halfVertFOV = THREE.Math.degToRad(camera.fov / 2);
+  const halfVertFOV = THREE.MathUtils.degToRad(camera.fov / 2);
   camera.position.set(0, 0, (halfYExtents / Math.tan(halfVertFOV) + box.max.z) * margin);
   camera.position.applyEuler(ORBIT_ANGLE);
   camera.position.add(center);
   camera.lookAt(center);
+}
+
+function getThemeBackground() {
+  const currentTheme = APP?.store?.state?.preferences?.theme;
+  const themes = window.APP_CONFIG?.theme?.themes;
+  const currentThemeObject = themes?.find(t => t.id === currentTheme) || getColorSchemePref();
+  const previewBackgroundColor = new THREE.Color(currentThemeObject?.variables["background3-color"] || 0xeaeaea);
+  return previewBackgroundColor;
 }
 
 class AvatarPreview extends Component {
@@ -71,6 +84,7 @@ class AvatarPreview extends Component {
     this.state = { loading: true, error: null };
     this.avatar = null;
     this.imageBitmaps = {};
+    this.mounted = false;
   }
 
   componentDidMount = () => {
@@ -109,7 +123,7 @@ class AvatarPreview extends Component {
     this.snapshotRenderer.setClearAlpha(0);
 
     this.previewRenderer = createRenderer(this.canvas);
-    this.previewRenderer.setClearColor(0xeaeaea);
+    this.previewRenderer.setClearColor(getThemeBackground());
     this.previewRenderer.setAnimationLoop(() => {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);
@@ -117,6 +131,8 @@ class AvatarPreview extends Component {
     });
     window.addEventListener("resize", this.resize);
     this.resize();
+
+    this.mounted = true;
   };
 
   resize = () => {
@@ -154,6 +170,8 @@ class AvatarPreview extends Component {
   })();
 
   componentWillUnmount = () => {
+    this.mounted = false;
+
     // Gotta be particularly careful about disposing things here since we will likely create many avatar
     // previews during a session and Chrome will eventually discard the oldest webgl context if we leak
     // contexts by holding on to them directly or indirectly.
@@ -193,7 +211,7 @@ class AvatarPreview extends Component {
     const url = proxiedUrlFor(this.props.avatarGltfUrl);
     const gltf = await this.loadPreviewAvatar(url);
     // If we had started loading another avatar while we were loading this one, throw this one away
-    if (newLoadId !== this.loadId) return;
+    if (!this.mounted || newLoadId !== this.loadId) return;
     if (gltf && this.props.onGltfLoaded) this.props.onGltfLoaded(gltf);
     this.setAvatar(gltf.scene);
   }
@@ -224,6 +242,8 @@ class AvatarPreview extends Component {
       this.setState({ loading: false, error: true });
       return;
     }
+
+    if (!this.mounted) return;
 
     // TODO Check for "Bot_Skinned" here is a hack for legacy avatars which only has a name one of the MOZ_alt_material nodes
     this.previewMesh = findNode(
@@ -277,7 +297,7 @@ class AvatarPreview extends Component {
       ];
 
       // Low and medium quality materials don't use environment maps
-      if (window.APP.store.materialQualitySetting === "high") {
+      if (window.APP.store.state.preferences.materialQualitySetting === "high") {
         dependencies.push(
           // TODO apply environment map to secondary materials as well
           createDefaultEnvironmentMap().then(t => {
@@ -304,12 +324,15 @@ class AvatarPreview extends Component {
       const texture = this.previewMesh.material[prop];
 
       // Low quality materials are missing normal maps
-      if (prop === "normalMap" && window.APP.store.materialQualitySetting === "low") {
+      if (prop === "normalMap" && window.APP.store.state.preferences.materialQualitySetting === "low") {
         return;
       }
 
       // Medium Quality materials are missing metalness and roughness maps
-      if ((prop === "roughnessMap" || prop === "metalnessMap") && window.APP.store.materialQualitySetting !== "high") {
+      if (
+        (prop === "roughnessMap" || prop === "metalnessMap") &&
+        window.APP.store.state.preferences.materialQualitySetting !== "high"
+      ) {
         return;
       }
 

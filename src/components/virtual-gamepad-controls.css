@@ -10,13 +10,11 @@
 }
 
 :local(.touchZone.left) {
-  left: 0;
-  right: 55%;
+  left: 80px;
 }
 
 :local(.touchZone.right) {
-  left: 55%;
-  right: 0;
+  right: 80px;
 }
 
 :local(.mockJoystickContainer) {

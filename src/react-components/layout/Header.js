@@ -6,10 +6,11 @@ import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
 import { Container } from "./Container";
+import { SocialBar } from "../home/SocialBar";
+import { SignInButton } from "../home/SignInButton";
+import { AppLogo } from "../misc/AppLogo";
 
 export function Header({
-  appName,
-  appLogo,
   showCloud,
   enableSpoke,
   editorName,
@@ -21,7 +22,8 @@ export function Header({
   isAdmin,
   isSignedIn,
   email,
-  onSignOut
+  onSignOut,
+  isHmc
 }) {
   return (
     <header>
@@ -30,32 +32,32 @@ export function Header({
           <ul>
             <li>
               <a href="/" className={styles.homeLink}>
-                <img alt={appName} src={appLogo} />
+                {/*
+                This forceConfigurableLogo prop is a bit of a hack, since we want the home page on HMC to use our 
+                configured logo, which is left-aligned, as opposed to the logo that we typically used for HMC, 
+                which is center-aligned.
+                */}
+                <AppLogo forceConfigurableLogo />
               </a>
             </li>
-            {showCloud && (
-              <li>
-                <a href="/cloud">
-                  <FormattedMessage id="header.cloud" defaultMessage="Hubs Cloud" />
-                </a>
-              </li>
-            )}
             {enableSpoke && (
               <li>
-                <a href="/spoke">{editorName}</a>
+                <a href="/spoke">
+                  {isHmc ? <FormattedMessage id="header.spoke" defaultMessage="Spoke" /> : editorName}
+                </a>
               </li>
             )}
             {showDocsLink && (
               <li>
                 <a href={docsUrl}>
-                  <FormattedMessage id="header.docs" defaultMessage="Docs" />
+                  <FormattedMessage id="header.docs" defaultMessage="Guides" />
                 </a>
               </li>
             )}
             {showSourceLink && (
               <li>
                 <a href="https://github.com/mozilla/hubs">
-                  <FormattedMessage id="header.source" defaultMessage="Source" />
+                  <FormattedMessage id="header.source" defaultMessage="Developers" />
                 </a>
               </li>
             )}
@@ -63,6 +65,20 @@ export function Header({
               <li>
                 <a href={communityUrl}>
                   <FormattedMessage id="header.community" defaultMessage="Community" />
+                </a>
+              </li>
+            )}
+            {showCloud && (
+              <li>
+                <a href="/cloud">
+                  <FormattedMessage id="header.cloud" defaultMessage="Hubs Cloud" />
+                </a>
+              </li>
+            )}
+            {isHmc && (
+              <li>
+                <a href="/labs">
+                  <FormattedMessage id="header.labs" defaultMessage="Labs" />
                 </a>
               </li>
             )}
@@ -88,25 +104,22 @@ export function Header({
                   defaultMessage="Signed in as {email}"
                   values={{ email: maskEmail(email) }}
                 />
-              </span>{" "}
+              </span>
               <a href="#" onClick={onSignOut}>
                 <FormattedMessage id="header.sign-out" defaultMessage="Sign Out" />
               </a>
             </div>
           ) : (
-            <a href="/signin" rel="noreferrer noopener">
-              <FormattedMessage id="header.sign-in" defaultMessage="Sign In" />
-            </a>
+            <SignInButton />
           )}
         </div>
+        {isHmc ? <SocialBar mobile /> : null}
       </Container>
     </header>
   );
 }
 
 Header.propTypes = {
-  appName: PropTypes.string,
-  appLogo: PropTypes.string,
   showCloud: PropTypes.bool,
   enableSpoke: PropTypes.bool,
   editorName: PropTypes.string,
@@ -118,5 +131,6 @@ Header.propTypes = {
   isAdmin: PropTypes.bool,
   isSignedIn: PropTypes.bool,
   email: PropTypes.string,
-  onSignOut: PropTypes.func
+  onSignOut: PropTypes.func,
+  isHmc: PropTypes.bool
 };

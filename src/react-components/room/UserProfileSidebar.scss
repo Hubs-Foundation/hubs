@@ -15,3 +15,12 @@
     background-color: theme.$tile-bg-color;
   }
 }
+
+:local(.slider-container) {
+  display: flex;
+  flex-direction: row;
+}
+
+:local(.slider-input-container) {
+  width: 209px;
+}

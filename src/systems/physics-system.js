@@ -108,7 +108,7 @@ export class PhysicsSystem {
       this.debugGeometry.addAttribute("position", new THREE.BufferAttribute(debugVertices, 3));
       this.debugGeometry.addAttribute("color", new THREE.BufferAttribute(debugColors, 3));
       const debugMaterial = new THREE.LineBasicMaterial({
-        vertexColors: THREE.VertexColors,
+        vertexColors: true,
         depthTest: true
       });
       this.debugMesh = new THREE.LineSegments(this.debugGeometry, debugMaterial);
@@ -166,7 +166,7 @@ export class PhysicsSystem {
                 index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.MATRIX_OFFSET
               );
               object3D.parent.updateMatrices();
-              inverse.getInverse(object3D.parent.matrixWorld);
+              inverse.copy(object3D.parent.matrixWorld).invert();
               transform.multiplyMatrices(inverse, matrix);
               transform.decompose(object3D.position, object3D.quaternion, scale);
               object3D.matrixNeedsUpdate = true;

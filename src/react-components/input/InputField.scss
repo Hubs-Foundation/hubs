@@ -11,6 +11,8 @@
   flex-direction: column;
   width: 100%;
   max-width: 300px;
+  white-space: break-spaces;
+  line-height: 1.2rem;
 }
 
 :local(.fullWidth) {
@@ -27,4 +29,8 @@
   margin-top: 8px;
   color: theme.$text3-color;
   align-self: flex-start;
+}
+
+:local(.info), :local(.error) {
+  font-size: 10px;
 }

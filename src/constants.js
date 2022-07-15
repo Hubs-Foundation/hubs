@@ -16,6 +16,11 @@ CL.DEFAULT_INTERACTABLE = CL.INTERACTABLES | CL.ENVIRONMENT | CL.AVATAR | CL.HAN
 CL.UNOWNED_INTERACTABLE = CL.INTERACTABLES | CL.HANDS;
 CL.DEFAULT_SPAWNER = CL.INTERACTABLES | CL.HANDS;
 
+const PRIVACY = "https://www.mozilla.org/en-US/privacy/hubs/";
+const TERMS = "https://www.mozilla.org/en-US/about/legal/terms/hubs/";
+
 module.exports = {
-  COLLISION_LAYERS: CL
+  COLLISION_LAYERS: CL,
+  PRIVACY,
+  TERMS
 };

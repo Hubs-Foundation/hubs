@@ -1,6 +1,7 @@
 import { Layers } from "./layers";
 import "../vendor/Water";
 import waterNormalMap from "../assets/waternormals.jpg";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
 /**
  * @author jbouny / https://github.com/jbouny
@@ -140,9 +141,7 @@ MobileWater.prototype = Object.create(THREE.Mesh.prototype);
 MobileWater.prototype.constructor = THREE.Water;
 
 async function loadWaterNormals(url) {
-  const texture = await new Promise((resolve, reject) =>
-    new THREE.TextureLoader().load(url, resolve, undefined, reject)
-  );
+  const texture = await new Promise((resolve, reject) => new HubsTextureLoader().load(url, resolve, undefined, reject));
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   texture.needsUpdate = true;
   return texture;
@@ -182,7 +181,7 @@ AFRAME.registerComponent("water", {
         this.water = new MobileWater(waterGeometry, waterConfig);
       } else {
         this.water = new THREE.Water(waterGeometry, waterConfig);
-        this.water.mirrorCamera.layers.set(Layers.reflection);
+        this.water.mirrorCamera.layers.set(Layers.CAMERA_LAYER_REFLECTION);
       }
 
       this.el.setObject3D("water", this.water);

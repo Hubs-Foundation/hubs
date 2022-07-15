@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import "./Page.scss";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { MobileNav } from "./MobileNav";
 
 export function Page({
-  appLogo,
   showCloud,
   enableSpoke,
   editorName,
@@ -28,14 +28,13 @@ export function Page({
   companyLogoUrl,
   showDiscordBotLink,
   appName,
+  isHmc,
   children,
   ...rest
 }) {
   return (
     <>
       <Header
-        appName={appName}
-        appLogo={appLogo}
         showCloud={showCloud}
         enableSpoke={enableSpoke}
         editorName={editorName}
@@ -48,8 +47,20 @@ export function Page({
         isSignedIn={isSignedIn}
         email={email}
         onSignOut={onSignOut}
+        isHmc={isHmc}
       />
-      <main {...rest}>{children}</main>
+      <main {...rest}>
+        <MobileNav
+          showDocsLink={showDocsLink}
+          showSourceLink={showSourceLink}
+          showCommunityLink={showCommunityLink}
+          isHmc={isHmc}
+          isAdmin={isAdmin}
+          docsUrl={docsUrl}
+          communityUrl={communityUrl}
+        />
+        {children}
+      </main>
       <Footer
         hidePoweredBy={hidePoweredBy}
         showWhatsNewLink={showWhatsNewLink}
@@ -61,13 +72,13 @@ export function Page({
         companyLogoUrl={companyLogoUrl}
         showDiscordBotLink={showDiscordBotLink}
         appName={appName}
+        isHmc={isHmc}
       />
     </>
   );
 }
 
 Page.propTypes = {
-  appLogo: PropTypes.string,
   showCloud: PropTypes.bool,
   enableSpoke: PropTypes.bool,
   editorName: PropTypes.string,
@@ -90,5 +101,6 @@ Page.propTypes = {
   companyLogoUrl: PropTypes.string,
   showDiscordBotLink: PropTypes.bool,
   appName: PropTypes.string,
+  isHmc: PropTypes.bool,
   children: PropTypes.node
 };

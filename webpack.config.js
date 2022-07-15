@@ -137,7 +137,7 @@ function createDefaultAppConfig() {
   if (fs.existsSync(themesPath)) {
     const themesString = fs.readFileSync(themesPath).toString();
     const themes = JSON.parse(themesString);
-    appConfig.themes = themes;
+    appConfig.theme.themes = themes;
   }
 
   return appConfig;
@@ -190,6 +190,23 @@ async function fetchAppConfigAndEnvironmentVars() {
   return appConfig;
 }
 
+function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) {
+  const chunkName = filename.match(/(.+).html/)[1];
+  const options = {
+    filename,
+    template: path.join(__dirname, "src", filename),
+    chunks: [...extraChunks, chunkName],
+    minify: {
+      removeComments: false
+    }
+  };
+
+  if (chunksSortMode) options.chunksSortMode = chunksSortMode;
+  if (inject) options.inject = inject;
+
+  return new HTMLWebpackPlugin(options);
+}
+
 module.exports = async (env, argv) => {
   env = env || {};
 
@@ -220,16 +237,18 @@ module.exports = async (env, argv) => {
     }
 
     if (env.localDev) {
+      const localDevHost = "hubs.local";
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
-        HOST: "hubs.local",
-        RETICULUM_SOCKET_SERVER: "hubs.local",
+        HOST: localDevHost,
+        RETICULUM_SOCKET_SERVER: localDevHost,
         CORS_PROXY_SERVER: "hubs-proxy.local:4000",
-        NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
-        BASE_ASSETS_PATH: "https://hubs.local:8080/",
-        RETICULUM_SERVER: "hubs.local:4000",
+        NON_CORS_PROXY_DOMAINS: `${localDevHost},dev.reticulum.io`,
+        BASE_ASSETS_PATH: `https://${localDevHost}:8080/`,
+        RETICULUM_SERVER: `${localDevHost}:4000`,
         POSTGREST_SERVER: "",
-        ITA_SERVER: ""
+        ITA_SERVER: "",
+        UPLOADS_HOST: `https://${localDevHost}:4000`
       });
     }
   }
@@ -251,6 +270,18 @@ module.exports = async (env, argv) => {
     ]
   };
 
+  const devServerHeaders = {
+    "Access-Control-Allow-Origin": "*"
+  };
+
+  // Behind and environment var for now pending further testing
+  if (process.env.DEV_CSP_SOURCE) {
+    const CSPResp = await fetch(`https://${process.env.DEV_CSP_SOURCE}/`);
+    const remoteCSP = CSPResp.headers.get("content-security-policy");
+    devServerHeaders["content-security-policy"] = remoteCSP;
+    // .replaceAll("connect-src", "connect-src https://example.com");
+  }
+
   return {
     node: {
       // need to specify this manually because some random lodash code will try to access
@@ -269,7 +300,9 @@ module.exports = async (env, argv) => {
       cloud: path.join(__dirname, "src", "cloud.js"),
       signin: path.join(__dirname, "src", "signin.js"),
       verify: path.join(__dirname, "src", "verify.js"),
-      "whats-new": path.join(__dirname, "src", "whats-new.js")
+      tokens: path.join(__dirname, "src", "tokens.js"),
+      "whats-new": path.join(__dirname, "src", "whats-new.js"),
+      "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
@@ -282,9 +315,7 @@ module.exports = async (env, argv) => {
       public: `${host}:8080`,
       useLocalIp: true,
       allowedHosts: [host, "hubs.local"],
-      headers: {
-        "Access-Control-Allow-Origin": "*"
-      },
+      headers: devServerHeaders,
       hot: liveReload,
       inline: liveReload,
       historyApiFallback: {
@@ -293,6 +324,7 @@ module.exports = async (env, argv) => {
           { from: /^\/discord/, to: "/discord.html" },
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
+          { from: /^\/tokens/, to: "/tokens.html" },
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
       },
@@ -318,7 +350,7 @@ module.exports = async (env, argv) => {
           if (req.method === "OPTIONS") {
             res.send();
           } else {
-            const url = req.path.replace("/cors-proxy/", "");
+            const url = req.originalUrl.replace("/cors-proxy/", "");
             request({ url, method: req.method }, error => {
               if (error) {
                 console.error(`cors-proxy: error fetching "${url}"\n`, error);
@@ -378,7 +410,29 @@ module.exports = async (env, argv) => {
         // Some JS assets are loaded at runtime and should be coppied unmodified and loaded using file-loader
         {
           test: [
-            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js")
+            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js"),
+            path.resolve(
+              __dirname,
+              "node_modules",
+              "three",
+              "examples",
+              "js",
+              "libs",
+              "draco",
+              "gltf",
+              "draco_decoder.js"
+            ),
+            path.resolve(
+              __dirname,
+              "node_modules",
+              "three",
+              "examples",
+              "js",
+              "libs",
+              "draco",
+              "gltf",
+              "draco_wasm_wrapper.js"
+            )
           ],
           loader: "file-loader",
           options: {
@@ -392,6 +446,11 @@ module.exports = async (env, argv) => {
           // Exclude JS assets in node_modules because they are already transformed and often big.
           exclude: [path.resolve(__dirname, "node_modules")],
           loader: "babel-loader"
+        },
+        {
+          test: [path.resolve(__dirname, "node_modules", "three", "examples", "jsm", "exporters", "GLTFExporter.js")],
+          loader: "babel-loader",
+          options: legacyBabelConfig
         },
         {
           test: /\.(scss|css)$/,
@@ -434,7 +493,7 @@ module.exports = async (env, argv) => {
           ]
         },
         {
-          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
+          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm|3dl|cube)$/,
           use: {
             loader: "file-loader",
             options: {
@@ -511,95 +570,53 @@ module.exports = async (env, argv) => {
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
       }),
       // Each output page needs a HTMLWebpackPlugin entry
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "index.html",
-        template: path.join(__dirname, "src", "index.html"),
-        chunks: ["support", "index"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+        extraChunks: ["support"],
+        chunksSortMode: "manual"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "hub.html",
-        template: path.join(__dirname, "src", "hub.html"),
-        chunks: ["support", "hub"],
+        extraChunks: ["webxr-polyfill", "support"],
         chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "scene.html",
-        template: path.join(__dirname, "src", "scene.html"),
-        chunks: ["support", "scene"],
+        extraChunks: ["support"],
         chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "avatar.html",
-        template: path.join(__dirname, "src", "avatar.html"),
-        chunks: ["support", "avatar"],
+        extraChunks: ["support"],
         chunksSortMode: "manual",
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "link.html",
-        template: path.join(__dirname, "src", "link.html"),
-        chunks: ["support", "link"],
-        chunksSortMode: "manual",
-        minify: {
-          removeComments: false
-        }
+        extraChunks: ["support"],
+        chunksSortMode: "manual"
       }),
-      new HTMLWebpackPlugin({
-        filename: "discord.html",
-        template: path.join(__dirname, "src", "discord.html"),
-        chunks: ["discord"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        filename: "discord.html"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "whats-new.html",
-        template: path.join(__dirname, "src", "whats-new.html"),
-        chunks: ["whats-new"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
+      htmlPagePlugin({
         filename: "cloud.html",
-        template: path.join(__dirname, "src", "cloud.html"),
-        chunks: ["cloud"],
-        inject: "head",
-        minify: {
-          removeComments: false
-        }
+        inject: "head"
       }),
-      new HTMLWebpackPlugin({
-        filename: "signin.html",
-        template: path.join(__dirname, "src", "signin.html"),
-        chunks: ["signin"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        filename: "signin.html"
       }),
-      new HTMLWebpackPlugin({
-        filename: "verify.html",
-        template: path.join(__dirname, "src", "verify.html"),
-        chunks: ["verify"],
-        minify: {
-          removeComments: false
-        }
+      htmlPagePlugin({
+        filename: "verify.html"
+      }),
+      htmlPagePlugin({
+        filename: "tokens.html"
       }),
       new CopyWebpackPlugin([
         {
@@ -632,6 +649,8 @@ module.exports = async (env, argv) => {
           SENTRY_DSN: process.env.SENTRY_DSN,
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
+          UPLOADS_HOST: process.env.UPLOADS_HOST,
+          BASE_ASSETS_PATH: process.env.BASE_ASSETS_PATH,
           APP_CONFIG: appConfig
         })
       })

@@ -131,7 +131,7 @@ AFRAME.registerComponent("pen", {
     this.dirty = true;
 
     let material = new THREE.MeshStandardMaterial();
-    const quality = window.APP.store.materialQualitySetting;
+    const quality = window.APP.store.state.preferences.materialQualitySetting;
     material = convertStandardMaterial(material, quality);
 
     this.penTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), material);
@@ -139,11 +139,6 @@ AFRAME.registerComponent("pen", {
     this.penTip.matrixNeedsUpdate = true;
 
     this.el.setObject3D("mesh", this.penTip);
-
-    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-    if (environmentMapComponent) {
-      environmentMapComponent.applyEnvironmentMap(this.el.parentEl.object3D);
-    }
 
     this.penLaserAttributesUpdated = false;
     this.penLaserAttributes = {

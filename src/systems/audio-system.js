@@ -1,4 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
+import { GAIN_TIME_CONST, SourceType } from "../components/audio-params";
 
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
@@ -17,6 +18,12 @@ function performDelayedReconnect(gainNode) {
 }
 
 import * as sdpTransform from "sdp-transform";
+import MediaDevicesManager from "../utils/media-devices-manager";
+import { THREE } from "aframe";
+
+function isThreeAudio(node) {
+  return node instanceof THREE.Audio || node instanceof THREE.PositionalAudio;
+}
 
 async function enableChromeAEC(gainNode) {
   /**
@@ -117,17 +124,11 @@ async function enableChromeAEC(gainNode) {
 export class AudioSystem {
   constructor(sceneEl) {
     this._sceneEl = sceneEl;
-    this._sceneEl.audioListener = this._sceneEl.audioListener || new THREE.AudioListener();
-    if (this._sceneEl.camera) {
-      this._sceneEl.camera.add(this._sceneEl.audioListener);
-    }
-    this._sceneEl.addEventListener("camera-set-active", evt => {
-      evt.detail.cameraEl.getObject3D("camera").add(this._sceneEl.audioListener);
-    });
 
     this.audioContext = THREE.AudioContext.getContext();
     this.audioNodes = new Map();
-    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination();
+    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination(); // Voice, camera, screenshare
+    this.audioDestination = this.audioContext.createMediaStreamDestination(); // Media elements
     this.outboundStream = this.mediaStreamDestinationNode.stream;
     this.outboundGainNode = this.audioContext.createGain();
     this.outboundAnalyser = this.audioContext.createAnalyser();
@@ -137,11 +138,30 @@ export class AudioSystem {
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
     this.audioContextNeedsToBeResumed = false;
 
+    this.mixer = {
+      [SourceType.AVATAR_AUDIO_SOURCE]: this.audioContext.createGain(),
+      [SourceType.MEDIA_VIDEO]: this.audioContext.createGain(),
+      [SourceType.SFX]: this.audioContext.createGain()
+    };
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[SourceType.SFX].connect(this._sceneEl.audioListener.getInput());
+
+    // Analyser to show the output audio level
+    this.mixerAnalyser = this.audioContext.createAnalyser();
+    this.mixerAnalyser.fftSize = 32;
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this.mixerAnalyser);
+    this.mixer[SourceType.SFX].connect(this.mixerAnalyser);
+
     // Webkit Mobile fix
     this._safariMobileAudioInterruptionFix();
 
     document.body.addEventListener("touchend", this._resumeAudioContext, false);
     document.body.addEventListener("mouseup", this._resumeAudioContext, false);
+
+    this.onPrefsUpdated = this.updatePrefs.bind(this);
+    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -162,6 +182,78 @@ export class AudioSystem {
       nodes.sourceNode.disconnect();
       nodes.gainNode.disconnect();
       this.audioNodes.delete(id);
+    }
+  }
+
+  addAudio({ sourceType, node }) {
+    let outputNode = node;
+    if (isThreeAudio(node)) {
+      node.gain.disconnect();
+      outputNode = node.gain;
+    }
+    outputNode.connect(this.mixer[sourceType]);
+  }
+
+  removeAudio({ node }) {
+    let outputNode = node;
+    if (isThreeAudio(node)) {
+      outputNode = node.gain;
+    }
+    outputNode.disconnect();
+  }
+
+  updatePrefs() {
+    const { globalVoiceVolume, globalMediaVolume, globalSFXVolume } = window.APP.store.state.preferences;
+    let newGain = globalMediaVolume / 100;
+    this.mixer[SourceType.MEDIA_VIDEO].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+
+    newGain = globalSFXVolume / 100;
+    this.mixer[SourceType.SFX].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+
+    newGain = globalVoiceVolume / 100;
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].gain.setTargetAtTime(
+      newGain,
+      this.audioContext.currentTime,
+      GAIN_TIME_CONST
+    );
+
+    if (MediaDevicesManager.isAudioOutputSelectEnabled && APP.mediaDevicesManager) {
+      const sinkId = APP.mediaDevicesManager.selectedSpeakersDeviceId;
+      const isDefault = sinkId === APP.mediaDevicesManager.defaultOutputDeviceId;
+      if ((!this.outputMediaAudio && isDefault) || sinkId === this.outputMediaAudio?.sinkId) return;
+      const sink = isDefault ? this._sceneEl.audioListener.getInput() : this.audioDestination;
+      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
+      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);
+      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
+      this.mixer[SourceType.MEDIA_VIDEO].disconnect();
+      this.mixer[SourceType.MEDIA_VIDEO].connect(sink);
+      this.mixer[SourceType.MEDIA_VIDEO].connect(this.mixerAnalyser);
+      this.mixer[SourceType.SFX].disconnect();
+      this.mixer[SourceType.SFX].connect(sink);
+      this.mixer[SourceType.SFX].connect(this.mixerAnalyser);
+      if (isDefault) {
+        if (this.outputMediaAudio) {
+          this.outputMediaAudio.pause();
+          this.outputMediaAudio.srcObject = null;
+          this.outputMediaAudio = null;
+        }
+      } else {
+        // Swithing the audio sync is only supported in Chrome at the time of writing this.
+        // It also seems to have some limitations and it only works on audio elements. We are piping all our media through the Audio Context
+        // and that doesn't seem to work.
+        // To workaround that we need to use a MediaStreamAudioDestinationNode that is set as the source of the audio element where we switch the sink.
+        // This is very hacky but there don't seem to have any better alternatives at the time of writing this.
+        // https://stackoverflow.com/a/67043782
+        if (!this.outputMediaAudio) {
+          this.outputMediaAudio = new Audio();
+          this.outputMediaAudio.srcObject = this.audioDestination.stream;
+        }
+        if (this.outputMediaAudio.sinkId !== sinkId) {
+          this.outputMediaAudio.setSinkId(sinkId).then(() => {
+            this.outputMediaAudio.play();
+          });
+        }
+      }
     }
   }
 

@@ -77,8 +77,6 @@ AFRAME.registerComponent("super-spawner", {
     this.handleMediaLoaded = this.handleMediaLoaded.bind(this);
 
     this.spawnedMediaScale = null;
-
-    this.physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
   },
 
   play() {
@@ -191,7 +189,14 @@ AFRAME.registerComponent("super-spawner", {
       }
     }
 
-    this.physicsSystem.resetDynamicBody(spawnedEntity.components["body-helper"].uuid);
+    // We skip this in the scene preview because
+    //   1. hubs-systems is not initialized in the scene preview
+    //   2. physics is not needed in the scene preview
+    if (this.el.sceneEl.systems["hubs-systems"]) {
+      this.el.sceneEl.systems["hubs-systems"].physicsSystem.resetDynamicBody(
+        spawnedEntity.components["body-helper"].uuid
+      );
+    }
 
     spawnedEntity.addEventListener(
       "media-loaded",

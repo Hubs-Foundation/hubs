@@ -602,7 +602,7 @@ class AvatarEditor extends Component {
                 {this.checkbox(
                   "allow_remixing",
                   intl.formatMessage({
-                    id: "avatar-editor.field.alllow-remixing",
+                    id: "avatar-editor.field.allow-remixing",
                     defaultMessage: "Allow others to edit and re-publish your avatar as long as they give you credit."
                   }),
                   <span>

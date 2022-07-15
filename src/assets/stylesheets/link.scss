@@ -82,19 +82,6 @@ a {
   }
 }
 
-:local(.entered-footer) {
-  margin: 16px;
-  font-size: 0.8em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  @media (max-width: 690px) {
-    display: none;
-  }
-}
-
 :local(.entered-contents) {
   display: flex;
   flex-direction: column;
@@ -115,39 +102,9 @@ a {
   background: theme.$overlay-bg-color;
 }
 
-:local(.entry-footer-image) {
-  width: 200px;
-  margin: 12px;
-  margin-top: 24px;
-}
-
-
-:local(.footer-image) {
-  width: 200px;
-  margin: 12px;
-
-  @media (max-height: 719px) {
-    display: none;
-  }
-}
-
 :local(.header) {
   text-align: center;
   white-space: pre-wrap;
-}
-
-:local(.footer) {
-  margin: 16px;
-  font-size: 0.8em;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  @media (min-width: 691px) , (max-height: 650px) {
-    display: none;
-  }
 }
 
 :local(.keypad) {
@@ -195,7 +152,7 @@ a {
   background-color: theme.$disabled-bg-color;
 }
 
-:local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active, :local(.keypad-toggle-mode), :local(.keypad-toggle-mode):disabled, :local(.keypad-toggle-mode):active {
+:local(.keypad-backspace) , :local(.keypad-backspace):disabled , :local(.keypad-backspace):active {
   border: none;
   background: transparent;
   box-shadow: none;
@@ -211,10 +168,6 @@ a {
   color: theme.$text1-color;
 }
 
-:local(.keypad-toggle-mode) {
-  font-size: 1.0em;
-}
-
 :local(.entered) {
   @extend %default-font;
   height: 100px;
@@ -224,10 +177,6 @@ a {
   color: theme.$text1-color;
   display: flex;
   justify-content: center;
-}
-
-:local(.char) {
-  margin: 8px;
 }
 
 :local(.char-input) {
@@ -249,29 +198,4 @@ a {
 
 :local(.char-input::placeholder) {
   letter-spacing: 0;
-}
-
-:local(.headset-icon) {
-  width: 64px;
-  height: 64px;
-  background-color: theme.$text1-color;
-  border-radius: 32px;
-  margin-bottom: 8px;
-  padding-right: 2px;
-  cursor: pointer;
-}
-
-:local(.link-headset-footer-link) {
-  display: flex;
-  align-items: center;
-
-  img {
-    width: 32px;
-    height: 32px;
-    border-radius: 32px;
-    margin-bottom: 8px;
-    margin-right: 16px;
-    padding-right: 2px;
-    cursor: pointer;
-  }
 }
