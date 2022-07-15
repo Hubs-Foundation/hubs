@@ -27,7 +27,7 @@ export const defaultTheme = "default";
 
 export const themes = config?.theme?.themes || [];
 
-export function useDarkMode() {
+function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);
 
   const changeListener = useCallback(
