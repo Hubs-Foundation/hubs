@@ -12,6 +12,7 @@ const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
 import { NO_DEVICE_ID } from "../utils/media-devices-utils.js";
+import { getDefaultTheme } from "../utils/theme.js";
 
 const defaultMaterialQuality = (function() {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
@@ -153,7 +154,7 @@ export const SCHEMA = {
         enableAudioClipping: { type: "bool", default: false },
         audioClippingThreshold: { type: "number", default: 0.015 },
         audioPanningQuality: { type: "string", default: defaultAudioPanningQuality() },
-        theme: { type: "string", default: undefined },
+        theme: { type: "string", default: getDefaultTheme()?.name },
         cursorSize: { type: "number", default: 1 },
         nametagVisibility: { type: "string", default: "showAll" },
         nametagVisibilityDistance: { type: "number", default: 5 },

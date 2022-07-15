@@ -1,3 +1,4 @@
+import { themes } from "../react-components/styles/theme";
 import { waitForDOMContentLoaded } from "./async-utils";
 import configs from "./configs";
 
@@ -107,4 +108,8 @@ function applyThemeToTextButton(el, highlighted) {
   );
 }
 
-export { applyThemeToTextButton, getThemeColor };
+function getDefaultTheme() {
+  return themes.find(t => t.default) || themes[0];
+}
+
+export { applyThemeToTextButton, getThemeColor, getDefaultTheme };
