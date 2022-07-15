@@ -3,8 +3,7 @@ on:
   schedule:
     - cron: 0 23 1 * *
   workflow_dispatch:
+
 jobs:
   hcpkgrelease:
-  run-on: ubuntu-lastest
-  steps:
     uses: mozilla/hubs-ops/.github/workflows/hc_release.yaml@workflow_changes
