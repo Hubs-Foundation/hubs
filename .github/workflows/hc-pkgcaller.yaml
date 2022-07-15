@@ -1,0 +1,8 @@
+name: hubs
+on:
+  schedule:
+    - cron: 0 23 1 * *
+  workflow_dispatch:
+jobs:
+  hcpkgrelease:
+  uses: mozilla/hubs-ops/.github/workflows/hc_release.yaml@workflow_changes
