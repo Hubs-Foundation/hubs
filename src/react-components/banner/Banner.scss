@@ -202,6 +202,12 @@
 
 }
 
+:local(.close_button) {
+  path {
+    stroke: #000000 !important;
+  }
+}
+
 :local(.expand_contents) {
   display: flex;
   flex-direction: column;
@@ -333,6 +339,7 @@
   font-size: 28px;
   line-height: 36px;
   margin-bottom: 16px;
+  color: #000000;
 }
 
 :local(.error_message_title) {
@@ -353,6 +360,7 @@
   line-height: 150% !important;
   margin-bottom: 16px;
   width: 220px;
+  color: #000000;
 }
 
 :local(.success_image) {

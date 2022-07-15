@@ -8,7 +8,7 @@ export const CheckboxInput = memo(
     return (
       <label className={classNames(styles.checkboxInput, { [styles.disabled]: disabled }, className)}>
         <input type="checkbox" disabled={disabled} checked={checked} ref={ref} {...rest} />
-        <div className={classNames(styles.checkmark,'checkmark')} />
+        <div className={classNames(styles.checkmark)} />
         {label && (
           <div className={classNames(styles.labelContainer, labelClassName)}>
             <p className={styles.label}>{label}</p>
