@@ -293,20 +293,21 @@ export function cameraToolSystem(world) {
       depth: false,
       stencil: false
     });
-
     renderTarget.lastUpdated = 0;
     renderTarget.needsUpdate = true;
 
-    // Bit of a hack here to only update the renderTarget when the screens are in view
-    renderTarget.texture.isVideoTexture = true;
-    renderTarget.texture.update = () => {
+    // Only update the renderTarget when the screens are in view
+    function setRendertargetDirty() {
       renderTarget.needsUpdate = true;
-    };
+    }
 
     const screenObj = world.eid2obj.get(CameraTool.screenRef[eid]);
-    const selfieScreenObj = world.eid2obj.get(CameraTool.selfieScreenRef[eid]);
     screenObj.material.map = renderTarget.texture;
+    screenObj.onBeforeRender = setRendertargetDirty;
+
+    const selfieScreenObj = world.eid2obj.get(CameraTool.selfieScreenRef[eid]);
     selfieScreenObj.material.map = renderTarget.texture;
+    selfieScreenObj.onBeforeRender = setRendertargetDirty;
 
     renderTargets.set(eid, renderTarget);
   });
