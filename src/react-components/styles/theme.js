@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { getColorSchemePref } from "../../utils/get-color-scheme-pref";
+import configs from "../../utils/configs";
 
 let config = process.env.APP_CONFIG;
 
@@ -35,30 +37,33 @@ export function useDarkMode() {
     [setDarkMode]
   );
 
-  useEffect(() => {
-    const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  useEffect(
+    () => {
+      const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-    setDarkMode(darkmodeQuery.matches);
+      setDarkMode(darkmodeQuery.matches);
 
-    // This is a workaround for old Safari.
-    // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use
-    // addListener() and removeListener() to observe media query lists.
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
-    // We may remove this workaround when no one will use Safari 13 or before.
-    if (darkmodeQuery.addEventListener) {
-      darkmodeQuery.addEventListener("change", changeListener);
-    } else {
-      darkmodeQuery.addListener(changeListener);
-    }
-
-    return () => {
-      if (darkmodeQuery.removeEventListener) {
-        darkmodeQuery.removeEventListener("change", changeListener);
+      // This is a workaround for old Safari.
+      // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use
+      // addListener() and removeListener() to observe media query lists.
+      // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
+      // We may remove this workaround when no one will use Safari 13 or before.
+      if (darkmodeQuery.addEventListener) {
+        darkmodeQuery.addEventListener("change", changeListener);
       } else {
-        darkmodeQuery.removeListener(changeListener);
+        darkmodeQuery.addListener(changeListener);
       }
-    };
-  }, []);
+
+      return () => {
+        if (darkmodeQuery.removeEventListener) {
+          darkmodeQuery.removeEventListener("change", changeListener);
+        } else {
+          darkmodeQuery.removeListener(changeListener);
+        }
+      };
+    },
+    [changeListener]
+  );
 
   return darkMode;
 }
@@ -110,6 +115,28 @@ export function useTheme(themeId) {
     },
     [themeId, darkMode]
   );
+}
+
+function getCurrentTheme() {
+  if (!Array.isArray(themes)) return;
+
+  const preferredThemeId = window.APP.store?.state?.preferences?.theme;
+  if (preferredThemeId) {
+    return themes.find(t => t.id === preferredThemeId);
+  } else {
+    return getColorSchemePref();
+  }
+}
+
+function getAppLogo(darkMode) {
+  const theme = getCurrentTheme();
+  const shouldUseDarkLogo = theme ? theme.darkModeDefault : darkMode;
+  return (shouldUseDarkLogo && configs.image("logo_dark")) || configs.image("logo");
+}
+
+export function useLogo() {
+  const darkMode = useDarkMode();
+  return getAppLogo(darkMode);
 }
 
 export function useThemeFromStore(store) {
