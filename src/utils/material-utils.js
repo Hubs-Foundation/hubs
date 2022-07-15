@@ -45,7 +45,8 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
     material.map = source.map;
 
     material.lightMap = source.lightMap;
-    material.lightMapIntensity = source.lightMapIntensity;
+    // See https://github.com/mrdoob/three.js/pull/23613 for "* Math.PI"
+    material.lightMapIntensity = source.lightMapIntensity * Math.PI;
 
     material.aoMap = source.aoMap;
     material.aoMapIntensity = source.aoMapIntensity;

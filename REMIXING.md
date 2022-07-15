@@ -4,4 +4,4 @@ Allowing remixing means that others can download, edit, change, and re-publish y
 
 You can change this setting at any time, by re-saving your avatar.
 
-If you don't allow remixing, your content will be published under the Hubs [Terms of Service](https://github.com/mozilla/hubs/blob/master/TERMS.md).
+If you don't allow remixing, your content will be published under the Hubs [Terms of Service](https://www.mozilla.org/en-US/about/legal/terms/hubs/).

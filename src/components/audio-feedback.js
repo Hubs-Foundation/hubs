@@ -28,7 +28,7 @@ const calculateVolume = (analyser, levels) => {
 function updateVolume(component) {
   const newRawVolume = calculateVolume(component.analyser, component.levels);
 
-  const newPerceivedVolume = Math.log(THREE.Math.mapLinear(newRawVolume, 0, 1, 1, Math.E));
+  const newPerceivedVolume = Math.log(THREE.MathUtils.mapLinear(newRawVolume, 0, 1, 1, Math.E));
 
   component.volume = newPerceivedVolume < MIN_VOLUME_THRESHOLD ? 0 : newPerceivedVolume;
 
@@ -180,7 +180,7 @@ AFRAME.registerComponent("scale-audio-feedback", {
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
     this.el.object3D.scale.setScalar(
-      THREE.Math.mapLinear(this.analyser?.volume || 0, 0, 1, this.data.minScale, this.data.maxScale)
+      THREE.MathUtils.mapLinear(this.analyser?.volume || 0, 0, 1, this.data.minScale, this.data.maxScale)
     );
     this.el.object3D.matrixNeedsUpdate = true;
   }
@@ -219,7 +219,7 @@ AFRAME.registerComponent("morph-audio-feedback", {
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
     const { minValue, maxValue } = this.data;
-    const morphValue = THREE.Math.mapLinear(
+    const morphValue = THREE.MathUtils.mapLinear(
       easeOutQuadratic(this.analyser ? this.analyser.volume : 0),
       0,
       1,
@@ -267,7 +267,7 @@ const SPRITE_NAMES = {
 };
 
 export function micLevelForVolume(volume) {
-  return THREE.Math.clamp(Math.ceil(THREE.Math.mapLinear(volume - 0.05, 0, 1, 0, 7)), 0, 7);
+  return THREE.MathUtils.clamp(Math.ceil(THREE.MathUtils.mapLinear(volume - 0.05, 0, 1, 0, 7)), 0, 7);
 }
 
 AFRAME.registerComponent("mic-button", {

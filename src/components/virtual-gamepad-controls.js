@@ -127,10 +127,16 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.rightTouchZone.classList.add(styles.touchZone, styles.right);
     insertAfter(this.rightTouchZone, this.mockJoystickContainer);
     this.rightStick = nipplejs.create({
+      mode: "static",
+      position: { left: "50%", top: "50%" },
       zone: this.rightTouchZone,
       color: "white",
       fadeTime: 0
     });
+    // nipplejs sets z-index 999 but it makes the joysticks
+    // visible even if the scene is hidden for example by
+    // preference dialog. So remove z-index.
+    this.rightStick[0].ui.el.style.removeProperty("z-index");
     this.rightStick.on("start", this.onFirstInteraction);
     this.rightStick.on("move", this.onLookJoystickChanged);
     this.rightStick.on("end", this.onLookJoystickEnd);
@@ -141,10 +147,13 @@ AFRAME.registerComponent("virtual-gamepad-controls", {
     this.leftTouchZone.classList.add(styles.touchZone, styles.left);
     insertAfter(this.leftTouchZone, this.mockJoystickContainer);
     this.leftStick = nipplejs.create({
+      mode: "static",
+      position: { left: "50%", top: "50%" },
       zone: this.leftTouchZone,
       color: "white",
       fadeTime: 0
     });
+    this.leftStick[0].ui.el.style.removeProperty("z-index");
     this.leftStick.on("start", this.onFirstInteraction);
     this.leftStick.on("move", this.onMoveJoystickChanged);
     this.leftStick.on("end", this.onMoveJoystickEnd);

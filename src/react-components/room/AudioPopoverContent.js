@@ -8,14 +8,13 @@ import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
 import { SelectInputField } from "../input/SelectInputField";
 import { Row } from "../layout/Row";
-import { LevelBar } from "../misc/LevelBar";
 import { ToggleInput } from "../input/ToggleInput";
 import { Divider } from "../layout/Divider";
 import { Button } from "../input/Button";
-import MediaDevicesManager from "../../utils/media-devices-manager";
 
 export const AudioPopoverContent = ({
-  micLevel,
+  micLevelBar,
+  speakerLevelBar,
   microphoneOptions,
   onChangeMicrophone,
   isMicrophoneEnabled,
@@ -23,8 +22,9 @@ export const AudioPopoverContent = ({
   onChangeMicrophoneMuted,
   speakerOptions,
   onChangeSpeaker,
-  speakerLevel,
-  onPlaySound
+  onPlaySound,
+  isAudioInputSelectAvailable,
+  isAudioOutputSelectAvailable
 }) => {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
   return (
@@ -32,7 +32,7 @@ export const AudioPopoverContent = ({
       <p style={{ alignSelf: "start" }}>
         <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
       </p>
-      {MediaDevicesManager.isAudioInputSelectEnabled && (
+      {isAudioInputSelectAvailable && (
         <SelectInputField
           className={styles.selectionInput}
           buttonClassName={styles.selectionInput}
@@ -46,7 +46,7 @@ export const AudioPopoverContent = ({
         ) : (
           <MicrophoneMutedIcon className={iconStyle} style={{ marginRight: "12px" }} />
         )}
-        <LevelBar className={styles.levelBar} level={!isMicrophoneEnabled || isMicrophoneMuted ? 0 : micLevel} />
+        <> {micLevelBar}</>
       </Row>
       <Row nowrap>
         <ToggleInput
@@ -59,7 +59,7 @@ export const AudioPopoverContent = ({
       <p style={{ alignSelf: "start" }}>
         <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
       </p>
-      {MediaDevicesManager.isAudioOutputSelectEnabled && (
+      {isAudioOutputSelectAvailable && (
         <SelectInputField
           className={styles.selectionInput}
           buttonClassName={styles.selectionInput}
@@ -69,7 +69,7 @@ export const AudioPopoverContent = ({
       )}
       <Row noWrap>
         <VolumeOff className={iconStyle} style={{ marginRight: "12px" }} />
-        <LevelBar className={styles.levelBar} level={speakerLevel} />
+        <> {speakerLevelBar} </>
       </Row>
       <Button preset="basic" onClick={onPlaySound} sm>
         <FormattedMessage id="mic-setup-modal.test-audio-button" defaultMessage="Test Audio" />
@@ -79,15 +79,17 @@ export const AudioPopoverContent = ({
 };
 
 AudioPopoverContent.propTypes = {
+  micLevelBar: PropTypes.node,
+  speakerLevelBar: PropTypes.node,
   isSoundPlaying: PropTypes.bool,
   onPlaySound: PropTypes.func,
-  micLevel: PropTypes.number,
-  speakerLevel: PropTypes.number,
   isMicrophoneEnabled: PropTypes.bool,
   isMicrophoneMuted: PropTypes.bool,
   onChangeMicrophoneMuted: PropTypes.func,
   microphoneOptions: PropTypes.object,
   onChangeMicrophone: PropTypes.func,
   speakerOptions: PropTypes.object,
-  onChangeSpeaker: PropTypes.func
+  onChangeSpeaker: PropTypes.func,
+  isAudioInputSelectAvailable: PropTypes.bool,
+  isAudioOutputSelectAvailable: PropTypes.bool
 };

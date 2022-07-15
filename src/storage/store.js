@@ -3,6 +3,7 @@ import merge from "deepmerge";
 import Cookies from "js-cookie";
 import jwtDecode from "jwt-decode";
 import { qsGet } from "../utils/qs_truthy.js";
+import detectMobile, { isAndroid, isMobileVR } from "../utils/is-mobile";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
@@ -34,6 +35,19 @@ const defaultMaterialQuality = (function() {
 
   return "high";
 })();
+
+// WebAudio on Android devices (only non-VR devices?) seems to have
+// a bug and audio can be broken if there are many people in a room.
+// We have reported the problem to the Android devs. We found that
+// using equal power panning mode can mitigate the problem so we
+// use low audio panning quality (= equal power mode) by default
+// on Android as workaround until the root issue is fixed on
+// Android end. See
+//   - https://github.com/mozilla/hubs/issues/5057
+//   - https://bugs.chromium.org/p/chromium/issues/detail?id=1308962
+const defaultAudioPanningQuality = () => {
+  return isAndroid() && !isMobileVR() ? "Low" : "High";
+};
 
 //workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1626081 : disable echoCancellation, noiseSuppression, autoGainControl
 const isFirefoxReality = window.AFRAME?.utils.device.isMobileVR() && navigator.userAgent.match(/Firefox/);
@@ -104,8 +118,8 @@ export const SCHEMA = {
         disableLeftRightPanning: { type: "bool", default: false },
         audioNormalization: { type: "bool", default: 0.0 },
         invertTouchscreenCameraMove: { type: "bool", default: true },
-        enableOnScreenJoystickLeft: { type: "bool", default: false },
-        enableOnScreenJoystickRight: { type: "bool", default: false },
+        enableOnScreenJoystickLeft: { type: "bool", default: detectMobile() },
+        enableOnScreenJoystickRight: { type: "bool", default: detectMobile() },
         enableGyro: { type: "bool", default: true },
         animateWaypointTransitions: { type: "bool", default: true },
         showFPSCounter: { type: "bool", default: false },
@@ -138,7 +152,7 @@ export const SCHEMA = {
         showAudioDebugPanel: { type: "bool", default: false },
         enableAudioClipping: { type: "bool", default: false },
         audioClippingThreshold: { type: "number", default: 0.015 },
-        audioPanningQuality: { type: "string", default: "High" },
+        audioPanningQuality: { type: "string", default: defaultAudioPanningQuality() },
         theme: { type: "string", default: undefined },
         cursorSize: { type: "number", default: 1 },
         nametagVisibility: { type: "string", default: "showAll" },

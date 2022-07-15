@@ -773,7 +773,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       showSignInDialog: true,
       signInMessage,
       onContinueAfterSignIn: async () => {
-        remountUI({ showSignInDialog: false });
+        remountUI({ showSignInDialog: false, onContinueAfterSignIn: null });
         let actionError = null;
         if (predicate()) {
           try {
@@ -787,13 +787,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (actionError && onFailure) onFailure(actionError);
         exit2DInterstitialAndEnterVR();
-      },
-      onSignInDialogVisibilityChanged: visible => {
-        if (visible) {
-          remountUI({ showSignInDialog: true });
-        } else {
-          remountUI({ showSignInDialog: false, onContinueAfterSignIn: null });
-        }
       }
     });
   };

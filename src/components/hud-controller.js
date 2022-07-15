@@ -35,14 +35,14 @@ AFRAME.registerComponent("hud-controller", {
 
     const { offset, lookCutoff, animRange, yawCutoff } = this.data;
 
-    const pitch = head.rotation.x * THREE.Math.RAD2DEG;
-    const yawDif = deltaAngle(head.rotation.y, hud.rotation.y) * THREE.Math.RAD2DEG;
+    const pitch = head.rotation.x * THREE.MathUtils.RAD2DEG;
+    const yawDif = deltaAngle(head.rotation.y, hud.rotation.y) * THREE.MathUtils.RAD2DEG;
 
     // HUD is always visible until first hover, to increase discoverability.
     const forceHudVisible = !this.store.state.activity.hasHoveredInWorldHud;
 
     // animate the hud into place over animRange degrees as the user aproaches the lookCutoff angle
-    let t = 1 - THREE.Math.clamp(lookCutoff - pitch, 0, animRange) / animRange;
+    let t = 1 - THREE.MathUtils.clamp(lookCutoff - pitch, 0, animRange) / animRange;
 
     // HUD is locked down while showing tooltip or if forced.
     if (forceHudVisible) {
@@ -80,7 +80,7 @@ AFRAME.registerComponent("hud-controller", {
       (!hudOutOfView || forceHudVisible) &&
       this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_FIRST_PERSON;
     hud.position.y = (this.isYLocked ? this.lockedHeadPositionY : head.position.y) + offset + (1 - t) * offset;
-    hud.rotation.x = (1 - t) * THREE.Math.DEG2RAD * 90;
+    hud.rotation.x = (1 - t) * THREE.MathUtils.DEG2RAD * 90;
     hud.matrixNeedsUpdate = true;
   },
 

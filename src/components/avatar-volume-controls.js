@@ -71,14 +71,14 @@ AFRAME.registerComponent("avatar-volume-controls", {
   volumeUp() {
     let gainMultiplier = APP.gainMultipliers.get(this.audioEl);
     const step = calcGainStepUp(gainMultiplier);
-    gainMultiplier = THREE.Math.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
+    gainMultiplier = THREE.MathUtils.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
     this.updateGainMultiplier(gainMultiplier, true);
   },
 
   volumeDown() {
     let gainMultiplier = APP.gainMultipliers.get(this.audioEl);
     const step = -calcGainStepDown(gainMultiplier);
-    gainMultiplier = THREE.Math.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
+    gainMultiplier = THREE.MathUtils.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
     this.updateGainMultiplier(gainMultiplier, true);
   },
 
