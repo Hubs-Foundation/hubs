@@ -1,4 +1,4 @@
-name: hubs
+name: hc-pkg
 on:
   schedule:
     - cron: 0 23 1 * *
