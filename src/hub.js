@@ -260,6 +260,7 @@ import { LogMessageType } from "./react-components/room/ChatSidebar";
 import stgSysClass from "./onboardxr/onboard_data/stage-system.js";
 import loginManagerOB from "./onboardxr/hubs-docking/onboard-login-manager.js"; //mike
 import "./components/vpt-stream";
+import "./onboardxr/hubs-docking/components/cueingObject.js";
 
 //onBoard - roman end
 

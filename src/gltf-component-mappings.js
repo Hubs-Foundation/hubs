@@ -626,4 +626,5 @@ AFRAME.GLTFModelPlus.registerComponent("vpt-stream", "vpt-stream", (el, _compone
 
   el.setAttribute(_componentName, componentData);
 });
+AFRAME.GLTFModelPlus.registerComponent("cueing-object", "cueing-object");
 //onboardend

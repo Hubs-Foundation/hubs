@@ -396,7 +396,7 @@ export default class Store extends EventTarget {
         console.log("waiting for hubs store");
       }
     }
-    //console.log("running forced settings");
+    console.log("running forced settings");
     //onboardend
 
     if (newState.profile !== undefined) {

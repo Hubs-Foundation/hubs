@@ -1407,7 +1407,6 @@ class UIRoot extends Component {
               {entered &&
                 isMobileVR && (
                   <ToolbarButton
-                    className={styleUtils.hideLg}
                     icon={<VRIcon />}
                     preset="accept"
                     label={<FormattedMessage id="toolbar.enter-vr-button" defaultMessage="Enter VR" />}
