@@ -178,7 +178,7 @@ export class CharacterControllerSystem {
       const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
       if (!isGhost && !entered) return;
 
-      //onboard waypoint lock
+      //onboard waypoint lock developed by MattBCool
       const userinput = AFRAME.scenes[0].systems.userinput;
       const acceleration = userinput.get(paths.actions.characterAcceleration);
       const didTryToMove = acceleration && (Math.abs(acceleration[0]) > 0.001 || Math.abs(acceleration[1]) > 0.001);
@@ -187,7 +187,7 @@ export class CharacterControllerSystem {
       }
       if (this.lockedObject) {
         this.lockedObject.updateMatrices();
-        this.travelByWaypoint(this.lockedObject.matrixWorld, false, true);
+        this.travelByWaypoint(this.lockedObject.matrixWorld, false, false);
         return;
       }
       //onboardend
