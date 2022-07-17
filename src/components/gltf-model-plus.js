@@ -438,7 +438,7 @@ class GLTFHubsPlugin {
       // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
       // @TODO: Should this be fixed in the gltf loader?
       object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
-      const materialQuality = window.APP.store.materialQualitySetting;
+      const materialQuality = window.APP.store.state.preferences.materialQualitySetting;
       updateMaterials(object, material => convertStandardMaterial(material, materialQuality));
     });
 

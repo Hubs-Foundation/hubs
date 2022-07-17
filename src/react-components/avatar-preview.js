@@ -83,6 +83,7 @@ class AvatarPreview extends Component {
     this.state = { loading: true, error: null };
     this.avatar = null;
     this.imageBitmaps = {};
+    this.mounted = false;
   }
 
   componentDidMount = () => {
@@ -129,6 +130,8 @@ class AvatarPreview extends Component {
     });
     window.addEventListener("resize", this.resize);
     this.resize();
+
+    this.mounted = true;
   };
 
   resize = () => {
@@ -166,6 +169,8 @@ class AvatarPreview extends Component {
   })();
 
   componentWillUnmount = () => {
+    this.mounted = false;
+
     // Gotta be particularly careful about disposing things here since we will likely create many avatar
     // previews during a session and Chrome will eventually discard the oldest webgl context if we leak
     // contexts by holding on to them directly or indirectly.
@@ -205,7 +210,7 @@ class AvatarPreview extends Component {
     const url = proxiedUrlFor(this.props.avatarGltfUrl);
     const gltf = await this.loadPreviewAvatar(url);
     // If we had started loading another avatar while we were loading this one, throw this one away
-    if (newLoadId !== this.loadId) return;
+    if (!this.mounted || newLoadId !== this.loadId) return;
     if (gltf && this.props.onGltfLoaded) this.props.onGltfLoaded(gltf);
     this.setAvatar(gltf.scene);
   }
@@ -236,6 +241,8 @@ class AvatarPreview extends Component {
       this.setState({ loading: false, error: true });
       return;
     }
+
+    if (!this.mounted) return;
 
     // TODO Check for "Bot_Skinned" here is a hack for legacy avatars which only has a name one of the MOZ_alt_material nodes
     this.previewMesh = findNode(
@@ -289,7 +296,7 @@ class AvatarPreview extends Component {
       ];
 
       // Low and medium quality materials don't use environment maps
-      if (window.APP.store.materialQualitySetting === "high") {
+      if (window.APP.store.state.preferences.materialQualitySetting === "high") {
         dependencies.push(
           // TODO apply environment map to secondary materials as well
           createDefaultEnvironmentMap().then(t => {
@@ -316,12 +323,15 @@ class AvatarPreview extends Component {
       const texture = this.previewMesh.material[prop];
 
       // Low quality materials are missing normal maps
-      if (prop === "normalMap" && window.APP.store.materialQualitySetting === "low") {
+      if (prop === "normalMap" && window.APP.store.state.preferences.materialQualitySetting === "low") {
         return;
       }
 
       // Medium Quality materials are missing metalness and roughness maps
-      if ((prop === "roughnessMap" || prop === "metalnessMap") && window.APP.store.materialQualitySetting !== "high") {
+      if (
+        (prop === "roughnessMap" || prop === "metalnessMap") &&
+        window.APP.store.state.preferences.materialQualitySetting !== "high"
+      ) {
         return;
       }
 

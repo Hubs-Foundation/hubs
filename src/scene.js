@@ -53,6 +53,7 @@ function mountUI(scene, props = {}) {
         <SceneUI
           {...{
             scene,
+            store: window.APP.store,
             ...props
           }}
         />

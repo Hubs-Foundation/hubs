@@ -10,6 +10,7 @@ import { MediaDevicesEvents } from "../utils/media-devices-utils";
 // the avatar is quiet during that entire duration (eg they are muted)
 const DISABLE_AT_VOLUME_THRESHOLD = 0.00001;
 const DISABLE_GRACE_PERIOD_MS = 10000;
+const IS_TALKING_THRESHOLD_MS = 1000;
 const MIN_VOLUME_THRESHOLD = 0.08;
 
 const calculateVolume = (analyser, levels) => {
@@ -23,16 +24,6 @@ const calculateVolume = (analyser, levels) => {
   const currVolume = Math.sqrt(sum / levels.length);
   return currVolume;
 };
-
-const tempScaleFromPosition = new THREE.Vector3();
-const tempScaleToPosition = new THREE.Vector3();
-
-export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, volume) {
-  tempScaleToPosition.setFromMatrixPosition(toObject.matrixWorld);
-  tempScaleFromPosition.setFromMatrixPosition(fromObject.matrixWorld);
-  const distance = tempScaleFromPosition.distanceTo(tempScaleToPosition) / 10;
-  return Math.min(maxScale, minScale + (maxScale - minScale) * volume * 8 * distance);
-}
 
 function updateVolume(component) {
   const newRawVolume = calculateVolume(component.analyser, component.levels);
@@ -55,7 +46,8 @@ AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
     this.prevVolume = 0;
-    this.avatarIsQuiet = true;
+    this.disableUpdates = true;
+    this.avatarIsTalking = false;
 
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
@@ -82,13 +74,13 @@ AFRAME.registerComponent("networked-audio-analyser", {
   },
 
   tick: function(t) {
-    if (!this.avatarIsQuiet) {
+    if (!this.disableUpdates) {
       this._updateAnalysis(t);
     }
   },
 
   _runScheduledWork: function() {
-    if (this.avatarIsQuiet) {
+    if (this.disableUpdates) {
       this._updateAnalysis();
     }
   },
@@ -104,14 +96,18 @@ AFRAME.registerComponent("networked-audio-analyser", {
 
     if (this.volume < DISABLE_AT_VOLUME_THRESHOLD) {
       if (t && this.lastSeenVolume && this.lastSeenVolume < t - DISABLE_GRACE_PERIOD_MS) {
-        this.avatarIsQuiet = true;
+        this.disableUpdates = true;
+      }
+      if (t && this.lastSeenVolume && this.lastSeenVolume < t - IS_TALKING_THRESHOLD_MS) {
+        this.avatarIsTalking = false;
       }
     } else {
       if (t) {
         this.lastSeenVolume = t;
       }
 
-      this.avatarIsQuiet = false;
+      this.disableUpdates = false;
+      this.avatarIsTalking = true;
     }
   }
 });
@@ -152,7 +148,14 @@ AFRAME.registerSystem("local-audio-analyser", {
 
   tick: function() {
     if (!this.analyser) return;
-    updateVolume(this);
+
+    // TODO Ideally, when muted no audio should ever even make it into the analyser to begin with
+    if (APP.dialog.isMicEnabled) {
+      updateVolume(this);
+    } else {
+      this.prevVolume = this.volume;
+      this.volume = 0;
+    }
   }
 });
 
@@ -173,26 +176,13 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   tick() {
-    // TODO: come up with a cleaner way to handle this.
-    // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
-    if (!this.el.object3D.visible) return;
     if (!this.cameraEl) return;
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
-    const { minScale, maxScale } = this.data;
-
-    const { object3D } = this.el;
-
-    const scale = getAudioFeedbackScale(
-      this.el.object3D,
-      this.cameraEl.object3DMap.camera,
-      minScale,
-      maxScale,
-      this.analyser ? this.analyser.volume : 0
+    this.el.object3D.scale.setScalar(
+      THREE.Math.mapLinear(this.analyser?.volume || 0, 0, 1, this.data.minScale, this.data.maxScale)
     );
-
-    object3D.scale.setScalar(scale);
-    object3D.matrixNeedsUpdate = true;
+    this.el.object3D.matrixNeedsUpdate = true;
   }
 });
 

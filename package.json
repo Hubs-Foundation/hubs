@@ -130,7 +130,7 @@
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
     "react-textarea-autosize": "^8.2.0",
-    "react-use-css-breakpoints": "^1.0.3",
+    "react-use-css-breakpoints": "^1.0.4",
     "resize-observer-polyfill": "^1.5.1",
     "screenfull": "^4.0.1",
     "sdp-transform": "^2.14.1",

@@ -5,15 +5,12 @@ import styles from "./AudioDebugPanel.scss";
 import { CollapsiblePanel } from ".//CollapsiblePanel";
 import classNames from "classnames";
 import {
-  CLIPPING_THRESHOLD_ENABLED,
   CLIPPING_THRESHOLD_MIN,
   CLIPPING_THRESHOLD_MAX,
   CLIPPING_THRESHOLD_STEP,
-  CLIPPING_THRESHOLD_DEFAULT,
   GLOBAL_VOLUME_MIN,
   GLOBAL_VOLUME_MAX,
-  GLOBAL_VOLUME_STEP,
-  GLOBAL_VOLUME_DEFAULT
+  GLOBAL_VOLUME_STEP
 } from "../../react-components/preferences-screen";
 import { SelectInputField } from "../input/SelectInputField";
 import { DISTANCE_MODEL_OPTIONS, DistanceModelType, SourceType } from "../../components/audio-params";
@@ -89,19 +86,13 @@ SliderProperty.propTypes = {
 };
 
 function getPrefs() {
-  const prefs = {
+  return {
     enableAudioClipping: APP.store.state.preferences.enableAudioClipping,
     audioClippingThreshold: APP.store.state.preferences.audioClippingThreshold,
     globalVoiceVolume: APP.store.state.preferences.globalVoiceVolume,
     globalMediaVolume: APP.store.state.preferences.globalMediaVolume,
     globalSFXVolume: APP.store.state.preferences.globalSFXVolume
   };
-  if (prefs.enableAudioClipping === undefined) prefs.enableAudioClipping = CLIPPING_THRESHOLD_ENABLED;
-  if (prefs.audioClippingThreshold === undefined) prefs.audioClippingThreshol = CLIPPING_THRESHOLD_DEFAULT;
-  if (prefs.globalVoiceVolume === undefined) prefs.globalVoiceVolume = GLOBAL_VOLUME_DEFAULT;
-  if (prefs.globalMediaVolume === undefined) prefs.globalMediaVolume = GLOBAL_VOLUME_DEFAULT;
-  if (prefs.globalSFXVolume === undefined) prefs.globalSFXVolume = GLOBAL_VOLUME_DEFAULT;
-  return prefs;
 }
 
 export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {

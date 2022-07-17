@@ -1,19 +1,8 @@
-import { CLIPPING_THRESHOLD_ENABLED, CLIPPING_THRESHOLD_DEFAULT } from "../react-components/preferences-screen";
 import {
   getCurrentAudioSettings,
   shouldAddSupplementaryAttenuation,
   updateAudioSettings
 } from "../update-audio-settings";
-
-function isClippingEnabled() {
-  const { enableAudioClipping } = window.APP.store.state.preferences;
-  return enableAudioClipping !== undefined ? enableAudioClipping : CLIPPING_THRESHOLD_ENABLED;
-}
-
-function getClippingThreshold() {
-  const { audioClippingThreshold } = window.APP.store.state.preferences;
-  return audioClippingThreshold !== undefined ? audioClippingThreshold : CLIPPING_THRESHOLD_DEFAULT;
-}
 
 const distanceModels = {
   linear: function(distance, rolloffFactor, refDistance, maxDistance) {
@@ -62,8 +51,7 @@ const calculateAttenuation = (() => {
 // TODO: Rename "GainSystem" because the name is suspicious
 export class GainSystem {
   tick() {
-    const clippingEnabled = isClippingEnabled();
-    const clippingThreshold = getClippingThreshold();
+    const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
     for (const [el, audio] of APP.audios.entries()) {
       const attenuation = calculateAttenuation(el, audio);
 
@@ -76,7 +64,7 @@ export class GainSystem {
       }
 
       const isClipped = APP.clippingState.has(el);
-      const shouldBeClipped = clippingEnabled && attenuation < clippingThreshold;
+      const shouldBeClipped = enableAudioClipping && attenuation < audioClippingThreshold;
       if (isClipped !== shouldBeClipped) {
         if (shouldBeClipped) {
           APP.clippingState.add(el);

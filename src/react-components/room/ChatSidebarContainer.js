@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import {
   ChatSidebar,
@@ -164,6 +164,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
+  const typingTimeoutRef = useRef();
   const intl = useIntl();
   const inputRef = useRef();
 
@@ -182,6 +183,9 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
       } else if (e.key === "Escape") {
         onClose();
       }
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => window.APP.hubChannel.endTyping(), 500);
+      window.APP.hubChannel.beginTyping();
     },
     [sendMessage, setMessage, onClose]
   );
@@ -209,6 +213,16 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
       }
     },
     [scene]
+  );
+
+  const onSelectEmoji = useCallback(
+    ({ emoji, pickerRemainedOpen }) => {
+      setMessage(message => message + emoji.native);
+      // If the picker remained open, avoid selecting the input so that the
+      // user can keep picking emojis.
+      if (!pickerRemainedOpen) inputRef.current.select();
+    },
+    [setMessage, inputRef]
   );
 
   useEffect(() => inputEffect(inputRef.current), [inputEffect, inputRef]);
@@ -293,9 +307,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         }
         afterInput={
           <>
-            {!isMobile && (
-              <EmojiPickerPopoverButton onSelectEmoji={emoji => setMessage(message => message + emoji.native)} />
-            )}
+            {!isMobile && <EmojiPickerPopoverButton onSelectEmoji={onSelectEmoji} />}
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (

@@ -193,7 +193,7 @@ AFRAME.registerSystem("audio-debug", {
   },
 
   updateState({ force }) {
-    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel || false;
+    const isEnabled = window.APP.store.state.preferences.showAudioDebugPanel;
     if (force || isEnabled !== this.data.enabled) {
       this.enableDebugMode(isEnabled, force);
     }

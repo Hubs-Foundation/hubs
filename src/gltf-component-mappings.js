@@ -84,6 +84,7 @@ AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("uv-scroll", "uv-scroll");
 AFRAME.GLTFModelPlus.registerComponent("frustrum", "frustrum");
+AFRAME.GLTFModelPlus.registerComponent("mirror", "mirror");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
   "shape-helper",

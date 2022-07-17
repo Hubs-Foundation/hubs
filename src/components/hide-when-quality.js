@@ -8,7 +8,7 @@ AFRAME.registerComponent("hide-when-quality", {
 
   update(oldData) {
     if (this.data !== oldData) {
-      this.updateComponentState(window.APP.store.materialQualitySetting);
+      this.updateComponentState(window.APP.store.state.preferences.materialQualitySetting);
     }
   },
 

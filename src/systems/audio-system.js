@@ -20,7 +20,6 @@ function performDelayedReconnect(gainNode) {
 import * as sdpTransform from "sdp-transform";
 import MediaDevicesManager from "../utils/media-devices-manager";
 import { THREE } from "aframe";
-import { DEFAULT_DEVICE_ID } from "../utils/media-devices-utils";
 
 function isThreeAudio(node) {
   return node instanceof THREE.Audio || node instanceof THREE.PositionalAudio;
@@ -125,13 +124,6 @@ async function enableChromeAEC(gainNode) {
 export class AudioSystem {
   constructor(sceneEl) {
     this._sceneEl = sceneEl;
-    this._sceneEl.audioListener = this._sceneEl.audioListener || new THREE.AudioListener();
-    if (this._sceneEl.camera) {
-      this._sceneEl.camera.add(this._sceneEl.audioListener);
-    }
-    this._sceneEl.addEventListener("camera-set-active", evt => {
-      evt.detail.cameraEl.getObject3D("camera").add(this._sceneEl.audioListener);
-    });
 
     this.audioContext = THREE.AudioContext.getContext();
     this.audioNodes = new Map();
@@ -212,22 +204,23 @@ export class AudioSystem {
 
   updatePrefs() {
     const { globalVoiceVolume, globalMediaVolume, globalSFXVolume } = window.APP.store.state.preferences;
-    let newGain = (globalMediaVolume !== undefined ? globalMediaVolume : 100) / 100;
+    let newGain = globalMediaVolume / 100;
     this.mixer[SourceType.MEDIA_VIDEO].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
 
-    newGain = (globalSFXVolume !== undefined ? globalSFXVolume : 100) / 100;
+    newGain = globalSFXVolume / 100;
     this.mixer[SourceType.SFX].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
 
-    newGain = (globalVoiceVolume !== undefined ? globalVoiceVolume : 100) / 100;
+    newGain = globalVoiceVolume / 100;
     this.mixer[SourceType.AVATAR_AUDIO_SOURCE].gain.setTargetAtTime(
       newGain,
       this.audioContext.currentTime,
       GAIN_TIME_CONST
     );
 
-    if (MediaDevicesManager.isAudioOutputSelectEnabled && window.APP.mediaDevicesManager) {
-      const sinkId = window.APP.mediaDevicesManager.selectedSpeakersDeviceId;
-      const isDefault = sinkId === DEFAULT_DEVICE_ID;
+    if (MediaDevicesManager.isAudioOutputSelectEnabled && APP.mediaDevicesManager) {
+      const sinkId = APP.mediaDevicesManager.selectedSpeakersDeviceId;
+      const isDefault = sinkId === APP.mediaDevicesManager.defaultOutputDeviceId;
+      if ((!this.outputMediaAudio && isDefault) || sinkId === this.outputMediaAudio?.sinkId) return;
       const sink = isDefault ? this._sceneEl.audioListener.getInput() : this.audioDestination;
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);

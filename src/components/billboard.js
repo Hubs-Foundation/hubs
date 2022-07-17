@@ -43,7 +43,7 @@ AFRAME.registerComponent("billboard", {
 
     const isInViewOfCamera = (obj, screenCamera) => {
       frustumMatrix.multiplyMatrices(screenCamera.projectionMatrix, screenCamera.matrixWorldInverse);
-      frustum.setFromMatrix(frustumMatrix);
+      frustum.setFromProjectionMatrix(frustumMatrix);
       box.makeEmpty();
       obj.traverse(expandBox);
 
