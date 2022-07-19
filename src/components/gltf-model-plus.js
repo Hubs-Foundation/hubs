@@ -11,6 +11,11 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
+// It seems we need to use require to import modules
+// under the three/examples/js to avoid tree shaking
+// in webpack production mode.
+require("three/examples/js/loaders/GLTFLoader");
+
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 class GLTFCache {
@@ -53,7 +58,7 @@ class GLTFCache {
     }
   }
 }
-const gltfCache = new GLTFCache();
+export const gltfCache = new GLTFCache();
 const inflightGltfs = new Map();
 
 const extractZipFile = promisifyWorker(new SketchfabZipWorker());

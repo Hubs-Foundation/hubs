@@ -68,7 +68,8 @@ AFRAME.registerComponent("shape-helper", {
   },
 
   remove: function() {
-    if (this.uuid !== -1) {
+    // Removing a body already cleans up it's shapes
+    if (this.uuid !== -1 && this.bodyHelper.alive) {
       this.system.removeShapes(this.bodyHelper.uuid, this.uuid);
     }
     this.alive = false;

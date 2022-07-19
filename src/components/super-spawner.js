@@ -151,15 +151,6 @@ AFRAME.registerComponent("super-spawner", {
     const willAnimateFromCursor =
       this.data.animateFromCursor &&
       (userinput.get(paths.actions.rightHand.matrix) || userinput.get(paths.actions.leftHand.matrix));
-    if (!willAnimateFromCursor) {
-      if (left) {
-        interaction.state.leftRemote.held = spawnedEntity;
-        interaction.state.leftRemote.spawning = true;
-      } else {
-        interaction.state.rightRemote.held = spawnedEntity;
-        interaction.state.rightRemote.spawning = true;
-      }
-    }
     this.activateCooldown();
     await waitForEvent("model-loaded", spawnedEntity);
 
@@ -181,12 +172,6 @@ AFRAME.registerComponent("super-spawner", {
         to: { x: this.handPosition.x, y: this.handPosition.y, z: this.handPosition.z },
         easing: "easeInOutBack"
       });
-    } else {
-      if (left) {
-        interaction.state.leftRemote.spawning = false;
-      } else {
-        interaction.state.rightRemote.spawning = false;
-      }
     }
 
     // We skip this in the scene preview because

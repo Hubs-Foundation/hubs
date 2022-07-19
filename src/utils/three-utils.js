@@ -26,6 +26,10 @@ export function disposeMaterial(mtrl) {
   if (mtrl.normalMap) mtrl.normalMap.dispose();
   if (mtrl.specularMap) mtrl.specularMap.dispose();
   if (mtrl.envMap) mtrl.envMap.dispose();
+  if (mtrl.aoMap) mtrl.aoMap.dispose();
+  if (mtrl.metalnessMap) mtrl.metalnessMap.dispose();
+  if (mtrl.roughnessMap) mtrl.roughnessMap.dispose();
+  if (mtrl.emissiveMap) mtrl.emissiveMap.dispose();
   mtrl.dispose();
 }
 
@@ -56,12 +60,12 @@ export function setMatrixWorld(object3D, m) {
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {
     object3D.parent.updateMatrices();
-    object3D.matrix = object3D.matrix
+    object3D.matrix
       .copy(object3D.parent.matrixWorld)
       .invert()
-      .multiply(object3D.matrixWorld);
+      .multiply(m);
   } else {
-    object3D.matrix.copy(object3D.matrixWorld);
+    object3D.matrix.copy(m);
   }
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
   if (tempMatrix4.near(object3D.matrixWorld, EPSILON)) {
@@ -462,3 +466,16 @@ export function createHeadlessModelForSkinnedMesh(mesh) {
 
   return createErasedMesh(mesh, eraseBoneIndexes);
 }
+
+export const isFacingCamera = (function() {
+  const objWorldDir = new THREE.Vector3();
+  const objWorld = new THREE.Vector3();
+  const camWorld = new THREE.Vector3();
+  return function isFacingCamera(obj) {
+    const playerCamera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+    playerCamera.getWorldPosition(camWorld);
+    obj.getWorldPosition(objWorld);
+    obj.getWorldDirection(objWorldDir);
+    return objWorldDir.dot(objWorld.sub(camWorld)) < 0;
+  };
+})();

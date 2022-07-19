@@ -1,9 +1,11 @@
 import { addMedia } from "../utils/media-utils";
 import { ObjectContentOrigins } from "../object-types";
+import { Held, HeldHandLeft, HeldHandRight, HeldRemoteLeft, HeldRemoteRight } from "../bit-components";
+import { addComponent } from "bitecs";
 
 // WARNING: This system mutates interaction system state!
 export class SuperSpawnerSystem {
-  maybeSpawn(state, grabPath) {
+  maybeSpawn(state, grabPath, HeldComponent) {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const superSpawner = state.hovered && state.hovered.components["super-spawner"];
 
@@ -20,11 +22,11 @@ export class SuperSpawnerSystem {
       userinput.get(grabPath) &&
       isPermitted
     ) {
-      this.performSpawn(state, grabPath, userinput, superSpawner);
+      this.performSpawn(state, superSpawner, HeldComponent);
     }
   }
 
-  performSpawn(state, grabPath, userinput, superSpawner) {
+  performSpawn(state, superSpawner, HeldComponent) {
     const data = superSpawner.data;
 
     const spawnedEntity = addMedia(
@@ -51,18 +53,21 @@ export class SuperSpawnerSystem {
 
     superSpawner.el.emit("spawned-entity-created", { target: spawnedEntity });
 
-    state.held = spawnedEntity;
-
     superSpawner.activateCooldown();
-    state.spawning = true;
 
     spawnedEntity.addEventListener(
       "media-loaded",
       () => {
         spawnedEntity.object3D.scale.copy(superSpawner.spawnedMediaScale);
         spawnedEntity.object3D.matrixNeedsUpdate = true;
-        state.spawning = false;
+
         superSpawner.el.emit("spawned-entity-loaded", { target: spawnedEntity });
+
+        // TODO we do this in media loaded as the entity doesn't appear to actually be initialized right away (and thus doesn't have an eid)
+        // This is fairly hacky and is why we had equally hacky "spawning" state stuff before. This goes away with non aframe entities so
+        // just localizing and carrying forward the hack for now.
+        addComponent(APP.world, HeldComponent, spawnedEntity.eid);
+        addComponent(APP.world, Held, spawnedEntity.eid);
       },
       { once: true }
     );
@@ -71,9 +76,9 @@ export class SuperSpawnerSystem {
   tick() {
     const interaction = AFRAME.scenes[0].systems.interaction;
     if (!interaction.ready) return; //DOMContentReady workaround
-    this.maybeSpawn(interaction.state.leftHand, interaction.options.leftHand.grabPath);
-    this.maybeSpawn(interaction.state.rightHand, interaction.options.rightHand.grabPath);
-    this.maybeSpawn(interaction.state.rightRemote, interaction.options.rightRemote.grabPath);
-    this.maybeSpawn(interaction.state.leftRemote, interaction.options.leftRemote.grabPath);
+    this.maybeSpawn(interaction.state.leftHand, interaction.options.leftHand.grabPath, HeldHandLeft);
+    this.maybeSpawn(interaction.state.rightHand, interaction.options.rightHand.grabPath, HeldHandRight);
+    this.maybeSpawn(interaction.state.rightRemote, interaction.options.rightRemote.grabPath, HeldRemoteRight);
+    this.maybeSpawn(interaction.state.leftRemote, interaction.options.leftRemote.grabPath, HeldRemoteLeft);
   }
 }

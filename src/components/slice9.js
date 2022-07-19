@@ -92,6 +92,7 @@ AFRAME.registerComponent("slice9", {
     this.el.setObject3D("mesh", this.plane);
   },
 
+  // TODO use updateSlice9Geometry
   regenerateMesh: function() {
     const data = this.data;
     let height;
@@ -257,5 +258,9 @@ AFRAME.registerComponent("slice9", {
     }
 
     this.setMap(null);
+  },
+
+  remove() {
+    this.geometry?.dispose();
   }
 });

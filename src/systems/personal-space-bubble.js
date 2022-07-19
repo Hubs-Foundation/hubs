@@ -1,3 +1,5 @@
+import { hasComponent } from "bitecs";
+import { IgnoreSpaceBubble } from "../bit-components";
 import { forEachMaterial } from "../utils/material-utils";
 import qsTruthy from "../utils/qs_truthy";
 import traverseFilteredSubtrees from "../utils/traverseFilteredSubtrees";
@@ -239,7 +241,7 @@ AFRAME.registerComponent("personal-space-invader", {
     if (this.gltfRootEl && this.gltfRootEl.object3DMap.mesh && !this.alwaysHidden) {
       traverseFilteredSubtrees(this.gltfRootEl.object3DMap.mesh, obj => {
         // Prevents changing the opacity of ui elements
-        if (obj.el && obj.el.components.tags && obj.el.components.tags.data.ignoreSpaceBubble) {
+        if (obj.el && hasComponent(APP.world, IgnoreSpaceBubble, obj.el.eid)) {
           // Skip all objects under this branch by returning false
           return false;
         }

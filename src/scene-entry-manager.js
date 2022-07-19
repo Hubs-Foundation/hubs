@@ -2,6 +2,7 @@ import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
 import { SignInMessages } from "./react-components/auth/SignInModal";
+import { createNetworkedEntity } from "./systems/netcode";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -21,6 +22,9 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
+import { addComponent, removeEntity } from "bitecs";
+import { MyCameraTool } from "./bit-components";
+import { anyEntityWith } from "./utils/bit-utils";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -417,24 +421,22 @@ export default class SceneEntryManager {
 
   _setupCamera = () => {
     this.scene.addEventListener("action_toggle_camera", () => {
-      if (!this.hubChannel.can("spawn_camera")) return;
-      const myCamera = this.scene.systems["camera-tools"].getMyCamera();
-
-      if (myCamera) {
-        myCamera.parentNode.removeChild(myCamera);
+      const myCam = anyEntityWith(APP.world, MyCameraTool);
+      if (myCam) {
+        removeEntity(APP.world, myCam);
+        this.scene.removeState("camera");
       } else {
-        const entity = document.createElement("a-entity");
-        entity.setAttribute("networked", { template: "#interactable-camera" });
-        entity.setAttribute("offset-relative-to", {
-          target: "#avatar-pov-node",
-          offset: { x: 0, y: 0, z: -1.5 }
-        });
-        this.scene.appendChild(entity);
+        const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+        const eid = createNetworkedEntity(APP.world, "camera");
+        addComponent(APP.world, MyCameraTool, eid);
+
+        const obj = APP.world.eid2obj.get(eid);
+        obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+        obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+
+        this.scene.addState("camera");
       }
     });
-
-    this.scene.addEventListener("photo_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "photo"));
-    this.scene.addEventListener("video_taken", e => this.hubChannel.sendMessage({ src: e.detail }, "video"));
   };
 
   _spawnAvatar = () => {
