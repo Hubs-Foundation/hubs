@@ -271,9 +271,7 @@ module.exports = async (env, argv) => {
   };
 
   const devServerHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Cross-Origin-Opener-Policy": "same-origin",
-    "Cross-Origin-Embedder-Policy": "require-corp"
+    "Access-Control-Allow-Origin": "*"
   };
 
   // Behind and environment var for now pending further testing
