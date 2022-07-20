@@ -1,7 +1,8 @@
 name: hc-pkg
 on:
+  push:
   schedule:
-    - cron: 30 23 1 1-12 1
+    - cron: 30 23 1 1-12 *
 
 jobs:
   hcpkgrelease:
