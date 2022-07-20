@@ -132,7 +132,7 @@
     "signin": {
         "SIGN_IN": "로그인",
         "LANGUAGE": "언어",
-        "USERNAME_LABEL": "사용자 이름",
+        "EMAIL_LABEL": "이메일",
         "PASSWORD_LABEL": "비밀번호",
         "SIGN_IN_BUTTON": "로그인",
         "SIGN_UP_LABEL": "또는",
