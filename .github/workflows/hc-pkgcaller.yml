@@ -1,8 +1,7 @@
 name: hc-pkg
 on:
   schedule:
-    - 0 23 1 * *
-  workflow_dispatch:
+    - cron: 30 23 1 1-12 1
 
 jobs:
   hcpkgrelease:
