@@ -41,7 +41,7 @@ const getPlayerCamera = function() {
 
 function shouldMoveCursor(touch, rect, raycaster) {
   const isCursorGrabbing = anyEntityWith(APP.world, HeldRemoteRight);
-  if (isCursorGrabbing) return false;
+  if (isCursorGrabbing) return true;
 
   // Check if this touch might result in an interact or grab eventually
   const rawIntersections = [];
