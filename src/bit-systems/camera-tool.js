@@ -166,9 +166,10 @@ function updateRenderTarget(world, camera) {
   renderTarget.needsUpdate = false;
   renderTarget.lastUpdated = world.time.elapsed;
 
+  const tmpRenderTarget = renderer.getRenderTarget();
   renderer.setRenderTarget(renderTarget);
   renderer.render(sceneEl.object3D, world.eid2obj.get(CameraTool.cameraRef[camera]));
-  renderer.setRenderTarget(null);
+  renderer.setRenderTarget(tmpRenderTarget);
 
   renderer.xr.enabled = tmpVRFlag;
   sceneEl.object3D.onAfterRender = tmpOnAfterRender;

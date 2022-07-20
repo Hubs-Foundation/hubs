@@ -102,7 +102,7 @@ export class App {
 
     const renderer = new THREE.WebGLRenderer({
       // TODO we should not be using alpha: false https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#avoid_alphafalse_which_can_be_expensive
-      alpha: false,
+      alpha: true,
       antialias: true,
       depth: true,
       stencil: true,
@@ -110,7 +110,7 @@ export class App {
       preserveDrawingBuffer: false,
       logarithmicDepthBuffer: false,
       // TODO we probably want high-performance
-      powerPreference: "default",
+      powerPreference: "high-performance",
       canvas
     });
 
