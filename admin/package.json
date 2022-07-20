@@ -28,7 +28,7 @@
     "react-admin": "^2.6.3",
     "react-dom": "^16.1.1",
     "react-intl": "^2.4.0",
-    "three": "github:mozillareality/three.js#hubs/master"
+    "three": "github:mozillareality/three.js#hubs-patches-141"
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",
