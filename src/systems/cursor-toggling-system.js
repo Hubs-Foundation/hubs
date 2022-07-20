@@ -21,10 +21,6 @@ function shouldEnableRemote(world, scene, handHovering, handHeld, remoteHeld, te
     hasComponent(world, Pen, remoteHeld) &&
     world.eid2obj.get(remoteHeld).el.children[0].components.pen.intersection;
 
-  if (remoteHeld && hasComponent(world, Pen, remoteHeld)) {
-    console.log(world.eid2obj.get(remoteHeld));
-  }
-
   return scene.is("entered") && woke && !handHovering && !handHeld && !teleporting && !vrRemotePenIntersection;
 }
 

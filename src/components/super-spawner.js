@@ -4,6 +4,8 @@ import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
+import { addComponent } from "bitecs";
+import { Held, HeldRemoteLeft, HeldRemoteRight } from "../bit-components";
 
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 
@@ -172,6 +174,13 @@ AFRAME.registerComponent("super-spawner", {
         to: { x: this.handPosition.x, y: this.handPosition.y, z: this.handPosition.z },
         easing: "easeInOutBack"
       });
+    } else {
+      addComponent(APP.world, Held, spawnedEntity.eid);
+      if (left) {
+        addComponent(APP.world, HeldRemoteLeft, spawnedEntity.eid);
+      } else {
+        addComponent(APP.world, HeldRemoteRight, spawnedEntity.eid);
+      }
     }
 
     // We skip this in the scene preview because
