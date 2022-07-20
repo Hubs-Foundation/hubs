@@ -289,6 +289,7 @@
   "tips.embedded": "해당 Room은 embed되어서 다른 웹사이트에서 방문객들이 볼 수 있습니다.",
   "place-popover.title": "상호작용",
   "place-popover.item-type.pen": "펜",
+  "place-popover.item-type.eraser": "지우개",
   "place-popover.item-type.camera": "카메라",
   "place-popover.item-type.gif": "GIF",
   "place-popover.item-type.model": "3D 모델",
