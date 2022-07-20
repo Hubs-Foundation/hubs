@@ -1,7 +1,12 @@
 name: hc-pkg
 on:
+  schedule:
+    - 0 23 1 * *
   workflow_dispatch:
 
 jobs:
   hcpkgrelease:
-    uses: mozilla/hubs-ops/.github/workflows/hc_release.yaml@workflow_changes
+    uses: mozilla/hubs-ops/.github/workflows/reuseablehcpkgrelease.yaml@workflow_changes
+    with:
+      main: main
+      releasing: bpt
