@@ -24,11 +24,11 @@ const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.disp
 // When we remove an entity with an Object3DTag:
 // - The associated object3D will be removed from the scene graph.
 // - The rest of the scene graph will be left intact.
-// - We will call removeEntity for all entities associated with the object3D's descendents.
-// - The descendents won't be removed from their parents.
+// - We will call removeEntity for all entities associated with the object3D's descendants.
+// - The descendants won't be removed from their parents.
 //
 // TODO AFRAME entities get cleaned up in an an odd way:
-//      When we remove an AFRAME entity, AFRAME will call `removeEntity` for all of its descendents,
+//      When we remove an AFRAME entity, AFRAME will call `removeEntity` for all of its descendants,
 //      which means we will remove each descendent from its parent.
 const exitedObject3DQuery = exitQuery(defineQuery([Object3DTag]));
 export function removeObject3DSystem(world) {
@@ -38,7 +38,7 @@ export function removeObject3DSystem(world) {
     o.eid = null;
   }
 
-  // remove entities that are children of any removed entiteis
+  // remove entities that are children of any removed entities
   const entities = exitedObject3DQuery(world);
   entities.forEach(eid => {
     const obj = world.eid2obj.get(eid);
@@ -52,7 +52,7 @@ export function removeObject3DSystem(world) {
   cleanupTexts(world);
   cleanupMediaFrames(world);
 
-  // Finally remove all the entiteis we just removed from the eid2obj map
+  // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeFromMap);
   exitedObject3DQuery(world).forEach(removeFromMap);
 }
