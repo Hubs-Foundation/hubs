@@ -1,7 +1,8 @@
-import { defineComponent, setDefaultSize, Types } from "bitecs";
+import { defineComponent, setDefaultSize, setRemovedRecycleThreshold, Types } from "bitecs";
 
 // TODO this has to happen before all components are defined. Is there a better spot to be doing this?
 setDefaultSize(10000);
+setRemovedRecycleThreshold(0.2);
 
 export const $isStringType = Symbol("isStringType");
 
