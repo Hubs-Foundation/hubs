@@ -21,6 +21,7 @@ AFRAME.registerComponent("pen-laser", {
     material = convertStandardMaterial(material, quality);
 
     const tipMaterial = material.clone();
+    tipMaterial.onBeforeRender = material.onBeforeRender;
 
     const lineCurve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 2));
     const geometry = new THREE.TubeBufferGeometry(lineCurve, 2, 0.003, 8, true);

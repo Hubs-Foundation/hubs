@@ -289,6 +289,7 @@ export function injectCustomShaderChunks(obj) {
         return material;
 
       const newMaterial = material.clone();
+      newMaterial.onBeforeRender = material.onBeforeRender;
       newMaterial.onBeforeCompile = (shader, renderer) => {
         if (shader.vertexShader.indexOf("#include <skinning_vertex>") == -1) return;
 
