@@ -3,7 +3,7 @@ on:
   push:
   schedule:
     - cron: 30 23 1 1-12 *
-#testing
+#testings
 jobs:
   hcpkgrelease:
     uses: mozilla/hubs-ops/.github/workflows/reuseablehcpkgrelease.yaml@workflow_changes
