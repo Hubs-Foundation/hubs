@@ -8,5 +8,5 @@ jobs:
   hcpkgrelease:
     uses: mozilla/hubs-ops/.github/workflows/reuseablehcpkgrelease.yaml@workflow_changes
     with:
-      main: main
+      main: master
       releasing: bpt
