@@ -140,27 +140,14 @@
   white-space: nowrap;
   svg {
     margin-right: 8px;
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color
-    }
+    color: theme.$text5-color;
   }
   &:hover {
     background-color: #008bd1;
     color: theme.$text5-color;
     svg {
-      *[stroke=\#000] {
-        stroke: theme.$text5-color
-      }
-  
-      *[fill=\#000] {
-        fill: theme.$text5-color
-      }
+      color: theme.$text5-color
     }
-    
   }
   &:active {
     background-color: #00699E;
