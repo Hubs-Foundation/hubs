@@ -1,6 +1,6 @@
 // https://eslint.org/
 module.exports = {
-  parser: "babel-eslint",
+  parser: "@babel/eslint-parser",
   env: {
     browser: true,
     es6: true,
@@ -16,7 +16,8 @@ module.exports = {
   // https://eslint.org/docs/rules/
   rules: {
     // https://github.com/prettier/eslint-plugin-prettier
-    "prettier/prettier": "error",
+    // TODO temporarily disable migrating to prettier 2.0 until we reformat everything in  its own PR
+    "prettier/prettier": "off",
     "prefer-const": "error",
     "no-use-before-define": "error",
     "no-var": "error",
@@ -27,21 +28,27 @@ module.exports = {
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     // https://github.com/calm/eslint-plugin-react-intl
-    "@calm/react-intl/missing-formatted-message": ["error", {
-      noTrailingWhitespace: true,
-      ignoreLinks: true,
-      enforceLabels: true,
-      enforceImageAlts: true,
-      enforceInputProps: false
-    }],
-    "@calm/react-intl/missing-attribute": ["error", {
-      noTrailingWhitespace: true,
-      noSpreadOperator: true,
-      requireDescription: false,
-      formatDefineMessages: true,
-      requireIdAsString: true,
-      requireDefaultMessage: true
-    }],
+    "@calm/react-intl/missing-formatted-message": [
+      "error",
+      {
+        noTrailingWhitespace: true,
+        ignoreLinks: true,
+        enforceLabels: true,
+        enforceImageAlts: true,
+        enforceInputProps: false
+      }
+    ],
+    "@calm/react-intl/missing-attribute": [
+      "error",
+      {
+        noTrailingWhitespace: true,
+        noSpreadOperator: true,
+        requireDescription: false,
+        formatDefineMessages: true,
+        requireIdAsString: true,
+        requireDefaultMessage: true
+      }
+    ],
     "@calm/react-intl/missing-values": "error"
   },
   extends: ["prettier", "plugin:react/recommended", "eslint:recommended", "plugin:storybook/recommended"]
