@@ -17,9 +17,7 @@ if (!config) {
 
 if (config?.theme?.error) {
   console.error(
-    `Custom themes failed to load.\n${
-      config.theme.error
-    }\nIf you are an admin, reconfigure your themes in the admin panel.`
+    `Custom themes failed to load.\n${config.theme.error}\nIf you are an admin, reconfigure your themes in the admin panel.`
   );
 }
 
@@ -37,33 +35,30 @@ function useDarkMode() {
     [setDarkMode]
   );
 
-  useEffect(
-    () => {
-      const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  useEffect(() => {
+    const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-      setDarkMode(darkmodeQuery.matches);
+    setDarkMode(darkmodeQuery.matches);
 
-      // This is a workaround for old Safari.
-      // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use
-      // addListener() and removeListener() to observe media query lists.
-      // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
-      // We may remove this workaround when no one will use Safari 13 or before.
-      if (darkmodeQuery.addEventListener) {
-        darkmodeQuery.addEventListener("change", changeListener);
+    // This is a workaround for old Safari.
+    // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use
+    // addListener() and removeListener() to observe media query lists.
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
+    // We may remove this workaround when no one will use Safari 13 or before.
+    if (darkmodeQuery.addEventListener) {
+      darkmodeQuery.addEventListener("change", changeListener);
+    } else {
+      darkmodeQuery.addListener(changeListener);
+    }
+
+    return () => {
+      if (darkmodeQuery.removeEventListener) {
+        darkmodeQuery.removeEventListener("change", changeListener);
       } else {
-        darkmodeQuery.addListener(changeListener);
+        darkmodeQuery.removeListener(changeListener);
       }
-
-      return () => {
-        if (darkmodeQuery.removeEventListener) {
-          darkmodeQuery.removeEventListener("change", changeListener);
-        } else {
-          darkmodeQuery.removeListener(changeListener);
-        }
-      };
-    },
-    [changeListener]
-  );
+    };
+  }, [changeListener]);
 
   return darkMode;
 }
@@ -71,56 +66,53 @@ function useDarkMode() {
 export function useTheme(themeId) {
   const darkMode = useDarkMode();
 
-  useEffect(
-    () => {
-      // Themes can come from an external source. Ensure it is an array.
-      if (!Array.isArray(themes)) return;
+  useEffect(() => {
+    // Themes can come from an external source. Ensure it is an array.
+    if (!Array.isArray(themes)) return;
 
-      let theme;
+    let theme;
 
-      if (themeId) {
-        theme = themes.find(t => t.id === themeId);
-      }
+    if (themeId) {
+      theme = themes.find(t => t.id === themeId);
+    }
 
-      if (!theme && darkMode) {
-        theme = themes.find(t => t.darkModeDefault);
-      }
+    if (!theme && darkMode) {
+      theme = themes.find(t => t.darkModeDefault);
+    }
 
-      if (!theme) {
-        theme = themes.find(t => t.default);
-      }
+    if (!theme) {
+      theme = themes.find(t => t.default);
+    }
 
-      if (!theme) {
-        return;
-      }
+    if (!theme) {
+      return;
+    }
 
-      const variables = [];
+    const variables = [];
 
-      for (const key in theme.variables) {
-        if (!theme.variables.hasOwnProperty(key)) continue;
-        variables.push(`--${key}: ${theme.variables[key]};`);
-      }
+    for (const key in theme.variables) {
+      if (!theme.variables.hasOwnProperty(key)) continue;
+      variables.push(`--${key}: ${theme.variables[key]};`);
+    }
 
-      const styleTag = document.createElement("style");
+    const styleTag = document.createElement("style");
 
-      styleTag.innerHTML = `:root {
+    styleTag.innerHTML = `:root {
         ${variables.join("\n")}
       }`;
 
-      document.head.appendChild(styleTag);
+    document.head.appendChild(styleTag);
 
-      return () => {
-        document.head.removeChild(styleTag);
-      };
-    },
-    [themeId, darkMode]
-  );
+    return () => {
+      document.head.removeChild(styleTag);
+    };
+  }, [themeId, darkMode]);
 }
 
 function getCurrentTheme() {
   if (!Array.isArray(themes)) return;
 
-  const preferredThemeId = window.APP.store?.state?.preferences?.theme;
+  const preferredThemeId = window.APP?.store?.state?.preferences?.theme;
   if (preferredThemeId) {
     return themes.find(t => t.id === preferredThemeId);
   } else {
