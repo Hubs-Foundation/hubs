@@ -1,4 +1,3 @@
-import { THREE } from "aframe";
 import audioDebugVert from "./audio-debug.vert";
 import audioDebugFrag from "./audio-debug.frag";
 import { DistanceModelType } from "../components/audio-params";
@@ -108,7 +107,7 @@ AFRAME.registerSystem("audio-debug", {
   tick: (() => {
     const sourcePos = new THREE.Vector3();
     const sourceDir = new THREE.Vector3();
-    return function(time) {
+    return function (time) {
       if (!this.data.enabled) {
         return;
       }

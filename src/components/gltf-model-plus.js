@@ -1,6 +1,6 @@
 import nextTick from "../utils/next-tick";
 import { updateMaterials, mapMaterials, convertStandardMaterial } from "../utils/material-utils";
-import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+const SketchfabZipWorker = new Worker(new URL("../workers/sketchfab-zip.worker.js", import.meta.url));
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
@@ -10,11 +10,7 @@ import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
-
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/loaders/GLTFLoader");
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -61,7 +57,7 @@ class GLTFCache {
 export const gltfCache = new GLTFCache();
 const inflightGltfs = new Map();
 
-const extractZipFile = promisifyWorker(new SketchfabZipWorker());
+const extractZipFile = promisifyWorker(SketchfabZipWorker);
 
 function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {
@@ -150,7 +146,7 @@ function getHubsComponentsFromMaterial(node) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(indexToEntityMap, node, templates, isRoot, modelToWorldScale = 1) {
+const inflateEntities = function (indexToEntityMap, node, templates, isRoot, modelToWorldScale = 1) {
   // TODO: Remove this once we update the legacy avatars to the new node names
   if (node.name === "Chest") {
     node.name = "Spine";
@@ -653,7 +649,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
-  const gltfLoader = new THREE.GLTFLoader(loadingManager);
+  const gltfLoader = new GLTFLoader(loadingManager);
   gltfLoader
     .register(parser => new GLTFHubsComponentsExtension(parser))
     .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))

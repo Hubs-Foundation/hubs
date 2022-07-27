@@ -1,7 +1,9 @@
-import { AmmoWorker, WorkerHelpers, CONSTANTS } from "three-ammo";
+import { WorkerHelpers, CONSTANTS } from "three-ammo";
 import { AmmoDebugConstants, DefaultBufferSize } from "ammo-debug-drawer";
 import configs from "../utils/configs";
-import * as ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
+import ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
+
+const AmmoWorker = new Worker(new URL("three-ammo/src/ammo.worker.js", import.meta.url));
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,
   TYPE = CONSTANTS.TYPE,
@@ -16,7 +18,7 @@ const MAX_BODIES = 512;
 
 export class PhysicsSystem {
   constructor(scene) {
-    this.ammoWorker = new AmmoWorker();
+    this.ammoWorker = AmmoWorker;
     this.workerHelpers = new WorkerHelpers(this.ammoWorker);
 
     this.bodyHelpers = [];
@@ -136,7 +138,7 @@ export class PhysicsSystem {
     const inverse = new THREE.Matrix4();
     const matrix = new THREE.Matrix4();
     const scale = new THREE.Vector3();
-    return function() {
+    return function () {
       if (this.ready) {
         if (this.debugRequested !== this.debugEnabled) {
           if (this.debugRequested) {
@@ -179,13 +181,15 @@ export class PhysicsSystem {
               index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.MATRIX_OFFSET
             );
 
-            body.linearVelocity = this.objectMatricesFloatArray[
-              index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.LINEAR_VELOCITY_OFFSET
-            ];
+            body.linearVelocity =
+              this.objectMatricesFloatArray[
+                index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.LINEAR_VELOCITY_OFFSET
+              ];
 
-            body.angularVelocity = this.objectMatricesFloatArray[
-              index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.ANGULAR_VELOCITY_OFFSET
-            ];
+            body.angularVelocity =
+              this.objectMatricesFloatArray[
+                index * BUFFER_CONFIG.BODY_DATA_SIZE + BUFFER_CONFIG.ANGULAR_VELOCITY_OFFSET
+              ];
 
             body.collisions.length = 0;
 

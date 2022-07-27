@@ -35,11 +35,6 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/loaders/GLTFLoader");
-
 import "networked-aframe/src/index";
 import "webrtc-adapter";
 import { detectOS, detect } from "detect-browser";
@@ -300,10 +295,7 @@ function setupLobbyCamera() {
 let uiProps = {};
 
 // Hub ID and slug are the basename
-let routerBaseName = document.location.pathname
-  .split("/")
-  .slice(0, 2)
-  .join("/");
+let routerBaseName = document.location.pathname.split("/").slice(0, 2).join("/");
 
 if (document.location.pathname.includes("hub.html")) {
   routerBaseName = "/";
@@ -1085,13 +1077,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("[reconnect] Reconnection successful.");
   };
 
-  const onRetDeploy = (function() {
+  const onRetDeploy = (function () {
     let pendingNotification = null;
-    const hasPendingNotification = function() {
+    const hasPendingNotification = function () {
       return !!pendingNotification;
     };
 
-    const handleNextMessage = (function() {
+    const handleNextMessage = (function () {
       let isLocked = false;
       return async function handleNextMessage() {
         if (isLocked || !pendingNotification) return;

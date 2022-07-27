@@ -101,7 +101,7 @@
       &::-ms-thumb {
         @include thumb;
         cursor: pointer;
-        margin-top: $track-height / 4;
+        margin-top: calc($track-height / 4);
       }
     }
   }

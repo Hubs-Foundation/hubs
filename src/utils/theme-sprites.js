@@ -1,8 +1,8 @@
 import "./configs";
 import { getThemeColor } from "./theme";
-import ColorShiftWorker from "../workers/color-shift.worker.js";
+const ColorShiftWorker = new Worker(new URL("../workers/color-shift.worker.js", import.meta.url));
 import { promisifyWorker } from "./promisify-worker.js";
-const colorShift = promisifyWorker(new ColorShiftWorker());
+const colorShift = promisifyWorker(ColorShiftWorker);
 
 function getThemeColorShifter(type) {
   // Goal of this algorithm is to take a ctx pointing to a spritesheet

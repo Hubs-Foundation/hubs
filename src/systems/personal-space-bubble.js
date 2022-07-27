@@ -4,8 +4,8 @@ import { forEachMaterial } from "../utils/material-utils";
 import qsTruthy from "../utils/qs_truthy";
 import traverseFilteredSubtrees from "../utils/traverseFilteredSubtrees";
 
-const invaderPos = new AFRAME.THREE.Vector3();
-const bubblePos = new AFRAME.THREE.Vector3();
+const invaderPos = new THREE.Vector3();
+const bubblePos = new THREE.Vector3();
 const isDebug = qsTruthy("debug");
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
@@ -82,7 +82,7 @@ AFRAME.registerSystem("personal-space-bubble", {
     this.tickCount++;
   },
 
-  _updateInvaders: (function() {
+  _updateInvaders: (function () {
     const tempInvasionFlags = [];
 
     const setInvaderFlag = (i, invaders, bubble) => {
@@ -104,7 +104,7 @@ AFRAME.registerSystem("personal-space-bubble", {
       }
     };
 
-    return function() {
+    return function () {
       if (!this.data.enabled) return;
       if (this.invaders.length === 0) return;
 
