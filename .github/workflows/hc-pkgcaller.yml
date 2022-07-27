@@ -1,12 +1,10 @@
 name: hc-pkg
 on:
-  push:
   schedule:
     - cron: 30 23 1 1-12 *
-#testings
 jobs:
   hcpkgrelease:
     uses: mozilla/hubs-ops/.github/workflows/reuseablehcpkgrelease.yaml@workflow_changes
     with:
       main: master
-      releasing: bpt
+      releasing: qa-test
