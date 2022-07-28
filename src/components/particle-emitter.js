@@ -1,4 +1,4 @@
-import { ParticleEmitter } from "lib-hubs/packages/three-particle-emitter/lib/esm/index";
+import { ParticleEmitter } from "@mozillareality/three-particle-emitter";
 import { textureLoader } from "../utils/media-utils";
 import { resolveUrl } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
