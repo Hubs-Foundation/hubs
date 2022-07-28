@@ -96,12 +96,11 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
   return getAbsoluteUrl(baseUrl, relativeUrl).href;
 }
 
-// Note this file is configured in webpack.config.js to be handled with file-loader, so this will be a string containing the file path
-// TODO importing these as relative paths because `three` only "exports" stuff in examples/jsm
-import basisJsUrl from "../../node_modules/three/examples/js/libs/basis/basis_transcoder.js";
-import basisWasmUrl from "../../node_modules/three/examples/js/libs/basis/basis_transcoder.wasm";
-import dracoWrapperJsUrl from "../../node_modules/three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js";
-import dracoWasmUrl from "../../node_modules/three/examples/js/libs/draco/gltf/draco_decoder.wasm";
+// Note these files are configured in webpack.config.js to be handled with file-loader, so this will be a string containing the file paths
+import basisJsUrl from "three/examples/js/libs/basis/basis_transcoder.js";
+import dracoWrapperJsUrl from "three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js";
+import basisWasmUrl from "three/examples/js/libs/basis/basis_transcoder.wasm";
+import dracoWasmUrl from "three/examples/js/libs/draco/gltf/draco_decoder.wasm";
 
 export const rewriteBasisTranscoderUrls = function (url) {
   if (url === "basis_transcoder.js") {

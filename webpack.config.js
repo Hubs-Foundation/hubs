@@ -209,6 +209,12 @@ function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) 
   return new HTMLWebpackPlugin(options);
 }
 
+const threeExampelesDir = path.resolve(__dirname, "node_modules", "three", "examples");
+const basisTranscoderPath = path.resolve(threeExampelesDir, "js", "libs", "basis", "basis_transcoder.js");
+const dracoWasmWrapperPath = path.resolve(threeExampelesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
+const basisWasmPath = path.resolve(threeExampelesDir, "js", "libs", "basis", "basis_transcoder.wasm");
+const dracoWasmPath = path.resolve(threeExampelesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
+
 module.exports = async (env, argv) => {
   env = env || {};
 
@@ -279,13 +285,19 @@ module.exports = async (env, argv) => {
       type: "filesystem"
     },
     resolve: {
-      // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
-      // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
-      // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
-      // and for example AFRAME.THREE.Object3D !== THREE.Object3D in Hubs code, which breaks many things.
       alias: {
+        // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
+        // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
+        // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
+        // and for example AFRAME.THREE.Object3D !== THREE.Object3D in Hubs code, which breaks many things.
         three$: path.resolve(__dirname, "./node_modules/three/build/three.module.js"),
-        bitecs$: path.resolve(__dirname, "./node_modules/bitecs/dist/index.mjs")
+        bitecs$: path.resolve(__dirname, "./node_modules/bitecs/dist/index.mjs"),
+
+        // TODO these aliases are reequired because `three` only "exports" stuff in examples/jsm
+        "three/examples/js/libs/basis/basis_transcoder.js": basisTranscoderPath,
+        "three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js": dracoWasmWrapperPath,
+        "three/examples/js/libs/basis/basis_transcoder.wasm": basisWasmPath,
+        "three/examples/js/libs/draco/gltf/draco_decoder.wasm": dracoWasmPath
       },
       // Allows using symlinks in node_modules
       symlinks: false,
@@ -417,31 +429,7 @@ module.exports = async (env, argv) => {
         },
         // Some JS assets are loaded at runtime and should be copied unmodified and loaded using file-loader
         {
-          test: [
-            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js"),
-            path.resolve(
-              __dirname,
-              "node_modules",
-              "three",
-              "examples",
-              "js",
-              "libs",
-              "draco",
-              "gltf",
-              "draco_decoder.js"
-            ),
-            path.resolve(
-              __dirname,
-              "node_modules",
-              "three",
-              "examples",
-              "js",
-              "libs",
-              "draco",
-              "gltf",
-              "draco_wasm_wrapper.js"
-            )
-          ],
+          test: [basisTranscoderPath, dracoWasmWrapperPath],
           loader: "file-loader",
           options: {
             outputPath: "assets/raw-js",
