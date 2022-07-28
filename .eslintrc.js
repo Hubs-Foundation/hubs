@@ -12,9 +12,22 @@ module.exports = {
     NAF: true,
     APP: true
   },
+  settings: {
+    react: {
+      version: "detect"
+    }
+  },
   plugins: ["prettier", "react", "react-hooks", "@calm/react-intl"],
   // https://eslint.org/docs/rules/
   rules: {
+    "no-prototype-builtins": "off",
+
+    // TODO these are nw as of our Webpack 5 upgrade, making them warnings till we get a handle on them or decide we don't want them
+    "react/prop-types": "warn",
+    "react/display-name": "warn",
+    "no-redeclare": "warn",
+    "no-async-promise-executor": "warn",
+
     // https://github.com/prettier/eslint-plugin-prettier
     // TODO temporarily disable migrating to prettier 2.0 until we reformat everything in  its own PR
     "prettier/prettier": "off",
