@@ -4,7 +4,7 @@ aliases:
   - &defaults
     working_directory: ~/repo
     docker:
-      - image: circleci/node:14.5-browsers
+      - image: circleci/node:16.13.1-browsers
     resource_class: medium+
 
 jobs:
