@@ -86,14 +86,6 @@ module.exports = (env, argv) => {
   const defaultHostName = "hubs.local";
   const host = process.env.HOST_IP || defaultHostName;
 
-  // Remove comments from .babelrc
-  const babelConfig = JSON.parse(
-    fs
-      .readFileSync(path.resolve(__dirname, "..", ".babelrc"))
-      .toString()
-      .replace(/\/\/.+/g, "")
-  );
-
   return {
     cache: {
       type: "filesystem"
@@ -177,7 +169,7 @@ module.exports = (env, argv) => {
         {
           test: /\.js$/,
           loader: "babel-loader",
-          options: babelConfig,
+          options: require("../babel.config"),
           exclude: function (modulePath) {
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }

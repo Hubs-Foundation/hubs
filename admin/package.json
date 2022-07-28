@@ -51,8 +51,6 @@
     "dotenv": "^16.0.1",
     "eslint": "^8.20.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.30.1",
     "esm": "^3.2.25",
     "file-loader": "^6.2.0",
     "html-loader": "^4.1.0",
