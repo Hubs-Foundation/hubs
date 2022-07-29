@@ -9,8 +9,7 @@ pkg_upstream_url="https://hubs.mozilla.com/"
 pkg_build_deps=(
     core/coreutils/8.32/20210826054709
     core/bash/5.1/20210826055113
-    # TODO github actions using a slightly newer version (16.16) we should upgrade once hab pkg becomes available
-    core/node16/16.13.1/20220617092950
+    mozillareality/node16/16.16.0/20220729014143
     core/git/2.31.0/20211016175551
 )
 
