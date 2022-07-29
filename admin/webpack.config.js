@@ -155,7 +155,10 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.html$/,
-          loader: "html-loader"
+          loader: "html-loader",
+          options: {
+            minimize: false // This is handled by HTMLWebpackPlugin
+          }
         },
         // Some JS assets are loaded at runtime and should be copied unmodified and loaded using file-loader
         {
@@ -247,7 +250,10 @@ module.exports = (env, argv) => {
       new HTMLWebpackPlugin({
         filename: "admin.html",
         template: path.join(__dirname, "src", "admin.html"),
-        scriptLoading: "blocking"
+        scriptLoading: "blocking",
+        minify: {
+          removeComments: false
+        }
       }),
       new CopyWebpackPlugin({
         patterns: [
