@@ -1,9 +1,7 @@
-import { WorkerHelpers, CONSTANTS } from "three-ammo";
+import { AmmoWorker, WorkerHelpers, CONSTANTS } from "three-ammo";
 import { AmmoDebugConstants, DefaultBufferSize } from "ammo-debug-drawer";
 import configs from "../utils/configs";
 import ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
-
-const AmmoWorker = new Worker(new URL("three-ammo/src/ammo.worker.js", import.meta.url));
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,
   TYPE = CONSTANTS.TYPE,
@@ -18,7 +16,7 @@ const MAX_BODIES = 512;
 
 export class PhysicsSystem {
   constructor(scene) {
-    this.ammoWorker = AmmoWorker;
+    this.ammoWorker = new AmmoWorker();
     this.workerHelpers = new WorkerHelpers(this.ammoWorker);
 
     this.bodyHelpers = [];

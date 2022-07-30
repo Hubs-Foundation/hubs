@@ -1,6 +1,6 @@
 import { promisifyWorker } from "../utils/promisify-worker.js";
 
-const GIFWorker = new Worker(new URL("../workers/gifparsing.worker.js", import.meta.url));
+import GIFWorker from "../workers/gifparsing.worker.js";
 
 class GIFTexture extends THREE.Texture {
   constructor(frames, delays, disposals) {
@@ -37,7 +37,7 @@ class GIFTexture extends THREE.Texture {
   }
 }
 
-const parseGIF = promisifyWorker(GIFWorker);
+const parseGIF = promisifyWorker(new GIFWorker());
 
 export async function createGIFTexture(url) {
   return new Promise((resolve, reject) => {

@@ -1,6 +1,6 @@
 import nextTick from "../utils/next-tick";
 import { updateMaterials, mapMaterials, convertStandardMaterial } from "../utils/material-utils";
-const SketchfabZipWorker = new Worker(new URL("../workers/sketchfab-zip.worker.js", import.meta.url));
+import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
@@ -57,7 +57,7 @@ class GLTFCache {
 export const gltfCache = new GLTFCache();
 const inflightGltfs = new Map();
 
-const extractZipFile = promisifyWorker(SketchfabZipWorker);
+const extractZipFile = promisifyWorker(new SketchfabZipWorker());
 
 function defaultInflator(el, componentName, componentData) {
   if (!AFRAME.components[componentName]) {

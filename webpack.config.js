@@ -436,6 +436,17 @@ module.exports = async (env, argv) => {
             name: "[name]-[contenthash].[ext]"
           }
         },
+        // TODO worker-loader has been deprecated, but we need "inline" support which is not available yet
+        // ideally instead of inlining workers we should serve them off the root domain instead of CDN.
+        {
+          test: /\.worker\.js$/,
+          loader: "worker-loader",
+          options: {
+            filename: "assets/js/[name]-[hash].js",
+            publicPath: "/",
+            inline: "no-fallback"
+          }
+        },
         {
           test: /\.js$/,
           include: [path.resolve(__dirname, "src")],
