@@ -55,11 +55,11 @@ function createHTTPSConfig() {
   }
 }
 
-const threeExampelesDir = path.resolve(__dirname, "node_modules", "three", "examples");
-const basisTranscoderPath = path.resolve(threeExampelesDir, "js", "libs", "basis", "basis_transcoder.js");
-const dracoWasmWrapperPath = path.resolve(threeExampelesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
-const basisWasmPath = path.resolve(threeExampelesDir, "js", "libs", "basis", "basis_transcoder.wasm");
-const dracoWasmPath = path.resolve(threeExampelesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
+const threeExamplesDir = path.resolve(__dirname, "node_modules", "three", "examples");
+const basisTranscoderPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.js");
+const dracoWasmWrapperPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
+const basisWasmPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.wasm");
+const dracoWasmPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
 
 module.exports = (env, argv) => {
   env = env || {};
