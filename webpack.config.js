@@ -428,6 +428,19 @@ module.exports = async (env, argv) => {
             }
           }
         },
+        // On legacy browsers we want to show a "unsupported browser" page. That page needs to polyfill more things so we set the target to ie11
+        {
+          test: [
+            path.resolve(__dirname, "src", "utils", "configs.js"),
+            path.resolve(__dirname, "src", "utils", "i18n.js"),
+            path.resolve(__dirname, "src", "support.js")
+          ],
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
+            plugins: require("./babel.config").plugins
+          }
+        },
         // Some JS assets are loaded at runtime and should be copied unmodified and loaded using file-loader
         {
           test: [basisTranscoderPath, dracoWasmWrapperPath],
