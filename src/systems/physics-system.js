@@ -19,8 +19,6 @@ export class PhysicsSystem {
     this.ammoWorker = new AmmoWorker();
     this.workerHelpers = new WorkerHelpers(this.ammoWorker);
 
-    this.bodyHelpers = [];
-    this.shapeHelpers = [];
     this.bodyUuids = [];
     this.indexToUuid = {};
     this.bodyUuidToData = new Map();
@@ -53,23 +51,16 @@ export class PhysicsSystem {
     this.ammoWorker.onmessage = async event => {
       if (event.data.type === MESSAGE_TYPES.READY) {
         this.ready = true;
-        for (const bodyHelper of this.bodyHelpers) {
-          if (bodyHelper.alive) bodyHelper.init2();
-        }
-        for (const shapeHelper of this.shapeHelpers) {
-          if (shapeHelper.alive) shapeHelper.init2();
-        }
-        this.shapeHelpers.length = 0;
-        this.bodyHelpers.length = 0;
       } else if (event.data.type === MESSAGE_TYPES.BODY_READY) {
-        const uuid = event.data.uuid;
-        const index = event.data.index;
-        if (this.bodyUuidToData.has(uuid)) {
-          this.bodyUuids.push(uuid);
-          this.bodyUuidToData.get(uuid).index = index;
-          this.indexToUuid[index] = uuid;
+        const { uuid, index } = event.data;
+        const bodyData = this.bodyUuidToData.get(uuid);
+        bodyData.index = index;
+        bodyData.isInitialized = true;
+        if (bodyData.removeBodyMessageSent) {
+          this.bodyUuidToData.delete(uuid);
         } else {
-          console.warn(`Body initialized for uuid: ${uuid} but body missing.`);
+          this.bodyUuids.push(uuid);
+          this.indexToUuid[index] = uuid;
         }
       } else if (event.data.type === MESSAGE_TYPES.SHAPES_READY) {
         const bodyUuid = event.data.bodyUuid;
@@ -77,7 +68,7 @@ export class PhysicsSystem {
         if (this.bodyUuidToData.has(bodyUuid)) {
           this.bodyUuidToData.get(bodyUuid).shapes.push(shapesUuid);
         } else {
-          console.warn(`Shape initialized but body with uuid: ${bodyUuid} missing.`);
+          console.warn(`Shape initialized on worker but body is missing.`);
         }
       } else if (event.data.type === MESSAGE_TYPES.TRANSFER_DATA) {
         this.objectMatricesFloatArray = event.data.objectMatricesFloatArray;
@@ -161,6 +152,11 @@ export class PhysicsSystem {
             const index = body.index;
             const type = body.options.type ? body.options.type : TYPE.DYNAMIC;
             const object3D = body.object3D;
+            if (!object3D.parent) {
+              // TODO: Fix me
+              console.error("Physics body exists but object3D has no parent.");
+              continue;
+            }
             if (type === TYPE.DYNAMIC) {
               matrix.fromArray(
                 this.objectMatricesFloatArray,
@@ -225,19 +221,24 @@ export class PhysicsSystem {
   })();
 
   addBody(object3D, options) {
-    this.workerHelpers.addBody(this.nextBodyUuid, object3D, options);
+    const bodyId = this.nextBodyUuid;
+    this.nextBodyUuid += 1;
 
-    this.bodyUuidToData.set(this.nextBodyUuid, {
+    this.workerHelpers.addBody(bodyId, object3D, options);
+
+    this.bodyUuidToData.set(bodyId, {
       object3D: object3D,
       options: options,
       collisions: [],
       linearVelocity: 0,
       angularVelocity: 0,
       index: -1,
-      shapes: []
+      shapes: [],
+      isInitialized: false,
+      removeBodyMessageSent: false
     });
 
-    return this.nextBodyUuid++;
+    return bodyId;
   }
 
   updateBody(uuid, options) {
@@ -251,25 +252,34 @@ export class PhysicsSystem {
 
   // TODO inline updateBody
   updateBodyOptions(bodyId, options) {
+    const bodyData = this.bodyUuidToData.get(bodyId);
+    if (!bodyData) {
+      // TODO: Fix me.
+      console.warn("updateBodyOptions called for invalid bodyId");
+      return;
+    }
     this.workerHelpers.updateBody(bodyId, Object.assign(this.bodyUuidToData.get(bodyId).options, options));
   }
 
   removeBody(uuid) {
-    const idx = this.bodyUuids.indexOf(uuid);
-    if (this.bodyUuidToData.has(uuid) && idx !== -1) {
-      delete this.indexToUuid[this.bodyUuidToData.get(uuid).index];
+    const bodyData = this.bodyUuidToData.get(uuid);
+    if (!bodyData) {
+      // TODO: REMOVE ME. We should not ever see this!
+      console.error(`removeBody called for unknown body id`);
+      return;
+    }
 
-      const collisions = this.bodyUuidToData.get(uuid).collisions;
-      collisions.forEach(otherId => {
+    this.workerHelpers.removeBody(uuid);
+    bodyData.removeBodyMessageSent = true;
+
+    if (bodyData.isInitialized) {
+      delete this.indexToUuid[bodyData.index];
+      bodyData.collisions.forEach(otherId => {
         const otherData = this.bodyUuidToData.get(otherId).collisions;
         otherData.splice(otherData.indexOf(uuid), 1);
       });
-
+      this.bodyUuids.splice(this.bodyUuids.indexOf(uuid), 1);
       this.bodyUuidToData.delete(uuid);
-      this.bodyUuids.splice(idx, 1);
-      this.workerHelpers.removeBody(uuid);
-    } else {
-      console.warn(`removeBody called for uuid: ${uuid} but body missing.`);
     }
   }
 
@@ -294,7 +304,7 @@ export class PhysicsSystem {
         console.warn(`removeShapes called for shapesUuid: ${shapesUuid} on bodyUuid: ${bodyUuid} but shapes missing.`);
       }
     } else {
-      console.warn(`Tried to remove shape for unknown body ${bodyUuid}`);
+      console.error(`Tried to remove shape for unknown body ${bodyUuid}`);
     }
   }
 
@@ -304,22 +314,6 @@ export class PhysicsSystem {
 
   removeConstraint(constraintId) {
     this.workerHelpers.removeConstraint(constraintId);
-  }
-
-  registerBodyHelper(bodyHelper) {
-    if (this.ready) {
-      bodyHelper.init2();
-    } else {
-      this.bodyHelpers.push(bodyHelper);
-    }
-  }
-
-  registerShapeHelper(shapeHelper) {
-    if (this.ready) {
-      shapeHelper.init2();
-    } else {
-      this.shapeHelpers.push(shapeHelper);
-    }
   }
 
   bodyInitialized(uuid) {

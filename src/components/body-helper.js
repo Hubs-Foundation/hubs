@@ -37,11 +37,6 @@ AFRAME.registerComponent("body-helper", {
   init: function() {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
     this.alive = true;
-    this.uuid = -1;
-    this.system.registerBodyHelper(this);
-  },
-
-  init2: function() {
     this.el.object3D.updateMatrices();
     this.uuid = this.system.addBody(this.el.object3D, this.data);
     const eid = this.el.object3D.eid;
@@ -50,17 +45,15 @@ AFRAME.registerComponent("body-helper", {
   },
 
   update: function(prevData) {
-    if (prevData !== null && this.uuid !== -1) {
+    if (prevData) {
       this.system.updateBody(this.uuid, this.data);
     }
   },
 
   remove: function() {
-    if (this.uuid !== -1) {
-      this.system.removeBody(this.uuid);
-      const eid = this.el.object3D.eid;
-      removeComponent(APP.world, Rigidbody, eid);
-    }
+    this.system.removeBody(this.uuid);
+    const eid = this.el.object3D.eid;
+    removeComponent(APP.world, Rigidbody, eid);
     this.alive = false;
   }
 });
