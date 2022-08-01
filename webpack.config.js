@@ -12,7 +12,6 @@ const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
 const packageLock = require("./package-lock.json");
 const request = require("request");
-const internalIp = import("internal-ip");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -144,6 +143,8 @@ function createDefaultAppConfig() {
 }
 
 async function fetchAppConfigAndEnvironmentVars() {
+  const { internalIpV4 } = await import("internal-ip");
+
   if (!fs.existsSync(".ret.credentials")) {
     throw new Error("Not logged in to Hubs Cloud. Run `npm run login` first.");
   }
@@ -179,11 +180,11 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
 
-  const localIp = process.env.HOST_IP || (await internalIp.v4()) || "localhost";
+  const localIp = process.env.HOST_IP || (await internalIpV4()) || "localhost";
 
   process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
-  process.env.CORS_PROXY_SERVER = `${localIp}:8080/cors-proxy`;
+  process.env.CORS_PROXY_SERVER = `hubs.local:8080/cors-proxy`;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
   process.env.NON_CORS_PROXY_DOMAINS = `${localIp},hubs.local,localhost`;
 
