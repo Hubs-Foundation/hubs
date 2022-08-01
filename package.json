@@ -194,7 +194,7 @@
     "localstorage-memory": "^1.0.3",
     "mediasoup-client": "^3.6.54",
     "mini-css-extract-plugin": "^2.6.1",
-    "node-fetch": "^3.2.9",
+    "node-fetch": "^2.6.7",
     "npm-scripts-info": "0.3.9",
     "ora": "^6.1.2",
     "phoenix-channels": "^1.0.0",
