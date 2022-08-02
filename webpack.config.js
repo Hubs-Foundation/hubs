@@ -469,6 +469,13 @@ module.exports = async (env, argv) => {
           exclude: [path.resolve(__dirname, "node_modules")],
           loader: "babel-loader"
         },
+        // pdfjs uses features that break in IOS14, so we want to run it through babel https://github.com/mozilla/pdf.js/issues/14327
+        // TODO remove when iOS 16 is out as we support last 2 major versions in our .browserslistrc so this will become a noop in terms of fixing that error
+        {
+          test: /\.js$/,
+          include: [path.resolve(__dirname, "node_modules", "pdfjs-dist")],
+          loader: "babel-loader"
+        },
         {
           test: /\.(scss|css)$/,
           use: [
