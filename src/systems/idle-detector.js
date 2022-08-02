@@ -17,48 +17,45 @@ const BASIC_ACTIVITY_PATHS = [
   paths.actions.angularVelocity
 ];
 
-AFRAME.registerSystem("idle-detector", {
-  init() {
-    this.resetTimeout = this.resetTimeout.bind(this);
-    this.idleTimeout = null;
-    this.lastInputCheck = 0;
+let idleTimeout = null;
+const lastInputCheck = 0;
 
-    const events = ["click", "pointerdown", "touchstart", "keyup"];
+const onIdleTimeout = () => {
+  window.dispatchEvent(new CustomEvent("idle_detected"));
+};
 
-    for (const event of events) {
-      window.addEventListener(event, this.resetTimeout);
-    }
+const resetTimeout = () => {
+  if (idleTimeout) clearTimeout(idleTimeout);
+  idleTimeout = setTimeout(onIdleTimeout, IDLE_TIMEOUT_MS);
+  window.dispatchEvent(new CustomEvent("activity_detected"));
+};
 
-    this.resetTimeout();
-  },
-  resetTimeout() {
-    if (this.idleTimeout) clearTimeout(this.idleTimeout);
-    this.idleTimeout = setTimeout(this.onIdleTimeout, IDLE_TIMEOUT_MS);
-    window.dispatchEvent(new CustomEvent("activity_detected"));
-  },
-  onIdleTimeout() {
-    window.dispatchEvent(new CustomEvent("idle_detected"));
-  },
-  tick(time) {
-    if (time - this.lastInputCheck < INPUT_CHECK_INTERVAL_MS) return;
+for (const event of ["click", "pointerdown", "touchstart", "keyup"]) {
+  window.addEventListener(event, resetTimeout);
+}
 
-    const userinput = this.el.systems.userinput;
+resetTimeout();
 
-    let basicActivity = false;
-    for (const activityPath of BASIC_ACTIVITY_PATHS) {
-      basicActivity = basicActivity || !!userinput.get(activityPath);
-    }
+export const idleDetectSystem = time => {
+  // TODO: When should lastInputCheck be updated?
+  if (time - lastInputCheck < INPUT_CHECK_INTERVAL_MS) return;
 
-    const characterAcceleration = userinput.get(CHARACTER_ACCELERATION_PATH);
+  // TODO: Remove the dependency with AFRAME
+  const userinput = AFRAME.scenes[0].systems.userinput;
 
-    const active =
-      basicActivity ||
-      !!(characterAcceleration && characterAcceleration[0]) ||
-      !!(characterAcceleration && characterAcceleration[1]);
+  let basicActivity = false;
+  for (const activityPath of BASIC_ACTIVITY_PATHS) {
+    basicActivity = basicActivity || !!userinput.get(activityPath);
+  }
 
-    if (active) {
-      this.resetTimeout();
-    }
-  },
-  remove() {}
-});
+  const characterAcceleration = userinput.get(CHARACTER_ACCELERATION_PATH);
+
+  const active =
+    basicActivity ||
+    !!(characterAcceleration && characterAcceleration[0]) ||
+    !!(characterAcceleration && characterAcceleration[1]);
+
+  if (active) {
+    resetTimeout();
+  }
+};

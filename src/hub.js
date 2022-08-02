@@ -166,7 +166,6 @@ import "./systems/app-mode";
 import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/auto-pixel-ratio";
-import "./systems/idle-detector";
 import "./systems/pen-tools";
 import "./systems/userinput/userinput";
 import "./systems/userinput/userinput-debug";
