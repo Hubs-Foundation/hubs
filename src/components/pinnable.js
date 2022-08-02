@@ -12,7 +12,28 @@ AFRAME.registerComponent("pinnable", {
 
     this.el.addEventListener("owned-pager-page-changed", this._persist);
 
-    this.el.addEventListener("owned-video-state-changed", this._persistAndAnimate);
+    // Fire pinned events when video state changes so we can persist the page.
+    this.el.addEventListener("owned-video-state-changed", this._fireEventsAndAnimate);
+
+    this.el.sceneEl.addEventListener("presence_updated", this._onPresenceUpdate);
+  },
+
+  async _onPresenceUpdate(e) {
+    //There is a bug in NAF that when a persitent (pinned) entity creator leaves, the next person that removes persistence (and takes ownership)
+    // and leaves will leave the object without and owner or creator this the prevents the object to be shared to others on the inital sync.
+    //to Prevent this we let one of the existing users take the ownership. It does not matter who gets it as long an one has it
+    try {
+      let connectedIds = Object.keys(APP.hubChannel.presence.state || {});
+      if (this.data.pinned) return;
+      if (this.el?.components?.networked?.data?.persistent) return;
+      let creator = this.el?.components?.networked?.data?.creator;
+      let owner = this.el?.components?.networked?.data?.owner;
+      if (!connectedIds.includes(creator) && !connectedIds.includes(owner)) {
+        await NAF.utils.takeOwnership(this.el);
+      }
+    } catch (error) {
+      console.warn(error);
+    }
   },
 
   update() {
@@ -84,5 +105,9 @@ AFRAME.registerComponent("pinnable", {
       this._persistAndAnimate();
     }
     this.wasTransforming = transforming;
+  },
+
+  remove(){
+    this.el.sceneEl.removeEventListener("presence_updated", this._onPresenceUpdate);
   }
 });
