@@ -4,23 +4,9 @@ module.exports = {
     [
       "@babel/env",
       {
+        debug: true,
         exclude: ["transform-regenerator"],
-        targets: {
-          browsers: [
-            "last 2 major versions",
-            "not <= 0.5%",
-            "not dead",
-            // No WebRTC support (including datachannels)
-            "not ios_saf < 11",
-            "not safari < 11",
-            "not ie >= 0",
-            "not edge >= 0",
-            "not ie_mob >= 0",
-            "not and_uc >= 0",
-            // No WebGL or WebRTC support
-            "not op_mini all"
-          ]
-        },
+        // targets are defined in .browserslistrc
         // false = do not polyfill stuff unneccessarily
         useBuiltIns: false
       }
