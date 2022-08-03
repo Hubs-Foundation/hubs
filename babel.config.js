@@ -4,7 +4,6 @@ module.exports = {
     [
       "@babel/env",
       {
-        debug: true,
         exclude: ["transform-regenerator"],
         // targets are defined in .browserslistrc
         // false = do not polyfill stuff unneccessarily
