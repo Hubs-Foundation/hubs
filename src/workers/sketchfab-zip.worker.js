@@ -5,13 +5,13 @@ async function fetchZipAndGetBlobs(src) {
   return zip.load().then(() => {
     // Rewrite any url references in the GLTF to blob urls
     const fileMap = {};
-    for (const fileName in zip.files) {
-      fileMap[fileName] = zip.extractAsBlobUrl(fileName);
-    }
-
+    const rewriteUri = uri => {
+      fileMap[uri] = fileMap[uri] || zip.extractAsBlobUrl(uri);
+      return fileMap[uri];
+    };
     const gltfJson = JSON.parse(zip.extractAsText("scene.gltf"));
-    gltfJson.buffers && gltfJson.buffers.forEach(b => (b.uri = fileMap[b.uri]));
-    gltfJson.images && gltfJson.images.forEach(i => (i.uri = fileMap[i.uri]));
+    gltfJson.buffers && gltfJson.buffers.forEach(b => (b.uri = rewriteUri(b.uri)));
+    gltfJson.images && gltfJson.images.forEach(i => (i.uri = rewriteUri(i.uri)));
     fileMap["scene.gtlf"] = URL.createObjectURL(new Blob([JSON.stringify(gltfJson, null, 2)], { type: "text/plain" }));
 
     return fileMap;
