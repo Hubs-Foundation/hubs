@@ -2,7 +2,6 @@ import React, { memo, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Slider.scss";
-import { trackColor } from "./Slider.scss";
 
 function getLinearGradientCSS(ratio, leftColor, rightColor) {
   return [
@@ -19,7 +18,7 @@ function getLinearGradientCSS(ratio, leftColor, rightColor) {
 function updateGradient(el, min, max) {
   if (el) {
     const ratio = ((parseFloat(el.value) - min) / (max - min)).toFixed(2);
-    el.style.backgroundImage = getLinearGradientCSS(ratio, trackColor, "transparent");
+    el.style.backgroundImage = getLinearGradientCSS(ratio, styles.trackColor, "transparent");
   }
 }
 

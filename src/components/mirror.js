@@ -1,4 +1,3 @@
-import { THREE } from "aframe";
 import { Reflector } from "three/examples/jsm/objects/Reflector";
 
 const DEFAULT_MIRROR_GEOMETRY = new THREE.PlaneBufferGeometry();
@@ -32,9 +31,9 @@ AFRAME.registerComponent("mirror", {
 
     // HACK the first time we render this, add the appropriate camera layers to the virtual camera
     const originalOnBeforeRender = reflector.onBeforeRender;
-    reflector.onBeforeRender = function(renderer, scene, camera) {
+    reflector.onBeforeRender = function (renderer, scene, camera) {
       const originalRender = renderer.render;
-      renderer.render = function(scene, camera) {
+      renderer.render = function (scene, camera) {
         camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
         camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
         reflector.onBeforeRender = originalOnBeforeRender;

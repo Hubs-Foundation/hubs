@@ -29,7 +29,7 @@ export function getCurrentStreamer() {
 }
 
 export function getPlayerInfo(sessionId) {
-  const playerInfos = window.APP.componentRegistry["player-info"] || [];
+  const playerInfos = window.APP?.componentRegistry["player-info"] || [];
   return playerInfos.find(info => {
     return info.playerSessionId === sessionId;
   });

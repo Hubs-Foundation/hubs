@@ -1,14 +1,10 @@
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/lights/LightProbeGenerator");
+import { LightProbeGenerator } from "three/examples/jsm/lights/LightProbeGenerator";
 
 const {
   AmbientLight,
   BackSide,
   BoxBufferGeometry,
   CubeCamera,
-  LightProbeGenerator,
   LinearFilter,
   Mesh,
   Object3D,

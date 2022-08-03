@@ -4,11 +4,7 @@ import { injectIntl, FormattedMessage } from "react-intl";
 import { getColorSchemePref } from "../utils/get-color-scheme-pref";
 import classNames from "classnames";
 
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/controls/OrbitControls");
-require("three/examples/js/loaders/GLTFLoader");
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
@@ -91,7 +87,7 @@ class AvatarPreview extends Component {
     this.scene = new THREE.Scene();
 
     this.camera = new THREE.PerspectiveCamera(55, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
-    this.controls = new THREE.OrbitControls(this.camera, this.canvas);
+    this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.screenSpacePanning = true;
     this.controls.enableKeys = true;
 
@@ -373,27 +369,25 @@ class AvatarPreview extends Component {
     return (
       <div className={classNames(styles.preview, this.props.className)}>
         {!this.props.avatarGltfUrl ||
-          (this.state.loading &&
-            !this.state.error && (
-              <div className="loader">
-                <div className="loader-center" />
-              </div>
-            ))}
-        {this.props.avatarGltfUrl &&
-          (this.state.error && !this.state.loading) && (
-            <div className="error">
-              <img
-                src="../assets/images/warning_icon.png"
-                srcSet="../assets/images/warning_icon@2x.png 2x"
-                className="error-icon"
-              />
-              <FormattedMessage
-                id="avatar-preview.loading-failed"
-                defaultMessage="Loading failed{linebreak}Please choose another avatar"
-                values={{ linebreak: <br /> }}
-              />
+          (this.state.loading && !this.state.error && (
+            <div className="loader">
+              <div className="loader-center" />
             </div>
-          )}
+          ))}
+        {this.props.avatarGltfUrl && this.state.error && !this.state.loading && (
+          <div className="error">
+            <img
+              src="../assets/images/warning_icon.png"
+              srcSet="../assets/images/warning_icon@2x.png 2x"
+              className="error-icon"
+            />
+            <FormattedMessage
+              id="avatar-preview.loading-failed"
+              defaultMessage="Loading failed{linebreak}Please choose another avatar"
+              values={{ linebreak: <br /> }}
+            />
+          </div>
+        )}
         <canvas ref={c => (this.canvas = c)} />
       </div>
     );
