@@ -285,6 +285,7 @@ module.exports = async (env, argv) => {
     // .replaceAll("connect-src", "connect-src https://example.com");
   }
 
+  const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
     cache: {
       type: "filesystem"
@@ -350,7 +351,7 @@ module.exports = async (env, argv) => {
       },
       host: "0.0.0.0",
       port: 8080,
-      allowedHosts: [host, "hubs.local"],
+      allowedHosts: [host, internalHostname],
       headers: devServerHeaders,
       hot: liveReload,
       liveReload: liveReload,
