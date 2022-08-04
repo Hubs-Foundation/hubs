@@ -1,6 +1,7 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, Owned } from "../bit-components";
-import { CameraPrefab, CubeMediaFramePrefab } from "../network-prefabs/camera-tool";
+import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
+import { MediaPrefab } from "../prefabs/media";
 import { defineNetworkSchema } from "../utils/bit-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 
@@ -12,6 +13,9 @@ const prefabs = new Map(
     },
     cube: {
       template: CubeMediaFramePrefab
+    },
+    media: {
+      template: MediaPrefab
     }
   })
 );
@@ -37,7 +41,7 @@ export function createNetworkedEntityFromRemote(world, prefabName, initialData, 
   createMessageDatas.set(eid, { prefabName, initialData });
 
   let i = 0;
-  obj.traverse(function(o) {
+  obj.traverse(function (o) {
     if (o.eid && hasComponent(world, Networked, o.eid)) {
       const eid = o.eid;
       Networked.id[eid] = APP.getSid(i === 0 ? rootNid : `${rootNid}.${i}`);
@@ -78,17 +82,17 @@ const pendingJoins = [];
 const pendingParts = [];
 
 // TODO messaging, joining, and leaving should not be using NAF
-NAF.connection.subscribeToDataChannel("nn", function(fromClientId, _dataType, data) {
+NAF.connection.subscribeToDataChannel("nn", function (fromClientId, _dataType, data) {
   data.fromClientId = fromClientId;
   pendingMessages.push(data);
 });
 
-document.addEventListener("DOMContentLoaded", function() {
-  document.body.addEventListener("clientConnected", function({ detail: { clientId } }) {
+document.addEventListener("DOMContentLoaded", function () {
+  document.body.addEventListener("clientConnected", function ({ detail: { clientId } }) {
     console.log("client joined", clientId);
     pendingJoins.push(APP.getSid(clientId));
   });
-  document.body.addEventListener("clientDisconnected", function({ detail: { clientId } }) {
+  document.body.addEventListener("clientDisconnected", function ({ detail: { clientId } }) {
     console.log("client left", clientId);
     pendingParts.push(APP.getSid(clientId));
   });

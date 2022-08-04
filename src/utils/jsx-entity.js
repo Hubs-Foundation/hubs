@@ -1,6 +1,7 @@
 import { addComponent, addEntity, hasComponent } from "bitecs";
 import { preloadFont } from "troika-three-text";
 import {
+  $isStringType,
   CameraTool,
   CursorRaycastable,
   DestroyAtExtremeDistance,
@@ -10,6 +11,8 @@ import {
   HoldableButton,
   HoverButton,
   MakeKinematicOnRelease,
+  MediaLoader,
+  AnimationMixer,
   Networked,
   NetworkedTransform,
   Object3DTag,
@@ -22,12 +25,14 @@ import {
   TextButton
 } from "../bit-components";
 import { inflateMediaFrame } from "../inflators/media-frame";
+import { inflateGrabbable } from "../inflators/grabbable";
+import { inflateImage } from "../inflators/image";
 import { inflateModel } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
 
 // TODO we should do this in a more explicit spot for "preloading" during the loading screen
-preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }, function() {});
+preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }, function () {});
 
 function isValidChild(child) {
   if (child === undefined) {
@@ -114,7 +119,16 @@ const createDefaultInflator = (Component, defaults = {}) => {
         return;
       }
       const value = componentProps[propName];
-      prop[eid] = prop[$isEidType] ? resolveRef(world, value) : value;
+      if (prop[$isStringType]) {
+        if (value && typeof value !== "string") {
+          throw new TypeError(`Expected ${propName} to be a string, got an ${typeof value} (${value})`);
+        }
+        prop[eid] = APP.getSid(value);
+      } else if (prop[$isEidType]) {
+        prop[eid] = resolveRef(world, value);
+      } else {
+        prop[eid] = value;
+      }
     });
   };
 };
@@ -138,13 +152,17 @@ const inflators = {
   "networked-transform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   "camera-tool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
+  "media-loader": createDefaultInflator(MediaLoader),
+  "animation-mixer": createDefaultInflator(AnimationMixer),
 
   // inflators that create Object3Ds
   "media-frame": inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
   text: inflateText,
-  model: inflateModel
+  model: inflateModel,
+  grabbable: inflateGrabbable,
+  image: inflateImage
 };
 
 export function renderAsEntity(world, entityDef) {

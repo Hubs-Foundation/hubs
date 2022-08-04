@@ -120,3 +120,16 @@ export const CameraTool = defineComponent({
   sndToggleRef: Types.eid
 });
 export const MyCameraTool = defineComponent();
+export const MediaLoader = defineComponent({
+  src: Types.ui32,
+  uid: Types.ui32,
+  loadingObjectRef: Types.eid
+});
+MediaLoader.src[$isStringType] = true;
+
+export const MediaImage = defineComponent({
+  textureSrc: Types.ui32,
+  textureVersion: Types.ui8
+});
+
+export const AnimationMixer = defineComponent();

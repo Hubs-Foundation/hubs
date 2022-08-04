@@ -36,6 +36,7 @@ import { networkSendSystem, networkReceiveSystem } from "./netcode";
 import { onOwnershipLost } from "./on-ownership-lost";
 import { interactionSystem } from "./bit-interaction-system";
 import { floatyObjectSystem } from "./floaty-object-system";
+import { animationMixerSystem } from "../bit-systems/animation-mixer-system";
 import { removeNetworkedObjectButtonSystem } from "./remove-networked-object-button-system";
 import { removeObject3DSystem } from "./remove-object3D-system";
 import { networkedTransformSystem } from "./networked-transform";
@@ -43,6 +44,7 @@ import { buttonSystems } from "./single-action-button-system";
 import { constraintsSystem } from "./bit-constraints-system";
 import { mediaFramesSystem } from "./bit-media-frames";
 import { cameraToolSystem } from "../bit-systems/camera-tool";
+import { mediaLoadingSystem } from "../bit-systems/media-loading";
 // import { holdableButtonSystem } from "./holdable-button-system";
 import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
@@ -94,8 +96,9 @@ AFRAME.registerSystem("hubs-systems", {
 
     networkReceiveSystem(world);
     onOwnershipLost(world);
+    mediaLoadingSystem(world);
 
-    physicsCompatSystem(APP.world);
+    physicsCompatSystem(world);
 
     networkedTransformSystem(world);
 
@@ -122,6 +125,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.twoPointStretchingSystem.tick();
 
     floatyObjectSystem(world);
+    animationMixerSystem(world);
 
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();

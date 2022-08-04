@@ -1,10 +1,11 @@
 import { defineQuery, exitQuery, removeEntity } from "bitecs";
-import { GLTFModel, MediaFrame, Object3DTag, Slice9, Text } from "../bit-components";
+import { MediaImage, GLTFModel, MediaFrame, Object3DTag, Slice9, Text } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
+import { releaseTexture } from "../utils/load-texture";
 
 function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
-  return function(world) {
+  return function (world) {
     query(world).forEach(eid => f(world.eid2obj.get(eid)));
   };
 }
@@ -15,6 +16,13 @@ const cleanupSlice9s = cleanupObjOnExit(Slice9, obj => obj.geometry.dispose());
 const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => gltfCache.release(obj.userData.gltfSrc));
 const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
+
+const exitedMediaImageQuery = exitQuery(defineQuery([MediaImage]));
+const cleanupImages = world => {
+  exitedMediaImageQuery(world).forEach(eid => {
+    releaseTexture({ src: APP.getString(MediaImage.textureSrc[eid]), version: MediaImage.textureVersion[eid] });
+  });
+};
 
 // TODO This feels messy and brittle
 //
@@ -51,6 +59,7 @@ export function removeObject3DSystem(world) {
   cleanupSlice9s(world);
   cleanupTexts(world);
   cleanupMediaFrames(world);
+  cleanupImages(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeFromMap);

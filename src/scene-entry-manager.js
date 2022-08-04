@@ -266,6 +266,7 @@ export default class SceneEntryManager {
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
     document.addEventListener("paste", e => {
+      return; //TODO: Remove
       if (
         (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
         document.activeElement === e.target
