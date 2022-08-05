@@ -527,22 +527,27 @@ module.exports = async (env, argv) => {
           ]
         },
         {
-          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|webm|3dl|cube)$/,
-          type: "asset/resource",
-          generator: {
-            // move required assets to output dir and add a hash for cache busting
-            // Make asset paths relative to /src
-            filename: function ({ filename }) {
-              let rootPath = path.dirname(filename) + path.sep;
-              if (rootPath.startsWith("src" + path.sep)) {
-                const parts = rootPath.split(path.sep);
-                parts.shift();
-                rootPath = parts.join(path.sep);
+          oneOf: [
+            { resourceQuery: /inline/, type: "asset/inline" },
+            {
+              test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|webm|3dl|cube)$/,
+              type: "asset/resource",
+              generator: {
+                // move required assets to output dir and add a hash for cache busting
+                // Make asset paths relative to /src
+                filename: function ({ filename }) {
+                  let rootPath = path.dirname(filename) + path.sep;
+                  if (rootPath.startsWith("src" + path.sep)) {
+                    const parts = rootPath.split(path.sep);
+                    parts.shift();
+                    rootPath = parts.join(path.sep);
+                  }
+                  // console.log(path, name, contenthash, ext);
+                  return rootPath + "[name]-[contenthash].[ext]";
+                }
               }
-              // console.log(path, name, contenthash, ext);
-              return rootPath + "[name]-[contenthash].[ext]";
             }
-          }
+          ]
         },
         {
           test: /\.(wasm)$/,
