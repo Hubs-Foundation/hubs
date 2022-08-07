@@ -113,6 +113,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: { value: paths.device.keyboard.key("b") },
+      dest: { value: paths.actions.toggleRecord },
+      xform: xforms.rising
+    },
+    {
       src: { value: paths.device.keyboard.key("Tab") },
       dest: { value: paths.actions.toggleFreeze },
       xform: xforms.rising
