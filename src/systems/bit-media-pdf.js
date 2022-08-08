@@ -167,7 +167,8 @@ export function mediaPdfSystem(world) {
   });
   pdfsQueryEnterQuery(world).forEach(async eid => {
     await loadPdf(eid);
-    console.log("XXX - ADDED")
+    const obj = APP.world.eid2obj.get(eid);
+    obj.el.components["listed-media"] && obj.el.sceneEl.emit("listed_media_changed");
   });
   pdfsQuery(world).forEach(async eid => {
     const prevPage = prevPages.get(eid);
