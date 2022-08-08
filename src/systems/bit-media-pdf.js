@@ -39,8 +39,8 @@ const snap = async ({ detail: { eid } }) => {
   const spanCount = snapCounts.get(eid);
   snapCounts.set(eid, spanCount + 1);
 
-  const mediaPdfObj = APP.world.eid2obj.get(eid);
-  const { entity } = addAndArrangeMedia(mediaPdfObj.el, file, "photo-snapshot", snapCounts.get(eid), false, 1);
+  const obj = APP.world.eid2obj.get(eid);
+  const { entity } = addAndArrangeMedia(obj.el, file, "photo-snapshot", snapCounts.get(eid), false, 1);
   entity.addEventListener("image-loaded", onSnapImageLoaded, ONCE_TRUE);
 };
 
