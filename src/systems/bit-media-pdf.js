@@ -20,10 +20,6 @@ const prevPages = new Map();
 const prevSrcs = new Map();
 const isRendering = new Map();
 
-const onSnapImageLoaded = (eid) => {
-  snapping.set(eid, false);
-};
-
 const snap = async ({ detail: { eid } }) => {
   if (snapping.get(eid)) return;
   snapping.set(eid, true);
@@ -41,7 +37,9 @@ const snap = async ({ detail: { eid } }) => {
 
   const obj = APP.world.eid2obj.get(eid);
   const { entity } = addAndArrangeMedia(obj.el, file, "photo-snapshot", snapCounts.get(eid), false, 1);
-  entity.addEventListener("image-loaded", onSnapImageLoaded, ONCE_TRUE);
+  entity.addEventListener("image-loaded", () => {
+    snapping.set(eid, false);
+  }, ONCE_TRUE);
 };
 
 const loadPage = async (eid) => {
