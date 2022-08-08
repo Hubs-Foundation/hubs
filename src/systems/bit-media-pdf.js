@@ -74,8 +74,6 @@ const loadPage = async (eid) => {
 
     await renderTask.promise;
 
-    pdf.lola[6] = 2;
-
     texture = textures.get(eid);
     renderTask = null;
 
