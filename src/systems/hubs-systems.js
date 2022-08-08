@@ -45,6 +45,7 @@ import { mediaFramesSystem } from "./bit-media-frames";
 import { videoSystem } from "../bit-systems/video-system";
 import { cameraToolSystem } from "../bit-systems/camera-tool";
 import { mediaLoadingSystem } from "../bit-systems/media-loading";
+import { mediaPdfSystem } from "./bit-media-pdf";
 // import { holdableButtonSystem } from "./holdable-button-system";
 import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
@@ -153,6 +154,7 @@ AFRAME.registerSystem("hubs-systems", {
     videoMenuSystem(world, systems.userinput);
     videoSystem(world, this.audioSystem);
     mediaFramesSystem(world);
+    mediaPdfSystem(world);
     this.audioZonesSystem.tick(this.el);
     this.gainSystem.tick();
     this.nameTagSystem.tick();

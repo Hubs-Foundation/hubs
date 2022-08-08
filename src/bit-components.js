@@ -160,3 +160,11 @@ export const VideoMenu = defineComponent({
 export const AudioEmitter = defineComponent();
 export const AudioSettingsChanged = defineComponent();
 export const Deletable = defineComponent();
+
+export const MediaPdf = defineComponent({
+  src: Types.ui32,
+  projection: Types.ui8,
+  contentType: Types.ui32,
+  index: Types.ui8,
+  updated: Types.ui8
+})
