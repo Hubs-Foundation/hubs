@@ -110,7 +110,6 @@ const loadPage = async (eid) => {
 
   scaleToAspectRatio(obj.el, ratio);
 
-  console.log("XXX - PAGE RENDERED")
   return ratio;
 };
 
@@ -163,7 +162,6 @@ export function mediaPdfSystem(world) {
     prevPages.delete(eid);
     prevSrcs.delete(eid);
     isRendering.delete(eid);
-    console.log("XXX - REMOVED")
   });
   pdfsQueryEnterQuery(world).forEach(async eid => {
     await loadPdf(eid);
