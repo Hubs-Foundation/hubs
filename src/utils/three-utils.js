@@ -479,3 +479,12 @@ export const isFacingCamera = (function() {
     return objWorldDir.dot(objWorld.sub(camWorld)) < 0;
   };
 })();
+
+export function findAncestor(obj, predicate) {
+  let ancestor = obj;
+  while (ancestor) {
+    if (predicate(ancestor)) return ancestor;
+    ancestor = ancestor.parent;
+  }
+  return null;
+}

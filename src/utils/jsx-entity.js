@@ -133,7 +133,7 @@ const createDefaultInflator = (Component, defaults = {}) => {
   };
 };
 
-const inflators = {
+export const inflators = {
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
   "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
   "hand-collision-target": createDefaultInflator(HandCollisionTarget),
@@ -167,7 +167,6 @@ const inflators = {
 
 export function renderAsEntity(world, entityDef) {
   const eid = entityDef.ref ? resolveRef(world, entityDef.ref) : addEntity(world);
-
   Object.keys(entityDef.components).forEach(name => {
     if (!inflators[name]) {
       throw new Error(`Failed to inflate unknown component called ${name}`);

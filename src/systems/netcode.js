@@ -48,7 +48,7 @@ export function createNetworkedEntityFromRemote(world, prefabName, initialData, 
       APP.world.nid2eid.set(Networked.id[eid], eid);
       Networked.creator[eid] = APP.getSid(creator);
       Networked.owner[eid] = APP.getSid(owner);
-      if (NAF.clientId === creator) takeOwnership(world, eid);
+      if (NAF.clientId === owner) takeOwnership(world, eid);
       i += 1;
     }
   });

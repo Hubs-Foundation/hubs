@@ -112,9 +112,10 @@ function generateMeshBVH(object3D) {
 }
 
 function cloneGltf(gltf) {
+  const scene = cloneObject3D(gltf.scene);
   return {
-    animations: gltf.scene.animations,
-    scene: cloneObject3D(gltf.scene)
+    animations: scene.animations,
+    scene
   };
 }
 
@@ -460,7 +461,6 @@ class GLTFHubsPlugin {
       }
     }
 
-    //
     gltf.scene.animations = gltf.animations;
   }
 }
@@ -796,7 +796,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
-        this.el.components["animation-mixer"].initMixer(this.model.animations);
+        this.el.components["animation-mixer"].initMixer(gltf.animations);
       } else {
         generateMeshBVH(this.model);
       }

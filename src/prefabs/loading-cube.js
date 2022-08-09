@@ -8,5 +8,12 @@ import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 loadModel(loadingObjectSrc, null, true);
 
 export function LoadingCubePrefab({ ref }) {
-  return <entity name="Loading Cube" ref={ref} model={{ src: loadingObjectSrc }} animation-mixer />;
+  // TODO: Use loading object
+  return (
+    <entity
+      name="Loading Cube"
+      ref={ref}
+      object3D={new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial())}
+    />
+  );
 }
