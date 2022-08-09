@@ -1,6 +1,7 @@
 import { MEDIA_TYPE } from "../utils/media-type";
 import { Cube } from "../prefabs/cube";
 import { loadImage } from "../utils/load-image";
+import { loadVideo } from "../utils/load-video";
 import { optionsFor } from "../utils/media-utils";
 import { defineQuery, enterQuery, entityExists, exitQuery, removeEntity } from "bitecs";
 import { MediaLoader } from "../bit-components";
@@ -10,7 +11,8 @@ import { renderAsEntity } from "../utils/jsx-entity";
 // import { Image } from "../prefabs/image";
 
 const loaderForMediaType = {
-  [MEDIA_TYPE.IMAGE]: loadImage
+  [MEDIA_TYPE.IMAGE]: loadImage,
+  [MEDIA_TYPE.VIDEO]: loadVideo
 };
 
 function swapLoadingObject({ world, eid, media }) {

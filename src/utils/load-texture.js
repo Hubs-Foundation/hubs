@@ -60,9 +60,7 @@ export function loadTextureCancellable(args) {
   return {
     value: loadPromise,
     onCancel: () => {
-      console.log("Could stop loading texture... if only I knew how!!");
       loadPromise.then(() => {
-        console.log("Load texture canceled... Releasing texture.");
         releaseTexture(args);
       });
     }
