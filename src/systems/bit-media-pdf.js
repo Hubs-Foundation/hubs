@@ -105,8 +105,6 @@ const loadPage = async (eid) => {
   isRendering.set(eid, false);
 
   scaleToAspectRatio(obj.el, ratio);
-
-  return ratio;
 };
 
 const loadPdf = async (eid) => {
