@@ -1,4 +1,4 @@
-import errorImageSrc from "!!url-loader!../assets/images/media-error.png";
+import errorImageSrc from "../assets/images/media-error.png?inline";
 
 const errorImage = new Image();
 errorImage.src = errorImageSrc;

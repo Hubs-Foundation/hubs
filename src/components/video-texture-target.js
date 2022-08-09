@@ -35,7 +35,7 @@ AFRAME.registerComponent("video-texture-source", {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
-      encoding: THREE.GammaEncoding,
+      encoding: THREE.sRGBEncoding,
       depth: false,
       stencil: false
     });

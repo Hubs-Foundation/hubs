@@ -13,13 +13,13 @@ import tlds from "tlds";
 import anime from "animejs";
 
 export const MediaType = {
-  ALL: "all",
-  ALL_2D: "all-2d",
-  MODEL: "model",
-  IMAGE: "image",
-  VIDEO: "video",
-  PDF: "pdf"
+  MODEL: 1 << 0,
+  IMAGE: 1 << 1,
+  VIDEO: 1 << 2,
+  PDF: 1 << 3
 };
+MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF;
+MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF;
 
 const linkify = Linkify();
 linkify.tlds(tlds);
@@ -157,8 +157,9 @@ export const addMedia = (
 
   const entity = document.createElement("a-entity");
 
+  const nid = NAF.utils.createNetworkId();
   if (networked) {
-    entity.setAttribute("networked", { template: template });
+    entity.setAttribute("networked", { template: template, networkId: nid });
   } else {
     const templateBody = document
       .importNode(document.body.querySelector(template).content, true)
@@ -470,7 +471,8 @@ export function createVideoOrAudioEl(type) {
   el.muted = isIOS;
   el.preload = "auto";
   el.crossOrigin = "anonymous";
-
+  // Audio should default to zero or it be heard before it is positioning and adjusted
+  el.volume = 0;
   return el;
 }
 

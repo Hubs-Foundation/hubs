@@ -9,7 +9,7 @@ pkg_upstream_url="https://hubs.mozilla.com/"
 pkg_build_deps=(
     core/coreutils/8.32/20210826054709
     core/bash/5.1/20210826055113
-    core/node10/10.16.1/20190801173856 # Latest node10 fails during npm ci due to a permissions error creating tmp dir
+    mozillareality/node16/16.16.0/20220729014143
     core/git/2.31.0/20211016175551
 )
 

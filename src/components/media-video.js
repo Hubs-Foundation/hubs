@@ -213,7 +213,7 @@ AFRAME.registerComponent("media-video", {
 
   changeVolumeBy(v) {
     let gainMultiplier = APP.gainMultipliers.get(this.el);
-    gainMultiplier = THREE.Math.clamp(gainMultiplier + v, 0, MAX_GAIN_MULTIPLIER);
+    gainMultiplier = THREE.MathUtils.clamp(gainMultiplier + v, 0, MAX_GAIN_MULTIPLIER);
     APP.gainMultipliers.set(this.el, gainMultiplier);
     this.updateVolumeLabel();
     const audio = APP.audios.get(this.el);
@@ -358,6 +358,8 @@ AFRAME.registerComponent("media-video", {
     } else {
       this.audio = new THREE.Audio(audioListener);
     }
+    // Default to being quiet so it fades in when volume is set by audio systems
+    this.audio.gain.gain.value = 0;
     this.audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: this.audio });
 
     this.audio.setNodeSource(this.mediaElementAudioSource);
@@ -370,6 +372,8 @@ AFRAME.registerComponent("media-video", {
 
     APP.audios.set(this.el, this.audio);
     updateAudioSettings(this.el, this.audio);
+    // Original audio source volume can now be restored as audio systems will take over
+    this.mediaElementAudioSource.mediaElement.volume = 1;
   },
 
   async updateSrc(oldData) {

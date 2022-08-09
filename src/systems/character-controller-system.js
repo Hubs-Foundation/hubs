@@ -202,7 +202,7 @@ export class CharacterControllerSystem {
       const animationIsOver =
         this.waypointTravelTime === 0 || t >= this.waypointTravelStartTime + this.waypointTravelTime;
       if (this.activeWaypoint && !animationIsOver) {
-        const progress = THREE.Math.clamp((t - this.waypointTravelStartTime) / this.waypointTravelTime, 0, 1);
+        const progress = THREE.MathUtils.clamp((t - this.waypointTravelStartTime) / this.waypointTravelTime, 0, 1);
         interpolateAffine(
           startTransform,
           this.activeWaypoint.transform,

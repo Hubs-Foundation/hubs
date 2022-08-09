@@ -109,7 +109,7 @@
 
                     <a-entity class="right-controller"></a-entity>
 
-                    <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" billboard="onlyY: true;">
+                    <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" layers="mask: 256; recursive: true;" billboard="onlyY: true;">
                         <a-entity class="nametag-background" slice9="width: 1; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 0.5; alphaTest: 0.1; src: nametag;">
                             <a-entity class="nametag-status-border" visible="false" slice9="width: 0.45; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; transparent: false; alphaTest: 0.1; src: nametag-border;"></a-entity>
                             <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0.025 0.001"></a-entity>
@@ -153,7 +153,7 @@
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity class="avatar-inspect-collider" avatar-inspect-collider tags="togglesHoveredActionSet: true; ignoreSpaceBubble: true;" is-remote-hover-target inspect-button></a-entity>
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
-                                <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui">
+                                <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui" layers="mask: 256; recursive: true;">
                                     <a-entity billboard="onlyY: true;" class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
                                         <a-entity class="avatar-volume-label" text="value: 0%; anchorX: center; textAlign: center; color: #ff3464; letterSpacing: 0.08;" text-raycast-hack position="0.0 0.45 0.35" scale="1.25 1.25 1.25"></a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.45 0.35" class="avatar-volume-down-button">
@@ -218,6 +218,7 @@
             <template id="static-media">
                 <a-entity
                     body-helper="type: static; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 1;"
+                    tags="isStatic: true;"
                 >
                 </a-entity>
             </template>
@@ -231,7 +232,7 @@
                     tags="isStatic: true; togglesHoveredActionSet: true; inspectable: true;"
                     listed-media
                 >
-                    <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100;">
+                    <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100;" layers="mask: 256; recursive: true;">
                         <a-entity mixin="rounded-text-button ui"
                             is-remote-hover-target
                             tags="singleActionButton: true; isHoverMenuChild: true;"
@@ -280,21 +281,21 @@
             <template id="interactable-media">
                 <a-entity
                     class="interactable"
-                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
+                    body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 25;"
                     owned-object-limiter="counter: #media-counter"
                     set-unowned-body-kinematic
                     is-remote-hover-target
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
-                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
+                    floaty-object="modifyGravityOnRelease: true;"
                     set-yxz-order
                     hoverable-visuals
                     position-at-border__freeze="target:.freeze-menu"
                     position-at-border__freeze-unprivileged="target:.freeze-unprivileged-menu"
                     listed-media
                 >
-                    <a-entity class="ui interactable-ui">
+                    <a-entity class="ui interactable-ui" layers="mask: 256; recursive: true;">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
                             <a-entity
                                 mixin="rounded-text-action-button"
@@ -524,7 +525,7 @@
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; inspectable: true;"
                     destroy-at-extreme-distances
                     scalable-when-grabbed
-                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true;"
+                    floaty-object="modifyGravityOnRelease: true;"
                     set-yxz-order
                     position-at-border__freeze="target:.freeze-menu;"
                     hoverable-visuals
@@ -535,7 +536,7 @@
                         scale="0.25 0.25 0.25"
                         position="0 0.25 -0.001"
                     ></a-entity>
-                    <a-entity class="ui interactable-ui">
+                    <a-entity class="ui interactable-ui" layers="mask: 256; recursive: true;">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media; visibleIfOwned: false;">
                             <a-entity
                                 mixin="rounded-button"
@@ -555,17 +556,6 @@
                     </a-entity>
                 </a-entity>
             </template>
-
-            <template id="interactable-media-frame">
-                <!--
-                    note we intentionally don't setup the shape or media-frame here since they both don't support dynamic updates
-                    and so must be configured when creating the entity on each client. Since we only support media frames in scenes
-                    for now, this is acceptable, but TODO this will need to be handled if we want to dynamically spawn them.
-                -->
-                <a-entity body-helper="type: kinematic; collisionFilterGroup: 16; collisionFilterMask: 1; disableCollision: true;" >
-                </a-entity>
-            </template>
-
 
             <template id="linked-media">
                 <a-entity
@@ -590,7 +580,7 @@
                     set-unowned-body-kinematic
                     is-remote-hover-target
                     tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true; isPen: true;"
-                    floaty-object="modifyGravityOnRelease: true; autoLockOnLoad: true; gravitySpeedLimit: 0; reduceAngularFloat: true;"
+                    floaty-object="modifyGravityOnRelease: true; unthrowable: true; reduceAngularFloat: true;"
                     scale="0.5 0.5 0.5"
                     action-to-remove__pen="path: /actions/pen/remove;"
                     position-at-border="target:.pen-menu"
@@ -604,127 +594,6 @@
                     ></a-entity>
                     <a-entity class="ui delete-button pen-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_drawing" >
                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 0 0.001">
-                            <a-entity
-                                sprite
-                                icon-button="image: remove-action.png; hoverImage: remove-action.png;"
-                                scale="0.165 0.165 0.165"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                    </a-entity>
-                </a-entity>
-            </template>
-
-            <template id="interactable-camera">
-                <a-entity
-                    class="interactable"
-                    body-helper="type: dynamic; mass: 0.001; collisionFilterGroup: 1; collisionFilterMask: 8;"
-                    camera-tool
-                    is-remote-hover-target
-                    tags="isHandCollisionTarget: true; isHoldable: true; offersHandConstraint: true; offersRemoteConstraint: true;"
-                    shape-helper="type: box; fit: manual; halfExtents: 0.22 0.14 0.1; offset: 0 0.02 0;"
-                    floaty-object="autoLockOnRelease: true; autoLockOnLoad: true;"
-                    owned-object-limiter="counter: #camera-counter"
-                    set-unowned-body-kinematic
-                    scalable-when-grabbed
-                    position-at-border="target:.camera-menu; isFlat: true"
-                    set-yxz-order
-                >
-                    <a-entity class="ui interactable-ui camera-snap-menu" visible-if-permitted="spawn_camera">
-                        <a-entity
-                            class="label"
-                            text="value: 3; textAlign: center; color: #fafafa; fontSize: 0.09;"
-                            position="0 0.15 0.081"
-                        ></a-entity>
-                        <a-entity class="label-action-background" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
-                        </a-entity>
-                        <a-entity class="label-background" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
-                        </a-entity>
-                        <a-entity
-                            class="duration"
-                            text="value: 5s; textAlign: center; color: #fafafa; fontSize: 0.09;"
-                            position="0 -0.15 0.09"
-                        ></a-entity>
-                        <a-entity class="snap-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
-                            <a-entity
-                                sprite class="snap-icon"
-                                icon-button="image: snap_camera.png; hoverImage: snap_camera.png;"
-                                scale="0.2 0.2 0.2"
-                                position="0 0.002 0.001"
-                            ></a-entity>
-                        </a-entity>
-                        <a-entity class="record-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.75 0.75 0.75">
-                            <a-entity
-                                sprite class="record-icon"
-                                icon-button="image: record-action.png; hoverImage: record-action.png;"
-                                scale="0.175 0.175 0.175"
-                                position="0 0 0.001"
-                            ></a-entity>
-                            <a-entity
-                                sprite class="record-alpha-icon"
-                                icon-button="image: record-action-alpha.png; hoverImage: record-action-alpha.png;"
-                                scale="0.175 0.175 0.175"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                        <a-entity class="cancel-button" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0 -0.15 0.075" scale="0.65 0.65 0.65">
-                            <a-entity
-                                sprite
-                                icon-button="image: close-action.png; hoverImage: close-action.png;"
-                                scale="0.075 0.075 0.075"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                        <a-entity class="prev-duration" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.135 -0.15 0.075" scale="0.5 0.5 0.5">
-                            <a-entity
-                                sprite
-                                icon-button="image: prev.png; hoverImage: prev.png;"
-                                scale="0.075 0.075 0.075"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                        <a-entity class="next-duration" mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="0.135 -0.15 0.075" scale="0.5 0.5 0.5">
-                            <a-entity
-                                sprite
-                                icon-button="image: next.png; hoverImage: next.png;"
-                                scale="0.075 0.075 0.075"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                        <a-entity class="stop-button" mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" position="0 0.15 0.08" scale="0.75 0.75 0.75">
-                            <a-entity
-                                sprite class="stop-icon"
-                                icon-button="image: stop-action.png; hoverImage: stop-action.png;"
-                                scale="0.125 0.125 0.125"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                    </a-entity>
-                    <a-entity class="ui interactable-ui camera-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_camera">
-                        <a-entity mixin="rounded-action-button" class="capture-audio" is-remote-hover-target tags="singleActionButton: true;" position="0 0.125 0.001">
-                            <a-entity sprite class="capture-audio-icon"
-                                icon-button="image: unmute-action.png; hoverImage: unmute-action.png; activeImage: mute-action.png; activeHoverImage: mute-action.png"
-                                scale="0.165 0.165 0.165"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                        <a-entity mixin="rounded-action-button" is-remote-hover-target tags="singleActionButton: true;" transform-button="mode: align;" position="-0.15 -0.125 0.001">
-                            <a-entity
-                                sprite
-                                icon-button="image: recenter-action.png; hoverImage: recenter-action.png;"
-                                scale="0.165 0.165 0.165"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                        <a-entity mixin="rounded-action-button" is-remote-hover-target tags="isHoldable: true; holdableButton: true;" transform-button transform-button-selector position="0.15 -0.125 0.001">
-                            <a-entity
-                                sprite
-                                icon-button="image: rotate-action.png; hoverImage: rotate-action.png;"
-                                scale="0.165 0.165 0.165"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
-                        <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true" remove-networked-object-button position="0 -0.350 0.001">
                             <a-entity
                                 sprite
                                 icon-button="image: remove-action.png; hoverImage: remove-action.png;"
@@ -1011,20 +880,23 @@
 
         <a-entity id="camera-counter" networked-counter="max: 1;"></a-entity>
 
+        <a-entity
+            id="pen-spawner"
+            action-to-event="path: /actions/spawnPen; event: spawn_pen; withPermission: spawn_drawing"
+            super-spawner="
+                template: #interactable-pen;
+                spawnEvent: spawn_pen;
+                animateFromCursor: true;
+                spawnScale: 0.5, 0.5, 0.5;
+                "
+        ></a-entity>
+
         <a-entity id="drawing-manager" drawing-manager="penSpawner: #pen-spawner"></a-entity>
 
-        <a-entity
-            id="right-cursor-controller"
-            cursor-controller="cursor: #right-cursor; camera: #avatar-pov-node; cursorVisual: #right-cursor-visual;"
-        ></a-entity>
-
-        <a-entity
-            id="left-cursor-controller"
-            cursor-controller="cursor: #left-cursor; camera: #avatar-pov-node; cursorVisual: #left-cursor-visual;"
-        ></a-entity>
 
         <a-entity
             id="right-cursor"
+            remote-right
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
             <a-entity
@@ -1039,6 +911,7 @@
 
         <a-entity
             id="left-cursor"
+            remote-left
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
             <a-entity
@@ -1051,6 +924,16 @@
             ></a-entity>
         </a-entity>
 
+        <a-entity id="viewing-rig" set-yxz-order>
+            <a-entity
+                id="viewing-camera"
+                inject-main-camera-here
+                rotation
+                fader
+                set-yxz-order
+                pitch-yaw-rotator>
+            </a-entity>
+        </a-entity>
         <!-- Avatar Rig -->
         <a-entity
             id="avatar-rig"
@@ -1063,9 +946,28 @@
             inspect-pivot-child-selector="selector:.inspect-pivot"
         >
             <a-entity
+                id="avatar-pov-node"
+                class="camera"
+                personal-space-bubble="radius: 0.4;"
+                rotation
+                pitch-yaw-rotator
+                set-yxz-order
+                position="0 1.6 0"
+            >
+                <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
+                <a-entity
+                    id="gaze-teleport"
+                    position = "0.15 0 0"
+                    teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport; collisionEntities: [nav-mesh];"
+                ></a-entity>
+                <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
+            </a-entity>
+
+            <a-entity
                 id="player-hud"
                 hud-controller="head: #viewing-camera;"
                 vr-mode-toggle-class="class: ui"
+                layers="mask: 256; recursive: true;"
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
             >
@@ -1148,27 +1050,11 @@
                 </a-entity>
             </a-entity>
 
-            <a-entity
-                id="avatar-pov-node"
-                class="camera"
-                personal-space-bubble="radius: 0.4;"
-                rotation
-                pitch-yaw-rotator
-                set-yxz-order
-                position="0 1.6 0"
-            >
-                <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
-                <a-entity
-                    id="gaze-teleport"
-                    position = "0.15 0 0"
-                    teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport; collisionEntities: [nav-mesh];"
-                ></a-entity>
-                <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
-            </a-entity>
 
             <a-entity
                 id="player-left-controller"
                 class="left-controller"
+                hand-left
                 track-pose="path: /actions/leftHand/matrix"
                 visibility-by-path="path: /actions/leftHand/matrix"
                 hand-controls2="left"
@@ -1182,6 +1068,7 @@
             <a-entity
                 id="player-right-controller"
                 class="right-controller"
+                hand-right
                 track-pose="path: /actions/rightHand/matrix"
                 visibility-by-path="path: /actions/rightHand/matrix"
                 hand-controls2="right"
@@ -1221,6 +1108,16 @@
             </a-entity>
         </a-entity>
 
+        <a-entity
+            id="right-cursor-controller"
+            cursor-controller="cursor: #right-cursor; camera: #avatar-pov-node;"
+        ></a-entity>
+
+        <a-entity
+            id="left-cursor-controller"
+            cursor-controller="cursor: #left-cursor; camera: #avatar-pov-node;"
+        ></a-entity>
+
         <!-- Environment -->
         <a-entity
             id="environment-root"
@@ -1233,17 +1130,6 @@
         <a-entity id="objects-root">
             <a-entity id="objects-scene"></a-entity>
         </a-entity>
-
-        <a-entity
-            id="pen-spawner"
-            action-to-event="path: /actions/spawnPen; event: spawn_pen; withPermission: spawn_drawing"
-            super-spawner="
-                template: #interactable-pen;
-                spawnEvent: spawn_pen;
-                animateFromCursor: true;
-                spawnScale: 0.5, 0.5, 0.5;
-                "
-        ></a-entity>
 
         <a-entity class="ui interactable-ui vr-notice" follow-in-fov="target: #avatar-pov-node; offset: 0 0 -0.8; angle: 39;" visible="false">
             <a-entity slice9="width: 0.8; height: 0.25; left: 64; top: 64; right: 66; bottom: 66; opacity: 1.0; src: button"
@@ -1272,16 +1158,6 @@
                     scale="0.075 0.075 0.075"
                     position="0 0 0.001"
                 ></a-entity>
-            </a-entity>
-        </a-entity>
-        <a-entity id="viewing-rig" set-yxz-order>
-            <a-entity
-                id="viewing-camera"
-                inject-main-camera-here
-                rotation
-                fader
-                set-yxz-order
-                pitch-yaw-rotator>
             </a-entity>
         </a-entity>
         <a-entity id="scene-preview-node">

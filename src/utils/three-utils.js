@@ -26,6 +26,10 @@ export function disposeMaterial(mtrl) {
   if (mtrl.normalMap) mtrl.normalMap.dispose();
   if (mtrl.specularMap) mtrl.specularMap.dispose();
   if (mtrl.envMap) mtrl.envMap.dispose();
+  if (mtrl.aoMap) mtrl.aoMap.dispose();
+  if (mtrl.metalnessMap) mtrl.metalnessMap.dispose();
+  if (mtrl.roughnessMap) mtrl.roughnessMap.dispose();
+  if (mtrl.emissiveMap) mtrl.emissiveMap.dispose();
   mtrl.dispose();
 }
 
@@ -37,14 +41,8 @@ export function disposeNode(node) {
   }
 
   if (node.material) {
-    let materialArray;
-    if (node.material instanceof THREE.MeshFaceMaterial || node.material instanceof THREE.MultiMaterial) {
-      materialArray = node.material.materials;
-    } else if (node.material instanceof Array) {
-      materialArray = node.material;
-    }
-    if (materialArray) {
-      materialArray.forEach(disposeMaterial);
+    if (Array.isArray(node.material)) {
+      node.material.forEach(disposeMaterial);
     } else {
       disposeMaterial(node.material);
     }
@@ -62,12 +60,12 @@ export function setMatrixWorld(object3D, m) {
   object3D.matrixWorld.copy(m);
   if (object3D.parent) {
     object3D.parent.updateMatrices();
-    object3D.matrix = object3D.matrix
+    object3D.matrix
       .copy(object3D.parent.matrixWorld)
       .invert()
-      .multiply(object3D.matrixWorld);
+      .multiply(m);
   } else {
-    object3D.matrix.copy(object3D.matrixWorld);
+    object3D.matrix.copy(m);
   }
   object3D.matrix.decompose(object3D.position, object3D.quaternion, object3D.scale);
   if (tempMatrix4.near(object3D.matrixWorld, EPSILON)) {
@@ -310,7 +308,7 @@ export const calculateViewingDistance = (function() {
   return function calculateViewingDistance(fov, aspect, box, center, vrMode) {
     const halfYExtents = Math.max(Math.abs(box.max.y - center.y), Math.abs(center.y - box.min.y));
     const halfXExtents = Math.max(Math.abs(box.max.x - center.x), Math.abs(center.x - box.min.x));
-    const halfVertFOV = THREE.Math.degToRad(fov / 2);
+    const halfVertFOV = THREE.MathUtils.degToRad(fov / 2);
     const halfHorFOV = Math.atan(Math.tan(halfVertFOV) * aspect) * (vrMode ? 0.5 : 1);
     const margin = 1.05;
     const length1 = Math.abs((halfYExtents * margin) / Math.tan(halfVertFOV));
@@ -468,3 +466,16 @@ export function createHeadlessModelForSkinnedMesh(mesh) {
 
   return createErasedMesh(mesh, eraseBoneIndexes);
 }
+
+export const isFacingCamera = (function() {
+  const objWorldDir = new THREE.Vector3();
+  const objWorld = new THREE.Vector3();
+  const camWorld = new THREE.Vector3();
+  return function isFacingCamera(obj) {
+    const playerCamera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+    playerCamera.getWorldPosition(camWorld);
+    obj.getWorldPosition(objWorld);
+    obj.getWorldDirection(objWorldDir);
+    return objWorldDir.dot(objWorld.sub(camWorld)) < 0;
+  };
+})();

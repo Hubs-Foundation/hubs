@@ -13,6 +13,8 @@ import { PlacePopoverButton } from "./PlacePopover";
 import { ObjectUrlModalContainer } from "./ObjectUrlModalContainer";
 import configs from "../../utils/configs";
 import { FormattedMessage } from "react-intl";
+import { anyEntityWith } from "../../utils/bit-utils";
+import { MyCameraTool } from "../../bit-components";
 
 export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {
   const [items, setItems] = useState([]);
@@ -20,7 +22,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
   useEffect(
     () => {
       function updateItems() {
-        const hasActiveCamera = !!scene.systems["camera-tools"].getMyCamera();
+        const hasActiveCamera = !!anyEntityWith(APP.world, MyCameraTool);
         const hasActivePen = !!scene.systems["pen-tools"].getMyPen();
 
         let nextItems = [

@@ -3,7 +3,6 @@ import MovingAverage from "moving-average";
 import { getThemeColor } from "../utils/theme";
 import qsTruthy from "../utils/qs_truthy";
 import { findAncestorWithComponent } from "../utils/scene-graph";
-import { THREE } from "aframe";
 import nextTick from "../utils/next-tick";
 import { createPlaneBufferGeometry, setMatrixWorld } from "../utils/three-utils";
 import { textureLoader } from "../utils/media-utils";
@@ -119,7 +118,7 @@ AFRAME.registerComponent("name-tag", {
     let typingAnimTime = 0;
     const worldPos = new THREE.Vector3();
     const mat = new THREE.Matrix4();
-    return function(t) {
+    return function (t) {
       if (!this.isAvatarReady) {
         this.nametag.visible = false;
         return;

@@ -23,6 +23,8 @@ import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
+import { addComponent, entityExists, removeComponent } from "bitecs";
+import { MediaLoading } from "../bit-components";
 
 let loadingObject;
 
@@ -283,7 +285,13 @@ AFRAME.registerComponent("media-loader", {
         this.data.linkedEl.addEventListener("componentremoved", this.handleLinkedElRemoved);
       }
 
+      // TODO this does duplicate work in some cases, but finish() is the only consistent place to do it
+      this.contentBounds = getBox(this.el, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
+
       el.emit("media-loaded");
+      if (el.eid && entityExists(APP.world, el.eid)) {
+        removeComponent(APP.world, MediaLoading, el.eid);
+      }
     };
 
     if (this.data.animate) {
@@ -342,6 +350,7 @@ AFRAME.registerComponent("media-loader", {
     try {
       if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
+        addComponent(APP.world, MediaLoading, this.el.eid);
       }
 
       //check if url is an anchor hash e.g. #Spawn_Point_1
@@ -654,9 +663,7 @@ AFRAME.registerComponent("media-pager", {
       })
       .catch(() => {}); //ignore exception, entity might not be networked
 
-    this.el.addEventListener("pdf-loaded", async () => {
-      this.update();
-    });
+    this.el.addEventListener("pdf-loaded", this.update);
   },
 
   async update(oldData) {
@@ -702,6 +709,12 @@ AFRAME.registerComponent("media-pager", {
       this.networkedEl.removeEventListener("unpinned", this.update);
     }
 
+    this.nextButton.object3D.removeEventListener("interact", this.onNext);
+    this.prevButton.object3D.removeEventListener("interact", this.onPrev);
+    this.snapButton.object3D.removeEventListener("interact", this.onSnap);
+
     window.APP.hubChannel.removeEventListener("permissions_updated", this.update);
+
+    this.el.removeEventListener("pdf-loaded", this.update);
   }
 });

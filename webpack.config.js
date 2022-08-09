@@ -12,7 +12,6 @@ const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
 const packageLock = require("./package-lock.json");
 const request = require("request");
-const internalIp = require("internal-ip");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -98,7 +97,7 @@ function deepModuleDependencyTest(modulesArr) {
 
     const name = module.nameForCondition();
 
-    return deps.some(depName => name.startsWith(depName));
+    return deps.some(depName => name?.startsWith(depName));
   };
 }
 
@@ -144,6 +143,8 @@ function createDefaultAppConfig() {
 }
 
 async function fetchAppConfigAndEnvironmentVars() {
+  const { internalIpV4 } = await import("internal-ip");
+
   if (!fs.existsSync(".ret.credentials")) {
     throw new Error("Not logged in to Hubs Cloud. Run `npm run login` first.");
   }
@@ -182,11 +183,11 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
 
-  const localIp = process.env.HOST_IP || (await internalIp.v4()) || "localhost";
+  const localIp = process.env.HOST_IP || (await internalIpV4()) || "localhost";
 
   process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
-  process.env.CORS_PROXY_SERVER = `${localIp}:8080/cors-proxy`;
+  process.env.CORS_PROXY_SERVER = `hubs.local:8080/cors-proxy`;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
   process.env.NON_CORS_PROXY_DOMAINS = `${localIp},hubs.local,localhost`;
 
@@ -199,6 +200,8 @@ function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) 
     filename,
     template: path.join(__dirname, "src", filename),
     chunks: [...extraChunks, chunkName],
+    // TODO we still have some things that depend on execution order, mostly aframe element API
+    scriptLoading: "blocking",
     minify: {
       removeComments: false
     }
@@ -209,6 +212,12 @@ function htmlPagePlugin({ filename, extraChunks = [], chunksSortMode, inject }) 
 
   return new HTMLWebpackPlugin(options);
 }
+
+const threeExamplesDir = path.resolve(__dirname, "node_modules", "three", "examples");
+const basisTranscoderPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.js");
+const dracoWasmWrapperPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
+const basisWasmPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.wasm");
+const dracoWasmPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
 
 module.exports = async (env, argv) => {
   env = env || {};
@@ -263,16 +272,6 @@ module.exports = async (env, argv) => {
 
   const liveReload = !!process.env.LIVE_RELOAD || false;
 
-  const legacyBabelConfig = {
-    presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
-    plugins: [
-      "@babel/proposal-class-properties",
-      "@babel/proposal-object-rest-spread",
-      "@babel/plugin-transform-async-to-generator",
-      "@babel/plugin-proposal-optional-chaining"
-    ]
-  };
-
   const devServerHeaders = {
     "Access-Control-Allow-Origin": "*"
   };
@@ -286,11 +285,34 @@ module.exports = async (env, argv) => {
   }
 
   return {
-    node: {
-      // need to specify this manually because some random lodash code will try to access
-      // Buffer on the global object if it exists, so webpack will polyfill on its behalf
-      Buffer: false,
-      fs: "empty"
+    cache: {
+      type: "filesystem"
+    },
+    resolve: {
+      alias: {
+        // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
+        // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
+        // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
+        // and for example AFRAME.THREE.Object3D !== THREE.Object3D in Hubs code, which breaks many things.
+        three$: path.resolve(__dirname, "./node_modules/three/build/three.module.js"),
+        bitecs$: path.resolve(__dirname, "./node_modules/bitecs/dist/index.mjs"),
+
+        // TODO these aliases are reequired because `three` only "exports" stuff in examples/jsm
+        "three/examples/js/libs/basis/basis_transcoder.js": basisTranscoderPath,
+        "three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js": dracoWasmWrapperPath,
+        "three/examples/js/libs/basis/basis_transcoder.wasm": basisWasmPath,
+        "three/examples/js/libs/draco/gltf/draco_decoder.wasm": dracoWasmPath
+      },
+      // Allows using symlinks in node_modules
+      symlinks: false,
+      fallback: {
+        // need to specify this manually because some random lodash code will try to access
+        // Buffer on the global object if it exists, so webpack will polyfill on its behalf
+        Buffer: false,
+        fs: false,
+        stream: require.resolve("stream-browserify"),
+        path: require.resolve("path-browserify")
+      }
     },
     entry: {
       support: path.join(__dirname, "src", "support.js"),
@@ -311,16 +333,25 @@ module.exports = async (env, argv) => {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || ""
     },
+    target: ["web", "es5"], // use es5 for webpack runtime to maximize compatibility
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
-      https: createHTTPSConfig(),
+      client: {
+        overlay: {
+          errors: true,
+          warnings: false
+        }
+      },
+      server: {
+        type: "https",
+        options: createHTTPSConfig()
+      },
       host: "0.0.0.0",
-      public: `${host}:8080`,
-      useLocalIp: true,
+      port: 8080,
       allowedHosts: [host, "hubs.local"],
       headers: devServerHeaders,
       hot: liveReload,
-      inline: liveReload,
+      liveReload: liveReload,
       historyApiFallback: {
         rewrites: [
           { from: /^\/link/, to: "/link.html" },
@@ -334,7 +365,7 @@ module.exports = async (env, argv) => {
           { from: /^\/whats-new/, to: "/whats-new.html" }
         ]
       },
-      before: function(app) {
+      setupMiddlewares: (middlewares, { app }) => {
         // Local CORS proxy
         app.all("/cors-proxy/*", (req, res) => {
           res.header("Access-Control-Allow-Origin", "*");
@@ -369,7 +400,7 @@ module.exports = async (env, argv) => {
         // be flexible with people accessing via a local reticulum on another port
         app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
         // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
-        app.head("*", function(req, res, next) {
+        app.head("*", function (req, res, next) {
           if (req.method === "HEAD") {
             res.append("Date", new Date().toGMTString());
             res.send("");
@@ -377,6 +408,8 @@ module.exports = async (env, argv) => {
             next();
           }
         });
+
+        return middlewares;
       }
     },
     performance: {
@@ -391,19 +424,18 @@ module.exports = async (env, argv) => {
           test: /\.html$/,
           loader: "html-loader",
           options: {
-            // <a-asset-item>'s src property is overwritten with the correct transformed asset url.
-            attrs: ["img:src", "a-asset-item:src", "audio:src", "source:src"]
+            minimize: false, // This is handled by HTMLWebpackPlugin
+            sources: {
+              list: [
+                { tag: "img", attribute: "src", type: "src" },
+                { tag: "a-asset-item", attribute: "src", type: "src" },
+                { tag: "audio", attribute: "src", type: "src" },
+                { tag: "source", attribute: "src", type: "src" }
+              ]
+            }
           }
         },
-        {
-          test: /\.worker\.js$/,
-          loader: "worker-loader",
-          options: {
-            name: "assets/js/[name]-[hash].js",
-            publicPath: "/",
-            inline: true
-          }
-        },
+        // On legacy browsers we want to show a "unsupported browser" page. That page needs to polyfill more things so we set the target to ie11
         {
           test: [
             path.resolve(__dirname, "src", "utils", "configs.js"),
@@ -411,39 +443,29 @@ module.exports = async (env, argv) => {
             path.resolve(__dirname, "src", "support.js")
           ],
           loader: "babel-loader",
-          options: legacyBabelConfig
+          options: {
+            presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
+            plugins: require("./babel.config").plugins
+          }
         },
-        // Some JS assets are loaded at runtime and should be coppied unmodified and loaded using file-loader
+        // Some JS assets are loaded at runtime and should be copied unmodified and loaded using file-loader
         {
-          test: [
-            path.resolve(__dirname, "node_modules", "three", "examples", "js", "libs", "basis", "basis_transcoder.js"),
-            path.resolve(
-              __dirname,
-              "node_modules",
-              "three",
-              "examples",
-              "js",
-              "libs",
-              "draco",
-              "gltf",
-              "draco_decoder.js"
-            ),
-            path.resolve(
-              __dirname,
-              "node_modules",
-              "three",
-              "examples",
-              "js",
-              "libs",
-              "draco",
-              "gltf",
-              "draco_wasm_wrapper.js"
-            )
-          ],
+          test: [basisTranscoderPath, dracoWasmWrapperPath],
           loader: "file-loader",
           options: {
             outputPath: "assets/raw-js",
-            name: "[name]-[hash].[ext]"
+            name: "[name]-[contenthash].[ext]"
+          }
+        },
+        // TODO worker-loader has been deprecated, but we need "inline" support which is not available yet
+        // ideally instead of inlining workers we should serve them off the root domain instead of CDN.
+        {
+          test: /\.worker\.js$/,
+          loader: "worker-loader",
+          options: {
+            filename: "assets/js/[name]-[contenthash].js",
+            publicPath: "/",
+            inline: "no-fallback"
           }
         },
         {
@@ -451,6 +473,13 @@ module.exports = async (env, argv) => {
           include: [path.resolve(__dirname, "src")],
           // Exclude JS assets in node_modules because they are already transformed and often big.
           exclude: [path.resolve(__dirname, "node_modules")],
+          loader: "babel-loader"
+        },
+        // pdfjs uses features that break in IOS14, so we want to run it through babel https://github.com/mozilla/pdf.js/issues/14327
+        // TODO remove when iOS 16 is out as we support last 2 major versions in our .browserslistrc so this will become a noop in terms of fixing that error
+        {
+          test: /\.js$/,
+          include: [path.resolve(__dirname, "node_modules", "pdfjs-dist")],
           loader: "babel-loader"
         },
         {
@@ -462,9 +491,12 @@ module.exports = async (env, argv) => {
             {
               loader: "css-loader",
               options: {
-                name: "[path][name]-[hash].[ext]",
-                localIdentName: "[name]__[local]__[hash:base64:5]",
-                camelCase: true
+                modules: {
+                  localIdentName: "[name]__[local]__[hash:base64:5]",
+                  exportLocalsConvention: "camelCase",
+                  // TODO we ideally would be able to get rid of this but we have some global styles and many :local's that would become superfluous
+                  mode: "global"
+                }
               }
             },
             "sass-loader"
@@ -478,32 +510,50 @@ module.exports = async (env, argv) => {
               loader: "@svgr/webpack",
               options: {
                 titleProp: true,
-                replaceAttrValues: { "#000": "{props.color}" },
-                template: require("./src/react-components/icons/IconTemplate"),
+                replaceAttrValues: { "#000": "currentColor" },
+                exportType: "named",
+                svgo: true,
                 svgoConfig: {
-                  plugins: {
-                    removeViewBox: false,
-                    mergePaths: false,
-                    convertShapeToPath: false,
-                    removeHiddenElems: false
-                  }
+                  plugins: [
+                    {
+                      name: "preset-default",
+                      params: {
+                        overrides: {
+                          removeViewBox: false,
+                          mergePaths: false,
+                          convertShapeToPath: false,
+                          removeHiddenElems: false
+                        }
+                      }
+                    }
+                  ]
                 }
               }
-            },
-            "url-loader"
+            }
           ]
         },
         {
-          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm|3dl|cube)$/,
-          use: {
-            loader: "file-loader",
-            options: {
-              // move required assets to output dir and add a hash for cache busting
-              name: "[path][name]-[hash].[ext]",
-              // Make asset paths relative to /src
-              context: path.join(__dirname, "src")
+          oneOf: [
+            { resourceQuery: /inline/, type: "asset/inline" },
+            {
+              test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|webm|3dl|cube)$/,
+              type: "asset/resource",
+              generator: {
+                // move required assets to output dir and add a hash for cache busting
+                // Make asset paths relative to /src
+                filename: function ({ filename }) {
+                  let rootPath = path.dirname(filename) + path.sep;
+                  if (rootPath.startsWith("src" + path.sep)) {
+                    const parts = rootPath.split(path.sep);
+                    parts.shift();
+                    rootPath = parts.join(path.sep);
+                  }
+                  // console.log(path, name, contenthash, ext);
+                  return rootPath + "[name]-[contenthash].[ext]";
+                }
+              }
             }
-          }
+          ]
         },
         {
           test: /\.(wasm)$/,
@@ -512,7 +562,7 @@ module.exports = async (env, argv) => {
             loader: "file-loader",
             options: {
               outputPath: "assets/wasm",
-              name: "[name]-[hash].[ext]"
+              name: "[name]-[contenthash].[ext]"
             }
           }
         },
@@ -522,7 +572,6 @@ module.exports = async (env, argv) => {
         }
       ]
     },
-
     optimization: {
       splitChunks: {
         maxAsyncRequests: 10,
@@ -567,6 +616,11 @@ module.exports = async (env, argv) => {
       }
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        process: "process/browser",
+        // TODO we should bee direclty importing THREE stuff when we need it
+        THREE: "three"
+      }),
       new BundleAnalyzerPlugin({
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
       }),
@@ -619,22 +673,25 @@ module.exports = async (env, argv) => {
       htmlPagePlugin({
         filename: "tokens.html"
       }),
-      new CopyWebpackPlugin([
-        {
-          from: "src/hub.service.js",
-          to: "hub.service.js"
-        }
-      ]),
-      new CopyWebpackPlugin([
-        {
-          from: "src/schema.toml",
-          to: "schema.toml"
-        }
-      ]),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/hub.service.js",
+            to: "hub.service.js"
+          }
+        ]
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/schema.toml",
+            to: "schema.toml"
+          }
+        ]
+      }),
       // Extract required css and add a content hash.
       new MiniCssExtractPlugin({
-        filename: "assets/stylesheets/[name]-[contenthash].css",
-        disable: argv.mode !== "production"
+        filename: "assets/stylesheets/[name]-[contenthash].css"
       }),
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({

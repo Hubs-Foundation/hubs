@@ -35,11 +35,6 @@ import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
 
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/loaders/GLTFLoader");
-
 import "networked-aframe/src/index";
 import "webrtc-adapter";
 import { detectOS, detect } from "detect-browser";
@@ -107,12 +102,9 @@ import "./components/pin-networked-object-button";
 import "./components/mirror-media-button";
 import "./components/close-mirrored-media-button";
 import "./components/drop-object-button";
-import "./components/remove-networked-object-button";
 import "./components/camera-focus-button";
 import "./components/unmute-video-button";
-import "./components/destroy-at-extreme-distances";
 import "./components/visible-to-owner";
-import "./components/camera-tool";
 import "./components/emit-state-change";
 import "./components/action-to-event";
 import "./components/action-to-remove";
@@ -170,7 +162,6 @@ import "./systems/permissions";
 import "./systems/exit-on-blur";
 import "./systems/auto-pixel-ratio";
 import "./systems/idle-detector";
-import "./systems/camera-tools";
 import "./systems/pen-tools";
 import "./systems/userinput/userinput";
 import "./systems/userinput/userinput-debug";
@@ -304,10 +295,7 @@ function setupLobbyCamera() {
 let uiProps = {};
 
 // Hub ID and slug are the basename
-let routerBaseName = document.location.pathname
-  .split("/")
-  .slice(0, 2)
-  .join("/");
+let routerBaseName = document.location.pathname.split("/").slice(0, 2).join("/");
 
 if (document.location.pathname.includes("hub.html")) {
   routerBaseName = "/";
@@ -777,7 +765,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       showSignInDialog: true,
       signInMessage,
       onContinueAfterSignIn: async () => {
-        remountUI({ showSignInDialog: false });
+        remountUI({ showSignInDialog: false, onContinueAfterSignIn: null });
         let actionError = null;
         if (predicate()) {
           try {
@@ -791,13 +779,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (actionError && onFailure) onFailure(actionError);
         exit2DInterstitialAndEnterVR();
-      },
-      onSignInDialogVisibilityChanged: visible => {
-        if (visible) {
-          remountUI({ showSignInDialog: true });
-        } else {
-          remountUI({ showSignInDialog: false, onContinueAfterSignIn: null });
-        }
       }
     });
   };
@@ -1096,13 +1077,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("[reconnect] Reconnection successful.");
   };
 
-  const onRetDeploy = (function() {
+  const onRetDeploy = (function () {
     let pendingNotification = null;
-    const hasPendingNotification = function() {
+    const hasPendingNotification = function () {
       return !!pendingNotification;
     };
 
-    const handleNextMessage = (function() {
+    const handleNextMessage = (function () {
       let isLocked = false;
       return async function handleNextMessage() {
         if (isLocked || !pendingNotification) return;

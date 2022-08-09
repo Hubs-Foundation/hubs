@@ -1,4 +1,4 @@
-import pdfjs from "pdfjs-dist";
+import * as pdfjs from "pdfjs-dist";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { errorTexture } from "../utils/error-texture";
@@ -18,7 +18,8 @@ const TYPE_IMG_PNG = { type: "image/png" };
  * name -> how to name the file
  * Then the path to the worker script
  */
-pdfjs.GlobalWorkerOptions.workerSrc = require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js");
+pdfjs.GlobalWorkerOptions.workerSrc =
+  require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js").default;
 
 AFRAME.registerComponent("media-pdf", {
   schema: {
@@ -77,7 +78,7 @@ AFRAME.registerComponent("media-pdf", {
 
       if (src !== oldData.src) {
         const loadingSrc = this.data.src;
-        const pdf = await pdfjs.getDocument(src);
+        const pdf = await pdfjs.getDocument(src).promise;
         if (loadingSrc !== this.data.src) return;
 
         this.pdf = pdf;

@@ -1,3 +1,4 @@
+import { themes } from "../react-components/styles/theme";
 import { waitForDOMContentLoaded } from "./async-utils";
 import configs from "./configs";
 
@@ -79,6 +80,8 @@ function activateTheme() {
         `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
       );
   }
+
+  window.dispatchEvent(new CustomEvent("update_theme"));
 }
 
 const onStoreChanged = (function() {
@@ -115,4 +118,8 @@ function applyThemeToTextButton(el, highlighted) {
   );
 }
 
-export { applyThemeToTextButton, getThemeColor };
+function getDefaultTheme() {
+  return themes.find(t => t.default) || themes[0];
+}
+
+export { applyThemeToTextButton, getThemeColor, getDefaultTheme };

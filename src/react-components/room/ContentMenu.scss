@@ -46,13 +46,7 @@
   }
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text1-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text1-color;
-    }
+    color: theme.$text1-color;
   }
 }
 
@@ -61,13 +55,7 @@
   background-color: theme.$active-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {

@@ -1,9 +1,40 @@
-export function isTagged(el, tag) {
-  return el && el.components && el.components.tags && el.components.tags.data[tag];
-}
+import { addComponent, hasComponent } from "bitecs";
+import {
+  Holdable,
+  OffersRemoteConstraint,
+  HandCollisionTarget,
+  OffersHandConstraint,
+  TogglesHoveredActionSet,
+  SingleActionButton,
+  HoldableButton,
+  Pen,
+  HoverMenuChild,
+  Static,
+  Inspectable,
+  PreventAudioBoost,
+  IgnoreSpaceBubble
+} from "../bit-components";
 
-export function setTag(el, tag, value = true) {
-  return (el.components.tags.data[tag] = !!value);
+const tag2ecs = {
+  isHoldable: Holdable,
+  offersRemoteConstraint: OffersRemoteConstraint,
+  isHandCollisionTarget: HandCollisionTarget,
+  offersHandConstraint: OffersHandConstraint,
+  togglesHoveredActionSet: TogglesHoveredActionSet,
+  singleActionButton: SingleActionButton,
+  holdableButton: HoldableButton,
+  isPen: Pen,
+  isHoverMenuChild: HoverMenuChild,
+  isStatic: Static,
+  inspectable: Inspectable,
+  preventAudioBoost: PreventAudioBoost,
+  ignoreSpaceBubble: IgnoreSpaceBubble
+};
+
+// TODO usages of this should be replaced with direct hasComponent calls
+// but this also has additional logic to check for non existant object
+export function isTagged(elOrObject3D, tag) {
+  return elOrObject3D && hasComponent(APP.world, tag2ecs[tag], elOrObject3D.eid);
 }
 
 AFRAME.registerComponent("tags", {
@@ -27,13 +58,8 @@ AFRAME.registerComponent("tags", {
       console.warn("Do not edit tags with .setAttribute");
     }
     this.didUpdateOnce = true;
-  },
-
-  remove() {
-    const interaction = this.el.sceneEl.systems.interaction;
-    if (interaction.isHeld(this.el)) {
-      interaction.release(this.el);
-      this.el.sceneEl.systems["hubs-systems"].constraintsSystem.release(this.el);
-    }
+    Object.entries(this.data).forEach(([tagName, isSet]) => {
+      if (isSet) addComponent(APP.world, tag2ecs[tagName], this.el.eid);
+    });
   }
 });
