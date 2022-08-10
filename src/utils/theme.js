@@ -1,8 +1,7 @@
-import { themes } from "../react-components/styles/theme";
 import { waitForDOMContentLoaded } from "./async-utils";
 import configs from "./configs";
 
-// Node these should be synchronized with the top of shared.scss
+// NOTE these should be synchronized with the top of shared.scss
 const DEFAULT_ACTION_COLOR = "#FF3464";
 const DEFAULT_ACTION_COLOR_LIGHT = "#FF74A4";
 
@@ -23,24 +22,89 @@ const DEFAULT_COLORS = {
   "nametag-border-color-raised-hand": "#FFCD74"
 };
 
-// Note: duplicated logic in react-components/styles/theme.js
-const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-let isDarkMode = darkmodeQuery.matches;
-darkmodeQuery.addEventListener("change", event => {
-  isDarkMode = event.matches;
-});
+const config = (() => {
+  let config = process.env.APP_CONFIG;
+
+  // Storybook includes environment variables as a string
+  // https://storybook.js.org/docs/react/configure/environment-variables
+  if (!config && process.env.STORYBOOK_APP_CONFIG) {
+    config = JSON.parse(process.env.STORYBOOK_APP_CONFIG);
+  }
+
+  if (!config) {
+    config = window.APP_CONFIG;
+  }
+
+  if (config?.theme?.error) {
+    console.error(
+      `Custom themes failed to load.\n${config.theme.error}\nIf you are an admin, reconfigure your themes in the admin panel.`
+    );
+  }
+
+  return config;
+})();
+
+const themes = config?.theme?.themes || [];
+
+function getDarkModeQuery() {
+  // window.matchMedia is not available when this module is imported in node.js,
+  // which happens when using `npm run login` for Hubs Cloud customization.
+  // So we return a dummy MediaQueryList instead.
+  if (typeof window.matchMedia !== 'undefined') {
+    return window.matchMedia("(prefers-color-scheme: dark)");
+  } else {
+    return { matches: false, addEventListener: () => {}, removeEventListener: () => {} };
+  }
+}
+
+function registerDarkModeQuery(changeListener) {
+  const darkModeQuery = getDarkModeQuery();
+
+  // This is a workaround for old Safari.
+  // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use
+  // addListener() and removeListener() to observe media query lists.
+  // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
+  // We may remove this workaround when no one will use Safari 13 or before.
+  if (darkModeQuery.addEventListener) {
+    darkModeQuery.addEventListener("change", changeListener);
+  } else {
+    darkModeQuery.addListener(changeListener);
+  }
+
+  const removeListener = () => {
+    if (darkModeQuery.removeEventListener) {
+      darkModeQuery.removeEventListener("change", changeListener);
+    } else {
+      darkModeQuery.removeListener(changeListener);
+    }
+  };
+
+  return [darkModeQuery, removeListener];
+}
+
+function getDefaultTheme() {
+  return themes.find(t => t.default) || themes[0];
+}
+
+function tryGetTheme(themeId) {
+  if (!Array.isArray(themes)) return;
+
+  const theme = themeId && themes.find(t => t.id === themeId);
+  if (theme) {
+    return theme;
+  } else {
+    const darkMode = getDarkModeQuery().matches;
+    return (darkMode && themes.find(t => t.darkModeDefault)) || getDefaultTheme();
+  }
+}
+
+function getCurrentTheme() {
+  const preferredThemeId = window.APP?.store?.state?.preferences?.theme;
+  return tryGetTheme(preferredThemeId);
+}
 
 function getThemeColor(name) {
-  const themes = configs.APP_CONFIG?.theme?.themes;
-
-  const themeId = window.APP?.store?.state?.preferences?.theme;
-
-  const theme =
-    themes &&
-    ((themeId && themes.find(t => t.id === themeId)) ||
-      (isDarkMode && themes.find(t => t.darkModeDefault)) ||
-      themes.find(t => t.default === true));
-
+  const theme = getCurrentTheme();
   return theme?.variables?.[name] || DEFAULT_COLORS[name];
 }
 
@@ -84,16 +148,15 @@ function activateTheme() {
   window.dispatchEvent(new CustomEvent("update_theme"));
 }
 
-const onStoreChanged = (function() {
-  let themeId;
-  return function onStoreChanged() {
-    const newThemeId = window.APP?.store?.state?.preferences?.theme;
-    if (themeId !== newThemeId) {
-      themeId = newThemeId;
-      activateTheme();
-    }
-  };
-})();
+function onThemeChanged(themeChanged) {
+  window.APP?.store.addEventListener("themechanged", themeChanged);
+  const [_darkModeQuery, removeDarkModeListener] = registerDarkModeQuery(themeChanged);
+
+  return () => {
+    APP.store.removeEventListener("themechanged", themeChanged);
+    removeDarkModeListener();
+  }
+}
 
 waitForDOMContentLoaded().then(() => {
   if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme["dark-theme"]) {
@@ -102,7 +165,7 @@ waitForDOMContentLoaded().then(() => {
     document.body.classList.add("light-theme");
   }
   activateTheme();
-  window.APP?.store?.addEventListener("statechanged", onStoreChanged);
+  onThemeChanged(activateTheme);
 });
 
 function applyThemeToTextButton(el, highlighted) {
@@ -118,8 +181,13 @@ function applyThemeToTextButton(el, highlighted) {
   );
 }
 
-function getDefaultTheme() {
-  return themes.find(t => t.default) || themes[0];
-}
-
-export { applyThemeToTextButton, getThemeColor, getDefaultTheme };
+export { 
+  applyThemeToTextButton,
+  getCurrentTheme,
+  getDefaultTheme,
+  getThemeColor,
+  onThemeChanged,
+  registerDarkModeQuery,
+  themes,
+  tryGetTheme,
+};
