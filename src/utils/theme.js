@@ -108,7 +108,7 @@ function getThemeColor(name) {
   return theme?.variables?.[name] || DEFAULT_COLORS[name];
 }
 
-function activateTheme() {
+function updateTextButtonColors() {
   const actionColor = getThemeColor("action-color");
   const actionHoverColor = getThemeColor("action-color-highlight");
 
@@ -144,28 +144,68 @@ function activateTheme() {
         `textHoverColor: #fff; textColor: #fff; backgroundColor: ${actionColor}; backgroundHoverColor: ${actionHoverColor}`
       );
   }
-
-  window.dispatchEvent(new CustomEvent("update_theme"));
 }
 
-function onThemeChanged(themeChanged) {
-  window.APP?.store.addEventListener("themechanged", themeChanged);
-  const [_darkModeQuery, removeDarkModeListener] = registerDarkModeQuery(themeChanged);
+const themeChangedListeners = new Map();
+function registerThemeChangedListener(listener) {
+  window.APP.store.addEventListener("themechanged", listener);
+  const [_darkModeQuery, removeDarkModeListener] = registerDarkModeQuery(listener);
+
+  themeChangedListeners.set(listener, {
+    removeListener: () => {
+      window.APP.store.removeEventListener("themechanged", listener);
+      removeDarkModeListener();
+    }
+  });
+}
+
+function removeThemeChangedListener(listener) {
+  themeChangedListeners.get(listener).removeListener();
+  themeChangedListeners.delete(listener);
+}
+
+// window.APP.store may not be available when onThemeChanged is called, so we
+// stash listeners until waitForDOMContentLoaded.
+const stashedThemeChangedListeners = new Set();
+function onThemeChanged(listener) {
+  const storeIsAvailable = !!(window.APP?.store);
+  if (storeIsAvailable) {
+    registerThemeChangedListener(listener);
+  } else {
+    stashedThemeChangedListeners.add(listener);
+  }
 
   return () => {
-    APP.store.removeEventListener("themechanged", themeChanged);
-    removeDarkModeListener();
+    if (storeIsAvailable) {
+      removeThemeChangedListener(listener);
+    } else {
+      stashedThemeChangedListeners.delete(listener);
+    }
   }
 }
 
+function registerStashedThemeChangedListeners() {
+  for (const listener of stashedThemeChangedListeners) {
+    registerThemeChangedListener(listener);
+  }
+  stashedThemeChangedListeners.clear();
+}
+
 waitForDOMContentLoaded().then(() => {
+  if (process.env.NODE) {
+    // We're running in node.js, which happens when "npm run login" is used, for example,
+    // so don't bother doing anything UI related.
+    return;
+  }
+
   if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme["dark-theme"]) {
     document.body.classList.add("dark-theme");
   } else {
     document.body.classList.add("light-theme");
   }
-  activateTheme();
-  onThemeChanged(activateTheme);
+  updateTextButtonColors();
+  onThemeChanged(updateTextButtonColors);
+  registerStashedThemeChangedListeners()
 });
 
 function applyThemeToTextButton(el, highlighted) {
