@@ -24,6 +24,7 @@ import {
   SingleActionButton,
   TextButton
 } from "../bit-components";
+import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
 import { inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
@@ -56,7 +57,7 @@ class Ref {
 export function createRef() {
   return new Ref();
 }
-function resolveRef(world, ref) {
+export function resolveRef(world, ref) {
   if (ref.current === null) {
     ref.current = addEntity(world);
   }
@@ -152,8 +153,8 @@ export const inflators = {
   "networked-transform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   "camera-tool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
-  "media-loader": createDefaultInflator(MediaLoader),
   "animation-mixer": createDefaultInflator(AnimationMixer),
+  "media-loader": inflateMediaLoader,
 
   // inflators that create Object3Ds
   "media-frame": inflateMediaFrame,

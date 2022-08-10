@@ -22,7 +22,7 @@ async function maybeSpawnPastedURL(e) {
     return;
   }
 
-  const eid = createNetworkedEntity(APP.world, "media", { src: text });
+  const eid = createNetworkedEntity(APP.world, "media", { src: text, recenter: true, resize: true });
   const avatarPov = document.querySelector("#avatar-pov-node").object3D;
   const obj = APP.world.eid2obj.get(eid);
   obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));

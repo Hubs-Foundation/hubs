@@ -3,7 +3,7 @@ import { createElementEntity, createRef } from "../utils/jsx-entity";
 import { COLLISION_LAYERS } from "../constants";
 import { LoadingCubePrefab } from "./loading-cube";
 
-export function MediaPrefab({ src }) {
+export function MediaPrefab({ src, resize, recenter }) {
   const loadingObjectRef = createRef();
 
   return (
@@ -11,7 +11,7 @@ export function MediaPrefab({ src }) {
       name="Interactable"
       networked
       networked-transform
-      media-loader={{ src, loadingObjectRef }}
+      media-loader={{ src, loadingObjectRef, resize, recenter }}
       grabbable
       make-kinematic-on-release
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}

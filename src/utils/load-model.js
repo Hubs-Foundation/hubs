@@ -1,18 +1,20 @@
-import { addComponent, addEntity, hasComponent } from "bitecs";
-import { GLTFModel, Networked } from "../bit-components";
+import { addComponent, addEntity } from "bitecs";
+import { GLTFModel } from "../bit-components";
 // TODO Fix function names
 import { loadModel as loadGLTFModel } from "../components/gltf-model-plus";
 import { addObject3DComponent, inflators } from "../utils/jsx-entity";
-import { findAncestor } from "./three-utils";
-// import { sleep } from "../utils/async-utils";
 
-export function* loadModel({ world, mediaLoaderEid, accessibleUrl }) {
+// import cubeSrc from "../assets/models/polite_cube.glb";
+// console.warn("Cube src is", cubeSrc);
+
+export function* loadModel({ world, accessibleUrl }) {
   const { scene, animations } = yield loadGLTFModel(accessibleUrl, null, true, null, false);
   scene.userData.gltfSrc = accessibleUrl;
   scene.animations = animations;
   scene.mixer = new THREE.AnimationMixer(scene);
 
   const swap = [];
+  // Inflate components
   scene.traverse(obj => {
     // TODO: Which of these need "?"
     const components = obj.userData?.gltfExtensions?.MOZ_hubs_components || {};
@@ -21,7 +23,10 @@ export function* loadModel({ world, mediaLoaderEid, accessibleUrl }) {
 
     Object.keys(components).forEach(name => {
       if (!inflators[name]) {
-        throw new Error(`Failed to inflate unknown component called ${name}`);
+        // TODO: Throw error or warn?
+        // throw new Error(`Failed to inflate unknown component called ${name}`);
+        console.warn(`Failed to inflate unknown component called ${name}`);
+        return;
       }
 
       inflators[name](world, eid, components[name]);
@@ -38,6 +43,9 @@ export function* loadModel({ world, mediaLoaderEid, accessibleUrl }) {
     }
   });
 
+  addComponent(world, GLTFModel, scene.eid);
+
+  // Swap object3D's in the scene graph an inflator created replacement
   swap.forEach(([old, replacement]) => {
     for (let i = old.children.length - 1; i >= 0; i--) {
       replacement.add(old.children[i]);
@@ -55,25 +63,5 @@ export function* loadModel({ world, mediaLoaderEid, accessibleUrl }) {
     old.removeFromParent();
   });
 
-  const rootNid = APP.getString(Networked.id[mediaLoaderEid]);
-  const rootCreator = Networked.creator[mediaLoaderEid];
-  const rootOwner = Networked.owner[mediaLoaderEid];
-
-  console.log({ mediaLoaderEid, rootNid, rootCreator, rootOwner });
-
-  let i = 0;
-  scene.traverse(function (obj) {
-    if (obj.eid && hasComponent(world, Networked, obj.eid)) {
-      const eid = obj.eid;
-      Networked.id[eid] = APP.getSid(i === 0 ? rootNid : `${rootNid}.${i}`);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = rootCreator;
-      Networked.owner[eid] = rootOwner;
-      if (NAF.clientId === rootOwner) takeOwnership(world, eid);
-      i += 1;
-    }
-  });
-
-  addComponent(world, GLTFModel, scene.eid);
   return scene.eid;
 }
