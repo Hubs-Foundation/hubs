@@ -31,6 +31,12 @@ export function runCoroutine(c) {
         c.cancelFns[i]();
       }
       c.done = true;
+      if (c.throw) {
+        // We are canceling due to an uncaught error.
+        // Do not re-throw, but log the error to the
+        // console so that it's not lost.
+        console.error(c.value);
+      }
       return c;
     }
 
@@ -51,15 +57,14 @@ export function runCoroutine(c) {
       }
     } catch (e) {
       // Generator throws
-      console.error("Error in generator...");
-      console.error(e);
+      // console.error(e);
       c.waiting = false;
       c.value = e;
+      c.throw = true;
       if (c.stack.length === 1) {
         c.canceled = true;
       } else {
         c.stack.pop();
-        c.throw = true;
       }
       return c;
     }
@@ -87,8 +92,6 @@ export function runCoroutine(c) {
         })
         .catch(e => {
           c.waiting = false;
-          console.error("Rejected promise...");
-          console.error(e);
           c.throw = true;
           c.value = e;
         });
@@ -99,4 +102,42 @@ export function runCoroutine(c) {
       c.value = value;
     }
   }
+}
+
+// Run multiple coroutines in a sequence.
+// Canceling the chain will cancel only the current coroutine.
+export function* chain(generators) {
+  let c;
+  const onCancel = () => {
+    if (c) {
+      // console.log("Chain canceled!");
+      c.canceled = true;
+    }
+  };
+  // Yield a cancelable that can cancel the active coroutine
+  yield { value: null, onCancel };
+  c = createCoroutine(generators[0]());
+  // console.log("First coroutine is for...", c.stack[0]);
+  let i = 0;
+  while (true) {
+    runCoroutine(c);
+    if (c.done) {
+      if (c.canceled) {
+        // console.warn("Early exit from chain.");
+        break;
+      }
+
+      if (i === generators.length - 1) {
+        // console.log("Normal exit from chain.");
+        break;
+      }
+
+      i += 1;
+      c = createCoroutine(generators[i](c.value));
+      // console.log("Next coroutine is for...", c.stack[0]);
+    } else {
+      yield Promise.resolve();
+    }
+  }
+  // console.log("Done!");
 }

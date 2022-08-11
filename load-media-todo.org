@@ -1,0 +1,64 @@
+
+* feature/load-media
+
+This PR adds a media-loading system to eventually replace the media-loader aframe component.
+
+** TODO Basic support
+Load/spawn all the media types:
+*** TODO VIDEO
+*** TODO AUDIO
+*** DONE IMAGE
+*** TODO PDF
+*** DONE MODEL
+*** TODO HTML
+** DONE Show loading cube while loading
+** TODO Physics shape of loading cube
+** TODO Play loading cube animation
+** TODO Flat vs 360 projection
+** TODO Add physics shapes
+** DONE Resize models on load
+** DONE Recenter models
+** DONE (mostly) Animate loaded model scale
+** TODO Add Object Menus
+** TODO Write tests for coroutines
+
+
+* Scrap
+// Upload to GPU
+
+// const camera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+// const renderer = AFRAME.scenes[0].renderer;
+// renderer.render(scene, camera);
+
+// renderer.compile(scene, camera);
+// scene.traverse(obj => {
+//   if (!obj.material) {
+//     return;
+//   }
+//   const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+//   for (const material of materials) {
+//     for (const prop in material) {
+//       if (material[prop] && material[prop].isTexture) {
+//         renderer.initTexture(material[prop]);
+//       }
+//     }
+//   }
+// });
+// HACK
+// const camera = new THREE.OrthographicCamera();
+// camera.position.set(0, 0, -50);
+// renderer.compile(scene, camera);
+// scene.traverse(obj => {
+//   if (!obj.material) {
+//     return;
+//   }
+//   const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+//   for (const material of materials) {
+//     for (const prop in material) {
+//       if (material[prop] && material[prop].isTexture) {
+//         renderer.initTexture(material[prop]);
+//       }
+//     }
+//   }
+// });
+console.timeEnd("A");

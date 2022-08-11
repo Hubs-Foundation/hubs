@@ -4,9 +4,6 @@ import { GLTFModel } from "../bit-components";
 import { loadModel as loadGLTFModel } from "../components/gltf-model-plus";
 import { addObject3DComponent, inflators } from "../utils/jsx-entity";
 
-// import cubeSrc from "../assets/models/polite_cube.glb";
-// console.warn("Cube src is", cubeSrc);
-
 export function* loadModel({ world, accessibleUrl }) {
   const { scene, animations } = yield loadGLTFModel(accessibleUrl, null, true, null, false);
   scene.userData.gltfSrc = accessibleUrl;
@@ -14,13 +11,9 @@ export function* loadModel({ world, accessibleUrl }) {
   scene.mixer = new THREE.AnimationMixer(scene);
 
   const swap = [];
-  // Inflate components
   scene.traverse(obj => {
-    // TODO: Which of these need "?"
     const components = obj.userData?.gltfExtensions?.MOZ_hubs_components || {};
-
     const eid = addEntity(world);
-
     Object.keys(components).forEach(name => {
       if (!inflators[name]) {
         // TODO: Throw error or warn?
@@ -28,14 +21,12 @@ export function* loadModel({ world, accessibleUrl }) {
         console.warn(`Failed to inflate unknown component called ${name}`);
         return;
       }
-
       inflators[name](world, eid, components[name]);
     });
-
     const replacement = world.eid2obj.get(eid);
     if (replacement) {
       if (obj.type !== "Object3D") {
-        throw new Error("todo write error message here");
+        throw new Error("Cannot replace node in scene graph; it is not an Object3D.");
       }
       swap.push([obj, replacement]);
     } else {

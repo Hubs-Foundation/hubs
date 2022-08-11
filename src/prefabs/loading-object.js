@@ -5,15 +5,11 @@ import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 
 // Pre load and upload loading object, and intentionally never "release" it from the cache.
 // TODO we should do this in a more explicit spot for "preloading" during the loading screen
-loadModel(loadingObjectSrc, null, true);
+let loadingObject = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
+loadModel(loadingObjectSrc, null, true).then(gltf => {
+  loadingObject = gltf.scene;
+});
 
-export function LoadingCubePrefab({ ref }) {
-  // TODO: Use loading object
-  return (
-    <entity
-      name="Loading Cube"
-      ref={ref}
-      object3D={new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial())}
-    />
-  );
+export function LoadingObject() {
+  return <entity name="Loading Object" object3D={loadingObject.clone()} />;
 }
