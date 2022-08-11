@@ -105,7 +105,9 @@ export class GainSystem {
           } else if (sourceType === SourceType.MEDIA_VIDEO) {
             el.components["media-video"].setupAudio();
           }
-          updateAudioSettings(el, APP.audios.get(el));
+          if (APP.audios.has(el)) {
+            updateAudioSettings(el, APP.audios.get(el));
+          }
         }
       }
     });
