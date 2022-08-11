@@ -195,12 +195,13 @@ export class AudioSystem {
   }
 
   removeAudio({ node }) {
-    let outputNode = node;
     if (isThreeAudio(node)) {
-      outputNode = node.gain;
-      node.disconnect();
+      node.gain.disconnect();
     }
-    outputNode.disconnect();
+    try {
+      node.disconnect();
+    // eslint-disable-next-line no-empty
+    } catch(e) {}
   }
 
   updatePrefs() {
