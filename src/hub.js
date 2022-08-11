@@ -29,7 +29,9 @@ import "./utils/aframe-overrides";
 // But we don't want to use THREE.Cache because
 // web browser cache should work well.
 // So we disable it here.
+import * as THREE from "three";
 THREE.Cache.enabled = false;
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -177,19 +179,13 @@ import "./systems/audio-gain-system";
 
 import "./gltf-component-mappings";
 
-import { App } from "./App";
+import { App } from "./app";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 window.APP = new App();
-window.APP.dialog = new DialogAdapter();
-window.APP.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD_ICONS: 2,
-  CURSOR: 3
-};
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
@@ -205,8 +201,6 @@ if (isEmbed && !qs.get("embed_token")) {
   // Should be covered by X-Frame-Options, but just in case.
   throw new Error("no embed token");
 }
-
-THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
