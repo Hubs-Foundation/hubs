@@ -471,7 +471,8 @@ export function createVideoOrAudioEl(type) {
   el.muted = isIOS;
   el.preload = "auto";
   el.crossOrigin = "anonymous";
-
+  // Audio should default to zero or it be heard before it is positioning and adjusted
+  el.volume = 0;
   return el;
 }
 

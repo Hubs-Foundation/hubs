@@ -8,6 +8,7 @@ import { createPlaneBufferGeometry, setMatrixWorld } from "../utils/three-utils"
 import { textureLoader } from "../utils/media-utils";
 
 import handRaisedIconSrc from "../assets/hud/hand-raised.png";
+import { getOwnerId } from "../utils/aframe-utils";
 
 const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
@@ -46,6 +47,7 @@ AFRAME.registerComponent("name-tag", {
     this.isOwner = false;
     this.isRecording = false;
     this.isHandRaised = false;
+    this.isConsumerPaused = false;
     this.volumeAvg = new MovingAverage(128);
     this.shouldBeVisible = true;
     this.size = new THREE.Vector3();
@@ -61,6 +63,7 @@ AFRAME.registerComponent("name-tag", {
     this.onModelLoaded = this.onModelLoaded.bind(this);
     this.onModelIkFirstTick = this.onModelIkFirstTick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
+    this.consumerPause = this.consumerPause.bind(this);
 
     this.nametag = this.el.object3D;
     this.nametagIdentityName = this.el.querySelector(".identityName").object3D;
@@ -107,11 +110,22 @@ AFRAME.registerComponent("name-tag", {
       this.el.sceneEl.object3D.add(this.avatarAABBHelper);
     }
 
+    getOwnerId(this.el).then(ownerId => {
+      this.ownerId = ownerId;
+    });
+
+
     this.onStateChanged();
+
+    APP.dialog.on("consumer_pause", this.consumerPause, this);
+    APP.dialog.on("consumer_resume", this.consumerResume, this);
   },
 
   remove() {
     if (DEBUG) this.el.sceneEl.object3D.remove(this.avatarAABBHelper);
+
+    APP.dialog.off("consumer_pause", this.consumerPause, this);
+    APP.dialog.off("consumer_resume", this.consumerResume, this);
   },
 
   tick: (() => {
@@ -124,7 +138,7 @@ AFRAME.registerComponent("name-tag", {
         return;
       }
       this.wasTalking = this.isTalking;
-      this.isTalking = this.audioAnalyzer.avatarIsTalking;
+      this.isTalking = this.audioAnalyzer.avatarIsTalking && !this.isConsumerPaused;
 
       if (this.shouldBeVisible) {
         this.nametag.visible = true;
@@ -339,5 +353,23 @@ AFRAME.registerComponent("name-tag", {
     this.avatarAABB.setFromObject(this.model);
     this.avatarAABB.getSize(this.avatarAABBSize);
     this.avatarAABB.getCenter(this.avatarAABBCenter);
+  },
+
+  consumerPause(peerId, kind) {
+    if (this.ownerId == peerId && kind === "audio") {
+      const { enableAudioClipping } = window.APP.store.state.preferences;
+      if (enableAudioClipping) {
+        this.isConsumerPaused = true;
+      }
+    }
+  },
+
+  consumerResume(peerId, kind) {
+    if (this.ownerId == peerId && kind === "audio") {
+      const { enableAudioClipping } = window.APP.store.state.preferences;
+      if (enableAudioClipping) {
+        this.isConsumerPaused = false;
+      }
+    }
   }
 });

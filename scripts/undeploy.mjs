@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from "fs";
 import ora from "ora";
+import fetch from "node-fetch";
 
 if (!existsSync(".ret.credentials")) {
   console.log("Not logged in, so cannot deploy. To log in, run npm run login.");

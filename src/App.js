@@ -40,6 +40,7 @@ export class App {
     this.clippingState = new Set();
     this.mutedState = new Set();
     this.isAudioPaused = new Set();
+    this.audioElements = new Set();
 
     this.world = createWorld();
 
