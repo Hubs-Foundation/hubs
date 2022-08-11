@@ -169,6 +169,7 @@ AFRAME.registerComponent("media-video", {
       disableLeftRightPanning = newDisableLeftRightPanning;
       audioPanningQuality = newAudioPanningQuality;
 
+      APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
       if (shouldRecreateAudio) {
         this.setupAudio();
       } else if (shouldUpdateAudioSettings) {
@@ -180,6 +181,8 @@ AFRAME.registerComponent("media-video", {
 
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
     this.el.addEventListener("audio_type_changed", this.setupAudio);
+
+    APP.audioElements.add(this.el);
   },
 
   play() {
@@ -342,8 +345,6 @@ AFRAME.registerComponent("media-video", {
 
   setupAudio() {
     this.removeAudio();
-
-    APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
     if (this.data.videoPaused) {
       APP.isAudioPaused.add(this.el);
@@ -832,11 +833,11 @@ AFRAME.registerComponent("media-video", {
     }
 
     APP.gainMultipliers.delete(this.el);
-    APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
 
     this.removeAudio();
+    APP.audioElements.delete(this.el);
 
     if (this.networkedEl) {
       this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
@@ -868,6 +869,7 @@ AFRAME.registerComponent("media-video", {
     if (this.audio) {
       this.el.removeObject3D("sound");
       this.audioSystem.removeAudio({ node: this.audio });
+      APP.audios.delete(this.el);
       delete this.audio;
     }
   }

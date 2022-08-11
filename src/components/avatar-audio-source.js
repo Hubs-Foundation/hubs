@@ -1,7 +1,7 @@
 import { SourceType, AudioType } from "./audio-params";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
+import { getOwnerId } from "../utils/aframe-utils";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
-const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
 
 // Chrome seems to require a MediaStream be attached to an AudioElement before AudioNodes work correctly
@@ -15,16 +15,6 @@ function createSilentAudioEl(stream) {
   audioEl.srcObject = stream;
   audioEl.volume = 0; // we don't actually want to hear audio from this element
   return audioEl;
-}
-
-async function getOwnerId(el) {
-  const networkedEl = await NAF.utils.getNetworkedEntity(el).catch(e => {
-    console.error(INFO_INIT_FAILED, INFO_NO_NETWORKED_EL, e);
-  });
-  if (!networkedEl) {
-    return null;
-  }
-  return networkedEl.components.networked.data.owner;
 }
 
 async function getMediaStream(el) {
@@ -52,7 +42,6 @@ AFRAME.registerComponent("avatar-audio-source", {
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
-    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
     const { audioType } = getCurrentAudioSettings(this.el);
     const audioListener = this.el.sceneEl.audioListener;
     let audio = this.el.getObject3D(this.attrName);
@@ -72,11 +61,11 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     this.destination = audio.context.createMediaStreamDestination();
     this.mediaStreamSource = audio.context.createMediaStreamSource(stream);
-    const destinationSource = audio.context.createMediaStreamSource(this.destination.stream);
+    this.destinationSource = audio.context.createMediaStreamSource(this.destination.stream);
     this.mediaStreamSource.connect(this.destination);
-    audio.setNodeSource(destinationSource);
+    audio.setNodeSource(this.destinationSource);
     this.el.setObject3D(this.attrName, audio);
-    this.el.emit("sound-source-set", { soundSource: destinationSource });
+    this.el.emit("sound-source-set", { soundSource: this.destinationSource });
 
     APP.audios.set(this.el, audio);
     updateAudioSettings(this.el, audio);
@@ -87,6 +76,15 @@ AFRAME.registerComponent("avatar-audio-source", {
     if (audio) {
       this.audioSystem.removeAudio({ node: audio });
       this.el.removeObject3D(this.attrName);
+      this.mediaStreamSource.disconnect();
+      this.mediaStreamSource = null;
+      this.destinationSource.disconnect();
+      this.destinationSource = null;
+      this.destination.disconnect();
+      this.destination = null;
+      this.el.emit("sound-source-unset");
+
+      APP.audios.delete(this.el);
     }
   },
 
@@ -94,9 +92,14 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.createAudio = this.createAudio.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
+
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
+    APP.dialog.on("consumer_pause", this._consumerPause, this);
+    APP.dialog.on("consumer_resume", this._consumerResume, this);
+
+    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
     this.createAudio();
 
     let { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;
@@ -121,6 +124,12 @@ AFRAME.registerComponent("avatar-audio-source", {
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
     this.el.addEventListener("audio_type_changed", this.createAudio);
+
+    getOwnerId(this.el).then(ownerId => {
+      this.ownerId = ownerId;
+    });
+
+    APP.audioElements.add(this.el);
   },
 
   async _onStreamUpdated(peerId, kind) {
@@ -129,33 +138,51 @@ AFRAME.registerComponent("avatar-audio-source", {
     const stream = audio.source.mediaStream;
     if (!stream) return;
 
-    getOwnerId(this.el).then(async ownerId => {
-      if (ownerId === peerId && kind === "audio") {
-        // The audio stream for this peer has been updated
-        const newStream = await APP.dialog.getMediaStream(peerId, "audio").catch(e => {
-          console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
-        });
+    if (this.ownerId === peerId && kind === "audio") {
+      // The audio stream for this peer has been updated
+      const newStream = await APP.dialog.getMediaStream(peerId, "audio").catch(e => {
+        console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerId}`, e);
+      });
 
-        if (newStream) {
-          this.mediaStreamSource.disconnect();
-          this.mediaStreamSource = audio.context.createMediaStreamSource(newStream);
-          this.mediaStreamSource.connect(this.destination);
-        }
+      if (newStream) {
+        this.mediaStreamSource.disconnect();
+        this.mediaStreamSource = audio.context.createMediaStreamSource(newStream);
+        this.mediaStreamSource.connect(this.destination);
       }
-    });
+    }
+  },
+
+  _consumerPause(peerId, kind) {
+    if (this.ownerId == peerId && kind === "audio") {
+      const { enableAudioClipping } = window.APP.store.state.preferences;
+      if (enableAudioClipping) {
+        this.removeAudio();
+      }
+    }
+  },
+
+  _consumerResume(peerId, kind) {
+    if (this.ownerId == peerId && kind === "audio") {
+      const { enableAudioClipping } = window.APP.store.state.preferences;
+      if (enableAudioClipping) {
+        this.createAudio();
+      }
+    }
   },
 
   remove: function() {
     APP.dialog.off("stream_updated", this._onStreamUpdated);
+    APP.dialog.off("consumer_pause", this._consumerPause);
+    APP.dialog.off("consumer_resume", this._consumerResume);
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
     this.el.removeEventListener("audio_type_changed", this.createAudio);
 
-    APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
 
     this.removeAudio();
+    APP.audioElements.delete(this.el);
   }
 });
 
@@ -291,6 +318,7 @@ AFRAME.registerComponent("audio-target", {
     }, 0);
     this.el.setAttribute("audio-zone-source");
 
+    APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     this.createAudio = this.createAudio.bind(this);
     this.el.addEventListener("audio_type_changed", this.createAudio);
   },
@@ -298,7 +326,6 @@ AFRAME.registerComponent("audio-target", {
   remove: function() {
     APP.supplementaryAttenuation.delete(this.el);
     APP.audios.delete(this.el);
-    APP.sourceType.delete(this.el);
 
     this.removeAudio();
 
@@ -309,7 +336,6 @@ AFRAME.registerComponent("audio-target", {
   createAudio: function() {
     this.removeAudio();
 
-    APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const audioListener = this.el.sceneEl.audioListener;
     const { audioType } = getCurrentAudioSettings(this.el);
     let audio = this.el.getObject3D(this.attrName);
@@ -354,6 +380,7 @@ AFRAME.registerComponent("audio-target", {
     if (audio) {
       this.audioSystem.removeAudio({ node: this.audio });
       this.el.removeObject3D(this.attrName);
+      APP.sourceType.delete(this.el);
     }
   }
 });

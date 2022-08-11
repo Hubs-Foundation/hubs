@@ -314,6 +314,15 @@ export class DialogAdapter extends EventEmitter {
             // Store in the map.
             this._consumers.set(consumer.id, consumer);
 
+            consumer.observer.on("pause", () => {
+              this.emitRTCEvent("info", "RTC", () => `Consumer paused`);
+              this.emit("consumer_pause", consumer.appData.peerId, consumer.kind);
+            });
+            consumer.observer.on("resume", () => {
+              this.emitRTCEvent("info", "RTC", () => `Consumer resumed`);
+              this.emit("consumer_resume", consumer.appData.peerId, consumer.kind);
+            });
+
             consumer.on("transportclose", () => {
               this.emitRTCEvent("error", "RTC", () => `Consumer transport closed`);
               this.removeConsumer(consumer.id);
@@ -431,6 +440,34 @@ export class DialogAdapter extends EventEmitter {
 
           this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
           this._consumerStats[consumerId]["score"] = score;
+          break;
+        }
+
+        case "consumerPaused": {
+          const { consumerId } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerPaused event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          consumer.pause();
+          break;
+        }
+
+        case "consumerResumed": {
+          const { consumerId } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerResumed event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          consumer.resume();
         }
       }
     });
@@ -791,6 +828,12 @@ export class DialogAdapter extends EventEmitter {
               this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
               this._micProducer = null;
             });
+            this._micProducer.observer.on("pause", () => {
+              this.emitRTCEvent("info", "RTC", () => `Mic producer paused`);
+            });
+            this._micProducer.observer.on("resume", () => {
+              this.emitRTCEvent("info", "RTC", () => `Mic producer resumed`);
+            });
 
             this.emit("mic-state-changed", { enabled: this.isMicEnabled });
           }
@@ -841,6 +884,12 @@ export class DialogAdapter extends EventEmitter {
       this.emitRTCEvent("info", "RTC", () => `Camera track ended`);
       this.disableCamera();
     });
+    this._cameraProducer.observer.on("pause", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera producer paused`);
+    });
+    this._cameraProducer.observer.on("resume", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera producer resumed`);
+    });
   }
 
   async disableCamera() {
@@ -881,6 +930,12 @@ export class DialogAdapter extends EventEmitter {
       this.emitRTCEvent("info", "RTC", () => `Desktop Share transport track ended`);
       this.disableShare();
     });
+    this._shareProducer.observer.on("pause", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera producer paused`);
+    });
+    this._shareProducer.observer.on("resume", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera producer resumed`);
+    });
   }
 
   async disableShare() {
@@ -914,11 +969,11 @@ export class DialogAdapter extends EventEmitter {
     }
 
     if (enabled && !this.isMicEnabled) {
-      this._micProducer.resume();
       this._protoo.request("resumeProducer", { producerId: this._micProducer.id });
+      this._micProducer.resume();
     } else if (!enabled && this.isMicEnabled) {
-      this._micProducer.pause();
       this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
+      this._micProducer.pause();
     }
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
@@ -926,6 +981,38 @@ export class DialogAdapter extends EventEmitter {
 
   get isMicEnabled() {
     return this._micProducer && !this._micProducer.paused;
+  }
+
+  pauseConsumer(clientId) {
+    const consumer = Array.from(this._consumers.values()).filter((consumer) => consumer.appData.peerId === clientId).pop();
+    if (consumer) {
+      this._protoo
+        .request("pauseConsumer", {
+          consumerId: consumer.id
+        })
+        .then(() => {
+          console.log("pauseConsumer");
+        })
+        .catch((err) => {
+          console.error("pauseConsumer", err);
+        });
+    }
+  }
+
+  resumeConsumer(clientId) {
+    const consumer = Array.from(this._consumers.values()).filter((consumer) => consumer.appData.peerId === clientId).pop();
+    if (consumer) {
+      this._protoo
+        .request("resumeConsumer", {
+          consumerId: consumer.id
+        })
+        .then(() => {
+          console.log("resumeConsumer");
+        })
+        .catch((err) => {
+          console.error("resumeConsumer", err);
+        });
+    }
   }
 
   cleanUpLocalState() {
