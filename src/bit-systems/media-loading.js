@@ -125,11 +125,13 @@ function* animateScale(world, media) {
 
 const coroutines = new Map();
 
-function removeLoadingCube(world, eid) {
-  if (coroutines.get(eid).proxy.done) {
-    removeEntity(world, world.eid2obj.get(eid).children[0].eid);
-  } else {
+function removeProxyObject(world, eid) {
+  if (!coroutines.get(eid).proxy.done) {
     coroutines.get(eid).proxy.canceled = true;
+  }
+
+  if (world.eid2obj.get(eid).children.length) {
+    removeEntity(world, world.eid2obj.get(eid).children[0].eid);
   }
 }
 
@@ -144,7 +146,9 @@ function add(world, child, parent) {
 
 function* maybeAddProxy(world, eid) {
   yield sleep(200);
-  add(world, renderAsEntity(world, LoadingObject()), eid);
+  const proxy = renderAsEntity(world, LoadingObject());
+  add(world, proxy, eid);
+  return proxy;
 }
 
 function* loadMedia(world, eid) {
@@ -154,11 +158,11 @@ function* loadMedia(world, eid) {
     const media = yield loaderForMediaType[options.mediaType]({ world, ...options });
     assignNetworkIds(world, media, eid);
     resizeAndRecenter(world, media, eid);
-    removeLoadingCube(world, eid);
+    removeProxyObject(world, eid);
     add(world, media, eid);
     return media;
   } catch (e) {
-    removeLoadingCube(world, eid);
+    removeProxyObject(world, eid);
     add(world, renderAsEntity(world, Cube()), eid);
     throw e;
   }
@@ -171,7 +175,7 @@ export function mediaLoadingSystem(world) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
     coroutines.set(eid, {
       load: createCoroutine(chain([() => loadMedia(world, eid), media => animateScale(world, media)])),
-      proxy: createCoroutine(maybeAddProxy(world, eid))
+      proxy: createCoroutine(chain([() => maybeAddProxy(world, eid), media => animateScale(world, media)]))
     });
   });
 
