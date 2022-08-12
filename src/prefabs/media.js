@@ -5,7 +5,7 @@ import { COLLISION_LAYERS } from "../constants";
 export function MediaPrefab({ src, resize, recenter }) {
   return (
     <entity
-      name="Interactable"
+      name="Interactable Media"
       networked
       networked-transform
       media-loader={{ src, resize, recenter }}

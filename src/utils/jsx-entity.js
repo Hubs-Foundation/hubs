@@ -28,6 +28,7 @@ import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
 import { inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
+import { inflateVideo } from "../inflators/video";
 import { inflateModel } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
@@ -163,7 +164,8 @@ export const inflators = {
   text: inflateText,
   model: inflateModel,
   grabbable: inflateGrabbable,
-  image: inflateImage
+  image: inflateImage,
+  video: inflateVideo
 };
 
 export function renderAsEntity(world, entityDef) {

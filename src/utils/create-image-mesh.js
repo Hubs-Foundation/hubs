@@ -40,7 +40,9 @@ export function create360ImageMesh({ texture }) {
 }
 
 export function createImageMesh({ texture, ratio }) {
-  const geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+  const width = Math.min(1.0, 1.0 / ratio);
+  const height = Math.min(1.0, ratio);
+  const geometry = createPlaneBufferGeometry(width, height, 1, 1, texture.flipY);
 
   const material = new THREE.MeshBasicMaterial();
   material.toneMapped == false;
@@ -66,11 +68,5 @@ export function createImageMesh({ texture, ratio }) {
   material.map = texture;
   material.needsUpdate = true;
 
-  const mesh = new THREE.Mesh(geometry, material);
-  const width = Math.min(1.0, 1.0 / ratio);
-  const height = Math.min(1.0, ratio);
-  mesh.scale.set(width, height, 1);
-  mesh.matrixNeedsUpdate = true;
-
-  return mesh;
+  return new THREE.Mesh(geometry, material);
 }

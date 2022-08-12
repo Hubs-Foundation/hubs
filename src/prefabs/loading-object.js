@@ -2,11 +2,12 @@
 import { createElementEntity } from "../utils/jsx-entity";
 import { loadModel } from "../components/gltf-model-plus";
 import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
+import { disposeNode } from "../utils/three-utils";
 
-// Pre load and upload loading object, and intentionally never "release" it from the cache.
-// TODO we should do this in a more explicit spot for "preloading" during the loading screen
+// TODO We should have an explicit "preload assets" step
 let loadingObject = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
 loadModel(loadingObjectSrc, null, true).then(gltf => {
+  disposeNode(loadingObject);
   loadingObject = gltf.scene;
 });
 

@@ -131,4 +131,10 @@ export const MediaImage = defineComponent({
   textureVersion: Types.ui8
 });
 
+export const MediaVideo = defineComponent({
+  textureSrc: Types.ui32,
+  textureVersion: Types.ui8,
+  autoPlay: Types.ui8
+});
+
 export const AnimationMixer = defineComponent();

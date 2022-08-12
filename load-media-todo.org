@@ -1,4 +1,3 @@
-
 * feature/load-media
 
 This PR adds a media-loading system to eventually replace the media-loader aframe component.
@@ -22,43 +21,112 @@ Load/spawn all the media types:
 ** TODO Add Object Menus
 ** TODO Write tests for coroutines
 
+* Stuff
+** Do work before render for object loading (upload textures to GPU, etc)
 
-* Scrap
-// Upload to GPU
+#+begin_src javascript
+Upload to GPU
 
-// const camera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
-// const renderer = AFRAME.scenes[0].renderer;
-// renderer.render(scene, camera);
+const camera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+const renderer = AFRAME.scenes[0].renderer;
+renderer.render(scene, camera);
 
-// renderer.compile(scene, camera);
-// scene.traverse(obj => {
-//   if (!obj.material) {
-//     return;
-//   }
-//   const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-//   for (const material of materials) {
-//     for (const prop in material) {
-//       if (material[prop] && material[prop].isTexture) {
-//         renderer.initTexture(material[prop]);
-//       }
-//     }
-//   }
-// });
+renderer.compile(scene, camera);
+scene.traverse(obj => {
+  if (!obj.material) {
+    return;
+  }
+  const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+  for (const material of materials) {
+    for (const prop in material) {
+      if (material[prop] && material[prop].isTexture) {
+        renderer.initTexture(material[prop]);
+      }
+    }
+  }
+});
 // HACK
-// const camera = new THREE.OrthographicCamera();
-// camera.position.set(0, 0, -50);
-// renderer.compile(scene, camera);
-// scene.traverse(obj => {
-//   if (!obj.material) {
-//     return;
-//   }
-//   const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-//   for (const material of materials) {
-//     for (const prop in material) {
-//       if (material[prop] && material[prop].isTexture) {
-//         renderer.initTexture(material[prop]);
-//       }
-//     }
-//   }
-// });
-console.timeEnd("A");
+const camera = new THREE.OrthographicCamera();
+camera.position.set(0, 0, -50);
+renderer.compile(scene, camera);
+scene.traverse(obj => {
+  if (!obj.material) {
+    return;
+  }
+  const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+  for (const material of materials) {
+    for (const prop in material) {
+      if (material[prop] && material[prop].isTexture) {
+        renderer.initTexture(material[prop]);
+      }
+    }
+  }
+});
+#+end_src
+
+** useTimeout
+*** Similar to useState in react...
+
+#+begin_src javascript
+
+let u;
+export const useState = (args) => {
+  u(args)
+}
+
+const state = {};
+function render(foo = SomeBannerInstance) {
+  let i=0;
+  u = function(initialState) {
+    if (!state[foo][i]) {
+        state[foo][i] = [initialState, (newState)=>{
+        state[foo][i][0] = newState;
+      }]
+    }
+
+    state[foo][i]
+  }
+  render(foo)
+}
+#+end_src
+
+*** Create a contextual, cancelable useTimeout
+
+#+begin_src javascript
+function* loadMedia(world, eid) {
+  const src = APP.getString(MediaLoader.src[eid]);
+  const loadingCubeTimeout = useTimeout(() => {
+    const proxy = renderAsEntity(world, LoadingObject());
+    add(world, proxy, eid);
+  }, 300);
+  try {
+    const options = yield optionsFor(src);
+    const media = yield loaderForMediaType[options.mediaType]({ world, ...options });
+    clearTimeout(loadingCubeTimeout);
+    assignNetworkIds(world, media, eid);
+    resizeAndRecenter(world, media, eid);
+    removeProxyObject(world, eid);
+    add(world, media, eid);
+    return media;
+  } catch (e) {
+    clearTimeout(loadingCubeTimeout);
+    removeProxyObject(world, eid);
+    add(world, renderAsEntity(world, Cube()), eid);
+    throw e;
+  }
+}
+#+end_src
+
+** Use typescript?
+https://github.com/mozilla/hubs/compare/master...add-typescript
+
+** Asset preloading
+
+#+begin_src
+import { preloads } from "../systems/hubs-systems";
+preloads.push(
+  loadModel(loadingObjectSrc, null, true).then(gltf => {
+    loadingObject = gltf.scene;
+  })
+);
+#+end_src

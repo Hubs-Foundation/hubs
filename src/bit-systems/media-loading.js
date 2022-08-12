@@ -175,7 +175,7 @@ export function mediaLoadingSystem(world) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
     coroutines.set(eid, {
       load: createCoroutine(chain([() => loadMedia(world, eid), media => animateScale(world, media)])),
-      proxy: createCoroutine(chain([() => maybeAddProxy(world, eid), media => animateScale(world, media)]))
+      proxy: createCoroutine(maybeAddProxy(world, eid))
     });
   });
 
