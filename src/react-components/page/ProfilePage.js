@@ -21,6 +21,7 @@ import Validator from '../../utilities/validator';
 import moment from 'moment';
 import Language from './languages/language';
 import { useTranslation } from 'react-i18next';
+import logo from "./../../assets/images/larchiveum_logo.png";
 
 toast.configure();
 
@@ -253,9 +254,11 @@ const Header = () => {
 
     return (
         <div className="row_1">
-            <a href="/"><span className="text_1">Larchiveum</span></a>
+            <a href="/" style={{float: 'left', height: '100%'}}>
+              <img src={logo} style={{height: '100%'}}/>
+            </a>
             { user ? (
-                <span className="display-name">
+                <span className="display-name" style={{float: 'right'}}>
                     <span className="nameA"> {user.displayName || user.email} </span> |{" "}
                     <a className="logout_btn" onClick={handleLogout}> Sign out </a>
                 </span>

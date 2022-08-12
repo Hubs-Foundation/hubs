@@ -6,6 +6,7 @@ import "../../utils/theme";
 import Store from "../../utilities/store";
 import StoreHub from "../../storage/store";
 import UserService from "../../utilities/apiServices/UserService";
+import logo from "./../../assets/images/larchiveum_logo.png";
 
 const store = new StoreHub();
 window.APP = { store };
@@ -79,9 +80,11 @@ function WarningVerify() {
 
     return (
         <div className='manager-page height-100vh'>
-        <div className="row_1">
-          <a href="/"><span className="text_1"> Larchiveum </span></a> 
-        </div>
+          <div className="row_1">
+            <a href="/" style={{float: 'left', height: '100%'}}>
+              <img src={logo} style={{height: '100%'}}/>
+            </a>
+          </div>
         <div className="row_2">
             <b className="warning-content">
                 <p className="margintop30vh"> You need to verify your account</p>

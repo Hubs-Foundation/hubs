@@ -10,6 +10,8 @@ import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import { Center } from "./react-components/layout/Center";
 import "./assets/larchiveum/manager.scss"
+import logo from "./assets/images/larchiveum_logo.png";
+
 registerTelemetry("/verify", "Hubs Verify Email Page");
 
 const store = new Store();
@@ -19,7 +21,9 @@ function Root() {
   return (
     <div className='manager-page  height-100vh'>
       <div className="row_1">
-        <a href="/"><span className="text_1"> Larchiveum </span></a> 
+        <a href="/" style={{float: 'left', height: '100%'}}>
+          <img src={logo} style={{height: '100%'}}/>
+        </a>
       </div>
       <div className="row_2 paddingtop25vh">
         <WrappedIntlProvider>

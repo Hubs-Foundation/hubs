@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Language from './languages/language';
 import { useTranslation } from 'react-i18next';
+import logo from "./../../assets/images/larchiveum_logo.png";
 // ICON
 import {
   MdPublic,
@@ -483,9 +484,11 @@ function Home() {
 
         <div className="background-homepage">
           <div className="row_1">
-            <a href="/"><span className="text_1"> Larchiveum </span></a> 
+            <a href="/" style={{float: 'left', height: '100%'}}>
+              <img src={logo} style={{height: '100%'}}/>
+            </a>
             {/* <img src={LogoCompany}/> */}
-            <UIAuth />
+            <UIAuth style={{float: 'right'}}/>
           </div>
           <div className="row_2">
             <div className="test">

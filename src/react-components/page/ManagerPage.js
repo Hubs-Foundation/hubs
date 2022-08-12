@@ -28,7 +28,8 @@ import { object } from "prop-types";
 import { ToggleInput } from "./components/ToggleInput";
 import Language from './languages/language';
 import { useTranslation } from 'react-i18next';
-import Datetime from "react-datetime"
+import Datetime from "react-datetime";
+import logo from "./../../assets/images/larchiveum_logo.png";
 
 registerTelemetry("/manager", "Hubs Home Page");
 
@@ -1648,10 +1649,12 @@ function ManagerHome() {
   
           <div className="manager-page">
             <div className="row_1">
-              <a href="/"><span className="text_1">Larchiveum</span></a>
-              <IAuth />
+              <a href="/" style={{float: 'left', height: '100%'}}>
+                <img src={logo} style={{height: '100%'}}/>
+              </a>
+              {/* <img src={LogoCompany}/> */}
+              <IAuth style={{float: 'right'}}/>
             </div>
-  
             <div className="row_2">
               {renderTabs()}
                 <AccountPermision />
