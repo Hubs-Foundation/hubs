@@ -8,7 +8,7 @@ import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExcla
 import { FormattedMessage, injectIntl, useIntl, defineMessages } from "react-intl";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
-import { themes } from "./styles/theme";
+import { themes } from "../utils/theme";
 import MediaDevicesManager from "../utils/media-devices-manager";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { Slider } from "./input/Slider";

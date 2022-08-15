@@ -1,29 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { getColorSchemePref } from "../../utils/get-color-scheme-pref";
 import configs from "../../utils/configs";
-
-let config = process.env.APP_CONFIG;
-
-// Storybook includes environment variables as a string
-// https://storybook.js.org/docs/react/configure/environment-variables
-if (!config && process.env.STORYBOOK_APP_CONFIG) {
-  config = JSON.parse(process.env.STORYBOOK_APP_CONFIG);
-}
-
-if (!config) {
-  config = window.APP_CONFIG;
-}
-
-if (config?.theme?.error) {
-  console.error(
-    `Custom themes failed to load.\n${config.theme.error}\nIf you are an admin, reconfigure your themes in the admin panel.`
-  );
-}
-
-export const defaultTheme = "default";
-
-export const themes = config?.theme?.themes || [];
+import { tryGetTheme, getCurrentTheme, registerDarkModeQuery } from "../../utils/theme";
 
 function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);
@@ -36,28 +14,11 @@ function useDarkMode() {
   );
 
   useEffect(() => {
-    const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const [darkModeQuery, removeListener] = registerDarkModeQuery(changeListener);
 
-    setDarkMode(darkmodeQuery.matches);
+    setDarkMode(darkModeQuery.matches);
 
-    // This is a workaround for old Safari.
-    // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use
-    // addListener() and removeListener() to observe media query lists.
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
-    // We may remove this workaround when no one will use Safari 13 or before.
-    if (darkmodeQuery.addEventListener) {
-      darkmodeQuery.addEventListener("change", changeListener);
-    } else {
-      darkmodeQuery.addListener(changeListener);
-    }
-
-    return () => {
-      if (darkmodeQuery.removeEventListener) {
-        darkmodeQuery.removeEventListener("change", changeListener);
-      } else {
-        darkmodeQuery.removeListener(changeListener);
-      }
-    };
+    return removeListener;
   }, [changeListener]);
 
   return darkMode;
@@ -67,26 +28,9 @@ export function useTheme(themeId) {
   const darkMode = useDarkMode();
 
   useEffect(() => {
-    // Themes can come from an external source. Ensure it is an array.
-    if (!Array.isArray(themes)) return;
+    const theme = tryGetTheme(themeId);
 
-    let theme;
-
-    if (themeId) {
-      theme = themes.find(t => t.id === themeId);
-    }
-
-    if (!theme && darkMode) {
-      theme = themes.find(t => t.darkModeDefault);
-    }
-
-    if (!theme) {
-      theme = themes.find(t => t.default);
-    }
-
-    if (!theme) {
-      return;
-    }
+    if (!theme) { return; }
 
     const variables = [];
 
@@ -107,17 +51,6 @@ export function useTheme(themeId) {
       document.head.removeChild(styleTag);
     };
   }, [themeId, darkMode]);
-}
-
-function getCurrentTheme() {
-  if (!Array.isArray(themes)) return;
-
-  const preferredThemeId = window.APP?.store?.state?.preferences?.theme;
-  if (preferredThemeId) {
-    return themes.find(t => t.id === preferredThemeId);
-  } else {
-    return getColorSchemePref();
-  }
 }
 
 function getAppLogo(darkMode) {
