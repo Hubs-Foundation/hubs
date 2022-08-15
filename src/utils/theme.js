@@ -160,8 +160,10 @@ function registerThemeChangedListener(listener) {
 }
 
 function removeThemeChangedListener(listener) {
-  themeChangedListeners.get(listener).removeListener();
-  themeChangedListeners.delete(listener);
+  if (themeChangedListeners.has(listener)) {
+    themeChangedListeners.get(listener).removeListener();
+    themeChangedListeners.delete(listener);
+  }
 }
 
 // window.APP.store may not be available when onThemeChanged is called, so we
@@ -176,11 +178,10 @@ function onThemeChanged(listener) {
   }
 
   return () => {
-    if (storeIsAvailable) {
-      removeThemeChangedListener(listener);
-    } else {
+    if (stashedThemeChangedListeners.has(listener)) {
       stashedThemeChangedListeners.delete(listener);
     }
+    removeThemeChangedListener(listener);
   }
 }
 
