@@ -22,7 +22,8 @@ import {
   RemoteHoverTarget,
   Rigidbody,
   SingleActionButton,
-  TextButton
+  TextButton,
+  NetworkedVideo
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -50,7 +51,7 @@ function isValidChild(child) {
 
 const reservedAttrs = ["position", "rotation", "scale", "visible", "name", "layers"];
 
-class Ref {
+export class Ref {
   constructor() {
     this.current = null;
   }
@@ -58,6 +59,12 @@ class Ref {
 export function createRef() {
   return new Ref();
 }
+
+/**
+ * @param {import("../app").HubsWorld}  world
+ * @param {Ref} ref
+ * @returns {number} eid
+ */
 export function resolveRef(world, ref) {
   if (ref.current === null) {
     ref.current = addEntity(world);
@@ -155,6 +162,7 @@ export const inflators = {
   networked: createDefaultInflator(Networked),
   "camera-tool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   "animation-mixer": createDefaultInflator(AnimationMixer),
+  "networked-video": createDefaultInflator(NetworkedVideo),
   "media-loader": inflateMediaLoader,
 
   // inflators that create Object3Ds

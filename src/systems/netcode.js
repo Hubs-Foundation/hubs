@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, Owned } from "../bit-components";
+import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo, Owned } from "../bit-components";
 import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
 import { MediaPrefab } from "../prefabs/media";
 import { defineNetworkSchema } from "../utils/bit-utils";
@@ -20,6 +20,10 @@ const prefabs = new Map(
   })
 );
 
+/**
+ * @param {import("../app").HubsWorld}  world
+ * @param {number} eid
+ */
 export function takeOwnership(world, eid) {
   // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame
   if (hasComponent(world, AEntity, eid)) {
@@ -73,7 +77,8 @@ const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
 const schemas = new Map([
   [NetworkedMediaFrame, defineNetworkSchema(NetworkedMediaFrame)],
-  [NetworkedTransform, defineNetworkSchema(NetworkedTransform)]
+  [NetworkedTransform, defineNetworkSchema(NetworkedTransform)],
+  [NetworkedVideo, defineNetworkSchema(NetworkedVideo)]
 ]);
 const networkableComponents = Array.from(schemas.keys());
 

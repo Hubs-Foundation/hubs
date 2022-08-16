@@ -12,7 +12,7 @@ import { textureLoader } from "../utils/media-utils";
 const buttonTexture = textureLoader.load(buttonSrc);
 
 // eslint-disable-next-line react/prop-types
-function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TYPES.DEFAULT, ...props }) {
+export function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TYPES.DEFAULT, ...props }) {
   const labelRef = createRef();
   return (
     <entity

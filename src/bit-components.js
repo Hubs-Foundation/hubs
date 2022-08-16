@@ -134,7 +134,11 @@ export const MediaImage = defineComponent({
 export const MediaVideo = defineComponent({
   textureSrc: Types.ui32,
   textureVersion: Types.ui8,
-  autoPlay: Types.ui8
+  autoPlay: Types.ui8,
+  playButtonRef: Types.eid
 });
 
 export const AnimationMixer = defineComponent();
+export const NetworkedVideo = defineComponent({
+  time: Types.f32
+});

@@ -33,7 +33,7 @@ declare global {
   const APP: App;
 }
 
-interface HubsWorld extends IWorld {
+export interface HubsWorld extends IWorld {
   scene: Scene;
   nameToComponent: {
     object3d: typeof Object3DTag;

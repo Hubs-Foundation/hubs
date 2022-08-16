@@ -1,10 +1,5 @@
-/** @jsx createElementEntity */
-import { createElementEntity } from "../utils/jsx-entity";
-import { renderAsEntity } from "../utils/jsx-entity";
-
 import { createVideoOrAudioEl } from "../utils/media-utils";
-
-async function loadVideoTexture({ src }) {
+export async function loadVideoTexture({ src }) {
   const videoEl = createVideoOrAudioEl("video");
   const texture = new THREE.VideoTexture(videoEl);
   texture.minFilter = THREE.LinearFilter;
@@ -54,23 +49,4 @@ async function loadVideoTexture({ src }) {
 
     poll();
   });
-}
-
-export function* loadVideo({ world, accessibleUrl, canonicalAudioUrl, contentType }) {
-  console.log(`Url is ${accessibleUrl}`);
-  const { texture, ratio } = yield loadVideoTexture({ src: accessibleUrl });
-
-  return renderAsEntity(
-    world,
-    <entity
-      video={{
-        texture,
-        textureSrc: accessibleUrl,
-        textureVersion: 1,
-        ratio,
-        autoPlay: true,
-        projection: "flat" /* TODO */
-      }}
-    />
-  );
 }
