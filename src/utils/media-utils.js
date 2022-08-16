@@ -570,7 +570,7 @@ export function fetchContentType(url) {
   return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 }
 
-export async function optionsFor(urlString) {
+export async function fetchUrlData(urlString) {
   const url = parseURL(urlString);
   let canonicalUrl = url.href;
   let canonicalAudioUrl = null; // set non-null only if audio track is separated from video track (eg. 360 video)

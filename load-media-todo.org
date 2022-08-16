@@ -100,7 +100,7 @@ function* loadMedia(world, eid) {
     add(world, proxy, eid);
   }, 300);
   try {
-    const options = yield optionsFor(src);
+    const options = yield fetchUrlData(src);
     const media = yield loaderForMediaType[options.mediaType]({ world, ...options });
     clearTimeout(loadingCubeTimeout);
     assignNetworkIds(world, media, eid);

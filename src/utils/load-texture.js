@@ -3,6 +3,7 @@ import { errorTexture } from "../utils/error-texture";
 import { createImageTexture } from "../utils/media-utils";
 import { createBasisTexture, createKTX2Texture } from "../utils/create-basis-texture";
 import { createGIFTexture } from "../utils/gif-texture";
+import { makeCancelable } from "./coroutine";
 
 const textureCache = new TextureCache();
 const inflightTextures = new Map();
@@ -56,13 +57,11 @@ export async function releaseTexture({ src, version }) {
 }
 
 export function loadTextureCancellable(args) {
-  const loadPromise = loadTexture(args);
-  return {
-    value: loadPromise,
-    onCancel: () => {
-      loadPromise.then(() => {
-        releaseTexture(args);
-      });
-    }
-  };
+  const p = loadTexture(args);
+  return makeCancelable(() => {
+    // TODO: Actually cancel the in-flight texture loading
+    p.then(() => {
+      releaseTexture(args);
+    });
+  }, p);
 }

@@ -1,143 +1,157 @@
-function isCancellable(c) {
+let timers;
+
+class CoroutineTimerError extends Error {
+  constructor() {
+    super();
+    this.name = "CoroutineTimerError";
+    this.message = "Cannot call coroutine timer functions outside of coroutines.";
+  }
+}
+
+const nextTimerId = (function () {
+  let _i = 0;
+  return function () {
+    return _i++;
+  };
+})();
+
+export function clear(handle) {
+  if (!timers) {
+    throw new CoroutineTimerError();
+  }
+  return timers.delete(handle);
+}
+
+export function timeout(fn, ms) {
+  if (!timers) {
+    throw new CoroutineTimerError();
+  }
+  // TODO: Use world time?
+  const now = performance.now();
+  const handle = nextTimerId();
+  timers.set(handle, { repeat: false, fn, ms, exp: now + ms });
+  return handle;
+}
+
+export function interval(fn, ms) {
+  if (!timers) {
+    throw new CoroutineTimerError();
+  }
+  const now = performance.now();
+  const handle = nextTimerId();
+  timers.set(handle, { repeat: true, fn, ms, exp: now + ms });
+  return handle;
+}
+
+function isCancelable(c) {
   return !!c.onCancel;
+}
+
+// The thing that has an "onCancel" handler fn.
+export function makeCancelable(fn, obj = {}) {
+  obj.onCancel = fn;
+  return obj;
+}
+
+// The thing whose "cancel" function you can call
+export function cancelable(iter, signal) {
+  const cancelFns = [];
+  const rollback = () => {
+    for (let i = cancelFns.length - 1; i >= 0; i--) {
+      cancelFns[i]();
+    }
+  };
+
+  let canceled = false;
+  signal.cancel = () => {
+    rollback();
+    canceled = true;
+    signal.cancel = null;
+  };
+
+  let nextValue;
+  return (function* () {
+    while (true) {
+      if (canceled) {
+        return { canceled: true };
+      }
+      try {
+        const { value, done } = iter.next(nextValue);
+        if (done) {
+          signal.cancel = null;
+          return { value, canceled: false };
+        } else {
+          if (isCancelable(value)) {
+            cancelFns.push(value.onCancel);
+          }
+          nextValue = yield value;
+        }
+      } catch (e) {
+        rollback();
+        throw e;
+      }
+    }
+  })();
 }
 
 function isPromise(p) {
   return p.__proto__ === Promise.prototype;
 }
 
-function isGenerator(fn) {
-  return fn.__proto__.__proto__.toString() === "[object Generator]";
-}
+export function coroutine(iter) {
+  let waiting = false;
+  let doThrow = false;
+  let nextValue;
 
-export function createCoroutine(generator) {
-  return {
-    waiting: false,
-    done: false,
-    cancelFns: [],
-    value: null,
-    stack: [generator]
-  };
-}
+  const _timers = new Map();
 
-export function runCoroutine(c) {
-  if (c.done || c.stack.length === 0) {
-    throw new Error("Called coroutine that was already done.");
-  }
+  const i = (function* () {
+    while (true) {
+      const now = performance.now();
+      _timers.forEach(({ repeat, fn, ms, exp }, handle) => {
+        if (now > exp) {
+          fn();
+          if (repeat) {
+            // TODO: Do not create new object every time
+            _timers.set(handle, { repeat, fn, exp: exp + ms, ms });
+          } else {
+            _timers.delete(handle);
+          }
+        }
+      });
 
-  while (true) {
-    if (c.canceled) {
-      for (let i = c.cancelFns.length - 1; i >= 0; i--) {
-        c.cancelFns[i]();
+      if (waiting) {
+        yield;
+        continue;
       }
-      c.done = true;
-      if (c.throw) {
-        // We are canceling due to an uncaught error.
-        // Do not re-throw, but log the error to the
-        // console so that it's not lost.
-        console.error(c.value);
+      timers = _timers;
+      const { value, done } = doThrow ? iter.throw(nextValue) : iter.next(nextValue);
+      timers = null;
+      if (done) {
+        return value;
       }
-      return c;
-    }
 
-    if (c.waiting) return c;
-
-    if (c.stack.length === 0) {
-      c.done = true;
-      return c;
-    }
-
-    let next;
-    try {
-      if (c.throw) {
-        c.throw = false;
-        next = c.stack[c.stack.length - 1].throw(c.value);
+      if (isPromise(value)) {
+        waiting = true;
+        value
+          .then(v => {
+            waiting = false;
+            nextValue = v;
+          })
+          .catch(e => {
+            waiting = false;
+            doThrow = true;
+            nextValue = e;
+          });
+      } else if (isCancelable(value)) {
+        nextValue = value;
       } else {
-        next = c.stack[c.stack.length - 1].next(c.value);
+        console.error(`Coroutine yielded value that was not a promise or cancelable.`, c, c.iter);
+        throw new Error(`Coroutine yielded value that was not a promise or cancelable.`);
       }
-    } catch (e) {
-      // Generator throws
-      // console.error(e);
-      c.waiting = false;
-      c.value = e;
-      c.throw = true;
-      if (c.stack.length === 1) {
-        c.canceled = true;
-      } else {
-        c.stack.pop();
-      }
-      return c;
     }
-
-    let value = next.value;
-
-    if (value && isCancellable(value)) {
-      c.cancelFns.push(value.onCancel);
-      value = value.value;
-    }
-
-    if (next.done) {
-      c.stack.pop();
-      c.value = value;
-      continue;
-    }
-
-    if (value && isPromise(value)) {
-      c.waiting = true;
-      value
-        .then(v => {
-          c.waiting = false;
-          c.value = v;
-          return v;
-        })
-        .catch(e => {
-          c.waiting = false;
-          c.throw = true;
-          c.value = e;
-        });
-      return c;
-    } else if (value && isGenerator(value)) {
-      c.stack.push(value);
-    } else {
-      c.value = value;
-    }
-  }
-}
-
-// Run multiple coroutines in a sequence.
-// Canceling the chain will cancel only the current coroutine.
-export function* chain(generators) {
-  let c;
-  const onCancel = () => {
-    if (c) {
-      // console.log("Chain canceled!");
-      c.canceled = true;
-    }
+  })();
+  return function () {
+    return i.next();
   };
-  // Yield a cancelable that can cancel the active coroutine
-  yield { value: null, onCancel };
-  c = createCoroutine(generators[0]());
-  // console.log("First coroutine is for...", c.stack[0]);
-  let i = 0;
-  while (true) {
-    runCoroutine(c);
-    if (c.done) {
-      if (c.canceled) {
-        // console.warn("Early exit from chain.");
-        break;
-      }
-
-      if (i === generators.length - 1) {
-        // console.log("Normal exit from chain.");
-        break;
-      }
-
-      i += 1;
-      c = createCoroutine(generators[i](c.value));
-      // console.log("Next coroutine is for...", c.stack[0]);
-    } else {
-      yield Promise.resolve();
-    }
-  }
-  // console.log("Done!");
 }

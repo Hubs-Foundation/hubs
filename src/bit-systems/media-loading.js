@@ -1,17 +1,18 @@
 import { MEDIA_TYPE } from "../utils/media-type";
 import { Cube } from "../prefabs/cube";
-import { sleep } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { loadImage } from "../utils/load-image";
 import { loadVideo } from "../utils/load-video";
 import { loadModel } from "../utils/load-model";
-import { optionsFor } from "../utils/media-utils";
-import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeEntity } from "bitecs";
+import { fetchUrlData } from "../utils/media-utils";
+import { defineQuery, enterQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked } from "../bit-components";
-import { createCoroutine, runCoroutine, chain } from "../utils/coroutine";
+import { cancelable, coroutine, makeCancelable } from "../utils/coroutine";
 import { takeOwnership } from "../systems/netcode";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { LoadingObject } from "../prefabs/loading-object";
+import { timeout, clear } from "../utils/coroutine";
+import { sleep } from "../utils/async-utils";
 // import { errorTexture } from "../utils/error-texture";
 // import { Image } from "../prefabs/image";
 
@@ -112,7 +113,7 @@ function* animateScale(world, media) {
   onAnimate([startPosition, startScale]);
   yield Promise.resolve();
 
-  yield animate({
+  yield* animate({
     properties: [
       [startPosition, endPosition],
       [startScale, endScale]
@@ -123,14 +124,9 @@ function* animateScale(world, media) {
   });
 }
 
-const coroutines = new Map();
-
-function removeProxyObject(world, eid) {
-  if (!coroutines.get(eid).proxy.done) {
-    coroutines.get(eid).proxy.canceled = true;
-  }
-
+function removeLoadingObject(world, eid) {
   if (world.eid2obj.get(eid).children.length) {
+    // TODO: Make sure this is actually the correct object...
     removeEntity(world, world.eid2obj.get(eid).children[0].eid);
   }
 }
@@ -144,57 +140,64 @@ function add(world, child, parent) {
   childObj.matrixNeedsUpdate = true;
 }
 
-function* maybeAddProxy(world, eid) {
-  yield sleep(200);
-  const proxy = renderAsEntity(world, LoadingObject());
-  add(world, proxy, eid);
-  return proxy;
-}
-
-function* loadMedia(world, eid) {
-  const src = APP.getString(MediaLoader.src[eid]);
-  try {
-    const options = yield optionsFor(src);
-    const media = yield loaderForMediaType[options.mediaType]({ world, ...options });
+function* loadAndAnimateMedia(world, eid, signal) {
+  const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
+  if (!canceled) {
+    removeLoadingObject(world, eid);
     assignNetworkIds(world, media, eid);
     resizeAndRecenter(world, media, eid);
-    removeProxyObject(world, eid);
     add(world, media, eid);
-    return media;
-  } catch (e) {
-    removeProxyObject(world, eid);
-    add(world, renderAsEntity(world, Cube()), eid);
-    throw e;
+    yield* animateScale(world, media);
   }
 }
 
+function* loadMedia(world, eid) {
+  const addLoadingObjectTimeout = timeout(() => {
+    add(world, renderAsEntity(world, LoadingObject()), eid);
+  }, 400);
+  yield makeCancelable(() => removeLoadingObject(world, eid));
+  const src = APP.getString(MediaLoader.src[eid]);
+  let media;
+  try {
+    const urlData = yield fetchUrlData(src);
+    media = yield* loaderForMediaType[urlData.mediaType]({ world, ...urlData });
+  } catch (e) {
+    media = renderAsEntity(world, Cube()); // TODO: Use error image
+    console.error(e);
+  }
+  clear(addLoadingObjectTimeout);
+  return media;
+}
+
+const jobs = new Set();
+const signals = new Map();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
 export function mediaLoadingSystem(world) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
-    coroutines.set(eid, {
-      load: createCoroutine(chain([() => loadMedia(world, eid), media => animateScale(world, media)])),
-      proxy: createCoroutine(maybeAddProxy(world, eid))
-    });
+    const signal = {};
+    signals.set(eid, signal);
+    jobs.add(coroutine(loadAndAnimateMedia(world, eid, signal)));
+
+    // TODO NOCOMMIT
+    window.$cancel = () => {
+      console.warn("Removing eid", eid);
+      removeEntity(world, eid);
+    };
   });
 
   mediaLoaderExitQuery(world).forEach(function (eid) {
-    if (coroutines.has(eid) && !entityExists(world, eid)) {
-      coroutines.get(eid).load.canceled = true;
-      coroutines.get(eid).proxy.canceled = true;
+    let signal = signals.get(eid);
+    if (signal.cancel) {
+      signal.cancel();
     }
+    signals.delete(eid);
   });
 
-  coroutines.forEach(({ proxy, load }, eid) => {
-    if (!proxy.done) {
-      runCoroutine(proxy);
-    }
-    if (!load.done) {
-      runCoroutine(load);
-    }
-    if (proxy.done && load.done) {
-      coroutines.delete(eid);
+  jobs.forEach(c => {
+    if (c().done) {
+      jobs.delete(c);
     }
   });
 }
