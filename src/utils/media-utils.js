@@ -570,6 +570,20 @@ export function fetchContentType(url) {
   return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
 }
 
+export function parseURL(text) {
+  let url;
+  try {
+    url = new URL(text);
+  } catch (e) {
+    try {
+      url = new URL(`https://${text}`);
+    } catch (e) {
+      return null;
+    }
+  }
+  return url;
+}
+
 export async function fetchUrlData(urlString) {
   const url = parseURL(urlString);
   let canonicalUrl = url.href;
@@ -624,18 +638,4 @@ export async function fetchUrlData(urlString) {
   options.mediaType = mediaTypeFor(options);
 
   return options;
-}
-
-export function parseURL(text) {
-  let url;
-  try {
-    url = new URL(text);
-  } catch (e) {
-    try {
-      url = new URL(`https://${text}`);
-    } catch (e) {
-      return null;
-    }
-  }
-  return url;
 }

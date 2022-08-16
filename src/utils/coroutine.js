@@ -63,10 +63,10 @@ export function cancelable(iter, signal) {
   };
 
   let canceled = false;
-  signal.cancel = () => {
+  signal.onabort = () => {
     rollback();
     canceled = true;
-    signal.cancel = null;
+    signal.onabort = null;
   };
 
   let nextValue;
@@ -78,7 +78,7 @@ export function cancelable(iter, signal) {
       try {
         const { value, done } = iter.next(nextValue);
         if (done) {
-          signal.cancel = null;
+          signal.onabort = null;
           return { value, canceled: false };
         } else {
           if (isCancelable(value)) {
@@ -146,7 +146,7 @@ export function coroutine(iter) {
       } else if (isCancelable(value)) {
         nextValue = value;
       } else {
-        console.error(`Coroutine yielded value that was not a promise or cancelable.`, c, c.iter);
+        console.error(`Coroutine yielded value that was not a promise or cancelable.`, value, iter);
         throw new Error(`Coroutine yielded value that was not a promise or cancelable.`);
       }
     }

@@ -1,5 +1,6 @@
 import { MEDIA_TYPE } from "../utils/media-type";
-import { Cube } from "../prefabs/cube";
+import { LoadingObject } from "../prefabs/loading-object";
+import { ErrorObject } from "../prefabs/error-object";
 import { easeOutQuadratic } from "../utils/easing";
 import { loadImage } from "../utils/load-image";
 import { loadVideo } from "../utils/load-video";
@@ -7,14 +8,9 @@ import { loadModel } from "../utils/load-model";
 import { fetchUrlData } from "../utils/media-utils";
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked } from "../bit-components";
-import { cancelable, coroutine, makeCancelable } from "../utils/coroutine";
+import { timeout, clear, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
 import { takeOwnership } from "../systems/netcode";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { LoadingObject } from "../prefabs/loading-object";
-import { timeout, clear } from "../utils/coroutine";
-import { sleep } from "../utils/async-utils";
-// import { errorTexture } from "../utils/error-texture";
-// import { Image } from "../prefabs/image";
 
 const loaderForMediaType = {
   [MEDIA_TYPE.IMAGE]: loadImage,
@@ -26,6 +22,22 @@ export const MEDIA_LOADER_FLAGS = {
   RECENTER: 1 << 0,
   RESIZE: 1 << 1
 };
+
+function assignNetworkIds(world, mediaEid, mediaLoaderEid) {
+  const rootNid = APP.getString(Networked.id[mediaLoaderEid]);
+  let i = 0;
+  world.eid2obj.get(mediaEid).traverse(function (obj) {
+    if (obj.eid && hasComponent(world, Networked, obj.eid)) {
+      const eid = obj.eid;
+      Networked.id[eid] = APP.getSid(`${rootNid}.${i}`);
+      APP.world.nid2eid.set(Networked.id[eid], eid);
+      Networked.creator[eid] = Networked.creator[mediaLoaderEid];
+      Networked.owner[eid] = Networked.owner[mediaLoaderEid];
+      if (NAF.clientId === Networked.owner[mediaLoaderEid]) takeOwnership(world, eid);
+      i += 1;
+    }
+  });
+}
 
 function resizeAndRecenter(world, media, eid) {
   const resize = MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RESIZE;
@@ -52,22 +64,6 @@ function resizeAndRecenter(world, media, eid) {
     mediaObj.position.copy(center).multiplyScalar(-1 * scale);
     mediaObj.matrixNeedsUpdate = true;
   }
-}
-
-function assignNetworkIds(world, mediaEid, mediaLoaderEid) {
-  const rootNid = APP.getString(Networked.id[mediaLoaderEid]);
-  let i = 0;
-  world.eid2obj.get(mediaEid).traverse(function (obj) {
-    if (obj.eid && hasComponent(world, Networked, obj.eid)) {
-      const eid = obj.eid;
-      Networked.id[eid] = APP.getSid(`${rootNid}.${i}`);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = Networked.creator[mediaLoaderEid];
-      Networked.owner[eid] = Networked.owner[mediaLoaderEid];
-      if (NAF.clientId === Networked.owner[mediaLoaderEid]) takeOwnership(world, eid);
-      i += 1;
-    }
-  });
 }
 
 function* animate({ properties, duration, easing, fn }) {
@@ -140,17 +136,6 @@ function add(world, child, parent) {
   childObj.matrixNeedsUpdate = true;
 }
 
-function* loadAndAnimateMedia(world, eid, signal) {
-  const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
-  if (!canceled) {
-    removeLoadingObject(world, eid);
-    assignNetworkIds(world, media, eid);
-    resizeAndRecenter(world, media, eid);
-    add(world, media, eid);
-    yield* animateScale(world, media);
-  }
-}
-
 function* loadMedia(world, eid) {
   const addLoadingObjectTimeout = timeout(() => {
     add(world, renderAsEntity(world, LoadingObject()), eid);
@@ -162,23 +147,34 @@ function* loadMedia(world, eid) {
     const urlData = yield fetchUrlData(src);
     media = yield* loaderForMediaType[urlData.mediaType]({ world, ...urlData });
   } catch (e) {
-    media = renderAsEntity(world, Cube()); // TODO: Use error image
     console.error(e);
+    media = renderAsEntity(world, ErrorObject());
   }
   clear(addLoadingObjectTimeout);
   return media;
 }
 
+function* loadAndAnimateMedia(world, eid, signal) {
+  const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
+  if (!canceled) {
+    removeLoadingObject(world, eid);
+    assignNetworkIds(world, media, eid);
+    resizeAndRecenter(world, media, eid);
+    add(world, media, eid);
+    yield* animateScale(world, media);
+  }
+}
+
 const jobs = new Set();
-const signals = new Map();
+const abortControllers = new Map();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
 export function mediaLoadingSystem(world) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
-    const signal = {};
-    signals.set(eid, signal);
-    jobs.add(coroutine(loadAndAnimateMedia(world, eid, signal)));
+    const ac = new AbortController();
+    abortControllers.set(eid, ac);
+    jobs.add(coroutine(loadAndAnimateMedia(world, eid, ac.signal)));
 
     // TODO NOCOMMIT
     window.$cancel = () => {
@@ -188,11 +184,9 @@ export function mediaLoadingSystem(world) {
   });
 
   mediaLoaderExitQuery(world).forEach(function (eid) {
-    let signal = signals.get(eid);
-    if (signal.cancel) {
-      signal.cancel();
-    }
-    signals.delete(eid);
+    const ac = abortControllers.get(eid);
+    ac.abort();
+    abortControllers.delete(eid);
   });
 
   jobs.forEach(c => {

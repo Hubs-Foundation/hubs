@@ -59,7 +59,7 @@ export async function releaseTexture({ src, version }) {
 export function loadTextureCancellable(args) {
   const p = loadTexture(args);
   return makeCancelable(() => {
-    // TODO: Actually cancel the in-flight texture loading
+    // TODO: Pass in an AbortSignal through to loadTexture so that we can cancel inflight requests.
     p.then(() => {
       releaseTexture(args);
     });
