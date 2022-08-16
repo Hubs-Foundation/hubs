@@ -1,0 +1,11 @@
+on:
+
+jobs:
+  slackmessage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: someimportantcompany/github-actions-slack-message@v1
+        with:
+          channel: ${{env.SLACK_CHANNEL}}
+          bot-token: ${{secrets.SLACK_BOT_TOKEN}}
+          text: New github discussion post
