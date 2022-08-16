@@ -312,7 +312,8 @@ module.exports = async (env, argv) => {
         fs: false,
         stream: require.resolve("stream-browserify"),
         path: require.resolve("path-browserify")
-      }
+      },
+      extensions: [".ts", ".tsx", ".js", ".jsx"]
     },
     entry: {
       support: path.join(__dirname, "src", "support.js"),
@@ -481,6 +482,11 @@ module.exports = async (env, argv) => {
           test: /\.js$/,
           include: [path.resolve(__dirname, "node_modules", "pdfjs-dist")],
           loader: "babel-loader"
+        },
+        {
+          test: /\.tsx?$/,
+          include: [path.resolve(__dirname, "src")],
+          loader: "ts-loader"
         },
         {
           test: /\.(scss|css)$/,
