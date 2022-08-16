@@ -140,5 +140,12 @@ export const MediaVideo = defineComponent({
 
 export const AnimationMixer = defineComponent();
 export const NetworkedVideo = defineComponent({
-  time: Types.f32
+  time: Types.f32,
+  flags: Types.ui8
+});
+
+export const VideoMenuButton = defineComponent({});
+export const VideoMenu = defineComponent({
+  videoRef: Types.eid,
+  playButtonRef: Types.eid
 });

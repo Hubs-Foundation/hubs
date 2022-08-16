@@ -2,14 +2,14 @@
 import { createElementEntity } from "../utils/jsx-entity";
 import { loadTextureCancellable } from "../utils/load-texture";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { IWorld } from "bitecs";
+import { HubsWorld } from "../app";
 
 export function* loadImage({
   world,
   accessibleUrl,
   contentType
 }: {
-  world: IWorld;
+  world: HubsWorld;
   accessibleUrl: string;
   contentType: string;
 }) {

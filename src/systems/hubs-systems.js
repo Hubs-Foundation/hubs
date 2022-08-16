@@ -49,6 +49,7 @@ import { mediaLoadingSystem } from "../bit-systems/media-loading";
 // import { holdableButtonSystem } from "./holdable-button-system";
 import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
+import { videoMenuSystem } from "../bit-systems/video-menu-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -150,6 +151,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.spriteSystem.tick(t, dt);
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
+    videoMenuSystem(world);
     mediaVideoSystem(world);
     mediaFramesSystem(world);
     this.audioZonesSystem.tick(this.el);

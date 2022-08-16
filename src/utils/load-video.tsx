@@ -1,17 +1,15 @@
 /** @jsx createElementEntity */
-import { createElementEntity, createRef } from "../utils/jsx-entity";
-import { IWorld } from "bitecs";
+import { createElementEntity } from "../utils/jsx-entity";
 import { VideoTexture } from "three";
-/* import { Button } from "../prefabs/camera-tool"; */
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadVideoTexture } from "../utils/load-video-texture";
-import { Button } from "../prefabs/camera-tool";
+import { HubsWorld } from "../app";
 
 export function* loadVideo({
   world,
   accessibleUrl
 }: {
-  world: IWorld;
+  world: HubsWorld;
   accessibleUrl: string;
   canonicalAudioUrl: string;
   contentType: string;
@@ -19,24 +17,21 @@ export function* loadVideo({
   console.log(`Url is ${accessibleUrl}`);
   const { texture, ratio }: { texture: VideoTexture; ratio: number } = yield loadVideoTexture({ src: accessibleUrl });
 
-  const playButtonRef = createRef();
-  const uiZ = 0.1;
   return renderAsEntity(
     world,
     <entity
       networked
-      networked-video={{ time: 0.0 }}
+      networked-video
+      cursor-raycastable
+      remote-hover-target
       video={{
         texture,
         textureSrc: accessibleUrl,
         textureVersion: 1,
         ratio,
         autoPlay: true,
-        projection: "flat",
-        playButtonRef
+        projection: "flat"
       }}
-    >
-      <Button ref={playButtonRef} position={[0, 0, uiZ]} width={0.4} height={0.4} text={"Play"} />
-    </entity>
+    ></entity>
   );
 }

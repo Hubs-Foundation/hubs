@@ -1,10 +1,9 @@
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { Interacted, MediaVideo, NetworkedVideo, Owned } from "../bit-components";
-import { takeOwnership } from "../systems/netcode";
+import { MediaVideo, NetworkedVideo, Owned } from "../bit-components";
 
-function clicked(eid: number) {
-  return hasComponent(APP.world, Interacted, eid);
+enum Flags {
+  PAUSED = 1 << 0
 }
 
 const OUT_OF_SYNC_SEC = 5;
@@ -32,26 +31,16 @@ export function mediaVideoSystem(world: HubsWorld) {
     const video = (world.eid2obj.get(eid) as any).material.map.image as HTMLVideoElement;
     if (hasComponent(world, Owned, eid)) {
       NetworkedVideo.time[eid] = video.currentTime;
+      let flags = 0;
+      flags |= video.paused ? Flags.PAUSED : 0;
+      NetworkedVideo.flags[eid] = flags;
     } else {
       if (Math.abs(NetworkedVideo.time[eid] - video.currentTime) > OUT_OF_SYNC_SEC) {
         video.currentTime = NetworkedVideo.time[eid];
       }
+      if (!!(NetworkedVideo.flags[eid] & Flags.PAUSED) !== video.paused) {
+        video.paused ? video.play() : video.pause();
+      }
     }
-
-    if (clicked(MediaVideo.playButtonRef[eid])) {
-      takeOwnership(world, eid);
-      video.paused ? video.play() : video.pause();
-    }
-
-    // TODO :
-    // - seek forward
-    // - seek back
-    // - drag seek
-    // - volume up
-    // - volume down
-    // - drag volume
-    // - volume (mousewheel)
-    //
-    //  Separate the "active video menu" from this object
   });
 }

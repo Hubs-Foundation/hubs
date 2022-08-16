@@ -1,13 +1,9 @@
 import { create360ImageMesh, createImageMesh } from "../utils/create-image-mesh";
 import { addComponent } from "bitecs";
-import { addObject3DComponent, resolveRef } from "../utils/jsx-entity";
+import { addObject3DComponent } from "../utils/jsx-entity";
 import { MediaVideo } from "../bit-components";
 
-export function inflateVideo(
-  world,
-  eid,
-  { texture, textureSrc, textureVersion, ratio, projection, autoPlay, playButtonRef }
-) {
+export function inflateVideo(world, eid, { texture, textureSrc, textureVersion, ratio, projection, autoPlay }) {
   const mesh =
     projection === "360-equirectangular" ? create360ImageMesh({ texture, ratio }) : createImageMesh({ texture, ratio });
   addObject3DComponent(world, eid, mesh);
@@ -15,6 +11,5 @@ export function inflateVideo(
   MediaVideo.textureSrc[eid] = APP.getSid(textureSrc);
   MediaVideo.textureVersion[eid] = textureVersion;
   MediaVideo.autoPlay[eid] = autoPlay ? 1 : 0;
-  MediaVideo.playButtonRef[eid] = resolveRef(world, playButtonRef);
   return eid;
 }

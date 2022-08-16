@@ -18,13 +18,13 @@ declare namespace createElementEntity.JSX {
       ratio: number;
       projection: "flat" | "360-equirectangular";
       autoPlay: boolean;
-      playButtonRef: any; // TODO Learn typescript
     };
     networked?: any;
-    "networked-video"?: {
-      time: number;
-    };
+    "networked-video"?: true;
     children?: JSX.ElementChildrenAttribute;
+    "video-menu"?: {
+      playButtonRef: any; // Ref
+    };
   }
 
   interface IntrinsicElements {

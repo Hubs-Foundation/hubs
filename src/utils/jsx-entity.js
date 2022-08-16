@@ -23,7 +23,9 @@ import {
   Rigidbody,
   SingleActionButton,
   TextButton,
-  NetworkedVideo
+  NetworkedVideo,
+  VideoMenu,
+  VideoMenuButton
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -104,10 +106,10 @@ export function createElementEntity(tag, attrs, ...children) {
 }
 
 export function addObject3DComponent(world, eid, obj) {
-  if (hasComponent(APP.world, Object3DTag, eid)) {
+  if (hasComponent(world, Object3DTag, eid)) {
     throw new Error("Tried to an object3D tag to an entity that already has one");
   }
-  addComponent(APP.world, Object3DTag, eid);
+  addComponent(world, Object3DTag, eid);
   world.eid2obj.set(eid, obj);
   obj.eid = eid;
   return eid;
@@ -163,6 +165,8 @@ export const inflators = {
   "camera-tool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   "animation-mixer": createDefaultInflator(AnimationMixer),
   "networked-video": createDefaultInflator(NetworkedVideo),
+  "video-menu": createDefaultInflator(VideoMenu),
+  "video-menu-button": createDefaultInflator(VideoMenuButton),
   "media-loader": inflateMediaLoader,
 
   // inflators that create Object3Ds
@@ -176,6 +180,10 @@ export const inflators = {
   video: inflateVideo
 };
 
+/**
+ * @param {import("../app").HubsWorld}  world
+ * @param {any} entityDef
+ */
 export function renderAsEntity(world, entityDef) {
   const eid = entityDef.ref ? resolveRef(world, entityDef.ref) : addEntity(world);
   Object.keys(entityDef.components).forEach(name => {

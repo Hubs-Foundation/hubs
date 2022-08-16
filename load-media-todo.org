@@ -5,16 +5,27 @@ This PR adds a media-loading system to eventually replace the media-loader afram
 ** TODO Basic support
 Load/spawn all the media types:
 *** TODO VIDEO
+- Spatialize the audio
+- Re-add support for all the video types (HLS, Dash, hubs://)
+**** Make menu
+- Make some jsx that makes buttons
+- The element we want to mess with is the one that's hovered (and is a video)
+- Update the buttons and the slider and stuff depending on the video state
+- Make the buttons do the thing to the video
+- Maybe parent the menu(?)
+
 *** TODO AUDIO
 *** DONE IMAGE
 *** TODO PDF
 *** DONE MODEL
 *** TODO HTML
 ** DONE Show loading cube while loading
-** TODO Physics shape of loading cube
+** TODO New objects need to show up in the object list
 ** TODO Play loading cube animation
+** TODO Alternative loading cubes
 ** TODO Flat vs 360 projection
 ** TODO Add physics shapes
+*** TODO Physics shape of loading cube
 ** DONE Resize models on load
 ** DONE Recenter models
 ** DONE (mostly) Animate loaded model scale

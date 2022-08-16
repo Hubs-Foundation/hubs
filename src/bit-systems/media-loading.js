@@ -133,7 +133,7 @@ function add(world, child, parent) {
   parentObj.add(childObj);
 
   // TODO: Fix this in THREE.Object3D.add
-  childObj.matrixNeedsUpdate = true;
+  childObj.matrixWorldNeedsUpdate = true;
 }
 
 function* loadMedia(world, eid) {
