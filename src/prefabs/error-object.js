@@ -10,7 +10,7 @@ export function ErrorObject() {
         textureSrc: "error",
         textureVersion: 1,
         ratio: 1400 / 1200,
-        projection: "flat" /* TODO */
+        projection: "flat"
       }}
     />
   );

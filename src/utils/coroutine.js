@@ -70,13 +70,15 @@ export function cancelable(iter, signal) {
   };
 
   let nextValue;
+  let throwing;
   return (function* () {
     while (true) {
       if (canceled) {
         return { canceled: true };
       }
       try {
-        const { value, done } = iter.next(nextValue);
+        const { value, done } = throwing ? iter.throw(nextValue) : iter.next(nextValue);
+        throwing = false;
         if (done) {
           signal.onabort = null;
           return { value, canceled: false };
@@ -87,8 +89,14 @@ export function cancelable(iter, signal) {
           nextValue = yield value;
         }
       } catch (e) {
-        rollback();
-        throw e;
+        if (throwing) {
+          // We already threw back into the iter, rollback and throw ourselves
+          rollback();
+          throw e;
+        } else {
+          throwing = true;
+          nextValue = e;
+        }
       }
     }
   })();
@@ -126,6 +134,7 @@ export function coroutine(iter) {
       }
       timers = _timers;
       const { value, done } = doThrow ? iter.throw(nextValue) : iter.next(nextValue);
+      doThrow = false;
       timers = null;
       if (done) {
         return value;
