@@ -1,6 +1,6 @@
 import { getPromotionTokenForFile } from "../utils/media-utils";
 import { SOUND_PIN } from "../systems/sound-effects-system";
-import { applyThemeToTextButton } from "../utils/theme";
+import { onThemeChanged, applyThemeToTextButton } from "../utils/theme";
 
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
@@ -48,7 +48,7 @@ AFRAME.registerComponent("pin-networked-object-button", {
       }
     };
 
-    APP.store.addEventListener("themechanged", this._updateUI);
+    this.removeThemeChangedListener = onThemeChanged(this._updateUI);
   },
 
   play() {
@@ -71,6 +71,8 @@ AFRAME.registerComponent("pin-networked-object-button", {
       this.targetEl.removeEventListener("pinned", this._updateUI);
       this.targetEl.removeEventListener("unpinned", this._updateUI);
     }
+
+    this.removeThemeChangedListener();
   },
 
   _discordBridges() {

@@ -14,7 +14,6 @@ import { MediaTile } from "../room/MediaTiles";
 import { PageContainer } from "../layout/PageContainer";
 import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
 import { Column } from "../layout/Column";
-import { Button } from "../input/Button";
 import { Container } from "../layout/Container";
 import { SocialBar } from "../home/SocialBar";
 import { SignInButton } from "./SignInButton";
@@ -180,13 +179,6 @@ export function HomePage() {
           </Column>
         </Container>
       )}
-      <Container>
-        <Column center grow>
-          <Button thin preset="landing" as="a" href="/link">
-            <FormattedMessage id="home-page.have-code" defaultMessage="Have a room code?" />
-          </Button>
-        </Column>
-      </Container>
       {isHmc() ? (
         <Column center>
           <SocialBar />
