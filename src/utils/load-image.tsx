@@ -3,6 +3,7 @@ import { createElementEntity } from "../utils/jsx-entity";
 import { loadTextureCancellable } from "../utils/load-texture";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { HubsWorld } from "../app";
+import { Texture } from "three";
 
 export function* loadImage({
   world,
@@ -13,6 +14,6 @@ export function* loadImage({
   accessibleUrl: string;
   contentType: string;
 }) {
-  const { texture, ratio } = yield loadTextureCancellable({ src: accessibleUrl, version: 1, contentType });
+  const { texture, ratio } : {texture: Texture, ratio: number}= yield loadTextureCancellable({ src: accessibleUrl, version: 1, contentType });
   return renderAsEntity(world, <entity image={{ texture, textureSrc: accessibleUrl, textureVersion: 1, ratio, projection: "flat" }} />);
 }

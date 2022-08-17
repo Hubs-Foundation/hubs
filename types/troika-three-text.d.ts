@@ -5,4 +5,9 @@ declare module "troika-three-text" {
     text: string;
     sync(callback?: () => void): void;
   }
+
+  export const preloadFont: (
+    options: { font?: string; characters: string | string[]; sdfGlyphSize?: number },
+    callback: () => void
+  ) => void;
 }

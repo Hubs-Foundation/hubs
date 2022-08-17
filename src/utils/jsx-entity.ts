@@ -1,4 +1,4 @@
-import { addComponent, addEntity, hasComponent } from "bitecs";
+import { addComponent, addEntity, Component, ComponentType, hasComponent } from "bitecs";
 import { preloadFont } from "troika-three-text";
 import {
   $isStringType,
@@ -11,7 +11,6 @@ import {
   HoldableButton,
   HoverButton,
   MakeKinematicOnRelease,
-  MediaLoader,
   AnimationMixer,
   Networked,
   NetworkedTransform,
@@ -35,25 +34,16 @@ import { inflateVideo } from "../inflators/video";
 import { inflateModel } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
+import { HubsWorld } from "../app";
+import { Object3D, Texture, VideoTexture } from "three";
 
 // TODO we should do this in a more explicit spot for "preloading" during the loading screen
 preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }, function () {});
 
-function isValidChild(child) {
-  if (child === undefined) {
-    console.warn("found undefined node");
-    return false;
-  } else if (typeof child === "string") {
-    console.warn("found text node", child);
-    return false;
-  }
-
-  return true;
-}
-
 const reservedAttrs = ["position", "rotation", "scale", "visible", "name", "layers"];
 
 export class Ref {
+  current: number | null;
   constructor() {
     this.current = null;
   }
@@ -62,50 +52,72 @@ export function createRef() {
   return new Ref();
 }
 
-/**
- * @param {import("../app").HubsWorld}  world
- * @param {Ref} ref
- * @returns {number} eid
- */
-export function resolveRef(world, ref) {
+export function resolveRef(world: HubsWorld, ref: Ref) {
   if (ref.current === null) {
     ref.current = addEntity(world);
   }
   return ref.current;
 }
 
-export function createElementEntity(tag, attrs, ...children) {
+type ArrayVec3 = [x: number, y: number, z: number];
+type Attrs = {
+  position?: ArrayVec3;
+  rotation?: ArrayVec3;
+  scale?: ArrayVec3;
+  visible?: boolean;
+  name?: string;
+  layers?: number;
+  ref?: Ref;
+};
+
+type EntityDef = {
+  components: ComponentData;
+  attrs: Attrs;
+  children: EntityDef[];
+  ref?: Ref;
+};
+
+function isReservedAttr(attr: string): attr is keyof Attrs {
+  return reservedAttrs.includes(attr);
+}
+
+export function createElementEntity(
+  tag: string | ((arg0: any, arg1: any[]) => EntityDef),
+  attrs: Attrs & ComponentData,
+  ...children: EntityDef[]
+): EntityDef {
   attrs = attrs || {};
   if (typeof tag === "function") {
     return tag(attrs, children);
   } else if (tag === "entity") {
-    const outputAttrs = {};
-    const components = [];
-    let ref = null;
+    const outputAttrs: Attrs = {};
+    const components: ComponentData & Attrs = {};
+    let ref = undefined;
 
     for (const attr in attrs) {
-      if (reservedAttrs.includes(attr)) {
-        outputAttrs[attr] = attrs[attr];
+      if (isReservedAttr(attr)) {
+        outputAttrs[attr] = attrs[attr] as any;
       } else if (attr === "ref") {
         ref = attrs[attr];
       } else {
         // if jsx transformed the attr into attr: true, change it to attr: {}.
-        components[attr] = attrs[attr] === true ? {} : attrs[attr];
+        const c = attr as keyof ComponentData;
+        components[c] = attrs[c] === true ? {} : attrs[c];
       }
     }
 
     return {
       attrs: outputAttrs,
       components,
-      children: children.flat().filter(isValidChild),
+      children: children.flat(),
       ref
     };
   } else {
-    throw new Error("invalid tag", tag);
+    throw new Error(`invalid tag "${tag}"`);
   }
 }
 
-export function addObject3DComponent(world, eid, obj) {
+export function addObject3DComponent(world: HubsWorld, eid: number, obj: Object3D) {
   if (hasComponent(world, Object3DTag, eid)) {
     throw new Error("Tried to an object3D tag to an entity that already has one");
   }
@@ -117,16 +129,15 @@ export function addObject3DComponent(world, eid, obj) {
 
 // TODO HACK gettting internal bitecs symbol, should expose an API to check a properties type
 const $isEidType = Object.getOwnPropertySymbols(CameraTool.screenRef).find(s => s.description === "isEidType");
-console.log($isEidType);
 
-const createDefaultInflator = (Component, defaults = {}) => {
+const createDefaultInflator = (C: Component, defaults = {}): InflatorFn => {
   return (world, eid, componentProps) => {
     componentProps = Object.assign({}, defaults, componentProps);
-    addComponent(world, Component, eid, true);
+    addComponent(world, C, eid, true);
     Object.keys(componentProps).forEach(propName => {
-      const prop = Component[propName];
+      const prop = C[propName as keyof Component] as any;
       if (!prop) {
-        console.error(`${propName} is not a valid property of`, Component);
+        console.error(`${propName} is not a valid property of`, C);
         return;
       }
       const value = componentProps[propName];
@@ -135,7 +146,7 @@ const createDefaultInflator = (Component, defaults = {}) => {
           throw new TypeError(`Expected ${propName} to be a string, got an ${typeof value} (${value})`);
         }
         prop[eid] = APP.getSid(value);
-      } else if (prop[$isEidType]) {
+      } else if (prop[$isEidType!]) {
         prop[eid] = resolveRef(world, value);
       } else {
         prop[eid] = value;
@@ -144,7 +155,83 @@ const createDefaultInflator = (Component, defaults = {}) => {
   };
 };
 
-export const inflators = {
+interface InflatorFn {
+  (world: HubsWorld, eid: number, componentProps: any): void;
+}
+
+// @TODO these properties should import types from their inflators
+export interface ComponentData {
+  slice9?: {
+    size: [width: number, height: number];
+    insets: [top: number, buttom: number, left: number, right: number];
+  };
+  image?: {
+    texture: Texture;
+    textureSrc: string;
+    textureVersion: number;
+    ratio: number;
+    projection: "flat" | "360-equirectangular";
+  };
+  video?: {
+    texture: VideoTexture;
+    textureSrc: string;
+    textureVersion: number;
+    ratio: number;
+    projection: "flat" | "360-equirectangular";
+    autoPlay: boolean;
+  };
+  networked?: any;
+  "networked-video"?: true;
+  "video-menu"?: {
+    playButtonRef: Ref;
+    currentTimeRef: Ref;
+    durationRef: Ref;
+  };
+  "cursor-raycastable"?: true;
+  "remote-hover-target"?: true;
+  "hand-collision-target"?: true;
+  "offers-remote-constraint"?: true;
+  "offers-hand-constraint"?: true;
+  "single-action-button"?: true;
+  "holdable-button"?: true;
+  holdable?: true;
+  "make-kinematic-on-release"?: true;
+  "destroy-at-extreme-distance"?: true;
+  "video-menu-item"?: true;
+
+  // @TODO
+  "text-button"?: any;
+  "hover-button"?: any;
+  rigidbody?: any;
+  "physics-shape"?: any;
+  "floaty-object"?: any;
+  "networked-transform"?: any;
+  "camera-tool"?: any;
+  "animation-mixer"?: any;
+  "media-loader"?: any;
+  "media-frame"?: any;
+  object3D?: any;
+  text?: any;
+  model?: any;
+  grabbable?: any;
+}
+
+declare global {
+  namespace createElementEntity.JSX {
+    interface IntrinsicElements {
+      entity: ComponentData &
+        Attrs & {
+          children?: IntrinsicElements[];
+        };
+    }
+
+    interface ElementChildrenAttribute {
+      children: {};
+    }
+  }
+}
+
+export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
   "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
   "hand-collision-target": createDefaultInflator(HandCollisionTarget),
@@ -180,18 +267,17 @@ export const inflators = {
   video: inflateVideo
 };
 
-/**
- * @param {import("../app").HubsWorld}  world
- * @param {any} entityDef
- */
-export function renderAsEntity(world, entityDef) {
+function inflatorExists(name: string): name is keyof ComponentData {
+  return inflators.hasOwnProperty(name);
+}
+
+export function renderAsEntity(world: HubsWorld, entityDef: EntityDef) {
   const eid = entityDef.ref ? resolveRef(world, entityDef.ref) : addEntity(world);
   Object.keys(entityDef.components).forEach(name => {
-    if (!inflators[name]) {
+    if (!inflatorExists(name)) {
       throw new Error(`Failed to inflate unknown component called ${name}`);
     }
-
-    inflators[name](world, eid, entityDef.components[name]);
+    inflators[name]!(world, eid, entityDef.components[name as keyof ComponentData]);
   });
 
   let obj = world.eid2obj.get(eid);
@@ -219,12 +305,8 @@ export function renderAsEntity(world, entityDef) {
     obj.visible = entityDef.attrs.visible;
   }
   entityDef.children.forEach(child => {
-    if (child.type === "a-entity") {
-      throw new Error("a-entity can only be children of a-entity");
-    } else {
-      const childEid = renderAsEntity(world, child);
-      obj.add(world.eid2obj.get(childEid));
-    }
+    const childEid = renderAsEntity(world, child);
+    obj!.add(world.eid2obj.get(childEid)!);
   });
   return eid;
 }
