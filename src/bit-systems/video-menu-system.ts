@@ -12,6 +12,7 @@ import { HubsWorld } from "../app";
 import { takeOwnership } from "../systems/netcode";
 import { isFacingCamera } from "../utils/three-utils";
 import { timeFmt } from "../components/media-video";
+import { Text as TroikaText } from "troika-three-text";
 
 function clicked(eid: number) {
   return hasComponent(APP.world, Interacted, eid);
@@ -65,7 +66,7 @@ export function videoMenuSystem(world: HubsWorld) {
       }
       video.paused ? video.play() : video.pause();
     }
-    const currentTimeLabel = world.eid2obj.get(VideoMenu.currentTimeRef[eid])! as any; // TODO: as Text
+    const currentTimeLabel = world.eid2obj.get(VideoMenu.currentTimeRef[eid])! as TroikaText;
     currentTimeLabel.text = timeFmt(video.currentTime);
     currentTimeLabel.sync();
     const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);
