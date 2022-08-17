@@ -33,7 +33,7 @@ function assignNetworkIds(world, mediaEid, mediaLoaderEid) {
       APP.world.nid2eid.set(Networked.id[eid], eid);
       Networked.creator[eid] = Networked.creator[mediaLoaderEid];
       Networked.owner[eid] = Networked.owner[mediaLoaderEid];
-      if (NAF.clientId === Networked.owner[mediaLoaderEid]) takeOwnership(world, eid);
+      if (APP.getSid(NAF.clientId) === Networked.owner[mediaLoaderEid]) takeOwnership(world, eid);
       i += 1;
     }
   });

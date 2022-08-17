@@ -35,7 +35,7 @@ import { inflateModel } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
 import { HubsWorld } from "../app";
-import { Object3D, Texture, VideoTexture } from "three";
+import { Group, Object3D, Texture, VideoTexture } from "three";
 
 // TODO we should do this in a more explicit spot for "preloading" during the loading screen
 preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }, function () {});
@@ -282,7 +282,7 @@ export function renderAsEntity(world: HubsWorld, entityDef: EntityDef) {
 
   let obj = world.eid2obj.get(eid);
   if (!obj) {
-    obj = new THREE.Group();
+    obj = new Group();
     addObject3DComponent(world, eid, obj);
   }
 
