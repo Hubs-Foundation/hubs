@@ -82,7 +82,7 @@ function isReservedAttr(attr: string): attr is keyof Attrs {
 }
 
 export function createElementEntity(
-  tag: string | ((arg0: any, arg1: any[]) => EntityDef),
+  tag: string | ((attrs: Attrs & ComponentData, children?: EntityDef[]) => EntityDef),
   attrs: Attrs & ComponentData,
   ...children: EntityDef[]
 ): EntityDef {
@@ -180,7 +180,6 @@ export interface ComponentData {
     projection: "flat" | "360-equirectangular";
     autoPlay: boolean;
   };
-  networked?: any;
   "networked-video"?: true;
   "video-menu"?: {
     playButtonRef: Ref;
@@ -200,6 +199,7 @@ export interface ComponentData {
   "video-menu-item"?: true;
 
   // @TODO
+  networked?: any;
   "text-button"?: any;
   "hover-button"?: any;
   rigidbody?: any;
@@ -277,7 +277,7 @@ export function renderAsEntity(world: HubsWorld, entityDef: EntityDef) {
     if (!inflatorExists(name)) {
       throw new Error(`Failed to inflate unknown component called ${name}`);
     }
-    inflators[name]!(world, eid, entityDef.components[name as keyof ComponentData]);
+    inflators[name]!(world, eid, entityDef.components[name]);
   });
 
   let obj = world.eid2obj.get(eid);
