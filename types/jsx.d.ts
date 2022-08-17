@@ -21,10 +21,12 @@ declare namespace createElementEntity.JSX {
     };
     networked?: any;
     "networked-video"?: true;
-    children?: JSX.ElementChildrenAttribute;
     "video-menu"?: {
       playButtonRef: any; // Ref
+      currentTimeRef: any; // Ref
+      durationRef: any; // Ref
     };
+    children?: JSX.ElementChildrenAttribute | JSX.ElementChildrenAttribute[];
   }
 
   interface IntrinsicElements {

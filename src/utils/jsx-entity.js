@@ -25,7 +25,7 @@ import {
   TextButton,
   NetworkedVideo,
   VideoMenu,
-  VideoMenuButton
+  VideoMenuItem
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -166,7 +166,7 @@ export const inflators = {
   "animation-mixer": createDefaultInflator(AnimationMixer),
   "networked-video": createDefaultInflator(NetworkedVideo),
   "video-menu": createDefaultInflator(VideoMenu),
-  "video-menu-button": createDefaultInflator(VideoMenuButton),
+  "video-menu-item": createDefaultInflator(VideoMenuItem),
   "media-loader": inflateMediaLoader,
 
   // inflators that create Object3Ds

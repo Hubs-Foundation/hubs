@@ -1,8 +1,17 @@
-import { Interacted, HoveredRemoteRight, MediaVideo, VideoMenu, VideoMenuButton } from "../bit-components";
-import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
+import {
+  Interacted,
+  HoveredRemoteRight,
+  MediaVideo,
+  VideoMenu,
+  VideoMenuItem,
+  CursorRaycastable
+} from "../bit-components";
+// import { Text } from "troika-three-text";
+import { defineQuery, enterQuery, exitQuery, hasComponent, addComponent, removeComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { takeOwnership } from "../systems/netcode";
 import { isFacingCamera } from "../utils/three-utils";
+import { timeFmt } from "../components/media-video";
 
 function clicked(eid: number) {
   return hasComponent(APP.world, Interacted, eid);
@@ -15,7 +24,18 @@ const videoMenuExitQuery = exitQuery(videoMenuQuery);
 const hoverRightQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
 const hoverRightEnterQuery = enterQuery(hoverRightQuery);
 
-const hoveredRemoteRightMenuButton = defineQuery([HoveredRemoteRight, VideoMenuButton]);
+const hoveredRemoteRightMenuButton = defineQuery([HoveredRemoteRight, VideoMenuItem]);
+
+function toTimeFormat(n: number) {
+  return `${timeFmt(this.video.currentTime)} / ${timeFmt(this.video.duration)}`;
+  return n.toString(); // TODO
+}
+
+function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
+  let change = enable ? addComponent : removeComponent;
+  change(world, CursorRaycastable, menu);
+  change(world, CursorRaycastable, VideoMenu.playButtonRef[menu]);
+}
 
 export function videoMenuSystem(world: HubsWorld) {
   videoMenuEnterQuery(world).forEach(function (eid) {
@@ -34,6 +54,8 @@ export function videoMenuSystem(world: HubsWorld) {
     const menu = videoMenuQuery(world)[0];
     const menuObj = world.eid2obj.get(menu)!;
     menuObj.removeFromParent();
+    // menuObj.visible = false; // Disable raycasting
+    setCursorRaycastable(world, menu, false);
     VideoMenu.videoRef[menu] = 0;
   }
 
@@ -44,7 +66,15 @@ export function videoMenuSystem(world: HubsWorld) {
     const menuObj = world.eid2obj.get(menu)!;
     const videoObj = world.eid2obj.get(eid)!;
     videoObj.add(menuObj);
+    setCursorRaycastable(world, menu, true);
+    // menuObj.visible = true; // Enable raycasting
     menuObj.matrixWorldNeedsUpdate = true; // TODO: Fix in threejs
+
+    const video = (world.eid2obj.get(eid) as any).material.map.image as HTMLVideoElement;
+
+    const durationLabel = world.eid2obj.get(VideoMenu.durationRef[menu])! as any; // TODO: as Text
+    durationLabel.text = timeFmt(video.duration);
+    durationLabel.sync();
   });
 
   videoMenuQuery(world).forEach(function (eid) {
@@ -57,6 +87,10 @@ export function videoMenuSystem(world: HubsWorld) {
       takeOwnership(world, videoEid);
       video.paused ? video.play() : video.pause();
     }
+
+    const currentTimeLabel = world.eid2obj.get(VideoMenu.currentTimeRef[eid])! as any; // TODO: as Text
+    currentTimeLabel.text = timeFmt(video.currentTime);
+    currentTimeLabel.sync();
 
     const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);
     const menuObj = world.eid2obj.get(eid)!;

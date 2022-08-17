@@ -40,7 +40,7 @@ for (let i = 0; i <= 20; i++) {
   VOLUME_LABELS[i] = s;
 }
 
-function timeFmt(t) {
+export function timeFmt(t) {
   let s = Math.floor(t),
     h = Math.floor(s / 3600);
   s -= h * 3600;

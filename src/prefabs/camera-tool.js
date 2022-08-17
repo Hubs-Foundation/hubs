@@ -37,7 +37,7 @@ export function Button({ text, width, height, texture = buttonTexture, type = BU
 }
 
 // eslint-disable-next-line react/prop-types
-function Label({ text, ...props }, ...children) {
+export function Label({ text = {}, ...props }, ...children) {
   const value = children.join("\n");
   return <entity name="Label" text={{ value, ...text }} layers={1 << Layers.CAMERA_LAYER_UI} {...props} />;
 }

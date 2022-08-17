@@ -144,8 +144,10 @@ export const NetworkedVideo = defineComponent({
   flags: Types.ui8
 });
 
-export const VideoMenuButton = defineComponent({});
+export const VideoMenuItem = defineComponent({});
 export const VideoMenu = defineComponent({
   videoRef: Types.eid,
-  playButtonRef: Types.eid
+  playButtonRef: Types.eid,
+  currentTimeRef: Types.eid,
+  durationRef: Types.eid
 });
