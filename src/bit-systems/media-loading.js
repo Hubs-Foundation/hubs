@@ -175,12 +175,6 @@ export function mediaLoadingSystem(world) {
     const ac = new AbortController();
     abortControllers.set(eid, ac);
     jobs.add(coroutine(loadAndAnimateMedia(world, eid, ac.signal)));
-
-    // TODO NOCOMMIT
-    window.$cancel = () => {
-      console.warn("Removing eid", eid);
-      removeEntity(world, eid);
-    };
   });
 
   mediaLoaderExitQuery(world).forEach(function (eid) {
