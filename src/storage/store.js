@@ -137,6 +137,7 @@ export const SCHEMA = {
         globalSFXVolume: { type: "number", default: 100 },
         snapRotationDegrees: { type: "number", default: 45 },
         materialQualitySetting: { type: "string", default: defaultMaterialQuality },
+        enableThirdPersonView: { type: "bool", default: false },
         enableDynamicShadows: { type: "bool", default: false },
         disableSoundEffects: { type: "bool", default: false },
         disableMovement: { type: "bool", default: false },
@@ -432,6 +433,15 @@ export default class Store extends EventTarget {
     this.dispatchEvent(new CustomEvent("statechanged"));
 
     return finalState;
+  }
+
+  getEmbedTokenForHub(hub) {
+    const embedTokenEntry = this.state.embedTokens.find(embedTokenEntry => embedTokenEntry.hubId === hub.hub_id);
+    if (embedTokenEntry) {
+      return embedTokenEntry.embedToken;
+    } else {
+      return null;
+    }
   }
 
   get schema() {

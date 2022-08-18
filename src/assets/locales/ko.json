@@ -413,6 +413,7 @@
   "preferences-screen.preference.movement-speed-modifier": "이동속도 조절",
   "preferences-screen.preference.enable-on-screen-joystick-left": "왼쪽 화면 조이스틱을 사용하여 캐릭터 이동",
   "preferences-screen.preference.enable-on-screen-joystick-right": "오른쪽 화면 조이스틱을 사용하여 시점 이동",
+  "preferences-screen.preference.enable-third-person-view": "3인칭 모드 활성화",
   "preferences-screen.preference.enable-gyro": "자이로스코프 사용 (브라우저/디바이스가 지원하면)",
   "preferences-screen.preference.invert-touchscreen-camera-move": "터치스크린의 카메라 이동 방향 반전",
   "preferences-screen.preference.locale": "언어",
