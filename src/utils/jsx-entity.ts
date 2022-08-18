@@ -24,7 +24,8 @@ import {
   TextButton,
   NetworkedVideo,
   VideoMenu,
-  VideoMenuItem
+  VideoMenuItem,
+  NotRemoteHoverTarget
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -189,6 +190,7 @@ export interface ComponentData {
   };
   "cursor-raycastable"?: true;
   "remote-hover-target"?: true;
+  "is-not-remote-hover-target"?: true;
   "hand-collision-target"?: true;
   "offers-remote-constraint"?: true;
   "offers-hand-constraint"?: true;
@@ -235,6 +237,7 @@ declare global {
 export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
   "cursor-raycastable": createDefaultInflator(CursorRaycastable),
   "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
+  "is-not-remote-hover-target": createDefaultInflator(NotRemoteHoverTarget),
   "hand-collision-target": createDefaultInflator(HandCollisionTarget),
   "offers-remote-constraint": createDefaultInflator(OffersRemoteConstraint),
   "offers-hand-constraint": createDefaultInflator(OffersHandConstraint),

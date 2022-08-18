@@ -38,7 +38,7 @@ AFRAME.registerComponent("cursor-controller", {
     minDistance: { default: 0.18 }
   },
 
-  init: function() {
+  init: function () {
     this.enabled = false;
 
     this.cursorVisual = new THREE.Mesh(
@@ -122,7 +122,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.el.setObject3D("line", this.line);
   },
 
-  update: function() {
+  update: function () {
     this.raycaster.far = this.data.far;
     this.raycaster.near = this.data.near;
   },
@@ -132,7 +132,7 @@ AFRAME.registerComponent("cursor-controller", {
     const cameraPos = new THREE.Vector3();
     const v = new THREE.Vector3();
 
-    return function(t, left) {
+    return function (t, left) {
       const userinput = AFRAME.scenes[0].systems.userinput;
       const cursorPose = userinput.get(left ? paths.actions.cursor.left.pose : paths.actions.cursor.right.pose);
       const hideLine = userinput.get(left ? paths.actions.cursor.left.hideLine : paths.actions.cursor.right.hideLine);
@@ -167,9 +167,18 @@ AFRAME.registerComponent("cursor-controller", {
           true,
           rawIntersections
         );
-        this.intersection = rawIntersections[0];
 
-        const remoteHoverTarget = this.intersection && findRemoteHoverTarget(APP.world, this.intersection.object);
+        this.intersection = rawIntersections[0];
+        let remoteHoverTarget;
+        for (let i = 0; i < rawIntersections.length; i++) {
+          const maybeHoverTarget = findRemoteHoverTarget(APP.world, rawIntersections[i].object);
+          if (maybeHoverTarget) {
+            this.intersection = rawIntersections[i];
+            remoteHoverTarget = maybeHoverTarget;
+            break;
+          }
+        }
+
         isHoveringSomething = !!remoteHoverTarget;
         if (remoteHoverTarget) {
           addComponent(APP.world, left ? HoveredRemoteLeft : HoveredRemoteRight, remoteHoverTarget);

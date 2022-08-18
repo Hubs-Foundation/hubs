@@ -20,6 +20,7 @@ export function* loadVideo({
   return renderAsEntity(
     world,
     <entity
+      name="Video"
       networked
       networked-video
       cursor-raycastable
