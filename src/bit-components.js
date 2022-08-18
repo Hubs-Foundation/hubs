@@ -148,8 +148,7 @@ export const VideoMenuItem = defineComponent({});
 export const VideoMenu = defineComponent({
   videoRef: Types.eid,
   playButtonRef: Types.eid,
-  currentTimeRef: Types.eid,
-  durationRef: Types.eid,
+  timeLabelRef: Types.eid,
   trackRef: Types.eid,
   headRef: Types.eid
 });

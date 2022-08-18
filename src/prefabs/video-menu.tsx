@@ -25,23 +25,16 @@ function Slider({ trackRef, headRef, ...props} : any) {
   );
 }
 
-/* Slider({ trackRef: createRef(),
-*          headRef: createRef(),
-*            foo: "bar"}); */
-
 export function VideoMenuPrefab() {
   const uiZ = 0.01;
   const playButtonRef = createRef();
-  const currentTimeRef = createRef();
-  const durationRef = createRef();
+  const timeLabelRef = createRef();
   const headRef = createRef();
   const trackRef = createRef();
   return (
-    <entity video-menu={{ playButtonRef, currentTimeRef, durationRef, headRef, trackRef }}>
+    <entity video-menu={{ playButtonRef, timeLabelRef, headRef, trackRef }}>
       <Button ref={playButtonRef} video-menu-item position={[0, 0, uiZ]} width={0.3} height={0.15} text="Play" />
-      <Label ref={currentTimeRef} scale={[1, 1, 1]} position={[-0.3, -0.25, uiZ]} />
-      <Label text={{ value: "/" }} scale={[1, 1, 1]} position={[-0.15, -0.25, uiZ]} />
-      <Label ref={durationRef} scale={[1, 1, 1]} position={[-0.0, -0.25, uiZ]} />
+      <Label ref={timeLabelRef} scale={[1, 1, 1]} position={[-0.2, -0.15, uiZ]} />
       <Slider trackRef={trackRef} headRef={headRef} position={[0, -0.25, uiZ]} />
       </entity>
   );

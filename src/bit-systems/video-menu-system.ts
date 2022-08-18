@@ -11,6 +11,7 @@ import {
   MediaVideo,
   NetworkedVideo,
   RemoteRight,
+  TextButton,
   VideoMenu,
   VideoMenuItem
 } from "../bit-components";
@@ -57,9 +58,6 @@ export function videoMenuSystem(world: HubsWorld) {
     menuObj.matrixWorldNeedsUpdate = true; // TODO: Fix in threejs
     setCursorRaycastable(world, menu, true);
     const video = (world.eid2obj.get(eid) as any).material.map.image as HTMLVideoElement;
-    const durationLabel = world.eid2obj.get(VideoMenu.durationRef[menu])! as any; // TODO: as Text
-    durationLabel.text = timeFmt(video.duration);
-    durationLabel.sync();
   });
 
   videoMenuQuery(world).forEach(function (eid) {
@@ -72,9 +70,9 @@ export function videoMenuSystem(world: HubsWorld) {
       }
       video.paused ? video.play() : video.pause();
     }
-    const currentTimeLabel = world.eid2obj.get(VideoMenu.currentTimeRef[eid])! as TroikaText;
-    currentTimeLabel.text = timeFmt(video.currentTime);
-    currentTimeLabel.sync();
+    const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
+    timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
+    timeLabelRef.sync();
     const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);
     const menuObj = world.eid2obj.get(eid)!;
     const yRot = videoIsFacingCamera ? 0 : Math.PI;
@@ -94,5 +92,9 @@ export function videoMenuSystem(world: HubsWorld) {
     }
     headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -0.5, 0.5);
     headObj.matrixNeedsUpdate = true;
+
+    const playButtonLabel = world.eid2obj.get(TextButton.labelRef[VideoMenu.playButtonRef[eid]])! as TroikaText;
+    playButtonLabel.text = video.paused ? "Play" : "Pause";
+    playButtonLabel.sync();
   });
 }
