@@ -18,7 +18,8 @@ import {
   TogglesHoveredActionSet,
   CameraTool,
   OffersHandConstraint,
-  AEntity
+  AEntity,
+  VideoMenuItem
 } from "../../bit-components";
 import { hasComponent } from "bitecs";
 const debugUserInput = qsTruthy("dui");

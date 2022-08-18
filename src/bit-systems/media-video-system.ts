@@ -29,12 +29,12 @@ export function mediaVideoSystem(world: HubsWorld) {
       flags |= video.paused ? Flags.PAUSED : 0;
       NetworkedVideo.flags[eid] = flags;
     } else {
-      if (Math.abs(NetworkedVideo.time[eid] - video.currentTime) > OUT_OF_SYNC_SEC) {
-        video.currentTime = NetworkedVideo.time[eid];
-      }
       const networkedPauseState = !!(NetworkedVideo.flags[eid] & Flags.PAUSED);
       if (networkedPauseState !== video.paused) {
         video.paused ? video.play() : video.pause();
+      }
+      if (networkedPauseState || Math.abs(NetworkedVideo.time[eid] - video.currentTime) > OUT_OF_SYNC_SEC) {
+        video.currentTime = NetworkedVideo.time[eid];
       }
     }
   });

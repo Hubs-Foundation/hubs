@@ -1,18 +1,23 @@
-import {
-  Interacted,
-  HoveredRemoteRight,
-  MediaVideo,
-  VideoMenu,
-  VideoMenuItem,
-  CursorRaycastable,
-  NetworkedVideo
-} from "../bit-components";
-import { defineQuery, enterQuery, hasComponent, addComponent, removeComponent } from "bitecs";
-import { HubsWorld } from "../app";
-import { takeOwnership } from "../systems/netcode";
-import { isFacingCamera } from "../utils/three-utils";
-import { timeFmt } from "../components/media-video";
+import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
+import { Matrix4, Quaternion, Vector3 } from "three";
+import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
+import { HubsWorld } from "../app";
+import {
+  CursorRaycastable,
+  HeldRemoteRight,
+  HoveredRemoteRight,
+  Interacted,
+  MediaVideo,
+  NetworkedVideo,
+  RemoteRight,
+  VideoMenu,
+  VideoMenuItem
+} from "../bit-components";
+import { timeFmt } from "../components/media-video";
+import { takeOwnership } from "../systems/netcode";
+import { anyEntityWith } from "../utils/bit-utils";
+import { isFacingCamera, setMatrixWorld } from "../utils/three-utils";
 
 function clicked(eid: number) {
   return hasComponent(APP.world, Interacted, eid);
@@ -27,6 +32,7 @@ function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
   let change = enable ? addComponent : removeComponent;
   change(world, CursorRaycastable, menu);
   change(world, CursorRaycastable, VideoMenu.playButtonRef[menu]);
+  change(world, CursorRaycastable, VideoMenu.trackRef[menu]);
 }
 
 export function videoMenuSystem(world: HubsWorld) {
@@ -76,5 +82,17 @@ export function videoMenuSystem(world: HubsWorld) {
       menuObj.rotation.y = yRot;
       menuObj.matrixNeedsUpdate = true;
     }
+
+    const headObj = world.eid2obj.get(VideoMenu.headRef[eid])!;
+    if (hasComponent(world, HeldRemoteRight, VideoMenu.trackRef[eid])) {
+      const cursorObj = world.eid2obj.get(anyEntityWith(APP.world, RemoteRight))!;
+      const newPosition = headObj.parent!.worldToLocal(cursorObj.getWorldPosition(new Vector3()));
+      if (hasComponent(world, NetworkedVideo, videoEid)) {
+        takeOwnership(world, videoEid);
+      }
+      video.currentTime = mapLinear(clamp(newPosition.x, -0.5, 0.5), -0.5, 0.5, 0, 1) * video.duration;
+    }
+    headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -0.5, 0.5);
+    headObj.matrixNeedsUpdate = true;
   });
 }

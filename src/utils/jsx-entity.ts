@@ -185,6 +185,8 @@ export interface ComponentData {
     playButtonRef: Ref;
     currentTimeRef: Ref;
     durationRef: Ref;
+    trackRef: Ref;
+    headRef: Ref;
   };
   "cursor-raycastable"?: true;
   "remote-hover-target"?: true;
