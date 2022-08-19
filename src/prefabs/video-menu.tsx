@@ -22,6 +22,7 @@ function Slider({ trackRef, headRef, ...props }: any) {
         ref={trackRef}
       >
         <entity
+          is-not-remote-hover-target
           name="Slider:Head"
           object3D={new Mesh(new BoxBufferGeometry(0.05, 0.05, 0.05), new MeshBasicMaterial())}
           ref={headRef}
@@ -40,9 +41,10 @@ export function VideoMenuPrefab() {
   const halfHeight = 9 / 16 / 2;
 
   return (
-    <entity video-menu={{ playButtonRef, timeLabelRef, headRef, trackRef }}>
-      <Button ref={playButtonRef} video-menu-item position={[0, 0, uiZ]} width={0.3} height={0.2} text="Play" />
+    <entity name="Video Menu" video-menu={{ playButtonRef, timeLabelRef, headRef, trackRef }}>
+      <Button name="Play Button" ref={playButtonRef} video-menu-item position={[0, 0, uiZ]} width={0.3} height={0.2} text="Play" />
       <Label
+        name="Time Label"
         text={{ anchorY: "top", anchorX: "right" }}
         ref={timeLabelRef}
         scale={[0.5, 0.5, 0.5]}

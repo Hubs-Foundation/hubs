@@ -151,7 +151,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.spriteSystem.tick(t, dt);
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
-    videoMenuSystem(world);
+    videoMenuSystem(world, systems.userinput);
     mediaVideoSystem(world);
     mediaFramesSystem(world);
     this.audioZonesSystem.tick(this.el);

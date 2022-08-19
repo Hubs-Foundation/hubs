@@ -130,6 +130,7 @@ export const MediaImage = defineComponent({
   textureSrc: Types.ui32,
   textureVersion: Types.ui8
 });
+MediaImage.textureSrc[$isStringType] = true;
 
 export const MediaVideo = defineComponent({
   textureSrc: Types.ui32,

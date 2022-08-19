@@ -15,5 +15,5 @@ export function* loadImage({
   contentType: string;
 }) {
   const { texture, ratio } : {texture: Texture, ratio: number}= yield loadTextureCancellable({ src: accessibleUrl, version: 1, contentType });
-  return renderAsEntity(world, <entity image={{ texture, textureSrc: accessibleUrl, textureVersion: 1, ratio, projection: "flat" }} />);
+  return renderAsEntity(world, <entity name="Image" image={{ texture, textureSrc: accessibleUrl, textureVersion: 1, ratio, projection: "flat" }} />);
 }

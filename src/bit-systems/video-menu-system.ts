@@ -1,10 +1,11 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
-import { Matrix4, Quaternion, Vector3 } from "three";
+import { Line3, Matrix4, Object3D, Plane, PlaneHelper, Quaternion, Ray, Vector3 } from "three";
 import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
 import {
   CursorRaycastable,
+  Held,
   HeldRemoteRight,
   HoveredRemoteRight,
   Interacted,
@@ -17,6 +18,7 @@ import {
 } from "../bit-components";
 import { timeFmt } from "../components/media-video";
 import { takeOwnership } from "../systems/netcode";
+import { paths } from "../systems/userinput/paths";
 import { anyEntityWith } from "../utils/bit-utils";
 import { isFacingCamera, setMatrixWorld } from "../utils/three-utils";
 
@@ -28,6 +30,7 @@ const videoMenuQuery = defineQuery([VideoMenu]);
 const hoverRightQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
 const hoverRightEnterQuery = enterQuery(hoverRightQuery);
 const hoveredRemoteRightMenuButton = defineQuery([HoveredRemoteRight, VideoMenuItem]);
+const sliderHalfWidth = 0.475;
 
 function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
   let change = enable ? addComponent : removeComponent;
@@ -36,13 +39,31 @@ function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
   change(world, CursorRaycastable, VideoMenu.trackRef[menu]);
 }
 
-export function videoMenuSystem(world: HubsWorld) {
+const intersectInThePlaneOf = (() => {
+  let plane = new Plane();
+  let ray = new Ray();
+  type Pose = { position: Vector3; direction: Vector3 };
+  return function intersectInThePlaneOf(obj: Object3D, { position, direction }: Pose, intersection: Vector3) {
+    ray.set(position, direction);
+    plane.normal.set(0, 0, 1);
+    plane.constant = 0;
+    obj.updateMatrices();
+    plane.applyMatrix4(obj.matrixWorld);
+    ray.intersectPlane(plane, intersection);
+  };
+})();
+
+let intersectionPoint = new Vector3();
+export function videoMenuSystem(world: HubsWorld, userinput: any) {
+  const rightVideoMenu = videoMenuQuery(world)[0];
   const unhovered =
     !hoverRightQuery(world).length &&
     !hoveredRemoteRightMenuButton(world).length &&
-    VideoMenu.videoRef[videoMenuQuery(world)[0]];
+    VideoMenu.videoRef[rightVideoMenu] &&
+    !hasComponent(world, Held, VideoMenu.trackRef[rightVideoMenu]);
   if (unhovered) {
-    const menu = videoMenuQuery(world)[0];
+    // TODO: Left remote
+    const menu = rightVideoMenu;
     const menuObj = world.eid2obj.get(menu)!;
     menuObj.removeFromParent();
     setCursorRaycastable(world, menu, false);
@@ -50,7 +71,7 @@ export function videoMenuSystem(world: HubsWorld) {
   }
 
   hoverRightEnterQuery(world).forEach(function (eid) {
-    const menu = videoMenuQuery(world)[0];
+    const menu = rightVideoMenu;
     VideoMenu.videoRef[menu] = eid;
     const menuObj = world.eid2obj.get(menu)!;
     const videoObj = world.eid2obj.get(eid)!;
@@ -73,8 +94,8 @@ export function videoMenuSystem(world: HubsWorld) {
     const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
     timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
     timeLabelRef.sync();
-    const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);
     const menuObj = world.eid2obj.get(eid)!;
+    const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);
     const yRot = videoIsFacingCamera ? 0 : Math.PI;
     if (menuObj.rotation.y !== yRot) {
       menuObj.rotation.y = yRot;
@@ -82,15 +103,20 @@ export function videoMenuSystem(world: HubsWorld) {
     }
 
     const headObj = world.eid2obj.get(VideoMenu.headRef[eid])!;
+    const trackObj = world.eid2obj.get(VideoMenu.trackRef[eid])!;
     if (hasComponent(world, HeldRemoteRight, VideoMenu.trackRef[eid])) {
-      const cursorObj = world.eid2obj.get(anyEntityWith(APP.world, RemoteRight))!;
-      const newPosition = headObj.parent!.worldToLocal(cursorObj.getWorldPosition(new Vector3()));
+      intersectInThePlaneOf(trackObj, userinput.get(paths.actions.cursor.right.pose), intersectionPoint);
+      if (intersectionPoint) {
+        const newPosition = headObj.parent!.worldToLocal(intersectionPoint);
+        video.currentTime =
+          mapLinear(clamp(newPosition.x, -sliderHalfWidth, sliderHalfWidth), -sliderHalfWidth, sliderHalfWidth, 0, 1) *
+          video.duration;
+      }
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
       }
-      video.currentTime = mapLinear(clamp(newPosition.x, -0.5, 0.5), -0.5, 0.5, 0, 1) * video.duration;
     }
-    headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -0.5, 0.5);
+    headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -sliderHalfWidth, sliderHalfWidth);
     headObj.matrixNeedsUpdate = true;
 
     const playButtonLabel = world.eid2obj.get(TextButton.labelRef[VideoMenu.playButtonRef[eid]])! as TroikaText;
