@@ -14,7 +14,6 @@ export function* loadVideo({
   canonicalAudioUrl: string;
   contentType: string;
 }) {
-  console.log(`Url is ${accessibleUrl}`);
   const { texture, ratio }: { texture: VideoTexture; ratio: number } = yield loadVideoTexture({ src: accessibleUrl });
 
   return renderAsEntity(

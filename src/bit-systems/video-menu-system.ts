@@ -76,7 +76,6 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     videoObj.add(menuObj);
     menuObj.matrixWorldNeedsUpdate = true; // TODO: Fix in threejs
     setCursorRaycastable(world, menu, true);
-    const video = (world.eid2obj.get(eid) as any).material.map.image as HTMLVideoElement;
   });
 
   videoMenuQuery(world).forEach(function (eid) {
@@ -89,9 +88,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
       }
       video.paused ? video.play() : video.pause();
     }
-    const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
-    timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
-    timeLabelRef.sync();
+
     const menuObj = world.eid2obj.get(eid)!;
     const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);
     const yRot = videoIsFacingCamera ? 0 : Math.PI;
@@ -101,8 +98,8 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     }
 
     const headObj = world.eid2obj.get(VideoMenu.headRef[eid])!;
-    const trackObj = world.eid2obj.get(VideoMenu.trackRef[eid])!;
     if (hasComponent(world, HeldRemoteRight, VideoMenu.trackRef[eid])) {
+      const trackObj = world.eid2obj.get(VideoMenu.trackRef[eid])!;
       intersectInThePlaneOf(trackObj, userinput.get(paths.actions.cursor.right.pose), intersectionPoint);
       if (intersectionPoint) {
         const newPosition = headObj.parent!.worldToLocal(intersectionPoint);
@@ -120,5 +117,9 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     const playButtonLabel = world.eid2obj.get(TextButton.labelRef[VideoMenu.playButtonRef[eid]])! as TroikaText;
     playButtonLabel.text = video.paused ? "Play" : "Pause";
     playButtonLabel.sync();
+
+    const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
+    timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
+    timeLabelRef.sync();
   });
 }

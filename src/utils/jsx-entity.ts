@@ -270,6 +270,7 @@ export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
   "video-menu": createDefaultInflator(VideoMenu),
   "video-menu-item": createDefaultInflator(VideoMenuItem),
   "media-loader": inflateMediaLoader,
+  grabbable: inflateGrabbable,
 
   // inflators that create Object3Ds
   "media-frame": inflateMediaFrame,
@@ -277,7 +278,6 @@ export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
   slice9: inflateSlice9,
   text: inflateText,
   model: inflateModel,
-  grabbable: inflateGrabbable,
   image: inflateImage,
   video: inflateVideo
 };
