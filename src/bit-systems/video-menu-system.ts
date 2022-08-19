@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
-import { Line3, Matrix4, Object3D, Plane, PlaneHelper, Quaternion, Ray, Vector3 } from "three";
+import { Object3D, Plane, Ray, Vector3 } from "three";
 import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
@@ -11,7 +11,6 @@ import {
   Interacted,
   MediaVideo,
   NetworkedVideo,
-  RemoteRight,
   TextButton,
   VideoMenu,
   VideoMenuItem
@@ -19,8 +18,7 @@ import {
 import { timeFmt } from "../components/media-video";
 import { takeOwnership } from "../systems/netcode";
 import { paths } from "../systems/userinput/paths";
-import { anyEntityWith } from "../utils/bit-utils";
-import { isFacingCamera, setMatrixWorld } from "../utils/three-utils";
+import { isFacingCamera } from "../utils/three-utils";
 
 function clicked(eid: number) {
   return hasComponent(APP.world, Interacted, eid);

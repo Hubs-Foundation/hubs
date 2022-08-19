@@ -71,17 +71,17 @@ export class App {
   store = new Store();
   mediaSearchStore = new MediaSearchStore();
 
-  audios = new Map<AElement, PositionalAudio | Audio>();
-  sourceType = new Map<AElement, SourceType>();
-  audioOverrides = new Map<AElement, AudioSettings>();
-  zoneOverrides = new Map<AElement, AudioSettings>();
+  audios = new Map<AElement | number, PositionalAudio | Audio>();
+  sourceType = new Map<AElement | number, SourceType>();
+  audioOverrides = new Map<AElement | number, AudioSettings>();
+  zoneOverrides = new Map<AElement | number, AudioSettings>();
+  gainMultipliers = new Map<AElement | number, number>();
+  supplementaryAttenuation = new Map<AElement | number, number>();
+  clippingState = new Set<AElement | number>();
+  mutedState = new Set<AElement | number>();
+  isAudioPaused = new Set<AElement | number>();
   audioDebugPanelOverrides = new Map<SourceType, AudioSettings>();
   sceneAudioDefaults = new Map<SourceType, AudioSettings>();
-  gainMultipliers = new Map<AElement, number>();
-  supplementaryAttenuation = new Map<AElement, number>();
-  clippingState = new Set<AElement>();
-  mutedState = new Set<AElement>();
-  isAudioPaused = new Set<AElement>();
 
   world: HubsWorld = createWorld();
 

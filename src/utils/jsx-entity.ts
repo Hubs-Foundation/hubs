@@ -120,9 +120,20 @@ export function createElementEntity(
 
 export function addObject3DComponent(world: HubsWorld, eid: number, obj: Object3D) {
   if (hasComponent(world, Object3DTag, eid)) {
-    throw new Error("Tried to an object3D tag to an entity that already has one");
+    throw new Error("Tried to add an object3D tag to an entity that already has one");
   }
   addComponent(world, Object3DTag, eid);
+  world.eid2obj.set(eid, obj);
+  obj.eid = eid;
+  return eid;
+}
+
+export function swapObject3DComponent(world: HubsWorld, eid: number, obj: Object3D) {
+  if (!hasComponent(world, Object3DTag, eid)) {
+    throw new Error("Tried to swap Object3D aon an entity that does not have the object3D tag");
+  }
+  const oldObj = world.eid2obj.get(eid)!;
+  oldObj.eid = 0;
   world.eid2obj.set(eid, obj);
   obj.eid = eid;
   return eid;

@@ -1,5 +1,5 @@
 import { defineQuery, exitQuery, removeEntity } from "bitecs";
-import { MediaImage, GLTFModel, MediaFrame, Object3DTag, Slice9, Text } from "../bit-components";
+import { MediaImage, GLTFModel, MediaFrame, Object3DTag, Slice9, Text, AudioEmitter } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTexture } from "../utils/load-texture";
 
@@ -16,6 +16,11 @@ const cleanupSlice9s = cleanupObjOnExit(Slice9, obj => obj.geometry.dispose());
 const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => gltfCache.release(obj.userData.gltfSrc));
 const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
+const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
+  obj.disconnect();
+  const audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
+  audioSystem.removeAudio({ node: obj });
+});
 
 const exitedMediaImageQuery = exitQuery(defineQuery([MediaImage]));
 const cleanupImages = world => {
@@ -60,6 +65,7 @@ export function removeObject3DSystem(world) {
   cleanupTexts(world);
   cleanupMediaFrames(world);
   cleanupImages(world);
+  cleanupAudioEmitters(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeFromMap);

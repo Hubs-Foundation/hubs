@@ -145,7 +145,7 @@ export const NetworkedVideo = defineComponent({
   flags: Types.ui8
 });
 
-export const VideoMenuItem = defineComponent({});
+export const VideoMenuItem = defineComponent();
 export const VideoMenu = defineComponent({
   videoRef: Types.eid,
   playButtonRef: Types.eid,
@@ -153,3 +153,6 @@ export const VideoMenu = defineComponent({
   trackRef: Types.eid,
   headRef: Types.eid
 });
+
+export const AudioEmitter = defineComponent();
+export const AudioSettingsChanged = defineComponent();
