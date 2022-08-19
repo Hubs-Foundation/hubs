@@ -104,7 +104,7 @@ const OUT_OF_SYNC_SEC = 5;
 const networkedVideoQuery = defineQuery([NetworkedVideo]);
 const mediaVideoQuery = defineQuery([MediaVideo]);
 const mediaVideoEnterQuery = enterQuery(mediaVideoQuery);
-export function mediaVideoSystem(world: HubsWorld, audioSystem: AudioSystem) {
+export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
   mediaVideoEnterQuery(world).forEach(function (eid) {
     const videoObj = world.eid2obj.get(eid) as Mesh;
     const video = (videoObj.material as MeshStandardMaterial).map!.image as HTMLVideoElement;

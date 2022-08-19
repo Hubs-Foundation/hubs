@@ -2,24 +2,30 @@
 
 This PR adds a media-loading system to eventually replace the media-loader aframe component.
 
+** TODO Delete, rotate, and scale
 ** TODO Basic support
 Load/spawn all the media types:
 *** TODO VIDEO
-- Spatialize the audio
-- Re-add support for all the video types (HLS, Dash, hubs://)
-**** Make menu
+**** DONE Play the audio
+**** DONE Spatialize the audio
+**** TODO Re-add support for all the video types (HLS, Dash, hubs://)
+**** DONE Make menu
 - Make some jsx that makes buttons
 - The element we want to mess with is the one that's hovered (and is a video)
 - Update the buttons and the slider and stuff depending on the video state
 - Make the buttons do the thing to the video
 - Maybe parent the menu(?)
 
+**** Fix issue where we can't move videos
 *** TODO AUDIO
 *** DONE IMAGE
 *** TODO PDF
 *** DONE MODEL
 *** TODO HTML
 ** DONE Show loading cube while loading
+** TODO Restore original pasting action.
+** TODO Support pasting files
+** TODO Put it behind a feature flag
 ** TODO New objects need to show up in the object list
 ** TODO Play loading cube animation
 ** TODO Alternative loading cubes
@@ -31,6 +37,7 @@ Load/spawn all the media types:
 ** DONE (mostly) Animate loaded model scale
 ** TODO Add Object Menus
 ** TODO Write tests for coroutines
+** TODO Pinning
 
 * Stuff
 ** Do work before render for object loading (upload textures to GPU, etc)
@@ -141,3 +148,11 @@ preloads.push(
   })
 );
 #+end_src
+
+** Ownership of scene-loaded objects?
+      // if explicit vs implicit, choose explicit
+      // if both explicit, choose bigger
+      // if both implicit, choose smaller.
+      //
+      // when taking over from an implicit owner,
+      // take an explicit opinion

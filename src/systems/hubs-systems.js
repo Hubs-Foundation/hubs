@@ -43,7 +43,7 @@ import { networkedTransformSystem } from "./networked-transform";
 import { buttonSystems } from "./single-action-button-system";
 import { constraintsSystem } from "./bit-constraints-system";
 import { mediaFramesSystem } from "./bit-media-frames";
-import { mediaVideoSystem } from "../bit-systems/media-video-system";
+import { videoSystem } from "../bit-systems/video-system";
 import { cameraToolSystem } from "../bit-systems/camera-tool";
 import { mediaLoadingSystem } from "../bit-systems/media-loading";
 // import { holdableButtonSystem } from "./holdable-button-system";
@@ -152,7 +152,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.uvScrollSystem.tick(dt);
     this.shadowSystem.tick();
     videoMenuSystem(world, systems.userinput);
-    mediaVideoSystem(world, this.audioSystem);
+    videoSystem(world, this.audioSystem);
     mediaFramesSystem(world);
     this.audioZonesSystem.tick(this.el);
     this.gainSystem.tick();
