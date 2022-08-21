@@ -95,6 +95,7 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { TERMS, PRIVACY } from "../constants";
+import { rsort } from "semver";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -181,6 +182,7 @@ class UIRoot extends Component {
     showPrefs: false,
     watching: false,
     isStreaming: false,
+    isRecordingMode: false,
 
     waitingOnAudio: false,
     audioTrackClone: null,
@@ -325,12 +327,17 @@ class UIRoot extends Component {
     );
     this.props.scene.addEventListener("action_toggle_record", () => {
       const cursor = document.querySelector("#right-cursor");
-      if (cursor.object3D.scale.x > 0.1) {
-        cursor.setAttribute("scale", { x: 0, y: 0, z: 0 });
-        this.setState({ hide: !this.state.hide, hideUITip: true });
-      } else {
+      if (this.state.isRecordingMode) {
+        // If isRecordingMode is true then toggle it off.
         cursor.setAttribute("scale", { x: 1, y: 1, z: 1 });
-        this.setState({ hide: !this.state.hide, hideUITip: false });
+        this.setState({ hide: false, hideUITip: false, isRecordingMode: false });
+        document.querySelector(".rs-fps-counter").style.visibility = "visible";
+        document.querySelector(".rs-base").style.visibility = "visible";
+      } else {
+        cursor.setAttribute("scale", { x: 0, y: 0, z: 0 });
+        this.setState({ hide: true, hideUITip: true, isRecordingMode: true });
+        document.querySelector(".rs-fps-counter").style.visibility = "hidden";
+        document.querySelector(".rs-base").style.visibility = "hidden";
       }
     });
     this.props.scene.addEventListener("devicechange", () => {
