@@ -100,14 +100,6 @@ export function resolveActionSets() {
   );
 
   userinput.toggleSet(
-    sets.leftHandHoveringOnVideo,
-    hcAFRAME(world, "media-video", leftHandHovering) || hc(world, MediaVideo, leftHandHovering)
-  );
-  userinput.toggleSet(
-    sets.rightHandHoveringOnVideo,
-    hcAFRAME(world, "media-video", rightHandHovering) || hc(world, MediaVideo, rightHandHovering)
-  );
-  userinput.toggleSet(
     sets.leftCursorHoveringOnVideo,
     hcAFRAME(world, "media-video", leftRemoteHovering) || hc(world, MediaVideo, leftRemoteHovering)
   );
