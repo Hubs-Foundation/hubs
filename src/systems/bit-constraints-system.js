@@ -1,4 +1,4 @@
-import { anyEntityWith } from "../utils/bit-utils";
+import { anyEntityWith, findAncestorEntity } from "../utils/bit-utils";
 import { CONSTANTS } from "three-ammo";
 const { DISABLE_DEACTIVATION, ACTIVE_TAG } = CONSTANTS.ACTIVATION_STATE;
 
@@ -18,19 +18,19 @@ import {
 } from "../bit-components";
 import { takeOwnership } from "./netcode";
 
-const queryRemoteRight = defineQuery([HeldRemoteRight, OffersRemoteConstraint, Rigidbody]);
+const queryRemoteRight = defineQuery([HeldRemoteRight, OffersRemoteConstraint]);
 const queryEnterRemoteRight = enterQuery(queryRemoteRight);
 const queryExitRemoteRight = exitQuery(queryRemoteRight);
 
-const queryRemoteLeft = defineQuery([HeldRemoteLeft, OffersRemoteConstraint, Rigidbody]);
+const queryRemoteLeft = defineQuery([HeldRemoteLeft, OffersRemoteConstraint]);
 const queryEnterRemoteLeft = enterQuery(queryRemoteLeft);
 const queryExitRemoteLeft = exitQuery(queryRemoteLeft);
 
-const queryHandRight = defineQuery([HeldHandRight, OffersHandConstraint, Rigidbody]);
+const queryHandRight = defineQuery([HeldHandRight, OffersHandConstraint]);
 const queryEnterHandRight = enterQuery(queryHandRight);
 const queryExitHandRight = exitQuery(queryHandRight);
 
-const queryHandLeft = defineQuery([HeldHandLeft, OffersHandConstraint, Rigidbody]);
+const queryHandLeft = defineQuery([HeldHandLeft, OffersHandConstraint]);
 const queryEnterHandLeft = enterQuery(queryHandLeft);
 const queryExitHandLeft = exitQuery(queryHandLeft);
 
@@ -39,7 +39,7 @@ const releaseBodyOptions = { activationState: ACTIVE_TAG };
 
 function add(world, physicsSystem, interactor, entities) {
   for (let i = 0; i < entities.length; i++) {
-    const eid = entities[i];
+    const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     takeOwnership(world, eid);
     physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {});
@@ -48,9 +48,9 @@ function add(world, physicsSystem, interactor, entities) {
 
 function remove(world, offersConstraint, physicsSystem, interactor, entities) {
   for (let i = 0; i < entities.length; i++) {
-    const eid = entities[i];
+    const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     if (!entityExists(world, eid)) continue;
-    if (hasComponent(world, offersConstraint, eid) && hasComponent(world, Rigidbody, eid)) {
+    if (hasComponent(world, offersConstraint, entities[i]) && hasComponent(world, Rigidbody, eid)) {
       physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], releaseBodyOptions);
       physicsSystem.removeConstraint(interactor);
     }

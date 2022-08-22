@@ -732,6 +732,16 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.right.mediaVolumeMod },
       xform: xforms.scale(-0.3),
       priority: 1
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: {
+        click: paths.actions.cursor.right.togglePlayVideo,
+        grab: paths.actions.cursor.right.grab,
+        drop: paths.actions.cursor.right.drop
+      },
+      xform: xforms.clickAndHold(),
+      priority: 3
     }
   ],
   [sets.inputFocused]: [

@@ -34,15 +34,13 @@ function Slider({ trackRef, headRef, ...props }: any) {
 
 export function VideoMenuPrefab() {
   const uiZ = 0.001;
-  const playButtonRef = createRef();
   const timeLabelRef = createRef();
   const headRef = createRef();
   const trackRef = createRef();
   const halfHeight = 9 / 16 / 2;
 
   return (
-    <entity name="Video Menu" video-menu={{ playButtonRef, timeLabelRef, headRef, trackRef }}>
-      <Button name="Play Button" ref={playButtonRef} video-menu-item position={[0, 0, uiZ]} width={0.3} height={0.2} text="Play" />
+    <entity name="Video Menu" video-menu={{ timeLabelRef, headRef, trackRef }}>
       <Label
         name="Time Label"
         text={{ anchorY: "top", anchorX: "right" }}

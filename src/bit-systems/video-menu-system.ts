@@ -33,7 +33,6 @@ const sliderHalfWidth = 0.475;
 function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
   let change = enable ? addComponent : removeComponent;
   change(world, CursorRaycastable, menu);
-  change(world, CursorRaycastable, VideoMenu.playButtonRef[menu]);
   change(world, CursorRaycastable, VideoMenu.trackRef[menu]);
 }
 
@@ -82,7 +81,8 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     const videoEid = VideoMenu.videoRef[eid];
     if (!videoEid) return;
     const video = (world.eid2obj.get(videoEid) as any).material.map.image as HTMLVideoElement;
-    if (clicked(VideoMenu.playButtonRef[eid])) {
+    const togglePlayVideo = userinput.get(paths.actions.cursor.right.togglePlayVideo);
+    if (togglePlayVideo) {
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
       }
@@ -113,10 +113,6 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     }
     headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -sliderHalfWidth, sliderHalfWidth);
     headObj.matrixNeedsUpdate = true;
-
-    const playButtonLabel = world.eid2obj.get(TextButton.labelRef[VideoMenu.playButtonRef[eid]])! as TroikaText;
-    playButtonLabel.text = video.paused ? "Play" : "Pause";
-    playButtonLabel.sync();
 
     const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
     timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;

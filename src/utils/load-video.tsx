@@ -22,8 +22,7 @@ export function* loadVideo({
       name="Video"
       networked
       networked-video
-      cursor-raycastable
-      remote-hover-target
+      grabbable={{ cursor: true, hand: false }}
       video={{
         texture,
         textureSrc: accessibleUrl,

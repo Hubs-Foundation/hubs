@@ -135,8 +135,7 @@ MediaImage.textureSrc[$isStringType] = true;
 export const MediaVideo = defineComponent({
   textureSrc: Types.ui32,
   textureVersion: Types.ui8,
-  autoPlay: Types.ui8,
-  playButtonRef: Types.eid
+  autoPlay: Types.ui8
 });
 
 export const AnimationMixer = defineComponent();
@@ -148,7 +147,6 @@ export const NetworkedVideo = defineComponent({
 export const VideoMenuItem = defineComponent();
 export const VideoMenu = defineComponent({
   videoRef: Types.eid,
-  playButtonRef: Types.eid,
   timeLabelRef: Types.eid,
   trackRef: Types.eid,
   headRef: Types.eid

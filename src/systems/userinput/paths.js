@@ -45,6 +45,7 @@ paths.actions.cursor.right = {};
 paths.actions.cursor.right.pose = "/actions/cursor/right/Pose";
 paths.actions.cursor.right.hideLine = "/actions/cursor/right/HideLine";
 paths.actions.cursor.right.grab = "/actions/cursor/right/Grab";
+paths.actions.cursor.right.togglePlayVideo = "/actions/cursor/right/togglePlayVideo";
 paths.actions.cursor.right.drop = "/actions/cursor/right/Drop";
 paths.actions.cursor.right.modDelta = "/actions/cursor/right/ModDelta";
 paths.actions.cursor.right.startDrawing = "/actions/cursor/right/StartDrawing";
@@ -171,7 +172,7 @@ paths.device.hud.penButton = "/device/hud/penButton";
 
 paths.device.keyboard = {
   map: new Map(),
-  key: function(k) {
+  key: function (k) {
     let path = this.map.get(k);
     if (path) {
       return path;

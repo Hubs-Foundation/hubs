@@ -194,7 +194,6 @@ export interface ComponentData {
   };
   "networked-video"?: true;
   "video-menu"?: {
-    playButtonRef: Ref;
     timeLabelRef: Ref;
     trackRef: Ref;
     headRef: Ref;

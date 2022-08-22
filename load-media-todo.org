@@ -38,6 +38,8 @@ Load/spawn all the media types:
 ** TODO Add Object Menus
 ** TODO Write tests for coroutines
 ** TODO Pinning
+** TODO Do memory audit. What is our footprint?
+** TODO Fix scale animate hover thing
 
 * Stuff
 ** Do work before render for object loading (upload textures to GPU, etc)
