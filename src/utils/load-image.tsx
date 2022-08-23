@@ -4,6 +4,7 @@ import { loadTextureCancellable } from "../utils/load-texture";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { HubsWorld } from "../app";
 import { Texture } from "three";
+import { AlphaMode } from "./create-image-mesh";
 
 export function* loadImage({
   world,
@@ -21,6 +22,16 @@ export function* loadImage({
   });
   return renderAsEntity(
     world,
-    <entity name="Image" image={{ texture, textureSrc: accessibleUrl, textureVersion: 1, ratio, projection: "flat" }} />
+    <entity
+      name="Image"
+      image={{
+        texture,
+        textureSrc: accessibleUrl,
+        textureVersion: 1,
+        ratio,
+        projection: "flat",
+        alphaMode: AlphaMode.Opaque
+      }}
+    />
   );
 }

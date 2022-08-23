@@ -186,6 +186,8 @@ import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 
 window.APP = new App();
+renderAsEntity(APP.world, VideoMenuPrefab());
+renderAsEntity(APP.world, VideoMenuPrefab());
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
@@ -234,6 +236,8 @@ import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./utils/onpaste";
+import { renderAsEntity } from "./utils/jsx-entity";
+import { VideoMenuPrefab } from "./prefabs/video-menu";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;

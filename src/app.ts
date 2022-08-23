@@ -117,8 +117,6 @@ export class App {
 
     // reserve entity 0 to avoid needing to check for undefined everywhere eid is checked for existance
     addEntity(this.world);
-    renderAsEntity(this.world, VideoMenuPrefab());
-    renderAsEntity(this.world, VideoMenuPrefab());
 
     this.str2sid = new Map([[null, 0]]);
     this.sid2str = new Map([[0, null]]);

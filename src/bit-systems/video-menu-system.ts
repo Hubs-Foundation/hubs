@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
-import { Object3D, Plane, Ray, Vector3 } from "three";
+import { Mesh, MeshBasicMaterial, Object3D, Plane, Ray, Vector3 } from "three";
 import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
@@ -8,7 +8,6 @@ import {
   Held,
   HeldRemoteRight,
   HoveredRemoteRight,
-  Interacted,
   MediaVideo,
   NetworkedVideo,
   VideoMenu,
@@ -17,6 +16,9 @@ import {
 import { timeFmt } from "../components/media-video";
 import { takeOwnership } from "../systems/netcode";
 import { paths } from "../systems/userinput/paths";
+import { animate } from "../utils/animate";
+import { coroutine } from "../utils/coroutine";
+import { easeOutQuadratic } from "../utils/easing";
 import { isFacingCamera } from "../utils/three-utils";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
@@ -44,6 +46,9 @@ const intersectInThePlaneOf = (() => {
     ray.intersectPlane(plane, intersection);
   };
 })();
+
+type Job<T> = () => IteratorResult<undefined, T>;
+let rightMenuIndicatorCoroutine: Job<void> | null = null;
 
 let intersectionPoint = new Vector3();
 export function videoMenuSystem(world: HubsWorld, userinput: any) {
@@ -74,16 +79,31 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
   videoMenuQuery(world).forEach(function (eid) {
     const videoEid = VideoMenu.videoRef[eid];
     if (!videoEid) return;
+    const menuObj = world.eid2obj.get(eid)!;
     const video = (world.eid2obj.get(videoEid) as any).material.map.image as HTMLVideoElement;
     const togglePlayVideo = userinput.get(paths.actions.cursor.right.togglePlayVideo);
     if (togglePlayVideo) {
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
       }
-      video.paused ? video.play() : video.pause();
+
+      const playIndicatorObj = world.eid2obj.get(VideoMenu.playIndicatorRef[eid])!;
+      const pauseIndicatorObj = world.eid2obj.get(VideoMenu.pauseIndicatorRef[eid])!;
+
+      if (video.paused) {
+        video.play();
+        playIndicatorObj.visible = true;
+        pauseIndicatorObj.visible = false;
+        rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.playIndicatorRef[eid]));
+        // TODO: Coroutine
+      } else {
+        video.pause();
+        playIndicatorObj.visible = false;
+        pauseIndicatorObj.visible = true;
+        rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.pauseIndicatorRef[eid]));
+      }
     }
 
-    const menuObj = world.eid2obj.get(eid)!;
     const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);
     const yRot = videoIsFacingCamera ? 0 : Math.PI;
     if (menuObj.rotation.y !== yRot) {
@@ -111,5 +131,28 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
     timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
     timeLabelRef.sync();
+
+    if (rightMenuIndicatorCoroutine && rightMenuIndicatorCoroutine().done) {
+      rightMenuIndicatorCoroutine = null;
+    }
   });
+}
+
+const START_SCALE = new Vector3().setScalar(0.05);
+const END_SCALE = new Vector3().setScalar(0.25);
+function* animateIndicator(world: HubsWorld, eid: number) {
+  const obj = world.eid2obj.get(eid)!;
+  yield* animate(
+    [
+      [START_SCALE, END_SCALE],
+      [0.75, 0]
+    ],
+    700,
+    easeOutQuadratic,
+    ([scale, opacity]: [Vector3, number]) => {
+      obj.scale.copy(scale);
+      obj.matrixNeedsUpdate = true;
+      ((obj as Mesh).material as MeshBasicMaterial).opacity = opacity;
+    }
+  );
 }

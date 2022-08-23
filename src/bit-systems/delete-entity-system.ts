@@ -8,13 +8,14 @@ import { findAncestorEntity } from "../utils/bit-utils";
 import { coroutine } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
 
+// TODO Move to coroutine.ts when it exists
 // TODO Figure out the appropriate type and use it everywhere
-type Coroutine = Generator<Promise<void>, void, unknown>;
+export type Coroutine = Generator<Promise<void>, void, unknown>;
 
 const END_SCALE = new Vector3().setScalar(0.001);
 function* deleteEntity(world: HubsWorld, eid: number): Coroutine {
   const obj = world.eid2obj.get(eid)!;
-  yield* animate([[obj.scale.clone(), END_SCALE]], 400, easeOutQuadratic, ([scale]) => {
+  yield* animate([[obj.scale.clone(), END_SCALE]], 400, easeOutQuadratic, ([scale]: [Vector3]) => {
     obj.scale.copy(scale);
     obj.matrixNeedsUpdate = true;
   });

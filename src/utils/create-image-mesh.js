@@ -1,6 +1,12 @@
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import { errorTexture } from "../utils/error-texture";
 
+export const AlphaMode = Object.freeze({
+  Blend: "blend",
+  Mask: "mask",
+  Opaque: "opaque"
+});
+
 export function create360ImageMesh({ texture }) {
   const geometry = new THREE.SphereBufferGeometry(1, 64, 32);
   // invert the geometry on the x-axis so that all of the faces point inward
@@ -28,9 +34,12 @@ export function create360ImageMesh({ texture }) {
         material.alphaTest = this.data.alphaCutoff;
         break;
       case "blend":
-      default:
         material.transparent = true;
         material.alphaTest = 0;
+        break;
+
+      default:
+        throw new Error("Invalid alpha mode.");
     }
   }
   material.map = texture;
@@ -39,7 +48,7 @@ export function create360ImageMesh({ texture }) {
   return new THREE.Mesh(geometry, material);
 }
 
-export function createImageMesh({ texture, ratio }) {
+export function createImageMesh({ texture, ratio, alphaMode = AlphaMode.Opaque, alphaCutoff = 0.5 }) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   const geometry = createPlaneBufferGeometry(width, height, 1, 1, texture.flipY);
@@ -47,23 +56,18 @@ export function createImageMesh({ texture, ratio }) {
   const material = new THREE.MeshBasicMaterial();
   material.toneMapped == false;
   material.side = THREE.DoubleSide;
-  if (texture === errorTexture) {
-    material.transparent = true;
-  } else {
-    const alphaMode = "opaque"; //TODO
-    switch (alphaMode) {
-      case "opaque":
-        material.transparent = false;
-        break;
-      case "mask":
-        material.transparent = false;
-        material.alphaTest = this.data.alphaCutoff;
-        break;
-      case "blend":
-      default:
-        material.transparent = true;
-        material.alphaTest = 0;
-    }
+  switch (alphaMode) {
+    case AlphaMode.Mask:
+      material.transparent = false;
+      material.alphaTest = alphaCutoff;
+      break;
+    case AlphaMode.Blend:
+      material.transparent = true;
+      material.alphaTest = 0;
+      break;
+    case AlphaMode.Opaque:
+    default:
+      material.transparent = false;
   }
   material.map = texture;
   material.needsUpdate = true;

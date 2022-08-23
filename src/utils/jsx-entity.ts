@@ -38,6 +38,7 @@ import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
+import { AlphaMode } from "./create-image-mesh";
 
 // TODO we should do this in a more explicit spot for "preloading" during the loading screen
 preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }, function () {});
@@ -184,6 +185,7 @@ export interface ComponentData {
     textureVersion: number;
     ratio: number;
     projection: "flat" | "360-equirectangular";
+    alphaMode: typeof AlphaMode.Blend | typeof AlphaMode.Mask | typeof AlphaMode.Opaque;
   };
   video?: {
     texture: VideoTexture;
@@ -198,6 +200,8 @@ export interface ComponentData {
     timeLabelRef: Ref;
     trackRef: Ref;
     headRef: Ref;
+    playIndicatorRef: Ref;
+    pauseIndicatorRef: Ref;
   };
   "cursor-raycastable"?: true;
   "remote-hover-target"?: true;
