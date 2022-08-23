@@ -11,7 +11,6 @@ import {
   Interacted,
   MediaVideo,
   NetworkedVideo,
-  TextButton,
   VideoMenu,
   VideoMenuItem
 } from "../bit-components";
@@ -20,14 +19,10 @@ import { takeOwnership } from "../systems/netcode";
 import { paths } from "../systems/userinput/paths";
 import { isFacingCamera } from "../utils/three-utils";
 
-function clicked(eid: number) {
-  return hasComponent(APP.world, Interacted, eid);
-}
-
 const videoMenuQuery = defineQuery([VideoMenu]);
-const hoverRightQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
-const hoverRightEnterQuery = enterQuery(hoverRightQuery);
-const hoveredRemoteRightMenuButton = defineQuery([HoveredRemoteRight, VideoMenuItem]);
+const hoverRightVideoQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
+const hoverRightVideoEnterQuery = enterQuery(hoverRightVideoQuery);
+const hoverRightMenuItemQuery = defineQuery([HoveredRemoteRight, VideoMenuItem]);
 const sliderHalfWidth = 0.475;
 
 function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
@@ -53,13 +48,12 @@ const intersectInThePlaneOf = (() => {
 let intersectionPoint = new Vector3();
 export function videoMenuSystem(world: HubsWorld, userinput: any) {
   const rightVideoMenu = videoMenuQuery(world)[0];
-  const unhovered =
-    !hoverRightQuery(world).length &&
-    !hoveredRemoteRightMenuButton(world).length &&
+  const shouldHideVideoMenu =
     VideoMenu.videoRef[rightVideoMenu] &&
+    !hoverRightVideoQuery(world).length &&
+    !hoverRightMenuItemQuery(world).length &&
     !hasComponent(world, Held, VideoMenu.trackRef[rightVideoMenu]);
-  if (unhovered) {
-    // TODO: Left remote
+  if (shouldHideVideoMenu) {
     const menu = rightVideoMenu;
     const menuObj = world.eid2obj.get(menu)!;
     menuObj.removeFromParent();
@@ -67,7 +61,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     VideoMenu.videoRef[menu] = 0;
   }
 
-  hoverRightEnterQuery(world).forEach(function (eid) {
+  hoverRightVideoEnterQuery(world).forEach(function (eid) {
     const menu = rightVideoMenu;
     VideoMenu.videoRef[menu] = eid;
     const menuObj = world.eid2obj.get(menu)!;

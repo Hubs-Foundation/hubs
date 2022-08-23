@@ -1,7 +1,17 @@
-import { defineQuery, exitQuery, removeEntity } from "bitecs";
-import { MediaImage, GLTFModel, MediaFrame, Object3DTag, Slice9, Text, AudioEmitter } from "../bit-components";
+import { defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
+import {
+  MediaImage,
+  GLTFModel,
+  MediaFrame,
+  Object3DTag,
+  Slice9,
+  Text,
+  AudioEmitter,
+  VideoMenu
+} from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTexture } from "../utils/load-texture";
+import { traverseSome } from "../utils/three-utils";
 
 function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
@@ -18,7 +28,7 @@ const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
 const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
   obj.disconnect();
-  const audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
+  const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem;
   audioSystem.removeAudio({ node: obj });
 });
 
@@ -55,7 +65,14 @@ export function removeObject3DSystem(world) {
   const entities = exitedObject3DQuery(world);
   entities.forEach(eid => {
     const obj = world.eid2obj.get(eid);
-    obj.traverse(o => o.eid && removeEntity(world, o.eid));
+    traverseSome(obj, o => {
+      // TODO
+      if (o.eid && hasComponent(world, VideoMenu, o.eid)) {
+        return false;
+      }
+      o.eid && removeEntity(world, o.eid);
+      return true;
+    });
     obj.removeFromParent();
   });
 

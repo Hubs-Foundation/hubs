@@ -25,7 +25,8 @@ import {
   NetworkedVideo,
   VideoMenu,
   VideoMenuItem,
-  NotRemoteHoverTarget
+  NotRemoteHoverTarget,
+  Deletable
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -207,6 +208,7 @@ export interface ComponentData {
   "single-action-button"?: true;
   "holdable-button"?: true;
   holdable?: true;
+  deletable?: true;
   "make-kinematic-on-release"?: true;
   "destroy-at-extreme-distance"?: true;
   "video-menu-item"?: true;
@@ -256,6 +258,7 @@ export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
   "text-button": createDefaultInflator(TextButton),
   "hover-button": createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
+  deletable: createDefaultInflator(Deletable),
   rigidbody: createDefaultInflator(Rigidbody),
   "physics-shape": createDefaultInflator(PhysicsShape),
   "floaty-object": createDefaultInflator(FloatyObject),

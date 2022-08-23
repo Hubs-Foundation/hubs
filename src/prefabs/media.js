@@ -9,7 +9,9 @@ export function MediaPrefab({ src, resize, recenter }) {
       networked
       networked-transform
       media-loader={{ src, resize, recenter }}
+      deletable
       grabbable
+      destroy-at-extreme-distance
       make-kinematic-on-release
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physics-shape={{ halfExtents: [0.22, 0.14, 0.1] }} /* TODO Physics shapes*/

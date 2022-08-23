@@ -50,6 +50,7 @@ import { mediaLoadingSystem } from "../bit-systems/media-loading";
 import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
+import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -158,6 +159,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.gainSystem.tick();
     this.nameTagSystem.tick();
 
+    deleteEntitySystem(world, systems.userinput);
     destroyAtExtremeDistanceSystem(world);
     removeNetworkedObjectButtonSystem(world);
     removeObject3DSystem(world);

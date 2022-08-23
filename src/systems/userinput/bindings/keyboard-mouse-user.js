@@ -154,11 +154,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
-      src: { value: paths.device.keyboard.key("x") },
-      dest: { value: paths.actions.takeSnapshot },
-      xform: xforms.copy
-    },
-    {
       src: { value: paths.device.smartMouse.cursorPose },
       dest: { value: paths.actions.cursor.right.pose },
       xform: xforms.copy
@@ -724,6 +719,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.startInspecting },
       xform: xforms.any,
       priority: 201
+    },
+    {
+      src: { value: paths.device.keyboard.key("x") },
+      dest: { value: paths.actions.cursor.right.deleteEntity },
+      xform: xforms.rising
     }
   ],
   [sets.rightCursorHoveringOnVideo]: [

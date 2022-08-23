@@ -154,3 +154,4 @@ export const VideoMenu = defineComponent({
 
 export const AudioEmitter = defineComponent();
 export const AudioSettingsChanged = defineComponent();
+export const Deletable = defineComponent();
