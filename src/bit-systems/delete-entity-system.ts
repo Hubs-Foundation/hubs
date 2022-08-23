@@ -1,13 +1,23 @@
 import { defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
+import { Vector3 } from "three";
 import { HubsWorld } from "../app";
 import { Deletable, HoveredRemoteLeft, HoveredRemoteRight } from "../bit-components";
 import { paths } from "../systems/userinput/paths";
-import { sleep } from "../utils/async-utils";
+import { animate } from "../utils/animate";
 import { findAncestorEntity } from "../utils/bit-utils";
 import { coroutine } from "../utils/coroutine";
+import { easeOutQuadratic } from "../utils/easing";
 
-function* deleteEntity(world: HubsWorld, eid: number) {
-  yield sleep(1000);
+// TODO Figure out the appropriate type and use it everywhere
+type Coroutine = Generator<Promise<void>, void, unknown>;
+
+const END_SCALE = new Vector3().setScalar(0.001);
+function* deleteEntity(world: HubsWorld, eid: number): Coroutine {
+  const obj = world.eid2obj.get(eid)!;
+  yield* animate([[obj.scale.clone(), END_SCALE]], 400, easeOutQuadratic, ([scale]) => {
+    obj.scale.copy(scale);
+    obj.matrixNeedsUpdate = true;
+  });
   removeEntity(world, eid);
 }
 

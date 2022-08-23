@@ -11,6 +11,7 @@ import { MediaLoader, Networked } from "../bit-components";
 import { timeout, clear, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
 import { takeOwnership } from "../systems/netcode";
 import { renderAsEntity } from "../utils/jsx-entity";
+import { animate } from "../utils/animate";
 
 const loaderForMediaType = {
   [MEDIA_TYPE.IMAGE]: loadImage,
@@ -66,27 +67,6 @@ function resizeAndRecenter(world, media, eid) {
   }
 }
 
-function* animate({ properties, duration, easing, fn }) {
-  const values = properties.map(([s]) => new THREE.Vector3().copy(s));
-  const start = performance.now();
-  const end = start + duration;
-  let now = start;
-  while (now < end) {
-    const t = easing((now - start) / (end - start));
-    for (let i = 0; i < values.length; i++) {
-      values[i].lerpVectors(properties[i][0], properties[i][1], t);
-    }
-    fn(values);
-    yield Promise.resolve();
-    now = performance.now();
-  }
-
-  for (let i = 0; i < values.length; i++) {
-    values[i].copy(properties[i][1]);
-  }
-  fn(values);
-}
-
 function* animateScale(world, media) {
   const mediaObj = world.eid2obj.get(media);
 
@@ -109,15 +89,15 @@ function* animateScale(world, media) {
   onAnimate([startPosition, startScale]);
   yield Promise.resolve();
 
-  yield* animate({
-    properties: [
+  yield* animate(
+    [
       [startPosition, endPosition],
       [startScale, endScale]
     ],
-    duration: 400,
-    easing: easeOutQuadratic,
-    fn: onAnimate
-  });
+    400,
+    easeOutQuadratic,
+    onAnimate
+  );
 }
 
 function removeLoadingObject(world, eid) {
