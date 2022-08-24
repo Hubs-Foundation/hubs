@@ -84,8 +84,9 @@ function isReservedAttr(attr: string): attr is keyof Attrs {
   return reservedAttrs.includes(attr);
 }
 
+type ComponentFn = string | ((attrs: Attrs & ComponentData, children?: EntityDef[]) => EntityDef);
 export function createElementEntity(
-  tag: string | ((attrs: Attrs & ComponentData, children?: EntityDef[]) => EntityDef),
+  tag: "entity" | ComponentFn,
   attrs: Attrs & ComponentData,
   ...children: EntityDef[]
 ): EntityDef {

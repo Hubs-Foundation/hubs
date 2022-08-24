@@ -1,16 +1,15 @@
 /** @jsx createElementEntity */
-import { BoxBufferGeometry, Mesh, MeshBasicMaterial, PlaneBufferGeometry, Texture } from "three";
+import { BoxBufferGeometry, Mesh, MeshBasicMaterial, PlaneBufferGeometry } from "three";
 import { Label } from "../prefabs/camera-tool";
 import { AlphaMode } from "../utils/create-image-mesh";
 import { createElementEntity, createRef } from "../utils/jsx-entity";
 
 import { textureLoader } from "../utils/media-utils";
-declare function require(s: string): string;
-const playImageUrl = require("../assets/images/sprites/notice/play.png");
-const pauseImageUrl = require("../assets/images/sprites/notice/pause.png");
+import playImageUrl from "../assets/images/sprites/notice/play.png";
+import pauseImageUrl from "../assets/images/sprites/notice/pause.png";
 
-const playTexture = textureLoader.load(playImageUrl) as unknown as Texture;
-const pauseTexture = textureLoader.load(pauseImageUrl) as unknown as Texture;
+const playTexture = textureLoader.load(playImageUrl);
+const pauseTexture = textureLoader.load(pauseImageUrl);
 
 function Slider({ trackRef, headRef, ...props }: any) {
   return (
