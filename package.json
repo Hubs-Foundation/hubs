@@ -186,6 +186,7 @@
     "esm": "^3.2.25",
     "fast-plural-rules": "1.0.2",
     "file-loader": "^6.2.0",
+    "fork-ts-checker-webpack-plugin": "^7.2.13",
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
     "html-loader": "^4.1.0",

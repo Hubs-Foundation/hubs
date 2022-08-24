@@ -12,6 +12,7 @@ const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
 const packageLock = require("./package-lock.json");
 const request = require("request");
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -480,7 +481,8 @@ module.exports = async (env, argv) => {
         },
         {
           // We use babel to handle typescript so that features are correctly polyfilled for our targeted browsers. It also ends up being
-          // a good deeal faster since it just strips out types. It does NOT typecheck. Typechecking is only done at build and (ideally) in your editor.
+          // a good deal faster since it just strips out types. It does NOT typecheck. Typechecking is handled at build time by `npm run check`
+          // and concurrently at dev time with ForkTsCheckerWebpackPlugin
           test: /\.tsx?$/,
           include: [path.resolve(__dirname, "src")],
           exclude: [path.resolve(__dirname, "node_modules")],
@@ -620,6 +622,14 @@ module.exports = async (env, argv) => {
       }
     },
     plugins: [
+      new ForkTsCheckerWebpackPlugin({
+        typescript: {
+          diagnosticOptions: {
+            semantic: true,
+            syntactic: false // this will already fail in the babel step
+          }
+        }
+      }),
       new webpack.ProvidePlugin({
         process: "process/browser",
         // TODO we should bee direclty importing THREE stuff when we need it
