@@ -7,7 +7,9 @@ import {
 import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
-import "@babel/polyfill";
+
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 console.log(
   `App version: ${

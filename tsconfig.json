@@ -8,9 +8,17 @@
     "target": "es6",
     "jsx": "react",
     "allowJs": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "typeRoots": [
       "./node_modules/@types",
       "./types"
     ]
-  }
+  },
+  "include": [
+    "types/",
+    "src/"
+  ]
 }
