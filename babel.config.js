@@ -25,7 +25,6 @@ module.exports = {
   plugins: [
     // TODO: When i18n build pipeline is finished move to: [ "react-intl", { "removeDefaultMessage": true } ]
     "react-intl",
-    "transform-react-jsx-img-import",
     ["@babel/proposal-class-properties", { loose: true }],
     ["@babel/plugin-proposal-private-property-in-object", { loose: true }],
     ["@babel/plugin-proposal-private-methods", { loose: true }],

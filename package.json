@@ -173,7 +173,6 @@
     "ava": "^4.3.1",
     "babel-loader": "^8.2.5",
     "babel-plugin-react-intl": "^8.2.21",
-    "babel-plugin-transform-react-jsx-img-import": "^0.1.4",
     "copy-webpack-plugin": "^11.0.0",
     "cors": "^2.8.5",
     "css-loader": "^6.7.1",
