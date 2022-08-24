@@ -6,10 +6,21 @@ module.exports = {
       {
         exclude: ["transform-regenerator"],
         // targets are defined in .browserslistrc
-        // false = do not polyfill stuff unneccessarily
-        useBuiltIns: false
+        useBuiltIns: "entry",
+        // This should be kept up to date with thee version in package.json
+        corejs: "3.24.1",
+        // We care more about perf than exactly conforming to the spec
+        loose: true,
+        exclude: [
+          // These exist since forever but end up being polyfilled anyway because of an obscure issue if length is not writeable
+          "es.array.push",
+          "es.array.unshift"
+        ],
+        // Enable to sse resolved targets and polyfills being used
+        debug: false
       }
-    ]
+    ],
+    "@babel/typescript"
   ],
   plugins: [
     // TODO: When i18n build pipeline is finished move to: [ "react-intl", { "removeDefaultMessage": true } ]

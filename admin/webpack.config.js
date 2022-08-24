@@ -177,6 +177,17 @@ module.exports = (env, argv) => {
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }
         },
+        {
+          // We use babel to handle typescript so that features are correctly polyfilled for our targeted browsers. It also ends up being
+          // a good deeal faster since it just strips out types. It does NOT typecheck. Typechecking is only done at build and (ideally) in your editor.
+          test: /\.tsx?$/,
+          loader: "babel-loader",
+          options: require("../babel.config"),
+          include: [path.resolve(__dirname, "src")],
+          exclude: function (modulePath) {
+            return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+          }
+        },
         // TODO worker-loader has been deprecated, but we need "inline" support which is not available yet
         // ideally instead of inlining workers we should serve them off the root domain instead of CDN.
         {
