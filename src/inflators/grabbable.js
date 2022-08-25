@@ -8,7 +8,9 @@ import {
   RemoteHoverTarget
 } from "../bit-components";
 
-export function inflateGrabbable(world, eid, props = { cursor: true, hand: true }) {
+const defaults = { cursor: true, hand: true };
+export function inflateGrabbable(world, eid, props) {
+  props = Object.assign({}, defaults, props);
   if (props.hand) {
     addComponent(world, HandCollisionTarget, eid);
     addComponent(world, OffersHandConstraint, eid);

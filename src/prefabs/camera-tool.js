@@ -22,7 +22,7 @@ export function Button({ text, width, height, texture = buttonTexture, type = BU
       remoteHoverTarget
       hoverButton={{ type }}
       textButton={{ labelRef }}
-      signleActionButton
+      singleActionButton
       layers={1 << Layers.CAMERA_LAYER_UI}
       {...props}
     >

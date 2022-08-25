@@ -39,6 +39,7 @@ import { inflateText } from "../inflators/text";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
 import { AlphaMode } from "./create-image-mesh";
+import { MediaParams } from "../prefabs/media";
 
 // TODO we should do this in a more explicit spot for "preloading" during the loading screen
 preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }, function () {});
@@ -211,7 +212,7 @@ export interface ComponentData {
   handCollisionTarget?: true;
   offersRemoteConstraint?: true;
   offersHandConstraint?: true;
-  signleActionButton?: true;
+  singleActionButton?: true;
   holdableButton?: true;
   holdable?: true;
   deletable?: true;
@@ -228,7 +229,7 @@ export interface ComponentData {
   networkedTransform?: any;
   cameraTool?: any;
   animationMixer?: any;
-  mediaLoader?: any;
+  mediaLoader?: MediaParams;
   mediaFrame?: any;
   object3D?: any;
   text?: any;
@@ -252,35 +253,35 @@ declare global {
 }
 
 export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
-  "cursorRaycastable": createDefaultInflator(CursorRaycastable),
-  "remoteHoverTarget": createDefaultInflator(RemoteHoverTarget),
-  "isNotRemoteHoverTarget": createDefaultInflator(NotRemoteHoverTarget),
-  "handCollisionTarget": createDefaultInflator(HandCollisionTarget),
-  "offersRemoteConstraint": createDefaultInflator(OffersRemoteConstraint),
-  "offersHandConstraint": createDefaultInflator(OffersHandConstraint),
-  "signleActionButton": createDefaultInflator(SingleActionButton),
-  "holdableButton": createDefaultInflator(HoldableButton),
-  "textButton": createDefaultInflator(TextButton),
-  "hoverButton": createDefaultInflator(HoverButton),
+  cursorRaycastable: createDefaultInflator(CursorRaycastable),
+  remoteHoverTarget: createDefaultInflator(RemoteHoverTarget),
+  isNotRemoteHoverTarget: createDefaultInflator(NotRemoteHoverTarget),
+  handCollisionTarget: createDefaultInflator(HandCollisionTarget),
+  offersRemoteConstraint: createDefaultInflator(OffersRemoteConstraint),
+  offersHandConstraint: createDefaultInflator(OffersHandConstraint),
+  singleActionButton: createDefaultInflator(SingleActionButton),
+  holdableButton: createDefaultInflator(HoldableButton),
+  textButton: createDefaultInflator(TextButton),
+  hoverButton: createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),
   rigidbody: createDefaultInflator(Rigidbody),
-  "physicsShape": createDefaultInflator(PhysicsShape),
-  "floatyObject": createDefaultInflator(FloatyObject),
-  "makeKinematicOnRelease": createDefaultInflator(MakeKinematicOnRelease),
-  "destroyAtExtremeDistance": createDefaultInflator(DestroyAtExtremeDistance),
-  "networkedTransform": createDefaultInflator(NetworkedTransform),
+  physicsShape: createDefaultInflator(PhysicsShape),
+  floatyObject: createDefaultInflator(FloatyObject),
+  makeKinematicOnRelease: createDefaultInflator(MakeKinematicOnRelease),
+  destroyAtExtremeDistance: createDefaultInflator(DestroyAtExtremeDistance),
+  networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
-  "cameraTool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
-  "animationMixer": createDefaultInflator(AnimationMixer),
-  "networkedVideo": createDefaultInflator(NetworkedVideo),
-  "videoMenu": createDefaultInflator(VideoMenu),
-  "videoMenuItem": createDefaultInflator(VideoMenuItem),
-  "mediaLoader": inflateMediaLoader,
+  cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
+  animationMixer: createDefaultInflator(AnimationMixer),
+  networkedVideo: createDefaultInflator(NetworkedVideo),
+  videoMenu: createDefaultInflator(VideoMenu),
+  videoMenuItem: createDefaultInflator(VideoMenuItem),
+  mediaLoader: inflateMediaLoader,
   grabbable: inflateGrabbable,
 
   // inflators that create Object3Ds
-  "mediaFrame": inflateMediaFrame,
+  mediaFrame: inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
   text: inflateText,

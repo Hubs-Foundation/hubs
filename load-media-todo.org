@@ -41,6 +41,8 @@ Load/spawn all the media types:
 ** TODO Fix scale animate hover thing
 ** TODO Check that the play/pause video behavior we added for new videos did not mess up aframe videos
 ** DONE Rename hyphen-ated jsx properties to camelCase
+** TODO Think about default props for inflators. We make an empty object. Should it be undefined?
+** TODO Think about how uploading a file gives no user feedback until the upload is complete. We can do better than that.
 
 * Stuff
 ** Do work before render for object loading (upload textures to GPU, etc)

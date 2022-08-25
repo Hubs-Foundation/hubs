@@ -2,13 +2,19 @@
 import { createElementEntity } from "../utils/jsx-entity";
 import { COLLISION_LAYERS } from "../constants";
 
-export function MediaPrefab({ src, resize, recenter }) {
+export type MediaParams = {
+  src: string;
+  resize: boolean;
+  recenter: boolean;
+};
+
+export function MediaPrefab(params: MediaParams) {
   return (
     <entity
       name="Interactable Media"
       networked
       networkedTransform
-      mediaLoader={{ src, resize, recenter }}
+      mediaLoader={params}
       deletable
       grabbable
       destroyAtExtremeDistance
