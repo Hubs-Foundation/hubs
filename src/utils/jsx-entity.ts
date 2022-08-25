@@ -196,40 +196,40 @@ export interface ComponentData {
     projection: "flat" | "360-equirectangular";
     autoPlay: boolean;
   };
-  "networked-video"?: true;
-  "video-menu"?: {
+  networkedVideo?: true;
+  videoMenu?: {
     timeLabelRef: Ref;
     trackRef: Ref;
     headRef: Ref;
     playIndicatorRef: Ref;
     pauseIndicatorRef: Ref;
   };
-  "cursor-raycastable"?: true;
-  "remote-hover-target"?: true;
-  "is-not-remote-hover-target"?: true;
-  "hand-collision-target"?: true;
-  "offers-remote-constraint"?: true;
-  "offers-hand-constraint"?: true;
-  "single-action-button"?: true;
-  "holdable-button"?: true;
+  videoMenuItem?: true;
+  cursorRaycastable?: true;
+  remoteHoverTarget?: true;
+  isNotRemoteHoverTarget?: true;
+  handCollisionTarget?: true;
+  offersRemoteConstraint?: true;
+  offersHandConstraint?: true;
+  signleActionButton?: true;
+  holdableButton?: true;
   holdable?: true;
   deletable?: true;
-  "make-kinematic-on-release"?: true;
-  "destroy-at-extreme-distance"?: true;
-  "video-menu-item"?: true;
+  makeKinematicOnRelease?: true;
+  destroyAtExtremeDistance?: true;
 
   // @TODO
   networked?: any;
-  "text-button"?: any;
-  "hover-button"?: any;
+  textButton?: any;
+  hoverButton?: any;
   rigidbody?: any;
-  "physics-shape"?: any;
-  "floaty-object"?: any;
-  "networked-transform"?: any;
-  "camera-tool"?: any;
-  "animation-mixer"?: any;
-  "media-loader"?: any;
-  "media-frame"?: any;
+  physicsShape?: any;
+  floatyObject?: any;
+  networkedTransform?: any;
+  cameraTool?: any;
+  animationMixer?: any;
+  mediaLoader?: any;
+  mediaFrame?: any;
   object3D?: any;
   text?: any;
   model?: any;
@@ -252,35 +252,35 @@ declare global {
 }
 
 export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
-  "cursor-raycastable": createDefaultInflator(CursorRaycastable),
-  "remote-hover-target": createDefaultInflator(RemoteHoverTarget),
-  "is-not-remote-hover-target": createDefaultInflator(NotRemoteHoverTarget),
-  "hand-collision-target": createDefaultInflator(HandCollisionTarget),
-  "offers-remote-constraint": createDefaultInflator(OffersRemoteConstraint),
-  "offers-hand-constraint": createDefaultInflator(OffersHandConstraint),
-  "single-action-button": createDefaultInflator(SingleActionButton),
-  "holdable-button": createDefaultInflator(HoldableButton),
-  "text-button": createDefaultInflator(TextButton),
-  "hover-button": createDefaultInflator(HoverButton),
+  "cursorRaycastable": createDefaultInflator(CursorRaycastable),
+  "remoteHoverTarget": createDefaultInflator(RemoteHoverTarget),
+  "isNotRemoteHoverTarget": createDefaultInflator(NotRemoteHoverTarget),
+  "handCollisionTarget": createDefaultInflator(HandCollisionTarget),
+  "offersRemoteConstraint": createDefaultInflator(OffersRemoteConstraint),
+  "offersHandConstraint": createDefaultInflator(OffersHandConstraint),
+  "signleActionButton": createDefaultInflator(SingleActionButton),
+  "holdableButton": createDefaultInflator(HoldableButton),
+  "textButton": createDefaultInflator(TextButton),
+  "hoverButton": createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),
   rigidbody: createDefaultInflator(Rigidbody),
-  "physics-shape": createDefaultInflator(PhysicsShape),
-  "floaty-object": createDefaultInflator(FloatyObject),
-  "make-kinematic-on-release": createDefaultInflator(MakeKinematicOnRelease),
-  "destroy-at-extreme-distance": createDefaultInflator(DestroyAtExtremeDistance),
-  "networked-transform": createDefaultInflator(NetworkedTransform),
+  "physicsShape": createDefaultInflator(PhysicsShape),
+  "floatyObject": createDefaultInflator(FloatyObject),
+  "makeKinematicOnRelease": createDefaultInflator(MakeKinematicOnRelease),
+  "destroyAtExtremeDistance": createDefaultInflator(DestroyAtExtremeDistance),
+  "networkedTransform": createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
-  "camera-tool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
-  "animation-mixer": createDefaultInflator(AnimationMixer),
-  "networked-video": createDefaultInflator(NetworkedVideo),
-  "video-menu": createDefaultInflator(VideoMenu),
-  "video-menu-item": createDefaultInflator(VideoMenuItem),
-  "media-loader": inflateMediaLoader,
+  "cameraTool": createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
+  "animationMixer": createDefaultInflator(AnimationMixer),
+  "networkedVideo": createDefaultInflator(NetworkedVideo),
+  "videoMenu": createDefaultInflator(VideoMenu),
+  "videoMenuItem": createDefaultInflator(VideoMenuItem),
+  "mediaLoader": inflateMediaLoader,
   grabbable: inflateGrabbable,
 
   // inflators that create Object3Ds
-  "media-frame": inflateMediaFrame,
+  "mediaFrame": inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
   text: inflateText,

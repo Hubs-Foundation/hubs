@@ -40,7 +40,7 @@ Load/spawn all the media types:
 ** TODO Do memory audit. What is our footprint?
 ** TODO Fix scale animate hover thing
 ** TODO Check that the play/pause video behavior we added for new videos did not mess up aframe videos
-** TODO Rename hyphen-ated jsx properties to camelCase
+** DONE Rename hyphen-ated jsx properties to camelCase
 
 * Stuff
 ** Do work before render for object loading (upload textures to GPU, etc)

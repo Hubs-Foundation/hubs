@@ -4,6 +4,10 @@ import { GLTFModel } from "../bit-components";
 import { loadModel as loadGLTFModel } from "../components/gltf-model-plus";
 import { addObject3DComponent, inflators } from "../utils/jsx-entity";
 
+function camelCase(s) {
+  return s.replace(/-(\w)/g, (_, m) => m.toUpperCase());
+}
+
 export function* loadModel({ world, accessibleUrl }) {
   const { scene, animations } = yield loadGLTFModel(accessibleUrl, null, true, null, false);
   scene.userData.gltfSrc = accessibleUrl;
@@ -15,13 +19,14 @@ export function* loadModel({ world, accessibleUrl }) {
     const components = obj.userData?.gltfExtensions?.MOZ_hubs_components || {};
     const eid = addEntity(world);
     Object.keys(components).forEach(name => {
-      if (!inflators[name]) {
+      const inflatorName = camelCase(name);
+      if (!inflators[inflatorName]) {
         // TODO: Throw error or warn?
         // throw new Error(`Failed to inflate unknown component called ${name}`);
-        console.warn(`Failed to inflate unknown component called ${name}`);
+        console.warn(`Failed to inflate unknown component called ${inflatorName}`);
         return;
       }
-      inflators[name](world, eid, components[name]);
+      inflators[inflatorName](world, eid, components[name]);
     });
     const replacement = world.eid2obj.get(eid);
     if (replacement) {

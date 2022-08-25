@@ -18,11 +18,11 @@ export function Button({ text, width, height, texture = buttonTexture, type = BU
     <entity
       name={props.name || "Button"}
       slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
-      cursor-raycastable
-      remote-hover-target
-      hover-button={{ type }}
-      text-button={{ labelRef }}
-      single-action-button
+      cursorRaycastable
+      remoteHoverTarget
+      hoverButton={{ type }}
+      textButton={{ labelRef }}
+      signleActionButton
       layers={1 << Layers.CAMERA_LAYER_UI}
       {...props}
     >
@@ -88,17 +88,17 @@ export function CameraPrefab() {
     <entity
       name="Camera Tool"
       networked
-      networked-transform
-      cursor-raycastable
-      remote-hover-target
-      hand-collision-target
-      offers-remote-constraint
-      offers-hand-constraint
-      make-kinematic-on-release
+      networkedTransform
+      cursorRaycastable
+      remoteHoverTarget
+      handCollisionTarget
+      offersRemoteConstraint
+      offersHandConstraint
+      makeKinematicOnRelease
       holdable
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-      physics-shape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      camera-tool={{
+      physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
+      cameraTool={{
         snapRef,
         cancelRef,
         button_next,
@@ -198,14 +198,14 @@ export function CubeMediaFramePrefab() {
     <entity
       name="Media Frame"
       networked
-      networked-transform
-      cursor-raycastable
-      remote-hover-target
-      hand-collision-target
-      offers-remote-constraint
-      offers-hand-constraint
-      floaty-object
-      destroy-at-extreme-distance
+      networkedTransform
+      cursorRaycastable
+      remoteHoverTarget
+      handCollisionTarget
+      offersRemoteConstraint
+      offersHandConstraint
+      floatyObject
+      destroyAtExtremeDistance
       holdable
       rigidbody={{
         gravity: -9.8,
@@ -216,10 +216,10 @@ export function CubeMediaFramePrefab() {
           COLLISION_LAYERS.INTERACTABLES |
           COLLISION_LAYERS.AVATAR
       }}
-      physics-shape={{ halfExtents: [0.5, 0.5, 0.5] }}
+      physicsShape={{ halfExtents: [0.5, 0.5, 0.5] }}
       object3D={new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial())}
     >
-      <entity media-frame position={[0, 1, 0]} />
+      <entity mediaFrame position={[0, 1, 0]} />
     </entity>
   );
 }

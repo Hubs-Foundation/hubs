@@ -21,7 +21,7 @@ export function* loadVideo({
     <entity
       name="Video"
       networked
-      networked-video
+      networkedVideo
       grabbable={{ cursor: true, hand: false }}
       video={{
         texture,

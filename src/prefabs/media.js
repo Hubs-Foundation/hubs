@@ -7,14 +7,14 @@ export function MediaPrefab({ src, resize, recenter }) {
     <entity
       name="Interactable Media"
       networked
-      networked-transform
-      media-loader={{ src, resize, recenter }}
+      networkedTransform
+      mediaLoader={{ src, resize, recenter }}
       deletable
       grabbable
-      destroy-at-extreme-distance
-      make-kinematic-on-release
+      destroyAtExtremeDistance
+      makeKinematicOnRelease
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-      physics-shape={{ halfExtents: [0.22, 0.14, 0.1] }} /* TODO Physics shapes*/
+      physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }} /* TODO Physics shapes*/
       scale={[1, 1, 1]}
     />
   );
