@@ -329,12 +329,12 @@ class UIRoot extends Component {
       const cursor = document.querySelector("#right-cursor");
       if (this.state.isRecordingMode) {
         // If isRecordingMode is true then toggle it off.
-        cursor.setAttribute("scale", { x: 1, y: 1, z: 1 });
+        cursor.object3D.children[1].material.visible = true;
         this.setState({ hide: false, hideUITip: false, isRecordingMode: false });
         document.querySelector(".rs-fps-counter").style.visibility = "visible";
         document.querySelector(".rs-base").style.visibility = "visible";
       } else {
-        cursor.setAttribute("scale", { x: 0, y: 0, z: 0 });
+        cursor.object3D.children[1].material.visible = false;
         this.setState({ hide: true, hideUITip: true, isRecordingMode: true });
         document.querySelector(".rs-fps-counter").style.visibility = "hidden";
         document.querySelector(".rs-base").style.visibility = "hidden";
