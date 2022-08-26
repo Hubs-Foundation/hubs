@@ -1,7 +1,9 @@
 * feature/load-media
 This PR adds a media-loading system to eventually replace the media-loader aframe component.
 
-** TODO Delete, rotate, and scale
+** DONE Delete
+** TODO rotate
+** TODO scale
 ** TODO Basic support
 Load/spawn all the media types:
 *** TODO VIDEO
@@ -22,9 +24,9 @@ Load/spawn all the media types:
 *** DONE MODEL
 *** TODO HTML
 ** DONE Show loading cube while loading
-** TODO Restore original pasting action.
-** TODO Support pasting files
-** TODO Put it behind a feature flag
+** DONE Restore original pasting action.
+** DONE Support pasting files
+** DONE Put it behind a feature flag
 ** TODO New objects need to show up in the object list
 ** TODO Play loading cube animation
 ** TODO Alternative loading cubes
