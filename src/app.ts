@@ -1,7 +1,7 @@
 import * as bitecs from "bitecs";
 import { addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
-import { AEntity, Networked, Object3DTag, Owned, VideoMenu } from "./bit-components";
+import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
 import MediaSearchStore from "./storage/media-search-store";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
@@ -23,8 +23,6 @@ import {
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { DialogAdapter } from "./naf-dialog-adapter";
-import { renderAsEntity } from "./utils/jsx-entity";
-import { VideoMenuPrefab } from "./prefabs/video-menu";
 
 declare global {
   interface Window {
