@@ -2,8 +2,8 @@
 This PR adds a media-loading system to eventually replace the media-loader aframe component.
 
 ** DONE Delete
-** TODO rotate
-** TODO scale
+** TODO Rotate
+** TODO Scale
 ** TODO Basic support
 Load/spawn all the media types:
 *** TODO VIDEO
@@ -17,7 +17,7 @@ Load/spawn all the media types:
 - Make the buttons do the thing to the video
 - Maybe parent the menu(?)
 
-**** Fix issue where we can't move videos
+**** DONE Fix issue where we can't move videos
 *** TODO AUDIO
 *** DONE IMAGE
 *** TODO PDF
@@ -31,6 +31,7 @@ Load/spawn all the media types:
 ** TODO Play loading cube animation
 ** TODO Alternative loading cubes
 ** TODO Flat vs 360 projection
+Both work, but no way to spawn 360 images yet.
 ** TODO Add physics shapes
 *** TODO Physics shape of loading cube
 ** DONE Resize models on load
@@ -39,9 +40,11 @@ Load/spawn all the media types:
 ** TODO Add Object Menus
 ** TODO Write tests for coroutines
 ** TODO Pinning
-** TODO Do memory audit. What is our footprint?
-** TODO Fix scale animate hover thing
-** TODO Check that the play/pause video behavior we added for new videos did not mess up aframe videos
+** DONE Do memory audit. What is our footprint?
+Each entity seems to be about 1.2 KB. 10000 entities ~ 120MB.
+** DONE Fix scale animate hover thing
+Not sure if this is fixed, but can't reproduce
+** DONE Check that the play/pause video behavior we added for new videos did not mess up aframe videos
 ** DONE Rename hyphen-ated jsx properties to camelCase
 ** TODO Think about default props for inflators. We make an empty object. Should it be undefined?
 ** TODO Think about how uploading a file gives no user feedback until the upload is complete. We can do better than that.
