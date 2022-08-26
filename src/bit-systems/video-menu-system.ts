@@ -34,8 +34,8 @@ function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
 }
 
 const intersectInThePlaneOf = (() => {
-  let plane = new Plane();
-  let ray = new Ray();
+  const plane = new Plane();
+  const ray = new Ray();
   type Pose = { position: Vector3; direction: Vector3 };
   return function intersectInThePlaneOf(obj: Object3D, { position, direction }: Pose, intersection: Vector3) {
     ray.set(position, direction);
@@ -95,7 +95,6 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
         playIndicatorObj.visible = true;
         pauseIndicatorObj.visible = false;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.playIndicatorRef[eid]));
-        // TODO: Coroutine
       } else {
         video.pause();
         playIndicatorObj.visible = false;
