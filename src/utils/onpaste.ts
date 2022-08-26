@@ -3,6 +3,7 @@ import { upload, parseURL } from "../utils/media-utils";
 import { guessContentType } from "../utils/media-url-utils";
 import { AElement } from "aframe";
 import { Vector3 } from "three";
+import qsTruthy from "../utils/qs_truthy";
 
 type UploadResponse = {
   file_id: string;
@@ -75,6 +76,7 @@ async function onPaste(e: ClipboardEvent) {
   if (!e.clipboardData) {
     return;
   }
+  e.preventDefault();
   if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) {
     return spawnFromFileList(e.clipboardData.files);
   }
@@ -88,14 +90,17 @@ function onDrop(e: DragEvent) {
   }
   const files = e.dataTransfer?.files;
   if (files && files.length) {
+    e.preventDefault();
     return spawnFromFileList(files);
   }
   const url = e.dataTransfer?.getData("url") || e.dataTransfer?.getData("text");
   if (url) {
+    e.preventDefault();
     return spawnFromUrl(url);
   }
-  console.warn("Could not handle drop event", e);
 }
 
-document.addEventListener("paste", onPaste);
-document.addEventListener("drop", onDrop);
+if (qsTruthy("newloader")) {
+  document.addEventListener("paste", onPaste);
+  document.addEventListener("drop", onDrop);
+}
