@@ -48,21 +48,15 @@ AFRAME.registerComponent("networked-audio-analyser", {
     this.prevVolume = 0;
     this.disableUpdates = true;
     this.avatarIsTalking = false;
+    this.soundSource = null;
 
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
+    this._setSoundSource = this._setSoundSource.bind(this);
+    this._unsetSoundSource = this._unsetSoundSource.bind(this);
     this.el.sceneEl.systems["frame-scheduler"].schedule(this._runScheduledWork, "audio-analyser");
-    this.el.addEventListener(
-      "sound-source-set",
-      event => {
-        const ctx = THREE.AudioContext.getContext();
-        this.analyser = ctx.createAnalyser();
-        this.analyser.fftSize = 32;
-        this.levels = new Uint8Array(this.analyser.fftSize);
-        event.detail.soundSource.connect(this.analyser);
-      },
-      { once: true }
-    );
+    this.el.addEventListener("sound-source-set", this._setSoundSource);
+    this.el.addEventListener("sound-source-unset", this._unsetSoundSource);
 
     this.playerSessionId = findAncestorWithComponent(this.el, "player-info").components["player-info"].playerSessionId;
     registerComponentInstance(this, "networked-audio-analyser");
@@ -71,6 +65,9 @@ AFRAME.registerComponent("networked-audio-analyser", {
   remove: function() {
     deregisterComponentInstance(this, "networked-audio-analyser");
     this.el.sceneEl.systems["frame-scheduler"].unschedule(this._runScheduledWork, "audio-analyser");
+    this.el.removeEventListener("sound-source-set", this._setSoundSource);
+    this.el.removeEventListener("sound-source-unset", this._unsetSoundSource);
+    this._unsetSoundSource();
   },
 
   tick: function(t) {
@@ -82,6 +79,24 @@ AFRAME.registerComponent("networked-audio-analyser", {
   _runScheduledWork: function() {
     if (this.disableUpdates) {
       this._updateAnalysis();
+    }
+  },
+
+  _setSoundSource: function(event) {
+    this._unsetSoundSource(event);
+    this.soundSource = event.detail.soundSource;
+    const ctx = THREE.AudioContext.getContext();
+    this.analyser = ctx.createAnalyser();
+    this.analyser.fftSize = 32;
+    this.levels = new Uint8Array(this.analyser.fftSize);
+    this.soundSource.connect(this.analyser);
+  },
+
+  _unsetSoundSource: function() {
+    if (this.soundSource) {
+      this.soundSource.disconnect();
+      this.soundSource = null;
+      this.analyser = null;
     }
   },
 

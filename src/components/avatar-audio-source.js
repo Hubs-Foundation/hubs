@@ -72,11 +72,11 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     this.destination = audio.context.createMediaStreamDestination();
     this.mediaStreamSource = audio.context.createMediaStreamSource(stream);
-    const destinationSource = audio.context.createMediaStreamSource(this.destination.stream);
+    this.destinationSource = audio.context.createMediaStreamSource(this.destination.stream);
     this.mediaStreamSource.connect(this.destination);
-    audio.setNodeSource(destinationSource);
+    audio.setNodeSource(this.destinationSource);
     this.el.setObject3D(this.attrName, audio);
-    this.el.emit("sound-source-set", { soundSource: destinationSource });
+    this.el.emit("sound-source-set", { soundSource: this.destinationSource });
 
     APP.audios.set(this.el, audio);
     updateAudioSettings(this.el, audio);
@@ -87,6 +87,13 @@ AFRAME.registerComponent("avatar-audio-source", {
     if (audio) {
       this.audioSystem.removeAudio({ node: audio });
       this.el.removeObject3D(this.attrName);
+      this.mediaStreamSource.disconnect();
+      this.mediaStreamSource = null;
+      this.destinationSource.disconnect();
+      this.destinationSource = null;
+      this.destination.disconnect();
+      this.destination = null;
+      this.el.emit("sound-source-unset");
     }
   },
 
