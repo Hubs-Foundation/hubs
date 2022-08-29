@@ -221,11 +221,12 @@ AFRAME.registerComponent("zone-audio-source", {
     }
   },
 
+  remove() {
+    this.cleanUpAudio();
+  },
+
   setInput(newInput) {
-    if (this.input) {
-      this.input.disconnect(this.gainFilter);
-      this.input = null;
-    }
+    this.cleanUpAudio();
 
     if (newInput) {
       newInput.connect(this.gainFilter);
@@ -235,6 +236,13 @@ AFRAME.registerComponent("zone-audio-source", {
 
   getGainFilter() {
     return this.gainFilter;
+  },
+
+  cleanUpAudio() {
+    if (this.input) {
+      this.input.disconnect();
+      this.input = null;
+    }
   },
 
   tick() {
