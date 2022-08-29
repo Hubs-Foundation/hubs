@@ -11,5 +11,6 @@ jobs:
     with:
       registry: mozillareality
       dockerfile: RetPageOriginDockerfile
+      smoke: true
     secrets:
       DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
