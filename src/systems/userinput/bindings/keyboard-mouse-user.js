@@ -37,15 +37,31 @@ const videoBindings = [
 ];
 
 if (qsTruthy("newLoader")) {
+  const priority = 3;
   videoBindings.push({
     src: { value: paths.device.mouse.buttonLeft },
+    dest: { value: k("mousedown") },
+    xform: xforms.rising,
+    priority
+  });
+  videoBindings.push({
+    src: { value: paths.device.mouse.buttonLeft },
+    dest: { value: k("mouseup") },
+    xform: xforms.falling,
+    priority
+  });
+  videoBindings.push({
+    src: {
+      rising: k("mousedown"),
+      falling: k("mouseup")
+    },
     dest: {
       click: paths.actions.cursor.right.togglePlayVideo,
       grab: paths.actions.cursor.right.grab,
       drop: paths.actions.cursor.right.drop
     },
     xform: xforms.clickAndHold(),
-    priority: 3
+    priority
   });
 }
 

@@ -70,29 +70,24 @@ export const xforms = {
   },
   clickAndHold: function (grabDelayMs = 160) {
     return function (frame, src, dest, state = {}) {
-      const buttonIsDown = frame.get(src.value);
       let click = false;
       let grab = false;
       let drop = false;
-      if (buttonIsDown) {
-        if (!state.buttonWasDown) {
-          state.buttonDownTime = performance.now();
-        }
 
-        const timeHeldDown = performance.now() - state.buttonDownTime;
-        if (!state.grabbed && timeHeldDown > grabDelayMs) {
-          state.grabbed = true;
-          grab = true;
-        }
-      } else if (state.buttonWasDown) {
+      if (frame.get(src.rising)) {
+        state.buttonDownTime = performance.now();
+      } else if (state.buttonDownTime && frame.get(src.falling)) {
+        state.buttonDownTime = 0;
         if (state.grabbed) {
           state.grabbed = false;
           drop = true;
         } else {
           click = true;
         }
+      } else if (state.buttonDownTime && !state.grabbed && performance.now() - state.buttonDownTime > grabDelayMs) {
+        state.grabbed = true;
+        grab = true;
       }
-      state.buttonWasDown = buttonIsDown;
 
       frame.setValueType(dest.click, click);
       frame.setValueType(dest.grab, grab);
