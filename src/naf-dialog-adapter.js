@@ -751,14 +751,13 @@ export class DialogAdapter extends EventEmitter {
     });
 
     if (this._localMediaStream) {
-      // TODO: Refactor to be "Create producers"
-      await this.setLocalMediaStream(this._localMediaStream);
+      await this.createProducers(this._localMediaStream);
     }
   }
 
-  async setLocalMediaStream(stream) {
+  async createProducers(stream) {
     if (!this._sendTransport) {
-      console.error("Tried to setLocalMediaStream before a _sendTransport existed");
+      console.error("Tried to createProducers before a _sendTransport existed");
       return;
     }
     this.emitRTCEvent("info", "RTC", () => `Creating missing producers`);
@@ -769,40 +768,15 @@ export class DialogAdapter extends EventEmitter {
       stream.getTracks().map(async track => {
         if (track.kind === "audio") {
           sawAudio = true;
-
-          // TODO multiple audio tracks?
-          if (this._micProducer) {
-            if (this._micProducer.track !== track) {
-              this._micProducer.track.stop();
-              this._micProducer.replaceTrack(track);
-            }
-          } else {
-            // stopTracks = false because otherwise the track will end during a temporary disconnect
-            this._micProducer = await this._sendTransport.produce({
-              track,
-              pause: !this._micShouldBeEnabled,
-              stopTracks: false,
-              codecOptions: { opusStereo: false, opusDtx: true },
-              zeroRtpOnPause: true,
-              disableTrackOnPause: true
-            });
-
-            this._micProducer.on("transportclose", () => {
-              this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
-              this._micProducer = null;
-            });
-
-            this.emit("mic-state-changed", { enabled: this.isMicEnabled });
-          }
+          await this.createMicProducer(track);
         } else {
           sawVideo = true;
-
           if (track._hubs_contentHint === MediaDevices.SCREEN) {
-            await this.disableCamera();
-            await this.enableShare(track);
+            await this.closeCameraProducer();
+            await this.createShareProducer(track);
           } else if (track._hubs_contentHint === MediaDevices.CAMERA) {
-            await this.disableShare();
-            await this.enableCamera(track);
+            await this.closeShareProducer();
+            await this.createCameraProducer(track);
           }
         }
 
@@ -811,18 +785,16 @@ export class DialogAdapter extends EventEmitter {
     );
 
     if (!sawAudio && this._micProducer) {
-      this._protoo.request("closeProducer", { producerId: this._micProducer.id });
-      this._micProducer.close();
-      this._micProducer = null;
+      this.closeMicProducer();
     }
     if (!sawVideo) {
-      this.disableCamera();
-      this.disableShare();
+      this.closeCameraProducer();
+      this.closeShareProducer();
     }
     this._localMediaStream = stream;
   }
 
-  async enableCamera(track) {
+  async createCameraProducer(track) {
     // stopTracks = false because otherwise the track will end during a temporary disconnect
     this._cameraProducer = await this._sendTransport.produce({
       track,
@@ -835,15 +807,18 @@ export class DialogAdapter extends EventEmitter {
 
     this._cameraProducer.on("transportclose", () => {
       this.emitRTCEvent("info", "RTC", () => `Camera transport closed`);
-      this.disableCamera();
+      this.closeCameraProducer();
     });
     this._cameraProducer.observer.on("trackended", () => {
       this.emitRTCEvent("info", "RTC", () => `Camera track ended`);
-      this.disableCamera();
+      this.closeCameraProducer();
+    });
+    this._cameraProducer.observer.on("close", () => {
+      this.emitRTCEvent("info", "RTC", () => `Camera producer closed`);
     });
   }
 
-  async disableCamera() {
+  async closeCameraProducer() {
     if (!this._cameraProducer) return;
 
     this._cameraProducer.close();
@@ -853,13 +828,13 @@ export class DialogAdapter extends EventEmitter {
         await this._protoo.request("closeProducer", { producerId: this._cameraProducer.id });
       }
     } catch (error) {
-      console.error(`disableCamera(): ${error}`);
+      console.error(`closeCameraProducer(): ${error}`);
     }
 
     this._cameraProducer = null;
   }
 
-  async enableShare(track) {
+  async createShareProducer(track) {
     // stopTracks = false because otherwise the track will end during a temporary disconnect
     this._shareProducer = await this._sendTransport.produce({
       track,
@@ -875,15 +850,18 @@ export class DialogAdapter extends EventEmitter {
 
     this._shareProducer.on("transportclose", () => {
       this.emitRTCEvent("info", "RTC", () => `Desktop Share transport closed`);
-      this.disableShare();
+      this.closeShareProducer();
     });
     this._shareProducer.observer.on("trackended", () => {
       this.emitRTCEvent("info", "RTC", () => `Desktop Share transport track ended`);
-      this.disableShare();
+      this.closeShareProducer();
+    });
+    this._shareProducer.observer.on("close", () => {
+      this.emitRTCEvent("info", "RTC", () => `Desktop Share producer closed`);
     });
   }
 
-  async disableShare() {
+  async closeShareProducer() {
     if (!this._shareProducer) return;
 
     this._shareProducer.close();
@@ -893,10 +871,56 @@ export class DialogAdapter extends EventEmitter {
         await this._protoo.request("closeProducer", { producerId: this._shareProducer.id });
       }
     } catch (error) {
-      console.error(`disableShare(): ${error}`);
+      console.error(`closeShareProducer(): ${error}`);
     }
 
     this._shareProducer = null;
+  }
+
+  async createMicProducer(track) {
+    // stopTracks = false because otherwise the track will end during a temporary disconnect
+    this._micProducer = await this._sendTransport.produce({
+      track,
+      pause: !this._micShouldBeEnabled,
+      stopTracks: false,
+      codecOptions: { opusStereo: false, opusDtx: true },
+      zeroRtpOnPause: true,
+      disableTrackOnPause: true
+    });
+
+    this._micProducer.on("transportclose", () => {
+      this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
+      this._micProducer = null;
+    });
+    this._micProducer.observer.on("pause", () => {
+      this.emitRTCEvent("info", "RTC", () => `Mic producer paused`);
+    });
+    this._micProducer.observer.on("resume", () => {
+      this.emitRTCEvent("info", "RTC", () => `Mic producer resumed`);
+    });
+    this._micProducer.observer.on("close", () => {
+      this.emitRTCEvent("info", "RTC", () => `Mic producer closed`);
+    });
+
+    this.emit("mic-state-changed", { enabled: this.isMicEnabled });
+  }
+
+  async closeMicProducer() {
+    if (!this._micProducer) return;
+
+    this._micProducer.close();
+
+    try {
+      if (!this._sendTransport.closed) {
+        await this._protoo.request("closeProducer", { producerId: this._micProducer.id });
+      }
+    } catch (error) {
+      console.error(`closeMicProducer(): ${error}`);
+    }
+
+    this._micProducer = null;
+
+    this.emit("mic-state-changed", { enabled: this.isMicEnabled });
   }
 
   toggleMicrophone() {
@@ -907,21 +931,25 @@ export class DialogAdapter extends EventEmitter {
     }
   }
 
-  enableMicrophone(enabled) {
-    if (!this._micProducer) {
-      console.error("Tried to toggle mic but there's no producer.");
-      return;
-    }
-
+  async enableMicrophone(enabled) {
+    if (!this._micProducer) return;
     if (enabled && !this.isMicEnabled) {
-      this._micProducer.resume();
-      this._protoo.request("resumeProducer", { producerId: this._micProducer.id });
+      this.enableMic();
     } else if (!enabled && this.isMicEnabled) {
-      this._micProducer.pause();
-      this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
+      this.disableMic();
     }
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
+  }
+
+  enableMic() {
+    this._protoo.request("resumeProducer", { producerId: this._micProducer.id });
+    this._micProducer.resume();
+  }
+
+  disableMic() {
+    this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
+    this._micProducer.pause();
   }
 
   get isMicEnabled() {

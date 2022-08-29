@@ -248,7 +248,7 @@ export default class MediaDevicesManager extends EventEmitter {
       console.log("No available audio tracks");
     }
 
-    await APP.dialog.setLocalMediaStream(this._mediaStream);
+    await APP.dialog.createProducers(this._mediaStream);
 
     if (unmute) {
       APP.dialog.enableMicrophone(true);
@@ -328,7 +328,7 @@ export default class MediaDevicesManager extends EventEmitter {
     this.audioTrack?.stop();
     this.audioTrack = null;
 
-    await APP.dialog.setLocalMediaStream(this._mediaStream);
+    await APP.dialog.createProducers(this._mediaStream);
     APP.dialog.enableMicrophone(false);
   }
 
@@ -379,7 +379,7 @@ export default class MediaDevicesManager extends EventEmitter {
           this.audioSystem.addStreamToOutboundAudio("screenshare", newStream);
         }
 
-        await APP.dialog.setLocalMediaStream(this._mediaStream);
+        await APP.dialog.createProducers(this._mediaStream);
 
         const mediaDevice = isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA;
         this._permissionsStatus[mediaDevice] = PermissionStatus.GRANTED;
@@ -408,7 +408,7 @@ export default class MediaDevicesManager extends EventEmitter {
 
     this.audioSystem.removeStreamFromOutboundAudio("screenshare");
 
-    await APP.dialog.setLocalMediaStream(this._mediaStream);
+    await APP.dialog.createProducers(this._mediaStream);
   }
 
   async shouldShowHmdMicWarning() {

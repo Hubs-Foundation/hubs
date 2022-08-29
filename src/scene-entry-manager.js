@@ -525,7 +525,7 @@ export default class SceneEntryManager {
     }
 
     const connect = async () => {
-      await APP.dialog.setLocalMediaStream(this.mediaDevicesManager.mediaStream);
+      await APP.dialog.createProducers(this.mediaDevicesManager.mediaStream);
       audioEl.play();
     };
     if (APP.dialog._sendTransport) {
