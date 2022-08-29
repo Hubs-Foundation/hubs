@@ -4,7 +4,6 @@ on:
     branches:
     paths-ignore: ["README.md"]
   workflow_dispatch:
-#1
 jobs:
   turkeyGitops:
     uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@master
