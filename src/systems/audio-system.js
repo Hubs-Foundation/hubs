@@ -194,11 +194,18 @@ export class AudioSystem {
   }
 
   removeAudio({ node }) {
-    let outputNode = node;
-    if (isThreeAudio(node)) {
-      outputNode = node.gain;
+    try {
+      node.disconnect();
+    } catch (e) {
+      console.warn("Audio node not connected");
     }
-    outputNode.disconnect();
+    if (isThreeAudio(node)) {
+      try {
+        node.gain.disconnect();
+      } catch (e) {
+        console.warn("Audio node not connected");
+      }   
+    }
   }
 
   updatePrefs() {
