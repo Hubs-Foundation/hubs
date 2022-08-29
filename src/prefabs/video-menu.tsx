@@ -30,7 +30,6 @@ function Slider({ trackRef, headRef, ...props }: any) {
         ref={trackRef}
       >
         <entity
-          isNotRemoteHoverTarget
           name="Slider:Head"
           object3D={new Mesh(new BoxBufferGeometry(0.05, 0.05, 0.05), new MeshBasicMaterial())}
           ref={headRef}

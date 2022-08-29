@@ -167,18 +167,9 @@ AFRAME.registerComponent("cursor-controller", {
           true,
           rawIntersections
         );
-
         this.intersection = rawIntersections[0];
-        let remoteHoverTarget;
-        for (let i = 0; i < rawIntersections.length; i++) {
-          const maybeHoverTarget = findRemoteHoverTarget(APP.world, rawIntersections[i].object);
-          if (maybeHoverTarget) {
-            this.intersection = rawIntersections[i];
-            remoteHoverTarget = maybeHoverTarget;
-            break;
-          }
-        }
 
+        const remoteHoverTarget = this.intersection && findRemoteHoverTarget(APP.world, this.intersection.object);
         isHoveringSomething = !!remoteHoverTarget;
         if (remoteHoverTarget) {
           addComponent(APP.world, left ? HoveredRemoteLeft : HoveredRemoteRight, remoteHoverTarget);
