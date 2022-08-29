@@ -36,7 +36,7 @@ const videoBindings = [
   }
 ];
 
-if (qsTruthy("newloader")) {
+if (qsTruthy("newLoader")) {
   videoBindings.push({
     src: { value: paths.device.mouse.buttonLeft },
     dest: {

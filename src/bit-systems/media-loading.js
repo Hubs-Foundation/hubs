@@ -6,7 +6,7 @@ import { loadImage } from "../utils/load-image";
 import { loadVideo } from "../utils/load-video";
 import { loadModel } from "../utils/load-model";
 import { fetchUrlData } from "../utils/media-utils";
-import { defineQuery, enterQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
+import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked } from "../bit-components";
 import { timeout, clear, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
 import { takeOwnership } from "../systems/netcode";
@@ -142,6 +142,7 @@ function* loadAndAnimateMedia(world, eid, signal) {
     resizeAndRecenter(world, media, eid);
     add(world, media, eid);
     yield* animateScale(world, media);
+    removeComponent(world, MediaLoader, eid);
   }
 }
 

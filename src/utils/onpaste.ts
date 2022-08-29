@@ -100,7 +100,7 @@ function onDrop(e: DragEvent) {
   }
 }
 
-if (qsTruthy("newloader")) {
+if (qsTruthy("newLoader")) {
   document.addEventListener("paste", onPaste);
   document.addEventListener("drop", onDrop);
 }
