@@ -154,6 +154,7 @@
     "@babel/register": "^7.18.9",
     "@calm/eslint-plugin-react-intl": "^1.4.1",
     "@formatjs/cli": "^5.0.6",
+    "@formatjs/cli-lib": "^5.1.0",
     "@iarna/toml": "^2.2.5",
     "@storybook/addon-actions": "^6.5.9",
     "@storybook/addon-essentials": "^6.5.9",
