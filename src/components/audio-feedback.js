@@ -97,6 +97,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
       this.soundSource.disconnect();
       this.soundSource = null;
       this.analyser = null;
+      this.avatarIsTalking = false;
     }
   },
 
