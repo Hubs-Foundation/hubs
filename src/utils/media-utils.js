@@ -586,6 +586,9 @@ export function parseURL(text) {
 
 export async function fetchUrlData(urlString) {
   const url = parseURL(urlString);
+  if (!url) {
+    throw new Error(`Cannot fetch data for URL: ${urlString}`);
+  }
   let canonicalUrl = url.href;
   let canonicalAudioUrl = null; // set non-null only if audio track is separated from video track (eg. 360 video)
   let contentType;
