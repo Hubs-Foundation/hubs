@@ -26,7 +26,8 @@ import {
   VideoMenu,
   VideoMenuItem,
   NotRemoteHoverTarget,
-  Deletable
+  Deletable,
+  TextureCacheKey
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -183,16 +184,16 @@ export interface ComponentData {
   };
   image?: {
     texture: Texture;
-    textureSrc: string;
-    textureVersion: number;
     ratio: number;
     projection: "flat" | "360-equirectangular";
     alphaMode: typeof AlphaMode.Blend | typeof AlphaMode.Mask | typeof AlphaMode.Opaque;
   };
+  textureCacheKey?: {
+    src: string;
+    version: number;
+  };
   video?: {
     texture: VideoTexture;
-    textureSrc: string;
-    textureVersion: number;
     ratio: number;
     projection: "flat" | "360-equirectangular";
     autoPlay: boolean;
@@ -277,6 +278,7 @@ export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
   networkedVideo: createDefaultInflator(NetworkedVideo),
   videoMenu: createDefaultInflator(VideoMenu),
   videoMenuItem: createDefaultInflator(VideoMenuItem),
+  textureCacheKey: createDefaultInflator(TextureCacheKey),
   mediaLoader: inflateMediaLoader,
   grabbable: inflateGrabbable,
 

@@ -64,11 +64,13 @@ export function VideoMenuPrefab() {
         scale={[0.25, 0.25, 0.25]}
         image={{
           texture: playTexture,
-          textureSrc: playImageUrl,
-          textureVersion: 1,
           ratio: 1,
           projection: "flat",
           alphaMode: AlphaMode.Blend
+        }}
+        textureCacheKey={{
+          src: playImageUrl,
+          version: 1
         }}
         visible={false}
       />
@@ -78,11 +80,13 @@ export function VideoMenuPrefab() {
         scale={[0.25, 0.25, 0.25]}
         image={{
           texture: pauseTexture,
-          textureSrc: pauseImageUrl,
-          textureVersion: 1,
           ratio: 1,
           projection: "flat",
           alphaMode: AlphaMode.Blend
+        }}
+        textureCacheKey={{
+          src: pauseImageUrl,
+          version: 1
         }}
         visible={false}
       />

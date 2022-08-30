@@ -8,11 +8,13 @@ export function ErrorObject() {
     <entity
       image={{
         texture: errorTexture,
-        textureSrc: "error",
-        textureVersion: 1,
         ratio: 1400 / 1200,
         projection: "flat",
         alphaMode: AlphaMode.Blend
+      }}
+      textureCacheKey={{
+        src: "error",
+        version: 1
       }}
     />
   );

@@ -25,8 +25,6 @@ export function* loadVideo({
       grabbable={{ cursor: true, hand: false }}
       video={{
         texture,
-        textureSrc: accessibleUrl,
-        textureVersion: 1,
         ratio,
         autoPlay: true,
         projection: "flat"

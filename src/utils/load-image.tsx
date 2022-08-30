@@ -26,11 +26,13 @@ export function* loadImage({
       name="Image"
       image={{
         texture,
-        textureSrc: accessibleUrl,
-        textureVersion: 1,
         ratio,
         projection: "flat",
         alphaMode: AlphaMode.Opaque
+      }}
+      textureCacheKey={{
+        src: accessibleUrl,
+        version: 1
       }}
     />
   );

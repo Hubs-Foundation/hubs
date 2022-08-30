@@ -1,6 +1,6 @@
 import { defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
 import {
-  MediaImage,
+  TextureCacheKey,
   GLTFModel,
   MediaFrame,
   Object3DTag,
@@ -32,10 +32,10 @@ const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
   audioSystem.removeAudio({ node: obj });
 });
 
-const exitedMediaImageQuery = exitQuery(defineQuery([MediaImage]));
-const cleanupImages = world => {
-  exitedMediaImageQuery(world).forEach(eid => {
-    releaseTexture({ src: APP.getString(MediaImage.textureSrc[eid]), version: MediaImage.textureVersion[eid] });
+const exitedCacheKeyQuery = exitQuery(defineQuery([TextureCacheKey]));
+const releaseTexturesFromCache = world => {
+  exitedCacheKeyQuery(world).forEach(eid => {
+    releaseTexture({ src: APP.getString(TextureCacheKey.src[eid]), version: TextureCacheKey.version[eid] });
   });
 };
 
@@ -81,7 +81,7 @@ export function removeObject3DSystem(world) {
   cleanupSlice9s(world);
   cleanupTexts(world);
   cleanupMediaFrames(world);
-  cleanupImages(world);
+  releaseTexturesFromCache(world);
   cleanupAudioEmitters(world);
 
   // Finally remove all the entities we just removed from the eid2obj map

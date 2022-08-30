@@ -131,15 +131,13 @@ export const MediaLoader = defineComponent({
 });
 MediaLoader.src[$isStringType] = true;
 
-export const MediaImage = defineComponent({
-  textureSrc: Types.ui32,
-  textureVersion: Types.ui8
+export const TextureCacheKey = defineComponent({
+  src: Types.ui32,
+  version: Types.ui8
 });
-MediaImage.textureSrc[$isStringType] = true;
+TextureCacheKey.src[$isStringType] = true;
 
 export const MediaVideo = defineComponent({
-  textureSrc: Types.ui32,
-  textureVersion: Types.ui8,
   autoPlay: Types.ui8
 });
 
