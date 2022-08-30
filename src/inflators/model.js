@@ -17,7 +17,7 @@ export function inflateModel(world, rootEid, { src }) {
 
       Object.keys(components).forEach(name => {
         if (!inflators[name]) {
-          throw new Error(`Failed to inflate unknown component called ${name}`);
+          console.warn(`Failed to inflate unknown component called ${name}`);
         }
 
         inflators[name](world, eid, components[name]);
@@ -26,7 +26,8 @@ export function inflateModel(world, rootEid, { src }) {
       const replacement = world.eid2obj.get(eid);
       if (replacement) {
         if (obj.type !== "Object3D") {
-          throw new Error("todo write error message here");
+          console.error(obj, replacement);
+          throw new Error("Failed to inflate model. Unexpected object type found before swap.");
         }
         swap.push([obj, replacement]);
       } else {
