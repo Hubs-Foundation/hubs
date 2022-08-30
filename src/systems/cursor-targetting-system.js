@@ -27,7 +27,6 @@ const exitedCurserRaycastableQuery = exitQuery(cursorRaycastableQuery);
 export class CursorTargettingSystem {
   constructor() {
     this.aframeTargets = [];
-    this.bitTargets = [];
     this.targets = [];
     this.dirty = true;
     this.onMutation = this.onMutation.bind(this);
@@ -63,12 +62,6 @@ export class CursorTargettingSystem {
     }
 
     if (enteredCursorRaycastableQuery(APP.world).length || exitedCurserRaycastableQuery(APP.world).length) {
-      this.bitTargets.length = 0;
-
-      const eids = cursorRaycastableQuery(APP.world);
-      for (let i = 0; i < eids.length; i++) {
-        this.bitTargets.push(APP.world.eid2obj.get(eids[i]));
-      }
       needsCombine = true;
     }
 
@@ -77,9 +70,11 @@ export class CursorTargettingSystem {
       this.aframeTargets.forEach(t => {
         this.targets.push(t);
       });
-      this.bitTargets.forEach(t => {
-        this.targets.push(t);
-      });
+
+      const eids = cursorRaycastableQuery(APP.world);
+      for (let i = 0; i < eids.length; i++) {
+        this.targets.push(APP.world.eid2obj.get(eids[i]));
+      }
     }
 
     if (this.rightRemote) {
