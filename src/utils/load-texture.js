@@ -9,7 +9,7 @@ const textureCache = new TextureCache();
 const inflightTextures = new Map();
 const errorCacheItem = { texture: errorTexture, ratio: 1400 / 1200 };
 
-function createTexture({ contentType, src }) {
+function createTexture(contentType, src) {
   if (contentType.includes("image/gif")) {
     return createGIFTexture(src);
   }
@@ -41,7 +41,7 @@ async function loadTexture(src, version, contentType) {
     return textureCache.retain(src, version);
   }
 
-  const promise = createTexture({ contentType, src });
+  const promise = createTexture(contentType, src);
   inflightTextures.set(inflightKey, promise);
   try {
     const texture = await promise;
