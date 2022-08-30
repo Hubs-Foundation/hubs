@@ -6,7 +6,7 @@ import { loadVideoTexture } from "../utils/load-video-texture";
 import { HubsWorld } from "../app";
 
 export function* loadVideo(world: HubsWorld, url: string) {
-  const { texture, ratio }: { texture: VideoTexture; ratio: number } = yield loadVideoTexture({ src: url });
+  const { texture, ratio }: { texture: VideoTexture; ratio: number } = yield loadVideoTexture(url);
 
   return renderAsEntity(
     world,

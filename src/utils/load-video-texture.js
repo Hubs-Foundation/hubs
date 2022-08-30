@@ -1,5 +1,5 @@
 import { createVideoOrAudioEl } from "../utils/media-utils";
-export async function loadVideoTexture({ src }) {
+export async function loadVideoTexture(src) {
   const videoEl = createVideoOrAudioEl("video");
   const texture = new THREE.VideoTexture(videoEl);
   texture.minFilter = THREE.LinearFilter;
