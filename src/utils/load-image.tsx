@@ -6,17 +6,9 @@ import { HubsWorld } from "../app";
 import { Texture } from "three";
 import { AlphaMode } from "./create-image-mesh";
 
-export function* loadImage({
-  world,
-  accessibleUrl,
-  contentType
-}: {
-  world: HubsWorld;
-  accessibleUrl: string;
-  contentType: string;
-}) {
+export function* loadImage(world: HubsWorld, url: string, contentType: string) {
   const { texture, ratio }: { texture: Texture; ratio: number } = yield loadTextureCancellable({
-    src: accessibleUrl,
+    src: url,
     version: 1,
     contentType
   });
@@ -31,7 +23,7 @@ export function* loadImage({
         alphaMode: AlphaMode.Opaque
       }}
       textureCacheKey={{
-        src: accessibleUrl,
+        src: url,
         version: 1
       }}
     />

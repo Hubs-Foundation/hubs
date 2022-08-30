@@ -8,9 +8,9 @@ function camelCase(s) {
   return s.replace(/-(\w)/g, (_, m) => m.toUpperCase());
 }
 
-export function* loadModel({ world, accessibleUrl }) {
-  const { scene, animations } = yield loadGLTFModel(accessibleUrl, null, true, null, false);
-  scene.userData.gltfSrc = accessibleUrl;
+export function* loadModel(world, url) {
+  const { scene, animations } = yield loadGLTFModel(url, null, true, null, false);
+  scene.userData.gltfSrc = url;
   scene.animations = animations;
   scene.mixer = new THREE.AnimationMixer(scene);
 

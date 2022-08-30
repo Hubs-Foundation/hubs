@@ -13,9 +13,9 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { animate } from "../utils/animate";
 
 const loaderForMediaType = {
-  [MediaType.IMAGE]: loadImage,
-  [MediaType.VIDEO]: loadVideo,
-  [MediaType.MODEL]: loadModel
+  [MediaType.IMAGE]: (world, { accessibleUrl, contentType }) => loadImage(world, accessibleUrl, contentType),
+  [MediaType.VIDEO]: (world, { accessibleUrl }) => loadVideo(world, accessibleUrl),
+  [MediaType.MODEL]: (world, { accessibleUrl }) => loadModel(world, accessibleUrl)
 };
 
 export const MEDIA_LOADER_FLAGS = {
@@ -124,7 +124,7 @@ function* loadMedia(world, eid) {
   let media;
   try {
     const urlData = yield fetchUrlData(src);
-    media = yield* loaderForMediaType[urlData.mediaType]({ world, ...urlData });
+    media = yield* loaderForMediaType[urlData.mediaType](world, urlData);
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());
