@@ -7,7 +7,7 @@ export const AlphaMode = Object.freeze({
   Opaque: "opaque"
 });
 
-export function create360ImageMesh({ texture }) {
+export function create360ImageMesh(texture) {
   const geometry = new THREE.SphereBufferGeometry(1, 64, 32);
   // invert the geometry on the x-axis so that all of the faces point inward
   geometry.scale(-1, 1, 1);
@@ -48,7 +48,7 @@ export function create360ImageMesh({ texture }) {
   return new THREE.Mesh(geometry, material);
 }
 
-export function createImageMesh({ texture, ratio, alphaMode = AlphaMode.Opaque, alphaCutoff = 0.5 }) {
+export function createImageMesh(texture, ratio, alphaMode = AlphaMode.Opaque, alphaCutoff = 0.5) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
   const geometry = createPlaneBufferGeometry(width, height, 1, 1, texture.flipY);

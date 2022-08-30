@@ -5,7 +5,7 @@ import { MediaVideo } from "../bit-components";
 
 export function inflateVideo(world, eid, { texture, ratio, projection, autoPlay }) {
   const mesh =
-    projection === "360-equirectangular" ? create360ImageMesh({ texture, ratio }) : createImageMesh({ texture, ratio });
+    projection === "360-equirectangular" ? create360ImageMesh(texture, ratio) : createImageMesh(texture, ratio);
   addObject3DComponent(world, eid, mesh);
   addComponent(world, MediaVideo, eid);
   MediaVideo.autoPlay[eid] = autoPlay ? 1 : 0;
