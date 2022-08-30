@@ -630,15 +630,14 @@ export async function fetchUrlData(urlString) {
     contentType = "application/vnd.apple.mpegurl";
   }
 
-  const options = {
+  const mediaType = mediaTypeFor(contentType, canonicalUrl);
+
+  return {
     accessibleUrl,
     canonicalUrl,
     canonicalAudioUrl,
     contentType,
+    mediaType,
     thumbnail
   };
-
-  options.mediaType = mediaTypeFor(options);
-
-  return options;
 }

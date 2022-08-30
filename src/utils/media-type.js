@@ -8,7 +8,7 @@ export const MEDIA_TYPE = {
   HTML: 6
 };
 
-function isVideo({ canonicalUrl, contentType }) {
+function isVideo(contentType, canonicalUrl) {
   return (
     contentType.startsWith("video/") ||
     contentType.startsWith("application/dash") ||
@@ -16,19 +16,19 @@ function isVideo({ canonicalUrl, contentType }) {
   );
 }
 
-function isAudio({ contentType }) {
+function isAudio(contentType) {
   return contentType.startsWith("audio/");
 }
 
-function isImage({ contentType }) {
+function isImage(contentType) {
   return contentType.startsWith("image/");
 }
 
-function isPDF({ contentType }) {
+function isPDF(contentType) {
   return contentType.startsWith("application/pdf");
 }
 
-function isModel({ contentType }) {
+function isModel(contentType) {
   return (
     contentType.includes("application/octet-stream") ||
     contentType.includes("x-zip-compressed") ||
@@ -36,16 +36,16 @@ function isModel({ contentType }) {
   );
 }
 
-function isHTML({ contentType }) {
+function isHTML(contentType) {
   return contentType.startsWith("text/html");
 }
 
-export function mediaTypeFor(options) {
-  if (isVideo(options)) return MEDIA_TYPE.VIDEO;
-  if (isAudio(options)) return MEDIA_TYPE.AUDIO;
-  if (isImage(options)) return MEDIA_TYPE.IMAGE;
-  if (isPDF(options)) return MEDIA_TYPE.PDF;
-  if (isModel(options)) return MEDIA_TYPE.MODEL;
-  if (isHTML(options)) return MEDIA_TYPE.HTML;
+export function mediaTypeFor(contentType, canonicalUrl) {
+  if (isVideo(contentType, canonicalUrl)) return MEDIA_TYPE.VIDEO;
+  if (isAudio(contentType)) return MEDIA_TYPE.AUDIO;
+  if (isImage(contentType)) return MEDIA_TYPE.IMAGE;
+  if (isPDF(contentType)) return MEDIA_TYPE.PDF;
+  if (isModel(contentType)) return MEDIA_TYPE.MODEL;
+  if (isHTML(contentType)) return MEDIA_TYPE.HTML;
   return null;
 }
