@@ -23,8 +23,8 @@ import {
 } from "../utils/screen-orientation-utils";
 
 export const CLIPPING_THRESHOLD_MIN = 0.0;
-export const CLIPPING_THRESHOLD_MAX = 0.1;
-export const CLIPPING_THRESHOLD_STEP = 0.001;
+export const CLIPPING_THRESHOLD_MAX = 10;
+export const CLIPPING_THRESHOLD_STEP = 0.05;
 export const GLOBAL_VOLUME_MIN = 0;
 export const GLOBAL_VOLUME_MAX = 200;
 export const GLOBAL_VOLUME_STEP = 5;

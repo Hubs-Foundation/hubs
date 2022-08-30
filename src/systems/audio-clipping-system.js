@@ -1,3 +1,4 @@
+import { SourceType } from "../components/audio-params";
 import {
   getCurrentAudioSettings,
   shouldAddSupplementaryAttenuation,
@@ -48,31 +49,43 @@ const calculateAttenuation = (() => {
   };
 })();
 
-// TODO: Rename "GainSystem" because the name is suspicious
-export class GainSystem {
+export class AudioClippingSystem {
   tick() {
     const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
-    for (const [el, audio] of APP.audios.entries()) {
-      const attenuation = calculateAttenuation(el, audio);
+    APP.audioElements.forEach(el => {
+      const attenuation = calculateAttenuation(el, APP.audios.get(el) || el.object3D);
 
-      if (shouldAddSupplementaryAttenuation(el, audio)) {
-        APP.supplementaryAttenuation.set(el, attenuation);
-        updateAudioSettings(el, audio);
-      } else if (APP.supplementaryAttenuation.has(el)) {
-        APP.supplementaryAttenuation.delete(el);
-        updateAudioSettings(el, audio);
+      if (APP.audios.has(el)) {
+        const audio = APP.audios.get(el);
+        if (shouldAddSupplementaryAttenuation(el, audio)) {
+          APP.supplementaryAttenuation.set(el, attenuation);
+          updateAudioSettings(el, audio);
+        } else if (APP.supplementaryAttenuation.has(el)) {
+          APP.supplementaryAttenuation.delete(el);
+          updateAudioSettings(el, audio);
+        }
       }
 
       const isClipped = APP.clippingState.has(el);
       const shouldBeClipped = enableAudioClipping && attenuation < audioClippingThreshold;
+      const sourceType = APP.sourceType.get(el);
       if (isClipped !== shouldBeClipped) {
         if (shouldBeClipped) {
           APP.clippingState.add(el);
+          if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
+            el.components["avatar-audio-source"].disableConsumer();
+          } else if (sourceType === SourceType.MEDIA_VIDEO) {
+            el.components["media-video"].removeAudio();
+          }
         } else {
           APP.clippingState.delete(el);
+          if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
+            el.components["avatar-audio-source"].enableConsumer();
+          } else if (sourceType === SourceType.MEDIA_VIDEO) {
+            el.components["media-video"].setupAudio();
+          }
         }
-        updateAudioSettings(el, audio);
       }
-    }
+    });
   }
 }

@@ -24,7 +24,6 @@ uniform int distanceModel[MAX_DEBUG_SOURCES];
 uniform float coneInnerAngle[MAX_DEBUG_SOURCES];
 uniform float coneOuterAngle[MAX_DEBUG_SOURCES];
 uniform float gain[MAX_DEBUG_SOURCES];
-uniform bool clipped[MAX_DEBUG_SOURCES];
 
 const float kPi = 3.141592;
 const float kDegToRad = kPi / 180.0;
@@ -140,7 +139,7 @@ void main() {
     background = mix(background, outerLayer1, outerLayer1.a * clampedGain[i]);
     vec4 outerLayer2 = circle(center[i], distance[i], outerAngleDiffHalf, 10000.0, 1.0, colorOuter, innerStartAngle - innerAngle);
     outerLayer2 = draw_att(distance[i], attenuation, outerLayer2);
-    background = mix(background, outerLayer2, outerLayer2.a * (clipped[i] ? 0.0 : 1.0) * clampedGain[i]);
+    background = mix(background, outerLayer2, outerLayer2.a * clampedGain[i]);
   }
 
   for (int i=0; i<count; i++) {

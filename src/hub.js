@@ -173,7 +173,7 @@ import "./systems/capture-system";
 import "./systems/listed-media";
 import "./systems/linked-media";
 import "./systems/audio-debug-system";
-import "./systems/audio-gain-system";
+import "./systems/audio-clipping-system";
 
 import "./gltf-component-mappings";
 

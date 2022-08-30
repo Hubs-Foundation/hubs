@@ -7,3 +7,13 @@ export function getMeshes(collisionEntities) {
       return n;
     });
 }
+
+export async function getOwnerId(el) {
+  const networkedEl = await NAF.utils.getNetworkedEntity(el).catch(e => {
+    console.error("Could not find networked element", e);
+  });
+  if (!networkedEl) {
+    return null;
+  }
+  return networkedEl.components.networked.data.owner;
+}

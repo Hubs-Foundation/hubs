@@ -318,6 +318,16 @@ export class DialogAdapter extends EventEmitter {
               this.emitRTCEvent("error", "RTC", () => `Consumer transport closed`);
               this.removeConsumer(consumer.id);
             });
+            consumer.observer.on("pause", () => {
+              this.emitRTCEvent("info", "RTC", () => `Consumer paused`);
+            });
+            consumer.observer.on("resume", () => {
+              this.emitRTCEvent("info", "RTC", () => `Consumer resumed`);
+            });
+            consumer.observer.on("close", () => {
+              this.emitRTCEvent("info", "RTC", () => `Consumer closed`);
+              this.emit("close_consumer", consumer.appData.peerId, consumer.kind);
+            });
 
             if (kind === "video") {
               const { spatialLayers, temporalLayers } = mediasoupClient.parseScalabilityMode(
@@ -334,6 +344,8 @@ export class DialogAdapter extends EventEmitter {
             accept();
 
             this.resolvePendingMediaRequestForTrack(peerId, consumer.track);
+
+            this.emit("create_consumer", peerId, kind);
 
             // Notify of an stream update event
             this.emit("stream_updated", peerId, kind);
@@ -431,6 +443,34 @@ export class DialogAdapter extends EventEmitter {
 
           this._consumerStats[consumerId] = this._consumerStats[consumerId] || {};
           this._consumerStats[consumerId]["score"] = score;
+          break;
+        }
+
+        case "consumerPaused": {
+          const { consumerId } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerPaused event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          consumer.pause();
+          break;
+        }
+
+        case "consumerResumed": {
+          const { consumerId } = notification.data;
+
+          const consumer = this._consumers.get(consumerId);
+
+          if (!consumer) {
+            info(`consumerResumed event received without related consumer: ${consumerId}`);
+            break;
+          }
+
+          consumer.resume();
         }
       }
     });
@@ -932,28 +972,56 @@ export class DialogAdapter extends EventEmitter {
   }
 
   async enableMicrophone(enabled) {
-    if (!this._micProducer) return;
     if (enabled && !this.isMicEnabled) {
-      this.enableMic();
+      if (!this._localMediaStream) return;
+      let sawAudio = false;
+      await Promise.all(
+        this._localMediaStream.getTracks().map(async track => {
+          if (track.kind === "audio") {
+            sawAudio = true;
+            await this.createMicProducer(track);
+          }
+        })
+      );
+
+      if (!sawAudio && this._micProducer) {
+        this.closeMicProducer();
+      }
     } else if (!enabled && this.isMicEnabled) {
-      this.disableMic();
+      this.closeMicProducer();
     }
     this._micShouldBeEnabled = enabled;
     this.emit("mic-state-changed", { enabled: this.isMicEnabled });
   }
 
-  enableMic() {
-    this._protoo.request("resumeProducer", { producerId: this._micProducer.id });
-    this._micProducer.resume();
-  }
-
-  disableMic() {
-    this._protoo.request("pauseProducer", { producerId: this._micProducer.id });
-    this._micProducer.pause();
-  }
-
   get isMicEnabled() {
     return this._micProducer && !this._micProducer.paused;
+  }
+
+  disableConsumer(peerId, kind) {
+    if (this._protoo.connected) {
+      this._protoo
+        .request("disableConsumer", {
+          otherPeerId: peerId,
+          kind
+        })
+        .catch((err) => {
+          console.error("disableConsumer", err);
+        });
+      }
+  }
+
+  enableConsumer(peerId, kind) {
+    if (this._protoo.connected) {
+      this._protoo
+      .request("enableConsumer", {
+        otherPeerId: peerId,
+        kind
+      })
+      .catch((err) => {
+        console.error("enableConsumer", err);
+      });
+    }
   }
 
   cleanUpLocalState() {
@@ -964,6 +1032,9 @@ export class DialogAdapter extends EventEmitter {
     this._micProducer = null;
     this._shareProducer = null;
     this._cameraProducer = null;
+    this._consumers = new Map();
+    this._pendingMediaRequests = new Map();
+    this._blockedClients = new Map();
   }
 
   disconnect() {

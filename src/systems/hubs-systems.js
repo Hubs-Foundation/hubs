@@ -27,7 +27,7 @@ import { ShadowSystem } from "./shadow-system";
 import { InspectYourselfSystem } from "./inspect-yourself-system";
 import { EmojiSystem } from "./emoji-system";
 import { AudioZonesSystem } from "./audio-zones-system";
-import { GainSystem } from "./audio-gain-system";
+import { AudioClippingSystem } from "./audio-clipping-system";
 import { EnvironmentSystem } from "./environment-system";
 import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 
@@ -81,7 +81,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.inspectYourselfSystem = new InspectYourselfSystem();
     this.emojiSystem = new EmojiSystem(this.el);
     this.audioZonesSystem = new AudioZonesSystem();
-    this.gainSystem = new GainSystem();
+    this.gainSystem = new AudioClippingSystem();
     this.environmentSystem = new EnvironmentSystem(this.el);
     this.nameTagSystem = new NameTagVisibilitySystem(this.el);
 

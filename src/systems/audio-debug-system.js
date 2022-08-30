@@ -54,8 +54,7 @@ AFRAME.registerSystem("audio-debug", {
         sourceOrientation: { value: [] },
         coneInnerAngle: { value: [] },
         coneOuterAngle: { value: [] },
-        gain: { value: [] },
-        clipped: { value: [] }
+        gain: { value: [] }
       },
       vertexShader: audioDebugVert,
       fragmentShader: audioDebugFrag
@@ -83,8 +82,6 @@ AFRAME.registerSystem("audio-debug", {
     this.coneOuterAngles.fill(0.0);
     this.gains = new Array(this.maxDebugSources);
     this.gains.fill(0.0);
-    this.clipped = new Array(this.maxDebugSources);
-    this.clipped.fill(0.0);
   },
 
   remove() {
@@ -139,7 +136,6 @@ AFRAME.registerSystem("audio-debug", {
         this.coneOuterAngles[sourceNum] = panner.coneOuterAngle;
 
         this.gains[sourceNum] = audio.gain.gain.value;
-        this.clipped[sourceNum] = APP.clippingState.has(el);
         sourceNum++;
       }
 
@@ -155,7 +151,6 @@ AFRAME.registerSystem("audio-debug", {
       this.material.uniforms.coneInnerAngle.value = this.coneInnerAngles;
       this.material.uniforms.coneOuterAngle.value = this.coneOuterAngles;
       this.material.uniforms.gain.value = this.gains;
-      this.material.uniforms.clipped.value = this.clipped;
     };
   })(),
 
