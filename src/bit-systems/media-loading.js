@@ -88,15 +88,15 @@ function* animateScale(world, media) {
   onAnimate([startPosition, startScale]);
   yield Promise.resolve();
 
-  yield* animate(
-    [
+  yield* animate({
+    properties: [
       [startPosition, endPosition],
       [startScale, endScale]
     ],
-    400,
-    easeOutQuadratic,
-    onAnimate
-  );
+    durationMS: 400,
+    easing: easeOutQuadratic,
+    fn: onAnimate
+  });
 }
 
 function removeLoadingObject(world, eid) {

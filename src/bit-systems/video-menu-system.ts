@@ -141,17 +141,17 @@ const START_SCALE = new Vector3().setScalar(0.05);
 const END_SCALE = new Vector3().setScalar(0.25);
 function* animateIndicator(world: HubsWorld, eid: number) {
   const obj = world.eid2obj.get(eid)!;
-  yield* animate(
-    [
+  yield* animate({
+    properties: [
       [START_SCALE, END_SCALE],
       [0.75, 0]
     ],
-    700,
-    easeOutQuadratic,
-    ([scale, opacity]: [Vector3, number]) => {
+    durationMS: 700,
+    easing: easeOutQuadratic,
+    fn: ([scale, opacity]: [Vector3, number]) => {
       obj.scale.copy(scale);
       obj.matrixNeedsUpdate = true;
       ((obj as Mesh).material as MeshBasicMaterial).opacity = opacity;
     }
-  );
+  });
 }

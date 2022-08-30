@@ -5,12 +5,14 @@ type AnimationProperty = [start: Value, end: Value];
 type EasingFunction = (t: number) => number;
 type AnimationCallback = (values: Value[]) => void;
 
-export function* animate(
-  properties: AnimationProperty[],
-  duration: number,
-  easing: EasingFunction,
-  fn: AnimationCallback
-) {
+type AnimationConfig = {
+  properties: AnimationProperty[];
+  durationMS: number;
+  easing: EasingFunction;
+  fn: AnimationCallback;
+};
+
+export function* animate({ properties, durationMS, easing, fn }: AnimationConfig) {
   const values = properties.map(([s]) => {
     if (typeof s === "number") {
       return s;
@@ -20,7 +22,7 @@ export function* animate(
   });
 
   const start = performance.now();
-  const end = start + duration;
+  const end = start + durationMS;
   let now = start;
   while (now < end) {
     const t = easing((now - start) / (end - start));

@@ -15,9 +15,14 @@ export type Coroutine = Generator<Promise<void>, void, unknown>;
 const END_SCALE = new Vector3().setScalar(0.001);
 function* deleteEntity(world: HubsWorld, eid: number): Coroutine {
   const obj = world.eid2obj.get(eid)!;
-  yield* animate([[obj.scale.clone(), END_SCALE]], 400, easeOutQuadratic, ([scale]: [Vector3]) => {
-    obj.scale.copy(scale);
-    obj.matrixNeedsUpdate = true;
+  yield* animate({
+    properties: [[obj.scale.clone(), END_SCALE]],
+    durationMS: 400,
+    easing: easeOutQuadratic,
+    fn: ([scale]: [Vector3]) => {
+      obj.scale.copy(scale);
+      obj.matrixNeedsUpdate = true;
+    }
   });
   removeEntity(world, eid);
 }
