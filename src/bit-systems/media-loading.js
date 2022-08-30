@@ -1,11 +1,10 @@
-import { MEDIA_TYPE } from "../utils/media-type";
 import { LoadingObject } from "../prefabs/loading-object";
 import { ErrorObject } from "../prefabs/error-object";
 import { easeOutQuadratic } from "../utils/easing";
 import { loadImage } from "../utils/load-image";
 import { loadVideo } from "../utils/load-video";
 import { loadModel } from "../utils/load-model";
-import { fetchUrlData } from "../utils/media-utils";
+import { MediaType, fetchUrlData } from "../utils/media-utils";
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked } from "../bit-components";
 import { timeout, clear, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
@@ -14,9 +13,9 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { animate } from "../utils/animate";
 
 const loaderForMediaType = {
-  [MEDIA_TYPE.IMAGE]: loadImage,
-  [MEDIA_TYPE.VIDEO]: loadVideo,
-  [MEDIA_TYPE.MODEL]: loadModel
+  [MediaType.IMAGE]: loadImage,
+  [MediaType.VIDEO]: loadVideo,
+  [MediaType.MODEL]: loadModel
 };
 
 export const MEDIA_LOADER_FLAGS = {

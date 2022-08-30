@@ -17,10 +17,12 @@ export const MediaType = {
   MODEL: 1 << 0,
   IMAGE: 1 << 1,
   VIDEO: 1 << 2,
-  PDF: 1 << 3
+  PDF: 1 << 3,
+  HTML: 1 << 4,
+  AUDIO: 1 << 5
 };
-MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF;
-MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF;
+MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML | MediaType.AUDIO;
+MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML;
 
 const linkify = Linkify();
 linkify.tlds(tlds);

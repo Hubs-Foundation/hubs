@@ -1,12 +1,4 @@
-// TODO: Consolidate with MediaType in media-utils!!
-export const MEDIA_TYPE = {
-  VIDEO: 1,
-  AUDIO: 2,
-  IMAGE: 3,
-  PDF: 4,
-  MODEL: 5,
-  HTML: 6
-};
+import { MediaType } from "../utils/media-utils";
 
 function isVideo(contentType, canonicalUrl) {
   return (
@@ -41,11 +33,11 @@ function isHTML(contentType) {
 }
 
 export function mediaTypeFor(contentType, canonicalUrl) {
-  if (isVideo(contentType, canonicalUrl)) return MEDIA_TYPE.VIDEO;
-  if (isAudio(contentType)) return MEDIA_TYPE.AUDIO;
-  if (isImage(contentType)) return MEDIA_TYPE.IMAGE;
-  if (isPDF(contentType)) return MEDIA_TYPE.PDF;
-  if (isModel(contentType)) return MEDIA_TYPE.MODEL;
-  if (isHTML(contentType)) return MEDIA_TYPE.HTML;
+  if (isVideo(contentType, canonicalUrl)) return MediaType.VIDEO;
+  if (isAudio(contentType)) return MediaType.AUDIO;
+  if (isImage(contentType)) return MediaType.IMAGE;
+  if (isPDF(contentType)) return MediaType.PDF;
+  if (isModel(contentType)) return MediaType.MODEL;
+  if (isHTML(contentType)) return MediaType.HTML;
   return null;
 }
