@@ -52,7 +52,6 @@ export async function loadTexture({ src, version, contentType }) {
 }
 
 export async function releaseTexture({ src, version }) {
-  console.log("Releasing texture", src, version);
   textureCache.release(src, version);
 }
 
