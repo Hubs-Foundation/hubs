@@ -16,7 +16,7 @@ export function Button({ text, width, height, texture = buttonTexture, type = BU
   const labelRef = createRef();
   return (
     <entity
-      name={props.name || "Button"}
+      name={"Button"}
       slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
       cursorRaycastable
       remoteHoverTarget
@@ -31,7 +31,7 @@ export function Button({ text, width, height, texture = buttonTexture, type = BU
         layers={1 << Layers.CAMERA_LAYER_UI}
         text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
         position={[0, 0, 0.01]}
-        name={`${props.name} Label` || "Button Label"}
+        name={props.name ? `${props.name} Label` : "Button Label"}
       />
     </entity>
   );
