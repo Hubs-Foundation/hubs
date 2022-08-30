@@ -5,18 +5,6 @@ export async function loadVideoTexture(src) {
   texture.minFilter = THREE.LinearFilter;
   texture.encoding = THREE.sRGBEncoding;
 
-  // Firefox seems to have video play (or decode) performance issue.
-  // Somehow setting RGBA format improves the performance very well.
-  // Some tickets have been opened for the performance issue but
-  // I don't think it will be fixed soon. So we set RGBA format for Firefox
-  // as workaround so far.
-  // See https://github.com/mozilla/hubs/issues/3470
-  //
-  // TODO: Is this still true?
-  if (/firefox/i.test(navigator.userAgent)) {
-    texture.format = THREE.RGBAFormat;
-  }
-
   const isReady = () => {
     return (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
   };
