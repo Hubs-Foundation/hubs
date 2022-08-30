@@ -161,7 +161,8 @@ class UIRoot extends Component {
     onLoaded: PropTypes.func,
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
-    breakpoint: PropTypes.string
+    breakpoint: PropTypes.string,
+    dialogConnected: PropTypes.bool
   };
 
   state = {
@@ -963,7 +964,7 @@ class UIRoot extends Component {
 
     const preload = this.props.showPreload;
 
-    const isLoading = !preload && !this.state.hideLoader;
+    const isLoading = !preload && !this.state.hideLoader || !this.props.dialogConnected;
 
     if (isLoading && this.state.showPrefs) {
       return (

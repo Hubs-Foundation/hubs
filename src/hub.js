@@ -735,6 +735,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   APP.dialog.on(DIALOG_CONNECTION_CONNECTED, () => {
     scene.emit("didConnectToDialog");
+    remountUI({ dialogConnected: true });
   });
   APP.dialog.on(DIALOG_CONNECTION_ERROR_FATAL, () => {
     // TODO: Change the wording of the connect error to match dialog connection error
