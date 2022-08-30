@@ -36,7 +36,6 @@ import { networkSendSystem, networkReceiveSystem } from "./netcode";
 import { onOwnershipLost } from "./on-ownership-lost";
 import { interactionSystem } from "./bit-interaction-system";
 import { floatyObjectSystem } from "./floaty-object-system";
-import { animationMixerSystem } from "../bit-systems/animation-mixer-system";
 import { removeNetworkedObjectButtonSystem } from "./remove-networked-object-button-system";
 import { removeObject3DSystem } from "./remove-object3D-system";
 import { networkedTransformSystem } from "./networked-transform";
@@ -128,7 +127,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.twoPointStretchingSystem.tick();
 
     floatyObjectSystem(world);
-    animationMixerSystem(world);
 
     this.holdableButtonSystem.tick();
     this.hoverButtonSystem.tick();
