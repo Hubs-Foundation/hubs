@@ -1,9 +1,9 @@
-import { createNetworkedEntity } from "../systems/netcode.js";
-import { upload, parseURL } from "../utils/media-utils";
-import { guessContentType } from "../utils/media-url-utils";
+import { createNetworkedEntity } from "./systems/netcode.js";
+import { upload, parseURL } from "./utils/media-utils";
+import { guessContentType } from "./utils/media-url-utils";
 import { AElement } from "aframe";
 import { Vector3 } from "three";
-import qsTruthy from "../utils/qs_truthy";
+import qsTruthy from "./utils/qs_truthy";
 
 type UploadResponse = {
   file_id: string;
