@@ -97,8 +97,8 @@ export class PhysicsSystem {
       const debugVertices = new Float32Array(this.debugSharedArrayBuffer, 4, DefaultBufferSize);
       const debugColors = new Float32Array(this.debugSharedArrayBuffer, 4 + DefaultBufferSize, DefaultBufferSize);
       this.debugGeometry = new THREE.BufferGeometry();
-      this.debugGeometry.addAttribute("position", new THREE.BufferAttribute(debugVertices, 3));
-      this.debugGeometry.addAttribute("color", new THREE.BufferAttribute(debugColors, 3));
+      this.debugGeometry.setAttribute("position", new THREE.BufferAttribute(debugVertices, 3));
+      this.debugGeometry.setAttribute("color", new THREE.BufferAttribute(debugColors, 3));
       const debugMaterial = new THREE.LineBasicMaterial({
         vertexColors: true,
         depthTest: true
