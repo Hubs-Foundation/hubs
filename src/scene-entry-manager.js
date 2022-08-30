@@ -443,6 +443,7 @@ export default class SceneEntryManager {
     this.avatarRig.setAttribute("networked", "template: #remote-avatar; attachTemplateToLocal: false;");
     this.avatarRig.setAttribute("networked-avatar", "");
     this.avatarRig.emit("entered");
+    this.scene.emit("scene-entered");
   };
 
   _runBot = async () => {

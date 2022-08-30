@@ -50,6 +50,11 @@ const calculateAttenuation = (() => {
 })();
 
 export class AudioClippingSystem {
+  constructor(scene) {
+    this.recalculateClipping = true;
+    scene.addEventListener("scene-entered", () => { this.recalculateClipping = true; })
+  }
+
   tick() {
     const { enableAudioClipping, audioClippingThreshold } = window.APP.store.state.preferences;
     APP.audioElements.forEach(el => {
@@ -69,7 +74,7 @@ export class AudioClippingSystem {
       const isClipped = APP.clippingState.has(el);
       const shouldBeClipped = enableAudioClipping && attenuation < audioClippingThreshold;
       const sourceType = APP.sourceType.get(el);
-      if (isClipped !== shouldBeClipped) {
+      if (isClipped !== shouldBeClipped || this.recalculateClipping) {
         if (shouldBeClipped) {
           APP.clippingState.add(el);
           if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
@@ -87,5 +92,6 @@ export class AudioClippingSystem {
         }
       }
     });
+    this.recalculateClipping = false;
   }
 }
