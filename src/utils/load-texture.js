@@ -26,7 +26,7 @@ function createTexture({ contentType, src }) {
   throw new Error(`Unknown image content type: ${contentType}`);
 }
 
-export async function loadTexture({ src, version, contentType }) {
+async function loadTexture(src, version, contentType) {
   if (textureCache.has(src, version)) {
     return textureCache.retain(src, version);
   }
@@ -51,16 +51,16 @@ export async function loadTexture({ src, version, contentType }) {
   }
 }
 
-export async function releaseTexture({ src, version }) {
+export async function releaseTexture(src, version) {
   textureCache.release(src, version);
 }
 
-export function loadTextureCancellable(args) {
-  const p = loadTexture(args);
+export function loadTextureCancellable(src, version, contentType) {
+  const p = loadTexture(src, version, contentType);
   return makeCancelable(() => {
     // TODO: Pass in an AbortSignal through to loadTexture so that we can cancel inflight requests.
     p.then(() => {
-      releaseTexture(args);
+      releaseTexture(src, version);
     });
   }, p);
 }

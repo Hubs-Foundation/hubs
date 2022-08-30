@@ -35,7 +35,7 @@ const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
 const exitedCacheKeyQuery = exitQuery(defineQuery([TextureCacheKey]));
 const releaseTexturesFromCache = world => {
   exitedCacheKeyQuery(world).forEach(eid => {
-    releaseTexture({ src: APP.getString(TextureCacheKey.src[eid]), version: TextureCacheKey.version[eid] });
+    releaseTexture(APP.getString(TextureCacheKey.src[eid]), TextureCacheKey.version[eid]);
   });
 };
 
