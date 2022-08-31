@@ -23,6 +23,7 @@ import {
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { DialogAdapter } from "./naf-dialog-adapter";
+import { waitForPreloads } from "./utils/preload";
 
 declare global {
   interface Window {
@@ -218,8 +219,10 @@ export class App {
 
     // This gets called after all system and component init functions
     sceneEl.addEventListener("loaded", () => {
-      renderer.setAnimationLoop(mainTick);
-      sceneEl.renderStarted = true;
+      waitForPreloads().then(() => {
+        renderer.setAnimationLoop(mainTick);
+        sceneEl.renderStarted = true;
+      });
     });
 
     return {

@@ -1,13 +1,13 @@
 /** @jsx createElementEntity */
-
 import cameraModelSrc from "../assets/camera_tool.glb";
 import buttonSrc from "../assets/hud/button.9.png";
-import { loadModel } from "../components/gltf-model-plus";
+import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { Layers } from "../components/layers";
 import { COLLISION_LAYERS } from "../constants";
 import { BUTTON_TYPES } from "../systems/single-action-button-system";
 import { createElementEntity, createRef } from "../utils/jsx-entity";
 import { textureLoader } from "../utils/media-utils";
+import { preload } from "../utils/preload";
 
 const buttonTexture = textureLoader.load(buttonSrc);
 
@@ -46,9 +46,8 @@ export function Label({ text = {}, ...props }, ...children) {
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 
-// Pre load and upload camera model, and intentionally never "release" it from the cache.
-// TODO we should do this in a more explicit spot for "preloading" during the loading screen
-loadModel(cameraModelSrc, null, true);
+// We intentionally do not remove this model from the GLTF Cache
+preload(loadModel(cameraModelSrc, null, true));
 
 export function CameraPrefab() {
   const snapMenuRef = createRef();
@@ -128,7 +127,7 @@ export function CameraPrefab() {
         scale={[-2, 2, 2]}
       />
 
-      <entity name="Camera Model" model={{ src: cameraModelSrc }} scale={[2, 2, 2]} />
+      <entity name="Camera Model" model={{ model: cloneModelFromCache(cameraModelSrc).scene }} scale={[2, 2, 2]} />
 
       <entity ref={cameraRef} object3D={camera} position={[0, 0, 0.05]} rotation={[0, Math.PI, 0]} />
 

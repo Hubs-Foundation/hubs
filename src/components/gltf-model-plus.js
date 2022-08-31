@@ -18,6 +18,7 @@ class GLTFCache {
   cache = new Map();
 
   set(src, gltf) {
+    gltf.scene.userData.gltfCacheKey = src;
     this.cache.set(src, {
       gltf,
       count: 0
@@ -682,6 +683,15 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
       Object.keys(fileMap).forEach(URL.revokeObjectURL);
     }
   });
+}
+
+export function cloneModelFromCache(src) {
+  if (gltfCache.has(src)) {
+    gltfCache.retain(src);
+    return cloneGltf(gltfCache.get(src).gltf);
+  } else {
+    throw new Error(`Model not in cache: ${src}`);
+  }
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {

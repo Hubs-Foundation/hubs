@@ -34,16 +34,23 @@ import { inflateMediaFrame } from "../inflators/media-frame";
 import { inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
 import { inflateVideo } from "../inflators/video";
-import { inflateModel } from "../inflators/model";
+import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
 import { AlphaMode } from "./create-image-mesh";
 import { MediaParams } from "../prefabs/media";
+import { preload } from "./preload";
 
-// TODO we should do this in a more explicit spot for "preloading" during the loading screen
-preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }, function () {});
+preload(
+  new Promise(resolve => {
+    preloadFont(
+      { characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" },
+      resolve as () => void
+    );
+  })
+);
 
 const reservedAttrs = ["position", "rotation", "scale", "visible", "name", "layers"];
 
@@ -234,7 +241,7 @@ export interface ComponentData {
   mediaFrame?: any;
   object3D?: any;
   text?: any;
-  model?: any;
+  model?: ModelParams;
   grabbable?: any;
 }
 
@@ -253,7 +260,7 @@ declare global {
   }
 }
 
-export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
+export const inflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   cursorRaycastable: createDefaultInflator(CursorRaycastable),
   remoteHoverTarget: createDefaultInflator(RemoteHoverTarget),
   isNotRemoteHoverTarget: createDefaultInflator(NotRemoteHoverTarget),
@@ -292,7 +299,7 @@ export const inflators: { [K in keyof ComponentData]: InflatorFn } = {
   video: inflateVideo
 };
 
-function inflatorExists(name: string): name is keyof ComponentData {
+export function inflatorExists(name: string): name is keyof ComponentData {
   return inflators.hasOwnProperty(name);
 }
 
@@ -302,7 +309,7 @@ export function renderAsEntity(world: HubsWorld, entityDef: EntityDef) {
     if (!inflatorExists(name)) {
       throw new Error(`Failed to inflate unknown component called ${name}`);
     }
-    inflators[name]!(world, eid, entityDef.components[name]);
+    inflators[name](world, eid, entityDef.components[name]);
   });
 
   let obj = world.eid2obj.get(eid);

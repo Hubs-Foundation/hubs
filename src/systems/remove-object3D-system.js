@@ -23,7 +23,7 @@ function cleanupObjOnExit(Component, f) {
 // NOTE we don't dispose of slice9's textures here, its non trivial since they are shared.
 // We want to keep them loaded anyway since we only have a few and want them to load instantly.
 const cleanupSlice9s = cleanupObjOnExit(Slice9, obj => obj.geometry.dispose());
-const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => gltfCache.release(obj.userData.gltfSrc));
+const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => gltfCache.release(obj.userData.gltfCacheKey));
 const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
 const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
