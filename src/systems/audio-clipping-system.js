@@ -50,9 +50,8 @@ const calculateAttenuation = (() => {
 })();
 
 export class AudioClippingSystem {
-  constructor(scene) {
-    this.recalculateClipping = true;
-    scene.addEventListener("scene-entered", () => { this.recalculateClipping = true; })
+  constructor() {
+    this.transientClippingState = new Set();
   }
 
   tick() {
@@ -74,24 +73,39 @@ export class AudioClippingSystem {
       const isClipped = APP.clippingState.has(el);
       const shouldBeClipped = enableAudioClipping && attenuation < audioClippingThreshold;
       const sourceType = APP.sourceType.get(el);
-      if (isClipped !== shouldBeClipped || this.recalculateClipping) {
+      if (isClipped !== shouldBeClipped && !this.transientClippingState.has(el)) {
         if (shouldBeClipped) {
-          APP.clippingState.add(el);
           if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
-            el.components["avatar-audio-source"].disableConsumer();
+            this.transientClippingState.add(el);
+            const cmp = el.components["avatar-audio-source"];
+            APP.dialog.disableConsumer(cmp.ownerId, "audio").then(success => {
+              if (success) {
+                APP.clippingState.add(el);
+                cmp.removeAudio();
+              }
+              this.transientClippingState.delete(el);
+            });
           } else if (sourceType === SourceType.MEDIA_VIDEO) {
+            APP.clippingState.add(el);
             el.components["media-video"].removeAudio();
           }
         } else {
-          APP.clippingState.delete(el);
           if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
-            el.components["avatar-audio-source"].enableConsumer();
+            this.transientClippingState.add(el);
+            const cmp = el.components["avatar-audio-source"];
+            APP.dialog.enableConsumer(cmp.ownerId, "audio").then(success => {
+              if (success) {
+                APP.clippingState.delete(el);
+                cmp.createAudio();
+              }
+              this.transientClippingState.delete(el);
+            });
           } else if (sourceType === SourceType.MEDIA_VIDEO) {
+            APP.clippingState.delete(el);
             el.components["media-video"].setupAudio();
           }
         }
       }
     });
-    this.recalculateClipping = false;
   }
 }

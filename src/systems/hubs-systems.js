@@ -81,7 +81,7 @@ AFRAME.registerSystem("hubs-systems", {
     this.inspectYourselfSystem = new InspectYourselfSystem();
     this.emojiSystem = new EmojiSystem(this.el);
     this.audioZonesSystem = new AudioZonesSystem();
-    this.gainSystem = new AudioClippingSystem(this.el);
+    this.gainSystem = new AudioClippingSystem();
     this.environmentSystem = new EnvironmentSystem(this.el);
     this.nameTagSystem = new NameTagVisibilitySystem(this.el);
 

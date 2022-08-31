@@ -179,16 +179,6 @@ AFRAME.registerComponent("avatar-audio-source", {
       APP.clippingState.delete(this.el);
       this.createAudio();
     }
-  },
-
-  enableConsumer() {
-    APP.dialog.enableConsumer(this.ownerId, "audio");
-    this.createAudio();
-  },
-
-  disableConsumer() {
-    APP.dialog.disableConsumer(this.ownerId, "audio");
-    this.removeAudio();
   }
 });
 

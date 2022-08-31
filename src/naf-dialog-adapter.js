@@ -998,30 +998,54 @@ export class DialogAdapter extends EventEmitter {
     return this._micProducer && !this._micProducer.paused;
   }
 
-  disableConsumer(peerId, kind) {
-    if (this._protoo.connected) {
-      this._protoo
-        .request("disableConsumer", {
-          otherPeerId: peerId,
-          kind
-        })
-        .catch((err) => {
-          console.error("disableConsumer", err);
-        });
+  async disableConsumer(peerId, kind) {
+    return new Promise(resolve => {
+      if (this._protoo.connected) {
+        const consumer = Array.from(this._consumers.values()).filter((consumer) => consumer.appData.peerId === peerId && consumer.kind === kind).pop();
+        if (!consumer) {
+          resolve(false);
+        } else {
+          this._protoo
+            .request("disableConsumer", {
+              otherPeerId: peerId,
+              kind
+            })
+            .then(() => {
+              resolve(true);
+            })
+            .catch(() => {
+              resolve(false);
+            });
+        }
+      } else {
+        resolve(false);
       }
+    });
   }
 
-  enableConsumer(peerId, kind) {
-    if (this._protoo.connected) {
-      this._protoo
-      .request("enableConsumer", {
-        otherPeerId: peerId,
-        kind
-      })
-      .catch((err) => {
-        console.error("enableConsumer", err);
-      });
-    }
+  async enableConsumer(peerId, kind) {
+    return new Promise(resolve => {
+      if (this._protoo.connected) {
+        const consumer = Array.from(this._consumers.values()).filter((consumer) => consumer.appData.peerId === peerId && consumer.kind === kind).pop();
+        if (consumer) {
+          resolve(false);
+        } else {
+          this._protoo
+            .request("enableConsumer", {
+              otherPeerId: peerId,
+              kind
+            })
+            .then(() => {
+              resolve(true);
+            })
+            .catch(() => {
+              resolve(false);
+            });
+        }
+      } else {
+        resolve(false);
+      }
+    });
   }
 
   cleanUpLocalState() {
