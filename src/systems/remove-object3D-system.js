@@ -61,12 +61,16 @@ export function removeObject3DSystem(world) {
     o.eid = null;
   }
 
+  // TODO  write removeObject3DEntity to do this work up-front,
+  // keeping the scene graph consistent and avoiding the second exitedObject3DQuery in this system.
+  // This becomes a "cleanup dangling resources" system that doesn't care
+  // about the hierarchy
+
   // remove entities that are children of any removed entities
   const entities = exitedObject3DQuery(world);
   entities.forEach(eid => {
     const obj = world.eid2obj.get(eid);
     traverseSome(obj, o => {
-      // TODO
       if (o.eid && hasComponent(world, VideoMenu, o.eid)) {
         return false;
       }

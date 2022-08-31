@@ -7,7 +7,7 @@ export function interactionSystem(world, cursorTargettingSystem, t, systems) {
   handHoverSystem(world, systems.interaction);
   holdSystem(world, systems.userinput);
   dontHoldWithHandAndRemote(world);
-  // dontHoverAndHold(world); // TODO: Is this necessary?
+  dontHoverAndHold(world);
   // Copies hovered/held state (only for aframe entities) for querying by legacy systems/components
   systems.interaction.updateLegacyState();
 }

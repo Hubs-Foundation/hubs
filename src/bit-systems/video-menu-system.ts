@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, entityExists, hasComponent, removeComponent } from "bitecs";
 import { Mesh, MeshBasicMaterial, Object3D, Plane, Ray, Vector3 } from "three";
 import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
@@ -55,9 +55,10 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
   const rightVideoMenu = videoMenuQuery(world)[0];
   const shouldHideVideoMenu =
     VideoMenu.videoRef[rightVideoMenu] &&
-    !hoverRightVideoQuery(world).length &&
-    !hoverRightMenuItemQuery(world).length &&
-    !hasComponent(world, Held, VideoMenu.trackRef[rightVideoMenu]);
+    (!entityExists(world, VideoMenu.videoRef[rightVideoMenu]) ||
+      (!hoverRightVideoQuery(world).length &&
+        !hoverRightMenuItemQuery(world).length &&
+        !hasComponent(world, Held, VideoMenu.trackRef[rightVideoMenu])));
   if (shouldHideVideoMenu) {
     const menu = rightVideoMenu;
     const menuObj = world.eid2obj.get(menu)!;
