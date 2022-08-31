@@ -586,7 +586,7 @@ export function parseURL(text) {
   return url;
 }
 
-export async function fetchUrlData(urlString) {
+export async function resolveMediaInfo(urlString) {
   const url = parseURL(urlString);
   if (!url) {
     throw new Error(`Cannot fetch data for URL: ${urlString}`);

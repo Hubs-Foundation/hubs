@@ -4,7 +4,7 @@ import { easeOutQuadratic } from "../utils/easing";
 import { loadImage } from "../utils/load-image";
 import { loadVideo } from "../utils/load-video";
 import { loadModel } from "../utils/load-model";
-import { MediaType, fetchUrlData } from "../utils/media-utils";
+import { MediaType, resolveMediaInfo } from "../utils/media-utils";
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked } from "../bit-components";
 import { timeout, clear, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
@@ -123,7 +123,7 @@ function* loadMedia(world, eid) {
   const src = APP.getString(MediaLoader.src[eid]);
   let media;
   try {
-    const urlData = yield fetchUrlData(src);
+    const urlData = yield resolveMediaInfo(src);
     media = yield* loaderForMediaType[urlData.mediaType](world, urlData);
   } catch (e) {
     console.error(e);
