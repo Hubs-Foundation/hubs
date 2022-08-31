@@ -78,13 +78,17 @@ export class AudioClippingSystem {
           if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
             this.transientClippingState.add(el);
             const cmp = el.components["avatar-audio-source"];
-            APP.dialog.disableConsumer(cmp.ownerId, "audio").then(success => {
-              if (success) {
-                APP.clippingState.add(el);
-                cmp.removeAudio();
-              }
-              this.transientClippingState.delete(el);
-            });
+            const audio = APP.audios.get(el);
+            audio && audio.gain.gain.setTargetAtTime(0, audio.context.currentTime, 0.1);
+            setTimeout(() => {
+              APP.dialog.disableConsumer(cmp.ownerId, "audio").then(success => {
+                if (success) {
+                  APP.clippingState.add(el);
+                  cmp.removeAudio();
+                }
+                this.transientClippingState.delete(el);
+              });
+            }, 1000);
           } else if (sourceType === SourceType.MEDIA_VIDEO) {
             APP.clippingState.add(el);
             el.components["media-video"].removeAudio();
