@@ -836,6 +836,7 @@ AFRAME.registerComponent("media-video", {
     APP.gainMultipliers.delete(this.el);
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
+    APP.clippingState.delete(this.el);
 
     this.removeAudio();
     APP.audioElements.delete(this.el);

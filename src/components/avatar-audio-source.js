@@ -142,6 +142,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.audioElements.delete(this.el);
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
+    APP.clippingState.delete(this.el);
 
     this.removeAudio();
   },
