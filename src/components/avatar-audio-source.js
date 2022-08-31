@@ -95,8 +95,8 @@ AFRAME.registerComponent("avatar-audio-source", {
     // We subscribe to audio stream notifications for this peer to update the audio source
     // This could happen in case there is an ICE failure that requires a transport recreation.
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
-    APP.dialog.on("close_consumer", this._onCloseConsumer, this);
-    APP.dialog.on("create_consumer", this._onCreateConsumer, this);
+    APP.dialog.on("consumer_closed", this._onConsumerClosed, this);
+    APP.dialog.on("new_consumer", this._onNewConsumer, this);
    
     this.createAudio();
 
@@ -133,8 +133,8 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   remove: function() {
     APP.dialog.off("stream_updated", this._onStreamUpdated);
-    APP.dialog.off("close_consumer", this._onCloseConsumer);
-    APP.dialog.off("create_consumer", this._onCreateConsumer);
+    APP.dialog.off("consumer_closed", this._onConsumerClosed);
+    APP.dialog.off("new_consumer", this._onNewConsumer);
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
     this.el.removeEventListener("audio_type_changed", this.createAudio);
@@ -166,13 +166,13 @@ AFRAME.registerComponent("avatar-audio-source", {
     }
   },
 
-  _onCloseConsumer(peerId, kind) {
+  _onConsumerClosed(peerId, kind) {
     if (this.ownerId == peerId && kind === "audio") {
       this.removeAudio();
     }
   },
 
-  _onCreateConsumer(peerId, kind) {
+  _onNewConsumer(peerId, kind) {
     const { enableAudioClipping } = window.APP.store.state.preferences;
     const apply = !enableAudioClipping || (!!enableAudioClipping && !APP.clippingState.has(this.el));
     if (this.ownerId == peerId && kind === "audio" && apply) {

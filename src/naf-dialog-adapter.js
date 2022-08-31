@@ -326,7 +326,7 @@ export class DialogAdapter extends EventEmitter {
             });
             consumer.observer.on("close", () => {
               this.emitRTCEvent("info", "RTC", () => `Consumer closed`);
-              this.emit("close_consumer", consumer.appData.peerId, consumer.kind);
+              this.emit("consumer_closed", consumer.appData.peerId, consumer.kind);
             });
 
             if (kind === "video") {
@@ -345,7 +345,7 @@ export class DialogAdapter extends EventEmitter {
 
             this.resolvePendingMediaRequestForTrack(peerId, consumer.track);
 
-            this.emit("create_consumer", peerId, kind);
+            this.emit("new_consumer", peerId, kind);
 
             // Notify of an stream update event
             this.emit("stream_updated", peerId, kind);
