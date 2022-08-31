@@ -2,14 +2,9 @@
 import { createElementEntity } from "../utils/jsx-entity";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
+import { MediaLoaderParams } from "../inflators/media-loader";
 
-export type MediaParams = {
-  src: string;
-  resize: boolean;
-  recenter: boolean;
-};
-
-export function MediaPrefab(params: MediaParams) {
+export function MediaPrefab(params: MediaLoaderParams) {
   return (
     <entity
       name="Interactable Media"

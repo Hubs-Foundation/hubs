@@ -2,9 +2,14 @@ import { addComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { MediaLoader } from "../bit-components";
 import { MEDIA_LOADER_FLAGS } from "../bit-systems/media-loading";
-import { MediaParams } from "../prefabs/media";
 
-export function inflateMediaLoader(world: HubsWorld, eid: number, { src, recenter, resize }: MediaParams) {
+export type MediaLoaderParams = {
+  src: string;
+  resize: boolean;
+  recenter: boolean;
+};
+
+export function inflateMediaLoader(world: HubsWorld, eid: number, { src, recenter, resize }: MediaLoaderParams) {
   addComponent(world, MediaLoader, eid);
   let flags = 0;
   if (recenter) flags |= MEDIA_LOADER_FLAGS.RECENTER;

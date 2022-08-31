@@ -40,7 +40,7 @@ import { inflateText } from "../inflators/text";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
 import { AlphaMode } from "./create-image-mesh";
-import { MediaParams } from "../prefabs/media";
+import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 
 preload(
@@ -237,7 +237,7 @@ export interface ComponentData {
   networkedTransform?: any;
   cameraTool?: any;
   animationMixer?: any;
-  mediaLoader?: MediaParams;
+  mediaLoader?: MediaLoaderParams;
   mediaFrame?: any;
   object3D?: any;
   text?: any;
