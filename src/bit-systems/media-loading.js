@@ -7,7 +7,7 @@ import { loadModel } from "../utils/load-model";
 import { MediaType, resolveMediaInfo } from "../utils/media-utils";
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked } from "../bit-components";
-import { timeout, clear, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
+import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
 import { takeOwnership } from "../systems/netcode";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { animate } from "../utils/animate";
@@ -116,7 +116,7 @@ function add(world, child, parent) {
 }
 
 function* loadMedia(world, eid) {
-  const addLoadingObjectTimeout = timeout(() => {
+  const addLoadingObjectTimeout = crTimeout(() => {
     add(world, renderAsEntity(world, LoadingObject()), eid);
   }, 400);
   yield makeCancelable(() => removeLoadingObject(world, eid));
@@ -129,7 +129,7 @@ function* loadMedia(world, eid) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());
   }
-  clear(addLoadingObjectTimeout);
+  crClearTimeout(addLoadingObjectTimeout);
   return media;
 }
 

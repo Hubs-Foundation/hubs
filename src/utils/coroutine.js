@@ -15,14 +15,15 @@ const nextTimerId = (function () {
   };
 })();
 
-export function clear(handle) {
+export function crClearTimeout(handle) {
   if (!timers) {
     throw new CoroutineTimerError();
   }
   return timers.delete(handle);
 }
+export const crClearInterval = crClearTimeout;
 
-export function timeout(fn, ms) {
+export function crTimeout(fn, ms) {
   if (!timers) {
     throw new CoroutineTimerError();
   }
@@ -33,7 +34,7 @@ export function timeout(fn, ms) {
   return handle;
 }
 
-export function interval(fn, ms) {
+export function crInterval(fn, ms) {
   if (!timers) {
     throw new CoroutineTimerError();
   }
