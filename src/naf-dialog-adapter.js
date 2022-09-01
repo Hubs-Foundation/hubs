@@ -918,6 +918,12 @@ export class DialogAdapter extends EventEmitter {
   }
 
   async createMicProducer(track) {
+    // TODO multiple audio tracks?
+    if (this._micProducer && this._micProducer.track !== track) {
+      this._micProducer.track.stop();
+      this._micProducer.replaceTrack(track);
+    }
+
     // stopTracks = false because otherwise the track will end during a temporary disconnect
     this._micProducer = await this._sendTransport.produce({
       track,
