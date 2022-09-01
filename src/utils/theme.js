@@ -50,7 +50,7 @@ function getDarkModeQuery() {
   // window.matchMedia is not available when this module is imported in node.js,
   // which happens when using `npm run login` for Hubs Cloud customization.
   // So we return a dummy MediaQueryList instead.
-  if (typeof window.matchMedia !== 'undefined') {
+  if (typeof window.matchMedia !== "undefined") {
     return window.matchMedia("(prefers-color-scheme: dark)");
   } else {
     return { matches: false, addEventListener: () => {}, removeEventListener: () => {} };
@@ -182,7 +182,7 @@ function onThemeChanged(listener) {
       stashedThemeChangedListeners.delete(listener);
     }
     removeThemeChangedListener(listener);
-  }
+  };
 }
 
 function registerStashedThemeChangedListeners() {
@@ -206,7 +206,14 @@ waitForDOMContentLoaded().then(() => {
   }
   updateTextButtonColors();
   onThemeChanged(updateTextButtonColors);
-  registerStashedThemeChangedListeners()
+  if (window.APP?.store) {
+    registerStashedThemeChangedListeners();
+  } else {
+    console.warn(
+      "utils/theme.js: Skipped theme preference listeners, since window.APP.store is not available. " +
+        "This should only happen when running Storybook."
+    );
+  }
 });
 
 function applyThemeToTextButton(el, highlighted) {
@@ -222,7 +229,7 @@ function applyThemeToTextButton(el, highlighted) {
   );
 }
 
-export { 
+export {
   applyThemeToTextButton,
   getCurrentTheme,
   getDefaultTheme,
