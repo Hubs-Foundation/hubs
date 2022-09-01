@@ -4,7 +4,6 @@ module.exports = {
     [
       "@babel/env",
       {
-        exclude: ["transform-regenerator"],
         // targets are defined in .browserslistrc
         useBuiltIns: "entry",
         // This should be kept up to date with thee version in package.json
