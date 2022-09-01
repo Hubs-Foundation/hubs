@@ -521,7 +521,9 @@ export default class SceneEntryManager {
       audioSource.connect(gainNode);
       gainNode.connect(audioDestination);
       gainNode.gain.value = audioVolume;
-      this.mediaDevicesManager.mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+
+      const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem
+      audioSystem.addStreamToOutboundAudio("microphone", audioDestination.stream);
     }
 
     const connect = async () => {
