@@ -1026,22 +1026,17 @@ export class DialogAdapter extends EventEmitter {
   async enableConsumer(peerId, kind) {
     return new Promise(resolve => {
       if (this._protoo.connected) {
-        const consumer = Array.from(this._consumers.values()).filter((consumer) => consumer.appData.peerId === peerId && consumer.kind === kind).pop();
-        if (consumer) {
-          resolve(false);
-        } else {
-          this._protoo
-            .request("enableConsumer", {
-              otherPeerId: peerId,
-              kind
-            })
-            .then(() => {
-              resolve(true);
-            })
-            .catch(() => {
-              resolve(false);
-            });
-        }
+        this._protoo
+          .request("enableConsumer", {
+            otherPeerId: peerId,
+            kind
+          })
+          .then(() => {
+            resolve(true);
+          })
+          .catch(() => {
+            resolve(false);
+          });
       } else {
         resolve(false);
       }
