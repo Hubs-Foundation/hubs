@@ -518,6 +518,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     // Send complete sync on phoenix re-join.
     // TODO: We should be able to safely remove this completeSync now that
     //       NAF occupancy is driven from phoenix presence state.
+    APP.dialog.joinToken = permsToken;
     NAF.connection.entities.completeSync(null, true);
     return;
   }
