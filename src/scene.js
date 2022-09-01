@@ -27,7 +27,7 @@ import "./systems/scene-systems";
 import "./gltf-component-mappings";
 import { EnvironmentSystem } from "./systems/environment-system";
 
-import { App } from "./App";
+import { App } from "./app";
 
 window.APP = new App();
 

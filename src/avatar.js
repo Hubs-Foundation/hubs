@@ -17,7 +17,7 @@ import configs from "./utils/configs";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 disableiOSZoom();
 
-import { App } from "./App";
+import { App } from "./app";
 
 import AvatarPreview from "./react-components/avatar-preview";
 
