@@ -46,6 +46,7 @@ import { cameraToolSystem } from "../bit-systems/camera-tool";
 // import { holdableButtonSystem } from "./holdable-button-system";
 import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
+import { idleDetectSystem } from "./idle-detector";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -153,6 +154,7 @@ AFRAME.registerSystem("hubs-systems", {
     destroyAtExtremeDistanceSystem(world);
     removeNetworkedObjectButtonSystem(world);
     removeObject3DSystem(world);
+    idleDetectSystem(t);
 
     // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
     this.boneVisibilitySystem.tick();
