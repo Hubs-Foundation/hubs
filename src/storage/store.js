@@ -434,6 +434,15 @@ export default class Store extends EventTarget {
     return finalState;
   }
 
+  getEmbedTokenForHub(hub) {
+    const embedTokenEntry = this.state.embedTokens.find(embedTokenEntry => embedTokenEntry.hubId === hub.hub_id);
+    if (embedTokenEntry) {
+      return embedTokenEntry.embedToken;
+    } else {
+      return null;
+    }
+  }
+
   get schema() {
     return SCHEMA;
   }

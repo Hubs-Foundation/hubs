@@ -17,7 +17,7 @@
     "lint:js": "eslint '*.js' 'src/**/*.js'",
     "lint:html": "htmlhint 'src/**/*.html'",
     "lint": "npm run lint:js && npm run lint:html",
-    "test": "npm run lint && npm run build"
+    "test": "npm run lint"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.3",

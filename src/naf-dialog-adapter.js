@@ -60,6 +60,10 @@ export class DialogAdapter extends EventEmitter {
     this._consumerStats = {};
   }
 
+  set joinToken(token) {
+    this._joinToken = token;
+  }
+
   get consumerStats() {
     return this._consumerStats;
   }
