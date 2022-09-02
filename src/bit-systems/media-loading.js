@@ -99,13 +99,6 @@ function* animateScale(world, media) {
   });
 }
 
-function removeLoadingObject(world, eid) {
-  if (world.eid2obj.get(eid).children.length) {
-    // TODO: Make sure this is actually the correct object...
-    removeEntity(world, world.eid2obj.get(eid).children[0].eid);
-  }
-}
-
 function add(world, child, parent) {
   const parentObj = world.eid2obj.get(parent);
   const childObj = world.eid2obj.get(child);
@@ -116,10 +109,12 @@ function add(world, child, parent) {
 }
 
 function* loadMedia(world, eid) {
+  let loadingObjEid = 0;
   const addLoadingObjectTimeout = crTimeout(() => {
-    add(world, renderAsEntity(world, LoadingObject()), eid);
+    loadingObjEid = renderAsEntity(world, LoadingObject());
+    add(world, loadingObjEid, eid);
   }, 400);
-  yield makeCancelable(() => removeLoadingObject(world, eid));
+  yield makeCancelable(() => loadingObjEid && removeEntity(world, loadingObjEid));
   const src = APP.getString(MediaLoader.src[eid]);
   let media;
   try {
@@ -130,13 +125,13 @@ function* loadMedia(world, eid) {
     media = renderAsEntity(world, ErrorObject());
   }
   crClearTimeout(addLoadingObjectTimeout);
+  loadingObjEid && removeEntity(world, loadingObjEid);
   return media;
 }
 
 function* loadAndAnimateMedia(world, eid, signal) {
   const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
   if (!canceled) {
-    removeLoadingObject(world, eid);
     assignNetworkIds(world, media, eid);
     resizeAndRecenter(world, media, eid);
     add(world, media, eid);
