@@ -504,7 +504,7 @@ function onConnectionError(entryManager, connectError) {
 // TODO: Find a home for this
 // TODO: Naming. Is this an "event bus"?
 const events = emitter();
-function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data, permsToken) {
+function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
 
@@ -599,7 +599,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
       APP.dialog.connect({
         serverUrl: `wss://${hub.host}:${hub.port}`,
         roomId: hub.hub_id,
-        joinToken: permsToken,
         serverParams: { host: hub.host, port: hub.port, turn: hub.turn },
         scene,
         clientId: data.session_id,
@@ -1254,7 +1253,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       await presenceSync.promise;
-      handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data, permsToken, hubChannel, events);
+      handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {
