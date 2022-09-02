@@ -26,10 +26,8 @@ const delistAvatarInfoMessage = defineMessage({
 const AVATARS_API = "/api/v1/avatars";
 
 const defaultEditors = [
-  {
-    name: "Quilt",
-    url: "https://tryquilt.io/?gltf=$AVATAR_GLTF"
-  }
+  // TODO This previously contain tryquilt.io.  We should re-evaluate whether these types of editors are still desired,
+  // and change the related code accordingly.
 ];
 const useAllowedEditors = true;
 const allowedEditors = [
