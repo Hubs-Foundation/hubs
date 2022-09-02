@@ -1,15 +1,12 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
 import { CloseButton } from "../input/CloseButton";
 import { Sidebar } from "../sidebar/Sidebar";
-import { List, ListItem } from "../layout/List";
 import styles from "./ECSSidebar.scss";
 import { IconButton } from "../input/IconButton";
+import { FormattedMessage } from "react-intl";
 
 import * as bitComponents from "../../bit-components";
 import { defineQuery, getEntityComponents } from "bitecs";
-import { Button } from "../input/Button";
-import { findAncestor } from "../../utils/three-utils";
 
 const bitComponentNames = new Map();
 for (const [name, Component] of Object.entries(bitComponents)) {
@@ -83,8 +80,8 @@ function EntityInfo({ eid }) {
       <div className="components">
         {getEntityComponents(APP.world, eid)
           .sort((a, b) => Object.keys(a).length - Object.keys(b).length)
-          .map(Component => (
-            <ComponentPill eid={eid} component={Component} />
+          .map((Component, i) => (
+            <ComponentPill eid={eid} key={i} component={Component} />
           ))}
       </div>
     </div>
@@ -97,7 +94,9 @@ function ObjectProperties({ obj }) {
     <div className="obj-properties">
       <div className="title">
         <span>{displayName}</span>
-        <button onClick={() => console.log(obj)}>log</button>
+        <button onClick={() => console.log(obj)}>
+          <FormattedMessage id="ecs-sidebar.log-button" defaultMessage="log" />
+        </button>
       </div>
       <div className="content">{obj.eid && <EntityInfo eid={obj.eid} />}</div>
     </div>
@@ -105,7 +104,11 @@ function ObjectProperties({ obj }) {
 }
 
 function RefreshButton({ onClick }) {
-  return <IconButton onClick={onClick}>R</IconButton>;
+  return (
+    <IconButton onClick={onClick}>
+      <FormattedMessage id="ecs-sidebar.refresh-icon" defaultMessage="refresh" />
+    </IconButton>
+  );
 }
 
 const object3dQuery = defineQuery([bitComponents.Object3DTag]);

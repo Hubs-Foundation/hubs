@@ -19,7 +19,6 @@ import {
   CameraTool,
   OffersHandConstraint,
   AEntity,
-  VideoMenuItem,
   MediaVideo
 } from "../../bit-components";
 import { hasComponent } from "bitecs";
