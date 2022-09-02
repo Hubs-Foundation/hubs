@@ -9,14 +9,11 @@ export function LoadingScreenContainer({ onLoaded, scene }) {
 
   const { loading, message } = useRoomLoadingState(scene);
 
-  useEffect(
-    () => {
-      if (!loading) {
-        onLoaded();
-      }
-    },
-    [loading, onLoaded]
-  );
+  useEffect(() => {
+    if (!loading) {
+      onLoaded();
+    }
+  }, [loading, onLoaded]);
 
   //TODO: Make these configurable
   const infoMessages = useMemo(

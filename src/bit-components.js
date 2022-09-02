@@ -67,6 +67,11 @@ export const HeldHandLeft = defineComponent();
 export const HeldRemoteRight = defineComponent();
 export const HeldRemoteLeft = defineComponent();
 export const Held = defineComponent();
+export const Constraint = defineComponent();
+export const ConstraintHandRight = defineComponent();
+export const ConstraintHandLeft = defineComponent();
+export const ConstraintRemoteRight = defineComponent();
+export const ConstraintRemoteLeft = defineComponent();
 export const OffersRemoteConstraint = defineComponent();
 export const HandCollisionTarget = defineComponent();
 export const OffersHandConstraint = defineComponent();
@@ -120,3 +125,38 @@ export const CameraTool = defineComponent({
   sndToggleRef: Types.eid
 });
 export const MyCameraTool = defineComponent();
+export const MediaLoader = defineComponent({
+  src: Types.ui32,
+  flags: Types.ui8
+});
+MediaLoader.src[$isStringType] = true;
+
+export const TextureCacheKey = defineComponent({
+  src: Types.ui32,
+  version: Types.ui8
+});
+TextureCacheKey.src[$isStringType] = true;
+
+export const MediaVideo = defineComponent({
+  autoPlay: Types.ui8
+});
+
+export const AnimationMixer = defineComponent();
+export const NetworkedVideo = defineComponent({
+  time: Types.f32,
+  flags: Types.ui8
+});
+
+export const VideoMenuItem = defineComponent();
+export const VideoMenu = defineComponent({
+  videoRef: Types.eid,
+  timeLabelRef: Types.eid,
+  trackRef: Types.eid,
+  headRef: Types.eid,
+  playIndicatorRef: Types.eid,
+  pauseIndicatorRef: Types.eid
+});
+
+export const AudioEmitter = defineComponent();
+export const AudioSettingsChanged = defineComponent();
+export const Deletable = defineComponent();

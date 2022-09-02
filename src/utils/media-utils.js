@@ -5,10 +5,11 @@ import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { updateMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
-import { proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
+import { isNonCorsProxyDomain, proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
 import { isIOS as detectIOS } from "./is-mobile";
 import Linkify from "linkify-it";
 import tlds from "tlds";
+import { mediaTypeFor } from "./media-type";
 
 import anime from "animejs";
 
@@ -16,10 +17,12 @@ export const MediaType = {
   MODEL: 1 << 0,
   IMAGE: 1 << 1,
   VIDEO: 1 << 2,
-  PDF: 1 << 3
+  PDF: 1 << 3,
+  HTML: 1 << 4,
+  AUDIO: 1 << 5
 };
-MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF;
-MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF;
+MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML | MediaType.AUDIO;
+MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML;
 
 const linkify = Linkify();
 linkify.tlds(tlds);
@@ -82,7 +85,7 @@ export const upload = (file, desiredContentType) => {
 // https://stackoverflow.com/questions/7584794/accessing-jpeg-exif-rotation-data-in-javascript-on-the-client-side/32490603#32490603
 function getOrientation(file, callback) {
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const view = new DataView(e.target.result);
     if (view.getUint16(0, false) != 0xffd8) {
       return callback(-2);
@@ -199,7 +202,7 @@ export const addMedia = (
 
   (parentEl || scene).appendChild(entity);
 
-  const orientation = new Promise(function(resolve) {
+  const orientation = new Promise(function (resolve) {
     if (needsToBeUploaded) {
       getOrientation(src, x => {
         resolve(x);
@@ -478,9 +481,9 @@ export function createVideoOrAudioEl(type) {
 }
 
 export function addMeshScaleAnimation(mesh, initialScale, onComplete) {
-  const step = (function() {
+  const step = (function () {
     const lastValue = {};
-    return function(anim) {
+    return function (anim) {
       const value = anim.animatables[0].target;
 
       value.x = Math.max(Number.MIN_VALUE, value.x);
@@ -564,4 +567,80 @@ export function hasAudioTracks(el) {
   } else {
     return false;
   }
+}
+
+export function fetchContentType(url) {
+  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
+}
+
+export function parseURL(text) {
+  let url;
+  try {
+    url = new URL(text);
+  } catch (e) {
+    try {
+      url = new URL(`https://${text}`);
+    } catch (e) {
+      return null;
+    }
+  }
+  return url;
+}
+
+export async function resolveMediaInfo(urlString) {
+  const url = parseURL(urlString);
+  if (!url) {
+    throw new Error(`Cannot fetch data for URL: ${urlString}`);
+  }
+  let canonicalUrl = url.href;
+  let canonicalAudioUrl = null; // set non-null only if audio track is separated from video track (eg. 360 video)
+  let contentType;
+  let thumbnail;
+
+  // We want to resolve and proxy some hubs urls, like rooms and scene links,
+  // but want to avoid proxying assets in order for this to work in dev environments
+  const isLocalModelAsset =
+    isNonCorsProxyDomain(url.hostname) && (guessContentType(url.href) || "").startsWith("model/gltf");
+
+  if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalModelAsset) {
+    const response = await resolveUrl(url.href);
+    canonicalUrl = response.origin;
+    if (canonicalUrl.startsWith("//")) {
+      canonicalUrl = `${location.protocol}${canonicalUrl}`;
+    }
+
+    canonicalAudioUrl = response.origin_audio;
+    if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
+      canonicalAudioUrl = location.protocol + canonicalAudioUrl;
+    }
+
+    contentType = (response.meta && response.meta.expected_content_type) || contentType;
+    thumbnail = response.meta && response.meta.thumbnail && proxiedUrlFor(response.meta.thumbnail);
+  }
+
+  const accessibleUrl = proxiedUrlFor(canonicalUrl);
+  if (!contentType) {
+    contentType = guessContentType(canonicalUrl) || (await fetchContentType(accessibleUrl));
+  }
+
+  // TODO we should probably just never return "application/octet-stream" as expectedContentType, since its not really useful
+  if (contentType === "application/octet-stream") {
+    contentType = guessContentType(canonicalUrl) || contentType;
+  }
+
+  // Some servers treat m3u8 playlists as "audio/x-mpegurl", we always want to treat them as HLS videos
+  if (contentType === "audio/x-mpegurl" || contentType === "audio/mpegurl") {
+    contentType = "application/vnd.apple.mpegurl";
+  }
+
+  const mediaType = mediaTypeFor(contentType, canonicalUrl);
+
+  return {
+    accessibleUrl,
+    canonicalUrl,
+    canonicalAudioUrl,
+    contentType,
+    mediaType,
+    thumbnail
+  };
 }

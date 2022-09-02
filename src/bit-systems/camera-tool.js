@@ -208,7 +208,7 @@ function updateUI(world, camera) {
     CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO;
 
   const inVR = AFRAME.scenes[0].is("vr-mode");
-  const showViewfinder = !inVR || (hasComponent(world, Held, camera) || !isIdle);
+  const showViewfinder = !inVR || hasComponent(world, Held, camera) || !isIdle;
   screenObj.visible = showViewfinder;
   selfieScreenObj.visible = showViewfinder;
 
@@ -249,7 +249,8 @@ function updateUI(world, camera) {
 
   // TODO HACK hidden objects are still not having their matricies updated correctly
   // Seems like a regression of #5421
-  snapMenuObj.matrixNeedsUpdate = true;
+  // updateMatrices should be checking forceWorldUpdate instead of parent.childrenNeedMatrixWorldUpdate
+  snapMenuObj.childrenNeedMatrixWorldUpdate = true;
 }
 
 let snapPixels;
@@ -289,7 +290,7 @@ const cameraToolEnterQuery = enterQuery(cameraToolQuery);
 const cameraToolExitQuery = exitQuery(cameraToolQuery);
 
 export function cameraToolSystem(world) {
-  cameraToolEnterQuery(world).forEach(function(eid) {
+  cameraToolEnterQuery(world).forEach(function (eid) {
     const renderTarget = new THREE.WebGLRenderTarget(RENDER_WIDTH, RENDER_HEIGHT, {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
@@ -317,7 +318,7 @@ export function cameraToolSystem(world) {
     renderTargets.set(eid, renderTarget);
   });
 
-  cameraToolExitQuery(world).forEach(function(eid) {
+  cameraToolExitQuery(world).forEach(function (eid) {
     const renderTarget = renderTargets.get(eid);
     renderTarget.dispose();
     renderTargets.delete(eid);

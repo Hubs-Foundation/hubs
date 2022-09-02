@@ -7,6 +7,7 @@ declare module "aframe" {
       mesh: Mesh;
       [name: string]: Object3D;
     };
+    getObject3D(string): Object3D?;
   }
   interface AScene extends AElement {
     object3D: Scene;

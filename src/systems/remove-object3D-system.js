@@ -1,10 +1,21 @@
-import { defineQuery, exitQuery, removeEntity } from "bitecs";
-import { GLTFModel, MediaFrame, Object3DTag, Slice9, Text } from "../bit-components";
+import { defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
+import {
+  TextureCacheKey,
+  GLTFModel,
+  MediaFrame,
+  Object3DTag,
+  Slice9,
+  Text,
+  AudioEmitter,
+  VideoMenu
+} from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
+import { releaseTexture } from "../utils/load-texture";
+import { traverseSome } from "../utils/three-utils";
 
 function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
-  return function(world) {
+  return function (world) {
     query(world).forEach(eid => f(world.eid2obj.get(eid)));
   };
 }
@@ -12,9 +23,21 @@ function cleanupObjOnExit(Component, f) {
 // NOTE we don't dispose of slice9's textures here, its non trivial since they are shared.
 // We want to keep them loaded anyway since we only have a few and want them to load instantly.
 const cleanupSlice9s = cleanupObjOnExit(Slice9, obj => obj.geometry.dispose());
-const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => gltfCache.release(obj.userData.gltfSrc));
+const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => gltfCache.release(obj.userData.gltfCacheKey));
 const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
+const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
+  obj.disconnect();
+  const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem;
+  audioSystem.removeAudio({ node: obj });
+});
+
+const exitedCacheKeyQuery = exitQuery(defineQuery([TextureCacheKey]));
+const releaseTexturesFromCache = world => {
+  exitedCacheKeyQuery(world).forEach(eid => {
+    releaseTexture(APP.getString(TextureCacheKey.src[eid]), TextureCacheKey.version[eid]);
+  });
+};
 
 // TODO This feels messy and brittle
 //
@@ -38,11 +61,22 @@ export function removeObject3DSystem(world) {
     o.eid = null;
   }
 
+  // TODO  write removeObject3DEntity to do this work up-front,
+  // keeping the scene graph consistent and avoiding the second exitedObject3DQuery in this system.
+  // This becomes a "cleanup dangling resources" system that doesn't care
+  // about the hierarchy
+
   // remove entities that are children of any removed entities
   const entities = exitedObject3DQuery(world);
   entities.forEach(eid => {
     const obj = world.eid2obj.get(eid);
-    obj.traverse(o => o.eid && removeEntity(world, o.eid));
+    traverseSome(obj, o => {
+      if (o.eid && hasComponent(world, VideoMenu, o.eid)) {
+        return false;
+      }
+      o.eid && removeEntity(world, o.eid);
+      return true;
+    });
     obj.removeFromParent();
   });
 
@@ -51,6 +85,8 @@ export function removeObject3DSystem(world) {
   cleanupSlice9s(world);
   cleanupTexts(world);
   cleanupMediaFrames(world);
+  releaseTexturesFromCache(world);
+  cleanupAudioEmitters(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeFromMap);
