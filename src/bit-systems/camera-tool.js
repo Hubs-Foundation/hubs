@@ -191,8 +191,8 @@ function updateUI(world, camera) {
   const snapBtnObj = world.eid2obj.get(CameraTool.snapRef[camera]);
   const recBtnObj = world.eid2obj.get(CameraTool.recVideoRef[camera]);
   const cancelBtnObj = world.eid2obj.get(CameraTool.cancelRef[camera]);
-  const nextBtnObj = world.eid2obj.get(CameraTool.button_next[camera]);
-  const prevBtnObj = world.eid2obj.get(CameraTool.button_prev[camera]);
+  const nextBtnObj = world.eid2obj.get(CameraTool.nextButtonRef[camera]);
+  const prevBtnObj = world.eid2obj.get(CameraTool.prevButtonRef[camera]);
   const countdownLblObj = world.eid2obj.get(CameraTool.countdownLblRef[camera]);
   const captureDurLblObj = world.eid2obj.get(CameraTool.captureDurLblRef[camera]);
   const screenObj = world.eid2obj.get(CameraTool.screenRef[camera]);
@@ -351,11 +351,11 @@ export function cameraToolSystem(world) {
         CameraTool.snapTime[camera] = world.time.elapsed + 3000;
       }
 
-      if (clicked(CameraTool.button_next[camera])) {
+      if (clicked(CameraTool.nextButtonRef[camera])) {
         CameraTool.captureDurIdx[camera] = (CameraTool.captureDurIdx[camera] + 1) % CAPTURE_DURATIONS.length;
       }
 
-      if (clicked(CameraTool.button_prev[camera])) {
+      if (clicked(CameraTool.prevButtonRef[camera])) {
         CameraTool.captureDurIdx[camera] =
           CameraTool.captureDurIdx[camera] === 0 ? CAPTURE_DURATIONS.length - 1 : CameraTool.captureDurIdx[camera] - 1;
       }

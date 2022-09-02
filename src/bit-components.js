@@ -112,8 +112,8 @@ export const CameraTool = defineComponent({
   trackTarget: Types.eid,
 
   snapMenuRef: Types.eid,
-  button_next: Types.eid,
-  button_prev: Types.eid,
+  nextButtonRef: Types.eid,
+  prevButtonRef: Types.eid,
   snapRef: Types.eid,
   cancelRef: Types.eid,
   recVideoRef: Types.eid,
