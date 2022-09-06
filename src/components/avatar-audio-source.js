@@ -98,6 +98,8 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.dialog.on("consumer_closed", this._onConsumerClosed, this);
     APP.dialog.on("new_consumer", this._onNewConsumer, this);
    
+    const { enableAudioClipping } = window.APP.store.state.preferences;
+    enableAudioClipping && APP.clippingState.add(this.el);
     this.createAudio();
 
     let { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;

@@ -129,6 +129,9 @@ AFRAME.registerComponent("media-video", {
       this.updatePlaybackState();
     });
 
+    const { enableAudioClipping } = window.APP.store.state.preferences;
+    enableAudioClipping && APP.clippingState.has(this.el);
+
     NAF.utils
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
