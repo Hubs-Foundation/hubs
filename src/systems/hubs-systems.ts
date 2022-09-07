@@ -50,6 +50,13 @@ import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
+import type { HubsSystems } from "aframe";
+
+declare global {
+  interface Window {
+    $S: HubsSystems;
+  }
+}
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -110,7 +117,7 @@ AFRAME.registerSystem("hubs-systems", {
     interactionSystem(world, this.cursorTargettingSystem, t, systems);
 
     buttonSystems(world);
-    constraintsSystem(world, systems.userinput);
+    constraintsSystem(world, this.physicsSystem);
 
     // We run this earlier in the frame so things have a chance to override properties run by animations
     this.animationMixerSystem.tick(dt);
