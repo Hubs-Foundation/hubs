@@ -10,10 +10,22 @@ declare module "aframe" {
     getObject3D(string): Object3D?;
   }
 
+  type FnTick = (t: number, dt: number) => void;
+
   interface ASystem {
-    init?();
-    tick?(t: number, dt: number);
-    remove?();
+    init();
+    tick: FnTick;
+    tock: FnTick;
+    remove();
+    el: AScene;
+  }
+
+  interface AComponent {
+    init();
+    tick: FnTick;
+    tock: FnTick;
+    remove();
+    el: AScene;
   }
 
   interface HubsSystems extends ASystem {
@@ -49,6 +61,8 @@ declare module "aframe" {
     gainSystem: GainSystem;
     environmentSystem: EnvironmentSystem;
     nameTagSystem: NameTagVisibilitySystem;
+
+    DOMContentDidLoad: bool;
   }
 
   interface UserInputSystem extends ASystem {
@@ -71,6 +85,11 @@ declare module "aframe" {
     isPlaying: boolean;
     frame: XRFrame;
     clock: Clock;
+    behaviors: {
+      tick: AComponent[];
+      tock: AComponent[];
+    };
+    systemNames: Array<keyof AScene["systems"]>;
     systems: {
       "hubs-systems": HubsSystems;
       userinput: UserInputSystem;
@@ -81,7 +100,7 @@ declare module "aframe" {
 
   declare global {
     const AFRAME: {
-      registerSystem: (name: string, def: ASystem) => void;
+      registerSystem(name: string, def: Partial<ASystem>);
       scenes: AScene[];
     };
   }

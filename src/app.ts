@@ -24,6 +24,7 @@ import {
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { DialogAdapter } from "./naf-dialog-adapter";
 import { waitForPreloads } from "./utils/preload";
+import { mainTick } from "./systems/hubs-systems";
 
 declare global {
   interface Window {
@@ -50,17 +51,6 @@ export interface HubsWorld extends IWorld {
 }
 
 window.$B = bitecs;
-
-const timeSystem = (world: HubsWorld) => {
-  const { time } = world;
-  const now = performance.now();
-  const delta = now - time.then;
-  time.delta = delta;
-  time.elapsed += delta;
-  time.then = now;
-  time.tick++;
-  return world;
-};
 
 export class App {
   scene?: AScene;
@@ -198,29 +188,12 @@ export class App {
 
     this.world.scene = sceneEl.object3D;
 
-    // Main RAF loop
-    const mainTick = (_rafTime: number, xrFrame: XRFrame) => {
-      // TODO we should probably be using time from the raf loop itself
-      const delta = renderClock.getDelta() * 1000;
-      const time = renderClock.elapsedTime * 1000;
-
-      // TODO pass this into systems that care about it (like input) once they are moved into this loop
-      sceneEl.frame = xrFrame;
-
-      timeSystem(this.world);
-
-      // Tick AFrame systems and components
-      if (sceneEl.isPlaying) {
-        sceneEl.tick(time, delta);
-      }
-
-      renderer.render(sceneEl.object3D, camera);
-    };
-
     // This gets called after all system and component init functions
     sceneEl.addEventListener("loaded", () => {
       waitForPreloads().then(() => {
-        renderer.setAnimationLoop(mainTick);
+        renderer.setAnimationLoop(function (rafTime, xrFrame) {
+          mainTick(rafTime, xrFrame, renderClock, renderer, sceneEl.object3D, camera);
+        });
         sceneEl.renderStarted = true;
       });
     });
