@@ -51,29 +51,24 @@ preload(loadModel(cameraModelSrc, null, true));
 
 export function CameraPrefab() {
   const snapMenuRef = createRef();
-
+  const nextButtonRef = createRef();
+  const prevButtonRef = createRef();
   const snapRef = createRef();
   const cancelRef = createRef();
   const recVideoRef = createRef();
-  const button_next = createRef();
-  const button_prev = createRef();
-  const sndToggleRef = createRef();
-
-  const countdownLblRef = createRef();
-  const captureDurLblRef = createRef();
-
   const screenRef = createRef();
   const selfieScreenRef = createRef();
+  const cameraRef = createRef();
+  const countdownLblRef = createRef();
+  const captureDurLblRef = createRef();
+  const sndToggleRef = createRef();
 
   const screenMaterial = new THREE.MeshBasicMaterial({ toneMapped: false });
-
   const width = 0.28;
   const aspect = 1280 / 720;
   const screenGeometry = new THREE.PlaneBufferGeometry(width, width / aspect);
 
-  const cameraRef = createRef();
   const camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
-
   camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
   camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
 
@@ -98,17 +93,17 @@ export function CameraPrefab() {
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
       cameraTool={{
+        snapMenuRef,
+        nextButtonRef,
+        prevButtonRef,
         snapRef,
         cancelRef,
-        button_next,
-        button_prev,
+        recVideoRef,
         screenRef,
         selfieScreenRef,
         cameraRef,
         countdownLblRef,
         captureDurLblRef,
-        recVideoRef,
-        snapMenuRef,
         sndToggleRef
       }}
     >
@@ -154,7 +149,7 @@ export function CameraPrefab() {
         />
 
         <Button
-          ref={button_prev}
+          ref={prevButtonRef}
           scale={smallButtonScale}
           position={[-0.082, 0, uiZ]}
           width={buttonHeight}
@@ -171,7 +166,7 @@ export function CameraPrefab() {
           text={"Video"}
         />
         <Button
-          ref={button_next}
+          ref={nextButtonRef}
           scale={smallButtonScale}
           position={[0.082, 0, uiZ]}
           width={buttonHeight}

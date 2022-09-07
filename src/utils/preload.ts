@@ -1,7 +1,6 @@
 const preloads: Promise<any>[] = [];
 
 export function waitForPreloads() {
-  console.log(preloads.length);
   return Promise.all(preloads);
 }
 

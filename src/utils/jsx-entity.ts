@@ -235,7 +235,20 @@ export interface ComponentData {
   physicsShape?: any;
   floatyObject?: any;
   networkedTransform?: any;
-  cameraTool?: any;
+  cameraTool?: {
+    snapMenuRef: Ref;
+    nextButtonRef: Ref;
+    prevButtonRef: Ref;
+    snapRef: Ref;
+    cancelRef: Ref;
+    recVideoRef: Ref;
+    screenRef: Ref;
+    selfieScreenRef: Ref;
+    cameraRef: Ref;
+    countdownLblRef: Ref;
+    captureDurLblRef: Ref;
+    sndToggleRef: Ref;
+  };
   animationMixer?: any;
   mediaLoader?: MediaLoaderParams;
   mediaFrame?: any;
