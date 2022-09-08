@@ -194,7 +194,7 @@ module.exports = (env, argv) => {
           test: /\.worker\.js$/,
           loader: "worker-loader",
           options: {
-            filename: "assets/js/[name]-[hash].js",
+            filename: "assets/js/[name]-[contenthash].js",
             publicPath: "/",
             inline: "no-fallback"
           }

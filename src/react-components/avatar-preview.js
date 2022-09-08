@@ -14,6 +14,9 @@ import { createImageBitmap, disposeImageBitmap } from "../utils/image-bitmap-uti
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import styles from "../assets/stylesheets/avatar-preview.scss";
 
+import warningIconUrl from "../assets/images/warning_icon.png";
+import warningIcon2xUrl from "../assets/images/warning_icon@2x.png";
+
 const TEXTURE_PROPS = {
   base_map: ["map"],
   emissive_map: ["emissiveMap"],
@@ -374,11 +377,7 @@ class AvatarPreview extends Component {
           ))}
         {this.props.avatarGltfUrl && this.state.error && !this.state.loading && (
           <div className="error">
-            <img
-              src="../assets/images/warning_icon.png"
-              srcSet="../assets/images/warning_icon@2x.png 2x"
-              className="error-icon"
-            />
+            <img src={warningIconUrl} srcSet={`${warningIcon2xUrl} 2x`} className="error-icon" />
             <FormattedMessage
               id="avatar-preview.loading-failed"
               defaultMessage="Loading failed{linebreak}Please choose another avatar"

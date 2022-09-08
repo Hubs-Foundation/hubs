@@ -22,6 +22,9 @@ import {
   setMaxResolution
 } from "../utils/screen-orientation-utils";
 
+import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
+import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
+
 export const CLIPPING_THRESHOLD_MIN = 0.0;
 export const CLIPPING_THRESHOLD_MAX = 0.1;
 export const CLIPPING_THRESHOLD_STEP = 0.001;
@@ -225,11 +228,7 @@ class Select extends React.Component {
         <select value={this.props.value} tabIndex="0" onChange={this.props.onChange}>
           {this.props.children}
         </select>
-        <img
-          className={styles.dropdownArrow}
-          src="../assets/images/dropdown_arrow.png"
-          srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-        />
+        <img className={styles.dropdownArrow} src={dropdownArrowUrl} srcSet={`${dropdownArrow2xUrl} 2x`} />
       </div>
     );
   }
@@ -1321,9 +1320,7 @@ class PreferencesScreen extends Component {
         </Nav>
         <div className={styles.contentContainer}>
           <div className={styles.scrollingContent}>
-            {this.createSections()
-              .get(this.state.category)
-              .map(Section)}
+            {this.createSections().get(this.state.category).map(Section)}
             {shouldPromptForRefresh && (
               <div
                 style={{
