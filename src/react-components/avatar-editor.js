@@ -17,6 +17,9 @@ import styles from "../assets/stylesheets/avatar-editor.scss";
 
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
+import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
+import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
+
 const delistAvatarInfoMessage = defineMessage({
   id: "avatar-editor.delist-avatar-info",
   defaultMessage:
@@ -363,11 +366,7 @@ class AvatarEditor extends Component {
           <FormattedMessage id="avatar-editor.custom-avatar-option" defaultMessage="Custom GLB..." />
         </option>
       </select>
-      <img
-        className="arrow"
-        src="../assets/images/dropdown_arrow.png"
-        srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-      />
+      <img className="arrow" src={dropdownArrowUrl} srcSet={`${dropdownArrow2xUrl} 2x`} />
     </div>
   );
 
