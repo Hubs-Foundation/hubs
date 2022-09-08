@@ -178,6 +178,8 @@ AFRAME.registerComponent("video-texture-target", {
 
           const video = createVideoOrAudioEl("video");
           video.srcObject = stream;
+          // Video is muted so autoplay is allowed
+          video.play();
 
           const texture = new THREE.VideoTexture(video);
           texture.flipY = false;
