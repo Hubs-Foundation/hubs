@@ -51,7 +51,7 @@ import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distanc
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
 import type { HubsSystems } from "aframe";
-import { Camera, Clock, Scene, WebGLRenderer } from "three";
+import { Camera, Scene, WebGLRenderer } from "three";
 import { HubsWorld } from "../app";
 
 declare global {
@@ -63,12 +63,9 @@ declare global {
 const timeSystem = (world: HubsWorld) => {
   const { time } = world;
   const now = performance.now();
-  const delta = now - time.then;
-  time.delta = delta;
-  time.elapsed += delta;
-  time.then = now;
+  time.delta = now - time.elapsed;
+  time.elapsed = now;
   time.tick++;
-  return world;
 };
 
 // NOTE keeping this around since many things index into it to get a reference to a system. This will
@@ -122,14 +119,7 @@ AFRAME.registerSystem("hubs-systems", {
   }
 });
 
-export function mainTick(
-  _rafTime: DOMHighResTimeStamp,
-  xrFrame: XRFrame,
-  renderClock: Clock,
-  renderer: WebGLRenderer,
-  scene: Scene,
-  camera: Camera
-) {
+export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene, camera: Camera) {
   const world = APP.world;
 
   const sceneEl = AFRAME.scenes[0];
@@ -139,12 +129,9 @@ export function mainTick(
   // NOTE this is now blocking execution of all components/systems, make sure that's not an issue
   if (!hubsSystems.DOMContentDidLoad) return;
 
-  // NOTE now is probably a good time to do this, and consolidate with timeSystem
-  // TODO we should probably be using time from the raf loop itself
-  const dt = renderClock.getDelta() * 1000;
-  const t = renderClock.elapsedTime * 1000;
-
   timeSystem(world);
+  const t = world.time.elapsed;
+  const dt = world.time.delta;
 
   // Tick AFrame components
   const tickComponents = sceneEl.behaviors.tick;

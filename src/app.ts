@@ -13,7 +13,6 @@ import MediaDevicesManager from "./utils/media-devices-manager";
 import {
   Audio,
   AudioListener,
-  Clock,
   Object3D,
   PerspectiveCamera,
   PositionalAudio,
@@ -23,8 +22,8 @@ import {
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { DialogAdapter } from "./naf-dialog-adapter";
-import { waitForPreloads } from "./utils/preload";
 import { mainTick } from "./systems/hubs-systems";
+import { waitForPreloads } from "./utils/preload";
 
 declare global {
   interface Window {
@@ -47,7 +46,7 @@ export interface HubsWorld extends IWorld {
   deletedNids: Set<number>;
   nid2eid: Map<number, number>;
   eid2obj: Map<number, Object3D>;
-  time: { delta: number; elapsed: number; tick: number; then: number };
+  time: { delta: number; elapsed: number; tick: number };
 }
 
 window.$B = bitecs;
@@ -173,16 +172,9 @@ export class App {
     this.audioListener = audioListener;
     camera.add(audioListener);
 
-    const renderClock = new Clock();
-
-    // TODO NAF currently depends on this, it should not
-    sceneEl.clock = renderClock;
-
-    // TODO we should have 1 source of truth for time
     this.world.time = {
       delta: 0,
       elapsed: 0,
-      then: performance.now(),
       tick: 0
     };
 
@@ -191,8 +183,9 @@ export class App {
     // This gets called after all system and component init functions
     sceneEl.addEventListener("loaded", () => {
       waitForPreloads().then(() => {
-        renderer.setAnimationLoop(function (rafTime, xrFrame) {
-          mainTick(rafTime, xrFrame, renderClock, renderer, sceneEl.object3D, camera);
+        this.world.time.elapsed = performance.now();
+        renderer.setAnimationLoop(function (_rafTime, xrFrame) {
+          mainTick(xrFrame, renderer, sceneEl.object3D, camera);
         });
         sceneEl.renderStarted = true;
       });
