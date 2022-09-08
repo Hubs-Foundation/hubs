@@ -252,7 +252,7 @@ export function mainTick(
   removeNetworkedObjectButtonSystem(world);
   removeObject3DSystem(world);
 
-  // We run hubsSystems late in the frame so that its the last thing to have an opinion about the scale of an object
+  // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
   hubsSystems.boneVisibilitySystem.tick();
 
   networkSendSystem(world);
