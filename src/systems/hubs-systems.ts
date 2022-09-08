@@ -108,9 +108,6 @@ AFRAME.registerSystem("hubs-systems", {
     this.environmentSystem = new EnvironmentSystem(this.el);
     this.nameTagSystem = new NameTagVisibilitySystem(this.el);
 
-    // NOTE think about if we need a spot to initialize new systems or if doing everything when
-    // the module is loaded (or via things like preload()) is enough.
-
     window.$S = this;
   },
 
@@ -126,7 +123,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   const aframeSystems = sceneEl.systems;
   const hubsSystems = aframeSystems["hubs-systems"];
 
-  // NOTE this is now blocking execution of all components/systems, make sure that's not an issue
   if (!hubsSystems.DOMContentDidLoad) return;
 
   timeSystem(world);
@@ -140,30 +136,20 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
     tickComponents[i].tick(t, dt);
   }
 
-  // TODO these should be inlined instead of looping so they can be ordered with respect to other systems,
-  // but this will be a breaking change to third party devs unless we filter the ones we inline
+  // Run order of this loop, based on module load order
+  // NOTE these could be inlined instead of looping but that would be a breakings change
+  // to third part devs. This will also just naturally burndown as we migrate.
   // aframeSystems["networked"].tick(t, dt);
   // aframeSystems["local-audio-analyser"].tick(t, dt);
   // aframeSystems["transform-selected-object"].tick(t, dt);
-  // aframeSystems["nav"].tick(t, dt); // NOTE has no tick function, just state + utilities
   // aframeSystems["frame-scheduler"].tick(t, dt);
   // aframeSystems["personal-space-bubble"].tick(t, dt);
-  // aframeSystems["permissions"].tick(t, dt); // NOTE has no tick or state, just utilities
   // aframeSystems["exit-on-blur"].tick(t, dt);
   // aframeSystems["auto-pixel-ratio"].tick(t, dt);
   // aframeSystems["idle-detector"].tick(t, dt);
-  // aframeSystems["pen-tools"].tick(t, dt); // NOTE has no tick, just state + utilities
-  // aframeSystems["userinput"].tick(t, dt); // NOTE has no tick, uses tick2
   // aframeSystems["userinput-debug"].tick(t, dt);
   // aframeSystems["ui-hotkeys"].tick(t, dt);
   // aframeSystems["tips"].tick(t, dt);
-  // aframeSystems["interaction"].tick(t, dt); // NOTE has no tick, just state + utilities, should be considered deprecated as it has been replaced
-  // // -- previous location of hubs-systems tick --
-  // // NOTE anything that ran after hubs-sytems is now running earlier (before the rest of hubs-systems have run)
-  // // the 3 we have don't have ticks so this is not an issue, but its possible 3rd party systems were registered after ours
-  // aframeSystems["capture-system"].tick(t, dt); // NOTE has no tick, just state + utilities
-  // aframeSystems["listed-media"].tick(t, dt); // NOTE has no tick, just state + utilities
-  // aframeSystems["linked-media"].tick(t, dt); // NOTE has no tick, just state + utilities
   const systemNames = sceneEl.systemNames;
   for (let i = 0; i < systemNames.length; i++) {
     if (!aframeSystems[systemNames[i]].tick) continue;
@@ -185,7 +171,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   buttonSystems(world);
   constraintsSystem(world, hubsSystems.physicsSystem);
 
-  // We run hubsSystems earlier in the frame so things have a chance to override properties run by animations
+  // We run this earlier in the frame so things have a chance to override properties run by animations
   hubsSystems.animationMixerSystem.tick(dt);
 
   hubsSystems.characterController.tick(t, dt);
@@ -200,7 +186,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.cursorPoseTrackingSystem.tick();
   hubsSystems.hoverMenuSystem.tick();
   hubsSystems.positionAtBorderSystem.tick();
-  // hubsSystems.constraintsSystem.tick();
   hubsSystems.twoPointStretchingSystem.tick();
 
   floatyObjectSystem(world);
@@ -245,6 +230,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   networkSendSystem(world);
 
   renderer.render(scene, camera);
-
+  // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)
   // TODO inline invoking tocks instead of using onAfterRender registered in a-scene
 }
