@@ -118,12 +118,12 @@ AFRAME.registerSystem("hubs-systems", {
 
 export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene, camera: Camera) {
   const world = APP.world;
-
   const sceneEl = AFRAME.scenes[0];
   const aframeSystems = sceneEl.systems;
   const hubsSystems = aframeSystems["hubs-systems"];
 
-  if (!hubsSystems.DOMContentDidLoad) return;
+  // TODO does anything actually ever pause the scene?
+  if (!sceneEl.isPlaying && !hubsSystems.DOMContentDidLoad) return;
 
   timeSystem(world);
   const t = world.time.elapsed;
