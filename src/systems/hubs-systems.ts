@@ -139,9 +139,6 @@ export function mainTick(
   // NOTE this is now blocking execution of all components/systems, make sure that's not an issue
   if (!hubsSystems.DOMContentDidLoad) return;
 
-  // TODO audit if anything but the input system needs this, pass it in directly
-  sceneEl.frame = xrFrame;
-
   // NOTE now is probably a good time to do this, and consolidate with timeSystem
   // TODO we should probably be using time from the raf loop itself
   const dt = renderClock.getDelta() * 1000;
@@ -194,7 +191,7 @@ export function mainTick(
 
   networkedTransformSystem(world);
 
-  aframeSystems.userinput.tick2();
+  aframeSystems.userinput.tick2(xrFrame);
 
   interactionSystem(world, hubsSystems.cursorTargettingSystem, t, aframeSystems);
 

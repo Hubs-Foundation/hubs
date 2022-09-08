@@ -207,25 +207,25 @@ AFRAME.registerSystem("userinput", {
       generation: 0,
       values: {},
       generations: {},
-      get: function(path) {
+      get: function (path) {
         if (this.generations[path] !== this.generation) return undefined;
         return this.values[path];
       },
-      setValueType: function(path, value) {
+      setValueType: function (path, value) {
         this.values[path] = value;
         this.generations[path] = this.generation;
       },
-      setVector2: function(path, a, b) {
+      setVector2: function (path, a, b) {
         const value = this.values[path] || [];
         value[0] = a;
         value[1] = b;
         this.values[path] = value;
         this.generations[path] = this.generation;
       },
-      setPose: function(path, pose) {
+      setPose: function (path, pose) {
         this.setValueType(path, pose);
       },
-      setMatrix4: function(path, mat4) {
+      setMatrix4: function (path, mat4) {
         // Should we assume the incoming mat4 is safe to store instead of copying values?
         const value = this.values[path] || new THREE.Matrix4();
         value.copy(mat4);
@@ -470,7 +470,7 @@ AFRAME.registerSystem("userinput", {
     }
   },
 
-  tick2() {
+  tick2(xrFrame) {
     this.frame.generation += 1;
     const registeredMappingsChanged = this.registeredMappingsChanged;
     if (registeredMappingsChanged) {
@@ -516,7 +516,7 @@ AFRAME.registerSystem("userinput", {
     }
 
     for (let i = 0; i < this.activeDevices.items.length; i++) {
-      this.activeDevices.items[i].write(this.frame, this.el.sceneEl, this.xrReferenceSpace);
+      this.activeDevices.items[i].write(this.frame, xrFrame, this.xrReferenceSpace);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {

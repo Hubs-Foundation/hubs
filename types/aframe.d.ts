@@ -68,7 +68,7 @@ declare module "aframe" {
   interface UserInputSystem extends ASystem {
     get<T>(path: string): T;
     toggleSet(set: string, value: boolean): T;
-    tick2();
+    tick2(xrFrame: XRFrame);
   }
 
   interface InteractionSystem extends ASystem {
@@ -83,7 +83,6 @@ declare module "aframe" {
     renderStarted: boolean;
     tick(time: number, delta: number): void;
     isPlaying: boolean;
-    frame: XRFrame;
     clock: Clock;
     behaviors: {
       tick: AComponent[];
