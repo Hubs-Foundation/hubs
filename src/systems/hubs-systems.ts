@@ -53,6 +53,7 @@ import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
 import type { HubsSystems } from "aframe";
 import { Camera, Scene, WebGLRenderer } from "three";
 import { HubsWorld } from "../app";
+import { EffectComposer } from "postprocessing";
 
 declare global {
   interface Window {
@@ -116,7 +117,13 @@ AFRAME.registerSystem("hubs-systems", {
   }
 });
 
-export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene, camera: Camera) {
+export function mainTick(
+  xrFrame: XRFrame,
+  renderer: WebGLRenderer,
+  scene: Scene,
+  camera: Camera,
+  composer: EffectComposer
+) {
   const world = APP.world;
   const sceneEl = AFRAME.scenes[0];
   const aframeSystems = sceneEl.systems;
@@ -229,7 +236,9 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   networkSendSystem(world);
 
-  renderer.render(scene, camera);
+  // renderer.render(scene, camera);
+  composer.render();
+
   // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)
   // TODO inline invoking tocks instead of using onAfterRender registered in a-scene
 }

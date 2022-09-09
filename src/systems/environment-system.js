@@ -64,22 +64,10 @@ export class EnvironmentSystem {
     };
 
     const gui = new GUI();
-    gui
-      .add(debugSettings, "toneMapping", Object.values(toneMappingOptions))
-      .onChange(updateDebug)
-      .listen();
-    gui
-      .add(debugSettings, "toneMappingExposure", 0, 4, 0.01)
-      .onChange(updateDebug)
-      .listen();
-    gui
-      .add(debugSettings, "outputEncoding", Object.values(outputEncodingOptions))
-      .onChange(updateDebug)
-      .listen();
-    gui
-      .add(debugSettings, "physicallyCorrectLights", true)
-      .onChange(updateDebug)
-      .listen();
+    gui.add(debugSettings, "toneMapping", Object.values(toneMappingOptions)).onChange(updateDebug).listen();
+    gui.add(debugSettings, "toneMappingExposure", 0, 4, 0.01).onChange(updateDebug).listen();
+    gui.add(debugSettings, "outputEncoding", Object.values(outputEncodingOptions)).onChange(updateDebug).listen();
+    gui.add(debugSettings, "physicallyCorrectLights", true).onChange(updateDebug).listen();
     gui.open();
 
     this.debugGui = gui;
@@ -132,7 +120,8 @@ export class EnvironmentSystem {
       materialsNeedUpdate = true;
     }
 
-    const newToneMapping = THREE[settings.toneMapping];
+    // const newToneMapping = THREE[settings.toneMapping];
+    const newToneMapping = THREE.NoToneMapping;
     if (this.renderer.toneMapping !== newToneMapping) {
       this.renderer.toneMapping = newToneMapping;
       materialsNeedUpdate = true;
@@ -140,7 +129,7 @@ export class EnvironmentSystem {
       // TODO clean up async behavior
       if (newToneMapping === THREE.LUTToneMapping) {
         if (!blenderLUTPromise) {
-          blenderLUTPromise = new Promise(function(resolve, reject) {
+          blenderLUTPromise = new Promise(function (resolve, reject) {
             new LUTCubeLoader().load(blenderLutPath, ({ texture3D }) => resolve(texture3D), null, reject);
           });
         }
@@ -149,7 +138,7 @@ export class EnvironmentSystem {
           .then(t => {
             this.renderer.tonemappingLUT = t;
           })
-          .catch(function(e) {
+          .catch(function (e) {
             console.error("Error loading Blender LUT", e);
             blenderLUTPromise = null;
           });
@@ -249,7 +238,7 @@ AFRAME.registerComponent("reflection-probe", {
     envMapTexture: { type: "map" }
   },
 
-  init: function() {
+  init: function () {
     this.el.object3D.updateMatrices();
 
     const box = new THREE.Box3()

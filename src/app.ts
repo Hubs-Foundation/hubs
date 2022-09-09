@@ -9,21 +9,41 @@ import qsTruthy from "./utils/qs_truthy";
 import type { AElement, AScene } from "aframe";
 import HubChannel from "./utils/hub-channel";
 import MediaDevicesManager from "./utils/media-devices-manager";
+// @ts-ignore
+import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
 
 import {
   Audio,
   AudioListener,
+  HalfFloatType,
   Object3D,
   PerspectiveCamera,
   PositionalAudio,
+  RGBAFormat,
   Scene,
   sRGBEncoding,
-  WebGLRenderer
+  WebGLRenderer,
+  WebGLRenderTarget
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { DialogAdapter } from "./naf-dialog-adapter";
 import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
+import {
+  BlendFunction,
+  BloomEffect,
+  ClearPass,
+  CopyPass,
+  EffectComposer,
+  EffectPass,
+  LambdaPass,
+  LuminancePass,
+  RenderPass,
+  TextureEffect,
+  ToneMappingEffect,
+  ToneMappingMode
+} from "postprocessing";
+import { Layers } from "./components/layers";
 
 declare global {
   interface Window {
@@ -87,6 +107,8 @@ export class App {
     CURSOR: 3
   };
 
+  composer: EffectComposer;
+
   constructor() {
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map();
@@ -135,6 +157,10 @@ export class App {
     const canvas = document.createElement("canvas");
     canvas.classList.add("a-canvas");
     canvas.dataset.aframeCanvas = "true";
+    canvas.width = 1280;
+    canvas.height = 720;
+    canvas.style.backgroundColor = "black";
+    document.body.style.backgroundColor = "#111";
 
     // TODO this comes from aframe and prevents zoom on ipad.
     // This should alreeady be handleed by disable-ios-zoom but it does not appear to work
@@ -144,14 +170,13 @@ export class App {
 
     const renderer = new WebGLRenderer({
       // TODO we should not be using alpha: false https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#avoid_alphafalse_which_can_be_expensive
-      alpha: true,
-      antialias: true,
-      depth: true,
-      stencil: true,
-      premultipliedAlpha: true,
-      preserveDrawingBuffer: false,
-      logarithmicDepthBuffer: false,
-      // TODO we probably want high-performance
+      // alpha: true,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      // premultipliedAlpha: true,
+      // preserveDrawingBuffer: false,
+      // logarithmicDepthBuffer: false,
       powerPreference: "high-performance",
       canvas
     });
@@ -166,7 +191,7 @@ export class App {
 
     sceneEl.appendChild(renderer.domElement);
 
-    const camera = new PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.05, 10000);
+    const camera = new PerspectiveCamera(80, canvas.width / canvas.height, 0.05, 10000);
 
     const audioListener = new AudioListener();
     this.audioListener = audioListener;
@@ -179,13 +204,55 @@ export class App {
     };
 
     this.world.scene = sceneEl.object3D;
+    const scene = sceneEl.object3D;
+
+    const composer = new EffectComposer(renderer, {
+      frameBufferType: HalfFloatType
+    });
+    APP.composer = composer;
+    composer.setSize(canvas.width, canvas.height, false);
+
+    {
+      const bloom = new BloomEffect({
+        luminanceThreshold: 1.0,
+        luminanceSmoothing: 0.3,
+
+        intensity: 1.0,
+        mipmapBlur: true
+      });
+
+      composer.addPass(new RenderPass(scene, camera));
+      composer.addPass(
+        new EffectPass(
+          camera,
+          bloom,
+          new ToneMappingEffect({
+            mode: ToneMappingMode.ACES_FILMIC
+          })
+        )
+      );
+
+      const gui = new GUI();
+      gui.add(bloom, "intensity", 0, 10, 0.01);
+      gui.add(bloom.luminanceMaterial, "threshold", 0, 2, 0.001);
+      gui.add((bloom as any).mipmapBlurPass, "radius", 0, 1, 0.001);
+      gui.add(bloom.luminanceMaterial, "smoothing", 0, 1, 0.001);
+      gui.add(bloom.blendMode, "blendFunction", BlendFunction);
+      gui.add(bloom.blendMode.opacity, "value", 0, 1).name("Opacity");
+      gui.open();
+    }
+
+    (sceneEl as any).addEventListener("rendererresize", function ({ detail }: { detail: DOMRectReadOnly }) {
+      console.log("Resize", detail);
+      composer.setSize(detail.width, detail.height, true);
+    });
 
     // This gets called after all system and component init functions
     sceneEl.addEventListener("loaded", () => {
       waitForPreloads().then(() => {
         this.world.time.elapsed = performance.now();
         renderer.setAnimationLoop(function (_rafTime, xrFrame) {
-          mainTick(xrFrame, renderer, sceneEl.object3D, camera);
+          mainTick(xrFrame, renderer, scene, camera, composer);
         });
         sceneEl.renderStarted = true;
       });
