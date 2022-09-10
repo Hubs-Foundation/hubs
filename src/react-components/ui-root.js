@@ -90,7 +90,7 @@ import { UserProfileSidebarContainer } from "./room/UserProfileSidebarContainer"
 import { CloseRoomModal } from "./room/CloseRoomModal";
 import { WebVRUnsupportedModal } from "./room/WebVRUnsupportedModal";
 import { TweetModalContainer } from "./room/TweetModalContainer";
-import { TipContainer, FullscreenTip } from "./room/TipContainer";
+import { TipContainer, FullscreenTip, RecordModeTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
@@ -959,6 +959,13 @@ class UIRoot extends Component {
       isGhost,
       hide
     };
+    if (this.state.isRecordingMode) {
+      return (
+        <div className={classNames(rootStyles)}>
+          <RoomLayoutContainer scene={this.props.scene} store={this.props.store} viewport={<RecordModeTip />} />
+        </div>
+      );
+    }
     if (this.props.hide || this.state.hide) {
       return (
         <div className={classNames(rootStyles)}>
