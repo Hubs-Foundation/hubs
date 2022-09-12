@@ -62,7 +62,7 @@ const Banner = () => {
     newsletterSuccess();
   };
 
-  const onSubmit = useCallback(async data => {
+  const onSubmit = async data => {
     const url = "https://basket.mozilla.org/news/subscribe/";
     const body =
       "email=" +
@@ -88,7 +88,7 @@ const Banner = () => {
       console.error(error);
       newsletterError();
     }
-  });
+  };
 
   /**
    * Emain input change
@@ -105,7 +105,7 @@ const Banner = () => {
    */
   const onConfirm = useCallback(() => {
     setConfirm(state => !state);
-  });
+  }, []);
 
   /**
    * Checkbox Label
