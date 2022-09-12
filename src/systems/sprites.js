@@ -1,5 +1,3 @@
-/* global AFRAME THREE */
-
 // See doc/spritesheet-generation.md for information about this spritesheet
 import spritesheetAction from "../assets/images/spritesheets/sprite-system-action-spritesheet.json";
 import spritesheetNotice from "../assets/images/spritesheets/sprite-system-notice-spritesheet.json";

@@ -1,4 +1,3 @@
-/* global APP*/
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
 

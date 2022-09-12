@@ -1,4 +1,3 @@
-/* global AFRAME */
 import { textureLoader } from "../utils/media-utils";
 
 import actionButtonSrc from "../assets/hud/action_button.9.png";

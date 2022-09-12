@@ -1,4 +1,3 @@
-/* global THREE */
 /**
  * Networked Drawing
  * Creates procedurally generated 'lines' (or tubes) that are networked.

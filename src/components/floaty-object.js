@@ -1,7 +1,6 @@
 import { addComponent } from "bitecs";
 import { FloatyObject } from "../bit-components";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
-/* global AFRAME */
 
 AFRAME.registerComponent("floaty-object", {
   schema: {

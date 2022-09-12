@@ -1,4 +1,3 @@
-/* global AFRAME NAF performance */
 AFRAME.registerComponent("owned-object-limiter", {
   schema: {
     counter: { type: "selector" }
