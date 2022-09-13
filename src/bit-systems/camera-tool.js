@@ -246,11 +246,6 @@ function updateUI(world, camera) {
     sndToggleLblObj.text = captureAudio ? "Sound ON" : "Sound OFF";
     sndToggleLblObj.sync();
   }
-
-  // TODO HACK hidden objects are still not having their matricies updated correctly
-  // Seems like a regression of #5421
-  // updateMatrices should be checking forceWorldUpdate instead of parent.childrenNeedMatrixWorldUpdate
-  snapMenuObj.childrenNeedMatrixWorldUpdate = true;
 }
 
 let snapPixels;
