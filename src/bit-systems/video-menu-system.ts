@@ -73,10 +73,6 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     const menuObj = world.eid2obj.get(menu)!;
     const videoObj = world.eid2obj.get(eid)!;
     videoObj.add(menuObj);
-    // TODO: Fix add in threejs
-    // TODO remove should also reset matrixWorld to cachedMatrixWorld
-    menuObj.matrixWorldNeedsUpdate = true;
-    menuObj.childrenNeedMatrixWorldUpdate = true;
     setCursorRaycastable(world, menu, true);
   });
 
