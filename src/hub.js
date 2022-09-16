@@ -529,15 +529,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
   }
 
   const hub = data.hubs[0];
-  let embedToken = hub.embed_token;
-
-  if (!embedToken) {
-    const embedTokenEntry = store.state.embedTokens && store.state.embedTokens.find(t => t.hubId === hub.hub_id);
-
-    if (embedTokenEntry) {
-      embedToken = embedTokenEntry.embedToken;
-    }
-  }
 
   console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
@@ -548,8 +539,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     onMediaSearchResultEntrySelected: (entry, selectAction) =>
       scene.emit("action_selected_media_result_entry", { entry, selectAction }),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
-    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedToken
+    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
-import { getColorSchemePref } from "../utils/get-color-scheme-pref";
+import { onThemeChanged, getThemeColor } from "../utils/theme";
 import classNames from "classnames";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -62,11 +62,7 @@ function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
 }
 
 function getThemeBackground() {
-  const currentTheme = APP?.store?.state?.preferences?.theme;
-  const themes = window.APP_CONFIG?.theme?.themes;
-  const currentThemeObject = themes?.find(t => t.id === currentTheme) || getColorSchemePref();
-  const previewBackgroundColor = new THREE.Color(currentThemeObject?.variables["background3-color"] || 0xeaeaea);
-  return previewBackgroundColor;
+  return new THREE.Color(getThemeColor("background3-color") || 0xeaeaea);
 }
 
 class AvatarPreview extends Component {
@@ -125,6 +121,7 @@ class AvatarPreview extends Component {
       this.mixer && this.mixer.update(dt);
       this.previewRenderer.render(this.scene, this.camera);
     });
+    this.removeThemeChangedListener = onThemeChanged(() => this.previewRenderer.setClearColor(getThemeBackground()));
     window.addEventListener("resize", this.resize);
     this.resize();
 
@@ -186,6 +183,7 @@ class AvatarPreview extends Component {
 
     Object.values(this.imageBitmaps).forEach(img => disposeImageBitmap(img));
     window.removeEventListener("resize", this.resize);
+    this.removeThemeChangedListener();
   };
 
   componentDidUpdate = async oldProps => {

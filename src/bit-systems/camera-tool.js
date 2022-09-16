@@ -308,11 +308,11 @@ export function cameraToolSystem(world) {
 
     const screenObj = world.eid2obj.get(CameraTool.screenRef[eid]);
     screenObj.material.map = renderTarget.texture;
-    screenObj.onBeforeRender = setRendertargetDirty;
+    screenObj.material.onBeforeRender = setRendertargetDirty;
 
     const selfieScreenObj = world.eid2obj.get(CameraTool.selfieScreenRef[eid]);
     selfieScreenObj.material.map = renderTarget.texture;
-    selfieScreenObj.onBeforeRender = setRendertargetDirty;
+    selfieScreenObj.material.onBeforeRender = setRendertargetDirty;
 
     renderTargets.set(eid, renderTarget);
   });

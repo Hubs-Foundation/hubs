@@ -153,9 +153,8 @@ AFRAME.registerComponent("video-texture-target", {
         const texture = videoTextureSource.renderTarget.texture;
         this.applyTexture(texture);
 
-        // Bit of a hack here to only update the renderTarget when the screens are in view
-        material.map.isVideoTexture = true;
-        material.map.update = () => {
+        // Only update the renderTarget when the screens are in view
+        material.onBeforeRender = () => {
           videoTextureSource.textureNeedsUpdate = true;
         };
       } else {

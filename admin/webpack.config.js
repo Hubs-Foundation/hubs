@@ -177,6 +177,17 @@ module.exports = (env, argv) => {
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }
         },
+        // TODO worker-loader has been deprecated, but we need "inline" support which is not available yet
+        // ideally instead of inlining workers we should serve them off the root domain instead of CDN.
+        {
+          test: /\.worker\.js$/,
+          loader: "worker-loader",
+          options: {
+            filename: "assets/js/[name]-[hash].js",
+            publicPath: "/",
+            inline: "no-fallback"
+          }
+        },
         {
           test: /\.(scss|css)$/,
           use: [
