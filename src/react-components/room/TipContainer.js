@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage, useIntl, defineMessages } from "react-intl";
 import { Tip } from "./Tip";
+import { ToastTip } from "./ToastTip";
 import { useEffect } from "react";
 import { discordBridgesForPresences, hasEmbedPresences } from "../../utils/phoenix-utils";
 import configs from "../../utils/configs";
@@ -75,7 +76,26 @@ export function FullscreenTip(props) {
   );
 }
 
-export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
+export function RecordModeTip(props) {
+  return (
+    <ToastTip>
+      <FormattedMessage id="record-mode-enabled-tip" defaultMessage="Record mode on, press 'B' to toggle off" />
+    </ToastTip>
+  );
+}
+
+export function TipContainer({
+  hide,
+  inLobby,
+  inRoom,
+  isStreaming,
+  isEmbedded,
+  scene,
+  store,
+  hubId,
+  presences,
+  isRecordMode
+}) {
   const intl = useIntl();
   const [lobbyTipDismissed, setLobbyTipDismissed] = useState(false);
   const [broadcastTipDismissed, setBroadcastTipDismissed] = useState(() =>
@@ -94,15 +114,15 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
 
   useEffect(
     () => {
-      function onSceneTipChanged({ detail: tipId }) {
-        setOnboardingTipId(tipId);
-      }
+    function onSceneTipChanged({ detail: tipId }) {
+      setOnboardingTipId(tipId);
+    }
 
-      scene.addEventListener("tip-changed", onSceneTipChanged);
+    scene.addEventListener("tip-changed", onSceneTipChanged);
 
-      setOnboardingTipId(scene.systems.tips.activeTip);
-    },
-    [scene]
+    setOnboardingTipId(scene.systems.tips.activeTip);
+  },
+  [scene]
   );
 
   const discordBridges = presences ? discordBridgesForPresences(presences) : [];
