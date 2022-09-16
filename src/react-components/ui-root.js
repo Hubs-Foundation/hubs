@@ -95,7 +95,6 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { TERMS, PRIVACY } from "../constants";
-import { rsort } from "semver";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
