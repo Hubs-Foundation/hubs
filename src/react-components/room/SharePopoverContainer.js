@@ -137,7 +137,7 @@ export function SharePopoverContainer({ scene, hubChannel }) {
       id: "camera",
       icon: VideoIcon,
       color: "accent5",
-      label: <FormattedMessage id="share-popover.source.camera" defaultMessage="Camera" />,
+      label: <FormattedMessage id="share-popover.source.camera" defaultMessage="カメラ" />,
       onSelect: toggleShareCamera,
       active: sharingSource === MediaDevices.CAMERA
     },
@@ -145,7 +145,7 @@ export function SharePopoverContainer({ scene, hubChannel }) {
       id: "screen",
       icon: DesktopIcon,
       color: "accent5",
-      label: <FormattedMessage id="share-popover.source.screen" defaultMessage="Screen" />,
+      label: <FormattedMessage id="share-popover.source.screen" defaultMessage="スクリーン" />,
       onSelect: toggleShareScreen,
       active: sharingSource === MediaDevices.SCREEN
     },

@@ -37,7 +37,7 @@ export default class SceneEntryManager {
     this.leftCursorController = document.getElementById("left-cursor-controller");
     this.avatarRig = document.getElementById("avatar-rig");
     this._entered = false;
-    this.performConditionalSignIn = () => {};
+    this.performConditionalSignIn = () => { };
     this.history = history;
   }
 
@@ -234,7 +234,6 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("add_media", e => {
       const contentOrigin = e.detail instanceof File ? ObjectContentOrigins.FILE : ObjectContentOrigins.URL;
-
       spawnMediaInfrontOfPlayer(e.detail, contentOrigin);
     });
 
@@ -314,13 +313,13 @@ export default class SceneEntryManager {
 
       const files = e.dataTransfer.files;
 
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
-        }
-      }
+      // if (url) {
+      //   spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+      // } else {
+      //   for (const file of files) {
+      //     spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
+      //   }
+      // }
     });
 
     let currentVideoShareEntity;

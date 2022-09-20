@@ -74,7 +74,7 @@ MoreMenuPopoverContent.propTypes = {
 
 // The MoreMenuContext allows us to control the more menu popover visibility from the MoreMenuPopoverButton
 // and CompactMoreMenuButton.
-const MoreMenuContext = createContext([false, () => {}]);
+const MoreMenuContext = createContext([false, () => { }]);
 
 export function MoreMenuContextProvider({ initiallyVisible, children }) {
   const context = useState(initiallyVisible || false);
@@ -88,7 +88,7 @@ MoreMenuContextProvider.propTypes = {
 
 const moreMenuTitle = defineMessage({
   id: "more-menu-popover.title",
-  defaultMessage: "More"
+  defaultMessage: "ƒƒjƒ…["
 });
 
 export function MoreMenuPopoverButton({ menu }) {

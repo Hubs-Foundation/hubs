@@ -85,58 +85,56 @@ export function UserProfileSidebar({
         {canPromote && (
           <Button
             preset="accept"
-            disabled={!isSignedIn}
             title={
               isSignedIn
-                ? intl.formatMessage({ id: "user-profile-sidebar.promote-button", defaultMessage: "Promote" })
+                ? intl.formatMessage({ id: "user-profile-sidebar.promote-button", defaultMessage: "Œ ŒÀ•t—^" })
                 : intl.formatMessage(
-                    {
-                      id: "user-profile-sidebar.promote-button-disabled-label",
-                      defaultMessage: "{displayName} is signed out."
-                    },
-                    { displayName }
-                  )
+                  {
+                    id: "user-profile-sidebar.promote-button-disabled-label",
+                    defaultMessage: "{displayName} is signed out."
+                  },
+                  { displayName }
+                )
             }
             onClick={onPromote}
           >
-            <FormattedMessage id="user-profile-sidebar.promote-button" defaultMessage="Promote" />
+            <FormattedMessage id="user-profile-sidebar.promote-button" defaultMessage="Œ ŒÀ•t—^" />
           </Button>
         )}
         {canDemote && (
           <Button
             preset="cancel"
-            disabled={!isSignedIn}
             title={
               isSignedIn
-                ? intl.formatMessage({ id: "user-profile-sidebar.demote-button", defaultMessage: "Demote" })
+                ? intl.formatMessage({ id: "user-profile-sidebar.demote-button", defaultMessage: "Œ ŒÀ”’D" })
                 : intl.formatMessage(
-                    {
-                      id: "user-profile-sidebar.demote-button-disabled-label",
-                      defaultMessage: "{displayName} is signed out."
-                    },
-                    { displayName }
-                  )
+                  {
+                    id: "user-profile-sidebar.demote-button-disabled-label",
+                    defaultMessage: "{displayName} is signed out."
+                  },
+                  { displayName }
+                )
             }
             onClick={onDemote}
           >
-            <FormattedMessage id="user-profile-sidebar.demote-button" defaultMessage="Demote" />
+            <FormattedMessage id="user-profile-sidebar.demote-button" defaultMessage="Œ ŒÀ”’D" />
           </Button>
         )}
         <Button onClick={onToggleHidden}>
           {isHidden ? (
-            <FormattedMessage id="user-profile-sidebar.unhide-button" defaultMessage="Unhide" />
+            <FormattedMessage id="user-profile-sidebar.unhide-button" defaultMessage="•\Ž¦" />
           ) : (
-            <FormattedMessage id="user-profile-sidebar.hide-button" defaultMessage="Hide" />
+            <FormattedMessage id="user-profile-sidebar.hide-button" defaultMessage="”ñ•\Ž¦" />
           )}
         </Button>
         {canMute && (
           <Button preset="cancel" onClick={onMute}>
-            <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="Mute" />
+            <FormattedMessage id="user-profile-sidebar.mute-button" defaultMessage="ƒ~ƒ…[ƒg" />
           </Button>
         )}
         {canKick && (
           <Button preset="cancel" onClick={onKick}>
-            <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="Kick" />
+            <FormattedMessage id="user-profile-sidebar.kick-button" defaultMessage="‘Þê" />
           </Button>
         )}
       </Column>

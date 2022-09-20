@@ -75,7 +75,7 @@ export function NextButton(props) {
 export function CancelButton(props) {
   return (
     <Button preset="cancel" {...props}>
-      <FormattedMessage id="button.cancel" defaultMessage="Cancel" />
+      <FormattedMessage id="button.cancel" defaultMessage="キャンセル" />
     </Button>
   );
 }
@@ -83,7 +83,7 @@ export function CancelButton(props) {
 export function ContinueButton(props) {
   return (
     <Button preset="accept" {...props}>
-      <FormattedMessage id="button.continue" defaultMessage="Continue" />
+      <FormattedMessage id="button.continue" defaultMessage="コンティニュー" />
     </Button>
   );
 }
@@ -91,7 +91,7 @@ export function ContinueButton(props) {
 export function AcceptButton(props) {
   return (
     <Button preset="accept" {...props}>
-      <FormattedMessage id="button.accept" defaultMessage="Accept" />
+      <FormattedMessage id="button.accept" defaultMessage="このアバターで参加" />
     </Button>
   );
 }

@@ -51,7 +51,7 @@ export function RoomSettingsSidebar({
 
   return (
     <Sidebar
-      title={<FormattedMessage id="room-settings-sidebar.title" defaultMessage="Room Settings" />}
+      title={<FormattedMessage id="room-settings-sidebar.title" defaultMessage="ƒ‹[ƒ€Ý’è" />}
       beforeTitle={showBackButton ? <BackButton onClick={onClose} /> : <CloseButton onClick={onClose} />}
     >
       <Column padding as="form" onSubmit={handleSubmit(onSubmit)}>

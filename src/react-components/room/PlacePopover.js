@@ -8,7 +8,7 @@ import { defineMessage, useIntl } from "react-intl";
 
 const placePopoverTitle = defineMessage({
   id: "place-popover.title",
-  defaultMessage: "Place"
+  defaultMessage: "ƒŠƒvƒ‰ƒC"
 });
 
 export function PlacePopoverButton({ items }) {

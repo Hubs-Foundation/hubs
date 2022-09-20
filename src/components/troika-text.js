@@ -16,14 +16,14 @@ const THREE_SIDES = {
 function numberOrPercent(defaultValue) {
   return {
     default: defaultValue,
-    parse: function(value) {
+    parse: function (value) {
       if (typeof value === "string" && value.indexOf("%") > 0) {
         return value;
       }
       value = +value;
       return isNaN(value) ? 0 : value;
     },
-    stringify: function(value) {
+    stringify: function (value) {
       return "" + value;
     }
   };
@@ -37,9 +37,9 @@ AFRAME.registerComponent("text", {
     clipRect: {
       type: "string",
       default: "",
-      parse: function(value) {
+      parse: function (value) {
         if (value) {
-          value = value.split(/[\s,]+/).reduce(function(out, val) {
+          value = value.split(/[\s,]+/).reduce(function (out, val) {
             val = +val;
             if (!isNaN(val)) {
               out.push(val);
@@ -49,7 +49,7 @@ AFRAME.registerComponent("text", {
         }
         return value && value.length === 4 ? value : null;
       },
-      stringify: function(value) {
+      stringify: function (value) {
         return value ? value.join(" ") : "";
       }
     },
@@ -59,7 +59,7 @@ AFRAME.registerComponent("text", {
     direction: { type: "string", default: "auto", oneOf: ["auto", "ltr", "rtl"] },
     fillOpacity: { type: "number", default: 1 },
     // This is different from the Troika preoperty name, Using "fontUrl" to prevent conflict with previous "font" property and to allow us to make named fonts later
-    fontUrl: { type: "string" },
+    fontUrl: { type: "string", default: "https://kamoenai-root-redirector-760b3d20.s3.ap-northeast-1.amazonaws.com/HigashiOme-Gothic-1.3i.ttf" },
     // This default value differs from the Troika default of 0.1, it most closely matches the size of our previous text component.
     fontSize: { type: "number", default: 0.075 },
     letterSpacing: { type: "number", default: 0 },
@@ -86,7 +86,7 @@ AFRAME.registerComponent("text", {
   /**
    * Called once when component is attached for initial setup.
    */
-  init: function() {
+  init: function () {
     this.troikaTextMesh = new Text();
     this.troikaTextMesh.material.toneMapped = false;
     this.el.setObject3D("text", this.troikaTextMesh);
@@ -96,7 +96,7 @@ AFRAME.registerComponent("text", {
    * Called when component is attached and when component data changes.
    * Generally modifies the entity based on the data.
    */
-  update: function() {
+  update: function () {
     const data = this.data;
     const mesh = this.troikaTextMesh;
 
@@ -139,14 +139,14 @@ AFRAME.registerComponent("text", {
    * Called when a component is removed (e.g., via removeAttribute).
    * Generally undoes all modifications to the entity.
    */
-  remove: function() {
+  remove: function () {
     // Free memory
     this.troikaTextMesh.dispose();
   },
 
-  getSize: (function() {
+  getSize: (function () {
     const size = new THREE.Vector3();
-    return function(outSize) {
+    return function (outSize) {
       this.troikaTextMesh.geometry.boundingBox.getSize(size);
       outSize.set(
         size.x * this.troikaTextMesh.scale.x,

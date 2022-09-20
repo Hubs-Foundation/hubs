@@ -20,7 +20,7 @@ AFRAME.registerComponent("open-media-button", {
       this.el.object3D.visible = !!visible;
 
       if (visible) {
-        let label = "open link";
+        let label = "ƒŠƒ“ƒN";
         if (!this.data.onlyOpenLink) {
           let hubId;
           if (await isLocalHubsAvatarUrl(src)) {
@@ -30,7 +30,8 @@ AFRAME.registerComponent("open-media-button", {
           } else if ((hubId = await isHubsRoomUrl(src))) {
             const url = new URL(src);
             if (url.hash && window.APP.hub.hub_id === hubId) {
-              label = "go to";
+              console.log("way point url", url);
+              label = "ƒ‰ƒxƒ‹";
             } else {
               label = "visit room";
             }
@@ -43,7 +44,7 @@ AFRAME.registerComponent("open-media-button", {
     this.onClick = async () => {
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
-      const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);
+      const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => { }, true);
 
       let hubId;
       if (this.data.onlyOpenLink) {

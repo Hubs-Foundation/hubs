@@ -14,7 +14,7 @@ import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identit
 import { NO_DEVICE_ID } from "../utils/media-devices-utils.js";
 import { getDefaultTheme } from "../utils/theme.js";
 
-const defaultMaterialQuality = (function() {
+const defaultMaterialQuality = (function () {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
 
   // HACK: AFRAME is not available on all pages, so we catch the ReferenceError.
@@ -63,7 +63,7 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        displayName: { type: "string", pattern: "^[A-Za-z0-9_~ -]{3,32}$" },
+        displayName: { type: "string", pattern: "[^ ]{1,24}$" }, // pattern: "^[A-Za-z0-9_~ -]{3,32}$"
         avatarId: { type: "string" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
@@ -137,6 +137,7 @@ export const SCHEMA = {
         globalSFXVolume: { type: "number", default: 100 },
         snapRotationDegrees: { type: "number", default: 45 },
         materialQualitySetting: { type: "string", default: defaultMaterialQuality },
+        enableThirdPersonView: { type: "bool", default: false },
         enableDynamicShadows: { type: "bool", default: false },
         disableSoundEffects: { type: "bool", default: false },
         disableMovement: { type: "bool", default: false },

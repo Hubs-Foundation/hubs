@@ -23,11 +23,11 @@ function getDeviceLabel(ctx, intl) {
     } else if (ctx.discord) {
       return intl.formatMessage({ id: "people-sidebar.device-label.discord", defaultMessage: "Discord Bot" });
     } else if (ctx.mobile) {
-      return intl.formatMessage({ id: "people-sidebar.device-label.mobile", defaultMessage: "Mobile" });
+      return intl.formatMessage({ id: "people-sidebar.device-label.mobile", defaultMessage: "モバイル" });
     }
   }
 
-  return intl.formatMessage({ id: "people-sidebar.device-label.desktop", defaultMessage: "Desktop" });
+  return intl.formatMessage({ id: "people-sidebar.device-label.desktop", defaultMessage: "デスクトップ" });
 }
 
 function getDeviceIconComponent(ctx) {
@@ -47,13 +47,13 @@ function getDeviceIconComponent(ctx) {
 function getVoiceLabel(micPresence, intl) {
   if (micPresence) {
     if (micPresence.talking) {
-      return intl.formatMessage({ id: "people-sidebar.voice-label.talking", defaultMessage: "Talking" });
+      return intl.formatMessage({ id: "people-sidebar.voice-label.talking", defaultMessage: "トーク中" });
     } else if (micPresence.muted) {
-      return intl.formatMessage({ id: "people-sidebar.voice-label.muted", defaultMessage: "Muted" });
+      return intl.formatMessage({ id: "people-sidebar.voice-label.muted", defaultMessage: "ミュート中" });
     }
   }
 
-  return intl.formatMessage({ id: "people-sidebar.voice-label.not-talking", defaultMessage: "Not Talking" });
+  return intl.formatMessage({ id: "people-sidebar.voice-label.not-talking", defaultMessage: "ボイスON" });
 }
 
 function getVoiceIconComponent(micPresence) {
@@ -71,11 +71,11 @@ function getVoiceIconComponent(micPresence) {
 function getPresenceMessage(presence, intl) {
   switch (presence) {
     case "lobby":
-      return intl.formatMessage({ id: "people-sidebar.presence.in-lobby", defaultMessage: "In Lobby" });
+      return intl.formatMessage({ id: "people-sidebar.presence.in-lobby", defaultMessage: "ロビー" });
     case "room":
-      return intl.formatMessage({ id: "people-sidebar.presence.in-room", defaultMessage: "In Room" });
+      return intl.formatMessage({ id: "people-sidebar.presence.in-room", defaultMessage: "ルーム" });
     case "entering":
-      return intl.formatMessage({ id: "people-sidebar.presence.entering", defaultMessage: "Entering Room" });
+      return intl.formatMessage({ id: "people-sidebar.presence.entering", defaultMessage: "エントランス" });
     default:
       return undefined;
   }
@@ -84,7 +84,7 @@ function getPresenceMessage(presence, intl) {
 function getPersonName(person, intl) {
   const you = intl.formatMessage({
     id: "people-sidebar.person-name.you",
-    defaultMessage: "You"
+    defaultMessage: "あなた"
   });
 
   return person.profile.displayName + (person.isMe ? ` (${you})` : "");
@@ -98,7 +98,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
       title={
         <FormattedMessage
           id="people-sidebar.title"
-          defaultMessage="People ({numPeople})"
+          defaultMessage="参加者 ({numPeople})"
           values={{ numPeople: people.length }}
         />
       }
@@ -106,7 +106,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
       afterTitle={
         showMuteAll ? (
           <IconButton onClick={onMuteAll}>
-            <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="Mute All" />
+            <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="ミュート" />
           </IconButton>
         ) : (
           undefined
@@ -131,7 +131,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
               <p>{getPersonName(person, intl)}</p>
               {person.roles.owner && (
                 <StarIcon
-                  title={intl.formatMessage({ id: "people-sidebar.moderator-label", defaultMessage: "Moderator" })}
+                  title={intl.formatMessage({ id: "people-sidebar.moderator-label", defaultMessage: "管理者" })}
                   className={styles.moderatorIcon}
                   width={12}
                   height={12}
@@ -156,5 +156,5 @@ PeopleSidebar.propTypes = {
 
 PeopleSidebar.defaultProps = {
   people: [],
-  onSelectPerson: () => {}
+  onSelectPerson: () => { }
 };

@@ -38,7 +38,7 @@ export function MicSetupModal({
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
   return (
     <Modal
-      title={<FormattedMessage id="mic-setup-modal.title" defaultMessage="Microphone Setup" />}
+      title={<FormattedMessage id="mic-setup-modal.title" defaultMessage="マイク設定" />}
       beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       {...rest}
@@ -47,7 +47,7 @@ export function MicSetupModal({
         <p>
           <FormattedMessage
             id="mic-setup-modal.check-mic"
-            defaultMessage="Check your microphone and audio before entering."
+            defaultMessage="ミュート設定を確認してください"
           />
         </p>
         <div className={styles.audioCheckContainer}>
@@ -71,7 +71,7 @@ export function MicSetupModal({
               {permissionStatus === PermissionStatus.GRANTED ? (
                 <>
                   <ToggleInput
-                    label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle-v2" defaultMessage="Mute" />}
+                    label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle-v2" defaultMessage="ミュート" />}
                     checked={isMicrophoneMuted}
                     onChange={onChangeMicrophoneMuted}
                   />
@@ -81,7 +81,7 @@ export function MicSetupModal({
                       <Column className={styles.popoverContent}>
                         <FormattedMessage
                           id="mic-setup-modal.mute-mic-info"
-                          defaultMessage="You can mute anytime after you enter the room"
+                          defaultMessage="入室後ミュートにできます"
                         />
                       </Column>
                     }
@@ -103,7 +103,7 @@ export function MicSetupModal({
                   <p>
                     <FormattedMessage
                       id="mic-setup-modal.mic-permission-prompt"
-                      defaultMessage="Requesting access to your microphone..."
+                      defaultMessage="マイク読み込み中"
                     />
                   </p>
                 )) ||
@@ -112,13 +112,13 @@ export function MicSetupModal({
                     <span className={styles.errorTitle}>
                       <FormattedMessage
                         id="mic-setup-modal.error-title"
-                        defaultMessage="Microphone access was blocked."
+                        defaultMessage="マイクにアクセスできませんでした"
                         className={styles.errorTitle}
                       />
                     </span>{" "}
                     <FormattedMessage
                       id="mic-setup-modal.error-description"
-                      defaultMessage="To talk in Hubs you will need to allow microphone access."
+                      defaultMessage="通話するにはマイクの使用を許可する必要があります。"
                     />
                   </p>
                 ))
@@ -128,7 +128,7 @@ export function MicSetupModal({
               isAudioInputSelectAvailable && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
-                    <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
+                    <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="マイク" />
                   </p>
                   <SelectInputField
                     className={styles.selectionInput}
@@ -146,14 +146,14 @@ export function MicSetupModal({
             </div>
             <div className={styles.actionContainer}>
               <Button preset="basic" onClick={onPlaySound} sm>
-                <FormattedMessage id="mic-setup-modal.test-audio-button" defaultMessage="Test Audio" />
+                <FormattedMessage id="mic-setup-modal.test-audio-button" defaultMessage="オーディオテスト" />
               </Button>
             </div>
             {permissionStatus === PermissionStatus.GRANTED &&
               isAudioOutputSelectAvailable && (
                 <div className={styles.selectionContainer}>
                   <p style={{ alignSelf: "start" }}>
-                    <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
+                    <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="スピーカー設定" />
                   </p>
                   <SelectInputField
                     onChange={onChangeSpeaker}
@@ -166,7 +166,7 @@ export function MicSetupModal({
           </div>
         </div>
         <Button preset="primary" onClick={onEnterRoom}>
-          <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="Enter Room" />
+          <FormattedMessage id="mic-setup-modal.enter-room-button" defaultMessage="ルームに入る" />
         </Button>
       </Column>
     </Modal>

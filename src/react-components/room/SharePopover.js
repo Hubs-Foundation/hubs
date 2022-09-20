@@ -8,7 +8,7 @@ import { defineMessage, useIntl } from "react-intl";
 
 const sharePopoverTitle = defineMessage({
   id: "share-popover.title",
-  defaultMessage: "Share"
+  defaultMessage: "‹¤—L"
 });
 
 export function SharePopoverButton({ items }) {

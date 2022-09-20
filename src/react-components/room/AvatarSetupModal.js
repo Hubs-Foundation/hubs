@@ -8,7 +8,7 @@ import { FormattedMessage } from "react-intl";
 export function AvatarSetupModal({ className, onBack, ...rest }) {
   return (
     <Modal
-      title={<FormattedMessage id="avatar-setup-sidebar.title" defaultMessage="Avatar Setup" />}
+      title={<FormattedMessage id="avatar-setup-sidebar.title" defaultMessage="アバター選択" />}
       beforeTitle={<BackButton onClick={onBack} />}
       className={className}
     >

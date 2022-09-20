@@ -19,7 +19,7 @@ import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 
-const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
+const ChatContext = createContext({ messageGroups: [], sendMessage: () => { } });
 
 let uniqueMessageId = 0;
 
@@ -290,7 +290,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
           }
         })}
       </ChatMessageList>
-      <ChatInput
+      {/* <ChatInput
         id="chat-input"
         ref={inputRef}
         onKeyDown={onKeyDown}
@@ -318,7 +318,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             )}
           </>
         }
-      />
+      /> */}
     </ChatSidebar>
   );
 }

@@ -14,7 +14,7 @@ import { Button } from "../input/Button";
 
 const reactionPopoverTitle = defineMessage({
   id: "reaction-popover.title",
-  defaultMessage: "React"
+  defaultMessage: "ƒŠƒAƒNƒVƒ‡ƒ“"
 });
 
 function ReactionPopoverContent({ items, presence, onToggleHandRaised, ...rest }) {
@@ -23,14 +23,14 @@ function ReactionPopoverContent({ items, presence, onToggleHandRaised, ...rest }
       <Row noWrap>
         <ImageGridPopover items={items} {...rest} />
       </Row>
-      <Row>
+      {/* <Row>
         <label className={styles.label}>
           <FormattedMessage id="reaction-popover.action" defaultMessage="Actions" />
         </label>
       </Row>
       <Row nowrap>
         <HandRaisedButton active={presence.hand_raised} onClick={onToggleHandRaised} />
-      </Row>
+      </Row> */}
     </Column>
   );
 }

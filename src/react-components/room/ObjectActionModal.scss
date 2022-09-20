@@ -1,0 +1,29 @@
+@use "../styles/theme.scss";
+
+:local(.person) {
+  font-size: theme.$font-size-sm;
+
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+:local(.moderator-icon) {
+  *[stroke=\#000] {
+    stroke: theme.$red;
+  }
+
+  *[fill=\#000] {
+    fill: theme.$red;
+  }
+}
+
+:local(.presence) {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}

@@ -4,6 +4,7 @@ import { PromoteClientModal } from "./PromoteClientModal";
 import { getAvatarThumbnailUrl } from "../../utils/avatar-utils";
 import { UserProfileSidebar } from "./UserProfileSidebar.js";
 import { SignInMessages } from "../auth/SignInModal";
+import configs from "../../utils/configs";
 
 export function UserProfileSidebarContainer({
   user,

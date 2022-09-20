@@ -39,7 +39,7 @@ export function RoomEntryModal({
           )}
         <div className={styles.roomName}>
           <h5>
-            <FormattedMessage id="room-entry-modal.room-name-label" defaultMessage="Room Name" />
+            <FormattedMessage id="room-entry-modal.room-name-label" defaultMessage="ルーム名" />
           </h5>
           <p>{roomName}</p>
         </div>
@@ -48,23 +48,23 @@ export function RoomEntryModal({
             <Button preset="accent4" onClick={onJoinRoom}>
               <EnterIcon />
               <span>
-                <FormattedMessage id="room-entry-modal.join-room-button" defaultMessage="Join Room" />
+                <FormattedMessage id="room-entry-modal.join-room-button" defaultMessage="ルームに参加" />
               </span>
             </Button>
           )}
-          {showEnterOnDevice && (
+          {/* {showEnterOnDevice && (
             <Button preset="accent5" onClick={onEnterOnDevice}>
               <VRIcon />
               <span>
                 <FormattedMessage id="room-entry-modal.enter-on-device-button" defaultMessage="Enter On Device" />
               </span>
             </Button>
-          )}
+          )} */}
           {showSpectate && (
             <Button preset="accent2" onClick={onSpectate}>
               <ShowIcon />
               <span>
-                <FormattedMessage id="room-entry-modal.spectate-button" defaultMessage="Spectate" />
+                <FormattedMessage id="room-entry-modal.spectate-button" defaultMessage="ロビーモード" />
               </span>
             </Button>
           )}
@@ -75,7 +75,7 @@ export function RoomEntryModal({
                 <Button preset="transparent" className={styleUtils.showLg} onClick={onOptions}>
                   <SettingsIcon />
                   <span>
-                    <FormattedMessage id="room-entry-modal.options-button" defaultMessage="Options" />
+                    <FormattedMessage id="room-entry-modal.options-button" defaultMessage="ルーム設定" />
                   </span>
                 </Button>
               </>
