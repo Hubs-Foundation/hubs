@@ -28,7 +28,7 @@
     "logout": "node ./scripts/logout.mjs",
     "deploy": "node ./scripts/deploy.mjs",
     "undeploy": "node ./scripts/undeploy.mjs",
-    "test": "npm run lint && npm run test:unit && npm run build",
+    "test": "npm run lint && npm run test:unit",
     "test:unit": "ava",
     "stats": "rimraf ./dist && webpack --mode=production --json",
     "spritesheet": "npm run spritesheet:system-action && npm run spritesheet:system-notice",
@@ -55,10 +55,7 @@
   },
   "ava": {
     "files": [
-      "./test/unit"
-    ],
-    "sources": [
-      "src/**/*.js"
+      "./test/unit/**"
     ],
     "require": [
       "@babel/register",

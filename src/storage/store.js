@@ -153,7 +153,7 @@ export const SCHEMA = {
         showRtcDebugPanel: { type: "bool", default: false },
         showAudioDebugPanel: { type: "bool", default: false },
         enableAudioClipping: { type: "bool", default: false },
-        audioClippingThreshold: { type: "number", default: 0.015 },
+        audioClippingThreshold: { type: "number", default: 0.2 },
         audioPanningQuality: { type: "string", default: defaultAudioPanningQuality() },
         theme: { type: "string", default: getDefaultTheme()?.name },
         cursorSize: { type: "number", default: 1 },
@@ -433,6 +433,15 @@ export default class Store extends EventTarget {
     this.dispatchEvent(new CustomEvent("statechanged"));
 
     return finalState;
+  }
+
+  getEmbedTokenForHub(hub) {
+    const embedTokenEntry = this.state.embedTokens.find(embedTokenEntry => embedTokenEntry.hubId === hub.hub_id);
+    if (embedTokenEntry) {
+      return embedTokenEntry.embedToken;
+    } else {
+      return null;
+    }
   }
 
   get schema() {

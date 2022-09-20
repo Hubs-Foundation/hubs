@@ -160,7 +160,6 @@ class UIRoot extends Component {
     showPreload: PropTypes.bool,
     onPreloadLoadClicked: PropTypes.func,
     embed: PropTypes.bool,
-    embedToken: PropTypes.string,
     onLoaded: PropTypes.func,
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
@@ -814,7 +813,7 @@ class UIRoot extends Component {
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
 
-            // ƒAƒNƒZƒXŒ³IPƒAƒhƒŒƒXŽæ“¾
+            // ï¿½Aï¿½Nï¿½Zï¿½Xï¿½ï¿½IPï¿½Aï¿½hï¿½ï¿½ï¿½Xï¿½æ“¾
             try {
               var URL = 'https://ipinfo.io?callback';
               var request = require('sync-request');
@@ -1161,7 +1160,7 @@ class UIRoot extends Component {
           // },
           {
             id: "user-profile",
-            label: <FormattedMessage id="more-menu.profile" defaultMessage="ƒAƒoƒ^[‘I‘ð" />,
+            label: <FormattedMessage id="more-menu.profile" defaultMessage="ï¿½Aï¿½oï¿½^ï¿½[ï¿½Iï¿½ï¿½" />,
             icon: AvatarIcon,
             onClick: () => this.setSidebar("profile")
           },
@@ -1262,7 +1261,7 @@ class UIRoot extends Component {
       // },
       {
         id: "support",
-        label: <FormattedMessage id="more-menu.support" defaultMessage="ƒTƒ|[ƒg" />,
+        label: <FormattedMessage id="more-menu.support" defaultMessage="ï¿½Tï¿½|ï¿½[ï¿½g" />,
         items: [
           // configs.feature("show_community_link") && {
           //   id: "community",
@@ -1290,7 +1289,7 @@ class UIRoot extends Component {
           // },
           configs.feature("show_controls_link") && {
             id: "controls",
-            label: <FormattedMessage id="more-menu.controls" defaultMessage="‘€ìà–¾" />,
+            label: <FormattedMessage id="more-menu.controls" defaultMessage="ï¿½ï¿½ï¿½ï¿½ï¿½" />,
             icon: SupportIcon,
             href: configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")
           },
@@ -1302,7 +1301,7 @@ class UIRoot extends Component {
           // },
           configs.feature("show_terms") && {
             id: "tos",
-            label: <FormattedMessage id="more-menu.tos" defaultMessage="‚²—˜—p‹K–ñ" />,
+            label: <FormattedMessage id="more-menu.tos" defaultMessage="ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½Kï¿½ï¿½" />,
             icon: TextDocumentIcon,
             href: configs.link("terms_of_use", TERMS)
           },
@@ -1563,7 +1562,7 @@ class UIRoot extends Component {
                       <>
                         <ToolbarButton
                           icon={<EnterIcon />}
-                          label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="–ß‚é" />}
+                          label={<FormattedMessage id="toolbar.join-room-button" defaultMessage="ï¿½ß‚ï¿½" />}
                           preset="accept"
                           onClick={() => this.setState({ watching: false })}
                         />
@@ -1572,7 +1571,7 @@ class UIRoot extends Component {
                             icon={<VRIcon />}
                             preset="accent5"
                             label={
-                              <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="ƒƒr[ƒ‚[ƒh" />
+                              <FormattedMessage id="toolbar.spectate-in-vr-button" defaultMessage="ï¿½ï¿½ï¿½rï¿½[ï¿½ï¿½ï¿½[ï¿½h" />
                             }
                             onClick={() => this.props.scene.enterVR()}
                           />
@@ -1614,7 +1613,7 @@ class UIRoot extends Component {
                     )}
                     {<ToolbarButton
                       icon={<LeaveIcon />}
-                      label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="‘ÞŽº" />}
+                      label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="ï¿½ÞŽï¿½" />}
                       preset="cancel"
                       onClick={() => {
                         this.showNonHistoriedDialog(LeaveRoomModal, {
@@ -1660,7 +1659,7 @@ class UIRoot extends Component {
                     {/* {entered && (
                       <ToolbarButton
                         icon={<LeaveIcon />}
-                        label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="‘ÞŽº" />}
+                        label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="ï¿½ÞŽï¿½" />}
                         preset="cancel"
                         onClick={() => {
                           this.showNonHistoriedDialog(LeaveRoomModal, {

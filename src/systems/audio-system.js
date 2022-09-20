@@ -25,6 +25,7 @@ function isThreeAudio(node) {
 }
 
 async function enableChromeAEC(gainNode) {
+  return;
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
    *  1. grab the GainNode from the scene's THREE.AudioListener
@@ -194,11 +195,13 @@ export class AudioSystem {
   }
 
   removeAudio({ node }) {
-    let outputNode = node;
     if (isThreeAudio(node)) {
-      outputNode = node.gain;
+      node.gain.disconnect();
     }
-    outputNode.disconnect();
+    try {
+      node.disconnect();
+    // eslint-disable-next-line no-empty
+    } catch(e) {}
   }
 
   updatePrefs() {

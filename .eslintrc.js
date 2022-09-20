@@ -36,6 +36,12 @@ module.exports = {
     "no-use-before-define": "error",
     "no-var": "error",
     "no-throw-literal": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        destructuredArrayIgnorePattern: "^_"
+      }
+    ],
     // Light console usage is useful but remove debug logs before merging to master.
     "no-console": "off",
     // https://www.npmjs.com/package/eslint-plugin-react-hooks

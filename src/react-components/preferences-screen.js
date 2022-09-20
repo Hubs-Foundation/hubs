@@ -8,7 +8,7 @@ import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExcla
 import { FormattedMessage, injectIntl, useIntl, defineMessages } from "react-intl";
 import styles from "../assets/stylesheets/preferences-screen.scss";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
-import { themes } from "./styles/theme";
+import { themes } from "../utils/theme";
 import MediaDevicesManager from "../utils/media-devices-manager";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { Slider } from "./input/Slider";
@@ -24,8 +24,8 @@ import {
 import { CAMERA_MODE_THIRD_PERSON_VIEW, CAMERA_MODE_FIRST_PERSON } from "../systems/camera-system";
 
 export const CLIPPING_THRESHOLD_MIN = 0.0;
-export const CLIPPING_THRESHOLD_MAX = 0.1;
-export const CLIPPING_THRESHOLD_STEP = 0.001;
+export const CLIPPING_THRESHOLD_MAX = 1.0;
+export const CLIPPING_THRESHOLD_STEP = 0.1;
 export const GLOBAL_VOLUME_MIN = 0;
 export const GLOBAL_VOLUME_MAX = 200;
 export const GLOBAL_VOLUME_STEP = 5;
