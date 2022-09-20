@@ -10,9 +10,12 @@ jobs:
     with:
       registry: mozillareality
       dockerfile: RetPageOriginDockerfile
-      smoke_k8s_deployment: hubs
-      smoke_k8s_deployment_container: hubs
+      personal_k8s_deployment: hubs
+      personal_k8s_deployment_container: hubs
+      bio_script_path: scripts/hab-wrap-and-push.sh
     secrets:
       DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
-      GCP_TURKEYGITOPS_SA_JSON : ${{ secrets.GCP_TURKEYGITOPS_SA_JSON  }}
-      
+      GCP_TURKEYGITOPS_SA_JSON: ${{ secrets.GCP_TURKEYGITOPS_SA_JSON  }}
+      BLDR_HAB_TOKEN: ${{ secrets.BLDR_HAB_TOKEN }}
+      BLDR_RET_TOKEN: ${{ secrets.BLDR_RET_TOKEN }}
+      BLDR_RET_PUB_B64: ${{ secrets.BLDR_RET_PUB_B64 }}
