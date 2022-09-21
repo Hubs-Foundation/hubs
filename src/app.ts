@@ -13,7 +13,6 @@ import MediaDevicesManager from "./utils/media-devices-manager";
 import {
   Audio,
   AudioListener,
-  Clock,
   Object3D,
   PerspectiveCamera,
   PositionalAudio,
@@ -23,6 +22,7 @@ import {
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { DialogAdapter } from "./naf-dialog-adapter";
+import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 
 declare global {
@@ -46,21 +46,10 @@ export interface HubsWorld extends IWorld {
   deletedNids: Set<number>;
   nid2eid: Map<number, number>;
   eid2obj: Map<number, Object3D>;
-  time: { delta: number; elapsed: number; tick: number; then: number };
+  time: { delta: number; elapsed: number; tick: number };
 }
 
 window.$B = bitecs;
-
-const timeSystem = (world: HubsWorld) => {
-  const { time } = world;
-  const now = performance.now();
-  const delta = now - time.then;
-  time.delta = delta;
-  time.elapsed += delta;
-  time.then = now;
-  time.tick++;
-  return world;
-};
 
 export class App {
   scene?: AScene;
@@ -183,44 +172,21 @@ export class App {
     this.audioListener = audioListener;
     camera.add(audioListener);
 
-    const renderClock = new Clock();
-
-    // TODO NAF currently depends on this, it should not
-    sceneEl.clock = renderClock;
-
-    // TODO we should have 1 source of truth for time
     this.world.time = {
       delta: 0,
       elapsed: 0,
-      then: performance.now(),
       tick: 0
     };
 
     this.world.scene = sceneEl.object3D;
 
-    // Main RAF loop
-    const mainTick = (_rafTime: number, xrFrame: XRFrame) => {
-      // TODO we should probably be using time from the raf loop itself
-      const delta = renderClock.getDelta() * 1000;
-      const time = renderClock.elapsedTime * 1000;
-
-      // TODO pass this into systems that care about it (like input) once they are moved into this loop
-      sceneEl.frame = xrFrame;
-
-      timeSystem(this.world);
-
-      // Tick AFrame systems and components
-      if (sceneEl.isPlaying) {
-        sceneEl.tick(time, delta);
-      }
-
-      renderer.render(sceneEl.object3D, camera);
-    };
-
     // This gets called after all system and component init functions
     sceneEl.addEventListener("loaded", () => {
       waitForPreloads().then(() => {
-        renderer.setAnimationLoop(mainTick);
+        this.world.time.elapsed = performance.now();
+        renderer.setAnimationLoop(function (_rafTime, xrFrame) {
+          mainTick(xrFrame, renderer, sceneEl.object3D, camera);
+        });
         sceneEl.renderStarted = true;
       });
     });

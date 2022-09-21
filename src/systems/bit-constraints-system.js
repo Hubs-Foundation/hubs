@@ -73,8 +73,7 @@ function remove(world, offersConstraint, constraintComponent, physicsSystem, int
   }
 }
 
-export function constraintsSystem(world) {
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+export function constraintsSystem(world, physicsSystem) {
   add(world, physicsSystem, anyEntityWith(world, RemoteRight), ConstraintRemoteRight, queryEnterRemoteRight(world));
   add(world, physicsSystem, anyEntityWith(world, RemoteLeft), ConstraintRemoteLeft, queryEnterRemoteLeft(world));
   add(world, physicsSystem, anyEntityWith(world, HandRight), ConstraintHandRight, queryEnterHandRight(world));
