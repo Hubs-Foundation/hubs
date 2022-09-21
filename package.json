@@ -105,7 +105,7 @@
     "jwt-decode": "^2.2.0",
     "lib-hubs": "github:mozillareality/lib-hubs#master",
     "linkify-it": "^2.0.3",
-    "markdown-it": "^8.4.2",
+    "markdown-it": "^12.3.2",
     "moving-average": "^1.0.0",
     "networked-aframe": "github:mozillareality/networked-aframe#6093c3a0b2867a9e141cd5c19f7d13dfa7c38479",
     "nipplejs": "github:mozillareality/nipplejs#mr-social-client/master",
