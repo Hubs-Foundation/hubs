@@ -2,7 +2,8 @@ import {
   getCurrentHubId,
   updateVRHudPresenceCount,
   updateSceneCopresentState,
-  createHubChannelParams
+  createHubChannelParams,
+  updateRoomPermissions
 } from "./utils/hub-utils";
 import "./utils/debug-log";
 import configs from "./utils/configs";
@@ -1150,6 +1151,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       name: meta.profile.displayName
     });
   });
+  events.on(`hub:join`, ({ meta }) => {
+    updateRoomPermissions(meta);
+  });
 
   events.on(`hub:leave`, ({ meta }) => {
     if (APP.hideHubPresenceEvents || hubChannel.presence.list().length > NOISY_OCCUPANT_COUNT) {
@@ -1204,6 +1208,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       hand_raised: current.hand_raised,
       typing: current.typing
     });
+  });
+  events.on(`hub:change`, ({ current }) => {
+    updateRoomPermissions(current);
   });
 
   // We need to be able to wait for initial presence syncs across reconnects and socket migrations,

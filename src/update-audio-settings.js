@@ -71,7 +71,10 @@ export function getCurrentAudioSettings(el) {
     preferencesOverrides
   );
 
-  if (APP.clippingState.has(el) || APP.mutedState.has(el)) {
+  if (!APP.hub.member_permissions || !APP.hub.member_permissions.voice_chat) {
+    if (!APP.roomOwnerSources.has(el))
+      settings.gain = 0;
+  } else if (APP.clippingState.has(el) || APP.mutedState.has(el)) {
     settings.gain = 0;
   } else if (APP.gainMultipliers.has(el)) {
     settings.gain = settings.gain * APP.gainMultipliers.get(el);

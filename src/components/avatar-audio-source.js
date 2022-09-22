@@ -1,5 +1,6 @@
 import { SourceType, AudioType } from "./audio-params";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
+import { isRoomOwner } from "../utils/hub-utils";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
@@ -78,8 +79,13 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.setObject3D(this.attrName, audio);
     this.el.emit("sound-source-set", { soundSource: destinationSource });
 
-    APP.audios.set(this.el, audio);
-    updateAudioSettings(this.el, audio);
+    getOwnerId(this.el).then(async ownerId => {
+      if (isRoomOwner(ownerId)) {
+        APP.roomOwnerSources.add(this.el);
+      }
+      APP.audios.set(this.el, audio);
+      updateAudioSettings(this.el, audio);
+    });
   },
 
   removeAudio() {
