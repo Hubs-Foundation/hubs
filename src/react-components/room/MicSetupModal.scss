@@ -64,6 +64,19 @@ $mobile-breakpoint-width: 450px;
   margin-bottom: 10px;
 }
 
+:local(.voice-chat-disabled) {
+  display: flex;
+  flex: auto;
+  align-items: center;
+  justify-content: center;
+  flex-flow: column;
+  gap: 20px;
+}
+
+:local(.text-disabled) {
+  color: theme.$text2-color;
+}
+
 :local(.action-container) {  
   height: 48px;
   margin-bottom: 10px;

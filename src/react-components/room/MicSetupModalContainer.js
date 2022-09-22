@@ -11,6 +11,7 @@ import { useState } from "react";
 import MediaDevicesManager from "../../utils/media-devices-manager";
 import { VolumeLevelBar } from "../misc/VolumeLevelBar";
 import styles from "./MicSetupModal.scss";
+import { usePermission } from "./usePermission";
 
 export function MicSetupModalContainer({ scene, ...rest }) {
   const { isMicEnabled, permissionStatus } = useMicrophoneStatus(scene);
@@ -27,6 +28,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       preferences: { muteMicOnEntry: muted }
     });
   }, []);
+  const { canDo: canVoiceChat } = usePermission("voice_chat");
 
   return (
     <MicSetupModal
@@ -43,6 +45,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       onChangeMicrophoneMuted={onChangeMicrophoneMuted}
       isAudioInputSelectAvailable={MediaDevicesManager.isAudioInputSelectEnabled}
       isAudioOutputSelectAvailable={MediaDevicesManager.isAudioOutputSelectEnabled}
+      canVoiceChat={canVoiceChat}
       {...rest}
     />
   );
