@@ -1,4 +1,3 @@
-import { LogMessageType } from "../react-components/room/ChatSidebar";
 import configs from "./configs";
 export function getCurrentHubId() {
   const qs = new URLSearchParams(location.search);
