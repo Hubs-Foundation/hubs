@@ -8,15 +8,23 @@ import {
   ChatInput,
   SpawnMessageButton,
   MessageAttachmentButton,
-  EmojiPickerPopoverButton
+  EmojiPickerPopoverButton,
+  PermissionMessageGroup
 } from "./ChatSidebar";
 import imgSrc from "../../assets/background.jpg";
 import videoSrc from "../../assets/video/home.mp4";
+import { PermissionMessage } from "./PermissionsMessages";
 
 export default {
   title: "Room/ChatSidebar",
   parameters: {
-    layout: "fullscreen"
+    layout: "fullscreen",
+  },
+  argTypes: {
+    textChatEnabled: { 
+      control: "boolean",
+      defaultValue: true 
+    }
   }
 };
 
@@ -29,7 +37,7 @@ const nextTimestamp = (function() {
   };
 })();
 
-export const Base = () => (
+export const Base = args => (
   <RoomLayout
     sidebar={
       <ChatSidebar>
@@ -84,17 +92,32 @@ export const Base = () => (
               { type: "chat", body: "Test message with url. https://hubs.mozilla.com" }
             ]}
           />
+          <PermissionMessageGroup
+            sent
+            timestamp={nextTimestamp()}
+            messages={[
+              { type: "permission", body: { permission: "voice_chat", status: false }},
+              { type: "permission", body: { permission: "text_chat", status: true }},
+            ]}
+            permissionMessage
+          />
         </ChatMessageList>
+        {!!args.textChatEnabled && <PermissionMessage permission={"text_chat"} />}
         <ChatInput
           afterInput={
             <>
-              <EmojiPickerPopoverButton onSelectEmoji={emoji => console.log(emoji)} />
-              <MessageAttachmentButton />
-              <SpawnMessageButton />
+              <EmojiPickerPopoverButton onSelectEmoji={emoji => console.log(emoji)} disabled={!args.textChatEnabled}/>
+              <MessageAttachmentButton disabled={!args.textChatEnabled} />
+              <SpawnMessageButton disabled={!args.textChatEnabled} />
             </>
           }
+          disabled={!args.textChatEnabled}
         />
       </ChatSidebar>
     }
   />
 );
+
+Base.args = {
+  textChatEnabled: false
+};

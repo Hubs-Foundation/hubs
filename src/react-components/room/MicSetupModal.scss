@@ -52,11 +52,12 @@ $mobile-breakpoint-width: 450px;
 :local(.icon-disabled) {
   path {
     stroke-width: 1;
+    color: theme.$disabled-icon-color;
   }
 
   width: 48px;
   height: 48px;
-  color: theme.$text2-color;
+  color: theme.$disabled-text-color;
 }
 
 :local(.icon-container) {
@@ -74,7 +75,7 @@ $mobile-breakpoint-width: 450px;
 }
 
 :local(.text-disabled) {
-  color: theme.$text2-color;
+  color: theme.$disabled-text-color;
 }
 
 :local(.action-container) {  

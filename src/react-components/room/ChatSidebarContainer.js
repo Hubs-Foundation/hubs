@@ -11,13 +11,17 @@ import {
   ChatToolbarButton,
   SendMessageButton,
   EmojiPickerPopoverButton,
-  ChatLengthWarning
+  ChatLengthWarning,
+  PermissionMessageGroup
+  
 } from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
 import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
+import { PermissionMessage } from "./PermissionsMessages";
+import { useCan } from "./useCan";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 
@@ -41,7 +45,7 @@ function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
   return now - lastMessage.timestamp > NEW_MESSAGE_GROUP_TIMEOUT;
 }
 
-function processChatMessage(messageGroups, newMessage) {
+function processChatMessage(messageGroups, newMessage, permission) {
   const now = Date.now();
   const { name, sent, sessionId, ...messageProps } = newMessage;
 
@@ -54,7 +58,8 @@ function processChatMessage(messageGroups, newMessage) {
         sent,
         sender: name,
         senderSessionId: sessionId,
-        messages: [{ id: uniqueMessageId++, timestamp: now, ...messageProps }]
+        messages: [{ id: uniqueMessageId++, timestamp: now, ...messageProps }],
+        permissionMessage: permission
       }
     ];
   }
@@ -94,6 +99,8 @@ function updateMessageGroups(messageGroups, newMessage) {
     case "photo":
     case "video":
       return processChatMessage(messageGroups, newMessage);
+    case "permission":
+      return processChatMessage(messageGroups, newMessage, true);
     default:
       return messageGroups;
   }
@@ -113,7 +120,8 @@ export function ChatContextProvider({ messageDispatch, children }) {
           newMessage.type === "chat" ||
           newMessage.type === "image" ||
           newMessage.type === "photo" ||
-          newMessage.type === "video"
+          newMessage.type === "video" ||
+          newMessage.type === "permission"
         ) {
           setUnreadMessages(true);
         }
@@ -277,19 +285,24 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     }
   }
 
+  const { can: canTextChat } = useCan("text_chat");
+
   const isMobile = AFRAME.utils.device.isMobile();
   const isOverMaxLength = message.length > MAX_MESSAGE_LENGTH;
   return (
     <ChatSidebar onClose={onClose}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
-        {messageGroups.map(({ id, systemMessage, ...rest }) => {
+        {messageGroups.map(({ id, systemMessage, permissionMessage, ...rest }) => {
           if (systemMessage) {
             return <SystemMessage key={id} {...rest} />;
+          } else if (permissionMessage) {
+            return <PermissionMessageGroup key={id} {...rest} />;
           } else {
             return <ChatMessageGroup key={id} {...rest} />;
           }
         })}
       </ChatMessageList>
+      {!canTextChat && <PermissionMessage permission={"text_chat"} />}
       <ChatInput
         id="chat-input"
         ref={inputRef}
@@ -307,17 +320,18 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         }
         afterInput={
           <>
-            {!isMobile && <EmojiPickerPopoverButton onSelectEmoji={onSelectEmoji} />}
+            {!isMobile && <EmojiPickerPopoverButton onSelectEmoji={onSelectEmoji} disabled={!canTextChat}/>}
             {message.length === 0 && canSpawnMessages ? (
-              <MessageAttachmentButton onChange={onUploadAttachments} />
+              <MessageAttachmentButton onChange={onUploadAttachments} disabled={!canTextChat} />
             ) : (
-              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0 || isOverMaxLength} />
+              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0 || isOverMaxLength || !canTextChat} />
             )}
             {canSpawnMessages && (
-              <SpawnMessageButton disabled={message.length === 0 || isOverMaxLength} onClick={onSpawnMessage} />
+              <SpawnMessageButton disabled={message.length === 0 || isOverMaxLength || !canTextChat} onClick={onSpawnMessage} />
             )}
           </>
         }
+        disabled={!canTextChat}
       />
     </ChatSidebar>
   );

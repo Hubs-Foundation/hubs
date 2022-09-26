@@ -37,3 +37,5 @@ IconButton.propTypes = {
 IconButton.defaultProps = {
   as: "button"
 };
+
+IconButton.displayName = "IconButton";

@@ -28,7 +28,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       preferences: { muteMicOnEntry: muted }
     });
   }, []);
-  const { canDo: canVoiceChat } = usePermission("voice_chat");
+  const { canDo: voiceChatEnabled } = usePermission("voice_chat");
 
   return (
     <MicSetupModal
@@ -45,7 +45,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       onChangeMicrophoneMuted={onChangeMicrophoneMuted}
       isAudioInputSelectAvailable={MediaDevicesManager.isAudioInputSelectEnabled}
       isAudioOutputSelectAvailable={MediaDevicesManager.isAudioOutputSelectEnabled}
-      canVoiceChat={canVoiceChat}
+      voiceChatEnabled={voiceChatEnabled}
       {...rest}
     />
   );

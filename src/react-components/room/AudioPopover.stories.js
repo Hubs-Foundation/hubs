@@ -4,7 +4,7 @@ import { AudioPopoverButton } from "./AudioPopoverButton";
 import { AudioPopoverContent } from "./AudioPopoverContent";
 import { LevelBar } from "../misc/LevelBar";
 import styles from "./AudioPopover.scss";
-import PropTypes from "prop-types";
+import PropTypes, { bool } from "prop-types";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
@@ -65,6 +65,10 @@ export default {
         options: speakerOptions
       },
       defaultValue: speakerOptions[0]
+    },
+    voiceChatEnabled: { 
+      control: "boolean",
+      defaultValue: true 
     }
   }
 };
@@ -115,6 +119,7 @@ const Template = args => (
             onPlaySound={args.onPlaySound}
             isAudioInputSelectAvailable={args.isAudioInputSelectAvailable}
             isAudioOutputSelectAvailable={args.isAudioOutputSelectAvailable}
+            voiceChatEnabled={args.voiceChatEnabled}
           />
         }
         micButton={

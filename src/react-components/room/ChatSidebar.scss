@@ -109,6 +109,14 @@
   }
 }
 
+:local(.message-bubble):local(.permission) {
+  display: flex;
+  gap: 10px;
+  background-color: theme.$transparent;
+  border: 1px solid theme.$input-border-color;
+  color: theme.$text1-color;
+}
+
 :local(.chat-input-icon) {
   cursor: pointer;
   width: 24px;

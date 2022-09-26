@@ -87,6 +87,10 @@ export default {
         options: permissionOptions
       },
       defaultValue: permissionOptions[0]
+    },
+    voiceChatEnabled: { 
+      control: "boolean",
+      defaultValue: true 
     }
   }
 };
@@ -181,4 +185,10 @@ NoSpeakers.args = {
   permissionStatus: PermissionStatus.GRANTED,
   isAudioInputSelectAvailable: true,
   isAudioOutputSelectAvailable: false
+};
+
+export const NoVoiceChat = Template.bind({});
+
+NoVoiceChat.args = {
+  voiceChatEnabled: false
 };

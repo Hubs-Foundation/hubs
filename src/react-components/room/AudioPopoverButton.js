@@ -11,7 +11,7 @@ const invitePopoverTitle = defineMessage({
   defaultMessage: "Audio Settings"
 });
 
-export const AudioPopoverButton = ({ initiallyVisible, content, micButton }) => {
+export const AudioPopoverButton = ({ initiallyVisible, content, micButton, disabled }) => {
   const intl = useIntl();
   const title = intl.formatMessage(invitePopoverTitle);
   const popoverApiRef = useRef();
@@ -36,6 +36,7 @@ export const AudioPopoverButton = ({ initiallyVisible, content, micButton }) => 
             type={"left"}
             className={popoverVisible ? styles.arrowButton : styles.arrowButtonSelected}
             title={"Audio Settings"}
+            disabled={disabled}
           />
           {micButton}
         </div>
@@ -47,5 +48,6 @@ export const AudioPopoverButton = ({ initiallyVisible, content, micButton }) => 
 AudioPopoverButton.propTypes = {
   initiallyVisible: PropTypes.bool,
   content: PropTypes.element,
-  micButton: PropTypes.element
+  micButton: PropTypes.element,
+  disabled: PropTypes.bool
 };
