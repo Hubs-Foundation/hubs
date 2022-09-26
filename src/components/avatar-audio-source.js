@@ -81,7 +81,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
     getOwnerId(this.el).then(async ownerId => {
       if (isRoomOwner(ownerId)) {
-        APP.roomOwnerSources.add(this.el);
+        APP.moderatorAudioSource.add(this.el);
       }
       APP.audios.set(this.el, audio);
       updateAudioSettings(this.el, audio);
@@ -98,6 +98,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   init() {
     this.createAudio = this.createAudio.bind(this);
+    this.onPermissionsUpdated = this.onPermissionsUpdated.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
     // We subscribe to audio stream notifications for this peer to update the audio source
@@ -127,6 +128,17 @@ AFRAME.registerComponent("avatar-audio-source", {
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
     this.el.addEventListener("audio_type_changed", this.createAudio);
+    APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
+  },
+
+  onPermissionsUpdated() {
+    getOwnerId(this.el).then(async ownerId => {
+      if (isRoomOwner(ownerId)) {
+        APP.moderatorAudioSource.add(this.el);
+      }
+      const audio = APP.audios.get(this.el);
+      audio && updateAudioSettings(this.el, audio);
+    });
   },
 
   async _onStreamUpdated(peerId, kind) {
@@ -153,6 +165,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   remove: function() {
     APP.dialog.off("stream_updated", this._onStreamUpdated);
+    APP.hubChannel.removeEventListener("permissions_updated", this.onPermissionsUpdated);
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
     this.el.removeEventListener("audio_type_changed", this.createAudio);
