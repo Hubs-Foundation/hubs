@@ -64,28 +64,3 @@ export function PermissionMessage({ permission }) {
 PermissionMessage.propTypes = {
   permission: PropTypes.string
 };
-
-function filteredPermissions(permissions, limit) {
-  return limit ? Object.keys(permissions)
-        .filter((perm) => limit.includes(perm) && permissions[perm] === false)
-        .reduce((cur, key) => { return Object.assign(cur, { [key]: permissions[key] })}, {}) : permissions;
-}
-
-export function PermissionsMessages({ permissions, limit }) {
-  const intl = useIntl();
-  return (
-    Object.keys(filteredPermissions(permissions, limit)).map(perm => {
-      return <div key={perm} className={classNames(styles.pinnedMessage)}>
-        {permissionMessage({
-          permission: perm,
-          status: permissions[perm]},
-          intl)}
-      </div>
-    })
-  );
-}
-
-PermissionsMessages.propTypes = {
-  permissions: PropTypes.object,
-  limit: PropTypes.array
-};
