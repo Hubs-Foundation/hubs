@@ -6,12 +6,13 @@ import { useIntl, defineMessages } from "react-intl";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
 import { ReactComponent as Microphone } from "../icons/Microphone.svg";
 import { ReactComponent as Chat } from "../icons/Chat.svg";
+import { ReactComponent as ChatOff } from "../icons/ChatOff.svg";
 
 export const permissionsIcons = {
   voiceChatEnabled: <Microphone />,
   voiceChatDisabled: <MicrophoneMutedIcon />,
   textChatEnabled: <Chat />,
-  textChatDisabled: <Chat />
+  textChatDisabled: <ChatOff />
 };
 
 export const permissionsMessages = defineMessages({
