@@ -115,6 +115,7 @@
   background-color: theme.$transparent;
   border: 1px solid theme.$input-border-color;
   color: theme.$text1-color;
+  align-items: center;
 }
 
 :local(.chat-input-icon) {
