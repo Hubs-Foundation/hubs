@@ -5,13 +5,13 @@ import {
 } from "../update-audio-settings";
 
 const distanceModels = {
-  linear: function(distance, rolloffFactor, refDistance, maxDistance) {
+  linear: function (distance, rolloffFactor, refDistance, maxDistance) {
     return 1.0 - rolloffFactor * ((distance - refDistance) / (maxDistance - refDistance));
   },
-  inverse: function(distance, rolloffFactor, refDistance) {
+  inverse: function (distance, rolloffFactor, refDistance) {
     return refDistance / (refDistance + rolloffFactor * (Math.max(distance, refDistance) - refDistance));
   },
-  exponential: function(distance, rolloffFactor, refDistance) {
+  exponential: function (distance, rolloffFactor, refDistance) {
     return Math.pow(Math.max(distance, refDistance) / refDistance, -rolloffFactor);
   }
 };
@@ -20,7 +20,7 @@ const calculateAttenuation = (() => {
   const listenerPos = new THREE.Vector3();
   const sourcePos = new THREE.Vector3();
   return (el, audio) => {
-    el.sceneEl.audioListener.getWorldPosition(listenerPos);
+    APP.audioListener.getWorldPosition(listenerPos);
     audio.getWorldPosition(sourcePos);
     const distance = sourcePos.distanceTo(listenerPos);
     if (audio.panner) {

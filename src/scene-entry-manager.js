@@ -265,63 +265,65 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
-    document.addEventListener("paste", e => {
-      if (
-        (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
-        document.activeElement === e.target
-      )
-        return;
+    if (!qsTruthy("newLoader")) {
+      document.addEventListener("paste", e => {
+        if (
+          (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
+          document.activeElement === e.target
+        )
+          return;
 
-      // Never paste into scene if dialog is open
-      const uiRoot = document.querySelector(".ui-root");
-      if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
+        // Never paste into scene if dialog is open
+        const uiRoot = document.querySelector(".ui-root");
+        if (uiRoot && uiRoot.classList.contains("in-modal-or-overlay")) return;
 
-      const url = e.clipboardData.getData("text");
-      const files = e.clipboardData.files && e.clipboardData.files;
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
+        const url = e.clipboardData.getData("text");
+        const files = e.clipboardData.files && e.clipboardData.files;
+        if (url) {
+          spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.CLIPBOARD);
+          }
         }
-      }
-    });
+      });
+
+      let lastDebugScene;
+      document.addEventListener("drop", e => {
+        e.preventDefault();
+
+        if (qsTruthy("debugLocalScene")) {
+          URL.revokeObjectURL(lastDebugScene);
+          const url = URL.createObjectURL(e.dataTransfer.files[0]);
+          this.hubChannel.updateScene(url);
+          lastDebugScene = url;
+          return;
+        }
+
+        let url = e.dataTransfer.getData("url");
+
+        if (!url) {
+          // Sometimes dataTransfer text contains a valid URL, so try for that.
+          try {
+            url = new URL(e.dataTransfer.getData("text")).href;
+          } catch (e) {
+            // Nope, not this time.
+          }
+        }
+
+        const files = e.dataTransfer.files;
+
+        if (url) {
+          spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
+        } else {
+          for (const file of files) {
+            spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
+          }
+        }
+      });
+    }
 
     document.addEventListener("dragover", e => e.preventDefault());
-
-    let lastDebugScene;
-    document.addEventListener("drop", e => {
-      e.preventDefault();
-
-      if (qsTruthy("debugLocalScene")) {
-        URL.revokeObjectURL(lastDebugScene);
-        const url = URL.createObjectURL(e.dataTransfer.files[0]);
-        this.hubChannel.updateScene(url);
-        lastDebugScene = url;
-        return;
-      }
-
-      let url = e.dataTransfer.getData("url");
-
-      if (!url) {
-        // Sometimes dataTransfer text contains a valid URL, so try for that.
-        try {
-          url = new URL(e.dataTransfer.getData("text")).href;
-        } catch (e) {
-          // Nope, not this time.
-        }
-      }
-
-      const files = e.dataTransfer.files;
-
-      if (url) {
-        spawnMediaInfrontOfPlayer(url, ObjectContentOrigins.URL);
-      } else {
-        for (const file of files) {
-          spawnMediaInfrontOfPlayer(file, ObjectContentOrigins.FILE);
-        }
-      }
-    });
 
     let currentVideoShareEntity;
     let isHandlingVideoShare = false;
@@ -506,8 +508,8 @@ export default class SceneEntryManager {
     const audioStream = audioEl.captureStream
       ? audioEl.captureStream()
       : audioEl.mozCaptureStream
-        ? audioEl.mozCaptureStream()
-        : null;
+      ? audioEl.mozCaptureStream()
+      : null;
 
     if (audioStream) {
       let audioVolume = Number(qs.get("audio_volume") || "1.0");
@@ -521,7 +523,9 @@ export default class SceneEntryManager {
       audioSource.connect(gainNode);
       gainNode.connect(audioDestination);
       gainNode.gain.value = audioVolume;
-      this.mediaDevicesManager.mediaStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+
+      const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem
+      audioSystem.addStreamToOutboundAudio("microphone", audioDestination.stream);
     }
 
     const connect = async () => {

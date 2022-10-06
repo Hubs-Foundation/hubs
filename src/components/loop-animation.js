@@ -10,6 +10,8 @@ AFRAME.registerComponent("loop-animation", {
     /* DEPRECATED: Use activeClipIndex instead since animation names are not unique */
     clip: { type: "string", default: "" },
     activeClipIndex: { type: "int", default: 0 },
+    startOffset: { type: "number", default: 0 },
+    timeScale: { type: "number", default: 1 },
     activeClipIndices: { type: "array" }
   },
 
@@ -75,6 +77,8 @@ AFRAME.registerComponent("loop-animation", {
     for (let i = 0; i < clips.length; i++) {
       const action = mixer.clipAction(clips[i], this.el.object3D);
       action.enabled = true;
+      action.time = this.data.startOffset;
+      action.timeScale = this.data.timeScale;
       action.setLoop(THREE.LoopRepeat, Infinity).play();
       this.currentActions.push(action);
     }

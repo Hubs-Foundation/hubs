@@ -1,6 +1,7 @@
 import { computeObjectAABB, getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import {
   resolveUrl,
+  fetchContentType,
   getDefaultResolveQuality,
   injectCustomShaderChunks,
   addMeshScaleAnimation,
@@ -33,10 +34,6 @@ waitForDOMContentLoaded().then(() => {
     loadingObject = gltf;
   });
 });
-
-const fetchContentType = url => {
-  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-};
 
 AFRAME.registerComponent("media-loader", {
   schema: {

@@ -7,7 +7,9 @@ import {
 import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
-import "@babel/polyfill";
+
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 console.log(
   `App version: ${
@@ -29,7 +31,9 @@ import "./utils/aframe-overrides";
 // But we don't want to use THREE.Cache because
 // web browser cache should work well.
 // So we disable it here.
+import * as THREE from "three";
 THREE.Cache.enabled = false;
+THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 import "./utils/logging";
 import { patchWebGLRenderingContext } from "./utils/webgl";
@@ -54,7 +58,7 @@ import "./phoenix-adapter";
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
 import Cookies from "js-cookie";
-import { DialogAdapter, DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECTED } from "./naf-dialog-adapter";
+import { DIALOG_CONNECTION_ERROR_FATAL, DIALOG_CONNECTION_CONNECTED } from "./naf-dialog-adapter";
 import "./change-hub";
 
 import "./components/scene-components";
@@ -177,19 +181,17 @@ import "./systems/audio-gain-system";
 
 import "./gltf-component-mappings";
 
-import { App } from "./App";
+import { App } from "./app";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
+import { renderAsEntity } from "./utils/jsx-entity";
+import { VideoMenuPrefab } from "./prefabs/video-menu";
 
 window.APP = new App();
-window.APP.dialog = new DialogAdapter();
-window.APP.RENDER_ORDER = {
-  HUD_BACKGROUND: 1,
-  HUD_ICONS: 2,
-  CURSOR: 3
-};
+renderAsEntity(APP.world, VideoMenuPrefab());
+renderAsEntity(APP.world, VideoMenuPrefab());
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
@@ -205,8 +207,6 @@ if (isEmbed && !qs.get("embed_token")) {
   // Should be covered by X-Frame-Options, but just in case.
   throw new Error("no embed token");
 }
-
-THREE.Object3D.DefaultMatrixAutoUpdate = false;
 
 import "./components/owned-object-limiter";
 import "./components/owned-object-cleanup-timeout";
@@ -239,6 +239,7 @@ import { OAuthScreenContainer } from "./react-components/auth/OAuthScreenContain
 import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
+import "./load-media-on-paste-or-drop";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -503,7 +504,7 @@ function onConnectionError(entryManager, connectError) {
 // TODO: Find a home for this
 // TODO: Naming. Is this an "event bus"?
 const events = emitter();
-function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data, permsToken) {
+function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data) {
   const scene = document.querySelector("a-scene");
   const isRejoin = NAF.connection.isConnected();
 
@@ -529,15 +530,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
   }
 
   const hub = data.hubs[0];
-  let embedToken = hub.embed_token;
-
-  if (!embedToken) {
-    const embedTokenEntry = store.state.embedTokens && store.state.embedTokens.find(t => t.hubId === hub.hub_id);
-
-    if (embedTokenEntry) {
-      embedToken = embedTokenEntry.embedToken;
-    }
-  }
 
   console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
@@ -548,8 +540,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
     onMediaSearchResultEntrySelected: (entry, selectAction) =>
       scene.emit("action_selected_media_result_entry", { entry, selectAction }),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
-    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry),
-    embedToken: embedToken
+    onAvatarSaved: entry => scene.emit("action_avatar_saved", entry)
   });
 
   scene.addEventListener("action_selected_media_result_entry", e => {
@@ -608,7 +599,6 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data,
       APP.dialog.connect({
         serverUrl: `wss://${hub.host}:${hub.port}`,
         roomId: hub.hub_id,
-        joinToken: permsToken,
         serverParams: { host: hub.host, port: hub.port, turn: hub.turn },
         scene,
         clientId: data.session_id,
@@ -1263,7 +1253,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       await presenceSync.promise;
-      handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data, permsToken, hubChannel, events);
+      handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data);
     })
     .receive("error", res => {
       if (res.reason === "closed") {

@@ -20,6 +20,17 @@ ContentMenuButton.propTypes = {
   active: PropTypes.bool
 };
 
+export function ECSDebugMenuButton(props) {
+  return (
+    <ContentMenuButton {...props}>
+      <ObjectsIcon />
+      <span>
+        <FormattedMessage id="content-menu.ecs-debug-menu-button" defaultMessage="ECS Debug" />
+      </span>
+    </ContentMenuButton>
+  );
+}
+
 export function ObjectsMenuButton(props) {
   return (
     <ContentMenuButton {...props}>
@@ -50,7 +61,13 @@ PeopleMenuButton.propTypes = {
 };
 
 export function ContentMenu({ children }) {
-  return <div className={styles.contentMenu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>;
+  return (
+    <div className={styles.contentMenu}>
+      {joinChildren(children, () => (
+        <div className={styles.separator} />
+      ))}
+    </div>
+  );
 }
 
 ContentMenu.propTypes = {

@@ -18,6 +18,7 @@ class GLTFCache {
   cache = new Map();
 
   set(src, gltf) {
+    gltf.scene.userData.gltfCacheKey = src;
     this.cache.set(src, {
       gltf,
       count: 0
@@ -112,9 +113,10 @@ function generateMeshBVH(object3D) {
 }
 
 function cloneGltf(gltf) {
+  const scene = cloneObject3D(gltf.scene);
   return {
-    animations: gltf.scene.animations,
-    scene: cloneObject3D(gltf.scene)
+    animations: scene.animations,
+    scene
   };
 }
 
@@ -460,7 +462,6 @@ class GLTFHubsPlugin {
       }
     }
 
-    //
     gltf.scene.animations = gltf.animations;
   }
 }
@@ -684,6 +685,15 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   });
 }
 
+export function cloneModelFromCache(src) {
+  if (gltfCache.has(src)) {
+    gltfCache.retain(src);
+    return cloneGltf(gltfCache.get(src).gltf);
+  } else {
+    throw new Error(`Model not in cache: ${src}`);
+  }
+}
+
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
   console.log(`Loading model ${src}`);
   if (useCache) {
@@ -796,7 +806,7 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
-        this.el.components["animation-mixer"].initMixer(this.model.animations);
+        this.el.components["animation-mixer"].initMixer(gltf.animations);
       } else {
         generateMeshBVH(this.model);
       }

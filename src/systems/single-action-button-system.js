@@ -10,7 +10,7 @@ import {
   TextButton
 } from "../bit-components";
 import { hasAnyComponent } from "../utils/bit-utils";
-import { getThemeColor } from "../utils/theme";
+import { onThemeChanged, getThemeColor } from "../utils/theme";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 import { paths } from "./userinput/paths";
 
@@ -84,7 +84,7 @@ function applyTheme() {
     textHoverColor: new THREE.Color(0xffffff)
   };
 }
-window.addEventListener("update_theme", applyTheme);
+onThemeChanged(applyTheme);
 applyTheme();
 
 const hoverComponents = [HoveredRemoteRight, HoveredRemoteLeft, HoveredHandRight, HoveredHandLeft];

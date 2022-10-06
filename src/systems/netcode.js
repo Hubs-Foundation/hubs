@@ -1,6 +1,7 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, Owned } from "../bit-components";
-import { CameraPrefab, CubeMediaFramePrefab } from "../network-prefabs/camera-tool";
+import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo, Owned } from "../bit-components";
+import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
+import { MediaPrefab } from "../prefabs/media";
 import { defineNetworkSchema } from "../utils/bit-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 
@@ -12,10 +13,17 @@ const prefabs = new Map(
     },
     cube: {
       template: CubeMediaFramePrefab
+    },
+    media: {
+      template: MediaPrefab
     }
   })
 );
 
+/**
+ * @param {import("../app").HubsWorld}  world
+ * @param {number} eid
+ */
 export function takeOwnership(world, eid) {
   // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame
   if (hasComponent(world, AEntity, eid)) {
@@ -37,14 +45,14 @@ export function createNetworkedEntityFromRemote(world, prefabName, initialData, 
   createMessageDatas.set(eid, { prefabName, initialData });
 
   let i = 0;
-  obj.traverse(function(o) {
+  obj.traverse(function (o) {
     if (o.eid && hasComponent(world, Networked, o.eid)) {
       const eid = o.eid;
       Networked.id[eid] = APP.getSid(i === 0 ? rootNid : `${rootNid}.${i}`);
       APP.world.nid2eid.set(Networked.id[eid], eid);
       Networked.creator[eid] = APP.getSid(creator);
       Networked.owner[eid] = APP.getSid(owner);
-      if (NAF.clientId === creator) takeOwnership(world, eid);
+      if (NAF.clientId === owner) takeOwnership(world, eid);
       i += 1;
     }
   });
@@ -69,7 +77,8 @@ const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
 const schemas = new Map([
   [NetworkedMediaFrame, defineNetworkSchema(NetworkedMediaFrame)],
-  [NetworkedTransform, defineNetworkSchema(NetworkedTransform)]
+  [NetworkedTransform, defineNetworkSchema(NetworkedTransform)],
+  [NetworkedVideo, defineNetworkSchema(NetworkedVideo)]
 ]);
 const networkableComponents = Array.from(schemas.keys());
 
@@ -78,17 +87,17 @@ const pendingJoins = [];
 const pendingParts = [];
 
 // TODO messaging, joining, and leaving should not be using NAF
-NAF.connection.subscribeToDataChannel("nn", function(fromClientId, _dataType, data) {
+NAF.connection.subscribeToDataChannel("nn", function (fromClientId, _dataType, data) {
   data.fromClientId = fromClientId;
   pendingMessages.push(data);
 });
 
-document.addEventListener("DOMContentLoaded", function() {
-  document.body.addEventListener("clientConnected", function({ detail: { clientId } }) {
+document.addEventListener("DOMContentLoaded", function () {
+  document.body.addEventListener("clientConnected", function ({ detail: { clientId } }) {
     console.log("client joined", clientId);
     pendingJoins.push(APP.getSid(clientId));
   });
-  document.body.addEventListener("clientDisconnected", function({ detail: { clientId } }) {
+  document.body.addEventListener("clientDisconnected", function ({ detail: { clientId } }) {
     console.log("client left", clientId);
     pendingParts.push(APP.getSid(clientId));
   });
