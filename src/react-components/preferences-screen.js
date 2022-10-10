@@ -514,6 +514,18 @@ const preferenceLabels = defineMessages({
   nametagVisibilityDistance: {
     id: "preferences-screen.preference.nametag-visibility-distance",
     defaultMessage: "Nametag visibility distance"
+  },
+  enablePostEffects: {
+    id: "preferences-screen.preference.enable-fx",
+    defaultMessage: "Enable Post Processing Effects"
+  },
+  enableBloom: {
+    id: "preferences-screen.preference.enable-fx-bloom",
+    defaultMessage: "Enable Bloom Effect"
+  },
+  aaMode: {
+    id: "preferences-screen.preference.fx-aa-mode",
+    defaultMessage: "Anti-Aliasing Mode"
   }
 });
 
@@ -630,6 +642,7 @@ const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
 const CATEGORY_ACCESSIBILITY = 5;
+const CATEGORY_GRAPHICS = 6;
 const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
@@ -637,7 +650,8 @@ const categoryNames = defineMessages({
   [CATEGORY_MISC]: { id: "preferences-screen.category.misc", defaultMessage: "Misc" },
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
   [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" },
-  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" }
+  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" },
+  [CATEGORY_GRAPHICS]: { id: "preferences-screen.category.graphics", defaultMessage: "Graphics" }
 });
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -1109,7 +1123,6 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableThemes
           },
-          { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
           {
             key: "nametagVisibility",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
@@ -1161,43 +1174,6 @@ class PreferencesScreen extends Component {
           },
           this.state.preferredCamera,
           {
-            key: "materialQualitySetting",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-            options: [
-              {
-                value: "low",
-                text: intl.formatMessage({
-                  id: "preferences-screen.material-quality-setting.low",
-                  defaultMessage: "Low"
-                })
-              },
-              {
-                value: "medium",
-                text: intl.formatMessage({
-                  id: "preferences-screen.material-quality-setting.medium",
-                  defaultMessage: "Medium"
-                })
-              },
-              {
-                value: "high",
-                text: intl.formatMessage({
-                  id: "preferences-screen.material-quality-setting.high",
-                  defaultMessage: "High"
-                })
-              }
-            ],
-            promptForRefresh: true
-          },
-          {
-            key: "enableDynamicShadows",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false
-          },
-          {
-            key: "disableAutoPixelRatio",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
-          },
-          {
             key: "allowMultipleHubsInstances",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           },
@@ -1247,6 +1223,103 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           }
         ]
+      ],
+      [
+        CATEGORY_GRAPHICS,
+        [
+          { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+          {
+            key: "materialQualitySetting",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: [
+              {
+                value: "low",
+                text: intl.formatMessage({
+                  id: "preferences-screen.material-quality-setting.low",
+                  defaultMessage: "Low"
+                })
+              },
+              {
+                value: "medium",
+                text: intl.formatMessage({
+                  id: "preferences-screen.material-quality-setting.medium",
+                  defaultMessage: "Medium"
+                })
+              },
+              {
+                value: "high",
+                text: intl.formatMessage({
+                  id: "preferences-screen.material-quality-setting.high",
+                  defaultMessage: "High"
+                })
+              }
+            ],
+            promptForRefresh: true
+          },
+          {
+            key: "enableDynamicShadows",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "disableAutoPixelRatio",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "enablePostEffects",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            promptForRefresh: true
+          },
+          {
+            key: "enableBloom",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            disableIfFalse: "enablePostEffects",
+            promptForRefresh: true
+          },
+          {
+            key: "aaMode",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            disableIfFalse: "enablePostEffects",
+            promptForRefresh: true,
+            options: [
+              {
+                value: 0,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.fx-aa-none",
+                  defaultMessage: "none"
+                })
+              },
+              {
+                value: 1,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.smaa",
+                  defaultMessage: "SMAA"
+                })
+              },
+              {
+                value: 2,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.2xmsaa",
+                  defaultMessage: "2x MSAA"
+                })
+              },
+              {
+                value: 4,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.4xmsaa",
+                  defaultMessage: "4x MSAA"
+                })
+              },
+              {
+                value: 8,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.8xmsaa",
+                  defaultMessage: "8x MSAA"
+                })
+              }
+            ],
+            promptForRefresh: true
+          }
+        ]
       ]
     ]);
 
@@ -1282,7 +1355,16 @@ class PreferencesScreen extends Component {
           }
         ]
       ],
-      [CATEGORY_MISC, [{ items: items.get(CATEGORY_MISC) }]]
+      [
+        CATEGORY_MISC,
+        [
+          { items: items.get(CATEGORY_MISC) },
+          {
+            name: intl.formatMessage(categoryNames[CATEGORY_GRAPHICS]),
+            items: items.get(CATEGORY_GRAPHICS)
+          }
+        ]
+      ]
     ]);
   }
 

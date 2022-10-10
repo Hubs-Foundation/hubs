@@ -3,6 +3,8 @@ import qsTruthy from "../utils/qs_truthy";
 
 import { LUTCubeLoader } from "three/examples/jsm/loaders/LUTCubeLoader";
 import blenderLutPath from "../assets/blender-lut.cube";
+import { NoToneMapping } from "three";
+import { ToneMappingMode } from "postprocessing";
 
 const toneMappingOptions = {
   None: "NoToneMapping",
@@ -37,7 +39,16 @@ const defaultEnvSettings = {
   fogColor: new THREE.Color("#ffffff"),
   fogDensity: 0.00025,
   fogFar: 1000,
-  fogNear: 1
+  fogNear: 1,
+
+  enableHDRPipeline: false,
+  enableBloom: false,
+  bloom: {
+    threshold: 1.0,
+    intensity: 1.0,
+    radius: 0.85,
+    smoothing: 0.025
+  }
 };
 
 let blenderLUTPromise; // lazy loaded
@@ -59,15 +70,37 @@ export class EnvironmentSystem {
   setupDebugView() {
     const debugSettings = { ...defaultEnvSettings };
 
+    let tonemappingController, bloomController, bloomFolder;
+
     const updateDebug = () => {
       this.applyEnvSettings(debugSettings);
+      bloomController.enable(debugSettings.enableHDRPipeline);
+      tonemappingController.enable(!debugSettings.enableHDRPipeline);
+      bloomFolder.show(debugSettings.enableHDRPipeline && debugSettings.enableBloom);
     };
 
-    const gui = new GUI();
-    gui.add(debugSettings, "toneMapping", Object.values(toneMappingOptions)).onChange(updateDebug).listen();
+    const gui = new GUI({ title: "Environment Settings" });
+    tonemappingController = gui
+      .add(debugSettings, "toneMapping", Object.values(toneMappingOptions))
+      .onChange(updateDebug)
+      .listen();
+    tonemappingController.enable(!debugSettings.enableHDRPipeline);
     gui.add(debugSettings, "toneMappingExposure", 0, 4, 0.01).onChange(updateDebug).listen();
     gui.add(debugSettings, "outputEncoding", Object.values(outputEncodingOptions)).onChange(updateDebug).listen();
-    gui.add(debugSettings, "physicallyCorrectLights", true).onChange(updateDebug).listen();
+    gui.add(debugSettings, "physicallyCorrectLights").onChange(updateDebug).listen();
+    gui.add(debugSettings, "enableHDRPipeline").onChange(updateDebug).listen();
+    bloomController = gui.add(debugSettings, "enableBloom").onChange(updateDebug).listen();
+    bloomController.enable(debugSettings.enableHDRPipeline);
+
+    bloomFolder = gui.addFolder("bloom");
+    bloomFolder.show(debugSettings.enableHDRPipeline && debugSettings.enableBloom);
+    bloomFolder.add(debugSettings.bloom, "intensity", 0, 10, 0.01).onChange(updateDebug).listen();
+    bloomFolder.add(debugSettings.bloom, "threshold", 0, 2, 0.001).onChange(updateDebug).listen();
+    bloomFolder.add(debugSettings.bloom, "radius", 0, 1, 0.001).onChange(updateDebug).listen();
+    bloomFolder.add(debugSettings.bloom, "smoothing", 0, 1, 0.001).onChange(updateDebug).listen();
+    // bloomFolder.add(bloom.blendMode, "blendFunction", BlendFunction);
+    // bloomFolder.add(bloom.blendMode.opacity, "value", 0, 1).name("Opacity");
+
     gui.open();
 
     this.debugGui = gui;
@@ -120,9 +153,32 @@ export class EnvironmentSystem {
       materialsNeedUpdate = true;
     }
 
-    // const newToneMapping = THREE[settings.toneMapping];
-    const newToneMapping = THREE.NoToneMapping;
-    if (this.renderer.toneMapping !== newToneMapping) {
+    let newToneMapping = THREE[settings.toneMapping];
+    if (APP.fx.tonemappingPass) {
+      if (settings.enableHDRPipeline) {
+        APP.fx.tonemappingPass.enabled = true;
+        newToneMapping = NoToneMapping;
+        // APP.fx.tonemappingPass.effects[0].mode = fxToneMapping[settings.toneMapping];
+        if (APP.fx.bloomPass) {
+          APP.fx.bloomPass.enabled = settings.enableBloom;
+          APP.fx.dummyBloomPass.enabled = !settings.enableBloom;
+
+          const bloom = APP.fx.bloomPass.effects[0];
+          bloom.intensity = settings.bloom.intensity;
+          bloom.luminanceMaterial.threshold = settings.bloom.threshold;
+          bloom.mipmapBlurPass.radius = settings.bloom.radius;
+          bloom.luminanceMaterial.smoothing = settings.bloom.smoothing;
+        }
+      } else {
+        APP.fx.tonemappingPass.enabled = false;
+        if (APP.fx.bloomPass) {
+          APP.fx.bloomPass.enabled = false;
+          APP.fx.dummyBloomPass.enabled = false;
+        }
+      }
+    }
+    const toneMappingChanged = this.renderer.toneMapping !== newToneMapping;
+    if (toneMappingChanged) {
       this.renderer.toneMapping = newToneMapping;
       materialsNeedUpdate = true;
 

@@ -35,9 +35,7 @@ AFRAME.registerComponent("video-texture-source", {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
-      encoding: THREE.sRGBEncoding,
-      depth: false,
-      stencil: false
+      encoding: THREE.sRGBEncoding
     });
 
     const texture = this.renderTarget.texture;
@@ -78,6 +76,7 @@ AFRAME.registerComponent("video-texture-source", {
     sceneEl.object3D.autoUpdate = false;
 
     renderer.setRenderTarget(this.renderTarget);
+    renderer.clearDepth();
     renderer.render(sceneEl.object3D, this.camera);
     renderer.setRenderTarget(null);
 

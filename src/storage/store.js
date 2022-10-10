@@ -14,7 +14,7 @@ import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identit
 import { NO_DEVICE_ID } from "../utils/media-devices-utils.js";
 import { getDefaultTheme } from "../utils/theme.js";
 
-const defaultMaterialQuality = (function() {
+const defaultMaterialQuality = (function () {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
 
   // HACK: AFRAME is not available on all pages, so we catch the ReferenceError.
@@ -158,7 +158,10 @@ export const SCHEMA = {
         cursorSize: { type: "number", default: 1 },
         nametagVisibility: { type: "string", default: "showAll" },
         nametagVisibilityDistance: { type: "number", default: 5 },
-        avatarVoiceLevels: { type: "object" }
+        avatarVoiceLevels: { type: "object" },
+        enablePostEffects: { type: "bool", default: false },
+        enableBloom: { type: "bool", default: true }, // only applies if post effects are enabled
+        aaMode: { type: "number", default: 4 } // only applies if post effects are enabled
       }
     },
 

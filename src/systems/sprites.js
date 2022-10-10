@@ -54,7 +54,7 @@ AFRAME.registerComponent("sprite", {
   }
 });
 
-const normalizedFrame = (function() {
+const normalizedFrame = (function () {
   const memo = new Map();
   return function normalizedFrame(name, spritesheet) {
     let ret = memo.get(name);
@@ -80,7 +80,7 @@ const normalizedFrame = (function() {
   };
 })();
 
-const raycastOnSprite = (function() {
+const raycastOnSprite = (function () {
   const vA = new THREE.Vector3();
   const vB = new THREE.Vector3();
   const vC = new THREE.Vector3();
@@ -231,6 +231,7 @@ export class SpriteSystem {
           el.setObject3D("mesh", mesh);
           mesh.frustumCulled = false;
           mesh.layers.set(Layers.CAMERA_LAYER_UI);
+          // mesh.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
           mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
           mesh.raycast = this.raycast.bind(this);
         });
@@ -254,7 +255,7 @@ export class SpriteSystem {
           });
         }
       }
-    }
+    };
 
     onThemeChanged(updateSprites);
   }

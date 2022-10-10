@@ -117,13 +117,7 @@ AFRAME.registerSystem("hubs-systems", {
   }
 });
 
-export function mainTick(
-  xrFrame: XRFrame,
-  renderer: WebGLRenderer,
-  scene: Scene,
-  camera: Camera,
-  composer: EffectComposer
-) {
+export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene, camera: Camera) {
   const world = APP.world;
   const sceneEl = AFRAME.scenes[0];
   const aframeSystems = sceneEl.systems;
@@ -236,8 +230,14 @@ export function mainTick(
 
   networkSendSystem(world);
 
-  // renderer.render(scene, camera);
-  composer.render();
+  scene.updateMatrixWorld();
+
+  renderer.info.reset();
+  if (APP.fx.composer) {
+    APP.fx.composer.render();
+  } else {
+    renderer.render(scene, camera);
+  }
 
   // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)
   // TODO inline invoking tocks instead of using onAfterRender registered in a-scene

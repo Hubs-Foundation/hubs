@@ -56,7 +56,6 @@ export function useResizeViewport(viewportRef, store, scene) {
   }, [store]);
 
   useEffect(() => {
-    return;
     const observer = new ResizeObserver(entries => {
       const isPresenting = scene.renderer.xr.isPresenting;
       const isVRPresenting = scene.renderer.xr.enabled && isPresenting;

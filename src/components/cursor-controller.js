@@ -99,6 +99,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.cursorVisual.renderOrder = window.APP.RENDER_ORDER.CURSOR;
     this.cursorVisual.material.transparent = true;
     this.cursorVisual.layers.set(Layers.CAMERA_LAYER_UI);
+    this.cursorVisual.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
     this.data.cursor.object3D.add(this.cursorVisual);
 
     this.intersection = null;

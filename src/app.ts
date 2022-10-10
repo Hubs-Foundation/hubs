@@ -15,8 +15,15 @@ import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
 import {
   Audio,
   AudioListener,
+  BasicDepthPacking,
+  BoxGeometry,
+  Camera,
+  CameraHelper,
   HalfFloatType,
+  Mesh,
+  MeshBasicMaterial,
   Object3D,
+  OrthographicCamera,
   PerspectiveCamera,
   PositionalAudio,
   RGBAFormat,
@@ -34,16 +41,21 @@ import {
   BloomEffect,
   ClearPass,
   CopyPass,
+  DepthCopyPass,
   EffectComposer,
   EffectPass,
   LambdaPass,
   LuminancePass,
+  OverrideMaterialManager,
   RenderPass,
+  SelectiveBloomEffect,
+  SMAAEffect,
   TextureEffect,
   ToneMappingEffect,
   ToneMappingMode
 } from "postprocessing";
 import { Layers } from "./components/layers";
+import { createImageMesh } from "./utils/create-image-mesh";
 
 declare global {
   interface Window {
@@ -107,7 +119,12 @@ export class App {
     CURSOR: 3
   };
 
-  composer: EffectComposer;
+  fx: {
+    composer?: EffectComposer;
+    bloomPass?: EffectPass;
+    tonemappingPass?: EffectPass;
+    dummyBloomPass?: EffectPass;
+  } = {};
 
   constructor() {
     // TODO: Create accessor / update methods for these maps / set
@@ -168,11 +185,12 @@ export class App {
       event.preventDefault();
     });
 
+    const enablePostEffects = this.store.state.preferences.enablePostEffects;
+
     const renderer = new WebGLRenderer({
-      // TODO we should not be using alpha: false https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#avoid_alphafalse_which_can_be_expensive
-      // alpha: true,
-      antialias: false,
-      depth: false,
+      alpha: true,
+      antialias: !enablePostEffects,
+      depth: !enablePostEffects,
       stencil: false,
       // premultipliedAlpha: true,
       // preserveDrawingBuffer: false,
@@ -180,6 +198,7 @@ export class App {
       powerPreference: "high-performance",
       canvas
     });
+    renderer.info.autoReset = false;
 
     renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -205,54 +224,18 @@ export class App {
 
     this.world.scene = sceneEl.object3D;
     const scene = sceneEl.object3D;
+    scene.autoUpdate = false;
 
-    const composer = new EffectComposer(renderer, {
-      frameBufferType: HalfFloatType
-    });
-    APP.composer = composer;
-    composer.setSize(canvas.width, canvas.height, false);
-
-    {
-      const bloom = new BloomEffect({
-        luminanceThreshold: 1.0,
-        luminanceSmoothing: 0.3,
-
-        intensity: 1.0,
-        mipmapBlur: true
-      });
-
-      composer.addPass(new RenderPass(scene, camera));
-      composer.addPass(
-        new EffectPass(
-          camera,
-          bloom,
-          new ToneMappingEffect({
-            mode: ToneMappingMode.ACES_FILMIC
-          })
-        )
-      );
-
-      const gui = new GUI();
-      gui.add(bloom, "intensity", 0, 10, 0.01);
-      gui.add(bloom.luminanceMaterial, "threshold", 0, 2, 0.001);
-      gui.add((bloom as any).mipmapBlurPass, "radius", 0, 1, 0.001);
-      gui.add(bloom.luminanceMaterial, "smoothing", 0, 1, 0.001);
-      gui.add(bloom.blendMode, "blendFunction", BlendFunction);
-      gui.add(bloom.blendMode.opacity, "value", 0, 1).name("Opacity");
-      gui.open();
+    if (enablePostEffects) {
+      this.initEffectsComposer(canvas, renderer, camera, scene, sceneEl);
     }
-
-    (sceneEl as any).addEventListener("rendererresize", function ({ detail }: { detail: DOMRectReadOnly }) {
-      console.log("Resize", detail);
-      composer.setSize(detail.width, detail.height, true);
-    });
 
     // This gets called after all system and component init functions
     sceneEl.addEventListener("loaded", () => {
       waitForPreloads().then(() => {
         this.world.time.elapsed = performance.now();
         renderer.setAnimationLoop(function (_rafTime, xrFrame) {
-          mainTick(xrFrame, renderer, scene, camera, composer);
+          mainTick(xrFrame, renderer, scene, camera);
         });
         sceneEl.renderStarted = true;
       });
@@ -263,5 +246,199 @@ export class App {
       camera,
       audioListener
     };
+  }
+
+  initEffectsComposer(
+    canvas: HTMLCanvasElement,
+    renderer: WebGLRenderer,
+    camera: Camera,
+    scene: Scene,
+    sceneEl: AScene
+  ) {
+    const composer = new EffectComposer(renderer, {
+      frameBufferType: HalfFloatType,
+      multisampling: 4
+    });
+    // (composer as any).createDepthTexture();
+
+    composer.autoRenderToScreen = false;
+    composer.setSize(canvas.width, canvas.height, false);
+
+    {
+      let renderScenePass = new RenderPass(scene, camera);
+      renderScenePass.clear = true;
+
+      let renderUIPass = new RenderPass(scene, camera);
+      renderUIPass.ignoreBackground = true;
+      renderUIPass.clear = false;
+      // renderUIPass.needsDepthTexture = true;
+
+      let copyToScreenPass = new CopyPass();
+      copyToScreenPass.renderToScreen = true;
+
+      const tonemappingEffect = new ToneMappingEffect({
+        // mode: ToneMappingMode.REINHARD2_ADAPTIVE
+        mode: ToneMappingMode.ACES_FILMIC
+        // adaptationRate: 1,
+        // middleGrey: 1
+      });
+
+      let bloomPass;
+      if (this.store.state.preferences.enableBloom) {
+        const bloom = new BloomEffect({
+          luminanceThreshold: 1.0,
+          luminanceSmoothing: 0.3,
+
+          intensity: 1.0,
+          mipmapBlur: true
+        });
+        bloomPass = new EffectPass(camera, bloom);
+        bloomPass.enabled = false;
+      }
+      const dummyBloomPass = new EffectPass(camera);
+      dummyBloomPass.enabled = false;
+
+      let tonemappingPass = new EffectPass(camera, tonemappingEffect);
+      // include LUT tonemapping shader code unconditionally in case it is used
+      tonemappingPass.fullscreenMaterial.defines!.LUT_TONE_MAPPING = "1";
+      tonemappingPass.enabled = false;
+
+      const aaMode = parseInt(this.store.state.preferences.aaMode);
+      let aaPass = new EffectPass(camera, new SMAAEffect());
+      aaPass.renderToScreen = true;
+      aaPass.enabled = aaMode === 1;
+      copyToScreenPass.enabled = !aaPass.enabled; // SMAA pass will copy to the screen so we can skip explicit copy
+      composer.multisampling = aaMode > 1 ? aaMode : 0;
+
+      let mask: number;
+      const disableUILayers = new LambdaPass(function () {
+        mask = camera.layers.mask;
+        camera.layers.disable(Layers.CAMERA_LAYER_UI);
+        camera.layers.disable(Layers.CAMERA_LAYER_FX_MASK);
+      });
+      const enableUILayers = new LambdaPass(() => {
+        camera.layers.set(Layers.CAMERA_LAYER_UI);
+        camera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
+      });
+      const resetLayers = new LambdaPass(() => {
+        camera.layers.mask = mask;
+      });
+
+      composer.addPass(disableUILayers);
+      composer.addPass(renderScenePass);
+      if (bloomPass) composer.addPass(bloomPass);
+      if (bloomPass) composer.addPass(dummyBloomPass);
+      (dummyBloomPass as any).skipRendering = false;
+      dummyBloomPass.needsSwap = true;
+
+      composer.addPass(tonemappingPass);
+      composer.addPass(enableUILayers);
+      composer.addPass(renderUIPass);
+      composer.addPass(resetLayers);
+      composer.addPass(copyToScreenPass);
+      composer.addPass(aaPass);
+
+      // composer.outputBuffer.depthTexture = composer.inputBuffer.depthTexture;
+
+      this.fx.composer = composer;
+      this.fx.bloomPass = bloomPass;
+      this.fx.dummyBloomPass = dummyBloomPass;
+      this.fx.tonemappingPass = tonemappingPass;
+
+      if (bloomPass) {
+        const bloom = (this.fx.bloomPass as any).effects[0] as BloomEffect;
+
+        const debugScene = new Scene();
+        const debugCamera = new OrthographicCamera(0, canvas.width, 0, canvas.height, 0.1, 100);
+        debugCamera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
+        console.log(debugCamera);
+        debugCamera.matrixAutoUpdate = true;
+        debugCamera.position.z = 5;
+
+        // composer.addPass(debugTexturePass);
+        let y = 10;
+        for (let texture of [
+          /*(bloom as any).depthPass.texture,*/ bloom.luminancePass.texture,
+          bloom.texture,
+          (tonemappingEffect as any).luminancePass.texture,
+          (tonemappingEffect as any).adaptiveLuminancePass.texture
+          // tonemappingEffect.adaptiveLuminanceMaterial.luminanceBuffer0,
+          // tonemappingEffect.adaptiveLuminanceMaterial.luminanceBuffer1
+        ]) {
+          const imageMesh = createImageMesh(texture, canvas.height / canvas.width);
+          console.log(imageMesh);
+          imageMesh.material.depthTest = false;
+          imageMesh.scale.setScalar(320);
+          imageMesh.position.y = y + 90;
+          imageMesh.position.x = 160 + 10;
+          debugScene.add(imageMesh);
+          y += 180 + 10;
+        }
+
+        const debugPass = new RenderPass(debugScene, debugCamera);
+        debugPass.ignoreBackground = true;
+        debugPass.clear = false;
+        debugPass.renderToScreen = true;
+        debugPass.enabled = false;
+
+        composer.addPass(debugPass);
+
+        setTimeout(function () {
+          const envSystem = sceneEl.systems["hubs-systems"].environmentSystem;
+          console.log(envSystem);
+          const gui = envSystem.debugGui.addFolder("Post Effects Debug"); //new GUI({ container: envSystem.debugGui });
+          {
+            const f = gui.addFolder("Bloom");
+            // f.add(bloom, "intensity", 0, 10, 0.01);
+            // f.add(bloom.luminanceMaterial, "threshold", 0, 2, 0.001);
+            // f.add((bloom as any).mipmapBlurPass, "radius", 0, 1, 0.001);
+            // f.add(bloom.luminanceMaterial, "smoothing", 0, 1, 0.001);
+            f.add(bloom.blendMode, "blendFunction", BlendFunction);
+            f.add(bloom.blendMode.opacity, "value", 0, 1).name("Opacity");
+          }
+
+          {
+            const f = gui.addFolder("Tonemapping");
+            f.add(tonemappingEffect, "mode", ToneMappingMode);
+            f.add(renderer, "toneMappingExposure", 0.0, 2.0, 0.001).name("exposure");
+            f.add(tonemappingEffect, "whitePoint", 2.0, 32.0, 0.01);
+            f.add(tonemappingEffect, "middleGrey", 0.0, 1.0, 0.0001);
+            f.add(tonemappingEffect, "averageLuminance", 0.0001, 1.0, 0.0001);
+            f.open();
+          }
+
+          {
+            const f = gui.addFolder("Reinhard (Adaptive)");
+            f.add(tonemappingEffect, "resolution", [64, 128, 256, 512]);
+            f.add(tonemappingEffect, "adaptationRate", 0.001, 3.0, 0.001);
+            f.add({ minLum: 0.01 }, "minLum", 0.001, 1.0, 0.001).onChange((value: number) => {
+              tonemappingEffect.adaptiveLuminanceMaterial.uniforms.minLuminance.value = value;
+            });
+            f.open();
+          }
+
+          gui
+            .add({ aaMode }, "aaMode", {
+              none: 0,
+              SMAA: 1,
+              "2x MSAA": 2,
+              "4x MSAA": 4,
+              "8x MSAA": 8,
+              "16x MSAA": 16
+            })
+            .onChange(function (d: number) {
+              aaPass.enabled = d === 1;
+              composer.multisampling = d > 1 ? d : 0;
+              console.log(aaPass.enabled, composer.multisampling);
+            });
+          gui.add(debugPass, "enabled").name("debug");
+        }, 0);
+      }
+    }
+
+    (sceneEl as any).addEventListener("rendererresize", function ({ detail }: { detail: DOMRectReadOnly }) {
+      console.log("Resize", detail);
+      composer.setSize(detail.width, detail.height, true);
+    });
   }
 }
