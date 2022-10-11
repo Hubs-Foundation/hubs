@@ -11,10 +11,21 @@ import { BackButton } from "../input/BackButton";
 import { SelectInputField } from "../input/SelectInputField";
 import { ToggleInput } from "../input/ToggleInput";
 import { Column } from "../layout/Column";
-import { FormattedMessage } from "react-intl";
+import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Popover } from "../popover/Popover";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { Spinner } from "../misc/Spinner";
+
+export const tittleMessages = defineMessages({
+  microphoneSetup: {
+    id: "cmic-setup-modal.title",
+    defaultMessage: "Microphone Setup",
+  },
+  audioSetup: {
+    id: "mic-setup-modal.title-audio",
+    defaultMessage: "Audio Setup"
+  }
+});
 
 export function MicSetupModal({
   className,
@@ -37,9 +48,10 @@ export function MicSetupModal({
   ...rest
 }) {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
+  const intl = useIntl();
   return (
     <Modal
-      title={<FormattedMessage id="mic-setup-modal.title" defaultMessage="Microphone Setup" />}
+      title={intl.formatMessage(tittleMessages[voiceChatEnabled ? "microphoneSetup" : "audioSetup"])}
       beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       {...rest}
