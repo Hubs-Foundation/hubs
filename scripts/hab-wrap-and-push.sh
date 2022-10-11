@@ -70,12 +70,12 @@ EOF
 bio pkg build --cache-key-path $habCacheKeyPath -k mozillareality .
 
 ### upload
-echo "### upload hab pkg"
-export HAB_AUTH_TOKEN=$BLDR_HAB_TOKEN
-export HAB_ORIGIN_KEYS=mozillareality_ret
-hart="/hab/cache/artifacts/$HAB_ORIGIN-hubs*.hart"
-ls -lha $hart
-bio pkg upload $hart
+# echo "### upload hab pkg"
+# export HAB_AUTH_TOKEN=$BLDR_HAB_TOKEN
+# export HAB_ORIGIN_KEYS=mozillareality_ret
+# hart="/hab/cache/artifacts/$HAB_ORIGIN-hubs*.hart"
+# ls -lha $hart
+# bio pkg upload $hart
 
 echo "### upload hab pkg to bldr.reticulum.io"
 export HAB_BLDR_URL="https://bldr.reticulum.io"
