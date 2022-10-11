@@ -143,10 +143,6 @@ export class App {
     const canvas = document.createElement("canvas");
     canvas.classList.add("a-canvas");
     canvas.dataset.aframeCanvas = "true";
-    canvas.width = 1280;
-    canvas.height = 720;
-    canvas.style.backgroundColor = "black";
-    document.body.style.backgroundColor = "#111";
 
     // TODO this comes from aframe and prevents zoom on ipad.
     // This should alreeady be handleed by disable-ios-zoom but it does not appear to work
@@ -167,6 +163,8 @@ export class App {
       powerPreference: "high-performance",
       canvas
     });
+
+    // We manually handle resetting this in mainTick so that stats are correctly reported with post effects enabled
     renderer.info.autoReset = false;
 
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -193,6 +191,8 @@ export class App {
 
     this.world.scene = sceneEl.object3D;
     const scene = sceneEl.object3D;
+
+    // We manually call scene.updateMatrixWolrd in mainTick
     scene.autoUpdate = false;
 
     if (enablePostEffects) {

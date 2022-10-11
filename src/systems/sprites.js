@@ -231,7 +231,7 @@ export class SpriteSystem {
           el.setObject3D("mesh", mesh);
           mesh.frustumCulled = false;
           mesh.layers.set(Layers.CAMERA_LAYER_UI);
-          // mesh.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
+          mesh.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
           mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
           mesh.raycast = this.raycast.bind(this);
         });

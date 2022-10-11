@@ -1,4 +1,3 @@
-/* global performance THREE AFRAME NAF MediaStream setTimeout */
 import configs from "../utils/configs";
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";

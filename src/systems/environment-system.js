@@ -4,7 +4,6 @@ import qsTruthy from "../utils/qs_truthy";
 import { LUTCubeLoader } from "three/examples/jsm/loaders/LUTCubeLoader";
 import blenderLutPath from "../assets/blender-lut.cube";
 import { NoToneMapping } from "three";
-import { ToneMappingMode } from "postprocessing";
 
 const toneMappingOptions = {
   None: "NoToneMapping",
@@ -70,8 +69,6 @@ export class EnvironmentSystem {
   setupDebugView() {
     const debugSettings = { ...defaultEnvSettings };
 
-    let tonemappingController, bloomController, bloomFolder;
-
     const updateDebug = () => {
       this.applyEnvSettings(debugSettings);
       bloomController.enable(debugSettings.enableHDRPipeline);
@@ -80,7 +77,7 @@ export class EnvironmentSystem {
     };
 
     const gui = new GUI({ title: "Environment Settings" });
-    tonemappingController = gui
+    const tonemappingController = gui
       .add(debugSettings, "toneMapping", Object.values(toneMappingOptions))
       .onChange(updateDebug)
       .listen();
@@ -89,10 +86,10 @@ export class EnvironmentSystem {
     gui.add(debugSettings, "outputEncoding", Object.values(outputEncodingOptions)).onChange(updateDebug).listen();
     gui.add(debugSettings, "physicallyCorrectLights").onChange(updateDebug).listen();
     gui.add(debugSettings, "enableHDRPipeline").onChange(updateDebug).listen();
-    bloomController = gui.add(debugSettings, "enableBloom").onChange(updateDebug).listen();
+    const bloomController = gui.add(debugSettings, "enableBloom").onChange(updateDebug).listen();
     bloomController.enable(debugSettings.enableHDRPipeline);
 
-    bloomFolder = gui.addFolder("bloom");
+    const bloomFolder = gui.addFolder("bloom");
     bloomFolder.show(debugSettings.enableHDRPipeline && debugSettings.enableBloom);
     bloomFolder.add(debugSettings.bloom, "intensity", 0, 10, 0.01).onChange(updateDebug).listen();
     bloomFolder.add(debugSettings.bloom, "threshold", 0, 10, 0.001).onChange(updateDebug).listen();
