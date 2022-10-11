@@ -121,9 +121,8 @@ export class App {
 
   fx: {
     composer?: EffectComposer;
-    bloomPass?: EffectPass;
-    tonemappingPass?: EffectPass;
-    dummyBloomPass?: EffectPass;
+    bloomAndTonemapPass?: EffectPass;
+    tonemapOnlyPass?: EffectPass;
   } = {};
 
   constructor() {
@@ -259,31 +258,30 @@ export class App {
       frameBufferType: HalfFloatType,
       multisampling: 4
     });
-    // (composer as any).createDepthTexture();
-
     composer.autoRenderToScreen = false;
     composer.setSize(canvas.width, canvas.height, false);
+    composer.outputBuffer.depthBuffer = composer.inputBuffer.depthBuffer;
 
     {
-      let renderScenePass = new RenderPass(scene, camera);
+      const renderScenePass = new RenderPass(scene, camera);
       renderScenePass.clear = true;
 
-      let renderUIPass = new RenderPass(scene, camera);
-      renderUIPass.ignoreBackground = true;
+      const renderUIPass = new RenderPass(scene, camera);
       renderUIPass.clear = false;
-      // renderUIPass.needsDepthTexture = true;
+      renderUIPass.ignoreBackground = true;
 
-      let copyToScreenPass = new CopyPass();
+      const copyToScreenPass = new CopyPass();
       copyToScreenPass.renderToScreen = true;
 
+      const copyBuffersPass = new EffectPass(camera);
+      copyBuffersPass.enabled = false;
+
+      // TODO support other tonemapping options with HDR pipeline
       const tonemappingEffect = new ToneMappingEffect({
-        // mode: ToneMappingMode.REINHARD2_ADAPTIVE
         mode: ToneMappingMode.ACES_FILMIC
-        // adaptationRate: 1,
-        // middleGrey: 1
       });
 
-      let bloomPass;
+      let bloomAndTonemapPass: EffectPass | undefined;
       if (this.store.state.preferences.enableBloom) {
         const bloom = new BloomEffect({
           luminanceThreshold: 1.0,
@@ -292,22 +290,14 @@ export class App {
           intensity: 1.0,
           mipmapBlur: true
         });
-        bloomPass = new EffectPass(camera, bloom);
-        bloomPass.enabled = false;
+        bloomAndTonemapPass = new EffectPass(camera, bloom, tonemappingEffect);
       }
-      const dummyBloomPass = new EffectPass(camera);
-      dummyBloomPass.enabled = false;
 
-      let tonemappingPass = new EffectPass(camera, tonemappingEffect);
-      // include LUT tonemapping shader code unconditionally in case it is used
-      tonemappingPass.fullscreenMaterial.defines!.LUT_TONE_MAPPING = "1";
-      tonemappingPass.enabled = false;
+      let tonemapOnlyPass = new EffectPass(camera, tonemappingEffect);
 
       const aaMode = parseInt(this.store.state.preferences.aaMode);
       let aaPass = new EffectPass(camera, new SMAAEffect());
       aaPass.renderToScreen = true;
-      aaPass.enabled = aaMode === 1;
-      copyToScreenPass.enabled = !aaPass.enabled; // SMAA pass will copy to the screen so we can skip explicit copy
       composer.multisampling = aaMode > 1 ? aaMode : 0;
 
       let mask: number;
@@ -319,54 +309,53 @@ export class App {
       const enableUILayers = new LambdaPass(() => {
         camera.layers.set(Layers.CAMERA_LAYER_UI);
         camera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
+        copyBuffersPass.enabled = bloomAndTonemapPass?.enabled || tonemapOnlyPass.enabled;
       });
       const resetLayers = new LambdaPass(() => {
         camera.layers.mask = mask;
       });
 
+      // One of these will be enabled by environment-system depending on scene settings and prefs
+      tonemapOnlyPass.enabled = false;
+      if (bloomAndTonemapPass) bloomAndTonemapPass.enabled = false;
+
+      // either aaPass or copyToScreenPass will handle the final copy to the canvas framebuffer
+      aaPass.enabled = aaMode === 1;
+      copyToScreenPass.enabled = !aaPass.enabled;
+
       composer.addPass(disableUILayers);
       composer.addPass(renderScenePass);
-      if (bloomPass) composer.addPass(bloomPass);
-      if (bloomPass) composer.addPass(dummyBloomPass);
-      (dummyBloomPass as any).skipRendering = false;
-      dummyBloomPass.needsSwap = true;
-
-      composer.addPass(tonemappingPass);
+      if (bloomAndTonemapPass) composer.addPass(bloomAndTonemapPass);
+      composer.addPass(tonemapOnlyPass);
       composer.addPass(enableUILayers);
+      composer.addPass(copyBuffersPass);
       composer.addPass(renderUIPass);
       composer.addPass(resetLayers);
       composer.addPass(copyToScreenPass);
       composer.addPass(aaPass);
 
-      // composer.outputBuffer.depthTexture = composer.inputBuffer.depthTexture;
+      // TODO this is a bit of a hack using an empty effect pass to copy buffers so that renderUIPass uses same depth buffer as renderScenePass
+      // There should be a cleaner way to just bind the depth buffer for the renderUIPass correctly.
+      (copyBuffersPass as any).skipRendering = false;
+      copyBuffersPass.needsSwap = true;
 
       this.fx.composer = composer;
-      this.fx.bloomPass = bloomPass;
-      this.fx.dummyBloomPass = dummyBloomPass;
-      this.fx.tonemappingPass = tonemappingPass;
+      this.fx.bloomAndTonemapPass = bloomAndTonemapPass;
+      this.fx.tonemapOnlyPass = tonemapOnlyPass;
 
-      if (bloomPass) {
-        const bloom = (this.fx.bloomPass as any).effects[0] as BloomEffect;
+      if (bloomAndTonemapPass) {
+        const bloom = (this.fx.bloomAndTonemapPass as any).effects[0] as BloomEffect;
 
         const debugScene = new Scene();
         const debugCamera = new OrthographicCamera(0, canvas.width, 0, canvas.height, 0.1, 100);
         debugCamera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
-        console.log(debugCamera);
         debugCamera.matrixAutoUpdate = true;
         debugCamera.position.z = 5;
 
         // composer.addPass(debugTexturePass);
         let y = 10;
-        for (let texture of [
-          /*(bloom as any).depthPass.texture,*/ bloom.luminancePass.texture,
-          bloom.texture,
-          (tonemappingEffect as any).luminancePass.texture,
-          (tonemappingEffect as any).adaptiveLuminancePass.texture
-          // tonemappingEffect.adaptiveLuminanceMaterial.luminanceBuffer0,
-          // tonemappingEffect.adaptiveLuminanceMaterial.luminanceBuffer1
-        ]) {
+        for (let texture of [bloom.luminancePass.texture, bloom.texture]) {
           const imageMesh = createImageMesh(texture, canvas.height / canvas.width);
-          console.log(imageMesh);
           imageMesh.material.depthTest = false;
           imageMesh.scale.setScalar(320);
           imageMesh.position.y = y + 90;
@@ -389,32 +378,8 @@ export class App {
           const gui = envSystem.debugGui.addFolder("Post Effects Debug"); //new GUI({ container: envSystem.debugGui });
           {
             const f = gui.addFolder("Bloom");
-            // f.add(bloom, "intensity", 0, 10, 0.01);
-            // f.add(bloom.luminanceMaterial, "threshold", 0, 2, 0.001);
-            // f.add((bloom as any).mipmapBlurPass, "radius", 0, 1, 0.001);
-            // f.add(bloom.luminanceMaterial, "smoothing", 0, 1, 0.001);
             f.add(bloom.blendMode, "blendFunction", BlendFunction);
             f.add(bloom.blendMode.opacity, "value", 0, 1).name("Opacity");
-          }
-
-          {
-            const f = gui.addFolder("Tonemapping");
-            f.add(tonemappingEffect, "mode", ToneMappingMode);
-            f.add(renderer, "toneMappingExposure", 0.0, 2.0, 0.001).name("exposure");
-            f.add(tonemappingEffect, "whitePoint", 2.0, 32.0, 0.01);
-            f.add(tonemappingEffect, "middleGrey", 0.0, 1.0, 0.0001);
-            f.add(tonemappingEffect, "averageLuminance", 0.0001, 1.0, 0.0001);
-            f.open();
-          }
-
-          {
-            const f = gui.addFolder("Reinhard (Adaptive)");
-            f.add(tonemappingEffect, "resolution", [64, 128, 256, 512]);
-            f.add(tonemappingEffect, "adaptationRate", 0.001, 3.0, 0.001);
-            f.add({ minLum: 0.01 }, "minLum", 0.001, 1.0, 0.001).onChange((value: number) => {
-              tonemappingEffect.adaptiveLuminanceMaterial.uniforms.minLuminance.value = value;
-            });
-            f.open();
           }
 
           gui

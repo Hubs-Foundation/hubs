@@ -154,27 +154,24 @@ export class EnvironmentSystem {
     }
 
     let newToneMapping = THREE[settings.toneMapping];
-    if (APP.fx.tonemappingPass) {
+    if (APP.fx.composer) {
       if (settings.enableHDRPipeline) {
-        APP.fx.tonemappingPass.enabled = true;
         newToneMapping = NoToneMapping;
-        // APP.fx.tonemappingPass.effects[0].mode = fxToneMapping[settings.toneMapping];
-        if (APP.fx.bloomPass) {
-          APP.fx.bloomPass.enabled = settings.enableBloom;
-          APP.fx.dummyBloomPass.enabled = !settings.enableBloom;
-
-          const bloom = APP.fx.bloomPass.effects[0];
-          bloom.intensity = settings.bloom.intensity;
-          bloom.luminanceMaterial.threshold = settings.bloom.threshold;
-          bloom.mipmapBlurPass.radius = settings.bloom.radius;
-          bloom.luminanceMaterial.smoothing = settings.bloom.smoothing;
+        // TODO HDR pipeline currently hardcodes ACES tonemapping. Support customization.
+        if (APP.fx.bloomAndTonemapPass) {
+          APP.fx.bloomAndTonemapPass.enabled = settings.enableBloom;
+          if (settings.enableBloom) {
+            const bloom = APP.fx.bloomAndTonemapPass.effects[0];
+            bloom.intensity = settings.bloom.intensity;
+            bloom.luminanceMaterial.threshold = settings.bloom.threshold;
+            bloom.mipmapBlurPass.radius = settings.bloom.radius;
+            bloom.luminanceMaterial.smoothing = settings.bloom.smoothing;
+          }
         }
+        APP.fx.tonemapOnlyPass.enabled = !APP.fx.bloomAndTonemapPass?.enabled;
       } else {
-        APP.fx.tonemappingPass.enabled = false;
-        if (APP.fx.bloomPass) {
-          APP.fx.bloomPass.enabled = false;
-          APP.fx.dummyBloomPass.enabled = false;
-        }
+        APP.fx.tonemapOnlyPass.enabled = false;
+        if (APP.fx.bloomAndTonemapPass) APP.fx.bloomAndTonemapPass.enabled = false;
       }
     }
     const toneMappingChanged = this.renderer.toneMapping !== newToneMapping;
