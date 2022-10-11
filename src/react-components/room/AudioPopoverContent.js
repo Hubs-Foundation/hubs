@@ -65,7 +65,7 @@ export const AudioPopoverContent = ({
             <p className={styles.textDisabled}>
               <FormattedMessage
                 id="mic-setup-modal.voice-chat-disabled"
-                defaultMessage="Voice chat is <bold>turned off</bold> for this space."
+                defaultMessage="Voice chat is <bold>turned off</bold> for this room."
                 values={{
                   bold: str => <b>{str}</b>
                 }}
