@@ -326,17 +326,21 @@ function Home() {
                   <div className="span1">{item?.room?.name}</div>
                   <div className="span2">
                     <p className="p-1">
-                      <MdPeopleAlt />
+                      <MdPeopleAlt style={{marginTop:"5px"}}/>
                       {item.reservationCount}/{item.maxSize}
                     </p>
-                    <p className="p-1">
-                      <MdCalendarToday />
-                      {item.startDate ? moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT") : `<${t('home.NOT_SET')}>`} {' (start)'}
-                    </p>
-                    <p className="p-1">
-                      <MdCalendarToday />
-                      {item.endDate ? moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT") : `<${t('home.NOT_SET')}>`} {' (end)'}
-                    </p>
+                    {(item.startDate) && (
+                      <p className="p-1">
+                      <MdCalendarToday style={{marginTop:"5px"}}/>
+                        { moment.utc(item.startDate).local().locale(Language.getLanguage()).format("L LT")} {' (start)'}
+                      </p>
+                    )}
+                    {(item.endDate) && (
+                      <p className="p-1">
+                      <MdCalendarToday style={{marginTop:"5px"}} />
+                        { moment.utc(item.endDate).local().locale(Language.getLanguage()).format("L LT")} {' (end)'}
+                      </p>
+                    )}
                   </div>
                   <ActionButton/>
                 </div>
