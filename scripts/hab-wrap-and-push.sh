@@ -20,17 +20,19 @@ echo $BLDR_HAB_TOKEN > $habCacheKeyPath/mozillareality_hab
 echo $BLDR_RET_TOKEN > $habCacheKeyPath/mozillareality_ret
 export HAB_ORIGIN=mozillareality
 export HAB_ORIGIN_KEYS=mozillareality_hab
-cd /hubs && mkdir -p dist
+cd /repo && mkdir -p dist
 
 ### get turkey files
-cp -r /www/hubs ./dist
+ls -lha ./dist/
+cp -r /www/hubs/* ./dist
+
 #translate from turkey to hab
 export BASE_ASSETS_PATH="$(echo "base_assets_path" | sha256sum | cut -d' ' -f1)"
 
-find dist/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}\//$BASE_ASSETS_PATH\//g" {} \;           
-find dist/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}/$BASE_ASSETS_PATH\//g" {} \; 
-find dist/hubs/ -type f -name *.css -exec sed -i "s/{{rawhubs-base-assets-path}}\//$BASE_ASSETS_PATH\//g" {} \; 
-find dist/hubs/ -type f -name *.css -exec sed -i "s/{{rawhubs-base-assets-path}}/$BASE_ASSETS_PATH\//g" {} \;
+find dist/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}\//$BASE_ASSETS_PATH\//g" {} \;           
+find dist/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}/$BASE_ASSETS_PATH\//g" {} \; 
+find dist/ -type f -name *.css -exec sed -i "s/{{rawhubs-base-assets-path}}\//$BASE_ASSETS_PATH\//g" {} \; 
+find dist/ -type f -name *.css -exec sed -i "s/{{rawhubs-base-assets-path}}/$BASE_ASSETS_PATH\//g" {} \;
 
 echo "### build hab pkg"
 export HAB_AUTH_TOKEN=$BLDR_HAB_TOKEN
@@ -68,12 +70,18 @@ EOF
 bio pkg build --cache-key-path $habCacheKeyPath -k mozillareality .
 
 ### upload
-echo "### upload hab pkg"
+# echo "### upload hab pkg"
+# export HAB_AUTH_TOKEN=$BLDR_HAB_TOKEN
+# export HAB_ORIGIN_KEYS=mozillareality_ret
+# hart="/hab/cache/artifacts/$HAB_ORIGIN-hubs*.hart"
+# ls -lha $hart
+# bio pkg upload $hart
+
+echo "### upload hab pkg to bldr.reticulum.io"
 export HAB_BLDR_URL="https://bldr.reticulum.io"
 export HAB_AUTH_TOKEN=$BLDR_RET_TOKEN
 export HAB_ORIGIN_KEYS=mozillareality_ret
 echo $BLDR_RET_PUB_B64 | base64 -d > /hab/cache/keys/mozillareality-20190117233449.pub
-# cat /hab/cache/keys/mozillareality-20190117233449.pub
 hart="/hab/cache/artifacts/$HAB_ORIGIN-hubs*.hart"
 ls -lha $hart
 bio pkg upload $hart

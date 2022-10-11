@@ -10,8 +10,8 @@ jobs:
     with:
       registry: mozillareality
       dockerfile: RetPageOriginDockerfile
-      personal_k8s_deployment: hubs
-      personal_k8s_deployment_container: hubs
+      # personal_k8s_deployment: hubs
+      # personal_k8s_deployment_container: hubs
       bio_script_path: scripts/hab-wrap-and-push.sh
     secrets:
       DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
