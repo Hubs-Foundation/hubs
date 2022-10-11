@@ -52,7 +52,7 @@ const Pagination = props => {
 
 		// "<<"
 		elements.push(
-			<div key={'double-prev'} className={'double double-prev' + (pagination.beginPage <= 1 ? ' event-none' : '')} onClick={setMorePagePrev}>
+			<div key={'double-prev'} className={'double double-prev' + (pagination.currentPage <= 1 ? ' event-none' : '')} onClick={()=>{changePage(1)}}>
 				<IconPreviousDouble className="ico" />
 			</div>
 		)
@@ -80,7 +80,7 @@ const Pagination = props => {
 		)
 		// ">>"
 		elements.push(
-			<div key={'double-next'}  className={'double double-next' + (pagination.endPage >= pagination.totalPage ? ' event-none' : '')} onClick={setMorePageNext}>
+			<div key={'double-next'}  className={'double double-next' + (pagination.currentPage >= pagination.totalPage ? ' event-none' : '')} onClick={()=>{changePage(pagination.totalPage)}}>
 				<IconNextDouble className="ico" />
 			</div>
 		)
