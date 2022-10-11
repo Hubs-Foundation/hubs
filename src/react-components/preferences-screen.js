@@ -21,6 +21,7 @@ import {
   getScreenResolutionHeight,
   setMaxResolution
 } from "../utils/screen-orientation-utils";
+import { AAModes } from "../effects";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
@@ -1282,37 +1283,37 @@ class PreferencesScreen extends Component {
             promptForRefresh: true,
             options: [
               {
-                value: 0,
+                value: AAModes.NONE,
                 text: intl.formatMessage({
-                  id: "preferences-screen.aa-mode.fx-aa-none",
+                  id: "preferences-screen.aa-mode.none",
                   defaultMessage: "none"
                 })
               },
               {
-                value: 1,
+                value: AAModes.SMAA,
                 text: intl.formatMessage({
                   id: "preferences-screen.aa-mode.smaa",
                   defaultMessage: "SMAA"
                 })
               },
               {
-                value: 2,
+                value: AAModes.MSAA_2X,
                 text: intl.formatMessage({
-                  id: "preferences-screen.aa-mode.2xmsaa",
+                  id: "preferences-screen.aa-mode.msaa_2x",
                   defaultMessage: "2x MSAA"
                 })
               },
               {
-                value: 4,
+                value: AAModes.MSAA_4X,
                 text: intl.formatMessage({
-                  id: "preferences-screen.aa-mode.4xmsaa",
+                  id: "preferences-screen.aa-mode.msaa_4x",
                   defaultMessage: "4x MSAA"
                 })
               },
               {
-                value: 8,
+                value: AAModes.MSAA_8X,
                 text: intl.formatMessage({
-                  id: "preferences-screen.aa-mode.8xmsaa",
+                  id: "preferences-screen.aa-mode.msaa_8x",
                   defaultMessage: "8x MSAA"
                 })
               }

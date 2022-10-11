@@ -95,7 +95,7 @@ export class EnvironmentSystem {
     bloomFolder = gui.addFolder("bloom");
     bloomFolder.show(debugSettings.enableHDRPipeline && debugSettings.enableBloom);
     bloomFolder.add(debugSettings.bloom, "intensity", 0, 10, 0.01).onChange(updateDebug).listen();
-    bloomFolder.add(debugSettings.bloom, "threshold", 0, 2, 0.001).onChange(updateDebug).listen();
+    bloomFolder.add(debugSettings.bloom, "threshold", 0, 10, 0.001).onChange(updateDebug).listen();
     bloomFolder.add(debugSettings.bloom, "radius", 0, 1, 0.001).onChange(updateDebug).listen();
     bloomFolder.add(debugSettings.bloom, "smoothing", 0, 1, 0.001).onChange(updateDebug).listen();
     // bloomFolder.add(bloom.blendMode, "blendFunction", BlendFunction);

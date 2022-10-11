@@ -9,53 +9,23 @@ import qsTruthy from "./utils/qs_truthy";
 import type { AElement, AScene } from "aframe";
 import HubChannel from "./utils/hub-channel";
 import MediaDevicesManager from "./utils/media-devices-manager";
-// @ts-ignore
-import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
 
+import { EffectComposer, EffectPass } from "postprocessing";
 import {
   Audio,
   AudioListener,
-  BasicDepthPacking,
-  BoxGeometry,
-  Camera,
-  CameraHelper,
-  HalfFloatType,
-  Mesh,
-  MeshBasicMaterial,
   Object3D,
-  OrthographicCamera,
   PerspectiveCamera,
   PositionalAudio,
-  RGBAFormat,
   Scene,
   sRGBEncoding,
-  WebGLRenderer,
-  WebGLRenderTarget
+  WebGLRenderer
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
+import { createEffectsComposer } from "./effects";
 import { DialogAdapter } from "./naf-dialog-adapter";
 import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
-import {
-  BlendFunction,
-  BloomEffect,
-  ClearPass,
-  CopyPass,
-  DepthCopyPass,
-  EffectComposer,
-  EffectPass,
-  LambdaPass,
-  LuminancePass,
-  OverrideMaterialManager,
-  RenderPass,
-  SelectiveBloomEffect,
-  SMAAEffect,
-  TextureEffect,
-  ToneMappingEffect,
-  ToneMappingMode
-} from "postprocessing";
-import { Layers } from "./components/layers";
-import { createImageMesh } from "./utils/create-image-mesh";
 
 declare global {
   interface Window {
@@ -226,7 +196,7 @@ export class App {
     scene.autoUpdate = false;
 
     if (enablePostEffects) {
-      this.initEffectsComposer(canvas, renderer, camera, scene, sceneEl);
+      this.fx = createEffectsComposer(canvas, renderer, camera, scene, sceneEl, this.store);
     }
 
     // This gets called after all system and component init functions
@@ -245,165 +215,5 @@ export class App {
       camera,
       audioListener
     };
-  }
-
-  initEffectsComposer(
-    canvas: HTMLCanvasElement,
-    renderer: WebGLRenderer,
-    camera: Camera,
-    scene: Scene,
-    sceneEl: AScene
-  ) {
-    const composer = new EffectComposer(renderer, {
-      frameBufferType: HalfFloatType,
-      multisampling: 4
-    });
-    composer.autoRenderToScreen = false;
-    composer.setSize(canvas.width, canvas.height, false);
-    composer.outputBuffer.depthBuffer = composer.inputBuffer.depthBuffer;
-
-    {
-      const renderScenePass = new RenderPass(scene, camera);
-      renderScenePass.clear = true;
-
-      const renderUIPass = new RenderPass(scene, camera);
-      renderUIPass.clear = false;
-      renderUIPass.ignoreBackground = true;
-
-      const copyToScreenPass = new CopyPass();
-      copyToScreenPass.renderToScreen = true;
-
-      const copyBuffersPass = new EffectPass(camera);
-      copyBuffersPass.enabled = false;
-
-      // TODO support other tonemapping options with HDR pipeline
-      const tonemappingEffect = new ToneMappingEffect({
-        mode: ToneMappingMode.ACES_FILMIC
-      });
-
-      let bloomAndTonemapPass: EffectPass | undefined;
-      if (this.store.state.preferences.enableBloom) {
-        const bloom = new BloomEffect({
-          luminanceThreshold: 1.0,
-          luminanceSmoothing: 0.3,
-
-          intensity: 1.0,
-          mipmapBlur: true
-        });
-        bloomAndTonemapPass = new EffectPass(camera, bloom, tonemappingEffect);
-      }
-
-      let tonemapOnlyPass = new EffectPass(camera, tonemappingEffect);
-
-      const aaMode = parseInt(this.store.state.preferences.aaMode);
-      let aaPass = new EffectPass(camera, new SMAAEffect());
-      aaPass.renderToScreen = true;
-      composer.multisampling = aaMode > 1 ? aaMode : 0;
-
-      let mask: number;
-      const disableUILayers = new LambdaPass(function () {
-        mask = camera.layers.mask;
-        camera.layers.disable(Layers.CAMERA_LAYER_UI);
-        camera.layers.disable(Layers.CAMERA_LAYER_FX_MASK);
-      });
-      const enableUILayers = new LambdaPass(() => {
-        camera.layers.set(Layers.CAMERA_LAYER_UI);
-        camera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
-        copyBuffersPass.enabled = bloomAndTonemapPass?.enabled || tonemapOnlyPass.enabled;
-      });
-      const resetLayers = new LambdaPass(() => {
-        camera.layers.mask = mask;
-      });
-
-      // One of these will be enabled by environment-system depending on scene settings and prefs
-      tonemapOnlyPass.enabled = false;
-      if (bloomAndTonemapPass) bloomAndTonemapPass.enabled = false;
-
-      // either aaPass or copyToScreenPass will handle the final copy to the canvas framebuffer
-      aaPass.enabled = aaMode === 1;
-      copyToScreenPass.enabled = !aaPass.enabled;
-
-      composer.addPass(disableUILayers);
-      composer.addPass(renderScenePass);
-      if (bloomAndTonemapPass) composer.addPass(bloomAndTonemapPass);
-      composer.addPass(tonemapOnlyPass);
-      composer.addPass(enableUILayers);
-      composer.addPass(copyBuffersPass);
-      composer.addPass(renderUIPass);
-      composer.addPass(resetLayers);
-      composer.addPass(copyToScreenPass);
-      composer.addPass(aaPass);
-
-      // TODO this is a bit of a hack using an empty effect pass to copy buffers so that renderUIPass uses same depth buffer as renderScenePass
-      // There should be a cleaner way to just bind the depth buffer for the renderUIPass correctly.
-      (copyBuffersPass as any).skipRendering = false;
-      copyBuffersPass.needsSwap = true;
-
-      this.fx.composer = composer;
-      this.fx.bloomAndTonemapPass = bloomAndTonemapPass;
-      this.fx.tonemapOnlyPass = tonemapOnlyPass;
-
-      if (bloomAndTonemapPass) {
-        const bloom = (this.fx.bloomAndTonemapPass as any).effects[0] as BloomEffect;
-
-        const debugScene = new Scene();
-        const debugCamera = new OrthographicCamera(0, canvas.width, 0, canvas.height, 0.1, 100);
-        debugCamera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
-        debugCamera.matrixAutoUpdate = true;
-        debugCamera.position.z = 5;
-
-        // composer.addPass(debugTexturePass);
-        let y = 10;
-        for (let texture of [bloom.luminancePass.texture, bloom.texture]) {
-          const imageMesh = createImageMesh(texture, canvas.height / canvas.width);
-          imageMesh.material.depthTest = false;
-          imageMesh.scale.setScalar(320);
-          imageMesh.position.y = y + 90;
-          imageMesh.position.x = 160 + 10;
-          debugScene.add(imageMesh);
-          y += 180 + 10;
-        }
-
-        const debugPass = new RenderPass(debugScene, debugCamera);
-        debugPass.ignoreBackground = true;
-        debugPass.clear = false;
-        debugPass.renderToScreen = true;
-        debugPass.enabled = false;
-
-        composer.addPass(debugPass);
-
-        setTimeout(function () {
-          const envSystem = sceneEl.systems["hubs-systems"].environmentSystem;
-          console.log(envSystem);
-          const gui = envSystem.debugGui.addFolder("Post Effects Debug"); //new GUI({ container: envSystem.debugGui });
-          {
-            const f = gui.addFolder("Bloom");
-            f.add(bloom.blendMode, "blendFunction", BlendFunction);
-            f.add(bloom.blendMode.opacity, "value", 0, 1).name("Opacity");
-          }
-
-          gui
-            .add({ aaMode }, "aaMode", {
-              none: 0,
-              SMAA: 1,
-              "2x MSAA": 2,
-              "4x MSAA": 4,
-              "8x MSAA": 8,
-              "16x MSAA": 16
-            })
-            .onChange(function (d: number) {
-              aaPass.enabled = d === 1;
-              composer.multisampling = d > 1 ? d : 0;
-              console.log(aaPass.enabled, composer.multisampling);
-            });
-          gui.add(debugPass, "enabled").name("debug");
-        }, 0);
-      }
-    }
-
-    (sceneEl as any).addEventListener("rendererresize", function ({ detail }: { detail: DOMRectReadOnly }) {
-      console.log("Resize", detail);
-      composer.setSize(detail.width, detail.height, true);
-    });
   }
 }
