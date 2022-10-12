@@ -35,7 +35,7 @@ export const AudioPopoverButton = ({ initiallyVisible, content, micButton, disab
             onClick={togglePopover}
             type={"left"}
             className={popoverVisible ? styles.arrowButton : styles.arrowButtonSelected}
-            title={"Audio Settings"}
+            title={title}
             disabled={disabled}
           />
           {micButton}

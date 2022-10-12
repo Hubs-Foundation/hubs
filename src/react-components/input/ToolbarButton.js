@@ -21,7 +21,7 @@ export const statusColors = ["recording", "unread", "enabled", "disabled"];
 
 export const ToolbarButton = forwardRef(
   (
-    { preset, className, iconContainerClassName, children, icon, label, selected, large, statusColor, type, disabled, ...rest },
+    { preset, className, iconContainerClassName, children, icon, label, title, selected, large, statusColor, type, disabled, ...rest },
     ref
   ) => {
     return (
@@ -35,6 +35,7 @@ export const ToolbarButton = forwardRef(
           className
         )}
         disabled={disabled}
+        title={title}
         {...rest}
       >
         <div className={classNames(styles.iconContainer, iconContainerClassName, { [styles.disabled]: disabled })} aria-hidden="true">
@@ -59,7 +60,8 @@ ToolbarButton.propTypes = {
   children: PropTypes.node,
   type: PropTypes.oneOf(types),
   large: PropTypes.bool,
-  disabled: PropTypes.bool
+  disabled: PropTypes.bool,
+  title: PropTypes.node
 };
 
 ToolbarButton.defaultProps = {
