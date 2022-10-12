@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage } from "react-intl";
+import { onThemeChanged, getThemeColor } from "../utils/theme";
 import classNames from "classnames";
-import "three/examples/js/controls/OrbitControls";
+
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { createDefaultEnvironmentMap } from "../components/environment-map";
 import { loadGLTF } from "../components/gltf-model-plus";
@@ -11,6 +13,9 @@ import { ensureAvatarMaterial, MAT_NAME } from "../utils/avatar-utils";
 import { createImageBitmap, disposeImageBitmap } from "../utils/image-bitmap-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import styles from "../assets/stylesheets/avatar-preview.scss";
+
+import warningIconUrl from "../assets/images/warning_icon.png";
+import warningIcon2xUrl from "../assets/images/warning_icon@2x.png";
 
 const TEXTURE_PROPS = {
   base_map: ["map"],
@@ -34,8 +39,7 @@ function createRenderer(canvas, alpha = false, useDevicePixelRatio = true) {
   });
 
   const renderer = new THREE.WebGLRenderer({ alpha, canvas, context, forceWebVR: true });
-  renderer.gammaOutput = true;
-  renderer.gammaFactor = 2.2;
+  renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.physicallyCorrectLights = true;
   if (useDevicePixelRatio) {
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -48,16 +52,20 @@ const createImageBitmapFromURL = url =>
     .then(r => r.blob())
     .then(createImageBitmap);
 
-const ORBIT_ANGLE = new THREE.Euler(-30 * THREE.Math.DEG2RAD, 30 * THREE.Math.DEG2RAD, 0);
+const ORBIT_ANGLE = new THREE.Euler(-30 * THREE.MathUtils.DEG2RAD, 30 * THREE.MathUtils.DEG2RAD, 0);
 const DEFAULT_MARGIN = 1;
 
 function fitBoxInFrustum(camera, box, center, margin = DEFAULT_MARGIN) {
   const halfYExtents = Math.max(box.max.y - center.y, center.y - box.min.y);
-  const halfVertFOV = THREE.Math.degToRad(camera.fov / 2);
+  const halfVertFOV = THREE.MathUtils.degToRad(camera.fov / 2);
   camera.position.set(0, 0, (halfYExtents / Math.tan(halfVertFOV) + box.max.z) * margin);
   camera.position.applyEuler(ORBIT_ANGLE);
   camera.position.add(center);
   camera.lookAt(center);
+}
+
+function getThemeBackground() {
+  return new THREE.Color(getThemeColor("background3-color") || 0xeaeaea);
 }
 
 class AvatarPreview extends Component {
@@ -71,13 +79,14 @@ class AvatarPreview extends Component {
     this.state = { loading: true, error: null };
     this.avatar = null;
     this.imageBitmaps = {};
+    this.mounted = false;
   }
 
   componentDidMount = () => {
     this.scene = new THREE.Scene();
 
     this.camera = new THREE.PerspectiveCamera(55, this.canvas.clientWidth / this.canvas.clientHeight, 0.1, 1000);
-    this.controls = new THREE.OrbitControls(this.camera, this.canvas);
+    this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.screenSpacePanning = true;
     this.controls.enableKeys = true;
 
@@ -109,14 +118,17 @@ class AvatarPreview extends Component {
     this.snapshotRenderer.setClearAlpha(0);
 
     this.previewRenderer = createRenderer(this.canvas);
-    this.previewRenderer.setClearColor(0xeaeaea);
+    this.previewRenderer.setClearColor(getThemeBackground());
     this.previewRenderer.setAnimationLoop(() => {
       const dt = clock.getDelta();
       this.mixer && this.mixer.update(dt);
       this.previewRenderer.render(this.scene, this.camera);
     });
+    this.removeThemeChangedListener = onThemeChanged(() => this.previewRenderer.setClearColor(getThemeBackground()));
     window.addEventListener("resize", this.resize);
     this.resize();
+
+    this.mounted = true;
   };
 
   resize = () => {
@@ -154,6 +166,8 @@ class AvatarPreview extends Component {
   })();
 
   componentWillUnmount = () => {
+    this.mounted = false;
+
     // Gotta be particularly careful about disposing things here since we will likely create many avatar
     // previews during a session and Chrome will eventually discard the oldest webgl context if we leak
     // contexts by holding on to them directly or indirectly.
@@ -172,6 +186,7 @@ class AvatarPreview extends Component {
 
     Object.values(this.imageBitmaps).forEach(img => disposeImageBitmap(img));
     window.removeEventListener("resize", this.resize);
+    this.removeThemeChangedListener();
   };
 
   componentDidUpdate = async oldProps => {
@@ -193,7 +208,7 @@ class AvatarPreview extends Component {
     const url = proxiedUrlFor(this.props.avatarGltfUrl);
     const gltf = await this.loadPreviewAvatar(url);
     // If we had started loading another avatar while we were loading this one, throw this one away
-    if (newLoadId !== this.loadId) return;
+    if (!this.mounted || newLoadId !== this.loadId) return;
     if (gltf && this.props.onGltfLoaded) this.props.onGltfLoaded(gltf);
     this.setAvatar(gltf.scene);
   }
@@ -224,6 +239,8 @@ class AvatarPreview extends Component {
       this.setState({ loading: false, error: true });
       return;
     }
+
+    if (!this.mounted) return;
 
     // TODO Check for "Bot_Skinned" here is a hack for legacy avatars which only has a name one of the MOZ_alt_material nodes
     this.previewMesh = findNode(
@@ -277,7 +294,7 @@ class AvatarPreview extends Component {
       ];
 
       // Low and medium quality materials don't use environment maps
-      if (window.APP.store.materialQualitySetting === "high") {
+      if (window.APP.store.state.preferences.materialQualitySetting === "high") {
         dependencies.push(
           // TODO apply environment map to secondary materials as well
           createDefaultEnvironmentMap().then(t => {
@@ -304,12 +321,15 @@ class AvatarPreview extends Component {
       const texture = this.previewMesh.material[prop];
 
       // Low quality materials are missing normal maps
-      if (prop === "normalMap" && window.APP.store.materialQualitySetting === "low") {
+      if (prop === "normalMap" && window.APP.store.state.preferences.materialQualitySetting === "low") {
         return;
       }
 
       // Medium Quality materials are missing metalness and roughness maps
-      if ((prop === "roughnessMap" || prop === "metalnessMap") && window.APP.store.materialQualitySetting !== "high") {
+      if (
+        (prop === "roughnessMap" || prop === "metalnessMap") &&
+        window.APP.store.state.preferences.materialQualitySetting !== "high"
+      ) {
         return;
       }
 
@@ -350,23 +370,21 @@ class AvatarPreview extends Component {
     return (
       <div className={classNames(styles.preview, this.props.className)}>
         {!this.props.avatarGltfUrl ||
-          (this.state.loading &&
-            !this.state.error && (
-              <div className="loader">
-                <div className="loader-center" />
-              </div>
-            ))}
-        {this.props.avatarGltfUrl &&
-          (this.state.error && !this.state.loading) && (
-            <div className="error">
-              <img
-                src="../assets/images/warning_icon.png"
-                srcSet="../assets/images/warning_icon@2x.png 2x"
-                className="error-icon"
-              />
-              <FormattedMessage id="avatar-preview.loading-failed" />
+          (this.state.loading && !this.state.error && (
+            <div className="loader">
+              <div className="loader-center" />
             </div>
-          )}
+          ))}
+        {this.props.avatarGltfUrl && this.state.error && !this.state.loading && (
+          <div className="error">
+            <img src={warningIconUrl} srcSet={`${warningIcon2xUrl} 2x`} className="error-icon" />
+            <FormattedMessage
+              id="avatar-preview.loading-failed"
+              defaultMessage="Loading failed{linebreak}Please choose another avatar"
+              values={{ linebreak: <br /> }}
+            />
+          </div>
+        )}
         <canvas ref={c => (this.canvas = c)} />
       </div>
     );

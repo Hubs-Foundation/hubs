@@ -1,54 +1,8 @@
+@use "../../react-components/styles/theme.scss";
 @import 'shared';
-@import 'drop-menus.scss';
-
-:local(.streaming-tip) {
-  position: absolute;
-  left: 8px;
-  top: 72px;
-  background-color: $notice-background-color;
-  padding: 12px 24px;
-  border-radius: 28px;
-  display: flex;
-  pointer-events: auto;
-  max-width: 30%;
-  text-align: center;
-
-  @media (max-width: 960px) {
-    display:none;
-  }
-
-  :local(.streaming-tip-attach-point) {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid $notice-background-color;
-    position: absolute;
-    top: -5px;
-  }
-
-  :local(.streaming-tip-close){
-    width: 32px;
-    margin-right: 2px;
-    margin-left: -16px;
-    border: none;
-    cursor: pointer;
-    background: transparent;
-    color: $notice-widget-color;
-  }
-  :local(.streaming-tip-message){
-    color: $notice-text-color;
-    user-select: text;
-    display: flex;
-    flex-flow: column;
-    font-size: 0.8em;
-  }
-}
-
 
 :local(.ui) {
   @extend %default-font;
-  @extend %unselectable;
 
   width: 100%;
   height: 100%;
@@ -64,251 +18,10 @@ body.vr-mode {
   }
 }
 
-:local(.ui-dialog) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  @extend %unselectable;
-  flex-direction: column;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-:local(.ui-dialog-box-contents) {
-  background-color: var(--panel-background-color);
-  border-radius: 18px 18px 0 0;
-  width: 100%;
-  max-width: 600px;
-  z-index: 2;
-  position: relative;
-
-  :local(.backgrounded) {
-    filter: blur(1px);
-    opacity: 0.7;
-    pointer-events: none;
-  }
-}
-
-:local(.ui-interactive) {
-  pointer-events: auto;
-  @extend %unselectable;
-}
-
-:local(.in-room-favorite-button) {
-  position: absolute;
-  z-index: 1;
-  bottom: 0;
-  left: 16px;
-  margin: 22px 0;
-  padding: 0;
-  background-color: var(--overlay-button-background-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-  cursor: pointer;
-  border-radius: 24px;
-  font-size: 1.3em;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  outline-style: none;
-  border: 0;
-  width: 43px;
-  height: 43px;
-  color: var(--unfavorited-color);
-
-  @media (max-width: 1080px) {
-    display: none;
-  }
-}
-
-:local(.nag-corner-button) {
-  position: absolute;
-  z-index: 1;
-  bottom: 4px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  height: 80px;
-  pointer-events: none;
-
-  button {
-    @extend %action-button-secondary;
-    margin-right: 12px;
-    margin-left: 12px;
-    white-space: nowrap;
-    border: none;
-    pointer-events: auto;
-  }
-
-  :local(.help-button) {
-    color: var(--menu-icon-color);
-    width: 43px;
-    height: 43px;
-    min-width: auto;
-    font-size: 1.2em;
-  }
-
-  @media (max-width: 1080px) {
-    display: none;
-  }
-}
-
-:local(.object-list) {
-  @extend %drop-menu;
-  @media(max-width: 500px) {
-    top: 184px;
-  }
-  right: 16px;
-}
-
-
-%button-with-count {
-  @extend %unselectable;
-  pointer-events: auto;
-  cursor: pointer;
-  position: absolute;
-  padding: 0px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  background-color: var(--menu-background-color);
-  color: var(--menu-icon-color);
-  border-radius: 24px;
-  border-style: none;
-  border-width: 0px;
-  svg {
-    width: 26px !important;
-    height: 26px;
-  }
-  span {
-    font-size: 22px;
-    font-weight: bold;
-    font-family: 'Open Sans', sans-serif;
-  }
-  @media(min-width: 501px) {
-    width: 90px;
-    min-width: 90px;
-    height: 44px;
-    justify-content: space-evenly;
-  }
-  @media(max-width: 500px) {
-    flex-direction: column;
-    width: 52px;
-    min-width: 52px;
-    height: 72px;
-    justify-content: center;
-  }
-}
-:local(.object-list-button) {
-  @extend %button-with-count;
-
-  @media(min-width: 501px) {
-    top: 20px;
-    right: 122px;
-    justify-content: space-evenly;
-  }
-
-  @media(max-width: 500px) {
-    right: 16px;
-    top: 96px;
-  }
-}
-
-:local(.presence-list-button) {
-  @extend %button-with-count;
-
-  top: 20px;
-  right: 16px;
-}
-
-:local(.presence-info-selected) {
-  color: $action-label-color;
-}
-
-:local(.corner-button) {
-  @extend %unselectable;
-  text-align: right;
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  left: 16px;
-  margin: 20px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3em;
-  color: var(--overlay-button-icon-color);
-  background-color: var(--overlay-button-background-color);
-  border-radius: 24px;
-  font-weight: bold;
-  padding: 10px 12px;
-  pointer-events: auto;
-  cursor: pointer;
-  border: none;
-}
-
-:local(.camera-mode-exit-button) {
-  padding: 10px 14px;
-}
-
-:local(.corner-button-selected) {
-  color: $action-label-color;
-}
-
-:local(.leave-button) {
-  @extend %action-button;
-  position: absolute;
-  z-index: 10;
-  top: 24px;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  pointer-events: auto;
-}
-
-:local(.choose-scene-button) {
-  @extend %action-button-secondary;
-  pointer-events: auto;
-  @media (max-width: 500px) {
-    margin-top: 8px;
-  }
-  @media (min-width: 501px) {
-    margin-top: 16px;
-  }
-}
-
-:local(.invite-tip) {
-  @extend %tip-bubble;
-  width: auto;
-  top: 60px;
-
-  display: none;
-
-  @media (min-height: 450px) {
-    display: flex;
-  }
-
-  :local(.invite-tip-attach-point) {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid $notice-background-color;
-    position: absolute;
-    top: -5px;
-  }
-}
-
 :local(.interstitial) {
   @extend %default-font;
-  background-color: var(--vr-interstitial-background-color);
-  color: var(--vr-interstitial-text-color);
+  background-color: theme.$overlay-bg-color;
+  color: theme.$overlay-text-color;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -329,12 +42,12 @@ body.vr-mode {
 }
 
 :local(.avatar-editor) {
-  position:absolute;
-  background: var(--full-panel-background-color);
-  top: 0;
+  position: fixed;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: theme.$background1-color;
   z-index: 11;
   pointer-events: auto;
 }

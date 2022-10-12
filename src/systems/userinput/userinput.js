@@ -207,25 +207,25 @@ AFRAME.registerSystem("userinput", {
       generation: 0,
       values: {},
       generations: {},
-      get: function(path) {
+      get: function (path) {
         if (this.generations[path] !== this.generation) return undefined;
         return this.values[path];
       },
-      setValueType: function(path, value) {
+      setValueType: function (path, value) {
         this.values[path] = value;
         this.generations[path] = this.generation;
       },
-      setVector2: function(path, a, b) {
+      setVector2: function (path, a, b) {
         const value = this.values[path] || [];
         value[0] = a;
         value[1] = b;
         this.values[path] = value;
         this.generations[path] = this.generation;
       },
-      setPose: function(path, pose) {
+      setPose: function (path, pose) {
         this.setValueType(path, pose);
       },
-      setMatrix4: function(path, mat4) {
+      setMatrix4: function (path, mat4) {
         // Should we assume the incoming mat4 is safe to store instead of copying values?
         const value = this.values[path] || new THREE.Matrix4();
         value.copy(mat4);
@@ -412,12 +412,20 @@ AFRAME.registerSystem("userinput", {
       gamepad && gamepadConnected({ gamepad });
     }
 
-    const retrieveXRGamepads = ({ session }) => {
-      for (const inputSource of session.inputSources) {
+    const retrieveXRGamepads = ({ added, removed }) => {
+      for (const inputSource of removed) {
+        gamepadDisconnected(inputSource);
+      }
+      for (const inputSource of added) {
         inputSource.gamepad.isWebXRGamepad = true;
         inputSource.gamepad.targetRaySpace = inputSource.targetRaySpace;
         inputSource.gamepad.primaryProfile = inputSource.profiles[0];
-        inputSource.gamepad.hand = inputSource.handedness;
+        // inputSource.gamepad.hand is a read-only property and still an experimental property.
+        // We read this property elsewhere. Only Firefox supports this property now.
+        // So we set this property if it's undefined.
+        if (inputSource.gamepad.hand === undefined) {
+          inputSource.gamepad.hand = inputSource.handedness;
+        }
         gamepadConnected(inputSource);
       }
     };
@@ -429,7 +437,9 @@ AFRAME.registerSystem("userinput", {
         xrSession.requestReferenceSpace("local-floor").then(referenceSpace => {
           this.xrReferenceSpace = referenceSpace;
         });
-        retrieveXRGamepads({ session: xrSession });
+        xrSession.addEventListener("end", () => {
+          this.activeDevices.items.filter(d => d.gamepad && d.gamepad.isWebXRGamepad).forEach(gamepadDisconnected);
+        });
       }
       updateBindingsForVRMode();
     });
@@ -460,7 +470,7 @@ AFRAME.registerSystem("userinput", {
     }
   },
 
-  tick2() {
+  tick2(xrFrame) {
     this.frame.generation += 1;
     const registeredMappingsChanged = this.registeredMappingsChanged;
     if (registeredMappingsChanged) {
@@ -506,7 +516,7 @@ AFRAME.registerSystem("userinput", {
     }
 
     for (let i = 0; i < this.activeDevices.items.length; i++) {
-      this.activeDevices.items[i].write(this.frame, this.el.sceneEl, this.xrReferenceSpace);
+      this.activeDevices.items[i].write(this.frame, xrFrame, this.xrReferenceSpace);
     }
 
     for (let i = 0; i < this.sortedBindings.length; i++) {

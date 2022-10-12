@@ -55,6 +55,12 @@ function createHTTPSConfig() {
   }
 }
 
+const threeExamplesDir = path.resolve(__dirname, "node_modules", "three", "examples");
+const basisTranscoderPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.js");
+const dracoWasmWrapperPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_wasm_wrapper.js");
+const basisWasmPath = path.resolve(threeExamplesDir, "js", "libs", "basis", "basis_transcoder.wasm");
+const dracoWasmPath = path.resolve(threeExamplesDir, "js", "libs", "draco", "gltf", "draco_decoder.wasm");
+
 module.exports = (env, argv) => {
   env = env || {};
 
@@ -80,17 +86,34 @@ module.exports = (env, argv) => {
   const defaultHostName = "hubs.local";
   const host = process.env.HOST_IP || defaultHostName;
 
-  // Remove comments from .babelrc
-  const babelConfig = JSON.parse(
-    fs
-      .readFileSync(path.resolve(__dirname, ".babelrc"))
-      .toString()
-      .replace(/\/\/.+/g, "")
-  );
-
+  const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
-    node: {
-      fs: "empty"
+    cache: {
+      type: "filesystem"
+    },
+    resolve: {
+      alias: {
+        // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
+        // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
+        // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
+        // and for example AFRAME.THREE.Object3D !== THREE.Object3D in Hubs code, which breaks many things.
+        three$: path.resolve(__dirname, "./node_modules/three/build/three.module.js"),
+        bitecs$: path.resolve(__dirname, "./node_modules/bitecs/dist/index.mjs"),
+
+        // TODO these aliases are reequired because `three` only "exports" stuff in examples/jsm
+        "three/examples/js/libs/basis/basis_transcoder.js": basisTranscoderPath,
+        "three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js": dracoWasmWrapperPath,
+        "three/examples/js/libs/basis/basis_transcoder.wasm": basisWasmPath,
+        "three/examples/js/libs/draco/gltf/draco_decoder.wasm": dracoWasmPath
+      },
+      // Allows using symlinks in node_modules
+      symlinks: false,
+      fallback: {
+        fs: false,
+        buffer: require.resolve("buffer/"),
+        stream: require.resolve("stream-browserify"),
+        path: require.resolve("path-browserify")
+      }
     },
     entry: {
       admin: path.join(__dirname, "src", "admin.js")
@@ -101,27 +124,26 @@ module.exports = (env, argv) => {
     },
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
-      https: createHTTPSConfig(),
+      client: {
+        overlay: {
+          errors: true,
+          warnings: false
+        }
+      },
+      server: {
+        type: "https",
+        options: createHTTPSConfig()
+      },
       host: process.env.HOST_IP || "0.0.0.0",
       port: process.env.PORT || "8989",
-      public: `${host}:${process.env.PORT || "8989"}`,
-      useLocalIp: true,
-      allowedHosts: [host],
+      allowedHosts: [host, internalHostname],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
-      before: function(app) {
+      setupMiddlewares: (middlewares, { app }) => {
         // be flexible with people accessing via a local reticulum on another port
         app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
-        // networked-aframe makes HEAD requests to the server for time syncing. Respond with an empty body.
-        app.head("*", function(req, res, next) {
-          if (req.method === "HEAD") {
-            res.append("Date", new Date().toGMTString());
-            res.send("");
-          } else {
-            next();
-          }
-        });
+        return middlewares;
       }
     },
     performance: {
@@ -134,23 +156,48 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.html$/,
-          loader: "html-loader"
+          loader: "html-loader",
+          options: {
+            minimize: false // This is handled by HTMLWebpackPlugin
+          }
+        },
+        // Some JS assets are loaded at runtime and should be copied unmodified and loaded using file-loader
+        {
+          test: [basisTranscoderPath, dracoWasmWrapperPath],
+          loader: "file-loader",
+          options: {
+            outputPath: "assets/raw-js",
+            name: "[name]-[contenthash].[ext]"
+          }
         },
         {
           test: /\.js$/,
           loader: "babel-loader",
-          options: babelConfig,
-          exclude: function(modulePath) {
+          options: require("../babel.config"),
+          exclude: function (modulePath) {
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }
         },
         {
+          // We use babel to handle typescript so that features are correctly polyfilled for our targeted browsers. It also ends up being
+          // a good deeal faster since it just strips out types. It does NOT typecheck. Typechecking is only done at build and (ideally) in your editor.
+          test: /\.tsx?$/,
+          loader: "babel-loader",
+          options: require("../babel.config"),
+          include: [path.resolve(__dirname, "src")],
+          exclude: function (modulePath) {
+            return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+          }
+        },
+        // TODO worker-loader has been deprecated, but we need "inline" support which is not available yet
+        // ideally instead of inlining workers we should serve them off the root domain instead of CDN.
+        {
           test: /\.worker\.js$/,
           loader: "worker-loader",
           options: {
-            name: "assets/js/[name]-[hash].js",
+            filename: "assets/js/[name]-[contenthash].js",
             publicPath: "/",
-            inline: true
+            inline: "no-fallback"
           }
         },
         {
@@ -162,9 +209,12 @@ module.exports = (env, argv) => {
             {
               loader: "css-loader",
               options: {
-                name: "[path][name]-[hash].[ext]",
-                localIdentName: "[name]__[local]__[hash:base64:5]",
-                camelCase: true
+                modules: {
+                  localIdentName: "[name]__[local]__[hash:base64:5]",
+                  exportLocalsConvention: "camelCase",
+                  // TODO we ideally would be able to get rid of this but we have some global styles and many :local's that would become superfluous
+                  mode: "global"
+                }
               }
             },
             "sass-loader"
@@ -175,14 +225,28 @@ module.exports = (env, argv) => {
           use: { loader: "raw-loader" }
         },
         {
-          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|svg|webm)$/,
-          use: {
-            loader: "file-loader",
-            options: {
-              // move required assets to output dir and add a hash for cache busting
-              name: "[path][name]-[hash].[ext]",
-              // Make asset paths relative to /src
-              context: path.join(__dirname, "src")
+          test: /\.(png|jpg|gif|glb|ogg|mp3|mp4|wav|woff2|webm)$/,
+          type: "asset/resource",
+          generator: {
+            // move required assets to output dir and add a hash for cache busting
+            // Make asset paths relative to /src
+            filename: function ({ filename }) {
+              let rootPath = path.dirname(filename) + path.sep;
+              if (rootPath.startsWith("src" + path.sep)) {
+                const parts = rootPath.split(path.sep);
+                parts.shift();
+                rootPath = parts.join(path.sep);
+              }
+
+              if (rootPath.startsWith("node_modules" + path.sep + "hubs" + path.sep + "src" + path.sep)) {
+                const parts = rootPath.split(path.sep);
+                parts.shift();
+                parts.shift();
+                parts.shift();
+                rootPath = parts.join(path.sep);
+              }
+              // console.log(path, name, contenthash, ext);
+              return rootPath + "[name]-[contenthash].[ext]";
             }
           }
         },
@@ -193,30 +257,42 @@ module.exports = (env, argv) => {
             loader: "file-loader",
             options: {
               outputPath: "assets/wasm",
-              name: "[name]-[hash].[ext]"
+              name: "[name]-[contenthash].[ext]"
             }
           }
         }
       ]
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        // TODO we should bee direclty importing THREE stuff when we need it
+        process: "process/browser",
+        THREE: "three",
+        Buffer: ["buffer", "Buffer"]
+      }),
       new HTMLWebpackPlugin({
         filename: "admin.html",
-        template: path.join(__dirname, "src", "admin.html")
-      }),
-      new CopyWebpackPlugin([
-        {
-          from: "src/assets/images/favicon.ico",
-          to: "favicon.ico"
+        template: path.join(__dirname, "src", "admin.html"),
+        scriptLoading: "blocking",
+        minify: {
+          removeComments: false
         }
-      ]),
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/assets/images/favicon.ico",
+            to: "favicon.ico"
+          }
+        ]
+      }),
       // Extract required css and add a content hash.
       new MiniCssExtractPlugin({
-        filename: "assets/stylesheets/[name]-[contenthash].css",
-        disable: argv.mode !== "production"
+        filename: "assets/stylesheets/[name]-[contenthash].css"
       }),
       // Define process.env variables in the browser context.
       new webpack.DefinePlugin({
+        "process.browser": true,
         "process.env": JSON.stringify({
           NODE_ENV: argv.mode,
           BUILD_VERSION: process.env.BUILD_VERSION,
@@ -224,7 +300,9 @@ module.exports = (env, argv) => {
           ITA_SERVER: process.env.ITA_SERVER,
           RETICULUM_SERVER: process.env.RETICULUM_SERVER,
           CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
-          POSTGREST_SERVER: process.env.POSTGREST_SERVER
+          POSTGREST_SERVER: process.env.POSTGREST_SERVER,
+          UPLOADS_HOST: process.env.UPLOADS_HOST,
+          BASE_ASSETS_PATH: process.env.BASE_ASSETS_PATH
         })
       })
     ]

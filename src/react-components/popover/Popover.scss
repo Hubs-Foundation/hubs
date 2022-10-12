@@ -1,0 +1,140 @@
+@use "../styles/theme";
+
+:local(.popover) {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  background-color: theme.$background1-color;
+  border: 1px solid theme.$border1-color;
+  min-width: 160px;
+  z-index: 10;
+  max-height: calc(100vh - 200px);
+
+  :local(.content) {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  &[data-popper-placement^=bottom] {
+    :local(.content) {
+      padding-top: 8px;
+    }
+
+    :local(.arrow) {
+      margin-top: -9px;
+
+      svg {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  &[data-popper-placement^=top] {
+    :local(.content) {
+      padding-bottom: 8px;
+    }
+
+    :local(.arrow) {
+      bottom: -9px;
+    }
+  }
+
+  &[data-popper-placement^=right] {
+    :local(.content) {
+      padding-left: 8px;
+    }
+
+    :local(.arrow) {
+      left: -16px;
+
+      svg {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  &[data-popper-placement^=left] {
+    :local(.content) {
+      padding-right: 8px;
+    }
+
+    :local(.arrow) {
+      right: -16px;
+
+      svg {
+        transform: rotate(270deg);
+      }
+    }
+  }
+}
+
+:local(.header) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 8px;
+  height: 48px;
+  position: relative;
+  flex-shrink: 0;
+
+  h5 {
+    display: flex
+  }
+
+  button {
+    position: absolute;
+    left: 8px;
+    border: none;
+    background-color: transparent;
+
+    &:hover * {
+      color: theme.$link-color-hover;
+    }
+
+    &:active * {
+      color: theme.$link-color-pressed;
+    }
+  }
+}
+
+:local(.arrow) {
+  position: absolute;
+}
+
+:local(.arrow-bg) {
+  color: theme.$background1-color;
+}
+
+:local(.arrow-border) {
+  color: theme.$border1-color;
+}
+
+:local(.fullscreen) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  border-width: 0;
+  border-radius: 0;
+  z-index: 10;
+  max-height: none;
+
+  :local(.header) {
+    border-bottom: 1px solid theme.$border1-color;
+
+    button {
+      left: 16px;
+    }
+  }
+
+  :local(.content) {
+    padding: 0;
+    height: 100%;
+    overflow-y: auto;
+  }
+}
+
+:local(.fullscreen-body) {
+  overflow: hidden;
+}

@@ -25,8 +25,5 @@ AFRAME.registerComponent("set-unowned-body-kinematic", {
       type: "kinematic",
       collisionFilterMask: COLLISION_LAYERS.UNOWNED_INTERACTABLE
     });
-    if (this.el.components["floaty-object"]) {
-      this.el.components["floaty-object"].locked = true;
-    }
   }
 });

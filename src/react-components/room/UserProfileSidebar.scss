@@ -1,0 +1,26 @@
+@use "../styles/theme.scss";
+
+:local(.avatar-preview-container) {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: center;
+
+  /* TODO: This styling into AvatarPreview */
+  & > :first-child {
+    width: 168px;
+    height: 300px;
+    min-height: 300px;
+    border-radius: 8px;
+    background-color: theme.$tile-bg-color;
+  }
+}
+
+:local(.slider-container) {
+  display: flex;
+  flex-direction: row;
+}
+
+:local(.slider-input-container) {
+  width: 209px;
+}

@@ -1,6 +1,6 @@
 import { getPromotionTokenForFile } from "../utils/media-utils";
 import { SOUND_PIN } from "../systems/sound-effects-system";
-import { applyThemeToTextButton } from "../utils/theme";
+import { onThemeChanged, applyThemeToTextButton } from "../utils/theme";
 
 AFRAME.registerComponent("pin-networked-object-button", {
   schema: {
@@ -42,11 +42,13 @@ AFRAME.registerComponent("pin-networked-object-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) return;
 
       const wasPinned = this.targetEl.components.pinnable && this.targetEl.components.pinnable.data.pinned;
-      this.targetEl.setAttribute("pinnable", "pinned", !wasPinned);
+      window.APP.pinningHelper.setPinned(this.targetEl, !wasPinned);
       if (!wasPinned) {
         this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIN);
       }
     };
+
+    this.removeThemeChangedListener = onThemeChanged(this._updateUI);
   },
 
   play() {
@@ -69,6 +71,8 @@ AFRAME.registerComponent("pin-networked-object-button", {
       this.targetEl.removeEventListener("pinned", this._updateUI);
       this.targetEl.removeEventListener("unpinned", this._updateUI);
     }
+
+    this.removeThemeChangedListener();
   },
 
   _discordBridges() {

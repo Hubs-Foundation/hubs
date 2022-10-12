@@ -1,0 +1,26 @@
+@use "../styles/theme.scss";
+
+:local(.social-bar-container) {
+    display: none;
+   
+    @media(min-width: theme.$breakpoint-lg) {
+        display: flex;
+        justify-content: space-around;
+        width: 169px;
+        align-items: center;
+        margin-bottom: 2em !important;
+      }
+}
+
+:local(.mobile-social-bar) {
+    display: flex;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    width: 250px;
+    justify-content: space-between;
+    align-items: center;
+
+    @media(min-width: theme.$breakpoint-lg) {
+      display: none;
+    }
+  }

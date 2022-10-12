@@ -1,5 +1,5 @@
 :local(.support-main) {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   z-index: 10000;
   position: absolute;
   width: 100%;
@@ -14,16 +14,16 @@
 }
 
 :local(.support-content) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   text-align: center;
+  margin: 1em;
   a {
     font-size: smaller;
     color: white;
   }
   input {
     width: 15em;
+    background: white;
+    color: black;
     font-size: 12pt;
     padding: 0.4em;
     border-radius: 10px;
@@ -33,11 +33,14 @@
     margin-left: 0.5em;
     font-size: 12pt;
   }
-}
-
-:local(.logo) {
-  max-width: 250px;
-  filter: drop-shadow(0 0 4px #888);
+  :local(.unsupported-langs) {
+    span {
+      white-space: nowrap;
+    }
+  }
+  table {
+    margin: auto;
+  }
 }
 
 :local(.details) {

@@ -216,7 +216,7 @@ AFRAME.registerComponent("position-at-border", {
       }
       if (this.data.scale) {
         const distanceToCenter = centerToCamera.subVectors(cameraPosition, desiredCenterPoint).length();
-        desiredTargetScale.setScalar(THREE.Math.clamp(0.45 * distanceToCenter, MIN_SCALE, MAX_SCALE));
+        desiredTargetScale.setScalar(THREE.MathUtils.clamp(0.45 * distanceToCenter, MIN_SCALE, MAX_SCALE));
       } else {
         desiredTargetScale.setFromMatrixScale(this.target.matrixWorld);
       }

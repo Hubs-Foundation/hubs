@@ -1,0 +1,82 @@
+@use "../styles/theme.scss";
+
+:local(.column) {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  flex-basis: auto;
+}
+
+:local(.xs-gap) > * {
+  margin-bottom: theme.$spacing-xs;
+}
+
+:local(.sm-gap) > * {
+  margin-bottom: theme.$spacing-sm;
+}
+
+:local(.md-gap) > * {
+  margin-bottom: theme.$spacing-md;
+}
+
+:local(.lg-gap) > * {
+  margin-bottom: theme.$spacing-lg;
+}
+
+:local(.xl-gap) > * {
+  margin-bottom: theme.$spacing-xl;
+}
+
+:local(.xs-padding) {
+  padding: theme.$spacing-xs;
+}
+
+:local(.sm-padding) {
+  padding: theme.$spacing-sm;
+}
+
+:local(.md-padding) {
+  padding: theme.$spacing-md;
+}
+
+:local(.lg-padding) {
+  padding: theme.$spacing-lg;
+}
+
+:local(.xl-padding) {
+  padding: theme.$spacing-xl;
+}
+
+:local(.center) {
+  align-items: center;
+  text-align: center;
+}
+
+:local(.center-vertical) {
+  justify-content: center;
+}
+
+:local(.center-md) {
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    align-items: center;
+    text-align: center;
+  }
+}
+
+:local(.center-vertical-md) {
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    justify-content: center;
+  }
+}
+
+:local(.grow) {
+  flex-grow: 1;
+}
+
+:local(.overflow) {
+  overflow-y: auto;
+}
+
+:local(.margin-0-last-child) > :last-child {
+  margin-bottom: 0;
+}

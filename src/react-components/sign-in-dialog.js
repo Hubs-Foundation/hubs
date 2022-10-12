@@ -117,7 +117,7 @@ export default class SignInDialog extends Component {
       return (
         <div>
           <p>
-            <FormattedMessage className="preformatted" id="sign-in.oidc-auth-started" />
+            <FormattedMessage className="preformatted" id="sign-in.oidc-auth-started" defaultMessage="Waiting for signin..."/>
           </p>
         </div>
       );

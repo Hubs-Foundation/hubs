@@ -1,0 +1,28 @@
+@use "../styles/theme.scss";
+
+:local(.object) {
+  font-size: theme.$font-size-sm;
+
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  svg {
+    color: theme.$text1-color;
+  }
+}
+
+:local(.no-objects) {
+  text-align: center;
+  list-style: none;
+  margin-top: 20px;
+
+  p {
+    margin: 20px;
+    color: theme.$text2-color;
+  }
+}

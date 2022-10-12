@@ -1,6 +1,7 @@
 import { Socket } from "phoenix";
 import { generateHubName } from "../utils/name-generation";
 import configs from "../utils/configs";
+import { sleep } from "../utils/async-utils";
 
 import Store from "../storage/store";
 
@@ -12,7 +13,7 @@ export function isLocalClient() {
   return hasReticulumServer() && document.location.host !== configs.RETICULUM_SERVER;
 }
 
-export function hubUrl(hubId) {
+export function hubUrl(hubId, extraParams, slug) {
   if (!hubId) {
     if (isLocalClient()) {
       hubId = new URLSearchParams(location.search).get("hub_id");
@@ -20,7 +21,23 @@ export function hubUrl(hubId) {
       hubId = location.pathname.split("/")[1];
     }
   }
-  return new URL(isLocalClient() ? `/hub.html?hub_id=${hubId}` : `/${hubId}`, location.href);
+
+  let url;
+  if (isLocalClient()) {
+    url = new URL(`/hub.html`, location.href);
+    url.searchParams.set("hub_id", hubId);
+  } else {
+    const maybeSlug = slug ? `/${slug}` : "";
+    url = new URL(`/${hubId}${maybeSlug}`, location.href);
+  }
+
+  for (const key in extraParams) {
+    if (extraParams.hasOwnProperty(key)) {
+      url.searchParams.set(key, extraParams[key]);
+    }
+  }
+
+  return url;
 }
 
 const resolverLink = document.createElement("a");
@@ -36,6 +53,18 @@ export function getReticulumFetchUrl(path, absolute = false, host = null, port =
   } else {
     return path;
   }
+}
+
+export function getUploadsUrl(path, absolute = false, host = null, port = null) {
+  // If the Hubs Cloud stack is configured to use Cloudflare, we need to ignore the configured UPLOADS_HOST
+  // since reticulum will only serve uploads via the Cloudflare worker. BASE_ASSETS_PATH will have been
+  // correctly configured to use the Cloudflare worker, though we only need the hostname,
+  // not the full assets URL.
+  const isUsingCloudflare = configs.BASE_ASSETS_PATH.includes("workers.dev");
+  const uploadsHost = isUsingCloudflare ? new URL(configs.BASE_ASSETS_PATH).hostname : configs.UPLOADS_HOST;
+  return uploadsHost
+    ? `https://${uploadsHost}${port ? `:${port}` : ""}${path}`
+    : getReticulumFetchUrl(path, absolute, host, port);
 }
 
 export async function getReticulumMeta() {
@@ -241,6 +270,20 @@ export function getPresenceProfileForSession(presences, sessionId) {
   return (getPresenceEntryForSession(presences, sessionId) || {}).profile || {};
 }
 
+function migrateBindings(oldChannel, newChannel) {
+  const doNotDuplicate = ["phx_close", "phx_error", "phx_reply", "presence_state", "presence_diff"];
+  const shouldDuplicate = event => {
+    return !event.startsWith("chan_reply_") && !doNotDuplicate.includes(event);
+  };
+  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
+    const item = oldChannel.bindings[i];
+    if (shouldDuplicate(item.event)) {
+      newChannel.bindings.push(item);
+    }
+  }
+  newChannel.bindingRef = oldChannel.bindingRef;
+}
+
 // Takes the given channel, and creates a new channel with the same bindings
 // with the given socket, joins it, and leaves the old channel after joining.
 //
@@ -249,10 +292,7 @@ export function getPresenceProfileForSession(presences, sessionId) {
 export function migrateChannelToSocket(oldChannel, socket, params) {
   const channel = socket.channel(oldChannel.topic, params || oldChannel.params);
 
-  for (let i = 0, l = oldChannel.bindings.length; i < l; i++) {
-    const item = oldChannel.bindings[i];
-    channel.on(item.event, item.callback);
-  }
+  migrateBindings(oldChannel, channel);
 
   for (let i = 0, l = oldChannel.pushBuffer.length; i < l; i++) {
     const item = oldChannel.pushBuffer[i];
@@ -276,6 +316,24 @@ export function migrateChannelToSocket(oldChannel, socket, params) {
   });
 }
 
+export function migrateToChannel(oldChannel, newChannel) {
+  migrateBindings(oldChannel, newChannel);
+
+  return new Promise((resolve, reject) => {
+    newChannel
+      .join()
+      .receive("ok", data => {
+        oldChannel.leave();
+        oldChannel.bindings = [];
+        resolve(data);
+      })
+      .receive("error", data => {
+        newChannel.leave();
+        reject(data);
+      });
+  });
+}
+
 export function discordBridgesForPresences(presences) {
   const channels = [];
   for (const p of Object.values(presences)) {
@@ -287,3 +345,78 @@ export function discordBridgesForPresences(presences) {
   }
   return channels;
 }
+
+export function hasEmbedPresences(presences) {
+  for (const p of Object.values(presences)) {
+    for (const m of p.metas) {
+      if (m.context && m.context.embed) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+export function denoisePresence({ onJoin, onLeave, onChange }) {
+  return {
+    rawOnJoin: (key, beforeJoin, afterJoin) => {
+      if (beforeJoin === undefined) {
+        onJoin(key, afterJoin.metas[0]);
+      }
+    },
+    rawOnLeave: (key, remaining, removed) => {
+      if (remaining.metas.length === 0) {
+        onLeave(key, removed.metas[0]);
+      } else {
+        onChange(key, removed.metas[removed.metas.length - 1], remaining.metas[remaining.metas.length - 1]);
+      }
+    }
+  };
+}
+
+export function presenceEventsForHub(events) {
+  const onJoin = (key, meta) => {
+    events.trigger(`hub:join`, { key, meta });
+  };
+  const onLeave = (key, meta) => {
+    events.trigger(`hub:leave`, { key, meta });
+  };
+  const onChange = (key, previous, current) => {
+    events.trigger(`hub:change`, { key, previous, current });
+  };
+  return {
+    onJoin,
+    onLeave,
+    onChange
+  };
+}
+
+export const tryGetMatchingMeta = async ({ ret_pool, ret_version }, shouldAbandonMigration) => {
+  const backoffMS = 5000;
+  const randomMS = 15000;
+  const maxAttempts = 10;
+  let didMatchMeta = false;
+  let attempt = 0;
+  while (!didMatchMeta && attempt < maxAttempts && !shouldAbandonMigration()) {
+    try {
+      // Add randomness to the first request avoid flooding reticulum.
+      const delayMS = attempt * backoffMS + (attempt === 0 ? Math.random() * randomMS : 0);
+      console.log(
+        `[reconnect] Getting reticulum meta in ${Math.ceil(delayMS / 1000)} seconds.${
+          attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""
+        }`
+      );
+      await sleep(delayMS);
+      invalidateReticulumMeta();
+      console.log(`[reconnect] Getting reticulum meta.${attempt ? ` (Attempt ${attempt + 1} of ${maxAttempts})` : ""}`);
+      const { pool, version } = await getReticulumMeta();
+      didMatchMeta = ret_pool === pool && ret_version === version;
+    } catch {
+      didMatchMeta = false;
+    }
+
+    attempt = attempt + 1;
+  }
+  return didMatchMeta;
+};

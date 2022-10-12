@@ -1,0 +1,81 @@
+@use './theme';
+
+:local(.hide-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
+    display: none !important;
+  }
+}
+
+:local(.show-lg) {
+  @media (max-width: theme.$breakpoint-lg - 1px) {
+    display: none !important;
+  }
+}
+
+:local(.margin-0) {
+  margin: 0px !important;
+}
+
+:local(.textError) {
+  color: theme.$red
+}
+
+$spacing: (
+    "2xs": theme.$spacing-2xs,
+    "xs": theme.$spacing-xs,
+    "sm": theme.$spacing-sm,
+    "md": theme.$spacing-md,
+    "lg": theme.$spacing-lg,
+    "xl": theme.$spacing-xl
+);
+
+@each $size, $theme-spacing in $spacing {
+    // .xs-margin-y // xsMarginY
+    :local(.#{$size}-margin-y) {
+      margin-bottom: $theme-spacing;
+      margin-top: $theme-spacing;
+    }
+
+    // .xs-margin-r // xsMarginR
+    :local(.#{$size}-margin-r) {
+      margin-right: $theme-spacing;
+    }
+
+    // .xs-margin-l // xsMarginL
+    :local(.#{$size}-margin-l) {
+      margin-left: $theme-spacing;
+    }
+
+    // .xs-margin-bottom // xsMarginBottom
+    :local(.#{$size}-margin-bottom) {
+      margin-bottom: $theme-spacing;
+    }
+    // .xs-margin-top // xsMarginTop
+    :local(.#{$size}-margin-top) {
+      margin-top: $theme-spacing;
+    }
+
+    // .xs-padding // xsPadding
+    :local(.#{$size}-padding) {
+      padding: $theme-spacing;
+    }
+
+    // .xs-wrap-margin
+    // Used for row responsiveness, adds margins to wrapped content but not the first row
+    :local(.#{$size}-wrap-margin) {
+      margin-top: -$theme-spacing;
+    }
+    :local(.#{$size}-wrap-margin) > * {
+      margin-top: $theme-spacing;
+    }
+}
+
+// flex-basis 10% to 90%
+@for $i from 1 to 9 {
+  $percent: percentage($number: calc($i/10));
+  // .flex-basis-10 // flexBasis10
+  :local(.flex-basis-#{$i}0) {
+    flex-basis: $percent;
+  }
+}
+

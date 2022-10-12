@@ -10,6 +10,8 @@ AFRAME.registerComponent("loop-animation", {
     /* DEPRECATED: Use activeClipIndex instead since animation names are not unique */
     clip: { type: "string", default: "" },
     activeClipIndex: { type: "int", default: 0 },
+    startOffset: { type: "number", default: 0 },
+    timeScale: { type: "number", default: 1 },
     activeClipIndices: { type: "array" }
   },
 
@@ -53,7 +55,16 @@ AFRAME.registerComponent("loop-animation", {
     } else {
       // Support for old Spoke->Hubs { clipName, activeClipIndex } struct. Still used for Blender imports.
       if (clipName !== "") {
-        clips = clipName.split(",").map(n => animations.find(({ name }) => name === n));
+        const clipNames = clipName.split(",");
+        for (let i = 0; i < clipNames.length; i++) {
+          const n = clipNames[i];
+          const a = animations.find(({ name }) => name === n);
+          if (a) {
+            clips.push(a);
+          } else {
+            console.warn(`Could not find animation named '${n}' in ${this.el.className}`);
+          }
+        }
       } else {
         clips = [animations[activeClipIndex]];
       }
@@ -66,6 +77,8 @@ AFRAME.registerComponent("loop-animation", {
     for (let i = 0; i < clips.length; i++) {
       const action = mixer.clipAction(clips[i], this.el.object3D);
       action.enabled = true;
+      action.time = this.data.startOffset;
+      action.timeScale = this.data.timeScale;
       action.setLoop(THREE.LoopRepeat, Infinity).play();
       this.currentActions.push(action);
     }

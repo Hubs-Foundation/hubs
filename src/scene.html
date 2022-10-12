@@ -9,7 +9,8 @@
 
     <link rel="shortcut icon" type="image/png" href="/favicon.ico">
     <title>Scene</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Google Analytics -->
     <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
     <script>
@@ -27,23 +28,15 @@
 
     <a-scene
         loading-screen="enabled: false"
-        renderer="
-            antialias: true;
-            gammaOutput: true;
-            sortObjects: true;
-            physicallyCorrectLights: true;
-            colorManagement: true;
-            alpha: false;"
         shadow="type: pcfsoft;autoUpdate: false"
         light="defaultLightsEnabled: false"
-        environment-map
     >
         <a-entity
             id="scene-root"
             static-body="shape: none;"
         ></a-entity>
 
-        <a-camera id="camera" fov="80" near="0.05" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
+        <a-entity id="camera" inject-main-camera-here></a-entity>
     </a-scene>
 
     <div id="ui-root"></div>

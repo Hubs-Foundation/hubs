@@ -1,0 +1,373 @@
+@use "../styles/theme.scss";
+
+:local(.down_arrow) {
+  transform: rotate(180deg);
+}
+
+:local(.banner_wrapper) {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(#000000, 0.3);
+  order: -2;
+  background-color: #ffffff;
+}
+
+:local(.primary_override) {
+  background: #1700C7;
+  border: 2px solid #1700C7;
+  border-radius: 20px;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 24px;
+  min-height: 40px;
+  height: 40px;
+
+  &:hover:enabled {
+    background-color: #170696;
+    border: solid 2px #170696;
+  }
+
+  &:focus {
+    border: solid 2px #140968;
+    background-color: #140968;
+  }
+
+  &:disabled,
+  &[disabled] {
+    background-color: #BABBBC;
+    border: solid 2px #BABBBC;
+    color: #ffffff;
+  }
+}
+
+:local(.clear_override) {
+  background-color: transparent;
+  border: 0;
+  border-radius: 20px;
+  color: #1700C7;
+  min-height: 40px;
+  height: 40px;
+  line-height: 24px;
+
+  &:hover:enabled {
+    background-color: #E8EFFD;
+    border: solid 2px #E8EFFD;
+    color: #170696;
+  }
+
+  &:focus {
+    background-color: #CBD8F0;
+    border: solid 2px #CBD8F0;
+    color: #140968;
+  }
+
+  &:disabled,
+  &[disabled] {
+    background-color: transparent;
+    border: solid 2px #E7E7E7;
+    color: #8F8F8F;
+  }
+}
+
+:local(.banner_container) {
+  max-width: 960px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: left;
+  flex-direction: column;
+  padding: 16px;
+
+  @media(min-width: theme.$breakpoint-md) {
+    align-items: center;
+    flex-direction: row;
+    padding: 16px 0;
+    margin: 0 16px;
+  }
+
+  @media(min-width: theme.$breakpoint-xl) {
+    max-width: 1140px;
+  }
+}
+
+:local(.branding_container) {
+  margin-bottom: 16px;
+
+  h2 {
+    margin-bottom: 4px;
+    font-family: 'Space Grotesk';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 31px;
+    color: #000000;
+  }
+
+  p {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150% !important;
+    color: #000000;
+  }
+
+  @media(min-width: theme.$breakpoint-md) {
+    margin-bottom: 0px;
+  }
+}
+
+:local(.logo) {
+  width: 80px;
+  margin-bottom: 10px;
+}
+
+:local(.expand_wrapper) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgba(#000000, 0.3);
+  z-index: 2;
+  padding: 24px 0 40px;
+  display: flex;
+  justify-content: center;
+
+  @media(min-width: theme.$breakpoint-md) {
+    padding: 48px 0 70px;
+  }
+}
+
+:local(.banner_gradient) {
+  order: -3;
+  padding: 4px;
+  background: radial-gradient(147.61% 1186.51% at 110.24% -15.63%, #FF806F 36.82%, #FFFF98 100%)
+}
+
+:local(.radio_override) {
+  margin-bottom: 0;
+
+  input {
+    background-color: #ffffff;
+  }
+
+  input:after {
+    background-color: #ffffff;
+  }
+
+  input:checked:after,
+  input:checked:hover:after {
+    background-color: #170696;
+  }
+
+  span {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    color: #000000;
+  }
+}
+
+:local(.expand_container) {
+  max-width: 960px;
+}
+
+:local(.expand_header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 24px;
+
+  h2 {
+    font-family: 'Space Grotesk';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    color: #000000;
+
+    @media(min-width: theme.$breakpoint-lg) {
+      font-size: 40px;
+    }
+  }
+
+  @media(min-width: theme.$breakpoint-lg) {
+    margin-bottom: 24px;
+    padding: 0 24px;
+  }
+
+}
+
+:local(.close_button) {
+  color: #000000 !important;
+}
+
+:local(.expand_contents) {
+  display: flex;
+  flex-direction: column;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    flex-direction: row;
+  }
+}
+
+:local(.checkbox_label) {
+  margin-left: 0 !important;
+}
+
+:local(.expand_form) {
+  display: flex;
+  justify-content: center;
+}
+
+:local(.expand_messaging) {
+  p:first-child {
+    margin-bottom: 14px;
+  }
+}
+
+:local(.expand_messaging),
+:local(.expand_form) {
+
+  &>p {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    color: #000000;
+  }
+
+  padding: 14px 24px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    padding: 0 24px;
+    width: 50%;
+  }
+
+}
+
+:local(.expand_form_fields) {
+  width: 300px;
+
+  @media(min-width: theme.$breakpoint-md) {
+    width: initial;
+  }
+}
+
+
+:local(.expand_actions) {
+  display: flex;
+
+  button[type="submit"] {
+    margin-right: 10px;
+  }
+}
+
+:local(.expand_form_field) {
+  margin-bottom: 24px;
+
+  &>div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  label {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    color: #000000;
+  }
+
+  input {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    color: #000000;
+
+    &::placeholder {
+      color: #AAAAAA;
+    }
+  }
+}
+
+:local(.expand_checkbox_field) {
+  margin-bottom: 40px;
+
+  &>div {
+    background-color: #ffffff !important;
+    border-color: #1700C7 !important;
+  }
+
+
+  & p {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    color: #000000;
+    line-height: 150% !important;
+
+    a {
+      color: #1700C7;
+      text-decoration: underline;
+    }
+  }
+}
+
+:local(.message_wrapper) {
+  display: flex;
+}
+
+:local(.error_icon) {
+  margin-right: 20px;
+  height: 32px;
+  width: 32px;
+}
+
+:local(.message_title) {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 36px;
+  margin-bottom: 16px;
+  color: #000000;
+}
+
+:local(.error_message_title) {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 26px;
+  margin-bottom: 8px;
+  color: #D32947;
+}
+
+:local(.message_body) {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150% !important;
+  margin-bottom: 16px;
+  width: 220px;
+  color: #000000;
+}
+
+:local(.success_image) {
+  height: 75px;
+  width: 75px;
+  margin-right: 20px;
+
+  @media(min-width: theme.$breakpoint-sm) {
+    height: 134px;
+    width: 134px;
+  }
+}

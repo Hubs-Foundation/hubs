@@ -1,0 +1,15 @@
+@use "../styles/theme.scss";
+
+:local(.spinner) {
+  animation: rotate 3s infinite linear;
+  color: theme.$primary-color;
+
+  @keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+  }
+}

@@ -1,18 +1,16 @@
-import "./webxr-bypass-hacks";
 import "./utils/theme";
 import "./utils/configs";
 
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
+import "./react-components/styles/global.scss";
 import "./assets/stylesheets/scene.scss";
 
 import "aframe";
+import "networked-aframe/src/index";
 import "./utils/logging";
-import "./utils/threejs-world-update";
 import { patchWebGLRenderingContext } from "./utils/webgl";
 patchWebGLRenderingContext();
-
-import "three/examples/js/loaders/GLTFLoader";
 
 import "./components/scene-components";
 import "./components/debug";
@@ -28,8 +26,9 @@ import { disableiOSZoom } from "./utils/disable-ios-zoom";
 
 import "./systems/scene-systems";
 import "./gltf-component-mappings";
+import { EnvironmentSystem } from "./systems/environment-system";
 
-import { App } from "./App";
+import { App } from "./app";
 
 window.APP = new App();
 
@@ -38,22 +37,31 @@ const qs = new URLSearchParams(location.search);
 import "./components/event-repeater";
 
 import registerTelemetry from "./telemetry";
+import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import { ThemeProvider } from "./react-components/styles/theme";
 
 disableiOSZoom();
 
 function mountUI(scene, props = {}) {
   ReactDOM.render(
-    <SceneUI
-      {...{
-        scene,
-        ...props
-      }}
-    />,
+    <WrappedIntlProvider>
+      <ThemeProvider store={window.APP.store}>
+        <SceneUI
+          {...{
+            scene,
+            store: window.APP.store,
+            ...props
+          }}
+        />
+      </ThemeProvider>
+    </WrappedIntlProvider>,
     document.getElementById("ui-root")
   );
 }
 
 const onReady = async () => {
+  console.log("Scene is ready");
+
   const scene = document.querySelector("a-scene");
   window.APP.scene = scene;
 
@@ -94,17 +102,25 @@ const onReady = async () => {
     });
   });
 
+  const envSystem = new EnvironmentSystem(scene);
+
   sceneModelEntity.addEventListener("environment-scene-loaded", () => {
     remountUI({ sceneLoaded: true });
     const previewCamera = gltfEl.object3D.getObjectByName("scene-preview-camera");
 
     if (previewCamera) {
+      console.log("Setting up preview camera");
       camera.object3D.position.copy(previewCamera.position);
       camera.object3D.rotation.copy(previewCamera.rotation);
       camera.object3D.matrixNeedsUpdate = true;
+    } else {
+      console.warn("No preview camera found");
     }
 
     camera.setAttribute("scene-preview-camera", "");
+
+    const environmentEl = sceneModelEntity.childNodes[0];
+    envSystem.updateEnvironment(environmentEl);
   });
 
   const res = await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneId}`);

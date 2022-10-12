@@ -1,5 +1,10 @@
-import { CYLINDER_TEXTURE } from "./cylinder-texture";
+import { cylinderTextureSrc } from "./cylinder-texture";
 import { SOUND_TELEPORT_START, SOUND_TELEPORT_END } from "../systems/sound-effects-system";
+import { getMeshes } from "../utils/aframe-utils";
+
+import { textureLoader } from "../utils/media-utils";
+
+const CYLINDER_TEXTURE = textureLoader.load(cylinderTextureSrc);
 
 function easeIn(t) {
   return t * t;
@@ -10,64 +15,108 @@ function easeOutIn(t) {
   return 0.5 * (t = t * 2 - 1) * t * t + 0.5;
 }
 
-const RayCurve = function(numPoints, width) {
-  this.geometry = new THREE.BufferGeometry();
-  this.vertices = new Float32Array(numPoints * 3 * 2);
-  this.uvs = new Float32Array(numPoints * 2 * 2);
-  this.width = width;
+const UP = new THREE.Vector3(0, 1, 0);
 
-  this.geometry.setAttribute("position", new THREE.BufferAttribute(this.vertices, 3).setUsage(THREE.DynamicDrawUsage));
+class RayCurve extends THREE.Mesh {
+  constructor(numPoints, width) {
+    super(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        toneMapped: false,
+        transparent: true
+      })
+    );
 
-  this.material = new THREE.MeshBasicMaterial({
-    side: THREE.DoubleSide,
-    transparent: true
-  });
+    this.vertices = new Float32Array(numPoints * 3 * 6);
+    this.width = width;
 
-  this.mesh = new THREE.Mesh(this.geometry, this.material);
-  this.mesh.drawMode = THREE.TriangleStripDrawMode;
+    this.geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(this.vertices, 3).setUsage(THREE.DynamicDrawUsage)
+    );
 
-  this.mesh.frustumCulled = false;
-  this.mesh.vertices = this.vertices;
+    this.frustumCulled = false;
 
-  this.direction = new THREE.Vector3();
-  this.numPoints = numPoints;
-};
+    this.direction = new THREE.Vector3();
+    this.numPoints = numPoints;
+  }
 
-RayCurve.prototype = {
-  setDirection: function(direction) {
-    const UP = new THREE.Vector3(0, 1, 0);
+  setDirection(direction) {
     this.direction
       .copy(direction)
       .cross(UP)
       .normalize()
       .multiplyScalar(this.width / 2);
-  },
+  }
 
-  setWidth: function(width) {
+  setWidth(width) {
     this.width = width;
-  },
+  }
 
-  setPoint: (function() {
-    const posA = new THREE.Vector3();
-    const posB = new THREE.Vector3();
+  setPoint = (function() {
+    const A = new THREE.Vector3();
+    const B = new THREE.Vector3();
+    const C = new THREE.Vector3();
+    const D = new THREE.Vector3();
 
-    return function(i, point) {
-      posA.copy(point).add(this.direction);
-      posB.copy(point).sub(this.direction);
+    return function(i, P) {
+      let idx = 3 * 6 * i;
 
-      let idx = 2 * 3 * i;
-      this.vertices[idx++] = posA.x;
-      this.vertices[idx++] = posA.y;
-      this.vertices[idx++] = posA.z;
+      A.copy(P).add(this.direction);
+      B.copy(P).sub(this.direction);
+      C.set(
+        // Previous A
+        i === 0 ? A.x : this.vertices[idx - 3],
+        i === 0 ? A.y : this.vertices[idx - 2],
+        i === 0 ? A.z : this.vertices[idx - 1]
+      );
+      D.set(
+        // Previous B
+        i === 0 ? B.x : this.vertices[idx - 6],
+        i === 0 ? B.y : this.vertices[idx - 5],
+        i === 0 ? B.z : this.vertices[idx - 4]
+      );
 
-      this.vertices[idx++] = posB.x;
-      this.vertices[idx++] = posB.y;
-      this.vertices[idx++] = posB.z;
+      //   A---P---B
+      //   | \     |
+      //   |  \    |
+      //   |   \   |
+      //   |    \  |
+      //   |     \ |
+      //   |      \|
+      //   C-------D
+      //   A'--P'--B' Previous P
+      //   | \     |
+
+      this.vertices[idx++] = A.x;
+      this.vertices[idx++] = A.y;
+      this.vertices[idx++] = A.z;
+
+      this.vertices[idx++] = C.x;
+      this.vertices[idx++] = C.y;
+      this.vertices[idx++] = C.z;
+
+      this.vertices[idx++] = D.x;
+      this.vertices[idx++] = D.y;
+      this.vertices[idx++] = D.z;
+
+      this.vertices[idx++] = D.x;
+      this.vertices[idx++] = D.y;
+      this.vertices[idx++] = D.z;
+
+      this.vertices[idx++] = B.x;
+      this.vertices[idx++] = B.y;
+      this.vertices[idx++] = B.z;
+
+      this.vertices[idx++] = A.x;
+      this.vertices[idx++] = A.y;
+      this.vertices[idx++] = A.z;
 
       this.geometry.attributes.position.needsUpdate = true;
     };
-  })()
-};
+  })();
+}
 
 function parabolicCurve(p0, v0, t, out) {
   out.x = p0.x + v0.x * t;
@@ -78,7 +127,7 @@ function parabolicCurve(p0, v0, t, out) {
 
 function isValidNormalsAngle(collisionNormal, referenceNormal, landingMaxAngle) {
   const angleNormals = referenceNormal.angleTo(collisionNormal);
-  return THREE.Math.RAD2DEG * angleNormals <= landingMaxAngle;
+  return THREE.MathUtils.RAD2DEG * angleNormals <= landingMaxAngle;
 }
 
 const checkLineIntersection = (function() {
@@ -97,20 +146,10 @@ const checkLineIntersection = (function() {
   };
 })();
 
-function getMeshes(collisionEntities) {
-  return collisionEntities
-    .map(function(entity) {
-      return entity.getObject3D("mesh");
-    })
-    .filter(function(n) {
-      return n;
-    });
-}
-
 const MISS_OPACITY = 0.1;
 const HIT_OPACITY = 0.3;
 const MISS_COLOR = 0xff0000;
-const HIT_COLOR = 0x00ff00;
+const HIT_COLOR = 0x99ff99;
 const FORWARD = new THREE.Vector3(0, 0, -1);
 const LANDING_NORMAL = new THREE.Vector3(0, 1, 0);
 const MAX_LANDING_ANGLE = 45;
@@ -136,10 +175,8 @@ AFRAME.registerComponent("teleporter", {
     this.characterController = this.el.sceneEl.systems["hubs-systems"].characterController;
     this.isTeleporting = false;
     this.rayCurve = new RayCurve(20, 0.025);
-    this.rayCurve.mesh.visible = false;
-    this.teleportEntity = document.createElement("a-entity");
-    this.teleportEntity.setObject3D("mesh", this.rayCurve.mesh);
-    this.el.sceneEl.appendChild(this.teleportEntity);
+    this.rayCurve.visible = false;
+    this.el.sceneEl.object3D.add(this.rayCurve);
 
     this.p0 = new THREE.Vector3();
     this.v0 = new THREE.Vector3();
@@ -160,8 +197,8 @@ AFRAME.registerComponent("teleporter", {
     this.prevHitHeight = 0;
     this.direction = new THREE.Vector3();
     this.hitEntity = this.createHitEntity();
-    this.hitEntity.object3D.visible = false;
-    this.el.sceneEl.appendChild(this.hitEntity);
+    this.hitEntity.visible = false;
+    this.el.sceneEl.object3D.add(this.hitEntity);
     this.queryCollisionEntities();
   },
 
@@ -201,11 +238,11 @@ AFRAME.registerComponent("teleporter", {
       this.isTeleporting = true;
       this.timeTeleporting = 0;
       this.hit = false;
-      this.rayCurve.mesh.visible = true;
-      this.rayCurve.mesh.updateMatrixWorld();
-      this.rayCurve.mesh.material.opacity = MISS_OPACITY;
-      this.rayCurve.mesh.material.color.set(MISS_COLOR);
-      this.rayCurve.mesh.material.needsUpdate = true;
+      this.rayCurve.visible = true;
+      this.rayCurve.updateMatrixWorld();
+      this.rayCurve.material.opacity = MISS_OPACITY;
+      this.rayCurve.material.color.set(MISS_COLOR);
+      this.rayCurve.material.needsUpdate = true;
       this.teleportingSound = sfx.playSoundLoopedWithGain(SOUND_TELEPORT_START);
       if (this.teleportingSound) {
         this.teleportingSound.gain.gain.value = 0.005;
@@ -220,9 +257,9 @@ AFRAME.registerComponent("teleporter", {
     }
 
     if (userinput.get(confirm)) {
-      this.hitEntity.setAttribute("visible", false);
+      this.hitEntity.visible = false;
       this.isTeleporting = false;
-      this.rayCurve.mesh.visible = false;
+      this.rayCurve.visible = false;
 
       if (this.teleportingSound) {
         this.stopPlayingTeleportSound();
@@ -295,85 +332,82 @@ AFRAME.registerComponent("teleporter", {
     this.rayCurve.material.color.set(color);
     this.rayCurve.material.opacity = opacity;
 
-    this.hitEntity.setAttribute("visible", this.hit);
+    this.hitEntity.visible = this.hit;
     if (this.hit) {
-      this.hitEntity.setAttribute("position", this.hitPoint);
-      this.hitEntity.object3D.traverse(o => {
-        o.matrixNeedsUpdate = true;
-      });
-      const hitEntityOpacity = HIT_OPACITY * easeOutIn(percentToDraw);
+      this.hitEntity.position.copy(this.hitPoint);
+      this.hitEntity.matrixNeedsUpdate = true;
+
       const dRadii = this.data.outerRadius - this.data.hitCylinderRadius;
       const outerScale = (this.data.outerRadius - easeIn(percentToDraw) * dRadii) / this.data.outerRadius;
-      this.outerTorus.object3D.scale.set(outerScale, outerScale, 1);
-      this.torus.setAttribute("material", "opacity", hitEntityOpacity);
-      this.cylinder.setAttribute("material", "opacity", hitEntityOpacity);
+      this.outerTorus.scale.set(outerScale, outerScale, 1);
+      this.outerTorus.matrixNeedsUpdate = true;
+
+      const hitEntityOpacity = HIT_OPACITY * easeOutIn(percentToDraw);
+      this.torus.material.opacity = hitEntityOpacity;
+      this.cylinder.material.opacity = hitEntityOpacity;
     }
   },
 
+  // TODO the use of toruses here is a bit wasteful.
   createHitEntity() {
     const data = this.data;
 
     // Parent.
-    const hitEntity = document.createElement("a-entity");
-    hitEntity.className = "hitEntity";
+    const hitEntity = new THREE.Group();
 
     // Torus.
-    this.torus = document.createElement("a-entity");
-    this.torus.setAttribute("geometry", {
-      primitive: "torus",
-      radius: data.hitCylinderRadius,
-      radiusTubular: 0.01,
-      segmentsRadial: 16,
-      segmentsTubular: 18
-    });
-    this.torus.setAttribute("rotation", { x: 90, y: 0, z: 0 });
-    this.torus.setAttribute("material", {
-      shader: "flat",
-      color: data.hitCylinderColor,
-      side: "double",
-      depthTest: false
-    });
-    hitEntity.appendChild(this.torus);
+    this.torus = new THREE.Mesh(
+      new THREE.TorusBufferGeometry(data.hitCylinderRadius, 0.01, 16, 18, 360 * THREE.MathUtils.DEG2RAD),
+      new THREE.MeshBasicMaterial({
+        color: data.hitCylinderColor,
+        side: THREE.DoubleSide,
+        transparent: true,
+        toneMapped: false,
+        depthTest: false
+      })
+    );
+    this.torus.rotation.x = 90 * THREE.MathUtils.DEG2RAD;
+    hitEntity.add(this.torus);
 
     // Cylinder.
-    this.cylinder = document.createElement("a-entity");
-    this.cylinder.setAttribute("position", { x: 0, y: data.hitCylinderHeight / 2, z: 0 });
-    this.cylinder.setAttribute("geometry", {
-      primitive: "cylinder",
-      segmentsHeight: 1,
-      radius: data.hitCylinderRadius,
-      height: data.hitCylinderHeight,
-      openEnded: true
-    });
-    this.cylinder.setAttribute("material", {
-      shader: "flat",
-      color: data.hitCylinderColor,
-      side: "double",
-      src: CYLINDER_TEXTURE,
-      transparent: true,
-      depthTest: false
-    });
-    hitEntity.appendChild(this.cylinder);
+    this.cylinder = new THREE.Mesh(
+      new THREE.CylinderBufferGeometry(
+        data.hitCylinderRadius,
+        data.hitCylinderRadius,
+        data.hitCylinderHeight,
+        16,
+        1,
+        true
+      ),
+      new THREE.MeshBasicMaterial({
+        color: data.hitCylinderColor,
+        side: THREE.DoubleSide,
+        map: CYLINDER_TEXTURE,
+        toneMapped: false,
+        transparent: true,
+        depthTest: false
+      })
+    );
+    this.cylinder.position.y = data.hitCylinderHeight / 2;
+    // UV's for THREE Geometries assume flipY
+    if (!CYLINDER_TEXTURE.flipY) {
+      this.cylinder.rotation.z = 180 * THREE.MathUtils.DEG2RAD;
+    }
+    hitEntity.add(this.cylinder);
 
     // create another torus for animating when the hit destination is ready to go
-    this.outerTorus = document.createElement("a-entity");
-    this.outerTorus.setAttribute("geometry", {
-      primitive: "torus",
-      radius: data.outerRadius,
-      radiusTubular: 0.01,
-      segmentsRadial: 16,
-      segmentsTubular: 18
-    });
-    this.outerTorus.setAttribute("rotation", { x: 90, y: 0, z: 0 });
-    this.outerTorus.setAttribute("material", {
-      shader: "flat",
-      color: data.hitCylinderColor,
-      side: "double",
-      opacity: HIT_OPACITY,
-      depthTest: false
-    });
-    this.outerTorus.setAttribute("id", "outerTorus");
-    hitEntity.appendChild(this.outerTorus);
+    this.outerTorus = new THREE.Mesh(
+      new THREE.TorusBufferGeometry(data.outerRadius, 0.01, 16, 18, 360 * THREE.MathUtils.DEG2RAD),
+      new THREE.MeshBasicMaterial({
+        color: data.hitCylinderColor,
+        side: THREE.DoubleSide,
+        opacity: HIT_OPACITY,
+        transparent: true,
+        depthTest: false
+      })
+    );
+    this.outerTorus.rotation.x = 90 * THREE.MathUtils.DEG2RAD;
+    hitEntity.add(this.outerTorus);
 
     return hitEntity;
   }

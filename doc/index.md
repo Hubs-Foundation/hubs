@@ -23,7 +23,6 @@
   - [environment](#components/environment)
     - [hide-when-quality](#components/environment/hide-when-quality)
     - [layers](#components/environment/layers)
-    - [nav-mesh-helper](#components/environment/nav-mesh-helper)
     - [scene-shadow](#components/environment/scene-shadow)
     - [spawn-point](#components/environment/spawn-point)
   - [gltf](#components/gltf)
@@ -370,14 +369,6 @@ Hides entities based on the scene's quality mode
 Sets layer flags on the underlying Object3D
 
 `src/components/layers.js`
-          
-
-<a name="components/environment/nav-mesh-helper"></a>
-#### nav-mesh-helper
-
-Initializes teleporters when the environment bundle has loaded.
-
-`src/components/nav-mesh-helper.js`
           
 
 <a name="components/environment/scene-shadow"></a>

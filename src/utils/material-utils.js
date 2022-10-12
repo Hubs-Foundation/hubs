@@ -8,13 +8,23 @@ export function forEachMaterial(object3D, fn) {
   }
 }
 
-export function mapMaterials(object3D, fn) {
+export function updateMaterials(object3D, fn) {
   if (!object3D.material) return;
+
+  if (Array.isArray(object3D.material)) {
+    object3D.material = object3D.material.map(fn);
+  } else {
+    object3D.material = fn(object3D.material);
+  }
+}
+
+export function mapMaterials(object3D, fn) {
+  if (!object3D.material) return [];
 
   if (Array.isArray(object3D.material)) {
     return object3D.material.map(fn);
   } else {
-    return fn(object3D.material);
+    return [fn(object3D.material)];
   }
 }
 
@@ -25,6 +35,7 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
     const material = new HubsMeshBasicMaterial();
 
     THREE.Material.prototype.copy.call(material, source);
+    material.onBeforeRender = source.onBeforeRender;
 
     material.color.copy(source.color);
 
@@ -35,7 +46,8 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
     material.map = source.map;
 
     material.lightMap = source.lightMap;
-    material.lightMapIntensity = source.lightMapIntensity;
+    // See https://github.com/mrdoob/three.js/pull/23613 for "* Math.PI"
+    material.lightMapIntensity = source.lightMapIntensity * Math.PI;
 
     material.aoMap = source.aoMap;
     material.aoMapIntensity = source.aoMapIntensity;
@@ -46,9 +58,6 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
     material.wireframeLinewidth = source.wireframeLinewidth;
     material.wireframeLinecap = source.wireframeLinecap;
     material.wireframeLinejoin = source.wireframeLinejoin;
-
-    material.skinning = source.skinning;
-    material.morphTargets = source.morphTargets;
 
     return material;
   }
@@ -107,17 +116,11 @@ class HubsMeshBasicMaterial extends THREE.MeshBasicMaterial {
     shader.fragmentShader = shader.fragmentShader.replace(
       "#include <envmap_fragment>",
       `#include <envmap_fragment>
+
       vec3 totalEmissiveRadiance = emissive;
-
-      vec4 emissiveColor = vec4(0.0, 0.0, 0.0, 0.0);
-
-      #ifdef USE_UV
-        emissiveColor = texture2D( emissiveMap, vUv );
-      #endif
-
-      emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;
-      totalEmissiveRadiance *= emissiveColor.rgb;
+      #include <emissivemap_fragment>
       outgoingLight += totalEmissiveRadiance;
+
       `
     );
   };
@@ -128,6 +131,7 @@ class HubsMeshPhongMaterial extends THREE.MeshPhongMaterial {
     const material = new HubsMeshPhongMaterial();
 
     THREE.Material.prototype.copy.call(material, source);
+    material.onBeforeRender = source.onBeforeRender;
 
     material.color.copy(source.color);
 
@@ -163,10 +167,6 @@ class HubsMeshPhongMaterial extends THREE.MeshPhongMaterial {
     material.wireframeLinewidth = source.wireframeLinewidth;
     material.wireframeLinecap = source.wireframeLinecap;
     material.wireframeLinejoin = source.wireframeLinejoin;
-
-    material.skinning = source.skinning;
-    material.morphTargets = source.morphTargets;
-    material.morphNormals = source.morphNormals;
 
     return material;
   }
@@ -222,4 +222,26 @@ export function convertStandardMaterial(source, quality) {
   }
 
   return source;
+}
+
+export function disposeTexture(texture) {
+  if (texture.dash) {
+    texture.dash.reset();
+  }
+
+  if (texture.image instanceof HTMLVideoElement) {
+    const video = texture.image;
+    video.pause();
+    video.src = "";
+    video.load();
+  }
+
+  if (texture.hls) {
+    texture.hls.stopLoad();
+    texture.hls.detachMedia();
+    texture.hls.destroy();
+    texture.hls = null;
+  }
+
+  texture.dispose();
 }

@@ -17,10 +17,11 @@ AFRAME.registerComponent("pen-laser", {
 
   init() {
     let material = new THREE.MeshStandardMaterial({ color: "red", opacity: 0.5, transparent: true, visible: true });
-    const quality = window.APP.store.materialQualitySetting;
+    const quality = window.APP.store.state.preferences.materialQualitySetting;
     material = convertStandardMaterial(material, quality);
 
     const tipMaterial = material.clone();
+    tipMaterial.onBeforeRender = material.onBeforeRender;
 
     const lineCurve = new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 2));
     const geometry = new THREE.TubeBufferGeometry(lineCurve, 2, 0.003, 8, true);
@@ -29,12 +30,6 @@ AFRAME.registerComponent("pen-laser", {
     this.laserTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 8, 6), tipMaterial);
     this.laserTip.scale.setScalar(0.01);
     this.laserTip.matrixNeedsUpdate = true;
-
-    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-    if (environmentMapComponent) {
-      environmentMapComponent.applyEnvironmentMap(this.laser);
-      environmentMapComponent.applyEnvironmentMap(this.laserTip);
-    }
 
     //prevents the line from being a raycast target for the cursor
     this.laser.raycast = function() {};

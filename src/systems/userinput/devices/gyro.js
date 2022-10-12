@@ -55,10 +55,15 @@ export class GyroDevice {
       this.vrDisplay = window.webvrpolyfill.getPolyfillDisplays()[0];
       this.frameData = new window.webvrpolyfill.constructor.VRFrameData();
     }
+
+    this.enableGyro = window.APP.store.state.preferences.enableGyro;
+    window.APP.store.addEventListener("statechanged", () => {
+      this.enableGyro = window.APP.store.state.preferences.enableGyro;
+    });
   }
 
   write(frame) {
-    if (!this.hasPolyfill || !this.vrDisplay || !this.frameData) {
+    if (!this.enableGyro || !this.hasPolyfill || !this.vrDisplay || !this.frameData) {
       return;
     }
     const hmdEuler = this.hmdEuler;

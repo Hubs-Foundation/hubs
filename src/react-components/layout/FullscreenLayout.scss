@@ -1,0 +1,78 @@
+@use "../styles/theme.scss";
+
+:local(.fullscreen-layout) {
+  display: flex;
+  flex-direction: column;
+  pointer-events: all;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: theme.$background1-color;
+  z-index: 10;
+}
+
+:local(.header) {
+  position: relative;
+  height: 144px;
+  border-bottom: 1px solid theme.$border1-color;
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    height: 96px;
+  }
+}
+
+:local(.header-left) {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin-left: 16px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    margin-left: 24px;
+    height: 96px;
+  }
+}
+
+:local(.header-center) {
+  margin-top: 48px;
+  border-top: 1px solid theme.$border1-color;
+  width: 100%;
+  height: 96px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    margin-top: 0;
+    border-top: none;
+  }
+}
+
+:local(.header-right) {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-right: 16px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    margin-right: 24px;
+    height: 96px;
+  }
+}
+
+:local(.content) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: auto;
+}

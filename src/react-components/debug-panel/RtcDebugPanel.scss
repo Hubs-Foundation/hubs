@@ -1,0 +1,138 @@
+
+@use "../styles/theme.scss";
+
+:local(.border-tile) {
+  border: 2px;  
+  border-color: theme.$lightgrey;
+  border-style: solid;
+  padding: 4px;
+  margin: 4px;
+  border-radius: 5px;
+  display: flex;
+  flex-flow: column;
+  flex: 0 1 auto;
+  background-color: theme.$overlay-bg-color;
+  pointer-events: auto;
+
+  @media not all and (min-resolution:.001dpcm){ @supports (-webkit-appearance:none) { height: 100%; }}
+}
+
+:local(.border-tile).collapsed {
+  display: none;
+}
+
+:local(.borderless-tile) {
+  @extend :local(.border-tile);
+  border: none;
+}
+
+:local(.borderless-tile).collapsed {
+  display: none;
+}
+
+:local(.rtc-debug-panel-root) {
+  pointer-events: none;
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  height: auto;
+  top: 76px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
+
+  @media(max-width: 500px) {
+    flex-flow: column nowrap;
+    width: 100%;
+    justify-content: stretch;
+  }
+}
+
+:local(.rtc-status-container) {
+  display: flex;
+  overflow-y: auto;
+  pointer-events: auto;
+  width: 25%;
+  align-self: flex-start;
+  max-height: 100%;
+
+  @media(max-width: 500px) {
+    width: 100%;
+    max-height: 33%;
+    align-self: baseline;
+    flex: 0 1 auto;
+  }
+}
+
+:local(.rtc-status-container-left) {
+  @extend :local(.rtc-status-container);
+  justify-content: start;
+}
+
+:local(.rtc-status-container-right) {
+  @extend :local(.rtc-status-container);
+  justify-content: end;
+
+  @media(max-width: 500px) {
+    justify-content: start;
+  }
+}
+
+:local(.status-container-middle) {
+  @extend :local(.rtc-status-container);
+  width: 50%;
+  height: 100%;
+  flex: 1 0 auto;
+  flex-flow: column;
+  overflow-y: hidden;
+  pointer-events: none;
+
+  @media(max-width: 500px) {
+    justify-content: start;
+    width: 100%;
+  }
+}
+
+:local(.rtc-log-container) {
+  pointer-events: auto;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  align-self: flex-end;
+  max-height: 33%;
+  flex: 0 1 auto;
+  justify-content: center;
+
+  @media(max-width: 500px) {
+    width: 100%;
+    align-self: baseline;
+    flex: 0 1 auto;
+    justify-content: left;
+  }
+}
+
+:local(.rtc-log-time) {
+  font-size: theme.$font-size-xs;
+  color: theme.$blue;
+  margin: 0;
+}
+
+:local(.rtc-log-text) {
+  font-size: theme.$font-size-xs;
+  margin: 0;
+}
+
+:local(.rtc-log-tag) {
+  @extend :local(.rtc-log-text);
+  color: theme.$yellow;
+}
+
+:local(.rtc-log-msg-container) {
+  user-select: text;
+}
+
+:local(.rtc-log-msg) {
+  @extend :local(.rtc-log-text);
+  color: theme.$white;
+}

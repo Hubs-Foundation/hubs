@@ -1,0 +1,16 @@
+@use "../styles/theme.scss";
+
+:local(.rtc-tile-text) {
+  color: theme.$white;
+  font-size: theme.$font-size-xs;
+  display: block;
+  margin: 0;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+:local(.rtc-value-text) {
+  font-size: theme.$font-size-xs;
+  margin: 0;
+  color: theme.$yellow;
+}

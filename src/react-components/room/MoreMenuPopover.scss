@@ -1,0 +1,115 @@
+@use "../styles/theme.scss";
+
+:local(.more-menu-popover) {
+  min-width: 240px;
+  padding-top: 16px;
+
+  @media(min-width: theme.$breakpoint-lg) {
+    padding-top: 0px;
+  }
+}
+
+:local(.more-menu-group-label) {
+  margin-left: 16px;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-bold;
+  color: theme.$text3-color;
+}
+
+:local(.more-menu-item-list) {
+  padding-top: 4px;
+  padding-bottom: 16px;
+}
+
+:local(.more-menu-item-target) {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  color: theme.$text1-color;
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-medium;
+
+  & > * {
+    margin-right: 16px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  svg {
+    color: theme.$text1-color;
+  }
+
+  // Hack to make hover styles overlap popover border and look correct.
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    width: calc(100% + 2px);
+
+    &:hover, &:active, :global(body.keyboard-user) &:focus {
+      margin-left: -1px;
+      margin-right: -1px;
+      padding-left: 17px;
+      padding-right: 17px;
+    }
+  }
+
+  &:hover, &:active, :global(body.keyboard-user) &:focus {
+    color: theme.$active-text-color;
+    font-weight: theme.$font-weight-bold;
+
+    svg {
+      color: theme.$active-text-color;
+    }
+  }
+
+  &:hover, :global(body.keyboard-user) &:focus {
+    background-color: theme.$active-color-hover;
+  }
+
+  &:active {
+    background-color: theme.$active-color-pressed;
+  }
+
+  :global(body.keyboard-user) &:focus {
+    box-shadow: inset 0 0 0 3px theme.$outline-color;
+  }
+}
+
+button:local(.more-menu-item-target) {
+  background: transparent;
+  border: none; 
+}
+
+:local(.compact-button) {
+  pointer-events: auto;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 48px;
+  color: theme.$button-text-color;
+  background-color: theme.$button-bg-color;
+  border: 1px solid theme.$button-border-color;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    background-color: theme.$button-bg-color-hover;
+  }
+
+  &:active {
+    background-color: theme.$button-bg-color-pressed;
+  }
+
+  svg {
+    color: theme.$text1-color;
+  }
+
+  @media(min-width: theme.$breakpoint-lg) {
+    display: none;
+  }
+}

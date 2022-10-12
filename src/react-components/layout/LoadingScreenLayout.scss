@@ -1,0 +1,40 @@
+@use "../styles/theme.scss";
+
+:local(.loading-screen-layout) {
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: theme.$loading-screen-background;
+
+  font-size: theme.$font-size-sm;
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    font-size: theme.$font-size-md;
+  }
+}
+
+:local(.center) {
+  flex-grow: 0;
+}
+
+:local(.logo) {
+  // Keep arbitrary-sized logos from making the page jump on load
+  position: absolute;
+  transform: translateY(calc(-100% - 20px));
+  max-width: 260px;
+  max-height: 140px;
+}
+
+:local(.bottom) {
+  position: absolute;
+  bottom: 10%;
+  width: 100%;
+  padding: 0 48px;
+}

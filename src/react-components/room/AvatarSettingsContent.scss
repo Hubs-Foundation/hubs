@@ -1,0 +1,34 @@
+@use "../styles/theme.scss";
+
+:local(.content) {
+  align-items: center;
+  padding: 24px;
+  padding-top: 10px;
+  text-align: center;
+}
+
+
+:local(.avatar-preview-container) {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: center;
+
+  /* TODO: This styling into AvatarPreview */
+  & > :first-child {
+    /*
+    We need to set dimensions explicitly here, since AvatarPreview
+    resizes itself to its container's dimensions.
+    */
+    width: 168px;
+    height: 250px;
+    border-radius: 8px;
+    background-color: theme.$tile-bg-color;
+  }
+
+  button {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 8px;
+  }
+}

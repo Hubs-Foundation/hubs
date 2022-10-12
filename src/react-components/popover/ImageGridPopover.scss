@@ -1,0 +1,30 @@
+@use "../styles/theme.scss";
+
+
+:local(.image-grid-popover) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+  gap: 12px;
+  padding: 16px;
+
+  &:not(:local(.fullscreen)) {
+    max-width: 224px;
+    padding-top: 0;
+  }
+
+  img {
+    padding: 4px;
+    border-radius: 6px;
+    width: 100%;
+    min-height: 56px;
+
+    &:hover {
+      background-color: theme.$list-bg-color-hover;
+    }
+
+    &:active {
+      background-color: theme.$list-bg-color-pressed;
+    }
+  }
+}
+

@@ -1,0 +1,67 @@
+@use "../styles/theme.scss";
+
+:local(.toggle-input) {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  &:focus-within :local(.track) {
+    border-color: theme.$active-color;
+    box-shadow: 0 0 0 2px theme.$active-color;
+  }
+}
+
+:local(.disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+:local(.label-container) {
+  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  color: theme.$text2-color;
+}
+
+:local(.label) {
+  font-size: theme.$font-size-sm;
+}
+
+:local(.description) {
+  margin-top: 8px;
+  font-size: theme.$font-size-xs;
+  font-weight: theme.$font-weight-regular;
+}
+
+:local(.track) {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border: 1px solid theme.$radio-border-color;
+  border-radius: 44px; 
+}
+
+:local(.button) {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 20px;
+  height: 20px;
+  border-radius: 20px;
+  background-color: theme.$toggle-button-color;
+}
+
+:local(.toggle-input) input:checked + :local(.track) :local(.button) {
+  left: auto;
+  right: 1px;
+  background-color: theme.$active-color;
+}
+

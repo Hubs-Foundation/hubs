@@ -9,6 +9,15 @@ function isVisibleUpToRoot(node, root) {
   return false;
 }
 
+// HACK Troika Text GlyphGeometry doesn't play nicely with this code. Also it's infinitely thin.
+// We don't particularly care about it's bounds, but its important that they are non zero since
+// other code checks for that case. Fudge it for now with a very small static box.
+const FAKE_TROIKA_BOUNDS = new THREE.Box3(
+  new THREE.Vector3(-0.001, -0.001, -0.001),
+  new THREE.Vector3(0.001, 0.001, 0.001)
+);
+
+// TODO This whole function is suspect for manually computing bounding boxes when geometry already has code for this
 export const computeLocalBoundingBox = (function() {
   const vertex = new THREE.Vector3();
   const rootInverse = new THREE.Matrix4();
@@ -16,7 +25,7 @@ export const computeLocalBoundingBox = (function() {
   return function computeLocalBoundingBox(root, box, excludeInvisible) {
     box.makeEmpty();
     root.updateMatrices();
-    rootInverse.getInverse(root.matrixWorld);
+    rootInverse.copy(root.matrixWorld).invert();
     root.traverse(node => {
       if (excludeInvisible && !isVisibleUpToRoot(node, root)) {
         return;
@@ -24,7 +33,9 @@ export const computeLocalBoundingBox = (function() {
       node.updateMatrices();
       toRootSpace.multiplyMatrices(rootInverse, node.matrixWorld);
       if (node.geometry) {
-        if (node.geometry.isGeometry) {
+        if (node.isTroikaText) {
+          box.union(FAKE_TROIKA_BOUNDS);
+        } else if (node.geometry.isGeometry) {
           for (let i = 0; i < node.geometry.vertices; i++) {
             vertex.copy(node.geometry.vertices[i]).applyMatrix4(toRootSpace);
             if (isNaN(vertex.x)) continue;
@@ -32,7 +43,7 @@ export const computeLocalBoundingBox = (function() {
           }
         } else if (node.geometry.isBufferGeometry && node.geometry.attributes.position) {
           const array = node.geometry.attributes.position.array;
-          const itemSize = node.geometry.attributes.position._itemSize;
+          const itemSize = node.geometry.attributes.position.itemSize;
           for (let i = 0; i < node.geometry.attributes.position.count; i++) {
             if (itemSize === 2) {
               vertex.set(array[2 * i], array[2 * i + 1], 0);

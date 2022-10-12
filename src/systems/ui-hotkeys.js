@@ -24,19 +24,25 @@ AFRAME.registerSystem("ui-hotkeys", {
     }
 
     if (this.userinput.get(paths.actions.focusChat)) {
-      this.focusChat();
+      window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "" } }));
     }
 
     if (this.userinput.get(paths.actions.focusChatCommand)) {
-      this.focusChat("/");
+      window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "/" } }));
     }
 
     if (this.userinput.get(paths.actions.mediaExit)) {
-      if (
-        window.APP.history.location.state &&
-        window.APP.history.location.state.value !== "avatar-editor" &&
-        window.APP.history.location.state.value !== "link"
-      ) {
+      const state = window.APP.history.location.state && window.APP.history.location.state.value;
+      const ignoredStates = new Set(["avatar-editor", "link", "profile", "device", "audio"]);
+      const maybeInMediaBrowser = !state || !ignoredStates.has(state);
+      if (maybeInMediaBrowser) {
+        // Do not push "exit media browser" to history
+        // if we know we are NOT in the media browser.
+        // TODO: If we set the state to "media browser"
+        //       while the media browser is open, then we
+        //       can check that condition directly.
+        //       Until then, we push "exit media browser"
+        //       to the history if state is undefined.
         this.mediaSearchStore.pushExitMediaBrowserHistory();
       }
 
@@ -54,20 +60,7 @@ AFRAME.registerSystem("ui-hotkeys", {
     }
 
     if (this.userinput.get(paths.actions.toggleUI)) {
-      if (this.el.sceneEl.is("entered")) {
-        this.el.emit("action_toggle_ui");
-      }
-    }
-  },
-
-  focusChat: function(prefix) {
-    const target = document.querySelector(".chat-focus-target");
-    if (!target) return;
-
-    target.focus();
-
-    if (prefix) {
-      target.value = prefix;
+      this.el.emit("action_toggle_ui");
     }
   }
 });

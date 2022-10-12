@@ -164,7 +164,7 @@ function WaitForVerification({ email, onCancel }) {
         {email ? (
           <FormattedMessage id="sign-in.auth-started" values={{ email }} />
         ) : (
-          <FormattedMessage className="preformatted" id="sign-in.oidc-auth-started" />
+          <FormattedMessage className="preformatted" id="sign-in.oidc-auth-started" defaultMessage="Waiting for signin..." />
         )}
       </p>
       <IfFeature name="show_newsletter_signup">

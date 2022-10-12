@@ -1,0 +1,52 @@
+@use "../styles/theme.scss";
+
+:local(.content) {
+  padding: 24px 8px;
+
+  button {
+    width: 156px;
+  }
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    padding: 24px;
+  }
+}
+
+:local(.logo-container) {
+  padding: 0 16px;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+:local(.room-name) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  h5 {
+    font-size: theme.$font-size-xs;
+    color: theme.$grey;
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: theme.$font-size-sm;
+    text-align: center;
+
+    @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+      font-size: 20px;
+    }
+  }
+}
+
+:local(.buttons) {
+  button {
+    margin-left: 16px;
+    margin-right: 16px;
+
+    @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+      margin-left: 8px;
+      margin-right: 8px;
+    }
+  }
+}

@@ -42,7 +42,6 @@ const calculateDisplacementToDesiredPOV = (function() {
  * The controller accounts for playspace offset and orientation and depends on the nav mesh system for translation.
  * @namespace avatar
  */
-const SNAP_ROTATION_RADIAN = THREE.Math.DEG2RAD * 45;
 const BASE_SPEED = 3.2; //TODO: in what units?
 export class CharacterControllerSystem {
   constructor(scene) {
@@ -71,7 +70,6 @@ export class CharacterControllerSystem {
     this.waypoints.push({ transform: getPooledMatrix4().copy(inTransform), isInstant, waypointComponentData }); //TODO: don't create new object
   }
   enqueueRelativeMotion(motion) {
-    motion.z *= -1;
     this.relativeMotion.add(motion);
   }
   enqueueInPlaceRotationAroundWorldUp(dXZ) {
@@ -125,8 +123,16 @@ export class CharacterControllerSystem {
         inPosition.setFromMatrixPosition(inMat4Copy);
         this.findPositionOnNavMesh(inPosition, inPosition, outPosition, true);
         finalPOV.setPosition(outPosition);
+        translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
+      } else {
+        // If we are not snapping to the nav mesh, align the user's
+        // perspective exactly to the robot eyes as they appear in the
+        // waypoint indicator. (1.6 meters up and 0.15 meters forward)
+        // This does _not_ require taking the player's height into account
+        // on this line because we are only interested in where the
+        // camera will end up.
+        translation.makeTranslation(0, 1.6, -0.15);
       }
-      translation.makeTranslation(0, getCurrentPlayerHeight(), -0.15);
       finalPOV.multiply(translation);
       if (willMaintainInitialOrientation) {
         initialOrientation.extractRotation(this.avatarPOV.object3D.matrixWorld);
@@ -196,7 +202,7 @@ export class CharacterControllerSystem {
       const animationIsOver =
         this.waypointTravelTime === 0 || t >= this.waypointTravelStartTime + this.waypointTravelTime;
       if (this.activeWaypoint && !animationIsOver) {
-        const progress = THREE.Math.clamp((t - this.waypointTravelStartTime) / this.waypointTravelTime, 0, 1);
+        const progress = THREE.MathUtils.clamp((t - this.waypointTravelStartTime) / this.waypointTravelTime, 0, 1);
         interpolateAffine(
           startTransform,
           this.activeWaypoint.transform,
@@ -239,16 +245,10 @@ export class CharacterControllerSystem {
       const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
       if (snapRotateLeft) {
-        this.dXZ +=
-          preferences.snapRotationDegrees === undefined
-            ? SNAP_ROTATION_RADIAN
-            : (preferences.snapRotationDegrees * Math.PI) / 180;
+        this.dXZ += (preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateRight) {
-        this.dXZ -=
-          preferences.snapRotationDegrees === undefined
-            ? SNAP_ROTATION_RADIAN
-            : (preferences.snapRotationDegrees * Math.PI) / 180;
+        this.dXZ -= (preferences.snapRotationDegrees * Math.PI) / 180;
       }
       if (snapRotateLeft || snapRotateRight) {
         this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
@@ -283,7 +283,7 @@ export class CharacterControllerSystem {
         const triedToMove = this.relativeMotion.lengthSq() > 0.000001;
 
         if (triedToMove) {
-          const speedModifier = preferences.movementSpeedModifier || 1;
+          const speedModifier = preferences.movementSpeedModifier;
           calculateDisplacementToDesiredPOV(
             snapRotatedPOV,
             this.fly || !navMeshExists,

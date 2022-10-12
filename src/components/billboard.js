@@ -1,9 +1,12 @@
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 // Billboard component that only updates visible objects and only those in the camera view on mobile VR.
+// TODO billboarding assumes a single camera viewpoint but with video-texture-source, mirrors, and camera tools this is no longer valid
 AFRAME.registerComponent("billboard", {
+  schema: {
+    onlyY: { type: "boolean" }
+  },
   init: function() {
-    this.target = new THREE.Vector3();
     this._updateBillboard = this._updateBillboard.bind(this);
     this._updateIsInView = this._updateIsInView.bind(this);
 
@@ -41,7 +44,7 @@ AFRAME.registerComponent("billboard", {
 
     const isInViewOfCamera = (obj, screenCamera) => {
       frustumMatrix.multiplyMatrices(screenCamera.projectionMatrix, screenCamera.matrixWorldInverse);
-      frustum.setFromMatrix(frustumMatrix);
+      frustum.setFromProjectionMatrix(frustumMatrix);
       box.makeEmpty();
       obj.traverse(expandBox);
 
@@ -63,31 +66,30 @@ AFRAME.registerComponent("billboard", {
       if (!this.playerCamera) return;
 
       this.isInView = this.el.sceneEl.is("vr-mode") ? true : isInViewOfCamera(this.el.object3D, this.playerCamera);
-
-      if (!this.isInView) {
-        // Check in-game camera if rendering to viewfinder and owned
-        const cameraTools = this.el.sceneEl.systems["camera-tools"];
-
-        if (cameraTools) {
-          cameraTools.ifMyCameraRenderingViewfinder(cameraTool => {
-            this.isInView = this.isInView || isInViewOfCamera(this.el.object3D, cameraTool.camera);
-          });
-        }
-      }
     };
   })(),
 
-  _updateBillboard: function() {
-    if (!this.el.object3D.visible) return;
+  _updateBillboard: (function() {
+    const targetPos = new THREE.Vector3();
+    const worldPos = new THREE.Vector3();
+    return function() {
+      if (!this.el.object3D.visible) return;
 
-    const camera = this.el.sceneEl.camera;
-    const object3D = this.el.object3D;
+      const camera = this.el.sceneEl.camera;
+      const object3D = this.el.object3D;
 
-    if (camera) {
-      // Set the camera world position as the target.
-      this.target.setFromMatrixPosition(camera.matrixWorld);
-      object3D.lookAt(this.target);
-      object3D.matrixNeedsUpdate = true;
-    }
-  }
+      if (camera) {
+        // Set the camera world position as the target.
+        targetPos.setFromMatrixPosition(camera.matrixWorld);
+
+        if (this.data.onlyY) {
+          object3D.getWorldPosition(worldPos);
+          targetPos.y = worldPos.y;
+        }
+        object3D.lookAt(targetPos);
+
+        object3D.matrixNeedsUpdate = true;
+      }
+    };
+  })()
 });

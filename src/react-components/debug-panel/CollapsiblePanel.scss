@@ -1,0 +1,68 @@
+@use "../styles/theme.scss";
+@import './RtcDebugPanel.scss';
+
+:local(.collapse-button) {
+  background-color: theme.$transparent;
+  border-color: theme.$transparent;
+  color: theme.$lightgrey;
+  cursor: pointer;
+  font-size: theme.$font-size-md;
+  font-weight: theme.$font-weight-bold;
+}
+
+:local(.log-button) {
+  color: theme.$black;
+  background-color: theme.$lightgrey;
+  border-radius: 50%;
+  font-weight: theme.$font-weight-bold;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  cursor: pointer;
+  align-self: center;
+  font-size: theme.$font-size-xs;
+}
+
+:local(.collapse-button):after {
+  content: '\2212';
+  color: theme.$lightgrey;
+  font-weight: theme.$font-weight-bold;
+  float: left;
+  align-self: stretch;
+  padding-right: 6px;
+}
+
+:local(.collapse-button).collapsed:after {
+  content: "\002B";
+}
+
+:local(.collapsible-content) {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+:local(.collapsible-content-root) {
+  @extend :local(.collapsible-content);
+  flex-flow: column nowrap;
+  overflow-y: auto;
+  justify-content: space-evenly;
+}
+
+:local(.collapsible-content).collapsed {
+  display: none;
+}
+
+:local(.collapsible-header) {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  margin-right: 4px;
+}
+
+:local(.collapsible-right-buttons) > * {
+  margin: 4px;
+}

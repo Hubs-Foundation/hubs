@@ -131,7 +131,7 @@ AFRAME.registerComponent("pen", {
     this.dirty = true;
 
     let material = new THREE.MeshStandardMaterial();
-    const quality = window.APP.store.materialQualitySetting;
+    const quality = window.APP.store.state.preferences.materialQualitySetting;
     material = convertStandardMaterial(material, quality);
 
     this.penTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), material);
@@ -139,11 +139,6 @@ AFRAME.registerComponent("pen", {
     this.penTip.matrixNeedsUpdate = true;
 
     this.el.setObject3D("mesh", this.penTip);
-
-    const environmentMapComponent = this.el.sceneEl.components["environment-map"];
-    if (environmentMapComponent) {
-      environmentMapComponent.applyEnvironmentMap(this.el.parentEl.object3D);
-    }
 
     this.penLaserAttributesUpdated = false;
     this.penLaserAttributes = {
@@ -164,6 +159,9 @@ AFRAME.registerComponent("pen", {
       scene.addEventListener("object3dset", this.setDirty);
       scene.addEventListener("object3dremove", this.setDirty);
     });
+
+    this.penSystem = this.el.sceneEl.systems["pen-tools"];
+    this.penSystem.register(this.el);
   },
 
   play() {
@@ -498,5 +496,6 @@ AFRAME.registerComponent("pen", {
     this.observer.disconnect();
     AFRAME.scenes[0].removeEventListener("object3dset", this.setDirty);
     AFRAME.scenes[0].removeEventListener("object3dremove", this.setDirty);
+    this.penSystem.deregister(this.el);
   }
 });

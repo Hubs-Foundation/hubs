@@ -29,6 +29,7 @@ features.public_rooms = { category = "features", type = "boolean", name = "Publi
 features.default_room_id = { category = "features", type = "string", name = "Homepage Room ID", description = "Use the specified room in place of the homepage."}
 features.enable_spoke = { category = "features", type = "boolean", name = "Enable Scene Editor", description = "Enable Scene Editor for all visitors."}
 features.enable_lobby_ghosts = { category = "features", type = "boolean", name = "Enable Lobby Ghosts", description = "Allow people in the lobby to explore the room while remaining invisible and inaudible." }
+features.public_api_access = { category = "features", type = "boolean", name = "Public API Access", description = "Enables a publicly-accessible API for managing backend resources programmatically.", internal = "false" }
 
 features.permissive_rooms = { category = "rooms", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
 features.disable_room_creation = { category = "rooms", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }
@@ -47,6 +48,7 @@ features.show_cloud = { category = "features", type = "boolean", internal = "tru
 features.show_newsletter_signup = { category = "features", type = "boolean", internal = "true" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
+images.logo_dark = { category = "images", type = "file", name = "App Logo Dark", description = "Logo used across the app in dark mode." }
 images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }
 images.app_icon = { category = "images", type = "file", name = "App Icon", description = "Icon for the app." }
 images.app_thumbnail = { category = "images", type = "file", name = "App Thumbnail", description = "Thumbnail for app." }
@@ -58,17 +60,20 @@ images.landing_rooms_thumb = { category = "images", type = "file", internal = "t
 images.landing_communicate_thumb = { category = "images", type = "file", internal = "true" }
 images.landing_media_thumb = { category = "images", type = "file", internal = "true" }
 
-theme.dark-theme = { category = "theme", type = "boolean", name = "Dark Mode", description = "Use dark UI styling." }
-theme.action-color = { category = "theme", type = "color", name = "Primary Color", description = "Call to action button color." }
-theme.action-color-highlight = { category = "theme", type = "color", name = "Highlighted Primary Color", description = "Highlighted call to action color." }
-theme.action-color-disabled = { category = "theme", type = "color", name = "Disabled Primary Color", description = "Disabled call to action color." }
-theme.action-text-color = { category = "theme", type = "color", name = "Primary Text Color", description = "Call to action button text color." }
-theme.action-subtitle-color = { category = "theme", type = "color", name = "Primary Subtitle Color", description = "Call to action button subtitle text color." }
-theme.action-label-color = { category = "theme", type = "color", name = "Primary Label Color", description = "Call to action label color." }
-theme.notice-background-color = { category = "theme", type = "color", name = "Secondary Color", description = "Notice and indicator color." }
-theme.notice-text-color = { category = "theme", type = "color", name = "Secondary Text Color", description = "Notice and indicator text color." }
-theme.notice-widget-color = { category = "theme", type = "color", name = "Secondary Widget Color", description = "Notice and indicator UI widget color." }
-theme.favorited-color = { category = "theme", type = "color", name = "Favorited Color", description = "Favorited Color" }
+theme.dark-theme = { category = "theme", type = "boolean", name = "Dark Mode", description = "[deprecated] Use dark UI styling.", deprecated="true" }
+theme.action-color = { category = "theme", type = "color", name = "Primary Color", description = "[deprecated] Call to action button color.", deprecated="true" }
+theme.action-color-highlight = { category = "theme", type = "color", name = "Highlighted Primary Color", description = "[deprecated] Highlighted call to action color.", deprecated="true" }
+theme.action-color-disabled = { category = "theme", type = "color", name = "Disabled Primary Color", description = "[deprecated] Disabled call to action color.", deprecated="true" }
+theme.action-text-color = { category = "theme", type = "color", name = "Primary Text Color", description = "[deprecated] Call to action button text color.", deprecated="true" }
+theme.action-subtitle-color = { category = "theme", type = "color", name = "Primary Subtitle Color", description = "[deprecated] Call to action button subtitle text color.", deprecated="true" }
+theme.action-label-color = { category = "theme", type = "color", name = "Primary Label Color", description = "[deprecated] Call to action label color.", deprecated="true" }
+theme.notice-background-color = { category = "theme", type = "color", name = "Secondary Color", description = "[deprecated] Notice and indicator color.", deprecated="true" }
+theme.notice-text-color = { category = "theme", type = "color", name = "Secondary Text Color", description = "[deprecated] Notice and indicator text color.", deprecated="true" }
+theme.notice-widget-color = { category = "theme", type = "color", name = "Secondary Widget Color", description = "[deprecated] Notice and indicator UI widget color.", deprecated="true" }
+theme.favorited-color = { category = "theme", type = "color", name = "Favorited Color", description = "[deprecated] Favorited Color", deprecated = "true" }
+theme.nametag-color = { category = "theme", type = "color", name = "Nametag Color", description = "Avatar nametag color." }
+theme.nametag-text-color = { category = "theme", type = "color", name = "Nametag Color", description = "Avatar nametag text color." }
+theme.themes = { category = "theme", type = "json", name = "Themes", description = "A json array describing custom client themes." }
 
 links.terms_of_use = { category = "links", type = "string", name = "Terms of Use", description = "Link to your terms of use page."}
 links.privacy_notice = { category = "links", type = "string", name = "Privacy Notice", description = "Link to your privacy page."}

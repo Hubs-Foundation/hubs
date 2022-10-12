@@ -1,8 +1,20 @@
 import { paths } from "../paths";
 import { Pose } from "../pose";
 import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouch } from "./touchscreen/assignments";
-import { findRemoteHoverTarget } from "../../interactions";
-import { canMove } from "../../../utils/permissions-utils";
+import { findRemoteHoverTarget } from "../../../components/cursor-controller";
+// import { canMove } from "../../../utils/permissions-utils";
+import ResizeObserver from "resize-observer-polyfill";
+import { hasComponent } from "bitecs";
+import {
+  AEntity,
+  HeldRemoteRight,
+  OffersRemoteConstraint,
+  Pinnable,
+  Pinned,
+  SingleActionButton,
+  Static
+} from "../../../bit-components";
+import { anyEntityWith } from "../../../utils/bit-utils";
 
 const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
@@ -23,28 +35,20 @@ function distance(x1, y1, x2, y2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-const getPlayerCamera = (() => {
-  let playerCamera;
+const getPlayerCamera = function() {
+  return AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+};
 
-  return function() {
-    if (!playerCamera) {
-      playerCamera = document.getElementById("viewing-camera").components.camera.camera;
-    }
+function shouldMoveCursor(touch, rect, raycaster) {
+  const isCursorGrabbing = anyEntityWith(APP.world, HeldRemoteRight);
+  if (isCursorGrabbing) return true;
 
-    return playerCamera;
-  };
-})();
-
-function shouldMoveCursor(touch, raycaster) {
-  const isCursorGrabbing = !!AFRAME.scenes[0].systems.interaction.state.rightRemote.held;
-  if (isCursorGrabbing) {
-    return true;
-  }
+  // Check if this touch might result in an interact or grab eventually
   const rawIntersections = [];
   raycaster.setFromCamera(
     {
-      x: (touch.clientX / window.innerWidth) * 2 - 1,
-      y: -(touch.clientY / window.innerHeight) * 2 + 1
+      x: ((touch.clientX - rect.left) / rect.width) * 2 - 1,
+      y: -((touch.clientY - rect.top) / rect.height) * 2 + 1
     },
     getPlayerCamera()
   );
@@ -53,27 +57,29 @@ function shouldMoveCursor(touch, raycaster) {
     true,
     rawIntersections
   );
-  const intersection = rawIntersections.find(x => x.object.el);
-  const isInteractable =
-    intersection &&
-    intersection.object.el.matches(
-      ".interactable, .interactable *, .occupiable-waypoint-icon, .teleport-waypoint-icon"
-    );
-  const remoteHoverTarget = intersection && findRemoteHoverTarget(intersection.object);
-  const isPinned =
-    remoteHoverTarget && remoteHoverTarget.components.pinnable && remoteHoverTarget.components.pinnable.data.pinned;
-  const isFrozen = AFRAME.scenes[0].is("frozen");
+  const intersection = rawIntersections[0];
+  const remoteHoverTarget = intersection && findRemoteHoverTarget(APP.world, intersection.object);
+  if (!remoteHoverTarget) return false;
 
-  const template =
-    remoteHoverTarget && remoteHoverTarget.components.networked && remoteHoverTarget.components.networked.data.template;
-  const isStaticControlledMedia = template && template === "#static-controlled-media";
-  const isStaticMedia = template && template === "#static-media";
+  const isSingleActionButton = hasComponent(APP.world, SingleActionButton, remoteHoverTarget);
+
+  const isInteractable =
+    hasComponent(APP.world, OffersRemoteConstraint, remoteHoverTarget) ||
+    (hasComponent(APP.world, AEntity, remoteHoverTarget) &&
+      APP.world.eid2obj
+        .get(remoteHoverTarget)
+        .el.matches(".interactable, .interactable *, .occupiable-waypoint-icon, .teleport-waypoint-icon"));
+
+  const isPinned =
+    hasComponent(APP.world, Pinnable, remoteHoverTarget) && hasComponent(APP.world, Pinned, remoteHoverTarget);
+  const isSceneFrozen = AFRAME.scenes[0].is("frozen");
+
+  // TODO isStatic is likely a superfluous check for things matched via OffersRemoteConstraint
+  const isStatic = hasComponent(APP.world, Static, remoteHoverTarget);
   return (
-    isInteractable &&
-    (isFrozen || !isPinned) &&
-    !isStaticControlledMedia &&
-    !isStaticMedia &&
-    (remoteHoverTarget && canMove(remoteHoverTarget))
+    isSingleActionButton || (isInteractable && (isSceneFrozen || !isPinned) && !isStatic)
+    // TODO check canMove
+    //&& (remoteHoverTarget && canMove(remoteHoverTarget))
   );
 }
 
@@ -87,10 +93,14 @@ export class AppAwareTouchscreenDevice {
     this.pendingTap = { maxTouchCount: 0, startedAt: 0 };
     this.tapIndexToWriteNextFrame = 0;
 
+    this.canvas = document.querySelector("canvas");
+
     this.events = [];
     ["touchstart", "touchend", "touchmove", "touchcancel"].map(x =>
-      document.querySelector("canvas").addEventListener(x, this.events.push.bind(this.events))
+      this.canvas.addEventListener(x, this.events.push.bind(this.events))
     );
+    this.canvasRect = this.canvas.getBoundingClientRect();
+    new ResizeObserver(() => (this.canvasRect = this.canvas.getBoundingClientRect())).observe(this.canvas);
   }
 
   end(touch) {
@@ -104,7 +114,7 @@ export class AppAwareTouchscreenDevice {
           // If grab was being delayed, we should fire the initial grab and also delay the unassignment
           // to ensure we write at least two frames with the grab down (since the action set will change)
           // and otherwise we'd not see the falling xform.
-          if (assignment.framesUntilGrab >= 0) {
+          if (assignment.framesUntilGrab > 0) {
             assignment.framesUntilUnassign = assignment.framesUntilGrab + 2;
           } else {
             unassign(assignment.touch, assignment.job, this.assignments);
@@ -169,11 +179,14 @@ export class AppAwareTouchscreenDevice {
     const assignment = findByTouch(touch, this.assignments);
     switch (assignment.job) {
       case MOVE_CURSOR_JOB:
-        assignment.cursorPose.fromCameraProjection(
-          getPlayerCamera(),
-          (touch.clientX / window.innerWidth) * 2 - 1,
-          -(touch.clientY / window.innerHeight) * 2 + 1
-        );
+        // Don't move the cursor until after the grab so that the grab happens at the touch's initial position
+        if (assignment.framesUntilGrab < 0) {
+          assignment.cursorPose.fromCameraProjection(
+            getPlayerCamera(),
+            ((touch.clientX - this.canvasRect.left) / this.canvasRect.width) * 2 - 1,
+            -((touch.clientY - this.canvasRect.top) / this.canvasRect.height) * 2 + 1
+          );
+        }
         break;
       case MOVE_CAMERA_JOB:
         assignment.delta[0] += touch.clientX - assignment.clientX;
@@ -212,13 +225,13 @@ export class AppAwareTouchscreenDevice {
       let assignment;
 
       // First touch or third touch and other two fingers were pinching
-      if (shouldMoveCursor(touch, this.raycaster)) {
+      if (shouldMoveCursor(touch, this.canvasRect, this.raycaster)) {
         assignment = assign(touch, MOVE_CURSOR_JOB, this.assignments);
 
         // Grabbing objects is delayed by several frames:
         // - We don't want the physics constraint to be applied too early, which results in crazy velocities
         // - We don't want to mis-trigger grabs if the user is about to put down a second finger.
-        assignment.framesUntilGrab = 2;
+        assignment.framesUntilGrab = 8;
       } else {
         assignment = assign(touch, MOVE_CAMERA_JOB, this.assignments);
         assignment.delta = [0, 0];
@@ -231,8 +244,8 @@ export class AppAwareTouchscreenDevice {
       // the touch will then track the cursor (instead of the camera)
       assignment.cursorPose = new Pose().fromCameraProjection(
         getPlayerCamera(),
-        (touch.clientX / window.innerWidth) * 2 - 1,
-        -(touch.clientY / window.innerHeight) * 2 + 1
+        ((touch.clientX - this.canvasRect.left) / this.canvasRect.width) * 2 - 1,
+        -((touch.clientY - this.canvasRect.top) / this.canvasRect.height) * 2 + 1
       );
     } else if (isSecondTouch || isThirdTouch) {
       const cursorJob = findByJob(MOVE_CURSOR_JOB, this.assignments);
@@ -332,6 +345,11 @@ export class AppAwareTouchscreenDevice {
 
       const assignment = findByJob(MOVE_CURSOR_JOB, this.assignments) || findByJob(MOVE_CAMERA_JOB, this.assignments);
       frame.setPose(path.cursorPose, assignment.cursorPose);
+      this.lastPose = assignment.cursorPose;
+    } else if (this.lastPose) {
+      // TODO We want to be able to "hover" on things with the touchscreen so we keep the cursor at its last know position
+      // This is not ideal but its also unclear what the "right" interaction for this should be on a touchscreen.
+      frame.setPose(path.cursorPose, this.lastPose);
     }
 
     frame.setValueType(path.isTouchingGrabbable, false);
@@ -352,7 +370,7 @@ export class AppAwareTouchscreenDevice {
 
     if (hasCameraJob) {
       const delta = findByJob(MOVE_CAMERA_JOB, this.assignments).delta;
-      frame.setVector2(path.touchCameraDelta, delta[0] / window.innerWidth, delta[1] / window.innerHeight);
+      frame.setVector2(path.touchCameraDelta, delta[0] / this.canvas.clientWidth, delta[1] / this.canvas.clientHeight);
     }
 
     frame.setValueType(path.pinch.delta, this.pinch.delta);

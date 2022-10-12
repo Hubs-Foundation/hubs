@@ -1,0 +1,24 @@
+@use "../styles/theme.scss";
+
+:local(.person) {
+  font-size: theme.$font-size-sm;
+  color: theme.$text1-color;
+
+  & > * {
+    margin-right: 8px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+:local(.moderator-icon) {
+  color: theme.$admin-color;
+}
+
+:local(.presence) {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}

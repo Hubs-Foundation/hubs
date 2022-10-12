@@ -1,0 +1,11 @@
+@use "../styles/theme";
+
+:local(.numeric-input) {
+  input {
+    padding-right: 4px;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}

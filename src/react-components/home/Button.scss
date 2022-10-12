@@ -1,0 +1,33 @@
+
+@use "../styles/theme.scss";
+
+:local(.primary-button) {
+
+}
+
+:local(.cta-button) {
+  font-size: 14pt;
+  width: 19em;
+  margin-right: 1em;
+
+  @media (max-width: 380px) {
+    width: 18em;
+  }
+}
+
+:local(.secondary-button) {
+  display: flex;
+  flex-direction: row;
+  width: 250px;
+  margin-top: 18px;
+  margin-bottom: 18px;
+  padding-right: 20px;
+
+  i {
+    margin-right: 16px;
+  }
+}
+
+:local(.thin) {
+  padding: 0 4px
+}

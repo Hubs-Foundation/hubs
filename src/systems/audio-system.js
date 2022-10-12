@@ -1,3 +1,29 @@
+import { LogMessageType } from "../react-components/room/ChatSidebar";
+import { GAIN_TIME_CONST, SourceType } from "../components/audio-params";
+
+let delayedReconnectTimeout = null;
+function performDelayedReconnect(gainNode) {
+  if (delayedReconnectTimeout) {
+    clearTimeout(delayedReconnectTimeout);
+  }
+
+  delayedReconnectTimeout = setTimeout(() => {
+    delayedReconnectTimeout = null;
+    console.warn(
+      "enableChromeAEC: recreate RTCPeerConnection loopback because the local connection was disconnected for 10s"
+    );
+    // eslint-disable-next-line no-use-before-define
+    enableChromeAEC(gainNode);
+  }, 10000);
+}
+
+import * as sdpTransform from "sdp-transform";
+import MediaDevicesManager from "../utils/media-devices-manager";
+
+function isThreeAudio(node) {
+  return node instanceof THREE.Audio || node instanceof THREE.PositionalAudio;
+}
+
 async function enableChromeAEC(gainNode) {
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
@@ -20,15 +46,43 @@ async function enableChromeAEC(gainNode) {
   const inboundPeerConnection = new RTCPeerConnection();
 
   const onError = e => {
-    console.error("RTCPeerConnection loopback initialization error", e);
+    console.error("enableChromeAEC: RTCPeerConnection loopback initialization error", e);
   };
 
   outboundPeerConnection.addEventListener("icecandidate", e => {
     inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
   });
+  outboundPeerConnection.addEventListener("iceconnectionstatechange", () => {
+    console.warn(
+      "enableChromeAEC: outboundPeerConnection state changed to " + outboundPeerConnection.iceConnectionState
+    );
+    if (outboundPeerConnection.iceConnectionState === "disconnected") {
+      performDelayedReconnect(gainNode);
+    }
+    if (outboundPeerConnection.iceConnectionState === "connected") {
+      if (delayedReconnectTimeout) {
+        // The RTCPeerConnection reconnected by itself, cancel recreating the
+        // local connection.
+        clearTimeout(delayedReconnectTimeout);
+      }
+    }
+  });
 
   inboundPeerConnection.addEventListener("icecandidate", e => {
     outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+  });
+  inboundPeerConnection.addEventListener("iceconnectionstatechange", () => {
+    console.warn("enableChromeAEC: inboundPeerConnection state changed to " + inboundPeerConnection.iceConnectionState);
+    if (inboundPeerConnection.iceConnectionState === "disconnected") {
+      performDelayedReconnect(gainNode);
+    }
+    if (inboundPeerConnection.iceConnectionState === "connected") {
+      if (delayedReconnectTimeout) {
+        // The RTCPeerConnection reconnected by itself, cancel recreating the
+        // local connection.
+        clearTimeout(delayedReconnectTimeout);
+      }
+    }
   });
 
   inboundPeerConnection.addEventListener("track", e => {
@@ -46,6 +100,16 @@ async function enableChromeAEC(gainNode) {
     await inboundPeerConnection.setRemoteDescription(offer);
 
     const answer = await inboundPeerConnection.createAnswer();
+
+    // Rewrite SDP to be stereo and (variable) max bitrate
+    const parsedSdp = sdpTransform.parse(answer.sdp);
+    for (let i = 0; i < parsedSdp.media.length; i++) {
+      for (let j = 0; j < parsedSdp.media[i].fmtp.length; j++) {
+        parsedSdp.media[i].fmtp[j].config += `;stereo=1;cbr=0;maxaveragebitrate=510000;`;
+      }
+    }
+    answer.sdp = sdpTransform.write(parsedSdp);
+
     inboundPeerConnection.setLocalDescription(answer);
     outboundPeerConnection.setRemoteDescription(answer);
 
@@ -58,17 +122,12 @@ async function enableChromeAEC(gainNode) {
 
 export class AudioSystem {
   constructor(sceneEl) {
-    sceneEl.audioListener = sceneEl.audioListener || new THREE.AudioListener();
-    if (sceneEl.camera) {
-      sceneEl.camera.add(sceneEl.audioListener);
-    }
-    sceneEl.addEventListener("camera-set-active", evt => {
-      evt.detail.cameraEl.getObject3D("camera").add(sceneEl.audioListener);
-    });
+    this._sceneEl = sceneEl;
 
     this.audioContext = THREE.AudioContext.getContext();
     this.audioNodes = new Map();
-    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination();
+    this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination(); // Voice, camera, screenshare
+    this.audioDestination = this.audioContext.createMediaStreamDestination(); // Media elements
     this.outboundStream = this.mediaStreamDestinationNode.stream;
     this.outboundGainNode = this.audioContext.createGain();
     this.outboundAnalyser = this.audioContext.createAnalyser();
@@ -76,28 +135,32 @@ export class AudioSystem {
     this.analyserLevels = new Uint8Array(this.outboundAnalyser.fftSize);
     this.outboundGainNode.connect(this.outboundAnalyser);
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
+    this.audioContextNeedsToBeResumed = false;
 
-    /**
-     * Chrome and Safari will start Audio contexts in a "suspended" state.
-     * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
-     */
-    const resume = () => {
-      this.audioContext.resume();
-
-      setTimeout(() => {
-        if (this.audioContext.state === "running") {
-          if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
-            enableChromeAEC(sceneEl.audioListener.gain);
-          }
-
-          document.body.removeEventListener("touchend", resume, false);
-          document.body.removeEventListener("mouseup", resume, false);
-        }
-      }, 0);
+    this.mixer = {
+      [SourceType.AVATAR_AUDIO_SOURCE]: this.audioContext.createGain(),
+      [SourceType.MEDIA_VIDEO]: this.audioContext.createGain(),
+      [SourceType.SFX]: this.audioContext.createGain()
     };
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[SourceType.SFX].connect(this._sceneEl.audioListener.getInput());
 
-    document.body.addEventListener("touchend", resume, false);
-    document.body.addEventListener("mouseup", resume, false);
+    // Analyser to show the output audio level
+    this.mixerAnalyser = this.audioContext.createAnalyser();
+    this.mixerAnalyser.fftSize = 32;
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this.mixerAnalyser);
+    this.mixer[SourceType.SFX].connect(this.mixerAnalyser);
+
+    // Webkit Mobile fix
+    this._safariMobileAudioInterruptionFix();
+
+    document.body.addEventListener("touchend", this._resumeAudioContext, false);
+    document.body.addEventListener("mouseup", this._resumeAudioContext, false);
+
+    this.onPrefsUpdated = this.updatePrefs.bind(this);
+    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -119,5 +182,117 @@ export class AudioSystem {
       nodes.gainNode.disconnect();
       this.audioNodes.delete(id);
     }
+  }
+
+  addAudio({ sourceType, node }) {
+    let outputNode = node;
+    if (isThreeAudio(node)) {
+      node.gain.disconnect();
+      outputNode = node.gain;
+    }
+    outputNode.connect(this.mixer[sourceType]);
+  }
+
+  removeAudio({ node }) {
+    let outputNode = node;
+    if (isThreeAudio(node)) {
+      outputNode = node.gain;
+    }
+    outputNode.disconnect();
+  }
+
+  updatePrefs() {
+    const { globalVoiceVolume, globalMediaVolume, globalSFXVolume } = window.APP.store.state.preferences;
+    let newGain = globalMediaVolume / 100;
+    this.mixer[SourceType.MEDIA_VIDEO].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+
+    newGain = globalSFXVolume / 100;
+    this.mixer[SourceType.SFX].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
+
+    newGain = globalVoiceVolume / 100;
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].gain.setTargetAtTime(
+      newGain,
+      this.audioContext.currentTime,
+      GAIN_TIME_CONST
+    );
+
+    if (MediaDevicesManager.isAudioOutputSelectEnabled && APP.mediaDevicesManager) {
+      const sinkId = APP.mediaDevicesManager.selectedSpeakersDeviceId;
+      const isDefault = sinkId === APP.mediaDevicesManager.defaultOutputDeviceId;
+      if ((!this.outputMediaAudio && isDefault) || sinkId === this.outputMediaAudio?.sinkId) return;
+      const sink = isDefault ? this._sceneEl.audioListener.getInput() : this.audioDestination;
+      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
+      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);
+      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
+      this.mixer[SourceType.MEDIA_VIDEO].disconnect();
+      this.mixer[SourceType.MEDIA_VIDEO].connect(sink);
+      this.mixer[SourceType.MEDIA_VIDEO].connect(this.mixerAnalyser);
+      this.mixer[SourceType.SFX].disconnect();
+      this.mixer[SourceType.SFX].connect(sink);
+      this.mixer[SourceType.SFX].connect(this.mixerAnalyser);
+      if (isDefault) {
+        if (this.outputMediaAudio) {
+          this.outputMediaAudio.pause();
+          this.outputMediaAudio.srcObject = null;
+          this.outputMediaAudio = null;
+        }
+      } else {
+        // Swithing the audio sync is only supported in Chrome at the time of writing this.
+        // It also seems to have some limitations and it only works on audio elements. We are piping all our media through the Audio Context
+        // and that doesn't seem to work.
+        // To workaround that we need to use a MediaStreamAudioDestinationNode that is set as the source of the audio element where we switch the sink.
+        // This is very hacky but there don't seem to have any better alternatives at the time of writing this.
+        // https://stackoverflow.com/a/67043782
+        if (!this.outputMediaAudio) {
+          this.outputMediaAudio = new Audio();
+          this.outputMediaAudio.srcObject = this.audioDestination.stream;
+        }
+        if (this.outputMediaAudio.sinkId !== sinkId) {
+          this.outputMediaAudio.setSinkId(sinkId).then(() => {
+            this.outputMediaAudio.play();
+          });
+        }
+      }
+    }
+  }
+
+  /**
+   * Chrome and Safari will start Audio contexts in a "suspended" state.
+   * A user interaction (touch/mouse event) is needed in order to resume the AudioContext.
+   */
+  _resumeAudioContext = () => {
+    this.audioContext.resume();
+
+    setTimeout(() => {
+      if (this.audioContext.state === "running") {
+        const disableAEC = window.APP.store.state.preferences.disableEchoCancellation;
+        if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent) && !disableAEC) {
+          enableChromeAEC(this._sceneEl.audioListener.gain);
+        }
+
+        document.body.removeEventListener("touchend", this._resumeAudioContext, false);
+        document.body.removeEventListener("mouseup", this._resumeAudioContext, false);
+      }
+    }, 0);
+  };
+
+  // Webkit mobile fix
+  // https://stackoverflow.com/questions/10232908/is-there-a-way-to-detect-a-mobile-safari-audio-interruption-headphones-unplugg
+  _safariMobileAudioInterruptionFix() {
+    this.audioContext.onstatechange = () => {
+      console.log(`AudioContext state changed to ${this.audioContext.state}`);
+      if (this.audioContext.state === "suspended") {
+        // When you unplug the headphone or when the bluetooth headset disconnects on
+        // iOS Safari or Chrome, the state changes to suspended.
+        // Chrome Android doesn't go in suspended state for this case.
+        document.getElementById("avatar-rig").messageDispatch.log(LogMessageType.audioSuspended);
+        document.body.addEventListener("touchend", this._resumeAudioContext, false);
+        document.body.addEventListener("mouseup", this._resumeAudioContext, false);
+        this.audioContextNeedsToBeResumed = true;
+      } else if (this.audioContext.state === "running" && this.audioContextNeedsToBeResumed) {
+        this.audioContextNeedsToBeResumed = false;
+        document.getElementById("avatar-rig").messageDispatch.log(LogMessageType.audioResumed);
+      }
+    };
   }
 }
