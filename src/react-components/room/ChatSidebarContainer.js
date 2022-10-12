@@ -172,12 +172,14 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
+  const { can: canTextChat } = useCan("text_chat");
   const typingTimeoutRef = useRef();
   const intl = useIntl();
   const inputRef = useRef();
 
   const onKeyDown = useCallback(
     e => {
+      if (!canTextChat) return;
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
@@ -195,7 +197,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
       typingTimeoutRef.current = setTimeout(() => window.APP.hubChannel.endTyping(), 500);
       window.APP.hubChannel.beginTyping();
     },
-    [sendMessage, setMessage, onClose]
+    [sendMessage, setMessage, onClose, canTextChat]
   );
 
   const onSendMessage = useCallback(
@@ -285,8 +287,6 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     }
   }
 
-  const { can: canTextChat } = useCan("text_chat");
-
   const isMobile = AFRAME.utils.device.isMobile();
   const isOverMaxLength = message.length > MAX_MESSAGE_LENGTH;
   return (
@@ -320,9 +320,9 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         }
         afterInput={
           <>
-            {!isMobile && <EmojiPickerPopoverButton onSelectEmoji={onSelectEmoji} disabled={!canTextChat}/>}
+            {!isMobile && <EmojiPickerPopoverButton onSelectEmoji={onSelectEmoji} />}
             {message.length === 0 && canSpawnMessages ? (
-              <MessageAttachmentButton onChange={onUploadAttachments} disabled={!canTextChat} />
+              <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
               <SendMessageButton onClick={onSendMessage} disabled={message.length === 0 || isOverMaxLength || !canTextChat} />
             )}
@@ -331,7 +331,6 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             )}
           </>
         }
-        disabled={!canTextChat}
       />
     </ChatSidebar>
   );
