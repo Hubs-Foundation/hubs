@@ -1,6 +1,6 @@
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import { errorTexture } from "../utils/error-texture";
-import { Layers } from "../components/layers";
+import { Layers } from "../camera-layers";
 
 export const AlphaMode = Object.freeze({
   Blend: "blend",

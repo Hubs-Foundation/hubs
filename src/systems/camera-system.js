@@ -7,7 +7,7 @@ import { isTagged } from "../components/tags";
 import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
-import { Layers } from "../components/layers";
+import { Layers } from "../camera-layers";
 
 function getInspectableInHierarchy(el) {
   let inspectable = el;

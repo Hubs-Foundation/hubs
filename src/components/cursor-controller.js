@@ -11,7 +11,7 @@ import {
 import { paths } from "../systems/userinput/paths";
 import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
-import { Layers } from "./layers";
+import { Layers } from "../camera-layers";
 
 export function findRemoteHoverTarget(world, object3D) {
   if (!object3D) return null;

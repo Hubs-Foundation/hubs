@@ -1,5 +1,3 @@
-import "./aframe-to-bit-components";
-
 import type { AScene } from "aframe";
 import {
   BlendFunction,
@@ -14,7 +12,7 @@ import {
   ToneMappingMode
 } from "postprocessing";
 import { Camera, HalfFloatType, OrthographicCamera, Scene, WebGLRenderer } from "three";
-import { Layers } from "./components/layers";
+import { Layers } from "./camera-layers";
 import { createImageMesh } from "./utils/create-image-mesh";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";

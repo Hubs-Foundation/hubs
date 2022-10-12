@@ -12,7 +12,7 @@ import fragmentShader from "./sprites/sprite.frag";
 import { getThemeColorShifter } from "../utils/theme-sprites";
 import { onThemeChanged } from "../utils/theme";
 import { disposeTexture } from "../utils/material-utils";
-import { Layers } from "../components/layers";
+import { Layers } from "../camera-layers";
 
 const MAX_SPRITES = 1024;
 const SHEET_TYPES = ["action", "notice"];

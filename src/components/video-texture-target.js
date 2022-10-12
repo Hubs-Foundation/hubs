@@ -1,7 +1,7 @@
 import { disposeTexture } from "../utils/material-utils";
 import { createVideoOrAudioEl } from "../utils/media-utils";
 import { findNode } from "../utils/three-utils";
-import { Layers } from "./layers";
+import { Layers } from "../camera-layers";
 
 /**
  * @component video-texture-source

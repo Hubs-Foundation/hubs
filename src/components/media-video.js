@@ -20,7 +20,7 @@ import { errorTexture } from "../utils/error-texture";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { isSafari } from "../utils/detect-safari";
 import { isIOS as detectIOS } from "../utils/is-mobile";
-import { Layers } from "./layers";
+import { Layers } from "../camera-layers";
 import qsTruthy from "../utils/qs_truthy";
 
 const ONCE_TRUE = { once: true };

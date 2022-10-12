@@ -5,7 +5,7 @@ import { errorTexture } from "../utils/error-texture";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { createGIFTexture } from "../utils/gif-texture";
-import { Layers } from "./layers";
+import { Layers } from "../camera-layers";
 
 const textureCache = new TextureCache();
 const inflightTextures = new Map();
