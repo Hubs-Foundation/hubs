@@ -11,11 +11,12 @@ import {
   ToneMappingEffect,
   ToneMappingMode
 } from "postprocessing";
-import { Camera, HalfFloatType, OrthographicCamera, Scene, WebGLRenderer } from "three";
+import { Camera, HalfFloatType, Mesh, OrthographicCamera, Scene, WebGLRenderer } from "three";
 import { Layers } from "./camera-layers";
 import { createImageMesh } from "./utils/create-image-mesh";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
+import ImageMessage from "./react-components/image-message";
 
 export enum AAModes {
   NONE = "NONE",
@@ -131,26 +132,40 @@ export function createEffectsComposer(
   (copyBuffersPass as any).skipRendering = false;
   copyBuffersPass.needsSwap = true;
 
+  let debugCamera: OrthographicCamera;
+  let debugMeshes: Mesh[];
+  let updateDebugMeshes: () => void;
   if (qsTruthy("envSettingsDebug") && bloomAndTonemapPass) {
     const bloom = (bloomAndTonemapPass as any).effects[0] as BloomEffect;
 
     const debugScene = new Scene();
-    const debugCamera = new OrthographicCamera(0, canvas.width, 0, canvas.height, 0.1, 100);
+    debugCamera = new OrthographicCamera(0, canvas.width, 0, canvas.height, 0.1, 100);
     debugCamera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
     debugCamera.matrixAutoUpdate = true;
     debugCamera.position.z = 5;
 
     // composer.addPass(debugTexturePass);
-    let y = 10;
-    for (let texture of [bloom.luminancePass.texture, bloom.texture]) {
-      const imageMesh = createImageMesh(texture, canvas.height / canvas.width);
+    debugMeshes = [bloom.luminancePass.texture, bloom.texture].map(function (t) {
+      const imageMesh = createImageMesh(t, 1);
       imageMesh.material.depthTest = false;
-      imageMesh.scale.setScalar(320);
-      imageMesh.position.y = y + 90;
-      imageMesh.position.x = 160 + 10;
       debugScene.add(imageMesh);
-      y += 180 + 10;
-    }
+      return imageMesh;
+    });
+
+    updateDebugMeshes = () => {
+      let y = 10;
+      for (const imageMesh of debugMeshes) {
+        const height = 200;
+        const width = height * (canvas.width / canvas.height);
+        imageMesh.scale.x = width;
+        imageMesh.scale.y = height;
+        imageMesh.position.y = y + height / 2;
+        imageMesh.position.x = 10 + width / 2;
+        imageMesh.matrixNeedsUpdate = true;
+        y += height + 10;
+      }
+    };
+    updateDebugMeshes();
 
     const debugPass = new RenderPass(debugScene, debugCamera);
     debugPass.ignoreBackground = true;
@@ -175,6 +190,12 @@ export function createEffectsComposer(
 
   (sceneEl as any).addEventListener("rendererresize", function ({ detail }: { detail: DOMRectReadOnly }) {
     composer.setSize(detail.width, detail.height, true);
+    if (debugCamera) {
+      debugCamera.right = detail.width;
+      debugCamera.bottom = detail.height;
+      debugCamera.updateProjectionMatrix();
+      updateDebugMeshes();
+    }
   });
 
   return {

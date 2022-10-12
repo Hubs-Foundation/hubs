@@ -45,7 +45,7 @@ const defaultEnvSettings = {
   bloom: {
     threshold: 1.0,
     intensity: 1.0,
-    radius: 0.85,
+    radius: 0.6,
     smoothing: 0.025
   }
 };
@@ -69,11 +69,15 @@ export class EnvironmentSystem {
   setupDebugView() {
     const debugSettings = { ...defaultEnvSettings };
 
-    const updateDebug = () => {
-      this.applyEnvSettings(debugSettings);
+    this.debugUpdateUI = function () {
       bloomController.enable(debugSettings.enableHDRPipeline);
       tonemappingController.enable(!debugSettings.enableHDRPipeline);
       bloomFolder.show(debugSettings.enableHDRPipeline && debugSettings.enableBloom);
+    };
+
+    const updateDebug = () => {
+      this.applyEnvSettings(debugSettings);
+      this.debugUpdateUI();
     };
 
     const gui = new GUI({ title: "Environment Settings" });
@@ -138,7 +142,13 @@ export class EnvironmentSystem {
 
   applyEnvSettings(settings) {
     if (this.debugSettings) {
+      const bloomSettings = this.debugSettings.bloom;
       Object.assign(this.debugSettings, settings);
+      if (settings.bloom) {
+        Object.assign(bloomSettings, settings.bloom);
+        this.debugSettings.bloom = bloomSettings;
+      }
+      this.debugUpdateUI();
     }
 
     let materialsNeedUpdate = false;
