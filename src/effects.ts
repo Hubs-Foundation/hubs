@@ -35,12 +35,10 @@ export function createEffectsComposer(
   store: Store
 ) {
   const composer = new EffectComposer(renderer, {
-    frameBufferType: HalfFloatType,
-    multisampling: 4
+    frameBufferType: HalfFloatType
   });
   composer.autoRenderToScreen = false;
   composer.setSize(canvas.width, canvas.height, false);
-  composer.outputBuffer.depthBuffer = composer.inputBuffer.depthBuffer;
 
   const renderScenePass = new RenderPass(scene, camera);
   renderScenePass.clear = true;
@@ -144,7 +142,6 @@ export function createEffectsComposer(
     debugCamera.matrixAutoUpdate = true;
     debugCamera.position.z = 5;
 
-    // composer.addPass(debugTexturePass);
     debugMeshes = [bloom.luminancePass.texture, bloom.texture].map(function (t) {
       const imageMesh = createImageMesh(t, 1);
       imageMesh.material.depthTest = false;
@@ -177,7 +174,7 @@ export function createEffectsComposer(
 
     setTimeout(function () {
       const envSystem = sceneEl.systems["hubs-systems"].environmentSystem;
-      const gui = envSystem.debugGui.addFolder("Post Effects Debug"); //new GUI({ container: envSystem.debugGui });
+      const gui = envSystem.debugGui.addFolder("Post Effects Debug");
       {
         const f = gui.addFolder("Bloom");
         f.add(bloom.blendMode, "blendFunction", BlendFunction);
