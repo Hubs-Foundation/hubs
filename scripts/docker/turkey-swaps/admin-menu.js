@@ -120,7 +120,7 @@ class Menu extends Component {
   }
 
   render() {
-    if (configs.ITA_SERVER == ""){
+    if (configs.ITA_SERVER == "turkey"){
       return (
         <List className={this.props.classes.root}>
           <ListItem className={this.props.classes.logo}>
