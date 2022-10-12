@@ -77,13 +77,8 @@ export function useResizeViewport(viewportRef, store, scene) {
       canvas.style.width = canvasRect.width + "px";
       canvas.style.height = canvasRect.height + "px";
 
-      // scene.renderer.setSize(rendererSize.width, rendererSize.height, false);
-
       scene.camera.aspect = rendererSize.width / rendererSize.height;
       scene.camera.updateProjectionMatrix();
-
-      // Resizing the canvas clears it, so render immediately after resize to prevent flicker.
-      // scene.renderer.render(scene.object3D, scene.camera);
 
       scene.emit("rendererresize", rendererSize, false);
     });

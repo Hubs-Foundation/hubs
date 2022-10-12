@@ -194,6 +194,10 @@ export class App {
 
     if (enablePostEffects) {
       this.fx = createEffectsComposer(canvas, renderer, camera, scene, sceneEl, this.store);
+    } else {
+      (sceneEl as any).addEventListener("rendererresize", function ({ detail }: { detail: DOMRectReadOnly }) {
+        renderer.setSize(detail.width, detail.height, true);
+      });
     }
 
     // This gets called after all system and component init functions
