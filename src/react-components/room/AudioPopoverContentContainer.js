@@ -11,7 +11,7 @@ import { VolumeLevelBar } from "../misc/VolumeLevelBar";
 import styles from "./AudioPopover.scss";
 
 export const AudioPopoverContentContainer = ({ scene }) => {
-  const { isMicMuted, toggleMute, isMicEnabled } = useMicrophoneStatus(scene);
+  const { isMicMuted, toggleMute, isMicEnabled, permissionStatus } = useMicrophoneStatus(scene);
   const { micDeviceChanged, micDevices, voiceChatEnabled } = useMicrophone(scene);
   const { speakerDeviceChanged, speakerDevices } = useSpeakers();
   const { playSound } = useSound({
@@ -33,6 +33,7 @@ export const AudioPopoverContentContainer = ({ scene }) => {
       isAudioInputSelectAvailable={MediaDevicesManager.isAudioInputSelectEnabled}
       isAudioOutputSelectAvailable={MediaDevicesManager.isAudioOutputSelectEnabled}
       voiceChatEnabled={voiceChatEnabled}
+      permissionStatus={permissionStatus}
     />
   );
 };

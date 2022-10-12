@@ -11,6 +11,7 @@ import { Row } from "../layout/Row";
 import { ToggleInput } from "../input/ToggleInput";
 import { Divider } from "../layout/Divider";
 import { Button } from "../input/Button";
+import { PermissionStatus } from "../../utils/media-devices-utils";
 
 export const AudioPopoverContent = ({
   micLevelBar,
@@ -25,7 +26,8 @@ export const AudioPopoverContent = ({
   onPlaySound,
   isAudioInputSelectAvailable,
   isAudioOutputSelectAvailable,
-  voiceChatEnabled
+  voiceChatEnabled,
+  permissionStatus
 }) => {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
   return (
@@ -77,13 +79,14 @@ export const AudioPopoverContent = ({
       <p style={{ alignSelf: "start" }}>
         <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
       </p>
-      {isAudioOutputSelectAvailable && (
-        <SelectInputField
-          className={styles.selectionInput}
-          buttonClassName={styles.selectionInput}
-          onChange={onChangeSpeaker}
-          {...speakerOptions}
-        />
+      {permissionStatus === PermissionStatus.GRANTED &&
+        isAudioOutputSelectAvailable && (
+          <SelectInputField
+            className={styles.selectionInput}
+            buttonClassName={styles.selectionInput}
+            onChange={onChangeSpeaker}
+            {...speakerOptions}
+          />
       )}
       <Row noWrap>
         <VolumeOff className={iconStyle} style={{ marginRight: "12px" }} />
@@ -110,5 +113,10 @@ AudioPopoverContent.propTypes = {
   onChangeSpeaker: PropTypes.func,
   isAudioInputSelectAvailable: PropTypes.bool,
   isAudioOutputSelectAvailable: PropTypes.bool,
-  voiceChatEnabled: PropTypes.bool
+  voiceChatEnabled: PropTypes.bool,
+  permissionStatus: PropTypes.string
+};
+
+AudioPopoverContent.defaultProps = {
+  permissionStatus: PermissionStatus.PROMPT
 };
