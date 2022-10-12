@@ -1317,8 +1317,7 @@ class PreferencesScreen extends Component {
                   defaultMessage: "8x MSAA"
                 })
               }
-            ],
-            promptForRefresh: true
+            ]
           }
         ]
       ]

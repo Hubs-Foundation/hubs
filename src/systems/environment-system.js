@@ -69,12 +69,6 @@ export class EnvironmentSystem {
   setupDebugView() {
     const debugSettings = { ...defaultEnvSettings };
 
-    this.debugUpdateUI = function () {
-      bloomController.enable(debugSettings.enableHDRPipeline);
-      tonemappingController.enable(!debugSettings.enableHDRPipeline);
-      bloomFolder.show(debugSettings.enableHDRPipeline && debugSettings.enableBloom);
-    };
-
     const updateDebug = () => {
       this.applyEnvSettings(debugSettings);
       this.debugUpdateUI();
@@ -107,6 +101,11 @@ export class EnvironmentSystem {
     this.debugGui = gui;
     this.debugSettings = debugSettings;
     this.debugMode = true;
+    this.debugUpdateUI = function () {
+      bloomController.enable(debugSettings.enableHDRPipeline);
+      tonemappingController.enable(!debugSettings.enableHDRPipeline);
+      bloomFolder.show(debugSettings.enableHDRPipeline && debugSettings.enableBloom);
+    };
 
     window.$E = this;
   }
