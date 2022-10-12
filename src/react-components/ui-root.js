@@ -8,7 +8,6 @@ import screenfull from "screenfull";
 import configs from "../utils/configs";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
-import maskEmail from "../utils/mask-email";
 import styles from "../assets/stylesheets/ui-root.scss";
 import styleUtils from "./styles/style-utils.scss";
 import { ReactAudioContext } from "./wrap-with-audio";
