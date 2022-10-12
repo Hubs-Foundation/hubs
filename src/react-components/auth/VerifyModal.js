@@ -24,6 +24,12 @@ export function VerifyingEmail() {
 }
 
 export function EmailVerified({ origin }) {
+
+  // FROM ORIGINAL OIDC SPIKE
+  // useEffect(function() {
+  //   window.close();
+  // });
+
   return (
     <Column center padding grow>
       <b>
