@@ -136,15 +136,38 @@ SubmitEmail.propTypes = {
   onSubmitEmail: PropTypes.func.isRequired
 };
 
+function SubmitOIDC({ onSubmitOIDC }) {
+  const onSubmitForm = useCallback(
+    e => {
+      e.preventDefault();
+      onSubmitOIDC();
+    },
+    [onSubmitOIDC]
+  );
+
+  return (
+    <form onSubmit={onSubmitForm} className={styles.signInContainer}>
+      <button type="submit">{configs.APP_CONFIG.auth.oidc_button_label || "Sign In"}</button>
+    </form>
+  );
+}
+SubmitOIDC.propTypes = {
+  onSubmitOIDC: PropTypes.func.isRequired
+};
+
 export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
   return (
     <Column center padding>
-      <FormattedMessage
-        id="sign-in-modal.wait-for-verification"
-        defaultMessage="<p>Email sent to {email}!</p><p>To continue, click on the link in the email using your phone, tablet, or PC.</p><p>No email? You may not be able to create an account.</p>"
-        // eslint-disable-next-line react/display-name
-        values={{ email, p: chunks => <p>{chunks}</p> }}
-      />
+      {email ? (
+        <FormattedMessage
+          id="sign-in-modal.wait-for-verification"
+          defaultMessage="<p>Email sent to {email}!</p><p>To continue, click on the link in the email using your phone, tablet, or PC.</p><p>No email? You may not be able to create an account.</p>"
+          // eslint-disable-next-line react/display-name
+          values={{ email, p: chunks => <p>{chunks}</p> }}
+        />
+      ) : (
+        <FormattedMessage className="preformatted" id="sign-in.oidc-auth-started" defaultMessage="Waiting for signin..."/>
+      )}
       {showNewsletterSignup && (
         <p>
           <small>
@@ -166,7 +189,7 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
 
 WaitForVerification.propTypes = {
   showNewsletterSignup: PropTypes.bool,
-  email: PropTypes.string.isRequired,
+  email: PropTypes.string,
   onCancel: PropTypes.func.isRequired
 };
 
