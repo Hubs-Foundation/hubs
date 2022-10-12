@@ -157,9 +157,6 @@ export class App {
       antialias: !enablePostEffects,
       depth: !enablePostEffects,
       stencil: false,
-      // premultipliedAlpha: true,
-      // preserveDrawingBuffer: false,
-      // logarithmicDepthBuffer: false,
       powerPreference: "high-performance",
       canvas
     });
