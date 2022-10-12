@@ -119,7 +119,7 @@ class Menu extends Component {
   }
 
   render() {
-    if (process.env.TURKEY_MODE === 'true'){
+    if (configs.ITA_SERVER != ""){
       return (
         <List className={this.props.classes.root}>
           <ListItem className={this.props.classes.logo}>
