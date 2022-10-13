@@ -38,7 +38,7 @@ export function ToolbarMicButton({ scene, disabled, ...rest }) {
   }, []);
   useVolumeMeter({
     analyser: scene.systems["hubs-systems"].audioSystem.outboundAnalyser,
-    update
+    update: !disabled && update
   });
   const intl = useIntl();
   return (

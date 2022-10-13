@@ -18,13 +18,13 @@ export const AudioPopoverButtonContainer = ({ scene, initiallyVisible, content }
       micButton={
         <ToolbarMicButton
           scene={scene}
-          icon={isMicMuted || !isMicEnabled || !canVoiceChat ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
+          icon={isMicMuted|| !isMicEnabled || !canVoiceChat ? <MicrophoneMutedIcon /> : <MicrophoneIcon />}
           label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}
           preset="basic"
           onClick={toggleMute}
-          statusColor={isMicMuted || !isMicEnabled || !canVoiceChat ? "disabled" : "enabled"}
+          statusColor={isMicEnabled && canVoiceChat ? isMicMuted ? "disabled" : "enabled" : undefined}
           type={"right"}
-          disabled={!canVoiceChat}
+          disabled={!canVoiceChat || !isMicEnabled}
         />
       }
       onChangeMicrophoneMuted={toggleMute}
