@@ -38,12 +38,12 @@ export const ToolbarButton = forwardRef(
         title={title}
         {...rest}
       >
-        <div className={classNames(styles.iconContainer, iconContainerClassName, { [styles.disabled]: disabled })} aria-hidden="true">
+        <div className={classNames(styles.iconContainer, iconContainerClassName)} disabled={disabled} aria-hidden="true">
           {icon}
           {statusColor && <div className={classNames(styles.statusIndicator, styles["status-" + statusColor])} />}
           {children}
         </div>
-        {label && <label>{label}</label>}
+        {label && <label disabled={disabled}>{label}</label>}
       </button>
     );
   }

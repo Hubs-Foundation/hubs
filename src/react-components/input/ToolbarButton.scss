@@ -14,6 +14,16 @@
     margin-top: 8px;
     margin-bottom: 3px;
     white-space: nowrap;
+
+    &:disabled,
+    &[disabled] {
+      cursor: default;
+    }
+  }
+
+  &:disabled,
+  &[disabled] {
+    cursor: default;
   }
 }
 
@@ -56,21 +66,27 @@
       color: theme.$toolbar-basic-icon-color;
     }
 
-    &:local(.disabled) {
-      border-color: theme.$transparent;;
+    &:disabled,
+    &[disabled] {
+      border-color: theme.$transparent;
+      background-color: theme.$disabled-bg-color;
       svg {
         color: theme.$disabled-icon-color;
       }
     }
-  }  
+  }
 
   &:hover :local(.icon-container) {
     border: 1px solid theme.$toolbar-basic-border-color;
     background-color: theme.$basic-color-hover;
 
-    &:local(.disabled) {
-      border-color: theme.$transparent;;
-      background-color: theme.$transparent;;
+    &:disabled,
+    &[disabled] {
+      border-color: theme.$transparent;
+      background-color: theme.$disabled-bg-color;
+      svg {
+        color: theme.$disabled-icon-color;
+      }
     }
   }
 
@@ -113,6 +129,13 @@
 :local(.primary) {
   :local(.icon-container) {
     background-color: theme.$primary-color;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:hover :local(.icon-container) {
@@ -145,6 +168,22 @@
         svg {
           color: theme.$primary-color-hover;
         }
+
+        &:disabled,
+        &[disabled] {
+          svg {
+            color: theme.$disabled-icon-color;
+          }
+        }
+      }
+
+      &:disabled,
+      &[disabled] {
+        border-color: theme.$transparent;
+        background-color: theme.$disabled-bg-color;
+        svg {
+          color: theme.$disabled-icon-color;
+        }
       }
     }
   
@@ -166,7 +205,8 @@
     background-color: theme.$accept-color;
     border-color: theme.$accept-border-color;
 
-    &:local(.disabled) {
+    &:disabled,
+    &[disabled] {
       svg {
         color: theme.$disabled-icon-color;
       }
@@ -176,8 +216,11 @@
   &:hover :local(.icon-container) {
     background-color: theme.$accept-color-hover;
 
-    &:local(.disabled) {
-      background-color: theme.$accept-color;
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
     }
   }
 
@@ -225,7 +268,8 @@
   :local(.icon-container) {
     background-color: theme.$cancel-color;
 
-    &:local(.disabled) {
+    &:disabled,
+    &[disabled] {
       svg {
         color: theme.$disabled-icon-color;
       }
@@ -235,8 +279,11 @@
   &:hover :local(.icon-container) {
     background-color: theme.$cancel-color-hover;
 
-    &:local(.disabled) {
-      background-color: theme.$cancel-color;
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
     }
   }
 
@@ -285,7 +332,8 @@
     background-color: theme.$accent1-color;
     border-color: theme.$accent1-border-color;
 
-    &:local(.disabled) {
+    &:disabled,
+    &[disabled] {
       svg {
         color: theme.$disabled-icon-color;
       }
@@ -295,7 +343,8 @@
   &:hover :local(.icon-container) {
     background-color: theme.$accent1-color-hover;
 
-    &:local(.disabled) {
+    &:disabled,
+    &[disabled] {
       background-color: theme.$accent1-color;
     }
   }
@@ -326,6 +375,13 @@
           color: theme.$accent1-color-hover;
         }
       }
+
+      &:disabled,
+      &[disabled] {
+        svg {
+          color: theme.$disabled-icon-color;
+        }
+      }
     }
   
     &:active {
@@ -345,7 +401,8 @@
     background-color: theme.$accent2-color;
     border-color: theme.$accent2-border-color;
 
-    &:local(.disabled) {
+    &:disabled,
+    &[disabled] {
       svg {
         color: theme.$disabled-icon-color;
       }
@@ -355,8 +412,11 @@
   &:hover :local(.icon-container) {
     background-color: theme.$accent2-color-hover;
 
-    &:local(.disabled) {
-      background-color: theme.$accent2-color;
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
     }
   }
 
@@ -405,7 +465,8 @@
     background-color: theme.$accent3-color;
     border-color: theme.$accent3-border-color;
 
-    &:local(.disabled) {
+    &:disabled,
+    &[disabled] {
       svg {
         color: theme.$disabled-icon-color;
       }
@@ -415,8 +476,11 @@
   &:hover :local(.icon-container) {
     background-color: theme.$accent3-color-hover;
 
-    &:local(.disabled) {
-      background-color: theme.$accent3-color;
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
     }
   }
 
@@ -465,7 +529,8 @@
     background-color: theme.$accent4-color;
     border-color: theme.$accent4-border-color;
 
-    &:local(.disabled) {
+    &:disabled,
+    &[disabled] {
       svg {
         color: theme.$disabled-icon-color;
       }
@@ -475,8 +540,11 @@
   &:hover :local(.icon-container) {
     background-color: theme.$accent4-color-hover;
 
-    &:local(.disabled) {
-      background-color: theme.$accent4-color;
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
     }
   }
 
@@ -525,7 +593,8 @@
     background-color: theme.$accent5-color;
     border-color: theme.$accent5-border-color;
 
-    &:local(.disabled) {
+    &:disabled,
+    &[disabled] {
       svg {
         color: theme.$disabled-icon-color;
       }
@@ -535,8 +604,11 @@
   &:hover :local(.icon-container) {
     background-color: theme.$accent5-color-hover;
 
-    &:local(.disabled) {
-      background-color: theme.$accent5-color;
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
     }
   }
 
