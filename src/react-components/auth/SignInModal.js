@@ -136,7 +136,7 @@ SubmitEmail.propTypes = {
   onSubmitEmail: PropTypes.func.isRequired
 };
 
-function SubmitOIDC({ onSubmitOIDC }) {
+export function SubmitOIDC({ onSubmitOIDC }) {
   const onSubmitForm = useCallback(
     e => {
       e.preventDefault();
