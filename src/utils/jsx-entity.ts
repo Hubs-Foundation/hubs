@@ -43,6 +43,7 @@ import { Group, Object3D, Texture, VideoTexture } from "three";
 import { AlphaMode } from "./create-image-mesh";
 import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
+import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 
 preload(
   new Promise(resolve => {
@@ -206,6 +207,7 @@ export interface ComponentData {
     projection: "flat" | "360-equirectangular";
     autoPlay: boolean;
   };
+  directionalLight?: DirectionalLightParams;
   networkedVideo?: true;
   videoMenu?: {
     timeLabelRef: Ref;
@@ -312,7 +314,8 @@ export const inflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   text: inflateText,
   model: inflateModel,
   image: inflateImage,
-  video: inflateVideo
+  video: inflateVideo,
+  directionalLight: inflateDirectionalLight
 };
 
 export function inflatorExists(name: string): name is keyof ComponentData {
