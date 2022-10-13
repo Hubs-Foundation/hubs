@@ -1,3 +1,4 @@
+import "aframe";
 import {
   getCurrentHubId,
   updateVRHudPresenceCount,
@@ -7,6 +8,7 @@ import {
 import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
+import { ScenePrefab } from "./prefabs/scene";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
@@ -24,7 +26,6 @@ import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
-import "aframe";
 import "./utils/aframe-overrides";
 
 // A-Frame hardcodes THREE.Cache.enabled = true
@@ -388,6 +389,14 @@ export async function getSceneUrlForHub(hub) {
 export async function updateEnvironmentForHub(hub, entryManager) {
   console.log("Updating environment for hub");
   const sceneUrl = await getSceneUrlForHub(hub);
+
+  if (qsTruthy("newLoader")) {
+    console.log("Using new loading path for scenes.");
+    const entity = renderAsEntity(APP.world, ScenePrefab(sceneUrl));
+    document.querySelector("#environment-scene").object3D.add(APP.world.eid2obj.get(entity));
+    return;
+  }
+  console.log("Using legacy loading path for scenes.");
 
   const sceneErrorHandler = () => {
     remountUI({ roomUnavailableReason: ExitReason.sceneError });

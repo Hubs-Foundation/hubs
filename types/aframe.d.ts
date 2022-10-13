@@ -94,6 +94,7 @@ declare module "aframe" {
       /** @deprecated see bit-interaction-system */
       interaction: InteractionSystem;
     };
+    emit(string, any): void;
   }
 
   declare global {

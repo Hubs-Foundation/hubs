@@ -23,8 +23,7 @@ export const MEDIA_LOADER_FLAGS = {
   RESIZE: 1 << 1
 };
 
-function assignNetworkIds(world, mediaEid, mediaLoaderEid) {
-  const rootNid = APP.getString(Networked.id[mediaLoaderEid]);
+export function assignNetworkIds(world, rootNid, mediaEid, mediaLoaderEid) {
   let i = 0;
   world.eid2obj.get(mediaEid).traverse(function (obj) {
     if (obj.eid && hasComponent(world, Networked, obj.eid)) {
@@ -99,7 +98,8 @@ function* animateScale(world, media) {
   });
 }
 
-function add(world, child, parent) {
+// TODO: Move to bit utils and rename
+export function add(world, child, parent) {
   const parentObj = world.eid2obj.get(parent);
   const childObj = world.eid2obj.get(child);
   parentObj.add(childObj);
@@ -129,7 +129,7 @@ function* loadMedia(world, eid) {
 function* loadAndAnimateMedia(world, eid, signal) {
   const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
   if (!canceled) {
-    assignNetworkIds(world, media, eid);
+    assignNetworkIds(world, APP.getString(Networked.id[eid]), media, eid);
     resizeAndRecenter(world, media, eid);
     add(world, media, eid);
     yield* animateScale(world, media);

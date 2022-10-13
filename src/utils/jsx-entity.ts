@@ -27,7 +27,8 @@ import {
   VideoMenuItem,
   NotRemoteHoverTarget,
   Deletable,
-  TextureCacheKey
+  TextureCacheKey,
+  SceneLoader
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -251,6 +252,7 @@ export interface ComponentData {
   };
   animationMixer?: any;
   mediaLoader?: MediaLoaderParams;
+  sceneLoader?: { src: string };
   mediaFrame?: any;
   object3D?: any;
   text?: any;
@@ -299,6 +301,7 @@ export const inflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   videoMenu: createDefaultInflator(VideoMenu),
   videoMenuItem: createDefaultInflator(VideoMenuItem),
   textureCacheKey: createDefaultInflator(TextureCacheKey),
+  sceneLoader: createDefaultInflator(SceneLoader),
   mediaLoader: inflateMediaLoader,
   grabbable: inflateGrabbable,
 

@@ -131,6 +131,9 @@ export const MediaLoader = defineComponent({
 });
 MediaLoader.src[$isStringType] = true;
 
+export const SceneLoader = defineComponent({ src: Types.ui32 });
+SceneLoader.src[$isStringType] = true;
+
 export const TextureCacheKey = defineComponent({
   src: Types.ui32,
   version: Types.ui8
