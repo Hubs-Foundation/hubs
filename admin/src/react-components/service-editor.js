@@ -128,8 +128,7 @@ function getConfigurables(categorySchema) {
   return getDescriptors(categorySchema).filter(
     ([path, descriptor]) =>
     (qs.get("show_internal_configs") !== null || descriptor.internal !== "true") &&
-    (qs.get("show_deprecated_configs") !== null || descriptor.internal !== "true") &&
-    (qs.get("show_oidc_configs") !== null || path[1] !== "oidc")
+    (qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true")
   );
 }
 
