@@ -1,21 +1,23 @@
 import { useState, useEffect } from "react";
 
-export function usePermission(permission) {
-  const [canDo, setCanDo] = useState(APP.hubChannel.can(permission));
+export function useRoomPermissions() {
+  const [roomPermissions, setRoomPermissions] = useState(APP.hub.member_permissions);
 
   useEffect(
     () => {
-      const onPermissionsUpdated = () => setCanDo(APP.hubChannel.can(permission));
+      const onPermissionsUpdated = () => {
+        setRoomPermissions(APP.hub.member_permissions);
+      };
       APP.hubChannel.addEventListener("permissions_updated", onPermissionsUpdated);
 
       return () => {
         APP.hubChannel.removeEventListener("permissions_updated", onPermissionsUpdated);
       };
     },
-    [permission, setCanDo]
+    [roomPermissions, setRoomPermissions]
   );
 
   return {
-    canDo
+    ...roomPermissions
   };
 }

@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 
-export function useRoomPermissionsUpdated() {
-  const [roomPermissions, setRoomPermissions] = useState(APP.hub.member_permissions);
+export function usePermissions() {
+  const [permissions, setPermissions] = useState(APP.hubChannel._permissions);
 
   useEffect(
     () => {
       const onPermissionsUpdated = () => {
-        setRoomPermissions(APP.hub.member_permissions);
+        setPermissions(APP.hubChannel._permissions);
       };
       APP.hubChannel.addEventListener("permissions_updated", onPermissionsUpdated);
 
@@ -14,10 +14,10 @@ export function useRoomPermissionsUpdated() {
         APP.hubChannel.removeEventListener("permissions_updated", onPermissionsUpdated);
       };
     },
-    [roomPermissions, setRoomPermissions]
+    [permissions, setPermissions]
   );
 
   return {
-    roomPermissions
+    ...permissions
   };
 }

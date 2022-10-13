@@ -12,7 +12,7 @@ import styles from "./AudioPopover.scss";
 
 export const AudioPopoverContentContainer = ({ scene }) => {
   const { isMicMuted, toggleMute, isMicEnabled, permissionStatus } = useMicrophoneStatus(scene);
-  const { micDeviceChanged, micDevices, voiceChatEnabled } = useMicrophone(scene);
+  const { micDeviceChanged, micDevices, canVoiceChat } = useMicrophone(scene);
   const { speakerDeviceChanged, speakerDevices } = useSpeakers();
   const { playSound } = useSound({
     scene,
@@ -32,7 +32,7 @@ export const AudioPopoverContentContainer = ({ scene }) => {
       onPlaySound={playSound}
       isAudioInputSelectAvailable={MediaDevicesManager.isAudioInputSelectEnabled}
       isAudioOutputSelectAvailable={MediaDevicesManager.isAudioOutputSelectEnabled}
-      voiceChatEnabled={voiceChatEnabled}
+      canVoiceChat={canVoiceChat}
       permissionStatus={permissionStatus}
     />
   );

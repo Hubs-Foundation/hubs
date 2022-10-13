@@ -6,11 +6,11 @@ import { ToolbarMicButton } from "../input/ToolbarMicButton";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
 import { FormattedMessage } from "react-intl";
-import { usePermission } from "./usePermission";
+import { useCan } from "./useCan";
 
 export const AudioPopoverButtonContainer = ({ scene, initiallyVisible, content }) => {
   const { isMicMuted, toggleMute, isMicEnabled } = useMicrophoneStatus(scene);
-  const { canDo: canVoiceChat } = usePermission("voice_chat");
+  const canVoiceChat = useCan("voice_chat");
   return (
     <AudioPopoverButton
       initiallyVisible={initiallyVisible}

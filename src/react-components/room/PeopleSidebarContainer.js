@@ -5,7 +5,7 @@ import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
 import { useCan } from "./useCan";
-import { useRoomPermissionsUpdated } from "./useRoomPermissionsUpdated";
+import { useRoomPermissions } from "./useRoomPermissions";
 
 export function userFromPresence(sessionId, presence, micPresences, mySessionId, voiceEnabled) {
   const meta = presence.metas[presence.metas.length - 1];
@@ -18,7 +18,7 @@ export function userFromPresence(sessionId, presence, micPresences, mySessionId,
 
 function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   const [people, setPeople] = useState([]);
-  const { roomPermissions } = useRoomPermissionsUpdated();
+  const { voice_chat: voiceChatEnabled } = useRoomPermissions();
 
   useEffect(
     () => {
@@ -29,7 +29,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
 
         setPeople(
           Object.entries(presences).map(([id, presence]) => {
-            return userFromPresence(id, presence, micPresences, mySessionId, roomPermissions["voice_chat"]);
+            return userFromPresence(id, presence, micPresences, mySessionId, voiceChatEnabled);
           })
         );
 
@@ -42,7 +42,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
         clearTimeout(timeout);
       };
     },
-    [presences, micUpdateFrequency, setPeople, mySessionId, roomPermissions]
+    [presences, micUpdateFrequency, setPeople, mySessionId, voiceChatEnabled]
   );
 
   return people;
@@ -59,8 +59,7 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
     },
     [people, hubChannel]
   );
-  const { can: canVoiceChat } = useCan("voice_chat");
-  const { permissions: roomPermissions } = useRoomPermissionsUpdated();
+  const canVoiceChat = useCan("voice_chat");
 
   return (
     <PeopleSidebar
@@ -70,7 +69,6 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
       onMuteAll={onMuteAll}
       showMuteAll={hubChannel.can("mute_users")}
       canVoiceChat={canVoiceChat}
-      roomPermissions={roomPermissions}
     />
   );
 }

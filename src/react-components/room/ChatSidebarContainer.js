@@ -21,6 +21,8 @@ import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 import { PermissionMessage } from "./PermissionsMessages";
+import { usePermissions } from "./usePermissions";
+import { useRoomPermissions } from "./useRoomPermissions";
 import { useCan } from "./useCan";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
@@ -109,11 +111,15 @@ function updateMessageGroups(messageGroups, newMessage) {
 export function ChatContextProvider({ messageDispatch, children }) {
   const [messageGroups, setMessageGroups] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState(false);
+  const isMod = useCan("kick_users");
 
   useEffect(
     () => {
       function onReceiveMessage(event) {
         const newMessage = event.detail;
+
+        if (isMod && newMessage.type === "permission") return;
+
         setMessageGroups(messages => updateMessageGroups(messages, newMessage));
 
         if (
@@ -137,7 +143,7 @@ export function ChatContextProvider({ messageDispatch, children }) {
         }
       };
     },
-    [messageDispatch, setMessageGroups, setUnreadMessages]
+    [messageDispatch, setMessageGroups, setUnreadMessages, isMod]
   );
 
   const sendMessage = useCallback(
@@ -172,7 +178,8 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
-  const { can: canTextChat } = useCan("text_chat");
+  const { text_chat: canTextChat, kick_users: isMod } = usePermissions();
+  const { text_chat: textChatEnabled } = useRoomPermissions();
   const typingTimeoutRef = useRef();
   const intl = useIntl();
   const inputRef = useRef();
@@ -295,7 +302,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         {messageGroups.map(({ id, systemMessage, permissionMessage, ...rest }) => {
           if (systemMessage) {
             return <SystemMessage key={id} {...rest} />;
-          } else if (permissionMessage) {
+          } else if (permissionMessage && !isMod) {
             return <PermissionMessageGroup key={id} {...rest} />;
           } else {
             return <ChatMessageGroup key={id} {...rest} />;
@@ -303,6 +310,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         })}
       </ChatMessageList>
       {!canTextChat && <PermissionMessage permission={"text_chat"} />}
+      {!textChatEnabled && isMod && <PermissionMessage permission={"text_chat"} isMod={true}/>}
       <ChatInput
         id="chat-input"
         ref={inputRef}

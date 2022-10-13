@@ -47,7 +47,7 @@ export function ToolbarMicButton({ scene, disabled, ...rest }) {
       label={intl.formatMessage(micButtonMessages["label"])}
       preset="basic"
       type={"right"}
-      title={disabled && intl.formatMessage(micButtonMessages["title"])}
+      title={disabled ? intl.formatMessage(micButtonMessages["title"]) : undefined}
       disabled={disabled}
       {...rest}
     />

@@ -16,6 +16,8 @@ import { ReactComponent as HandRaisedIcon } from "../icons/HandRaised.svg";
 import { List, ButtonListItem } from "../layout/List";
 import { FormattedMessage, useIntl } from "react-intl";
 import { PermissionMessage } from "./PermissionsMessages";
+import { useCan } from "./useCan";
+import { useRoomPermissions } from "./useRoomPermissions";
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {
@@ -93,6 +95,8 @@ function getPersonName(person, intl) {
 
 export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, onMuteAll, canVoiceChat }) {
   const intl = useIntl();
+  const isMod = useCan("kick_users");
+  const { voice_chat: voiceChatEnabled } = useRoomPermissions();
   return (
     <Sidebar
       title={
@@ -114,6 +118,7 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
       }
     >
       {!canVoiceChat && <PermissionMessage permission={"voice_chat"} />}
+      {!voiceChatEnabled && isMod && <PermissionMessage permission={"voice_chat"} isMod={true}/>}
       <List>
         {people.map(person => {
           const DeviceIcon = getDeviceIconComponent(person.context);

@@ -44,14 +44,14 @@ export function MicSetupModal({
   isAudioOutputSelectAvailable,
   micLevelBar,
   speakerLevelBar,
-  voiceChatEnabled,
+  canVoiceChat,
   ...rest
 }) {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
   const intl = useIntl();
   return (
     <Modal
-      title={intl.formatMessage(tittleMessages[voiceChatEnabled ? "microphoneSetup" : "audioSetup"])}
+      title={intl.formatMessage(tittleMessages[canVoiceChat ? "microphoneSetup" : "audioSetup"])}
       beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       {...rest}
@@ -65,7 +65,7 @@ export function MicSetupModal({
         </p>
         <div className={styles.audioCheckContainer}>
           <div className={styles.audioIoContainer}>
-            {voiceChatEnabled && (
+            {canVoiceChat && (
               <>
                 <div className={styles.iconContainer}>
                   <div>
@@ -220,7 +220,7 @@ MicSetupModal.propTypes = {
   permissionStatus: PropTypes.string,
   isAudioInputSelectAvailable: PropTypes.bool,
   isAudioOutputSelectAvailable: PropTypes.bool,
-  voiceChatEnabled: PropTypes.bool
+  canVoiceChat: PropTypes.bool
 };
 
 MicSetupModal.defaultProps = {

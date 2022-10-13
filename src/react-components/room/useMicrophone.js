@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
-import { usePermission } from "./usePermission";
+import { useCan } from "./useCan";
 
 export function useMicrophone(scene) {
   const mediaDevicesManager = APP.mediaDevicesManager;
-  const { canDo: voiceChatEnabled } = usePermission("voice_chat");
+  const canVoiceChat = useCan("voice_chat");
   const [micDevices, setMicDevices] = useState({
     value: mediaDevicesManager.selectedMicDeviceId,
     options: mediaDevicesManager.micDevicesOptions
@@ -72,15 +72,15 @@ export function useMicrophone(scene) {
   );
 
   useEffect(() => {
-    if (voiceChatEnabled) {
+    if (canVoiceChat) {
       mediaDevicesManager.startMicShare({});
     }
   },
-  [mediaDevicesManager, voiceChatEnabled]);
+  [mediaDevicesManager, canVoiceChat]);
 
   return {
     micDeviceChanged,
     micDevices,
-    voiceChatEnabled
+    canVoiceChat
   };
 }

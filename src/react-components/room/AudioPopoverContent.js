@@ -26,13 +26,13 @@ export const AudioPopoverContent = ({
   onPlaySound,
   isAudioInputSelectAvailable,
   isAudioOutputSelectAvailable,
-  voiceChatEnabled,
+  canVoiceChat,
   permissionStatus
 }) => {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
   return (
     <Column padding grow gap="lg" className={styles.audioToolbarPopover}>
-      {voiceChatEnabled && (
+      {canVoiceChat && (
         <>
           <p style={{ alignSelf: "start" }}>
           <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
@@ -113,7 +113,7 @@ AudioPopoverContent.propTypes = {
   onChangeSpeaker: PropTypes.func,
   isAudioInputSelectAvailable: PropTypes.bool,
   isAudioOutputSelectAvailable: PropTypes.bool,
-  voiceChatEnabled: PropTypes.bool,
+  canVoiceChat: PropTypes.bool,
   permissionStatus: PropTypes.string
 };
 

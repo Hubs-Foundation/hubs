@@ -14,7 +14,7 @@ import styles from "./MicSetupModal.scss";
 
 export function MicSetupModalContainer({ scene, ...rest }) {
   const { isMicEnabled, permissionStatus } = useMicrophoneStatus(scene);
-  const { micDeviceChanged, micDevices, voiceChatEnabled } = useMicrophone(scene);
+  const { micDeviceChanged, micDevices, canVoiceChat } = useMicrophone(scene);
   const { speakerDeviceChanged, speakerDevices } = useSpeakers();
   const { playSound } = useSound({
     scene,
@@ -43,7 +43,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       onChangeMicrophoneMuted={onChangeMicrophoneMuted}
       isAudioInputSelectAvailable={MediaDevicesManager.isAudioInputSelectEnabled}
       isAudioOutputSelectAvailable={MediaDevicesManager.isAudioOutputSelectEnabled}
-      voiceChatEnabled={voiceChatEnabled}
+      canVoiceChat={canVoiceChat}
       {...rest}
     />
   );

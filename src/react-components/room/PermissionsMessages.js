@@ -7,30 +7,41 @@ import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.
 import { ReactComponent as Microphone } from "../icons/Microphone.svg";
 import { ReactComponent as Chat } from "../icons/Chat.svg";
 import { ReactComponent as ChatOff } from "../icons/ChatOff.svg";
+import { useCan } from "./useCan";
 
 export const permissionsIcons = {
   voiceChatEnabled: <Microphone />,
   voiceChatDisabled: <MicrophoneMutedIcon />,
+  voiceChatDisabledMod: <MicrophoneMutedIcon />,
   textChatEnabled: <Chat />,
-  textChatDisabled: <ChatOff />
+  textChatDisabled: <ChatOff />,
+  textChatDisabledMod: <ChatOff />
 };
 
 export const permissionsMessages = defineMessages({
   voiceChatEnabled: {
     id: "chat-sidebar.moderator-message.voice-chat-enabled",
-    defaultMessage: "Voice chat has been turned on by a moderator.",
+    defaultMessage: "Voice chat has been turned on by a moderator",
   },
   voiceChatDisabled: {
     id: "chat-sidebar.moderator-message.voice-chat-disabled",
-    defaultMessage: "Voice chat has been turned off by a moderator."
+    defaultMessage: "Voice chat has been turned off by a moderator"
+  },
+  voiceChatDisabledMod: {
+    id: "chat-sidebar.moderator-message.voice-chat-disabled-mod",
+    defaultMessage: "Guests are unable to use voice chat"
   },
   textChatEnabled: {
     id: "chat-sidebar.moderator-message.text-chat-enabled",
-    defaultMessage: "Text chat has been turned on by a moderator."
+    defaultMessage: "Text chat has been turned on by a moderator"
   },
   textChatDisabled: {
     id: "chat-sidebar.moderator-message.text-chat-disabled",
-    defaultMessage: "Text chat has been turned off by a moderator."
+    defaultMessage: "Text chat has been turned off by a moderator"
+  },
+  textChatDisabledMod: {
+    id: "chat-sidebar.moderator-message.text-chat-disabled-mod",
+    defaultMessage: "Guests are unable to send chat messages"
   }
 });
 
@@ -39,8 +50,8 @@ function camelize(text) {
   return text.substring(0, 1).toLowerCase() + text.substring(1);
 }
 
-export function permissionMessage({permission, status}, intl) {
-  const key = `${permission}_${status ? "enabled" : "disabled"}`;
+export function permissionMessage({permission, status, isMod = false}, intl) {
+  const key = `${permission}_${status ? "enabled" : "disabled"}${isMod ? "_Mod" : ""}`;
   const message = intl.formatMessage(permissionsMessages[camelize(key)]);
   const icon = permissionsIcons[camelize(key)];
   return (
@@ -52,11 +63,14 @@ export function permissionMessage({permission, status}, intl) {
 }
 
 export function PermissionMessage({ permission }) {
+  const isMod = useCan("kick_users");
   const intl = useIntl();
   return (<div key={permission} className={classNames(styles.pinnedMessage)}>
         {permissionMessage({
           permission: permission,
-          status: false},
+          status: false,
+          isMod
+        },
           intl)}
       </div>);
 }
