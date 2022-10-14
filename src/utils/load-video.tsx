@@ -1,5 +1,5 @@
 /** @jsx createElementEntity */
-import { createElementEntity } from "../utils/jsx-entity";
+import { createElementEntity, ProjectionMode } from "../utils/jsx-entity";
 import { VideoTexture } from "three";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadVideoTexture } from "../utils/load-video-texture";
@@ -19,7 +19,7 @@ export function* loadVideo(world: HubsWorld, url: string) {
         texture,
         ratio,
         autoPlay: true,
-        projection: "flat"
+        projection: ProjectionMode.FLAT
       }}
     ></entity>
   );

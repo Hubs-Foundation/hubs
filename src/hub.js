@@ -241,6 +241,7 @@ import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
+import { swapActiveScene } from "./bit-systems/scene-loading";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -392,8 +393,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 
   if (qsTruthy("newLoader")) {
     console.log("Using new loading path for scenes.");
-    const entity = renderAsEntity(APP.world, ScenePrefab(sceneUrl));
-    document.querySelector("#environment-scene").object3D.add(APP.world.eid2obj.get(entity));
+    swapActiveScene(APP.world, sceneUrl);
     return;
   }
   console.log("Using legacy loading path for scenes.");

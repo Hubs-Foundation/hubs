@@ -1,4 +1,5 @@
 import { addComponent } from "bitecs";
+import { HubsWorld } from "../app";
 import {
   CursorRaycastable,
   HandCollisionTarget,
@@ -8,8 +9,9 @@ import {
   RemoteHoverTarget
 } from "../bit-components";
 
-const defaults = { cursor: true, hand: true };
-export function inflateGrabbable(world, eid, props) {
+export type GrabbableParams = { cursor: boolean; hand: boolean };
+const defaults: GrabbableParams = { cursor: true, hand: true };
+export function inflateGrabbable(world: HubsWorld, eid: number, props: GrabbableParams) {
   props = Object.assign({}, defaults, props);
   if (props.hand) {
     addComponent(world, HandCollisionTarget, eid);

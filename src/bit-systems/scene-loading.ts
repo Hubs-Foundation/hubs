@@ -1,9 +1,25 @@
-import { defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
+import { defineQuery, enterQuery, exitQuery, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
-import { SceneLoader } from "../bit-components";
+import { SceneLoader, SceneRoot } from "../bit-components";
 import { cancelable, coroutine } from "../utils/coroutine";
 import { add, assignNetworkIds } from "./media-loading";
 import { loadModel } from "../utils/load-model";
+import { AElement } from "aframe";
+import { anyEntityWith } from "../utils/bit-utils";
+import { renderAsEntity } from "../utils/jsx-entity";
+import { ScenePrefab } from "../prefabs/scene";
+import { remountUI } from "../hub";
+import { ExitReason } from "../react-components/room/ExitedRoomScreen";
+
+export function swapActiveScene(world: HubsWorld, src: string) {
+  const currentScene = anyEntityWith(APP.world, SceneRoot);
+  if (currentScene) {
+    removeEntity(APP.world, currentScene);
+  }
+
+  const newScene = renderAsEntity(world, ScenePrefab(src));
+  (document.querySelector("#environment-scene") as AElement).object3D.add(world.eid2obj.get(newScene)!);
+}
 
 function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal) {
   try {
@@ -17,9 +33,14 @@ function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal) {
       removeComponent(world, SceneLoader, eid);
       AFRAME.scenes[0].emit("environment-scene-loaded", scene);
       document.querySelector(".a-canvas")!.classList.remove("a-hidden");
+      const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
+      (fader as any).fadeIn();
     }
-  } catch {
+  } catch (e) {
+    console.error(e);
     console.error("Failed to load the scene");
+    remountUI({ roomUnavailableReason: ExitReason.sceneError });
+    APP.entryManager!.exitScene();
   }
 }
 

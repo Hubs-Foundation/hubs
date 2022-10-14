@@ -132,6 +132,7 @@ export const MediaLoader = defineComponent({
 });
 MediaLoader.src[$isStringType] = true;
 
+export const SceneRoot = defineComponent();
 export const SceneLoader = defineComponent({ src: Types.ui32 });
 SceneLoader.src[$isStringType] = true;
 

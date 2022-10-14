@@ -1,5 +1,5 @@
 /** @jsx createElementEntity */
-import { createElementEntity } from "../utils/jsx-entity";
+import { createElementEntity, ProjectionMode } from "../utils/jsx-entity";
 import { loadTextureCancellable } from "../utils/load-texture";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { HubsWorld } from "../app";
@@ -15,7 +15,7 @@ export function* loadImage(world: HubsWorld, url: string, contentType: string) {
       image={{
         texture,
         ratio,
-        projection: "flat",
+        projection: ProjectionMode.FLAT,
         alphaMode: AlphaMode.Opaque
       }}
       textureCacheKey={{

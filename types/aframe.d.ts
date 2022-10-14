@@ -8,6 +8,7 @@ declare module "aframe" {
       [name: string]: Object3D;
     };
     getObject3D(string): Object3D?;
+    components: { [s: string]: AComponent };
   }
 
   type FnTick = (t: number, dt: number) => void;

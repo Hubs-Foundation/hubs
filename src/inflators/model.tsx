@@ -2,7 +2,7 @@ import { addComponent, addEntity } from "bitecs";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { GLTFModel } from "../bit-components";
-import { addObject3DComponent, inflators, inflatorExists } from "../utils/jsx-entity";
+import { addObject3DComponent, gltfInflatorExists, gltfInflators } from "../utils/jsx-entity";
 
 function camelCase(s: string) {
   return s.replace(/-(\w)/g, (_, m) => m.toUpperCase());
@@ -18,11 +18,11 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
     const eid = obj === model ? rootEid : addEntity(world);
     Object.keys(components).forEach(name => {
       const inflatorName = camelCase(name);
-      if (!inflatorExists(inflatorName)) {
+      if (!gltfInflatorExists(inflatorName)) {
         console.warn(`Failed to inflate unknown component called ${inflatorName}`);
         return;
       }
-      inflators[inflatorName](world, eid, components[name]);
+      gltfInflators[inflatorName](world, eid, components[name]);
     });
     const replacement = world.eid2obj.get(eid);
     if (replacement) {

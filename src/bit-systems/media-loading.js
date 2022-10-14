@@ -116,7 +116,11 @@ function* loadMedia(world, eid) {
   let media;
   try {
     const urlData = yield resolveMediaInfo(src);
-    media = yield* loaderForMediaType[urlData.mediaType](world, urlData);
+    const loader = loaderForMediaType[urlData.mediaType];
+    if (!loader) {
+      throw new Error(`Unsupported media type: ${urlData.mediaType}`);
+    }
+    media = yield* loader(world, urlData);
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());
