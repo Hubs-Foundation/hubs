@@ -122,6 +122,11 @@
   cursor: pointer;
   width: 24px;
 
+  &:disabled,
+  &[disabled] {
+    cursor: default;
+  }
+
   svg {
     color: theme.$input-icon-color;
   }

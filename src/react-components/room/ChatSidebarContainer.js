@@ -20,7 +20,7 @@ import { spawnChatMessage } from "../chat-message";
 import { discordBridgesForPresences } from "../../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
-import { PermissionMessage } from "./PermissionsMessages";
+import { PermissionNotification } from "./PermissionNotifications";
 import { usePermissions } from "./usePermissions";
 import { useRoomPermissions } from "./useRoomPermissions";
 import { useCan } from "./useCan";
@@ -41,13 +41,16 @@ function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
   if (lastMessageGroup.senderSessionId !== newMessage.sessionId) {
     return true;
   }
+  if (lastMessageGroup.type !== newMessage.type) {
+    return true;
+  }
 
   const lastMessage = lastMessageGroup.messages[lastMessageGroup.messages.length - 1];
 
   return now - lastMessage.timestamp > NEW_MESSAGE_GROUP_TIMEOUT;
 }
 
-function processChatMessage(messageGroups, newMessage, permission) {
+function processChatMessage(messageGroups, newMessage) {
   const now = Date.now();
   const { name, sent, sessionId, ...messageProps } = newMessage;
 
@@ -61,7 +64,7 @@ function processChatMessage(messageGroups, newMessage, permission) {
         sender: name,
         senderSessionId: sessionId,
         messages: [{ id: uniqueMessageId++, timestamp: now, ...messageProps }],
-        permissionMessage: permission
+        type: newMessage.type
       }
     ];
   }
@@ -100,9 +103,8 @@ function updateMessageGroups(messageGroups, newMessage) {
     case "image":
     case "photo":
     case "video":
-      return processChatMessage(messageGroups, newMessage);
     case "permission":
-      return processChatMessage(messageGroups, newMessage, true);
+      return processChatMessage(messageGroups, newMessage);
     default:
       return messageGroups;
   }
@@ -299,18 +301,20 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   return (
     <ChatSidebar onClose={onClose}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
-        {messageGroups.map(({ id, systemMessage, permissionMessage, ...rest }) => {
+        {messageGroups.map(({ id, systemMessage, type, ...rest }) => {
           if (systemMessage) {
             return <SystemMessage key={id} {...rest} />;
-          } else if (permissionMessage && !isMod) {
-            return <PermissionMessageGroup key={id} {...rest} />;
           } else {
-            return <ChatMessageGroup key={id} {...rest} />;
+            if (type === "permission" && !isMod) {
+              return <PermissionMessageGroup key={id} {...rest} />;
+            } else {
+              return <ChatMessageGroup key={id} {...rest} />;
+            }
           }
         })}
       </ChatMessageList>
-      {!canTextChat && <PermissionMessage permission={"text_chat"} />}
-      {!textChatEnabled && isMod && <PermissionMessage permission={"text_chat"} isMod={true}/>}
+      {!canTextChat && <PermissionNotification permission={"text_chat"} />}
+      {!textChatEnabled && isMod && <PermissionNotification permission={"text_chat"} isMod={true}/>}
       <ChatInput
         id="chat-input"
         ref={inputRef}

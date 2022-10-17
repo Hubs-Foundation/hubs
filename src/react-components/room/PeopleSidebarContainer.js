@@ -60,6 +60,8 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
     [people, hubChannel]
   );
   const canVoiceChat = useCan("voice_chat");
+  const { voice_chat: voiceChatEnabled } = useRoomPermissions();
+  const isMod = useCan("kick_users");
 
   return (
     <PeopleSidebar
@@ -69,6 +71,8 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
       onMuteAll={onMuteAll}
       showMuteAll={hubChannel.can("mute_users")}
       canVoiceChat={canVoiceChat}
+      voiceChatEnabled={voiceChatEnabled}
+      isMod={isMod}
     />
   );
 }

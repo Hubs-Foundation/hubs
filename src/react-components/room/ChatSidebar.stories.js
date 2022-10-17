@@ -13,7 +13,7 @@ import {
 } from "./ChatSidebar";
 import imgSrc from "../../assets/background.jpg";
 import videoSrc from "../../assets/video/home.mp4";
-import { PermissionMessage } from "./PermissionsMessages";
+import { PermissionNotification } from "./PermissionNotifications";
 
 export default {
   title: "Room/ChatSidebar",
@@ -102,7 +102,7 @@ export const Base = args => (
             permissionMessage
           />
         </ChatMessageList>
-        {!!args.textChatEnabled && <PermissionMessage permission={"text_chat"} />}
+        {!!args.textChatEnabled && <PermissionNotification permission={"text_chat"} isMod={false}/>}
         <ChatInput
           afterInput={
             <>

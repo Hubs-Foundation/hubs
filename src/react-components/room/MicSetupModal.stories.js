@@ -88,7 +88,7 @@ export default {
       },
       defaultValue: permissionOptions[0]
     },
-    voiceChatEnabled: { 
+    canVoiceChat: { 
       control: "boolean",
       defaultValue: true 
     }
@@ -190,5 +190,5 @@ NoSpeakers.args = {
 export const NoVoiceChat = Template.bind({});
 
 NoVoiceChat.args = {
-  voiceChatEnabled: false
+  canVoiceChat: false
 };

@@ -66,7 +66,7 @@ export default {
       },
       defaultValue: speakerOptions[0]
     },
-    voiceChatEnabled: { 
+    canVoiceChat: { 
       control: "boolean",
       defaultValue: true 
     }
@@ -119,7 +119,7 @@ const Template = args => (
             onPlaySound={args.onPlaySound}
             isAudioInputSelectAvailable={args.isAudioInputSelectAvailable}
             isAudioOutputSelectAvailable={args.isAudioOutputSelectAvailable}
-            voiceChatEnabled={args.voiceChatEnabled}
+            canVoiceChat={args.canVoiceChat}
           />
         }
         micButton={

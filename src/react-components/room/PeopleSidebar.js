@@ -15,9 +15,7 @@ import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
 import { ReactComponent as HandRaisedIcon } from "../icons/HandRaised.svg";
 import { List, ButtonListItem } from "../layout/List";
 import { FormattedMessage, useIntl } from "react-intl";
-import { PermissionMessage } from "./PermissionsMessages";
-import { useCan } from "./useCan";
-import { useRoomPermissions } from "./useRoomPermissions";
+import { PermissionNotification } from "./PermissionNotifications";
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {
@@ -93,10 +91,8 @@ function getPersonName(person, intl) {
   return person.profile.displayName + (person.isMe ? ` (${you})` : "");
 }
 
-export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, onMuteAll, canVoiceChat }) {
+export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, onMuteAll, canVoiceChat, voiceChatEnabled, isMod }) {
   const intl = useIntl();
-  const isMod = useCan("kick_users");
-  const { voice_chat: voiceChatEnabled } = useRoomPermissions();
   return (
     <Sidebar
       title={
@@ -117,8 +113,8 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
         )
       }
     >
-      {!canVoiceChat && <PermissionMessage permission={"voice_chat"} />}
-      {!voiceChatEnabled && isMod && <PermissionMessage permission={"voice_chat"} isMod={true}/>}
+      {!canVoiceChat && <PermissionNotification permission={"voice_chat"} />}
+      {!voiceChatEnabled && isMod && <PermissionNotification permission={"voice_chat"} isMod={true}/>}
       <List>
         {people.map(person => {
           const DeviceIcon = getDeviceIconComponent(person.context);
@@ -158,10 +154,13 @@ PeopleSidebar.propTypes = {
   showMuteAll: PropTypes.bool,
   onMuteAll: PropTypes.func,
   onClose: PropTypes.func,
-  canVoiceChat: PropTypes.bool
+  canVoiceChat: PropTypes.bool,
+  voiceChatEnabled: PropTypes.bool,
+  isMod: PropTypes.bool
 };
 
 PeopleSidebar.defaultProps = {
   people: [],
-  onSelectPerson: () => {}
+  onSelectPerson: () => {},
+  isMod: false
 };

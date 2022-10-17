@@ -2,18 +2,12 @@
 
 :local(.tip) {
   pointer-events: all;
-  position: absolute;
-  bottom: 4px;
   min-height: 48px;
   background-color: theme.$tip-bg-color;
   border-radius: 16px;
   display: flex;
   color: theme.$tip-text-color;
   align-items: center;
-  width: max-content;
-  max-width: min(calc(100% - 8px), 360px);
-  left: 50%;
-  transform: translateX(-50%);
 
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     bottom: 24px;

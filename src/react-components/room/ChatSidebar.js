@@ -16,7 +16,7 @@ import { EmojiPicker } from "./EmojiPicker";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
-import { permissionMessage } from "./PermissionsMessages";
+import { permissionMessage } from "./PermissionNotifications";
 
 
 export function SpawnMessageButton(props) {
@@ -396,6 +396,12 @@ function getMessageComponent(message) {
           <img src={message.body.src} />
         </MessageBubble>
       );
+      case "permission":
+        return (
+          <MessageBubble key={message.id} media>
+            <img src={message.body.src} />
+          </MessageBubble>
+        );
     default:
       return null;
   }

@@ -1,13 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
-import styles from "./PermissionsMessages.scss";
+import styles from "./PermissionNotifications.scss";
 import { useIntl, defineMessages } from "react-intl";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
 import { ReactComponent as Microphone } from "../icons/Microphone.svg";
 import { ReactComponent as Chat } from "../icons/Chat.svg";
 import { ReactComponent as ChatOff } from "../icons/ChatOff.svg";
-import { useCan } from "./useCan";
 
 export const permissionsIcons = {
   voiceChatEnabled: <Microphone />,
@@ -62,10 +61,9 @@ export function permissionMessage({permission, status, isMod = false}, intl) {
   );
 }
 
-export function PermissionMessage({ permission }) {
-  const isMod = useCan("kick_users");
+export function PermissionNotification({ permission, className, isMod }) {
   const intl = useIntl();
-  return (<div key={permission} className={classNames(styles.pinnedMessage)}>
+  return (<div key={permission} className={classNames(styles.pinnedMessage, className)}>
         {permissionMessage({
           permission: permission,
           status: false,
@@ -75,6 +73,12 @@ export function PermissionMessage({ permission }) {
       </div>);
 }
 
-PermissionMessage.propTypes = {
-  permission: PropTypes.string
+PermissionNotification.propTypes = {
+  permission: PropTypes.string,
+  className: PropTypes.string,
+  isMod: PropTypes.bool
+};
+
+PermissionNotification.defaultProps = {
+  isMod: false
 };
