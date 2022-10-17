@@ -12,7 +12,7 @@ import { PageContainer } from "./react-components/layout/PageContainer";
 import { Center } from "./react-components/layout/Center";
 import { ThemeProvider } from "./react-components/styles/theme";
 
-registerTelemetry("/verify", "Hubs Verify Email Page");
+registerTelemetry("/verify", "Hubs Verify Account Page");
 
 const store = new Store();
 window.APP = { store };
