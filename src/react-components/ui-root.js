@@ -404,8 +404,10 @@ class UIRoot extends Component {
     this.showNonHistoriedDialog(RoomSignInModalContainer, {
       step: SignInStep.submit,
       message: signInMessage,
-      onSubmitEmail: async email => {
-        const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
+      onSignIn: async authPayload => {
+        const { authComplete } = await (authPayload == "oidc"
+          ? authChannel.startOIDCAuthentication(this.props.hubChannel)
+          : authChannel.startAuthentication(authPayload, this.props.hubChannel));
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
@@ -671,25 +673,6 @@ class UIRoot extends Component {
   };
 
   renderDialog = (DialogClass, props = {}) => <DialogClass {...{ onClose: this.closeDialog, ...props }} />;
-
-  // This logic may need to be somewhere else now
-  // showSignInDialog = () => {
-  //   this.showNonHistoriedDialog(SignInDialog, {
-  //     message: getMessages()["sign-in.prompt"],
-  //     onSignIn: async authPayload => {
-  //       const { authComplete } = await (authPayload == "oidc"
-  //         ? this.props.authChannel.startOIDCAuthentication(this.props.hubChannel)
-  //         : this.props.authChannel.startAuthentication(authPayload, this.props.hubChannel));
-
-  //       this.showNonHistoriedDialog(SignInDialog, { authStarted: true });
-
-  //       await authComplete;
-
-  //       this.setState({ signedIn: true });
-  //       this.closeDialog();
-  //     }
-  //   });
-  // };
 
   signOut = async () => {
     await this.props.authChannel.signOut(this.props.hubChannel);
@@ -1111,8 +1094,8 @@ class UIRoot extends Component {
         ) : (
           <FormattedMessage
             id="more-menu.you-signed-in-as"
-            defaultMessage="Signed in as: {email}"
-            values={{ email: maskEmail(this.props.store.state.credentials.email) }}
+            defaultMessage="Signed in as: {name}"
+            values={{ name: this.props.store.state.credentials.displayName || maskEmail(this.props.store.state.credentials.email) }}
           />
         ),
         items: [

@@ -72,6 +72,8 @@ export function SignInModalContainer() {
   const { step, submitEmail, submitOIDC, cancel, email } = useSignIn();
   const redirectUrl = qs.get("sign_in_destination_url") || "/";
 
+  const auth = useContext(AuthContext);
+
   useEffect(
     () => {
       if (step === SignInStep.complete) {
@@ -84,7 +86,7 @@ export function SignInModalContainer() {
   return (
     <SignInModal disableFullscreen>
       {step === SignInStep.submit ? (
-        configs.APP_CONFIG.auth.use_oidc ? (
+        auth.use_oidc ? (
           <SubmitOIDC onSubmitOIDC={submitOIDC} />
         ) : (
           <SubmitEmail
