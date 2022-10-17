@@ -97,7 +97,7 @@ export function AuthContextProvider({ children, store }) {
   const signOut = useCallback(
     async () => {
       configs.setIsAdmin(false);
-      store.update({ credentials: { token: null, email: null } });
+      store.update({ credentials: { token: null, email: null, extras: null } });
       await store.resetToRandomDefaultAvatar();
     },
     [store]
@@ -107,8 +107,7 @@ export function AuthContextProvider({ children, store }) {
     initialized: false,
     isSignedIn: !!store.state.credentials && !!store.state.credentials.token,
     isAdmin: configs.isAdmin(),
-    displayName:
-      store.state.credentials && (store.state.credentials.displayName || maskEmail(store.state.credentials.email)),
+    displayName: store.state.credentials && maskEmail(store.state.credentials.email),
     userId: store.credentialsAccountId,
     signIn,
     verify,
@@ -124,8 +123,7 @@ export function AuthContextProvider({ children, store }) {
           isSignedIn: !!store.state.credentials && !!store.state.credentials.token,
           isAdmin: configs.isAdmin(),
           displayName:
-            store.state.credentials &&
-            (store.state.credentials.displayName || maskEmail(store.state.credentials.email)),
+            store.state.credentials && maskEmail(store.state.credentials.email),
           userId: store.credentialsAccountId
         }));
       };

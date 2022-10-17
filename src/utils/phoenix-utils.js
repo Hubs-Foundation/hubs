@@ -218,7 +218,7 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
 
   if (res.error === "invalid_token") {
     // Clear the invalid token from store.
-    store.update({ credentials: { token: null, email: null, displayName: null } });
+    store.update({ credentials: { token: null, email: null, extras: null } });
 
     // Create hub anonymously
     delete headers.authorization;

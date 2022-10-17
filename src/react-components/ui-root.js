@@ -1095,7 +1095,7 @@ class UIRoot extends Component {
           <FormattedMessage
             id="more-menu.you-signed-in-as"
             defaultMessage="Signed in as: {name}"
-            values={{ name: this.props.store.state.credentials.displayName || maskEmail(this.props.store.state.credentials.email) }}
+            values={{ name: maskEmail(this.props.store.state.credentials.email) }}
           />
         ),
         items: [
@@ -1345,30 +1345,6 @@ class UIRoot extends Component {
                 scene={this.props.scene}
               />
             )}
-
-{/* This functionality belongs in here somewhere  */}
-            {/* {showPresenceList && (
-              <PresenceList
-                hubChannel={this.props.hubChannel}
-                history={this.props.history}
-                presences={this.props.presences}
-                sessionId={this.props.sessionId}
-                signedIn={this.state.signedIn}
-                displayName={
-                  this.props.store.state.credentials.displayName || maskEmail(this.props.store.state.credentials.email)
-                }
-                onSignIn={this.showSignInDialog}
-                onSignOut={this.signOut}
-                expanded={!this.state.isObjectListExpanded && this.state.isPresenceListExpanded}
-                onExpand={expand => {
-                  if (expand) {
-                    this.setState({ isPresenceListExpanded: expand, isObjectListExpanded: false });
-                  } else {
-                    this.setState({ isPresenceListExpanded: expand });
-                  }
-                }}
-              />
-            )} */}
 
             {this.props.hub && (
               <RoomLayoutContainer

@@ -23,7 +23,7 @@ export default class AuthChannel {
     if (hubChannel) {
       await hubChannel.signOut();
     }
-    this.store.update({ credentials: { token: null, email: null } });
+    this.store.update({ credentials: { token: null, email: null, extras: null } });
     await this.store.resetToRandomDefaultAvatar();
     this._signedIn = false;
   };
@@ -78,8 +78,11 @@ export default class AuthChannel {
 
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ user_info, credentials: token }) => {
-        console.log("got credentials", user_info, token);
-        await this.handleAuthCredentials(user_info, token, hubChannel);
+        const oidc = user_info.oidc;
+        // Favour email to match more closely to default Hubs operation
+        const email = oidc.email || oidc.preferred_username || oidc.name || oidc.sub;
+        // Include OIDC user info for potential use in custom clients
+        await this.handleAuthCredentials(email, token, hubChannel, oidc);
         resolve();
       })
     );
@@ -100,7 +103,7 @@ export default class AuthChannel {
 
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ credentials: token }) => {
-        await this.handleAuthCredentials({ email }, token, hubChannel);
+        await this.handleAuthCredentials(email, token, hubChannel);
         resolve();
       })
     );
@@ -112,10 +115,8 @@ export default class AuthChannel {
     return { authComplete };
   }
 
-  async handleAuthCredentials(userInfo, token, hubChannel) {
-    console.log("handleAuthCredentials", userInfo, token, hubChannel);
-    this.store.update({ credentials: { ...userInfo, token } });
-
+  async handleAuthCredentials(email, token, hubChannel, extras) {
+    this.store.update({ credentials: { email: email, token: token, extras: extras } });
     if (hubChannel) {
       await hubChannel.signIn(token);
     }
