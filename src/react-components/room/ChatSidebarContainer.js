@@ -301,14 +301,15 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   return (
     <ChatSidebar onClose={onClose}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
-        {messageGroups.map(({ id, systemMessage, type, ...rest }) => {
+        {messageGroups.map(entry => {
+          const { id, systemMessage, type } = entry;
           if (systemMessage) {
-            return <SystemMessage key={id} {...rest} />;
+            return <SystemMessage key={id} {...entry} />;
           } else {
-            if (type === "permission" && !isMod) {
-              return <PermissionMessageGroup key={id} {...rest} />;
+            if (type === "permission") {
+              return !isMod && <PermissionMessageGroup key={id} {...entry} />;
             } else {
-              return <ChatMessageGroup key={id} {...rest} />;
+              return <ChatMessageGroup key={id} {...entry} />;
             }
           }
         })}
