@@ -3,10 +3,11 @@ import PropTypes from "prop-types";
 import { CloseButton } from "../input/CloseButton";
 import { Modal } from "../modal/Modal";
 import { FormattedMessage, useIntl, defineMessages } from "react-intl";
-import { CancelButton, NextButton, ContinueButton } from "../input/Button";
+import { Button, CancelButton, NextButton, ContinueButton } from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
+import configs from "../../utils/configs";
 
 export const SignInStep = {
   submit: "submit",
@@ -136,7 +137,7 @@ SubmitEmail.propTypes = {
   onSubmitEmail: PropTypes.func.isRequired
 };
 
-export function SubmitOIDC({ onSubmitOIDC }) {
+export function SubmitOIDC({ onSubmitOIDC, privacyUrl, termsUrl, message }) {
   const onSubmitForm = useCallback(
     e => {
       e.preventDefault();
@@ -146,13 +147,28 @@ export function SubmitOIDC({ onSubmitOIDC }) {
   );
 
   return (
-    <form onSubmit={onSubmitForm} className={styles.signInContainer}>
-      <button type="submit">{configs.APP_CONFIG.auth.oidc_button_label || "Sign In"}</button>
-    </form>
+    <Column center padding as="form" onSubmit={onSubmitForm}>
+      <p>
+        {message ? (
+          intl.formatMessage(message)
+        ) : (
+          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
+        )}
+      </p>
+      <p>
+        <small>
+          <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
+        </small>
+      </p>
+      <Button preset="accept" type="submit">{configs.APP_CONFIG.auth.oidc_button_label || "Sign In With SSO"}</Button>
+    </Column>
   );
 }
 SubmitOIDC.propTypes = {
-  onSubmitOIDC: PropTypes.func.isRequired
+  onSubmitOIDC: PropTypes.func.isRequired,
+  message: PropTypes.object,
+  termsUrl: PropTypes.string,
+  privacyUrl: PropTypes.string
 };
 
 export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {

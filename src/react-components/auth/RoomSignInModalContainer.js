@@ -14,11 +14,17 @@ export function RoomSignInModalContainer({ onClose, step, onSignIn, message, onC
   return (
     <SignInModal onClose={onClose} closeable>
       {step === SignInStep.submit && (
-        auth.use_oidc
-        ? <SubmitOIDC 
+        auth.use_oidc ? (
+          <SubmitOIDC 
             onSubmitOIDC={() => onSignIn("oidc")} 
+            termsUrl={configs.link("terms_of_use", TERMS)}
+            showTerms={configs.feature("show_terms")}
+            privacyUrl={configs.link("privacy_notice", PRIVACY)}
+            showPrivacy={configs.feature("show_privacy")}
+            message={message}
           />
-        : <SubmitEmail
+        ) : (
+          <SubmitEmail
             onSubmitEmail={email => {
               setCachedEmail(email);
               onSignIn(email);
@@ -30,6 +36,7 @@ export function RoomSignInModalContainer({ onClose, step, onSignIn, message, onC
             showPrivacy={configs.feature("show_privacy")}
             message={message}
           />
+        )
       )}
       {step === SignInStep.waitForVerification && (
         <WaitForVerification
