@@ -1094,8 +1094,8 @@ class UIRoot extends Component {
         ) : (
           <FormattedMessage
             id="more-menu.you-signed-in-as"
-            defaultMessage="Signed in as: {name}"
-            values={{ name: maskEmail(this.props.store.state.credentials.email) }}
+            defaultMessage="Signed in as: {email}"
+            values={{ email: maskEmail(this.props.store.state.credentials.email) }}
           />
         ),
         items: [
@@ -1345,7 +1345,6 @@ class UIRoot extends Component {
                 scene={this.props.scene}
               />
             )}
-
             {this.props.hub && (
               <RoomLayoutContainer
                 scene={this.props.scene}

@@ -1,14 +1,14 @@
-import React, { useContext } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
+import maskEmail from "../../utils/mask-email";
 import styles from "./Header.scss";
 import { Container } from "./Container";
 import { SocialBar } from "../home/SocialBar";
 import { SignInButton } from "../home/SignInButton";
 import { AppLogo } from "../misc/AppLogo";
-import { AuthContext } from "../auth/AuthContext";
 
 export function Header({
   showCloud,
@@ -25,7 +25,6 @@ export function Header({
   onSignOut,
   isHmc
 }) {
-  const auth = useContext(AuthContext);
   return (
     <header>
       <Container as="div" className={styles.container}>
@@ -103,7 +102,7 @@ export function Header({
                 <FormattedMessage
                   id="header.signed-in-as"
                   defaultMessage="Signed in as {email}"
-                  values={{ email: auth.displayName }}
+                  values={{ email: maskEmail(email) }}
                 />
               </span>
               <a href="#" onClick={onSignOut}>

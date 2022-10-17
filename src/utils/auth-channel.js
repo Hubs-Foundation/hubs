@@ -45,11 +45,11 @@ export default class AuthChannel {
               .receive("ok", resolve)
               .receive("error", reject);
           } else {
-            channel.push("auth_verified", { token: authToken, payload: authPayload });
             channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
               await this.handleAuthCredentials({ email: payload.email }, token);
               resolve();
             });
+            channel.push("auth_verified", { token: authToken, payload: authPayload });
           }
         })
         .receive("error", reject);
