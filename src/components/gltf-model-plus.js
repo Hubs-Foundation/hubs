@@ -703,7 +703,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
         // @TODO: Check if this always works. Replace with a better and simpler solution.
         const currentOnBeforeRender = mesh.material.onBeforeRender;
         mesh.material = mesh.material.clone();
-        mesh.material.currentOnBeforeRender = currentOnBeforeRender;
+        mesh.material.onBeforeRender = currentOnBeforeRender;
 
         // onBeforeCompile of the material of the lowest level mesh should be
         // already set up because the lowest level should be loaded first.
