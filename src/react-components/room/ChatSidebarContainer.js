@@ -357,7 +357,6 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             )}
           </>
         }
-        disabled={isDisabled}
       />
     </ChatSidebar>
   );
