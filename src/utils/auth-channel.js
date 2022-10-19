@@ -78,11 +78,8 @@ export default class AuthChannel {
 
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ user_info, credentials: token }) => {
-        const oidc = user_info.oidc;
-        // Favour email to match more closely to default Hubs operation
-        const email = oidc.email || oidc.preferred_username || oidc.name || oidc.sub;
         // Include OIDC user info for potential use in custom clients
-        await this.handleAuthCredentials(email, token, hubChannel, oidc);
+        await this.handleAuthCredentials(user_info.oidc.sub, token, hubChannel, user_info.oidc);
         resolve();
       })
     );
