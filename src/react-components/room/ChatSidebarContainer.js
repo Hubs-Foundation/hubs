@@ -146,7 +146,7 @@ export function ChatContextProvider({ messageDispatch, children }) {
       function onReceiveMessage(event) {
         const newMessage = event.detail;
 
-        if (isMod && newMessage.type === "permission") return;
+        if (isMod && newMessage.sessionId === NAF.clientId && newMessage.type === "permission") return;
 
         setMessageGroups(messages => updateMessageGroups(messages, newMessage));
 
@@ -317,7 +317,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             return <SystemMessage key={id} {...entry} />;
           } else {
             if (type === "permission") {
-              return !isMod && <PermissionMessageGroup key={id} {...entry} />;
+              return <PermissionMessageGroup key={id} {...entry} />;
             } else {
               return <ChatMessageGroup key={id} {...entry} />;
             }

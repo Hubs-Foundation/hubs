@@ -85,13 +85,13 @@ export function PresenceLog({ entries, preset, hubId, history, presences, onView
           />
         );
       case "permission":
-        return !isMod && (
+        return (!isMod || e.sessionId !== NAF.clientId) && (
           <PermissionMessage
             key={e.key}
             permission={e.body.permission}
             className={classNames(entryClasses, styles.permission)}
             body={e.body}
-            isMod={isMod}
+            isMod={isMod && (e.sessionId === NAF.clientId)}
           />
         );
       default: {
