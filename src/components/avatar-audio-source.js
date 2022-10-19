@@ -82,6 +82,8 @@ AFRAME.registerComponent("avatar-audio-source", {
     getOwnerId(this.el).then(async ownerId => {
       if (isRoomOwner(ownerId)) {
         APP.moderatorAudioSource.add(this.el);
+      } else {
+        APP.moderatorAudioSource.delete(this.el);
       }
       APP.audios.set(this.el, audio);
       updateAudioSettings(this.el, audio);
@@ -135,6 +137,8 @@ AFRAME.registerComponent("avatar-audio-source", {
     getOwnerId(this.el).then(async ownerId => {
       if (isRoomOwner(ownerId)) {
         APP.moderatorAudioSource.add(this.el);
+      } else {
+        APP.moderatorAudioSource.delete(this.el);
       }
       const audio = APP.audios.get(this.el);
       audio && updateAudioSettings(this.el, audio);
