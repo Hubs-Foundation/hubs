@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
-import { VerifyModal, VerificationError, EmailVerified, VerifyingEmail } from "./VerifyModal";
+import { VerifyModal, VerificationError, AccountVerified, VerifyingAccount } from "./VerifyModal";
 import jwtDecode from "jwt-decode";
 
 const VerificationStep = {
@@ -69,9 +69,9 @@ export function VerifyModalContainer() {
   } else if (step === VerificationStep.complete) {
     const qs = new URLSearchParams(location.search);
     const origin = qs.get("auth_origin");
-    content = <EmailVerified origin={origin} />;
+    content = <AccountVerified origin={origin} />;
   } else {
-    content = <VerifyingEmail />;
+    content = <VerifyingAccount />;
   }
 
   return <VerifyModal>{content}</VerifyModal>;

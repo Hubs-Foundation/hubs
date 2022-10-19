@@ -11,11 +11,11 @@ export const VerificationStep = {
   error: "error"
 };
 
-export function VerifyingEmail() {
+export function VerifyingAccount() {
   return (
     <Column center padding grow>
       <b>
-        <FormattedMessage id="verify-modal.verifying-email" defaultMessage="Verifying Email" />
+        <FormattedMessage id="verify-modal.verifying-account" defaultMessage="Verifying Account" />
       </b>
       <br />
       <Spinner />
@@ -23,7 +23,7 @@ export function VerifyingEmail() {
   );
 }
 
-export function EmailVerified({ origin }) {
+export function AccountVerified({ origin }) {
   return (
     <Column center padding grow>
       <b>
@@ -40,7 +40,7 @@ export function EmailVerified({ origin }) {
   );
 }
 
-EmailVerified.propTypes = {
+AccountVerified.propTypes = {
   origin: PropTypes.string.isRequired
 };
 
