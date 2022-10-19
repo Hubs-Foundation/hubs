@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export function useRole(role, clientId = NAF.clientId) {
   const scene = AFRAME.scenes[0];
-  const [hasRole, setHasRole] = useState(false);
+  const [hasRole, setHasRole] = useState(APP.hubChannel.presence?.state[clientId]?.metas[0].roles[role]);
 
   useEffect(
     () => {
