@@ -3,10 +3,9 @@ export default function maskEmail(email) {
   const emailParts = email.split("@");
   const emailIdentity = emailParts[0];
   const emailDomain = emailParts[1];
-  const truncatedIdentity = emailIdentity.substring(0, Math.min(emailIdentity.length, 3));
   if(emailDomain) {
-    return `${truncatedIdentity}...@${emailDomain}`
+    return `${emailIdentity.substring(0, Math.min(emailIdentity.length, 3))}...@${emailDomain}`
   } else {
-    return `${truncatedIdentity}...`
+    return emailIdentity.length > 15 ? `${emailIdentity.substring(0, 15)}...` : emailIdentity;
   }
 }
