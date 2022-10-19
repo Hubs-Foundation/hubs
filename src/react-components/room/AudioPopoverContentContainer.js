@@ -9,10 +9,12 @@ import { useMicrophoneStatus } from "./useMicrophoneStatus";
 import MediaDevicesManager from "../../utils/media-devices-manager";
 import { VolumeLevelBar } from "../misc/VolumeLevelBar";
 import styles from "./AudioPopover.scss";
+import { useCan } from "./useCan";
 
 export const AudioPopoverContentContainer = ({ scene }) => {
   const { isMicMuted, toggleMute, isMicEnabled, permissionStatus } = useMicrophoneStatus(scene);
-  const { micDeviceChanged, micDevices, canVoiceChat } = useMicrophone(scene);
+  const { micDeviceChanged, micDevices } = useMicrophone(scene);
+  const canVoiceChat = useCan("voice_chat");
   const { speakerDeviceChanged, speakerDevices } = useSpeakers();
   const { playSound } = useSound({
     scene,

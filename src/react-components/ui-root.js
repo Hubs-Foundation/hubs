@@ -558,6 +558,7 @@ class UIRoot extends Component {
       }
       this.beginOrSkipAudioSetup();
     } else {
+      this.onRequestMicPermission();
       this.pushHistoryState("entry_step", "audio");
     }
 
@@ -581,6 +582,12 @@ class UIRoot extends Component {
   enterDaydream = async () => {
     console.log("Entering in Daydream mode");
     await this.performDirectEntryFlow(true);
+  };
+
+  onRequestMicPermission = async () => {
+    if (APP.hubChannel.can("voice_chat")) {
+      await this.mediaDevicesManager.startMicShare({});
+    }
   };
 
   beginOrSkipAudioSetup = () => {
@@ -810,6 +817,7 @@ class UIRoot extends Component {
               if (promptForNameAndAvatarBeforeEntry) {
                 this.pushHistoryState("entry_step", "profile");
               } else {
+                this.onRequestMicPermission();
                 this.pushHistoryState("entry_step", "audio");
               }
             } else {
@@ -1040,6 +1048,7 @@ class UIRoot extends Component {
                     this.pushHistoryState();
                     this.handleForceEntry();
                   } else {
+                    this.onRequestMicPermission();
                     this.pushHistoryState("entry_step", "audio");
                   }
                 }}
