@@ -9,7 +9,8 @@ import {
   SpawnMessageButton,
   MessageAttachmentButton,
   EmojiPickerPopoverButton,
-  PermissionMessageGroup
+  PermissionMessageGroup,
+  SendMessageButton
 } from "./ChatSidebar";
 import imgSrc from "../../assets/background.jpg";
 import videoSrc from "../../assets/video/home.mp4";
@@ -106,9 +107,10 @@ export const Base = args => (
         <ChatInput
           afterInput={
             <>
-              <EmojiPickerPopoverButton onSelectEmoji={emoji => console.log(emoji)} disabled={!args.textChatEnabled}/>
-              <MessageAttachmentButton disabled={!args.textChatEnabled} />
-              <SpawnMessageButton disabled={!args.textChatEnabled} />
+              <EmojiPickerPopoverButton onSelectEmoji={emoji => console.log(emoji)}/>
+              <MessageAttachmentButton />
+              <SendMessageButton disabled={!args.textChatEnabled} title={!args.textChatEnabled ? "Text Chat Off" : undefined}/>
+              <SpawnMessageButton disabled={!args.textChatEnabled}  title={!args.textChatEnabled ? "Text Chat Off" : undefined}/>
             </>
           }
           disabled={!args.textChatEnabled}

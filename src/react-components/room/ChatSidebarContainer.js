@@ -18,7 +18,7 @@ import {
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
 import { discordBridgesForPresences } from "../../utils/phoenix-utils";
-import { useIntl } from "react-intl";
+import { defineMessages, useIntl } from "react-intl";
 import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 import { PermissionNotification } from "./PermissionNotifications";
 import { usePermissions } from "./usePermissions";
@@ -30,6 +30,31 @@ const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 let uniqueMessageId = 0;
 
 const NEW_MESSAGE_GROUP_TIMEOUT = 1000 * 60;
+
+const chatSidebarMessages = defineMessages({
+  emmptyRoom: {
+    id: "chat-sidebar-container.input-placeholder.empty-room",
+    defaultMessage: "Nobody is here yet..."
+  },
+  emmptyRoomBot: {
+    id: "chat-sidebar-container.input-placeholder.empty-room-bot",
+    defaultMessage: "Send message to {discordChannels}"
+  },
+  occupants: {
+    id: "chat-sidebar-container.input-placeholder.occupants",
+    defaultMessage:
+      "{occupantCount, plural, one {Send message to one other...} other {Send message to {occupantCount} others...} }"
+  },
+  occupantsAndBot: {
+    id: "chat-sidebar-container.input-placeholder.occupants-and-bot",
+    defaultMessage:
+      "{occupantCount, plural, one {Send message to one other and {discordChannels}...} other {Send message to {occupantCount} others and {discordChannels}...} }"
+  },
+  textChatOff: {
+    id: "chat-sidebar-container.input-send-button.disabled",
+    defaultMessage: "Text Chat Off"
+  }
+});
 
 function shouldCreateNewMessageGroup(messageGroups, newMessage, now) {
   if (messageGroups.length === 0) {
@@ -261,36 +286,19 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
 
   if (occupantCount <= 1) {
     if (discordBridges.length === 0) {
-      placeholder = intl.formatMessage({
-        id: "chat-sidebar-container.input-placeholder.empty-room",
-        defaultMessage: "Nobody is here yet..."
-      });
+      placeholder = intl.formatMessage(chatSidebarMessages["emmptyRoom"]);
     } else {
-      placeholder = intl.formatMessage(
-        {
-          id: "chat-sidebar-container.input-placeholder.empty-room-bot",
-          defaultMessage: "Send message to {discordChannels}"
-        },
+      placeholder = intl.formatMessage(chatSidebarMessages["emmptyRoomBot"],
         { discordChannels: discordSnippet }
       );
     }
   } else {
     if (discordBridges.length === 0) {
-      placeholder = intl.formatMessage(
-        {
-          id: "chat-sidebar-container.input-placeholder.occupants",
-          defaultMessage:
-            "{occupantCount, plural, one {Send message to one other...} other {Send message to {occupantCount} others...} }"
-        },
+      placeholder = intl.formatMessage(chatSidebarMessages["occupants"],
         { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
       );
     } else {
-      placeholder = intl.formatMessage(
-        {
-          id: "chat-sidebar-container.input-placeholder.occupants-and-bot",
-          defaultMessage:
-            "{occupantCount, plural, one {Send message to one other and {discordChannels}...} other {Send message to {occupantCount} others and {discordChannels}...} }"
-        },
+      placeholder = intl.formatMessage(chatSidebarMessages["occupantsAndBot"],
         { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
       );
     }
@@ -298,6 +306,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
 
   const isMobile = AFRAME.utils.device.isMobile();
   const isOverMaxLength = message.length > MAX_MESSAGE_LENGTH;
+  const isDisabled = message.length === 0 || isOverMaxLength || !canTextChat;
   return (
     <ChatSidebar onClose={onClose}>
       <ChatMessageList ref={listRef} onScroll={onScrollList}>
@@ -337,13 +346,18 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
-              <SendMessageButton onClick={onSendMessage} disabled={message.length === 0 || isOverMaxLength || !canTextChat} />
+              <SendMessageButton onClick={onSendMessage} as={"button"} disabled={isDisabled} title={isDisabled ? intl.formatMessage(
+                chatSidebarMessages["textChatOff"]
+              ) : undefined} />
             )}
             {canSpawnMessages && (
-              <SpawnMessageButton disabled={message.length === 0 || isOverMaxLength || !canTextChat} onClick={onSpawnMessage} />
+              <SpawnMessageButton disabled={isDisabled} onClick={onSpawnMessage} title={isDisabled ? intl.formatMessage(
+                chatSidebarMessages["textChatOff"]
+              ) : undefined} />
             )}
           </>
         }
+        disabled={isDisabled}
       />
     </ChatSidebar>
   );
