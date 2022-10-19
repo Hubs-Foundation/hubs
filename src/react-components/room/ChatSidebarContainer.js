@@ -206,6 +206,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
+  const [isCommand, setIsCommand] = useState(false);
   const { text_chat: canTextChat, kick_users: isMod } = usePermissions();
   const { text_chat: textChatEnabled } = useRoomPermissions();
   const typingTimeoutRef = useRef();
@@ -214,7 +215,8 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
 
   const onKeyDown = useCallback(
     e => {
-      if (!canTextChat) return;
+      setIsCommand(e.target.value.startsWith("/"));
+      if (!canTextChat && !isCommand) return;
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
@@ -232,7 +234,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
       typingTimeoutRef.current = setTimeout(() => window.APP.hubChannel.endTyping(), 500);
       window.APP.hubChannel.beginTyping();
     },
-    [sendMessage, setMessage, onClose, canTextChat]
+    [sendMessage, setMessage, onClose, canTextChat, isCommand]
   );
 
   const onSendMessage = useCallback(
@@ -347,7 +349,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
-              <SendMessageButton onClick={onSendMessage} as={"button"} disabled={isDisabled} title={isDisabled ? intl.formatMessage(
+              <SendMessageButton onClick={onSendMessage} as={"button"} disabled={isDisabled && !isCommand} title={isDisabled && !isCommand ? intl.formatMessage(
                 chatSidebarMessages["textChatOff"]
               ) : undefined} />
             )}
