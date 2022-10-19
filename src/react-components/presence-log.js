@@ -11,7 +11,7 @@ import ImageMessage from "./image-message";
 import { getPresenceContextForSession } from "../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import PermissionMessage from "./permission-message";
-import { useCan } from "./room/useCan";
+import { useRole } from "./room/useRole";
 
 export const presets = [
   "InRoom",
@@ -20,7 +20,7 @@ export const presets = [
 
 export function PresenceLog({ entries, preset, hubId, history, presences, onViewProfile, include, exclude, ...rest }) {
   const intl = useIntl();
-  const isMod = useCan("kick_users");
+  const isMod = useRole("owner");
   const [logEntries, setLogEntries] = useState(null);
 
   const domForEntry = useCallback(e => {

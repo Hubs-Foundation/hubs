@@ -24,6 +24,7 @@ import { PermissionNotification } from "./PermissionNotifications";
 import { usePermissions } from "./usePermissions";
 import { useRoomPermissions } from "./useRoomPermissions";
 import { useCan } from "./useCan";
+import { useRole } from "./useRole";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
 
@@ -138,7 +139,7 @@ function updateMessageGroups(messageGroups, newMessage) {
 export function ChatContextProvider({ messageDispatch, children }) {
   const [messageGroups, setMessageGroups] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState(false);
-  const isMod = useCan("kick_users");
+  const isMod = useRole("owner");
 
   useEffect(
     () => {

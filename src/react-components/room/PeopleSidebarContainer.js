@@ -6,6 +6,7 @@ import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
 import { useCan } from "./useCan";
 import { useRoomPermissions } from "./useRoomPermissions";
+import { useRole } from "./useRole";
 
 export function userFromPresence(sessionId, presence, micPresences, mySessionId, voiceEnabled) {
   const meta = presence.metas[presence.metas.length - 1];
@@ -61,7 +62,7 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
   );
   const canVoiceChat = useCan("voice_chat");
   const { voice_chat: voiceChatEnabled } = useRoomPermissions();
-  const isMod = useCan("kick_users");
+  const isMod = useRole("owner");
 
   return (
     <PeopleSidebar
