@@ -27,7 +27,7 @@ export default class MessageDispatch extends EventTarget {
 
     const lastEntry = this.presenceLogEntries.length > 0 && this.presenceLogEntries[this.presenceLogEntries.length - 1];
     if (lastEntry && entry.type === "permission" && lastEntry.type === "permission") {
-      if (lastEntry.body.permission === entry.body.permission && entry.key - lastEntry.key < 10000) {
+      if (lastEntry.body.permission === entry.body.permission && parseInt(entry.key) - parseInt(lastEntry.key) < 10000) {
         this.presenceLogEntries.pop();
       }
     }
