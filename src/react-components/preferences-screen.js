@@ -518,7 +518,11 @@ const preferenceLabels = defineMessages({
   },
   enablePostEffects: {
     id: "preferences-screen.preference.enable-fx",
-    defaultMessage: "Enable Post Processing Effects"
+    defaultMessage: "Enable Post Processing Effects (experimental)"
+  },
+  enablePostEffectsTooltip: {
+    id: "preferences-screen.preference.enable-fx.tooltip",
+    defaultMessage: "This feature is still experimental and may have issues. It is currently unsupported in VR."
   },
   enableBloom: {
     id: "preferences-screen.preference.enable-fx-bloom",
@@ -556,7 +560,12 @@ class PreferenceListItem extends Component {
     const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isSmallScreen = window.innerWidth < 600;
     const label = (
-      <span className={styles.preferenceLabel}>{intl.formatMessage(preferenceLabels[this.props.storeKey])}</span>
+      <span
+        className={styles.preferenceLabel}
+        title={this.props.itemProps.tooltipKey && intl.formatMessage(preferenceLabels[this.props.itemProps.tooltipKey])}
+      >
+        {intl.formatMessage(preferenceLabels[this.props.storeKey])}
+      </span>
     );
     const prefSchema = this.props.store.schema.definitions.preferences.properties;
     const hasPref =
@@ -713,6 +722,7 @@ Control.propTypes = {
 };
 
 function createItem(itemProps, store) {
+  if (itemProps.hidden) return null;
   const setValue = v => {
     if (itemProps.promptForRefresh) {
       store.update({ preferences: { [itemProps.key]: v, shouldPromptForRefresh: true } });
@@ -1268,17 +1278,21 @@ class PreferencesScreen extends Component {
           {
             key: "enablePostEffects",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            hidden: AFRAME.utils.device.isMobileVR(),
+            tooltipKey: "enablePostEffectsTooltip",
             promptForRefresh: true
           },
           {
             key: "enableBloom",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            hidden: AFRAME.utils.device.isMobileVR(),
             disableIfFalse: "enablePostEffects",
             promptForRefresh: true
           },
           {
             key: "aaMode",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            hidden: AFRAME.utils.device.isMobileVR(),
             disableIfFalse: "enablePostEffects",
             promptForRefresh: true,
             options: [
@@ -1328,7 +1342,10 @@ class PreferencesScreen extends Component {
     const items = new Map();
 
     for (const [category, definitions] of DEFINITIONS) {
-      items.set(category, definitions.map(toItem));
+      items.set(
+        category,
+        definitions.map(toItem).filter(item => !!item)
+      );
     }
 
     return new Map([
