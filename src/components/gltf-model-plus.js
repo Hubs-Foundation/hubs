@@ -13,6 +13,7 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import GLBRangeRequests from "three-gltf-extensions/loaders/GLB_range_requests/GLB_range_requests";
 import GLTFLodExtension from "three-gltf-extensions/loaders/MSFT_lod/MSFT_lod";
+import qsTruthy from "../utils/qs_truthy";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -732,7 +733,11 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   }
 
   return new Promise((resolve, reject) => {
-    GLBRangeRequests.load(gltfUrl, gltfLoader, resolve, onProgress, reject);
+    if (qsTruthy("rangerequests")) {
+      GLBRangeRequests.load(gltfUrl, gltfLoader, resolve, onProgress, reject);
+    } else {
+      gltfLoader.load(gltfUrl, resolve, onProgress, reject);
+    }
   }).finally(() => {
     if (fileMap) {
       // The GLTF is now cached as a THREE object, we can get rid of the original blobs
