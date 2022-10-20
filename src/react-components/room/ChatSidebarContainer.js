@@ -23,7 +23,6 @@ import { MAX_MESSAGE_LENGTH } from "../../utils/chat-message";
 import { PermissionNotification } from "./PermissionNotifications";
 import { usePermissions } from "./usePermissions";
 import { useRoomPermissions } from "./useRoomPermissions";
-import { useCan } from "./useCan";
 import { useRole } from "./useRole";
 
 const ChatContext = createContext({ messageGroups: [], sendMessage: () => {} });
