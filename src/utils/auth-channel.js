@@ -46,7 +46,7 @@ export default class AuthChannel {
               .receive("error", reject);
           } else {
             channel.on("auth_credentials", async ({ credentials: token, payload: payload }) => {
-              await this.handleAuthCredentials({ email: payload.email }, token);
+              await this.handleAuthCredentials(payload.email, token);
               resolve();
             });
             channel.push("auth_verified", { token: authToken, payload: authPayload });
@@ -78,7 +78,7 @@ export default class AuthChannel {
 
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ user_info, credentials: token }) => {
-        // Include OIDC user info for potential use in custom clients
+        // `sub` is the definative user identifier, even though it may not be an email
         await this.handleAuthCredentials(user_info.oidc.sub, token, hubChannel, user_info.oidc);
         resolve();
       })
@@ -113,7 +113,7 @@ export default class AuthChannel {
   }
 
   async handleAuthCredentials(email, token, hubChannel, extras) {
-    this.store.update({ credentials: { email: email, token: token, extras: extras } });
+    this.store.update({ credentials: { email, token, extras } });
     if (hubChannel) {
       await hubChannel.signIn(token);
     }
