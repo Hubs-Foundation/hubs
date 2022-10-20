@@ -97,6 +97,7 @@ import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { TERMS, PRIVACY } from "../constants";
 import { ECSDebugSidebarContainer } from "./debug-panel/ECSSidebar";
 import { NotificationsContainer } from "./room/NotificationsContainer";
+import { usePermissions } from "./room/usePermissions";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -164,7 +165,8 @@ class UIRoot extends Component {
     onLoaded: PropTypes.func,
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
-    breakpoint: PropTypes.string
+    breakpoint: PropTypes.string,
+    canVoiceChat: PropTypes.bool
   };
 
   state = {
@@ -585,7 +587,7 @@ class UIRoot extends Component {
   };
 
   onRequestMicPermission = async () => {
-    if (APP.hubChannel.can("voice_chat")) {
+    if (this.props.canVoiceChat) {
       await this.mediaDevicesManager.startMicShare({});
     }
   };
@@ -1632,6 +1634,7 @@ class UIRoot extends Component {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
+  const { voice_chat: canVoiceChat} = usePermissions();
 
   useEffect(() => {
     const el = document.getElementById("preload-overlay");
@@ -1655,7 +1658,7 @@ function UIRootHooksWrapper(props) {
   return (
     <ChatContextProvider messageDispatch={props.messageDispatch}>
       <ObjectListProvider scene={props.scene}>
-        <UIRoot breakpoint={breakpoint} {...props} />
+        <UIRoot breakpoint={breakpoint} {...props} canVoiceChat={canVoiceChat} />
       </ObjectListProvider>
     </ChatContextProvider>
   );
