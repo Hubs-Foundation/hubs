@@ -186,7 +186,7 @@ export function createEffectsComposer(
   }
 
   (sceneEl as any).addEventListener("rendererresize", function ({ detail }: { detail: DOMRectReadOnly }) {
-    composer.setSize(detail.width, detail.height, true);
+    composer.setSize(detail.width, detail.height, false);
     if (debugCamera) {
       debugCamera.right = detail.width;
       debugCamera.bottom = detail.height;

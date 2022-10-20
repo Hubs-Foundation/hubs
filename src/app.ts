@@ -174,7 +174,7 @@ export class App {
 
     sceneEl.appendChild(renderer.domElement);
 
-    const camera = new PerspectiveCamera(80, canvas.width / canvas.height, 0.05, 10000);
+    const camera = new PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.05, 10000);
 
     const audioListener = new AudioListener();
     this.audioListener = audioListener;
@@ -195,8 +195,9 @@ export class App {
     if (enablePostEffects) {
       this.fx = createEffectsComposer(canvas, renderer, camera, scene, sceneEl, this.store);
     } else {
+      // EffectComposer manages renderer size internally
       (sceneEl as any).addEventListener("rendererresize", function ({ detail }: { detail: DOMRectReadOnly }) {
-        renderer.setSize(detail.width, detail.height, true);
+        renderer.setSize(detail.width, detail.height, false);
       });
     }
 
