@@ -68,7 +68,8 @@ export function VerifyModalContainer() {
     content = <VerificationError error={error} />;
   } else if (step === VerificationStep.complete) {
     const qs = new URLSearchParams(location.search);
-    const origin = qs.get("auth_origin");
+    // auth_origin is not set when using OIDC flow so use a neutral default
+    const origin = qs.get("auth_origin") || "Hubs";
     content = <AccountVerified origin={origin} />;
   } else {
     content = <VerifyingAccount />;
