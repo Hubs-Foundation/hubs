@@ -16,14 +16,13 @@ import { Layers } from "./camera-layers";
 import { createImageMesh } from "./utils/create-image-mesh";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
-import ImageMessage from "./react-components/image-message";
 
 export enum AAModes {
   NONE = "NONE",
   SMAA = "SMAA",
-  MSAA_2X = "MASS_2X",
-  MSAA_4X = "MASS_4X",
-  MSAA_8X = "MASS_8X"
+  MSAA_2X = "MSAA_2X",
+  MSAA_4X = "MSAA_4X",
+  MSAA_8X = "MSAA_8X"
 }
 
 export function createEffectsComposer(

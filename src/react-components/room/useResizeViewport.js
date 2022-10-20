@@ -61,10 +61,7 @@ export function useResizeViewport(viewportRef, store, scene) {
       const isVRPresenting = scene.renderer.xr.enabled && isPresenting;
 
       // Do not update renderer, if a camera or a canvas have not been injected.
-      // In VR mode, three handles canvas resize based on the dimensions returned by
-      // the getEyeParameters function of the WebVR API. These dimensions are independent of
-      // the window size, therefore should not be overwritten with the window's width and
-      // height, // except when in fullscreen mode.
+      // Also, in VR mode, WebXRManager is responsible for the framebuffer size and can not be overridden
       if (!scene.camera || !scene.canvas || (scene.is("vr-mode") && (scene.isMobile || isVRPresenting))) {
         return;
       }
