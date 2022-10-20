@@ -206,7 +206,8 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
   const [message, setMessage] = useState("");
   const [isCommand, setIsCommand] = useState(false);
-  const { text_chat: canTextChat, kick_users: isMod } = usePermissions();
+  const { text_chat: canTextChat } = usePermissions();
+  const isMod = useRole("owner");
   const { text_chat: textChatEnabled } = useRoomPermissions();
   const typingTimeoutRef = useRef();
   const intl = useIntl();
