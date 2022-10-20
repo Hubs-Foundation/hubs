@@ -182,7 +182,9 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
           values={{ email, p: chunks => <p>{chunks}</p> }}
         />
       ) : (
-        <FormattedMessage className="preformatted" id="sign-in.oidc-auth-started" defaultMessage="Waiting for signin..."/>
+        <p>
+          <FormattedMessage id="sign-in.oidc-auth-started" defaultMessage="Waiting for signin..."/>
+        </p>
       )}
       {showNewsletterSignup && (
         <p>
