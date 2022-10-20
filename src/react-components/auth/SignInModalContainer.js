@@ -3,6 +3,7 @@ import { TERMS, PRIVACY } from "../../constants";
 import configs from "../../utils/configs";
 import { AuthContext } from "./AuthContext";
 import { SignInModal, SignInStep, WaitForVerification, SubmitEmail, SubmitOIDC } from "./SignInModal";
+import { Column } from "../layout/Column";
 
 const SignInAction = {
   submitEmail: "submitEmail",
@@ -72,8 +73,6 @@ export function SignInModalContainer() {
   const { step, submitEmail, submitOIDC, cancel, email } = useSignIn();
   const redirectUrl = qs.get("sign_in_destination_url") || "/";
 
-  const auth = useContext(AuthContext);
-
   useEffect(
     () => {
       if (step === SignInStep.complete) {
@@ -82,23 +81,30 @@ export function SignInModalContainer() {
     },
     [step, redirectUrl]
   );
-
   return (
     <SignInModal disableFullscreen>
       {step === SignInStep.submit ? (
-        auth.use_oidc ? (
-          <SubmitOIDC onSubmitOIDC={submitOIDC} />
-        ) : (
-          <SubmitEmail
-            onSubmitEmail={submitEmail}
-            initialEmail={email}
-            signInReason={qs.get("sign_in_reason")}
-            termsUrl={configs.link("terms_of_use", TERMS)}
-            showTerms={configs.feature("show_terms")}
-            privacyUrl={configs.link("privacy_notice", PRIVACY)}
-            showPrivacy={configs.feature("show_privacy")}
-          />
-        )
+        <Column center padding>
+          {configs.APP_CONFIG.auth.use_oidc && 
+            <SubmitOIDC 
+              onSubmitOIDC={submitOIDC} 
+              termsUrl={configs.link("terms_of_use", TERMS)}
+              showTerms={configs.feature("show_terms")}
+              privacyUrl={configs.link("privacy_notice", PRIVACY)}
+              showPrivacy={configs.feature("show_privacy")}
+            />
+          }
+          {(!configs.APP_CONFIG.auth.use_oidc || qs.has("show_email_signin")) && (
+            <SubmitEmail
+              onSubmitEmail={submitEmail}
+              initialEmail={email}
+              termsUrl={configs.link("terms_of_use", TERMS)}
+              showTerms={configs.feature("show_terms")}
+              privacyUrl={configs.link("privacy_notice", PRIVACY)}
+              showPrivacy={configs.feature("show_privacy")}
+            />
+          )}
+        </Column>
       ) : (
         <WaitForVerification
           onCancel={cancel}

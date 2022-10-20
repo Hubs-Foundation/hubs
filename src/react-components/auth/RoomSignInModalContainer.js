@@ -8,13 +8,10 @@ import { TERMS, PRIVACY } from "../../constants";
 export function RoomSignInModalContainer({ onClose, step, onSignIn, message, onContinue }) {
   const [cachedEmail, setCachedEmail] = useState();
 
-  // Can't use `useContext(AuthContext)` unless component is wrapped in an AuthContext element
-  const auth = configs.APP_CONFIG.auth;
-
   return (
     <SignInModal onClose={onClose} closeable>
       {step === SignInStep.submit && (
-        auth.use_oidc ? (
+        configs.APP_CONFIG.auth.use_oidc ? (
           <SubmitOIDC 
             onSubmitOIDC={() => onSignIn("oidc")} 
             termsUrl={configs.link("terms_of_use", TERMS)}
