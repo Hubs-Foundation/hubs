@@ -81,6 +81,7 @@ export function SignInModalContainer() {
     },
     [step, redirectUrl]
   );
+
   return (
     <SignInModal disableFullscreen>
       {step === SignInStep.submit ? (
