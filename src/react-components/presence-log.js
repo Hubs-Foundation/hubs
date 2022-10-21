@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
@@ -21,9 +21,8 @@ export const presets = [
 export function PresenceLog({ entries, preset, hubId, history, presences, onViewProfile, include, exclude, ...rest }) {
   const intl = useIntl();
   const isMod = useRole("owner");
-  const [logEntries, setLogEntries] = useState(null);
 
-  const domForEntry = useCallback(e => {
+  const domForEntry = e => {
     if (include && !include.includes(e.type)) return;
     if (exclude && exclude.includes(e.type)) return;
 
@@ -106,16 +105,12 @@ export function PresenceLog({ entries, preset, hubId, history, presences, onView
         );
       }
     }
-  }, [history, hubId, preset, intl, onViewProfile, presences, include, exclude, isMod]);
-
-  useEffect(() => {
-    setLogEntries(entries.map(domForEntry));
-  }, [domForEntry, entries, setLogEntries]);
+  };
   
   return (<div className={classNames( 
       styles.presenceLog,
       styles["presenceLog" + preset]
-    )} {...rest}>{logEntries}</div>);
+    )} {...rest}>{entries.map(domForEntry)}</div>);
 }
 
 PresenceLog.propTypes = {
