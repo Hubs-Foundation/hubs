@@ -13,7 +13,7 @@ export function isLocalClient() {
   return hasReticulumServer() && document.location.host !== configs.RETICULUM_SERVER;
 }
 
-export function hubUrl(hubId, extraParams, slug) {
+export function hubUrl(hubId, extraParams, slug, waypoint) {
   if (!hubId) {
     if (isLocalClient()) {
       hubId = new URLSearchParams(location.search).get("hub_id");
@@ -35,6 +35,10 @@ export function hubUrl(hubId, extraParams, slug) {
     if (extraParams.hasOwnProperty(key)) {
       url.searchParams.set(key, extraParams[key]);
     }
+  }
+
+  if (waypoint) {
+    url.hash = waypoint;
   }
 
   return url;
