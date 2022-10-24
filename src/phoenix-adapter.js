@@ -168,11 +168,10 @@ export default class PhoenixAdapter {
 
     message.source = source;
 
-    //TODO: Handle frozen
-    if (this.frozen) {
+    if (this.frozen && (message.dataType === "um" || message.dataType === "u")) {
       this.storeMessage(message);
     } else {
-      this.nafMessageReceived(null, message.dataType, message.data, message.source);
+      this.nafMessageReceived(message.from_session_id, message.dataType, message.data, message.source);
     }
   };
   handleIncomingNAFR = ({ from_session_id, naf: unparsedData }) => {

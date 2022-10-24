@@ -1,14 +1,16 @@
 
-export turkeyCfg_postgrest_server=""
-export turkeyCfg_thumbnail_server="nearspark.reticulum.io"
-export turkeyCfg_base_assets_path="https://$SUB_DOMAIN-assets.$DOMAIN/hubs/"
-export turkeyCfg_non_cors_proxy_domains="$SUB_DOMAIN.$DOMAIN,$SUB_DOMAIN-assets.$DOMAIN"
-export turkeyCfg_reticulum_server="$SUB_DOMAIN.$DOMAIN"
-export turkeyCfg_cors_proxy_server="$SUB_DOMAIN-cors.$DOMAIN"
-export turkeyCfg_ga_tracking_id=""
-export turkeyCfg_shortlink_domain="$SUB_DOMAIN.$DOMAIN"
-export turkeyCfg_ita_server=""
-export turkeyCfg_sentry_dsn=""
+#cheatsheet
+#if [ -z ${var1+x} ]; then echo "is unset"; else echo " is set to '$var1'"; fi
+if [ -z ${turkeyCfg_thumbnail_server+x} ]; then export turkeyCfg_thumbnail_server="nearspark.reticulum.io"; fi
+if [ -z ${turkeyCfg_base_assets_path+x} ]; then export turkeyCfg_base_assets_path="https://$SUB_DOMAIN-assets.$DOMAIN/hubs/"; fi
+if [ -z ${turkeyCfg_non_cors_proxy_domains+x} ]; then export turkeyCfg_non_cors_proxy_domains="$SUB_DOMAIN.$DOMAIN,$SUB_DOMAIN-assets.$DOMAIN"; fi
+if [ -z ${turkeyCfg_reticulum_server+x} ]; then export turkeyCfg_reticulum_server="$SUB_DOMAIN.$DOMAIN"; fi
+if [ -z ${turkeyCfg_cors_proxy_server+x} ]; then export turkeyCfg_cors_proxy_server="$SUB_DOMAIN-cors.$DOMAIN"; fi
+if [ -z ${turkeyCfg_shortlink_domain+x} ]; then export turkeyCfg_shortlink_domain="$SUB_DOMAIN.$DOMAIN"; fi
+if [ -z ${turkeyCfg_sentry_dsn+x} ]; then export turkeyCfg_sentry_dsn=""; fi
+if [ -z ${turkeyCfg_postgrest_server+x} ]; then export turkeyCfg_postgrest_server=""; fi
+if [ -z ${turkeyCfg_ita_server+x} ]; then export turkeyCfg_ita_server=""; fi
+if [ -z ${turkeyCfg_ga_tracking_id+x} ]; then export turkeyCfg_ga_tracking_id=""; fi
 
 find /www/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}\//https:\/\/${SUB_DOMAIN}-assets.${DOMAIN}\/hubs\//g" {} \;           
 find /www/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}/https:\/\/${SUB_DOMAIN}-assets.${DOMAIN}\/hubs\//g" {} \; 

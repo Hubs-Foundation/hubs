@@ -29,13 +29,7 @@
   background-color: theme.$basic-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text4-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text4-color;
-    }
+    color: theme.$text4-color;
   }
 
   &:hover {
@@ -59,13 +53,7 @@
   background-color: theme.$primary-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {
@@ -85,13 +73,7 @@
   border: 2px solid theme.$accept-border-color;
   
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {
@@ -111,13 +93,7 @@
   background-color: theme.$cancel-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {
@@ -136,13 +112,7 @@
   background-color: theme.$accent1-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {
@@ -162,13 +132,7 @@
   border: 2px solid theme.$accent2-border-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {
@@ -188,13 +152,7 @@
   background-color: theme.$accent3-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {
@@ -214,13 +172,7 @@
   border: 2px solid theme.$accent4-border-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {
@@ -241,13 +193,7 @@
   border: 2px solid theme.$accent5-border-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {
@@ -268,13 +214,7 @@
   background-color: theme.$accent6-color;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text5-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text5-color;
-    }
+    color: theme.$text5-color;
   }
 
   &:hover {

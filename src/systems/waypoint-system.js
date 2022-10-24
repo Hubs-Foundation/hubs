@@ -2,7 +2,7 @@ import { setMatrixWorld, affixToWorldUp } from "../utils/three-utils";
 import { isTagged } from "../components/tags";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-const calculateIconTransform = (function() {
+const calculateIconTransform = (function () {
   const up = new THREE.Vector3();
   const backward = new THREE.Vector3();
   const forward = new THREE.Vector3();
@@ -28,10 +28,7 @@ const calculateIconTransform = (function() {
     } else {
       scale = 0.1 + 0.05 * distance;
     }
-    forward
-      .copy(camToWaypoint)
-      .projectOnPlane(up.set(0, 1, 0))
-      .normalize();
+    forward.copy(camToWaypoint).projectOnPlane(up.set(0, 1, 0)).normalize();
 
     return outMat4
       .makeBasis(

@@ -1,6 +1,7 @@
 import { computeObjectAABB, getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import {
   resolveUrl,
+  fetchContentType,
   getDefaultResolveQuality,
   injectCustomShaderChunks,
   addMeshScaleAnimation,
@@ -23,6 +24,8 @@ import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
+import { addComponent, entityExists, removeComponent } from "bitecs";
+import { MediaLoading } from "../bit-components";
 
 let loadingObject;
 
@@ -31,10 +34,6 @@ waitForDOMContentLoaded().then(() => {
     loadingObject = gltf;
   });
 });
-
-const fetchContentType = url => {
-  return fetch(url, { method: "HEAD" }).then(r => r.headers.get("content-type"));
-};
 
 AFRAME.registerComponent("media-loader", {
   schema: {
@@ -283,7 +282,13 @@ AFRAME.registerComponent("media-loader", {
         this.data.linkedEl.addEventListener("componentremoved", this.handleLinkedElRemoved);
       }
 
+      // TODO this does duplicate work in some cases, but finish() is the only consistent place to do it
+      this.contentBounds = getBox(this.el, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
+
       el.emit("media-loaded");
+      if (el.eid && entityExists(APP.world, el.eid)) {
+        removeComponent(APP.world, MediaLoading, el.eid);
+      }
     };
 
     if (this.data.animate) {
@@ -342,6 +347,7 @@ AFRAME.registerComponent("media-loader", {
     try {
       if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
+        addComponent(APP.world, MediaLoading, this.el.eid);
       }
 
       //check if url is an anchor hash e.g. #Spawn_Point_1

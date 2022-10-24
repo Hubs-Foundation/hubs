@@ -211,6 +211,7 @@ export class CameraSystem {
     }
     this.viewingCamera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
     this.viewingCamera.layers.enable(Layers.CAMERA_LAYER_FIRST_PERSON_ONLY);
+    this.viewingCamera.layers.enable(Layers.CAMERA_LAYER_UI);
 
     // xr.updateCamera gets called every render to copy the active cameras properties to the XR cameras. We also want to copy layers.
     // TODO this logic should either be moved into THREE or removed when we ditch aframe camera system

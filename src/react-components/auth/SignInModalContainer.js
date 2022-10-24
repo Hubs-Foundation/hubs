@@ -1,4 +1,5 @@
 import React, { useCallback, useReducer, useContext, useEffect } from "react";
+import { TERMS, PRIVACY } from "../../constants";
 import configs from "../../utils/configs";
 import { AuthContext } from "./AuthContext";
 import { SignInModal, SignInStep, WaitForVerification, SubmitEmail } from "./SignInModal";
@@ -72,9 +73,9 @@ export function SignInModalContainer() {
           onSubmitEmail={submitEmail}
           initialEmail={email}
           signInReason={qs.get("sign_in_reason")}
-          termsUrl={configs.link("terms_of_use", "https://github.com/mozilla/hubs/blob/master/TERMS.md")}
+          termsUrl={configs.link("terms_of_use", TERMS)}
           showTerms={configs.feature("show_terms")}
-          privacyUrl={configs.link("privacy_notice", "https://github.com/mozilla/hubs/blob/master/PRIVACY.md")}
+          privacyUrl={configs.link("privacy_notice", PRIVACY)}
           showPrivacy={configs.feature("show_privacy")}
         />
       ) : (

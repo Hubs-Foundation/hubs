@@ -1,6 +1,7 @@
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 // Billboard component that only updates visible objects and only those in the camera view on mobile VR.
+// TODO billboarding assumes a single camera viewpoint but with video-texture-source, mirrors, and camera tools this is no longer valid
 AFRAME.registerComponent("billboard", {
   schema: {
     onlyY: { type: "boolean" }
@@ -65,17 +66,6 @@ AFRAME.registerComponent("billboard", {
       if (!this.playerCamera) return;
 
       this.isInView = this.el.sceneEl.is("vr-mode") ? true : isInViewOfCamera(this.el.object3D, this.playerCamera);
-
-      if (!this.isInView) {
-        // Check in-game camera if rendering to viewfinder and owned
-        const cameraTools = this.el.sceneEl.systems["camera-tools"];
-
-        if (cameraTools) {
-          cameraTools.ifMyCameraRenderingViewfinder(cameraTool => {
-            this.isInView = this.isInView || isInViewOfCamera(this.el.object3D, cameraTool.camera);
-          });
-        }
-      }
     };
   })(),
 

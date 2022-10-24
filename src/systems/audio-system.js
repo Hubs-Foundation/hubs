@@ -19,7 +19,6 @@ function performDelayedReconnect(gainNode) {
 
 import * as sdpTransform from "sdp-transform";
 import MediaDevicesManager from "../utils/media-devices-manager";
-import { THREE } from "aframe";
 
 function isThreeAudio(node) {
   return node instanceof THREE.Audio || node instanceof THREE.PositionalAudio;

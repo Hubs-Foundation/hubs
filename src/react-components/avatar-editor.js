@@ -15,6 +15,11 @@ import { ensureAvatarMaterial } from "../utils/avatar-utils";
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+
+import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
+import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
+
 const delistAvatarInfoMessage = defineMessage({
   id: "avatar-editor.delist-avatar-info",
   defaultMessage:
@@ -24,10 +29,8 @@ const delistAvatarInfoMessage = defineMessage({
 const AVATARS_API = "/api/v1/avatars";
 
 const defaultEditors = [
-  {
-    name: "Quilt",
-    url: "https://tryquilt.io/?gltf=$AVATAR_GLTF"
-  }
+  // TODO This previously contain tryquilt.io.  We should re-evaluate whether these types of editors are still desired,
+  // and change the related code accordingly.
 ];
 const useAllowedEditors = true;
 const allowedEditors = [
@@ -147,7 +150,7 @@ class AvatarEditor extends Component {
     e.preventDefault();
 
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
-      const gltfLoader = new THREE.GLTFLoader().register(parser => new GLTFBinarySplitterPlugin(parser));
+      const gltfLoader = new GLTFLoader().register(parser => new GLTFBinarySplitterPlugin(parser));
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
       const onProgress = console.log;
 
@@ -363,11 +366,7 @@ class AvatarEditor extends Component {
           <FormattedMessage id="avatar-editor.custom-avatar-option" defaultMessage="Custom GLB..." />
         </option>
       </select>
-      <img
-        className="arrow"
-        src="../assets/images/dropdown_arrow.png"
-        srcSet="../assets/images/dropdown_arrow@2x.png 2x"
-      />
+      <img className="arrow" src={dropdownArrowUrl} srcSet={`${dropdownArrow2xUrl} 2x`} />
     </div>
   );
 

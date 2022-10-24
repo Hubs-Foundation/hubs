@@ -12,13 +12,7 @@
   }
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text1-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text1-color;
-    }
+    color: theme.$text1-color;
   }
 }
 

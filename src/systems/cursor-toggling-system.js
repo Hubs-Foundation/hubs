@@ -1,13 +1,27 @@
-import { paths } from "./userinput/paths";
-import { waitForDOMContentLoaded } from "../utils/async-utils";
-import { isTagged } from "../components/tags";
+import { hasComponent } from "bitecs";
+import {
+  HeldHandLeft,
+  HeldHandRight,
+  HeldRemoteLeft,
+  HeldRemoteRight,
+  HoveredHandLeft,
+  HoveredHandRight,
+  Pen
+} from "../bit-components";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { anyEntityWith } from "../utils/bit-utils";
 import { hackyMobileSafariTest } from "../utils/detect-touchscreen";
+import { paths } from "./userinput/paths";
 
-function shouldEnableRemote(scene, hand, remote, teleporting, woke) {
+function shouldEnableRemote(world, scene, handHovering, handHeld, remoteHeld, teleporting, woke) {
   const vrRemotePenIntersection =
-    scene.is("vr-mode") && isTagged(remote.held, "isPen") && remote.held.children[0].components.pen.intersection;
-  return scene.is("entered") && !hand.hovered && !hand.held && !teleporting && !vrRemotePenIntersection && woke;
+    scene.is("vr-mode") &&
+    remoteHeld &&
+    hasComponent(world, Pen, remoteHeld) &&
+    world.eid2obj.get(remoteHeld).el.children[0].components.pen.intersection;
+
+  return scene.is("entered") && woke && !handHovering && !handHeld && !teleporting && !vrRemotePenIntersection;
 }
 
 export class CursorTogglingSystem {
@@ -31,21 +45,26 @@ export class CursorTogglingSystem {
       this.gazeTeleporter = document.getElementById("gaze-teleport").components["teleporter"];
     }
 
-    const rightRemote = interaction.state.rightRemote;
-    const leftRemote = interaction.state.leftRemote;
-    const leftHand = interaction.state.leftHand;
-    const rightHand = interaction.state.rightHand;
+    const world = APP.world;
+
+    // TODO this is also in resolveActionSets. It might be we actually do want something like the legacy interaction system state
+    const leftHandHovering = anyEntityWith(world, HoveredHandLeft);
+    const leftHandHolding = anyEntityWith(world, HeldHandLeft);
+    const leftRemoteHolding = anyEntityWith(world, HeldRemoteLeft);
+    const rightHandHovering = anyEntityWith(world, HoveredHandRight);
+    const rightHandHolding = anyEntityWith(world, HeldHandRight);
+    const rightRemoteHolding = anyEntityWith(world, HeldRemoteRight);
 
     if (userinput.get(paths.actions.cursor.right.wake)) {
       this.wakeRight = true;
-      if (!leftRemote.held) {
+      if (!leftRemoteHolding) {
         this.wakeLeft = false;
       }
     }
 
     if (userinput.get(paths.actions.cursor.left.wake)) {
       this.wakeLeft = true;
-      if (!rightRemote.held) {
+      if (!rightRemoteHolding) {
         this.wakeRight = false;
       }
     }
@@ -54,9 +73,11 @@ export class CursorTogglingSystem {
     const shouldEnableLeftRemote =
       !inspecting &&
       shouldEnableRemote(
+        world,
         scene,
-        leftHand,
-        leftRemote,
+        leftHandHovering,
+        leftHandHolding,
+        leftRemoteHolding,
         this.leftHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
         this.wakeLeft
       );
@@ -66,19 +87,15 @@ export class CursorTogglingSystem {
       hackyMobileSafariTest() ||
       (!inspecting &&
         shouldEnableRemote(
+          world,
           scene,
-          rightHand,
-          rightRemote,
+          rightHandHovering,
+          rightHandHolding,
+          rightRemoteHolding,
           this.rightHandTeleporter.isTeleporting || this.gazeTeleporter.isTeleporting,
           this.wakeRight
         ));
 
-    if (!shouldEnableLeftRemote) {
-      leftRemote.hovered = null;
-    }
-    if (!shouldEnableRightRemote) {
-      rightRemote.hovered = null;
-    }
     this.leftCursorController.enabled = shouldEnableLeftRemote;
     this.rightCursorController.enabled = shouldEnableRightRemote;
   }

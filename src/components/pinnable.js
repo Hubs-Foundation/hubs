@@ -1,3 +1,6 @@
+import { addComponent, removeComponent } from "bitecs";
+import { Pinnable, Pinned } from "../bit-components";
+
 AFRAME.registerComponent("pinnable", {
   schema: {
     pinned: { default: false }
@@ -13,10 +16,18 @@ AFRAME.registerComponent("pinnable", {
     this.el.addEventListener("owned-pager-page-changed", this._persist);
 
     this.el.addEventListener("owned-video-state-changed", this._persistAndAnimate);
+
+    addComponent(APP.world, Pinnable, this.el.object3D.eid);
   },
 
   update() {
     this._animate();
+
+    if (this.data.pinned) {
+      addComponent(APP.world, Pinned, this.el.object3D.eid);
+    } else {
+      removeComponent(APP.world, Pinned, this.el.object3D.eid);
+    }
   },
 
   _persistAndAnimate() {

@@ -129,7 +129,7 @@ SubmitEmail.defaultProps = {
 };
 
 SubmitEmail.propTypes = {
-  message: PropTypes.string,
+  message: PropTypes.object,
   termsUrl: PropTypes.string,
   privacyUrl: PropTypes.string,
   initialEmail: PropTypes.string,
@@ -190,7 +190,7 @@ export function SignInComplete({ message, onContinue }) {
 }
 
 SignInComplete.propTypes = {
-  message: PropTypes.string.isRequired,
+  message: PropTypes.string,
   onContinue: PropTypes.func.isRequired
 };
 

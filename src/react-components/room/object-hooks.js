@@ -2,13 +2,11 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { removeNetworkedObject } from "../../utils/removeNetworkedObject";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { getPromotionTokenForFile } from "../../utils/media-utils";
+import { hasComponent } from "bitecs";
+import { Pinnable, Pinned, Static } from "../../bit-components";
 
 function getPinnedState(el) {
-  return !!(el.components.pinnable && el.components.pinnable.data.pinned);
-}
-
-function hasIsStaticTag(el) {
-  return !!(el.components.tags && el.components.tags.data.isStatic);
+  return !!(hasComponent(APP.world, Pinnable, el.eid) && hasComponent(APP.world, Pinned, el.eid));
 }
 
 export function isMe(object) {
@@ -94,7 +92,7 @@ export function usePinObject(hubChannel, scene, object) {
   const canPin = !!(
     scene.is("entered") &&
     !isPlayer(object) &&
-    !hasIsStaticTag(el) &&
+    !hasComponent(APP.world, Static, el.eid) &&
     hubChannel.can("pin_objects") &&
     userOwnsFile
   );
@@ -146,7 +144,7 @@ export function useRemoveObject(hubChannel, scene, object) {
     scene.is("entered") &&
     !isPlayer(object) &&
     !getPinnedState(el) &&
-    !hasIsStaticTag(el) &&
+    !hasComponent(APP.world, Static, el.eid) &&
     hubChannel.can("spawn_and_move_media")
   );
 

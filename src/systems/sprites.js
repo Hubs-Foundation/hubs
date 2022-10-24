@@ -10,7 +10,9 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import vertexShader from "./sprites/sprite.vert";
 import fragmentShader from "./sprites/sprite.frag";
 import { getThemeColorShifter } from "../utils/theme-sprites";
+import { onThemeChanged } from "../utils/theme";
 import { disposeTexture } from "../utils/material-utils";
+import { Layers } from "../components/layers";
 
 const MAX_SPRITES = 1024;
 const SHEET_TYPES = ["action", "notice"];
@@ -228,13 +230,14 @@ export class SpriteSystem {
           scene.appendChild(el);
           el.setObject3D("mesh", mesh);
           mesh.frustumCulled = false;
+          mesh.layers.set(Layers.CAMERA_LAYER_UI);
           mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
           mesh.raycast = this.raycast.bind(this);
         });
       }
     });
 
-    APP.store.addEventListener("themechanged", () => {
+    const updateSprites = () => {
       for (const type in PNGS) {
         const spritesheetPng = PNGS[type];
         // TODO: Fix me if possible
@@ -251,7 +254,9 @@ export class SpriteSystem {
           });
         }
       }
-    });
+    }
+
+    onThemeChanged(updateSprites);
   }
 
   tick(t) {
