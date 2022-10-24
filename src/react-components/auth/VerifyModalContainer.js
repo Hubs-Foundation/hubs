@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
-import { VerifyModal, VerificationError, AccountVerified, VerifyingAccount } from "./VerifyModal";
+import { VerifyModal, VerificationError, EmailVerified, VerifyingEmail } from "./VerifyModal";
 import jwtDecode from "jwt-decode";
 
 const VerificationStep = {
@@ -70,9 +70,9 @@ export function VerifyModalContainer() {
     const qs = new URLSearchParams(location.search);
     // auth_origin is not set when using OIDC flow so use a neutral default
     const origin = qs.get("auth_origin") || "Hubs";
-    content = <AccountVerified origin={origin} />;
+    content = <EmailVerified origin={origin} />;
   } else {
-    content = <VerifyingAccount />;
+    content = <VerifyingEmail />;
   }
 
   return <VerifyModal>{content}</VerifyModal>;

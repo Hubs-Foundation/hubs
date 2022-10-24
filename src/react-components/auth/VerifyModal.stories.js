@@ -1,7 +1,7 @@
 import React from "react";
 import { Center } from "../layout/Center";
 import { Page } from "../layout/Page";
-import { VerifyModal, VerifyingAccount, AccountVerified, VerificationError } from "./VerifyModal";
+import { VerifyModal, VerifyingEmail, EmailVerified, VerificationError } from "./VerifyModal";
 import backgroundUrl from "../../assets/images/home-hero-background-unbranded.png";
 
 export default {
@@ -15,7 +15,7 @@ export const Verifying = () => (
   <Page style={{ backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover" }}>
     <Center>
       <VerifyModal>
-        <VerifyingAccount />
+        <VerifyingEmail />
       </VerifyModal>
     </Center>
   </Page>
@@ -25,7 +25,7 @@ export const Verified = () => (
   <Page style={{ backgroundImage: `url(${backgroundUrl})`, backgroundSize: "cover" }}>
     <Center>
       <VerifyModal>
-        <AccountVerified origin="hubs.mozilla.com" />
+        <EmailVerified origin="hubs.mozilla.com" />
       </VerifyModal>
     </Center>
   </Page>
