@@ -138,6 +138,8 @@ SubmitEmail.propTypes = {
 };
 
 export function SubmitOIDC({ onSubmitOIDC, privacyUrl, termsUrl, message }) {
+  const intl = useIntl();
+  
   const onSubmitForm = useCallback(
     e => {
       e.preventDefault();
