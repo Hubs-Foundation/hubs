@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import configs from "../../utils/configs";
-import { SignInModal, SignInStep, SubmitEmail, SubmitOIDC, WaitForVerification, SignInComplete } from "./SignInModal";
+import { SignInModal, SignInStep, SubmitEmail, WaitForVerification, SignInComplete, SubmitOIDC } from "./SignInModal";
 import { TERMS, PRIVACY } from "../../constants";
 
 // TODO: Migrate to use AuthContext

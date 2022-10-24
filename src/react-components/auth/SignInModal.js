@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { CloseButton } from "../input/CloseButton";
 import { Modal } from "../modal/Modal";
 import { FormattedMessage, useIntl, defineMessages } from "react-intl";
-import { Button, CancelButton, NextButton, ContinueButton } from "../input/Button";
+import { CancelButton, NextButton, ContinueButton, Button } from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
