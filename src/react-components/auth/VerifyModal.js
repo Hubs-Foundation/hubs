@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { Spinner } from "../misc/Spinner";
 import { Modal } from "../modal/Modal";
@@ -24,6 +24,10 @@ export function VerifyingEmail() {
 }
 
 export function EmailVerified({ origin }) {
+  // Close the window, but display a comfort message anyway
+  useEffect(function() {
+    window.close();
+  });
   return (
     <Column center padding grow>
       <b>
