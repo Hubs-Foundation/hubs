@@ -16,6 +16,7 @@ import { EmojiPicker } from "./EmojiPicker";
 import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
+import { proxiedUrlFor } from "../../utils/media-url-utils";
 
 export function SpawnMessageButton(props) {
   return (
@@ -370,14 +371,14 @@ function getMessageComponent(message) {
     case "video":
       return (
         <MessageBubble key={message.id} media>
-          <video controls src={message.body.src} />
+          <video controls src={proxiedUrlFor(message.body.src)} />
         </MessageBubble>
       );
     case "image":
     case "photo":
       return (
         <MessageBubble key={message.id} media>
-          <img src={message.body.src} />
+          <img src={proxiedUrlFor(message.body.src)} />
         </MessageBubble>
       );
     default:
