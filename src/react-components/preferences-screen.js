@@ -582,9 +582,9 @@ class PreferenceListItem extends Component {
     const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isCustomComponent = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CUSTOM_COMPONENT;
     const isSmallScreen = window.innerWidth < 600;
-    const label = (
+    const label = preferenceLabels[this.props.storeKey] && (
       <span
-        className={styles.preferenceLabel}
+        className={classNames(styles.preferenceLabel, { [styles.disabled]: this.props.disabled })}
         title={this.props.itemProps.tooltipKey && intl.formatMessage(preferenceLabels[this.props.itemProps.tooltipKey])}
       >
         {intl.formatMessage(preferenceLabels[this.props.storeKey])}
