@@ -11,7 +11,7 @@ import {
 import { paths } from "../systems/userinput/paths";
 import { sets } from "../systems/userinput/sets";
 import { getLastWorldPosition } from "../utils/three-utils";
-import { Layers } from "./layers";
+import { Layers } from "../camera-layers";
 
 export function findRemoteHoverTarget(world, object3D) {
   if (!object3D) return null;
@@ -99,6 +99,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.cursorVisual.renderOrder = window.APP.RENDER_ORDER.CURSOR;
     this.cursorVisual.material.transparent = true;
     this.cursorVisual.layers.set(Layers.CAMERA_LAYER_UI);
+    this.cursorVisual.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
     this.data.cursor.object3D.add(this.cursorVisual);
 
     this.intersection = null;

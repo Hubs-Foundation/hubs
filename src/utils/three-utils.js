@@ -358,7 +358,7 @@ export function createPlaneBufferGeometry(width, height, widthSegments, heightSe
   return geometry;
 }
 
-import { Layers } from "../components/layers";
+import { Layers } from "../camera-layers";
 
 // This code is from three-vrm. We will likely be using that in the future and this inlined code can go away
 function excludeTriangles(triangles, bws, skinIndex, exclude) {

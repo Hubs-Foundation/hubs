@@ -113,7 +113,8 @@ module.exports = (env, argv) => {
         buffer: require.resolve("buffer/"),
         stream: require.resolve("stream-browserify"),
         path: require.resolve("path-browserify")
-      }
+      },
+      extensions: [".ts", ".tsx", ".js", ".jsx"]
     },
     entry: {
       admin: path.join(__dirname, "src", "admin.js")
@@ -184,7 +185,6 @@ module.exports = (env, argv) => {
           test: /\.tsx?$/,
           loader: "babel-loader",
           options: require("../babel.config"),
-          include: [path.resolve(__dirname, "src")],
           exclude: function (modulePath) {
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }

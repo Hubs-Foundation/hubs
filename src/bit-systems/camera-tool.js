@@ -168,6 +168,7 @@ function updateRenderTarget(world, camera) {
 
   const tmpRenderTarget = renderer.getRenderTarget();
   renderer.setRenderTarget(renderTarget);
+  renderer.clearDepth();
   renderer.render(sceneEl.object3D, world.eid2obj.get(CameraTool.cameraRef[camera]));
   renderer.setRenderTarget(tmpRenderTarget);
 
@@ -290,9 +291,7 @@ export function cameraToolSystem(world) {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
-      encoding: THREE.sRGBEncoding,
-      depth: false,
-      stencil: false
+      encoding: THREE.sRGBEncoding
     });
     renderTarget.lastUpdated = 0;
     renderTarget.needsUpdate = true;

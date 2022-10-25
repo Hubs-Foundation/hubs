@@ -38,84 +38,67 @@ export function useResizeViewport(viewportRef, store, scene) {
     height: getMaxResolutionHeight(store)
   });
 
-  useEffect(
-    () => {
-      function onStoreChanged() {
-        setMaxResolution({
-          width: getMaxResolutionWidth(store),
-          height: getMaxResolutionHeight(store)
-        });
-      }
-
-      onStoreChanged();
-
-      store.addEventListener("statechanged", onStoreChanged);
-
-      return () => {
-        store.removeEventListener("statechanged", onStoreChanged);
-      };
-    },
-    [store]
-  );
-
-  useEffect(
-    () => {
-      const observer = new ResizeObserver(entries => {
-        const isPresenting = scene.renderer.xr.isPresenting;
-        const isVRPresenting = scene.renderer.xr.enabled && isPresenting;
-
-        // Do not update renderer, if a camera or a canvas have not been injected.
-        // In VR mode, three handles canvas resize based on the dimensions returned by
-        // the getEyeParameters function of the WebVR API. These dimensions are independent of
-        // the window size, therefore should not be overwritten with the window's width and
-        // height, // except when in fullscreen mode.
-        if (!scene.camera || !scene.canvas || (scene.is("vr-mode") && (scene.isMobile || isVRPresenting))) {
-          return;
-        }
-
-        const canvasRect = entries[0].contentRect;
-
-        const rendererSize = calculateRendererSize(canvasRect, maxResolution, isVRPresenting);
-
-        const canvas = scene.canvas;
-        canvas.style.width = canvasRect.width + "px";
-        canvas.style.height = canvasRect.height + "px";
-
-        scene.renderer.setSize(rendererSize.width, rendererSize.height, false);
-
-        scene.camera.aspect = rendererSize.width / rendererSize.height;
-        scene.camera.updateProjectionMatrix();
-
-        // Resizing the canvas clears it, so render immediately after resize to prevent flicker.
-        scene.renderer.render(scene.object3D, scene.camera);
-
-        scene.emit("rendererresize", null, false);
+  useEffect(() => {
+    function onStoreChanged() {
+      setMaxResolution({
+        width: getMaxResolutionWidth(store),
+        height: getMaxResolutionHeight(store)
       });
+    }
 
-      observer.observe(viewportRef.current);
+    onStoreChanged();
 
-      return () => {
-        observer.disconnect();
-      };
-    },
-    [viewportRef, scene, maxResolution]
-  );
+    store.addEventListener("statechanged", onStoreChanged);
 
-  useEffect(
-    () => {
-      function onOrientationChange() {
-        setMaxResolution({
-          width: getMaxResolutionWidth(store),
-          height: getMaxResolutionHeight(store)
-        });
+    return () => {
+      store.removeEventListener("statechanged", onStoreChanged);
+    };
+  }, [store]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(entries => {
+      const isPresenting = scene.renderer.xr.isPresenting;
+      const isVRPresenting = scene.renderer.xr.enabled && isPresenting;
+
+      // Do not update renderer, if a camera or a canvas have not been injected.
+      // Also, in VR mode, WebXRManager is responsible for the framebuffer size and can not be overridden
+      if (!scene.camera || !scene.canvas || (scene.is("vr-mode") && (scene.isMobile || isVRPresenting))) {
+        return;
       }
 
-      addOrientationChangeListener(onOrientationChange);
+      const canvasRect = entries[0].contentRect;
 
-      return () => {
-        removeOrientationChangeListener(onOrientationChange);
-      };
-    },
-    [store]
-  );
+      const rendererSize = calculateRendererSize(canvasRect, maxResolution, isVRPresenting);
+
+      const canvas = scene.canvas;
+      canvas.style.width = canvasRect.width + "px";
+      canvas.style.height = canvasRect.height + "px";
+
+      scene.camera.aspect = rendererSize.width / rendererSize.height;
+      scene.camera.updateProjectionMatrix();
+
+      scene.emit("rendererresize", rendererSize, false);
+    });
+
+    observer.observe(viewportRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [viewportRef, scene, maxResolution]);
+
+  useEffect(() => {
+    function onOrientationChange() {
+      setMaxResolution({
+        width: getMaxResolutionWidth(store),
+        height: getMaxResolutionHeight(store)
+      });
+    }
+
+    addOrientationChangeListener(onOrientationChange);
+
+    return () => {
+      removeOrientationChangeListener(onOrientationChange);
+    };
+  }, [store]);
 }

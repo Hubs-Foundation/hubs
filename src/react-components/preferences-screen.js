@@ -21,6 +21,7 @@ import {
   getScreenResolutionHeight,
   setMaxResolution
 } from "../utils/screen-orientation-utils";
+import { AAModes } from "../effects";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
@@ -514,6 +515,22 @@ const preferenceLabels = defineMessages({
   nametagVisibilityDistance: {
     id: "preferences-screen.preference.nametag-visibility-distance",
     defaultMessage: "Nametag visibility distance"
+  },
+  enablePostEffects: {
+    id: "preferences-screen.preference.enable-fx",
+    defaultMessage: "Enable Post Processing Effects (experimental)"
+  },
+  enablePostEffectsTooltip: {
+    id: "preferences-screen.preference.enable-fx.tooltip",
+    defaultMessage: "This feature is still experimental and may have issues. It is currently unsupported in VR."
+  },
+  enableBloom: {
+    id: "preferences-screen.preference.enable-fx-bloom",
+    defaultMessage: "Enable Bloom Effect"
+  },
+  aaMode: {
+    id: "preferences-screen.preference.fx-aa-mode",
+    defaultMessage: "Anti-Aliasing Mode"
   }
 });
 
@@ -543,7 +560,12 @@ class PreferenceListItem extends Component {
     const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isSmallScreen = window.innerWidth < 600;
     const label = (
-      <span className={styles.preferenceLabel}>{intl.formatMessage(preferenceLabels[this.props.storeKey])}</span>
+      <span
+        className={styles.preferenceLabel}
+        title={this.props.itemProps.tooltipKey && intl.formatMessage(preferenceLabels[this.props.itemProps.tooltipKey])}
+      >
+        {intl.formatMessage(preferenceLabels[this.props.storeKey])}
+      </span>
     );
     const prefSchema = this.props.store.schema.definitions.preferences.properties;
     const hasPref =
@@ -630,6 +652,7 @@ const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
 const CATEGORY_ACCESSIBILITY = 5;
+const CATEGORY_GRAPHICS = 6;
 const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
@@ -637,7 +660,8 @@ const categoryNames = defineMessages({
   [CATEGORY_MISC]: { id: "preferences-screen.category.misc", defaultMessage: "Misc" },
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
   [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" },
-  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" }
+  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" },
+  [CATEGORY_GRAPHICS]: { id: "preferences-screen.category.graphics", defaultMessage: "Graphics" }
 });
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -698,6 +722,7 @@ Control.propTypes = {
 };
 
 function createItem(itemProps, store) {
+  if (itemProps.hidden) return null;
   const setValue = v => {
     if (itemProps.promptForRefresh) {
       store.update({ preferences: { [itemProps.key]: v, shouldPromptForRefresh: true } });
@@ -1109,7 +1134,6 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableThemes
           },
-          { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
           {
             key: "nametagVisibility",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
@@ -1161,43 +1185,6 @@ class PreferencesScreen extends Component {
           },
           this.state.preferredCamera,
           {
-            key: "materialQualitySetting",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-            options: [
-              {
-                value: "low",
-                text: intl.formatMessage({
-                  id: "preferences-screen.material-quality-setting.low",
-                  defaultMessage: "Low"
-                })
-              },
-              {
-                value: "medium",
-                text: intl.formatMessage({
-                  id: "preferences-screen.material-quality-setting.medium",
-                  defaultMessage: "Medium"
-                })
-              },
-              {
-                value: "high",
-                text: intl.formatMessage({
-                  id: "preferences-screen.material-quality-setting.high",
-                  defaultMessage: "High"
-                })
-              }
-            ],
-            promptForRefresh: true
-          },
-          {
-            key: "enableDynamicShadows",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false
-          },
-          {
-            key: "disableAutoPixelRatio",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
-          },
-          {
             key: "allowMultipleHubsInstances",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           },
@@ -1247,6 +1234,106 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           }
         ]
+      ],
+      [
+        CATEGORY_GRAPHICS,
+        [
+          { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+          {
+            key: "materialQualitySetting",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: [
+              {
+                value: "low",
+                text: intl.formatMessage({
+                  id: "preferences-screen.material-quality-setting.low",
+                  defaultMessage: "Low"
+                })
+              },
+              {
+                value: "medium",
+                text: intl.formatMessage({
+                  id: "preferences-screen.material-quality-setting.medium",
+                  defaultMessage: "Medium"
+                })
+              },
+              {
+                value: "high",
+                text: intl.formatMessage({
+                  id: "preferences-screen.material-quality-setting.high",
+                  defaultMessage: "High"
+                })
+              }
+            ],
+            promptForRefresh: true
+          },
+          {
+            key: "enableDynamicShadows",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "disableAutoPixelRatio",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "enablePostEffects",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            hidden: AFRAME.utils.device.isMobileVR(),
+            tooltipKey: "enablePostEffectsTooltip",
+            promptForRefresh: true
+          },
+          {
+            key: "enableBloom",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            hidden: AFRAME.utils.device.isMobileVR(),
+            disableIfFalse: "enablePostEffects",
+            promptForRefresh: true
+          },
+          {
+            key: "aaMode",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            hidden: AFRAME.utils.device.isMobileVR(),
+            disableIfFalse: "enablePostEffects",
+            promptForRefresh: true,
+            options: [
+              {
+                value: AAModes.NONE,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.none",
+                  defaultMessage: "none"
+                })
+              },
+              {
+                value: AAModes.SMAA,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.smaa",
+                  defaultMessage: "SMAA"
+                })
+              },
+              {
+                value: AAModes.MSAA_2X,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.msaa_2x",
+                  defaultMessage: "2x MSAA"
+                })
+              },
+              {
+                value: AAModes.MSAA_4X,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.msaa_4x",
+                  defaultMessage: "4x MSAA"
+                })
+              },
+              {
+                value: AAModes.MSAA_8X,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.msaa_8x",
+                  defaultMessage: "8x MSAA"
+                })
+              }
+            ]
+          }
+        ]
       ]
     ]);
 
@@ -1255,7 +1342,10 @@ class PreferencesScreen extends Component {
     const items = new Map();
 
     for (const [category, definitions] of DEFINITIONS) {
-      items.set(category, definitions.map(toItem));
+      items.set(
+        category,
+        definitions.map(toItem).filter(item => !!item)
+      );
     }
 
     return new Map([
@@ -1282,7 +1372,16 @@ class PreferencesScreen extends Component {
           }
         ]
       ],
-      [CATEGORY_MISC, [{ items: items.get(CATEGORY_MISC) }]]
+      [
+        CATEGORY_MISC,
+        [
+          { items: items.get(CATEGORY_MISC) },
+          {
+            name: intl.formatMessage(categoryNames[CATEGORY_GRAPHICS]),
+            items: items.get(CATEGORY_GRAPHICS)
+          }
+        ]
+      ]
     ]);
   }
 
