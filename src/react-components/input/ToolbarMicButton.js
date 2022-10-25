@@ -1,10 +1,21 @@
 import React, { useCallback, useRef } from "react";
 import PropTypes from "prop-types";
-import { FormattedMessage } from "react-intl";
+import { defineMessages, useIntl } from "react-intl";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { useVolumeMeter } from "../misc/useVolumeMeter";
 
-export function ToolbarMicButton({ scene, ...rest }) {
+const micButtonMessages = defineMessages({
+  label: {
+    id: "voice-button-container.label",
+    defaultMessage: "Voice"
+  },
+  title: {
+    id: "voice-button-container.title",
+    defaultMessage: "Voice Chat Off"
+  }
+});
+
+export function ToolbarMicButton({ scene, disabled, ...rest }) {
   const ref = useRef();
   const setRef = node => {
     if (node) {
@@ -27,19 +38,23 @@ export function ToolbarMicButton({ scene, ...rest }) {
   }, []);
   useVolumeMeter({
     analyser: scene.systems["hubs-systems"].audioSystem.outboundAnalyser,
-    update
+    update: !disabled && update
   });
+  const intl = useIntl();
   return (
     <ToolbarButton
       ref={setRef}
-      label={<FormattedMessage id="voice-button-container.label" defaultMessage="Voice" />}
+      label={intl.formatMessage(micButtonMessages["label"])}
       preset="basic"
       type={"right"}
+      title={disabled ? intl.formatMessage(micButtonMessages["title"]) : undefined}
+      disabled={disabled}
       {...rest}
     />
   );
 }
 
 ToolbarMicButton.propTypes = {
-  scene: PropTypes.object.isRequired
+  scene: PropTypes.object.isRequired,
+  disabled: PropTypes.bool
 };

@@ -109,9 +109,23 @@
   }
 }
 
+:local(.message-bubble):local(.permission) {
+  display: flex;
+  gap: 10px;
+  background-color: theme.$transparent;
+  border: 1px solid theme.$input-border-color;
+  color: theme.$text1-color;
+  align-items: center;
+}
+
 :local(.chat-input-icon) {
   cursor: pointer;
   width: 24px;
+
+  &:disabled,
+  &[disabled] {
+    cursor: default;
+  }
 
   svg {
     color: theme.$input-icon-color;
