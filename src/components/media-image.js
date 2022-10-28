@@ -5,6 +5,7 @@ import { errorTexture } from "../utils/error-texture";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { createGIFTexture } from "../utils/gif-texture";
+import { Layers } from "../camera-layers";
 
 const textureCache = new TextureCache();
 const inflightTextures = new Map();
@@ -129,6 +130,7 @@ AFRAME.registerComponent("media-image", {
       }
 
       this.mesh = new THREE.Mesh(geometry, material);
+      this.mesh.layers.set(Layers.CAMERA_LAYER_FX_MASK);
       this.el.setObject3D("mesh", this.mesh);
     }
 

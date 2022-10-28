@@ -4,7 +4,7 @@ import { addComponent, hasComponent } from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
 import { RIGIDBODY_FLAGS } from "../systems/bit-physics";
-import { Layers } from "../components/layers";
+import { Layers } from "../camera-layers";
 
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },

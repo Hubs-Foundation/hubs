@@ -11,10 +11,12 @@ import { useState } from "react";
 import MediaDevicesManager from "../../utils/media-devices-manager";
 import { VolumeLevelBar } from "../misc/VolumeLevelBar";
 import styles from "./MicSetupModal.scss";
+import { useCan } from "./useCan";
 
 export function MicSetupModalContainer({ scene, ...rest }) {
   const { isMicEnabled, permissionStatus } = useMicrophoneStatus(scene);
   const { micDeviceChanged, micDevices } = useMicrophone(scene);
+  const canVoiceChat = useCan("voice_chat");
   const { speakerDeviceChanged, speakerDevices } = useSpeakers();
   const { playSound } = useSound({
     scene,
@@ -43,6 +45,7 @@ export function MicSetupModalContainer({ scene, ...rest }) {
       onChangeMicrophoneMuted={onChangeMicrophoneMuted}
       isAudioInputSelectAvailable={MediaDevicesManager.isAudioInputSelectEnabled}
       isAudioOutputSelectAvailable={MediaDevicesManager.isAudioOutputSelectEnabled}
+      canVoiceChat={canVoiceChat}
       {...rest}
     />
   );

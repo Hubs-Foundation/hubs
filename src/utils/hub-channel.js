@@ -32,7 +32,9 @@ const VALID_PERMISSIONS = HUB_CREATOR_PERMISSIONS.concat([
   "spawn_and_move_media",
   "pin_objects",
   "spawn_emoji",
-  "fly"
+  "fly",
+  "voice_chat",
+  "text_chat"
 ]);
 
 export default class HubChannel extends EventTarget {

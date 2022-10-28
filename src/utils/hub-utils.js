@@ -48,3 +48,8 @@ export function createHubChannelParams({
     hub_invite_id: hubInviteId
   };
 }
+
+export function isRoomOwner(clientId) {
+  const presences = APP.hubChannel.presence.state;
+  return presences && presences[clientId] && presences[clientId].metas[0].roles.owner;
+}

@@ -33,6 +33,7 @@ export function useVolumeMeter({ analyser, update, updateRate = 50 }) {
 
   useEffect(
     () => {
+      if (!update) return;
       if (!movingAvgRef.current) {
         movingAvgRef.current = MovingAverage(updateRate * 2);
       }
