@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { TweetEditorModal } from "./TweetEditorModal";
 import { Modifier, EditorState } from "draft-js";
@@ -49,23 +49,20 @@ export function TweetEditorModalContainer({ initialTweet, mediaUrl, contentSubty
 
   const [sending, setSending] = useState(false);
 
-  const sendTweet = useCallback(
-    async () => {
-      setSending(true);
+  const sendTweet = useCallback(async () => {
+    setSending(true);
 
-      try {
-        const body = editorState.getCurrentContent().getPlainText();
-        // For now assume url is a stored file media url
-        await fetchReticulumAuthenticated("/api/v1/twitter/tweets", "POST", { media_stored_file_url: mediaUrl, body });
-      } catch (error) {
-        setSending(false);
-        console.error(error);
-      }
+    try {
+      const body = editorState.getCurrentContent().getPlainText();
+      // For now assume url is a stored file media url
+      await fetchReticulumAuthenticated("/api/v1/twitter/tweets", "POST", { media_stored_file_url: mediaUrl, body });
+    } catch (error) {
+      setSending(false);
+      console.error(error);
+    }
 
-      onClose();
-    },
-    [mediaUrl, editorState, onClose]
-  );
+    onClose();
+  }, [mediaUrl, editorState, onClose]);
 
   return (
     <TweetEditorModal
