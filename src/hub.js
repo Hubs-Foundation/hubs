@@ -1,4 +1,3 @@
-import "aframe";
 import {
   getCurrentHubId,
   updateVRHudPresenceCount,
@@ -8,7 +7,6 @@ import {
 import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
-import { ScenePrefab } from "./prefabs/scene";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
@@ -26,6 +24,7 @@ import "./assets/stylesheets/globals.scss";
 import "./assets/stylesheets/hub.scss";
 import loadingEnvironment from "./assets/models/LoadingEnvironment.glb";
 
+import "aframe";
 import "./utils/aframe-overrides";
 
 // A-Frame hardcodes THREE.Cache.enabled = true
