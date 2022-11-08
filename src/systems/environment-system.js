@@ -286,7 +286,7 @@ AFRAME.registerComponent("environment-settings", {
     fogType: { type: "string", default: defaultEnvSettings.fogType },
     fogColor: { type: "color", default: defaultEnvSettings.fogColor },
     fogDensity: { type: "number", default: defaultEnvSettings.fogDensity },
-    fogNear: { type: "number", default: defaultEnvSettings.forNear },
+    fogNear: { type: "number", default: defaultEnvSettings.fogNear },
     fogFar: { type: "number", default: defaultEnvSettings.fogFar }
   }
 });
