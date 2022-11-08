@@ -165,6 +165,8 @@ export function cloneObject3D(source, preserveUUIDs) {
       return;
     }
 
+    clonedNode.onBeforeRender = sourceNode.onBeforeRender;
+
     if (sourceNode.animations) {
       clonedNode.animations = sourceNode.animations.map(animationClip =>
         cloneAnimationClip(animationClip, cloneUUIDLookup)

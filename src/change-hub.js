@@ -25,7 +25,7 @@ function loadRoomObjects(hubId) {
   objectsScene.appendChild(objectsEl);
 }
 
-export async function changeHub(hubId, addToHistory = true) {
+export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   if (hubId === APP.hub.hub_id) {
     console.log("Change hub called with the current hub id. This is a noop.");
     return;
@@ -46,7 +46,7 @@ export async function changeHub(hubId, addToHistory = true) {
   const hub = data.hubs[0];
 
   if (addToHistory) {
-    window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug));
+    window.history.pushState(null, null, hubUrl(hubId, {}, hub.slug, waypoint));
   }
 
   APP.hub = hub;

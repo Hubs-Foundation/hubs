@@ -18,7 +18,7 @@ import { Spinner } from "../misc/Spinner";
 
 export const tittleMessages = defineMessages({
   microphoneSetup: {
-    id: "cmic-setup-modal.title",
+    id: "mic-setup-modal.title",
     defaultMessage: "Microphone Setup",
   },
   audioSetup: {
