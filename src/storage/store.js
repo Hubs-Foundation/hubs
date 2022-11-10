@@ -151,7 +151,7 @@ export const SCHEMA = {
         locale: { type: "string", default: "browser" },
         showRtcDebugPanel: { type: "bool", default: false },
         showAudioDebugPanel: { type: "bool", default: false },
-        enableAudioClipping: { type: "bool", default: false },
+        enableAudioClipping: { type: "bool", default: true },
         audioClippingThreshold: { type: "number", default: 0.2 },
         audioPanningQuality: { type: "string", default: defaultAudioPanningQuality() },
         theme: { type: "string", default: getDefaultTheme()?.name },
