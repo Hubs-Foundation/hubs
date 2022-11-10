@@ -50,7 +50,26 @@ import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
+import type { HubsSystems } from "aframe";
+import { Camera, Scene, WebGLRenderer } from "three";
+import { HubsWorld } from "../app";
 
+declare global {
+  interface Window {
+    $S: HubsSystems;
+  }
+}
+
+const timeSystem = (world: HubsWorld) => {
+  const { time } = world;
+  const now = performance.now();
+  time.delta = now - time.elapsed;
+  time.elapsed = now;
+  time.tick++;
+};
+
+// NOTE keeping this around since many things index into it to get a reference to a system. This will
+// naturally burn down as we migrate things, so it is not worth going through and changing all of them.
 AFRAME.registerSystem("hubs-systems", {
   init() {
     waitForDOMContentLoaded().then(() => {
@@ -92,83 +111,125 @@ AFRAME.registerSystem("hubs-systems", {
     window.$S = this;
   },
 
-  tick(t, dt) {
-    if (!this.DOMContentDidLoad) return;
-    const world = APP.world;
-
-    networkReceiveSystem(world);
-    onOwnershipLost(world);
-    mediaLoadingSystem(world);
-
-    physicsCompatSystem(world);
-
-    networkedTransformSystem(world);
-
-    const systems = AFRAME.scenes[0].systems;
-    systems.userinput.tick2();
-
-    interactionSystem(world, this.cursorTargettingSystem, t, systems);
-
-    buttonSystems(world);
-    constraintsSystem(world, systems.userinput);
-
-    // We run this earlier in the frame so things have a chance to override properties run by animations
-    this.animationMixerSystem.tick(dt);
-
-    this.characterController.tick(t, dt);
-    this.cursorTogglingSystem.tick(systems.interaction, systems.userinput, this.el);
-    this.interactionSfxSystem.tick(systems.interaction, systems.userinput, this.soundEffectsSystem);
-    this.superSpawnerSystem.tick();
-    this.emojiSystem.tick(t, systems.userinput);
-    this.cursorPoseTrackingSystem.tick();
-    this.hoverMenuSystem.tick();
-    this.positionAtBorderSystem.tick();
-    // this.constraintsSystem.tick();
-    this.twoPointStretchingSystem.tick();
-
-    floatyObjectSystem(world);
-
-    this.holdableButtonSystem.tick();
-    this.hoverButtonSystem.tick();
-    this.drawingMenuSystem.tick();
-    this.hapticFeedbackSystem.tick(
-      this.twoPointStretchingSystem,
-      false,
-      false
-      // TODO: didInteractLeftThisFrame doesn't exist?
-      // this.singleActionButtonSystem.didInteractLeftThisFrame,
-      // this.singleActionButtonSystem.didInteractRightThisFrame
-    );
-    this.soundEffectsSystem.tick();
-    this.scenePreviewCameraSystem.tick();
-    this.physicsSystem.tick(dt);
-    this.inspectYourselfSystem.tick(this.el, systems.userinput, this.cameraSystem);
-    this.cameraSystem.tick(this.el, dt);
-    cameraToolSystem(world);
-    this.waypointSystem.tick(t, dt);
-    this.menuAnimationSystem.tick(t);
-    this.spriteSystem.tick(t, dt);
-    this.uvScrollSystem.tick(dt);
-    this.shadowSystem.tick();
-    videoMenuSystem(world, systems.userinput);
-    videoSystem(world, this.audioSystem);
-    mediaFramesSystem(world);
-    this.audioZonesSystem.tick(this.el);
-    this.gainSystem.tick();
-    this.nameTagSystem.tick();
-
-    deleteEntitySystem(world, systems.userinput);
-    destroyAtExtremeDistanceSystem(world);
-    removeNetworkedObjectButtonSystem(world);
-    removeObject3DSystem(world);
-
-    // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
-    this.boneVisibilitySystem.tick();
-
-    networkSendSystem(world);
-  },
-
   remove() {
     this.cursorTargettingSystem.remove();
   }
 });
+
+export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene, camera: Camera) {
+  const world = APP.world;
+  const sceneEl = AFRAME.scenes[0];
+  const aframeSystems = sceneEl.systems;
+  const hubsSystems = aframeSystems["hubs-systems"];
+
+  // TODO does anything actually ever pause the scene?
+  if (!sceneEl.isPlaying && !hubsSystems.DOMContentDidLoad) return;
+
+  timeSystem(world);
+  const t = world.time.elapsed;
+  const dt = world.time.delta;
+
+  // Tick AFrame components
+  const tickComponents = sceneEl.behaviors.tick;
+  for (let i = 0; i < tickComponents.length; i++) {
+    if (!tickComponents[i].el.isPlaying) continue;
+    tickComponents[i].tick(t, dt);
+  }
+
+  // Run order of this loop, based on module load order
+  // NOTE these could be inlined instead of looping but that would be a breakings change
+  // to third part devs. This will also just naturally burndown as we migrate.
+  // aframeSystems["networked"].tick(t, dt);
+  // aframeSystems["local-audio-analyser"].tick(t, dt);
+  // aframeSystems["transform-selected-object"].tick(t, dt);
+  // aframeSystems["frame-scheduler"].tick(t, dt);
+  // aframeSystems["personal-space-bubble"].tick(t, dt);
+  // aframeSystems["exit-on-blur"].tick(t, dt);
+  // aframeSystems["auto-pixel-ratio"].tick(t, dt);
+  // aframeSystems["idle-detector"].tick(t, dt);
+  // aframeSystems["userinput-debug"].tick(t, dt);
+  // aframeSystems["ui-hotkeys"].tick(t, dt);
+  // aframeSystems["tips"].tick(t, dt);
+  const systemNames = sceneEl.systemNames;
+  for (let i = 0; i < systemNames.length; i++) {
+    if (!aframeSystems[systemNames[i]].tick) continue;
+    aframeSystems[systemNames[i]].tick(t, dt);
+  }
+
+  networkReceiveSystem(world);
+  onOwnershipLost(world);
+  mediaLoadingSystem(world);
+
+  physicsCompatSystem(world);
+
+  networkedTransformSystem(world);
+
+  aframeSystems.userinput.tick2(xrFrame);
+
+  interactionSystem(world, hubsSystems.cursorTargettingSystem, t, aframeSystems);
+
+  buttonSystems(world);
+  constraintsSystem(world, hubsSystems.physicsSystem);
+
+  // We run this earlier in the frame so things have a chance to override properties run by animations
+  hubsSystems.animationMixerSystem.tick(dt);
+
+  hubsSystems.characterController.tick(t, dt);
+  hubsSystems.cursorTogglingSystem.tick(aframeSystems.interaction, aframeSystems.userinput, hubsSystems.el);
+  hubsSystems.interactionSfxSystem.tick(
+    aframeSystems.interaction,
+    aframeSystems.userinput,
+    hubsSystems.soundEffectsSystem
+  );
+  hubsSystems.superSpawnerSystem.tick();
+  hubsSystems.emojiSystem.tick(t, aframeSystems.userinput);
+  hubsSystems.cursorPoseTrackingSystem.tick();
+  hubsSystems.hoverMenuSystem.tick();
+  hubsSystems.positionAtBorderSystem.tick();
+  hubsSystems.twoPointStretchingSystem.tick();
+
+  floatyObjectSystem(world);
+
+  hubsSystems.holdableButtonSystem.tick();
+  hubsSystems.hoverButtonSystem.tick();
+  hubsSystems.drawingMenuSystem.tick();
+  hubsSystems.hapticFeedbackSystem.tick(
+    hubsSystems.twoPointStretchingSystem,
+    false,
+    false
+    // TODO: didInteractLeftHubsSystemsFrame doesn't exist?
+    // hubsSystems.singleActionButtonSystem.didInteractLeftHubsSystemsFrame,
+    // hubsSystems.singleActionButtonSystem.didInteractRightHubsSystemsFrame
+  );
+  hubsSystems.soundEffectsSystem.tick();
+  hubsSystems.scenePreviewCameraSystem.tick();
+  hubsSystems.physicsSystem.tick(dt);
+  hubsSystems.inspectYourselfSystem.tick(hubsSystems.el, aframeSystems.userinput, hubsSystems.cameraSystem);
+  hubsSystems.cameraSystem.tick(hubsSystems.el, dt);
+  cameraToolSystem(world);
+  hubsSystems.waypointSystem.tick(t, dt);
+  hubsSystems.menuAnimationSystem.tick(t);
+  hubsSystems.spriteSystem.tick(t, dt);
+  hubsSystems.uvScrollSystem.tick(dt);
+  hubsSystems.shadowSystem.tick();
+  videoMenuSystem(world, aframeSystems.userinput);
+  videoSystem(world, hubsSystems.audioSystem);
+  mediaFramesSystem(world);
+  hubsSystems.audioZonesSystem.tick(hubsSystems.el);
+  hubsSystems.gainSystem.tick();
+  hubsSystems.nameTagSystem.tick();
+
+  deleteEntitySystem(world, aframeSystems.userinput);
+  destroyAtExtremeDistanceSystem(world);
+  removeNetworkedObjectButtonSystem(world);
+  removeObject3DSystem(world);
+
+  // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
+  hubsSystems.boneVisibilitySystem.tick();
+
+  networkSendSystem(world);
+
+  renderer.render(scene, camera);
+  // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)
+  // TODO inline invoking tocks instead of using onAfterRender registered in a-scene
+}

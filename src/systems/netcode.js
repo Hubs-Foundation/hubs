@@ -87,11 +87,16 @@ const pendingJoins = [];
 const pendingParts = [];
 
 // TODO messaging, joining, and leaving should not be using NAF
-NAF.connection.subscribeToDataChannel("nn", function (fromClientId, _dataType, data) {
-  data.fromClientId = fromClientId;
-  pendingMessages.push(data);
-});
-
+if (!window.NAF) {
+  console.warn(
+    "NAF is currently required for the new networking system but is not loaded. This is only expected on secondary pages like avatar.html."
+  );
+} else {
+  NAF.connection.subscribeToDataChannel("nn", function (fromClientId, _dataType, data) {
+    data.fromClientId = fromClientId;
+    pendingMessages.push(data);
+  });
+}
 document.addEventListener("DOMContentLoaded", function () {
   document.body.addEventListener("clientConnected", function ({ detail: { clientId } }) {
     console.log("client joined", clientId);

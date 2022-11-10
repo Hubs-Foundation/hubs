@@ -74,7 +74,6 @@ function swapAudioType<T extends AudioObject3D>(
   APP.audios.set(eid, newAudio);
 
   audio.parent!.add(newAudio);
-  newAudio.matrixWorldNeedsUpdate = true; // TODO: Fix in threejs
   audio.removeFromParent();
 
   swapObject3DComponent(world, eid, newAudio);
@@ -116,7 +115,6 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     }
     const audio = world.eid2obj.get(makeAudioSourceEntity(world, video, audioSystem))!;
     videoObj.add(audio);
-    audio.matrixWorldNeedsUpdate = true; // TODO: Fix in threejs
     // Note in media-video we call updateMatrixWorld here to force PositionalAudio's updateMatrixWorld to run even
     // if it has an invisible parent. We don't want to have invisible parents now.
   });

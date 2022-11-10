@@ -103,9 +103,6 @@ function add(world, child, parent) {
   const parentObj = world.eid2obj.get(parent);
   const childObj = world.eid2obj.get(child);
   parentObj.add(childObj);
-
-  // TODO: Fix this in THREE.Object3D.add
-  childObj.matrixWorldNeedsUpdate = true;
 }
 
 function* loadMedia(world, eid) {
