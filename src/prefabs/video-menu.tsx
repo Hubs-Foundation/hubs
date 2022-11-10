@@ -7,6 +7,7 @@ import { createElementEntity, createRef, ProjectionMode } from "../utils/jsx-ent
 import { textureLoader } from "../utils/media-utils";
 import playImageUrl from "../assets/images/sprites/notice/play.png";
 import pauseImageUrl from "../assets/images/sprites/notice/pause.png";
+import { TextureCache } from "../utils/texture-cache";
 
 const playTexture = textureLoader.load(playImageUrl);
 const pauseTexture = textureLoader.load(pauseImageUrl);
@@ -66,11 +67,8 @@ export function VideoMenuPrefab() {
           texture: playTexture,
           ratio: 1,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend
-        }}
-        textureCacheKey={{
-          src: playImageUrl,
-          version: 1
+          alphaMode: AlphaMode.Blend,
+          cacheKey: TextureCache.key(playImageUrl, 1)
         }}
         visible={false}
       />
@@ -82,11 +80,8 @@ export function VideoMenuPrefab() {
           texture: pauseTexture,
           ratio: 1,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend
-        }}
-        textureCacheKey={{
-          src: pauseImageUrl,
-          version: 1
+          alphaMode: AlphaMode.Blend,
+          cacheKey: TextureCache.key(pauseImageUrl, 1)
         }}
         visible={false}
       />

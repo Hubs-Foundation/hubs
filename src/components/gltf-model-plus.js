@@ -53,11 +53,35 @@ class GLTFCache {
 
     cacheItem.count--;
     if (cacheItem.count <= 0) {
-      cacheItem.gltf.scene.traverse(disposeNode);
+      cacheItem.gltf.scene.traverse(disposeGLTFNode);
       this.cache.delete(src);
     }
   }
 }
+
+export function disposeGLTFNode(node) {
+  // TODO: In the gltf loader, keep track of materials / textures / geometries that it creates. (Anything disposable.)
+  // Dispose of those things here.
+  //
+  // If the gltf was cloned from the cache, this will end up being the underlying thing.
+  // If not from the cache, this is the LIVE ONE.
+  if (!node.userData.wasSwapped) {
+    disposeNode(node);
+  }
+  disposeComponents(node);
+}
+
+function disposeComponents(node) {
+  const components = node.userData?.gltfExtensions?.MOZ_hubs_components || {};
+  Object.values(components).forEach(component => {
+    Object.values(component).forEach(maybeDisposable => {
+      if (maybeDisposable.dispose) {
+        maybeDisposable.dispose();
+      }
+    });
+  });
+}
+
 export const gltfCache = new GLTFCache();
 const inflightGltfs = new Map();
 
@@ -379,7 +403,7 @@ function runMigration(version, json) {
   }
 }
 
-const convertStandardMaterialsIfNeeded = (object) => {
+const convertStandardMaterialsIfNeeded = object => {
   const materialQuality = window.APP.store.state.preferences.materialQualitySetting;
   updateMaterials(object, material => convertStandardMaterial(material, materialQuality));
   return object;
@@ -392,7 +416,7 @@ class GLTFHubsPlugin {
   constructor(parser, jsonPreprocessor) {
     this.parser = parser;
     this.jsonPreprocessor = jsonPreprocessor;
-    this.name = 'MOZ_hubs_plugin';
+    this.name = "MOZ_hubs_plugin";
 
     // We override glTF parser textureLoader with our HubsTextureLoader for
     // 1. Clean up the texture image related resources after it is uploaded to WebGL texture
@@ -666,54 +690,56 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     .register(parser => new GLTFHubsLightMapExtension(parser))
     .register(parser => new GLTFHubsTextureBasisExtension(parser))
     .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)))
-    .register(parser => new GLTFLodExtension(parser, {
-      loadingMode: 'progressive',
-      onLoadMesh: (lod, mesh, level, lowestLevel) => {
-        // Higher levels are progressively loaded on demand.
-        // So some post-loading processings done in gltf-model-plus and media-loader
-        // need to be done here now.
+    .register(
+      parser =>
+        new GLTFLodExtension(parser, {
+          loadingMode: "progressive",
+          onLoadMesh: (lod, mesh, level, lowestLevel) => {
+            // Higher levels are progressively loaded on demand.
+            // So some post-loading processings done in gltf-model-plus and media-loader
+            // need to be done here now.
 
-        // Nothing to do if this is the lowest level mesh.
-        if (level === lowestLevel || lod.levels.length === 0) {
-          return mesh;
-        }
+            // Nothing to do if this is the lowest level mesh.
+            if (level === lowestLevel || lod.levels.length === 0) {
+              return mesh;
+            }
 
-        let lowestMeshLevel = null;
-        for (let index = lowestLevel; index > level; index--) {
-          if (lod.levels[index].object.type !== 'Object3D') {
-            lowestMeshLevel = index;
-            break;
+            let lowestMeshLevel = null;
+            for (let index = lowestLevel; index > level; index--) {
+              if (lod.levels[index].object.type !== "Object3D") {
+                lowestMeshLevel = index;
+                break;
+              }
+            }
+
+            if (lowestMeshLevel === null) {
+              return mesh;
+            }
+
+            // Create a mesh clone. Otherwise if an lod instance is cloned before higher
+            // levels are loaded the lods instance can refer to the same mesh instance,
+            // therefore the lods can be broken because an object can't be placed
+            // at multiple places in a Three.js scene tree.
+            mesh = mesh.clone();
+
+            convertStandardMaterialsIfNeeded(mesh);
+
+            // A hacky solution. media-loader and media-utils make a material clone
+            // and inject shader code chunk for hover effects on before compile hook
+            // as a post-loading process. Here simulates them.
+            // @TODO: Check if this always works. Replace with a better and simpler solution.
+            const currentOnBeforeRender = mesh.material.onBeforeRender;
+            mesh.material = mesh.material.clone();
+            mesh.material.onBeforeRender = currentOnBeforeRender;
+
+            // onBeforeCompile of the material of the lowest level mesh should be
+            // already set up because the lowest level should be loaded first.
+            mesh.material.onBeforeCompile = lod.levels[lowestMeshLevel].object.material.onBeforeCompile;
+
+            return mesh;
           }
-        }
-
-        if (lowestMeshLevel === null) {
-          return mesh;
-        }
-
-        // Create a mesh clone. Otherwise if an lod instance is cloned before higher
-        // levels are loaded the lods instance can refer to the same mesh instance,
-        // therefore the lods can be broken because an object can't be placed
-        // at multiple places in a Three.js scene tree.
-        mesh = mesh.clone();
-
-        convertStandardMaterialsIfNeeded(mesh);
-
-        // A hacky solution. media-loader and media-utils make a material clone
-        // and inject shader code chunk for hover effects on before compile hook
-        // as a post-loading process. Here simulates them.
-        // @TODO: Check if this always works. Replace with a better and simpler solution.
-        const currentOnBeforeRender = mesh.material.onBeforeRender;
-        mesh.material = mesh.material.clone();
-        mesh.material.onBeforeRender = currentOnBeforeRender;
-
-        // onBeforeCompile of the material of the lowest level mesh should be
-        // already set up because the lowest level should be loaded first.
-        mesh.material.onBeforeCompile =
-          lod.levels[lowestMeshLevel].object.material.onBeforeCompile;
-
-        return mesh;
-      }
-    }));
+        })
+    );
 
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
   // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of

@@ -33,6 +33,7 @@ export const MediaFrame = defineComponent({
   previewingNid: Types.eid
 });
 export const Text = defineComponent();
+export const ReflectionProbe = defineComponent();
 export const Slice9 = defineComponent({
   insets: [Types.ui32, 4],
   size: [Types.f32, 2]
@@ -136,11 +137,10 @@ export const SceneRoot = defineComponent();
 export const SceneLoader = defineComponent({ src: Types.ui32 });
 SceneLoader.src[$isStringType] = true;
 
-export const TextureCacheKey = defineComponent({
-  src: Types.ui32,
-  version: Types.ui8
+export const Image = defineComponent({
+  cacheKey: Types.ui32
 });
-TextureCacheKey.src[$isStringType] = true;
+Image.cacheKey[$isStringType] = true;
 
 export const MediaVideo = defineComponent({
   autoPlay: Types.ui8
@@ -165,3 +165,6 @@ export const VideoMenu = defineComponent({
 export const AudioEmitter = defineComponent();
 export const AudioSettingsChanged = defineComponent();
 export const Deletable = defineComponent();
+
+export const EnvironmentSettings = defineComponent();
+EnvironmentSettings.map = new Map();

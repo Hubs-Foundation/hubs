@@ -15,7 +15,7 @@ import { animate } from "../utils/animate";
 const loaderForMediaType = {
   [MediaType.IMAGE]: (world, { accessibleUrl, contentType }) => loadImage(world, accessibleUrl, contentType),
   [MediaType.VIDEO]: (world, { accessibleUrl }) => loadVideo(world, accessibleUrl),
-  [MediaType.MODEL]: (world, { accessibleUrl }) => loadModel(world, accessibleUrl)
+  [MediaType.MODEL]: (world, { accessibleUrl }) => loadModel(world, accessibleUrl, true)
 };
 
 export const MEDIA_LOADER_FLAGS = {

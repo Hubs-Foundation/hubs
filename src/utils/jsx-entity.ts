@@ -27,9 +27,9 @@ import {
   VideoMenuItem,
   NotRemoteHoverTarget,
   Deletable,
-  TextureCacheKey,
   SceneLoader,
-  SceneRoot
+  SceneRoot,
+  EnvironmentSettings
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -40,6 +40,7 @@ import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
+import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
 import { AlphaMode } from "./create-image-mesh";
@@ -203,10 +204,7 @@ export interface JSXComponentData extends ComponentData {
     ratio: number;
     projection: ProjectionMode;
     alphaMode: typeof AlphaMode.Blend | typeof AlphaMode.Mask | typeof AlphaMode.Opaque;
-  };
-  textureCacheKey?: {
-    src: string;
-    version: number;
+    cacheKey: string;
   };
   video?: {
     texture: VideoTexture;
@@ -275,15 +273,17 @@ export enum ProjectionMode {
 
 export interface GLTFComponentData extends ComponentData {
   video?: VideoLoaderParams;
+  environmentSettings?: any;
+  reflectionProbe?: ReflectionProbeParams;
 }
 
 declare global {
   namespace createElementEntity.JSX {
     interface IntrinsicElements {
       entity: JSXComponentData &
-        Attrs & {
-          children?: IntrinsicElements[];
-        };
+      Attrs & {
+        children?: IntrinsicElements[];
+      };
     }
 
     interface ElementChildrenAttribute {
@@ -301,7 +301,6 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   ...commonInflators,
-  textureCacheKey: createDefaultInflator(TextureCacheKey),
   cursorRaycastable: createDefaultInflator(CursorRaycastable),
   remoteHoverTarget: createDefaultInflator(RemoteHoverTarget),
   isNotRemoteHoverTarget: createDefaultInflator(NotRemoteHoverTarget),
@@ -342,7 +341,12 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
   ...commonInflators,
-  video: inflateVideoLoader
+  video: inflateVideoLoader,
+  reflectionProbe: inflateReflectionProbe,
+  environmentSettings: (world: HubsWorld, eid: number, props: any) => {
+    addComponent(world, EnvironmentSettings, eid);
+    (EnvironmentSettings as any).map.set(eid, props);
+  }
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

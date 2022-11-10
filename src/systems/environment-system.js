@@ -31,6 +31,8 @@ const defaultEnvSettings = {
   toneMappingExposure: 1,
   physicallyCorrectLights: true,
   envMapTexture: null,
+  // TODO
+  // skybox: null,
   backgroundTexture: null,
   backgroundColor: new THREE.Color("#000000"),
 
@@ -108,6 +110,14 @@ export class EnvironmentSystem {
     };
 
     window.$E = this;
+  }
+
+  updateEnvironmentSettings(newSettings) {
+    const envSettings = {
+      ...defaultEnvSettings,
+      ...newSettings
+    };
+    this.applyEnvSettings(envSettings);
   }
 
   updateEnvironment(envEl) {

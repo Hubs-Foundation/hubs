@@ -40,6 +40,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
   });
 
   swap.forEach(([old, replacement]) => {
+    replacement.userData.wasSwapped = true;
     for (let i = old.children.length - 1; i >= 0; i--) {
       replacement.add(old.children[i]);
     }

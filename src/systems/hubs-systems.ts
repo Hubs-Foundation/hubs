@@ -160,7 +160,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   networkReceiveSystem(world);
   onOwnershipLost(world);
-  sceneLoadingSystem(world);
+  sceneLoadingSystem(world, hubsSystems.environmentSystem);
   mediaLoadingSystem(world);
 
   physicsCompatSystem(world);

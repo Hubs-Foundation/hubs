@@ -1,6 +1,6 @@
-import { defineQuery, enterQuery, exitQuery, removeComponent, removeEntity } from "bitecs";
+import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
-import { SceneLoader, SceneRoot } from "../bit-components";
+import { EnvironmentSettings, SceneLoader, SceneRoot } from "../bit-components";
 import { cancelable, coroutine } from "../utils/coroutine";
 import { add, assignNetworkIds } from "./media-loading";
 import { loadModel } from "../utils/load-model";
@@ -10,6 +10,8 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { ScenePrefab } from "../prefabs/scene";
 import { remountUI } from "../hub";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
+import { EnvironmentSystem } from "../systems/environment-system";
+import { Mesh } from "three";
 
 export function swapActiveScene(world: HubsWorld, src: string) {
   const currentScene = anyEntityWith(APP.world, SceneRoot);
@@ -21,16 +23,36 @@ export function swapActiveScene(world: HubsWorld, src: string) {
   (document.querySelector("#environment-scene") as AElement).object3D.add(world.eid2obj.get(newScene)!);
 }
 
-function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal) {
+function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal, environmentSystem: EnvironmentSystem) {
   try {
     const src = APP.getString(SceneLoader.src[eid]);
     if (!src) throw new Error();
-    const { value: scene, canceled } = yield* cancelable(loadModel(world, src), signal);
+    const { value: scene, canceled } = yield* cancelable(loadModel(world, src, false), signal);
     if (!canceled) {
       // TODO: Maybe use scene id for root nid?
       assignNetworkIds(world, "scene", scene, eid);
       add(world, scene, eid);
       removeComponent(world, SceneLoader, eid);
+
+      if (hasComponent(world, EnvironmentSettings, scene)) {
+        world.eid2obj.get(scene);
+
+        const environmentSettings = (EnvironmentSettings as any).map.get(scene);
+        environmentSystem.updateEnvironmentSettings(environmentSettings);
+      }
+
+      world.eid2obj.get(scene)!.traverse(o => {
+        // TODO animated objects should not be static
+        if ((o as Mesh).isMesh) {
+          (o as Mesh).reflectionProbeMode = "static";
+        }
+
+        // TODO: Update this in 3js instead
+        if ((o as any).isReflectionProbe) {
+          o.updateMatrices();
+          (o as any).box.applyMatrix4(o.matrixWorld);
+        }
+      });
       AFRAME.scenes[0].emit("environment-scene-loaded", scene);
       document.querySelector(".a-canvas")!.classList.remove("a-hidden");
       const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
@@ -49,11 +71,11 @@ const abortControllers = new Map();
 const sceneLoaderQuery = defineQuery([SceneLoader]);
 const sceneLoaderEnterQuery = enterQuery(sceneLoaderQuery);
 const sceneLoaderExitQuery = exitQuery(sceneLoaderQuery);
-export function sceneLoadingSystem(world: HubsWorld) {
+export function sceneLoadingSystem(world: HubsWorld, environmentSystem: EnvironmentSystem) {
   sceneLoaderEnterQuery(world).forEach(function (eid) {
     const ac = new AbortController();
     abortControllers.set(eid, ac);
-    jobs.add(coroutine(loadScene(world, eid, ac.signal)));
+    jobs.add(coroutine(loadScene(world, eid, ac.signal, environmentSystem)));
   });
 
   sceneLoaderExitQuery(world).forEach(function (eid) {
