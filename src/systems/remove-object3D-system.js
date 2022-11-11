@@ -1,6 +1,6 @@
 import { defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
-import { Image, GLTFModel, MediaFrame, Object3DTag, Slice9, Text, AudioEmitter, VideoMenu } from "../bit-components";
-import { gltfCache, disposeGLTFNode } from "../components/gltf-model-plus";
+import { AudioEmitter, GLTFModel, Image, MediaFrame, Object3DTag, Slice9, Text, VideoMenu } from "../bit-components";
+import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
 import { traverseSome } from "../utils/three-utils";
 
@@ -18,7 +18,7 @@ const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => {
   if (obj.userData.gltfCacheKey) {
     gltfCache.release(obj.userData.gltfCacheKey);
   } else {
-    obj.traverse(disposeGLTFNode);
+    obj.dispose();
   }
 });
 const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());

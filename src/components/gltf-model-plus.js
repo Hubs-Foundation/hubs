@@ -53,33 +53,10 @@ class GLTFCache {
 
     cacheItem.count--;
     if (cacheItem.count <= 0) {
-      cacheItem.gltf.scene.traverse(disposeGLTFNode);
+      cacheItem.gltf.scene.dispose();
       this.cache.delete(src);
     }
   }
-}
-
-export function disposeGLTFNode(node) {
-  // TODO: In the gltf loader, keep track of materials / textures / geometries that it creates. (Anything disposable.)
-  // Dispose of those things here.
-  //
-  // If the gltf was cloned from the cache, this will end up being the underlying thing.
-  // If not from the cache, this is the LIVE ONE.
-  if (!node.userData.wasSwapped) {
-    disposeNode(node);
-  }
-  disposeComponents(node);
-}
-
-function disposeComponents(node) {
-  const components = node.userData?.gltfExtensions?.MOZ_hubs_components || {};
-  Object.values(components).forEach(component => {
-    Object.values(component).forEach(maybeDisposable => {
-      if (maybeDisposable.dispose) {
-        maybeDisposable.dispose();
-      }
-    });
-  });
 }
 
 export const gltfCache = new GLTFCache();
@@ -499,6 +476,45 @@ class GLTFHubsPlugin {
   }
 }
 
+class GLTFDisposeExtension {
+  constructor(parser) {
+    const disposables = new Set();
+    this.disposables = disposables;
+
+    parser.getDependency = (orig => {
+      return function getDependency(type, index) {
+        const dep = orig.call(parser, type, index);
+        switch (type) {
+          case "texture":
+            dep.then(texture => {
+              disposables.add(texture);
+            });
+            break;
+          case "mesh":
+            dep.then(mesh => {
+              if (mesh.geometry) {
+                disposables.add(mesh.geometry);
+              }
+            });
+            break;
+        }
+        return dep;
+      };
+    })(parser.getDependency);
+  }
+
+  afterRoot({ scenes }) {
+    const { disposables } = this;
+    scenes.forEach(scene => {
+      scene.dispose = function dispose() {
+        disposables.forEach(disposable => {
+          disposable.dispose();
+        });
+      };
+    });
+  }
+}
+
 class GLTFHubsComponentsExtension {
   constructor(parser) {
     this.parser = parser;
@@ -685,6 +701,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new GLTFLoader(loadingManager);
   gltfLoader
+    .register(parser => new GLTFDisposeExtension(parser))
     .register(parser => new GLTFHubsComponentsExtension(parser))
     .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
     .register(parser => new GLTFHubsLightMapExtension(parser))
