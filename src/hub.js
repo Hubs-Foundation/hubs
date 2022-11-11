@@ -594,6 +594,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
       updateEnvironmentForHub(hub, entryManager);
 
+      const force_tcp = qsTruthy("force_tcp");
+      const force_turn = qsTruthy("force_turn");
+
       // Disconnect in case this is a re-entry
       APP.dialog.disconnect();
       APP.dialog.connect({
@@ -602,9 +605,9 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         serverParams: { host: hub.host, port: hub.port, turn: hub.turn },
         scene,
         clientId: data.session_id,
-        forceTcp: qs.get("force_tcp"),
-        forceTurn: qs.get("force_turn"),
-        iceTransportPolicy: qs.get("force_tcp") || qs.get("force_turn") ? "relay" : "all"
+        forceTcp: force_tcp,
+        forceTurn: force_turn,
+        iceTransportPolicy: force_tcp || force_turn ? "relay" : "all"
       });
       scene.addEventListener(
         "adapter-ready",
