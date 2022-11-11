@@ -23,6 +23,17 @@ export const MediaType = {
 };
 MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML | MediaType.AUDIO;
 MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML;
+const MediaTypeName = new Map([
+  [MediaType.MODEL, "model"],
+  [MediaType.IMAGE, "image"],
+  [MediaType.VIDEO, "video"],
+  [MediaType.PDF, "pdf"],
+  [MediaType.HTML, "html"],
+  [MediaType.AUDIO, "audio"]
+]);
+export function mediaTypeName(type) {
+  return MediaTypeName.get(type) || "unknown";
+}
 
 const linkify = Linkify();
 linkify.tlds(tlds);

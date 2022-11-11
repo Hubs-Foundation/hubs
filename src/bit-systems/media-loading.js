@@ -4,7 +4,7 @@ import { easeOutQuadratic } from "../utils/easing";
 import { loadImage } from "../utils/load-image";
 import { loadVideo } from "../utils/load-video";
 import { loadModel } from "../utils/load-model";
-import { MediaType, resolveMediaInfo } from "../utils/media-utils";
+import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked } from "../bit-components";
 import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
@@ -105,6 +105,16 @@ export function add(world, child, parent) {
   parentObj.add(childObj);
 }
 
+class UnsupportedMediaTypeError extends Error {
+  constructor(eid, mediaType) {
+    super();
+    this.name = "UnsupportedMediaTypeError";
+    this.message = `Cannot load media for entity ${eid}. No loader for media type ${mediaType} (${mediaTypeName(
+      mediaType
+    )}).`;
+  }
+}
+
 function* loadMedia(world, eid) {
   let loadingObjEid = 0;
   const addLoadingObjectTimeout = crTimeout(() => {
@@ -118,7 +128,7 @@ function* loadMedia(world, eid) {
     const urlData = yield resolveMediaInfo(src);
     const loader = loaderForMediaType[urlData.mediaType];
     if (!loader) {
-      throw new Error(`Unsupported media type: ${urlData.mediaType}`);
+      throw new UnsupportedMediaTypeError(eid, urlData.mediaType);
     }
     media = yield* loader(world, urlData);
   } catch (e) {
