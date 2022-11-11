@@ -1,7 +1,5 @@
+import { SOUND_TELEPORT_END, SOUND_TELEPORT_START } from "../systems/sound-effects-system";
 import { cylinderTextureSrc } from "./cylinder-texture";
-import { SOUND_TELEPORT_START, SOUND_TELEPORT_END } from "../systems/sound-effects-system";
-import { getMeshes } from "../utils/aframe-utils";
-
 import { textureLoader } from "../utils/media-utils";
 
 const CYLINDER_TEXTURE = textureLoader.load(cylinderTextureSrc);
@@ -54,13 +52,13 @@ class RayCurve extends THREE.Mesh {
     this.width = width;
   }
 
-  setPoint = (function() {
+  setPoint = (function () {
     const A = new THREE.Vector3();
     const B = new THREE.Vector3();
     const C = new THREE.Vector3();
     const D = new THREE.Vector3();
 
-    return function(i, P) {
+    return function (i, P) {
       let idx = 3 * 6 * i;
 
       A.copy(P).add(this.direction);
@@ -130,7 +128,7 @@ function isValidNormalsAngle(collisionNormal, referenceNormal, landingMaxAngle) 
   return THREE.MathUtils.RAD2DEG * angleNormals <= landingMaxAngle;
 }
 
-const checkLineIntersection = (function() {
+const checkLineIntersection = (function () {
   const direction = new THREE.Vector3();
   return function checkLineIntersection(start, end, meshes, raycaster, referenceNormal, landingMaxAngle, hitPoint) {
     direction.copy(end).sub(start);
@@ -164,7 +162,6 @@ AFRAME.registerComponent("teleporter", {
     start: { type: "string" },
     confirm: { type: "string" },
     speed: { default: 12 },
-    collisionEntities: { default: "" },
     hitCylinderColor: { type: "color", default: "#99ff99" },
     hitCylinderRadius: { default: 0.25, min: 0 },
     outerRadius: { default: 0.6, min: 0 },
@@ -183,7 +180,6 @@ AFRAME.registerComponent("teleporter", {
     this.parabola = Array.from(new Array(this.rayCurve.numPoints), () => new THREE.Vector3());
     this.hit = false;
     this.hitPoint = new THREE.Vector3();
-    this.meshes = [];
     this.raycaster = new THREE.Raycaster();
     this.rigWorldPosition = new THREE.Vector3();
     this.newRigWorldPosition = new THREE.Vector3();
@@ -199,12 +195,6 @@ AFRAME.registerComponent("teleporter", {
     this.hitEntity = this.createHitEntity();
     this.hitEntity.visible = false;
     this.el.sceneEl.object3D.add(this.hitEntity);
-    this.queryCollisionEntities();
-  },
-
-  queryCollisionEntities: function() {
-    this.collisionEntities = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.collisionEntities));
-    this.meshes = getMeshes(this.collisionEntities);
   },
 
   remove() {
@@ -278,10 +268,7 @@ AFRAME.registerComponent("teleporter", {
     this.timeTeleporting += dt;
     object3D.updateMatrixWorld();
     object3D.matrixWorld.decompose(this.p0, q, vecHelper);
-    this.direction
-      .copy(FORWARD)
-      .applyQuaternion(q)
-      .normalize();
+    this.direction.copy(FORWARD).applyQuaternion(q).normalize();
     this.rayCurve.setDirection(this.direction);
     this.el.object3D.updateMatrices();
     const playerScale = v.setFromMatrixColumn(this.characterController.avatarPOV.object3D.matrixWorld, 1).length();
@@ -292,16 +279,18 @@ AFRAME.registerComponent("teleporter", {
     this.hit = false;
     this.parabola[0].copy(this.p0);
     const timeSegment = 1 / (this.rayCurve.numPoints - 1);
+    const navMesh = AFRAME?.scenes[0]?.systems?.nav?.mesh;
     for (let i = 1; i < this.rayCurve.numPoints; i++) {
       const t = i * timeSegment;
       parabolicCurve(this.p0, this.v0, t, vecHelper);
       this.parabola[i].copy(vecHelper);
 
       if (
+        navMesh &&
         checkLineIntersection(
           this.parabola[i - 1],
           this.parabola[i],
-          this.meshes,
+          [navMesh],
           this.raycaster,
           LANDING_NORMAL,
           MAX_LANDING_ANGLE,

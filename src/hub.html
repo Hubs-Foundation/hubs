@@ -958,7 +958,7 @@
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"
-                    teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport; collisionEntities: [nav-mesh];"
+                    teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport;"
                 ></a-entity>
                 <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
             </a-entity>
@@ -1058,7 +1058,7 @@
                 track-pose="path: /actions/leftHand/matrix"
                 visibility-by-path="path: /actions/leftHand/matrix"
                 hand-controls2="left"
-                teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
+                teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport;"
                 body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 set-yxz-order
@@ -1072,7 +1072,7 @@
                 track-pose="path: /actions/rightHand/matrix"
                 visibility-by-path="path: /actions/rightHand/matrix"
                 hand-controls2="right"
-                teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
+                teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport;"
                 body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 set-yxz-order

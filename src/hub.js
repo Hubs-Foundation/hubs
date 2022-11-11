@@ -999,9 +999,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     remountUI({ environmentSceneLoaded: true });
     scene.emit("environment-scene-loaded", model);
 
-    // Re-bind the teleporter controls collision meshes in case the scene changed.
-    document.querySelectorAll("a-entity[teleporter]").forEach(x => x.components["teleporter"].queryCollisionEntities());
-
     for (const modelEl of environmentScene.children) {
       addAnimationComponents(modelEl);
     }
