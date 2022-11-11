@@ -1,6 +1,6 @@
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
-import { EnvironmentSettings, SceneLoader, SceneRoot } from "../bit-components";
+import { EnvironmentSettings, NavMesh, SceneLoader, SceneRoot } from "../bit-components";
 import { cancelable, coroutine } from "../utils/coroutine";
 import { add, assignNetworkIds } from "./media-loading";
 import { loadModel } from "../utils/load-model";
@@ -51,6 +51,10 @@ function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal, environm
         if ((o as any).isReflectionProbe) {
           o.updateMatrices();
           (o as any).box.applyMatrix4(o.matrixWorld);
+        }
+
+        if (hasComponent(world, NavMesh, o.eid!)) {
+          AFRAME.scenes[0].systems.nav.loadMesh(o as Mesh, "character");
         }
       });
       AFRAME.scenes[0].emit("environment-scene-loaded", scene);

@@ -28,6 +28,7 @@ import {
   NotRemoteHoverTarget,
   Deletable,
   SceneLoader,
+  NavMesh,
   SceneRoot,
   EnvironmentSettings
 } from "../bit-components";
@@ -275,15 +276,16 @@ export interface GLTFComponentData extends ComponentData {
   video?: VideoLoaderParams;
   environmentSettings?: any;
   reflectionProbe?: ReflectionProbeParams;
+  navMesh?: boolean;
 }
 
 declare global {
   namespace createElementEntity.JSX {
     interface IntrinsicElements {
       entity: JSXComponentData &
-      Attrs & {
-        children?: IntrinsicElements[];
-      };
+        Attrs & {
+          children?: IntrinsicElements[];
+        };
     }
 
     interface ElementChildrenAttribute {
@@ -343,6 +345,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   ...commonInflators,
   video: inflateVideoLoader,
   reflectionProbe: inflateReflectionProbe,
+  navMesh: createDefaultInflator(NavMesh),
   environmentSettings: (world: HubsWorld, eid: number, props: any) => {
     addComponent(world, EnvironmentSettings, eid);
     (EnvironmentSettings as any).map.set(eid, props);
