@@ -1,19 +1,19 @@
-import nextTick from "../utils/next-tick";
-import { updateMaterials, mapMaterials, convertStandardMaterial } from "../utils/material-utils";
-import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
-import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
-import { promisifyWorker } from "../utils/promisify-worker.js";
-import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-import { disposeNode, cloneObject3D } from "../utils/three-utils";
-import HubsTextureLoader from "../loaders/HubsTextureLoader";
-import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
-import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import GLBRangeRequests from "three-gltf-extensions/loaders/GLB_range_requests/GLB_range_requests";
+import GLTFLodExtension from "three-gltf-extensions/loaders/MSFT_lod/MSFT_lod";
+import { acceleratedRaycast, MeshBVH } from "three-mesh-bvh";
 import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import GLBRangeRequests from "three-gltf-extensions/loaders/GLB_range_requests/GLB_range_requests";
-import GLTFLodExtension from "three-gltf-extensions/loaders/MSFT_lod/MSFT_lod";
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
+import { convertStandardMaterial, mapMaterials, updateMaterials } from "../utils/material-utils";
+import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
+import nextTick from "../utils/next-tick";
+import { promisifyWorker } from "../utils/promisify-worker.js";
 import qsTruthy from "../utils/qs_truthy";
+import { cloneObject3D } from "../utils/three-utils";
+import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
