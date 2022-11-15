@@ -476,45 +476,6 @@ class GLTFHubsPlugin {
   }
 }
 
-class GLTFDisposeExtension {
-  constructor(parser) {
-    const disposables = new Set();
-    this.disposables = disposables;
-
-    parser.getDependency = (orig => {
-      return function getDependency(type, index) {
-        const dep = orig.call(parser, type, index);
-        switch (type) {
-          case "texture":
-            dep.then(texture => {
-              disposables.add(texture);
-            });
-            break;
-          case "mesh":
-            dep.then(mesh => {
-              if (mesh.geometry) {
-                disposables.add(mesh.geometry);
-              }
-            });
-            break;
-        }
-        return dep;
-      };
-    })(parser.getDependency);
-  }
-
-  afterRoot({ scenes }) {
-    const { disposables } = this;
-    scenes.forEach(scene => {
-      scene.dispose = function dispose() {
-        disposables.forEach(disposable => {
-          disposable.dispose();
-        });
-      };
-    });
-  }
-}
-
 class GLTFHubsComponentsExtension {
   constructor(parser) {
     this.parser = parser;
@@ -701,7 +662,6 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new GLTFLoader(loadingManager);
   gltfLoader
-    .register(parser => new GLTFDisposeExtension(parser))
     .register(parser => new GLTFHubsComponentsExtension(parser))
     .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
     .register(parser => new GLTFHubsLightMapExtension(parser))
@@ -776,10 +736,55 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   }
 
   return new Promise((resolve, reject) => {
+    const onLoad = gltf => {
+      const disposables = new Set();
+
+      gltf.scenes.forEach(scene => {
+        scene.traverse(obj => {
+          if (obj.geometry) {
+            disposables.add(obj.geometry);
+          }
+
+          if (obj.material) {
+            if (obj.material.map) disposables.add(obj.material.map);
+            if (obj.material.lightMap) disposables.add(obj.material.lightMap);
+            if (obj.material.bumpMap) disposables.add(obj.material.bumpMap);
+            if (obj.material.normalMap) disposables.add(obj.material.normalMap);
+            if (obj.material.specularMap) disposables.add(obj.material.specularMap);
+            if (obj.material.envMap) disposables.add(obj.material.envMap);
+            if (obj.material.aoMap) disposables.add(obj.material.aoMap);
+            if (obj.material.metalnessMap) disposables.add(obj.material.metalnessMap);
+            if (obj.material.roughnessMap) disposables.add(obj.material.roughnessMap);
+            if (obj.material.emissiveMap) disposables.add(obj.material.emissiveMap);
+          }
+
+          const mozHubsComponents = obj.userData.gltfExtensions?.MOZ_hubs_components;
+          if (mozHubsComponents) {
+            for (const name in mozHubsComponents) {
+              const componentData = mozHubsComponents[name];
+              for (const propName in componentData) {
+                const propValue = componentData[propName];
+                if (propValue.isTexture || propValue.isGeometry) {
+                  disposables.add(propValue);
+                }
+              }
+            }
+          }
+        });
+
+        scene.dispose = function dispose() {
+          disposables.forEach(disposable => {
+            disposable.dispose();
+          });
+        };
+      });
+
+      resolve(gltf);
+    };
     if (qsTruthy("rangerequests")) {
-      GLBRangeRequests.load(gltfUrl, gltfLoader, resolve, onProgress, reject);
+      GLBRangeRequests.load(gltfUrl, gltfLoader, onLoad, onProgress, reject);
     } else {
-      gltfLoader.load(gltfUrl, resolve, onProgress, reject);
+      gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
     }
   }).finally(() => {
     if (fileMap) {
