@@ -240,6 +240,7 @@ import { SignInMessages } from "./react-components/auth/SignInModal";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
+import { swapActiveScene } from "./bit-systems/scene-loading";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -388,6 +389,12 @@ export async function getSceneUrlForHub(hub) {
 export async function updateEnvironmentForHub(hub, entryManager) {
   console.log("Updating environment for hub");
   const sceneUrl = await getSceneUrlForHub(hub);
+
+  if (qsTruthy("newLoader")) {
+    console.log("Using new loading path for scenes.");
+    swapActiveScene(APP.world, sceneUrl);
+    return;
+  }
 
   const sceneErrorHandler = () => {
     remountUI({ roomUnavailableReason: ExitReason.sceneError });
@@ -990,9 +997,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // This will be run every time the environment is changed (including the first load.)
     remountUI({ environmentSceneLoaded: true });
     scene.emit("environment-scene-loaded", model);
-
-    // Re-bind the teleporter controls collision meshes in case the scene changed.
-    document.querySelectorAll("a-entity[teleporter]").forEach(x => x.components["teleporter"].queryCollisionEntities());
 
     for (const modelEl of environmentScene.children) {
       addAnimationComponents(modelEl);

@@ -8,6 +8,7 @@ declare module "aframe" {
       [name: string]: Object3D;
     };
     getObject3D(string): Object3D?;
+    components: { [s: string]: AComponent };
   }
 
   type FnTick = (t: number, dt: number) => void;
@@ -78,6 +79,11 @@ declare module "aframe" {
     updateLegacyState();
   }
 
+  interface NavSystem extends ASystem {
+    loadMesh(mesh: Mesh, zone: string);
+    mesh?: Mesh;
+  }
+
   interface AScene extends AElement {
     object3D: Scene;
     renderStarted: boolean;
@@ -93,7 +99,11 @@ declare module "aframe" {
       userinput: UserInputSystem;
       /** @deprecated see bit-interaction-system */
       interaction: InteractionSystem;
+      nav: NavSystem;
     };
+    emit(string, any): void;
+    addState(string): void;
+    is(string): boolean;
   }
 
   declare global {
