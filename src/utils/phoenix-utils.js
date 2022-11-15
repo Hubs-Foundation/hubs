@@ -176,8 +176,8 @@ export function getLandingPageForPhoto(photoUrl) {
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
 }
 
-export function fetchReticulumAuthenticated(url, method = "GET", payload) {
-  const { token } = window.APP.store.state.credentials;
+export function fetchReticulumAuthenticatedWithStore(store, url, method = "GET", payload) {
+  const { token } = store.state.credentials;
   const retUrl = getReticulumFetchUrl(url);
   const params = {
     headers: { "content-type": "application/json" },
@@ -198,6 +198,9 @@ export function fetchReticulumAuthenticated(url, method = "GET", payload) {
       return result;
     }
   });
+}
+export function fetchReticulumAuthenticated(url, method = "GET", payload) {
+  return fetchReticulumAuthenticatedWithStore(window.APP.store, url, method, payload);
 }
 
 export async function createAndRedirectToNewHub(name, sceneId, replace) {
@@ -343,7 +346,10 @@ export function discordBridgesForPresences(presences) {
   for (const p of Object.values(presences)) {
     for (const m of p.metas) {
       if (m.profile && m.profile.discordBridges) {
-        Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
+        Array.prototype.push.apply(
+          channels,
+          m.profile.discordBridges.map(b => b.channel.name)
+        );
       }
     }
   }

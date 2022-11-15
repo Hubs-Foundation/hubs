@@ -1,31 +1,22 @@
 import jwtDecode from "jwt-decode";
 import React from "react";
 import ReactDOM from "react-dom";
-import "aframe";
-import { App } from "./app";
 import "./assets/stylesheets/scene.scss";
 import SceneUI from "./react-components/scene-ui";
 import "./react-components/styles/global.scss";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import Store from "./storage/store";
 import registerTelemetry from "./telemetry";
-import "./utils/configs";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import "./utils/logging";
-import { connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
+import { connectToReticulum, fetchReticulumAuthenticatedWithStore } from "./utils/phoenix-utils";
 import "./utils/theme";
-window.APP = new App();
 
 function mountUI(props = {}) {
   ReactDOM.render(
     <WrappedIntlProvider>
-      <ThemeProvider store={window.APP.store}>
-        <SceneUI
-          {...{
-            store: window.APP.store,
-            ...props
-          }}
-        />
+      <ThemeProvider store={props.store}>
+        <SceneUI {...props} />
       </ThemeProvider>
     </WrappedIntlProvider>,
     document.getElementById("ui-root")
@@ -80,8 +71,8 @@ async function shouldShowCreateRoom() {
   }
 }
 
-async function fetchSceneInfo(sceneId) {
-  const response = await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneId}`);
+async function fetchSceneInfo(store, sceneId) {
+  const response = await fetchReticulumAuthenticatedWithStore(store, `/api/v1/scenes/${sceneId}`);
   return response.scenes[0];
 }
 
@@ -95,17 +86,19 @@ function parseSceneId() {
 function onReady() {
   console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 
+  const store = new Store();
+
   disableiOSZoom();
 
   const sceneId = parseSceneId(document.location);
   console.log(`Scene ID: ${sceneId}`);
-  remountUI({ sceneId });
+  remountUI({ sceneId, store });
 
   shouldShowCreateRoom().then(showCreateRoom => {
     remountUI({ showCreateRoom });
   });
 
-  fetchSceneInfo(sceneId).then(async sceneInfo => {
+  fetchSceneInfo(store, sceneId).then(async sceneInfo => {
     console.log(`Scene Info:`, sceneInfo);
     if (!sceneInfo) {
       // Scene is delisted or removed
@@ -124,8 +117,8 @@ function onReady() {
         sceneId: sceneInfo.scene_id,
         sceneProjectId: sceneInfo.project_id,
         sceneAllowRemixing: sceneInfo.allow_remixing,
-        isOwner: sceneInfo.account_id && sceneInfo.account_id === window.APP.store.credentialsAccountId,
-        parentScene: sceneInfo.parent_scene_id && (await fetchSceneInfo(sceneInfo.parent_scene_id))
+        isOwner: sceneInfo.account_id && sceneInfo.account_id === store.credentialsAccountId,
+        parentScene: sceneInfo.parent_scene_id && (await fetchSceneInfo(store, sceneInfo.parent_scene_id))
       });
     }
   });
