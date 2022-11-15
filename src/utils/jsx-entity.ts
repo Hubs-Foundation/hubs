@@ -50,6 +50,7 @@ import { AlphaMode } from "./create-image-mesh";
 import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
+import { ProjectionMode } from "./projection-mode";
 
 preload(
   new Promise(resolve => {
@@ -237,7 +238,7 @@ export interface JSXComponentData extends ComponentData {
   makeKinematicOnRelease?: true;
   destroyAtExtremeDistance?: true;
 
-  // @TODO
+  // @TODO Define all the anys
   networked?: any;
   textButton?: any;
   hoverButton?: any;
@@ -267,11 +268,6 @@ export interface JSXComponentData extends ComponentData {
   object3D?: any;
   text?: any;
   model?: ModelParams;
-}
-
-export enum ProjectionMode {
-  FLAT = "flat",
-  SPHERE_EQUIRECTANGULAR = "360-equirectangular"
 }
 
 export interface GLTFComponentData extends ComponentData {

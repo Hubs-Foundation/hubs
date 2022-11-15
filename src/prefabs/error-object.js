@@ -1,5 +1,6 @@
 /** @jsx createElementEntity */
-import { createElementEntity, ProjectionMode } from "../utils/jsx-entity";
+import { createElementEntity } from "../utils/jsx-entity";
+import { ProjectionMode } from "../utils/projection-mode";
 import { AlphaMode } from "../utils/create-image-mesh";
 import { TextureCache } from "../utils/texture-cache";
 import { loadTextureFromCache } from "../utils/load-texture";

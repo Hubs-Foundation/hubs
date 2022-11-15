@@ -2,7 +2,8 @@
 import { BoxBufferGeometry, Mesh, MeshBasicMaterial, PlaneBufferGeometry } from "three";
 import { Label } from "../prefabs/camera-tool";
 import { AlphaMode } from "../utils/create-image-mesh";
-import { createElementEntity, createRef, ProjectionMode } from "../utils/jsx-entity";
+import { createElementEntity, createRef } from "../utils/jsx-entity";
+import { ProjectionMode } from "../utils/projection-mode";
 
 import { textureLoader } from "../utils/media-utils";
 import playImageUrl from "../assets/images/sprites/notice/play.png";

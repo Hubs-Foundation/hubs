@@ -1,6 +1,7 @@
 import { create360ImageMesh, createImageMesh } from "../utils/create-image-mesh";
 import { addComponent } from "bitecs";
-import { addObject3DComponent, ProjectionMode } from "../utils/jsx-entity";
+import { addObject3DComponent } from "../utils/jsx-entity";
+import { ProjectionMode } from "../utils/projection-mode";
 import { MediaVideo } from "../bit-components";
 
 export function inflateVideo(world, eid, { texture, ratio, projection, autoPlay }) {

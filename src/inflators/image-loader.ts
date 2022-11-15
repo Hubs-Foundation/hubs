@@ -1,5 +1,5 @@
 import { HubsWorld } from "../app";
-import { ProjectionMode } from "../utils/jsx-entity";
+import { ProjectionMode } from "../utils/projection-mode";
 import { inflateMediaLoader } from "./media-loader";
 
 export interface ImageLoaderParams {

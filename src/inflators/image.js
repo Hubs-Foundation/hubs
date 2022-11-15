@@ -1,7 +1,8 @@
 import { addComponent } from "bitecs";
 import { MediaImage } from "../bit-components";
+import { addObject3DComponent } from "../utils/jsx-entity";
 import { create360ImageMesh, createImageMesh } from "../utils/create-image-mesh";
-import { addObject3DComponent, ProjectionMode } from "../utils/jsx-entity";
+import { ProjectionMode } from "../utils/projection-mode";
 
 export function inflateImage(world, eid, { texture, ratio, projection, alphaMode, cacheKey }) {
   const mesh =
