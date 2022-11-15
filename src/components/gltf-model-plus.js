@@ -764,7 +764,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
               const componentData = mozHubsComponents[name];
               for (const propName in componentData) {
                 const propValue = componentData[propName];
-                if (propValue.isTexture || propValue.isGeometry) {
+                if (propValue && (propValue.isTexture || propValue.isGeometry)) {
                   disposables.add(propValue);
                 }
               }
