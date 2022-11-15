@@ -77,7 +77,6 @@ const onReady = async () => {
     mountUI(scene, uiProps);
   };
 
-  const sceneRoot = document.querySelector("#scene-root");
   const sceneModelEntity = document.createElement("a-entity");
   const gltfEl = document.createElement("a-entity");
   const camera = document.getElementById("camera");
@@ -140,13 +139,6 @@ const onReady = async () => {
 
   const modelUrl = sceneInfo.model_url;
   console.log(`Scene Model URL: ${modelUrl}`);
-
-  gltfEl.setAttribute("gltf-model-plus", { src: modelUrl, useCache: false, inflate: true });
-  gltfEl.addEventListener("model-loaded", ({ detail: { model } }) =>
-    sceneModelEntity.emit("environment-scene-loaded", model)
-  );
-  sceneModelEntity.appendChild(gltfEl);
-  sceneRoot.appendChild(sceneModelEntity);
 
   const parentScene =
     sceneInfo.parent_scene_id &&

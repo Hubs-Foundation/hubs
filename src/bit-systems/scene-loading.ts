@@ -8,7 +8,6 @@ import { AElement } from "aframe";
 import { anyEntityWith } from "../utils/bit-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { ScenePrefab } from "../prefabs/scene";
-import { remountUI } from "../hub";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { EnvironmentSystem } from "../systems/environment-system";
 import { Mesh } from "three";
@@ -68,7 +67,7 @@ function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal, environm
   } catch (e) {
     console.error(e);
     console.error("Failed to load the scene");
-    remountUI({ roomUnavailableReason: ExitReason.sceneError });
+    APP.messageDispatch?.remountUI({ roomUnavailableReason: ExitReason.sceneError });
     APP.entryManager!.exitScene();
   }
 }
