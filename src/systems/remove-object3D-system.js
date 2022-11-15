@@ -1,5 +1,15 @@
 import { defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
-import { AudioEmitter, GLTFModel, Image, MediaFrame, Object3DTag, Slice9, Text, VideoMenu } from "../bit-components";
+import {
+  AudioEmitter,
+  EnvironmentSettings,
+  GLTFModel,
+  Image,
+  MediaFrame,
+  Object3DTag,
+  Slice9,
+  Text,
+  VideoMenu
+} from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
 import { traverseSome } from "../utils/three-utils";
@@ -8,6 +18,13 @@ function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
   return function (world) {
     query(world).forEach(eid => f(world.eid2obj.get(eid)));
+  };
+}
+
+function cleanupOnExit(Component, f) {
+  const query = exitQuery(defineQuery([Component]));
+  return function (world) {
+    query(world).forEach(eid => f(eid));
   };
 }
 
@@ -31,6 +48,9 @@ const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
 const cleanupImages = cleanupObjOnExit(Image, obj => {
   releaseTextureByKey(APP.getString(Image.cacheKey[obj.eid]));
   obj.geometry.dispose();
+});
+const cleanupEnvironmentSettings = cleanupOnExit(EnvironmentSettings, eid => {
+  EnvironmentSettings.map.delete(eid);
 });
 
 // TODO This feels messy and brittle
@@ -80,6 +100,7 @@ export function removeObject3DSystem(world) {
   cleanupTexts(world);
   cleanupMediaFrames(world);
   cleanupImages(world);
+  cleanupEnvironmentSettings(world);
   cleanupAudioEmitters(world);
 
   // Finally remove all the entities we just removed from the eid2obj map

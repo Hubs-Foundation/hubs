@@ -42,6 +42,7 @@ import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
+import { inflateEnvironmentSettings } from "../inflators/environment-settings";
 import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
@@ -349,10 +350,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   image: inflateImageLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
-  environmentSettings: (world: HubsWorld, eid: number, props: any) => {
-    addComponent(world, EnvironmentSettings, eid);
-    (EnvironmentSettings as any).map.set(eid, props);
-  }
+  environmentSettings: inflateEnvironmentSettings
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

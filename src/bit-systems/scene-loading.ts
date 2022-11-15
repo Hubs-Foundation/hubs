@@ -39,6 +39,8 @@ function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal, environm
 
         const environmentSettings = (EnvironmentSettings as any).map.get(scene);
         environmentSystem.updateEnvironmentSettings(environmentSettings);
+      } else {
+        environmentSystem.updateEnvironmentSettings({});
       }
 
       world.eid2obj.get(scene)!.traverse(o => {
