@@ -5,6 +5,7 @@ import {
   GLTFModel,
   Image,
   MediaFrame,
+  MediaVideo,
   Object3DTag,
   Slice9,
   Text,
@@ -12,6 +13,7 @@ import {
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
+import { disposeTexture } from "../utils/material-utils";
 import { traverseSome } from "../utils/three-utils";
 
 function cleanupObjOnExit(Component, f) {
@@ -47,6 +49,10 @@ const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
 });
 const cleanupImages = cleanupObjOnExit(Image, obj => {
   releaseTextureByKey(APP.getString(Image.cacheKey[obj.eid]));
+  obj.geometry.dispose();
+});
+const cleanupVideos = cleanupObjOnExit(MediaVideo, obj => {
+  disposeTexture(obj.material.map);
   obj.geometry.dispose();
 });
 const cleanupEnvironmentSettings = cleanupOnExit(EnvironmentSettings, eid => {
@@ -100,6 +106,7 @@ export function removeObject3DSystem(world) {
   cleanupTexts(world);
   cleanupMediaFrames(world);
   cleanupImages(world);
+  cleanupVideos(world);
   cleanupEnvironmentSettings(world);
   cleanupAudioEmitters(world);
 
