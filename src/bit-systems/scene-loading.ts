@@ -49,7 +49,7 @@ function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal, environm
           (o as Mesh).reflectionProbeMode = "static";
         }
 
-        // TODO: Update this in 3js instead
+        // TODO: In three.js, update reflection probes so that boxes are defined in local space.
         if ((o as any).isReflectionProbe) {
           o.updateMatrices();
           (o as any).box.applyMatrix4(o.matrixWorld);
