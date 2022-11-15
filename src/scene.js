@@ -31,17 +31,16 @@ const remountUI = (function () {
   };
 })();
 
-async function shouldShowCreateRoom() {
+async function shouldShowCreateRoom(joinToken) {
   const socket = await connectToReticulum();
 
   const joinParams = {
     hub_id: "scene"
   };
-  const token = window.APP?.store?.state?.credentials?.token;
-  if (token) {
+  if (joinToken) {
     // Reticulum rejects a join with { token: null }, so don't add it to joinParams if we don't have it.
     // TODO: (In reticulum) Treat { token: null } the same as not sending a token
-    joinParams.token = token;
+    joinParams.token = joinToken;
   }
   const retPhxChannel = socket.channel("ret", joinParams);
 
@@ -94,7 +93,7 @@ function onReady() {
   console.log(`Scene ID: ${sceneId}`);
   remountUI({ sceneId, store });
 
-  shouldShowCreateRoom().then(showCreateRoom => {
+  shouldShowCreateRoom(store.state.credentials.token).then(showCreateRoom => {
     remountUI({ showCreateRoom });
   });
 
