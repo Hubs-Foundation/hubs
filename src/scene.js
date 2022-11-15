@@ -1,54 +1,27 @@
-import "./utils/theme";
-import "./utils/configs";
-
-console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
-
-import "./react-components/styles/global.scss";
-import "./assets/stylesheets/scene.scss";
-
-import "aframe";
-import "networked-aframe/src/index";
-import "./utils/logging";
-import { patchWebGLRenderingContext } from "./utils/webgl";
-patchWebGLRenderingContext();
-
-import "./components/scene-components";
-import "./components/debug";
-import "./systems/nav";
-
-import { connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
-
-import ReactDOM from "react-dom";
-import React from "react";
 import jwtDecode from "jwt-decode";
-import SceneUI from "./react-components/scene-ui";
-import { disableiOSZoom } from "./utils/disable-ios-zoom";
-
-import "./systems/scene-systems";
-import "./gltf-component-mappings";
-import { EnvironmentSystem } from "./systems/environment-system";
-
+import React from "react";
+import ReactDOM from "react-dom";
+import "aframe";
 import { App } from "./app";
-
+import "./assets/stylesheets/scene.scss";
+import SceneUI from "./react-components/scene-ui";
+import "./react-components/styles/global.scss";
+import { ThemeProvider } from "./react-components/styles/theme";
+import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
+import registerTelemetry from "./telemetry";
+import "./utils/configs";
+import { disableiOSZoom } from "./utils/disable-ios-zoom";
+import "./utils/logging";
+import { connectToReticulum, fetchReticulumAuthenticated } from "./utils/phoenix-utils";
+import "./utils/theme";
 window.APP = new App();
 
-const qs = new URLSearchParams(location.search);
-
-import "./components/event-repeater";
-
-import registerTelemetry from "./telemetry";
-import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
-import { ThemeProvider } from "./react-components/styles/theme";
-
-disableiOSZoom();
-
-function mountUI(scene, props = {}) {
+function mountUI(props = {}) {
   ReactDOM.render(
     <WrappedIntlProvider>
       <ThemeProvider store={window.APP.store}>
         <SceneUI
           {...{
-            scene,
             store: window.APP.store,
             ...props
           }}
@@ -59,102 +32,103 @@ function mountUI(scene, props = {}) {
   );
 }
 
-const onReady = async () => {
-  console.log("Scene is ready");
-
-  const scene = document.querySelector("a-scene");
-  window.APP.scene = scene;
-
-  const sceneId = qs.get("scene_id") || document.location.pathname.substring(1).split("/")[1];
-  console.log(`Scene ID: ${sceneId}`);
-
-  let uiProps = { sceneId: sceneId };
-
-  mountUI(scene);
-
-  const remountUI = props => {
-    uiProps = { ...uiProps, ...props };
-    mountUI(scene, uiProps);
+const remountUI = (function () {
+  let props;
+  return function remountUI(newProps) {
+    props = { ...props, ...newProps };
+    mountUI(props);
   };
+})();
 
-  const sceneModelEntity = document.createElement("a-entity");
-  const gltfEl = document.createElement("a-entity");
-  const camera = document.getElementById("camera");
+async function shouldShowCreateRoom() {
+  const socket = await connectToReticulum();
 
-  connectToReticulum().then(socket => {
-    const joinParams = { hub_id: "scene" };
+  const joinParams = {
+    hub_id: "scene"
+  };
+  const token = window.APP?.store?.state?.credentials?.token;
+  if (token) {
+    // Reticulum rejects a join with { token: null }, so don't add it to joinParams if we don't have it.
+    // TODO: (In reticulum) Treat { token: null } the same as not sending a token
+    joinParams.token = token;
+  }
+  const retPhxChannel = socket.channel("ret", joinParams);
 
-    if (window.APP.store.state.credentials && window.APP.store.state.credentials.token) {
-      joinParams.token = window.APP.store.state.credentials.token;
-    }
-
-    const retPhxChannel = socket.channel("ret", joinParams);
-
-    retPhxChannel.join().receive("ok", () => {
-      retPhxChannel.push("refresh_perms_token").receive("ok", ({ perms_token }) => {
-        const perms = jwtDecode(perms_token);
-        remountUI({ showCreateRoom: !!perms.create_hub });
-
-        retPhxChannel.leave();
-        socket.disconnect();
-      });
+  try {
+    await new Promise((resolve, reject) => {
+      retPhxChannel.join().receive("ok", resolve).receive("error", reject).receive("timeout", reject);
     });
+
+    const token = await new Promise((resolve, reject) => {
+      retPhxChannel
+        .push("refresh_perms_token")
+        .receive("ok", ({ perms_token }) => {
+          resolve(perms_token);
+        })
+        .receive("error", reject)
+        .receive("timeout", reject);
+    });
+
+    const perms = jwtDecode(token);
+    retPhxChannel.leave();
+    socket.disconnect();
+
+    return !!perms.create_hub;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
+async function fetchSceneInfo(sceneId) {
+  const response = await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneId}`);
+  return response.scenes[0];
+}
+
+function parseSceneId() {
+  return (
+    new URLSearchParams(document.location.search).get("scene_id") ||
+    document.location.pathname.substring(1).split("/")[1]
+  );
+}
+
+function onReady() {
+  console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
+
+  disableiOSZoom();
+
+  const sceneId = parseSceneId(document.location);
+  console.log(`Scene ID: ${sceneId}`);
+  remountUI({ sceneId });
+
+  shouldShowCreateRoom().then(showCreateRoom => {
+    remountUI({ showCreateRoom });
   });
 
-  const envSystem = new EnvironmentSystem(scene);
-
-  sceneModelEntity.addEventListener("environment-scene-loaded", () => {
-    remountUI({ sceneLoaded: true });
-    const previewCamera = gltfEl.object3D.getObjectByName("scene-preview-camera");
-
-    if (previewCamera) {
-      console.log("Setting up preview camera");
-      camera.object3D.position.copy(previewCamera.position);
-      camera.object3D.rotation.copy(previewCamera.rotation);
-      camera.object3D.matrixNeedsUpdate = true;
+  fetchSceneInfo(sceneId).then(async sceneInfo => {
+    console.log(`Scene Info:`, sceneInfo);
+    if (!sceneInfo) {
+      // Scene is delisted or removed
+      remountUI({ unavailable: true });
     } else {
-      console.warn("No preview camera found");
+      if (sceneInfo.allow_promotion) {
+        registerTelemetry(`/scene/${sceneId}`, `Hubs Scene: ${sceneInfo.title}`);
+      } else {
+        registerTelemetry("/scene", "Hubs Non-Promotable Scene Page");
+      }
+      remountUI({
+        sceneName: sceneInfo.name,
+        sceneDescription: sceneInfo.description,
+        sceneAttributions: sceneInfo.attributions,
+        sceneScreenshotURL: sceneInfo.screenshot_url,
+        sceneId: sceneInfo.scene_id,
+        sceneProjectId: sceneInfo.project_id,
+        sceneAllowRemixing: sceneInfo.allow_remixing,
+        isOwner: sceneInfo.account_id && sceneInfo.account_id === window.APP.store.credentialsAccountId,
+        parentScene: sceneInfo.parent_scene_id && (await fetchSceneInfo(sceneInfo.parent_scene_id))
+      });
     }
-
-    camera.setAttribute("scene-preview-camera", "");
-
-    const environmentEl = sceneModelEntity.childNodes[0];
-    envSystem.updateEnvironment(environmentEl);
   });
-
-  const res = await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneId}`);
-  const sceneInfo = res.scenes[0];
-
-  // Delisted/Removed
-  if (!sceneInfo) {
-    remountUI({ unavailable: true });
-    return;
-  }
-
-  if (sceneInfo.allow_promotion) {
-    registerTelemetry(`/scene/${sceneId}`, `Hubs Scene: ${sceneInfo.title}`);
-  } else {
-    registerTelemetry("/scene", "Hubs Non-Promotable Scene Page");
-  }
-
-  const modelUrl = sceneInfo.model_url;
-  console.log(`Scene Model URL: ${modelUrl}`);
-
-  const parentScene =
-    sceneInfo.parent_scene_id &&
-    (await fetchReticulumAuthenticated(`/api/v1/scenes/${sceneInfo.parent_scene_id}`)).scenes[0];
-
-  remountUI({
-    sceneName: sceneInfo.name,
-    sceneDescription: sceneInfo.description,
-    sceneAttributions: sceneInfo.attributions,
-    sceneScreenshotURL: sceneInfo.screenshot_url,
-    sceneId: sceneInfo.scene_id,
-    sceneProjectId: sceneInfo.project_id,
-    sceneAllowRemixing: sceneInfo.allow_remixing,
-    isOwner: sceneInfo.account_id && sceneInfo.account_id === window.APP.store.credentialsAccountId,
-    parentScene: parentScene
-  });
-};
+}
 
 document.addEventListener("DOMContentLoaded", onReady);
