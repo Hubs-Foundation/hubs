@@ -34,7 +34,7 @@ export class TextureCache {
   }
 
   release(src, version) {
-    releaseByKey(TextureCache.key(src, version));
+    this.releaseByKey(TextureCache.key(src, version));
   }
 
   releaseByKey(cacheKey) {
