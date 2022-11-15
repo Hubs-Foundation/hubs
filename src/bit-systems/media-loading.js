@@ -20,7 +20,8 @@ const loaderForMediaType = {
 
 export const MEDIA_LOADER_FLAGS = {
   RECENTER: 1 << 0,
-  RESIZE: 1 << 1
+  RESIZE: 1 << 1,
+  ANIMATE_LOAD: 1 << 2
 };
 
 export function assignNetworkIds(world, rootNid, mediaEid, mediaLoaderEid) {
@@ -146,7 +147,9 @@ function* loadAndAnimateMedia(world, eid, signal) {
     assignNetworkIds(world, APP.getString(Networked.id[eid]), media, eid);
     resizeAndRecenter(world, media, eid);
     add(world, media, eid);
-    yield* animateScale(world, media);
+    if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
+      yield* animateScale(world, media);
+    }
     removeComponent(world, MediaLoader, eid);
   }
 }

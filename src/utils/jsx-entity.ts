@@ -38,6 +38,7 @@ import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
 import { inflateVideo } from "../inflators/video";
 import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader";
+import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
@@ -274,6 +275,7 @@ export enum ProjectionMode {
 
 export interface GLTFComponentData extends ComponentData {
   video?: VideoLoaderParams;
+  image?: ImageLoaderParams;
   environmentSettings?: any;
   reflectionProbe?: ReflectionProbeParams;
   navMesh?: boolean;
@@ -344,6 +346,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
   ...commonInflators,
   video: inflateVideoLoader,
+  image: inflateImageLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
   environmentSettings: (world: HubsWorld, eid: number, props: any) => {
