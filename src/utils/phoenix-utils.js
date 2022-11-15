@@ -176,8 +176,7 @@ export function getLandingPageForPhoto(photoUrl) {
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
 }
 
-export function fetchReticulumAuthenticatedWithStore(store, url, method = "GET", payload) {
-  const { token } = store.state.credentials;
+export function fetchReticulumAuthenticatedWithToken(token, url, method = "GET", payload) {
   const retUrl = getReticulumFetchUrl(url);
   const params = {
     headers: { "content-type": "application/json" },
@@ -200,7 +199,7 @@ export function fetchReticulumAuthenticatedWithStore(store, url, method = "GET",
   });
 }
 export function fetchReticulumAuthenticated(url, method = "GET", payload) {
-  return fetchReticulumAuthenticatedWithStore(window.APP.store, url, method, payload);
+  return fetchReticulumAuthenticatedWithToken(window.APP.store.state.credentials.token, url, method, payload);
 }
 
 export async function createAndRedirectToNewHub(name, sceneId, replace) {

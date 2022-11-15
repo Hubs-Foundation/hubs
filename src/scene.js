@@ -9,7 +9,7 @@ import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import Store from "./storage/store";
 import registerTelemetry from "./telemetry";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
-import { connectToReticulum, fetchReticulumAuthenticatedWithStore } from "./utils/phoenix-utils";
+import { connectToReticulum, fetchReticulumAuthenticatedWithToken } from "./utils/phoenix-utils";
 import "./utils/theme";
 
 function mountUI(props = {}) {
@@ -71,8 +71,8 @@ async function shouldShowCreateRoom() {
   }
 }
 
-async function fetchSceneInfo(store, sceneId) {
-  const response = await fetchReticulumAuthenticatedWithStore(store, `/api/v1/scenes/${sceneId}`);
+async function fetchSceneInfo(token, sceneId) {
+  const response = await fetchReticulumAuthenticatedWithToken(token, `/api/v1/scenes/${sceneId}`);
   return response.scenes[0];
 }
 
@@ -98,7 +98,7 @@ function onReady() {
     remountUI({ showCreateRoom });
   });
 
-  fetchSceneInfo(store, sceneId).then(async sceneInfo => {
+  fetchSceneInfo(store.state.credentials.token, sceneId).then(async sceneInfo => {
     console.log(`Scene Info:`, sceneInfo);
     if (!sceneInfo) {
       // Scene is delisted or removed
@@ -118,7 +118,8 @@ function onReady() {
         sceneProjectId: sceneInfo.project_id,
         sceneAllowRemixing: sceneInfo.allow_remixing,
         isOwner: sceneInfo.account_id && sceneInfo.account_id === store.credentialsAccountId,
-        parentScene: sceneInfo.parent_scene_id && (await fetchSceneInfo(store, sceneInfo.parent_scene_id))
+        parentScene:
+          sceneInfo.parent_scene_id && (await fetchSceneInfo(store.state.credentials.token, sceneInfo.parent_scene_id))
       });
     }
   });
