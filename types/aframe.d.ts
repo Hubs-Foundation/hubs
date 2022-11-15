@@ -102,6 +102,8 @@ declare module "aframe" {
       nav: NavSystem;
     };
     emit(string, any): void;
+    addState(string): void;
+    is(string): boolean;
   }
 
   declare global {

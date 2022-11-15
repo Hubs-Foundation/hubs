@@ -5,6 +5,7 @@ import { loadModel as loadGLTFModel } from "../components/gltf-model-plus";
 import { renderAsEntity } from "../utils/jsx-entity";
 
 export function* loadModel(world: HubsWorld, src: string, useCache: boolean) {
+  // TODO: Write loadGLTFModelCancelable
   const { scene, animations } = yield loadGLTFModel(src, null, useCache, null);
 
   scene.animations = animations;

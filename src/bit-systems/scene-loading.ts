@@ -26,44 +26,45 @@ export function swapActiveScene(world: HubsWorld, src: string) {
 function* loadScene(world: HubsWorld, eid: number, signal: AbortSignal, environmentSystem: EnvironmentSystem) {
   try {
     const src = APP.getString(SceneLoader.src[eid]);
-    if (!src) throw new Error();
-    const { value: scene, canceled } = yield* cancelable(loadModel(world, src, false), signal);
-    if (!canceled) {
-      // TODO: Maybe use scene id for root nid?
-      assignNetworkIds(world, "scene", scene, eid);
-      add(world, scene, eid);
-      removeComponent(world, SceneLoader, eid);
-
-      if (hasComponent(world, EnvironmentSettings, scene)) {
-        world.eid2obj.get(scene);
-
-        const environmentSettings = (EnvironmentSettings as any).map.get(scene);
-        environmentSystem.updateEnvironmentSettings(environmentSettings);
-      } else {
-        environmentSystem.updateEnvironmentSettings({});
-      }
-
-      world.eid2obj.get(scene)!.traverse(o => {
-        // TODO animated objects should not be static
-        if ((o as Mesh).isMesh) {
-          (o as Mesh).reflectionProbeMode = "static";
-        }
-
-        // TODO: In three.js, update reflection probes so that boxes are defined in local space.
-        if ((o as any).isReflectionProbe) {
-          o.updateMatrices();
-          (o as any).box.applyMatrix4(o.matrixWorld);
-        }
-
-        if (hasComponent(world, NavMesh, o.eid!)) {
-          AFRAME.scenes[0].systems.nav.loadMesh(o as Mesh, "character");
-        }
-      });
-      AFRAME.scenes[0].emit("environment-scene-loaded", scene);
-      document.querySelector(".a-canvas")!.classList.remove("a-hidden");
-      const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
-      (fader as any).fadeIn();
+    if (!src) {
+      throw new Error("Scene loading failed. No src url provided to load.");
     }
+
+    const { value: scene, canceled } = yield* cancelable(loadModel(world, src, false), signal);
+    if (canceled) {
+      return;
+    }
+
+    // TODO: Use a unique id for each scene as the root nid
+    assignNetworkIds(world, "scene", scene, eid);
+    add(world, scene, eid);
+    if (hasComponent(world, EnvironmentSettings, scene)) {
+      // TODO: Support legacy components (fog, background, skybox)
+      const environmentSettings = (EnvironmentSettings as any).map.get(scene);
+      environmentSystem.updateEnvironmentSettings(environmentSettings);
+    } else {
+      environmentSystem.updateEnvironmentSettings({});
+    }
+    world.eid2obj.get(scene)!.traverse(o => {
+      if ((o as Mesh).isMesh) {
+        // TODO animated objects should not be static
+        (o as Mesh).reflectionProbeMode = "static";
+      }
+      if ((o as any).isReflectionProbe) {
+        o.updateMatrices();
+        // TODO: In three.js, update reflection probes so that boxes are defined in local space.
+        (o as any).box.applyMatrix4(o.matrixWorld);
+      }
+      if (hasComponent(world, NavMesh, o.eid!)) {
+        AFRAME.scenes[0].systems.nav.loadMesh(o as Mesh, "character");
+      }
+    });
+    AFRAME.scenes[0].emit("environment-scene-loaded", scene);
+    document.querySelector(".a-canvas")!.classList.remove("a-hidden");
+    AFRAME.scenes[0].addState("visible");
+    const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
+    (fader as any).fadeIn();
+    removeComponent(world, SceneLoader, eid);
   } catch (e) {
     console.error(e);
     console.error("Failed to load the scene");
