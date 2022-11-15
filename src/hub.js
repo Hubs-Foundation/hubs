@@ -395,7 +395,6 @@ export async function updateEnvironmentForHub(hub, entryManager) {
     swapActiveScene(APP.world, sceneUrl);
     return;
   }
-  console.log("Using legacy loading path for scenes.");
 
   const sceneErrorHandler = () => {
     remountUI({ roomUnavailableReason: ExitReason.sceneError });
