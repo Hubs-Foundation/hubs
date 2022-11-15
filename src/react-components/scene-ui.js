@@ -38,18 +38,11 @@ class SceneUI extends Component {
   };
 
   state = {
-    showScreenshot: false
+    showScreenshot: true
   };
 
   constructor(props) {
     super(props);
-
-    // Show screenshot if scene isn't loaded in 5 seconds
-    setTimeout(() => {
-      if (!this.props.sceneLoaded) {
-        this.setState({ showScreenshot: true });
-      }
-    }, 5000);
   }
 
   componentDidMount() {

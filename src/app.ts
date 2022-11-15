@@ -59,6 +59,7 @@ export class App {
   hubChannel?: HubChannel;
   mediaDevicesManager?: MediaDevicesManager;
   entryManager?: SceneEntryManager;
+  messageDispatch?: any;
 
   store = new Store();
   mediaSearchStore = new MediaSearchStore();
