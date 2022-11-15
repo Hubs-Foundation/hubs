@@ -31,8 +31,8 @@ const defaultEnvSettings = {
   toneMappingExposure: 1,
   physicallyCorrectLights: true,
   envMapTexture: null,
-  // TODO
-  // skybox: null,
+
+  skybox: null,
   backgroundTexture: null,
   backgroundColor: new THREE.Color("#000000"),
 
