@@ -138,10 +138,10 @@ export const NavMesh = defineComponent();
 export const SceneLoader = defineComponent({ src: Types.ui32 });
 SceneLoader.src[$isStringType] = true;
 
-export const Image = defineComponent({
+export const MediaImage = defineComponent({
   cacheKey: Types.ui32
 });
-Image.cacheKey[$isStringType] = true;
+MediaImage.cacheKey[$isStringType] = true;
 
 export const MediaVideo = defineComponent({
   autoPlay: Types.ui8

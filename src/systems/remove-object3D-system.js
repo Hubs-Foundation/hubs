@@ -3,7 +3,7 @@ import {
   AudioEmitter,
   EnvironmentSettings,
   GLTFModel,
-  Image,
+  MediaImage,
   MediaFrame,
   MediaVideo,
   Object3DTag,
@@ -47,8 +47,8 @@ const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
   const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem;
   audioSystem.removeAudio({ node: obj });
 });
-const cleanupImages = cleanupObjOnExit(Image, obj => {
-  releaseTextureByKey(APP.getString(Image.cacheKey[obj.eid]));
+const cleanupImages = cleanupObjOnExit(MediaImage, obj => {
+  releaseTextureByKey(APP.getString(MediaImage.cacheKey[obj.eid]));
   obj.geometry.dispose();
 });
 const cleanupVideos = cleanupObjOnExit(MediaVideo, obj => {
