@@ -18,7 +18,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import clsx from "classnames";
 import { Title } from "react-admin";
 
-import Store from "hubs/src/storage/store";
+import { store } from "hubs/src/utils/store-instance";
 import withCommonStyles from "../utils/with-common-styles";
 import {
   getEditableConfig,
@@ -462,7 +462,6 @@ const AppConfigEditor = withStyles(styles)(
   class AppConfigEditor extends ConfigurationEditor {
     constructor(props) {
       super(props);
-      const store = new Store();
       if (store.state && store.state.credentials && store.state.credentials.token) {
         AppConfigUtils.setAuthToken(store.state.credentials.token);
       }

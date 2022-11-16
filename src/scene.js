@@ -6,11 +6,11 @@ import SceneUI from "./react-components/scene-ui";
 import "./react-components/styles/global.scss";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
-import Store from "./storage/store";
 import registerTelemetry from "./telemetry";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { connectToReticulum, fetchReticulumAuthenticatedWithToken } from "./utils/phoenix-utils";
 import "./utils/theme";
+import { store } from "./utils/store-instance";
 
 function mountUI(props = {}) {
   ReactDOM.render(
@@ -84,8 +84,6 @@ function parseSceneId() {
 
 function onReady() {
   console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
-
-  const store = new Store();
 
   disableiOSZoom();
 
