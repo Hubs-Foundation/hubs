@@ -7,7 +7,7 @@ import ducky from "./assets/models/DuckyMesh.glb";
 import { EventTarget } from "event-target-shim";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
-import { createNetworkedEntity } from "./systems/netcode";
+import { createNetworkedEntity } from "./bit-systems/networking";
 
 let uiRoot;
 // Handles user-entered messages
@@ -27,7 +27,10 @@ export default class MessageDispatch extends EventTarget {
 
     const lastEntry = this.presenceLogEntries.length > 0 && this.presenceLogEntries[this.presenceLogEntries.length - 1];
     if (lastEntry && entry.type === "permission" && lastEntry.type === "permission") {
-      if (lastEntry.body.permission === entry.body.permission && parseInt(entry.key) - parseInt(lastEntry.key) < 10000) {
+      if (
+        lastEntry.body.permission === entry.body.permission &&
+        parseInt(entry.key) - parseInt(lastEntry.key) < 10000
+      ) {
         this.presenceLogEntries.pop();
       }
     }
