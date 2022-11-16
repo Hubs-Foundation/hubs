@@ -1,0 +1,147 @@
+@use "../styles/theme.scss";
+
+:local(.tip) {
+  pointer-events: all;
+  min-height: 48px;
+  border-radius: 24px;
+  background-color: theme.$background1-color;
+  border: 1px solid theme.$border1-color;
+  width: 360px;
+  font-size: theme.$font-size-sm;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    bottom: 24px;
+  }
+}
+
+:local(.content) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 18px 18px 18px;
+  justify-content: center;
+
+  button {
+    padding: 0px;
+  }
+}
+
+:local(.navigation-container) {
+  flex-direction: row;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 18px 18px 18px;
+  align-items: center;
+  align-self: stretch;
+
+  &>*:first-child {
+    display: flex;
+    flex: 1;
+  }
+
+  &>*:last-child {
+    display: flex;
+    flex: 1;
+    flex-flow: row-reverse;
+  }
+}
+
+:local(.key) {
+  border-radius: 8px;
+  background-color: theme.$background1-color;
+  border: 1px solid theme.$border1-color;
+  font-weight: theme.$font-weight-bold;
+  display: inline-block;
+  width: 36px;
+  line-height: 36px;
+  margin: 5px;
+}
+
+:local(.inline-button) {
+  border-radius: 36px;
+  background-color: var(--background1-color);
+  border: 1px solid var(--border1-color);
+  font-weight: 700;
+  display: inline-flex;
+  height: 32px;
+  margin: 0px 5px 0px 5px;
+  align-items: center;
+  padding: 12px;
+  vertical-align: middle;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+  }
+}
+
+:local(.inline-icon) {
+  border-radius: 36px;
+  background-color: var(--background1-color);
+  border: 1px solid var(--border1-color);
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  margin: 5px;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+:local(.keys-container) {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px
+}
+
+:local(.desktop-move-container) {
+  display: flex;
+  flex-direction: column;
+
+  div:first-child {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  div:last-child {
+    display: flex;
+    flex-direction: row;
+  }
+}
+
+:local(.dot) {
+  height: 6px;
+  width: 6px;
+  background-color: theme.$primary-color;;
+  border-radius: 50%;
+  display: inline-block;
+
+  &:first-child {
+    margin: 0px 12px 0px 0px;
+  }
+
+  &:last-child {
+    margin: 0px 0px 0px 12px;
+  }
+}
+
+:local(.arrows) {
+  font-size: 24px;
+  font-weight: lighter;
+}
