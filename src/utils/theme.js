@@ -1,5 +1,6 @@
 import { waitForDOMContentLoaded } from "./async-utils";
 import configs from "./configs";
+import { store } from "./store-instance";
 
 // NOTE these should be synchronized with the top of shared.scss
 const DEFAULT_ACTION_COLOR = "#FF3464";
@@ -99,7 +100,7 @@ function tryGetTheme(themeId) {
 }
 
 function getCurrentTheme() {
-  const preferredThemeId = window.APP?.store?.state?.preferences?.theme;
+  const preferredThemeId = store.state?.preferences?.theme;
   return tryGetTheme(preferredThemeId);
 }
 
@@ -146,50 +147,14 @@ function updateTextButtonColors() {
   }
 }
 
-const themeChangedListeners = new Map();
-function registerThemeChangedListener(listener) {
-  window.APP.store.addEventListener("themechanged", listener);
+function onThemeChanged(listener) {
+  store.addEventListener("themechanged", listener);
   const [_darkModeQuery, removeDarkModeListener] = registerDarkModeQuery(listener);
 
-  themeChangedListeners.set(listener, {
-    removeListener: () => {
-      window.APP.store.removeEventListener("themechanged", listener);
-      removeDarkModeListener();
-    }
-  });
-}
-
-function removeThemeChangedListener(listener) {
-  if (themeChangedListeners.has(listener)) {
-    themeChangedListeners.get(listener).removeListener();
-    themeChangedListeners.delete(listener);
-  }
-}
-
-// window.APP.store may not be available when onThemeChanged is called, so we
-// stash listeners until waitForDOMContentLoaded.
-const stashedThemeChangedListeners = new Set();
-function onThemeChanged(listener) {
-  const storeIsAvailable = !!(window.APP?.store);
-  if (storeIsAvailable) {
-    registerThemeChangedListener(listener);
-  } else {
-    stashedThemeChangedListeners.add(listener);
-  }
-
   return () => {
-    if (stashedThemeChangedListeners.has(listener)) {
-      stashedThemeChangedListeners.delete(listener);
-    }
-    removeThemeChangedListener(listener);
+    store.removeEventListener("themechanged", listener);
+    removeDarkModeListener();
   };
-}
-
-function registerStashedThemeChangedListeners() {
-  for (const listener of stashedThemeChangedListeners) {
-    registerThemeChangedListener(listener);
-  }
-  stashedThemeChangedListeners.clear();
 }
 
 waitForDOMContentLoaded().then(() => {
@@ -206,14 +171,6 @@ waitForDOMContentLoaded().then(() => {
   }
   updateTextButtonColors();
   onThemeChanged(updateTextButtonColors);
-  if (window.APP?.store) {
-    registerStashedThemeChangedListeners();
-  } else {
-    console.warn(
-      "utils/theme.js: Skipped theme preference listeners, since window.APP.store is not available. " +
-        "This should only happen when running Storybook."
-    );
-  }
 });
 
 function applyThemeToTextButton(el, highlighted) {
@@ -237,5 +194,5 @@ export {
   onThemeChanged,
   registerDarkModeQuery,
   themes,
-  tryGetTheme,
+  tryGetTheme
 };

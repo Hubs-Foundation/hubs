@@ -27,6 +27,7 @@ import { DialogAdapter } from "./naf-dialog-adapter";
 import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
+import { store } from "./utils/store-instance";
 
 declare global {
   interface Window {
@@ -60,8 +61,8 @@ export class App {
   mediaDevicesManager?: MediaDevicesManager;
   entryManager?: SceneEntryManager;
   messageDispatch?: any;
+  store: Store;
 
-  store = new Store();
   mediaSearchStore = new MediaSearchStore();
 
   audios = new Map<AElement | number, PositionalAudio | Audio>();
@@ -100,6 +101,7 @@ export class App {
   } = {};
 
   constructor() {
+    this.store = store;
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map();
 
