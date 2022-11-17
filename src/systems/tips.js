@@ -44,7 +44,22 @@ function markTipFinished (tip) {
   localStorageCache = null
 }
 
+function markTipUnfinished (tip) {
+  const storeData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
+  delete storeData[tip]
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(storeData))
+  localStorageCache = null
+}
+
+function storedStateForTip (tip) {
+  const storeData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
+  return storeData[tip] && storeData[tip][finished] === true ? FINISHED : VALID
+}
+
 const VALIDATORS = {
+  welcome: function () {
+    return storedStateForTip('welcome')
+  },
   look: function (userinput) {
     const cameraDelta = userinput.get(
       isMobile ? paths.device.touchscreen.touchCameraDelta : paths.device.smartMouse.cameraDelta
@@ -64,6 +79,12 @@ const VALIDATORS = {
   invite: function (_userinput, scene, hub) {
     if (hub && hub.entry_mode === 'invite') return INVALID
     return scene.is('copresent') ? FINISH : VALID
+  },
+  end: function () {
+    return storedStateForTip('end')
+  },
+  menu: function () {
+    return storedStateForTip('menu')
   }
 }
 
@@ -91,6 +112,18 @@ AFRAME.registerSystem('tips', {
       const tipId = platformTips[i]
       markTipFinished(tipId)
     }
+  },
+
+  prevTip: function () {
+    const step = this.activeTip.split('.')[2]
+    let index = platformTips.indexOf(step)
+    const prevStep = platformTips[index > 0 ? --index : 0]
+    markTipUnfinished(prevStep)
+  },
+
+  nextTip: function () {
+    const step = this.activeTip.split('.')[2]
+    markTipFinished(step)
   },
 
   tick: function () {

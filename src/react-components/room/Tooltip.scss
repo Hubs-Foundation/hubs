@@ -14,8 +14,28 @@
   flex-direction: column;
   text-align: center;
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     bottom: 24px;
+  }
+}
+
+:local(.tip-dismiss) {
+  display: none;
+}
+
+:local(.tip-show) {
+  display: flex;
+  animation: 0.2s ease normal soft-transition-in;
+}
+
+@keyframes soft-transition-in {
+  from {
+    opacity: 0;
+    transform: translateY(120%);
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -41,12 +61,12 @@
   align-items: center;
   align-self: stretch;
 
-  &>*:first-child {
+  & > *:first-child {
     display: flex;
     flex: 1;
   }
 
-  &>*:last-child {
+  & > *:last-child {
     display: flex;
     flex: 1;
     flex-flow: row-reverse;
@@ -106,7 +126,7 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 20px
+  gap: 20px;
 }
 
 :local(.desktop-move-container) {
@@ -128,7 +148,7 @@
 :local(.dot) {
   height: 6px;
   width: 6px;
-  background-color: theme.$primary-color;;
+  background-color: theme.$primary-color;
   border-radius: 50%;
   display: inline-block;
 
@@ -144,4 +164,8 @@
 :local(.arrows) {
   font-size: 24px;
   font-weight: lighter;
+}
+
+:local(.arrows-hidden) {
+  visibility: hidden;
 }

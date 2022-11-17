@@ -35,6 +35,14 @@ export function TipContainer ({ hide, inLobby, inRoom, isStreaming, isEmbedded, 
     scene.systems.tips.skipTips()
   }, [scene])
 
+  const onNextTip = useCallback(() => {
+    scene.systems.tips.nextTip()
+  }, [scene])
+
+  const onPrevTip = useCallback(() => {
+    scene.systems.tips.prevTip()
+  }, [scene])
+
   useEffect(() => {
     function onSceneTipChanged ({ detail: tipId }) {
       setOnboardingTipId(tipId)
@@ -66,7 +74,7 @@ export function TipContainer ({ hide, inLobby, inRoom, isStreaming, isEmbedded, 
     )
   } else if (inRoom) {
     if (onboardingTipId) {
-      return <Tooltip onDismiss={onSkipOnboarding} dismissLabel={<SkipDismissLabel />} step={onboardingTipId} />
+      return <Tooltip onPrev={onPrevTip} onNext={onNextTip} onDismiss={onSkipOnboarding} step={onboardingTipId} />
     }
 
     if (isStreaming && !streamingTipDismissed) {

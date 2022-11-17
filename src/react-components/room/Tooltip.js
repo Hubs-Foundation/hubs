@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState, useCallback, useMemo, memo } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import styles from './Tooltip.scss'
@@ -30,6 +30,9 @@ if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayo
       console.warn(`Unable to remap keyboard: ${e}`)
     })
 }
+
+const isEndStep = step =>
+  ['tips.desktop.end', 'tips.mobile.end', 'tips.desktop.menu', 'tips.mobile.menu'].includes(step)
 
 const onboardingMessages = defineMessages({
   'tips.welcome.title': {
@@ -87,8 +90,13 @@ const onboardingMessages = defineMessages({
   'tips.text.invite': {
     id: 'tips.text.invite',
     defaultMessage: 'Invite'
+  },
+  'tips.text.or': {
+    id: 'tips.text.or',
+    defaultMessage: 'or'
   }
 })
+
 function onboardingSteps ({ intl, step }) {
   switch (step) {
     case 'tips.desktop.welcome':
@@ -116,14 +124,16 @@ function onboardingSteps ({ intl, step }) {
         Control: Step,
         NavigationBar: StepNavigationBar,
         params: {
-          invite: <InlineButton icon={<InviteIcon />} text={'Invite'} />
+          invite: (
+            <InlineButton icon={<InviteIcon />} text={intl.formatMessage(onboardingMessages['tips.text.invite'])} />
+          )
         }
       }
     case 'tips.desktop.menu':
       return {
         Control: Step,
         params: {
-          menu: <InlineButton icon={<MoreIcon />} text={'More'} />
+          menu: <InlineButton icon={<MoreIcon />} text={intl.formatMessage(onboardingMessages['tips.text.more'])} />
         },
         messageId: 'tips.menu'
       }
@@ -219,7 +229,7 @@ function LocomotionStep ({ intl, step, params }) {
       </p>
       <div className={styles.keysContainer}>
         <MoveKeys up={'W'} left={'A'} down={'S'} right={'D'} />
-        <p>or</p>
+        <p>{intl.formatMessage(onboardingMessages['tips.text.or'])}</p>
         <MoveKeys up={'↑'} left={'←'} down={'↓'} right={'→'} />
       </div>
     </>
@@ -243,10 +253,17 @@ function WelcomeNavigationBar ({ intl, step, onNext, onDismiss }) {
   )
 }
 
-function StepNavigationBar ({ intl, step, onNext, onDismiss }) {
+function StepNavigationBar ({ intl, step, onPrev, onNext, onDismiss }) {
   return (
     <div className={styles.navigationContainer}>
-      <IconButton as={'span'} className={styles.arrows}>
+      <IconButton
+        as={'span'}
+        className={classNames(
+          styles.arrows,
+          step !== 'tips.desktop.locomotion' || (step !== 'tips.mobile.locomotion' && styles.arrowsHidden)
+        )}
+        onClick={onPrev}
+      >
         {'<'}
       </IconButton>
       <div style={{ display: 'flex' }}>
@@ -254,7 +271,7 @@ function StepNavigationBar ({ intl, step, onNext, onDismiss }) {
         <span className={styles.dot}></span>
         <span className={styles.dot}></span>
       </div>
-      {step === 'tips.desktop.invite' || step === 'tips.mobile.turning' ? (
+      {step === 'tips.desktop.end' || step === 'tips.mobile.end' ? (
         <a
           href={'#'}
           onClick={event => {
@@ -265,7 +282,7 @@ function StepNavigationBar ({ intl, step, onNext, onDismiss }) {
           {intl.formatMessage(onboardingMessages['tips.buttons.done'])}
         </a>
       ) : (
-        <IconButton as={'span'} className={styles.arrows}>
+        <IconButton as={'span'} className={styles.arrows} onClick={onNext}>
           {'>'}
         </IconButton>
       )}
@@ -273,22 +290,51 @@ function StepNavigationBar ({ intl, step, onNext, onDismiss }) {
   )
 }
 
-export function Tooltip ({ className, children, onDismiss, step, dismissLabel, ...rest }) {
+export const Tooltip = memo(({ className, children, onPrev, onNext, onDismiss, step, ...rest }) => {
   const intl = useIntl()
-  const { Control, NavigationBar, params, messageId } = onboardingSteps({ intl, step })
+  const [visibilityStyle, setVisibilityStyle] = useState(styles.tipShow)
+
+  useEffect(() => {
+    if (isEndStep(step)) {
+      setTimeout(() => {
+        onNext()
+      }, 1000)
+    }
+  }, [step, onNext])
+
+  const onPrevCallback = useCallback(() => {
+    setVisibilityStyle(styles.tipDismiss)
+    setTimeout(() => {
+      onPrev()
+      setVisibilityStyle(styles.tipShow)
+    }, 500)
+  }, [onPrev])
+
+  const onNextCallback = useCallback(() => {
+    setVisibilityStyle(styles.tipDismiss)
+    setTimeout(() => {
+      onNext()
+      setVisibilityStyle(styles.tipShow)
+    }, 500)
+  }, [onNext])
+
+  const { Control, NavigationBar, params, messageId } = useMemo(() => onboardingSteps({ intl, step }), [intl, step])
   return (
-    <div className={classNames(styles.tip, className)} {...rest}>
+    <div className={classNames(styles.tip, visibilityStyle, className)} {...rest}>
       <div className={NavigationBar && styles.content}>
         <Control intl={intl} step={messageId || step} params={params} />
       </div>
-      {NavigationBar && <NavigationBar intl={intl} step={step} onNext={() => {}} onDismiss={onDismiss} />}
+      {NavigationBar && (
+        <NavigationBar intl={intl} step={step} onPrev={onPrevCallback} onNext={onNextCallback} onDismiss={onDismiss} />
+      )}
     </div>
   )
-}
+})
 
 Tooltip.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node,
-  onDismiss: PropTypes.func,
-  dismissLabel: PropTypes.node
+  onPrev: PropTypes.func,
+  onNext: PropTypes.func,
+  onDismiss: PropTypes.func
 }
