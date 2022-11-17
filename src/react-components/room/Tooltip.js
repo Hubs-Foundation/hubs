@@ -89,55 +89,73 @@ const onboardingMessages = defineMessages({
     defaultMessage: 'Invite'
   }
 })
-
-const onboardingSteps = {
-  'tips.welcome': {
-    Control: Welcome,
-    NavigationBar: WelcomeNavigationBar
-  },
-  'tips.mobile.locomotion': {
-    Control: Step,
-    NavigationBar: StepNavigationBar
-  },
-  'tips.mobile.turning': {
-    Control: Step,
-    NavigationBar: StepNavigationBar
-  },
-  'tips.mobile.menu': {
-    Control: Step,
-    params: {
-      menu: <InlineIcon icon={<MoreIcon />} />
-    },
-    stepId: 'tips.menu'
-  },
-  'tips.desktop.locomotion': {
-    Control: LocomotionStep,
-    NavigationBar: StepNavigationBar
-  },
-  'tips.desktop.turning': {
-    Control: Step,
-    NavigationBar: StepNavigationBar,
-    params: {
-      left: <Key>{'Q'}</Key>,
-      right: <Key>{'E'}</Key>
-    }
-  },
-  'tips.desktop.invite': {
-    Control: Step,
-    NavigationBar: StepNavigationBar,
-    params: {
-      invite: <InlineButton icon={<InviteIcon />} text={'Invite'} />
-    }
-  },
-  'tips.desktop.menu': {
-    Control: Step,
-    params: {
-      menu: <InlineButton icon={<MoreIcon />} text={'More'} />
-    },
-    stepId: 'tips.menu'
-  },
-  'tips.end': {
-    Control: Step
+function onboardingSteps ({ intl, step }) {
+  switch (step) {
+    case 'tips.desktop.welcome':
+    case 'tips.mobile.welcome':
+      return {
+        Control: Welcome,
+        NavigationBar: WelcomeNavigationBar
+      }
+    case 'tips.desktop.locomotion':
+      return {
+        Control: LocomotionStep,
+        NavigationBar: StepNavigationBar
+      }
+    case 'tips.desktop.turning':
+      return {
+        Control: Step,
+        NavigationBar: StepNavigationBar,
+        params: {
+          left: <Key>{'Q'}</Key>,
+          right: <Key>{'E'}</Key>
+        }
+      }
+    case 'tips.desktop.invite':
+      return {
+        Control: Step,
+        NavigationBar: StepNavigationBar,
+        params: {
+          invite: <InlineButton icon={<InviteIcon />} text={'Invite'} />
+        }
+      }
+    case 'tips.desktop.menu':
+      return {
+        Control: Step,
+        params: {
+          menu: <InlineButton icon={<MoreIcon />} text={'More'} />
+        },
+        messageId: 'tips.menu'
+      }
+    case 'tips.mobile.welcome':
+      return {
+        Control: Welcome,
+        NavigationBar: WelcomeNavigationBar
+      }
+    case 'tips.mobile.locomotion':
+      return {
+        Control: Step,
+        NavigationBar: StepNavigationBar
+      }
+    case 'tips.mobile.turning':
+      return {
+        Control: Step,
+        NavigationBar: StepNavigationBar
+      }
+    case 'tips.mobile.menu':
+      return {
+        Control: Step,
+        params: {
+          menu: <InlineIcon icon={<MoreIcon />} />
+        },
+        messageId: 'tips.menu'
+      }
+    case 'tips.desktop.end':
+    case 'tips.mobile.end':
+      return {
+        Control: Step,
+        messageId: 'tips.end'
+      }
   }
 }
 
@@ -183,7 +201,8 @@ function Welcome ({ intl, step, params }) {
       </h2>
       <p>
         {intl.formatMessage(onboardingMessages['tips.welcome.message'], {
-          appName: configs.translation('app-name')
+          appName: configs.translation('app-name'),
+          br: <br />
         })}
       </p>
     </>
@@ -256,11 +275,11 @@ function StepNavigationBar ({ intl, step, onNext, onDismiss }) {
 
 export function Tooltip ({ className, children, onDismiss, step, dismissLabel, ...rest }) {
   const intl = useIntl()
-  const { Control, NavigationBar, params, stepId } = onboardingSteps[step]
+  const { Control, NavigationBar, params, messageId } = onboardingSteps({ intl, step })
   return (
     <div className={classNames(styles.tip, className)} {...rest}>
       <div className={NavigationBar && styles.content}>
-        <Control intl={intl} step={stepId || step} params={params} />
+        <Control intl={intl} step={messageId || step} params={params} />
       </div>
       {NavigationBar && <NavigationBar intl={intl} step={step} onNext={() => {}} onDismiss={onDismiss} />}
     </div>

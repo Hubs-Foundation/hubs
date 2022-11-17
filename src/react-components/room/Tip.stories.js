@@ -21,15 +21,17 @@ export const Tips = ({ step }) => (
 )
 
 const TOOLTIP_STEPS = {
-  'tips.welcome': 'Welcome Message',
+  'tips.desktop.welcome': 'Desktop Welcome Message',
   'tips.desktop.locomotion': 'Desktop Locomotion',
   'tips.desktop.turning': 'Desktop Turning',
   'tips.desktop.invite': 'Desktop Invite',
+  'tips.desktop.end': 'Desktop End',
   'tips.desktop.menu': 'Desktop Menu',
+  'tips.mobile.welcome': 'Mobile Welcome Message',
   'tips.mobile.locomotion': 'Mobile Locomotion',
   'tips.mobile.turning': 'Mobile Turning',
-  'tips.mobile.menu': 'Mobile Menu',
-  'tips.end': 'End'
+  'tips.mobile.end': 'Mobile End',
+  'tips.mobile.menu': 'Mobile Menu'
 }
 
 export const Tooltips = ({ step }) => (
