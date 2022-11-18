@@ -45,7 +45,7 @@ const onboardingMessages = defineMessages({
   },
   'tips.mobile.locomotion': {
     id: 'tips.mobile.locomotion',
-    defaultMessage: 'Move around by pinching with two fingers or with the on-screen joysticks'
+    defaultMessage: 'Move around by pinching with two fingers {br} or with the on-screen joysticks'
   },
   'tips.mobile.turning': {
     id: 'tips.mobile.turning',
@@ -102,71 +102,124 @@ function onboardingSteps ({ intl, step }) {
     case 'tips.desktop.welcome':
     case 'tips.mobile.welcome':
       return {
-        Control: Welcome,
-        NavigationBar: WelcomeNavigationBar
+        control: {
+          type: Welcome
+        },
+        navigationBar: {
+          type: WelcomeNavigationBar
+        }
       }
     case 'tips.desktop.locomotion':
       return {
-        Control: LocomotionStep,
-        NavigationBar: StepNavigationBar
+        control: {
+          type: LocomotionStep
+        },
+        navigationBar: {
+          type: StepNavigationBar,
+          params: {
+            numStep: 0,
+            rightArrow: true
+          }
+        }
       }
     case 'tips.desktop.turning':
       return {
-        Control: Step,
-        NavigationBar: StepNavigationBar,
-        params: {
-          left: <Key>{'Q'}</Key>,
-          right: <Key>{'E'}</Key>
+        control: {
+          type: Step,
+          params: {
+            left: <Key>{'Q'}</Key>,
+            right: <Key>{'E'}</Key>
+          }
+        },
+        navigationBar: {
+          type: StepNavigationBar,
+          params: {
+            numStep: 1,
+            leftArrow: true,
+            rightArrow: true
+          }
         }
       }
     case 'tips.desktop.invite':
       return {
-        Control: Step,
-        NavigationBar: StepNavigationBar,
-        params: {
-          invite: (
-            <InlineButton icon={<InviteIcon />} text={intl.formatMessage(onboardingMessages['tips.text.invite'])} />
-          )
+        control: {
+          type: Step,
+          params: {
+            invite: (
+              <InlineButton icon={<InviteIcon />} text={intl.formatMessage(onboardingMessages['tips.text.invite'])} />
+            )
+          }
+        },
+        navigationBar: {
+          type: StepNavigationBar,
+          params: {
+            numStep: 2,
+            leftArrow: true
+          }
         }
       }
     case 'tips.desktop.menu':
       return {
-        Control: Step,
-        params: {
-          menu: <InlineButton icon={<MoreIcon />} text={intl.formatMessage(onboardingMessages['tips.text.more'])} />
-        },
-        messageId: 'tips.menu'
-      }
-    case 'tips.mobile.welcome':
-      return {
-        Control: Welcome,
-        NavigationBar: WelcomeNavigationBar
+        control: {
+          type: Step,
+          params: {
+            menu: <InlineButton icon={<MoreIcon />} text={intl.formatMessage(onboardingMessages['tips.text.more'])} />
+          },
+          messageId: 'tips.menu'
+        }
       }
     case 'tips.mobile.locomotion':
       return {
-        Control: Step,
-        NavigationBar: StepNavigationBar
+        control: {
+          type: Step,
+          params: {
+            br: <br />
+          }
+        },
+        navigationBar: {
+          type: StepNavigationBar,
+          params: {
+            numStep: 0,
+            rightArrow: true
+          }
+        }
       }
     case 'tips.mobile.turning':
       return {
-        Control: Step,
-        NavigationBar: StepNavigationBar
+        control: {
+          type: Step
+        },
+        navigationBar: {
+          type: StepNavigationBar,
+          params: {
+            numStep: 1,
+            leftArrow: true
+          }
+        }
       }
     case 'tips.mobile.menu':
       return {
-        Control: Step,
-        params: {
-          menu: <InlineIcon icon={<MoreIcon />} />
-        },
-        messageId: 'tips.menu'
+        control: {
+          type: Step,
+          params: {
+            menu: <InlineIcon icon={<MoreIcon />} />
+          },
+          messageId: 'tips.menu'
+        }
       }
     case 'tips.desktop.end':
     case 'tips.mobile.end':
       return {
-        Control: Step,
-        messageId: 'tips.end'
+        control: {
+          type: Step,
+          messageId: 'tips.end'
+        }
       }
   }
+}
+
+function maxSteps (step) {
+  return step.indexOf('desktop') !== -1 ? 3 : 2
 }
 
 function Key ({ children }) {
@@ -201,7 +254,7 @@ function MoveKeys ({ up, left, down, right }) {
   )
 }
 
-function Welcome ({ intl, step, params }) {
+function Welcome ({ intl }) {
   return (
     <>
       <h2>
@@ -219,7 +272,7 @@ function Welcome ({ intl, step, params }) {
   )
 }
 
-function LocomotionStep ({ intl, step, params }) {
+function LocomotionStep ({ intl }) {
   return (
     <>
       <p>
@@ -240,7 +293,7 @@ function Step ({ intl, step, params }) {
   return <p>{intl.formatMessage(onboardingMessages[step], params)}</p>
 }
 
-function WelcomeNavigationBar ({ intl, step, onNext, onDismiss }) {
+function WelcomeNavigationBar ({ intl, onNext, onDismiss }) {
   return (
     <div className={styles.navigationContainer}>
       <Button preset='primary' onClick={onNext}>
@@ -253,38 +306,26 @@ function WelcomeNavigationBar ({ intl, step, onNext, onDismiss }) {
   )
 }
 
-function StepNavigationBar ({ intl, step, onPrev, onNext, onDismiss }) {
+function StepNavigationBar ({ intl, step, onPrev, onNext, params }) {
+  const { leftArrow, rightArrow, numStep } = params
   return (
     <div className={styles.navigationContainer}>
-      <IconButton
-        as={'span'}
-        className={classNames(
-          styles.arrows,
-          step !== 'tips.desktop.locomotion' || (step !== 'tips.mobile.locomotion' && styles.arrowsHidden)
-        )}
-        onClick={onPrev}
-      >
+      <IconButton as={'span'} className={classNames(styles.arrows, !leftArrow && styles.arrowsHidden)} onClick={onPrev}>
         {'<'}
       </IconButton>
       <div style={{ display: 'flex' }}>
-        <span className={styles.dot}></span>
-        <span className={styles.dot}></span>
-        <span className={styles.dot}></span>
+        {[...Array(maxSteps(step))].map((v, i) => {
+          return <span key={i} className={classNames(styles.dot, i === numStep && styles.dotEnabled)}></span>
+        })}
       </div>
-      {step === 'tips.desktop.end' || step === 'tips.mobile.end' ? (
-        <a
-          href={'#'}
-          onClick={event => {
-            event.preventDefault()
-            onDismiss()
-          }}
-        >
-          {intl.formatMessage(onboardingMessages['tips.buttons.done'])}
-        </a>
-      ) : (
+      {rightArrow ? (
         <IconButton as={'span'} className={styles.arrows} onClick={onNext}>
           {'>'}
         </IconButton>
+      ) : (
+        <Button className={styles.endButton} preset={'text'} onClick={onNext}>
+          {intl.formatMessage(onboardingMessages['tips.buttons.done'])}
+        </Button>
       )}
     </div>
   )
@@ -292,40 +333,30 @@ function StepNavigationBar ({ intl, step, onPrev, onNext, onDismiss }) {
 
 export const Tooltip = memo(({ className, children, onPrev, onNext, onDismiss, step, ...rest }) => {
   const intl = useIntl()
-  const [visibilityStyle, setVisibilityStyle] = useState(styles.tipShow)
 
   useEffect(() => {
     if (isEndStep(step)) {
       setTimeout(() => {
         onNext()
-      }, 1000)
+      }, 2500)
     }
   }, [step, onNext])
 
-  const onPrevCallback = useCallback(() => {
-    setVisibilityStyle(styles.tipDismiss)
-    setTimeout(() => {
-      onPrev()
-      setVisibilityStyle(styles.tipShow)
-    }, 500)
-  }, [onPrev])
-
-  const onNextCallback = useCallback(() => {
-    setVisibilityStyle(styles.tipDismiss)
-    setTimeout(() => {
-      onNext()
-      setVisibilityStyle(styles.tipShow)
-    }, 500)
-  }, [onNext])
-
-  const { Control, NavigationBar, params, messageId } = useMemo(() => onboardingSteps({ intl, step }), [intl, step])
+  const { control, navigationBar } = useMemo(() => onboardingSteps({ intl, step }), [intl, step])
   return (
-    <div className={classNames(styles.tip, visibilityStyle, className)} {...rest}>
-      <div className={NavigationBar && styles.content}>
-        <Control intl={intl} step={messageId || step} params={params} />
+    <div className={classNames(styles.tip, styles.tipShow, className)} {...rest}>
+      <div className={navigationBar?.type && styles.content}>
+        <control.type intl={intl} step={control?.messageId || step} params={control?.params} />
       </div>
-      {NavigationBar && (
-        <NavigationBar intl={intl} step={step} onPrev={onPrevCallback} onNext={onNextCallback} onDismiss={onDismiss} />
+      {navigationBar?.type && (
+        <navigationBar.type
+          intl={intl}
+          step={step}
+          onPrev={onPrev}
+          onNext={onNext}
+          onDismiss={onDismiss}
+          params={navigationBar?.params}
+        />
       )}
     </div>
   )

@@ -19,10 +19,6 @@
   }
 }
 
-:local(.tip-dismiss) {
-  display: none;
-}
-
 :local(.tip-show) {
   display: flex;
   animation: 0.2s ease normal soft-transition-in;
@@ -148,7 +144,7 @@
 :local(.dot) {
   height: 6px;
   width: 6px;
-  background-color: theme.$primary-color;
+  background-color: theme.$disabled-bg-color;
   border-radius: 50%;
   display: inline-block;
 
@@ -161,6 +157,10 @@
   }
 }
 
+:local(.dot-enabled) {
+  background-color: theme.$primary-color;
+}
+
 :local(.arrows) {
   font-size: 24px;
   font-weight: lighter;
@@ -168,4 +168,13 @@
 
 :local(.arrows-hidden) {
   visibility: hidden;
+}
+
+:local(.end-button) {
+  flex: 0;
+  justify-content: end;
+  min-width: fit-content;
+  width: fit-content;
+  min-height: fit-content;
+  height: fit-content;
 }

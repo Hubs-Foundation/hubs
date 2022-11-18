@@ -37,7 +37,7 @@ const TOOLTIP_STEPS = {
 export const Tooltips = ({ step }) => (
   <RoomLayout
     viewport={
-      <Tooltip onDismiss={() => {}} dismissLabel='Skip' step={step}>
+      <Tooltip step={step}>
         {"Welcome to Mozilla Hubs! Let's take a quick tour. 👋 Click and drag to look around."}
       </Tooltip>
     }

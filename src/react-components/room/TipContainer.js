@@ -10,10 +10,6 @@ function OkDismissLabel () {
   return <FormattedMessage id='tips.dismiss.ok' defaultMessage='Ok' />
 }
 
-function SkipDismissLabel () {
-  return <FormattedMessage id='tips.dismiss.skip' defaultMessage='Skip' />
-}
-
 export function FullscreenTip (props) {
   return (
     <Tip {...props} dismissLabel={<OkDismissLabel />}>
@@ -32,19 +28,23 @@ export function TipContainer ({ hide, inLobby, inRoom, isStreaming, isEmbedded, 
   const [onboardingTipId, setOnboardingTipId] = useState(null)
 
   const onSkipOnboarding = useCallback(() => {
+    setOnboardingTipId(null)
     scene.systems.tips.skipTips()
   }, [scene])
 
   const onNextTip = useCallback(() => {
+    setOnboardingTipId(null)
     scene.systems.tips.nextTip()
   }, [scene])
 
   const onPrevTip = useCallback(() => {
+    setOnboardingTipId(null)
     scene.systems.tips.prevTip()
   }, [scene])
 
   useEffect(() => {
     function onSceneTipChanged ({ detail: tipId }) {
+      setOnboardingTipId(null)
       setOnboardingTipId(tipId)
     }
 
