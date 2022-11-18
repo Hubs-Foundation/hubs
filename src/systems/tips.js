@@ -3,7 +3,7 @@ import { paths } from './userinput/paths'
 // The output of this system is activeTip. There are named tips (eg locomotion) that each have validators.
 //
 // Each frame we run all the non-finished validators and take the first tip (by order)
-// which is VALID. Any tip that returns FINISHED will no longer be considered without
+// which is VALID. Any tip that returns FINISH will no longer be considered without
 // a local storage reset.
 
 // Validators can return these values:
@@ -53,7 +53,7 @@ function markTipUnfinished (tip) {
 
 function storedStateForTip (tip) {
   const storeData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
-  return storeData[tip] && storeData[tip][finished] === true ? FINISHED : VALID
+  return storeData[tip] && storeData[tip][finished] === true ? FINISH : VALID
 }
 
 const VALIDATORS = {

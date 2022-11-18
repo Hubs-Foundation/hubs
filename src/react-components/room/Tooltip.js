@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo, memo } from 'react'
+import React, { useEffect, useMemo, memo } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import styles from './Tooltip.scss'
@@ -10,7 +10,10 @@ import { ReactComponent as InviteIcon } from '../icons/Invite.svg'
 import { ReactComponent as MoreIcon } from '../icons/More.svg'
 
 // These keys are hardcoded in the input system to be based on the physical location on the keyboard rather than character
-let moveKeys = 'W A S D'
+let moveKeyFront = 'W'
+let moveKeyLeft = 'A'
+let moveKeyBack = 'S'
+let moveKeyRight = 'D'
 let turnLeftKey = 'Q'
 let turnRightKey = 'E'
 
@@ -20,8 +23,10 @@ if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayo
   window.navigator.keyboard
     .getLayoutMap()
     .then(function (map) {
-      moveKeys = `${map.get('KeyW') || 'W'} ${map.get('KeyA') || 'A'} ${map.get('KeyS') || 'S'} ${map.get('KeyD') ||
-        'D'}`.toUpperCase()
+      moveKeyFront = `${map.get('KeyW')}`.toUpperCase()
+      moveKeyLeft = `${map.get('KeyA')}`.toUpperCase()
+      moveKeyBack = `${map.get('KeyS')}`.toUpperCase()
+      moveKeyRight = `${map.get('KeyD')}`.toUpperCase()
       turnLeftKey = map.get('KeyQ')?.toUpperCase()
       turnRightKey = map.get('KeyE')?.toUpperCase()
     })
@@ -97,6 +102,119 @@ const onboardingMessages = defineMessages({
   }
 })
 
+function maxSteps (step) {
+  return step.indexOf('desktop') !== -1 ? 3 : 2
+}
+
+function Key ({ children }) {
+  return <span className={styles.key}>{children}</span>
+}
+
+function InlineButton ({ icon, text }) {
+  return (
+    <span className={styles.inlineButton}>
+      {icon}
+      {text}
+    </span>
+  )
+}
+
+function InlineIcon ({ icon }) {
+  return <span className={styles.inlineIcon}>{icon}</span>
+}
+
+function MoveKeys ({ up, left, down, right }) {
+  return (
+    <div className={styles.desktopMoveContainer}>
+      <div>
+        <Key>{up}</Key>
+      </div>
+      <div>
+        <Key>{left}</Key>
+        <Key>{down}</Key>
+        <Key>{right}</Key>
+      </div>
+    </div>
+  )
+}
+
+function Welcome ({ intl }) {
+  return (
+    <>
+      <h2>
+        {intl.formatMessage(onboardingMessages['tips.welcome.title'], {
+          appName: configs.translation('app-name')
+        })}
+      </h2>
+      <p>
+        {intl.formatMessage(onboardingMessages['tips.welcome.message'], {
+          appName: configs.translation('app-name'),
+          br: <br />
+        })}
+      </p>
+    </>
+  )
+}
+
+function LocomotionStep ({ intl }) {
+  return (
+    <>
+      <p>
+        {intl.formatMessage(onboardingMessages['tips.desktop.locomotion'], {
+          appName: configs.translation('app-name')
+        })}
+      </p>
+      <div className={styles.keysContainer}>
+        <MoveKeys up={moveKeyFront} left={moveKeyLeft} down={moveKeyBack} right={moveKeyRight} />
+        <p>{intl.formatMessage(onboardingMessages['tips.text.or'])}</p>
+        <MoveKeys up={'↑'} left={'←'} down={'↓'} right={'→'} />
+      </div>
+    </>
+  )
+}
+
+function Step ({ intl, step, params }) {
+  return <p>{intl.formatMessage(onboardingMessages[step], params)}</p>
+}
+
+function WelcomeNavigationBar ({ intl, onNext, onDismiss }) {
+  return (
+    <div className={styles.navigationContainer}>
+      <Button preset='primary' onClick={onNext}>
+        {intl.formatMessage(onboardingMessages['tips.buttons.get-started'])}
+      </Button>
+      <Button preset='basic' onClick={onDismiss}>
+        {intl.formatMessage(onboardingMessages['tips.buttons.skip-tour'])}
+      </Button>
+    </div>
+  )
+}
+
+function StepNavigationBar ({ intl, step, onPrev, onNext, params }) {
+  const { leftArrow, rightArrow, numStep } = params
+  return (
+    <div className={styles.navigationContainer}>
+      <IconButton as={'span'} className={classNames(styles.arrows, !leftArrow && styles.arrowsHidden)} onClick={onPrev}>
+        {'<'}
+      </IconButton>
+      <div style={{ display: 'flex' }}>
+        {[...Array(maxSteps(step))].map((v, i) => {
+          return <span key={i} className={classNames(styles.dot, i === numStep && styles.dotEnabled)}></span>
+        })}
+      </div>
+      {rightArrow ? (
+        <IconButton as={'span'} className={styles.arrows} onClick={onNext}>
+          {'>'}
+        </IconButton>
+      ) : (
+        <Button className={styles.endButton} preset={'text'} onClick={onNext}>
+          {intl.formatMessage(onboardingMessages['tips.buttons.done'])}
+        </Button>
+      )}
+    </div>
+  )
+}
+
 function onboardingSteps ({ intl, step }) {
   switch (step) {
     case 'tips.desktop.welcome':
@@ -127,8 +245,8 @@ function onboardingSteps ({ intl, step }) {
         control: {
           type: Step,
           params: {
-            left: <Key>{'Q'}</Key>,
-            right: <Key>{'E'}</Key>
+            left: <Key>{turnLeftKey}</Key>,
+            right: <Key>{turnRightKey}</Key>
           }
         },
         navigationBar: {
@@ -218,120 +336,7 @@ function onboardingSteps ({ intl, step }) {
   }
 }
 
-function maxSteps (step) {
-  return step.indexOf('desktop') !== -1 ? 3 : 2
-}
-
-function Key ({ children }) {
-  return <span className={styles.key}>{children}</span>
-}
-
-function InlineButton ({ icon, text }) {
-  return (
-    <span className={styles.inlineButton}>
-      {icon}
-      {text}
-    </span>
-  )
-}
-
-function InlineIcon ({ icon }) {
-  return <span className={styles.inlineIcon}>{icon}</span>
-}
-
-function MoveKeys ({ up, left, down, right }) {
-  return (
-    <div className={styles.desktopMoveContainer}>
-      <div>
-        <Key>{up}</Key>
-      </div>
-      <div>
-        <Key>{left}</Key>
-        <Key>{down}</Key>
-        <Key>{right}</Key>
-      </div>
-    </div>
-  )
-}
-
-function Welcome ({ intl }) {
-  return (
-    <>
-      <h2>
-        {intl.formatMessage(onboardingMessages['tips.welcome.title'], {
-          appName: configs.translation('app-name')
-        })}
-      </h2>
-      <p>
-        {intl.formatMessage(onboardingMessages['tips.welcome.message'], {
-          appName: configs.translation('app-name'),
-          br: <br />
-        })}
-      </p>
-    </>
-  )
-}
-
-function LocomotionStep ({ intl }) {
-  return (
-    <>
-      <p>
-        {intl.formatMessage(onboardingMessages['tips.desktop.locomotion'], {
-          appName: configs.translation('app-name')
-        })}
-      </p>
-      <div className={styles.keysContainer}>
-        <MoveKeys up={'W'} left={'A'} down={'S'} right={'D'} />
-        <p>{intl.formatMessage(onboardingMessages['tips.text.or'])}</p>
-        <MoveKeys up={'↑'} left={'←'} down={'↓'} right={'→'} />
-      </div>
-    </>
-  )
-}
-
-function Step ({ intl, step, params }) {
-  return <p>{intl.formatMessage(onboardingMessages[step], params)}</p>
-}
-
-function WelcomeNavigationBar ({ intl, onNext, onDismiss }) {
-  return (
-    <div className={styles.navigationContainer}>
-      <Button preset='primary' onClick={onNext}>
-        {intl.formatMessage(onboardingMessages['tips.buttons.get-started'])}
-      </Button>
-      <Button preset='basic' onClick={onDismiss}>
-        {intl.formatMessage(onboardingMessages['tips.buttons.skip-tour'])}
-      </Button>
-    </div>
-  )
-}
-
-function StepNavigationBar ({ intl, step, onPrev, onNext, params }) {
-  const { leftArrow, rightArrow, numStep } = params
-  return (
-    <div className={styles.navigationContainer}>
-      <IconButton as={'span'} className={classNames(styles.arrows, !leftArrow && styles.arrowsHidden)} onClick={onPrev}>
-        {'<'}
-      </IconButton>
-      <div style={{ display: 'flex' }}>
-        {[...Array(maxSteps(step))].map((v, i) => {
-          return <span key={i} className={classNames(styles.dot, i === numStep && styles.dotEnabled)}></span>
-        })}
-      </div>
-      {rightArrow ? (
-        <IconButton as={'span'} className={styles.arrows} onClick={onNext}>
-          {'>'}
-        </IconButton>
-      ) : (
-        <Button className={styles.endButton} preset={'text'} onClick={onNext}>
-          {intl.formatMessage(onboardingMessages['tips.buttons.done'])}
-        </Button>
-      )}
-    </div>
-  )
-}
-
-export const Tooltip = memo(({ className, children, onPrev, onNext, onDismiss, step, ...rest }) => {
+export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, ...rest }) => {
   const intl = useIntl()
 
   useEffect(() => {
@@ -364,7 +369,6 @@ export const Tooltip = memo(({ className, children, onPrev, onNext, onDismiss, s
 
 Tooltip.propTypes = {
   className: PropTypes.string,
-  children: PropTypes.node,
   onPrev: PropTypes.func,
   onNext: PropTypes.func,
   onDismiss: PropTypes.func
