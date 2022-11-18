@@ -102,8 +102,14 @@ const onboardingMessages = defineMessages({
   }
 })
 
+function isStep (step, checks) {
+  return checks.every(item => {
+    return step.indexOf(item) !== -1
+  })
+}
+
 function maxSteps (step) {
-  return step.indexOf('desktop') !== -1 ? 3 : 2
+  return isStep(step, ['desktop']) ? 3 : 2
 }
 
 function Key ({ children }) {
@@ -339,6 +345,20 @@ function onboardingSteps ({ intl, step }) {
 export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, ...rest }) => {
   const intl = useIntl()
 
+  let layoutClass = null
+  let animationClass = styles.tipShowBottom
+  if (isStep(step, ['welcome'])) {
+    animationClass = null
+    if (isStep(step, ['mobile'])) {
+      layoutClass = styles.tooltipsCentered
+    }
+  } else {
+    if (isStep(step, ['mobile'])) {
+      layoutClass = styles.tooltipsTop
+      animationClass = styles.tipShowTop
+    }
+  }
+
   useEffect(() => {
     if (isEndStep(step)) {
       setTimeout(() => {
@@ -349,20 +369,22 @@ export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, ...re
 
   const { control, navigationBar } = useMemo(() => onboardingSteps({ intl, step }), [intl, step])
   return (
-    <div className={classNames(styles.tip, styles.tipShow, className)} {...rest}>
-      <div className={navigationBar?.type && styles.content}>
-        <control.type intl={intl} step={control?.messageId || step} params={control?.params} />
+    <div className={layoutClass}>
+      <div className={classNames(styles.tip, animationClass, className)} {...rest}>
+        <div className={navigationBar?.type && styles.content}>
+          <control.type intl={intl} step={control?.messageId || step} params={control?.params} />
+        </div>
+        {navigationBar?.type && (
+          <navigationBar.type
+            intl={intl}
+            step={step}
+            onPrev={onPrev}
+            onNext={onNext}
+            onDismiss={onDismiss}
+            params={navigationBar?.params}
+          />
+        )}
       </div>
-      {navigationBar?.type && (
-        <navigationBar.type
-          intl={intl}
-          step={step}
-          onPrev={onPrev}
-          onNext={onNext}
-          onDismiss={onDismiss}
-          params={navigationBar?.params}
-        />
-      )}
     </div>
   )
 })

@@ -1,5 +1,16 @@
 @use "../styles/theme.scss";
 
+:local(.tooltips-centered) {
+  position: absolute;
+  top: 50%;
+  transform: translate(-0%, -50%);
+}
+
+:local(.tooltips-top) {
+  position: absolute;
+  top: 10%;
+}
+
 :local(.tip) {
   pointer-events: all;
   min-height: 48px;
@@ -19,15 +30,29 @@
   }
 }
 
-:local(.tip-show) {
-  display: flex;
-  animation: 0.2s ease normal soft-transition-in;
+:local(.tip-show-bottom) {
+  animation: 0.2s ease normal soft-transition-bottom;
 }
 
-@keyframes soft-transition-in {
+@keyframes soft-transition-bottom {
   from {
     opacity: 0;
     transform: translateY(120%);
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+:local(.tip-show-top) {
+  animation: 0.2s ease normal soft-transition-top;
+}
+
+@keyframes soft-transition-top {
+  from {
+    opacity: 0;
+    transform: translateY(-120%);
   }
 
   to {
