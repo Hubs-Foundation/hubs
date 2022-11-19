@@ -12,6 +12,7 @@ const TOML = require("@iarna/toml");
 const fetch = require("node-fetch");
 const packageLock = require("./package-lock.json");
 const request = require("request");
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 function createHTTPSConfig() {
   // Generate certs for the local webpack-dev-server.
@@ -284,6 +285,7 @@ module.exports = async (env, argv) => {
     // .replaceAll("connect-src", "connect-src https://example.com");
   }
 
+  const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
     cache: {
       type: "filesystem"
@@ -312,7 +314,8 @@ module.exports = async (env, argv) => {
         fs: false,
         stream: require.resolve("stream-browserify"),
         path: require.resolve("path-browserify")
-      }
+      },
+      extensions: [".ts", ".tsx", ".js", ".jsx"]
     },
     entry: {
       support: path.join(__dirname, "src", "support.js"),
@@ -348,7 +351,7 @@ module.exports = async (env, argv) => {
       },
       host: "0.0.0.0",
       port: 8080,
-      allowedHosts: [host, "hubs.local"],
+      allowedHosts: [host, internalHostname],
       headers: devServerHeaders,
       hot: liveReload,
       liveReload: liveReload,
@@ -435,7 +438,8 @@ module.exports = async (env, argv) => {
             }
           }
         },
-        // On legacy browsers we want to show a "unsupported browser" page. That page needs to polyfill more things so we set the target to ie11
+        // On legacy browsers we want to show a "unsupported browser" page. That page needs to run on older browsers so w set the targeet to ie11.
+        // Note: We do not actually include any polyfills so the code in these files just needs to be written with bare minimum browser APIs
         {
           test: [
             path.resolve(__dirname, "src", "utils", "configs.js"),
@@ -480,6 +484,15 @@ module.exports = async (env, argv) => {
         {
           test: /\.js$/,
           include: [path.resolve(__dirname, "node_modules", "pdfjs-dist")],
+          loader: "babel-loader"
+        },
+        {
+          // We use babel to handle typescript so that features are correctly polyfilled for our targeted browsers. It also ends up being
+          // a good deal faster since it just strips out types. It does NOT typecheck. Typechecking is handled at build time by `npm run check`
+          // and concurrently at dev time with ForkTsCheckerWebpackPlugin
+          test: /\.tsx?$/,
+          include: [path.resolve(__dirname, "src")],
+          exclude: [path.resolve(__dirname, "node_modules")],
           loader: "babel-loader"
         },
         {
@@ -616,6 +629,14 @@ module.exports = async (env, argv) => {
       }
     },
     plugins: [
+      new ForkTsCheckerWebpackPlugin({
+        typescript: {
+          diagnosticOptions: {
+            semantic: true,
+            syntactic: false // this will already fail in the babel step
+          }
+        }
+      }),
       new webpack.ProvidePlugin({
         process: "process/browser",
         // TODO we should bee direclty importing THREE stuff when we need it

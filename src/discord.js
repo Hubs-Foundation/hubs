@@ -8,16 +8,14 @@ import styles from "./assets/stylesheets/discord.scss";
 import discordBotLogo from "./assets/images/discord-bot-logo.png";
 import discordBotVideoMP4 from "./assets/video/discord.mp4";
 import discordBotVideoWebM from "./assets/video/discord.webm";
-import Store from "./storage/store";
 
 import registerTelemetry from "./telemetry";
 import { ThemeProvider } from "./react-components/styles/theme";
+import { store } from "./utils/store-instance";
 
 registerTelemetry("/discord", "Discord Landing Page");
 
 const inviteUrl = "https://forms.gle/GGPgarSuY5WaTNCT8";
-
-const store = new Store();
 
 class DiscordPage extends Component {
   componentDidMount() {}

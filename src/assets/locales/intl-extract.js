@@ -1,5 +1,5 @@
 const path = require("path");
-const { extract } = require("@formatjs/cli");
+const { extract } = require("@formatjs/cli-lib");
 const glob = require("glob");
 const promisify = require("util").promisify;
 const asyncGlob = promisify(glob);

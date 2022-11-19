@@ -1,5 +1,6 @@
 import { SourceType, AudioType } from "./audio-params";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
+import { isRoomOwner } from "../utils/hub-utils";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
@@ -78,8 +79,15 @@ AFRAME.registerComponent("avatar-audio-source", {
     this.el.setObject3D(this.attrName, audio);
     this.el.emit("sound-source-set", { soundSource: destinationSource });
 
-    APP.audios.set(this.el, audio);
-    updateAudioSettings(this.el, audio);
+    getOwnerId(this.el).then(async ownerId => {
+      if (isRoomOwner(ownerId)) {
+        APP.moderatorAudioSource.add(this.el);
+      } else {
+        APP.moderatorAudioSource.delete(this.el);
+      }
+      APP.audios.set(this.el, audio);
+      updateAudioSettings(this.el, audio);
+    });
   },
 
   removeAudio() {
@@ -92,6 +100,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   init() {
     this.createAudio = this.createAudio.bind(this);
+    this.onPermissionsUpdated = this.onPermissionsUpdated.bind(this);
 
     this.audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
     // We subscribe to audio stream notifications for this peer to update the audio source
@@ -121,6 +130,19 @@ AFRAME.registerComponent("avatar-audio-source", {
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
     this.el.addEventListener("audio_type_changed", this.createAudio);
+    APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
+  },
+
+  onPermissionsUpdated() {
+    getOwnerId(this.el).then(async ownerId => {
+      if (isRoomOwner(ownerId)) {
+        APP.moderatorAudioSource.add(this.el);
+      } else {
+        APP.moderatorAudioSource.delete(this.el);
+      }
+      const audio = APP.audios.get(this.el);
+      audio && updateAudioSettings(this.el, audio);
+    });
   },
 
   async _onStreamUpdated(peerId, kind) {
@@ -147,6 +169,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   remove: function() {
     APP.dialog.off("stream_updated", this._onStreamUpdated);
+    APP.hubChannel.removeEventListener("permissions_updated", this.onPermissionsUpdated);
 
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
     this.el.removeEventListener("audio_type_changed", this.createAudio);
@@ -245,6 +268,8 @@ AFRAME.registerComponent("zone-audio-source", {
         const avatar = playerInfo.el;
 
         if (this.data.onlyMods && !playerInfo.can("amplify_audio")) continue;
+        // don't use avatar-rig if not entering scene yet.
+        if (avatar.id === "avatar-rig" && !this.el.sceneEl.is("entered")) continue;
 
         const distanceSquared = avatar.object3D.position.distanceToSquared(tmpWorldPos);
         if (distanceSquared < this.boundingRadiusSquared) {

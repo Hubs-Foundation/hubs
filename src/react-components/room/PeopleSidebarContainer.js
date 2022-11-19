@@ -4,15 +4,22 @@ import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
+import { useCan } from "./useCan";
+import { useRoomPermissions } from "./useRoomPermissions";
+import { useRole } from "./useRole";
 
-export function userFromPresence(sessionId, presence, micPresences, mySessionId) {
+export function userFromPresence(sessionId, presence, micPresences, mySessionId, voiceEnabled) {
   const meta = presence.metas[presence.metas.length - 1];
   const micPresence = micPresences.get(sessionId);
+  if (micPresence && !voiceEnabled && !meta.permissions.voice_chat) {
+    micPresence.muted = true;
+  }
   return { id: sessionId, isMe: mySessionId === sessionId, micPresence, ...meta };
 }
 
 function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   const [people, setPeople] = useState([]);
+  const { voice_chat: voiceChatEnabled } = useRoomPermissions();
 
   useEffect(
     () => {
@@ -23,7 +30,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
 
         setPeople(
           Object.entries(presences).map(([id, presence]) => {
-            return userFromPresence(id, presence, micPresences, mySessionId);
+            return userFromPresence(id, presence, micPresences, mySessionId, voiceChatEnabled);
           })
         );
 
@@ -36,7 +43,7 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
         clearTimeout(timeout);
       };
     },
-    [presences, micUpdateFrequency, setPeople, mySessionId]
+    [presences, micUpdateFrequency, setPeople, mySessionId, voiceChatEnabled]
   );
 
   return people;
@@ -53,6 +60,9 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
     },
     [people, hubChannel]
   );
+  const canVoiceChat = useCan("voice_chat");
+  const { voice_chat: voiceChatEnabled } = useRoomPermissions();
+  const isMod = useRole("owner");
 
   return (
     <PeopleSidebar
@@ -61,6 +71,9 @@ function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
       onClose={onClose}
       onMuteAll={onMuteAll}
       showMuteAll={hubChannel.can("mute_users")}
+      canVoiceChat={canVoiceChat}
+      voiceChatEnabled={voiceChatEnabled}
+      isMod={isMod}
     />
   );
 }

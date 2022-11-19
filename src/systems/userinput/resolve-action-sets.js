@@ -18,7 +18,8 @@ import {
   TogglesHoveredActionSet,
   CameraTool,
   OffersHandConstraint,
-  AEntity
+  AEntity,
+  MediaVideo
 } from "../../bit-components";
 import { hasComponent } from "bitecs";
 const debugUserInput = qsTruthy("dui");
@@ -97,10 +98,14 @@ export function resolveActionSets() {
       hcAFRAME(world, "super-spawner", rightRemoteHovering)
   );
 
-  userinput.toggleSet(sets.leftHandHoveringOnVideo, hcAFRAME(world, "media-video", leftHandHovering));
-  userinput.toggleSet(sets.rightHandHoveringOnVideo, hcAFRAME(world, "media-video", rightHandHovering));
-  userinput.toggleSet(sets.leftCursorHoveringOnVideo, hcAFRAME(world, "media-video", leftRemoteHovering));
-  userinput.toggleSet(sets.rightCursorHoveringOnVideo, hcAFRAME(world, "media-video", rightRemoteHovering));
+  userinput.toggleSet(
+    sets.leftCursorHoveringOnVideo,
+    hcAFRAME(world, "media-video", leftRemoteHovering) || hc(world, MediaVideo, leftRemoteHovering)
+  );
+  userinput.toggleSet(
+    sets.rightCursorHoveringOnVideo,
+    hcAFRAME(world, "media-video", rightRemoteHovering) || hc(world, MediaVideo, rightRemoteHovering)
+  );
 
   userinput.toggleSet(sets.leftHandHoldingPen, hc(world, Pen, leftHandHolding));
   userinput.toggleSet(sets.rightHandHoldingPen, hc(world, Pen, rightHandHolding));

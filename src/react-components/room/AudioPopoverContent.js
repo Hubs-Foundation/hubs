@@ -11,6 +11,7 @@ import { Row } from "../layout/Row";
 import { ToggleInput } from "../input/ToggleInput";
 import { Divider } from "../layout/Divider";
 import { Button } from "../input/Button";
+import { PermissionStatus } from "../../utils/media-devices-utils";
 
 export const AudioPopoverContent = ({
   micLevelBar,
@@ -24,48 +25,68 @@ export const AudioPopoverContent = ({
   onChangeSpeaker,
   onPlaySound,
   isAudioInputSelectAvailable,
-  isAudioOutputSelectAvailable
+  isAudioOutputSelectAvailable,
+  canVoiceChat,
+  permissionStatus
 }) => {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
   return (
     <Column padding grow gap="lg" className={styles.audioToolbarPopover}>
-      <p style={{ alignSelf: "start" }}>
-        <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
-      </p>
-      {isAudioInputSelectAvailable && (
-        <SelectInputField
-          className={styles.selectionInput}
-          buttonClassName={styles.selectionInput}
-          onChange={onChangeMicrophone}
-          {...microphoneOptions}
-        />
-      )}
-      <Row noWrap>
-        {isMicrophoneEnabled && !isMicrophoneMuted ? (
-          <MicrophoneIcon className={iconStyle} style={{ marginRight: "12px" }} />
-        ) : (
-          <MicrophoneMutedIcon className={iconStyle} style={{ marginRight: "12px" }} />
+      {canVoiceChat && (
+        <>
+          <p style={{ alignSelf: "start" }}>
+          <FormattedMessage id="mic-setup-modal.microphone-text" defaultMessage="Microphone" />
+        </p>
+        {isAudioInputSelectAvailable && (
+          <SelectInputField
+            className={styles.selectionInput}
+            buttonClassName={styles.selectionInput}
+            onChange={onChangeMicrophone}
+            {...microphoneOptions}
+          />
         )}
-        <> {micLevelBar}</>
-      </Row>
-      <Row nowrap>
-        <ToggleInput
-          label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle-v2" defaultMessage="Mute" />}
-          checked={isMicrophoneMuted}
-          onChange={onChangeMicrophoneMuted}
-        />
-      </Row>
+        <Row noWrap>
+          {isMicrophoneEnabled && !isMicrophoneMuted ? (
+            <MicrophoneIcon className={iconStyle} style={{ marginRight: "12px" }} />
+          ) : (
+            <MicrophoneMutedIcon className={iconStyle} style={{ marginRight: "12px" }} />
+          )}
+          <> {micLevelBar}</>
+        </Row>
+        <Row nowrap>
+          <ToggleInput
+            label={<FormattedMessage id="mic-setup-modal.mute-mic-toggle-v2" defaultMessage="Mute" />}
+            checked={isMicrophoneMuted}
+            onChange={onChangeMicrophoneMuted}
+          />
+        </Row>
+        </>
+      ) || (
+        <div className={styles.voiceChatDisabled}>
+            <MicrophoneMutedIcon className={styles.iconDisabled} />
+            <p className={styles.textDisabled}>
+              <FormattedMessage
+                id="mic-setup-modal.voice-chat-disabled"
+                defaultMessage="Voice chat is <bold>turned off</bold> for this room."
+                values={{
+                  bold: str => <b>{str}</b>
+                }}
+              />
+            </p>
+        </div>
+      )}
       <Divider />
       <p style={{ alignSelf: "start" }}>
         <FormattedMessage id="mic-setup-modal.speakers-text" defaultMessage="Speakers" />
       </p>
-      {isAudioOutputSelectAvailable && (
-        <SelectInputField
-          className={styles.selectionInput}
-          buttonClassName={styles.selectionInput}
-          onChange={onChangeSpeaker}
-          {...speakerOptions}
-        />
+      {permissionStatus === PermissionStatus.GRANTED &&
+        isAudioOutputSelectAvailable && (
+          <SelectInputField
+            className={styles.selectionInput}
+            buttonClassName={styles.selectionInput}
+            onChange={onChangeSpeaker}
+            {...speakerOptions}
+          />
       )}
       <Row noWrap>
         <VolumeOff className={iconStyle} style={{ marginRight: "12px" }} />
@@ -91,5 +112,11 @@ AudioPopoverContent.propTypes = {
   speakerOptions: PropTypes.object,
   onChangeSpeaker: PropTypes.func,
   isAudioInputSelectAvailable: PropTypes.bool,
-  isAudioOutputSelectAvailable: PropTypes.bool
+  isAudioOutputSelectAvailable: PropTypes.bool,
+  canVoiceChat: PropTypes.bool,
+  permissionStatus: PropTypes.string
+};
+
+AudioPopoverContent.defaultProps = {
+  permissionStatus: PermissionStatus.PROMPT
 };

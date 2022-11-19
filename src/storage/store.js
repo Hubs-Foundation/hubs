@@ -12,9 +12,9 @@ const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
 import { NO_DEVICE_ID } from "../utils/media-devices-utils.js";
-import { getDefaultTheme } from "../utils/theme.js";
+import { AAModes } from "../effects";
 
-const defaultMaterialQuality = (function() {
+const defaultMaterialQuality = (function () {
   const MATERIAL_QUALITY_OPTIONS = ["low", "medium", "high"];
 
   // HACK: AFRAME is not available on all pages, so we catch the ReferenceError.
@@ -154,11 +154,14 @@ export const SCHEMA = {
         enableAudioClipping: { type: "bool", default: false },
         audioClippingThreshold: { type: "number", default: 0.015 },
         audioPanningQuality: { type: "string", default: defaultAudioPanningQuality() },
-        theme: { type: "string", default: getDefaultTheme()?.name },
+        theme: { type: "string", default: undefined },
         cursorSize: { type: "number", default: 1 },
         nametagVisibility: { type: "string", default: "showAll" },
         nametagVisibilityDistance: { type: "number", default: 5 },
-        avatarVoiceLevels: { type: "object" }
+        avatarVoiceLevels: { type: "object" },
+        enablePostEffects: { type: "bool", default: false },
+        enableBloom: { type: "bool", default: true }, // only applies if post effects are enabled
+        aaMode: { type: "string", default: AAModes.MSAA_4X } // only applies if post effects are enabled
       }
     },
 

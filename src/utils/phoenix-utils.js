@@ -2,8 +2,7 @@ import { Socket } from "phoenix";
 import { generateHubName } from "../utils/name-generation";
 import configs from "../utils/configs";
 import { sleep } from "../utils/async-utils";
-
-import Store from "../storage/store";
+import { store } from "../utils/store-instance";
 
 export function hasReticulumServer() {
   return !!configs.RETICULUM_SERVER;
@@ -13,7 +12,7 @@ export function isLocalClient() {
   return hasReticulumServer() && document.location.host !== configs.RETICULUM_SERVER;
 }
 
-export function hubUrl(hubId, extraParams, slug) {
+export function hubUrl(hubId, extraParams, slug, waypoint) {
   if (!hubId) {
     if (isLocalClient()) {
       hubId = new URLSearchParams(location.search).get("hub_id");
@@ -35,6 +34,10 @@ export function hubUrl(hubId, extraParams, slug) {
     if (extraParams.hasOwnProperty(key)) {
       url.searchParams.set(key, extraParams[key]);
     }
+  }
+
+  if (waypoint) {
+    url.hash = waypoint;
   }
 
   return url;
@@ -172,8 +175,7 @@ export function getLandingPageForPhoto(photoUrl) {
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
 }
 
-export function fetchReticulumAuthenticated(url, method = "GET", payload) {
-  const { token } = window.APP.store.state.credentials;
+export function fetchReticulumAuthenticatedWithToken(token, url, method = "GET", payload) {
   const retUrl = getReticulumFetchUrl(url);
   const params = {
     headers: { "content-type": "application/json" },
@@ -195,6 +197,9 @@ export function fetchReticulumAuthenticated(url, method = "GET", payload) {
     }
   });
 }
+export function fetchReticulumAuthenticated(url, method = "GET", payload) {
+  return fetchReticulumAuthenticatedWithToken(store.state.credentials.token, url, method, payload);
+}
 
 export async function createAndRedirectToNewHub(name, sceneId, replace) {
   const createUrl = getReticulumFetchUrl("/api/v1/hubs");
@@ -205,7 +210,6 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
   }
 
   const headers = { "content-type": "application/json" };
-  const store = new Store();
   if (store.state && store.state.credentials.token) {
     headers.authorization = `bearer ${store.state.credentials.token}`;
   }
@@ -339,7 +343,10 @@ export function discordBridgesForPresences(presences) {
   for (const p of Object.values(presences)) {
     for (const m of p.metas) {
       if (m.profile && m.profile.discordBridges) {
-        Array.prototype.push.apply(channels, m.profile.discordBridges.map(b => b.channel.name));
+        Array.prototype.push.apply(
+          channels,
+          m.profile.discordBridges.map(b => b.channel.name)
+        );
       }
     }
   }

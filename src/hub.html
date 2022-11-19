@@ -109,7 +109,7 @@
 
                     <a-entity class="right-controller"></a-entity>
 
-                    <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" layers="mask: 256; recursive: true;" billboard="onlyY: true;">
+                    <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" layers="mask: 768; recursive: true;" billboard="onlyY: true;">
                         <a-entity class="nametag-background" slice9="width: 1; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 0.5; alphaTest: 0.1; src: nametag;">
                             <a-entity class="nametag-status-border" visible="false" slice9="width: 0.45; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; transparent: false; alphaTest: 0.1; src: nametag-border;"></a-entity>
                             <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0.025 0.001"></a-entity>
@@ -153,7 +153,7 @@
                             <a-entity is-remote-hover-target personal-space-invader="radius: 0.2; useMaterial: true;" bone-visibility>
                                 <a-entity class="avatar-inspect-collider" avatar-inspect-collider tags="togglesHoveredActionSet: true; ignoreSpaceBubble: true;" is-remote-hover-target inspect-button></a-entity>
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
-                                <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui" layers="mask: 256; recursive: true;">
+                                <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui" layers="mask: 768; recursive: true;">
                                     <a-entity billboard="onlyY: true;" class="freeze-menu" visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;" avatar-volume-controls>
                                         <a-entity class="avatar-volume-label" text="value: 0%; anchorX: center; textAlign: center; color: #ff3464; letterSpacing: 0.08;" text-raycast-hack position="0.0 0.45 0.35" scale="1.25 1.25 1.25"></a-entity>
                                         <a-entity mixin="rounded-button" is-remote-hover-target tags="singleActionButton: true;" position="-0.45 0.45 0.35" class="avatar-volume-down-button">
@@ -232,7 +232,7 @@
                     tags="isStatic: true; togglesHoveredActionSet: true; inspectable: true;"
                     listed-media
                 >
-                    <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100;" layers="mask: 256; recursive: true;">
+                    <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100;" layers="mask: 768; recursive: true;">
                         <a-entity mixin="rounded-text-button ui"
                             is-remote-hover-target
                             tags="singleActionButton: true; isHoverMenuChild: true;"
@@ -295,7 +295,7 @@
                     position-at-border__freeze-unprivileged="target:.freeze-unprivileged-menu"
                     listed-media
                 >
-                    <a-entity class="ui interactable-ui" layers="mask: 256; recursive: true;">
+                    <a-entity class="ui interactable-ui" layers="mask: 768; recursive: true;">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media">
                             <a-entity
                                 mixin="rounded-text-action-button"
@@ -536,7 +536,7 @@
                         scale="0.25 0.25 0.25"
                         position="0 0.25 -0.001"
                     ></a-entity>
-                    <a-entity class="ui interactable-ui" layers="mask: 256; recursive: true;">
+                    <a-entity class="ui interactable-ui" layers="mask: 768; recursive: true;">
                         <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100; withPermission: spawn_and_move_media; visibleIfOwned: false;">
                             <a-entity
                                 mixin="rounded-button"
@@ -958,7 +958,7 @@
                 <a-entity
                     id="gaze-teleport"
                     position = "0.15 0 0"
-                    teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport; collisionEntities: [nav-mesh];"
+                    teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport;"
                 ></a-entity>
                 <a-entity id="stats" stats-plus="false" position="0 0 -1"></a-entity>
             </a-entity>
@@ -967,7 +967,7 @@
                 id="player-hud"
                 hud-controller="head: #viewing-camera;"
                 vr-mode-toggle-class="class: ui"
-                layers="mask: 256; recursive: true;"
+                layers="mask: 768; recursive: true;"
                 vr-mode-toggle-visibility
                 vr-mode-toggle-playing__hud-controller
             >
@@ -1058,7 +1058,7 @@
                 track-pose="path: /actions/leftHand/matrix"
                 visibility-by-path="path: /actions/leftHand/matrix"
                 hand-controls2="left"
-                teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport; collisionEntities: [nav-mesh]"
+                teleporter="start: /actions/leftHand/startTeleport; confirm: /actions/leftHand/stopTeleport;"
                 body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 set-yxz-order
@@ -1072,7 +1072,7 @@
                 track-pose="path: /actions/rightHand/matrix"
                 visibility-by-path="path: /actions/rightHand/matrix"
                 hand-controls2="right"
-                teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport; collisionEntities: [nav-mesh]"
+                teleporter="start: /actions/rightHand/startTeleport; confirm: /actions/rightHand/stopTeleport;"
                 body-helper="type: kinematic; emitCollisionEvents: false; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 3; activationState: disable_deactivation; scaleAutoUpdate: false;"
                 shape-helper="type: box; fit: manual; halfExtents: 0.03 0.04 0.05; offset: 0 0 -0.04"
                 set-yxz-order

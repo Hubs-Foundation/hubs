@@ -1,7 +1,7 @@
 import { disposeTexture } from "../utils/material-utils";
 import { createVideoOrAudioEl } from "../utils/media-utils";
 import { findNode } from "../utils/three-utils";
-import { Layers } from "./layers";
+import { Layers } from "../camera-layers";
 
 /**
  * @component video-texture-source
@@ -35,9 +35,7 @@ AFRAME.registerComponent("video-texture-source", {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
-      encoding: THREE.sRGBEncoding,
-      depth: false,
-      stencil: false
+      encoding: THREE.sRGBEncoding
     });
 
     const texture = this.renderTarget.texture;
@@ -78,6 +76,7 @@ AFRAME.registerComponent("video-texture-source", {
     sceneEl.object3D.autoUpdate = false;
 
     renderer.setRenderTarget(this.renderTarget);
+    renderer.clearDepth();
     renderer.render(sceneEl.object3D, this.camera);
     renderer.setRenderTarget(null);
 
@@ -178,6 +177,8 @@ AFRAME.registerComponent("video-texture-target", {
 
           const video = createVideoOrAudioEl("video");
           video.srcObject = stream;
+          // Video is muted so autoplay is allowed
+          video.play();
 
           const texture = new THREE.VideoTexture(video);
           texture.flipY = false;

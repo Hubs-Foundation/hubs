@@ -28,6 +28,7 @@ export const IconButton = memo(
 
 IconButton.propTypes = {
   // compactSm makes the icon button shift to a vertical layout in the "sm" (mobile) breakpoint
+  as: PropTypes.elementType,
   compactSm: PropTypes.bool,
   lg: PropTypes.bool,
   className: PropTypes.string,
@@ -37,3 +38,5 @@ IconButton.propTypes = {
 IconButton.defaultProps = {
   as: "button"
 };
+
+IconButton.displayName = "IconButton";

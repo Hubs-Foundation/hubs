@@ -1,0 +1,17 @@
+// NOTE when changing be sure to check hardcoded mask values in hub.html
+export enum Layers {
+  // These 3 layers are hardcoded in THREE
+  CAMERA_LAYER_DEFAULT,
+  CAMERA_LAYER_XR_LEFT_EYE,
+  CAMERA_LAYER_XR_RIGHT_EYE,
+
+  CAMERA_LAYER_REFLECTION,
+  CAMERA_LAYER_INSPECT,
+  CAMERA_LAYER_VIDEO_TEXTURE_TARGET,
+
+  CAMERA_LAYER_THIRD_PERSON_ONLY,
+  CAMERA_LAYER_FIRST_PERSON_ONLY,
+
+  CAMERA_LAYER_UI,
+  CAMERA_LAYER_FX_MASK
+}

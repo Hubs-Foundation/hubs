@@ -157,6 +157,16 @@ export function RoomSettingsSidebar({
         >
           <div className={styles.roomPermissions}>
             <ToggleInput
+              name="member_permissions.voice_chat"
+              label={<FormattedMessage id="room-settings-sidebar.voice-chat" defaultMessage="Voice chat" />}
+              ref={register}
+            />
+            <ToggleInput
+              name="member_permissions.text_chat"
+              label={<FormattedMessage id="room-settings-sidebar.text-chat" defaultMessage="Text chat" />}
+              ref={register}
+            />
+            <ToggleInput
               name="member_permissions.spawn_and_move_media"
               label={
                 <FormattedMessage

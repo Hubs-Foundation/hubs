@@ -2,7 +2,7 @@ import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { CursorRaycastable } from "../bit-components";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
-const noop = function() {};
+const noop = function () {};
 AFRAME.registerComponent("overwrite-raycast-as-noop", {
   init() {
     this.el.object3D.raycast = noop;
@@ -26,6 +26,7 @@ const exitedCurserRaycastableQuery = exitQuery(cursorRaycastableQuery);
 
 export class CursorTargettingSystem {
   constructor() {
+    this.aframeTargets = [];
     this.targets = [];
     this.dirty = true;
     this.onMutation = this.onMutation.bind(this);
@@ -44,13 +45,36 @@ export class CursorTargettingSystem {
   }
 
   tick(t) {
-    if (
-      this.dirty ||
-      enteredCursorRaycastableQuery(APP.world).length ||
-      exitedCurserRaycastableQuery(APP.world).length
-    ) {
-      this.populateEntities(this.targets);
+    let needsCombine = false;
+    if (this.dirty) {
+      this.aframeTargets.length = 0;
+      const els = AFRAME.scenes[0].querySelectorAll(
+        ".collidable, .interactable, .ui, .drawing, .occupiable-waypoint-icon, .teleport-waypoint-icon, .avatar-inspect-collider"
+      );
+      for (let i = 0; i < els.length; i++) {
+        if (els[i].object3D) {
+          this.aframeTargets.push(els[i].object3D);
+        }
+      }
+      // Combine the targets
       this.dirty = false;
+      needsCombine = true;
+    }
+
+    if (enteredCursorRaycastableQuery(APP.world).length || exitedCurserRaycastableQuery(APP.world).length) {
+      needsCombine = true;
+    }
+
+    if (needsCombine) {
+      this.targets.length = 0;
+      this.aframeTargets.forEach(t => {
+        this.targets.push(t);
+      });
+
+      const eids = cursorRaycastableQuery(APP.world);
+      for (let i = 0; i < eids.length; i++) {
+        this.targets.push(APP.world.eid2obj.get(eids[i]));
+      }
     }
 
     if (this.rightRemote) {
@@ -74,24 +98,6 @@ export class CursorTargettingSystem {
     // let's try to avoid re-querying the targets on attribute changes we know we can ignore
     if (records.some(r => r.type === "childList" || (r.type === "attributes" && r.attributeName === "class"))) {
       this.dirty = true;
-    }
-  }
-
-  populateEntities(targets) {
-    targets.length = 0;
-    // TODO: Do not querySelectorAll on the entire scene every time anything changes!
-    const els = AFRAME.scenes[0].querySelectorAll(
-      ".collidable, .interactable, .ui, .drawing, .occupiable-waypoint-icon, .teleport-waypoint-icon, .avatar-inspect-collider"
-    );
-    for (let i = 0; i < els.length; i++) {
-      if (els[i].object3D) {
-        targets.push(els[i].object3D);
-      }
-    }
-
-    const eids = cursorRaycastableQuery(APP.world);
-    for (let i = 0; i < eids.length; i++) {
-      targets.push(APP.world.eid2obj.get(eids[i]));
     }
   }
 

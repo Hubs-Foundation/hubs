@@ -20,9 +20,15 @@ $semi-bold: 600;
   display: flex;
   flex-flow: column;
   align-items: center;
+  padding-bottom: 16px;
 
   input[type='number'] {
     -moz-appearance:textfield;
+
+    &:disabled,
+    &[disabled] {
+      color: theme.$disabled-text-color;
+    }
   }
 
   input[type=text],input[type=number] {
@@ -38,6 +44,11 @@ $semi-bold: 600;
     text-align: center;
     width: 60px;
     height: 38px;
+
+    &:disabled,
+    &[disabled] {
+      color: theme.$disabled-text-color;
+    }
   }
 
   input::-webkit-outer-spin-button,
@@ -196,6 +207,10 @@ $semi-bold: 600;
   font-size: $fontSize;
   font-weight: 600;
   flex-grow: 1;
+
+  &:local(.disabled) {
+    color: theme.$disabled-text-color;
+  }
 }
 
 :local(.close-button) {
@@ -355,12 +370,21 @@ $semi-bold: 600;
     font-weight: bold;
     padding-right: 30px;
     max-width: 170px;
+
+    &:disabled,
+    &[disabled] {
+      color: theme.$disabled-text-color;
+    }
   }
 }
 :local(.dropdown-arrow){
   pointer-events: none;
   position: absolute;
   right: 7.5%;
+
+  &:local(.disabled) {
+    filter: opacity(25%);
+  }
 }
 
 :local(.number-with-range){
@@ -374,6 +398,21 @@ $semi-bold: 600;
     justify-content: center;
     cursor: pointer;
 
+    &:local(.disabled) {
+      color: theme.$disabled-icon-color;
+    }
   }
+}
+
+:local(.pinned-message) {
+  display: flex;
+  gap: 10px;
+  background-color: var(--chat-bubble-bg-color-received);
+  border-radius: 10px;
+  margin: 8px 16px 18px 56px;
+  padding: 10px 16px;
+  font-size: 14px;
+  overflow-wrap: break-word;
+  line-height: 1.25;
 }
 

@@ -4,10 +4,9 @@ import InfiniteScroll from "react-infinite-scroller";
 import markdownit from "markdown-it";
 import { FormattedMessage } from "react-intl";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
-import Store from "./storage/store";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
+import { store } from "./utils/store-instance";
 
-const store = new Store();
 window.APP = { store };
 
 import registerTelemetry from "./telemetry";

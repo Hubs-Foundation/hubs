@@ -80,7 +80,7 @@ export default class HubsTextureLoader extends THREE.TextureLoader {
       ? this._loadImageBitmapTexture(url, callback, onProgress, onError)
       : super.load(url, callback, onProgress, onError);
 
-    texture.onUpdate = function() {
+    texture.onUpdate = function () {
       // Delete texture data once it has been uploaded to the GPU
       texture.image.close && texture.image.close();
       texture.image = null;

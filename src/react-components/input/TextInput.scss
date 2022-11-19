@@ -84,7 +84,7 @@ $input-height: 40px;
 }
 
 :local(.disabled) {
-  cursor: not-allowed;
+  cursor: default;
   color: theme.$disabled-text-color;
   background-color: theme.$disabled-bg-color;
 }

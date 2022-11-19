@@ -10,11 +10,11 @@ import {
   Not,
   entityExists
 } from "bitecs";
-import { FloatyObject, Held, Owned, Rigidbody, MakeKinematicOnRelease } from "../bit-components";
+import { FloatyObject, Owned, Rigidbody, MakeKinematicOnRelease, Constraint } from "../bit-components";
 
 export const MakeStaticWhenAtRest = defineComponent();
 
-const makeStaticAtRestQuery = defineQuery([FloatyObject, Rigidbody, Not(Held), MakeStaticWhenAtRest]);
+const makeStaticAtRestQuery = defineQuery([FloatyObject, Rigidbody, Not(Constraint), MakeStaticWhenAtRest]);
 function makeStaticAtRest(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   makeStaticAtRestQuery(world).forEach(eid => {
@@ -41,7 +41,7 @@ function makeStaticAtRest(world) {
   });
 }
 
-const makeKinematicOnReleaseExitQuery = exitQuery(defineQuery([Rigidbody, Held, MakeKinematicOnRelease]));
+const makeKinematicOnReleaseExitQuery = exitQuery(defineQuery([Rigidbody, Constraint, MakeKinematicOnRelease]));
 function makeKinematicOnRelease(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   makeKinematicOnReleaseExitQuery(world).forEach(eid => {
@@ -57,7 +57,7 @@ export const FLOATY_OBJECT_FLAGS = {
 };
 
 const enteredFloatyObjectsQuery = enterQuery(defineQuery([FloatyObject, Rigidbody]));
-const heldFloatyObjectsQuery = defineQuery([FloatyObject, Rigidbody, Held]);
+const heldFloatyObjectsQuery = defineQuery([FloatyObject, Rigidbody, Constraint]);
 const exitedHeldFloatyObjectsQuery = exitQuery(heldFloatyObjectsQuery);
 const enterHeldFloatyObjectsQuery = enterQuery(heldFloatyObjectsQuery);
 export const floatyObjectSystem = world => {

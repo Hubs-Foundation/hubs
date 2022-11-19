@@ -30,7 +30,7 @@ import MediaBrowserContainer from "./media-browser";
 import EntryStartPanel from "./entry-start-panel.js";
 import AvatarEditor from "./avatar-editor";
 import PreferencesScreen from "./preferences-screen.js";
-import PresenceLog from "./presence-log.js";
+import { PresenceLog } from "./presence-log.js";
 import PreloadOverlay from "./preload-overlay.js";
 import RTCDebugPanel from "./debug-panel/RtcDebugPanel.js";
 import { showFullScreenIfAvailable, showFullScreenIfWasFullScreen } from "../utils/fullscreen";
@@ -50,7 +50,7 @@ import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
 import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
-import { ContentMenu, PeopleMenuButton, ObjectsMenuButton } from "./room/ContentMenu";
+import { ContentMenu, PeopleMenuButton, ObjectsMenuButton, ECSDebugMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
 import { ReactComponent as AddIcon } from "./icons/Add.svg";
@@ -95,6 +95,9 @@ import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { TERMS, PRIVACY } from "../constants";
+import { ECSDebugSidebarContainer } from "./debug-panel/ECSSidebar";
+import { NotificationsContainer } from "./room/NotificationsContainer";
+import { usePermissions } from "./room/usePermissions";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -110,6 +113,7 @@ async function grantedMicLabels() {
   return mediaDevices.filter(d => d.label && d.kind === "audioinput").map(d => d.label);
 }
 
+const isSmallScreen = window.innerWidth < 450;
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 const AUTO_EXIT_TIMER_SECONDS = 10;
@@ -161,7 +165,8 @@ class UIRoot extends Component {
     onLoaded: PropTypes.func,
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
-    breakpoint: PropTypes.string
+    breakpoint: PropTypes.string,
+    canVoiceChat: PropTypes.bool
   };
 
   state = {
@@ -598,7 +603,9 @@ class UIRoot extends Component {
   };
 
   onRequestMicPermission = async () => {
-    await this.mediaDevicesManager.startMicShare({});
+    if (this.props.canVoiceChat) {
+      await this.mediaDevicesManager.startMicShare({});
+    }
   };
 
   beginOrSkipAudioSetup = () => {
@@ -1095,6 +1102,7 @@ class UIRoot extends Component {
     const streaming = this.state.isStreaming;
 
     const showObjectList = enteredOrWatching;
+    const showECSObjectsMenuButton = qsTruthy("ecsDebug");
 
     const streamer = getCurrentStreamer();
     const streamerName = streamer && streamer.displayName;
@@ -1388,6 +1396,12 @@ class UIRoot extends Component {
                           onClick={() => this.toggleSidebar("people")}
                           presencecount={this.state.presenceCount}
                         />
+                        {showECSObjectsMenuButton && (
+                          <ECSDebugMenuButton
+                            active={this.state.sidebarId === "ecs-debug"}
+                            onClick={() => this.toggleSidebar("ecs-debug")}
+                          />
+                        )}
                       </ContentMenu>
                     )}
                     {!entered && !streaming && !isMobile && streamerName && <SpectatingLabel name={streamerName} />}
@@ -1405,7 +1419,8 @@ class UIRoot extends Component {
                     )}
                     {this.state.sidebarId !== "chat" && this.props.hub && (
                       <PresenceLog
-                        inRoom={true}
+                        preset={"InRoom"}
+                        exclude={isSmallScreen ? [] : ["permission"]}
                         presences={this.props.presences}
                         entries={presenceLogEntries}
                         hubId={this.props.hub.hub_id}
@@ -1413,17 +1428,28 @@ class UIRoot extends Component {
                         onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                       />
                     )}
-                    <TipContainer
-                      hide={this.props.activeObject}
-                      inLobby={watching}
-                      inRoom={entered}
-                      isEmbedded={this.props.embed}
-                      isStreaming={streaming}
-                      hubId={this.props.hub.hub_id}
-                      presences={this.props.presences}
-                      scene={this.props.scene}
-                      store={this.props.store}
-                    />
+                    <NotificationsContainer>
+                      <TipContainer
+                        hide={this.props.activeObject}
+                        inLobby={watching}
+                        inRoom={entered}
+                        isEmbedded={this.props.embed}
+                        isStreaming={streaming}
+                        hubId={this.props.hub.hub_id}
+                        presences={this.props.presences}
+                        scene={this.props.scene}
+                        store={this.props.store}
+                      />
+                      {!isSmallScreen && <PresenceLog
+                          preset={"Notifications"}
+                          include={["permission"]}
+                          presences={this.props.presences}
+                          entries={presenceLogEntries}
+                          hubId={this.props.hub.hub_id}
+                          history={this.props.history}
+                          onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
+                        />}
+                    </NotificationsContainer>
                     {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
                         history={this.props.history}
@@ -1525,6 +1551,9 @@ class UIRoot extends Component {
                           onClose={() => this.setSidebar(null)}
                           onChangeScene={this.onChangeScene}
                         />
+                      )}
+                      {this.state.sidebarId === "ecs-debug" && (
+                        <ECSDebugSidebarContainer onClose={() => this.setSidebar(null)} />
                       )}
                     </>
                   ) : undefined
@@ -1628,6 +1657,7 @@ class UIRoot extends Component {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
+  const { voice_chat: canVoiceChat} = usePermissions();
 
   useEffect(() => {
     const el = document.getElementById("preload-overlay");
@@ -1651,7 +1681,7 @@ function UIRootHooksWrapper(props) {
   return (
     <ChatContextProvider messageDispatch={props.messageDispatch}>
       <ObjectListProvider scene={props.scene}>
-        <UIRoot breakpoint={breakpoint} {...props} />
+        <UIRoot breakpoint={breakpoint} {...props} canVoiceChat={canVoiceChat} />
       </ObjectListProvider>
     </ChatContextProvider>
   );
