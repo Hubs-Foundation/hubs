@@ -12,7 +12,7 @@ export function MediaPrefab(params: MediaLoaderParams) {
       networkedTransform
       mediaLoader={params}
       deletable
-      grabbable
+      grabbable={{ cursor: true, hand: true }}
       destroyAtExtremeDistance
       floatyObject={{
         flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE,

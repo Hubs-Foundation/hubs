@@ -146,6 +146,10 @@ export function cloneObject3D(source, preserveUUIDs) {
 
   parallelTraverse(source, clone, (sourceNode, clonedNode) => {
     cloneLookup.set(sourceNode, clonedNode);
+
+    if (sourceNode.userData.gltfExtensions?.MOZ_hubs_components) {
+      clonedNode.userData.gltfExtensions.MOZ_hubs_components = sourceNode.userData.gltfExtensions.MOZ_hubs_components;
+    }
   });
 
   source.traverse(sourceNode => {
