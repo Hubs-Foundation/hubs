@@ -1,5 +1,6 @@
 import { transportForChannel } from "./transport-for-channel";
 import { authorizeOrSanitizeMessage } from "./utils/permissions-utils";
+import hack from "./phoenix-adapter-hack";
 
 // TODO: Use the websocket connection, not HEAD requests
 const getTimeOffsetToServer = async () => {
@@ -7,10 +8,12 @@ const getTimeOffsetToServer = async () => {
   const clientSentTime = Date.now();
   const serverReceivedTime =
     new Date(
-      (await fetch(document.location.href, {
-        method: "HEAD",
-        cache: "no-cache"
-      })).headers.get("Date")
+      (
+        await fetch(document.location.href, {
+          method: "HEAD",
+          cache: "no-cache"
+        })
+      ).headers.get("Date")
     ).getTime() +
     precision / 2;
   const clientReceivedTime = Date.now();
@@ -65,6 +68,9 @@ export default class PhoenixAdapter {
     this.nafMessageReceived = nafMessageReceived;
   }
   async connect() {
+    // HACK Remove old listeners that queued naf/nafr events.
+    this.hubChannel.channel.off("naf");
+    this.hubChannel.channel.off("nafr");
     this.refs.set("naf", this.hubChannel.channel.on("naf", this.handleIncomingNAF));
     this.refs.set("nafr", this.hubChannel.channel.on("nafr", this.handleIncomingNAFR));
 
@@ -73,8 +79,27 @@ export default class PhoenixAdapter {
     this.unreliableTransport = transportForChannel(this.hubChannel.channel, false);
 
     this.hubChannel.presence.list(key => key).forEach(this.nafOccupantJoined);
-    this.refs.set("hub:join", this.events.on(`hub:join`, ({ key }) => this.nafOccupantJoined(key)));
-    this.refs.set("hub:leave", this.events.on(`hub:leave`, ({ key }) => this.nafOccupantLeave(key)));
+    this.refs.set(
+      "hub:join",
+      this.events.on(`hub:join`, ({ key }) => this.nafOccupantJoined(key))
+    );
+    this.refs.set(
+      "hub:leave",
+      this.events.on(`hub:leave`, ({ key }) => this.nafOccupantLeave(key))
+    );
+
+    // HACK If we received naf/nafr events before we were ready to receive them, process them now.
+    if (hack.eventQueue.length) {
+      console.warn(`Processing ${hack.eventQueue.length} naf/nafr events we would otherwise have missed.`);
+      for (const { type, event } of hack.eventQueue) {
+        if (type === "naf") {
+          this.handleIncomingNAF(event);
+        } else {
+          this.handleIncomingNAFR(event);
+        }
+      }
+      hack.eventQueue.length = 0;
+    }
   }
   shouldStartConnectionTo() {}
   startStreamConnection() {}
@@ -104,8 +129,8 @@ export default class PhoenixAdapter {
 
   disconnect() {
     this.hubChannel.presence.list(key => key).forEach(this.nafOccupantLeave);
-    this.hubChannel.channel.off("naf", this.refs.get("naf"));
-    this.hubChannel.channel.off("nafr", this.refs.get("nafr"));
+    this.hubChannel.channel.off("naf");
+    this.hubChannel.channel.off("nafr");
     this.events.off("hub:join", this.refs.get("hub:join"));
     this.events.off("hub:leave", this.refs.get("hub:leave"));
     this.refs.delete("naf");

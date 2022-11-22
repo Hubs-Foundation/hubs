@@ -54,6 +54,7 @@ import {
 import { Presence } from "phoenix";
 import { emitter } from "./emitter";
 import "./phoenix-adapter";
+import hack from "./phoenix-adapter-hack";
 
 import nextTick from "./utils/next-tick";
 import { addAnimationComponents } from "./utils/animation";
@@ -1232,6 +1233,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       presences: presence.state,
       entryDisallowed: !hubChannel.canEnterRoom(uiProps.hub)
     });
+  });
+
+  // HACK The delay between when we join the hub channel
+  // and when NAF creates / connects to our adapter
+  // may be long enough for us to miss naf / nafr events.
+  // Queue them here and consume them when we're ready.
+  hubPhxChannel.on("naf", event => {
+    hack.eventQueue.push({ type: "naf", event });
+  });
+  hubPhxChannel.on("nafr", event => {
+    hack.eventQueue.push({ type: "nafr", event });
   });
 
   hubPhxChannel
