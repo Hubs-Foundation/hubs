@@ -6,6 +6,9 @@ import { useEffect } from 'react'
 import { discordBridgesForPresences, hasEmbedPresences } from '../../utils/phoenix-utils'
 import { Tooltip } from './Tooltip'
 
+const isEndTooltipStep = step =>
+  ['tips.desktop.end', 'tips.mobile.end', 'tips.desktop.menu', 'tips.mobile.menu'].includes(step)
+
 function OkDismissLabel () {
   return <FormattedMessage id='tips.dismiss.ok' defaultMessage='Ok' />
 }
@@ -47,6 +50,14 @@ export function TipContainer ({ hide, inLobby, inRoom, isStreaming, isEmbedded, 
       scene.systems.tips.prevTip()
     }, 200)
   }, [scene])
+
+  useEffect(() => {
+    if (isEndTooltipStep(onboardingTipId)) {
+      setTimeout(() => {
+        scene.systems.tips.nextTip()
+      }, 2500)
+    }
+  }, [scene, onboardingTipId])
 
   useEffect(() => {
     function onSceneTipChanged ({ detail: tipId }) {

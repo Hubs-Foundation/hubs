@@ -34,15 +34,7 @@ const TOOLTIP_STEPS = {
   'tips.mobile.menu': 'Mobile Menu'
 }
 
-export const Tooltips = ({ step }) => (
-  <RoomLayout
-    viewport={
-      <Tooltip step={step}>
-        {"Welcome to Mozilla Hubs! Let's take a quick tour. 👋 Click and drag to look around."}
-      </Tooltip>
-    }
-  />
-)
+export const Tooltips = ({ step }) => <RoomLayout viewport={<Tooltip step={step} />} />
 
 Tooltips.argTypes = {
   step: {

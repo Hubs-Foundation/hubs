@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, memo } from 'react'
+import React, { useMemo, memo } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import styles from './Tooltip.scss'
@@ -35,9 +35,6 @@ if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayo
       console.warn(`Unable to remap keyboard: ${e}`)
     })
 }
-
-const isEndStep = step =>
-  ['tips.desktop.end', 'tips.mobile.end', 'tips.desktop.menu', 'tips.mobile.menu'].includes(step)
 
 const onboardingMessages = defineMessages({
   'tips.welcome.title': {
@@ -358,14 +355,6 @@ export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, ...re
       animationClass = styles.tipShowTop
     }
   }
-
-  useEffect(() => {
-    if (isEndStep(step)) {
-      setTimeout(() => {
-        onNext()
-      }, 2500)
-    }
-  }, [step, onNext])
 
   const { control, navigationBar } = useMemo(() => onboardingSteps({ intl, step }), [intl, step])
   return (
