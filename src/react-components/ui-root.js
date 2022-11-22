@@ -1406,17 +1406,18 @@ class UIRoot extends Component {
                       />
                     )}
                     <NotificationsContainer>
-                      <TipContainer
-                        hide={this.props.activeObject}
-                        inLobby={watching}
-                        inRoom={entered}
-                        isEmbedded={this.props.embed}
-                        isStreaming={streaming}
-                        hubId={this.props.hub.hub_id}
-                        presences={this.props.presences}
-                        scene={this.props.scene}
-                        store={this.props.store}
-                      />
+                      {!this.props.activeObject && (
+                        <TipContainer
+                          inLobby={watching}
+                          inRoom={entered}
+                          isEmbedded={this.props.embed}
+                          isStreaming={streaming}
+                          hubId={this.props.hub.hub_id}
+                          presences={this.props.presences}
+                          scene={this.props.scene}
+                          store={this.props.store}
+                        />
+                      )}
                       {!isSmallScreen && (
                         <PresenceLog
                           preset={'Notifications'}

@@ -21,7 +21,7 @@ export function FullscreenTip (props) {
   )
 }
 
-export function TipContainer ({ hide, inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
+export function TipContainer ({ inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
   const [lobbyTipDismissed, setLobbyTipDismissed] = useState(false)
   const [broadcastTipDismissed, setBroadcastTipDismissed] = useState(() =>
     store.state.confirmedBroadcastedRooms.includes(hubId)
@@ -74,12 +74,6 @@ export function TipContainer ({ hide, inLobby, inRoom, isStreaming, isEmbedded, 
 
   const discordBridges = presences ? discordBridgesForPresences(presences) : []
   const isBroadcasting = discordBridges.length > 0
-
-  // TODO: This only exists because we store local state in this component.
-  // If we move tip state to a context then we can remove this and not render this component at all.
-  if (hide) {
-    return null
-  }
 
   if (inLobby) {
     if (lobbyTipDismissed) {
