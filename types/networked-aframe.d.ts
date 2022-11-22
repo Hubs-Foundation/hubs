@@ -1,6 +1,5 @@
 import { AElement } from "aframe";
 
-// TODO Move this to a declaration file.
 declare global {
   const NAF: {
     utils: {
