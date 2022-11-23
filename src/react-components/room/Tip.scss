@@ -9,7 +9,7 @@
   color: theme.$tip-text-color;
   align-items: center;
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     bottom: 24px;
     max-width: 360px;
   }
@@ -17,7 +17,7 @@
 
 :local(.content) {
   margin: 16px;
-  font-size: theme.$font-size-sm;
+  font-size: theme.$font-size-md;
   font-weight: theme.$font-weight-bold;
   padding: 0 8px;
   line-height: 1.25;
@@ -35,7 +35,7 @@
   margin-right: 8px;
   margin-bottom: 8px;
   min-width: 48px;
-  font-size: theme.$font-size-xs;
+  font-size: theme.$font-size-md;
   font-weight: theme.$font-weight-bold;
   align-self: flex-end;
 

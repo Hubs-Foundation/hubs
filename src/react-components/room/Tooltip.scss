@@ -18,7 +18,7 @@
   background-color: theme.$background1-color;
   border: 1px solid theme.$border1-color;
   width: 360px;
-  font-size: theme.$font-size-sm;
+  font-size: theme.$font-size-md;
   justify-content: center;
   align-items: center;
   display: flex;
@@ -187,7 +187,7 @@
 }
 
 :local(.arrows) {
-  font-size: 24px;
+  font-size: theme.$font-size-xl;
   font-weight: lighter;
 }
 
