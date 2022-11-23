@@ -18,7 +18,7 @@ AFRAME.registerSystem("ui-hotkeys", {
     this.mediaSearchStore = window.APP.mediaSearchStore;
   },
 
-  tick: function() {
+  tick: function () {
     if (!this.userinput) {
       this.userinput = this.el.systems.userinput;
     }
@@ -61,6 +61,9 @@ AFRAME.registerSystem("ui-hotkeys", {
 
     if (this.userinput.get(paths.actions.toggleUI)) {
       this.el.emit("action_toggle_ui");
+    }
+    if (this.userinput.get(paths.actions.toggleRecord)) {
+      this.el.emit("action_toggle_record");
     }
   }
 });
