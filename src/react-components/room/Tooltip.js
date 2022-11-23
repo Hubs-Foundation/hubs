@@ -63,7 +63,7 @@ const onboardingMessages = defineMessages({
   },
   'tips.desktop.invite': {
     id: 'tips.desktop.invite',
-    defaultMessage: 'Use the {invite} button to share this room'
+    defaultMessage: 'Use the {invite} button to share {br} this room'
   },
   'tips.end': {
     id: 'tips.end',
@@ -268,7 +268,8 @@ function onboardingSteps ({ intl, step }) {
           params: {
             invite: (
               <InlineButton icon={<InviteIcon />} text={intl.formatMessage(onboardingMessages['tips.text.invite'])} />
-            )
+            ),
+            br: <br />
           }
         },
         navigationBar: {
