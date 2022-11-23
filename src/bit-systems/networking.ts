@@ -1,4 +1,14 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import {
+  addComponent,
+  Component,
+  defineQuery,
+  enterQuery,
+  exitQuery,
+  hasComponent,
+  removeComponent,
+  removeEntity
+} from "bitecs";
+import { HubsWorld } from "../app";
 import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo, Owned } from "../bit-components";
 import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
 import { MediaPrefab } from "../prefabs/media";
@@ -20,14 +30,10 @@ const prefabs = new Map(
   })
 );
 
-/**
- * @param {import("../app").HubsWorld}  world
- * @param {number} eid
- */
-export function takeOwnership(world, eid) {
+export function takeOwnership(world: HubsWorld, eid: number) {
   // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame
   if (hasComponent(world, AEntity, eid)) {
-    const el = world.eid2obj.get(eid).el;
+    const el = world.eid2obj.get(eid)!.el!;
     !NAF.utils.isMine(el) && NAF.utils.takeOwnership(el);
   } else {
     addComponent(world, Owned, eid);
@@ -36,11 +42,25 @@ export function takeOwnership(world, eid) {
   }
 }
 
-const createMessageDatas = new Map();
+type EntityID = number;
+interface CreateMessageData {
+  prefabName: string;
+  initialData: InitialData;
+}
+const createMessageDatas: Map<EntityID, CreateMessageData> = new Map();
 
-export function createNetworkedEntityFromRemote(world, prefabName, initialData, rootNid, creator, owner) {
-  const eid = renderAsEntity(world, prefabs.get(prefabName).template(initialData));
-  const obj = world.eid2obj.get(eid);
+type InitialData = any;
+
+export function createNetworkedEntityFromRemote(
+  world: HubsWorld,
+  prefabName: string,
+  initialData: InitialData,
+  rootNid: string,
+  creator: string,
+  owner: string
+) {
+  const eid = renderAsEntity(world, prefabs.get(prefabName)!.template(initialData));
+  const obj = world.eid2obj.get(eid)!;
 
   createMessageDatas.set(eid, { prefabName, initialData });
 
@@ -61,12 +81,12 @@ export function createNetworkedEntityFromRemote(world, prefabName, initialData, 
   return eid;
 }
 
-function spawnAllowed(creator, prefabName) {
-  const perm = prefabs.get(prefabName).permission;
-  return !perm || APP.hubChannel.userCan(creator, perm);
+function spawnAllowed(creator: string, prefabName: string) {
+  const perm = prefabs.get(prefabName)!.permission;
+  return !perm || APP.hubChannel!.userCan(creator, perm);
 }
 
-export function createNetworkedEntity(world, prefabName, initialData) {
+export function createNetworkedEntity(world: HubsWorld, prefabName: string, initialData: InitialData) {
   if (!spawnAllowed(NAF.clientId, prefabName)) throw new Error(`You do not have permission to spawn ${prefabName}`);
   const rootNid = NAF.utils.createNetworkId();
   return createNetworkedEntityFromRemote(world, prefabName, initialData, rootNid, NAF.clientId, NAF.clientId);
@@ -75,19 +95,43 @@ export function createNetworkedEntity(world, prefabName, initialData) {
 const networkedObjectsQuery = defineQuery([Networked]);
 const ownedNetworkObjectsQuery = defineQuery([Networked, Owned]);
 
-const schemas = new Map([
-  [NetworkedMediaFrame, defineNetworkSchema(NetworkedMediaFrame)],
-  [NetworkedTransform, defineNetworkSchema(NetworkedTransform)],
-  [NetworkedVideo, defineNetworkSchema(NetworkedVideo)]
-]);
+interface NetworkSchema {
+  serialize: (world: HubsWorld, eid: EntityID, data: any, isFullSync: boolean) => boolean;
+  deserialize: (world: HubsWorld, eid: EntityID, data: any) => void;
+}
+
+const schemas: Map<Component, NetworkSchema> = new Map();
+schemas.set(NetworkedMediaFrame, defineNetworkSchema(NetworkedMediaFrame));
+schemas.set(NetworkedTransform, defineNetworkSchema(NetworkedTransform));
+schemas.set(NetworkedVideo, defineNetworkSchema(NetworkedVideo));
 const networkableComponents = Array.from(schemas.keys());
 
-const pendingMessages = [];
-const pendingJoins = [];
-const pendingParts = [];
+type NetworkID = string;
+type CreateMessage = [networkId: NetworkID, prefabName: string, initialData: InitialData];
+type UpdateMessage = {
+  nid: NetworkID;
+  lastOwnerTime: number;
+  owner: string;
+  creator: string;
+  componentIds: number[];
+  data: any[];
+};
+type DeleteMessage = NetworkID;
+type Message = {
+  creates: CreateMessage[];
+  updates: UpdateMessage[];
+  deletes: DeleteMessage[];
+};
+type Join = any;
+type Part = any;
+
+type IncomingMessage = any;
+const pendingMessages: IncomingMessage[] = [];
+const pendingJoins: Join[] = [];
+const pendingParts: Part[] = [];
 
 // TODO messaging, joining, and leaving should not be using NAF
-if (!window.NAF) {
+if (!NAF) {
   console.warn(
     "NAF is currently required for the new networking system but is not loaded. This is only expected on secondary pages like avatar.html."
   );
@@ -98,42 +142,48 @@ if (!window.NAF) {
   });
 }
 document.addEventListener("DOMContentLoaded", function () {
-  document.body.addEventListener("clientConnected", function ({ detail: { clientId } }) {
-    console.log("client joined", clientId);
-    pendingJoins.push(APP.getSid(clientId));
-  });
-  document.body.addEventListener("clientDisconnected", function ({ detail: { clientId } }) {
-    console.log("client left", clientId);
-    pendingParts.push(APP.getSid(clientId));
-  });
+  (document.body as any).addEventListener(
+    "clientConnected",
+    function ({ detail: { clientId } }: { detail: { clientId: string } }) {
+      console.log("client joined", clientId);
+      pendingJoins.push(APP.getSid(clientId));
+    }
+  );
+  (document.body as any).addEventListener(
+    "clientDisconnected",
+    function ({ detail: { clientId } }: { detail: { clientId: string } }) {
+      console.log("client left", clientId);
+      pendingParts.push(APP.getSid(clientId));
+    }
+  );
 });
 
-function messageFor(world, created, updated, deleted, isFullSync) {
-  const message = {
+function messageFor(world: HubsWorld, created: number[], updated: number[], deleted: number[], isFullSync: boolean) {
+  const message: Message = {
     creates: [],
     updates: [],
     deletes: []
   };
 
   created.forEach(eid => {
-    const { prefabName, initialData } = createMessageDatas.get(eid);
-    message.creates.push([APP.getString(Networked.id[eid]), prefabName, initialData]);
+    const { prefabName, initialData } = createMessageDatas.get(eid)!;
+    message.creates.push([APP.getString(Networked.id[eid])!, prefabName, initialData]);
   });
 
   updated.forEach(eid => {
-    const updateMessage = {
-      nid: APP.getString(Networked.id[eid]),
+    const updateMessage: UpdateMessage = {
+      nid: APP.getString(Networked.id[eid])!,
       lastOwnerTime: Networked.lastOwnerTime[eid],
-      owner: APP.getString(Networked.owner[eid]), // This should always be NAF.clientId. If it's not, something bad happened
-      creator: APP.getString(Networked.creator[eid]),
+      owner: APP.getString(Networked.owner[eid])!, // This should always be NAF.clientId. If it's not, something bad happened
+      creator: APP.getString(Networked.creator[eid])!,
       componentIds: [],
       data: []
     };
 
     for (let j = 0; j < networkableComponents.length; j++) {
-      const Component = networkableComponents[j];
-      if (hasComponent(world, Component, eid)) {
-        if (schemas.get(Component).serialize(world, eid, updateMessage.data, isFullSync)) {
+      const component = networkableComponents[j];
+      if (hasComponent(world, component, eid)) {
+        if (schemas.get(component)!.serialize(world, eid, updateMessage.data, isFullSync)) {
           updateMessage.componentIds.push(j);
         }
       }
@@ -148,7 +198,7 @@ function messageFor(world, created, updated, deleted, isFullSync) {
   deleted.forEach(eid => {
     // TODO: We are reading component data of a deleted entity here.
     const nid = Networked.id[eid];
-    message.deletes.push(APP.getString(nid));
+    message.deletes.push(APP.getString(nid)!);
   });
 
   if (message.creates.length || message.updates.length || message.deletes.length) {
@@ -158,18 +208,18 @@ function messageFor(world, created, updated, deleted, isFullSync) {
   return null;
 }
 
-function isNetworkInstantiated(eid) {
+function isNetworkInstantiated(eid: EntityID) {
   return createMessageDatas.has(eid);
 }
 
-function isNetworkInstantiatedByMe(eid) {
+function isNetworkInstantiatedByMe(eid: EntityID) {
   return isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId);
 }
 
 const pendingUpdatesForNid = new Map();
 
 const rcvEnteredNetworkedObjectsQuery = enterQuery(defineQuery([Networked]));
-export function networkReceiveSystem(world) {
+export function networkReceiveSystem(world: HubsWorld) {
   // When a user leaves:
   // - locally delete all the entities that user network instantiated
   // - everyone attempts to take ownership of any objects that user owned
@@ -255,12 +305,12 @@ export function networkReceiveSystem(world) {
         continue;
       }
 
-      const eid = world.nid2eid.get(nid);
+      const eid = world.nid2eid.get(nid)!;
 
       if (
         Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime ||
         (Networked.lastOwnerTime[eid] === updateMessage.lastOwnerTime &&
-          APP.getString(Networked.owner[eid]) < updateMessage.owner) // arbitrary (but consistent) tiebreak
+          APP.getString(Networked.owner[eid])! < updateMessage.owner) // arbitrary (but consistent) tiebreak
       ) {
         console.log(
           "Received update from an old owner, skipping",
@@ -289,7 +339,7 @@ export function networkReceiveSystem(world) {
       updateMessage.data.cursor = 0;
       for (let s = 0; s < updateMessage.componentIds.length; s++) {
         const componentId = updateMessage.componentIds[s];
-        const schema = schemas.get(networkableComponents[componentId]);
+        const schema = schemas.get(networkableComponents[componentId])!;
         schema.deserialize(world, eid, updateMessage.data);
       }
       delete updateMessage.data.cursor;
@@ -300,7 +350,7 @@ export function networkReceiveSystem(world) {
       if (world.deletedNids.has(nid)) continue;
 
       world.deletedNids.add(nid);
-      const eid = world.nid2eid.get(nid);
+      const eid = world.nid2eid.get(nid)!;
       createMessageDatas.delete(eid);
       world.nid2eid.delete(nid);
       removeEntity(world, eid);
@@ -320,7 +370,7 @@ let nextNetworkTick = 0;
 const sendEnteredNetworkedObjectsQuery = enterQuery(networkedObjectsQuery);
 const sendExitedNetworkedObjectsQuery = exitQuery(networkedObjectsQuery);
 
-export function networkSendSystem(world) {
+export function networkSendSystem(world: HubsWorld) {
   if (performance.now() < nextNetworkTick) return;
   nextNetworkTick = performance.now() + TICK_RATE;
 
@@ -335,7 +385,7 @@ export function networkSendSystem(world) {
         true
       );
       if (message) {
-        pendingJoins.forEach(clientId => NAF.connection.sendDataGuaranteed(APP.getString(clientId), "nn", message));
+        pendingJoins.forEach(clientId => NAF.connection.sendDataGuaranteed(APP.getString(clientId)!, "nn", message));
       }
       pendingJoins.length = 0;
     }

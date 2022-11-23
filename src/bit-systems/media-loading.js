@@ -8,7 +8,7 @@ import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked } from "../bit-components";
 import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
-import { takeOwnership } from "../systems/netcode";
+import { takeOwnership } from "./networking";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { animate } from "../utils/animate";
 

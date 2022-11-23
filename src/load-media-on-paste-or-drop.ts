@@ -1,4 +1,4 @@
-import { createNetworkedEntity } from "./systems/netcode.js";
+import { createNetworkedEntity } from "./bit-systems/networking";
 import { upload, parseURL } from "./utils/media-utils";
 import { guessContentType } from "./utils/media-url-utils";
 import { AElement } from "aframe";
