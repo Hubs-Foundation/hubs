@@ -60,12 +60,6 @@ const VALIDATORS = {
   welcome: function () {
     return storedStateForTip('welcome')
   },
-  look: function (userinput) {
-    const cameraDelta = userinput.get(
-      isMobile ? paths.device.touchscreen.touchCameraDelta : paths.device.smartMouse.cameraDelta
-    )
-    return cameraDelta ? FINISH : VALID
-  },
   locomotion: function (userinput) {
     const accel = userinput.get(paths.actions.characterAcceleration)
 
@@ -73,8 +67,11 @@ const VALIDATORS = {
     return accel && (accel[0] !== 0 || accel[1] !== 0) ? FINISH : VALID
   },
   turning: function (userinput) {
-    if (userinput.get(paths.actions.snapRotateLeft) || userinput.get(paths.actions.snapRotateRight)) return FINISH
-    return VALID
+    const rotate = userinput.get(paths.actions.snapRotateLeft) || userinput.get(paths.actions.snapRotateRight)
+    const cameraDelta = userinput.get(
+      isMobile ? paths.device.touchscreen.touchCameraDelta : paths.device.smartMouse.cameraDelta
+    )
+    return rotate || cameraDelta ? FINISH : VALID
   },
   invite: function (_userinput, scene, hub) {
     if (hub && hub.entry_mode === 'invite') return INVALID
