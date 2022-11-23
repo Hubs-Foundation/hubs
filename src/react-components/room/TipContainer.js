@@ -76,7 +76,7 @@ export function FullscreenTip(props) {
   );
 }
 
-export function RecordModeTip(props) {
+export function RecordModeTip() {
   return (
     <ToastTip>
       <FormattedMessage id="record-mode-enabled-tip" defaultMessage="Record mode on, press 'B' to toggle off" />
@@ -84,18 +84,7 @@ export function RecordModeTip(props) {
   );
 }
 
-export function TipContainer({
-  hide,
-  inLobby,
-  inRoom,
-  isStreaming,
-  isEmbedded,
-  scene,
-  store,
-  hubId,
-  presences,
-  isRecordMode
-}) {
+export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
   const intl = useIntl();
   const [lobbyTipDismissed, setLobbyTipDismissed] = useState(false);
   const [broadcastTipDismissed, setBroadcastTipDismissed] = useState(() =>
