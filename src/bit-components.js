@@ -195,3 +195,6 @@ export const NetworkDebug = defineComponent();
 export const Waypoint = defineComponent({
   flags: Types.ui8
 });
+export const NetworkedWaypoint = defineComponent({
+  occupied: Types.ui8
+});
