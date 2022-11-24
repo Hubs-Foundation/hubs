@@ -17,7 +17,7 @@ import {
 } from "./networking";
 
 const partedClientIds = new Set<StringID>();
-const pendingUpdatesForNid = new Map<StringID, UpdateMessage[]>();
+const storedUpdates = new Map<StringID, UpdateMessage[]>();
 const enteredNetworkedQuery = enterQuery(defineQuery([Networked]));
 export function networkReceiveSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet.
@@ -38,9 +38,9 @@ export function networkReceiveSystem(world: HubsWorld) {
   // we can now apply them. Network instantiated entities are handled when processing creates.
   enteredNetworkedQuery(world).forEach(eid => {
     const nid = Networked.id[eid];
-    if (pendingUpdatesForNid.has(nid)) {
-      console.log("Had pending updates for", APP.getString(nid), pendingUpdatesForNid.get(nid));
-      const updates = pendingUpdatesForNid.get(nid)!;
+    if (storedUpdates.has(nid)) {
+      console.log("Had stored updates for", APP.getString(nid), storedUpdates.get(nid));
+      const updates = storedUpdates.get(nid)!;
 
       for (let i = 0; i < updates.length; i++) {
         const update = updates[i];
@@ -52,7 +52,7 @@ export function networkReceiveSystem(world: HubsWorld) {
       }
 
       pendingMessages.unshift({ creates: [], updates, deletes: [] });
-      pendingUpdatesForNid.delete(nid);
+      storedUpdates.delete(nid);
     }
   });
 
@@ -85,10 +85,10 @@ export function networkReceiveSystem(world: HubsWorld) {
         console.log("got create message for", nidString, eid);
 
         // If we were hanging onto updates for this nid we can now apply them. And they should be processed before other updates.
-        if (pendingUpdatesForNid.has(nid)) {
-          console.log("had pending updates for", nidString, pendingUpdatesForNid.get(nid));
-          Array.prototype.unshift.apply(message.updates, pendingUpdatesForNid.get(nid));
-          pendingUpdatesForNid.delete(nid);
+        if (storedUpdates.has(nid)) {
+          console.log("had pending updates for", nidString, storedUpdates.get(nid));
+          Array.prototype.unshift.apply(message.updates, storedUpdates.get(nid));
+          storedUpdates.delete(nid);
         }
       }
     }
@@ -111,10 +111,10 @@ export function networkReceiveSystem(world: HubsWorld) {
         console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
         // TODO: What if we will NEVER be able to apply this update?
         // TODO would be nice if we could squash these updates
-        const updates = pendingUpdatesForNid.get(nid) || [];
+        const updates = storedUpdates.get(nid) || [];
         updates.push(updateMessage);
-        pendingUpdatesForNid.set(nid, updates);
-        console.log(pendingUpdatesForNid);
+        storedUpdates.set(nid, updates);
+        console.log(storedUpdates);
         continue;
       }
 
