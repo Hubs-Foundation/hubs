@@ -1,4 +1,4 @@
-import { createNetworkedEntity } from "./bit-systems/networking";
+import { createNetworkedEntity } from "./utils/create-networked-entity";
 import { upload, parseURL } from "./utils/media-utils";
 import { guessContentType } from "./utils/media-url-utils";
 import { AElement } from "aframe";

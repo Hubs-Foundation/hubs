@@ -4,10 +4,9 @@ import { Networked, Owned } from "../bit-components";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { takeOwnership } from "../utils/take-ownership";
 import { PrefabName, prefabs } from "../prefabs/prefabs";
-import { hasPermissionToSpawn } from "../utils/permissions";
 
 export type EntityID = number;
-type InitialData = any;
+export type InitialData = any;
 interface CreateMessageData {
   prefabName: PrefabName;
   initialData: InitialData;
@@ -69,13 +68,6 @@ export function createNetworkedEntityFromRemote(
 
   AFRAME.scenes[0].object3D.add(obj);
   return eid;
-}
-
-export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, initialData: InitialData) {
-  if (!hasPermissionToSpawn(NAF.clientId, prefabName))
-    throw new Error(`You do not have permission to spawn ${prefabName}`);
-  const rootNid = NAF.utils.createNetworkId();
-  return createNetworkedEntityFromRemote(world, prefabName, initialData, rootNid, NAF.clientId, NAF.clientId);
 }
 
 export const networkedEntitiesQuery = defineQuery([Networked]);
