@@ -1,17 +1,16 @@
-import { enterQuery, exitQuery } from "bitecs";
+import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { HubsWorld } from "../app";
-import { Networked } from "../bit-components";
+import { Networked, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
-import {
-  networkedEntitiesQuery,
-  ownedNetworkedEntitiesQuery,
-  localClientID,
-  pendingJoins,
-  isNetworkInstantiated,
-  createMessageDatas
-} from "./networking";
-import type { EntityID } from "../utils/networking-types";
 import { messageFor } from "../utils/message-for";
+import type { EntityID } from "../utils/networking-types";
+import {
+  createMessageDatas,
+  isNetworkInstantiated,
+  localClientID,
+  networkedEntitiesQuery,
+  pendingJoins
+} from "./networking";
 
 function isNetworkInstantiatedByMe(eid: EntityID) {
   return isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId);
@@ -21,6 +20,7 @@ const ticksPerSecond = 12;
 const millisecondsBetweenTicks = 1000 / ticksPerSecond;
 let nextTick = 0;
 
+export const ownedNetworkedEntitiesQuery = defineQuery([Networked, Owned]);
 const sendEnteredNetworkedEntitiesQuery = enterQuery(networkedEntitiesQuery);
 const sendEnteredOwnedEntitiesQuery = enterQuery(ownedNetworkedEntitiesQuery);
 const sendExitedNetworkedEntitiesQuery = exitQuery(networkedEntitiesQuery);
