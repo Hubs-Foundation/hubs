@@ -1,14 +1,8 @@
 import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
-import {
-  EntityID,
-  Message,
-  createMessageDatas,
-  UpdateMessage,
-  networkableComponents,
-  schemas
-} from "../bit-systems/networking";
+import { EntityID, Message, createMessageDatas, UpdateMessage } from "../bit-systems/networking";
+import { networkableComponents, schemas } from "./network-schemas";
 
 export function messageFor(
   world: HubsWorld,

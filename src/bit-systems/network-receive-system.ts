@@ -14,10 +14,9 @@ import {
   pendingMessages,
   spawnAllowed,
   createNetworkedEntityFromRemote,
-  schemas,
-  networkableComponents,
   createMessageDatas
 } from "./networking";
+import { schemas, networkableComponents } from "../utils/network-schemas";
 
 const pendingUpdatesForNid = new Map<StringID, UpdateMessage[]>();
 const rcvEnteredNetworkedEntitiesQuery = enterQuery(defineQuery([Networked]));

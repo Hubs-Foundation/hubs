@@ -1,7 +1,6 @@
-import { Component, defineQuery, hasComponent } from "bitecs";
+import { defineQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { Networked, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo, Owned } from "../bit-components";
-import { defineNetworkSchema } from "../utils/bit-utils";
+import { Networked, Owned } from "../bit-components";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { takeOwnership } from "../utils/take-ownership";
 import { PrefabName, prefabs } from "../prefabs/prefabs";
@@ -65,23 +64,6 @@ export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, 
 export const networkedEntitiesQuery = defineQuery([Networked]);
 export const ownedNetworkedEntitiesQuery = defineQuery([Networked, Owned]);
 
-interface NetworkSchema {
-  serialize: (
-    world: HubsWorld,
-    eid: EntityID,
-    data: CursorBuffer,
-    isFullSync: boolean,
-    writeToShadow: boolean
-  ) => boolean;
-  deserialize: (world: HubsWorld, eid: EntityID, data: CursorBuffer) => void;
-}
-
-export const schemas: Map<Component, NetworkSchema> = new Map();
-schemas.set(NetworkedMediaFrame, defineNetworkSchema(NetworkedMediaFrame));
-schemas.set(NetworkedTransform, defineNetworkSchema(NetworkedTransform));
-schemas.set(NetworkedVideo, defineNetworkSchema(NetworkedVideo));
-export const networkableComponents = Array.from(schemas.keys());
-
 type ClientID = string;
 type NetworkID = string;
 type CreateMessage = [networkId: NetworkID, prefabName: PrefabName, initialData: InitialData];
@@ -94,7 +76,7 @@ export type UpdateMessage = {
   componentIds: number[];
   data: CursorBuffer;
 };
-type CursorBuffer = { cursor?: number; push: (data: any) => {} };
+export type CursorBuffer = { cursor?: number; push: (data: any) => {} };
 type DeleteMessage = NetworkID;
 export interface Message {
   fromClientId?: ClientID;
