@@ -41,7 +41,7 @@ export function loadTextureFromCache(src, version) {
   return textureCache.retain(src, version);
 }
 
-async function loadTexture(src, version, contentType) {
+export async function loadTexture(src, version, contentType) {
   if (textureCache.has(src, version)) {
     return textureCache.retain(src, version);
   }

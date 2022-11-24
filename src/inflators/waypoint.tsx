@@ -1,7 +1,17 @@
+/** @jsx createElementEntity */
 import { addComponent } from "bitecs";
 import { HubsWorld } from "../app";
+import spawnPointSrc from "../assets/images/sprites/notice/spawn-point.png";
 import { Waypoint } from "../bit-components";
 import { WaypointFlags } from "../bit-systems/waypoint";
+import { AlphaMode } from "../utils/create-image-mesh";
+import { createElementEntity, createRef, renderAsEntity } from "../utils/jsx-entity";
+import { loadTexture, loadTextureFromCache } from "../utils/load-texture";
+import { preload } from "../utils/preload";
+import { ProjectionMode } from "../utils/projection-mode";
+
+// We intentionally do not remove this model from the GLTF Cache
+preload(loadTexture(spawnPointSrc, 1, "image/png"));
 
 export interface WaypointParams {
   canBeSpawnPoint: boolean;
@@ -25,5 +35,23 @@ export function inflateWaypoint(world: HubsWorld, eid: number, props: WaypointPa
   if (props.snapToNavMesh) flags |= WaypointFlags.snapToNavMesh;
   Waypoint.flags[eid] = flags;
 
-  console.log("inflated a waypoint!", props, flags, eid);
+  if (props.canBeClicked) {
+    const { texture, cacheKey } = loadTextureFromCache(spawnPointSrc, 1);
+    renderAsEntity(
+      world,
+      <entity name="Waypoint" ref={createRef(eid)} cursorRaycastable remoteHoverTarget singleActionButton>
+        <entity
+          name="Waypoint Icon"
+          position={[0, 1.6, -0.15]}
+          image={{
+            texture,
+            ratio: 1,
+            projection: ProjectionMode.FLAT,
+            alphaMode: AlphaMode.Blend,
+            cacheKey
+          }}
+        ></entity>
+      </entity>
+    );
+  }
 }
