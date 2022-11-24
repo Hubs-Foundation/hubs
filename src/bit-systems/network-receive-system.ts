@@ -12,11 +12,11 @@ import {
   isNetworkInstantiated,
   localClientID,
   networkedEntitiesQuery,
-  partedClientIds,
   pendingMessages,
   pendingParts
 } from "./networking";
 
+const partedClientIds = new Set<StringID>();
 const pendingUpdatesForNid = new Map<StringID, UpdateMessage[]>();
 const rcvEnteredNetworkedEntitiesQuery = enterQuery(defineQuery([Networked]));
 export function networkReceiveSystem(world: HubsWorld) {

@@ -10,7 +10,6 @@ export const networkedEntitiesQuery = defineQuery([Networked]);
 export const pendingMessages: Message[] = [];
 export const pendingJoins: StringID[] = [];
 export const pendingParts: StringID[] = [];
-export const partedClientIds = new Set<StringID>();
 export function isNetworkInstantiated(eid: EntityID) {
   return createMessageDatas.has(eid);
 }
