@@ -48,7 +48,3 @@ export const partedClientIds = new Set<StringID>();
 export function isNetworkInstantiated(eid: EntityID) {
   return createMessageDatas.has(eid);
 }
-
-export function isNetworkInstantiatedByMe(eid: EntityID) {
-  return isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId);
-}

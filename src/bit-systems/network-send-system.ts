@@ -7,11 +7,15 @@ import {
   ownedNetworkedEntitiesQuery,
   localClientID,
   pendingJoins,
-  isNetworkInstantiatedByMe,
   isNetworkInstantiated,
-  createMessageDatas
+  createMessageDatas,
+  EntityID
 } from "./networking";
 import { messageFor } from "../utils/message-for";
+
+function isNetworkInstantiatedByMe(eid: EntityID) {
+  return isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId);
+}
 
 const ticksPerSecond = 12;
 const millisecondsBetweenTicks = 1000 / ticksPerSecond;
