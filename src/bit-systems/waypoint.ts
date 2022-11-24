@@ -1,9 +1,10 @@
-import { defineQuery, hasComponent } from "bitecs";
-import { Matrix4 } from "three";
+import { defineQuery, exitQuery, hasComponent } from "bitecs";
+import { Matrix4, Mesh, MeshStandardMaterial } from "three";
 import { HubsWorld } from "../app";
-import { Interacted, SceneRoot, Waypoint } from "../bit-components";
+import { Interacted, NetworkedWaypoint, Owned, SceneRoot, Waypoint } from "../bit-components";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { findAncestorWithComponent } from "../utils/bit-utils";
+import { takeOwnership } from "../utils/take-ownership";
 
 export enum WaypointFlags {
   canBeSpawnPoint = 1 << 0,
@@ -16,11 +17,19 @@ export enum WaypointFlags {
 }
 
 const waypointQuery = defineQuery([Waypoint]);
+
+let myOccupiedWaypoint = 0;
+export function releaseOccupiedWaypoint() {
+  if (myOccupiedWaypoint) {
+    NetworkedWaypoint.occupied[myOccupiedWaypoint] = 0;
+    myOccupiedWaypoint = 0;
+  }
+}
+
 export function moveToSpawnPoint(world: HubsWorld, characterController: CharacterControllerSystem) {
   const spawnPoints = waypointQuery(world).filter(eid => {
     return Waypoint.flags[eid] & WaypointFlags.canBeSpawnPoint && findAncestorWithComponent(world, SceneRoot, eid);
   });
-  // TODO: Remember about named waypoints and location.hash navigation
 
   if (spawnPoints.length === 0) {
     characterController.enqueueWaypointTravelTo(new Matrix4().identity(), true, {
@@ -56,16 +65,46 @@ function moveToWaypoint(
   );
 }
 
+const waypointExitQuery = exitQuery(waypointQuery);
 export function waypointSystem(
   world: HubsWorld,
   characterController: CharacterControllerSystem,
   sceneIsFrozen: boolean
 ) {
+  if (waypointExitQuery(world).includes(myOccupiedWaypoint)) {
+    myOccupiedWaypoint = 0;
+  }
+
   waypointQuery(world).forEach(eid => {
-    if (hasComponent(world, Interacted, eid)) {
-      moveToWaypoint(world, eid, characterController, false);
+    if (hasComponent(world, NetworkedWaypoint, eid) && hasComponent(world, Owned, eid) && eid !== myOccupiedWaypoint) {
+      // Inherited this waypoint, clear its occupied state
+      if (NetworkedWaypoint.occupied[eid]) {
+        NetworkedWaypoint.occupied[eid] = 0;
+      }
     }
 
-    world.eid2obj.get(eid)!.visible = sceneIsFrozen;
+    if (hasComponent(world, Interacted, eid)) {
+      if (hasComponent(world, NetworkedWaypoint, eid)) {
+        if (NetworkedWaypoint.occupied[eid]) {
+          console.warn("Can't travel to occupied waypoint...");
+        } else {
+          takeOwnership(world, eid);
+          NetworkedWaypoint.occupied[eid] = 1;
+          myOccupiedWaypoint = eid;
+          moveToWaypoint(world, eid, characterController, false);
+        }
+      } else {
+        moveToWaypoint(world, eid, characterController, false);
+      }
+    }
+
+    const obj = world.eid2obj.get(eid)!;
+    obj.visible = true || sceneIsFrozen;
+    const isOccupied = hasComponent(world, NetworkedWaypoint, eid) && NetworkedWaypoint.occupied[eid];
+    if (Waypoint.flags[eid] & WaypointFlags.canBeOccupied && obj.children.length) {
+      ((obj.children[0] as Mesh).material as MeshStandardMaterial).color.setHex(isOccupied ? 0xff00aa : 0xffffff);
+    }
   });
 }
+
+// TODO: Implement named waypoints and location.hash navigation
