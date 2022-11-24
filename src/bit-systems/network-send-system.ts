@@ -14,10 +14,10 @@ const ticksPerSecond = 12;
 const millisecondsBetweenTicks = 1000 / ticksPerSecond;
 let nextTick = 0;
 
-export const ownedNetworkedEntitiesQuery = defineQuery([Networked, Owned]);
-const sendEnteredNetworkedEntitiesQuery = enterQuery(networkedQuery);
-const sendEnteredOwnedEntitiesQuery = enterQuery(ownedNetworkedEntitiesQuery);
-const sendExitedNetworkedEntitiesQuery = exitQuery(networkedQuery);
+export const ownedNetworkedQuery = defineQuery([Owned, Networked]);
+const enteredNetworkedQuery = enterQuery(networkedQuery);
+const enteredOwnedNetworkedQuery = enterQuery(ownedNetworkedQuery);
+const exitedNetworkedQuery = exitQuery(networkedQuery);
 
 export function networkSendSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet
@@ -37,7 +37,7 @@ export function networkSendSystem(world: HubsWorld) {
     // TODO: Get the server time from the websocket connection
     //       before we start sending any messages, in case of large local clock skew.
     const timestamp = getServerTime();
-    ownedNetworkedEntitiesQuery(world).forEach(eid => {
+    ownedNetworkedQuery(world).forEach(eid => {
       Networked.timestamp[eid] = timestamp;
     });
   }
@@ -45,7 +45,7 @@ export function networkSendSystem(world: HubsWorld) {
   // Tell joining users about entities I network instantiated, and full updates for entities I own
   {
     if (pendingJoins.length) {
-      const ownedNetworkedEntities = ownedNetworkedEntitiesQuery(world);
+      const ownedNetworkedEntities = ownedNetworkedQuery(world);
       const message = messageFor(
         world,
         networkedQuery(world).filter(isNetworkInstantiatedByMe),
@@ -64,20 +64,20 @@ export function networkSendSystem(world: HubsWorld) {
   // Tell everyone about entities I created, entities I own, and entities that were deleted
   {
     // Note: Many people may send delete messages about the same entity
-    const deleted = sendExitedNetworkedEntitiesQuery(world).filter(eid => {
+    const deletedEntities = exitedNetworkedQuery(world).filter(eid => {
       return !world.deletedNids.has(Networked.id[eid]) && isNetworkInstantiated(eid);
     });
     const message = messageFor(
       world,
-      sendEnteredNetworkedEntitiesQuery(world).filter(isNetworkInstantiatedByMe),
-      ownedNetworkedEntitiesQuery(world),
-      sendEnteredOwnedEntitiesQuery(world),
-      deleted,
+      enteredNetworkedQuery(world).filter(isNetworkInstantiatedByMe),
+      ownedNetworkedQuery(world),
+      enteredOwnedNetworkedQuery(world),
+      deletedEntities,
       true
     );
     if (message) NAF.connection.broadcastDataGuaranteed("nn", message);
 
-    deleted.forEach(eid => {
+    deletedEntities.forEach(eid => {
       createMessageDatas.delete(eid);
       world.deletedNids.add(Networked.id[eid]);
       world.nid2eid.delete(Networked.id[eid]);
