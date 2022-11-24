@@ -18,7 +18,7 @@ import {
 
 const partedClientIds = new Set<StringID>();
 const pendingUpdatesForNid = new Map<StringID, UpdateMessage[]>();
-const rcvEnteredNetworkedEntitiesQuery = enterQuery(defineQuery([Networked]));
+const enteredNetworkedQuery = enterQuery(defineQuery([Networked]));
 export function networkReceiveSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet.
 
@@ -36,7 +36,7 @@ export function networkReceiveSystem(world: HubsWorld) {
 
   // If we were hanging onto updates for any newly created non network instantiated entities
   // we can now apply them. Network instantiated entities are handled when processing creates.
-  rcvEnteredNetworkedEntitiesQuery(world).forEach(eid => {
+  enteredNetworkedQuery(world).forEach(eid => {
     const nid = Networked.id[eid];
     if (pendingUpdatesForNid.has(nid)) {
       console.log("Had pending updates for", APP.getString(nid), pendingUpdatesForNid.get(nid));
@@ -167,7 +167,7 @@ export function networkReceiveSystem(world: HubsWorld) {
       world.nid2eid.delete(nid);
       removeEntity(world, eid);
 
-      console.log("OK, deleting ", APP.getString(nid));
+      console.log("Deleting ", APP.getString(nid));
     }
   }
   pendingMessages.length = 0;
