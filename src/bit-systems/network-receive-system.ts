@@ -12,9 +12,9 @@ import {
   partedClientIds,
   isNetworkInstantiated,
   pendingMessages,
-  createNetworkedEntityFromRemote,
   createMessageDatas
 } from "./networking";
+import { createNetworkedEntityFromRemote } from "../utils/create-networked-entity";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { schemas, networkableComponents } from "../utils/network-schemas";
 

@@ -1,9 +1,6 @@
-import { defineQuery, hasComponent } from "bitecs";
-import { HubsWorld } from "../app";
+import { defineQuery } from "bitecs";
 import { Networked, Owned } from "../bit-components";
-import { renderAsEntity } from "../utils/jsx-entity";
-import { takeOwnership } from "../utils/take-ownership";
-import { PrefabName, prefabs } from "../prefabs/prefabs";
+import { PrefabName } from "../prefabs/prefabs";
 
 export type EntityID = number;
 export type InitialData = any;
@@ -39,36 +36,6 @@ export function setLocalClientID(clientID: ClientID) {
 }
 
 export const createMessageDatas: Map<EntityID, CreateMessageData> = new Map();
-
-export function createNetworkedEntityFromRemote(
-  world: HubsWorld,
-  prefabName: PrefabName,
-  initialData: InitialData,
-  rootNid: string,
-  creator: ClientID,
-  owner: ClientID
-) {
-  const eid = renderAsEntity(world, prefabs.get(prefabName)!.template(initialData));
-  const obj = world.eid2obj.get(eid)!;
-
-  createMessageDatas.set(eid, { prefabName, initialData });
-
-  let i = 0;
-  obj.traverse(function (o) {
-    if (o.eid && hasComponent(world, Networked, o.eid)) {
-      const eid = o.eid;
-      Networked.id[eid] = APP.getSid(i === 0 ? rootNid : `${rootNid}.${i}`);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = APP.getSid(creator);
-      Networked.owner[eid] = APP.getSid(owner);
-      if (NAF.clientId === owner) takeOwnership(world, eid);
-      i += 1;
-    }
-  });
-
-  AFRAME.scenes[0].object3D.add(obj);
-  return eid;
-}
 
 export const networkedEntitiesQuery = defineQuery([Networked]);
 export const ownedNetworkedEntitiesQuery = defineQuery([Networked, Owned]);
