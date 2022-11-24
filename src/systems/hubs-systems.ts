@@ -32,7 +32,7 @@ import { EnvironmentSystem } from "./environment-system";
 import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 
 // new world
-import { networkReceiveSystem } from "../bit-systems/networking";
+import { networkReceiveSystem } from "../bit-systems/network-receive-system";
 import { networkSendSystem } from "../bit-systems/network-send-system";
 import { onOwnershipLost } from "./on-ownership-lost";
 import { interactionSystem } from "./bit-interaction-system";
