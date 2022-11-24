@@ -2,7 +2,7 @@ import { Component } from "bitecs";
 import { HubsWorld } from "../app";
 import { NetworkedMediaFrame, NetworkedTransform, NetworkedVideo } from "../bit-components";
 import { defineNetworkSchema } from "../utils/bit-utils";
-import { EntityID, CursorBuffer } from "../bit-systems/networking";
+import type { EntityID, CursorBuffer } from "./networking-types";
 
 interface NetworkSchema {
   serialize: (

@@ -1,5 +1,5 @@
 import { PrefabName, prefabs } from "../prefabs/prefabs";
-import { ClientID } from "../bit-systems/networking";
+import type { ClientID } from "./networking-types";
 
 export function hasPermissionToSpawn(creator: ClientID, prefabName: PrefabName) {
   const perm = prefabs.get(prefabName)!.permission;

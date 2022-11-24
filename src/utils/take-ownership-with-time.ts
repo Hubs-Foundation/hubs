@@ -1,7 +1,7 @@
 import { addComponent, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { AEntity, Networked, Owned } from "../bit-components";
-import { EntityID } from "../bit-systems/networking";
+import type { EntityID } from "./networking-types";
 
 export function takeOwnershipWithTime(world: HubsWorld, eid: EntityID, timestamp: number) {
   if (hasComponent(world, AEntity, eid)) {

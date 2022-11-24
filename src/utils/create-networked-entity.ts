@@ -1,11 +1,12 @@
 import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
-import { ClientID, createMessageDatas, InitialData } from "../bit-systems/networking";
+import { createMessageDatas } from "../bit-systems/networking";
 import { PrefabName, prefabs } from "../prefabs/prefabs";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnership } from "../utils/take-ownership";
+import type { ClientID, InitialData } from "./networking-types";
 
 export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, initialData: InitialData) {
   if (!hasPermissionToSpawn(NAF.clientId, prefabName))

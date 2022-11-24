@@ -1,4 +1,5 @@
-import { pendingJoins, pendingParts, Message, pendingMessages } from "../bit-systems/networking";
+import { pendingJoins, pendingMessages, pendingParts } from "../bit-systems/networking";
+import type { Message } from "./networking-types";
 
 type Emitter = {
   on: (event: string, callback: (a: any) => any) => number;

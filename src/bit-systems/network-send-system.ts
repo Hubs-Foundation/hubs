@@ -8,9 +8,9 @@ import {
   localClientID,
   pendingJoins,
   isNetworkInstantiated,
-  createMessageDatas,
-  EntityID
+  createMessageDatas
 } from "./networking";
+import type { EntityID } from "../utils/networking-types";
 import { messageFor } from "../utils/message-for";
 
 function isNetworkInstantiatedByMe(eid: EntityID) {

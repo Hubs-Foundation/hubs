@@ -2,21 +2,20 @@ import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, r
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
+import { createNetworkedEntityFromRemote } from "../utils/create-networked-entity";
+import { networkableComponents, schemas } from "../utils/network-schemas";
+import type { StringID, UpdateMessage } from "../utils/networking-types";
+import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import {
-  StringID,
-  UpdateMessage,
+  createMessageDatas,
+  isNetworkInstantiated,
   localClientID,
   networkedEntitiesQuery,
-  pendingParts,
   partedClientIds,
-  isNetworkInstantiated,
   pendingMessages,
-  createMessageDatas
+  pendingParts
 } from "./networking";
-import { createNetworkedEntityFromRemote } from "../utils/create-networked-entity";
-import { hasPermissionToSpawn } from "../utils/permissions";
-import { schemas, networkableComponents } from "../utils/network-schemas";
 
 const pendingUpdatesForNid = new Map<StringID, UpdateMessage[]>();
 const rcvEnteredNetworkedEntitiesQuery = enterQuery(defineQuery([Networked]));
