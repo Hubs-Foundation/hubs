@@ -1,13 +1,4 @@
-import {
-  addComponent,
-  Component,
-  defineQuery,
-  enterQuery,
-  exitQuery,
-  hasComponent,
-  removeComponent,
-  removeEntity
-} from "bitecs";
+import { addComponent, Component, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
@@ -19,7 +10,7 @@ import { PrefabName, prefabs } from "../prefabs/prefabs";
 
 export type EntityID = number;
 
-let localClientID: ClientID | null = null;
+export let localClientID: ClientID | null = null;
 export function setLocalClientID(clientID: ClientID) {
   localClientID = clientID;
 }
@@ -28,7 +19,7 @@ interface CreateMessageData {
   prefabName: PrefabName;
   initialData: InitialData;
 }
-const createMessageDatas: Map<EntityID, CreateMessageData> = new Map();
+export const createMessageDatas: Map<EntityID, CreateMessageData> = new Map();
 
 type InitialData = any;
 
@@ -73,8 +64,8 @@ export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, 
   return createNetworkedEntityFromRemote(world, prefabName, initialData, rootNid, NAF.clientId, NAF.clientId);
 }
 
-const networkedEntitiesQuery = defineQuery([Networked]);
-const ownedNetworkedEntitiesQuery = defineQuery([Networked, Owned]);
+export const networkedEntitiesQuery = defineQuery([Networked]);
+export const ownedNetworkedEntitiesQuery = defineQuery([Networked, Owned]);
 
 interface NetworkSchema {
   serialize: (
@@ -87,16 +78,16 @@ interface NetworkSchema {
   deserialize: (world: HubsWorld, eid: EntityID, data: CursorBuffer) => void;
 }
 
-const schemas: Map<Component, NetworkSchema> = new Map();
+export const schemas: Map<Component, NetworkSchema> = new Map();
 schemas.set(NetworkedMediaFrame, defineNetworkSchema(NetworkedMediaFrame));
 schemas.set(NetworkedTransform, defineNetworkSchema(NetworkedTransform));
 schemas.set(NetworkedVideo, defineNetworkSchema(NetworkedVideo));
-const networkableComponents = Array.from(schemas.keys());
+export const networkableComponents = Array.from(schemas.keys());
 
 type ClientID = string;
 type NetworkID = string;
 type CreateMessage = [networkId: NetworkID, prefabName: PrefabName, initialData: InitialData];
-type UpdateMessage = {
+export type UpdateMessage = {
   nid: NetworkID;
   lastOwnerTime: number;
   timestamp: number;
@@ -107,7 +98,7 @@ type UpdateMessage = {
 };
 type CursorBuffer = { cursor?: number; push: (data: any) => {} };
 type DeleteMessage = NetworkID;
-interface Message {
+export interface Message {
   fromClientId?: ClientID;
   creates: CreateMessage[];
   updates: UpdateMessage[];
@@ -116,7 +107,7 @@ interface Message {
 
 const pendingMessages: Message[] = [];
 type StringID = number;
-const pendingJoins: StringID[] = [];
+export const pendingJoins: StringID[] = [];
 const pendingParts: StringID[] = [];
 const partedClientIds = new Set<StringID>();
 
@@ -165,70 +156,11 @@ function onNafr(message: NafrMessage) {
   onNaf(message.parsed!);
 }
 
-function messageFor(
-  world: HubsWorld,
-  created: EntityID[],
-  updated: EntityID[],
-  needsFullSyncUpdate: EntityID[],
-  deleted: EntityID[],
-  isBroadcast: boolean
-) {
-  const message: Message = {
-    creates: [],
-    updates: [],
-    deletes: []
-  };
-
-  created.forEach(eid => {
-    const { prefabName, initialData } = createMessageDatas.get(eid)!;
-    message.creates.push([APP.getString(Networked.id[eid])!, prefabName, initialData]);
-  });
-
-  updated.forEach(eid => {
-    const updateMessage: UpdateMessage = {
-      nid: APP.getString(Networked.id[eid])!,
-      lastOwnerTime: Networked.lastOwnerTime[eid],
-      timestamp: Networked.timestamp[eid],
-      owner: APP.getString(Networked.owner[eid])!, // This should always be NAF.clientId. If it's not, something bad happened
-      creator: APP.getString(Networked.creator[eid])!,
-      componentIds: [],
-      data: []
-    };
-    const isFullSync = needsFullSyncUpdate.includes(eid);
-
-    for (let j = 0; j < networkableComponents.length; j++) {
-      const component = networkableComponents[j];
-      if (hasComponent(world, component, eid)) {
-        if (schemas.get(component)!.serialize(world, eid, updateMessage.data, isFullSync, isBroadcast)) {
-          updateMessage.componentIds.push(j);
-        }
-      }
-    }
-
-    // TODO: If the owner/lastOwnerTime changed, we need to send this updateMessage
-    if (updateMessage.componentIds.length) {
-      message.updates.push(updateMessage);
-    }
-  });
-
-  deleted.forEach(eid => {
-    // TODO: We are reading component data of a deleted entity here.
-    const nid = Networked.id[eid];
-    message.deletes.push(APP.getString(nid)!);
-  });
-
-  if (message.creates.length || message.updates.length || message.deletes.length) {
-    return message;
-  }
-
-  return null;
-}
-
-function isNetworkInstantiated(eid: EntityID) {
+export function isNetworkInstantiated(eid: EntityID) {
   return createMessageDatas.has(eid);
 }
 
-function isNetworkInstantiatedByMe(eid: EntityID) {
+export function isNetworkInstantiatedByMe(eid: EntityID) {
   return isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId);
 }
 
@@ -403,80 +335,3 @@ export function networkReceiveSystem(world: HubsWorld) {
 
   // TODO If there's a scene-owned entity, we should take ownership of it
 }
-
-const ticksPerSecond = 12;
-const millisecondsBetweenTicks = 1000 / ticksPerSecond;
-let nextTick = 0;
-
-const sendEnteredNetworkedEntitiesQuery = enterQuery(networkedEntitiesQuery);
-const sendEnteredOwnedEntitiesQuery = enterQuery(ownedNetworkedEntitiesQuery);
-const sendExitedNetworkedEntitiesQuery = exitQuery(networkedEntitiesQuery);
-
-export function networkSendSystem(world: HubsWorld) {
-  if (!localClientID) return; // Not connected yet
-
-  const now = performance.now();
-  if (now < nextTick) return;
-
-  if (now < nextTick + millisecondsBetweenTicks) {
-    nextTick = nextTick + millisecondsBetweenTicks; // The usual case
-  } else {
-    // An unusually long delay happened
-    nextTick = now + millisecondsBetweenTicks;
-  }
-
-  {
-    // TODO: Ensure getServerTime() is monotonically increasing.
-    // TODO: Get the server time from the websocket connection
-    //       before we start sending any messages, in case of large local clock skew.
-    const timestamp = getServerTime();
-    ownedNetworkedEntitiesQuery(world).forEach(eid => {
-      Networked.timestamp[eid] = timestamp;
-    });
-  }
-
-  // Tell joining users about entities I network instantiated, and full updates for entities I own
-  {
-    if (pendingJoins.length) {
-      const ownedNetworkedEntities = ownedNetworkedEntitiesQuery(world);
-      const message = messageFor(
-        world,
-        networkedEntitiesQuery(world).filter(isNetworkInstantiatedByMe),
-        ownedNetworkedEntities,
-        ownedNetworkedEntities,
-        [],
-        false
-      );
-      if (message) {
-        pendingJoins.forEach(clientId => NAF.connection.sendDataGuaranteed(APP.getString(clientId)!, "nn", message));
-      }
-      pendingJoins.length = 0;
-    }
-  }
-
-  // Tell everyone about entities I created, entities I own, and entities that were deleted
-  {
-    // Note: Many people may send delete messages about the same entity
-    const deleted = sendExitedNetworkedEntitiesQuery(world).filter(eid => {
-      return !world.deletedNids.has(Networked.id[eid]) && isNetworkInstantiated(eid);
-    });
-    const message = messageFor(
-      world,
-      sendEnteredNetworkedEntitiesQuery(world).filter(isNetworkInstantiatedByMe),
-      ownedNetworkedEntitiesQuery(world),
-      sendEnteredOwnedEntitiesQuery(world),
-      deleted,
-      true
-    );
-    if (message) NAF.connection.broadcastDataGuaranteed("nn", message);
-
-    deleted.forEach(eid => {
-      createMessageDatas.delete(eid);
-      world.deletedNids.add(Networked.id[eid]);
-      world.nid2eid.delete(Networked.id[eid]);
-    });
-  }
-}
-
-// TODO: Handle reconnect
-// TODO: Handle blocking/unblocking. Does this already work?
