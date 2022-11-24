@@ -25,6 +25,7 @@ import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
 import { addComponent, removeEntity } from "bitecs";
 import { MyCameraTool } from "./bit-components";
 import { anyEntityWith } from "./utils/bit-utils";
+import { moveToSpawnPoint } from "./bit-systems/waypoint";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -75,9 +76,7 @@ export default class SceneEntryManager {
       await exit2DInterstitialAndEnterVR(true);
     }
 
-    const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
-    waypointSystem.moveToSpawnPoint();
-
+    moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
     if (isMobile || forceEnableTouchscreen || qsTruthy("force_enable_touchscreen")) {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }
