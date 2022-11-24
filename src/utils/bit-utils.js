@@ -46,7 +46,7 @@ export function defineNetworkSchema(Component) {
   });
 
   return {
-    serialize(_world, eid, data, isFullSync = false) {
+    serialize(_world, eid, data, isFullSync, writeToShadow) {
       const changedPids = [];
       data.push(changedPids);
       for (let pid = 0; pid < componentProps.length; pid++) {
@@ -62,14 +62,14 @@ export function defineNetworkSchema(Component) {
               break;
             }
           }
-          if (!isFullSync) shadow[eid].set(prop[eid]);
+          if (writeToShadow) shadow[eid].set(prop[eid]);
         } else {
           if (isFullSync || shadow[eid] !== prop[eid]) {
             changedPids.push(pid);
             // TODO handle EID type
             data.push(prop[$isStringType] ? APP.getString(prop[eid]) : prop[eid]);
           }
-          if (!isFullSync) shadow[eid] = prop[eid];
+          if (writeToShadow) shadow[eid] = prop[eid];
         }
       }
       if (!changedPids.length) {
