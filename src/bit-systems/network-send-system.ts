@@ -4,13 +4,7 @@ import { Networked, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
 import { messageFor } from "../utils/message-for";
 import type { EntityID } from "../utils/networking-types";
-import {
-  createMessageDatas,
-  isNetworkInstantiated,
-  localClientID,
-  networkedEntitiesQuery,
-  pendingJoins
-} from "./networking";
+import { createMessageDatas, isNetworkInstantiated, localClientID, networkedQuery, pendingJoins } from "./networking";
 
 function isNetworkInstantiatedByMe(eid: EntityID) {
   return isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId);
@@ -21,9 +15,9 @@ const millisecondsBetweenTicks = 1000 / ticksPerSecond;
 let nextTick = 0;
 
 export const ownedNetworkedEntitiesQuery = defineQuery([Networked, Owned]);
-const sendEnteredNetworkedEntitiesQuery = enterQuery(networkedEntitiesQuery);
+const sendEnteredNetworkedEntitiesQuery = enterQuery(networkedQuery);
 const sendEnteredOwnedEntitiesQuery = enterQuery(ownedNetworkedEntitiesQuery);
-const sendExitedNetworkedEntitiesQuery = exitQuery(networkedEntitiesQuery);
+const sendExitedNetworkedEntitiesQuery = exitQuery(networkedQuery);
 
 export function networkSendSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet
@@ -54,7 +48,7 @@ export function networkSendSystem(world: HubsWorld) {
       const ownedNetworkedEntities = ownedNetworkedEntitiesQuery(world);
       const message = messageFor(
         world,
-        networkedEntitiesQuery(world).filter(isNetworkInstantiatedByMe),
+        networkedQuery(world).filter(isNetworkInstantiatedByMe),
         ownedNetworkedEntities,
         ownedNetworkedEntities,
         [],

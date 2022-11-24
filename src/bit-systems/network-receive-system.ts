@@ -11,7 +11,7 @@ import {
   createMessageDatas,
   isNetworkInstantiated,
   localClientID,
-  networkedEntitiesQuery,
+  networkedQuery,
   pendingMessages,
   pendingParts
 } from "./networking";
@@ -24,7 +24,7 @@ export function networkReceiveSystem(world: HubsWorld) {
 
   {
     // When a user leaves, remove the entities created by that user
-    const networkedEntities = networkedEntitiesQuery(world);
+    const networkedEntities = networkedQuery(world);
     pendingParts.forEach(partingClientId => {
       partedClientIds.add(partingClientId);
 
@@ -173,7 +173,7 @@ export function networkReceiveSystem(world: HubsWorld) {
   pendingMessages.length = 0;
 
   {
-    const networkedEntities = networkedEntitiesQuery(world);
+    const networkedEntities = networkedQuery(world);
     pendingParts.forEach(partingClientId => {
       networkedEntities
         .filter(eid => Networked.owner[eid] === partingClientId)

@@ -6,7 +6,7 @@ export function setLocalClientID(clientID: ClientID) {
   localClientID = clientID;
 }
 export const createMessageDatas: Map<EntityID, CreateMessageData> = new Map();
-export const networkedEntitiesQuery = defineQuery([Networked]);
+export const networkedQuery = defineQuery([Networked]);
 export const pendingMessages: Message[] = [];
 export const pendingJoins: StringID[] = [];
 export const pendingParts: StringID[] = [];
