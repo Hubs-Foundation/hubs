@@ -1,9 +1,16 @@
 import { Component } from "bitecs";
 import { HubsWorld } from "../app";
-import { $isStringType, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo } from "../bit-components";
+import {
+  $isStringType,
+  NetworkedMediaFrame,
+  NetworkedTransform,
+  NetworkedVideo,
+  NetworkedWaypoint
+} from "../bit-components";
 import { NetworkedMediaFrameSchema } from "./networked-media-frame-schema";
 import { NetworkedTransformSchema } from "./networked-transform-schema";
 import { NetworkedVideoSchema } from "./networked-video-schema";
+import { NetworkedWaypointSchema } from "./networked-waypoint-schema";
 import type { CursorBuffer, EntityID } from "./networking-types";
 
 export interface StoredComponent {
@@ -29,6 +36,10 @@ export const schemas: Map<Component, NetworkSchema> = new Map();
 schemas.set(NetworkedMediaFrame, NetworkedMediaFrameSchema);
 schemas.set(NetworkedTransform, NetworkedTransformSchema);
 schemas.set(NetworkedVideo, NetworkedVideoSchema);
+schemas.set(NetworkedWaypoint, NetworkedWaypointSchema);
+
+// TODO: Write rest of schema for waypoints
+// schemas.set(NetworkedWaypoint, defineNetworkSchema(NetworkedWaypoint));
 export const networkableComponents = Array.from(schemas.keys());
 
 export function read(prop: any, eid: EntityID) {
