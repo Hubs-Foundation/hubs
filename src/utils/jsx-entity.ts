@@ -44,6 +44,7 @@ import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
 import { inflateEnvironmentSettings } from "../inflators/environment-settings";
+import { inflateWaypoint, WaypointParams } from "../inflators/waypoint";
 import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
@@ -295,6 +296,7 @@ export interface GLTFComponentData extends ComponentData {
   environmentSettings?: any;
   reflectionProbe?: ReflectionProbeParams;
   navMesh?: boolean;
+  waypoint?: WaypointParams;
 }
 
 declare global {
@@ -367,6 +369,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   image: inflateImageLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
+  waypoint: inflateWaypoint,
   environmentSettings: inflateEnvironmentSettings
 };
 
