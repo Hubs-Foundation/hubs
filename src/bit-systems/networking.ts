@@ -9,12 +9,14 @@ import {
   removeEntity
 } from "bitecs";
 import { HubsWorld } from "../app";
-import { AEntity, Networked, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo, Owned } from "../bit-components";
+import { Networked, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
 import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
 import { MediaPrefab } from "../prefabs/media";
 import { defineNetworkSchema } from "../utils/bit-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
+import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
+import { takeOwnership } from "../utils/take-ownership";
 
 const prefabs = new Map(
   Object.entries({
@@ -31,33 +33,11 @@ const prefabs = new Map(
   })
 );
 
-type EntityID = number;
-
-export function takeOwnershipWithTime(world: HubsWorld, eid: EntityID, timestamp: number) {
-  if (hasComponent(world, AEntity, eid)) {
-    throw new Error("Cannot take ownership of AEntities with a specific timestamp.");
-  }
-
-  addComponent(world, Owned, eid);
-  Networked.lastOwnerTime[eid] = timestamp;
-  Networked.owner[eid] = APP.getSid(NAF.clientId);
-}
+export type EntityID = number;
 
 let localClientID: ClientID | null = null;
 export function setLocalClientID(clientID: ClientID) {
   localClientID = clientID;
-}
-
-export function takeOwnership(world: HubsWorld, eid: EntityID) {
-  // TODO we do this to have a single API for taking ownership of things in new code, but it obviously relies on NAF/AFrame
-  if (hasComponent(world, AEntity, eid)) {
-    const el = world.eid2obj.get(eid)!.el!;
-    !NAF.utils.isMine(el) && NAF.utils.takeOwnership(el);
-  } else {
-    addComponent(world, Owned, eid);
-    Networked.lastOwnerTime[eid] = Math.max(getServerTime(), Networked.lastOwnerTime[eid] + 1);
-    Networked.owner[eid] = APP.getSid(NAF.clientId);
-  }
 }
 
 interface CreateMessageData {
