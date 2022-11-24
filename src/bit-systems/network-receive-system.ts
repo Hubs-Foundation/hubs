@@ -1,7 +1,6 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
-import { getServerTime } from "../phoenix-adapter";
 import { createNetworkedEntityFromRemote } from "../utils/create-networked-entity";
 import { networkableComponents, schemas } from "../utils/network-schemas";
 import type { StringID, UpdateMessage } from "../utils/networking-types";
