@@ -67,12 +67,12 @@ const reservedAttrs = ["position", "rotation", "scale", "visible", "name", "laye
 
 export class Ref {
   current: number | null;
-  constructor() {
-    this.current = null;
+  constructor(value: number | null) {
+    this.current = value;
   }
 }
-export function createRef() {
-  return new Ref();
+export function createRef(value: number | null = null) {
+  return new Ref(value);
 }
 
 export function resolveRef(world: HubsWorld, ref: Ref) {
