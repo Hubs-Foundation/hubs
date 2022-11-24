@@ -6,19 +6,39 @@ import { takeOwnership } from "../utils/take-ownership";
 import { PrefabName, prefabs } from "../prefabs/prefabs";
 
 export type EntityID = number;
+type InitialData = any;
+interface CreateMessageData {
+  prefabName: PrefabName;
+  initialData: InitialData;
+}
+type ClientID = string;
+type NetworkID = string;
+export type StringID = number;
+type CreateMessage = [networkId: NetworkID, prefabName: PrefabName, initialData: InitialData];
+export type CursorBuffer = { cursor?: number; push: (data: any) => {} };
+export type UpdateMessage = {
+  nid: NetworkID;
+  lastOwnerTime: number;
+  timestamp: number;
+  owner: ClientID;
+  creator: ClientID;
+  componentIds: number[];
+  data: CursorBuffer;
+};
+type DeleteMessage = NetworkID;
+export interface Message {
+  fromClientId?: ClientID;
+  creates: CreateMessage[];
+  updates: UpdateMessage[];
+  deletes: DeleteMessage[];
+}
 
 export let localClientID: ClientID | null = null;
 export function setLocalClientID(clientID: ClientID) {
   localClientID = clientID;
 }
 
-interface CreateMessageData {
-  prefabName: PrefabName;
-  initialData: InitialData;
-}
 export const createMessageDatas: Map<EntityID, CreateMessageData> = new Map();
-
-type InitialData = any;
 
 export function createNetworkedEntityFromRemote(
   world: HubsWorld,
@@ -64,29 +84,7 @@ export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, 
 export const networkedEntitiesQuery = defineQuery([Networked]);
 export const ownedNetworkedEntitiesQuery = defineQuery([Networked, Owned]);
 
-type ClientID = string;
-type NetworkID = string;
-type CreateMessage = [networkId: NetworkID, prefabName: PrefabName, initialData: InitialData];
-export type UpdateMessage = {
-  nid: NetworkID;
-  lastOwnerTime: number;
-  timestamp: number;
-  owner: ClientID;
-  creator: ClientID;
-  componentIds: number[];
-  data: CursorBuffer;
-};
-export type CursorBuffer = { cursor?: number; push: (data: any) => {} };
-type DeleteMessage = NetworkID;
-export interface Message {
-  fromClientId?: ClientID;
-  creates: CreateMessage[];
-  updates: UpdateMessage[];
-  deletes: DeleteMessage[];
-}
-
 export const pendingMessages: Message[] = [];
-export type StringID = number;
 export const pendingJoins: StringID[] = [];
 export const pendingParts: StringID[] = [];
 export const partedClientIds = new Set<StringID>();
