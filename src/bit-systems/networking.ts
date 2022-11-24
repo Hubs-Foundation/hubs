@@ -11,27 +11,11 @@ import {
 import { HubsWorld } from "../app";
 import { Networked, NetworkedMediaFrame, NetworkedTransform, NetworkedVideo, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
-import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
-import { MediaPrefab } from "../prefabs/media";
 import { defineNetworkSchema } from "../utils/bit-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import { takeOwnership } from "../utils/take-ownership";
-
-const prefabs = new Map(
-  Object.entries({
-    camera: {
-      permission: "spawn_camera",
-      template: CameraPrefab
-    },
-    cube: {
-      template: CubeMediaFramePrefab
-    },
-    media: {
-      template: MediaPrefab
-    }
-  })
-);
+import { PrefabName, prefabs } from "../prefabs/prefabs";
 
 export type EntityID = number;
 
@@ -41,7 +25,7 @@ export function setLocalClientID(clientID: ClientID) {
 }
 
 interface CreateMessageData {
-  prefabName: string;
+  prefabName: PrefabName;
   initialData: InitialData;
 }
 const createMessageDatas: Map<EntityID, CreateMessageData> = new Map();
@@ -50,7 +34,7 @@ type InitialData = any;
 
 export function createNetworkedEntityFromRemote(
   world: HubsWorld,
-  prefabName: string,
+  prefabName: PrefabName,
   initialData: InitialData,
   rootNid: string,
   creator: ClientID,
@@ -78,12 +62,12 @@ export function createNetworkedEntityFromRemote(
   return eid;
 }
 
-function spawnAllowed(creator: ClientID, prefabName: string) {
+function spawnAllowed(creator: ClientID, prefabName: PrefabName) {
   const perm = prefabs.get(prefabName)!.permission;
   return !perm || APP.hubChannel!.userCan(creator, perm);
 }
 
-export function createNetworkedEntity(world: HubsWorld, prefabName: string, initialData: InitialData) {
+export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, initialData: InitialData) {
   if (!spawnAllowed(NAF.clientId, prefabName)) throw new Error(`You do not have permission to spawn ${prefabName}`);
   const rootNid = NAF.utils.createNetworkId();
   return createNetworkedEntityFromRemote(world, prefabName, initialData, rootNid, NAF.clientId, NAF.clientId);
@@ -111,7 +95,7 @@ const networkableComponents = Array.from(schemas.keys());
 
 type ClientID = string;
 type NetworkID = string;
-type CreateMessage = [networkId: NetworkID, prefabName: string, initialData: InitialData];
+type CreateMessage = [networkId: NetworkID, prefabName: PrefabName, initialData: InitialData];
 type UpdateMessage = {
   nid: NetworkID;
   lastOwnerTime: number;

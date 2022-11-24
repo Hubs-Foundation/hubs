@@ -91,7 +91,7 @@ type Attrs = {
   ref?: Ref;
 };
 
-type EntityDef = {
+export type EntityDef = {
   components: JSXComponentData;
   attrs: Attrs;
   children: EntityDef[];
