@@ -14,7 +14,7 @@ const ticksPerSecond = 12;
 const millisecondsBetweenTicks = 1000 / ticksPerSecond;
 let nextTick = 0;
 
-export const ownedNetworkedQuery = defineQuery([Owned, Networked]);
+const ownedNetworkedQuery = defineQuery([Owned, Networked]);
 const enteredNetworkedQuery = enterQuery(networkedQuery);
 const enteredOwnedNetworkedQuery = enterQuery(ownedNetworkedQuery);
 const exitedNetworkedQuery = exitQuery(networkedQuery);
