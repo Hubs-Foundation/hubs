@@ -202,6 +202,7 @@ export interface JSXComponentData extends ComponentData {
   slice9?: {
     size: [width: number, height: number];
     insets: [top: number, buttom: number, left: number, right: number];
+    texture: Texture;
   };
   image?: {
     texture: Texture;
