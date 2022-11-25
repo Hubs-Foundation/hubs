@@ -3,6 +3,7 @@ import { preloadFont } from "troika-three-text";
 import {
   $isStringType,
   CameraTool,
+  ObjectMenu,
   CursorRaycastable,
   DestroyAtExtremeDistance,
   FloatyObject,
@@ -80,8 +81,8 @@ export function resolveRef(world: HubsWorld, ref: Ref) {
   return ref.current;
 }
 
-type ArrayVec3 = [x: number, y: number, z: number];
-type Attrs = {
+export type ArrayVec3 = [x: number, y: number, z: number];
+export type Attrs = {
   position?: ArrayVec3;
   rotation?: ArrayVec3;
   scale?: ArrayVec3;
@@ -247,6 +248,21 @@ export interface JSXComponentData extends ComponentData {
   physicsShape?: any;
   floatyObject?: any;
   networkedTransform?: any;
+  objectMenu?: {
+    pinButtonRef: Ref;
+    cameraFocusButtonRef: Ref;
+    cameraTrackButtonRef: Ref;
+    removeButtonRef: Ref;
+    dropButtonRef: Ref;
+    inspectButtonRef: Ref;
+    deserializeDrawingButtonRef: Ref;
+    openLinkButtonRef: Ref;
+    refreshButtonRef: Ref;
+    cloneButtonRef: Ref;
+    rotateButtonRef: Ref;
+    mirrorButtonRef: Ref;
+    scaleButtonRef: Ref;
+  };
   cameraTool?: {
     snapMenuRef: Ref;
     nextButtonRef: Ref;
@@ -322,6 +338,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   destroyAtExtremeDistance: createDefaultInflator(DestroyAtExtremeDistance),
   networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
+  objectMenu: createDefaultInflator(ObjectMenu),
   cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   animationMixer: createDefaultInflator(AnimationMixer),
   networkedVideo: createDefaultInflator(NetworkedVideo),
