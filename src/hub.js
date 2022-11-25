@@ -241,7 +241,8 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
-import { listenForNetworkMessages, setLocalClientID } from "./bit-systems/networking";
+import { setLocalClientID } from "./bit-systems/networking";
+import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;

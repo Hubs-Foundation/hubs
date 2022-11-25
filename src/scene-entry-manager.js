@@ -2,7 +2,7 @@ import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
 import { SignInMessages } from "./react-components/auth/SignInModal";
-import { createNetworkedEntity } from "./bit-systems/networking";
+import { createNetworkedEntity } from "./utils/create-networked-entity";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
