@@ -23,7 +23,13 @@ function spawnFromUrl(text: string) {
     console.warn(`Could not parse URL. Ignoring pasted text:\n${text}`);
     return;
   }
-  const eid = createNetworkedEntity(APP.world, "media", { src: text, recenter: true, resize: true, animateLoad: true });
+  const eid = createNetworkedEntity(APP.world, "media", {
+    src: text,
+    recenter: true,
+    resize: true,
+    animateLoad: true,
+    isObjectMenuTarget: true
+  });
   const avatarPov = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
   const obj = APP.world.eid2obj.get(eid)!;
   obj.position.copy(avatarPov.localToWorld(new Vector3(0, 0, -1.5)));
@@ -44,7 +50,8 @@ async function spawnFromFileList(files: FileList) {
           src: srcUrl.href,
           recenter: true,
           resize: true,
-          animateLoad: true
+          animateLoad: true,
+          isObjectMenuTarget: true
         };
       })
       .catch(e => {
@@ -53,7 +60,8 @@ async function spawnFromFileList(files: FileList) {
           src: "error",
           recenter: true,
           resize: true,
-          animateLoad: true
+          animateLoad: true,
+          isObjectMenuTarget: true
         };
       });
 

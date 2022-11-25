@@ -11,7 +11,13 @@ export interface VideoLoaderParams {
 }
 
 export function inflateVideoLoader(world: HubsWorld, eid: number, params: VideoLoaderParams) {
-  inflateMediaLoader(world, eid, { src: params.src, recenter: false, resize: false, animateLoad: false });
+  inflateMediaLoader(world, eid, {
+    src: params.src,
+    recenter: false,
+    resize: false,
+    animateLoad: false,
+    isObjectMenuTarget: false
+  });
 
   // TODO: Use the rest of VideoLoaderParams
 }

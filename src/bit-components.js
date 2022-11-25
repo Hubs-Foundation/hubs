@@ -185,5 +185,8 @@ export const ObjectMenu = defineComponent({
   cloneButtonRef: Types.eid,
   rotateButtonRef: Types.eid,
   mirrorButtonRef: Types.eid,
-  scaleButtonRef: Types.eid
+  scaleButtonRef: Types.eid,
+  targetRef: Types.eid
 });
+
+export const ObjectMenuTarget = defineComponent();
