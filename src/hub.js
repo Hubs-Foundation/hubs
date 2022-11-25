@@ -241,6 +241,7 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
+import { listenForNetworkMessages } from "./bit-systems/networking";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -1234,6 +1235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
+  listenForNetworkMessages(hubPhxChannel, events);
   hubPhxChannel
     .join()
     .receive("ok", async data => {
