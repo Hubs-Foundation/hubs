@@ -1,3 +1,5 @@
+import { AudioZoneShape } from "../components/audio-zone";
+
 // We apply the most restrictive audio parameters
 function paramsReducer(acc, curr) {
   if (!curr && !acc) return {};
@@ -61,7 +63,11 @@ function exclude(zones) {
 function hasIntersection(ray) {
   const intersectTarget = new THREE.Vector3();
   return zone => {
-    ray.intersectBox(zone.getBoundingBox(), intersectTarget);
+    if (zone.data.shape === AudioZoneShape.Box) {
+      ray.intersectBox(zone.getBoundingBox(), intersectTarget);
+    } else {
+      ray.intersectSphere(zone.getBoundingSphere(), intersectTarget);
+    }
     return intersectTarget !== null;
   };
 }
