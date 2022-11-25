@@ -11,7 +11,8 @@ export const Networked = defineComponent({
   creator: Types.ui32,
   owner: Types.ui32,
 
-  lastOwnerTime: Types.ui32
+  lastOwnerTime: Types.ui32,
+  timestamp: Types.ui32
 });
 Networked.id[$isStringType] = true;
 Networked.creator[$isStringType] = true;

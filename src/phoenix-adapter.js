@@ -45,6 +45,10 @@ const getAverageTimeOffset = (() => {
   };
 })();
 
+export function getServerTime() {
+  return Date.now() + getAverageTimeOffset();
+}
+
 export default class PhoenixAdapter {
   constructor() {
     this.refs = new Map();
@@ -101,7 +105,7 @@ export default class PhoenixAdapter {
   }
 
   getServerTime() {
-    return Date.now() + getAverageTimeOffset();
+    return getServerTime();
   }
 
   sendData(clientId, dataType, data) {
