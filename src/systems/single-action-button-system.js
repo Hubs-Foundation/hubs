@@ -1,4 +1,4 @@
-import { addComponent, removeComponent, defineQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, hasComponent, removeComponent } from "bitecs";
 import {
   HoverButton,
   HoveredHandLeft,
@@ -9,8 +9,9 @@ import {
   SingleActionButton,
   TextButton
 } from "../bit-components";
+import { BUTTON_TYPES } from "../prefabs/button3D";
 import { hasAnyComponent } from "../utils/bit-utils";
-import { onThemeChanged, getThemeColor } from "../utils/theme";
+import { getThemeColor, onThemeChanged } from "../utils/theme";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 import { paths } from "./userinput/paths";
 
@@ -62,11 +63,6 @@ function singleActionButtonSystem(world) {
     interactorSettings.rightRemote.entity.object3D
   );
 }
-
-export const BUTTON_TYPES = {
-  DEFAULT: 0,
-  ACTION: 1
-};
 
 const buttonStyles = {};
 // TODO these colors come from what we are doing in theme.js for aframe mixins but they seem fishy
