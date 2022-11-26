@@ -22,6 +22,7 @@ function updateGradient(el, min, max) {
   }
 }
 
+/* eslint-disable-next-line react/display-name */
 export const Slider = memo(({ min, max, step, value, onChange, disabled, className, ...rest }) => {
   const inputRef = useRef();
 

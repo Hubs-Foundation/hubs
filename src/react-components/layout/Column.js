@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./Column.scss";
 
+/* eslint-disable-next-line react/display-name */
 export const Column = forwardRef(
   (
     { as: Component, lastChildMargin, className, gap, padding, center, centerMd, grow, overflow, children, ...rest },
