@@ -69,6 +69,7 @@ Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_
 
 Mozilla and Hubs believe that privacy is fundamental to a healthy internet. Read our [privacy policy](https://www.mozilla.org/en-US/privacy/hubs/) for more info.
 
+
 ## License
 
 Hubs is licensed with the [Mozilla Public License 2.0](./LICENSE)
