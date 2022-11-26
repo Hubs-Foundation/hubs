@@ -250,6 +250,7 @@ export interface JSXComponentData extends ComponentData {
   networkedTransform?: any;
   objectMenu?: {
     pinButtonRef: Ref;
+    unpinButtonRef: Ref;
     cameraFocusButtonRef: Ref;
     cameraTrackButtonRef: Ref;
     removeButtonRef: Ref;

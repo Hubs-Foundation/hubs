@@ -3,7 +3,7 @@ import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
 import { messageFor } from "../utils/message-for";
-import type { EntityID } from "../utils/networking-types";
+import type { EntityID, Message } from "../utils/networking-types";
 import { createMessageDatas, isNetworkInstantiated, localClientID, networkedQuery, pendingJoins } from "./networking";
 
 function isNetworkInstantiatedByMe(eid: EntityID) {
@@ -18,6 +18,8 @@ const ownedNetworkedQuery = defineQuery([Owned, Networked]);
 const enteredNetworkedQuery = enterQuery(networkedQuery);
 const enteredOwnedNetworkedQuery = enterQuery(ownedNetworkedQuery);
 const exitedNetworkedQuery = exitQuery(networkedQuery);
+
+export const pinMessages: Message[] = [];
 
 export function networkSendSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet
@@ -59,6 +61,15 @@ export function networkSendSystem(world: HubsWorld) {
       }
       pendingJoins.length = 0;
     }
+  }
+
+  // Tell everyone about entities I pin/unpin
+  {
+    for (let i = 0; i < pinMessages.length; i++) {
+      const message = pinMessages[i];
+      NAF.connection.broadcastDataGuaranteed("nn", message);
+    }
+    pinMessages.length = 0;
   }
 
   // Tell everyone about entities I created, entities I own, and entities that were deleted

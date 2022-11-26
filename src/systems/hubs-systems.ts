@@ -217,7 +217,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.spriteSystem.tick(t, dt);
   hubsSystems.uvScrollSystem.tick(dt);
   hubsSystems.shadowSystem.tick();
-  objectMenuSystem(world, APP.scene!.is("frozen"), aframeSystems.userinput);
+  objectMenuSystem(world, !!APP.scene && APP.scene.is("frozen"), aframeSystems.userinput, APP.hubChannel!);
   videoMenuSystem(world, aframeSystems.userinput);
   videoSystem(world, hubsSystems.audioSystem);
   mediaFramesSystem(world);

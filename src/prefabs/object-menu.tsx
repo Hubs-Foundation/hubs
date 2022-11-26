@@ -21,6 +21,20 @@ function PinButton(props: Attrs) {
   );
 }
 
+function UnpinButton(props: Attrs) {
+  return (
+    <Button3D
+      name="Unpin Button"
+      scale={buttonScale}
+      width={0.4}
+      height={buttonHeight}
+      type={BUTTON_TYPES.ACTION}
+      text={"unpin"}
+      {...props}
+    />
+  );
+}
+
 function CameraFocusButton(props: Attrs) {
   return (
     <Button3D
@@ -192,6 +206,7 @@ function ScaleButton(props: Attrs) {
 // prettier-ignore
 const position = {
   pin:                [    0,  0.125, uiZ] as ArrayVec3,
+  unpin:              [    0,  0.125, uiZ] as ArrayVec3,
   focus:              [-0.25,  0.375, uiZ] as ArrayVec3,
   track:              [ 0.25,  0.375, uiZ] as ArrayVec3,
   remove:             [    0, -0.375, uiZ] as ArrayVec3,
@@ -209,6 +224,7 @@ const position = {
 export function ObjectMenuPrefab() {
   const refs = {
     pin: createRef(),
+    unpin: createRef(),
     focus: createRef(),
     track: createRef(),
     remove: createRef(),
@@ -224,8 +240,11 @@ export function ObjectMenuPrefab() {
   };
 
   return (
-    <entity name="Interactable Object Menu" objectMenu={{
+    <entity
+      name="Interactable Object Menu"
+      objectMenu={{
         pinButtonRef: refs.pin,
+        unpinButtonRef: refs.unpin,
         cameraFocusButtonRef: refs.focus,
         cameraTrackButtonRef: refs.track,
         removeButtonRef: refs.remove,
@@ -237,9 +256,11 @@ export function ObjectMenuPrefab() {
         cloneButtonRef: refs.clone,
         rotateButtonRef: refs.rotate,
         mirrorButtonRef: refs.mirror,
-        scaleButtonRef: refs.scale,
-    }}>
+        scaleButtonRef: refs.scale
+      }}
+    >
       <PinButton ref={refs.pin} position={position.pin} />
+      <UnpinButton ref={refs.unpin} position={position.unpin} />
       <CameraFocusButton ref={refs.focus} position={position.focus} />
       <CameraTrackButton ref={refs.track} position={position.track} />
       <RemoveButton ref={refs.remove} position={position.remove} />
@@ -255,7 +276,6 @@ export function ObjectMenuPrefab() {
     </entity>
   );
 }
-
 
 // ui interactable-ui
 // layers mask 768
