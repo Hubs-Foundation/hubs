@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from "react";
 import { CloseButton } from "../input/CloseButton";
 import { Sidebar } from "../sidebar/Sidebar";
