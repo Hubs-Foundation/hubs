@@ -21,6 +21,7 @@ export const presets = [
   "signin"
 ];
 
+/* eslint-disable-next-line react/display-name */
 export const Button = memo(
   forwardRef(({ as, sm, lg, xl, thin, thick, preset, className, children, ...rest }, ref) => {
     const ButtonComponent = as;
@@ -56,7 +57,11 @@ Button.propTypes = {
   preset: PropTypes.oneOf(presets),
   className: PropTypes.string,
   children: PropTypes.node,
-  sm: PropTypes.bool
+  sm: PropTypes.bool,
+  lg: PropTypes.bool,
+  xl: PropTypes.bool,
+  thin: PropTypes.bool,
+  thick: PropTypes.bool
 };
 
 Button.defaultProps = {
