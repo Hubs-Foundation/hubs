@@ -30,7 +30,9 @@ export function useTheme(themeId) {
   useEffect(() => {
     const theme = tryGetTheme(themeId);
 
-    if (!theme) { return; }
+    if (!theme) {
+      return;
+    }
 
     const variables = [];
 

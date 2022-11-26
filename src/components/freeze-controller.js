@@ -8,11 +8,11 @@ import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
  * @component freeze-controller
  */
 AFRAME.registerComponent("freeze-controller", {
-  init: function() {
+  init: function () {
     this.onToggle = this.onToggle.bind(this);
   },
 
-  tick: function() {
+  tick: function () {
     const scene = this.el.sceneEl;
     if (!scene.is("entered")) return;
     const inspecting = scene.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT;
@@ -44,7 +44,7 @@ AFRAME.registerComponent("freeze-controller", {
     }
   },
 
-  onToggle: function() {
+  onToggle: function () {
     window.APP.store.update({ activity: { hasFoundFreeze: true } });
     if (!NAF.connection.adapter) return;
     NAF.connection.adapter.toggleFreeze();

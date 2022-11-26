@@ -11,7 +11,7 @@ import { updateAudioSettings } from "../update-audio-settings";
 
 //
 AFRAME.registerSystem("linked-media", {
-  init: function() {
+  init: function () {
     this.handlers = [];
     this.addLinkageHandler = this.addLinkageHandler.bind(this);
     this.syncLinkage = this.syncLinkage.bind(this);
@@ -42,7 +42,7 @@ AFRAME.registerSystem("linked-media", {
     return handler;
   },
 
-  registerLinkage: function(elA, elB) {
+  registerLinkage: function (elA, elB) {
     this.syncLinkage(elA, elB);
 
     const handlerA = this.addLinkageHandler(elA, elB);
@@ -60,7 +60,7 @@ AFRAME.registerSystem("linked-media", {
     this.handlers.push([elA, elB, handlerA, handlerB]);
   },
 
-  deregisterLinkage: function(el) {
+  deregisterLinkage: function (el) {
     // Deregister elA -> elB, get list of elBs, and remove them
     for (const [elA, elB, handlerA, handlerB] of this.handlers) {
       if (el === elA || el === elB) {
@@ -112,7 +112,7 @@ AFRAME.registerSystem("linked-media", {
 });
 
 AFRAME.registerComponent("linked-media", {
-  remove: function() {
+  remove: function () {
     this.system.deregisterLinkage(this.el);
   }
 });

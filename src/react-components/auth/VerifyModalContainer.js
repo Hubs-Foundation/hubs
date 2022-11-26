@@ -13,31 +13,28 @@ function useVerify() {
   const [error, setError] = useState();
   const { verify } = useContext(AuthContext);
 
-  useEffect(
-    () => {
-      const verifyAsync = async () => {
-        try {
-          const qs = new URLSearchParams(location.search);
+  useEffect(() => {
+    const verifyAsync = async () => {
+      try {
+        const qs = new URLSearchParams(location.search);
 
-          const authParams = {
-            topic: qs.get("auth_topic"),
-            token: qs.get("auth_token"),
-            origin: qs.get("auth_origin"),
-            payload: qs.get("auth_payload")
-          };
+        const authParams = {
+          topic: qs.get("auth_topic"),
+          token: qs.get("auth_token"),
+          origin: qs.get("auth_origin"),
+          payload: qs.get("auth_payload")
+        };
 
-          await verify(authParams);
-          setStep(VerificationStep.complete);
-        } catch (error) {
-          setStep(VerificationStep.error);
-          setError(error);
-        }
-      };
+        await verify(authParams);
+        setStep(VerificationStep.complete);
+      } catch (error) {
+        setStep(VerificationStep.error);
+        setError(error);
+      }
+    };
 
-      verifyAsync();
-    },
-    [verify]
-  );
+    verifyAsync();
+  }, [verify]);
 
   return { step, error };
 }

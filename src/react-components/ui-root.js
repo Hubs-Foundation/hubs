@@ -1440,7 +1440,8 @@ class UIRoot extends Component {
                         scene={this.props.scene}
                         store={this.props.store}
                       />
-                      {!isSmallScreen && <PresenceLog
+                      {!isSmallScreen && (
+                        <PresenceLog
                           preset={"Notifications"}
                           include={["permission"]}
                           presences={this.props.presences}
@@ -1448,7 +1449,8 @@ class UIRoot extends Component {
                           hubId={this.props.hub.hub_id}
                           history={this.props.history}
                           onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
-                        />}
+                        />
+                      )}
                     </NotificationsContainer>
                     {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
@@ -1657,7 +1659,7 @@ class UIRoot extends Component {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
-  const { voice_chat: canVoiceChat} = usePermissions();
+  const { voice_chat: canVoiceChat } = usePermissions();
 
   useEffect(() => {
     const el = document.getElementById("preload-overlay");

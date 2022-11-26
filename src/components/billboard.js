@@ -6,7 +6,7 @@ AFRAME.registerComponent("billboard", {
   schema: {
     onlyY: { type: "boolean" }
   },
-  init: function() {
+  init: function () {
     this._updateBillboard = this._updateBillboard.bind(this);
     this._updateIsInView = this._updateIsInView.bind(this);
 
@@ -26,7 +26,7 @@ AFRAME.registerComponent("billboard", {
     }
   },
 
-  _updateIsInView: (function() {
+  _updateIsInView: (function () {
     const frustum = new THREE.Frustum();
     const frustumMatrix = new THREE.Matrix4();
     const box = new THREE.Box3();
@@ -53,7 +53,7 @@ AFRAME.registerComponent("billboard", {
       return frustum.intersectsBox(box);
     };
 
-    return function() {
+    return function () {
       if (!this.el.object3D.visible) {
         this.isInView = false;
         return;
@@ -69,10 +69,10 @@ AFRAME.registerComponent("billboard", {
     };
   })(),
 
-  _updateBillboard: (function() {
+  _updateBillboard: (function () {
     const targetPos = new THREE.Vector3();
     const worldPos = new THREE.Vector3();
-    return function() {
+    return function () {
       if (!this.el.object3D.visible) return;
 
       const camera = this.el.sceneEl.camera;

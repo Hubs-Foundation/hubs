@@ -8,7 +8,7 @@ AFRAME.registerComponent("event-repeater", {
     events: { type: "array" }
   },
 
-  play: function() {
+  play: function () {
     this.data.eventListeners = [];
     const events = this.data.events;
     for (let i = 0; i < events.length; i++) {
@@ -18,7 +18,7 @@ AFRAME.registerComponent("event-repeater", {
     }
   },
 
-  pause: function() {
+  pause: function () {
     const events = this.data.events;
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
@@ -27,7 +27,7 @@ AFRAME.registerComponent("event-repeater", {
     this.data.eventListeners = [];
   },
 
-  _handleEvent: function(event, e) {
+  _handleEvent: function (event, e) {
     this.el.emit(event, e.detail);
   }
 });

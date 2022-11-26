@@ -25,7 +25,7 @@ export class MenuAnimationSystem {
     this.components.splice(this.components.indexOf(component), 1);
     this.data.delete(component);
   }
-  tick = (function() {
+  tick = (function () {
     const menuToCamera = new THREE.Vector3();
     const menuScale = new THREE.Vector3();
     const menuParentScale = new THREE.Vector3();

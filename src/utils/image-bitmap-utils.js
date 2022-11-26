@@ -1,6 +1,6 @@
 export const createImageBitmap =
   window.createImageBitmap ||
-  async function(data) {
+  async function (data) {
     return new Promise(resolve => {
       // https://dev.to/nektro/createimagebitmap-polyfill-for-safari-and-edge-228
       // https://gist.github.com/MonsieurV/fb640c29084c171b4444184858a91bc7

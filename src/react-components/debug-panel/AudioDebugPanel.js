@@ -115,27 +115,21 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
   };
 
   const [preferences, setPreferences] = useState(getPrefs());
-  const onPreferencesUpdated = useCallback(
-    () => {
-      setPreferences(getPrefs());
-    },
-    [setPreferences]
-  );
-  useEffect(
-    () => {
-      onPreferencesUpdated();
-      APP.store.addEventListener("statechanged", onPreferencesUpdated);
-      return () => {
-        APP.store.removeEventListener("statechanged", onPreferencesUpdated);
-        APP.audioDebugPanelOverrides.delete(SourceType.MEDIA_VIDEO);
-        APP.audioDebugPanelOverrides.delete(SourceType.AVATAR_AUDIO_SOURCE);
-        for (const [el, audio] of APP.audios.entries()) {
-          updateAudioSettings(el, audio);
-        }
-      };
-    },
-    [onPreferencesUpdated]
-  );
+  const onPreferencesUpdated = useCallback(() => {
+    setPreferences(getPrefs());
+  }, [setPreferences]);
+  useEffect(() => {
+    onPreferencesUpdated();
+    APP.store.addEventListener("statechanged", onPreferencesUpdated);
+    return () => {
+      APP.store.removeEventListener("statechanged", onPreferencesUpdated);
+      APP.audioDebugPanelOverrides.delete(SourceType.MEDIA_VIDEO);
+      APP.audioDebugPanelOverrides.delete(SourceType.AVATAR_AUDIO_SOURCE);
+      for (const [el, audio] of APP.audios.entries()) {
+        updateAudioSettings(el, audio);
+      }
+    };
+  }, [onPreferencesUpdated]);
 
   return (
     <div

@@ -65,7 +65,8 @@ const TokenMenuHeader = () => (
       <FormattedMessage id="tokens.create-tokens-description" defaultMessage="Create tokens to access the" />{" "}
       <a href="https://github.com/mozilla/reticulum/blob/master/guides/api.md" rel="noreferrer noopener">
         <FormattedMessage id="tokens.create-tokens-description-hubs-api" defaultMessage="Hubs API" />
-      </a>.
+      </a>
+      .
     </p>
   </Column>
 );

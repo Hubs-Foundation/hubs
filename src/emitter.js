@@ -12,9 +12,11 @@ export function emitter() {
     });
   };
   const trigger = (event, payload) => {
-    bindings.filter(bind => bind.event === event).forEach(bind => {
-      bind.callback(payload);
-    });
+    bindings
+      .filter(bind => bind.event === event)
+      .forEach(bind => {
+        bind.callback(payload);
+      });
   };
   const getBindings = () => {
     return bindings;

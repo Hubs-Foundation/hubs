@@ -9,7 +9,7 @@ AFRAME.registerComponent("duck", {
     maxScale: { default: 5 }
   },
 
-  init: function() {
+  init: function () {
     this.initialScale = this.el.object3D.scale.x;
     this.maxScale = this.data.maxScale * this.initialScale;
 
@@ -21,7 +21,7 @@ AFRAME.registerComponent("duck", {
     });
   },
 
-  tick: function() {
+  tick: function () {
     if (!this.networkedEntity || NAF.utils.isMine(this.networkedEntity)) {
       const entity = this.networkedEntity || this.el;
       const currentScale = entity.object3D.scale.x;

@@ -20,7 +20,7 @@ export const permissionsIcons = {
 export const permissionsMessages = defineMessages({
   voiceChatEnabled: {
     id: "chat-sidebar.moderator-message.voice-chat-enabled",
-    defaultMessage: "Voice chat has been turned on by a moderator",
+    defaultMessage: "Voice chat has been turned on by a moderator"
   },
   voiceChatDisabled: {
     id: "chat-sidebar.moderator-message.voice-chat-disabled",
@@ -45,11 +45,11 @@ export const permissionsMessages = defineMessages({
 });
 
 function camelize(text) {
-  text = text.replace(/[-_\s.]+(.)?/g, (_, c) => c ? c.toUpperCase() : '');
+  text = text.replace(/[-_\s.]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ""));
   return text.substring(0, 1).toLowerCase() + text.substring(1);
 }
 
-export function permissionMessage({permission, status, isMod = false}, intl) {
+export function permissionMessage({ permission, status, isMod = false }, intl) {
   const key = `${permission}_${status ? "enabled" : "disabled"}${isMod ? "_Mod" : ""}`;
   const message = intl.formatMessage(permissionsMessages[camelize(key)]);
   const icon = permissionsIcons[camelize(key)];
@@ -63,14 +63,18 @@ export function permissionMessage({permission, status, isMod = false}, intl) {
 
 export function PermissionNotification({ permission, className, isMod }) {
   const intl = useIntl();
-  return (<div key={permission} className={classNames(styles.pinnedMessage, className)}>
-        {permissionMessage({
+  return (
+    <div key={permission} className={classNames(styles.pinnedMessage, className)}>
+      {permissionMessage(
+        {
           permission: permission,
           status: false,
           isMod
         },
-          intl)}
-      </div>);
+        intl
+      )}
+    </div>
+  );
 }
 
 PermissionNotification.propTypes = {

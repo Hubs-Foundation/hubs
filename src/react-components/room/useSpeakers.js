@@ -8,38 +8,35 @@ export function useSpeakers() {
     options: mediaDevicesManager.outputDevicesOptions
   });
 
-  useEffect(
-    () => {
-      const onPermissionsChanged = ({ mediaDevice }) => {
-        if (mediaDevice === MediaDevices.MICROPHONE) {
-          setSpeakerDevices({
-            value: mediaDevicesManager.selectedSpeakersDeviceId,
-            options: mediaDevicesManager.outputDevicesOptions
-          });
-        }
-      };
-      mediaDevicesManager.on(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
-
-      const onDeviceChange = () => {
+  useEffect(() => {
+    const onPermissionsChanged = ({ mediaDevice }) => {
+      if (mediaDevice === MediaDevices.MICROPHONE) {
         setSpeakerDevices({
           value: mediaDevicesManager.selectedSpeakersDeviceId,
           options: mediaDevicesManager.outputDevicesOptions
         });
-      };
-      mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, onDeviceChange);
+      }
+    };
+    mediaDevicesManager.on(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
 
+    const onDeviceChange = () => {
       setSpeakerDevices({
         value: mediaDevicesManager.selectedSpeakersDeviceId,
         options: mediaDevicesManager.outputDevicesOptions
       });
+    };
+    mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, onDeviceChange);
 
-      return () => {
-        mediaDevicesManager.off(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
-        mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, onDeviceChange);
-      };
-    },
-    [setSpeakerDevices, mediaDevicesManager]
-  );
+    setSpeakerDevices({
+      value: mediaDevicesManager.selectedSpeakersDeviceId,
+      options: mediaDevicesManager.outputDevicesOptions
+    });
+
+    return () => {
+      mediaDevicesManager.off(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, onPermissionsChanged);
+      mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, onDeviceChange);
+    };
+  }, [setSpeakerDevices, mediaDevicesManager]);
 
   const speakerDeviceChanged = useCallback(
     deviceId => {

@@ -33,7 +33,7 @@ AFRAME.registerComponent("shape-helper", {
 
   multiple: true,
 
-  init: function() {
+  init: function () {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
     this.uuid = -1;
     this.mesh = null;
@@ -62,7 +62,7 @@ AFRAME.registerComponent("shape-helper", {
     this.uuid = this.system.addShapes(this.bodyHelper.uuid, this.mesh, this.data);
   },
 
-  remove: function() {
+  remove: function () {
     // Removing a body already cleans up it's shapes
     if (this.uuid !== -1 && this.bodyHelper.alive) {
       this.system.removeShapes(this.bodyHelper.uuid, this.uuid);

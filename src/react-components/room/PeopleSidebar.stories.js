@@ -8,9 +8,9 @@ export default {
     layout: "fullscreen"
   },
   argTypes: {
-    voiceChatEnabled: { 
+    voiceChatEnabled: {
       control: "boolean",
-      defaultValue: false 
+      defaultValue: false
     }
   }
 };
@@ -69,7 +69,9 @@ const people = [
   }
 ];
 
-export const Base = args => <RoomLayout sidebar={<PeopleSidebar people={people} canVoiceChat={args.voiceChatEnabled} />} />;
+export const Base = args => (
+  <RoomLayout sidebar={<PeopleSidebar people={people} canVoiceChat={args.voiceChatEnabled} />} />
+);
 
 Base.args = {
   voiceChatEnabled: false

@@ -45,7 +45,10 @@ export class OculusTouchControllerDevice {
     this.gamepad = gamepad;
     this.pose = new Pose();
     this.buttonMap = buttonMaps[gamepad.hand];
-    this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
+    this.axisMap = [
+      { name: "joyX", axisId: 0 },
+      { name: "joyY", axisId: 1 }
+    ];
     this.sittingToStandingMatrix = new THREE.Matrix4().makeTranslation(0, 1.6, 0);
     copySittingToStandingTransform(this.sittingToStandingMatrix);
     this.matrix = new THREE.Matrix4();

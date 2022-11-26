@@ -18,7 +18,6 @@ import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
 import { permissionMessage } from "./PermissionNotifications";
 
-
 export function SpawnMessageButton(props) {
   return (
     <IconButton className={styles.chatInputIcon} {...props}>
@@ -77,7 +76,13 @@ export const EmojiPickerPopoverButton = React.memo(({ onSelectEmoji, disabled })
       offsetDistance={28}
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
-        <IconButton ref={triggerRef} className={styles.chatInputIcon} selected={popoverVisible} onClick={togglePopover} disabled={disabled}>
+        <IconButton
+          ref={triggerRef}
+          className={styles.chatInputIcon}
+          selected={popoverVisible}
+          onClick={togglePopover}
+          disabled={disabled}
+        >
           <ReactionIcon />
         </IconButton>
       )}
@@ -97,7 +102,7 @@ export function MessageAttachmentButton(props) {
     <>
       <IconButton as="label" className={styles.chatInputIcon} disabled={props.disabled}>
         <AttachIcon />
-        <input type="file" {...props}  disabled={props.disabled} />
+        <input type="file" {...props} disabled={props.disabled} />
       </IconButton>
     </>
   );
@@ -353,12 +358,11 @@ function MessageBubble({ media, monospace, emoji, children, permission }) {
   return (
     <div
       className={classNames(styles.messageBubble, {
-          [styles.media]: media,
-          [styles.emoji]: emoji,
-          [styles.monospace]: monospace,
-          [styles.permission]: permission
-        }
-      )}
+        [styles.media]: media,
+        [styles.emoji]: emoji,
+        [styles.monospace]: monospace,
+        [styles.permission]: permission
+      })}
     >
       {children}
     </div>
@@ -396,12 +400,12 @@ function getMessageComponent(message) {
           <img src={message.body.src} />
         </MessageBubble>
       );
-      case "permission":
-        return (
-          <MessageBubble key={message.id} media>
-            <img src={message.body.src} />
-          </MessageBubble>
-        );
+    case "permission":
+      return (
+        <MessageBubble key={message.id} media>
+          <img src={message.body.src} />
+        </MessageBubble>
+      );
     default:
       return null;
   }
@@ -433,12 +437,19 @@ export function PermissionMessageGroup({ sent, timestamp, messages }) {
       <p className={styles.messageGroupLabel}>
         <FormattedRelativeTime updateIntervalInSeconds={10} value={(timestamp - Date.now()) / 1000} />
       </p>
-      <ul className={styles.messageGroupMessages}>{messages.map(message => <MessageBubble key={message.id} permission>
-          {permissionMessage({
-            permission: message.body.permission,
-            status: message.body.status}, 
-          intl)}
-        </MessageBubble>)}</ul>
+      <ul className={styles.messageGroupMessages}>
+        {messages.map(message => (
+          <MessageBubble key={message.id} permission>
+            {permissionMessage(
+              {
+                permission: message.body.permission,
+                status: message.body.status
+              },
+              intl
+            )}
+          </MessageBubble>
+        ))}
+      </ul>
     </li>
   );
 }
