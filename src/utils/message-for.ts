@@ -3,13 +3,8 @@ import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { createMessageDatas } from "../bit-systems/networking";
 import { networkableComponents, schemas } from "./network-schemas";
-import type {
-  CursorBufferUpdateMessage,
-  EntityID,
-  Message,
-  StorableUpdateMessage,
-  UpdateMessage
-} from "./networking-types";
+import type { CursorBufferUpdateMessage, EntityID, Message, StorableUpdateMessage } from "./networking-types";
+import { StorableMessage } from "./store-networked-state";
 
 export function messageFor(
   world: HubsWorld,
@@ -71,7 +66,8 @@ export function messageFor(
 }
 
 export function messageForStorage(world: HubsWorld, created: EntityID[], updated: EntityID[], deleted: EntityID[]) {
-  const message: Message = {
+  const message: StorableMessage = {
+    version: 1,
     creates: [],
     updates: [],
     deletes: []

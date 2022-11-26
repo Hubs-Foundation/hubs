@@ -197,6 +197,8 @@ renderAsEntity(APP.world, VideoMenuPrefab());
 renderAsEntity(APP.world, ObjectMenuPrefab());
 renderAsEntity(APP.world, ObjectMenuPrefab());
 
+// TODO: Add an initialization hook to do this without a timeout.
+import { anyEntityWith } from "./utils/bit-utils";
 setTimeout(() => {
   const eid = anyEntityWith(APP.world, ObjectMenu);
   const obj = APP.world.eid2obj.get(eid);
@@ -255,7 +257,6 @@ import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
-import { anyEntityWith } from "./utils/bit-utils";
 import { loadStoredRoomData } from "./utils/load-room-objects";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
