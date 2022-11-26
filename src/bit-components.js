@@ -174,6 +174,7 @@ EnvironmentSettings.map = new Map();
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const ObjectMenu = defineComponent({
   pinButtonRef: Types.eid,
+  unpinButtonRef: Types.eid,
   cameraFocusButtonRef: Types.eid,
   cameraTrackButtonRef: Types.eid,
   removeButtonRef: Types.eid,
