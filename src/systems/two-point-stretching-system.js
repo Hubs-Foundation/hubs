@@ -1,4 +1,3 @@
-/* global THREE AFRAME */
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 const COLLISION_FILTER_MASK_HANDS = { collisionFilterMask: COLLISION_LAYERS.HANDS };
 export const distanceBetweenStretchers = (() => {

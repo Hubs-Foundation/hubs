@@ -1,4 +1,3 @@
-/* global AFRAME performance */
 /**
  * Limits networked interactables to a maximum number at any given time
  * @namespace network
