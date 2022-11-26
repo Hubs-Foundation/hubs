@@ -256,6 +256,7 @@ import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
+import { loadStoredRoomData } from "./utils/load-room-objects";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -600,6 +601,10 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
       if (!isBotMode) {
         objectsScene.appendChild(objectsEl);
+      }
+
+      if (qsTruthy("newLoader")) {
+        loadStoredRoomData(hub.hub_id);
       }
     },
     { once: true }

@@ -13,3 +13,9 @@ export const pendingParts: StringID[] = [];
 export function isNetworkInstantiated(eid: EntityID) {
   return createMessageDatas.has(eid);
 }
+
+let reticulum: StringID | undefined;
+export function isPinned(eid: EntityID) {
+  reticulum = reticulum || APP.getSid("reticulum");
+  return Networked.creator[eid] === reticulum;
+}

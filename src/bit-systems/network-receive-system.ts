@@ -2,8 +2,8 @@ import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, r
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { createNetworkedEntityFromRemote } from "../utils/create-networked-entity";
-import { networkableComponents, schemas } from "../utils/network-schemas";
-import type { StringID, UpdateMessage } from "../utils/networking-types";
+import { networkableComponents, NetworkSchema, schemas, StoredComponent } from "../utils/network-schemas";
+import type { CursorBufferUpdateMessage, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import {
@@ -14,6 +14,10 @@ import {
   pendingMessages,
   pendingParts
 } from "./networking";
+
+function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateMessage {
+  return !!update.hasOwnProperty("componentIds");
+}
 
 const partedClientIds = new Set<StringID>();
 const storedUpdates = new Map<StringID, UpdateMessage[]>();
@@ -146,14 +150,24 @@ export function networkReceiveSystem(world: HubsWorld) {
       Networked.lastOwnerTime[eid] = updateMessage.lastOwnerTime;
       Networked.timestamp[eid] = updateMessage.timestamp;
 
-      // TODO HACK simulating a buffer with a cursor using an array
-      updateMessage.data.cursor = 0;
-      for (let s = 0; s < updateMessage.componentIds.length; s++) {
-        const componentId = updateMessage.componentIds[s];
-        const schema = schemas.get(networkableComponents[componentId])!;
-        schema.deserialize(world, eid, updateMessage.data);
+      if (isCursorBufferUpdateMessage(updateMessage)) {
+        // TODO HACK simulating a buffer with a cursor using an array
+        updateMessage.data.cursor = 0;
+        for (let s = 0; s < updateMessage.componentIds.length; s++) {
+          const componentId = updateMessage.componentIds[s];
+          const schema = schemas.get(networkableComponents[componentId])!;
+          schema.deserialize(world, eid, updateMessage.data);
+        }
+        delete updateMessage.data.cursor;
+      } else {
+        // Slow path: Deserializing from stored messages.
+        for (const schema of schemas.values()) {
+          if (updateMessage.data.hasOwnProperty(schema.componentName)) {
+            const storedComponent: StoredComponent = updateMessage.data[schema.componentName];
+            schema.deserializeFromStorage(eid, storedComponent);
+          }
+        }
       }
-      delete updateMessage.data.cursor;
     }
 
     for (let j = 0; j < message.deletes.length; j += 1) {

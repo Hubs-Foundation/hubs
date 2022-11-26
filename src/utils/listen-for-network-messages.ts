@@ -1,5 +1,7 @@
 import { pendingJoins, pendingMessages, pendingParts } from "../bit-systems/networking";
-import type { Message } from "./networking-types";
+import { isStorableMessage } from "./load-room-objects";
+import type { ClientID, Message, NetworkID } from "./networking-types";
+import { StorableMessage } from "./store-networked-state";
 
 type Emitter = {
   on: (event: string, callback: (a: any) => any) => number;
@@ -18,6 +20,7 @@ export function listenForNetworkMessages(channel: PhoenixChannel, presenceEventE
   });
   channel.on("naf", onNaf);
   channel.on("nafr", onNafr);
+  channel.on("pin", onPin);
 }
 type NafMessage = {
   from_session_id: string;
@@ -31,6 +34,7 @@ function onNaf({ from_session_id, data, dataType }: NafMessage) {
     pendingMessages.push(data);
   }
 }
+
 type NafrMessage = {
   from_session_id: string;
   naf: string;
@@ -43,4 +47,16 @@ function onNafr(message: NafrMessage) {
   message.parsed = JSON.parse(unparsedData);
   message.parsed!.from_session_id = from_session_id;
   onNaf(message.parsed!);
+}
+
+type PinMessage = {
+  gltf_node: StorableMessage;
+  object_id: NetworkID;
+  pinned_by: ClientID;
+};
+function onPin(pinMessage: PinMessage) {
+  if (isStorableMessage(pinMessage.gltf_node)) {
+    pinMessage.gltf_node.fromClientId = "reticulum";
+    pendingMessages.push(pinMessage.gltf_node);
+  }
 }

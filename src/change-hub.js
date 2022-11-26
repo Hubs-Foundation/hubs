@@ -1,5 +1,7 @@
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
+import { loadStoredRoomData } from "./utils/load-room-objects";
+import qsTruthy from "./utils/qs_truthy";
 
 function unloadRoomObjects() {
   document.querySelectorAll("[pinnable]").forEach(el => {
@@ -97,6 +99,10 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   ]);
 
   loadRoomObjects(hubId);
+
+  if (qsTruthy("newLoader")) {
+    loadStoredRoomData(hubId);
+  }
 
   APP.hubChannel.sendEnteredEvent();
 
