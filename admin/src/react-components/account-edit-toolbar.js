@@ -1,3 +1,5 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
+
 import React, { useState } from "react";
 import { Toolbar, SaveButton } from "react-admin";
 import { withStyles } from "@material-ui/core/styles";

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
 import ReactDOM from "react-dom";

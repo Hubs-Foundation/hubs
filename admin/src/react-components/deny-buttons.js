@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";

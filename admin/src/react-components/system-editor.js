@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React, { Component } from "react";
 import { Title } from "react-admin";
 import Card from "@material-ui/core/Card";

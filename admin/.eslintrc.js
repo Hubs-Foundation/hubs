@@ -7,8 +7,8 @@ module.exports = {
   },
   rules: {
     // TODO these are new as of our Webpack 5 upgrade, making them warnings till we get a handle on them or decide we don't want them
-    "react/prop-types": "warn",
-    "@calm/react-intl/missing-formatted-message": "warn",
-    "@calm/react-intl/missing-attribute": "warn"
+    "react/prop-types": "error",
+    "@calm/react-intl/missing-formatted-message": "error",
+    "@calm/react-intl/missing-attribute": "error"
   }
 };
