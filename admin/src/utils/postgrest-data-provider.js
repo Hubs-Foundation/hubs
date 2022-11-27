@@ -65,7 +65,7 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
   const convertFilters = filters => {
     const rest = {};
 
-    Object.keys(filters).map(function(key) {
+    Object.keys(filters).map(function (key) {
       switch (typeof filters[key]) {
         case "string":
           rest[key] = "ilike.*" + filters[key].replace(/:/, "") + "*";
@@ -209,15 +209,7 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
    */
   const convertHTTPResponseToREST = (response, type, resource, params) => {
     const { headers, json } = response;
-    const maxInPage =
-      parseInt(
-        headers
-          .get("content-range")
-          .split("/")[0]
-          .split("-")
-          .pop(),
-        10
-      ) + 1;
+    const maxInPage = parseInt(headers.get("content-range").split("/")[0].split("-").pop(), 10) + 1;
 
     switch (type) {
       case GET_LIST:
@@ -229,14 +221,7 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
         }
         return {
           data: json.map(x => x),
-          total:
-            parseInt(
-              headers
-                .get("content-range")
-                .split("/")
-                .pop(),
-              10
-            ) || maxInPage
+          total: parseInt(headers.get("content-range").split("/").pop(), 10) || maxInPage
         };
 
       case CREATE:
@@ -273,11 +258,11 @@ const postgrestClient = (apiUrl, httpClient = fetchJson) => {
 
 let retPhxChannel;
 
-const setAuthToken = function(token) {
+const setAuthToken = function (token) {
   currentAuthToken = token;
 };
 
-export const refreshPermsToken = function() {
+export const refreshPermsToken = function () {
   return new Promise((resolve, reject) => {
     retPhxChannel
       .push("refresh_perms_token")

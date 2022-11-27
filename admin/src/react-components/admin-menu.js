@@ -120,7 +120,7 @@ class Menu extends Component {
   }
 
   render() {
-    if (configs.ITA_SERVER == "turkey"){
+    if (configs.ITA_SERVER == "turkey") {
       return (
         <List className={this.props.classes.root}>
           <ListItem className={this.props.classes.logo}>
@@ -183,8 +183,7 @@ class Menu extends Component {
           </Collapse>
         </List>
       );
-    }
-    else{
+    } else {
       return (
         <List className={this.props.classes.root}>
           <ListItem className={this.props.classes.logo}>
@@ -279,7 +278,7 @@ class Menu extends Component {
             </List>
           </Collapse>
         </List>
-      );      
+      );
     }
   }
 }

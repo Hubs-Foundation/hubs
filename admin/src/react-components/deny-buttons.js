@@ -28,12 +28,6 @@ DenyButton.propTypes = {
   record: PropTypes.object
 };
 
-export const DenySceneButton = connect(
-  null,
-  { reviewed: sceneReviewed }
-)(DenyButton);
+export const DenySceneButton = connect(null, { reviewed: sceneReviewed })(DenyButton);
 
-export const DenyAvatarButton = connect(
-  null,
-  { reviewed: avatarReviewed }
-)(DenyButton);
+export const DenyAvatarButton = connect(null, { reviewed: avatarReviewed })(DenyButton);

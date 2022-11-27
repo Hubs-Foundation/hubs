@@ -39,7 +39,13 @@ export const AvatarListingEdit = props => (
         </SimpleFormIterator>
       </ArrayInput>
       <NumberInput source="order" />
-      <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]} />
+      <SelectInput
+        source="state"
+        choices={[
+          { id: "active", name: "active" },
+          { id: "delisted", name: "delisted" }
+        ]}
+      />
     </SimpleForm>
   </Edit>
 );

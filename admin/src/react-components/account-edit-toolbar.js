@@ -53,23 +53,23 @@ export const AccountEditToolbar = withStyles(accountEditToolbarStyles)(props => 
       <Dialog open={openConfirmationDialog}>
         <DialogContent>
           <DialogContentText>
-            {(() => { 
+            {(() => {
               switch (deleteState) {
                 case Confirming:
                   return (
                     <>
                       Are you sure you want to delete account {props.id}?<br />
                       <br />
-                      <b>WARNING!</b> This account will be permanently deleted, including all its scenes, assets, avatars,
-                      rooms and files. <b>This cannot be undone.</b>
+                      <b>WARNING!</b> This account will be permanently deleted, including all its scenes, assets,
+                      avatars, rooms and files. <b>This cannot be undone.</b>
                     </>
-                  )
+                  );
                 case Deleting:
-                  return <>Deleting account {props.id}...</>
+                  return <>Deleting account {props.id}...</>;
                 case Succeeded:
-                  return <>Successfully deleted account {props.id}.</>
+                  return <>Successfully deleted account {props.id}.</>;
                 case Failed:
-                  return <>Failed to delete account {props.id}.</>
+                  return <>Failed to delete account {props.id}.</>;
               }
             })()}
           </DialogContentText>

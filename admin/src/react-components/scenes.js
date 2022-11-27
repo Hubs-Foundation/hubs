@@ -32,7 +32,10 @@ export const SceneEdit = props => (
       <SelectInput
         label="Status"
         source="state"
-        choices={[{ id: "active", name: "active" }, { id: "removed", name: "removed" }]}
+        choices={[
+          { id: "active", name: "active" },
+          { id: "removed", name: "removed" }
+        ]}
       />
       <BooleanInput source="allow_remixing" />
       <BooleanInput source="allow_promotion" />
