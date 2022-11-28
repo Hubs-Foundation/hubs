@@ -25,6 +25,6 @@ for f in /www/hubs/pages/*.html; do
     done 
 done 
 
-if [ -z ${access_log+x} ]; then sed -i "s/access_log off;/g" /etc/nginx/config.d/default.conf; fi
+if [ -z ${access_log+x} ]; then sed -i "s/access_log off;//g" /etc/nginx/conf.d/default.conf; fi
 
 nginx -g "daemon off;"
