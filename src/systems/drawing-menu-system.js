@@ -56,7 +56,7 @@ export class DrawingMenuSystem {
 
   scaleMenus = (() => {
     const cameraWorldPos = new THREE.Vector3();
-    return function() {
+    return function () {
       if (!this.drawingMenus || this.drawingMenus.length === 0) return;
 
       this.camera.object3D.getWorldPosition(cameraWorldPos);
@@ -74,7 +74,7 @@ export class DrawingMenuSystem {
 
   handleButtons = (() => {
     const remotes = ["rightRemote", "leftRemote"];
-    return function() {
+    return function () {
       const interaction = AFRAME.scenes[0].systems.interaction;
       const userinput = AFRAME.scenes[0].systems.userinput;
 
@@ -131,15 +131,12 @@ export class DrawingMenuSystem {
   showMenu = (() => {
     const position = new THREE.Vector3();
     const cameraWorldPos = new THREE.Vector3();
-    return function(hovered, intersectionPoint) {
+    return function (hovered, intersectionPoint) {
       const menu = hovered.children[0];
 
       if (!menu.object3D.visible || !almostEquals(0.25, intersectionPoint, this.lastIntersection)) {
         this.camera.object3D.getWorldPosition(cameraWorldPos);
-        position
-          .subVectors(cameraWorldPos, intersectionPoint)
-          .normalize()
-          .multiplyScalar(0.1);
+        position.subVectors(cameraWorldPos, intersectionPoint).normalize().multiplyScalar(0.1);
         menu.object3D.position.copy(intersectionPoint).add(position);
         menu.object3D.lookAt(cameraWorldPos);
         menu.object3D.matrixNeedsUpdate = true;

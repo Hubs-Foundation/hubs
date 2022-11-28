@@ -1,3 +1,6 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
+
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -117,7 +120,7 @@ function getDescriptors(schema) {
 
 function isEmptyObject(obj) {
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       return false;
     }
   }

@@ -1,3 +1,6 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
+
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { IdentityEditLink, IdentityCreateLink } from "./fields";
@@ -42,10 +45,7 @@ const AccountFilter = props => (
 );
 
 export const AccountList = withStyles(styles)(
-  connect(
-    undefined,
-    { refreshView }
-  )(
+  connect(undefined, { refreshView })(
     class AccountList extends Component {
       state = {
         emailSearch: "",
@@ -269,7 +269,10 @@ export const AccountEdit = withStyles(styles)(props => {
         <BooleanInput source="is_admin" />
         <SelectInput
           source="state"
-          choices={[{ id: "enabled", name: "enabled" }, { id: "disabled", name: "disabled" }]}
+          choices={[
+            { id: "enabled", name: "enabled" },
+            { id: "disabled", name: "disabled" }
+          ]}
         />
 
         <ReferenceManyField label="Identity" target="_account_id" reference="identities">

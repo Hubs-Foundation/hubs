@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import { RadioInputField } from "../input/RadioInputField";
 import { RadioInputOption } from "../input/RadioInput";
 import { Button } from "../input/Button";
@@ -88,7 +89,8 @@ const Banner = () => {
       console.error(error);
       newsletterError();
     }
-  });
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   /**
    * Emain input change
@@ -105,7 +107,7 @@ const Banner = () => {
    */
   const onConfirm = useCallback(() => {
     setConfirm(state => !state);
-  });
+  }, []);
 
   /**
    * Checkbox Label
@@ -129,6 +131,9 @@ const Banner = () => {
    */
   const Messaging = ({ status }) => {
     return <>{status ? <Success /> : <Error />}</>;
+  };
+  Messaging.propTypes = {
+    status: PropTypes.bool
   };
 
   /**
@@ -197,7 +202,8 @@ const Banner = () => {
                     persists please reach out on our{" "}
                     <a href="https://discord.com/invite/dFJncWwHun" rel="noopener noreferrer" target="_blank">
                       Discord
-                    </a>.
+                    </a>
+                    .
                   </>
                 )
               }}

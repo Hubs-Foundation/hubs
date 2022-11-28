@@ -21,10 +21,10 @@ import {
   ["destroy-at-extreme-distances", DestroyAtExtremeDistance]
 ].forEach(([aframeComponentName, bitecsComponent]) => {
   AFRAME.registerComponent(aframeComponentName, {
-    init: function() {
+    init: function () {
       addComponent(APP.world, bitecsComponent, this.el.object3D.eid);
     },
-    remove: function() {
+    remove: function () {
       removeComponent(APP.world, bitecsComponent, this.el.object3D.eid);
     }
   });

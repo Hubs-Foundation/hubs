@@ -2,7 +2,7 @@
 // Modified version of json parser to auto-coerce bigints to strings.
 // Forked from the JSON2 parser from Doug Crockford.
 //
-// Patch on line 140 to return large numbers that would overflow 
+// Patch on line 140 to return large numbers that would overflow
 // as strings.
 //
 /*
@@ -57,7 +57,7 @@
     hasOwnProperty, message, n, name, prototype, push, r, t, text
 */
 
-export default (function() {
+export default (function () {
   "use strict";
 
   // This is a function that can parse a JSON text, producing a JavaScript
@@ -81,7 +81,7 @@ export default (function() {
       t: "\t"
     },
     text,
-    error = function(m) {
+    error = function (m) {
       // Call error when something is wrong.
 
       throw {
@@ -91,7 +91,7 @@ export default (function() {
         text: text
       };
     },
-    next = function(c) {
+    next = function (c) {
       // If a c parameter is provided, verify that it matches the current character.
 
       if (c && c !== ch) {
@@ -105,7 +105,7 @@ export default (function() {
       at += 1;
       return ch;
     },
-    number = function() {
+    number = function () {
       // Parse a number value.
 
       let number,
@@ -154,7 +154,7 @@ export default (function() {
         return number;
       }
     },
-    string = function() {
+    string = function () {
       // Parse a string value.
 
       let hex,
@@ -193,14 +193,14 @@ export default (function() {
       }
       error("Bad string");
     },
-    white = function() {
+    white = function () {
       // Skip whitespace.
 
       while (ch && ch <= " ") {
         next();
       }
     },
-    word = function() {
+    word = function () {
       // true, false, or null.
 
       switch (ch) {
@@ -227,7 +227,7 @@ export default (function() {
       error("Unexpected '" + ch + "'");
     },
     value, // Place holder for the value function.
-    array = function() {
+    array = function () {
       // Parse an array value.
 
       const array = [];
@@ -252,7 +252,7 @@ export default (function() {
       }
       error("Bad array");
     },
-    object = function() {
+    object = function () {
       // Parse an object value.
 
       let key,
@@ -269,7 +269,7 @@ export default (function() {
           key = string();
           white();
           next(":");
-          if (Object.hasOwnProperty.call(object, key)) {
+          if (Object.prototype.hasOwnProperty.call(object, key)) {
             error('Duplicate key "' + key + '"');
           }
           object[key] = value();
@@ -285,7 +285,7 @@ export default (function() {
       error("Bad object");
     };
 
-  value = function() {
+  value = function () {
     // Parse a JSON value. It could be an object, an array, a string, a number,
     // or a word.
 
@@ -307,7 +307,7 @@ export default (function() {
   // Return the json_parse function. It will have access to all of the above
   // functions and variables.
 
-  return function(source, reviver) {
+  return function (source, reviver) {
     let result;
 
     text = source;

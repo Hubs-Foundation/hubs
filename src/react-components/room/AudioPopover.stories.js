@@ -66,9 +66,9 @@ export default {
       },
       defaultValue: speakerOptions[0]
     },
-    canVoiceChat: { 
+    canVoiceChat: {
       control: "boolean",
-      defaultValue: true 
+      defaultValue: true
     }
   }
 };

@@ -30,12 +30,14 @@ export function useTheme(themeId) {
   useEffect(() => {
     const theme = tryGetTheme(themeId);
 
-    if (!theme) { return; }
+    if (!theme) {
+      return;
+    }
 
     const variables = [];
 
     for (const key in theme.variables) {
-      if (!theme.variables.hasOwnProperty(key)) continue;
+      if (!Object.prototype.hasOwnProperty.call(theme.variables, key)) continue;
       variables.push(`--${key}: ${theme.variables[key]};`);
     }
 

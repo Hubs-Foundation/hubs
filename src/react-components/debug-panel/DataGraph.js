@@ -4,22 +4,19 @@ import PropTypes from "prop-types";
 const useCanvas = (draw, color, xData, yData, options = {}) => {
   const canvasRef = React.useRef(null);
 
-  useEffect(
-    () => {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext(options.context || "2d");
-      let animationFrameId;
-      const render = () => {
-        draw(context, xData, yData, color);
-        animationFrameId = window.requestAnimationFrame(render);
-      };
-      render();
-      return () => {
-        window.cancelAnimationFrame(animationFrameId);
-      };
-    },
-    [options.context, xData, yData, color, draw]
-  );
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas.getContext(options.context || "2d");
+    let animationFrameId;
+    const render = () => {
+      draw(context, xData, yData, color);
+      animationFrameId = window.requestAnimationFrame(render);
+    };
+    render();
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [options.context, xData, yData, color, draw]);
   return canvasRef;
 };
 

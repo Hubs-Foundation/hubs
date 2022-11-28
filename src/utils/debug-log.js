@@ -89,7 +89,7 @@ if (showLog) {
   const origConsoleError = console.error;
   const origConsoleWarn = console.warn;
 
-  const log = function(className, objs) {
+  const log = function (className, objs) {
     let entry;
     if (debugLog.childNodes.length > 1000) {
       entry = debugLog.firstChild;
@@ -124,22 +124,22 @@ if (showLog) {
     if (shouldScroll) debugLog.scrollTop = debugLog.scrollHeight - debugLog.clientHeight;
   };
 
-  console.warn = function() {
+  console.warn = function () {
     origConsoleWarn.apply(null, arguments);
     log("warn", arguments);
   };
 
-  console.error = function() {
+  console.error = function () {
     origConsoleError.apply(null, arguments);
     log("error", arguments);
   };
 
-  console.log = function() {
+  console.log = function () {
     origConsoleLog.apply(null, arguments);
     log("log", arguments);
   };
 
-  console.info = function() {
+  console.info = function () {
     origConsoleInfo.apply(null, arguments);
     log("info", arguments);
   };

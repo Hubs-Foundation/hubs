@@ -45,7 +45,9 @@ export const Base = () => (
   <RoomLayout
     sidebar={
       <ObjectsSidebar objectCount={objects.length}>
-        {objects.map(object => <ObjectsSidebarItem object={object} key={object.id} />)}
+        {objects.map(object => (
+          <ObjectsSidebarItem object={object} key={object.id} />
+        ))}
       </ObjectsSidebar>
     }
   />

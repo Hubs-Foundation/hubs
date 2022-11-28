@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React from "react";
 import { SceneLink, OwnedFileImage, OwnedFileSizeField, ConditionalReferenceField } from "./fields";
 import { ApproveSceneButton } from "./approve-buttons";

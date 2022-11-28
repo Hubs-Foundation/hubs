@@ -5,7 +5,7 @@ const SCOPES_ENDPOINT = getReticulumFetchUrl("/api/v1/credentials/scopes");
 const CREDENTIALS_ENDPOINT_URL = getReticulumFetchUrl(ENDPOINT);
 
 export async function fetchMyTokens() {
-  return fetchReticulumAuthenticated(ENDPOINT).then(function(tokens) {
+  return fetchReticulumAuthenticated(ENDPOINT).then(function (tokens) {
     return tokens.credentials;
   });
 }

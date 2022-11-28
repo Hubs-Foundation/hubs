@@ -13,10 +13,7 @@ import { useIntl } from "react-intl";
 import PermissionMessage from "./permission-message";
 import { useRole } from "./room/useRole";
 
-export const presets = [
-  "InRoom",
-  "Notifications"
-];
+export const presets = ["InRoom", "Notifications"];
 
 export function PresenceLog({ entries, preset, hubId, history, presences, onViewProfile, include, exclude, ...rest }) {
   const intl = useIntl();
@@ -84,14 +81,16 @@ export function PresenceLog({ entries, preset, hubId, history, presences, onView
           />
         );
       case "permission":
-        return (!isMod || e.sessionId !== NAF.clientId) && (
-          <PermissionMessage
-            key={e.key}
-            permission={e.body.permission}
-            className={classNames(entryClasses, styles.permission)}
-            body={e.body}
-            isMod={isMod && (e.sessionId === NAF.clientId)}
-          />
+        return (
+          (!isMod || e.sessionId !== NAF.clientId) && (
+            <PermissionMessage
+              key={e.key}
+              permission={e.body.permission}
+              className={classNames(entryClasses, styles.permission)}
+              body={e.body}
+              isMod={isMod && e.sessionId === NAF.clientId}
+            />
+          )
         );
       default: {
         const systemMessage = formatSystemMessage(e, intl);
@@ -106,11 +105,12 @@ export function PresenceLog({ entries, preset, hubId, history, presences, onView
       }
     }
   };
-  
-  return (<div className={classNames( 
-      styles.presenceLog,
-      styles["presenceLog" + preset]
-    )} {...rest}>{entries.map(domForEntry)}</div>);
+
+  return (
+    <div className={classNames(styles.presenceLog, styles["presenceLog" + preset])} {...rest}>
+      {entries.map(domForEntry)}
+    </div>
+  );
 }
 
 PresenceLog.propTypes = {

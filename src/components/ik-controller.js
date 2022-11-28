@@ -57,7 +57,7 @@ const HAND_ROTATIONS = {
   right: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, -Math.PI / 2, 0))
 };
 
-const angleOnXZPlaneBetweenMatrixRotations = (function() {
+const angleOnXZPlaneBetweenMatrixRotations = (function () {
   const XZ_PLANE_NORMAL = new THREE.Vector3(0, -1, 0);
   const v1 = new THREE.Vector3();
   const v2 = new THREE.Vector3();
@@ -166,10 +166,7 @@ AFRAME.registerComponent("ik-controller", {
     this.middleEyeMatrix.makeTranslation(this.middleEyePosition.x, this.middleEyePosition.y, this.middleEyePosition.z);
     this.invMiddleEyeToHead = this.middleEyeMatrix.copy(this.middleEyeMatrix).invert();
 
-    this.invHipsToHeadVector
-      .addVectors(this.chest.position, this.neck.position)
-      .add(this.head.position)
-      .negate();
+    this.invHipsToHeadVector.addVectors(this.chest.position, this.neck.position).add(this.head.position).negate();
   },
 
   tick(time, dt) {
@@ -322,7 +319,7 @@ AFRAME.registerComponent("ik-controller", {
     this._updateIsInView();
   },
 
-  _updateIsInView: (function() {
+  _updateIsInView: (function () {
     const frustum = new THREE.Frustum();
     const frustumMatrix = new THREE.Matrix4();
     const tmpPos = new THREE.Vector3();
@@ -332,7 +329,7 @@ AFRAME.registerComponent("ik-controller", {
       return frustum.containsPoint(pos);
     };
 
-    return function() {
+    return function () {
       if (!this.playerCamera || this.data.alwaysUpdate) return;
 
       const camera = this.ikRoot.camera.object3D;

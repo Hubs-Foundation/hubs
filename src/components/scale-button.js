@@ -1,7 +1,7 @@
 import { setMatrixWorld } from "../utils/three-utils";
 import { TRANSFORM_MODE } from "./transform-object-button";
 
-const calculatePlaneMatrix = (function() {
+const calculatePlaneMatrix = (function () {
   const planeMatrix = new THREE.Matrix4();
   const planeUp = new THREE.Vector3();
   const planeForward = new THREE.Vector3();

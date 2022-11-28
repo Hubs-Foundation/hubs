@@ -39,15 +39,12 @@ export function RoomSettingsSidebar({
   const entryMode = watch("entry_mode");
   const spawnAndMoveMedia = watch("member_permissions.spawn_and_move_media");
 
-  useEffect(
-    () => {
-      if (!spawnAndMoveMedia) {
-        setValue("member_permissions.spawn_camera", false, { shouldDirty: true });
-        setValue("member_permissions.pin_objects", false, { shouldDirty: true });
-      }
-    },
-    [spawnAndMoveMedia, setValue]
-  );
+  useEffect(() => {
+    if (!spawnAndMoveMedia) {
+      setValue("member_permissions.spawn_camera", false, { shouldDirty: true });
+      setValue("member_permissions.pin_objects", false, { shouldDirty: true });
+    }
+  }, [spawnAndMoveMedia, setValue]);
 
   return (
     <Sidebar

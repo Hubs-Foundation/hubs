@@ -24,7 +24,7 @@ export class NameTagVisibilitySystem {
     this.components.splice(this.components.indexOf(component), 1);
   }
 
-  tick = (function() {
+  tick = (function () {
     const worldPos = new THREE.Vector3();
     const avatarRigWorldPos = new THREE.Vector3();
     return function tick() {

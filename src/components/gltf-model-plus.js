@@ -274,7 +274,10 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
 
     if (entityComponents && el) {
       for (const prop in entityComponents) {
-        if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+        if (
+          Object.prototype.hasOwnProperty.call(entityComponents, prop) &&
+          Object.prototype.hasOwnProperty.call(AFRAME.GLTFModelPlus.components, prop)
+        ) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
           await inflator(
             el,
@@ -291,7 +294,10 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
 
     if (materialComponents && el) {
       for (const prop in materialComponents) {
-        if (materialComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+        if (
+          Object.prototype.hasOwnProperty.call(materialComponents, prop) &&
+          Object.prototype.hasOwnProperty.call(AFRAME.GLTFModelPlus.components, prop)
+        ) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
           await inflator(
             el,
@@ -426,7 +432,7 @@ class GLTFHubsPlugin {
     if (
       parser.json.extensions &&
       parser.json.extensions.MOZ_hubs_components &&
-      parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
+      Object.prototype.hasOwnProperty.call(parser.json.extensions.MOZ_hubs_components, "version")
     ) {
       version = parser.json.extensions.MOZ_hubs_components.version;
     }

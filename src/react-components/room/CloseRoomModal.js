@@ -11,16 +11,13 @@ export function CloseRoomModal({ roomName, onClose, onConfirm }) {
   const [confirmText, setConfirmText] = useState("");
   const [showIsNotMatchError, setShowIsNotMatchError] = useState(false);
 
-  const onClickConfirm = useCallback(
-    () => {
-      if (confirmText.toLowerCase() === roomName.toLowerCase()) {
-        onConfirm();
-      } else {
-        setShowIsNotMatchError(true);
-      }
-    },
-    [onConfirm, confirmText, roomName]
-  );
+  const onClickConfirm = useCallback(() => {
+    if (confirmText.toLowerCase() === roomName.toLowerCase()) {
+      onConfirm();
+    } else {
+      setShowIsNotMatchError(true);
+    }
+  }, [onConfirm, confirmText, roomName]);
 
   return (
     <Modal

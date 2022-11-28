@@ -96,11 +96,7 @@ AFRAME.registerComponent("follow-in-fov", {
     this.snappedRot.set(x, y, z, target.rotation.order);
     this.snappedQ.setFromEuler(this.snappedRot);
 
-    this.snappedXForm.compose(
-      target.position,
-      this.snappedQ,
-      target.scale
-    );
+    this.snappedXForm.compose(target.position, this.snappedQ, target.scale);
 
     to.multiplyMatrices(target.parent.matrixWorld, this.snappedXForm);
   }

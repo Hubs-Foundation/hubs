@@ -7,7 +7,7 @@ const modeMod = {
   [WheelEvent.DOM_DELTA_PAGE]: 2
 };
 
-const isInModal = (function() {
+const isInModal = (function () {
   let uiRoot;
   return function isInModal() {
     // TODO: Tech debt. Find better way to handle this state that is available in react.

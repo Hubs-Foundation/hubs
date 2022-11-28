@@ -17,13 +17,14 @@ let turnRightKey = "E";
 if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayoutMap) {
   window.navigator.keyboard
     .getLayoutMap()
-    .then(function(map) {
-      moveKeys = `${map.get("KeyW") || "W"} ${map.get("KeyA") || "A"} ${map.get("KeyS") || "S"} ${map.get("KeyD") ||
-        "D"}`.toUpperCase();
+    .then(function (map) {
+      moveKeys = `${map.get("KeyW") || "W"} ${map.get("KeyA") || "A"} ${map.get("KeyS") || "S"} ${
+        map.get("KeyD") || "D"
+      }`.toUpperCase();
       turnLeftKey = map.get("KeyQ")?.toUpperCase();
       turnRightKey = map.get("KeyE")?.toUpperCase();
     })
-    .catch(function(e) {
+    .catch(function (e) {
       // This occurs on Chrome 93 when the Hubs page is in an iframe
       console.warn(`Unable to remap keyboard: ${e}`);
     });
@@ -94,15 +95,11 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
   const [embeddedTipDismissed, setEmbeddedTipDismissed] = useState(false);
   const [onboardingTipId, setOnboardingTipId] = useState(null);
 
-  const onSkipOnboarding = useCallback(
-    () => {
-      scene.systems.tips.skipTips();
-    },
-    [scene]
-  );
+  const onSkipOnboarding = useCallback(() => {
+    scene.systems.tips.skipTips();
+  }, [scene]);
 
-  useEffect(
-    () => {
+  useEffect(() => {
     function onSceneTipChanged({ detail: tipId }) {
       setOnboardingTipId(tipId);
     }
@@ -110,9 +107,7 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
     scene.addEventListener("tip-changed", onSceneTipChanged);
 
     setOnboardingTipId(scene.systems.tips.activeTip);
-  },
-  [scene]
-  );
+  }, [scene]);
 
   const discordBridges = presences ? discordBridgesForPresences(presences) : [];
   const isBroadcasting = discordBridges.length > 0;

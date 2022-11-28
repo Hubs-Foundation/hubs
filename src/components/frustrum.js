@@ -7,16 +7,16 @@ AFRAME.registerComponent("frustrum", {
     culled: { type: "boolean", default: true }
   },
 
-  update: function() {
+  update: function () {
     this.updateDescendants(this.data.culled);
   },
 
-  remove: function() {
+  remove: function () {
     this.updateDescendants(true);
   },
 
-  updateDescendants: function(culled) {
-    this.el.object3D.traverse(function(node) {
+  updateDescendants: function (culled) {
+    this.el.object3D.traverse(function (node) {
       if (!(node instanceof THREE.Mesh)) {
         return;
       }

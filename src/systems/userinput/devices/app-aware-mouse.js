@@ -3,16 +3,12 @@ import { anyEntityWith } from "../../../utils/bit-utils";
 import { paths } from "../paths";
 import { Pose } from "../pose";
 
-const calculateCursorPose = (function() {
+const calculateCursorPose = (function () {
   const origin = new THREE.Vector3();
   const direction = new THREE.Vector3();
-  return function(cursorPose, camera, coords) {
+  return function (cursorPose, camera, coords) {
     origin.setFromMatrixPosition(camera.matrixWorld);
-    direction
-      .set(coords[0], coords[1], 0.5)
-      .unproject(camera)
-      .sub(origin)
-      .normalize();
+    direction.set(coords[0], coords[1], 0.5).unproject(camera).sub(origin).normalize();
     cursorPose.fromOriginAndDirection(origin, direction);
     return cursorPose;
   };

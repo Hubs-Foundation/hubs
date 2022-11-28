@@ -123,12 +123,14 @@ class Support extends React.Component {
           {this.state.showDetails && (
             <table className={styles.details}>
               <tbody>
-                {platformSupport.sort((a, b) => (a.supported && !b.supported ? 1 : -1)).map(s => (
-                  <tr key={s.name}>
-                    <td>{s.name}</td>
-                    <td>{s.supported ? "supported" : "unsupported"}</td>
-                  </tr>
-                ))}
+                {platformSupport
+                  .sort((a, b) => (a.supported && !b.supported ? 1 : -1))
+                  .map(s => (
+                    <tr key={s.name}>
+                      <td>{s.name}</td>
+                      <td>{s.supported ? "supported" : "unsupported"}</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           )}

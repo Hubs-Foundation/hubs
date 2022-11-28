@@ -9,7 +9,7 @@ export default {
   title: "Room/Notifications",
   parameters: {
     layout: "fullscreen"
-  },
+  }
 };
 
 const entryClasses = {
@@ -49,24 +49,28 @@ const entries = [
       status: false
     }
   }
-]
+];
 
 export const Base = () => (
   <RoomLayout
     viewport={
       <NotificationsContainer>
-        <div style={{ alignItems: "center"}} className={classNames( 
-          styles.presenceLog,
-          styles["presenceLogPermission"]
-        )}>{entries.map(entry => {
-          return (<PermissionMessage
-            key={entry.key}
-            permission={entry.permission}
-            className={classNames(entryClasses, styles.permission)}
-            body={entry.body}
-            isMod={false}
-          />)
-        })}</div>
+        <div
+          style={{ alignItems: "center" }}
+          className={classNames(styles.presenceLog, styles["presenceLogPermission"])}
+        >
+          {entries.map(entry => {
+            return (
+              <PermissionMessage
+                key={entry.key}
+                permission={entry.permission}
+                className={classNames(entryClasses, styles.permission)}
+                body={entry.body}
+                isMod={false}
+              />
+            );
+          })}
+        </div>
       </NotificationsContainer>
     }
   />

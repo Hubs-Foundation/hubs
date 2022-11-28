@@ -4,16 +4,16 @@
  * @component log-events
  */
 AFRAME.registerComponent("log-events", {
-  init: function() {
+  init: function () {
     const el = this.el;
     const log = this.log.bind(this);
     const origDispatch = this.el.dispatchEvent;
-    this.el.dispatchEvent = function() {
+    this.el.dispatchEvent = function () {
       log(Array.from(arguments));
       return origDispatch.apply(el, arguments);
     };
   },
-  log: function([e]) {
+  log: function ([e]) {
     if (["componentchanged"].includes(e.type)) return;
     let firstObject = true;
     const replacer = (k, x) => {
@@ -41,28 +41,28 @@ AFRAME.registerComponent("lifecycle-checker", {
     name: { type: "string" },
     tick: { default: false }
   },
-  init: function() {
+  init: function () {
     this.log("init");
   },
-  update: function() {
+  update: function () {
     this.log("update");
   },
-  tick: function() {
+  tick: function () {
     if (this.data.tick) {
       this.log("tick");
     }
   },
-  remove: function() {
+  remove: function () {
     this.log("remove");
   },
-  pause: function() {
+  pause: function () {
     this.log("pause");
   },
-  play: function() {
+  play: function () {
     this.log("play");
   },
 
-  log: function(method) {
+  log: function (method) {
     console.info(`lifecycle-checker:${this.data.name} ${method}`);
   }
 });

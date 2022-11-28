@@ -1,10 +1,10 @@
 AFRAME.registerComponent("replay", {
-  init: function() {
+  init: function () {
     this.playhead = 0;
     this.poseIndex = 0;
   },
 
-  tick: function(t, dt) {
+  tick: function (t, dt) {
     let overflow = false;
     while (!overflow && this.playhead >= this.poses[this.poseIndex].timestamp) {
       this.el.setAttribute("position", this.poses[this.poseIndex].position);

@@ -350,11 +350,11 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
-  return jsxInflators.hasOwnProperty(name);
+  return Object.prototype.hasOwnProperty.call(jsxInflators, name);
 }
 
 export function gltfInflatorExists(name: string): name is keyof GLTFComponentData {
-  return gltfInflators.hasOwnProperty(name);
+  return Object.prototype.hasOwnProperty.call(gltfInflators, name);
 }
 
 export function renderAsEntity(world: HubsWorld, entityDef: EntityDef) {

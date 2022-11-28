@@ -21,7 +21,7 @@
     "build": "npm run check && rimraf ./dist && webpack --mode=production",
     "bundle-analyzer": "webpack serve --mode=production --env dev=1 --env bundleAnalyzer=1",
     "doc": "node ./scripts/doc/build.js",
-    "prettier": "prettier --write '*.js' 'src/**/*.js'",
+    "prettier": "prettier --write '*.js' 'src/**/*.js' 'scripts/**/*.js'",
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
     "lint:html": "htmlhint 'src/**/*.html' && node scripts/indent-linter.js 'src/**/*.html'",
     "lint": "npm run lint:js && npm run lint:html",

@@ -68,67 +68,58 @@ export function Popover({
   const closePopover = useCallback(() => setVisible(false), [setVisible]);
   const togglePopover = useCallback(() => setVisible(visible => !visible), [setVisible]);
 
-  useEffect(
-    () => {
-      if (!popoverApiRef) {
+  useEffect(() => {
+    if (!popoverApiRef) {
+      return;
+    }
+
+    popoverApiRef.current = {
+      openPopover,
+      closePopover,
+      togglePopover
+    };
+  }, [popoverApiRef, openPopover, closePopover, togglePopover]);
+
+  useEffect(() => {
+    const onClick = e => {
+      if (
+        (referenceElement && referenceElement.contains(e.target)) ||
+        (popperElement && popperElement.contains(e.target))
+      ) {
         return;
       }
 
-      popoverApiRef.current = {
-        openPopover,
-        closePopover,
-        togglePopover
-      };
-    },
-    [popoverApiRef, openPopover, closePopover, togglePopover]
-  );
+      setVisible(false);
+    };
 
-  useEffect(
-    () => {
-      const onClick = e => {
-        if (
-          (referenceElement && referenceElement.contains(e.target)) ||
-          (popperElement && popperElement.contains(e.target))
-        ) {
-          return;
-        }
-
+    const onKeyDown = e => {
+      if (e.key === "Escape") {
         setVisible(false);
-      };
-
-      const onKeyDown = e => {
-        if (e.key === "Escape") {
-          setVisible(false);
-        }
-      };
-
-      if (visible) {
-        window.addEventListener("mousedown", onClick);
-        window.addEventListener("keydown", onKeyDown);
       }
+    };
 
-      return () => {
-        window.removeEventListener("mousedown", onClick);
-        window.removeEventListener("keydown", onKeyDown);
-      };
-    },
-    [visible, popperElement, referenceElement, setVisible]
-  );
+    if (visible) {
+      window.addEventListener("mousedown", onClick);
+      window.addEventListener("keydown", onKeyDown);
+    }
 
-  useEffect(
-    () => {
-      if (visible && fullscreen) {
-        document.body.classList.add(styles.fullscreenBody);
-      } else {
-        document.body.classList.remove(styles.fullscreenBody);
-      }
+    return () => {
+      window.removeEventListener("mousedown", onClick);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [visible, popperElement, referenceElement, setVisible]);
 
-      return () => {
-        document.body.classList.remove(styles.fullscreenBody);
-      };
-    },
-    [fullscreen, visible]
-  );
+  useEffect(() => {
+    if (visible && fullscreen) {
+      document.body.classList.add(styles.fullscreenBody);
+    } else {
+      document.body.classList.remove(styles.fullscreenBody);
+    }
+
+    return () => {
+      document.body.classList.remove(styles.fullscreenBody);
+    };
+  }, [fullscreen, visible]);
 
   return (
     <>
@@ -180,7 +171,13 @@ Popover.propTypes = {
   content: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
   disableFullscreen: PropTypes.bool,
   popoverApiRef: PropTypes.object,
-  popoverClass: PropTypes.string
+  popoverClass: PropTypes.string,
+  showHeader: PropTypes.bool,
+  offsetSkidding: PropTypes.number,
+  offsetDistance: PropTypes.number,
+  isVisible: PropTypes.bool,
+  onChangeVisible: PropTypes.func,
+  arrowClass: PropTypes.string
 };
 
 Popover.defaultProps = {

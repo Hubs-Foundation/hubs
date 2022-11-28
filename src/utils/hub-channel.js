@@ -103,9 +103,9 @@ export default class HubChannel extends EventTarget {
         onSync: this.presence.caller.onSync
       };
 
-      this.presence.onJoin(function() {});
-      this.presence.onLeave(function() {});
-      this.presence.onSync(function() {});
+      this.presence.onJoin(function () {});
+      this.presence.onLeave(function () {});
+      this.presence.onSync(function () {});
     }
 
     this.channel = await migrateChannelToSocket(this.channel, socket, params);
@@ -131,9 +131,9 @@ export default class HubChannel extends EventTarget {
         onSync: this.presence.caller.onSync
       };
 
-      this.presence.onJoin(function() {});
-      this.presence.onLeave(function() {});
-      this.presence.onSync(function() {});
+      this.presence.onJoin(function () {});
+      this.presence.onLeave(function () {});
+      this.presence.onSync(function () {});
     }
 
     this.channel = newChannel;
@@ -405,10 +405,7 @@ export default class HubChannel extends EventTarget {
       payload.promotion_token = promotionToken;
     }
     return new Promise((resolve, reject) => {
-      this.channel
-        .push("pin", payload)
-        .receive("ok", resolve)
-        .receive("error", reject);
+      this.channel.push("pin", payload).receive("ok", resolve).receive("error", reject);
     });
   };
 

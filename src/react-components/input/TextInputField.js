@@ -4,6 +4,7 @@ import { InputField } from "./InputField";
 import { TextInput } from "./TextInput";
 import { useId } from "./useId";
 
+/* eslint-disable-next-line react/display-name */
 export const TextInputField = memo(
   forwardRef(({ className, error, description, inputClassName, label, fullWidth, ...rest }, ref) => {
     const id = useId();
