@@ -664,6 +664,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     gltfUrl = fileMap["scene.gtlf"];
   }
 
+  const useRangeRequests = qsTruthy("rangerequests");
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new GLTFLoader(loadingManager);
@@ -676,8 +677,13 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     .register(
       parser =>
         new GLTFLodExtension(parser, {
-          loadingMode: "progressive",
+          loadingMode: useRangeRequests ? "progressive" : "all",
           onLoadMesh: (lod, mesh, level, lowestLevel) => {
+            // Nothing to do for "all" mode
+            if (!useRangeRequests) {
+              return mesh;
+            }
+
             // Higher levels are progressively loaded on demand.
             // So some post-loading processings done in gltf-model-plus and media-loader
             // need to be done here now.
@@ -787,7 +793,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 
       resolve(gltf);
     };
-    if (qsTruthy("rangerequests")) {
+    if (useRangeRequests) {
       GLBRangeRequests.load(gltfUrl, gltfLoader, onLoad, onProgress, reject);
     } else {
       gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
