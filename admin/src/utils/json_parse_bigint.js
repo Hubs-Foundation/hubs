@@ -269,7 +269,7 @@ export default (function () {
           key = string();
           white();
           next(":");
-          if (Object.hasOwnProperty.call(object, key)) {
+          if (Object.prototype.hasOwnProperty.call(object, key)) {
             error('Duplicate key "' + key + '"');
           }
           object[key] = value();

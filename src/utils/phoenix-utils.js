@@ -31,7 +31,7 @@ export function hubUrl(hubId, extraParams, slug, waypoint) {
   }
 
   for (const key in extraParams) {
-    if (extraParams.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(extraParams, key)) {
       url.searchParams.set(key, extraParams[key]);
     }
   }

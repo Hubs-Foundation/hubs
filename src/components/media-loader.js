@@ -542,7 +542,7 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.addEventListener("model-error", this.onError, { once: true });
-        if (this.data.mediaOptions.hasOwnProperty("applyGravity")) {
+        if (Object.prototype.hasOwnProperty.call(this.data.mediaOptions, "applyGravity")) {
           this.el.setAttribute("floaty-object", {
             modifyGravityOnRelease: !this.data.mediaOptions.applyGravity
           });
