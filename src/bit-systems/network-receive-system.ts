@@ -12,7 +12,8 @@ import {
   localClientID,
   networkedQuery,
   pendingMessages,
-  pendingParts
+  pendingParts,
+  softRemovedEntities
 } from "./networking";
 
 function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateMessage {
@@ -33,7 +34,13 @@ export function networkReceiveSystem(world: HubsWorld) {
 
       networkedEntities
         .filter(eid => Networked.creator[eid] === partingClientId)
-        .forEach(eid => removeEntity(world, eid));
+        .forEach(eid => {
+          removeEntity(world, eid);
+          // Don't send delete messages about these entities,
+          // because the user might rejoin (and re-send creates
+          // with the same network ids).
+          softRemovedEntities.add(eid);
+        });
     });
   }
 
@@ -75,7 +82,6 @@ export function networkReceiveSystem(world: HubsWorld) {
       const nid = APP.getSid(nidString);
 
       if (world.deletedNids.has(nid)) {
-        // TODO we may need to allow this for reconnects
         console.log(`Received a create message for an entity I've already deleted. Skipping ${nidString}`);
       } else if (world.nid2eid.has(nid)) {
         console.log(`Received create message for entity I already created. Skipping ${nidString}`);
@@ -173,14 +179,15 @@ export function networkReceiveSystem(world: HubsWorld) {
     for (let j = 0; j < message.deletes.length; j += 1) {
       const nid = APP.getSid(message.deletes[j]);
       if (world.deletedNids.has(nid)) continue;
-
       world.deletedNids.add(nid);
-      const eid = world.nid2eid.get(nid)!;
-      createMessageDatas.delete(eid);
-      world.nid2eid.delete(nid);
-      removeEntity(world, eid);
 
-      console.log("Deleting ", APP.getString(nid));
+      const eid = world.nid2eid.get(nid);
+      if (eid) {
+        createMessageDatas.delete(eid);
+        world.nid2eid.delete(nid);
+        removeEntity(world, eid);
+        console.log("Deleting ", APP.getString(nid));
+      }
     }
   }
   pendingMessages.length = 0;
