@@ -10,7 +10,8 @@ import {
   isNetworkInstantiated,
   localClientID,
   networkedQuery,
-  pendingJoins
+  pendingJoins,
+  softRemovedEntities
 } from "./networking";
 
 const ticksPerSecond = 12;
@@ -75,12 +76,19 @@ export function networkSendSystem(world: HubsWorld) {
     pinMessages.length = 0;
   }
 
-  // Tell everyone about entities I created, entities I own, and entities that were deleted
+  // Tell everyone about entities I created, entities I own, and entities that I deleted
   {
-    // Note: Many people may send delete messages about the same entity
-    const deletedEntities = exitedNetworkedQuery(world).filter(eid => {
-      return !world.deletedNids.has(Networked.id[eid]) && isNetworkInstantiated(eid);
+    const removedEntities = exitedNetworkedQuery(world).filter(isNetworkInstantiated);
+    const deletedEntities = removedEntities.filter(eid => {
+      return (
+        // Don't send delete messages for entities that were not explicitly deleted.
+        !softRemovedEntities.has(eid) &&
+        // Rebroadcast delete messages of entities I created, in case
+        // a user who just joined missed a delete message I received.
+        (!world.deletedNids.has(Networked.id[eid]) || isCreatedByMe(eid))
+      );
     });
+
     const message = messageFor(
       world,
       enteredNetworkedQuery(world).filter(isCreatedByMe),
@@ -92,9 +100,14 @@ export function networkSendSystem(world: HubsWorld) {
     if (message) NAF.connection.broadcastDataGuaranteed("nn", message);
 
     deletedEntities.forEach(eid => {
-      createMessageDatas.delete(eid);
       world.deletedNids.add(Networked.id[eid]);
+    });
+
+    removedEntities.forEach(eid => {
+      createMessageDatas.delete(eid);
       world.nid2eid.delete(Networked.id[eid]);
     });
+
+    softRemovedEntities.clear();
   }
 }
