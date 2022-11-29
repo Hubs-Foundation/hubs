@@ -162,6 +162,9 @@ export const guessContentType = url => {
 };
 
 const originIsHubsServer = new Map();
+// HACK hubs.mozilla.com is now technically not a "hub" root, but we route existing links as if it is, so treat it as one.
+originIsHubsServer.set("http://hubs.mozilla.com", true);
+originIsHubsServer.set("https://hubs.mozilla.com", true);
 async function isHubsServer(url) {
   if (!url) return false;
   if (!url.startsWith("http")) {
