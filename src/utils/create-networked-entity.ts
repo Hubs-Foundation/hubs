@@ -34,7 +34,7 @@ export function createNetworkedEntityFromRemote(
       const eid = o.eid;
       Networked.id[eid] = APP.getSid(i === 0 ? rootNid : `${rootNid}.${i}`);
       APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = APP.getSid(creator);
+      Networked.creator[eid] = APP.getSid(i === 0 ? creator : rootNid);
       Networked.owner[eid] = APP.getSid(owner);
       if (NAF.clientId === owner) takeOwnership(world, eid);
       i += 1;

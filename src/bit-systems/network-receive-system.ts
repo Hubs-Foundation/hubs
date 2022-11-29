@@ -2,13 +2,13 @@ import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, r
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { createNetworkedEntityFromRemote } from "../utils/create-networked-entity";
-import { networkableComponents, NetworkSchema, schemas, StoredComponent } from "../utils/network-schemas";
+import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
 import type { CursorBufferUpdateMessage, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import {
   createMessageDatas,
-  isNetworkInstantiated,
+  isCreatedByMe,
   localClientID,
   networkedQuery,
   pendingMessages,
@@ -32,7 +32,7 @@ export function networkReceiveSystem(world: HubsWorld) {
       partedClientIds.add(partingClientId);
 
       networkedEntities
-        .filter(eid => isNetworkInstantiated(eid) && Networked.creator[eid] === partingClientId)
+        .filter(eid => Networked.creator[eid] === partingClientId)
         .forEach(eid => removeEntity(world, eid));
     });
   }
