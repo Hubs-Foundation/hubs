@@ -55,9 +55,14 @@ export interface HubsWorld extends IWorld {
 
 window.$B = bitecs;
 
+interface HubDescription {
+  hub_id: string;
+}
+
 export class App {
   scene?: AScene;
   hubChannel?: HubChannel;
+  hub?: HubDescription;
   mediaDevicesManager?: MediaDevicesManager;
   entryManager?: SceneEntryManager;
   messageDispatch?: any;

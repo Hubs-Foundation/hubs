@@ -18,14 +18,11 @@ export async function tryPin(world: HubsWorld, eid: EntityID, hubChannel: HubCha
 
   const nid = APP.getString(Networked.id[eid])!;
 
-  const message = messageFor(world, [eid], [eid], [eid], [], false)!;
-  pinMessages.push(message);
-
   const storableMessage = messageForStorage(world, [eid], [eid], []);
   const fileId = null;
   const fileAccessToken = null;
   const promotionToken = null;
-  console.log("Pinning:", { nid, message, storableMessage });
+  console.log("Pinning:", { nid, storableMessage });
   await hubChannel.pin(nid, storableMessage, fileId, fileAccessToken, promotionToken);
 }
 

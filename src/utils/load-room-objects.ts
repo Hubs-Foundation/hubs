@@ -15,8 +15,8 @@ type StoredRoomData = {
   extensionsUsed: ["HUBS_components"];
 };
 
-function isStorableMessage(node: any) {
-  return !!(node.creates && node.updates && node.deletes);
+export function isStorableMessage(node: any): node is StorableMessage {
+  return !!(node.version && node.creates && node.updates && node.deletes);
 }
 
 async function fetchStoredRoomMessages(hubId: string) {
@@ -29,10 +29,12 @@ async function fetchStoredRoomMessages(hubId: string) {
 
 export async function loadStoredRoomData(hubId: string) {
   const messages = await fetchStoredRoomMessages(hubId);
-  messages.forEach(m => {
-    m.fromClientId = "reticulum";
-    m.hubId = hubId;
-    console.log("queuing stored room data message", m);
-    pendingMessages.push(m);
-  });
+  if (hubId === APP.hub!.hub_id) {
+    messages.forEach(m => {
+      m.fromClientId = "reticulum";
+      m.hubId = hubId;
+      console.log("queuing stored room data message", m);
+      pendingMessages.push(m);
+    });
+  }
 }
