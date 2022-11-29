@@ -31,36 +31,33 @@ export function useVolumeMeter({ analyser, update, updateRate = 50 }) {
   const movingAvgRef = useRef();
   const meterRef = useRef({ levels: [], volume: 0, prevVolume: 0, max: 0 });
 
-  useEffect(
-    () => {
-      if (!update) return;
-      if (!movingAvgRef.current) {
-        movingAvgRef.current = MovingAverage(updateRate * 2);
-      }
+  useEffect(() => {
+    if (!update) return;
+    if (!movingAvgRef.current) {
+      movingAvgRef.current = MovingAverage(updateRate * 2);
+    }
 
-      analyser.fftSize = 32;
-      meterRef.current.levels = new Uint8Array(analyser.fftSize);
+    analyser.fftSize = 32;
+    meterRef.current.levels = new Uint8Array(analyser.fftSize);
 
-      let prevVolume = 0;
-      const timout = setInterval(() => {
-        updateVolume(analyser, meterRef.current);
+    let prevVolume = 0;
+    const timout = setInterval(() => {
+      updateVolume(analyser, meterRef.current);
 
-        meterRef.current.max = Math.max(meterRef.current.volume, meterRef.current.max);
+      meterRef.current.max = Math.max(meterRef.current.volume, meterRef.current.max);
 
-        // We use a moving average to smooth out the visual animation or else it would twitch too fast for
-        // the css renderer to keep up.
-        movingAvgRef.current.push(Date.now(), meterRef.current.volume);
-        const average = movingAvgRef.current.movingAverage();
-        const nextVolume = meterRef.current.max === 0 ? 0 : average / meterRef.current.max;
-        const volume = Math.max(Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume, 0.1);
-        prevVolume = volume;
-        update(volume);
-      }, updateRate);
+      // We use a moving average to smooth out the visual animation or else it would twitch too fast for
+      // the css renderer to keep up.
+      movingAvgRef.current.push(Date.now(), meterRef.current.volume);
+      const average = movingAvgRef.current.movingAverage();
+      const nextVolume = meterRef.current.max === 0 ? 0 : average / meterRef.current.max;
+      const volume = Math.max(Math.abs(prevVolume - nextVolume) > 0.05 ? nextVolume : prevVolume, 0.1);
+      prevVolume = volume;
+      update(volume);
+    }, updateRate);
 
-      return () => {
-        clearInterval(timout);
-      };
-    },
-    [analyser, update, updateRate]
-  );
+    return () => {
+      clearInterval(timout);
+    };
+  }, [analyser, update, updateRate]);
 }

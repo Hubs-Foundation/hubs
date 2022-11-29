@@ -72,8 +72,7 @@ export function getCurrentAudioSettings(el) {
   );
 
   if (!APP.hub.member_permissions || !APP.hub.member_permissions.voice_chat) {
-    if (!APP.moderatorAudioSource.has(el))
-      settings.gain = 0;
+    if (!APP.moderatorAudioSource.has(el)) settings.gain = 0;
   } else if (APP.clippingState.has(el) || APP.mutedState.has(el)) {
     settings.gain = 0;
   } else if (APP.gainMultipliers.has(el)) {

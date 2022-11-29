@@ -45,30 +45,30 @@ function markTipFinished(tip) {
 }
 
 const VALIDATORS = {
-  look: function(userinput) {
+  look: function (userinput) {
     const cameraDelta = userinput.get(
       isMobile ? paths.device.touchscreen.touchCameraDelta : paths.device.smartMouse.cameraDelta
     );
     return cameraDelta ? FINISH : VALID;
   },
-  locomotion: function(userinput) {
+  locomotion: function (userinput) {
     const accel = userinput.get(paths.actions.characterAcceleration);
 
     // User moved
     return accel && (accel[0] !== 0 || accel[1] !== 0) ? FINISH : VALID;
   },
-  turning: function(userinput) {
+  turning: function (userinput) {
     if (userinput.get(paths.actions.snapRotateLeft) || userinput.get(paths.actions.snapRotateRight)) return FINISH;
     return VALID;
   },
-  invite: function(_userinput, scene, hub) {
+  invite: function (_userinput, scene, hub) {
     if (hub && hub.entry_mode === "invite") return INVALID;
     return scene.is("copresent") ? FINISH : VALID;
   }
 };
 
 AFRAME.registerSystem("tips", {
-  init: function() {
+  init: function () {
     this.activeTip = null;
     this._performStep = this._performStep.bind(this);
 
@@ -77,7 +77,7 @@ AFRAME.registerSystem("tips", {
     }
   },
 
-  resetTips: function() {
+  resetTips: function () {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
     localStorageCache = null;
     window.APP.store.resetTipActivityFlags();
@@ -86,14 +86,14 @@ AFRAME.registerSystem("tips", {
     finished = false;
   },
 
-  skipTips: function() {
+  skipTips: function () {
     for (let i = 0; i < platformTips.length; i++) {
       const tipId = platformTips[i];
       markTipFinished(tipId);
     }
   },
 
-  tick: function() {
+  tick: function () {
     if (isMobileVR) return; // Optimization for now, don't bother with this on mobile VR until we have real tips
 
     if (!this._userinput) {
@@ -113,7 +113,7 @@ AFRAME.registerSystem("tips", {
     }
   },
 
-  _performStep: function(tips) {
+  _performStep: function (tips) {
     if (finished) return;
 
     let chosenTip = null;

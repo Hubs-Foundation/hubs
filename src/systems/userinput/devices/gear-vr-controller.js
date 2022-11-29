@@ -15,8 +15,14 @@ const m = new THREE.Matrix4();
 export class GearVRControllerDevice {
   constructor(gamepad) {
     this.gamepad = gamepad;
-    this.buttonMap = [{ name: "touchpad", buttonId: 0 }, { name: "trigger", buttonId: 1 }];
-    this.axisMap = [{ name: "touchpadX", axisId: 0 }, { name: "touchpadY", axisId: 1 }];
+    this.buttonMap = [
+      { name: "touchpad", buttonId: 0 },
+      { name: "trigger", buttonId: 1 }
+    ];
+    this.axisMap = [
+      { name: "touchpadX", axisId: 0 },
+      { name: "touchpadY", axisId: 1 }
+    ];
 
     this.rayObjectRotation = new THREE.Quaternion();
     this.selector = `#player-${gamepad.hand}-controller`;

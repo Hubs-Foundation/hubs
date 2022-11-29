@@ -106,19 +106,19 @@ AFRAME.registerComponent("hand-pose-controller", {
     eventSrc: { type: "selector" },
     networkedAvatar: { type: "selector" }
   },
-  init: function() {
+  init: function () {
     this.setHandPose = this.setHandPose.bind(this);
   },
 
-  play: function() {
+  play: function () {
     this.data.eventSrc.addEventListener("hand-pose", this.setHandPose);
   },
 
-  pause: function() {
+  pause: function () {
     this.data.eventSrc.removeEventListener("hand-pose", this.setHandPose);
   },
 
-  setHandPose: function(evt) {
+  setHandPose: function (evt) {
     this.data.networkedAvatar.setAttribute(
       "networked-avatar",
       `${this.id}_hand_pose`,

@@ -14,7 +14,7 @@ import {
   VideoMenuItem
 } from "../bit-components";
 import { timeFmt } from "../components/media-video";
-import { takeOwnership } from "../systems/netcode";
+import { takeOwnership } from "../utils/take-ownership";
 import { paths } from "../systems/userinput/paths";
 import { animate } from "../utils/animate";
 import { coroutine } from "../utils/coroutine";

@@ -3,6 +3,7 @@ import classNames from "classnames";
 import PropTypes from "prop-types";
 import styles from "./List.scss";
 
+/* eslint-disable-next-line react/display-name */
 export const List = forwardRef(({ className, children, ...rest }, ref) => {
   return (
     <ul {...rest} className={classNames(styles.list, className)} ref={ref}>

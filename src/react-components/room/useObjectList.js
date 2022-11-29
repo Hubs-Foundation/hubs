@@ -74,139 +74,119 @@ export function ObjectListProvider({ scene, children }) {
   const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
   const [lightsEnabled, setLightsEnabled] = useState(cameraSystem.lightsEnabled);
 
-  useEffect(
-    () => {
-      function updateMediaEntities() {
-        const objects = scene.systems["listed-media"].els.sort(mediaSort).map(el => ({
-          id: el.object3D.id,
-          name: getDisplayString(el),
-          type: getMediaType(el),
-          el
-        }));
+  useEffect(() => {
+    function updateMediaEntities() {
+      const objects = scene.systems["listed-media"].els.sort(mediaSort).map(el => ({
+        id: el.object3D.id,
+        name: getDisplayString(el),
+        type: getMediaType(el),
+        el
+      }));
 
-        setObjects(objects);
-      }
+      setObjects(objects);
+    }
 
-      let timeout;
+    let timeout;
 
-      function onListedMediaChanged() {
-        // HACK: The listed-media component exists before the media-loader component does, in cases where an entity is created from a network template because of an incoming message, so don't updateMediaEntities right away.
-        // Sorry in advance for the day this comment is out of date.
-        timeout = setTimeout(() => updateMediaEntities(), 0);
-      }
+    function onListedMediaChanged() {
+      // HACK: The listed-media component exists before the media-loader component does, in cases where an entity is created from a network template because of an incoming message, so don't updateMediaEntities right away.
+      // Sorry in advance for the day this comment is out of date.
+      timeout = setTimeout(() => updateMediaEntities(), 0);
+    }
 
-      scene.addEventListener("listed_media_changed", onListedMediaChanged);
+    scene.addEventListener("listed_media_changed", onListedMediaChanged);
 
-      updateMediaEntities();
+    updateMediaEntities();
 
-      return () => {
-        scene.removeEventListener("listed_media_changed", updateMediaEntities);
-        clearTimeout(timeout);
-      };
-    },
-    [scene, setObjects]
-  );
+    return () => {
+      scene.removeEventListener("listed_media_changed", updateMediaEntities);
+      clearTimeout(timeout);
+    };
+  }, [scene, setObjects]);
 
-  useEffect(
-    () => {
-      function onInspectTargetChanged() {
-        const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+  useEffect(() => {
+    function onInspectTargetChanged() {
+      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
 
-        const inspectedEl = cameraSystem.inspectable && cameraSystem.inspectable.el;
+      const inspectedEl = cameraSystem.inspectable && cameraSystem.inspectable.el;
 
-        if (inspectedEl) {
-          const object = objects.find(o => o.el === inspectedEl);
+      if (inspectedEl) {
+        const object = objects.find(o => o.el === inspectedEl);
 
-          if (object) {
-            setSelectedObject(object);
-          } else {
-            setSelectedObject({
-              id: inspectedEl.object3D.id,
-              name: getDisplayString(inspectedEl),
-              type: getMediaType(inspectedEl),
-              el: inspectedEl
-            });
-          }
+        if (object) {
+          setSelectedObject(object);
         } else {
-          setSelectedObject(null);
+          setSelectedObject({
+            id: inspectedEl.object3D.id,
+            name: getDisplayString(inspectedEl),
+            type: getMediaType(inspectedEl),
+            el: inspectedEl
+          });
         }
+      } else {
+        setSelectedObject(null);
       }
+    }
 
-      scene.addEventListener("inspect-target-changed", onInspectTargetChanged);
+    scene.addEventListener("inspect-target-changed", onInspectTargetChanged);
 
-      return () => {
-        scene.removeEventListener("inspect-target-changed", onInspectTargetChanged);
-      };
-    },
-    [scene, setSelectedObject, objects]
+    return () => {
+      scene.removeEventListener("inspect-target-changed", onInspectTargetChanged);
+    };
+  }, [scene, setSelectedObject, objects]);
+
+  useEffect(() => {
+    function onLightsChanged() {
+      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+      setLightsEnabled(cameraSystem.lightsEnabled);
+    }
+
+    scene.addEventListener("inspect-lights-changed", onLightsChanged);
+
+    return () => {
+      scene.removeEventListener("inspect-lights-changed", onLightsChanged);
+    };
+  }, [scene]);
+
+  const selectObject = useCallback(
+    object => handleInspect(scene, object, setSelectedObject),
+    [scene, setSelectedObject]
   );
 
-  useEffect(
-    () => {
-      function onLightsChanged() {
-        const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
-        setLightsEnabled(cameraSystem.lightsEnabled);
-      }
-
-      scene.addEventListener("inspect-lights-changed", onLightsChanged);
-
-      return () => {
-        scene.removeEventListener("inspect-lights-changed", onLightsChanged);
-      };
-    },
-    [scene]
+  const deselectObject = useCallback(
+    () => handleDeselect(scene, focusedObject, setSelectedObject),
+    [scene, setSelectedObject, focusedObject]
   );
-
-  const selectObject = useCallback(object => handleInspect(scene, object, setSelectedObject), [
-    scene,
-    setSelectedObject
-  ]);
-
-  const deselectObject = useCallback(() => handleDeselect(scene, focusedObject, setSelectedObject), [
-    scene,
-    setSelectedObject,
-    focusedObject
-  ]);
 
   const focusObject = useCallback(object => handleInspect(scene, object, setFocusedObject), [scene, setFocusedObject]);
 
-  const unfocusObject = useCallback(() => handleDeselect(scene, selectedObject, setFocusedObject), [
-    scene,
-    setFocusedObject,
-    selectedObject
-  ]);
-
-  const selectNextObject = useCallback(
-    () => {
-      const curObjIdx = objects.indexOf(selectedObject);
-
-      if (curObjIdx !== -1) {
-        const nextObjIdx = (curObjIdx + 1) % objects.length;
-        selectObject(objects[nextObjIdx]);
-      }
-    },
-    [selectObject, objects, selectedObject]
+  const unfocusObject = useCallback(
+    () => handleDeselect(scene, selectedObject, setFocusedObject),
+    [scene, setFocusedObject, selectedObject]
   );
 
-  const selectPrevObject = useCallback(
-    () => {
-      const curObjIdx = objects.indexOf(selectedObject);
+  const selectNextObject = useCallback(() => {
+    const curObjIdx = objects.indexOf(selectedObject);
 
-      if (curObjIdx !== -1) {
-        const nextObjIdx = curObjIdx === 0 ? objects.length - 1 : curObjIdx - 1;
-        selectObject(objects[nextObjIdx]);
-      }
-    },
-    [selectObject, objects, selectedObject]
-  );
+    if (curObjIdx !== -1) {
+      const nextObjIdx = (curObjIdx + 1) % objects.length;
+      selectObject(objects[nextObjIdx]);
+    }
+  }, [selectObject, objects, selectedObject]);
 
-  const toggleLights = useCallback(
-    () => {
-      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
-      cameraSystem.toggleLights();
-    },
-    [scene]
-  );
+  const selectPrevObject = useCallback(() => {
+    const curObjIdx = objects.indexOf(selectedObject);
+
+    if (curObjIdx !== -1) {
+      const nextObjIdx = curObjIdx === 0 ? objects.length - 1 : curObjIdx - 1;
+      selectObject(objects[nextObjIdx]);
+    }
+  }, [selectObject, objects, selectedObject]);
+
+  const toggleLights = useCallback(() => {
+    const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+    cameraSystem.toggleLights();
+  }, [scene]);
 
   const context = {
     objects,

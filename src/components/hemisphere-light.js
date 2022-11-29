@@ -26,7 +26,7 @@ AFRAME.registerComponent("hemisphere-light", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("hemisphere-light");
   }
 });

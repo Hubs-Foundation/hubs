@@ -71,7 +71,7 @@ AFRAME.registerComponent("spot-light", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("spot-light");
   }
 });

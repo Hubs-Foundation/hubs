@@ -135,7 +135,7 @@ export class App {
       this.sid2str.set(sid, str);
       return sid;
     }
-    return this.str2sid.get(str);
+    return this.str2sid.get(str)!;
   }
 
   getString(sid: number) {

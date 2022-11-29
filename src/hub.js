@@ -241,6 +241,8 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
+import { setLocalClientID } from "./bit-systems/networking";
+import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -1234,9 +1236,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
+  listenForNetworkMessages(hubPhxChannel, events);
   hubPhxChannel
     .join()
     .receive("ok", async data => {
+      setLocalClientID(data.session_id);
       APP.hideHubPresenceEvents = true;
       presenceSync.promise = new Promise(resolve => {
         presenceSync.resolve = resolve;

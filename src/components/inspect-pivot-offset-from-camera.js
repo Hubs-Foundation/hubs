@@ -7,11 +7,6 @@ AFRAME.registerComponent("inspect-pivot-offset-from-camera", {
   tick() {
     const parent = this.el.object3D.parent;
     parent.updateMatrices();
-    setMatrixWorld(
-      this.el.object3D,
-      affixToWorldUp(parent.matrixWorld, m)
-        .multiply(translate)
-        .multiply(rotate)
-    );
+    setMatrixWorld(this.el.object3D, affixToWorldUp(parent.matrixWorld, m).multiply(translate).multiply(rotate));
   }
 });

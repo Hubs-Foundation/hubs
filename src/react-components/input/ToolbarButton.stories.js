@@ -39,7 +39,7 @@ AllButtons.argTypes = {
       options: types
     },
     defaultValue: types[0]
-  },
+  }
 };
 
 AllButtons.parameters = {
@@ -58,7 +58,7 @@ export const RoomToolbar = args => (
     toolbarCenter={
       <>
         <div style={containerStyles}>
-          <ToolbarButton icon={<ArrowIcon />} preset="basic" type={"left"}  {...args} />
+          <ToolbarButton icon={<ArrowIcon />} preset="basic" type={"left"} {...args} />
           <ToolbarButton
             icon={<MicrophoneIcon />}
             label="Voice"

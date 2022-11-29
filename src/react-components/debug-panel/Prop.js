@@ -23,13 +23,12 @@ export function CreatePropsFromData(data) {
 
 export function Prop({ propKey, propValue }) {
   return (
-    (propKey !== undefined &&
-      propValue !== undefined && (
-        <p className={classNames(styles.rtcTileText)}>
-          {`${propKey}: `}
-          <span className={classNames(styles.rtcValueText)}>{`${propValue}`}</span>
-        </p>
-      )) ||
+    (propKey !== undefined && propValue !== undefined && (
+      <p className={classNames(styles.rtcTileText)}>
+        {`${propKey}: `}
+        <span className={classNames(styles.rtcValueText)}>{`${propValue}`}</span>
+      </p>
+    )) ||
     null
   );
 }

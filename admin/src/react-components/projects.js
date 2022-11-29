@@ -1,5 +1,5 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React from "react";
-
 import {
   List,
   Show,

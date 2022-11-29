@@ -21,7 +21,7 @@ import {
   ConstraintRemoteLeft,
   ConstraintRemoteRight
 } from "../bit-components";
-import { takeOwnership } from "./netcode";
+import { takeOwnership } from "../utils/take-ownership";
 
 const queryRemoteRight = defineQuery([HeldRemoteRight, OffersRemoteConstraint]);
 const queryEnterRemoteRight = enterQuery(queryRemoteRight);

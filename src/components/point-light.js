@@ -62,7 +62,7 @@ AFRAME.registerComponent("point-light", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("point-light");
   }
 });

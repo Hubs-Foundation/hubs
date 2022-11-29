@@ -14,11 +14,10 @@ function useVerify() {
   const [error, setError] = useState();
   const { verify } = useContext(AuthContext);
 
-  useEffect(
-    () => {
-      const verifyAsync = async () => {
-        try {
-          const qs = new URLSearchParams(location.search);
+  useEffect(() => {
+    const verifyAsync = async () => {
+      try {
+        const qs = new URLSearchParams(location.search);
 
           if (qs.get("error")) {
             throw new Error(`${qs.get("error")}: ${qs.get("error_description")}`);
@@ -43,18 +42,16 @@ function useVerify() {
             };
           }
 
-          await verify(authParams);
-          setStep(VerificationStep.complete);
-        } catch (error) {
-          setStep(VerificationStep.error);
-          setError(error);
-        }
-      };
+        await verify(authParams);
+        setStep(VerificationStep.complete);
+      } catch (error) {
+        setStep(VerificationStep.error);
+        setError(error);
+      }
+    };
 
-      verifyAsync();
-    },
-    [verify]
-  );
+    verifyAsync();
+  }, [verify]);
 
   return { step, error };
 }

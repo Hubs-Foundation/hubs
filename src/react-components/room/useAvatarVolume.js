@@ -38,24 +38,21 @@ export default function useAvatarVolume(sessionId, onMultiplierChanged) {
     [controls]
   );
 
-  useEffect(
-    () => {
-      if (!controlsEl) return;
-      controlsEl.addEventListener("gain_multiplier_updated", onMultiplierUpdated);
-      controlsEl.addEventListener("local_muted_updated", onLocalMutedUpdated);
+  useEffect(() => {
+    if (!controlsEl) return;
+    controlsEl.addEventListener("gain_multiplier_updated", onMultiplierUpdated);
+    controlsEl.addEventListener("local_muted_updated", onLocalMutedUpdated);
 
-      const gainMultiplier = APP.gainMultipliers.get(controls.audioEl);
-      onMultiplierUpdated({ detail: { gainMultiplier } });
-      const isLocalMuted = APP.mutedState.has(controls.audioEl);
-      setIsMuted(isLocalMuted);
+    const gainMultiplier = APP.gainMultipliers.get(controls.audioEl);
+    onMultiplierUpdated({ detail: { gainMultiplier } });
+    const isLocalMuted = APP.mutedState.has(controls.audioEl);
+    setIsMuted(isLocalMuted);
 
-      return () => {
-        controlsEl.removeEventListener("gain_multiplier_updated", onMultiplierUpdated);
-        controlsEl.removeEventListener("local_muted_updated", onLocalMutedUpdated);
-      };
-    },
-    [controls, controlsEl, onMultiplierUpdated, onLocalMutedUpdated]
-  );
+    return () => {
+      controlsEl.removeEventListener("gain_multiplier_updated", onMultiplierUpdated);
+      controlsEl.removeEventListener("local_muted_updated", onLocalMutedUpdated);
+    };
+  }, [controls, controlsEl, onMultiplierUpdated, onLocalMutedUpdated]);
 
   return [multiplier, updateMultiplier, isMuted, updateMuted];
 }

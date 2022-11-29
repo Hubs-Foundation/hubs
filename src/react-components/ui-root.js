@@ -90,7 +90,7 @@ import { UserProfileSidebarContainer } from "./room/UserProfileSidebarContainer"
 import { CloseRoomModal } from "./room/CloseRoomModal";
 import { WebVRUnsupportedModal } from "./room/WebVRUnsupportedModal";
 import { TweetModalContainer } from "./room/TweetModalContainer";
-import { TipContainer, FullscreenTip } from "./room/TipContainer";
+import { TipContainer, FullscreenTip, RecordModeTip } from "./room/TipContainer";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
@@ -185,6 +185,7 @@ class UIRoot extends Component {
     showPrefs: false,
     watching: false,
     isStreaming: false,
+    isRecordingMode: false,
 
     waitingOnAudio: false,
     audioTrackClone: null,
@@ -327,6 +328,21 @@ class UIRoot extends Component {
     this.props.scene.addEventListener("action_toggle_ui", () =>
       this.setState({ hide: !this.state.hide, hideUITip: false })
     );
+    this.props.scene.addEventListener("action_toggle_record", () => {
+      const cursor = document.querySelector("#right-cursor");
+      if (this.state.isRecordingMode) {
+        // If isRecordingMode is true then toggle it off.
+        cursor.object3D.children[1].material.visible = true;
+        this.setState({ hide: false, hideUITip: false, isRecordingMode: false });
+        document.querySelector(".rs-fps-counter").style.visibility = "visible";
+        document.querySelector(".rs-base").style.visibility = "visible";
+      } else {
+        cursor.object3D.children[1].material.visible = false;
+        this.setState({ hide: true, hideUITip: true, isRecordingMode: true });
+        document.querySelector(".rs-fps-counter").style.visibility = "hidden";
+        document.querySelector(".rs-base").style.visibility = "hidden";
+      }
+    });
     this.props.scene.addEventListener("devicechange", () => {
       this.forceUpdate();
     });
@@ -950,6 +966,13 @@ class UIRoot extends Component {
       isGhost,
       hide
     };
+    if (this.state.isRecordingMode) {
+      return (
+        <div className={classNames(rootStyles)}>
+          <RoomLayoutContainer scene={this.props.scene} store={this.props.store} viewport={<RecordModeTip />} />
+        </div>
+      );
+    }
     if (this.props.hide || this.state.hide) {
       return (
         <div className={classNames(rootStyles)}>
@@ -1419,7 +1442,8 @@ class UIRoot extends Component {
                         scene={this.props.scene}
                         store={this.props.store}
                       />
-                      {!isSmallScreen && <PresenceLog
+                      {!isSmallScreen && (
+                        <PresenceLog
                           preset={"Notifications"}
                           include={["permission"]}
                           presences={this.props.presences}
@@ -1427,7 +1451,8 @@ class UIRoot extends Component {
                           hubId={this.props.hub.hub_id}
                           history={this.props.history}
                           onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
-                        />}
+                        />
+                      )}
                     </NotificationsContainer>
                     {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
@@ -1636,7 +1661,7 @@ class UIRoot extends Component {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
-  const { voice_chat: canVoiceChat} = usePermissions();
+  const { voice_chat: canVoiceChat } = usePermissions();
 
   useEffect(() => {
     const el = document.getElementById("preload-overlay");

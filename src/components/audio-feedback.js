@@ -68,18 +68,18 @@ AFRAME.registerComponent("networked-audio-analyser", {
     registerComponentInstance(this, "networked-audio-analyser");
   },
 
-  remove: function() {
+  remove: function () {
     deregisterComponentInstance(this, "networked-audio-analyser");
     this.el.sceneEl.systems["frame-scheduler"].unschedule(this._runScheduledWork, "audio-analyser");
   },
 
-  tick: function(t) {
+  tick: function (t) {
     if (!this.disableUpdates) {
       this._updateAnalysis(t);
     }
   },
 
-  _runScheduledWork: function() {
+  _runScheduledWork: function () {
     if (this.disableUpdates) {
       this._updateAnalysis();
     }
@@ -89,7 +89,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
   // and so as a performance optimization will check to see if it's been at least DISABLE_GRACE_PERIOD_MS
   // since the last volume was seen above DISABLE_AT_VOLUME_THRESHOLD, and if so, will disable
   // tick updates until the volume exceeds the level again.
-  _updateAnalysis: function(t) {
+  _updateAnalysis: function (t) {
     if (!this.analyser) return;
 
     updateVolume(this);
@@ -146,7 +146,7 @@ AFRAME.registerSystem("local-audio-analyser", {
     this.levels = audioSystem.analyserLevels;
   },
 
-  tick: function() {
+  tick: function () {
     if (!this.analyser) return;
 
     // TODO Ideally, when muted no audio should ever even make it into the analyser to begin with

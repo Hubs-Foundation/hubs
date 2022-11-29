@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React from "react";
 import { AvatarLink, OwnedFileImage, ConditionalReferenceField } from "./fields";
 import { ApproveAvatarButton } from "./approve-buttons";
@@ -39,7 +40,13 @@ export const AvatarEdit = props => (
       <TextInput source="name" />
       <TextInput source="description" />
       <TextInput source="attributions" />
-      <SelectInput source="state" choices={[{ id: "active", name: "active" }, { id: "removed", name: "removed" }]} />
+      <SelectInput
+        source="state"
+        choices={[
+          { id: "active", name: "active" },
+          { id: "removed", name: "removed" }
+        ]}
+      />
       <BooleanInput source="allow_remixing" />
       <BooleanInput source="allow_promotion" />
     </SimpleForm>

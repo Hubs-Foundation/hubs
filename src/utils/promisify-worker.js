@@ -25,7 +25,7 @@ export function promisifyWorker(worker) {
     }
   };
 
-  return function(data, transfer, args = {}) {
+  return function (data, transfer, args = {}) {
     const id = nextItemId++;
     const promise = new Promise((resolve, reject) => {
       outstanding[id] = { resolve, reject };

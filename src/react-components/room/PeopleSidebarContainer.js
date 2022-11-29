@@ -21,45 +21,39 @@ function usePeopleList(presences, mySessionId, micUpdateFrequency = 500) {
   const [people, setPeople] = useState([]);
   const { voice_chat: voiceChatEnabled } = useRoomPermissions();
 
-  useEffect(
-    () => {
-      let timeout;
+  useEffect(() => {
+    let timeout;
 
-      function updateMicrophoneState() {
-        const micPresences = getMicrophonePresences();
+    function updateMicrophoneState() {
+      const micPresences = getMicrophonePresences();
 
-        setPeople(
-          Object.entries(presences).map(([id, presence]) => {
-            return userFromPresence(id, presence, micPresences, mySessionId, voiceChatEnabled);
-          })
-        );
+      setPeople(
+        Object.entries(presences).map(([id, presence]) => {
+          return userFromPresence(id, presence, micPresences, mySessionId, voiceChatEnabled);
+        })
+      );
 
-        timeout = setTimeout(updateMicrophoneState, micUpdateFrequency);
-      }
+      timeout = setTimeout(updateMicrophoneState, micUpdateFrequency);
+    }
 
-      updateMicrophoneState();
+    updateMicrophoneState();
 
-      return () => {
-        clearTimeout(timeout);
-      };
-    },
-    [presences, micUpdateFrequency, setPeople, mySessionId, voiceChatEnabled]
-  );
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [presences, micUpdateFrequency, setPeople, mySessionId, voiceChatEnabled]);
 
   return people;
 }
 
 function PeopleListContainer({ hubChannel, people, onSelectPerson, onClose }) {
-  const onMuteAll = useCallback(
-    () => {
-      for (const person of people) {
-        if (person.presence === "room" && person.permissions && !person.permissions.mute_users) {
-          hubChannel.mute(person.id);
-        }
+  const onMuteAll = useCallback(() => {
+    for (const person of people) {
+      if (person.presence === "room" && person.permissions && !person.permissions.mute_users) {
+        hubChannel.mute(person.id);
       }
-    },
-    [people, hubChannel]
-  );
+    }
+  }, [people, hubChannel]);
   const canVoiceChat = useCan("voice_chat");
   const { voice_chat: voiceChatEnabled } = useRoomPermissions();
   const isMod = useRole("owner");

@@ -1,6 +1,10 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
+
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { IdentityEditLink, IdentityCreateLink } from "./fields";
+import { AccountEditToolbar } from "./account-edit-toolbar";
 import { withStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
@@ -10,7 +14,6 @@ import Typography from "@material-ui/core/Typography";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Snackbar from "@material-ui/core/Snackbar";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
-import { ToolbarWithoutDelete } from "./toolbar-without-delete";
 
 import {
   BooleanField,
@@ -42,10 +45,7 @@ const AccountFilter = props => (
 );
 
 export const AccountList = withStyles(styles)(
-  connect(
-    undefined,
-    { refreshView }
-  )(
+  connect(undefined, { refreshView })(
     class AccountList extends Component {
       state = {
         emailSearch: "",
@@ -234,7 +234,7 @@ export const AccountList = withStyles(styles)(
                 </form>
               </CardContent>
             </Card>
-            <List {...other} filters={<AccountFilter />}>
+            <List {...other} filters={<AccountFilter />} bulkActionButtons={false}>
               <Datagrid>
                 <TextField source="id" />
                 <DateField source="inserted_at" />
@@ -264,12 +264,15 @@ export const AccountEdit = withStyles(styles)(props => {
 
   return (
     <Edit {...other}>
-      <SimpleForm toolbar={<ToolbarWithoutDelete />}>
+      <SimpleForm toolbar={<AccountEditToolbar {...other} />}>
         <TextField label="Account ID" source="id" />
         <BooleanInput source="is_admin" />
         <SelectInput
           source="state"
-          choices={[{ id: "enabled", name: "enabled" }, { id: "disabled", name: "disabled" }]}
+          choices={[
+            { id: "enabled", name: "enabled" },
+            { id: "disabled", name: "disabled" }
+          ]}
         />
 
         <ReferenceManyField label="Identity" target="_account_id" reference="identities">

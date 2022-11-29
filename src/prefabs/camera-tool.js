@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /** @jsx createElementEntity */
 import cameraModelSrc from "../assets/camera_tool.glb";
 import buttonSrc from "../assets/hud/button.9.png";

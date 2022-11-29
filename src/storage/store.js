@@ -331,14 +331,14 @@ export default class Store extends EventTarget {
   };
 
   get state() {
-    if (!this.hasOwnProperty(STORE_STATE_CACHE_KEY)) {
+    if (!Object.prototype.hasOwnProperty.call(this, STORE_STATE_CACHE_KEY)) {
       const state = (this[STORE_STATE_CACHE_KEY] = JSON.parse(localStorage.getItem(LOCAL_STORE_KEY)));
       if (!state.preferences) state.preferences = {};
       this._preferences = { ...state.preferences }; // cache prefs without injected defaults
       // inject default values
       for (const [key, props] of Object.entries(SCHEMA.definitions.preferences.properties)) {
-        if (!props.hasOwnProperty("default")) continue;
-        if (!state.preferences.hasOwnProperty(key)) {
+        if (!Object.prototype.hasOwnProperty.call(props, "default")) continue;
+        if (!Object.prototype.hasOwnProperty.call(state.preferences, key)) {
           state.preferences[key] = props.default;
         } else if (state.preferences[key] === props.default) {
           delete this._preferences[key];
@@ -418,7 +418,8 @@ export default class Store extends EventTarget {
       // new defaults will apply without user action
       for (const [key, value] of Object.entries(finalState.preferences)) {
         if (
-          SCHEMA.definitions.preferences.properties[key]?.hasOwnProperty("default") &&
+          SCHEMA.definitions.preferences.properties[key] &&
+          Object.prototype.hasOwnProperty.call(SCHEMA.definitions.preferences.properties[key], "default") &&
           value === SCHEMA.definitions.preferences.properties[key].default
         ) {
           delete finalState.preferences[key];

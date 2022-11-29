@@ -73,14 +73,11 @@ export function SignInModalContainer() {
   const { step, submitEmail, submitOIDC, cancel, email } = useSignIn();
   const redirectUrl = qs.get("sign_in_destination_url") || "/";
 
-  useEffect(
-    () => {
-      if (step === SignInStep.complete) {
-        window.location = redirectUrl;
-      }
-    },
-    [step, redirectUrl]
-  );
+  useEffect(() => {
+    if (step === SignInStep.complete) {
+      window.location = redirectUrl;
+    }
+  }, [step, redirectUrl]);
 
   return (
     <SignInModal disableFullscreen>

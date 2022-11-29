@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React from "react";
 import { SceneLink, OwnedFileImage, OwnedFileSizeField } from "./fields";
 import { FeatureSceneListingButton } from "./feature-listing-buttons";
@@ -39,7 +40,10 @@ export const SceneListingEdit = props => (
       <SelectInput
         label="Status"
         source="state"
-        choices={[{ id: "active", name: "active" }, { id: "delisted", name: "delisted" }]}
+        choices={[
+          { id: "active", name: "active" },
+          { id: "delisted", name: "delisted" }
+        ]}
       />
     </SimpleForm>
   </Edit>

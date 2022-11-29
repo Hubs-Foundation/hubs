@@ -236,15 +236,9 @@ AFRAME.registerComponent("stats-plus", {
         "text",
         "value",
         [
-          `f ${stats("fps")
-            .value()
-            .toFixed(0)}`,
-          `r ${stats("raf")
-            .value()
-            .toFixed(0)}`,
-          `p ${stats("physics")
-            .value()
-            .toFixed(0)}`,
+          `f ${stats("fps").value().toFixed(0)}`,
+          `r ${stats("raf").value().toFixed(0)}`,
+          `p ${stats("physics").value().toFixed(0)}`,
           `c ${this.el.sceneEl.renderer.info.render.calls}`,
           `t ${(this.el.sceneEl.renderer.info.render.triangles / 1000).toFixed(0)}k`
         ].join("\n")

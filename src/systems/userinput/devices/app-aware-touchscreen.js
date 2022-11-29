@@ -35,7 +35,7 @@ function distance(x1, y1, x2, y2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-const getPlayerCamera = function() {
+const getPlayerCamera = function () {
   return AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
 };
 

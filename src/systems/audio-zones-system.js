@@ -45,7 +45,7 @@ function isUpdated(currZones, prevZones) {
   return currZones.size !== prevZones.size || any(currZones, zone => !prevZones.has(zone));
 }
 
-const setRay = (function() {
+const setRay = (function () {
   const direction = new THREE.Vector3();
   return function setRay(ray, from, to) {
     ray.set(from, direction.subVectors(to, from).normalize());
@@ -65,7 +65,7 @@ function hasIntersection(ray) {
     return intersectTarget !== null;
   };
 }
-const updateSource = (function() {
+const updateSource = (function () {
   const ray = new THREE.Ray();
   return function updateSource(source, sourcePosition, sourceZones, listenerPosition, listenerZones) {
     setRay(ray, listenerPosition, sourcePosition);
@@ -151,9 +151,9 @@ export class AudioZonesSystem {
     this.prevZones.delete(entity);
   }
 
-  tick = (function() {
+  tick = (function () {
     const listenerPosition = new THREE.Vector3();
-    return function(scene) {
+    return function (scene) {
       if (!scene.is("entered")) return;
 
       if (!this.didRegisterAudioListener) {

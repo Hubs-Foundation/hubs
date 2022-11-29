@@ -19,17 +19,17 @@ import { PermissionNotification } from "./PermissionNotifications";
 export default {
   title: "Room/ChatSidebar",
   parameters: {
-    layout: "fullscreen",
+    layout: "fullscreen"
   },
   argTypes: {
-    textChatEnabled: { 
+    textChatEnabled: {
       control: "boolean",
-      defaultValue: true 
+      defaultValue: true
     }
   }
 };
 
-const nextTimestamp = (function() {
+const nextTimestamp = (function () {
   const now = Date.now();
   let time = now - 8 * 60 * 60 * 1000;
   return function nextTimeStamp() {
@@ -97,20 +97,26 @@ export const Base = args => (
             sent
             timestamp={nextTimestamp()}
             messages={[
-              { type: "permission", body: { permission: "voice_chat", status: false }},
-              { type: "permission", body: { permission: "text_chat", status: true }},
+              { type: "permission", body: { permission: "voice_chat", status: false } },
+              { type: "permission", body: { permission: "text_chat", status: true } }
             ]}
             permissionMessage
           />
         </ChatMessageList>
-        {!!args.textChatEnabled && <PermissionNotification permission={"text_chat"} isMod={false}/>}
+        {!!args.textChatEnabled && <PermissionNotification permission={"text_chat"} isMod={false} />}
         <ChatInput
           afterInput={
             <>
-              <EmojiPickerPopoverButton onSelectEmoji={emoji => console.log(emoji)}/>
+              <EmojiPickerPopoverButton onSelectEmoji={emoji => console.log(emoji)} />
               <MessageAttachmentButton />
-              <SendMessageButton disabled={!args.textChatEnabled} title={!args.textChatEnabled ? "Text Chat Off" : undefined}/>
-              <SpawnMessageButton disabled={!args.textChatEnabled}  title={!args.textChatEnabled ? "Text Chat Off" : undefined}/>
+              <SendMessageButton
+                disabled={!args.textChatEnabled}
+                title={!args.textChatEnabled ? "Text Chat Off" : undefined}
+              />
+              <SpawnMessageButton
+                disabled={!args.textChatEnabled}
+                title={!args.textChatEnabled ? "Text Chat Off" : undefined}
+              />
             </>
           }
           disabled={!args.textChatEnabled}

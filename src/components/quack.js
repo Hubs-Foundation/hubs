@@ -6,14 +6,14 @@ AFRAME.registerComponent("quack", {
     specialQuackPercentage: { default: 0.01 }
   },
 
-  init: function() {
+  init: function () {
     this.wasInteracting = false;
     NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
       this.networkedEntity = networkedEntity;
     });
   },
 
-  tick: function() {
+  tick: function () {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const isInteracting = interaction.isHeld(this.networkedEntity || this.el);
 
@@ -24,7 +24,7 @@ AFRAME.registerComponent("quack", {
     this.wasInteracting = isInteracting;
   },
 
-  quack: function() {
+  quack: function () {
     const rand = Math.random();
     if (rand < this.data.specialQuackPercentage) {
       this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);

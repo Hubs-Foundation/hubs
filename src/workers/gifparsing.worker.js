@@ -5,7 +5,7 @@
  *
  */
 
-const parseGIF = function(gif) {
+const parseGIF = function (gif) {
   let pos = 0;
   const delayTimes = [];
   let graphicControl = null;

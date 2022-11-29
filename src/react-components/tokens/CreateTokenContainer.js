@@ -160,5 +160,7 @@ export const CreateTokenContainer = ({ onCreateTokenCreated, onCreateTokenCancel
 };
 
 CreateTokenContainer.propTypes = {
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
+  onCreateTokenCreated: PropTypes.func,
+  onCreateTokenCancelled: PropTypes.func
 };

@@ -27,7 +27,7 @@ AFRAME.registerComponent("scene-preview-camera", {
     positionOnly: { default: false, type: "boolean" }
   },
 
-  init: function() {
+  init: function () {
     const systems = AFRAME.scenes[0].systems["hubs-systems"] || AFRAME.scenes[0].systems["scene-systems"];
 
     if (systems) {
@@ -51,7 +51,7 @@ AFRAME.registerComponent("scene-preview-camera", {
     this.ranOnePass = false;
   },
 
-  tick2: function() {
+  tick2: function () {
     const hubsSystems = this.el.sceneEl.systems["hubs-systems"];
 
     let streamerCamera;
@@ -98,7 +98,7 @@ AFRAME.registerComponent("scene-preview-camera", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     const systems = AFRAME.scenes[0]?.systems["hubs-systems"] || AFRAME.scenes[0]?.systems["scene-systems"];
 
     if (systems) {

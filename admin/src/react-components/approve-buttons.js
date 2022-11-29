@@ -23,6 +23,7 @@ class ApproveButton extends Component {
     if (!(record.allow_promotion || record._allow_promotion)) return false;
 
     return (
+      /* eslint-disable-next-line @calm/react-intl/missing-formatted-message*/
       <Button label="Approve" onClick={this.handleClick}>
         {record[`${resource}_listing_id`] ? "Update" : "Approve"}
       </Button>

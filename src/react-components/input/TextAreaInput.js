@@ -13,4 +13,4 @@ TextAreaInput.propTypes = {
   className: PropTypes.string
 };
 
-TextAreaInput.displayName = 'TextAreaInput';
+TextAreaInput.displayName = "TextAreaInput";

@@ -63,7 +63,11 @@ export function ObjectMenu({
               )}
             </IconButton>
           </div>
-          <div className={styles.menu}>{joinChildren(children, () => <div className={styles.separator} />)}</div>
+          <div className={styles.menu}>
+            {joinChildren(children, () => (
+              <div className={styles.separator} />
+            ))}
+          </div>
         </div>
         <div className={styles.pagination}>
           <IconButton onClick={onPrevObject}>
