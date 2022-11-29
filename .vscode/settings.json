@@ -5,8 +5,20 @@
   "html.format.enable": false,
   // Disable the default javascript formatter
   "javascript.format.enable": false,
-  // Use 'prettier-eslint' instead of 'prettier'. Other settings will only be fallbacks in case they could not be inferred from eslint rules.
-  "prettier.eslintIntegration": true,
+  // Using the prettier-vscode plugin as the old eslint integration has been deprecated. More here: https://github.com/prettier/prettier-vscode/issues/870
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   // Enable eslint for JavaScript files.
   "eslint.enable": true
 }
