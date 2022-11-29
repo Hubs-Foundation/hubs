@@ -19,3 +19,7 @@ export function isPinned(eid: EntityID) {
   reticulum = reticulum || APP.getSid("reticulum");
   return Networked.creator[eid] === reticulum;
 }
+
+export function isCreatedByMe(eid: EntityID) {
+  return Networked.creator[eid] === APP.getSid(NAF.clientId);
+}

@@ -4,7 +4,6 @@ import { HubsWorld } from "../app";
 import HubChannel from "./hub-channel";
 import { takeOwnership } from "./take-ownership";
 import { messageFor, messageForStorage } from "./message-for";
-import { setCreator } from "./set-creator";
 import { localClientID } from "../bit-systems/networking";
 import { pinMessages } from "../bit-systems/network-send-system";
 
@@ -14,7 +13,7 @@ export interface StorableMessage extends Message {
 
 export async function tryPin(world: HubsWorld, eid: EntityID, hubChannel: HubChannel) {
   takeOwnership(world, eid);
-  setCreator(world, eid, "reticulum");
+  Networked.creator[eid] = APP.getSid("reticulum");
 
   const nid = APP.getString(Networked.id[eid])!;
 
@@ -29,7 +28,7 @@ export async function tryPin(world: HubsWorld, eid: EntityID, hubChannel: HubCha
 export async function tryUnpin(world: HubsWorld, eid: EntityID, hubChannel: HubChannel) {
   if (!localClientID) throw new Error("Tried to unpin before connected to the channel...");
   takeOwnership(world, eid);
-  setCreator(world, eid, localClientID!);
+  Networked.creator[eid] = APP.getSid(localClientID!);
   const message = messageFor(world, [eid], [eid], [eid], [], false)!;
   pinMessages.push(message);
   const fileId = null;
