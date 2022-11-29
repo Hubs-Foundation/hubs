@@ -4,11 +4,14 @@ import { Networked, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
 import { messageFor } from "../utils/message-for";
 import type { EntityID, Message } from "../utils/networking-types";
-import { createMessageDatas, isNetworkInstantiated, localClientID, networkedQuery, pendingJoins } from "./networking";
-
-function isNetworkInstantiatedByMe(eid: EntityID) {
-  return isNetworkInstantiated(eid) && Networked.creator[eid] === APP.getSid(NAF.clientId);
-}
+import {
+  createMessageDatas,
+  isCreatedByMe,
+  isNetworkInstantiated,
+  localClientID,
+  networkedQuery,
+  pendingJoins
+} from "./networking";
 
 const ticksPerSecond = 12;
 const millisecondsBetweenTicks = 1000 / ticksPerSecond;
@@ -50,7 +53,7 @@ export function networkSendSystem(world: HubsWorld) {
       const ownedNetworkedEntities = ownedNetworkedQuery(world);
       const message = messageFor(
         world,
-        networkedQuery(world).filter(isNetworkInstantiatedByMe),
+        networkedQuery(world).filter(isCreatedByMe),
         ownedNetworkedEntities,
         ownedNetworkedEntities,
         [],
@@ -80,7 +83,7 @@ export function networkSendSystem(world: HubsWorld) {
     });
     const message = messageFor(
       world,
-      enteredNetworkedQuery(world).filter(isNetworkInstantiatedByMe),
+      enteredNetworkedQuery(world).filter(isCreatedByMe),
       ownedNetworkedQuery(world),
       enteredOwnedNetworkedQuery(world),
       deletedEntities,

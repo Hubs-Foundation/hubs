@@ -32,7 +32,7 @@ export function assignNetworkIds(world, rootNid, mediaEid, mediaLoaderEid) {
       const eid = obj.eid;
       Networked.id[eid] = APP.getSid(`${rootNid}.${i}`);
       APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = Networked.creator[mediaLoaderEid];
+      Networked.creator[eid] = APP.getSid(rootNid);
       Networked.owner[eid] = Networked.owner[mediaLoaderEid];
       if (APP.getSid(NAF.clientId) === Networked.owner[mediaLoaderEid]) takeOwnership(world, eid);
       i += 1;
