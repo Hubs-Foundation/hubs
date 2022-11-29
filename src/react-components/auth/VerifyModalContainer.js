@@ -19,28 +19,28 @@ function useVerify() {
       try {
         const qs = new URLSearchParams(location.search);
 
-          if (qs.get("error")) {
-            throw new Error(`${qs.get("error")}: ${qs.get("error_description")}`);
-          }
-  
-          let authParams;
-          if (qs.get("code")) {
-            const state = qs.get("state");
-            const topic_key = jwtDecode(state).topic_key;
-            authParams = {
-              topic: `oidc:${topic_key}`,
-              token: qs.get("code"),
-              origin: "oidc",
-              payload: qs.get("state")
-            };
-          } else {
-            authParams = {
-              topic: qs.get("auth_topic"),
-              token: qs.get("auth_token"),
-              origin: qs.get("auth_origin"),
-              payload: qs.get("auth_payload")
-            };
-          }
+        if (qs.get("error")) {
+          throw new Error(`${qs.get("error")}: ${qs.get("error_description")}`);
+        }
+
+        let authParams;
+        if (qs.get("code")) {
+          const state = qs.get("state");
+          const topic_key = jwtDecode(state).topic_key;
+          authParams = {
+            topic: `oidc:${topic_key}`,
+            token: qs.get("code"),
+            origin: "oidc",
+            payload: qs.get("state")
+          };
+        } else {
+          authParams = {
+            topic: qs.get("auth_topic"),
+            token: qs.get("auth_token"),
+            origin: qs.get("auth_origin"),
+            payload: qs.get("auth_payload")
+          };
+        }
 
         await verify(authParams);
         setStep(VerificationStep.complete);
