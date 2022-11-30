@@ -1428,31 +1428,30 @@ class UIRoot extends Component {
                         onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                       />
                     )}
-                    {!this.state.hide && (
-                      <NotificationsContainer>
-                        <TipContainer
-                          inLobby={watching}
-                          inRoom={entered}
-                          isEmbedded={this.props.embed}
-                          isStreaming={streaming}
-                          hubId={this.props.hub.hub_id}
+                    <NotificationsContainer>
+                      <TipContainer
+                        hide={this.state.hide || this.state.hideUITip || this.props.activeObject}
+                        inLobby={watching}
+                        inRoom={entered}
+                        isEmbedded={this.props.embed}
+                        isStreaming={streaming}
+                        hubId={this.props.hub.hub_id}
+                        presences={this.props.presences}
+                        scene={this.props.scene}
+                        store={this.props.store}
+                      />
+                      {!isSmallScreen && !this.state.hide && (
+                        <PresenceLog
+                          preset={"Notifications"}
+                          include={["permission"]}
                           presences={this.props.presences}
-                          scene={this.props.scene}
-                          store={this.props.store}
+                          entries={presenceLogEntries}
+                          hubId={this.props.hub.hub_id}
+                          history={this.props.history}
+                          onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                         />
-                        {!isSmallScreen && (
-                          <PresenceLog
-                            preset={"Notifications"}
-                            include={["permission"]}
-                            presences={this.props.presences}
-                            entries={presenceLogEntries}
-                            hubId={this.props.hub.hub_id}
-                            history={this.props.history}
-                            onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
-                          />
-                        )}
-                      </NotificationsContainer>
-                    )}
+                      )}
+                    </NotificationsContainer>
                     {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
                         history={this.props.history}

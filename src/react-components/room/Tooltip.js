@@ -382,7 +382,7 @@ function onboardingSteps({ intl, step }) {
   }
 }
 
-export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, ...rest }) => {
+export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, wasHidden, ...rest }) => {
   const intl = useIntl();
 
   let layoutClass = null;
@@ -397,6 +397,10 @@ export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, ...re
       layoutClass = styles.tooltipsTop;
       animationClass = styles.tipShowTop;
     }
+  }
+
+  if (wasHidden) {
+    animationClass = null;
   }
 
   const { control, navigationBar } = useMemo(() => onboardingSteps({ intl, step }), [intl, step]);
@@ -425,7 +429,8 @@ Tooltip.propTypes = {
   onPrev: PropTypes.func,
   onNext: PropTypes.func,
   onDismiss: PropTypes.func,
-  step: PropTypes.string
+  step: PropTypes.string,
+  wasHidden: PropTypes.bool
 };
 
 Tooltip.displayName = "Tooltip";

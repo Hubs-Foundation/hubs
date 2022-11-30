@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { Tip } from "./Tip";
@@ -30,7 +30,7 @@ export function RecordModeTip() {
   );
 }
 
-export function TipContainer({ inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
+export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, scene, store, hubId, presences }) {
   const [lobbyTipDismissed, setLobbyTipDismissed] = useState(false);
   const [broadcastTipDismissed, setBroadcastTipDismissed] = useState(() =>
     store.state.confirmedBroadcastedRooms.includes(hubId)
@@ -38,51 +38,70 @@ export function TipContainer({ inLobby, inRoom, isStreaming, isEmbedded, scene, 
   const [streamingTipDismissed, setStreamingTipDismissed] = useState(false);
   const [embeddedTipDismissed, setEmbeddedTipDismissed] = useState(false);
   const [onboardingTipId, setOnboardingTipId] = useState(null);
+  const timeoutRef = useRef(null);
+  const [wasHidden, setWasHidden] = useState(false);
 
   const onSkipOnboarding = useCallback(() => {
     setOnboardingTipId(null);
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
+      setWasHidden(false);
       scene.systems.tips.skipTips();
     }, 200);
-  }, [scene]);
+  }, [scene, timeoutRef]);
 
   const onNextTip = useCallback(() => {
     setOnboardingTipId(null);
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
+      setWasHidden(false);
       scene.systems.tips.nextTip();
     }, 200);
-  }, [scene]);
+  }, [scene, timeoutRef]);
 
   const onPrevTip = useCallback(() => {
     setOnboardingTipId(null);
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
+      setWasHidden(false);
       scene.systems.tips.prevTip();
     }, 200);
-  }, [scene]);
+  }, [scene, timeoutRef]);
 
   useEffect(() => {
     if (isEndTooltipStep(onboardingTipId)) {
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         scene.systems.tips.nextTip();
       }, 2500);
     }
-  }, [scene, onboardingTipId]);
+  }, [scene, timeoutRef, onboardingTipId]);
 
   useEffect(() => {
     function onSceneTipChanged({ detail: tipId }) {
       setOnboardingTipId(null);
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
+        setWasHidden(false);
         setOnboardingTipId(tipId);
       }, 250);
     }
 
     scene.addEventListener("tip-changed", onSceneTipChanged);
 
+    setWasHidden(hide === undefined ? false : true);
     setOnboardingTipId(scene.systems.tips.activeTip);
-  }, [scene]);
+
+    return () => {
+      setWasHidden(true);
+      scene.removeEventListener("tip-changed", onSceneTipChanged);
+      clearTimeout(timeoutRef.current);
+    };
+  }, [scene, timeoutRef, hide, setWasHidden]);
 
   const discordBridges = presences ? discordBridgesForPresences(presences) : [];
   const isBroadcasting = discordBridges.length > 0;
+
+  // TODO: This only exists because we store local state in this component.
+  // If we move tip state to a context then we can remove this and not render this component at all.
+  if (hide) {
+    return null;
+  }
 
   if (inLobby) {
     if (lobbyTipDismissed) {
@@ -96,7 +115,15 @@ export function TipContainer({ inLobby, inRoom, isStreaming, isEmbedded, scene, 
     );
   } else if (inRoom) {
     if (onboardingTipId) {
-      return <Tooltip onPrev={onPrevTip} onNext={onNextTip} onDismiss={onSkipOnboarding} step={onboardingTipId} />;
+      return (
+        <Tooltip
+          onPrev={onPrevTip}
+          onNext={onNextTip}
+          onDismiss={onSkipOnboarding}
+          step={onboardingTipId}
+          wasHidden={wasHidden}
+        />
+      );
     }
 
     if (isStreaming && !streamingTipDismissed) {
