@@ -1428,8 +1428,8 @@ class UIRoot extends Component {
                         onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                       />
                     )}
-                    <NotificationsContainer>
-                      {!this.props.activeObject && (
+                    {!this.state.hide && (
+                      <NotificationsContainer>
                         <TipContainer
                           inLobby={watching}
                           inRoom={entered}
@@ -1440,19 +1440,19 @@ class UIRoot extends Component {
                           scene={this.props.scene}
                           store={this.props.store}
                         />
-                      )}
-                      {!isSmallScreen && (
-                        <PresenceLog
-                          preset={"Notifications"}
-                          include={["permission"]}
-                          presences={this.props.presences}
-                          entries={presenceLogEntries}
-                          hubId={this.props.hub.hub_id}
-                          history={this.props.history}
-                          onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
-                        />
-                      )}
-                    </NotificationsContainer>
+                        {!isSmallScreen && (
+                          <PresenceLog
+                            preset={"Notifications"}
+                            include={["permission"]}
+                            presences={this.props.presences}
+                            entries={presenceLogEntries}
+                            hubId={this.props.hub.hub_id}
+                            history={this.props.history}
+                            onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
+                          />
+                        )}
+                      </NotificationsContainer>
+                    )}
                     {(showRtcDebugPanel || showAudioDebugPanel) && (
                       <RTCDebugPanel
                         history={this.props.history}
