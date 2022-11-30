@@ -3,7 +3,7 @@ const EYES_TO_ELBOW = { x: 0.175, y: -0.3, z: -0.03 };
 // Vector from eyes to elbow (divided by user height).
 const FOREARM = { x: 0, y: 0, z: -0.175 };
 
-export const applyArmModel = (function() {
+export const applyArmModel = (function () {
   const controllerEuler = new THREE.Euler();
   const deltaControllerPosition = new THREE.Vector3();
   const controllerQuaternion = new THREE.Quaternion();

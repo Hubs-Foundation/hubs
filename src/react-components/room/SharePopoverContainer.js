@@ -16,99 +16,87 @@ function useShare(scene, hubChannel) {
   const [canShareCameraToAvatar, setCanShareCameraToAvatar] = useState(false);
   const { hasVideoTextureTarget } = useAvatar();
 
-  useEffect(
-    () => {
-      function onShareVideoEnabled(event) {
-        setSharingSource(event.detail.source);
-      }
+  useEffect(() => {
+    function onShareVideoEnabled(event) {
+      setSharingSource(event.detail.source);
+    }
 
-      function onShareVideoDisabled() {
-        setSharingSource(null);
-      }
+    function onShareVideoDisabled() {
+      setSharingSource(null);
+    }
 
-      function onPermissionsUpdated() {
-        const canShareMedia = hubChannel.can("spawn_and_move_media");
+    function onPermissionsUpdated() {
+      const canShareMedia = hubChannel.can("spawn_and_move_media");
 
-        if (canShareMedia) {
-          navigator.mediaDevices
-            .enumerateDevices()
-            .then(devices => {
-              const hasCamera = devices.some(device => device.kind === "videoinput");
-              setCanShareCamera(hasCamera);
-              setCanShareCameraToAvatar(hasCamera && hasVideoTextureTarget);
-            })
-            .catch(() => {
-              setCanShareCamera(false);
-              setCanShareCameraToAvatar(false);
-            });
+      if (canShareMedia) {
+        navigator.mediaDevices
+          .enumerateDevices()
+          .then(devices => {
+            const hasCamera = devices.some(device => device.kind === "videoinput");
+            setCanShareCamera(hasCamera);
+            setCanShareCameraToAvatar(hasCamera && hasVideoTextureTarget);
+          })
+          .catch(() => {
+            setCanShareCamera(false);
+            setCanShareCameraToAvatar(false);
+          });
 
-          setCanShareScreen(!!navigator.mediaDevices.getDisplayMedia);
-        } else {
-          setCanShareScreen(false);
-          setCanShareCamera(false);
-          setCanShareCameraToAvatar(false);
-        }
-      }
-
-      scene.addEventListener("share_video_enabled", onShareVideoEnabled);
-      scene.addEventListener("share_video_disabled", onShareVideoDisabled);
-      // TODO: Show share error dialog
-      scene.addEventListener("share_video_failed", onShareVideoDisabled);
-      hubChannel.addEventListener("permissions_updated", onPermissionsUpdated);
-
-      onPermissionsUpdated();
-
-      // We currently only support sharing one video stream at the same time
-      setSharingSource(
-        mediaDevicesManager.isVideoShared
-          ? mediaDevicesManager.isWebcamShared
-            ? MediaDevices.CAMERA
-            : MediaDevices.SCREEN
-          : null
-      );
-
-      return () => {
-        scene.removeEventListener("share_video_enabled", onShareVideoEnabled);
-        scene.removeEventListener("share_video_disabled", onShareVideoDisabled);
-        scene.removeEventListener("share_video_failed", onShareVideoDisabled);
-        hubChannel.removeEventListener("permissions_updated", onPermissionsUpdated);
-      };
-    },
-    [scene, hubChannel, hasVideoTextureTarget, mediaDevicesManager]
-  );
-
-  const toggleShareCamera = useCallback(
-    () => {
-      if (sharingSource) {
-        scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
+        setCanShareScreen(!!navigator.mediaDevices.getDisplayMedia);
       } else {
-        scene.emit("action_share_camera");
+        setCanShareScreen(false);
+        setCanShareCamera(false);
+        setCanShareCameraToAvatar(false);
       }
-    },
-    [scene, sharingSource]
-  );
+    }
 
-  const toggleShareScreen = useCallback(
-    () => {
-      if (sharingSource) {
-        scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
-      } else {
-        scene.emit("action_share_screen");
-      }
-    },
-    [scene, sharingSource]
-  );
+    scene.addEventListener("share_video_enabled", onShareVideoEnabled);
+    scene.addEventListener("share_video_disabled", onShareVideoDisabled);
+    // TODO: Show share error dialog
+    scene.addEventListener("share_video_failed", onShareVideoDisabled);
+    hubChannel.addEventListener("permissions_updated", onPermissionsUpdated);
 
-  const toggleShareCameraToAvatar = useCallback(
-    () => {
-      if (sharingSource) {
-        scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
-      } else {
-        scene.emit("action_share_camera", { target: "avatar" });
-      }
-    },
-    [scene, sharingSource]
-  );
+    onPermissionsUpdated();
+
+    // We currently only support sharing one video stream at the same time
+    setSharingSource(
+      mediaDevicesManager.isVideoShared
+        ? mediaDevicesManager.isWebcamShared
+          ? MediaDevices.CAMERA
+          : MediaDevices.SCREEN
+        : null
+    );
+
+    return () => {
+      scene.removeEventListener("share_video_enabled", onShareVideoEnabled);
+      scene.removeEventListener("share_video_disabled", onShareVideoDisabled);
+      scene.removeEventListener("share_video_failed", onShareVideoDisabled);
+      hubChannel.removeEventListener("permissions_updated", onPermissionsUpdated);
+    };
+  }, [scene, hubChannel, hasVideoTextureTarget, mediaDevicesManager]);
+
+  const toggleShareCamera = useCallback(() => {
+    if (sharingSource) {
+      scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
+    } else {
+      scene.emit("action_share_camera");
+    }
+  }, [scene, sharingSource]);
+
+  const toggleShareScreen = useCallback(() => {
+    if (sharingSource) {
+      scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
+    } else {
+      scene.emit("action_share_screen");
+    }
+  }, [scene, sharingSource]);
+
+  const toggleShareCameraToAvatar = useCallback(() => {
+    if (sharingSource) {
+      scene.emit(MediaDevicesEvents.VIDEO_SHARE_ENDED);
+    } else {
+      scene.emit("action_share_camera", { target: "avatar" });
+    }
+  }, [scene, sharingSource]);
 
   return {
     sharingSource,

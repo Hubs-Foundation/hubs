@@ -21,22 +21,19 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
   const popoverApiRef = useRef();
 
   // Handle clicking on the invite button while in VR.
-  useEffect(
-    () => {
-      function onInviteButtonClicked() {
-        handleExitTo2DInterstitial(true, () => {}).then(() => {
-          popoverApiRef.current.openPopover();
-        });
-      }
+  useEffect(() => {
+    function onInviteButtonClicked() {
+      handleExitTo2DInterstitial(true, () => {}).then(() => {
+        popoverApiRef.current.openPopover();
+      });
+    }
 
-      scene.addEventListener("action_invite", onInviteButtonClicked);
+    scene.addEventListener("action_invite", onInviteButtonClicked);
 
-      return () => {
-        scene.removeEventListener("action_invite", onInviteButtonClicked);
-      };
-    },
-    [scene, popoverApiRef]
-  );
+    return () => {
+      scene.removeEventListener("action_invite", onInviteButtonClicked);
+    };
+  }, [scene, popoverApiRef]);
 
   const inviteRequired = hub.entry_mode === "invite";
   const canGenerateInviteUrl = hubChannel.can("update_hub");

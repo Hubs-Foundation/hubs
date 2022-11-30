@@ -1,4 +1,4 @@
-import { createNetworkedEntity } from "./systems/netcode.js";
+import { createNetworkedEntity } from "./utils/create-networked-entity";
 import { upload, parseURL } from "./utils/media-utils";
 import { guessContentType } from "./utils/media-url-utils";
 import { AElement } from "aframe";
@@ -23,7 +23,7 @@ function spawnFromUrl(text: string) {
     console.warn(`Could not parse URL. Ignoring pasted text:\n${text}`);
     return;
   }
-  const eid = createNetworkedEntity(APP.world, "media", { src: text, recenter: true, resize: true });
+  const eid = createNetworkedEntity(APP.world, "media", { src: text, recenter: true, resize: true, animateLoad: true });
   const avatarPov = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
   const obj = APP.world.eid2obj.get(eid)!;
   obj.position.copy(avatarPov.localToWorld(new Vector3(0, 0, -1.5)));
@@ -43,7 +43,8 @@ async function spawnFromFileList(files: FileList) {
         return {
           src: srcUrl.href,
           recenter: true,
-          resize: true
+          resize: true,
+          animateLoad: true
         };
       })
       .catch(e => {
@@ -51,7 +52,8 @@ async function spawnFromFileList(files: FileList) {
         return {
           src: "error",
           recenter: true,
-          resize: true
+          resize: true,
+          animateLoad: true
         };
       });
 

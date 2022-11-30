@@ -90,7 +90,7 @@ function log(...objs) {
       await loadFiles();
 
       // Do a periodic sanity check of the state of the bots.
-      setInterval(async function() {
+      setInterval(async function () {
         let avatarCounts;
         try {
           avatarCounts = await page.evaluate(() => ({

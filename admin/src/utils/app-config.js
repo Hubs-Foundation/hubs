@@ -24,7 +24,7 @@ function getConfig() {
 async function putConfig(config) {
   const uploadFiles = async obj => {
     for (const key in obj) {
-      if (!obj.hasOwnProperty(key)) continue;
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
       const val = obj[key];
       if (val instanceof File) {
         obj[key] = await upload(val);

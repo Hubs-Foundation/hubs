@@ -24,4 +24,7 @@ for f in /www/hubs/pages/*.html; do
     [[ $var == $prefix* ]] && sed -i "s/$anchor/ <meta name=\"env:${var#$prefix}\" content=\"${!var//\//\\\/}\"\/> $anchor/" $f; 
     done 
 done 
+
+if [ "${access_log}" = "enabled" ]; then sed -i "s/access_log off;//g" /etc/nginx/conf.d/default.conf; fi
+
 nginx -g "daemon off;"

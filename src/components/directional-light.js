@@ -56,7 +56,7 @@ AFRAME.registerComponent("directional-light", {
     this.light.shadow.camera.matrixNeedsUpdate = true;
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("directional-light");
   }
 });

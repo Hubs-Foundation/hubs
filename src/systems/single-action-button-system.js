@@ -91,7 +91,7 @@ const hoverComponents = [HoveredRemoteRight, HoveredRemoteLeft, HoveredHandRight
 
 const hoverButtonsQuery = defineQuery([HoverButton]);
 function hoverButtonSystem(world) {
-  hoverButtonsQuery(world).forEach(function(eid) {
+  hoverButtonsQuery(world).forEach(function (eid) {
     const obj = world.eid2obj.get(eid);
     const isHovered = hasAnyComponent(world, hoverComponents, eid);
     const style = buttonStyles[HoverButton.type[eid]];

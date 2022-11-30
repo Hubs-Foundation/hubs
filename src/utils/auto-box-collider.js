@@ -18,7 +18,7 @@ const FAKE_TROIKA_BOUNDS = new THREE.Box3(
 );
 
 // TODO This whole function is suspect for manually computing bounding boxes when geometry already has code for this
-export const computeLocalBoundingBox = (function() {
+export const computeLocalBoundingBox = (function () {
   const vertex = new THREE.Vector3();
   const rootInverse = new THREE.Matrix4();
   const toRootSpace = new THREE.Matrix4();
@@ -67,7 +67,7 @@ export const computeLocalBoundingBox = (function() {
 // possible AABB -- we could return a tighter one if we examined all of the vertices
 // of the geometry for ourselves, but we don't care enough for what we're using this
 // for to do so much work.
-export const computeObjectAABB = (function() {
+export const computeObjectAABB = (function () {
   const bounds = new THREE.Box3();
   return function computeObjectAABB(root, target, excludeInvisible) {
     target.makeEmpty();

@@ -1,7 +1,7 @@
 import { paths } from "../systems/userinput/paths";
 
 AFRAME.registerComponent("scalable-when-grabbed", {
-  tick: function() {
+  tick: function () {
     const userinput = AFRAME.scenes[0].systems.userinput;
     const interaction = AFRAME.scenes[0].systems.interaction;
     let deltaScale;

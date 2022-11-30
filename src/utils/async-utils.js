@@ -1,10 +1,10 @@
-export const waitForEvent = function(eventName, eventObj) {
+export const waitForEvent = function (eventName, eventObj) {
   return new Promise(resolve => {
     eventObj.addEventListener(eventName, resolve, { once: true });
   });
 };
 
-export const waitForDOMContentLoaded = function() {
+export const waitForDOMContentLoaded = function () {
   if (document.readyState === "complete" || document.readyState === "loaded" || document.readyState === "interactive") {
     return Promise.resolve(null);
   } else {
@@ -12,7 +12,7 @@ export const waitForDOMContentLoaded = function() {
   }
 };
 
-export const sleep = function(milliseconds) {
+export const sleep = function (milliseconds) {
   return new Promise(resolve => {
     setTimeout(resolve, milliseconds);
   });

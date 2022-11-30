@@ -91,7 +91,16 @@ function getPersonName(person, intl) {
   return person.profile.displayName + (person.isMe ? ` (${you})` : "");
 }
 
-export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, onMuteAll, canVoiceChat, voiceChatEnabled, isMod }) {
+export function PeopleSidebar({
+  people,
+  onSelectPerson,
+  onClose,
+  showMuteAll,
+  onMuteAll,
+  canVoiceChat,
+  voiceChatEnabled,
+  isMod
+}) {
   const intl = useIntl();
   return (
     <Sidebar
@@ -108,13 +117,11 @@ export function PeopleSidebar({ people, onSelectPerson, onClose, showMuteAll, on
           <IconButton onClick={onMuteAll}>
             <FormattedMessage id="people-sidebar.mute-all-button" defaultMessage="Mute All" />
           </IconButton>
-        ) : (
-          undefined
-        )
+        ) : undefined
       }
     >
       {!canVoiceChat && <PermissionNotification permission={"voice_chat"} />}
-      {!voiceChatEnabled && isMod && <PermissionNotification permission={"voice_chat"} isMod={true}/>}
+      {!voiceChatEnabled && isMod && <PermissionNotification permission={"voice_chat"} isMod={true} />}
       <List>
         {people.map(person => {
           const DeviceIcon = getDeviceIconComponent(person.context);

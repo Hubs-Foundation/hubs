@@ -13,7 +13,6 @@ import {
   EmojiPickerPopoverButton,
   ChatLengthWarning,
   PermissionMessageGroup
-  
 } from "./ChatSidebar";
 import { useMaintainScrollPosition } from "../misc/useMaintainScrollPosition";
 import { spawnChatMessage } from "../chat-message";
@@ -140,38 +139,35 @@ export function ChatContextProvider({ messageDispatch, children }) {
   const [unreadMessages, setUnreadMessages] = useState(false);
   const isMod = useRole("owner");
 
-  useEffect(
-    () => {
-      function onReceiveMessage(event) {
-        const newMessage = event.detail;
+  useEffect(() => {
+    function onReceiveMessage(event) {
+      const newMessage = event.detail;
 
-        if (isMod && newMessage.sessionId === NAF.clientId && newMessage.type === "permission") return;
+      if (isMod && newMessage.sessionId === NAF.clientId && newMessage.type === "permission") return;
 
-        setMessageGroups(messages => updateMessageGroups(messages, newMessage));
+      setMessageGroups(messages => updateMessageGroups(messages, newMessage));
 
-        if (
-          newMessage.type === "chat" ||
-          newMessage.type === "image" ||
-          newMessage.type === "photo" ||
-          newMessage.type === "video" ||
-          newMessage.type === "permission"
-        ) {
-          setUnreadMessages(true);
-        }
+      if (
+        newMessage.type === "chat" ||
+        newMessage.type === "image" ||
+        newMessage.type === "photo" ||
+        newMessage.type === "video" ||
+        newMessage.type === "permission"
+      ) {
+        setUnreadMessages(true);
       }
+    }
 
+    if (messageDispatch) {
+      messageDispatch.addEventListener("message", onReceiveMessage);
+    }
+
+    return () => {
       if (messageDispatch) {
-        messageDispatch.addEventListener("message", onReceiveMessage);
+        messageDispatch.removeEventListener("message", onReceiveMessage);
       }
-
-      return () => {
-        if (messageDispatch) {
-          messageDispatch.removeEventListener("message", onReceiveMessage);
-        }
-      };
-    },
-    [messageDispatch, setMessageGroups, setUnreadMessages, isMod]
-  );
+    };
+  }, [messageDispatch, setMessageGroups, setUnreadMessages, isMod]);
 
   const sendMessage = useCallback(
     message => {
@@ -182,12 +178,9 @@ export function ChatContextProvider({ messageDispatch, children }) {
     [messageDispatch]
   );
 
-  const setMessagesRead = useCallback(
-    () => {
-      setUnreadMessages(false);
-    },
-    [setUnreadMessages]
-  );
+  const setMessagesRead = useCallback(() => {
+    setUnreadMessages(false);
+  }, [setUnreadMessages]);
 
   return (
     <ChatContext.Provider value={{ messageGroups, unreadMessages, sendMessage, setMessagesRead }}>
@@ -237,13 +230,10 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     [sendMessage, setMessage, onClose, canTextChat, isCommand]
   );
 
-  const onSendMessage = useCallback(
-    () => {
-      sendMessage(message.substring(0, MAX_MESSAGE_LENGTH));
-      setMessage("");
-    },
-    [message, sendMessage, setMessage]
-  );
+  const onSendMessage = useCallback(() => {
+    sendMessage(message.substring(0, MAX_MESSAGE_LENGTH));
+    setMessage("");
+  }, [message, sendMessage, setMessage]);
 
   const onSpawnMessage = () => {
     spawnChatMessage(message);
@@ -274,14 +264,11 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
 
   useEffect(() => inputEffect(inputRef.current), [inputEffect, inputRef]);
 
-  useEffect(
-    () => {
-      if (scrolledToBottom) {
-        setMessagesRead();
-      }
-    },
-    [messageGroups, scrolledToBottom, setMessagesRead]
-  );
+  useEffect(() => {
+    if (scrolledToBottom) {
+      setMessagesRead();
+    }
+  }, [messageGroups, scrolledToBottom, setMessagesRead]);
 
   const discordBridges = discordBridgesForPresences(presences);
   const discordSnippet = discordBridges.map(ch => "#" + ch).join(", ");
@@ -291,19 +278,19 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     if (discordBridges.length === 0) {
       placeholder = intl.formatMessage(chatSidebarMessages["emmptyRoom"]);
     } else {
-      placeholder = intl.formatMessage(chatSidebarMessages["emmptyRoomBot"],
-        { discordChannels: discordSnippet }
-      );
+      placeholder = intl.formatMessage(chatSidebarMessages["emmptyRoomBot"], { discordChannels: discordSnippet });
     }
   } else {
     if (discordBridges.length === 0) {
-      placeholder = intl.formatMessage(chatSidebarMessages["occupants"],
-        { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
-      );
+      placeholder = intl.formatMessage(chatSidebarMessages["occupants"], {
+        discordChannels: discordSnippet,
+        occupantCount: occupantCount - 1
+      });
     } else {
-      placeholder = intl.formatMessage(chatSidebarMessages["occupantsAndBot"],
-        { discordChannels: discordSnippet, occupantCount: occupantCount - 1 }
-      );
+      placeholder = intl.formatMessage(chatSidebarMessages["occupantsAndBot"], {
+        discordChannels: discordSnippet,
+        occupantCount: occupantCount - 1
+      });
     }
   }
 
@@ -327,7 +314,7 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
         })}
       </ChatMessageList>
       {!canTextChat && <PermissionNotification permission={"text_chat"} />}
-      {!textChatEnabled && isMod && <PermissionNotification permission={"text_chat"} isMod={true}/>}
+      {!textChatEnabled && isMod && <PermissionNotification permission={"text_chat"} isMod={true} />}
       <ChatInput
         id="chat-input"
         ref={inputRef}
@@ -349,14 +336,19 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
             {message.length === 0 && canSpawnMessages ? (
               <MessageAttachmentButton onChange={onUploadAttachments} />
             ) : (
-              <SendMessageButton onClick={onSendMessage} as={"button"} disabled={isDisabled && !isCommand} title={isDisabled && !isCommand ? intl.formatMessage(
-                chatSidebarMessages["textChatOff"]
-              ) : undefined} />
+              <SendMessageButton
+                onClick={onSendMessage}
+                as={"button"}
+                disabled={isDisabled && !isCommand}
+                title={isDisabled && !isCommand ? intl.formatMessage(chatSidebarMessages["textChatOff"]) : undefined}
+              />
             )}
             {canSpawnMessages && (
-              <SpawnMessageButton disabled={isDisabled} onClick={onSpawnMessage} title={isDisabled ? intl.formatMessage(
-                chatSidebarMessages["textChatOff"]
-              ) : undefined} />
+              <SpawnMessageButton
+                disabled={isDisabled}
+                onClick={onSpawnMessage}
+                title={isDisabled ? intl.formatMessage(chatSidebarMessages["textChatOff"]) : undefined}
+              />
             )}
           </>
         }

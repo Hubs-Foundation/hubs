@@ -32,7 +32,8 @@ import { EnvironmentSystem } from "./environment-system";
 import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 
 // new world
-import { networkSendSystem, networkReceiveSystem } from "./netcode";
+import { networkReceiveSystem } from "../bit-systems/network-receive-system";
+import { networkSendSystem } from "../bit-systems/network-send-system";
 import { onOwnershipLost } from "./on-ownership-lost";
 import { interactionSystem } from "./bit-interaction-system";
 import { floatyObjectSystem } from "./floaty-object-system";
@@ -54,6 +55,7 @@ import type { HubsSystems } from "aframe";
 import { Camera, Scene, WebGLRenderer } from "three";
 import { HubsWorld } from "../app";
 import { EffectComposer } from "postprocessing";
+import { sceneLoadingSystem } from "../bit-systems/scene-loading";
 
 declare global {
   interface Window {
@@ -159,6 +161,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   networkReceiveSystem(world);
   onOwnershipLost(world);
+  sceneLoadingSystem(world, hubsSystems.environmentSystem);
   mediaLoadingSystem(world);
 
   physicsCompatSystem(world);

@@ -49,3 +49,17 @@
     background-color: theme.$tip-button-color-pressed;
   }
 }
+
+:local(.toast) {
+  animation: vanish 5s;
+  animation-fill-mode: forwards;
+  @keyframes vanish {
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+}

@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
 import { Tip } from "./Tip";
+import { ToastTip } from "./ToastTip";
 import { useEffect } from "react";
 import { discordBridgesForPresences, hasEmbedPresences } from "../../utils/phoenix-utils";
 import { Tooltip } from "./Tooltip";
@@ -18,6 +19,14 @@ export function FullscreenTip(props) {
     <Tip {...props} dismissLabel={<OkDismissLabel />}>
       <FormattedMessage id="tips.fullscreen" defaultMessage="Entered fullscreen mode. Press Escape to show UI." />
     </Tip>
+  );
+}
+
+export function RecordModeTip() {
+  return (
+    <ToastTip>
+      <FormattedMessage id="record-mode-enabled-tip" defaultMessage="Record mode on, press 'B' to toggle off" />
+    </ToastTip>
   );
 }
 

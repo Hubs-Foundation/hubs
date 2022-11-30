@@ -33,89 +33,71 @@ export function UserProfileSidebarContainer({
   const mayRemoveOwner = hubChannel.canOrWillIfCreator("update_roles") && isOwner && !isCreator;
   const [isHidden, setIsHidden] = useState(hubChannel.isHidden(user.id));
 
-  useEffect(
-    () => {
-      if (avatarId) {
-        getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => setAvatarThumbnailUrl(avatarThumbnailUrl));
-      }
-    },
-    [avatarId, setAvatarThumbnailUrl, user]
-  );
+  useEffect(() => {
+    if (avatarId) {
+      getAvatarThumbnailUrl(avatarId).then(avatarThumbnailUrl => setAvatarThumbnailUrl(avatarThumbnailUrl));
+    }
+  }, [avatarId, setAvatarThumbnailUrl, user]);
 
-  const addOwner = useCallback(
-    () => {
-      performConditionalSignIn(
-        () => hubChannel.can("update_roles"),
-        async () => {
-          showNonHistoriedDialog(PromoteClientModal, {
-            displayName,
-            onConfirm: async () => {
-              setIsOwner(true);
-              await hubChannel.addOwner(userId);
-              onCloseDialog();
-            }
-          });
-        },
-        SignInMessages.addOwner
-      );
-    },
-    [performConditionalSignIn, hubChannel, showNonHistoriedDialog, userId, onCloseDialog, displayName]
-  );
+  const addOwner = useCallback(() => {
+    performConditionalSignIn(
+      () => hubChannel.can("update_roles"),
+      async () => {
+        showNonHistoriedDialog(PromoteClientModal, {
+          displayName,
+          onConfirm: async () => {
+            setIsOwner(true);
+            await hubChannel.addOwner(userId);
+            onCloseDialog();
+          }
+        });
+      },
+      SignInMessages.addOwner
+    );
+  }, [performConditionalSignIn, hubChannel, showNonHistoriedDialog, userId, onCloseDialog, displayName]);
 
-  const removeOwner = useCallback(
-    () => {
-      performConditionalSignIn(
-        () => hubChannel.can("update_roles"),
-        async () => {
-          setIsOwner(false);
-          await hubChannel.removeOwner(userId);
-        },
-        SignInMessages.removeOwner
-      );
-    },
-    [performConditionalSignIn, hubChannel, userId]
-  );
+  const removeOwner = useCallback(() => {
+    performConditionalSignIn(
+      () => hubChannel.can("update_roles"),
+      async () => {
+        setIsOwner(false);
+        await hubChannel.removeOwner(userId);
+      },
+      SignInMessages.removeOwner
+    );
+  }, [performConditionalSignIn, hubChannel, userId]);
 
-  const toggleHidden = useCallback(
-    () => {
-      if (isHidden) {
-        hubChannel.unhide(userId);
-      } else {
-        hubChannel.hide(userId);
-      }
+  const toggleHidden = useCallback(() => {
+    if (isHidden) {
+      hubChannel.unhide(userId);
+    } else {
+      hubChannel.hide(userId);
+    }
 
-      setIsHidden(!isHidden);
-    },
-    [isHidden, userId, hubChannel]
-  );
+    setIsHidden(!isHidden);
+  }, [isHidden, userId, hubChannel]);
 
-  const mute = useCallback(
-    () => {
-      performConditionalSignIn(
-        () => hubChannel.can("mute_users"),
-        async () => await hubChannel.mute(userId),
-        SignInMessages.muteUser
-      );
-    },
-    [performConditionalSignIn, hubChannel, userId]
-  );
+  const mute = useCallback(() => {
+    performConditionalSignIn(
+      () => hubChannel.can("mute_users"),
+      async () => await hubChannel.mute(userId),
+      SignInMessages.muteUser
+    );
+  }, [performConditionalSignIn, hubChannel, userId]);
 
-  const kick = useCallback(
-    () => {
-      performConditionalSignIn(
-        () => hubChannel.can("kick_users"),
-        async () => await hubChannel.kick(userId),
-        SignInMessages.kickUser
-      );
+  const kick = useCallback(() => {
+    performConditionalSignIn(
+      () => hubChannel.can("kick_users"),
+      async () => await hubChannel.kick(userId),
+      SignInMessages.kickUser
+    );
 
-      if (onClose) {
-        onClose();
-      } else if (onBack) {
-        onBack();
-      }
-    },
-    [performConditionalSignIn, hubChannel, userId, onClose, onBack]
-  );
+    if (onClose) {
+      onClose();
+    } else if (onBack) {
+      onBack();
+    }
+  }, [performConditionalSignIn, hubChannel, userId, onClose, onBack]);
 
   return (
     <UserProfileSidebar

@@ -20,16 +20,7 @@ module.exports = {
   plugins: ["prettier", "react", "react-hooks", "@calm/react-intl"],
   // https://eslint.org/docs/rules/
   rules: {
-    "no-prototype-builtins": "off",
-
-    // TODO these are new as of our Webpack 5 upgrade, making them warnings till we get a handle on them or decide we don't want them
-    "react/prop-types": "warn",
-    "react/display-name": "warn",
-    "no-redeclare": "warn",
-    "no-async-promise-executor": "warn",
-
-    // TODO temporarily disable migrating to prettier 2.0 until we reformat everything in  its own PR
-    "prettier/prettier": "off",
+    "prettier/prettier": "error",
 
     // https://github.com/prettier/eslint-plugin-prettier
     "prefer-const": "error",
@@ -46,7 +37,7 @@ module.exports = {
     "no-console": "off",
     // https://www.npmjs.com/package/eslint-plugin-react-hooks
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/exhaustive-deps": "error",
     // https://github.com/calm/eslint-plugin-react-intl
     "@calm/react-intl/missing-formatted-message": [
       "error",

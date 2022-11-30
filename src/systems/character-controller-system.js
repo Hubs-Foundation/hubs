@@ -17,7 +17,7 @@ const NAV_ZONE = "character";
 const qsAllowWaypointLerp = qsTruthy("waypointLerp");
 const isMobile = AFRAME.utils.device.isMobile();
 
-const calculateDisplacementToDesiredPOV = (function() {
+const calculateDisplacementToDesiredPOV = (function () {
   const translationCoordinateSpace = new THREE.Matrix4();
   const translated = new THREE.Matrix4();
   const localTranslation = new THREE.Matrix4();
@@ -76,7 +76,7 @@ export class CharacterControllerSystem {
     this.dXZ += dXZ;
   }
   // We assume the rig is at the root, and its local position === its world position.
-  teleportTo = (function() {
+  teleportTo = (function () {
     const rig = new THREE.Vector3();
     const head = new THREE.Vector3();
     const deltaFromHeadToTargetForHead = new THREE.Vector3();
@@ -97,7 +97,7 @@ export class CharacterControllerSystem {
     };
   })();
 
-  travelByWaypoint = (function() {
+  travelByWaypoint = (function () {
     const inMat4Copy = new THREE.Matrix4();
     const inPosition = new THREE.Vector3();
     const outPosition = new THREE.Vector3();
@@ -138,17 +138,14 @@ export class CharacterControllerSystem {
         initialOrientation.extractRotation(this.avatarPOV.object3D.matrixWorld);
         finalScale.setFromMatrixScale(finalPOV);
         finalPosition.setFromMatrixPosition(finalPOV);
-        finalPOV
-          .copy(initialOrientation)
-          .scale(finalScale)
-          .setPosition(finalPosition);
+        finalPOV.copy(initialOrientation).scale(finalScale).setPosition(finalPosition);
       }
       calculateCameraTransformForWaypoint(this.avatarPOV.object3D.matrixWorld, finalPOV, finalPOV);
       childMatch(this.avatarRig.object3D, this.avatarPOV.object3D, finalPOV);
     };
   })();
 
-  tick = (function() {
+  tick = (function () {
     const snapRotatedPOV = new THREE.Matrix4();
     const newPOV = new THREE.Matrix4();
     const displacementToDesiredPOV = new THREE.Vector3();
@@ -264,8 +261,8 @@ export class CharacterControllerSystem {
             (preferences.disableMovement
               ? 0
               : preferences.disableBackwardsMovement
-                ? Math.min(0, zCharacterAcceleration)
-                : zCharacterAcceleration)
+              ? Math.min(0, zCharacterAcceleration)
+              : zCharacterAcceleration)
         );
       }
       const lerpC = vrMode ? 0 : 0.85; // TODO: To support drifting ("ice skating"), motion needs to keep initial direction
@@ -330,7 +327,7 @@ export class CharacterControllerSystem {
         if (!this.activeWaypoint && this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
           this.shouldUnoccupyWaypointsOnceMoving = false;
           this.waypointSystem.releaseAnyOccupiedWaypoints();
-          if (this.fly && this.shouldLandWhenPossible && (shouldResnapToNavMesh && squareDistNavMeshCorrection < 3)) {
+          if (this.fly && this.shouldLandWhenPossible && shouldResnapToNavMesh && squareDistNavMeshCorrection < 3) {
             newPOV.setPosition(navMeshSnappedPOVPosition);
             this.shouldLandWhenPossible = false;
             this.fly = false;
@@ -355,7 +352,7 @@ export class CharacterControllerSystem {
     );
   }
 
-  findPOVPositionAboveNavMesh = (function() {
+  findPOVPositionAboveNavMesh = (function () {
     const startingFeetPosition = new THREE.Vector3();
     const desiredFeetPosition = new THREE.Vector3();
     // TODO: Here we assume the player is standing straight up, but in VR it is often the case

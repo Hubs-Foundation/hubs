@@ -48,7 +48,9 @@ function MoreMenuGroup({ group, closePopover }) {
     <li>
       <h1 className={styles.moreMenuGroupLabel}>{group.label}</h1>
       <ul className={styles.moreMenuItemList}>
-        {group.items.map(item => <MoreMenuItem key={item.id} item={item} closePopover={closePopover} />)}
+        {group.items.map(item => (
+          <MoreMenuItem key={item.id} item={item} closePopover={closePopover} />
+        ))}
       </ul>
     </li>
   );
@@ -62,7 +64,11 @@ MoreMenuGroup.propTypes = {
 function MoreMenuPopoverContent({ menu, closePopover }) {
   return (
     <div className={styles.moreMenuPopover}>
-      <ul>{menu.map(group => <MoreMenuGroup key={group.id} group={group} closePopover={closePopover} />)}</ul>
+      <ul>
+        {menu.map(group => (
+          <MoreMenuGroup key={group.id} group={group} closePopover={closePopover} />
+        ))}
+      </ul>
     </div>
   );
 }

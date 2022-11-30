@@ -44,7 +44,7 @@ async function getMediaStream(el) {
 }
 
 AFRAME.registerComponent("avatar-audio-source", {
-  createAudio: async function() {
+  createAudio: async function () {
     this.removeAudio();
 
     this.isCreatingAudio = true;
@@ -167,7 +167,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     });
   },
 
-  remove: function() {
+  remove: function () {
     APP.dialog.off("stream_updated", this._onStreamUpdated);
     APP.hubChannel.removeEventListener("permissions_updated", this.onPermissionsUpdated);
 
@@ -320,7 +320,7 @@ AFRAME.registerComponent("audio-target", {
     this.el.addEventListener("audio_type_changed", this.createAudio);
   },
 
-  remove: function() {
+  remove: function () {
     APP.supplementaryAttenuation.delete(this.el);
     APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
@@ -331,7 +331,7 @@ AFRAME.registerComponent("audio-target", {
     this.el.removeEventListener("audio_type_changed", this.createAudio);
   },
 
-  createAudio: function() {
+  createAudio: function () {
     this.removeAudio();
 
     APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);

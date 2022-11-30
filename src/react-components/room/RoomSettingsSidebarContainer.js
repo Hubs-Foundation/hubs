@@ -18,11 +18,13 @@ export function RoomSettingsSidebarContainer({ showBackButton, room, hubChannel,
 
       NotifiablePermissions.forEach(perm => {
         if (APP.hub.member_permissions[perm] !== settings.member_permissions[perm]) {
-          hubChannel.sendMessage({
-            permission: perm,
-            status: settings.member_permissions[perm]
-          },
-          "permission");
+          hubChannel.sendMessage(
+            {
+              permission: perm,
+              status: settings.member_permissions[perm]
+            },
+            "permission"
+          );
         }
       });
     },

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./CheckboxInput.scss";
 
+/* eslint-disable-next-line react/display-name */
 export const CheckboxInput = memo(
   forwardRef(({ className, labelClassName, label, description, disabled, checked, ...rest }, ref) => {
     return (

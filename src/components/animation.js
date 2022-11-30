@@ -48,7 +48,7 @@ function getComponentPropertyPath(str, delimiter) {
  * Get component property using encoded component name + component property name with a
  * delimiter.
  */
-const getComponentProperty = function(el, name, delimiter) {
+const getComponentProperty = function (el, name, delimiter) {
   var splitName;
   delimiter = delimiter || ".";
   if (name.indexOf(delimiter) !== -1) {
@@ -65,7 +65,7 @@ const getComponentProperty = function(el, name, delimiter) {
  * Set component property using encoded component name + component property name with a
  * delimiter.
  */
-const setComponentProperty = function(el, name, value, delimiter) {
+const setComponentProperty = function (el, name, value, delimiter) {
   var splitName;
   delimiter = delimiter || ".";
   if (name.indexOf(delimiter) !== -1) {
@@ -122,7 +122,7 @@ module.exports.Component = registerComponent("animation", {
     from: { default: "" },
     loop: {
       default: 0,
-      parse: function(value) {
+      parse: function (value) {
         // Boolean or integer.
         if (value === true || value === "true") {
           return true;
@@ -145,7 +145,7 @@ module.exports.Component = registerComponent("animation", {
 
   multiple: true,
 
-  init: function() {
+  init: function () {
     var self = this;
 
     this.eventDetail = { name: this.attrName };
@@ -167,7 +167,7 @@ module.exports.Component = registerComponent("animation", {
     this.updateConfigForRawColor = this.updateConfigForRawColor.bind(this);
 
     this.config = {
-      complete: function() {
+      complete: function () {
         self.animationIsPlaying = false;
         self.el.emit("animationcomplete", self.eventDetail, false);
         if (self.id) {
@@ -177,7 +177,7 @@ module.exports.Component = registerComponent("animation", {
     };
   },
 
-  update: function(oldData) {
+  update: function (oldData) {
     var config = this.config;
     var data = this.data;
 
@@ -204,7 +204,7 @@ module.exports.Component = registerComponent("animation", {
     this.createAndStartAnimation();
   },
 
-  tick: function(t, dt) {
+  tick: function (t, dt) {
     if (!this.animationIsPlaying) {
       return;
     }
@@ -212,13 +212,13 @@ module.exports.Component = registerComponent("animation", {
     this.animation.tick(this.time);
   },
 
-  remove: function() {
+  remove: function () {
     this.pauseAnimation();
     this.removeEventListeners();
     this.cancelDelayedStart(); // hubs
   },
 
-  pause: function() {
+  pause: function () {
     this.paused = true;
     this.pausedWasPlaying = this.animationIsPlaying;
     this.pauseAnimation();
@@ -229,7 +229,7 @@ module.exports.Component = registerComponent("animation", {
   /**
    * `play` handler only for resuming scene.
    */
-  play: function() {
+  play: function () {
     if (!this.paused) {
       return;
     }
@@ -244,7 +244,7 @@ module.exports.Component = registerComponent("animation", {
   /**
    * Start animation from scratch.
    */
-  createAndStartAnimation: function() {
+  createAndStartAnimation: function () {
     var data = this.data;
 
     this.updateConfig();
@@ -275,7 +275,7 @@ module.exports.Component = registerComponent("animation", {
    * This is before animation start (including from startEvents).
    * Set to initial state (config.from, time = 0, seekTime = 0).
    */
-  beginAnimation: function() {
+  beginAnimation: function () {
     this.updateConfig();
     this.time = 0;
     this.animationIsPlaying = true;
@@ -283,18 +283,18 @@ module.exports.Component = registerComponent("animation", {
     this.el.emit("animationbegin", this.eventDetail, false);
   },
 
-  pauseAnimation: function() {
+  pauseAnimation: function () {
     this.animationIsPlaying = false;
   },
 
-  resumeAnimation: function() {
+  resumeAnimation: function () {
     this.animationIsPlaying = true;
   },
 
   /**
    * startEvents callback.
    */
-  onStartEvent: function() {
+  onStartEvent: function () {
     if (!this.data.enabled) {
       return;
     }
@@ -316,7 +316,7 @@ module.exports.Component = registerComponent("animation", {
   /**
    * rawProperty: true and type: color;
    */
-  updateConfigForRawColor: function() {
+  updateConfigForRawColor: function () {
     var config = this.config;
     var data = this.data;
     var el = this.el;
@@ -343,9 +343,9 @@ module.exports.Component = registerComponent("animation", {
       config[key] = to[key];
     }
 
-    config.update = (function() {
+    config.update = (function () {
       var lastValue = {};
-      return function(anim) {
+      return function (anim) {
         var value;
         value = anim.animatables[0].target;
         // For animation timeline.
@@ -361,7 +361,7 @@ module.exports.Component = registerComponent("animation", {
   /**
    * Stuff property into generic `property` key.
    */
-  updateConfigForDefault: function() {
+  updateConfigForDefault: function () {
     var config = this.config;
     var data = this.data;
     var el = this.el;
@@ -403,10 +403,10 @@ module.exports.Component = registerComponent("animation", {
     this.targets.aframeProperty = from;
     config.targets = this.targets;
     config.aframeProperty = to;
-    config.update = (function() {
+    config.update = (function () {
       var lastValue;
 
-      return function(anim) {
+      return function (anim) {
         var value;
         value = anim.animatables[0].target.aframeProperty;
 
@@ -435,7 +435,7 @@ module.exports.Component = registerComponent("animation", {
    * Extend x/y/z/w onto the config.
    * Update vector by modifying object3D.
    */
-  updateConfigForVector: function() {
+  updateConfigForVector: function () {
     var config = this.config;
     var data = this.data;
     var el = this.el;
@@ -465,9 +465,9 @@ module.exports.Component = registerComponent("animation", {
 
     // If animating object3D transformation, run more optimized updater.
     if (data.property === PROP_POSITION || data.property === PROP_ROTATION || data.property === PROP_SCALE) {
-      config.update = (function() {
+      config.update = (function () {
         var lastValue = {};
-        return function(anim) {
+        return function (anim) {
           var value = anim.animatables[0].target;
 
           if (data.property === PROP_SCALE) {
@@ -493,9 +493,9 @@ module.exports.Component = registerComponent("animation", {
     }
 
     // Animating some vector.
-    config.update = (function() {
+    config.update = (function () {
       var lastValue = {};
-      return function(anim) {
+      return function (anim) {
         var value = anim.animations[0].target;
 
         // Animate rotation through radians.
@@ -514,7 +514,7 @@ module.exports.Component = registerComponent("animation", {
   /**
    * Update the config before each run.
    */
-  updateConfig: function() {
+  updateConfig: function () {
     var propType;
 
     // Route config type.
@@ -531,7 +531,7 @@ module.exports.Component = registerComponent("animation", {
   /**
    * Wait for component to initialize.
    */
-  waitComponentInitRawProperty: function(cb) {
+  waitComponentInitRawProperty: function (cb) {
     var componentName;
     var data = this.data;
     var el = this.el;
@@ -568,7 +568,7 @@ module.exports.Component = registerComponent("animation", {
    * e.g., animation__mouseenter="property: material.opacity"
    *       animation__mouseleave="property: material.opacity"
    */
-  stopRelatedAnimations: function() {
+  stopRelatedAnimations: function () {
     var component;
     var componentName;
     for (componentName in this.el.components) {
@@ -589,7 +589,7 @@ module.exports.Component = registerComponent("animation", {
     }
   },
 
-  addEventListeners: function() {
+  addEventListeners: function () {
     var data = this.data;
     var el = this.el;
     addEventListeners(el, data.startEvents, this.onStartEvent);
@@ -597,7 +597,7 @@ module.exports.Component = registerComponent("animation", {
     addEventListeners(el, data.resumeEvents, this.resumeAnimation);
   },
 
-  removeEventListeners: function() {
+  removeEventListeners: function () {
     var data = this.data;
     var el = this.el;
     removeEventListeners(el, data.startEvents, this.onStartEvent);
@@ -606,14 +606,14 @@ module.exports.Component = registerComponent("animation", {
   },
 
   // hubs
-  cancelDelayedStart: function() {
+  cancelDelayedStart: function () {
     if (this.delayTimeout) {
       clearTimeout(this.delayTimeout);
       this.delayTimeout = null;
     }
   },
 
-  setColorConfig: function(from, to) {
+  setColorConfig: function (from, to) {
     colorHelperFrom.set(from);
     colorHelperTo.set(to);
     from = this.fromColor;

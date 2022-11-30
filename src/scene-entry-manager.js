@@ -2,7 +2,7 @@ import qsTruthy from "./utils/qs_truthy";
 import nextTick from "./utils/next-tick";
 import { hackyMobileSafariTest } from "./utils/detect-touchscreen";
 import { SignInMessages } from "./react-components/auth/SignInModal";
-import { createNetworkedEntity } from "./systems/netcode";
+import { createNetworkedEntity } from "./utils/create-networked-entity";
 
 const isBotMode = qsTruthy("bot");
 const isMobile = AFRAME.utils.device.isMobile();
@@ -524,7 +524,7 @@ export default class SceneEntryManager {
       gainNode.connect(audioDestination);
       gainNode.gain.value = audioVolume;
 
-      const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem
+      const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem;
       audioSystem.addStreamToOutboundAudio("microphone", audioDestination.stream);
     }
 

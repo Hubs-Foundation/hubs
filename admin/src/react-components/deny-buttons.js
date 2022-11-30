@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
@@ -28,12 +29,6 @@ DenyButton.propTypes = {
   record: PropTypes.object
 };
 
-export const DenySceneButton = connect(
-  null,
-  { reviewed: sceneReviewed }
-)(DenyButton);
+export const DenySceneButton = connect(null, { reviewed: sceneReviewed })(DenyButton);
 
-export const DenyAvatarButton = connect(
-  null,
-  { reviewed: avatarReviewed }
-)(DenyButton);
+export const DenyAvatarButton = connect(null, { reviewed: avatarReviewed })(DenyButton);

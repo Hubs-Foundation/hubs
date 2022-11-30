@@ -22,7 +22,9 @@ export const UnauthorizedPage = () => (
           alignItems: "center"
         }}
       >
+        {/* eslint-disable-next-line @calm/react-intl/missing-formatted-message */}
         <Typography variant="title">Sorry! Your account is not an admin.</Typography>
+        {/* eslint-disable-next-line @calm/react-intl/missing-formatted-message */}
         <Button variant="contained" style={{ marginTop: "40px" }} color="secondary" href="/">
           Return Home
         </Button>

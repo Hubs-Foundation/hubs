@@ -1,3 +1,4 @@
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -122,6 +123,11 @@ function formatFileSize(bytes) {
 function OwnedFileSizeFieldInternal({ record }) {
   return <span>{formatFileSize(record.content_length)}</span>;
 }
+OwnedFileSizeFieldInternal.propTypes = {
+  record: {
+    content_length: PropTypes.number
+  }
+};
 
 export const OwnedFileSizeField = withStyles(styles)(({ label, basePath, record, source }) => {
   return (

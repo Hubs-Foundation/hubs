@@ -12,9 +12,9 @@ export function createBasisTexture(url) {
   return new Promise((resolve, reject) => {
     basisLoader.load(
       url,
-      function(texture) {
+      function (texture) {
         texture.encoding = THREE.sRGBEncoding;
-        texture.onUpdate = function() {
+        texture.onUpdate = function () {
           // Delete texture data once it has been uploaded to the GPU
           texture.mipmaps.length = 0;
         };
@@ -22,7 +22,7 @@ export function createBasisTexture(url) {
         resolve(texture);
       },
       undefined,
-      function(error) {
+      function (error) {
         console.error(error);
         reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
       }
@@ -37,9 +37,9 @@ export function createKTX2Texture(url) {
   return new Promise((resolve, reject) => {
     ktxLoader.load(
       url,
-      function(texture) {
+      function (texture) {
         texture.encoding = THREE.sRGBEncoding;
-        texture.onUpdate = function() {
+        texture.onUpdate = function () {
           // Delete texture data once it has been uploaded to the GPU
           texture.mipmaps.length = 0;
         };
@@ -47,7 +47,7 @@ export function createKTX2Texture(url) {
         resolve(texture);
       },
       undefined,
-      function(error) {
+      function (error) {
         console.error(error);
         reject(new Error(`'${url}' could not be fetched (Error: ${error}`));
       }

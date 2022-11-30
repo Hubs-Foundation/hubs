@@ -50,7 +50,7 @@ function aframeDocs(doc) {
   return keys.includes("component") || keys.includes("system");
 }
 
-(async function() {
+(async function () {
   const files = shell.ls("src/components/*.js", "src/systems/*.js");
   const parsedDocs = flatten(await Promise.all(files.map(extractDocs)))
     .filter(x => x)

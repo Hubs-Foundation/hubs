@@ -20,7 +20,7 @@ AFRAME.registerComponent("ambient-light", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("ambient-light");
   }
 });

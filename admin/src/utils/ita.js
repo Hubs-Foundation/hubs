@@ -16,7 +16,7 @@ const schemaCategories = [
 const serviceNames = configs.CONFIGURABLE_SERVICES.split(",");
 let currentAuthToken = null;
 
-const setAuthToken = function(token) {
+const setAuthToken = function (token) {
   currentAuthToken = token;
 };
 

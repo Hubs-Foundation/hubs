@@ -21,13 +21,10 @@ function usePresence(scene, initialPresence) {
   const onPresenceUpdate = ({ detail: presence }) => {
     if (presence.sessionId === NAF.clientId) setPresence(presence);
   };
-  useEffect(
-    () => {
-      scene.addEventListener("presence_updated", onPresenceUpdate);
-      return () => scene.removeEventListener("presence_updated", onPresenceUpdate);
-    },
-    [scene]
-  );
+  useEffect(() => {
+    scene.addEventListener("presence_updated", onPresenceUpdate);
+    return () => scene.removeEventListener("presence_updated", onPresenceUpdate);
+  }, [scene]);
 
   return presence;
 }
@@ -43,16 +40,13 @@ export function ReactionPopoverContainer({ scene, initialPresence }) {
     ...emoji
   }));
 
-  const onToggleHandRaised = useCallback(
-    () => {
-      if (presence.hand_raised) {
-        window.APP.hubChannel.lowerHand();
-      } else {
-        window.APP.hubChannel.raiseHand();
-      }
-    },
-    [presence]
-  );
+  const onToggleHandRaised = useCallback(() => {
+    if (presence.hand_raised) {
+      window.APP.hubChannel.lowerHand();
+    } else {
+      window.APP.hubChannel.raiseHand();
+    }
+  }, [presence]);
 
   return <ReactionPopoverButton items={items} presence={presence} onToggleHandRaised={onToggleHandRaised} />;
 }

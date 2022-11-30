@@ -16,7 +16,7 @@ import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
 import { MediaType } from "../utils/media-utils";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
-import { takeOwnership } from "./netcode";
+import { takeOwnership } from "../utils/take-ownership";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
@@ -126,14 +126,7 @@ function setMatrixScale(obj, scaleArray) {
   const m4 = new THREE.Matrix4();
   obj.updateMatrices();
   obj.matrixWorld.decompose(position, quaternion, scale);
-  setMatrixWorld(
-    obj,
-    m4.compose(
-      position,
-      quaternion,
-      scale.fromArray(scaleArray)
-    )
-  );
+  setMatrixWorld(obj, m4.compose(position, quaternion, scale.fromArray(scaleArray)));
 }
 
 function cloneForPreview(world, eid) {
@@ -142,7 +135,7 @@ function cloneForPreview(world, eid) {
   const mesh = el.getObject3D("mesh");
   const meshClone = cloneObject3D(mesh, false);
   meshClone.traverse(node => {
-    updateMaterials(node, function(srcMat) {
+    updateMaterials(node, function (srcMat) {
       const mat = srcMat.clone();
       mat.transparent = true;
       mat.opacity = 0.5;
@@ -272,7 +265,9 @@ export function mediaFramesSystem(world) {
 
     if (
       NetworkedMediaFrame.capturedNid[frame] !== MediaFrame.capturedNid[frame] &&
-      (captured && entityExists(world, captured) && hasComponent(world, Owned, captured))
+      captured &&
+      entityExists(world, captured) &&
+      hasComponent(world, Owned, captured)
     ) {
       // TODO: If you are resetting scale because you lost a race for the frame,
       //       you should probably also move the object away from the frame.

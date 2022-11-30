@@ -6,8 +6,16 @@ import { createGIFTexture } from "../utils/gif-texture";
 import { makeCancelable } from "./coroutine";
 
 const textureCache = new TextureCache();
+// Prime the cache with the error texture.
+// We don't want to wait for the errorImage to finish loading, so hardcode the ratio and add it now.
+// We don't ever want to deallocate / dispose the texture, so set the count to 1.
+textureCache.cache.set(TextureCache.key("error", 1), {
+  cacheKey: TextureCache.key("error", 1),
+  texture: errorTexture,
+  ratio: 1400 / 1200,
+  count: 1
+});
 const inflightTextures = new Map();
-const errorCacheItem = { texture: errorTexture, ratio: 1400 / 1200 };
 
 function createTexture(contentType, src) {
   if (contentType.includes("image/gif")) {
@@ -26,16 +34,19 @@ function createTexture(contentType, src) {
   throw new Error(`Unknown image content type: ${contentType}`);
 }
 
+export function loadTextureFromCache(src, version) {
+  if (!textureCache.has(src, version)) {
+    throw new Error(`Texture not in cache: ${src} ${version}`);
+  }
+  return textureCache.retain(src, version);
+}
+
 async function loadTexture(src, version, contentType) {
   if (textureCache.has(src, version)) {
     return textureCache.retain(src, version);
   }
 
-  if (src === "error") {
-    return errorCacheItem;
-  }
-
-  const inflightKey = textureCache.key(src, version);
+  const inflightKey = TextureCache.key(src, version);
   if (inflightTextures.has(inflightKey)) {
     await inflightTextures.get(inflightKey);
     return textureCache.retain(src, version);
@@ -51,16 +62,16 @@ async function loadTexture(src, version, contentType) {
   }
 }
 
-export async function releaseTexture(src, version) {
-  textureCache.release(src, version);
+export async function releaseTextureByKey(cacheKey) {
+  textureCache.releaseByKey(cacheKey);
 }
 
 export function loadTextureCancellable(src, version, contentType) {
   const p = loadTexture(src, version, contentType);
   return makeCancelable(() => {
     // TODO: Pass in an AbortSignal through to loadTexture so that we can cancel inflight requests.
-    p.then(() => {
-      releaseTexture(src, version);
+    p.then(({ cacheKey }) => {
+      releaseTextureByKey(cacheKey);
     });
   }, p);
 }

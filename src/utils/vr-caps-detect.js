@@ -84,8 +84,8 @@ export async function getAvailableVREntryTypes() {
   const screen = isMobileVR
     ? VR_DEVICE_AVAILABILITY.no
     : isIDevice && isUIWebView
-      ? VR_DEVICE_AVAILABILITY.maybe
-      : VR_DEVICE_AVAILABILITY.yes;
+    ? VR_DEVICE_AVAILABILITY.maybe
+    : VR_DEVICE_AVAILABILITY.yes;
 
   // HACK -- we prompt the user to install firefox if they click the VR button on a non-WebVR compatible
   // browser. Without this check if you have FF on Mac/Linux you'll get the confusing flow of having a

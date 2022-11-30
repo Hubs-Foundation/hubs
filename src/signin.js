@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import registerTelemetry from "./telemetry";
-import Store from "./storage/store";
 import "./utils/theme";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import { SignInModalContainer } from "./react-components/auth/SignInModalContainer";
@@ -11,10 +10,10 @@ import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import { Center } from "./react-components/layout/Center";
 import { ThemeProvider } from "./react-components/styles/theme";
+import { store } from "./utils/store-instance";
 
 registerTelemetry("/signin", "Hubs Sign In Page");
 
-const store = new Store();
 window.APP = { store };
 
 function Root() {

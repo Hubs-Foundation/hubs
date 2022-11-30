@@ -67,13 +67,10 @@ export function ReactionPopoverButton({ items, presence, onToggleHandRaised }) {
   const title = intl.formatMessage(reactionPopoverTitle);
   const popoverApiRef = useRef();
 
-  const onTooltipHandLowered = useCallback(
-    () => {
-      setIsTooltipVisible(false);
-      onToggleHandRaised();
-    },
-    [onToggleHandRaised]
-  );
+  const onTooltipHandLowered = useCallback(() => {
+    setIsTooltipVisible(false);
+    onToggleHandRaised();
+  }, [onToggleHandRaised]);
 
   return (
     <Popover

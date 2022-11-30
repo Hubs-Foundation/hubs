@@ -1,4 +1,4 @@
-export const getCurrentPlayerHeight = (function() {
+export const getCurrentPlayerHeight = (function () {
   let avatarPOV;
   let avatarRig;
   return function getCurrentPlayerHeight(world) {

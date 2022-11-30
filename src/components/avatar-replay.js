@@ -22,12 +22,12 @@ AFRAME.registerComponent("avatar-replay", {
     recordingUrl: { type: "string" }
   },
 
-  init: function() {
+  init: function () {
     console.log("avatar replay init");
     this.modelLoaded = new Promise(resolve => this.el.addEventListener("model-loaded", resolve));
   },
 
-  update: function() {
+  update: function () {
     console.log("avatar replay updated: " + this.data.recordingUrl);
     const { camera, leftController, rightController, recordingUrl } = this.data;
     if (!recordingUrl) {
@@ -43,9 +43,9 @@ AFRAME.registerComponent("avatar-replay", {
 
     this.dataLoaded = Promise.all([fetchRecording, this.modelLoaded]).then(([recording]) => {
       console.log(
-        `Recording ready [${recording.camera.poses.length} cam/${recording.left &&
-          recording.left.poses.length} left/${recording.right &&
-          recording.right.poses.length} right] replaying traffic.`
+        `Recording ready [${recording.camera.poses.length} cam/${recording.left && recording.left.poses.length} left/${
+          recording.right && recording.right.poses.length
+        } right] replaying traffic.`
       );
       const cameraReplayer = camera.components["motion-capture-replayer"];
       cameraReplayer.startReplaying(recording.camera);
@@ -57,7 +57,7 @@ AFRAME.registerComponent("avatar-replay", {
     });
   },
 
-  _setupController: function(controller) {
+  _setupController: function (controller) {
     disallowedControls.forEach(controlsComponent => controller.removeAttribute(controlsComponent));
     controller.setAttribute("visible", true);
     controller.setAttribute("motion-capture-replayer", { loop: true });

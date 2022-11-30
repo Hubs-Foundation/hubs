@@ -38,24 +38,17 @@ export function SelectInputField({
   fullWidth,
   ...rest
 }) {
-  const {
-    isOpen,
-    selectedItem,
-    getToggleButtonProps,
-    getMenuProps,
-    getLabelProps,
-    highlightedIndex,
-    getItemProps
-  } = useSelect({
-    items: options,
-    selectedItem: getSelectedItem(value, options),
-    ...rest,
-    onSelectedItemChange: ({ selectedItem }) => {
-      if (onChange) {
-        onChange(getItemValue(selectedItem));
+  const { isOpen, selectedItem, getToggleButtonProps, getMenuProps, getLabelProps, highlightedIndex, getItemProps } =
+    useSelect({
+      items: options,
+      selectedItem: getSelectedItem(value, options),
+      ...rest,
+      onSelectedItemChange: ({ selectedItem }) => {
+        if (onChange) {
+          onChange(getItemValue(selectedItem));
+        }
       }
-    }
-  });
+    });
 
   const selectedItemLabel = getItemLabel(selectedItem);
 

@@ -42,7 +42,7 @@ export class HoldableButtonSystem {
   }
 }
 
-const hasButtonComponent = (function() {
+const hasButtonComponent = (function () {
   const BUTTON_COMPONENT_NAMES = [
     "icon-button",
     "text-button",
