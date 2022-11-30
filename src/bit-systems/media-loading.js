@@ -8,9 +8,9 @@ import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
 import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
-import { takeOwnership } from "../utils/take-ownership";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { animate } from "../utils/animate";
+import { assignNetworkIds } from "../utils/assign-network-ids";
 
 const loaderForMediaType = {
   [MediaType.IMAGE]: (world, { accessibleUrl, contentType }) => loadImage(world, accessibleUrl, contentType),
@@ -24,21 +24,6 @@ export const MEDIA_LOADER_FLAGS = {
   ANIMATE_LOAD: 1 << 2,
   IS_OBJECT_MENU_TARGET: 1 << 3
 };
-
-export function assignNetworkIds(world, rootNid, mediaEid, mediaLoaderEid) {
-  let i = 0;
-  world.eid2obj.get(mediaEid).traverse(function (obj) {
-    if (obj.eid && hasComponent(world, Networked, obj.eid)) {
-      const eid = obj.eid;
-      Networked.id[eid] = APP.getSid(`${rootNid}.${i}`);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = APP.getSid(rootNid);
-      Networked.owner[eid] = Networked.owner[mediaLoaderEid];
-      if (APP.getSid(NAF.clientId) === Networked.owner[mediaLoaderEid]) takeOwnership(world, eid);
-      i += 1;
-    }
-  });
-}
 
 function resizeAndRecenter(world, media, eid) {
   const resize = MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RESIZE;

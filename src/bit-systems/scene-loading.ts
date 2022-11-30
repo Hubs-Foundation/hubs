@@ -1,17 +1,20 @@
 import { AElement } from "aframe";
-import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
-import { EnvironmentSettings, NavMesh, SceneLoader, SceneRoot } from "../bit-components";
+import { EnvironmentSettings, NavMesh, Networked, SceneLoader, SceneRoot } from "../bit-components";
 import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { EnvironmentSystem } from "../systems/environment-system";
+import { assignNetworkIds } from "../utils/assign-network-ids";
 import { anyEntityWith } from "../utils/bit-utils";
 import { cancelable, coroutine } from "../utils/coroutine";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
-import { add, assignNetworkIds } from "./media-loading";
+import { EntityID } from "../utils/networking-types";
+import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
+import { add } from "./media-loading";
 import { moveToSpawnPoint } from "./waypoint";
 
 export function swapActiveScene(world: HubsWorld, src: string) {
@@ -26,13 +29,15 @@ export function swapActiveScene(world: HubsWorld, src: string) {
 
 function* loadScene(
   world: HubsWorld,
-  eid: number,
+  loaderEid: EntityID,
   signal: AbortSignal,
   environmentSystem: EnvironmentSystem,
   characterController: CharacterControllerSystem
 ) {
   try {
     const src = APP.getString(SceneLoader.src[eid]);
+
+    const src = APP.getString(SceneLoader.src[loaderEid]);
     if (!src) {
       throw new Error("Scene loading failed. No src url provided to load.");
     }
@@ -43,8 +48,8 @@ function* loadScene(
     }
 
     // TODO: Use a unique id for each scene as the root nid
-    assignNetworkIds(world, "scene", scene, eid);
-    add(world, scene, eid);
+    assignNetworkIds(world, "scene", scene, loaderEid);
+    add(world, scene, loaderEid);
     if (hasComponent(world, EnvironmentSettings, scene)) {
       // TODO: Support legacy components (fog, background, skybox)
       const environmentSettings = (EnvironmentSettings as any).map.get(scene);
@@ -75,7 +80,7 @@ function* loadScene(
     }
     const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
     (fader as any).fadeIn();
-    removeComponent(world, SceneLoader, eid);
+    removeComponent(world, SceneLoader, loaderEid);
   } catch (e) {
     console.error(e);
     console.error("Failed to load the scene");
