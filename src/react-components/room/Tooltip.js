@@ -113,6 +113,10 @@ function Key({ children }) {
   return <span className={styles.key}>{children}</span>;
 }
 
+Key.propTypes = {
+  children: PropTypes.node
+};
+
 function InlineButton({ icon, text }) {
   return (
     <span className={styles.inlineButton}>
@@ -122,9 +126,18 @@ function InlineButton({ icon, text }) {
   );
 }
 
+InlineButton.propTypes = {
+  icon: PropTypes.node,
+  text: PropTypes.string
+};
+
 function InlineIcon({ icon }) {
   return <span className={styles.inlineIcon}>{icon}</span>;
 }
+
+InlineIcon.propTypes = {
+  icon: PropTypes.node
+};
 
 function MoveKeys({ up, left, down, right }) {
   return (
@@ -141,7 +154,15 @@ function MoveKeys({ up, left, down, right }) {
   );
 }
 
-function Welcome({ intl }) {
+MoveKeys.propTypes = {
+  up: PropTypes.node,
+  left: PropTypes.node,
+  down: PropTypes.node,
+  right: PropTypes.node
+};
+
+function Welcome() {
+  const intl = useIntl();
   return (
     <>
       <h2>
@@ -159,7 +180,8 @@ function Welcome({ intl }) {
   );
 }
 
-function LocomotionStep({ intl }) {
+function LocomotionStep() {
+  const intl = useIntl();
   return (
     <>
       <p>
@@ -176,11 +198,18 @@ function LocomotionStep({ intl }) {
   );
 }
 
-function Step({ intl, step, params }) {
+function Step({ step, params }) {
+  const intl = useIntl();
   return <p>{intl.formatMessage(onboardingMessages[step], params)}</p>;
 }
 
-function WelcomeNavigationBar({ intl, onNext, onDismiss }) {
+Step.propTypes = {
+  step: PropTypes.string,
+  params: PropTypes.object
+};
+
+function WelcomeNavigationBar({ onNext, onDismiss }) {
+  const intl = useIntl();
   return (
     <div className={styles.navigationContainer}>
       <Button preset="primary" onClick={onNext}>
@@ -193,7 +222,13 @@ function WelcomeNavigationBar({ intl, onNext, onDismiss }) {
   );
 }
 
-function StepNavigationBar({ intl, step, onPrev, onNext, params }) {
+WelcomeNavigationBar.propTypes = {
+  onNext: PropTypes.func,
+  onDismiss: PropTypes.func
+};
+
+function StepNavigationBar({ step, onPrev, onNext, params }) {
+  const intl = useIntl();
   const { leftArrow, rightArrow, numStep } = params;
   return (
     <div className={styles.navigationContainer}>
@@ -217,6 +252,13 @@ function StepNavigationBar({ intl, step, onPrev, onNext, params }) {
     </div>
   );
 }
+
+StepNavigationBar.propTypes = {
+  step: PropTypes.string,
+  onPrev: PropTypes.func,
+  onNext: PropTypes.func,
+  params: PropTypes.object
+};
 
 function onboardingSteps({ intl, step }) {
   switch (step) {
@@ -362,11 +404,10 @@ export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, ...re
     <div className={layoutClass}>
       <div className={classNames(styles.tip, animationClass, className)} {...rest}>
         <div className={navigationBar?.type && styles.content}>
-          <control.type intl={intl} step={control?.messageId || step} params={control?.params} />
+          <control.type step={control?.messageId || step} params={control?.params} />
         </div>
         {navigationBar?.type && (
           <navigationBar.type
-            intl={intl}
             step={step}
             onPrev={onPrev}
             onNext={onNext}
@@ -383,5 +424,8 @@ Tooltip.propTypes = {
   className: PropTypes.string,
   onPrev: PropTypes.func,
   onNext: PropTypes.func,
-  onDismiss: PropTypes.func
+  onDismiss: PropTypes.func,
+  step: PropTypes.string
 };
+
+Tooltip.displayName = "Tooltip";

@@ -2,6 +2,7 @@ import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
 import { Tip } from "./Tip";
 import { Tooltip } from "./Tooltip";
+import PropTypes from "prop-types";
 
 export default {
   title: "Room/Tip",
@@ -19,6 +20,10 @@ export const Tips = ({ step }) => (
     }
   />
 );
+
+Tips.propTypes = {
+  step: PropTypes.string
+};
 
 const TOOLTIP_STEPS = {
   "tips.desktop.welcome": "Desktop Welcome Message",
@@ -46,4 +51,8 @@ Tooltips.argTypes = {
     },
     defaultValue: Object.keys(TOOLTIP_STEPS)[0]
   }
+};
+
+Tooltips.propTypes = {
+  step: PropTypes.string
 };
