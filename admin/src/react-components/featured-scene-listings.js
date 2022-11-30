@@ -25,7 +25,7 @@ const SceneFilter = props => (
 );
 
 export const FeaturedSceneListingList = props => (
-  <List {...props} filters={<SceneFilter />} sort={{ field: "order", order: "ASC" }}>
+  <List {...props} filters={<SceneFilter />} sort={{ field: "order", order: "ASC" }} bulkActionButtons={false}>
     <Datagrid>
       <OwnedFileImage source="screenshot_owned_file_id" />
       <OwnedFileSizeField label="Model size" source="model_owned_file_id" />

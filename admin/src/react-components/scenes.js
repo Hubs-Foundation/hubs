@@ -45,7 +45,7 @@ export const SceneEdit = props => (
 );
 
 export const SceneList = props => (
-  <List {...props} filters={<SceneFilter />}>
+  <List {...props} filters={<SceneFilter />} bulkActionButtons={false}>
     <Datagrid>
       <OwnedFileImage source="screenshot_owned_file_id" />
       <OwnedFileSizeField label="Model size" source="model_owned_file_id" />
