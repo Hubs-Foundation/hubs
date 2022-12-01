@@ -1,4 +1,10 @@
-import { pendingJoins, pendingMessages, pendingParts } from "../bit-systems/networking";
+import {
+  localClientID,
+  pendingJoins,
+  pendingMessages,
+  pendingParts,
+  takeOwnershipFrom
+} from "../bit-systems/networking";
 import { isStorableMessage } from "./load-room-objects";
 import type { ClientID, Message, NetworkID } from "./networking-types";
 import { StorableMessage } from "./store-networked-state";
@@ -10,18 +16,27 @@ type Emitter = {
   getBindings: () => any[];
 };
 type PhoenixChannel = any;
+
 export function listenForNetworkMessages(channel: PhoenixChannel, presenceEventEmitter: Emitter) {
-  presenceEventEmitter.on("hub:join", ({ key: nid }) => {
-    // TODO: Is it OK to use join events for our own client id?
-    pendingJoins.push(APP.getSid(nid));
-  });
-  presenceEventEmitter.on("hub:leave", ({ key: nid }) => {
-    pendingParts.push(APP.getSid(nid));
-  });
+  presenceEventEmitter.on("hub:join", onJoin);
+  presenceEventEmitter.on("hub:leave", onLeave);
   channel.on("naf", onNaf);
   channel.on("nafr", onNafr);
   channel.on("pin", onPin);
 }
+
+function onJoin({ key }: { key: ClientID }) {
+  if (key !== localClientID!) {
+    pendingJoins.push(APP.getSid(key));
+  }
+}
+
+function onLeave({ key }: { key: ClientID }) {
+  if (key !== localClientID!) {
+    pendingParts.push(APP.getSid(key));
+  }
+}
+
 type NafMessage = {
   from_session_id: string;
   data: any;

@@ -3,7 +3,7 @@ import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { getServerTime } from "../phoenix-adapter";
 import { messageFor } from "../utils/message-for";
-import type { EntityID, Message } from "../utils/networking-types";
+import type { Message } from "../utils/networking-types";
 import {
   createMessageDatas,
   isCreatedByMe,
@@ -97,7 +97,9 @@ export function networkSendSystem(world: HubsWorld) {
       deletedEntities,
       true
     );
-    if (message) NAF.connection.broadcastDataGuaranteed("nn", message);
+    if (message) {
+      NAF.connection.broadcastDataGuaranteed("nn", message);
+    }
 
     deletedEntities.forEach(eid => {
       world.deletedNids.add(Networked.id[eid]);

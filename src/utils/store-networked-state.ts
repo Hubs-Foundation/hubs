@@ -12,6 +12,7 @@ export interface StorableMessage extends Message {
 }
 
 export async function tryPin(world: HubsWorld, eid: EntityID, hubChannel: HubChannel) {
+  if (!localClientID) throw new Error("Tried to unpin before connected to the channel...");
   takeOwnership(world, eid);
   Networked.creator[eid] = APP.getSid("reticulum");
 

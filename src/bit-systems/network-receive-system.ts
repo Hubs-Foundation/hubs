@@ -1,9 +1,9 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
-import { createNetworkedEntityFromRemote } from "../utils/create-networked-entity";
+import { createSoftOwnedNetworkedEntity } from "../utils/create-networked-entity";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
-import type { CursorBufferUpdateMessage, StringID, UpdateMessage } from "../utils/networking-types";
+import type { ClientID, CursorBufferUpdateMessage, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import {
@@ -13,7 +13,8 @@ import {
   networkedQuery,
   pendingMessages,
   pendingParts,
-  softRemovedEntities
+  softRemovedEntities,
+  takeOwnershipFrom
 } from "./networking";
 
 function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateMessage {
@@ -23,6 +24,27 @@ function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateM
 const partedClientIds = new Set<StringID>();
 const storedUpdates = new Map<StringID, UpdateMessage[]>();
 const enteredNetworkedQuery = enterQuery(defineQuery([Networked]));
+
+let tickResolve: (() => void) | null = null;
+let tickPromise: Promise<void> | null = null;
+export function nextNetworkReceiveSystemTick() {
+  if (tickPromise) {
+    return tickPromise;
+  }
+
+  tickPromise = new Promise(resolve => {
+    tickResolve = resolve;
+  });
+  return tickPromise;
+}
+
+function breakTie(a: ClientID, b: ClientID) {
+  if (a === "reticulum") return b;
+  if (b === "reticulum") return a;
+  // arbitrary (but consistent) tiebreak
+  return a < b ? a : b;
+}
+
 export function networkReceiveSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet.
 
@@ -31,6 +53,7 @@ export function networkReceiveSystem(world: HubsWorld) {
     const networkedEntities = networkedQuery(world);
     pendingParts.forEach(partingClientId => {
       partedClientIds.add(partingClientId);
+      takeOwnershipFrom.push(partingClientId);
 
       networkedEntities
         .filter(eid => Networked.creator[eid] === partingClientId)
@@ -42,6 +65,7 @@ export function networkReceiveSystem(world: HubsWorld) {
           softRemovedEntities.add(eid);
         });
     });
+    pendingParts.length = 0;
   }
 
   // If we were hanging onto updates for any newly created non network instantiated entities
@@ -90,7 +114,7 @@ export function networkReceiveSystem(world: HubsWorld) {
         console.log(`Received create from a user who does not have permission to spawn ${prefabName}`);
         world.ignoredNids.add(nid); // TODO should we just use deletedNids for this?
       } else {
-        const eid = createNetworkedEntityFromRemote(world, prefabName, initialData, nidString, creator, creator);
+        const eid = createSoftOwnedNetworkedEntity(world, prefabName, initialData, nidString, creator);
         console.log("got create message for", nidString, eid);
 
         // If we were hanging onto updates for this nid we can now apply them. And they should be processed before other updates.
@@ -132,14 +156,12 @@ export function networkReceiveSystem(world: HubsWorld) {
       if (
         Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime ||
         (Networked.lastOwnerTime[eid] === updateMessage.lastOwnerTime &&
-          APP.getString(Networked.owner[eid])! < updateMessage.owner) // arbitrary (but consistent) tiebreak
+          updateMessage.owner !== breakTie(APP.getString(Networked.owner[eid])!, updateMessage.owner))
       ) {
-        console.log(
-          "Received update from an old owner, skipping",
-          updateMessage.nid,
-          Networked.lastOwnerTime[eid],
-          updateMessage.lastOwnerTime
-        );
+        console.log("Received update from an old owner, skipping", {
+          updateMessage,
+          currentOwner: Networked.lastOwnerTime[eid]
+        });
         continue;
       }
 
@@ -194,7 +216,7 @@ export function networkReceiveSystem(world: HubsWorld) {
 
   {
     const networkedEntities = networkedQuery(world);
-    pendingParts.forEach(partingClientId => {
+    takeOwnershipFrom.forEach(partingClientId => {
       networkedEntities
         .filter(eid => Networked.owner[eid] === partingClientId)
         .forEach(eid => {
@@ -202,8 +224,12 @@ export function networkReceiveSystem(world: HubsWorld) {
         });
     });
 
-    pendingParts.length = 0;
+    takeOwnershipFrom.length = 0;
   }
 
-  // TODO If there's a scene-owned entity, we should take ownership of it
+  if (tickResolve) {
+    tickResolve();
+    tickResolve = null;
+    tickPromise = null;
+  }
 }
