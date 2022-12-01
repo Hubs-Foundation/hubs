@@ -7,7 +7,7 @@ import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { EnvironmentSystem } from "../systems/environment-system";
-import { assignNetworkIds } from "../utils/assign-network-ids";
+import { setInitialNetworkedData, setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
 import { anyEntityWith } from "../utils/bit-utils";
 import { cancelable, coroutine } from "../utils/coroutine";
 import { renderAsEntity } from "../utils/jsx-entity";
@@ -35,7 +35,8 @@ function* loadScene(
   characterController: CharacterControllerSystem
 ) {
   try {
-    const src = APP.getString(SceneLoader.src[eid]);
+    addComponent(world, Networked, loaderEid);
+    setInitialNetworkedData(world, loaderEid, "scene", "reticulum");
 
     const src = APP.getString(SceneLoader.src[loaderEid]);
     if (!src) {
@@ -47,9 +48,10 @@ function* loadScene(
       return;
     }
 
-    // TODO: Use a unique id for each scene as the root nid
-    assignNetworkIds(world, "scene", scene, loaderEid);
     add(world, scene, loaderEid);
+    // TODO: Use a unique id for each scene as the root nid
+    setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
+
     if (hasComponent(world, EnvironmentSettings, scene)) {
       // TODO: Support legacy components (fog, background, skybox)
       const environmentSettings = (EnvironmentSettings as any).map.get(scene);

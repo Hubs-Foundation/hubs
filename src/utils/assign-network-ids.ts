@@ -1,20 +1,33 @@
 import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
-import { EntityID, NetworkID } from "./networking-types";
-import { takeOwnership } from "./take-ownership";
+import { ClientID, EntityID, NetworkID } from "./networking-types";
+import { takeOwnershipWithTime } from "./take-ownership-with-time";
 
-export function assignNetworkIds(world: HubsWorld, rootNid: NetworkID, mediaEid: EntityID, rootEid: EntityID) {
+export function setNetworkedDataWithRoot(world: HubsWorld, rootNid: NetworkID, eid: EntityID, creator: ClientID) {
   let i = 0;
-  world.eid2obj.get(mediaEid)!.traverse(function (obj) {
-    if (obj.eid && hasComponent(world, Networked, obj.eid)) {
-      const eid = obj.eid;
-      Networked.id[eid] = APP.getSid(`${rootNid}.${i}`);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = APP.getSid(rootNid);
-      Networked.owner[eid] = Networked.owner[rootEid];
-      if (APP.getSid(NAF.clientId) === Networked.owner[rootEid]) takeOwnership(world, eid);
+  world.eid2obj.get(eid)!.traverse(function (o) {
+    if (o.eid && hasComponent(world, Networked, o.eid)) {
+      setInitialNetworkedData(world, o.eid, i === 0 ? rootNid : `${rootNid}.${i}`, i === 0 ? creator : rootNid);
       i += 1;
     }
   });
+}
+
+export function setNetworkedDataWithoutRoot(world: HubsWorld, rootNid: NetworkID, childEid: EntityID) {
+  let i = 0;
+  world.eid2obj.get(childEid)!.traverse(function (obj) {
+    if (obj.eid && hasComponent(world, Networked, obj.eid)) {
+      setInitialNetworkedData(world, obj.eid, `${rootNid}.${i}`, rootNid);
+      i += 1;
+    }
+  });
+}
+
+type CreatorID = NetworkID | ClientID;
+export function setInitialNetworkedData(world: HubsWorld, eid: EntityID, nid: NetworkID, creator: CreatorID) {
+  Networked.id[eid] = APP.getSid(nid);
+  APP.world.nid2eid.set(Networked.id[eid], eid);
+  Networked.creator[eid] = APP.getSid(creator);
+  takeOwnershipWithTime(world, eid, 0);
 }
