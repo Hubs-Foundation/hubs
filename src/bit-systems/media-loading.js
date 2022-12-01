@@ -10,7 +10,7 @@ import { MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
 import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { animate } from "../utils/animate";
-import { assignNetworkIds } from "../utils/assign-network-ids";
+import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
 
 const loaderForMediaType = {
   [MediaType.IMAGE]: (world, { accessibleUrl, contentType }) => loadImage(world, accessibleUrl, contentType),
@@ -130,12 +130,14 @@ function* loadMedia(world, eid) {
 function* loadAndAnimateMedia(world, eid, signal) {
   const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
   if (!canceled) {
-    assignNetworkIds(world, APP.getString(Networked.id[eid]), media, eid);
     resizeAndRecenter(world, media, eid);
     if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
+      // TODO: This doesn't need to be a flag on media loader.
+      // Just add it to entities that need it.
       addComponent(world, ObjectMenuTarget, eid);
     }
     add(world, media, eid);
+    setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid]), media);
     if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
       yield* animateScale(world, media);
     }

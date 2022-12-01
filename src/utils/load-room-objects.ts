@@ -1,4 +1,5 @@
-import { pendingMessages } from "../bit-systems/networking";
+import { nextNetworkReceiveSystemTick } from "../bit-systems/network-receive-system";
+import { localClientID, pendingMessages, takeOwnershipFrom } from "../bit-systems/networking";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import { StorableMessage } from "./store-networked-state";
 
@@ -30,11 +31,20 @@ async function fetchStoredRoomMessages(hubId: string) {
 export async function loadStoredRoomData(hubId: string) {
   const messages = await fetchStoredRoomMessages(hubId);
   if (hubId === APP.hub!.hub_id) {
+    if (!localClientID) {
+      throw new Error("Cannot apply stored messages without a local client ID");
+    }
     messages.forEach(m => {
       m.fromClientId = "reticulum";
       m.hubId = hubId;
-      console.log("queuing stored room data message", m);
+      m.updates.forEach(update => {
+        update.owner = "reticulum";
+      });
+      console.log("Queuing message from stored room data", m);
       pendingMessages.push(m);
     });
+
+    await nextNetworkReceiveSystemTick();
+    takeOwnershipFrom.push(APP.getSid("reticulum"));
   }
 }
