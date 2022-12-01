@@ -126,6 +126,15 @@ export default class MessageDispatch extends EventTarget {
         this.entryManager.exitScene();
         this.remountUI({ roomUnavailableReason: ExitReason.left });
         break;
+
+      case "oldduck":
+        spawnChatMessage(getAbsoluteHref(location.href, ducky));
+        if (Math.random() < 0.01) {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
+        } else {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
+        }
+        break;
       case "duck":
         if (qsTruthy("newLoader")) {
           const avatarPov = document.querySelector("#avatar-pov-node").object3D;

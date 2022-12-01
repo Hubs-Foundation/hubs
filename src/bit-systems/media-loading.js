@@ -1,16 +1,16 @@
-import { LoadingObject } from "../prefabs/loading-object";
-import { ErrorObject } from "../prefabs/error-object";
-import { easeOutQuadratic } from "../utils/easing";
-import { loadImage } from "../utils/load-image";
-import { loadVideo } from "../utils/load-video";
-import { loadModel } from "../utils/load-model";
-import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, removeComponent, removeEntity } from "bitecs";
 import { MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
-import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
-import { renderAsEntity } from "../utils/jsx-entity";
+import { ErrorObject } from "../prefabs/error-object";
+import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
+import { cancelable, coroutine, crClearTimeout, crTimeout, makeCancelable } from "../utils/coroutine";
+import { easeOutQuadratic } from "../utils/easing";
+import { renderAsEntity } from "../utils/jsx-entity";
+import { loadImage } from "../utils/load-image";
+import { loadModel } from "../utils/load-model";
+import { loadVideo } from "../utils/load-video";
+import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 
 const loaderForMediaType = {
   [MediaType.IMAGE]: (world, { accessibleUrl, contentType }) => loadImage(world, accessibleUrl, contentType),
