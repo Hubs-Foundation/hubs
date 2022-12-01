@@ -136,7 +136,7 @@ AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _compo
 
   const networkedEl = findAncestorWithComponent(el, "networked");
   const rootNid = (networkedEl && networkedEl.components.networked.data.networkId) || "scene";
-  setInitialNetworkedData(world, eid, `${rootNid}.${el.object3D.children[0].userData.gltfIndex}`, rootNid);
+  setInitialNetworkedData(APP.world, eid, `${rootNid}.${el.object3D.children[0].userData.gltfIndex}`, rootNid);
 
   el.object3D.add(APP.world.eid2obj.get(eid));
 });

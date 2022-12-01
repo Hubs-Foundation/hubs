@@ -1,10 +1,4 @@
-import {
-  localClientID,
-  pendingJoins,
-  pendingMessages,
-  pendingParts,
-  takeOwnershipFrom
-} from "../bit-systems/networking";
+import { localClientID, pendingJoins, pendingMessages, pendingParts } from "../bit-systems/networking";
 import { isStorableMessage } from "./load-room-objects";
 import type { ClientID, Message, NetworkID } from "./networking-types";
 import { StorableMessage } from "./store-networked-state";
