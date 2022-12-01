@@ -1,5 +1,4 @@
-import { nextNetworkReceiveSystemTick } from "../bit-systems/network-receive-system";
-import { localClientID, pendingMessages, takeOwnershipFrom } from "../bit-systems/networking";
+import { localClientID, pendingMessages } from "../bit-systems/networking";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import { StorableMessage } from "./store-networked-state";
 
@@ -40,11 +39,7 @@ export async function loadStoredRoomData(hubId: string) {
       m.updates.forEach(update => {
         update.owner = "reticulum";
       });
-      console.log("Queuing message from stored room data", m);
       pendingMessages.push(m);
     });
-
-    await nextNetworkReceiveSystemTick();
-    takeOwnershipFrom.push(APP.getSid("reticulum"));
   }
 }

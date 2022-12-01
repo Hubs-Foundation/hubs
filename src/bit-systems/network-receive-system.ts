@@ -8,13 +8,11 @@ import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import {
   createMessageDatas,
-  isCreatedByMe,
   localClientID,
   networkedQuery,
   pendingMessages,
   pendingParts,
-  softRemovedEntities,
-  takeOwnershipFrom
+  softRemovedEntities
 } from "./networking";
 
 function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateMessage {
@@ -24,19 +22,6 @@ function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateM
 const partedClientIds = new Set<StringID>();
 const storedUpdates = new Map<StringID, UpdateMessage[]>();
 const enteredNetworkedQuery = enterQuery(defineQuery([Networked]));
-
-let tickResolve: (() => void) | null = null;
-let tickPromise: Promise<void> | null = null;
-export function nextNetworkReceiveSystemTick() {
-  if (tickPromise) {
-    return tickPromise;
-  }
-
-  tickPromise = new Promise(resolve => {
-    tickResolve = resolve;
-  });
-  return tickPromise;
-}
 
 function breakTie(a: ClientID, b: ClientID) {
   if (a === "reticulum") return b;
@@ -53,7 +38,6 @@ export function networkReceiveSystem(world: HubsWorld) {
     const networkedEntities = networkedQuery(world);
     pendingParts.forEach(partingClientId => {
       partedClientIds.add(partingClientId);
-      takeOwnershipFrom.push(partingClientId);
 
       networkedEntities
         .filter(eid => Networked.creator[eid] === partingClientId)
@@ -65,7 +49,6 @@ export function networkReceiveSystem(world: HubsWorld) {
           softRemovedEntities.add(eid);
         });
     });
-    pendingParts.length = 0;
   }
 
   // If we were hanging onto updates for any newly created non network instantiated entities
@@ -216,7 +199,7 @@ export function networkReceiveSystem(world: HubsWorld) {
 
   {
     const networkedEntities = networkedQuery(world);
-    takeOwnershipFrom.forEach(partingClientId => {
+    pendingParts.forEach(partingClientId => {
       networkedEntities
         .filter(eid => Networked.owner[eid] === partingClientId)
         .forEach(eid => {
@@ -224,12 +207,6 @@ export function networkReceiveSystem(world: HubsWorld) {
         });
     });
 
-    takeOwnershipFrom.length = 0;
-  }
-
-  if (tickResolve) {
-    tickResolve();
-    tickResolve = null;
-    tickPromise = null;
+    pendingParts.length = 0;
   }
 }

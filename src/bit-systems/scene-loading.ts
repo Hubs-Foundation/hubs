@@ -13,7 +13,6 @@ import { cancelable, coroutine } from "../utils/coroutine";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
 import { EntityID } from "../utils/networking-types";
-import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import { add } from "./media-loading";
 import { moveToSpawnPoint } from "./waypoint";
 
