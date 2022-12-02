@@ -94,7 +94,7 @@ export function networkReceiveSystem(world: HubsWorld) {
         console.log(`Received create message for entity I already created. Skipping ${nidString}`);
       } else if (!hasPermissionToSpawn(creator, prefabName)) {
         // this should only ever happen if there is a bug or the sender is maliciously modified
-        console.log(`Received create from a user who does not have permission to spawn ${prefabName}`);
+        console.warn(`Received create from a user who does not have permission to spawn ${prefabName}`);
         world.ignoredNids.add(nid); // TODO should we just use deletedNids for this?
       } else {
         const eid = createSoftOwnedNetworkedEntity(world, prefabName, initialData, nidString, creator);
