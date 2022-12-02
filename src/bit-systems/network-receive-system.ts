@@ -5,9 +5,11 @@ import { createSoftOwnedNetworkedEntity } from "../utils/create-networked-entity
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
 import type { ClientID, CursorBufferUpdateMessage, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
+import { tryUnpin } from "../utils/store-networked-state";
 import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import {
   createMessageDatas,
+  isPinned,
   localClientID,
   networkedQuery,
   pendingMessages,
@@ -193,6 +195,12 @@ export function networkReceiveSystem(world: HubsWorld) {
 
       const eid = world.nid2eid.get(nid);
       if (eid) {
+        if (isPinned(eid)) {
+          // We only expect this to happen if the client who sent the delete
+          // didn't know it was pinned yet.
+          console.warn("Told to delete a pinned entity. Unpinning it...");
+          tryUnpin(world, eid, APP.hubChannel!);
+        }
 
         // TODO Clear out any stored messages for this entity or its children
         createMessageDatas.delete(eid);
