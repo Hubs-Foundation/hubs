@@ -56,6 +56,32 @@ export function networkReceiveSystem(world: HubsWorld) {
   for (let i = 0; i < pendingMessages.length; i++) {
     const message = pendingMessages[i];
 
+    for (let j = 0; j < message.deletes.length; j += 1) {
+      const nid = APP.getSid(message.deletes[j]);
+      if (world.deletedNids.has(nid)) continue;
+      world.deletedNids.add(nid);
+
+      const eid = world.nid2eid.get(nid);
+      if (eid) {
+        if (isPinned(eid)) {
+          // We only expect this to happen if the client who sent the delete
+          // didn't know it was pinned yet.
+          console.warn("Told to delete a pinned entity. Unpinning it...");
+          tryUnpin(world, eid, APP.hubChannel!);
+        }
+
+        // TODO Clear out any stored messages for this entity or its children
+        createMessageDatas.delete(eid);
+        world.nid2eid.delete(nid);
+        removeEntity(world, eid);
+        console.log("Deleting ", APP.getString(nid));
+      }
+    }
+  }
+
+  for (let i = 0; i < pendingMessages.length; i++) {
+    const message = pendingMessages[i];
+
     for (let j = 0; j < message.creates.length; j++) {
       const [nidString, prefabName, initialData] = message.creates[j];
       const creator = message.fromClientId;
@@ -181,32 +207,6 @@ export function networkReceiveSystem(world: HubsWorld) {
             schema.deserializeFromStorage(eid, storedComponent);
           }
         }
-      }
-    }
-  }
-
-  for (let i = 0; i < pendingMessages.length; i++) {
-    const message = pendingMessages[i];
-
-    for (let j = 0; j < message.deletes.length; j += 1) {
-      const nid = APP.getSid(message.deletes[j]);
-      if (world.deletedNids.has(nid)) continue;
-      world.deletedNids.add(nid);
-
-      const eid = world.nid2eid.get(nid);
-      if (eid) {
-        if (isPinned(eid)) {
-          // We only expect this to happen if the client who sent the delete
-          // didn't know it was pinned yet.
-          console.warn("Told to delete a pinned entity. Unpinning it...");
-          tryUnpin(world, eid, APP.hubChannel!);
-        }
-
-        // TODO Clear out any stored messages for this entity or its children
-        createMessageDatas.delete(eid);
-        world.nid2eid.delete(nid);
-        removeEntity(world, eid);
-        console.log("Deleting ", APP.getString(nid));
       }
     }
   }
