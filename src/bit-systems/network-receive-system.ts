@@ -51,28 +51,6 @@ export function networkReceiveSystem(world: HubsWorld) {
     });
   }
 
-  // If we were hanging onto updates for any newly created non network instantiated entities
-  // we can now apply them. Network instantiated entities are handled when processing creates.
-  enteredNetworkedQuery(world).forEach(eid => {
-    const nid = Networked.id[eid];
-    if (storedUpdates.has(nid)) {
-      console.log("Had stored updates for", APP.getString(nid), storedUpdates.get(nid));
-      const updates = storedUpdates.get(nid)!;
-
-      for (let i = 0; i < updates.length; i++) {
-        const update = updates[i];
-        if (partedClientIds.has(APP.getSid(update.owner))) {
-          console.log("Rewriting update message from client who left.", JSON.stringify(update));
-          update.owner = NAF.clientId;
-          update.lastOwnerTime = update.timestamp;
-        }
-      }
-
-      pendingMessages.unshift({ creates: [], updates, deletes: [] });
-      storedUpdates.delete(nid);
-    }
-  });
-
   for (let i = 0; i < pendingMessages.length; i++) {
     const message = pendingMessages[i];
 
@@ -103,15 +81,34 @@ export function networkReceiveSystem(world: HubsWorld) {
 
         const eid = createSoftOwnedNetworkedEntity(world, prefabName, initialData, nidString, creator);
         console.log("got create message for", nidString, eid);
-
-        // If we were hanging onto updates for this nid we can now apply them. And they should be processed before other updates.
-        if (storedUpdates.has(nid)) {
-          console.log("had pending updates for", nidString, storedUpdates.get(nid));
-          Array.prototype.unshift.apply(message.updates, storedUpdates.get(nid));
-          storedUpdates.delete(nid);
-        }
       }
     }
+  }
+
+  // If we stored updates for newly created entities, queue them for processing
+  enteredNetworkedQuery(world).forEach(eid => {
+    const nid = Networked.id[eid];
+    if (storedUpdates.has(nid)) {
+      console.log("Had stored updates for", APP.getString(nid), storedUpdates.get(nid));
+      const updates = storedUpdates.get(nid)!;
+
+      for (let i = 0; i < updates.length; i++) {
+        const update = updates[i];
+        if (partedClientIds.has(APP.getSid(update.owner))) {
+          console.log("Rewriting update message from client who left.", JSON.stringify(update));
+          update.owner = NAF.clientId;
+          update.lastOwnerTime = update.timestamp;
+        }
+      }
+
+      // Process the stored message before other updates
+      pendingMessages.unshift({ creates: [], updates, deletes: [] });
+      storedUpdates.delete(nid);
+    }
+  });
+
+  for (let i = 0; i < pendingMessages.length; i++) {
+    const message = pendingMessages[i];
 
     for (let j = 0; j < message.updates.length; j++) {
       const updateMessage = message.updates[j];
@@ -184,6 +181,10 @@ export function networkReceiveSystem(world: HubsWorld) {
         }
       }
     }
+  }
+
+  for (let i = 0; i < pendingMessages.length; i++) {
+    const message = pendingMessages[i];
 
     for (let j = 0; j < message.deletes.length; j += 1) {
       const nid = APP.getSid(message.deletes[j]);
@@ -192,6 +193,8 @@ export function networkReceiveSystem(world: HubsWorld) {
 
       const eid = world.nid2eid.get(nid);
       if (eid) {
+
+        // TODO Clear out any stored messages for this entity or its children
         createMessageDatas.delete(eid);
         world.nid2eid.delete(nid);
         removeEntity(world, eid);
