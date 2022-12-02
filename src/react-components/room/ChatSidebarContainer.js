@@ -194,10 +194,18 @@ ChatContextProvider.propTypes = {
   messageDispatch: PropTypes.object
 };
 
-export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occupantCount, inputEffect, onClose }) {
+export function ChatSidebarContainer({
+  scene,
+  canSpawnMessages,
+  presences,
+  occupantCount,
+  initialValue,
+  autoFocus,
+  onClose
+}) {
   const { messageGroups, sendMessage, setMessagesRead } = useContext(ChatContext);
   const [onScrollList, listRef, scrolledToBottom] = useMaintainScrollPosition(messageGroups);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(initialValue || "");
   const [isCommand, setIsCommand] = useState(false);
   const { text_chat: canTextChat } = usePermissions();
   const isMod = useRole("owner");
@@ -262,7 +270,16 @@ export function ChatSidebarContainer({ scene, canSpawnMessages, presences, occup
     [setMessage, inputRef]
   );
 
-  useEffect(() => inputEffect(inputRef.current), [inputEffect, inputRef]);
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current.focus();
+      const len = inputRef.current.value.length;
+      inputRef.current.setSelectionRange(len, len);
+    }
+    // We only want this effect to run on initial mount even if autoFocus were to change.
+    // This does not happen in practice, but this is more correct.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (scrolledToBottom) {
@@ -363,7 +380,8 @@ ChatSidebarContainer.propTypes = {
   occupantCount: PropTypes.number.isRequired,
   scene: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-  inputEffect: PropTypes.func.isRequired
+  autoFocus: PropTypes.bool,
+  initialValue: PropTypes.string
 };
 
 export function ChatToolbarButtonContainer(props) {
