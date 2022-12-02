@@ -203,7 +203,8 @@ class UIRoot extends Component {
     objectSrc: "",
     sidebarId: null,
     presenceCount: 0,
-    chatInputEffect: () => {}
+    chatPrefix: "",
+    chatAutofocus: false
   };
 
   constructor(props) {
@@ -768,7 +769,7 @@ class UIRoot extends Component {
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
-    this.setState({ sidebarId, chatInputEffect: () => {}, selectedUserId: null, ...otherState });
+    this.setState({ sidebarId, chatPrefix: "", chatAutofoucs: false, selectedUserId: null, ...otherState });
   }
 
   toggleSidebar(sidebarId, otherState) {
@@ -785,10 +786,8 @@ class UIRoot extends Component {
 
   onFocusChat = e => {
     this.setSidebar("chat", {
-      chatInputEffect: input => {
-        input.focus();
-        input.value = e.detail.prefix;
-      }
+      chatPrefix: e.detail.prefix,
+      chatAutofocus: true
     });
   };
 
@@ -1475,7 +1474,8 @@ class UIRoot extends Component {
                           canSpawnMessages={entered && this.props.hubChannel.can("spawn_and_move_media")}
                           scene={this.props.scene}
                           onClose={() => this.setSidebar(null)}
-                          inputEffect={this.state.chatInputEffect}
+                          autoFocus={this.state.chatAutofocus}
+                          initialValue={this.state.chatPrefix}
                         />
                       )}
                       {this.state.sidebarId === "objects" && (
@@ -1609,7 +1609,9 @@ class UIRoot extends Component {
                         )}
                       </>
                     )}
-                    <ChatToolbarButtonContainer onClick={() => this.toggleSidebar("chat")} />
+                    <ChatToolbarButtonContainer
+                      onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
+                    />
                     {entered && isMobileVR && (
                       <ToolbarButton
                         className={styleUtils.hideLg}
