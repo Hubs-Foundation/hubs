@@ -97,6 +97,10 @@ export function networkReceiveSystem(world: HubsWorld) {
         console.warn(`Received create from a user who does not have permission to spawn ${prefabName}`);
         world.ignoredNids.add(nid); // TODO should we just use deletedNids for this?
       } else {
+        // TODO: Do we need to delete from ignoredNids?
+        // If permissions have changed, we don't want to permantently ignore messages.
+        // world.ignoredNids.delete(nid);
+
         const eid = createSoftOwnedNetworkedEntity(world, prefabName, initialData, nidString, creator);
         console.log("got create message for", nidString, eid);
 
@@ -125,8 +129,8 @@ export function networkReceiveSystem(world: HubsWorld) {
 
       if (!world.nid2eid.has(nid)) {
         console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
-        // TODO: What if we will NEVER be able to apply this update?
-        // TODO would be nice if we could squash these updates
+        // TODO What if we will NEVER be able to apply this update?
+        // TODO It would be nice if we could squash these updates
         const updates = storedUpdates.get(nid) || [];
         updates.push(updateMessage);
         storedUpdates.set(nid, updates);
