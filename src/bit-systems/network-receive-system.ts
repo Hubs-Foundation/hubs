@@ -1,7 +1,7 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
-import { createSoftOwnedNetworkedEntity } from "../utils/create-networked-entity";
+import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
 import type { ClientID, CursorBufferUpdateMessage, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
@@ -107,7 +107,7 @@ export function networkReceiveSystem(world: HubsWorld) {
         // If permissions have changed, we don't want to permantently ignore messages.
         // world.ignoredNids.delete(nid);
 
-        const eid = createSoftOwnedNetworkedEntity(world, prefabName, initialData, nidString, creator);
+        const eid = renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
         console.log("got create message for", nidString, eid);
       }
     }

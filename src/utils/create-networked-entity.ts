@@ -7,22 +7,22 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnership } from "../utils/take-ownership";
 import { setNetworkedDataWithRoot } from "./assign-network-ids";
-import type { ClientID, InitialData } from "./networking-types";
+import type { ClientID, InitialData, NetworkID } from "./networking-types";
 
 export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, initialData: InitialData) {
   if (!hasPermissionToSpawn(NAF.clientId, prefabName))
     throw new Error(`You do not have permission to spawn ${prefabName}`);
-  const rootNid = NAF.utils.createNetworkId();
-  const entity = createSoftOwnedNetworkedEntity(world, prefabName, initialData, rootNid, NAF.clientId);
+  const nid = NAF.utils.createNetworkId();
+  const entity = renderAsNetworkedEntity(world, prefabName, initialData, nid, NAF.clientId);
   takeOwnership(world, entity);
   return entity;
 }
 
-export function createSoftOwnedNetworkedEntity(
+export function renderAsNetworkedEntity(
   world: HubsWorld,
   prefabName: PrefabName,
   initialData: InitialData,
-  rootNid: string,
+  nid: NetworkID,
   creator: ClientID
 ) {
   const eid = renderAsEntity(world, prefabs.get(prefabName)!.template(initialData));
@@ -31,7 +31,7 @@ export function createSoftOwnedNetworkedEntity(
   }
   const obj = world.eid2obj.get(eid)!;
   createMessageDatas.set(eid, { prefabName, initialData });
-  setNetworkedDataWithRoot(world, rootNid, eid, creator);
+  setNetworkedDataWithRoot(world, nid, eid, creator);
   AFRAME.scenes[0].object3D.add(obj);
   return eid;
 }
