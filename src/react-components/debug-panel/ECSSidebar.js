@@ -46,7 +46,7 @@ function Object3DItem(props) {
   );
 }
 
-function formatComponentProps(eid, component) {
+export function formatComponentProps(eid, component) {
   const formatted = Object.keys(component).reduce((str, k, i, arr) => {
     const val = component[k][eid];
     const isStr = component[k][bitComponents.$isStringType];
@@ -54,7 +54,12 @@ function formatComponentProps(eid, component) {
     if (ArrayBuffer.isView(val)) {
       str += JSON.stringify(Array.from(val));
     } else if (isStr) {
-      str += `${val} "${APP.getString(val)}"`;
+      const strVal = APP.getString(val);
+      if (strVal === NAF.clientId) {
+        str += `${val} *You* "${strVal}"`;
+      } else {
+        str += `${val} "${strVal}"`;
+      }
     } else {
       str += val;
     }
