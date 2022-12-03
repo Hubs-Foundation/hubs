@@ -1,16 +1,16 @@
-import { Component, defineQuery, hasComponent } from "bitecs";
+import { Component, defineQuery, hasComponent, Query } from "bitecs";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { findAncestor } from "./three-utils";
 
-const queries = new Map();
+const queries = new Map<Component, Query>();
 export function anyEntityWith(world: HubsWorld, component: Component) {
   if (!queries.has(component)) {
     queries.set(component, defineQuery([component]));
   }
 
-  const eids = queries.get(component)(world);
-  return eids.length && eids[0];
+  const eids = queries.get(component)!(world);
+  return eids.length ? eids[0] : null;
 }
 
 export function hasAnyComponent(world: HubsWorld, components: Component[], eid: number) {

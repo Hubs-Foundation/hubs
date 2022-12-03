@@ -31,7 +31,6 @@ import { store } from "./utils/store-instance";
 
 declare global {
   interface Window {
-    $B: typeof bitecs;
     $O: (eid: number) => Object3D | undefined;
     APP: App;
   }
@@ -52,8 +51,6 @@ export interface HubsWorld extends IWorld {
   eid2obj: Map<number, Object3D>;
   time: { delta: number; elapsed: number; tick: number };
 }
-
-window.$B = bitecs;
 
 export class App {
   scene?: AScene;
