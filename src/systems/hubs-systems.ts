@@ -50,6 +50,7 @@ import { mediaLoadingSystem } from "../bit-systems/media-loading";
 import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
+import { objectMenuSystem } from "../bit-systems/object-menu";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
 import type { HubsSystems } from "aframe";
 import { Camera, Scene, WebGLRenderer } from "three";
@@ -216,6 +217,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.spriteSystem.tick(t, dt);
   hubsSystems.uvScrollSystem.tick(dt);
   hubsSystems.shadowSystem.tick();
+  objectMenuSystem(world, aframeSystems.userinput);
   videoMenuSystem(world, aframeSystems.userinput);
   videoSystem(world, hubsSystems.audioSystem);
   mediaFramesSystem(world);

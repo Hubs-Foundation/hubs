@@ -188,10 +188,23 @@ import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
+import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { ObjectMenu } from "./bit-components";
+import { anyEntityWith } from "./utils/bit-utils";
 
 window.APP = new App();
 renderAsEntity(APP.world, VideoMenuPrefab());
 renderAsEntity(APP.world, VideoMenuPrefab());
+renderAsEntity(APP.world, ObjectMenuPrefab());
+renderAsEntity(APP.world, ObjectMenuPrefab());
+
+setTimeout(() => {
+  const eid = anyEntityWith(APP.world, ObjectMenu);
+  const obj = APP.world.eid2obj.get(eid);
+  obj.position.set(0, 2, 0);
+  obj.matrixNeedsUpdate = true;
+  AFRAME.scenes[0].object3D.add(obj);
+}, 2000);
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
