@@ -14,12 +14,17 @@ for (const [name, Component] of Object.entries(bitComponents)) {
   bitComponentNames.set(Component, name);
 }
 
+export function formatObjectName(obj) {
+  const name =
+    obj.name ||
+    (obj.el ? (obj.el?.id && `#${obj.el.id}`) || `.${obj.el?.className?.replaceAll(" ", ".") || "a-entity"}` : "");
+  return name ? `${name}(${obj.constructor.name})` : `${obj.constructor.name}`;
+}
+
 function Object3DItem(props) {
   const { obj, toggleObjExpand, setSelectedObj, expanded, expandedIds } = props;
 
-  const name =
-    obj.name || (obj.el?.id && `#${obj.el.id}`) || `.${obj.el?.className?.replaceAll(" ", ".") || "a-entity"}`;
-  const displayName = name ? `${name}(${obj.constructor.name})` : `${obj.constructor.name}`;
+  const displayName = formatObjectName(obj);
 
   return (
     <div className="obj-item">

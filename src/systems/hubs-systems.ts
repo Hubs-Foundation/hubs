@@ -57,6 +57,8 @@ import { Camera, Scene, WebGLRenderer } from "three";
 import { HubsWorld } from "../app";
 import { EffectComposer } from "postprocessing";
 import { sceneLoadingSystem } from "../bit-systems/scene-loading";
+import { networkDebugSystem } from "../bit-systems/network-debug";
+import qsTruthy from "../utils/qs_truthy";
 
 declare global {
   interface Window {
@@ -71,6 +73,8 @@ const timeSystem = (world: HubsWorld) => {
   time.elapsed = now;
   time.tick++;
 };
+
+const enableNetworkDebug = qsTruthy("networkDebug");
 
 // NOTE keeping this around since many things index into it to get a reference to a system. This will
 // naturally burn down as we migrate things, so it is not worth going through and changing all of them.
@@ -234,6 +238,10 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.boneVisibilitySystem.tick();
 
   networkSendSystem(world);
+
+  if (enableNetworkDebug) {
+    networkDebugSystem(world, scene);
+  }
 
   scene.updateMatrixWorld();
 

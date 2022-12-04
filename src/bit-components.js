@@ -190,3 +190,4 @@ export const ObjectMenu = defineComponent({
 });
 
 export const ObjectMenuTarget = defineComponent();
+export const NetworkDebug = defineComponent();
