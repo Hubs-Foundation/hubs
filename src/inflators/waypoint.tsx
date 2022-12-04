@@ -48,6 +48,7 @@ export function inflateWaypoint(world: HubsWorld, eid: number, props: WaypointPa
         <entity
           name="Waypoint Icon"
           position={[0, 1.6, -0.15]}
+          scale={[0.5, 0.5, 0.5]}
           image={{
             texture,
             ratio: 1,

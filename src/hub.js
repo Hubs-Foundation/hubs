@@ -189,6 +189,7 @@ import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
 
 window.APP = new App();
@@ -204,6 +205,7 @@ function addToScene(entityDef, visible) {
 }
 preload(addToScene(ObjectMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
+preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
