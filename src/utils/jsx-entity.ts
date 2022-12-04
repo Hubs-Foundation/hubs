@@ -31,7 +31,8 @@ import {
   SceneLoader,
   NavMesh,
   SceneRoot,
-  NetworkDebug
+  NetworkDebug,
+  WaypointPreview
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -288,6 +289,7 @@ export interface JSXComponentData extends ComponentData {
   text?: any;
   model?: ModelParams;
   networkDebug?: boolean;
+  waypointPreview?: boolean;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -351,6 +353,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   sceneRoot: createDefaultInflator(SceneRoot),
   sceneLoader: createDefaultInflator(SceneLoader),
   networkDebug: createDefaultInflator(NetworkDebug),
+  waypointPreview: createDefaultInflator(WaypointPreview),
   mediaLoader: inflateMediaLoader,
 
   // inflators that create Object3Ds
