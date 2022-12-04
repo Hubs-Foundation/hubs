@@ -201,3 +201,4 @@ export const Waypoint = defineComponent({
 export const NetworkedWaypoint = defineComponent({
   occupied: Types.ui8
 });
+export const WaypointPreview = defineComponent();

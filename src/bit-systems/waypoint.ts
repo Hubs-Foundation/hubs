@@ -1,10 +1,20 @@
 import { defineQuery, exitQuery, hasComponent } from "bitecs";
-import { Matrix4, Mesh, MeshStandardMaterial } from "three";
+import { Matrix4, Mesh, MeshStandardMaterial, Object3D } from "three";
 import { HubsWorld } from "../app";
-import { Interacted, NetworkedWaypoint, Owned, SceneRoot, Waypoint } from "../bit-components";
+import {
+  HoveredRemoteLeft,
+  HoveredRemoteRight,
+  Interacted,
+  NetworkedWaypoint,
+  Owned,
+  SceneRoot,
+  Waypoint,
+  WaypointPreview
+} from "../bit-components";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
-import { findAncestorWithComponent } from "../utils/bit-utils";
+import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import { takeOwnership } from "../utils/take-ownership";
+import { setMatrixWorld } from "../utils/three-utils";
 
 export enum WaypointFlags {
   canBeSpawnPoint = 1 << 0,
@@ -65,7 +75,12 @@ function moveToWaypoint(
   );
 }
 
+const hoveredLeftWaypointQuery = defineQuery([Waypoint, HoveredRemoteLeft]);
+const hoveredRightWaypointQuery = defineQuery([Waypoint, HoveredRemoteRight]);
+
 const waypointExitQuery = exitQuery(waypointQuery);
+
+let preview: Object3D | null;
 export function waypointSystem(
   world: HubsWorld,
   characterController: CharacterControllerSystem,
@@ -99,12 +114,24 @@ export function waypointSystem(
     }
 
     const obj = world.eid2obj.get(eid)!;
-    obj.visible = true || sceneIsFrozen;
+    obj.visible = sceneIsFrozen;
     const isOccupied = hasComponent(world, NetworkedWaypoint, eid) && NetworkedWaypoint.occupied[eid];
     if (Waypoint.flags[eid] & WaypointFlags.canBeOccupied && obj.children.length) {
       ((obj.children[0] as Mesh).material as MeshStandardMaterial).color.setHex(isOccupied ? 0xff00aa : 0xffffff);
     }
   });
+
+  const hovered = hoveredRightWaypointQuery(world) || hoveredLeftWaypointQuery(world);
+  if (!preview) {
+    preview = world.eid2obj.get(anyEntityWith(world, WaypointPreview)!)!;
+  }
+  preview.visible = !!hovered.length;
+  if (hovered.length) {
+    const eid = hovered[0];
+    const obj = world.eid2obj.get(eid)!;
+    obj.updateMatrices();
+    setMatrixWorld(preview, obj.matrixWorld);
+  }
 }
 
 // TODO: Implement named waypoints and location.hash navigation
