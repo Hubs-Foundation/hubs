@@ -37,17 +37,14 @@ if (window.navigator.keyboard !== undefined && window.navigator.keyboard.getLayo
 }
 
 const onboardingMessages = defineMessages({
-  "tips.welcome.title": {
-    id: "tips.welcome.title",
-    defaultMessage: "Welcome to {appName}"
-  },
-  "tips.welcome.message": {
-    id: "tips.welcome.message",
-    defaultMessage: "Let's take a quick look to get comfortable {br} with the controls"
+  "tips.welcome": {
+    id: "tips.welcome",
+    defaultMessage:
+      "<h2>Welcome to {appName}</h2><p>Let's take a quick look to get comfortable</p><p2>with the controls</p2>"
   },
   "tips.mobile.locomotion": {
-    id: "tips.mobile.locomotion",
-    defaultMessage: "Move around by pinching with two fingers {br} or with the on-screen joysticks"
+    id: "tips.mobile.locomotion2",
+    defaultMessage: "<p>Move around by pinching with two fingers</p><p2>or with the on-screen joysticks</p2>"
   },
   "tips.mobile.turning": {
     id: "tips.mobile.turning",
@@ -55,7 +52,7 @@ const onboardingMessages = defineMessages({
   },
   "tips.desktop.locomotion": {
     id: "tips.desktop.locomotion",
-    defaultMessage: "Move around with"
+    defaultMessage: "<p>Move around with</p> {wasd} or {arrows}"
   },
   "tips.desktop.turning": {
     id: "tips.desktop.turning",
@@ -63,7 +60,7 @@ const onboardingMessages = defineMessages({
   },
   "tips.desktop.invite": {
     id: "tips.desktop.invite",
-    defaultMessage: "Use the {invite} button to share {br} this room"
+    defaultMessage: "<p>Use the {invite} button to share</p><p2>this room</p2>"
   },
   "tips.end": {
     id: "tips.end",
@@ -92,10 +89,6 @@ const onboardingMessages = defineMessages({
   "tips.text.invite": {
     id: "tips.text.invite",
     defaultMessage: "Invite"
-  },
-  "tips.text.or": {
-    id: "tips.text.or",
-    defaultMessage: "or"
   }
 });
 
@@ -161,46 +154,9 @@ MoveKeys.propTypes = {
   right: PropTypes.node
 };
 
-function Welcome() {
-  const intl = useIntl();
-  return (
-    <>
-      <h2>
-        {intl.formatMessage(onboardingMessages["tips.welcome.title"], {
-          appName: configs.translation("app-name")
-        })}
-      </h2>
-      <p>
-        {intl.formatMessage(onboardingMessages["tips.welcome.message"], {
-          appName: configs.translation("app-name"),
-          br: <br />
-        })}
-      </p>
-    </>
-  );
-}
-
-function LocomotionStep() {
-  const intl = useIntl();
-  return (
-    <>
-      <p>
-        {intl.formatMessage(onboardingMessages["tips.desktop.locomotion"], {
-          appName: configs.translation("app-name")
-        })}
-      </p>
-      <div className={styles.keysContainer}>
-        <MoveKeys up={moveKeyFront} left={moveKeyLeft} down={moveKeyBack} right={moveKeyRight} />
-        <p>{intl.formatMessage(onboardingMessages["tips.text.or"])}</p>
-        <MoveKeys up={"↑"} left={"←"} down={"↓"} right={"→"} />
-      </div>
-    </>
-  );
-}
-
 function Step({ step, params }) {
   const intl = useIntl();
-  return <p>{intl.formatMessage(onboardingMessages[step], params)}</p>;
+  return <>{intl.formatMessage(onboardingMessages[step], params)}</>;
 }
 
 Step.propTypes = {
@@ -266,7 +222,14 @@ function onboardingSteps({ intl, step }) {
     case "tips.mobile.welcome":
       return {
         control: {
-          type: Welcome
+          type: Step,
+          params: {
+            h2: chunks => <h2>{chunks}</h2>,
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            p2: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            appName: configs.translation("app-name")
+          },
+          messageId: "tips.welcome"
         },
         navigationBar: {
           type: WelcomeNavigationBar
@@ -275,7 +238,12 @@ function onboardingSteps({ intl, step }) {
     case "tips.desktop.locomotion":
       return {
         control: {
-          type: LocomotionStep
+          type: Step,
+          params: {
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            wasd: <MoveKeys up={moveKeyFront} left={moveKeyLeft} down={moveKeyBack} right={moveKeyRight} />,
+            arrows: <MoveKeys up={"↑"} left={"←"} down={"↓"} right={"→"} />
+          }
         },
         navigationBar: {
           type: StepNavigationBar,
@@ -311,7 +279,8 @@ function onboardingSteps({ intl, step }) {
             invite: (
               <InlineButton icon={<InviteIcon />} text={intl.formatMessage(onboardingMessages["tips.text.invite"])} />
             ),
-            br: <br />
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            p2: chunks => <p style={{ width: "100%" }}>{chunks}</p>
           }
         },
         navigationBar: {
@@ -337,7 +306,8 @@ function onboardingSteps({ intl, step }) {
         control: {
           type: Step,
           params: {
-            br: <br />
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            p2: chunks => <p style={{ width: "100%" }}>{chunks}</p>
           }
         },
         navigationBar: {
@@ -407,7 +377,7 @@ export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, wasHi
   return (
     <div className={layoutClass}>
       <div className={classNames(styles.tip, animationClass, className)} {...rest}>
-        <div className={navigationBar?.type && styles.content}>
+        <div className={navigationBar?.type && styles.step}>
           <control.type step={control?.messageId || step} params={control?.params} />
         </div>
         {navigationBar?.type && (

@@ -60,17 +60,14 @@
   }
 }
 
-:local(.content) {
+:local(.step) {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 20px;
-  padding: 18px 18px 18px 18px;
   justify-content: center;
-
-  button {
-    padding: 0px;
-  }
+  gap: 8px;
+  padding: 18px 18px 18px 18px;
 }
 
 :local(.navigation-container) {
