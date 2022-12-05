@@ -51,15 +51,15 @@ const onboardingMessages = defineMessages({
     defaultMessage: "Tap and drag to turn"
   },
   "tips.desktop.locomotion": {
-    id: "tips.desktop.locomotion",
+    id: "tips.desktop.locomotion2",
     defaultMessage: "<p>Move around with</p> {wasd} or {arrows}"
   },
   "tips.desktop.turning": {
-    id: "tips.desktop.turning",
+    id: "tips.desktop.turning2",
     defaultMessage: "Use {left} or {right} or click and drag"
   },
   "tips.desktop.invite": {
-    id: "tips.desktop.invite",
+    id: "tips.desktop.invite2",
     defaultMessage: "<p>Use the {invite} button to share</p><p2>this room</p2>"
   },
   "tips.end": {
