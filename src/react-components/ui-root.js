@@ -1430,7 +1430,7 @@ class UIRoot extends Component {
                     )}
                     <NotificationsContainer>
                       <TipContainer
-                        hide={this.state.hide || this.state.hideUITip || this.props.activeObject}
+                        hide={!!this.state.hide || !!this.state.hideUITip || !!this.props.activeObject}
                         inLobby={watching}
                         inRoom={entered}
                         isEmbedded={this.props.embed}

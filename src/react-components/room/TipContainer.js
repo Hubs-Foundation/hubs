@@ -39,31 +39,18 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
   const [embeddedTipDismissed, setEmbeddedTipDismissed] = useState(false);
   const [onboardingTipId, setOnboardingTipId] = useState(null);
   const timeoutRef = useRef(null);
-  const [wasHidden, setWasHidden] = useState(false);
 
   const onSkipOnboarding = useCallback(() => {
-    setOnboardingTipId(null);
-    timeoutRef.current = setTimeout(() => {
-      setWasHidden(false);
-      scene.systems.tips.skipTips();
-    }, 200);
-  }, [scene, timeoutRef]);
+    scene.systems.tips.skipTips();
+  }, [scene]);
 
   const onNextTip = useCallback(() => {
-    setOnboardingTipId(null);
-    timeoutRef.current = setTimeout(() => {
-      setWasHidden(false);
-      scene.systems.tips.nextTip();
-    }, 200);
-  }, [scene, timeoutRef]);
+    scene.systems.tips.nextTip();
+  }, [scene]);
 
   const onPrevTip = useCallback(() => {
-    setOnboardingTipId(null);
-    timeoutRef.current = setTimeout(() => {
-      setWasHidden(false);
-      scene.systems.tips.prevTip();
-    }, 200);
-  }, [scene, timeoutRef]);
+    scene.systems.tips.prevTip();
+  }, [scene]);
 
   useEffect(() => {
     if (isEndTooltipStep(onboardingTipId)) {
@@ -76,23 +63,18 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
   useEffect(() => {
     function onSceneTipChanged({ detail: tipId }) {
       setOnboardingTipId(null);
-      timeoutRef.current = setTimeout(() => {
-        setWasHidden(false);
-        setOnboardingTipId(tipId);
-      }, 250);
+      setOnboardingTipId(tipId);
     }
 
     scene.addEventListener("tip-changed", onSceneTipChanged);
 
-    setWasHidden(hide === undefined ? false : true);
     setOnboardingTipId(scene.systems.tips.activeTip);
 
     return () => {
-      setWasHidden(true);
       scene.removeEventListener("tip-changed", onSceneTipChanged);
       clearTimeout(timeoutRef.current);
     };
-  }, [scene, timeoutRef, hide, setWasHidden]);
+  }, [scene]);
 
   const discordBridges = presences ? discordBridgesForPresences(presences) : [];
   const isBroadcasting = discordBridges.length > 0;
@@ -115,15 +97,7 @@ export function TipContainer({ hide, inLobby, inRoom, isStreaming, isEmbedded, s
     );
   } else if (inRoom) {
     if (onboardingTipId) {
-      return (
-        <Tooltip
-          onPrev={onPrevTip}
-          onNext={onNextTip}
-          onDismiss={onSkipOnboarding}
-          step={onboardingTipId}
-          wasHidden={wasHidden}
-        />
-      );
+      return <Tooltip onPrev={onPrevTip} onNext={onNextTip} onDismiss={onSkipOnboarding} step={onboardingTipId} />;
     }
 
     if (isStreaming && !streamingTipDismissed) {
