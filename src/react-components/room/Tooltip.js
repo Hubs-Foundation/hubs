@@ -183,7 +183,9 @@ WelcomeNavigationBar.propTypes = {
 
 function StepNavigationBar({ step, onPrev, onNext, params }) {
   const intl = useIntl();
-  const { leftArrow, rightArrow, currentStep } = params;
+  const { currentStep } = params;
+  const leftArrow = currentStep !== 0;
+  const rightArrow = currentStep !== maxSteps(step) - 1;
   return (
     <div className={styles.navigationContainer}>
       <IconButton as={"span"} className={classNames(styles.arrows, !leftArrow && styles.arrowsHidden)} onClick={onPrev}>
@@ -246,8 +248,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            currentStep: 0,
-            rightArrow: true
+            currentStep: 0
           }
         }
       };
@@ -263,9 +264,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            currentStep: 1,
-            leftArrow: true,
-            rightArrow: true
+            currentStep: 1
           }
         }
       };
@@ -284,8 +283,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            currentStep: 2,
-            leftArrow: true
+            currentStep: 2
           }
         }
       };
@@ -311,8 +309,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            currentStep: 0,
-            rightArrow: true
+            currentStep: 0
           }
         }
       };
@@ -324,8 +321,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            currentStep: 1,
-            leftArrow: true
+            currentStep: 1
           }
         }
       };
