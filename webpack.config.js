@@ -556,11 +556,21 @@ module.exports = async (env, argv) => {
                 // Make asset paths relative to /src
                 filename: function ({ filename }) {
                   let rootPath = path.dirname(filename) + path.sep;
-                  if (rootPath.startsWith("src" + path.sep)) {
-                    const parts = rootPath.split(path.sep);
+
+                  function stripSrcFromPath(pathSeperator) {
+                    const parts = rootPath.split(pathSeperator);
                     parts.shift();
-                    rootPath = parts.join(path.sep);
+                    return parts.join(pathSeperator);
                   }
+
+                  if (rootPath.startsWith("src" + path.sep)) {
+                    rootPath = stripSrcFromPath(path.sep);
+                  }
+
+                  if (rootPath.startsWith("src/")) {
+                    rootPath = stripSrcFromPath("/");
+                  }
+
                   // console.log(path, name, contenthash, ext);
                   return rootPath + "[name]-[contenthash].[ext]";
                 }
