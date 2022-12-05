@@ -183,7 +183,7 @@ WelcomeNavigationBar.propTypes = {
 
 function StepNavigationBar({ step, onPrev, onNext, params }) {
   const intl = useIntl();
-  const { leftArrow, rightArrow, numStep } = params;
+  const { leftArrow, rightArrow, currentStep } = params;
   return (
     <div className={styles.navigationContainer}>
       <IconButton as={"span"} className={classNames(styles.arrows, !leftArrow && styles.arrowsHidden)} onClick={onPrev}>
@@ -191,7 +191,7 @@ function StepNavigationBar({ step, onPrev, onNext, params }) {
       </IconButton>
       <div style={{ display: "flex" }}>
         {[...Array(maxSteps(step))].map((v, i) => {
-          return <span key={i} className={classNames(styles.dot, i === numStep && styles.dotEnabled)}></span>;
+          return <span key={i} className={classNames(styles.dot, i === currentStep && styles.dotEnabled)}></span>;
         })}
       </div>
       {rightArrow ? (
@@ -246,7 +246,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            numStep: 0,
+            currentStep: 0,
             rightArrow: true
           }
         }
@@ -263,7 +263,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            numStep: 1,
+            currentStep: 1,
             leftArrow: true,
             rightArrow: true
           }
@@ -284,7 +284,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            numStep: 2,
+            currentStep: 2,
             leftArrow: true
           }
         }
@@ -311,7 +311,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            numStep: 0,
+            currentStep: 0,
             rightArrow: true
           }
         }
@@ -324,7 +324,7 @@ function onboardingSteps({ intl, step }) {
         navigationBar: {
           type: StepNavigationBar,
           params: {
-            numStep: 1,
+            currentStep: 1,
             leftArrow: true
           }
         }
