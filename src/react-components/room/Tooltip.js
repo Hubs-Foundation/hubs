@@ -92,14 +92,12 @@ const onboardingMessages = defineMessages({
   }
 });
 
-function isStep(step, checks) {
-  return checks.every(item => {
-    return step.indexOf(item) !== -1;
-  });
+function isStep(step, item) {
+  return step.indexOf(item) !== -1;
 }
 
 function maxSteps(step) {
-  return isStep(step, ["desktop"]) ? 3 : 2;
+  return isStep(step, "desktop") ? 3 : 2;
 }
 
 function Key({ children }) {
@@ -357,13 +355,13 @@ export const Tooltip = memo(({ className, onPrev, onNext, onDismiss, step, wasHi
 
   let layoutClass = null;
   let animationClass = styles.tipShowBottom;
-  if (isStep(step, ["welcome"])) {
+  if (isStep(step, "welcome")) {
     animationClass = null;
-    if (isStep(step, ["mobile"])) {
+    if (isStep(step, "mobile")) {
       layoutClass = styles.tooltipsCentered;
     }
   } else {
-    if (isStep(step, ["mobile"])) {
+    if (isStep(step, "mobile")) {
       layoutClass = styles.tooltipsTop;
       animationClass = styles.tipShowTop;
     }
