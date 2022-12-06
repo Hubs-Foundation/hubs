@@ -1,4 +1,5 @@
 import type { AScene } from "aframe";
+import { AAModes } from "./constants";
 import {
   BlendFunction,
   BloomEffect,
@@ -16,14 +17,6 @@ import { Layers } from "./camera-layers";
 import { createImageMesh } from "./utils/create-image-mesh";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
-
-export enum AAModes {
-  NONE = "NONE",
-  SMAA = "SMAA",
-  MSAA_2X = "MSAA_2X",
-  MSAA_4X = "MSAA_4X",
-  MSAA_8X = "MSAA_8X"
-}
 
 export function createEffectsComposer(
   canvas: HTMLCanvasElement,
