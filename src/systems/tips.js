@@ -90,8 +90,17 @@ AFRAME.registerSystem("tips", {
     this.activeTip = null;
     this._performStep = this._performStep.bind(this);
 
-    if (localStorage.getItem(LOCAL_STORAGE_KEY) === null) {
+    const storeData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    if (storeData === null) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
+    } else {
+      const currentKeys = Object.keys(storeData);
+      const isOldTips = !currentKeys.every(item => platformTips.includes(item));
+      // If they have old tips we just complete the tour.
+      if (isOldTips) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({}));
+        this.skipTips();
+      }
     }
   },
 
