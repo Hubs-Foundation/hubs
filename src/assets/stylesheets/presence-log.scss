@@ -48,6 +48,10 @@
       max-width: 500px;
       padding-bottom: 8px;
     }
+    /* this checks if a sibling has the message source for when have chat closed and resets padding */
+    :local(.message-source + .message-body) {
+      padding-bottom: 0px;
+    }
 
     :local(.message-body-multi) {
       margin-left: 0px;
