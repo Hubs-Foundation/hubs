@@ -31,7 +31,7 @@ import {
   SceneLoader,
   NavMesh,
   SceneRoot,
-  EnvironmentSettings
+  NetworkDebug
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -285,6 +285,7 @@ export interface JSXComponentData extends ComponentData {
   object3D?: any;
   text?: any;
   model?: ModelParams;
+  networkDebug?: boolean;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -346,6 +347,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   videoMenuItem: createDefaultInflator(VideoMenuItem),
   sceneRoot: createDefaultInflator(SceneRoot),
   sceneLoader: createDefaultInflator(SceneLoader),
+  networkDebug: createDefaultInflator(NetworkDebug),
   mediaLoader: inflateMediaLoader,
 
   // inflators that create Object3Ds
