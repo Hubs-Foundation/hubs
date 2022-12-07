@@ -3,7 +3,7 @@ import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
-import type { ClientID, CursorBufferUpdateMessage, StringID, UpdateMessage } from "../utils/networking-types";
+import type { ClientID, CursorBufferUpdateMessage, EntityID, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { tryUnpin } from "../utils/store-networked-state";
 import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
@@ -19,6 +19,17 @@ import {
 
 function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateMessage {
   return !!update.hasOwnProperty("componentIds");
+}
+
+function isOutdatedMessage(eid: EntityID, updateMessage: UpdateMessage) {
+  const messageIsNewer = Networked.lastOwnerTime[eid] < updateMessage.lastOwnerTime;
+  if (!Networked.owner[eid] || messageIsNewer) {
+    return false;
+  }
+
+  const messageIsOlder = Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime;
+  const messageWinsTie = updateMessage.owner !== breakTie(APP.getString(Networked.owner[eid])!, updateMessage.owner);
+  return messageIsOlder || messageWinsTie;
 }
 
 const partedClientIds = new Set<StringID>();
@@ -165,12 +176,8 @@ export function networkReceiveSystem(world: HubsWorld) {
 
       const eid = world.nid2eid.get(nid)!;
 
-      if (
-        Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime ||
-        (Networked.lastOwnerTime[eid] === updateMessage.lastOwnerTime &&
-          updateMessage.owner !== breakTie(APP.getString(Networked.owner[eid])!, updateMessage.owner))
-      ) {
-        console.log("Received update from an old owner, skipping", {
+      if (isOutdatedMessage(eid, updateMessage)) {
+        console.log("Skipping update from an old owner, skipping", {
           updateMessage,
           currentOwner: Networked.lastOwnerTime[eid]
         });
