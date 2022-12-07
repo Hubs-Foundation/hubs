@@ -19,3 +19,4 @@ jobs:
       BLDR_HAB_TOKEN: ${{ secrets.BLDR_HAB_TOKEN }}
       BLDR_RET_TOKEN: ${{ secrets.BLDR_RET_TOKEN }}
       BLDR_RET_PUB_B64: ${{ secrets.BLDR_RET_PUB_B64 }}
+      BLDR_HAB_PVT_B64: ${{ secrets.BLDR_HAB_PVT_B64 }}
