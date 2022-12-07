@@ -16,16 +16,13 @@ const exitedNetworkedQuery = exitQuery(networkedQuery);
 const _scale = new Vector3();
 export function networkDebugSystem(world: HubsWorld, scene: Scene) {
   enteredNetworkedQuery(world).forEach(eid => {
-    const obj = world.eid2obj.get(eid);
-    if (obj) {
-      const textObj = world.eid2obj.get(renderAsEntity(world, NetworkDebugPrefab()))! as TroikaText;
-      texts.set(eid, textObj);
-      scene.add(textObj);
-      textObj.renderOrder = 999;
-      forEachMaterial(textObj, function (mat: Material) {
-        mat.depthTest = false;
-      });
-    }
+    const textObj = world.eid2obj.get(renderAsEntity(world, NetworkDebugPrefab()))! as TroikaText;
+    texts.set(eid, textObj);
+    scene.add(textObj);
+    textObj.renderOrder = 999;
+    forEachMaterial(textObj, function (mat: Material) {
+      mat.depthTest = false;
+    });
   });
 
   exitedNetworkedQuery(world).forEach(eid => {
