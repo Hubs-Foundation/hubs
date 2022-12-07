@@ -19,7 +19,6 @@ import "./point-light";
 import "./quack";
 import "./scene-preview-camera";
 import "./skybox";
-import "./spawn-controller";
 import "./spot-light";
 import "./floaty-object";
 import "./super-spawner";
