@@ -5,8 +5,8 @@ import { loadImage } from "../utils/load-image";
 import { loadVideo } from "../utils/load-video";
 import { loadModel } from "../utils/load-model";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
-import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { MediaLoader, Networked } from "../bit-components";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
 import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
 import { takeOwnership } from "../utils/take-ownership";
 import { renderAsEntity } from "../utils/jsx-entity";
@@ -21,7 +21,8 @@ const loaderForMediaType = {
 export const MEDIA_LOADER_FLAGS = {
   RECENTER: 1 << 0,
   RESIZE: 1 << 1,
-  ANIMATE_LOAD: 1 << 2
+  ANIMATE_LOAD: 1 << 2,
+  IS_OBJECT_MENU_TARGET: 1 << 3
 };
 
 export function assignNetworkIds(world, rootNid, mediaEid, mediaLoaderEid) {
@@ -146,6 +147,9 @@ function* loadAndAnimateMedia(world, eid, signal) {
   if (!canceled) {
     assignNetworkIds(world, APP.getString(Networked.id[eid]), media, eid);
     resizeAndRecenter(world, media, eid);
+    if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
+      addComponent(world, ObjectMenuTarget, eid);
+    }
     add(world, media, eid);
     if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
       yield* animateScale(world, media);
