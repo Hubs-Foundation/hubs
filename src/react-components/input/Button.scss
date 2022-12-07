@@ -1,4 +1,4 @@
-@use '../styles/theme';
+@use "../styles/theme";
 
 :local(.button) {
   height: 48px;
@@ -23,7 +23,8 @@
   }
 }
 
-:local(.basic), :local(.transparent) {
+:local(.basic),
+:local(.transparent) {
   color: theme.$text4-color;
   border: 2px solid theme.$basic-border-color;
   background-color: theme.$basic-color;
@@ -71,7 +72,7 @@
   color: theme.$text5-color;
   background-color: theme.$accept-color;
   border: 2px solid theme.$accept-border-color;
-  
+
   svg {
     color: theme.$text5-color;
   }
@@ -138,7 +139,7 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent2-color-hover;
-    border: 2px solid theme.$accent2-border-color
+    border: 2px solid theme.$accent2-border-color;
   }
 
   &:active {
@@ -208,7 +209,6 @@
   }
 }
 
-
 :local(.accent6) {
   color: theme.$text5-color;
   background-color: theme.$accent6-color;
@@ -247,7 +247,8 @@
   padding: 0 8px;
 }
 
-:local(.lg), :local(.xl) {
+:local(.lg),
+:local(.xl) {
   border-radius: 32px;
   padding: 0 48px;
   font-size: 16px;
@@ -274,16 +275,16 @@
 }
 
 :local(.signin) {
-  border: 2px solid #007AB8;
+  border: 2px solid #007ab8;
   background-color: transparent;
-  color: #007AB8;
+  color: #007ab8;
   box-sizing: border-box;
   border-radius: 13px;
 }
 
 :local(.landing) {
-  border: 2px solid #007AB8;
-  background-color: #007AB8; 
+  border: 2px solid #007ab8;
+  background-color: #007ab8;
   color: theme.$text5-color;
   box-sizing: border-box;
   border-radius: 13px;
@@ -291,6 +292,14 @@
     background-color: #008bd1;
   }
   &:active {
-    background-color: #00699E;
+    background-color: #00699e;
   }
+}
+
+:local(.text) {
+  border: none;
+  background-color: theme.$transparent;
+  color: theme.$primary-color;
+  padding: 0px;
+  box-sizing: border-box;
 }

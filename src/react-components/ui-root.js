@@ -1429,7 +1429,7 @@ class UIRoot extends Component {
                     )}
                     <NotificationsContainer>
                       <TipContainer
-                        hide={this.props.activeObject}
+                        hide={!!this.state.hide || !!this.state.hideUITip || !!this.props.activeObject}
                         inLobby={watching}
                         inRoom={entered}
                         isEmbedded={this.props.embed}
@@ -1439,7 +1439,7 @@ class UIRoot extends Component {
                         scene={this.props.scene}
                         store={this.props.store}
                       />
-                      {!isSmallScreen && (
+                      {!isSmallScreen && !this.state.hide && (
                         <PresenceLog
                           preset={"Notifications"}
                           include={["permission"]}
