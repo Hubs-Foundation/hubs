@@ -35,7 +35,7 @@ export function inflateWaypoint(world: HubsWorld, eid: number, props: WaypointPa
   if (props.snapToNavMesh) flags |= WaypointFlags.snapToNavMesh;
   Waypoint.flags[eid] = flags;
 
-  if (true || props.canBeOccupied) {
+  if (Waypoint.flags[eid] & WaypointFlags.canBeOccupied) {
     addComponent(world, Networked, eid);
     addComponent(world, NetworkedWaypoint, eid);
   }
