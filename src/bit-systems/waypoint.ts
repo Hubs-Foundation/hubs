@@ -1,10 +1,11 @@
-import { defineQuery, exitQuery, hasComponent } from "bitecs";
+import { defineQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { Matrix4, Mesh, MeshStandardMaterial, Object3D } from "three";
 import { HubsWorld } from "../app";
 import {
   HoveredRemoteLeft,
   HoveredRemoteRight,
   Interacted,
+  Networked,
   NetworkedWaypoint,
   Owned,
   SceneRoot,
@@ -12,8 +13,12 @@ import {
   WaypointPreview
 } from "../bit-components";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
+import { sleep } from "../utils/async-utils";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
+import { coroutine } from "../utils/coroutine";
+import { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
+import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
 import { setMatrixWorld } from "../utils/three-utils";
 
 export enum WaypointFlags {
@@ -29,6 +34,7 @@ export enum WaypointFlags {
 const waypointQuery = defineQuery([Waypoint]);
 
 let myOccupiedWaypoint = 0;
+
 export function releaseOccupiedWaypoint() {
   if (myOccupiedWaypoint) {
     NetworkedWaypoint.occupied[myOccupiedWaypoint] = 0;
@@ -36,22 +42,82 @@ export function releaseOccupiedWaypoint() {
   }
 }
 
-export function moveToSpawnPoint(world: HubsWorld, characterController: CharacterControllerSystem) {
-  const spawnPoints = waypointQuery(world).filter(eid => {
-    return Waypoint.flags[eid] & WaypointFlags.canBeSpawnPoint && findAncestorWithComponent(world, SceneRoot, eid);
-  });
+function occupyWaypoint(world: HubsWorld, eid: EntityID) {
+  if (!hasComponent(world, Owned, eid)) {
+    throw new Error("Tried to occupy waypoint before owning it.");
+  }
+  NetworkedWaypoint.occupied[eid] = 1;
+  myOccupiedWaypoint = eid;
+}
 
-  if (spawnPoints.length === 0) {
+function nonOccupiableSpawnPoints(world: HubsWorld) {
+  return waypointQuery(world).filter(eid => {
+    const canBeSpawnPoint = Waypoint.flags[eid] & WaypointFlags.canBeSpawnPoint;
+    const canBeOccupied = Waypoint.flags[eid] & WaypointFlags.canBeOccupied;
+    return canBeSpawnPoint && !canBeOccupied && findAncestorWithComponent(world, SceneRoot, eid);
+  });
+}
+
+function occupiableSpawnPoints(world: HubsWorld) {
+  return waypointQuery(world).filter(eid => {
+    const canBeSpawnPoint = Waypoint.flags[eid] & WaypointFlags.canBeSpawnPoint;
+    const canBeOccupied = Waypoint.flags[eid] & WaypointFlags.canBeOccupied;
+    return (
+      canBeSpawnPoint &&
+      canBeOccupied &&
+      !NetworkedWaypoint.occupied[eid] &&
+      findAncestorWithComponent(world, SceneRoot, eid)
+    );
+  });
+}
+
+function* tryOccupyAndSpawn(world: HubsWorld, characterController: CharacterControllerSystem, spawnPoint: EntityID) {
+  moveToWaypoint(world, spawnPoint, characterController, true);
+  takeOwnershipWithTime(world, spawnPoint, 0);
+  occupyWaypoint(world, spawnPoint);
+  // TODO: We could check if we lost ownership, and not wait as long "lostOwnershipWithTimeout"
+  yield sleep(4000);
+  if (entityExists(world, spawnPoint) && hasComponent(world, Owned, spawnPoint)) {
+    takeOwnership(world, spawnPoint);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function* trySpawnIntoOccupiable(world: HubsWorld, characterController: CharacterControllerSystem) {
+  for (let i = 0; i < 3; i++) {
+    const spawnPoints = occupiableSpawnPoints(world);
+    if (!spawnPoints.length) return false;
+
+    const waypoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+    if (yield* tryOccupyAndSpawn(world, characterController, waypoint)) return true;
+  }
+
+  return false;
+}
+
+function* moveToSpawnPointJob(world: HubsWorld, characterController: CharacterControllerSystem) {
+  if (yield* trySpawnIntoOccupiable(world, characterController)) return;
+
+  const spawnPoints = nonOccupiableSpawnPoints(world);
+  if (spawnPoints.length) {
+    const waypoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+    moveToWaypoint(world, waypoint, characterController, true);
+  } else {
+    console.warn("Could not find any available spawn points, spawning at the origin.");
     characterController.enqueueWaypointTravelTo(new Matrix4().identity(), true, {
       willDisableMotion: false,
       willDisableTeleporting: false,
       snapToNavMesh: true,
       willMaintainInitialOrientation: false
     });
-  } else {
-    const randomWaypoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
-    moveToWaypoint(world, randomWaypoint, characterController, true);
   }
+}
+
+let spawnJob: Coroutine | null = null;
+export function moveToSpawnPoint(world: HubsWorld, characterController: CharacterControllerSystem) {
+  spawnJob = coroutine(moveToSpawnPointJob(world, characterController));
 }
 
 function moveToWaypoint(
@@ -78,7 +144,7 @@ function moveToWaypoint(
 const hoveredLeftWaypointQuery = defineQuery([Waypoint, HoveredRemoteLeft]);
 const hoveredRightWaypointQuery = defineQuery([Waypoint, HoveredRemoteRight]);
 
-const waypointExitQuery = exitQuery(waypointQuery);
+const exitedOwnedQuery = exitQuery(defineQuery([Owned]));
 
 let preview: Object3D | null;
 export function waypointSystem(
@@ -86,7 +152,7 @@ export function waypointSystem(
   characterController: CharacterControllerSystem,
   sceneIsFrozen: boolean
 ) {
-  if (waypointExitQuery(world).includes(myOccupiedWaypoint)) {
+  if (exitedOwnedQuery(world).includes(myOccupiedWaypoint)) {
     myOccupiedWaypoint = 0;
   }
 
@@ -104,8 +170,7 @@ export function waypointSystem(
           console.warn("Can't travel to occupied waypoint...");
         } else {
           takeOwnership(world, eid);
-          NetworkedWaypoint.occupied[eid] = 1;
-          myOccupiedWaypoint = eid;
+          occupyWaypoint(world, eid);
           moveToWaypoint(world, eid, characterController, false);
         }
       } else {
@@ -132,6 +197,13 @@ export function waypointSystem(
     obj.updateMatrices();
     setMatrixWorld(preview, obj.matrixWorld);
   }
+
+  if (spawnJob && spawnJob().done) {
+    spawnJob = null;
+  }
 }
 
 // TODO: Implement named waypoints and location.hash navigation
+
+// TODO: Don't use any. Write the correct type
+type Coroutine = () => any;
