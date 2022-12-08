@@ -10,7 +10,9 @@ export type ClientID = string;
 export type NetworkID = string;
 export type StringID = number;
 export type CreateMessage = [networkId: NetworkID, prefabName: PrefabName, initialData: InitialData];
-export type CursorBuffer = { cursor?: number; push: (data: any) => {} };
+export interface CursorBuffer extends Array<any> {
+  cursor?: number;
+}
 export type UpdateMessage = CursorBufferUpdateMessage | StorableUpdateMessage;
 export interface UpdateMessageBase {
   nid: NetworkID;
