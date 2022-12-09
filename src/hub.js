@@ -734,7 +734,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   subscriptions.register();
 
   const scene = document.querySelector("a-scene");
-  window.APP.scene = scene;
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;

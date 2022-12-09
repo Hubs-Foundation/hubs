@@ -197,8 +197,9 @@ export class App {
       tick: 0
     };
 
-    this.world.scene = sceneEl.object3D;
+    this.scene = sceneEl;
     const scene = sceneEl.object3D;
+    this.world.scene = scene;
     resolvePromiseToScene(scene);
 
     // We manually call scene.updateMatrixWolrd in mainTick
