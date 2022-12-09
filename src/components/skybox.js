@@ -3,7 +3,7 @@ import { LightProbeGenerator } from "three/examples/jsm/lights/LightProbeGenerat
 const {
   AmbientLight,
   BackSide,
-  BoxBufferGeometry,
+  BoxGeometry,
   CubeCamera,
   LinearFilter,
   Mesh,
@@ -236,7 +236,7 @@ export default class Sky extends Object3D {
     fragmentShader
   };
 
-  static _geometry = new BoxBufferGeometry(1, 1, 1);
+  static _geometry = new BoxGeometry(1, 1, 1);
 
   constructor() {
     super();

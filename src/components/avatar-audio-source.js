@@ -232,7 +232,7 @@ AFRAME.registerComponent("zone-audio-source", {
     if (this.data.debug) {
       this.el.setObject3D(
         "debug",
-        new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereBufferGeometry(1, 10, 10)))
+        new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(1, 10, 10)))
       );
     }
   },

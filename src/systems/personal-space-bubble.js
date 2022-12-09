@@ -146,7 +146,7 @@ AFRAME.registerSystem("personal-space-bubble", {
 });
 
 function createSphereGizmo(radius) {
-  const geometry = new THREE.SphereBufferGeometry(radius, 10, 10);
+  const geometry = new THREE.SphereGeometry(radius, 10, 10);
   const wireframe = new THREE.WireframeGeometry(geometry);
   const line = new THREE.LineSegments(wireframe);
   line.material.opacity = 0.5;

@@ -37,7 +37,7 @@ export function CameraPrefab() {
   const screenMaterial = new THREE.MeshBasicMaterial({ toneMapped: false });
   const width = 0.28;
   const aspect = 1280 / 720;
-  const screenGeometry = new THREE.PlaneBufferGeometry(width, width / aspect);
+  const screenGeometry = new THREE.PlaneGeometry(width, width / aspect);
 
   const camera = new THREE.PerspectiveCamera(50, RENDER_WIDTH / RENDER_HEIGHT, 0.1, 30000);
   camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
@@ -182,7 +182,7 @@ export function CubeMediaFramePrefab() {
           COLLISION_LAYERS.AVATAR
       }}
       physicsShape={{ halfExtents: [0.5, 0.5, 0.5] }}
-      object3D={new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial())}
+      object3D={new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial())}
     >
       <entity mediaFrame position={[0, 1, 0]} />
     </entity>

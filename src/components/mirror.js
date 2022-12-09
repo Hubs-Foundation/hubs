@@ -1,6 +1,6 @@
 import { Reflector } from "three/examples/jsm/objects/Reflector";
 
-const DEFAULT_MIRROR_GEOMETRY = new THREE.PlaneBufferGeometry();
+const DEFAULT_MIRROR_GEOMETRY = new THREE.PlaneGeometry();
 const DEFAULT_TEXTURE_WIDTH = window.innerWidth * window.devicePixelRatio;
 const DEFAULT_TEXTURE_HEIGHT = window.innerHeight * window.devicePixelRatio;
 

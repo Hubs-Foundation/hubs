@@ -1,4 +1,4 @@
-import { createPlaneBufferGeometry } from "../utils/three-utils";
+import { createPlaneGeometry } from "../utils/three-utils";
 import { errorTexture } from "../utils/error-texture";
 import { Layers } from "../camera-layers";
 
@@ -9,7 +9,7 @@ export const AlphaMode = Object.freeze({
 });
 
 export function create360ImageMesh(texture) {
-  const geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+  const geometry = new THREE.SphereGeometry(1, 64, 32);
   // invert the geometry on the x-axis so that all of the faces point inward
   geometry.scale(-1, 1, 1);
   // Flip uvs on the geometry
@@ -54,7 +54,7 @@ export function create360ImageMesh(texture) {
 export function createImageMesh(texture, ratio, alphaMode = AlphaMode.Opaque, alphaCutoff = 0.5) {
   const width = Math.min(1.0, 1.0 / ratio);
   const height = Math.min(1.0, ratio);
-  const geometry = createPlaneBufferGeometry(width, height, 1, 1, texture.flipY);
+  const geometry = createPlaneGeometry(width, height, 1, 1, texture.flipY);
 
   const material = new THREE.MeshBasicMaterial();
   material.toneMapped == false;

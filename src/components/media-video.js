@@ -12,7 +12,7 @@ import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
 import { detect } from "detect-browser";
 import semver from "semver";
-import { createPlaneBufferGeometry } from "../utils/three-utils";
+import { createPlaneGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { SourceType, AudioType } from "./audio-params";
@@ -467,12 +467,12 @@ AFRAME.registerComponent("media-video", {
       let geometry;
 
       if (projection === "360-equirectangular") {
-        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+        geometry = new THREE.SphereGeometry(1, 64, 32);
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
       } else {
         const flipY = texture.isVideoTexture ? texture.flipY : audioIconTexture.flipY;
-        geometry = createPlaneBufferGeometry(undefined, undefined, undefined, undefined, flipY);
+        geometry = createPlaneGeometry(undefined, undefined, undefined, undefined, flipY);
         material.side = THREE.DoubleSide;
       }
 

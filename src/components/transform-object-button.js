@@ -112,7 +112,7 @@ AFRAME.registerSystem("transform-selected-object", {
 
     this.planarInfo = {
       plane: new THREE.Mesh(
-        new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
+        new THREE.PlaneGeometry(100000, 100000, 2, 2),
         new THREE.MeshBasicMaterial({
           visible: false,
           wireframe: true,
