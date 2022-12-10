@@ -72,15 +72,15 @@ AFRAME.registerComponent("video-texture-source", {
 
     // The entire scene graph matrices should already be updated
     // in tick(). They don't need to be recomputed again in tock().
-    const tmpAutoUpdate = sceneEl.object3D.autoUpdate;
-    sceneEl.object3D.autoUpdate = false;
+    const tmpAutoUpdate = sceneEl.object3D.matrixWorldAutoUpdate;
+    sceneEl.object3D.matrixWorldAutoUpdate = false;
 
     renderer.setRenderTarget(this.renderTarget);
     renderer.clearDepth();
     renderer.render(sceneEl.object3D, this.camera);
     renderer.setRenderTarget(null);
 
-    sceneEl.object3D.autoUpdate = tmpAutoUpdate;
+    sceneEl.object3D.matrixWorldAutoUpdate = tmpAutoUpdate;
 
     renderer.xr.enabled = tmpXRFlag;
     sceneEl.object3D.onAfterRender = tmpOnAfterRender;

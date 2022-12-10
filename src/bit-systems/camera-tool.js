@@ -142,11 +142,11 @@ function updateRenderTarget(world, camera) {
   const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
   delete sceneEl.object3D.onAfterRender;
 
-  // TODO this assumption is now not true since we are not running after render. We should probably just permentently turn of autoUpdate and run matrix updates at a point we wnat to.
+  // TODO this assumption is now not true since we are not running after render. We should probably just permentently turn of matrixWorldAutoUpdate and run matrix updates at a point we wnat to.
   // The entire scene graph matrices should already be updated
   // in tick(). They don't need to be recomputed again in tock().
-  const tmpAutoUpdate = sceneEl.object3D.autoUpdate;
-  sceneEl.object3D.autoUpdate = false;
+  const tmpAutoUpdate = sceneEl.object3D.matrixWorldAutoUpdate;
+  sceneEl.object3D.matrixWorldAutoUpdate = false;
 
   const bubbleSystem = AFRAME.scenes[0].systems["personal-space-bubble"];
   const boneVisibilitySystem = AFRAME.scenes[0].systems["hubs-systems"].boneVisibilitySystem;
@@ -158,7 +158,7 @@ function updateRenderTarget(world, camera) {
     // HACK, bone visibility typically takes a tick to update, but since we want to be able
     // to have enable() and disable() be reflected this frame, we need to do it immediately.
     boneVisibilitySystem.tick();
-    // scene.autoUpdate will be false so explicitly update the world matrices
+    // scene.matrixWorldAutoUpdate will be false so explicitly update the world matrices
     boneVisibilitySystem.updateMatrices();
   }
 
@@ -174,7 +174,7 @@ function updateRenderTarget(world, camera) {
 
   renderer.xr.enabled = tmpVRFlag;
   sceneEl.object3D.onAfterRender = tmpOnAfterRender;
-  sceneEl.object3D.autoUpdate = tmpAutoUpdate;
+  sceneEl.object3D.matrixWorldAutoUpdate = tmpAutoUpdate;
 
   if (bubbleSystem) {
     for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
