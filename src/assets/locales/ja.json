@@ -502,6 +502,7 @@
   "reaction-popover.lower-hand": "手を下げる",
   "reaction-popover.raise-hand": "挙手",
   "reaction-popover.title": "リアクション",
+  "record-mode-enabled-tip": "録画モードが有効です。再度「B」キーを押すことで録画モードを終了します。",
   "revoke-token-modal.cancel": "キャンセル",
   "revoke-token-modal.description1": "本当にこのトークンを取り消しますか?",
   "revoke-token-modal.description2": "このトークンに依存するスクリプトやリクエストはアクセスを失うことになります。",
