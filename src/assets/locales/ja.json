@@ -204,6 +204,7 @@
   "header.cloud": "Hubs Cloud",
   "header.community": "コミュニティ",
   "header.docs": "ドキュメント",
+  "header.labs": "ラボ",
   "header.sign-out": "サインアウト",
   "header.signed-in-as": "ログインしました {email}",
   "header.source": "開発者",
