@@ -8,6 +8,7 @@ import { EventTarget } from "event-target-shim";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
+import { reloadSFX, downloadConfig, parseConfig, loadSFX } from "./utils/reload-sfx";
 
 let uiRoot;
 // Handles user-entered messages
@@ -65,14 +66,14 @@ export default class MessageDispatch extends EventTarget {
   dispatch = message => {
     if (message.startsWith("/")) {
       const commandParts = message.substring(1).split(/\s+/);
-      this.dispatchCommand(commandParts[0], ...commandParts.slice(1));
+      this.dispatchCommand(commandParts[0], message, ...commandParts.slice(1));
       document.activeElement.blur(); // Commands should blur
     } else {
       this.hubChannel.sendMessage(message);
     }
   };
 
-  dispatchCommand = async (command, ...args) => {
+  dispatchCommand = async (command, message, ...args) => {
     const entered = this.scene.is("entered");
     uiRoot = uiRoot || document.getElementById("ui-root");
     const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
@@ -210,6 +211,23 @@ export default class MessageDispatch extends EventTarget {
           } else {
             this.log(LogMessageType.invalidAudioNormalizationRange);
           }
+        }
+        break;
+      case "sfx":
+        {
+          let text = message.split(" ");
+          text.splice(0, 1);
+          text = text.join(" ");
+          this.log(LogMessageType.reloadingSoundEffects, {
+            info: text.length
+              ? // TODO: These should be translatable strings
+                `(Using the config you provided.)`
+              : `(You did not provide a config: Downloading it instead.)`
+          });
+          if (!text.length) {
+            text = await downloadConfig();
+          }
+          loadSFX(parseConfig(text));
         }
         break;
     }

@@ -79,13 +79,13 @@ function urlFor(filename) {
   return proxiedUrlFor(githubUrlFor(filename));
 }
 
-async function downloadConfig() {
+export async function downloadConfig() {
   const response = await fetch(urlFor("sounds.config"));
   const text = await response.text();
   return text;
 }
 
-async function parseConfig(text) {
+export function parseConfig(text) {
   console.log(`🔊 Parsing sound config file:\n${text}`);
 
   return text
@@ -120,7 +120,7 @@ async function parseConfig(text) {
     .filter(n => n);
 }
 
-async function loadSFX(config) {
+export async function loadSFX(config) {
   console.log(`📥 Downloading sounds...`, { config });
 
   const sfx = AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem;
@@ -164,8 +164,10 @@ async function loadSFX(config) {
 // SOUND_PEN_START_DRAW = PenDraw1.mp3
 // `;
 
-export async function reloadSFX() {
-  const text = await downloadConfig();
-  const config = await parseConfig(text);
+export async function reloadSFX(text) {
+  if (!text) {
+    text = await downloadConfig();
+  }
+  const config = parseConfig(text);
   loadSFX(config);
 }

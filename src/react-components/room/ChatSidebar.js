@@ -186,7 +186,8 @@ export const LogMessageType = {
   audioSuspended: "audioSuspended",
   audioResumed: "audioResumed",
   joinFailed: "joinFailed",
-  avatarChanged: "avatarChanged"
+  avatarChanged: "avatarChanged",
+  reloadingSoundEffects: "reloadingSoundEffects"
 };
 
 const logMessages = defineMessages({
@@ -274,6 +275,10 @@ const logMessages = defineMessages({
   [LogMessageType.avatarChanged]: {
     id: "chat-sidebar.log-message.avatar-changed",
     defaultMessage: "Your avatar has been changed."
+  },
+  [LogMessageType.reloadingSoundEffects]: {
+    id: "chat-sidebar.log-message.reloading-sound-effects",
+    defaultMessage: "Reloading sound effects.\n{info}\nCheck the console for details."
   }
 });
 
