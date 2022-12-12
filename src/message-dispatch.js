@@ -8,7 +8,7 @@ import { EventTarget } from "event-target-shim";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
-import { reloadSFX, downloadConfig, parseConfig, loadSFX } from "./utils/reload-sfx";
+import { downloadConfig, parseConfig, loadSFX } from "./utils/reload-sfx";
 
 let uiRoot;
 // Handles user-entered messages
