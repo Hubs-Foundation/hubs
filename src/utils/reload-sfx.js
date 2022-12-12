@@ -123,7 +123,6 @@ export function parseConfig(text) {
 export async function loadSFX(config) {
   console.log(`📥 Downloading sounds...`, { config });
 
-  const sfx = AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem;
   const loading = new Map();
   const load = url => {
     let audioBufferPromise = loading.get(url);
@@ -141,7 +140,7 @@ export async function loadSFX(config) {
     }
     return audioBufferPromise;
   };
-  sfx.sounds = new Map();
+  const sfx = AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem;
   config.map(([sound, url, name, filename]) => {
     load(url)
       .then(audioBuffer => {
