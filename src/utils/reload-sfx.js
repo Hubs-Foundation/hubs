@@ -136,9 +136,7 @@ export async function loadSFX(config) {
             throw new Error(`Failed to load ${url}`);
           }
         })
-        .then(arrayBuffer => {
-          decodeAudioData(sfx.audioContext, arrayBuffer);
-        });
+        .then(arrayBuffer => decodeAudioData(sfx.audioContext, arrayBuffer));
       loading.set(url, audioBufferPromise);
     }
     return audioBufferPromise;
