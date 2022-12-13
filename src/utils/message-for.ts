@@ -2,9 +2,35 @@ import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { createMessageDatas } from "../bit-systems/networking";
+import { defineNetworkSchemaForProps } from "./define-network-schema";
 import { networkableComponents, schemas } from "./network-schemas";
-import type { CursorBufferUpdateMessage, EntityID, Message, StorableUpdateMessage } from "./networking-types";
+import type {
+  CursorBuffer,
+  CursorBufferUpdateMessage,
+  EntityID,
+  Message,
+  StorableUpdateMessage
+} from "./networking-types";
 import { StorableMessage } from "./store-networked-state";
+
+const hasNetworkedComponentChanged = (() => {
+  const serialize = defineNetworkSchemaForProps([
+    Networked.lastOwnerTime,
+    Networked.creator,
+    Networked.owner
+  ]).serialize;
+  const data: CursorBuffer = [];
+  return function hasNetworkedComponentChanged(
+    world: HubsWorld,
+    eid: EntityID,
+    isFullSync: boolean,
+    isBroadcast: boolean
+  ) {
+    const hasChanged = serialize(world, eid, data, isFullSync, isBroadcast);
+    data.length = 0;
+    return hasChanged;
+  };
+})();
 
 export function messageFor(
   world: HubsWorld,
@@ -46,8 +72,7 @@ export function messageFor(
       }
     }
 
-    // TODO: If the owner/lastOwnerTime changed, we need to send this updateMessage
-    if (updateMessage.componentIds.length) {
+    if (hasNetworkedComponentChanged(world, eid, isFullSync, isBroadcast) || updateMessage.componentIds.length) {
       message.updates.push(updateMessage);
     }
   });
