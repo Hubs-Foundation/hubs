@@ -21,6 +21,13 @@ function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateM
   return !!update.hasOwnProperty("componentIds");
 }
 
+function breakTie(a: ClientID, b: ClientID) {
+  if (a === "reticulum") return b;
+  if (b === "reticulum") return a;
+  // arbitrary (but consistent) tiebreak
+  return a < b ? a : b;
+}
+
 function isOutdatedMessage(eid: EntityID, updateMessage: UpdateMessage) {
   const entityHasOwner = !!Networked.owner[eid];
   const messageIsNewer = Networked.lastOwnerTime[eid] < updateMessage.lastOwnerTime;
@@ -36,13 +43,6 @@ function isOutdatedMessage(eid: EntityID, updateMessage: UpdateMessage) {
 const partedClientIds = new Set<StringID>();
 export const storedUpdates = new Map<StringID, UpdateMessage[]>();
 const enteredNetworkedQuery = enterQuery(defineQuery([Networked]));
-
-function breakTie(a: ClientID, b: ClientID) {
-  if (a === "reticulum") return b;
-  if (b === "reticulum") return a;
-  // arbitrary (but consistent) tiebreak
-  return a < b ? a : b;
-}
 
 export function networkReceiveSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet.
