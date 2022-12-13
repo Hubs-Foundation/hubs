@@ -33,7 +33,7 @@ function isOutdatedMessage(eid: EntityID, updateMessage: UpdateMessage) {
 }
 
 const partedClientIds = new Set<StringID>();
-const storedUpdates = new Map<StringID, UpdateMessage[]>();
+export const storedUpdates = new Map<StringID, UpdateMessage[]>();
 const enteredNetworkedQuery = enterQuery(defineQuery([Networked]));
 
 function breakTie(a: ClientID, b: ClientID) {
