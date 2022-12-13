@@ -1,9 +1,10 @@
 import { localClientID, pendingMessages } from "../bit-systems/networking";
+import { messageForLegacyRoomObjects } from "./message-for";
 import { getReticulumFetchUrl } from "./phoenix-utils";
 import { StorableMessage } from "./store-networked-state";
 
-type HubsGltf = any;
-type StoredRoomDataNode = HubsGltf | StorableMessage;
+type LegacyRoomObject = any;
+type StoredRoomDataNode = LegacyRoomObject | StorableMessage;
 
 type StoredRoomData = {
   asset: {
@@ -41,5 +42,27 @@ export async function loadStoredRoomData(hubId: string) {
       });
       pendingMessages.push(m);
     });
+  }
+}
+
+export async function loadLegacyRoomObjects(hubId: string) {
+  console.log("loading legacy room objects...");
+  const objectsUrl = getReticulumFetchUrl(`/${hubId}/objects.gltf`) as URL;
+  const response = await fetch(objectsUrl);
+  const roomData: StoredRoomData = await response.json();
+  const legacyRoomObjects: LegacyRoomObject[] = roomData.nodes.filter(node => !isStorableMessage(node));
+
+  if (hubId === APP.hub!.hub_id) {
+    const message = messageForLegacyRoomObjects(legacyRoomObjects);
+    if (message) {
+      message.fromClientId = "reticulum";
+      message.hubId = hubId;
+
+      pendingMessages.push(message);
+      // TODO All clients must use the new loading path for this to work correctly,
+      // because all clients must agree on which netcode to use (hubs networking
+      // systems or networked aframe) for a given object.
+    }
+    console.log({ legacyRoomObjects, message });
   }
 }
