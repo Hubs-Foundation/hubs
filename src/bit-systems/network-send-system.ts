@@ -23,7 +23,7 @@ const enteredNetworkedQuery = enterQuery(networkedQuery);
 const enteredOwnedNetworkedQuery = enterQuery(ownedNetworkedQuery);
 const exitedNetworkedQuery = exitQuery(networkedQuery);
 
-export const pinMessages: Message[] = [];
+export const unpinMessages: Message[] = [];
 
 export function networkSendSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet
@@ -67,13 +67,14 @@ export function networkSendSystem(world: HubsWorld) {
     }
   }
 
-  // Tell everyone about entities I pin/unpin
+  // Tell everyone about entities I unpin
+  // TODO: Make reticulum broadcast the actual unpin message, like it does for pin messages.
   {
-    for (let i = 0; i < pinMessages.length; i++) {
-      const message = pinMessages[i];
+    for (let i = 0; i < unpinMessages.length; i++) {
+      const message = unpinMessages[i];
       NAF.connection.broadcastDataGuaranteed("nn", message);
     }
-    pinMessages.length = 0;
+    unpinMessages.length = 0;
   }
 
   // Tell everyone about entities I created, entities I own, and entities that I deleted
