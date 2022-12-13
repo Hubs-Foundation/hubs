@@ -134,7 +134,7 @@
     "semver": "^7.3.2",
     "three": "github:mozillareality/three.js#ca596a057f6de880d6f11fb6c402346863058d62",
     "three-ammo": "github:mozillareality/three-ammo",
-    "three-gltf-extensions": "^0.0.14",
+    "three-gltf-extensions": "^0.0.15",
     "three-mesh-bvh": "^0.3.7",
     "three-pathfinding": "^1.1.0",
     "three-to-ammo": "github:infinitelee/three-to-ammo",
