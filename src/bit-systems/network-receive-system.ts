@@ -225,7 +225,7 @@ export function networkReceiveSystem(world: HubsWorld) {
       networkedEntities
         .filter(eid => Networked.owner[eid] === partingClientId)
         .forEach(eid => {
-          takeOwnershipWithTime(world, eid, Networked.timestamp[eid]);
+          takeOwnershipWithTime(world, eid, Networked.timestamp[eid] + 1);
         });
     });
 
