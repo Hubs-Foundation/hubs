@@ -10,7 +10,6 @@ export const Networked = defineComponent({
   id: Types.ui32,
   creator: Types.ui32,
   owner: Types.ui32,
-
   lastOwnerTime: Types.ui32,
   timestamp: Types.ui32
 });
