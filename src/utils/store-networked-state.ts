@@ -5,7 +5,7 @@ import HubChannel from "./hub-channel";
 import { takeOwnership } from "./take-ownership";
 import { messageFor, messageForStorage } from "./message-for";
 import { localClientID } from "../bit-systems/networking";
-import { pinMessages } from "../bit-systems/network-send-system";
+import { unpinMessages } from "../bit-systems/network-send-system";
 
 export interface StorableMessage extends Message {
   version: 1;
@@ -31,7 +31,7 @@ export async function tryUnpin(world: HubsWorld, eid: EntityID, hubChannel: HubC
   takeOwnership(world, eid);
   Networked.creator[eid] = APP.getSid(localClientID!);
   const message = messageFor(world, [eid], [eid], [eid], [], false)!;
-  pinMessages.push(message);
+  unpinMessages.push(message);
   const fileId = null;
   console.log("this is where i would unpin...");
   hubChannel.unpin(APP.getString(Networked.id[eid])!, fileId);
