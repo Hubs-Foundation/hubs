@@ -2,14 +2,18 @@ import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { createMessageDatas } from "../bit-systems/networking";
+import { MediaLoaderParams } from "../inflators/media-loader";
 import { defineNetworkSchemaForProps } from "./define-network-schema";
 import { networkableComponents, schemas } from "./network-schemas";
 import type {
+  CreateMessage,
   CursorBuffer,
   CursorBufferUpdateMessage,
   EntityID,
   Message,
-  StorableUpdateMessage
+  NetworkID,
+  StorableUpdateMessage,
+  UpdateMessage
 } from "./networking-types";
 import { StorableMessage } from "./store-networked-state";
 
@@ -134,5 +138,69 @@ export function messageForStorage(world: HubsWorld, created: EntityID[], updated
     return message;
   }
 
+  return null;
+}
+
+export interface LegacyRoomObject {
+  extensions: {
+    HUBS_components: {
+      media: {
+        version: number;
+        src: string;
+        id: NetworkID;
+        contentSubtype?: string;
+      };
+      pinnable: {
+        pinned: boolean;
+      };
+    };
+  };
+  name: NetworkID;
+  rotation: [number, number, number, number];
+  translation: [number, number, number];
+}
+
+export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
+  const message: Message = {
+    creates: [],
+    updates: [],
+    deletes: []
+  };
+
+  objects.forEach(obj => {
+    const nid = obj.name;
+    const initialData: MediaLoaderParams = {
+      src: obj.extensions.HUBS_components.media.src,
+      resize: false,
+      recenter: false,
+      animateLoad: false,
+      isObjectMenuTarget: true
+    };
+    const createMessage: CreateMessage = [nid, "media", initialData];
+    message.creates.push(createMessage);
+
+    const updateMessage: StorableUpdateMessage = {
+      data: {
+        "networked-transform": {
+          version: 1,
+          data: {
+            position: obj.translation,
+            rotation: obj.rotation,
+            scale: [1, 1, 1]
+          }
+        }
+      },
+      nid,
+      lastOwnerTime: -1,
+      timestamp: -1,
+      owner: "reticulum",
+      creator: "reticulum"
+    };
+    message.updates.push(updateMessage);
+  });
+
+  if (message.creates.length || message.updates.length) {
+    return message;
+  }
   return null;
 }

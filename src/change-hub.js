@@ -1,6 +1,6 @@
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
-import { loadStoredRoomData } from "./utils/load-room-objects";
+import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
 import qsTruthy from "./utils/qs_truthy";
 import { localClientID, pendingMessages, pendingParts } from "./bit-systems/networking";
 import { storedUpdates } from "./bit-systems/network-receive-system";
@@ -83,7 +83,9 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   NAF.entities.removeRemoteEntities();
   await NAF.connection.adapter.disconnect();
   await APP.dialog.disconnect();
-  unloadRoomObjects();
+  if (!qsTruthy("newLoader")) {
+    unloadRoomObjects();
+  }
   NAF.connection.connectedClients = {};
   NAF.connection.activeDataChannels = {};
   if (pendingMessages.length || storedUpdates.size) {
@@ -132,10 +134,11 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     NAF.connection.adapter.connect()
   ]);
 
-  loadRoomObjects(hubId);
-
   if (qsTruthy("newLoader")) {
     loadStoredRoomData(hubId);
+    loadLegacyRoomObjects(hubId);
+  } else {
+    loadRoomObjects(hubId);
   }
 
   APP.hubChannel.sendEnteredEvent();

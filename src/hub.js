@@ -258,7 +258,7 @@ import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
-import { loadStoredRoomData } from "./utils/load-room-objects";
+import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -594,19 +594,19 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   scene.addEventListener(
     "didConnectToNetworkedScene",
     () => {
-      // Append objects once we are in the NAF room since ownership may be taken.
-      const objectsScene = document.querySelector("#objects-scene");
-      const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
-      const objectsEl = document.createElement("a-entity");
-
-      objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-
-      if (!isBotMode) {
-        objectsScene.appendChild(objectsEl);
-      }
-
       if (qsTruthy("newLoader")) {
         loadStoredRoomData(hub.hub_id);
+        loadLegacyRoomObjects(hub.hub_id);
+      } else {
+        // Append objects once we are in the NAF room since ownership may be taken.
+        const objectsScene = document.querySelector("#objects-scene");
+        const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+        const objectsEl = document.createElement("a-entity");
+        objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
+
+        if (!isBotMode) {
+          objectsScene.appendChild(objectsEl);
+        }
       }
     },
     { once: true }
