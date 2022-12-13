@@ -22,14 +22,15 @@ function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateM
 }
 
 function isOutdatedMessage(eid: EntityID, updateMessage: UpdateMessage) {
+  const entityHasOwner = !!Networked.owner[eid];
   const messageIsNewer = Networked.lastOwnerTime[eid] < updateMessage.lastOwnerTime;
-  if (!Networked.owner[eid] || messageIsNewer) {
+  if (!entityHasOwner || messageIsNewer) {
     return false;
   }
 
   const messageIsOlder = Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime;
-  const messageWinsTie = updateMessage.owner !== breakTie(APP.getString(Networked.owner[eid])!, updateMessage.owner);
-  return messageIsOlder || messageWinsTie;
+  const messageLosesTie = updateMessage.owner !== breakTie(APP.getString(Networked.owner[eid])!, updateMessage.owner);
+  return messageIsOlder || messageLosesTie;
 }
 
 const partedClientIds = new Set<StringID>();
