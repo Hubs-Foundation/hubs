@@ -194,3 +194,15 @@ export const NetworkDebug = defineComponent();
 export const NetworkDebugRef = defineComponent({
   ref: Types.eid
 });
+
+export const Portal = defineComponent({
+  uuid: Types.ui32,
+  bounds: [Types.f32, 3],
+  offset: [Types.f32, 3],
+  isInside: Types.ui8,
+  name: Types.ui32,
+  target: Types.ui32
+});
+Portal.name[$isStringType] = true;
+Portal.uuid[$isStringType] = true;
+Portal.target[$isStringType] = true;

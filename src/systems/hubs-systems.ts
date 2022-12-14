@@ -58,6 +58,7 @@ import { HubsWorld } from "../app";
 import { EffectComposer } from "postprocessing";
 import { sceneLoadingSystem } from "../bit-systems/scene-loading";
 import { networkDebugSystem } from "../bit-systems/network-debug";
+import { portalsSystem } from "../bit-systems/portals";
 import qsTruthy from "../utils/qs_truthy";
 
 declare global {
@@ -225,6 +226,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   videoMenuSystem(world, aframeSystems.userinput);
   videoSystem(world, hubsSystems.audioSystem);
   mediaFramesSystem(world);
+  portalsSystem(world, scene, hubsSystems.characterController);
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();

@@ -31,7 +31,8 @@ import {
   SceneLoader,
   NavMesh,
   SceneRoot,
-  NetworkDebug
+  NetworkDebug,
+  Portal
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -52,6 +53,7 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { ProjectionMode } from "./projection-mode";
+import { inflatePortal, PortalParams } from "../inflators/portal";
 
 preload(
   new Promise(resolve => {
@@ -286,6 +288,7 @@ export interface JSXComponentData extends ComponentData {
   text?: any;
   model?: ModelParams;
   networkDebug?: boolean;
+  portal?: PortalParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -294,6 +297,7 @@ export interface GLTFComponentData extends ComponentData {
   environmentSettings?: any;
   reflectionProbe?: ReflectionProbeParams;
   navMesh?: boolean;
+  portal?: any;
 }
 
 declare global {
@@ -357,7 +361,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   text: inflateText,
   model: inflateModel,
   image: inflateImage,
-  video: inflateVideo
+  video: inflateVideo,
+  portal: inflatePortal
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
@@ -366,7 +371,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   image: inflateImageLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
-  environmentSettings: inflateEnvironmentSettings
+  environmentSettings: inflateEnvironmentSettings,
+  portal: createDefaultInflator(Portal)
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
