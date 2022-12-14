@@ -1,5 +1,5 @@
 import { HubsWorld } from "../app";
-import { addComponent, ComponentType } from "bitecs";
+import { addComponent } from "bitecs";
 import { Portal } from "../bit-components";
 import { addObject3DComponent } from "../utils/jsx-entity";
 
