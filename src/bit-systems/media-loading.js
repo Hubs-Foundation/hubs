@@ -132,8 +132,6 @@ function* loadAndAnimateMedia(world, eid, signal) {
   if (!canceled) {
     resizeAndRecenter(world, media, eid);
     if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
-      // TODO: This doesn't need to be a flag on media loader.
-      // Just add it to entities that need it.
       addComponent(world, ObjectMenuTarget, eid);
     }
     add(world, media, eid);
