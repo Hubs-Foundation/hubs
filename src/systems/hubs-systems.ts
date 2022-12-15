@@ -59,6 +59,7 @@ import { sceneLoadingSystem } from "../bit-systems/scene-loading";
 import { networkDebugSystem } from "../bit-systems/network-debug";
 import qsTruthy from "../utils/qs_truthy";
 import { waypointSystem } from "../bit-systems/waypoint";
+import { followPetSystem } from "../bit-systems/follow-pet";
 
 declare global {
   interface Window {
@@ -229,6 +230,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
+  followPetSystem(world, aframeSystems.nav.pathfinder, hubsSystems.characterController);
 
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);

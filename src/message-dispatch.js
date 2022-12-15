@@ -165,6 +165,14 @@ export default class MessageDispatch extends EventTarget {
         obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
         break;
       }
+      case "pet": {
+        const avatarPov = document.querySelector("#avatar-rig").object3D;
+        const eid = createNetworkedEntity(APP.world, "follow-pet");
+        const obj = APP.world.eid2obj.get(eid);
+        obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+        obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+        break;
+      }
       case "debug":
         physicsSystem = document.querySelector("a-scene").systems["hubs-systems"].physicsSystem;
         physicsSystem.setDebug(!physicsSystem.debugEnabled);

@@ -1,5 +1,6 @@
 declare module "aframe" {
   import { Scene, Clock, Object3D, Mesh } from "three";
+  import { Pathfinding } from "three-pathfinding";
 
   interface AElement extends HTMLElement {
     object3D: Object3D;
@@ -82,6 +83,7 @@ declare module "aframe" {
   interface NavSystem extends ASystem {
     loadMesh(mesh: Mesh, zone: string);
     mesh?: Mesh;
+    pathfinder: Pathfinding;
   }
 
   interface AScene extends AElement {

@@ -166,7 +166,7 @@ export function swapObject3DComponent(world: HubsWorld, eid: number, obj: Object
 // TODO HACK gettting internal bitecs symbol, should expose an API to check a properties type
 const $isEidType = Object.getOwnPropertySymbols(CameraTool.screenRef).find(s => s.description === "isEidType");
 
-const createDefaultInflator = (C: Component, defaults = {}): InflatorFn => {
+export const createDefaultInflator = (C: Component, defaults = {}): InflatorFn => {
   return (world, eid, componentProps) => {
     componentProps = Object.assign({}, defaults, componentProps);
     addComponent(world, C, eid, true);
@@ -323,7 +323,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   directionalLight: inflateDirectionalLight
 };
 
-const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
+export const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   ...commonInflators,
   cursorRaycastable: createDefaultInflator(CursorRaycastable),
   remoteHoverTarget: createDefaultInflator(RemoteHoverTarget),
@@ -364,7 +364,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   model: inflateModel,
   image: inflateImage,
   video: inflateVideo
-};
+} as any; // TODO this "as any" is to allow interface merging in other files. "plugins". This is likely not needed when plugin is actually external.
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
   ...commonInflators,

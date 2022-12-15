@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, removeComponent, removeEntity } from "bitecs";
-import { MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import { MediaLoaded, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
@@ -142,6 +142,7 @@ function* loadAndAnimateMedia(world, eid, signal) {
       yield* animateScale(world, media);
     }
     removeComponent(world, MediaLoader, eid);
+    addComponent(world, MediaLoaded, eid);
   }
 }
 
