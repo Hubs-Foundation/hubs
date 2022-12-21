@@ -372,7 +372,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
   environmentSettings: inflateEnvironmentSettings,
-  portal: createDefaultInflator(Portal)
+  portal: inflatePortal
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

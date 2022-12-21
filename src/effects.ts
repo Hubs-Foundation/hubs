@@ -7,6 +7,7 @@ import {
   EffectComposer,
   EffectPass,
   LambdaPass,
+  PixelationEffect,
   RenderPass,
   SMAAEffect,
   ToneMappingEffect,
@@ -76,6 +77,10 @@ export function createEffectsComposer(
     camera.layers.mask = mask;
   });
 
+  const pixelationEffect = new PixelationEffect(24);
+  const pixelationPass = new EffectPass(camera, pixelationEffect);
+  pixelationPass.enabled = true;
+
   // One of these will be enabled by environment-system depending on scene settings and prefs
   tonemapOnlyPass.enabled = false;
   if (bloomAndTonemapPass) bloomAndTonemapPass.enabled = false;
@@ -84,6 +89,7 @@ export function createEffectsComposer(
   composer.addPass(renderScenePass);
   if (bloomAndTonemapPass) composer.addPass(bloomAndTonemapPass);
   composer.addPass(tonemapOnlyPass);
+  composer.addPass(pixelationPass);
   composer.addPass(enableUILayers);
   composer.addPass(copyBuffersPass);
   composer.addPass(renderUIPass);
@@ -190,6 +196,7 @@ export function createEffectsComposer(
   return {
     composer,
     bloomAndTonemapPass,
-    tonemapOnlyPass
+    tonemapOnlyPass,
+    pixelationEffect
   };
 }

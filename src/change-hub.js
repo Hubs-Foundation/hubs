@@ -72,11 +72,14 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     document.querySelector("#environment-scene").childNodes[0].components["gltf-model-plus"].data.src !==
     (await getSceneUrlForHub(hub))
   ) {
-    const fader = document.getElementById("viewing-camera").components["fader"];
-    fader.fadeOut().then(() => {
+    APP.transition.start(1);
+    // const fader = document.getElementById("viewing-camera").components["fader"];
+    // fader.fadeOut().then(() => {
+    setTimeout(() => {
       scene.emit("reset_scene");
       updateEnvironmentForHub(hub, APP.entryManager);
-    });
+    }, 2000);
+    // });
   }
 
   APP.retChannel.push("change_hub", { hub_id: hub.hub_id });

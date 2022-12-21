@@ -60,6 +60,7 @@ import { sceneLoadingSystem } from "../bit-systems/scene-loading";
 import { networkDebugSystem } from "../bit-systems/network-debug";
 import { portalsSystem } from "../bit-systems/portals";
 import qsTruthy from "../utils/qs_truthy";
+import { Transition } from "../utils/transition";
 
 declare global {
   interface Window {
@@ -125,7 +126,14 @@ AFRAME.registerSystem("hubs-systems", {
   }
 });
 
-export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene, camera: Camera) {
+export function mainTick(
+  xrFrame: XRFrame,
+  renderer: WebGLRenderer,
+  transition: Transition,
+  scene: Scene,
+  loadingScene: Scene,
+  camera: Camera
+) {
   const world = APP.world;
   const sceneEl = AFRAME.scenes[0];
   const aframeSystems = sceneEl.systems;
@@ -246,12 +254,14 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   }
 
   scene.updateMatrixWorld();
+  loadingScene.updateMatrixWorld();
 
   renderer.info.reset();
   if (APP.fx.composer) {
     APP.fx.composer.render();
   } else {
-    renderer.render(scene, camera);
+    transition.render(dt / 1000);
+    ///renderer.render(scene, camera);
   }
 
   // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)

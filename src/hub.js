@@ -256,6 +256,7 @@ import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
+import { startPortalSystem, stopPortalSystem } from "./bit-systems/portals";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -449,6 +450,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
+        setTimeout(startPortalSystem, 2000);
       },
       { once: true }
     );
@@ -472,6 +474,11 @@ export async function updateEnvironmentForHub(hub, entryManager) {
         environmentEl.addEventListener(
           "model-loaded",
           () => {
+            setTimeout(() => {
+              startPortalSystem();
+              APP.transition.start(0);
+            }, 2000);
+
             environmentEl.removeEventListener("model-error", sceneErrorHandler);
 
             envSystem.updateEnvironment(environmentEl);
@@ -485,10 +492,10 @@ export async function updateEnvironmentForHub(hub, entryManager) {
               waypointSystem.moveToSpawnPoint();
             }
 
-            const fader = document.getElementById("viewing-camera").components["fader"];
+            // const fader = document.getElementById("viewing-camera").components["fader"];
 
-            // Add a slight delay before de-in to reduce hitching.
-            setTimeout(() => fader.fadeIn(), 2000);
+            // // Add a slight delay before de-in to reduce hitching.
+            // setTimeout(() => fader.fadeIn(), 2000);
           },
           { once: true }
         );
@@ -511,6 +518,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
       console.warn("Transitioning to loading environment but was already in loading environment.");
       environmentEl.setAttribute("gltf-model-plus", { src: "" });
     }
+    stopPortalSystem();
     environmentEl.setAttribute("gltf-model-plus", { src: loadingEnvironment });
   }
 }

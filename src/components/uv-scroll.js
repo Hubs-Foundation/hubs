@@ -1,5 +1,5 @@
-const textureToData = new Map();
-const registeredTextures = [];
+export const textureToData = new Map();
+export const registeredTextures = [];
 
 export class UVScrollSystem {
   tick(dt) {

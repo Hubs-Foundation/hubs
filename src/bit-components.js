@@ -200,8 +200,11 @@ export const Portal = defineComponent({
   bounds: [Types.f32, 3],
   offset: [Types.f32, 3],
   isInside: Types.ui8,
+  wasInside: Types.ui8,
   name: Types.ui32,
-  target: Types.ui32
+  target: Types.ui32,
+  local: Types.ui8,
+  image: Types.eid
 });
 Portal.name[$isStringType] = true;
 Portal.uuid[$isStringType] = true;

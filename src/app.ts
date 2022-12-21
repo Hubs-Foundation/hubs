@@ -10,7 +10,7 @@ import type { AElement, AScene } from "aframe";
 import HubChannel from "./utils/hub-channel";
 import MediaDevicesManager from "./utils/media-devices-manager";
 
-import { EffectComposer, EffectPass } from "postprocessing";
+import { EffectComposer, EffectPass, PixelationEffect } from "postprocessing";
 import {
   Audio,
   AudioListener,
@@ -28,6 +28,9 @@ import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
+import { renderAsEntity } from "./utils/jsx-entity";
+import { LoadingScene } from "./prefabs/loading-scene";
+import { Transition } from "./utils/transition";
 
 declare global {
   interface Window {
@@ -88,6 +91,8 @@ export class App {
   str2sid: Map<string | null, number>;
   sid2str: Map<number, string | null>;
   nextSid = 1;
+  hub: any;
+  transition: Transition;
 
   audioListener: AudioListener;
 
@@ -103,6 +108,7 @@ export class App {
     composer?: EffectComposer;
     bloomAndTonemapPass?: EffectPass;
     tonemapOnlyPass?: EffectPass;
+    pixelationEffect?: PixelationEffect;
   } = {};
 
   constructor() {
@@ -202,6 +208,19 @@ export class App {
     this.world.scene = scene;
     resolvePromiseToScene(scene);
 
+    // Enable loading transition
+    const loadingSceneEid = renderAsEntity(this.world, LoadingScene());
+    const loadingScene = new THREE.Scene();
+    const gltf = this.world.eid2obj.get(loadingSceneEid)!;
+    loadingScene.add(gltf);
+    this.transition = new Transition(renderer, camera, loadingScene, scene, {
+      useTexture: false,
+      transition: 0,
+      cycle: true,
+      animate: false,
+      threshold: 0.3
+    });
+
     // We manually call scene.updateMatrixWolrd in mainTick
     scene.autoUpdate = false;
 
@@ -218,8 +237,8 @@ export class App {
     sceneEl.addEventListener("loaded", () => {
       waitForPreloads().then(() => {
         this.world.time.elapsed = performance.now();
-        renderer.setAnimationLoop(function (_rafTime, xrFrame) {
-          mainTick(xrFrame, renderer, scene, camera);
+        renderer.setAnimationLoop((_rafTime, xrFrame) => {
+          mainTick(xrFrame, renderer, this.transition, scene, loadingScene, camera);
         });
         sceneEl.renderStarted = true;
       });

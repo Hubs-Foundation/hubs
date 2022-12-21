@@ -185,7 +185,7 @@ async function isHubsServer(url) {
 
 const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/[a-zA-Z0-9]{7}(?:\/|$)/;
 const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
-const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
+const hubsRoomRegex = /(https?:\/\/)?[^/]+\/hub.html\?hub_id=(?<id>[a-zA-Z0-9]{7})(?:\/|#|$)/;
 
 export const isLocalHubsUrl = async url =>
   (await isHubsServer(url)) && new URL(url).origin === document.location.origin;
