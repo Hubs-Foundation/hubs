@@ -1,9 +1,10 @@
 @use "../styles/theme.scss";
 
 :local(.tooltips-centered) {
-  position: absolute;
-  top: 50%;
-  transform: translate(-0%, -50%);
+  transform: translateY(calc(50vh - 50% - 96px));
+  @media (min-width: theme.$breakpoint-lg) {
+    transform: translateY(calc(50vh - 50% - 96px + 24px));
+  }
 }
 
 :local(.tooltips-top) {
