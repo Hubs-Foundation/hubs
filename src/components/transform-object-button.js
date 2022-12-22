@@ -1,6 +1,6 @@
 import { paths } from "../systems/userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+import { COLLISION_LAYERS } from "../constants";
 const AMMO_BODY_ATTRIBUTES = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS };
 
 export const TRANSFORM_MODE = {
