@@ -3,7 +3,7 @@ import { TYPE } from "three-ammo/constants";
 import { HandCollisionTarget } from "../bit-components";
 import { emojis } from "./emoji";
 
-const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+import { COLLISION_LAYERS } from "../constants";
 
 function setOffsetVector(i, totalNumEmojis, width, spacing, offsetVector) {
   const sign = i & 1 ? -1 : 1;

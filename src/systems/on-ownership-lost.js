@@ -1,4 +1,4 @@
-const UNOWNED_INTERACTABLE = require("../constants").COLLISION_LAYERS.UNOWNED_INTERACTABLE;
+import { COLLISION_LAYERS } from "../constants";
 import { exitQuery, defineQuery, removeComponent, hasComponent, entityExists } from "bitecs";
 import {
   Held,
@@ -13,7 +13,7 @@ import {
 // TODO this seems wrong, nothing sets it back unless its a floaty object
 const exitOwned = exitQuery(defineQuery([Owned]));
 const componentsToRemove = [Held, HeldHandRight, HeldHandLeft, HeldRemoteRight, HeldRemoteLeft];
-const kinematicOptions = { type: "kinematic", collisionFilterMask: UNOWNED_INTERACTABLE };
+const kinematicOptions = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.UNOWNED_INTERACTABLE };
 export function onOwnershipLost(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
 
