@@ -645,13 +645,6 @@ class UIRoot extends Component {
     if (this.mediaDevicesManager.isVideoShared) {
       console.log("Screen sharing enabled.");
     }
-
-    const handler = setInterval(() => {
-      APP.fx.pixelationEffect.granularity = APP.fx.pixelationEffect.granularity - 2;
-      if (APP.fx.pixelationEffect.granularity <= 0) {
-        clearInterval(handler);
-      }
-    }, 100);
   };
 
   attemptLink = async () => {
