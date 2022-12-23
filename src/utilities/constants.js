@@ -1,6 +1,6 @@
 const expireCookies = 7;
 
-// const API_ROOT = "http://localhost:7500";
+// const API_ROOT = "http://localhost:7600";
 // const APP_ROOT = "https://hubs.local:8080";
 
 const API_ROOT = "https://api.larchiveum.link";
@@ -13,7 +13,7 @@ const naverApp = {
 
 const kakaoApp = {
   clientID: "760953",
-  jsKey: "698ea6399ce6667e16f2a4b9de93ddaf",
+  jsKey: "698ea6399ce6667e16f2a4b9de93ddaf"
 };
 
 const facebookApp = {
@@ -25,12 +25,4 @@ const googleApp = {
   clientSecret: "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"
 };
 
-export { 
-  expireCookies, 
-  naverApp, 
-  kakaoApp, 
-  facebookApp, 
-  googleApp, 
-  API_ROOT, 
-  APP_ROOT
-};
+export { expireCookies, naverApp, kakaoApp, facebookApp, googleApp, API_ROOT, APP_ROOT };

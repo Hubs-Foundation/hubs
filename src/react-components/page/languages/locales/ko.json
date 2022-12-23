@@ -23,6 +23,8 @@
     "manager": {
         "SIGN_OUT": "로그아웃",
         "LANGUAGE": "언어",
+        "CONTENT": "Content",
+        "ROOM": "Room",
         "SPOKE": "Spoke",
         "ADMIN": "Admin",
         "LIST_EXHIBITION": "전시회 목록",
@@ -111,6 +113,12 @@
         "DELETE_EXHIBITION_ERROR": "전시 삭제 오류",
         "CLOSE_EXHIBITION_ERROR": "전시 닫기 오류",
         "OPEN_EXHIBITION_ERROR": "전시회 열기 오류"
+    },
+    "content": {
+        "ADD_QUIZ": "Add Quiz",
+        "POPUP_CREATE_QUIZ__TITLE_LABEL": "Title",
+        "POPUP_CREATE_QUIZ__INTRODUCTION_LABEL": "Introduction",
+        "POPUP_CREATE_QUIZ__DESCRIPTION_LABEL": "Description"
     },
     "profile": {
         "SIGN_OUT": "로그아웃",

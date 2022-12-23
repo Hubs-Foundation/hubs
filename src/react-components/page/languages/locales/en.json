@@ -24,6 +24,8 @@
     "manager": {
         "SIGN_OUT": "Sign out",
         "LANGUAGE": "Language",
+        "CONTENT": "Content",
+        "ROOM": "Room",
         "SPOKE": "Spoke",
         "ADMIN": "Admin",
         "LIST_EXHIBITION": "List Exhibition",
@@ -112,6 +114,12 @@
         "DELETE_EXHIBITION_ERROR": "Delete exhibition error",
         "CLOSE_EXHIBITION_ERROR": "Close exhibition error",
         "OPEN_EXHIBITION_ERROR": "Open exhibition error"
+    },
+    "content": {
+        "ADD_QUIZ": "Add Quiz",
+        "POPUP_CREATE_QUIZ__TITLE_LABEL": "Title",
+        "POPUP_CREATE_QUIZ__INTRODUCTION_LABEL": "Introduction",
+        "POPUP_CREATE_QUIZ__DESCRIPTION_LABEL": "Description"
     },
     "profile": {
         "SIGN_OUT": "Sign out",

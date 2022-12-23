@@ -82,6 +82,7 @@
     "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer",
     "ammo.js": "github:mozillareality/ammo.js#hubs/master",
     "animejs": "github:mozillareality/anime#hubs/master",
+    "antd": "^5.1.0",
     "async": "^3.2.3",
     "axios": "^0.26.1",
     "bootstrap": "^5.1.3",
