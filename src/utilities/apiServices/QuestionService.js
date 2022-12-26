@@ -27,6 +27,22 @@ class QuestionService {
       return res.data;
     });
   }
+
+  static chooseCorrectAnswer(id, answerId) {
+    return request
+      .post("/v1/auth/questions/" + id + "/choose-correct-answer", {
+        answerId: answerId
+      })
+      .then(res => {
+        return res.data;
+      });
+  }
+
+  static delete(id) {
+    return request.delete("/v1/auth/questions/" + id).then(res => {
+      return res.data;
+    });
+  }
 }
 
 export default QuestionService;

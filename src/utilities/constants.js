@@ -1,10 +1,10 @@
 const expireCookies = 7;
 
-// const API_ROOT = "http://localhost:7600";
-// const APP_ROOT = "https://hubs.local:8080";
+const API_ROOT = "http://localhost:7600";
+const APP_ROOT = "https://hubs.local:8080";
 
-const API_ROOT = "https://api.larchiveum.link";
-const APP_ROOT = "https://larchiveum.link";
+// const API_ROOT = "https://api.larchiveum.link";
+// const APP_ROOT = "https://larchiveum.link";
 
 const naverApp = {
   clientID: "QPIOm41T66AJMeNwzeBI",

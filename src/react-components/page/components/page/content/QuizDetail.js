@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 /* eslint-disable no-use-before-define */
@@ -6,9 +7,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { LoadingOutlined } from "@ant-design/icons";
-import { Layout, Menu, Col, Row, Button, Spin, Empty, Input } from "antd";
+import { Layout, Menu, Col, Row, Button, Spin, Empty, Input, Card } from "antd";
 import Question from "./Question";
 import QuizService from "../../../../../utilities/apiServices/QuizService";
+import QuestionService from "../../../../../utilities/apiServices/QuestionService";
+import async from "async";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -16,7 +19,9 @@ export default function(props) {
   const { t } = useTranslation();
   const { quizId, onBack } = props;
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaveQuizSubmiting, setIsSaveQuizSubmiting] = useState(false);
+  const [isAddQuestionSubmiting, setIsAddQuestionSubmiting] = useState(false);
+  const [questions, setQuestions] = useState([]);
   const quiz = useRef({});
 
   useEffect(
@@ -28,14 +33,36 @@ export default function(props) {
 
   function load(quizId) {
     setIsLoading(true);
-    QuizService.getOne(quizId)
-      .then(res => {
-        quiz.current = res.data;
+    async.parallel(
+      [
+        function(next) {
+          QuizService.getOne(quizId)
+            .then(res => {
+              return next(null, res.data);
+            })
+            .catch(error => {
+              return next(error);
+            });
+        },
+        function(next) {
+          QuestionService.getAll({
+            filter: JSON.stringify([{ key: "quizId", operator: "=", value: quizId }])
+          })
+            .then(res => {
+              return next(null, res.data.items);
+            })
+            .catch(error => {
+              return next(error);
+            });
+        }
+      ],
+      function(error, [quizData, questionsData]) {
+        quiz.current = quizData;
+        console.log(questions);
+        setQuestions(questionsData);
         setIsLoading(false);
-      })
-      .catch(error => {
-        setIsLoading(false);
-      });
+      }
+    );
   }
 
   function onInputChange(e) {
@@ -45,15 +72,33 @@ export default function(props) {
   }
 
   function handleSaveQuiz() {
-    setIsSaving(true);
+    setIsSaveQuizSubmiting(true);
     QuizService.update(quizId, quiz.current)
       .then(res => {
         quiz.current = res.data;
-        setIsSaving(false);
+        setIsSaveQuizSubmiting(false);
       })
       .catch(error => {
-        setIsSaving(false);
+        setIsSaveQuizSubmiting(false);
       });
+  }
+
+  function handleAddQuestion() {
+    setIsAddQuestionSubmiting(true);
+    QuestionService.create({
+      quizId: quizId
+    })
+      .then(res => {
+        setQuestions([...questions, res.data]);
+        setIsAddQuestionSubmiting(false);
+      })
+      .catch(error => {
+        setIsAddQuestionSubmiting(false);
+      });
+  }
+
+  function onDeleteQuestion(question) {
+    setQuestions(questions.filter(q => q.id != question.id));
   }
 
   return (
@@ -69,69 +114,92 @@ export default function(props) {
               <Button type="default" style={{ float: "left" }} onClick={onBack}>
                 {"Back"}
               </Button>
-              <Button type="primary" style={{ float: "right" }} onClick={handleSaveQuiz} loading={isSaving}>
-                {"Save"}
-              </Button>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24}>
+              <Card
+                title={"Quiz detail"}
+                extra={
+                  <Button
+                    type="primary"
+                    style={{ float: "right" }}
+                    onClick={handleSaveQuiz}
+                    loading={isSaveQuizSubmiting}
+                  >
+                    {"Save"}
+                  </Button>
+                }
+              >
+                <Row>
+                  <Col span={24}>
+                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Title"}</label>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <Input
+                      type="text"
+                      name="title"
+                      placeholder="Enter quiz title"
+                      defaultValue={quiz.current?.title}
+                      onChange={onInputChange}
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Introduction"}</label>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <Input
+                      type="text"
+                      name="introduction"
+                      placeholder="Enter quiz introduction"
+                      defaultValue={quiz.current?.introduction}
+                      onChange={onInputChange}
+                    />
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Description"}</label>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <Input
+                      type="text"
+                      name="description"
+                      placeholder="Enter quiz description"
+                      defaultValue={quiz.current?.description}
+                      onChange={onInputChange}
+                    />
+                  </Col>
+                </Row>
+              </Card>
             </Col>
           </Row>
           <Row style={{ marginTop: "5px" }}>
             <Col span={24}>
-              <Row>
-                <Col span={24}>
-                  <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Title"}</label>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <Input
-                    type="text"
-                    name="title"
-                    placeholder="Enter quiz title"
-                    defaultValue={quiz.current.title}
-                    onChange={onInputChange}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Introduction"}</label>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <Input
-                    type="text"
-                    name="introduction"
-                    placeholder="Enter quiz introduction"
-                    defaultValue={quiz.current.introduction}
-                    onChange={onInputChange}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Description"}</label>
-                </Col>
-              </Row>
-              <Row>
-                <Col span={24}>
-                  <Input
-                    type="text"
-                    name="description"
-                    placeholder="Enter quiz description"
-                    defaultValue={quiz.current.description}
-                    onChange={onInputChange}
-                  />
-                </Col>
-              </Row>
-              <div style={{ margin: "30px 0px" }}>
-                <Question />
-              </div>
-              <Row style={{ marginTop: "30px" }}>
-                <Col span={24}>
-                  <Button style={{ width: "100%" }}>{"+ Add question"} </Button>
-                </Col>
-              </Row>
+              <>
+                {questions?.map((question, i) => {
+                  return (
+                    <div key={question.id} style={{ margin: "30px 0px" }}>
+                      <Question index={i + 1} question={question} onDelete={onDeleteQuestion} />
+                    </div>
+                  );
+                })}
+              </>
+            </Col>
+          </Row>
+          <Row style={{ marginTop: "30px", marginBottom: "50px" }}>
+            <Col span={24}>
+              <Button onClick={handleAddQuestion} style={{ width: "100%" }} loading={isAddQuestionSubmiting}>
+                {"+ Add question"}
+              </Button>
             </Col>
           </Row>
         </>
