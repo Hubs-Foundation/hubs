@@ -27,6 +27,12 @@ class QuizService {
       return res.data;
     });
   }
+
+  static delete(id) {
+    return request.delete("/v1/auth/quizs/" + id).then(res => {
+      return res.data;
+    });
+  }
 }
 
 export default QuizService;

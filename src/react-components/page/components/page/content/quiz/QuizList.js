@@ -16,6 +16,7 @@ export default function(props) {
   const { t } = useTranslation();
   const { onOpenQuizDetail } = props;
   const [isOpenPopupCreate, setIsOpenPopupCreate] = useState(false);
+  const [deletingQuizId, setDeletingQuizId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [listQuiz, setListQuiz] = useState([]);
 
@@ -41,6 +42,18 @@ export default function(props) {
   function handleOpenPopupCreate() {
     console.log(isOpenPopupCreate);
     setIsOpenPopupCreate(true);
+  }
+
+  function handleDeleteQuiz(quizId) {
+    setDeletingQuizId(quizId);
+    QuizService.delete(quizId)
+      .then(quiz => {
+        setListQuiz(listQuiz.filter(q => q.id != quizId));
+        setDeletingQuizId(null);
+      })
+      .catch(error => {
+        setDeletingQuizId(null);
+      });
   }
 
   return (
@@ -104,6 +117,10 @@ export default function(props) {
                               danger
                               style={{ marginLeft: "10px" }}
                               icon={<DeleteOutlined />}
+                              loading={deletingQuizId == quiz.id}
+                              onClick={() => {
+                                handleDeleteQuiz(quiz.id);
+                              }}
                             >
                               {"Delete"}
                             </Button>
