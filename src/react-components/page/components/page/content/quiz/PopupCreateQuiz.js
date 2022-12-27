@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-debugger */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 /* eslint-disable no-use-before-define */
@@ -13,23 +15,32 @@ const { Header, Content, Footer, Sider } = Layout;
 
 export default function(props) {
   const { t } = useTranslation();
+  toast.configure();
   const { setVisiable, onComplete } = props;
   const [isSaving, setIsSaving] = useState(false);
-  const quiz = useRef({});
+  const [form] = Form.useForm();
 
   function onInputChange(e) {
     const { value, name } = e.target;
-    quiz.current[name] = value;
+    form.setFieldValue(name, value);
   }
 
   function handleSave() {
     setIsSaving(true);
-    QuizService.create(quiz.current)
-      .then(res => {
-        //const quizs = res.data;
-        setIsSaving(false);
-        setVisiable(false);
-        onComplete(quiz.current);
+    form
+      .validateFields()
+      .then(result => {
+        QuizService.create(form.getFieldsValue())
+          .then(res => {
+            setIsSaving(false);
+            setVisiable(false);
+            onComplete(res.data);
+          })
+          .catch(error => {
+            console.log(error);
+            toast.error("Create quiz error", { autoClose: 2000 });
+            setIsSaving(false);
+          });
       })
       .catch(error => {
         setIsSaving(false);
@@ -37,7 +48,7 @@ export default function(props) {
   }
 
   function handleClose() {
-    quiz.current = {};
+    form.resetFields();
     setVisiable(false);
   }
 
@@ -48,14 +59,29 @@ export default function(props) {
       centered
       open={true}
       width={700}
-      okText={t("Create")}
-      cancelText={t("Close")}
-      onOk={handleSave}
-      onCancel={handleClose}
       confirmLoading={isSaving}
+      footer={[
+        <Button key="close" form="form-create-quiz" type="default" htmlType="reset" onClick={handleClose}>
+          {"Close"}
+        </Button>,
+        <Button
+          key="save"
+          form="form-create-quiz"
+          type="primary"
+          htmlType="submit"
+          onClick={handleSave}
+          loading={isSaving}
+        >
+          {"Save"}
+        </Button>
+      ]}
     >
-      <Form labelCol={{ span: 6 }} wrapperCol={{ span: 18 }} layout="horizontal">
-        <Form.Item name="title" label={t("content.POPUP_CREATE_QUIZ__TITLE_LABEL")} rules={[{ required: true }]}>
+      <Form id="form-create-quiz" form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }} layout="horizontal">
+        <Form.Item
+          name="title"
+          label={t("content.POPUP_CREATE_QUIZ__TITLE_LABEL")}
+          rules={[{ required: true, message: "Title must be not empty" }]}
+        >
           <Input type="text" name="title" placeholder="Enter quiz title" onChange={onInputChange} />
         </Form.Item>
         <Form.Item name="introduction" label={t("content.POPUP_CREATE_QUIZ__INTRODUCTION_LABEL")}>

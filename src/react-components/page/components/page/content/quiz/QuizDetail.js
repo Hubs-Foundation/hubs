@@ -104,7 +104,16 @@ export default function(props) {
   return (
     <Content style={{ margin: "0 16px" }}>
       {isLoading ? (
-        <div style={{ height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div
+          style={{
+            height: "100%",
+            minHeight: "300px",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
           <Spin indicator={<LoadingOutlined style={{ fontSize: 30 }} spin />} />
         </div>
       ) : (

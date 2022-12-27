@@ -59,7 +59,16 @@ export default function(props) {
   return (
     <Content style={{ margin: "0 16px" }}>
       {isLoading ? (
-        <div style={{ height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div
+          style={{
+            height: "100%",
+            minHeight: "300px",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
           <Spin indicator={<LoadingOutlined style={{ fontSize: 30 }} spin />} />
         </div>
       ) : (
@@ -82,7 +91,7 @@ export default function(props) {
                       <Card key={quiz.id} style={{ marginBottom: "20px" }}>
                         <Row>
                           <Col span={18}>
-                            <Row style={{ height: "30px" }}>
+                            <Row style={{ height: "30px", fontWeight: "bold" }}>
                               <Col span={24}>{quiz.title}</Col>
                             </Row>
                             <Row>
