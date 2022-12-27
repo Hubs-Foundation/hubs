@@ -60,6 +60,7 @@ export default function(props) {
       open={true}
       width={700}
       confirmLoading={isSaving}
+      onCancel={handleClose}
       footer={[
         <Button key="close" form="form-create-quiz" type="default" htmlType="reset" onClick={handleClose}>
           {"Close"}
