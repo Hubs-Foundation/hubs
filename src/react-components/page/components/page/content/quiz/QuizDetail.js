@@ -6,11 +6,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { LoadingOutlined } from "@ant-design/icons";
+import { LoadingOutlined, LeftOutlined } from "@ant-design/icons";
 import { Layout, Menu, Col, Row, Button, Spin, Empty, Input, Card } from "antd";
 import Question from "./Question";
-import QuizService from "../../../../../utilities/apiServices/QuizService";
-import QuestionService from "../../../../../utilities/apiServices/QuestionService";
+import QuizService from "../../../../../../utilities/apiServices/QuizService";
+import QuestionService from "../../../../../../utilities/apiServices/QuestionService";
 import async from "async";
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -111,26 +111,20 @@ export default function(props) {
         <>
           <Row>
             <Col span={24} style={{ padding: "10px 0px" }}>
-              <Button type="default" style={{ float: "left" }} onClick={onBack}>
+              <Button
+                type="default"
+                className="flex-center"
+                style={{ float: "left" }}
+                icon={<LeftOutlined />}
+                onClick={onBack}
+              >
                 {"Back"}
               </Button>
             </Col>
           </Row>
           <Row>
             <Col span={24}>
-              <Card
-                title={"Quiz detail"}
-                extra={
-                  <Button
-                    type="primary"
-                    style={{ float: "right" }}
-                    onClick={handleSaveQuiz}
-                    loading={isSaveQuizSubmiting}
-                  >
-                    {"Save"}
-                  </Button>
-                }
-              >
+              <Card title={"Quiz detail"}>
                 <Row>
                   <Col span={24}>
                     <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Title"}</label>
@@ -144,6 +138,7 @@ export default function(props) {
                       placeholder="Enter quiz title"
                       defaultValue={quiz.current?.title}
                       onChange={onInputChange}
+                      onBlur={handleSaveQuiz}
                     />
                   </Col>
                 </Row>
@@ -160,6 +155,7 @@ export default function(props) {
                       placeholder="Enter quiz introduction"
                       defaultValue={quiz.current?.introduction}
                       onChange={onInputChange}
+                      onBlur={handleSaveQuiz}
                     />
                   </Col>
                 </Row>
@@ -176,6 +172,7 @@ export default function(props) {
                       placeholder="Enter quiz description"
                       defaultValue={quiz.current?.description}
                       onChange={onInputChange}
+                      onBlur={handleSaveQuiz}
                     />
                   </Col>
                 </Row>
@@ -197,7 +194,12 @@ export default function(props) {
           </Row>
           <Row style={{ marginTop: "30px", marginBottom: "50px" }}>
             <Col span={24}>
-              <Button onClick={handleAddQuestion} style={{ width: "100%" }} loading={isAddQuestionSubmiting}>
+              <Button
+                className="flex-center"
+                style={{ width: "100%" }}
+                loading={isAddQuestionSubmiting}
+                onClick={handleAddQuestion}
+              >
                 {"+ Add question"}
               </Button>
             </Col>

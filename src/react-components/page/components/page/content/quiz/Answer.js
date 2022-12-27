@@ -3,13 +3,12 @@
 /* eslint-disable react/display-name */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-unused-vars */
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { LoadingOutlined } from "@ant-design/icons";
+import { LoadingOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Layout, Menu, Col, Row, Button, Spin, Empty, Input, Select, Switch, Card } from "antd";
-import QuestionService from "../../../../../utilities/apiServices/QuestionService";
-import AnswerService from "../../../../../utilities/apiServices/AnswerService";
+import AnswerService from "../../../../../../utilities/apiServices/AnswerService";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -21,19 +20,26 @@ export default function(props) {
   const [isDeleteAnswerSubmiting, setIsDeleteAnswerSubmiting] = useState(false);
   const [answer, setAnswer] = useState(props.answer || {});
 
+  useLayoutEffect(
+    () => {
+      setAnswer(props.answer);
+    },
+    [props.answer]
+  );
+
   function onInputChange(e) {
     const { value, name } = e.target;
-    if (name == "isCorrectAnswer" && onChooseCorrectAnswer) {
+    setAnswer({
+      ...answer,
+      [name]: value
+    });
+
+    if (name == "isCorrectAnswer" && value && onChooseCorrectAnswer) {
       onChooseCorrectAnswer(answer);
-    } else {
-      setAnswer({
-        ...answer,
-        [name]: value
-      });
     }
   }
 
-  function handleSaveAnswer() {
+  function handleSaveAnswer(answer) {
     setIsSaveAnswerSubmiting(true);
     AnswerService.update(answer.id, answer)
       .then(res => {
@@ -64,14 +70,16 @@ export default function(props) {
   return (
     <>
       <Row gutter={16}>
-        <Col span={20}>
+        <Col span={19}>
           <Input
             type="text"
             name="text"
             placeholder="Enter your answer here"
             defaultValue={answer?.text}
             onChange={onInputChange}
-            onBlur={handleSaveAnswer}
+            onBlur={() => {
+              handleSaveAnswer(answer);
+            }}
           />
         </Col>
         <Col span={2} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -84,13 +92,20 @@ export default function(props) {
                   value: e
                 }
               });
+              handleSaveAnswer({
+                ...answer,
+                isCorrectAnswer: e
+              });
             }}
           />
         </Col>
-        <Col span={2}>
+        <Col span={3}>
           <Button
             danger
+            className="flex-center"
             loading={isDeleteAnswerSubmiting}
+            icon={<DeleteOutlined />}
+            style={{ float: "right" }}
             onClick={() => {
               handleDeleteAnswer(answer);
             }}

@@ -8,7 +8,6 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { Layout, Menu, Col, Row, Button, Spin, Empty } from "antd";
 import QuizList from "./QuizList";
 import QuizDetail from "./QuizDetail";
-import QuizService from "../../../../../utilities/apiServices/QuizService";
 
 const { Header, Content, Footer, Sider } = Layout;
 

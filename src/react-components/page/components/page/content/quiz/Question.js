@@ -5,10 +5,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { LoadingOutlined } from "@ant-design/icons";
+import { LoadingOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Layout, Menu, Col, Row, Button, Spin, Empty, Input, Select, Switch, Card } from "antd";
-import QuestionService from "../../../../../utilities/apiServices/QuestionService";
-import AnswerService from "../../../../../utilities/apiServices/AnswerService";
+import QuestionService from "../../../../../../utilities/apiServices/QuestionService";
+import AnswerService from "../../../../../../utilities/apiServices/AnswerService";
 import Answer from "./Answer";
 import async from "async";
 
@@ -63,11 +63,13 @@ export default function(props) {
           ...question,
           ...res.data
         });
-        setIsSaveQuestionSubmiting(false);
+
         // if only one answer and has more one selected answer -> no select any answer
-        if (!res.data.multiple) {
+        if (!res.data.multiple && question.answers.filter(a => a.isCorrectAnswer).length > 1) {
           handleChooseAnswer(null);
         }
+
+        setIsSaveQuestionSubmiting(false);
       })
       .catch(error => {
         setIsSaveQuestionSubmiting(false);
@@ -96,7 +98,7 @@ export default function(props) {
       .then(res => {
         setQuestion({
           ...question,
-          answers: [...question.answers, res.data]
+          answers: [...(question.answers || []), res.data]
         });
         setIsAddAnswerSubmiting(false);
       })
@@ -116,6 +118,18 @@ export default function(props) {
 
   function handleChooseAnswer(answer) {
     setIsLoading(true);
+
+    // change answer then call api (for fast change)
+    if (!question.multiple && question.answers.filter(a => a.isCorrectAnswer).length > 1) {
+      setQuestion({
+        ...question,
+        answers: question.answers.map(a => {
+          a.isCorrectAnswer = 0;
+          return a;
+        })
+      });
+    }
+
     QuestionService.chooseCorrectAnswer(question.id, answer?.id)
       .then(res => {
         setQuestion({
@@ -129,6 +143,8 @@ export default function(props) {
       });
   }
 
+  console.log("Question: ", question);
+
   return (
     <>
       <Row style={{ marginTop: "5px", position: "relative" }}>
@@ -139,12 +155,14 @@ export default function(props) {
               <>
                 <Button
                   type="primary"
+                  className="flex-center"
                   loading={isDeleteQuestionSubmiting}
                   style={{ float: "right", marginLeft: "20px" }}
+                  danger
+                  icon={<DeleteOutlined />}
                   onClick={() => {
                     handleDeleteQuestion(question.id);
                   }}
-                  danger
                 >
                   {"Delete"}
                 </Button>
@@ -191,14 +209,14 @@ export default function(props) {
             {question?.answers?.length > 0 && (
               <>
                 <Row gutter={16} style={{ marginTop: "50px", marginBottom: "20px" }}>
-                  <Col span={20}>
+                  <Col span={19}>
                     <span> {"Answers"} </span>
                   </Col>
                   <Col span={2} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <span> {"Is correct ?"} </span>
                   </Col>
                 </Row>
-                {question.answers?.map((answer, i) => {
+                {question?.answers?.map((answer, i) => {
                   return (
                     <div key={i} style={{ margin: "20px 0px" }}>
                       <Answer
@@ -231,7 +249,7 @@ export default function(props) {
               alignItems: "center",
               position: "absolute",
               top: "0px",
-              backgroundColor: "rgba(255,255,255, 0.3)"
+              backgroundColor: "rgba(255,255,255, 0.7)"
             }}
           >
             <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />

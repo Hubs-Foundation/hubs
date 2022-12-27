@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Layout, Menu, Col, Row, Button, Spin, Empty, Modal, Form, Input } from "antd";
-import QuizService from "../../../../../utilities/apiServices/QuizService";
+import QuizService from "../../../../../../utilities/apiServices/QuizService";
 
 const { Header, Content, Footer, Sider } = Layout;
 

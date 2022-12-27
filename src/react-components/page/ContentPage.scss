@@ -11,3 +11,18 @@
 .ant-menu-item:hover {
     border: 1px solid rgb(129, 129, 255);
 }
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ant-menu {
+    border-inline-end: none !important;
+}
+
+.ant-card {
+    background-color: #fbfbfb;
+    border-color: #e0e0e0;
+}

@@ -8,13 +8,13 @@ import "../../react-components/styles/global.scss";
 import "../../assets/larchiveum/manager.scss";
 import "../../assets/larchiveum/loading.scss";
 import "react-datetime/css/react-datetime.css";
-import QuizComponent from "./components/page/content/Quiz";
+import QuizComponent from "./components/page/content/quiz/Quiz";
 import "reactjs-popup/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from "react-i18next";
 import LayoutHeader from "./components/layout/Header";
-import { Breadcrumb, Layout, Menu, Col, Row, Button } from "antd";
+import { Breadcrumb, Layout, Menu, Col, Row, Button, Card } from "antd";
 import logo from "./../../assets/images/larchiveum_logo.png";
 import "./ContentPage.scss";
 
@@ -81,37 +81,39 @@ export function ContentPage() {
             </div>
             <div className="row_2">
               <Layout style={{ minHeight: "80vh", marginTop: "30px", background: "white" }}>
-                <Sider style={{ background: "white", border: "1px solid gray", borderRadius: "3px" }}>
-                  <Menu
-                    mode="inline"
-                    items={[
-                      {
-                        className: tab == "quiz" ? "selected" : "",
-                        key: "quiz",
-                        label: "Quiz",
-                        onClick: () => {
-                          switchTab("quiz");
+                <Sider style={{ background: "white", borderInlineEnd: "none" }}>
+                  <Card style={{ height: "100%" }} bodyStyle={{ padding: "10px" }}>
+                    <Menu
+                      mode="inline"
+                      items={[
+                        {
+                          className: tab == "quiz" ? "selected" : "",
+                          key: "quiz",
+                          label: "Quiz",
+                          onClick: () => {
+                            switchTab("quiz");
+                          }
+                        },
+                        {
+                          className: tab == "document" ? "selected" : "",
+                          key: "document",
+                          label: "Document",
+                          onClick: () => {
+                            switchTab("document");
+                          }
+                        },
+                        {
+                          className: tab == "map" ? "selected" : "",
+                          key: "map",
+                          label: "Map",
+                          onClick: () => {
+                            switchTab("map");
+                          }
                         }
-                      },
-                      {
-                        className: tab == "document" ? "selected" : "",
-                        key: "document",
-                        label: "Document",
-                        onClick: () => {
-                          switchTab("document");
-                        }
-                      },
-                      {
-                        className: tab == "map" ? "selected" : "",
-                        key: "map",
-                        label: "Map",
-                        onClick: () => {
-                          switchTab("map");
-                        }
-                      }
-                    ]}
-                    style={{ background: "white" }}
-                  />
+                      ]}
+                      style={{ background: "white" }}
+                    />
+                  </Card>
                 </Sider>
                 <Layout className="site-layout" style={{ marginLeft: "30px", background: "white" }}>
                   {tab == "quiz" && <QuizComponent />}
