@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 import ReactDOM from "react-dom";
 import registerTelemetry from "./telemetry";
@@ -9,6 +10,7 @@ import { HomePage } from "./react-components/page/HomePage";
 import { SigninPage } from "./react-components/page/SigninPage";
 import { SignupPage } from "./react-components/page/SignupPage";
 import { ContentPage } from "./react-components/page/ContentPage";
+import { ViewQuizPage } from "./react-components/page/ViewQuizPage";
 import { ManagerPage } from "./react-components/page/ManagerPage";
 import { ForgotPasswordPage } from "./react-components/page/ForgotPasswordPage";
 import { ResetPasswordPage } from "./react-components/page/ResetPasswordPage";
@@ -56,6 +58,9 @@ function Root() {
 
     case "callback-naver-oauth":
       return <CallbackNaverOAuthPage />;
+
+    case "view-quiz":
+      return <ViewQuizPage />;
 
     default:
       return <HomePage />;

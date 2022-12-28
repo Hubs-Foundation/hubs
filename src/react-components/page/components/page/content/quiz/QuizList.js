@@ -56,6 +56,10 @@ export default function(props) {
       });
   }
 
+  function handleGotoViewQuiz(quizId) {
+    window.open("/?page=view-quiz&quizId=" + quizId);
+  }
+
   return (
     <Content style={{ margin: "0 16px" }}>
       {isLoading ? (
@@ -106,6 +110,9 @@ export default function(props) {
                               className="flex-center"
                               style={{ marginLeft: "10px" }}
                               icon={<EyeOutlined />}
+                              onClick={() => {
+                                handleGotoViewQuiz(quiz.id);
+                              }}
                             >
                               {"Preview"}
                             </Button>

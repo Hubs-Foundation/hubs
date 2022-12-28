@@ -38,6 +38,16 @@ class QuestionService {
       });
   }
 
+  static submitAnswers(id, answerIds) {
+    return request
+      .post("/v1/auth/questions/" + id + "/submit-answers", {
+        answerId: answerIds
+      })
+      .then(res => {
+        return res.data;
+      });
+  }
+
   static delete(id) {
     return request.delete("/v1/auth/questions/" + id).then(res => {
       return res.data;
