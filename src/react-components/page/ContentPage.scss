@@ -26,3 +26,14 @@
     background-color: #fbfbfb;
     border-color: #e0e0e0;
 }
+
+.fixed-menu {
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    position: sticky !important;
+    height: 300px;
+    top: 20px;
+    bottom: auto;
+}

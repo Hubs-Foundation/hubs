@@ -17,6 +17,7 @@ const { Header, Content, Footer, Sider } = Layout;
 
 export default function(props) {
   const { t } = useTranslation();
+  const MAX_QUESTION = 10;
   const { quizId, onBack } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [isSaveQuizSubmiting, setIsSaveQuizSubmiting] = useState(false);
@@ -201,18 +202,20 @@ export default function(props) {
               </>
             </Col>
           </Row>
-          <Row style={{ marginTop: "30px", marginBottom: "50px" }}>
-            <Col span={24}>
-              <Button
-                className="flex-center"
-                style={{ width: "100%" }}
-                loading={isAddQuestionSubmiting}
-                onClick={handleAddQuestion}
-              >
-                {"+ Add question"}
-              </Button>
-            </Col>
-          </Row>
+          {questions.length < MAX_QUESTION && (
+            <Row style={{ marginTop: "30px", marginBottom: "50px" }}>
+              <Col span={24}>
+                <Button
+                  className="flex-center"
+                  style={{ width: "100%" }}
+                  loading={isAddQuestionSubmiting}
+                  onClick={handleAddQuestion}
+                >
+                  {"+ Add question"}
+                </Button>
+              </Col>
+            </Row>
+          )}
         </>
       )}
     </Content>

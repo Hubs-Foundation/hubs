@@ -81,8 +81,14 @@ export function ContentPage() {
             </div>
             <div className="row_2">
               <Layout style={{ minHeight: "80vh", marginTop: "30px", background: "white" }}>
-                <Sider style={{ background: "white", borderInlineEnd: "none" }}>
-                  <Card style={{ height: "100%" }} bodyStyle={{ padding: "10px" }}>
+                <Sider
+                  className="fixed-menu"
+                  style={{
+                    background: "white",
+                    borderInlineEnd: "none"
+                  }}
+                >
+                  <Card style={{ height: "80vh" }} bodyStyle={{ padding: "10px" }}>
                     <Menu
                       mode="inline"
                       items={[
