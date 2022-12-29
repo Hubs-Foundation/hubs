@@ -63,7 +63,7 @@ export default function(props) {
       onCancel={handleClose}
       footer={[
         <Button key="close" form="form-create-quiz" type="default" htmlType="reset" onClick={handleClose}>
-          {"Close"}
+          {t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__CLOSE_BUTTON_LABEL")}
         </Button>,
         <Button
           key="save"
@@ -73,23 +73,38 @@ export default function(props) {
           onClick={handleSave}
           loading={isSaving}
         >
-          {"Save"}
+          {t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__SAVE_BUTTON_LABEL")}
         </Button>
       ]}
     >
       <Form id="form-create-quiz" form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }} layout="horizontal">
         <Form.Item
           name="title"
-          label={t("content.POPUP_CREATE_QUIZ__TITLE_LABEL")}
-          rules={[{ required: true, message: "Title must be not empty" }]}
+          label={t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__TITLE_INPUT_LABEL")}
+          rules={[{ required: true, message: t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__TITLE_INPUT_WARNING_MESSAGE") }]}
         >
-          <Input type="text" name="title" placeholder="Enter quiz title" onChange={onInputChange} />
+          <Input
+            type="text"
+            name="title"
+            placeholder={t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__TITLE_INPUT_PLACEHOLDER")}
+            onChange={onInputChange}
+          />
         </Form.Item>
-        <Form.Item name="introduction" label={t("content.POPUP_CREATE_QUIZ__INTRODUCTION_LABEL")}>
-          <Input type="text" name="introduction" placeholder="Enter quiz introduction" onChange={onInputChange} />
+        <Form.Item name="introduction" label={t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__INTRODUCTION_INPUT_LABEL")}>
+          <Input
+            type="text"
+            name="introduction"
+            placeholder={t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__INTRODUCTION_INPUT_PLACEHOLDER")}
+            onChange={onInputChange}
+          />
         </Form.Item>
-        <Form.Item name="description" label={t("content.POPUP_CREATE_QUIZ__DESCRIPTION_LABEL")}>
-          <Input type="text" name="description" placeholder="Enter quiz description" onChange={onInputChange} />
+        <Form.Item name="description" label={t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__DESCRIPTION_INPUT_LABEL")}>
+          <Input
+            type="text"
+            name="description"
+            placeholder={t("content.QUIZ_TAB__POPUP_CREATE_QUIZ__DESCRIPTION_INPUT_PLACEHOLDER")}
+            onChange={onInputChange}
+          />
         </Form.Item>
       </Form>
     </Modal>

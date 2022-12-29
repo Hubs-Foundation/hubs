@@ -73,11 +73,8 @@ export function ContentPage() {
       return (
         <>
           <div className="manager-page">
-            <div className="row_1">
-              <a href="/" style={{ float: "left", height: "100%" }}>
-                <img src={logo} style={{ height: "100%" }} />
-              </a>
-              <LayoutHeader style={{ float: "right" }} />
+            <div className="row_1" style={{ position: "relative" }}>
+              <LayoutHeader style={{ width: "100%", height: "100%" }} />
             </div>
             <div className="row_2">
               <Layout style={{ minHeight: "80vh", marginTop: "30px", background: "white" }}>
@@ -95,7 +92,7 @@ export function ContentPage() {
                         {
                           className: tab == "quiz" ? "selected" : "",
                           key: "quiz",
-                          label: "Quiz",
+                          label: t("content.LEFT_MENU__QUIZ_LABEL"),
                           onClick: () => {
                             switchTab("quiz");
                           }
@@ -103,7 +100,7 @@ export function ContentPage() {
                         {
                           className: tab == "document" ? "selected" : "",
                           key: "document",
-                          label: "Document",
+                          label: t("content.LEFT_MENU__DOCUMENT_LABEL"),
                           onClick: () => {
                             switchTab("document");
                           }
@@ -111,7 +108,7 @@ export function ContentPage() {
                         {
                           className: tab == "map" ? "selected" : "",
                           key: "map",
-                          label: "Map",
+                          label: t("content.LEFT_MENU__DOCUMENT_LABEL"),
                           onClick: () => {
                             switchTab("map");
                           }

@@ -80,7 +80,7 @@ export default function(props) {
           <Row>
             <Col span={24} style={{ padding: "10px 0px" }}>
               <Button type="primary" style={{ float: "right" }} onClick={handleOpenPopupCreate}>
-                {" + Add Quiz"}
+                {"+ " + t("content.QUIZ_TAB__QUIZ_LIST__QUIZ_TAB__ADD_QUIZ_BUTTON_LABEL")}
               </Button>
             </Col>
           </Row>
@@ -100,7 +100,7 @@ export default function(props) {
                             </Row>
                             <Row>
                               <Col span={24} style={{ fontSize: "0.9em", color: "#aaaaaa" }}>
-                                {quiz.description || "Description"}
+                                {quiz.description}
                               </Col>
                             </Row>
                           </Col>
@@ -114,7 +114,7 @@ export default function(props) {
                                 handleGotoViewQuiz(quiz.id);
                               }}
                             >
-                              {"Preview"}
+                              {t("content.QUIZ_TAB__QUIZ_LIST__PREVIEW_BUTTON_LABEL")}
                             </Button>
                             <Button
                               type="primary"
@@ -125,7 +125,7 @@ export default function(props) {
                                 onOpenQuizDetail(quiz);
                               }}
                             >
-                              {"Detail"}
+                              {t("content.QUIZ_TAB__QUIZ_LIST__DETAIL_BUTTON_LABEL")}
                             </Button>
                             <Button
                               type="primary"
@@ -138,7 +138,7 @@ export default function(props) {
                                 handleDeleteQuiz(quiz.id);
                               }}
                             >
-                              {"Delete"}
+                              {t("content.QUIZ_TAB__QUIZ_LIST__DELETE_BUTTON_LABEL")}
                             </Button>
                           </Col>
                         </Row>

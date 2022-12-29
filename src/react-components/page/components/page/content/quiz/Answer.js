@@ -74,7 +74,7 @@ export default function(props) {
           <Input
             type="text"
             name="text"
-            placeholder="Enter your answer here"
+            placeholder={t("content.QUIZ_TAB__ANSWER__TEXT_INPUT_PLACEHOLDER")}
             defaultValue={answer?.text}
             onChange={onInputChange}
             onBlur={() => {
@@ -110,7 +110,7 @@ export default function(props) {
               handleDeleteAnswer(answer);
             }}
           >
-            {"Delete"}
+            {t("content.QUIZ_TAB__ANSWER__DELETE_INPUT_LABEL")}
           </Button>
         </Col>
       </Row>

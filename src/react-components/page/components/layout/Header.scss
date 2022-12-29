@@ -1,0 +1,15 @@
+.page-btn {
+    background-color: transparent;
+    font-weight: bold;
+    color: rgb(63, 63, 255);
+}
+
+.page-btn.active {
+    background-color: rgb(63, 63, 255);
+    color: #ffffff;
+}
+
+.page-btn.active:hover {
+    box-shadow: 0px 0px 0px 3px rgba(0, 144, 237, 0.4);
+    color: #ffffff;
+}

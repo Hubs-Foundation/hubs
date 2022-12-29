@@ -128,16 +128,18 @@ export default function(props) {
                 icon={<LeftOutlined />}
                 onClick={onBack}
               >
-                {"Back"}
+                {t("content.QUIZ_TAB__QUIZ_DETAIL__BACK_BUTTON_LABEL")}
               </Button>
             </Col>
           </Row>
           <Row>
             <Col span={24}>
-              <Card title={"Quiz detail"}>
+              <Card title={t("content.QUIZ_TAB__QUIZ_DETAIL__QUIZ_DETAIL__QUIZ_DETAIL_LABEL")}>
                 <Row>
                   <Col span={24}>
-                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Title"}</label>
+                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>
+                      {t("content.QUIZ_TAB__QUIZ_DETAIL__QUIZ_DETAIL__QUIZ_TITLE_INPUT_LABEL")}
+                    </label>
                   </Col>
                 </Row>
                 <Row>
@@ -145,7 +147,7 @@ export default function(props) {
                     <Input
                       type="text"
                       name="title"
-                      placeholder="Enter quiz title"
+                      placeholder={t("content.QUIZ_TAB__QUIZ_DETAIL__QUIZ_TITLE_INPUT_PLACEHOLDER")}
                       defaultValue={quiz.current?.title}
                       onChange={onInputChange}
                       onBlur={handleSaveQuiz}
@@ -154,7 +156,9 @@ export default function(props) {
                 </Row>
                 <Row>
                   <Col span={24}>
-                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Introduction"}</label>
+                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>
+                      {t("content.QUIZ_TAB__QUIZ_DETAIL__QUIZ_INTRODUCTION_INPUT_LABEL")}
+                    </label>
                   </Col>
                 </Row>
                 <Row>
@@ -162,7 +166,7 @@ export default function(props) {
                     <Input
                       type="text"
                       name="introduction"
-                      placeholder="Enter quiz introduction"
+                      placeholder={t("content.QUIZ_TAB__QUIZ_DETAIL__QUIZ_INTRODUCTION_INPUT_PLACEHOLDER")}
                       defaultValue={quiz.current?.introduction}
                       onChange={onInputChange}
                       onBlur={handleSaveQuiz}
@@ -171,7 +175,9 @@ export default function(props) {
                 </Row>
                 <Row>
                   <Col span={24}>
-                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>{"Description"}</label>
+                    <label style={{ fontSize: "14px", margin: "10px 0px" }}>
+                      {t("content.QUIZ_TAB__QUIZ_DETAIL__QUIZ_DESCRIPTION_INPUT_LABEL")}
+                    </label>
                   </Col>
                 </Row>
                 <Row>
@@ -179,7 +185,7 @@ export default function(props) {
                     <Input
                       type="text"
                       name="description"
-                      placeholder="Enter quiz description"
+                      placeholder={t("content.QUIZ_TAB__QUIZ_DETAIL__QUIZ_DESCRIPTION_INPUT_PLACEHOLDER")}
                       defaultValue={quiz.current?.description}
                       onChange={onInputChange}
                       onBlur={handleSaveQuiz}
@@ -211,7 +217,7 @@ export default function(props) {
                   loading={isAddQuestionSubmiting}
                   onClick={handleAddQuestion}
                 >
-                  {"+ Add question"}
+                  {"+ " + t("content.QUIZ_TAB__QUIZ_DETAIL__ADD_QUESTION_BUTTON_LABEL")}
                 </Button>
               </Col>
             </Row>

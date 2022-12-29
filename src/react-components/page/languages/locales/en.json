@@ -1,4 +1,10 @@
 {
+    "_header": {
+        "TAB_CONTENT_LABEL": "Content",
+        "TAB_ROOM_LABEL": "Room",
+        "TAB_SPOKE_LABEL": "Spoke",
+        "TAB_ADMIN_LABEL": "Admin"
+    },
     "home": {
         "SIGN_IN": "Sign in",
         "SIGN_UP": "Sign up",
@@ -116,10 +122,43 @@
         "OPEN_EXHIBITION_ERROR": "Open exhibition error"
     },
     "content": {
-        "ADD_QUIZ": "Add Quiz",
-        "POPUP_CREATE_QUIZ__TITLE_LABEL": "Title",
-        "POPUP_CREATE_QUIZ__INTRODUCTION_LABEL": "Introduction",
-        "POPUP_CREATE_QUIZ__DESCRIPTION_LABEL": "Description"
+        "LEFT_MENU__QUIZ_LABEL": "Quiz",
+        "LEFT_MENU__DOCUMENT_LABEL": "Document",
+        "LEFT_MENU__MAP_LABEL": "MAP",
+        "QUIZ_TAB__ADD_QUIZ": "Add Quiz",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__POPUP_NAME_LABEL": "Create new quiz",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__TITLE_INPUT_LABEL": "Title",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__TITLE_INPUT_PLACEHOLDER": "Enter quiz title",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__TITLE_INPUT_WARNING_MESSAGE": "Title must be not empty",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__INTRODUCTION_INPUT_LABEL": "Introduction",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__INTRODUCTION_INPUT_PLACEHOLDER": "Enter quiz introduction",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__DESCRIPTION_INPUT_LABEL": "Description",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__DESCRIPTION_INPUT_PLACEHOLDER": "Enter quiz description",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__CLOSE_BUTTON_LABEL": "Close",
+        "QUIZ_TAB__POPUP_CREATE_QUIZ__SAVE_BUTTON_LABEL": "Save",
+        "QUIZ_TAB__QUIZ_LIST__QUIZ_TAB__ADD_QUIZ_BUTTON_LABEL": "Add quiz",
+        "QUIZ_TAB__QUIZ_LIST__PREVIEW_BUTTON_LABEL": "Preview",
+        "QUIZ_TAB__QUIZ_LIST__DETAIL_BUTTON_LABEL": "Detail",
+        "QUIZ_TAB__QUIZ_LIST__DELETE_BUTTON_LABEL": "Delete",
+        "QUIZ_TAB__QUIZ_DETAIL__BACK_BUTTON_LABEL": "Back",
+        "QUIZ_TAB__QUIZ_DETAIL__QUIZ_DETAIL__QUIZ_DETAIL_LABEL": "Quiz detail",
+        "QUIZ_TAB__QUIZ_DETAIL__QUIZ_DETAIL__QUIZ_TITLE_INPUT_LABEL": "Title",
+        "QUIZ_TAB__QUIZ_DETAIL__QUIZ_TITLE_INPUT_PLACEHOLDER": "Enter your quiz title",
+        "QUIZ_TAB__QUIZ_DETAIL__QUIZ_INTRODUCTION_INPUT_LABEL": "Introduction",
+        "QUIZ_TAB__QUIZ_DETAIL__QUIZ_INTRODUCTION_INPUT_PLACEHOLDER": "Enter your quiz introduction",
+        "QUIZ_TAB__QUIZ_DETAIL__QUIZ_DESCRIPTION_INPUT_LABEL": "Desscription",
+        "QUIZ_TAB__QUIZ_DETAIL__QUIZ_DESCRIPTION_INPUT_PLACEHOLDER": "Enter your quiz desscription",
+        "QUIZ_TAB__QUIZ_DETAIL__ADD_QUESTION_BUTTON_LABEL": "Add question",
+        "QUIZ_TAB__QUESTION__NAME_LABEL": "Question",
+        "QUIZ_TAB__QUESTION__DELETE_BUTTON_LABEL": "Delete",
+        "QUIZ_TAB__QUESTION__TEXT_INPUT_PLACEHOLDER": "Enter your question",
+        "QUIZ_TAB__QUESTION__MULTIPLE_SELECT__OPTION_ONE_LABEL": "These is one correct answer",
+        "QUIZ_TAB__QUESTION__MULTIPLE_SELECT__OPTION_MULTIPLE_LABEL": "These are possibty more correct answers",
+        "QUIZ_TAB__QUESTION__ANSWERS_LABEL": "Answers",
+        "QUIZ_TAB__QUESTION__IS_CORRECT_LABEL": "Is correct ?",
+        "QUIZ_TAB__QUESTION__ADD_ANSWER_BUTTON_LABEL": "Add answer",
+        "QUIZ_TAB__ANSWER__TEXT_INPUT_PLACEHOLDER": "Enter your answer",
+        "QUIZ_TAB__ANSWER__DELETE_INPUT_LABEL": "Delete"
     },
     "profile": {
         "SIGN_OUT": "Sign out",

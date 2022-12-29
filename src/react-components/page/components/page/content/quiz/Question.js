@@ -150,7 +150,7 @@ export default function(props) {
       <Row style={{ marginTop: "5px", position: "relative" }}>
         <Col span={24}>
           <Card
-            title={"Question #" + index}
+            title={t("content.QUIZ_TAB__QUESTION__NAME_LABEL") + " #" + index}
             extra={
               <>
                 <Button
@@ -164,7 +164,7 @@ export default function(props) {
                     handleDeleteQuestion(question.id);
                   }}
                 >
-                  {"Delete"}
+                  {t("content.QUIZ_TAB__QUESTION__DELETE_BUTTON_LABEL")}
                 </Button>
               </>
             }
@@ -174,7 +174,7 @@ export default function(props) {
                 <Input
                   type="text"
                   name="text"
-                  placeholder="Enter your question here"
+                  placeholder={t("content.QUIZ_TAB__QUESTION__TEXT_INPUT_PLACEHOLDER")}
                   defaultValue={question?.text}
                   onChange={onInputChange}
                   onBlur={() => {
@@ -196,11 +196,11 @@ export default function(props) {
                   options={[
                     {
                       value: 0,
-                      label: "There is one correct answer"
+                      label: t("content.QUIZ_TAB__QUESTION__MULTIPLE_SELECT__OPTION_ONE_LABEL")
                     },
                     {
                       value: 1,
-                      label: "There are possibly more correct answers"
+                      label: t("content.QUIZ_TAB__QUESTION__MULTIPLE_SELECT__OPTION_MULTIPLE_LABEL")
                     }
                   ]}
                 />
@@ -210,10 +210,10 @@ export default function(props) {
               <>
                 <Row gutter={16} style={{ marginTop: "50px", marginBottom: "20px" }}>
                   <Col span={19}>
-                    <span> {"Answers"} </span>
+                    <span> {t("content.QUIZ_TAB__QUESTION__ANSWERS_LABEL")} </span>
                   </Col>
                   <Col span={2} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <span> {"Is correct ?"} </span>
+                    <span> {t("content.QUIZ_TAB__QUESTION__IS_CORRECT_LABEL")} </span>
                   </Col>
                 </Row>
                 {question?.answers?.map((answer, i) => {
@@ -233,7 +233,7 @@ export default function(props) {
             <Row gutter={16} style={{ marginTop: "50px", marginBottom: "20px" }}>
               <Col span={24} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                 <Button onClick={handleAddAnswer} loading={isAddAnswerSubmiting}>
-                  {"+ Add Answer"}
+                  {"+ " + t("content.QUIZ_TAB__QUESTION__ADD_ANSWER_BUTTON_LABEL")}
                 </Button>
               </Col>
             </Row>

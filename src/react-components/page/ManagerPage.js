@@ -24,6 +24,7 @@ import defaultImage from "../../assets/larchiveum/default-image.png";
 import defaultModel from "../../assets/larchiveum/model-default.png";
 import defaultImage1 from "../../assets/larchiveum/siri.gif";
 import Pagination from "../../react-components/pagination/pagination";
+import LayoutHeader from "../../react-components/page/components/layout/Header";
 import { APP_ROOT } from "../../utilities/constants";
 import {
   FaUserFriends,
@@ -1696,12 +1697,8 @@ function ManagerHome() {
           )}
 
           <div className="manager-page">
-            <div className="row_1">
-              <a href="/" style={{ float: "left", height: "100%" }}>
-                <img src={logo} style={{ height: "100%" }} />
-              </a>
-              {/* <img src={LogoCompany}/> */}
-              <IAuth style={{ float: "right" }} />
+            <div className="row_1" style={{ position: "relative" }}>
+              <LayoutHeader style={{ width: "100%", height: "100%" }} />
             </div>
             <div className="row_2">
               {renderTabs()}
