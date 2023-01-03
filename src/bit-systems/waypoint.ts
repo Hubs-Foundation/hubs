@@ -5,7 +5,6 @@ import {
   HoveredRemoteLeft,
   HoveredRemoteRight,
   Interacted,
-  Networked,
   NetworkedWaypoint,
   Owned,
   SceneRoot,
