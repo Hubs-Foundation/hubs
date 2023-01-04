@@ -9,6 +9,7 @@ set -e
 ### preps
 org="biome-sh";repo="biome"
 ver=$(curl -s https://api.github.com/repos/$org/$repo/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3)}')
+if [ -z $ver ]; then ver='v1.6.544'; fi
 dl="https://github.com/$org/$repo/releases/download/$ver/bio-${ver#"v"}-x86_64-linux.tar.gz"
 echo "[info] getting bio from: $dl" && curl -L -o bio.gz $dl && tar -xf bio.gz 
 cp ./bio /usr/bin/bio && bio --version
