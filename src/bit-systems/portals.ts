@@ -1,35 +1,46 @@
-//@ts-nocheck
-
-import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeEntity } from "bitecs";
-import { Box3, MathUtils, Scene, Vector3 } from "three";
+import { defineQuery, enterQuery, exitQuery, removeEntity } from "bitecs";
+import {
+  Box3,
+  MathUtils,
+  Scene,
+  ShaderMaterial,
+  Vector3,
+  Matrix4,
+  Quaternion,
+  Object3D,
+  Camera,
+  Mesh,
+  Box3Helper,
+  Color,
+  PerspectiveCamera,
+  WebGLRenderTarget
+} from "three";
 import { degToRad } from "three/src/math/MathUtils";
 import { HubsWorld } from "../app";
 import { Portal } from "../bit-components";
 import { Layers } from "../camera-layers";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import qsTruthy from "../utils/qs_truthy";
-import noiseSrc from "../assets/images/portal_noise.png";
-import { isHubsRoomUrl, isLocalHubsUrl } from "../utils/media-url-utils";
 import { changeHub } from "../change-hub";
-import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
+import { AScene } from "aframe";
 
 const helpers = new Map();
 const AABBS = new Map();
 const renderTargets = new Map();
 const cameras = new Map();
 
-const offset = new THREE.Vector3();
-const bounds = new THREE.Vector3();
-const listenerPosition = new THREE.Vector3();
-const tmpMat = new THREE.Matrix4();
-const targetMat = new THREE.Matrix4().identity();
-const tmpQuat = new THREE.Quaternion();
-const avatarPos = new THREE.Vector3();
-const portalPos = new THREE.Vector3();
-const yUp = new THREE.Vector3(0, 1, 0);
-const objWorldDir = new THREE.Vector3();
+const offset = new Vector3();
+const bounds = new Vector3();
+const listenerPosition = new Vector3();
+const tmpMat = new Matrix4();
+const targetMat = new Matrix4().identity();
+const tmpQuat = new Quaternion();
+const avatarPos = new Vector3();
+const portalPos = new Vector3();
+const yUp = new Vector3(0, 1, 0);
+const objWorldDir = new Vector3();
 
-const TURN = new THREE.Matrix4().makeRotationY(degToRad(180));
+const TURN = new Matrix4().makeRotationY(degToRad(180));
 
 const portalsQuery = defineQuery([Portal]);
 const portalsEnterQuery = enterQuery(portalsQuery);
@@ -38,13 +49,6 @@ const portalsExitQuery = exitQuery(portalsQuery);
 const DEBUG = qsTruthy("debugPortals");
 export const PORTAL_RENDER_WIDTH = 1024;
 export const PORTAL_RENDER_HEIGHT = 1024;
-
-const loader = new THREE.TextureLoader();
-const noiseTexture = loader.load(noiseSrc);
-noiseTexture.minFilter = THREE.NearestFilter;
-noiseTexture.magFilter = THREE.NearestFilter;
-noiseTexture.wrapS = THREE.RepeatWrapping;
-noiseTexture.wrapT = THREE.RepeatWrapping;
 
 let running = false;
 export const startPortalSystem = () => {
@@ -56,10 +60,10 @@ export const stopPortalSystem = () => {
 
 const hubsRoomRegex = /(https?:\/\/)?[^\/]+\/hub.html\?hub_id=(?<id>[a-zA-Z0-9]{7})(?:.*)/;
 
-const screenPos = new THREE.Vector3();
-function toScreenPosition(obj, camera) {
-  var widthHalf = 0.5 * APP.scene.renderer.domElement.width;
-  var heightHalf = 0.5 * APP.scene.renderer.domElement.height;
+const screenPos = new Vector3();
+function toScreenPosition(obj: Object3D, camera: Camera) {
+  var widthHalf = 0.5 * APP.scene?.renderer.domElement.width!;
+  var heightHalf = 0.5 * APP.scene?.renderer.domElement.height!;
 
   obj.updateMatrixWorld();
   screenPos.setFromMatrixPosition(obj.matrixWorld);
@@ -74,28 +78,21 @@ function toScreenPosition(obj, camera) {
   };
 }
 
-const remotePortal = async src => {
-  let hubId = src.match(hubsRoomRegex)?.groups.id;
+const remotePortal = async (src: string) => {
+  let hubId = src.match(hubsRoomRegex)?.groups?.id;
   if (hubId) {
     const url = new URL(src);
-    if (url.hash && window.APP.hub.hub_id === hubId) {
-      // move to waypoint w/o writing to history
-      window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
-    } else if (APP.store.state.preferences.fastRoomSwitching) {
-      const waypoint = url.hash && url.hash.substring(1);
-      // move to new room without page load or entry flow
-      changeHub(hubId, true, waypoint);
-    } else {
-      await handleExitTo2DInterstitial(false, () => {}, true);
-      location.href = src;
-    }
+    const waypoint = url.hash && url.hash.substring(1);
+    // move to new room without page load or entry flow
+    changeHub(hubId, true, waypoint as any);
   }
 };
 
-function updateRenderTarget(world, portals, source, target) {
-  const obj = <THREE.Mesh>world.eid2obj.get(source)!;
-  obj.material.uniforms.iTime.value = world.time.elapsed / 1000;
-  obj.material.uniformsNeedUpdate = true;
+function updateRenderTarget(world: HubsWorld, portals: number[], source: number, target: number) {
+  const obj = <Mesh>world.eid2obj.get(source)!;
+  const shader = obj.material as ShaderMaterial;
+  shader.uniforms.iTime.value = world.time.elapsed / 1000;
+  shader.uniformsNeedUpdate = true;
 
   const isLocal = Portal.local[source];
   if (!isLocal) return;
@@ -110,7 +107,7 @@ function updateRenderTarget(world, portals, source, target) {
   // Namely to capture what camera was rendering. We don't actually use that in any of our tocks.
   // Also tock can likely go away as a concept since we can just direclty order things after render in raf if we want to.
   const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
-  delete sceneEl.object3D.onAfterRender;
+  sceneEl.object3D.onAfterRender = () => {};
 
   // TODO this assumption is now not true since we are not running after render. We should probably just permentently turn of autoUpdate and run matrix updates at a point we wnat to.
   // The entire scene graph matrices should already be updated
@@ -128,14 +125,14 @@ function updateRenderTarget(world, portals, source, target) {
   portals.forEach(p => {
     if (p === target) {
       const obj = world.eid2obj.get(p);
-      obj.visible = false;
+      if (obj) obj.visible = false;
     }
   });
   renderer.render(sceneEl.object3D, cameras.get(target));
   portals.forEach(p => {
     if (p === target) {
       const obj = world.eid2obj.get(p);
-      obj.visible = true;
+      if (obj) obj.visible = true;
     }
   });
   renderer.setRenderTarget(tmpRenderTarget);
@@ -150,53 +147,49 @@ export function portalsSystem(world: HubsWorld, scene: Scene, characterControlle
     const AABB = new Box3();
     AABBS.set(portal, AABB);
     if (DEBUG) {
-      const helper = new THREE.Box3Helper(AABB, new THREE.Color(0xffff00));
+      const helper = new Box3Helper(AABB, new Color(0xffff00));
       helpers.set(portal, helper);
       scene.add(helper);
     }
 
-    Portal.wasInside[portal] = true;
+    Portal.wasInside[portal] = 1;
 
     // Add cameras and render targets
-    const obj = <THREE.Mesh>world.eid2obj.get(portal)!;
+    const obj = <Mesh>world.eid2obj.get(portal)!;
 
-    const camera = new THREE.PerspectiveCamera(80, PORTAL_RENDER_WIDTH / PORTAL_RENDER_HEIGHT, 0.1, 1000);
+    const camera = new PerspectiveCamera(80, PORTAL_RENDER_WIDTH / PORTAL_RENDER_HEIGHT, 0.1, 1000);
     camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
     camera.layers.enable(Layers.CAMERA_LAYER_VIDEO_TEXTURE_TARGET);
     camera.matrixAutoUpdate = true;
-    //camera.translateZ(1);
     obj.add(camera);
     cameras.set(portal, camera);
 
-    const renderTarget = new THREE.WebGLRenderTarget(PORTAL_RENDER_WIDTH, PORTAL_RENDER_HEIGHT, {
+    const shaderMat = obj.material as ShaderMaterial;
+    const renderTarget = new WebGLRenderTarget(PORTAL_RENDER_WIDTH, PORTAL_RENDER_HEIGHT, {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
       encoding: THREE.sRGBEncoding
     });
-    renderTarget.lastUpdated = 0;
-    renderTarget.needsUpdate = true;
+    shaderMat.needsUpdate = true;
 
     // Only update the renderTarget when the screens are in view
     function setRenderTargetDirty() {
-      renderTarget.needsUpdate = true;
+      shaderMat.needsUpdate = true;
     }
 
     const isLocal = Portal.local[portal];
-    const image = Portal.image[portal];
 
-    if (isLocal) obj.material.uniforms.iChannel1.value = renderTarget.texture;
-    obj.material.uniforms.iChannel0.value = noiseTexture;
-    obj.material.uniforms.iResolution.value.set(PORTAL_RENDER_WIDTH, PORTAL_RENDER_HEIGHT, 1);
-    obj.material.uniformsNeedUpdate = true;
-    obj.material.onBeforeRender = setRenderTargetDirty;
+    if (isLocal) shaderMat.uniforms.iChannel0.value = renderTarget.texture;
+    shaderMat.uniforms.iResolution.value.set(PORTAL_RENDER_WIDTH, PORTAL_RENDER_HEIGHT, 1);
+    shaderMat.uniformsNeedUpdate = true;
+    obj.onBeforeRender = setRenderTargetDirty;
 
     renderTargets.set(portal, renderTarget);
   });
 
   portalsExitQuery(world).forEach(portal => {
     removeEntity(world, portal);
-    const helper = helpers.get(portal);
     helpers.delete(portal);
     AABBS.delete(portal);
 
@@ -207,7 +200,9 @@ export function portalsSystem(world: HubsWorld, scene: Scene, characterControlle
     cameras.delete(portal);
   });
 
-  if (!document.querySelector("a-scene").is("entered") || !running) return;
+  const aScene: AScene = document.querySelector("a-scene")! as AScene;
+  const updateState = !aScene.is("entered") || !running;
+
   const portals = portalsQuery(world);
   portals.forEach(portal => {
     const obj = world.eid2obj.get(portal)!;
@@ -236,48 +231,48 @@ export function portalsSystem(world: HubsWorld, scene: Scene, characterControlle
       return otherPortal !== portal && Portal.uuid[otherPortal] === target;
     })!;
 
+    updateRenderTarget(world, portals, portal, targetPortal);
+    if (updateState) return;
+
+    const avatarPOV = characterController?.avatarPOV as any;
     if (isLocal) {
       const targetObj = world.eid2obj.get(targetPortal);
 
       obj.getWorldPosition(portalPos).setY(0);
-      characterController.avatarPOV.object3D.getWorldPosition(avatarPos).setY(0);
+      avatarPOV.object3D.getWorldPosition(avatarPos).setY(0);
       const lookAtDir = portalPos.sub(avatarPos);
       obj.getWorldDirection(objWorldDir);
 
-      let angle = Math.acos(lookAtDir.normalize().dot(objWorldDir));
+      let angle = -Math.acos(lookAtDir.normalize().dot(objWorldDir));
       const cross = lookAtDir.cross(objWorldDir);
       if (yUp.dot(cross) < 0) {
         angle = -angle;
       }
       const targetCamera = cameras.get(targetPortal);
-      targetCamera.rotation.y = angle * 0.25;
-
-      updateRenderTarget(world, portals, portal, targetPortal);
+      targetCamera.rotation.y = angle * 0.18;
 
       if (targetObj && execute) {
         targetObj.updateMatrixWorld(true);
         tmpMat.makeTranslation(0, 0, bounds.z * 1.1);
         targetMat.copy(targetObj.matrixWorld).multiply(TURN).multiply(tmpMat);
-        tmpQuat.copy(characterController.avatarPOV.object3D.quaternion);
+        tmpQuat.copy(avatarPOV.object3D.quaternion);
         characterController.travelByWaypoint(targetMat, true, false);
-        characterController.avatarPOV.object3D.quaternion.copy(tmpQuat);
-        characterController.avatarPOV.object3D.updateMatrices();
+        avatarPOV.object3D.quaternion.copy(tmpQuat);
+        avatarPOV.object3D.updateMatrices();
       }
     } else {
-      const portal2DPos = toScreenPosition(obj, APP.scene.camera);
+      const portal2DPos = toScreenPosition(obj, APP.scene!.camera);
       APP.transition.setPos(portal2DPos.x, portal2DPos.y);
 
-      updateRenderTarget(world, portals, portal, targetPortal);
-
       if (execute) {
-        remotePortal(APP.getString(target));
+        remotePortal(APP.getString(target) as string);
       } else {
         obj.getWorldPosition(portalPos);
-        characterController.avatarPOV.object3D.getWorldPosition(avatarPos);
+        avatarPOV.object3D.getWorldPosition(avatarPos);
         let distance = avatarPos.distanceTo(portalPos) - bounds.z / 2;
         if (distance <= 1.1) {
           distance = MathUtils.clamp(distance, 0, 1);
-          APP.transition.setTransition(1 - distance);
+          APP.transition.setTransitionStep(1 - distance);
         }
       }
     }

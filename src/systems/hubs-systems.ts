@@ -55,7 +55,6 @@ import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
 import type { HubsSystems } from "aframe";
 import { Camera, Scene, WebGLRenderer } from "three";
 import { HubsWorld } from "../app";
-import { EffectComposer } from "postprocessing";
 import { sceneLoadingSystem } from "../bit-systems/scene-loading";
 import { networkDebugSystem } from "../bit-systems/network-debug";
 import { portalsSystem } from "../bit-systems/portals";
@@ -260,8 +259,8 @@ export function mainTick(
   if (APP.fx.composer) {
     APP.fx.composer.render();
   } else {
+    // TODO Create a render pass for this to be able to run using the effects composer.
     transition.render(dt / 1000);
-    ///renderer.render(scene, camera);
   }
 
   // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)

@@ -101,6 +101,8 @@ declare module "aframe" {
       interaction: InteractionSystem;
       nav: NavSystem;
     };
+    renderer: THREE.WebGLRenderer;
+    camera: THREE.Camera;
     emit(string, any): void;
     addState(string): void;
     is(string): boolean;

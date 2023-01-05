@@ -257,6 +257,7 @@ import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { startPortalSystem, stopPortalSystem } from "./bit-systems/portals";
+import { SceneId } from "./utils/transition";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -476,7 +477,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
           () => {
             setTimeout(() => {
               startPortalSystem();
-              APP.transition.start(0);
+              APP.transition.start(SceneId.CURRENT);
             }, 2000);
 
             environmentEl.removeEventListener("model-error", sceneErrorHandler);
@@ -491,11 +492,6 @@ export async function updateEnvironmentForHub(hub, entryManager) {
             if (sceneEl.is("entered")) {
               waypointSystem.moveToSpawnPoint();
             }
-
-            // const fader = document.getElementById("viewing-camera").components["fader"];
-
-            // // Add a slight delay before de-in to reduce hitching.
-            // setTimeout(() => fader.fadeIn(), 2000);
           },
           { once: true }
         );
