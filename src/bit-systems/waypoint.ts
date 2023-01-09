@@ -5,6 +5,7 @@ import {
   HoveredRemoteLeft,
   HoveredRemoteRight,
   Interacted,
+  Networked,
   NetworkedWaypoint,
   Owned,
   SceneRoot,
@@ -72,10 +73,10 @@ function occupiableSpawnPoints(world: HubsWorld) {
 
 function* tryOccupyAndSpawn(world: HubsWorld, characterController: CharacterControllerSystem, spawnPoint: EntityID) {
   moveToWaypoint(world, spawnPoint, characterController, true);
-  takeOwnershipWithTime(world, spawnPoint, 0);
+  takeOwnershipWithTime(world, spawnPoint, Networked.timestamp[spawnPoint] + 1);
   occupyWaypoint(world, spawnPoint);
   // TODO: We could check if we lost ownership, and not wait as long "lostOwnershipWithTimeout"
-  yield sleep(4000);
+  yield sleep(2000);
   if (entityExists(world, spawnPoint) && hasComponent(world, Owned, spawnPoint)) {
     takeOwnership(world, spawnPoint);
     return true;
