@@ -15,10 +15,8 @@ export function isNetworkInstantiated(eid: EntityID) {
   return createMessageDatas.has(eid);
 }
 
-let reticulum: StringID | undefined;
 export function isPinned(eid: EntityID) {
-  reticulum = reticulum || APP.getSid("reticulum");
-  return Networked.creator[eid] === reticulum;
+  return Networked.creator[eid] === APP.getSid("reticulum");
 }
 
 export function isCreatedByMe(eid: EntityID) {
