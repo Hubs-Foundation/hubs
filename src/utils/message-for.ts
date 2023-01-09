@@ -12,8 +12,7 @@ import type {
   EntityID,
   Message,
   NetworkID,
-  StorableUpdateMessage,
-  UpdateMessage
+  StorableUpdateMessage
 } from "./networking-types";
 import { StorableMessage } from "./store-networked-state";
 
@@ -158,6 +157,7 @@ export interface LegacyRoomObject {
   name: NetworkID;
   rotation: [number, number, number, number];
   translation: [number, number, number];
+  scale: [number, number, number];
 }
 
 export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
@@ -171,9 +171,9 @@ export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
     const nid = obj.name;
     const initialData: MediaLoaderParams = {
       src: obj.extensions.HUBS_components.media.src,
-      resize: false,
-      recenter: false,
-      animateLoad: false,
+      resize: true,
+      recenter: true,
+      animateLoad: true,
       isObjectMenuTarget: true
     };
     const createMessage: CreateMessage = [nid, "media", initialData];
@@ -184,9 +184,9 @@ export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
         "networked-transform": {
           version: 1,
           data: {
-            position: obj.translation,
-            rotation: obj.rotation,
-            scale: [1, 1, 1]
+            position: obj.translation || [0, 0, 0],
+            rotation: obj.rotation || [0, 0, 0, 1],
+            scale: obj.scale || [1, 1, 1]
           }
         }
       },
