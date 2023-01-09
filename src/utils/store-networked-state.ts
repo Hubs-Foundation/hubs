@@ -22,7 +22,6 @@ export async function tryPin(world: HubsWorld, eid: EntityID, hubChannel: HubCha
   const fileId = null;
   const fileAccessToken = null;
   const promotionToken = null;
-  console.log("Pinning:", { nid, storableMessage });
   await hubChannel.pin(nid, storableMessage, fileId, fileAccessToken, promotionToken);
 }
 
@@ -33,6 +32,5 @@ export async function tryUnpin(world: HubsWorld, eid: EntityID, hubChannel: HubC
   const message = messageFor(world, [eid], [eid], [eid], [], false)!;
   unpinMessages.push(message);
   const fileId = null;
-  console.log("this is where i would unpin...");
   hubChannel.unpin(APP.getString(Networked.id[eid])!, fileId);
 }
