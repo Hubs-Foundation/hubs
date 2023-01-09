@@ -82,12 +82,17 @@ export function networkReceiveSystem(world: HubsWorld) {
           tryUnpin(world, eid, APP.hubChannel!);
         }
 
-        // TODO Clear out any stored messages for this entity or its children
         createMessageDatas.delete(eid);
         world.nid2eid.delete(nid);
         removeEntity(world, eid);
         console.log("Deleting ", APP.getString(nid));
       }
+
+      // TODO: Clear out any stored messages for this entity's children.
+      //       If we did not create this entity and its children, then we
+      //       can't rely on the threejs scene graph. Instead, we should be
+      //       able to use network id prefixes in some way.
+      storedUpdates.delete(nid);
     }
   }
 
