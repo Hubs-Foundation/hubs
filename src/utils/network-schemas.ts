@@ -38,8 +38,6 @@ schemas.set(NetworkedTransform, NetworkedTransformSchema);
 schemas.set(NetworkedVideo, NetworkedVideoSchema);
 schemas.set(NetworkedWaypoint, NetworkedWaypointSchema);
 
-// TODO: Write rest of schema for waypoints
-// schemas.set(NetworkedWaypoint, defineNetworkSchema(NetworkedWaypoint));
 export const networkableComponents = Array.from(schemas.keys());
 
 export function read(prop: any, eid: EntityID) {
