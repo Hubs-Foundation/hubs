@@ -1,3 +1,4 @@
+import "./accessibility"
 import "./animation";
 import "./ambient-light";
 import "./animation-mixer";

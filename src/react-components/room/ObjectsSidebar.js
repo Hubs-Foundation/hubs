@@ -42,6 +42,8 @@ export function ObjectsSidebarItem({ selected, object, ...rest }) {
   const intl = useIntl();
   const ObjectTypeIcon = getObjectIcon(object.type);
 
+  if (object.el.components.accessibility) { object.name = object.el.components.accessibility.data["dc:title"]}
+
   return (
     <ButtonListItem
       {...rest}
