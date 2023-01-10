@@ -1,0 +1,14 @@
+@use "../styles/theme.scss";
+
+:local(.pinned-message) {
+  display: flex;
+  gap: 10px;
+  background-color: theme.$chat-bubble-bg-color-received;
+  border-radius: 10px;
+  margin: 8px 16px 8px 16px;
+  padding: 10px 16px;
+  font-size: theme.$font-size-md;
+  overflow-wrap: break-word;
+  line-height: 1.25;
+  align-items: center;
+}

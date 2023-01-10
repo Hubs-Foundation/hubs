@@ -25,27 +25,6 @@
 
 <body>
     <div id="support-root"></div>
-
-    <a-scene
-        loading-screen="enabled: false"
-        renderer="
-            antialias: true;
-            gammaOutput: true;
-            sortObjects: true;
-            physicallyCorrectLights: true;
-            colorManagement: true;
-            alpha: false;"
-        shadow="type: pcfsoft;autoUpdate: false"
-        light="defaultLightsEnabled: false"
-    >
-        <a-entity
-            id="scene-root"
-            static-body="shape: none;"
-        ></a-entity>
-
-        <a-camera id="camera" fov="80" near="0.05" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
-    </a-scene>
-
     <div id="ui-root"></div>
 </body>
 

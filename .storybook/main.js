@@ -1,15 +1,14 @@
 const path = require("path");
+
 const fs = require("fs");
 
 const themesPath = path.resolve(__dirname, "..", "themes.json");
 
 if (fs.existsSync(themesPath)) {
   const appConfig = {};
-
   const themesString = fs.readFileSync(themesPath).toString();
   appConfig.theme = {};
   appConfig.theme.themes = JSON.parse(themesString);
-
   process.env.STORYBOOK_APP_CONFIG = JSON.stringify(appConfig);
 }
 
@@ -24,17 +23,18 @@ module.exports = {
         {
           loader: "css-loader",
           options: {
-            importLoaders: "1",
-            localIdentName: "[name]__[local]___[hash:base64:5]",
-            modules: true,
-            camelCase: true
+            modules: {
+              localIdentName: "[name]__[local]__[hash:base64:5]",
+              exportLocalsConvention: "camelCase",
+              // TODO we ideally would be able to get rid of this but we have some global styles and many :local's that would become superfluous
+              mode: "global"
+            }
           }
         },
         "sass-loader"
       ],
       include: path.resolve(__dirname, "..", "src")
     });
-
     const fileLoaderRule = config.module.rules.find(rule => rule.test.test(".svg"));
     fileLoaderRule.exclude = /\.svg$/;
     config.module.rules.push({
@@ -44,28 +44,36 @@ module.exports = {
           loader: "@svgr/webpack",
           options: {
             titleProp: true,
-            replaceAttrValues: { "#000": "{props.color}" },
-            template: require("../src/react-components/icons/IconTemplate"),
+            replaceAttrValues: { "#000": "currentColor" },
+            exportType: "named",
+            svgo: true,
             svgoConfig: {
-              plugins: {
-                removeViewBox: false,
-                mergePaths: false,
-                convertShapeToPath: false,
-                removeHiddenElems: false
-              }
+              plugins: [
+                {
+                  name: "preset-default",
+                  params: {
+                    overrides: {
+                      removeViewBox: false,
+                      mergePaths: false,
+                      convertShapeToPath: false,
+                      removeHiddenElems: false
+                    }
+                  }
+                }
+              ]
             }
           }
-        },
-        "url-loader"
+        }
       ]
     });
-
     config.module.rules.push({
       test: /\.(glb|gltf)$/,
       use: ["file-loader"],
       include: path.resolve(__dirname, "../")
     });
-
     return config;
+  },
+  core: {
+    builder: "webpack5"
   }
 };

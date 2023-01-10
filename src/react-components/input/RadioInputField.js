@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { InputField } from "./InputField";
 import { RadioInputContainer, RadioInputOption as _RadioInputOption } from "./RadioInput";
 
+/* eslint-disable-next-line react/display-name */
 export const RadioInputField = memo(
   ({ className, error, description, inputClassName, label, children, fullWidth, ...rest }) => {
     return (

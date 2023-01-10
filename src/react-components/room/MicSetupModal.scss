@@ -1,73 +1,137 @@
 @use "../styles/theme.scss";
 
+$mobile-breakpoint-width: 450px;
+
 :local(.content) {
   p {
     font-size: theme.$font-size-sm;
     font-weight: theme.$font-weight-medium;
     line-height: 1.2;
   }
+
+  & > :last-child {
+    margin-top: auto;
+  }
 }
 
 :local(.audio-check-container) {
   display: flex;
+  gap: 24px 24px;
 
-  svg path {
+  @media(max-width: $mobile-breakpoint-width) {
+    flex-flow: wrap;
+  }
+}
+
+:local(.audio-io-container) {
+  width: 200px;
+  position: relative;
+  border-radius: theme.$border-radius-regular;
+  display: flex;
+  flex: auto;
+  flex-direction: column;
+  gap: 10px 10px;
+  padding: 20px;
+  align-items: center;
+  border: 1px solid var(--toolbar-basic-border-color);
+  background-color: theme.$transparent;
+
+  transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
+}
+
+:local(.icon-enabled) {
+  path {
     stroke-width: 1;
   }
 
-  & > :first-child {
-    margin-right: 24px;
-  }
+  width: 48px;
+  height: 48px;
+  color: theme.$text1-color;
 }
 
-:local(.mic-button-container) {
-  // Transitions don't look right with clipping, so just disable it.
-  transition: none;
-
-  :not(:last-child) {
-    z-index: 1;
+:local(.icon-disabled) {
+  path {
+    stroke-width: 1;
+    color: theme.$disabled-icon-color;
   }
 
-  :local(.clipped-icon) {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-  
-    path {
-      stroke: theme.$text5-color !important;
-      stroke-width: 1.25;
-    }
-  }
+  width: 48px;
+  height: 48px;
+  color: theme.$disabled-text-color;
 }
 
-:local(.mic-level) {
-  color: theme.$primary-color;
+:local(.icon-container) {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+:local(.voice-chat-disabled) {
+  display: flex;
+  flex: auto;
+  align-items: center;
+  justify-content: center;
+  flex-flow: column;
+  gap: 20px;
+}
+
+:local(.text-disabled) {
+  color: theme.$disabled-text-color;
+}
+
+:local(.action-container) {  
+  height: 48px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:local(.selection-container) {  
+  display: flex;
+  flex-direction: column;
+  flex: auto;
+  gap: 10px 10px;
+  align-self: stretch;
+}
+
+:local(.selection-input) {  
+  width: 100%;
+  max-width: none;
+}
+
+:local(.popover) {
+  background-color: theme.$black;
+  border: 1px solid theme.$black;
+}
+
+:local(.popover-arrow) {
+  color: theme.$black;
+}
+
+:local(.popover-content) {
+  width: 200px;
+  padding: 12px;
+  font-size: theme.$font-size-sm;
+  color: theme.$text5-color;
+  line-height: 20px;
+}
+
+:local(.error-title) {
+  font-size: theme.$font-size-sm;
+  font-weight: theme.$font-weight-bold;
+}
+
+:local(.spinner-container) {
   position: absolute;
-  z-index: 0;
+  margin-left: -11px;
+  margin-top: -11px;
 }
 
-:local(.mic-level-icon) {
-  position: absolute;
-  z-index: 2;
-  width: 96px;
-  height: 96px;
+:local(.info-icon) {
+  color: theme.$darkgrey;
 }
 
-:local(.mic-button) {
-  &:hover {
-    :local(.mic-level) {
-      color: theme.$primary-color-hover;
-    }
-  }
-
-  &:active {
-    :local(.mic-level) {
-      color: theme.$primary-color-pressed;
-    }
-  }
-}
-
-:local(.large-toolbar-button) {
-  width: 96px;
+:local(.level-bar) {
+  width: 24px;
+  height: 100%;
 }

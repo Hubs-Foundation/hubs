@@ -1,0 +1,112 @@
+@use "../styles/theme.scss";
+
+:local(.number-with-range) {
+  display: flex;
+  flex-flow: row;
+  justify-content: flex-start;
+  align-items: center;
+  
+  :local(.range-slider) {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 2.5rem;
+    padding: 0px 0px 0px 12px;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 40%;
+    }
+
+    // Styling Cross-Browser Compatible Range Inputs with Sass
+    // Github: https://github.com/darlanrod/input-range-sass
+    // Author: Darlan Rod https://github.com/darlanrod
+    // Version 1.5.2
+    // MIT License
+
+    $track-color: theme.$toggle-button-color !default;
+    $thumb-color: theme.$primary-color !default;
+
+    $thumb-radius: 15px !default;
+    $thumb-height: 30px !default;
+    $thumb-width: 30px !default;
+    $thumb-shadow-size: 0px !default;
+    $thumb-shadow-blur: 0px !default;
+    $thumb-border-width: 5px !default;
+    $thumb-border-color: theme.$primary-color !default;
+
+    $track-width: 100% !default;
+    $track-height: 9px !default;
+    $track-shadow-size: 0px !default;
+    $track-shadow-blur: 0px !default;
+    $track-border-width: 0px !default;
+    $track-border-color: theme.$button-border-color !default;
+
+    $progress-color: theme.$primary-color !default;
+
+    $track-radius: 5px !default;
+    $contrast: 5% !default;
+
+    $ie-bottom-track-color: $track-color !default;
+
+    $range-opacity: 0.4 !default;
+
+    @mixin track {
+      cursor: default;
+      height: $track-height;
+      transition: all .2s ease;
+      width: $track-width;
+    }
+
+    @mixin thumb {
+      background: theme.$button-bg-color;
+      border: $thumb-border-width solid $thumb-border-color;
+      border-radius: $thumb-radius;
+      box-sizing: border-box;
+      cursor: default;
+      height: $thumb-height;
+      width: $thumb-width;
+    }
+
+    input[type='range'] {
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      margin: 0;
+      width: $track-width;
+      height: $track-height;
+      cursor: pointer;
+      outline: none;
+      background: $track-color;
+      border: $track-border-width solid $track-border-color;
+      border-radius: $track-radius;
+
+      &:disabled {
+        opacity: 40%;
+      }
+
+      &::-webkit-slider-thumb {
+        @include thumb;
+        cursor: pointer;
+        -webkit-appearance: none;
+        margin-top: -1px;
+      }
+
+      &::-moz-range-thumb {
+        @include thumb;
+        -moz-appearance: none;
+        cursor: pointer;
+      }
+
+      &::-ms-thumb {
+        @include thumb;
+        cursor: pointer;
+        margin-top: calc($track-height / 4);
+      }
+    }
+  }
+}
+
+:export {
+  trackColor: theme.$primary-color;
+}

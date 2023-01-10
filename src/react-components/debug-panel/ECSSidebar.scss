@@ -1,0 +1,66 @@
+:local(.ecs) {
+    background-color: #222;
+    color: #eee;
+
+    > div > .content {
+        overflow: hidden;
+        height: 100%;
+    }
+    .object-list, .object-properties {
+        height: 50%;
+        overflow: auto;
+    }
+
+    .obj-item {
+        margin-left: 25px;
+        .obj-label {
+            padding: 7px 0;
+            white-space: nowrap;
+            cursor: pointer;
+            .toggle {
+                width: 10px;
+                margin-right: 3px;
+                display: inline-block;
+            }
+        }
+    }
+
+    .object-properties {
+        display: flex;
+        flex-direction: column;
+        .title {
+            border-bottom: 1px solid #6220d3;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            span {
+                flex: 1;
+                text-align: center;
+                padding: 5px;
+            }
+        }
+        .content {
+            padding: 10px;
+        }
+
+        .components {
+            pre {
+                display: inline-block;
+                padding: 5px 10px;
+                background: #333;
+                border-radius: 10px;
+                margin: 2px;
+            }
+        }
+    }
+
+    button {
+        background: #6220d3;
+        padding: 6px 10px;
+        font-size: 10px;
+        border-radius: 10px;
+        border: none;
+
+    }
+
+}

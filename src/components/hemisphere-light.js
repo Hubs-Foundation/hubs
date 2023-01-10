@@ -6,12 +6,10 @@ AFRAME.registerComponent("hemisphere-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.HemisphereLight();
     this.light.position.set(0, 0, 0);
     this.light.matrixNeedsUpdate = true;
     this.el.setObject3D("hemisphere-light", this.light);
-    this.el.sceneEl.systems.light.registerLight(el);
   },
 
   update(prevData) {
@@ -28,7 +26,7 @@ AFRAME.registerComponent("hemisphere-light", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("hemisphere-light");
   }
 });

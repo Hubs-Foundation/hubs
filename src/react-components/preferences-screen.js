@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, memo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,23 +7,43 @@ import { faUndo } from "@fortawesome/free-solid-svg-icons/faUndo";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons/faExclamationTriangle";
 import { FormattedMessage, injectIntl, useIntl, defineMessages } from "react-intl";
 import styles from "../assets/stylesheets/preferences-screen.scss";
-import { defaultMaterialQualitySetting } from "../storage/store";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
-import { themes } from "./styles/theme";
+import { themes } from "../utils/theme";
+import MediaDevicesManager from "../utils/media-devices-manager";
+import { MediaDevices, MediaDevicesEvents, PermissionStatus } from "../utils/media-devices-utils";
+import { Slider } from "./input/Slider";
+import {
+  addOrientationChangeListener,
+  removeOrientationChangeListener,
+  getMaxResolutionWidth,
+  getMaxResolutionHeight,
+  getScreenResolutionWidth,
+  getScreenResolutionHeight,
+  setMaxResolution
+} from "../utils/screen-orientation-utils";
+import { AAModes } from "../constants";
 
-export const CLIPPING_THRESHOLD_ENABLED = false;
+import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
+import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
+import { PermissionNotification } from "./room/PermissionNotifications";
+
 export const CLIPPING_THRESHOLD_MIN = 0.0;
 export const CLIPPING_THRESHOLD_MAX = 0.1;
 export const CLIPPING_THRESHOLD_STEP = 0.001;
-export const CLIPPING_THRESHOLD_DEFAULT = 0.015;
 export const GLOBAL_VOLUME_MIN = 0;
 export const GLOBAL_VOLUME_MAX = 200;
 export const GLOBAL_VOLUME_STEP = 5;
-export const GLOBAL_VOLUME_DEFAULT = 100;
 
-function round(step, n) {
-  return Math.round(n / step) * step;
-}
+const CustomComponentWrapper = memo(({ componentType: ComponentType, children, ...rest }) => {
+  return <ComponentType {...rest}>{children}</ComponentType>;
+});
+
+CustomComponentWrapper.propTypes = {
+  componentType: PropTypes.elementType,
+  children: PropTypes.node
+};
+
+CustomComponentWrapper.displayName = "CustomComponentWrapper";
 
 function WarnIcon() {
   return (
@@ -83,128 +103,91 @@ export class NumberRangeSelector extends Component {
     max: PropTypes.number,
     step: PropTypes.number,
     digits: PropTypes.number,
-    defaultNumber: PropTypes.number,
     store: PropTypes.object,
     storeKey: PropTypes.string,
-    setValue: PropTypes.func
+    setValue: PropTypes.func,
+    disabled: PropTypes.bool
   };
   state = {
     isFocused: false,
-    isDragging: false,
     displayValue: "",
     digitsFromUser: 0
   };
   constructor(props) {
     super(props);
-    this.myRoot = React.createRef();
-    this.stopDragging = this.stopDragging.bind(this);
-    this.drag = this.drag.bind(this);
     this.storeUpdated = this.storeUpdated.bind(this);
   }
 
   storeUpdated() {
     if (!this.state.isFocused) {
-      const currentValue =
-        this.props.store.state.preferences[this.props.storeKey] !== undefined
-          ? this.props.store.state.preferences[this.props.storeKey]
-          : this.props.defaultNumber;
       const digits = Math.max(this.state.digitsFromUser, this.props.digits);
-      this.setState({ displayValue: currentValue.toFixed(digits) });
+      this.setState({ displayValue: this.props.store.state.preferences[this.props.storeKey].toFixed(digits) });
     }
     this.forceUpdate();
   }
 
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    window.addEventListener("mouseup", this.stopDragging);
-    window.addEventListener("mousemove", this.drag);
-    const currentValue =
-      this.props.store.state.preferences[this.props.storeKey] !== undefined
-        ? this.props.store.state.preferences[this.props.storeKey]
-        : this.props.defaultNumber;
-    this.setState({ displayValue: currentValue.toFixed(this.props.digits) });
+    this.setState({ displayValue: this.props.store.state.preferences[this.props.storeKey].toFixed(this.props.digits) });
   }
   componentWillUnmount() {
-    window.removeEventListener("mouseup", this.stopDragging);
-    window.removeEventListener("mousemove", this.drag);
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
   }
 
-  stopDragging() {
-    this.setState({ isDragging: false });
-  }
-
-  drag(e) {
-    if (!this.state.isDragging) return;
-    const t = Math.max(0, Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1));
-    const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
-    this.setState({ displayValue: num.toFixed(this.props.digits) });
-    this.props.setValue(num);
-  }
-
   render() {
-    const currentValue =
-      this.props.store.state.preferences[this.props.storeKey] !== undefined
-        ? this.props.store.state.preferences[this.props.storeKey]
-        : this.props.defaultNumber;
-
     return (
-      <div className={classNames(styles.numberWithRange)}>
-        <div className={classNames(styles.numberInNumberWithRange)}>
+      <div className={classNames(styles.numberWithRange, { [styles.disabled]: this.props.disabled })}>
+        <div className={classNames(styles.numberInNumberWithRange, { [styles.disabled]: this.props.disabled })}>
           <input
             type="text"
             value={this.state.displayValue}
             onClick={e => {
-              //e.preventDefault();
               e.target.focus();
               e.target.select();
             }}
-            onBlur={() => {
-              if (this.props.store.state.preferences[this.props.storeKey] === undefined) {
-                this.setState({ displayValue: this.props.defaultNumber, isFocused: false });
-              } else {
-                this.setState({ isFocused: false });
-              }
+            onBlur={e => {
+              const sanitizedInput = sanitize(e.target.value);
+              const numberOrReset = isNaN(parseFloat(sanitizedInput)) ? undefined : parseFloat(sanitizedInput);
+              this.setState({
+                displayValue:
+                  numberOrReset === undefined
+                    ? this.props.store.state.preferences[this.props.storeKey].toFixed(this.props.digits)
+                    : Math.min(Math.max(this.props.min, numberOrReset), this.props.max).toFixed(this.props.digits),
+                isFocused: false
+              });
             }}
             onFocus={() => {
               this.setState({ isFocused: true });
             }}
             onChange={e => {
               const sanitizedInput = sanitize(e.target.value);
-              this.setState({ displayValue: sanitizedInput, digitsFromUser: countDigits(sanitizedInput) });
               const numberOrReset = isNaN(parseFloat(sanitizedInput)) ? undefined : parseFloat(sanitizedInput);
-              this.props.setValue(numberOrReset);
+              const finalValue = Math.min(Math.max(this.props.min, numberOrReset), this.props.max);
+              this.setState({
+                displayValue: numberOrReset === undefined ? "" : finalValue,
+                digitsFromUser: countDigits(sanitizedInput)
+              });
+              this.props.setValue(
+                numberOrReset === undefined
+                  ? parseFloat(this.props.store.state.preferences[this.props.storeKey])
+                  : finalValue
+              );
             }}
+            disabled={this.props.disabled}
           />
         </div>
-        <div
-          ref={this.myRoot}
-          className={classNames(styles.rangeSlider)}
-          onMouseDown={e => {
-            e.preventDefault();
-            this.setState({ isDragging: true, digitsFromUser: 0 });
-            const t = Math.max(
-              0,
-              Math.min((e.clientX - this.myRoot.current.offsetLeft) / this.myRoot.current.clientWidth, 1)
-            );
-            const num = round(this.props.step, this.props.min + t * (this.props.max - this.props.min));
-            this.setState({ displayValue: num.toFixed(this.props.digits) });
-            this.props.setValue(num);
+        <Slider
+          step={this.props.step}
+          min={this.props.min}
+          max={this.props.max}
+          value={this.props.store.state.preferences[this.props.storeKey]}
+          onChange={value => {
+            const num = value.toFixed(this.props.digits);
+            this.setState({ displayValue: num, digitsFromUser: 0 });
+            this.props.setValue(parseFloat(num));
           }}
-        >
-          <input
-            type="range"
-            step={this.props.step}
-            min={this.props.min}
-            max={this.props.max}
-            value={currentValue}
-            onChange={e => {
-              const num = round(this.props.step, parseFloat(e.target.value));
-              this.setState({ displayValue: num.toFixed(this.props.digits), digitsFromUser: 0 });
-              this.props.setValue(parseFloat(num.toFixed(this.props.digits)));
-            }}
-          />
-        </div>
+          disabled={this.props.disabled}
+        />
       </div>
     );
   }
@@ -213,9 +196,8 @@ export class NumberRangeSelector extends Component {
 function CheckboxPlaceholder() {
   return <div className={styles.checkboxPlaceholder} />;
 }
-function BooleanPreference({ store, storeKey, defaultBool, setValue }) {
-  const storedPref = store.state.preferences[storeKey];
-  const value = storedPref === undefined ? defaultBool : storedPref;
+function BooleanPreference({ store, storeKey, setValue }) {
+  const value = store.state.preferences[storeKey];
   return (
     <input
       tabIndex="0"
@@ -230,27 +212,44 @@ function BooleanPreference({ store, storeKey, defaultBool, setValue }) {
 BooleanPreference.propTypes = {
   store: PropTypes.object,
   storeKey: PropTypes.string,
-  defaultBool: PropTypes.bool,
-  setValue: PropTypes.func
+  setValue: PropTypes.func,
+  disabled: PropTypes.bool
+};
+
+function MapCountPreference({ store, storeKey, defaultValue, text }) {
+  const storedPref = store.state.preferences[storeKey];
+  const value = storedPref ? Object.keys(storedPref).length : defaultValue;
+  return (
+    <span className={styles.preferenceLabel}>
+      {value} {text}
+    </span>
+  );
+}
+MapCountPreference.propTypes = {
+  store: PropTypes.object,
+  storeKey: PropTypes.string,
+  defaultValue: PropTypes.number,
+  text: PropTypes.string
 };
 
 class Select extends React.Component {
   static propTypes = {
     children: PropTypes.node.isRequired,
     value: PropTypes.string,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    disabled: PropTypes.bool
   };
 
   render() {
     return (
       <div className={styles.dropdown}>
-        <select value={this.props.value} tabIndex="0" onChange={this.props.onChange}>
+        <select value={this.props.value} tabIndex="0" onChange={this.props.onChange} disabled={this.props.disabled}>
           {this.props.children}
         </select>
         <img
-          className={styles.dropdownArrow}
-          src="../assets/images/dropdown_arrow.png"
-          srcSet="../assets/images/dropdown_arrow@2x.png 2x"
+          className={classNames(styles.dropdownArrow, { [styles.disabled]: this.props.disabled })}
+          src={dropdownArrowUrl}
+          srcSet={`${dropdownArrow2xUrl} 2x`}
         />
       </div>
     );
@@ -260,11 +259,11 @@ class Select extends React.Component {
 class PreferenceSelect extends React.Component {
   static propTypes = {
     options: PropTypes.array,
-    defaultString: PropTypes.string,
     store: PropTypes.object,
     storeKey: PropTypes.string,
     setValue: PropTypes.func,
-    onChanged: PropTypes.func
+    onChanged: PropTypes.func,
+    disabled: PropTypes.bool
   };
   constructor() {
     super();
@@ -277,15 +276,14 @@ class PreferenceSelect extends React.Component {
         </option>
       );
     });
-    const storedPref = this.props.store.state.preferences[this.props.storeKey];
-    const value = storedPref === undefined || storedPref === "" ? this.props.defaultString : storedPref;
     return (
       <Select
-        value={value}
+        value={this.props.store.state.preferences[this.props.storeKey]}
         onChange={e => {
           this.props.setValue(e.target.value);
           this.props.onChanged && this.props.onChanged(e.target.value);
         }}
+        disabled={this.props.disabled}
       >
         {options}
       </Select>
@@ -297,14 +295,38 @@ export const PREFERENCE_LIST_ITEM_TYPE = {
   CHECK_BOX: 1,
   SELECT: 2,
   NUMBER_WITH_RANGE: 3,
-  MAX_RESOLUTION: 4
+  MAX_RESOLUTION: 4,
+  MAP_COUNT: 5,
+  CUSTOM_COMPONENT: 6
 };
 
 export class MaxResolutionPreferenceItem extends Component {
   static propTypes = {
     store: PropTypes.object
   };
+
+  onOrientationChange = () => {
+    // Width and height should be swapped on screen orientation change
+    // then need to update.
+    this.forceUpdate();
+  };
+
+  componentDidMount() {
+    addOrientationChangeListener(this.onOrientationChange);
+  }
+
+  componentWillUnmount() {
+    removeOrientationChangeListener(this.onOrientationChange);
+  }
+
   render() {
+    const onChange = multiplier => {
+      setMaxResolution(
+        this.props.store,
+        Math.floor(getScreenResolutionWidth() * multiplier),
+        Math.floor(getScreenResolutionHeight() * multiplier)
+      );
+    };
     return (
       <div className={classNames(styles.maxResolutionPreferenceItem)}>
         <input
@@ -312,22 +334,8 @@ export class MaxResolutionPreferenceItem extends Component {
           type="number"
           step="1"
           min="0"
-          value={
-            this.props.store.state.preferences.maxResolutionWidth === undefined
-              ? 1920
-              : this.props.store.state.preferences.maxResolutionWidth
-          }
-          onClick={e => {
-            e.preventDefault();
-            e.target.focus();
-            e.target.select();
-          }}
-          onChange={e => {
-            const num = parseInt(e.target.value);
-            this.props.store.update({
-              preferences: { maxResolutionWidth: num ? num : 0 }
-            });
-          }}
+          value={getMaxResolutionWidth(this.props.store)}
+          readOnly={true}
         />
         &nbsp;{"x"}&nbsp;
         <input
@@ -335,22 +343,16 @@ export class MaxResolutionPreferenceItem extends Component {
           type="number"
           step="1"
           min="0"
-          value={
-            this.props.store.state.preferences.maxResolutionHeight === undefined
-              ? 1920
-              : this.props.store.state.preferences.maxResolutionHeight
-          }
-          onClick={e => {
-            e.preventDefault();
-            e.target.focus();
-            e.target.select();
-          }}
-          onChange={e => {
-            const num = parseInt(e.target.value);
-            this.props.store.update({
-              preferences: { maxResolutionHeight: num ? num : 0 }
-            });
-          }}
+          value={getMaxResolutionHeight(this.props.store)}
+          readOnly={true}
+        />
+        &nbsp;
+        <Slider
+          step={0.1}
+          min={0.1}
+          max={1.0}
+          value={getMaxResolutionWidth(this.props.store) / getScreenResolutionWidth()}
+          onChange={onChange}
         />
       </div>
     );
@@ -374,9 +376,9 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.preferred-mic",
     defaultMessage: "Preferred mic"
   },
-  muteMicOnEntry: {
-    id: "preferences-screen.preference.mute-mic-on-entry",
-    defaultMessage: "Mute microphone on entry"
+  preferredSpeakers: {
+    id: "preferences-screen.preference.preferred-speakers",
+    defaultMessage: "Preferred speakers"
   },
   globalVoiceVolume: {
     id: "preferences-screen.preference.global-voice-volume",
@@ -385,6 +387,14 @@ const preferenceLabels = defineMessages({
   globalMediaVolume: {
     id: "preferences-screen.preference.global-media-volume",
     defaultMessage: "Media Volume"
+  },
+  globalSFXVolume: {
+    id: "preferences-screen.preference.global-sfx-volume",
+    defaultMessage: "SFX Volume"
+  },
+  avatarVoiceLevels: {
+    id: "preferences-screen.preference.avatar-volumes",
+    defaultMessage: "Stored avatar volumes"
   },
   disableSoundEffects: {
     id: "preferences-screen.preference.disable-sound-effects",
@@ -446,10 +456,6 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.locale",
     defaultMessage: "Language"
   },
-  onlyShowNametagsInFreeze: {
-    id: "preferences-screen.preference.only-show-nametags-in-freeze",
-    defaultMessage: "Only show nametags while frozen"
-  },
   animateWaypointTransitions: {
     id: "preferences-screen.preference.animate-waypoint-transitions",
     defaultMessage: "Animate waypoint transitions"
@@ -468,7 +474,7 @@ const preferenceLabels = defineMessages({
   },
   enableDynamicShadows: {
     id: "preferences-screen.preference.enable-dynamic-shadows",
-    defaultMessage: "Enable Dynamic Shadows"
+    defaultMessage: "Enable Real-time Shadows"
   },
   disableAutoPixelRatio: {
     id: "preferences-screen.preference.disable-auto-pixel-ratio",
@@ -494,6 +500,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.show-audio-debug-panel",
     defaultMessage: "Show Audio Debug Panel"
   },
+  audioPanningQuality: {
+    id: "preferences-screen.preference.audio-panning-quality",
+    defaultMessage: "Panning quality"
+  },
   enableAudioClipping: {
     id: "preferences-screen.preference.enable-audio-clipping",
     defaultMessage: "Enable Audio Clipping"
@@ -517,6 +527,34 @@ const preferenceLabels = defineMessages({
   disableLeftRightPanning: {
     id: "preferences-screen.preference.disable-panning",
     defaultMessage: "Disable audio left/right panning"
+  },
+  cursorSize: {
+    id: "preferences-screen.preference.cursor-size",
+    defaultMessage: "Cursor Size"
+  },
+  nametagVisibility: {
+    id: "preferences-screen.preference.nametag-visibility",
+    defaultMessage: "Show Nametag"
+  },
+  nametagVisibilityDistance: {
+    id: "preferences-screen.preference.nametag-visibility-distance",
+    defaultMessage: "Nametag visibility distance"
+  },
+  enablePostEffects: {
+    id: "preferences-screen.preference.enable-fx",
+    defaultMessage: "Enable Post Processing Effects (experimental)"
+  },
+  enablePostEffectsTooltip: {
+    id: "preferences-screen.preference.enable-fx.tooltip",
+    defaultMessage: "This feature is still experimental and may have issues. It is currently unsupported in VR."
+  },
+  enableBloom: {
+    id: "preferences-screen.preference.enable-fx-bloom",
+    defaultMessage: "Enable Bloom Effect"
+  },
+  aaMode: {
+    id: "preferences-screen.preference.fx-aa-mode",
+    defaultMessage: "Anti-Aliasing Mode"
   }
 });
 
@@ -526,7 +564,8 @@ class PreferenceListItem extends Component {
     store: PropTypes.object,
     storeKey: PropTypes.string,
     setValue: PropTypes.func,
-    itemProps: PropTypes.object
+    itemProps: PropTypes.object,
+    disabled: PropTypes.bool
   };
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
@@ -544,48 +583,64 @@ class PreferenceListItem extends Component {
   render() {
     const intl = this.props.intl;
     const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
+    const isCustomComponent = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CUSTOM_COMPONENT;
     const isSmallScreen = window.innerWidth < 600;
-    const label = (
-      <span className={styles.preferenceLabel}>{intl.formatMessage(preferenceLabels[this.props.storeKey])}</span>
+    const label = preferenceLabels[this.props.storeKey] && (
+      <span
+        className={classNames(styles.preferenceLabel, { [styles.disabled]: this.props.disabled })}
+        title={this.props.itemProps.tooltipKey && intl.formatMessage(preferenceLabels[this.props.itemProps.tooltipKey])}
+      >
+        {intl.formatMessage(preferenceLabels[this.props.storeKey])}
+      </span>
     );
+    const prefSchema = this.props.store.schema.definitions.preferences.properties;
     const hasPref =
-      this.props.store.state.preferences[this.props.storeKey] !== undefined ||
-      (this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION &&
-        (this.props.store.state.preferences.maxResolutionWidth !== undefined ||
-          this.props.store.state.preferences.maxResolutionHeight !== undefined));
-    const resetToDefault = hasPref ? (
-      <ResetToDefaultButton
-        onClick={() => {
-          switch (this.props.itemProps.prefType) {
-            case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
-              this.props.store.update({
-                preferences: {
-                  maxResolutionWidth: undefined,
-                  maxResolutionHeight: undefined
-                }
-              });
-              break;
-            default:
-              this.props.setValue(undefined);
-              break;
-          }
-          this.forceUpdate();
-        }}
-      />
-    ) : (
-      <ResetToDefaultButtonPlaceholder />
-    );
+      this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION
+        ? this.props.store.state.preferences.maxResolutionWidth !== undefined ||
+          this.props.store.state.preferences.maxResolutionHeight !== undefined
+        : prefSchema[this.props.storeKey] &&
+          this.props.store.state.preferences[this.props.storeKey] !== prefSchema[this.props.storeKey].default;
+    const resetToDefault =
+      !this.props.disabled && hasPref ? (
+        <ResetToDefaultButton
+          onClick={() => {
+            switch (this.props.itemProps.prefType) {
+              case PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION:
+                this.props.store.update({
+                  preferences: {
+                    maxResolutionWidth: undefined,
+                    maxResolutionHeight: undefined
+                  }
+                });
+                break;
+              default:
+                this.props.setValue(prefSchema[this.props.storeKey].default);
+                break;
+            }
+            this.forceUpdate();
+          }}
+        />
+      ) : (
+        <ResetToDefaultButtonPlaceholder />
+      );
 
     const disabled =
       (this.props.itemProps.disableIfTrue && this.props.store.state.preferences[this.props.itemProps.disableIfTrue]) ||
       (this.props.itemProps.disableIfFalse && !this.props.store.state.preferences[this.props.itemProps.disableIfFalse]);
     const indent = this.props.itemProps.disableIfTrue || this.props.itemProps.disableIfFalse;
 
-    if (isCheckbox) {
+    if (isCustomComponent) {
+      return <Control itemProps={this.props.itemProps} store={this.props.store} />;
+    } else if (isCheckbox) {
       return (
         <ListItem disabled={disabled} indent={indent}>
           <div className={styles.row}>
-            <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
+            <Control
+              itemProps={this.props.itemProps}
+              store={this.props.store}
+              setValue={this.props.setValue}
+              disabled={this.props.disabled}
+            />
             {label}
             <div className={styles.rowRight}>{resetToDefault}</div>
           </div>
@@ -601,7 +656,12 @@ class PreferenceListItem extends Component {
             </div>
             <div className={styles.row}>
               <div className={styles.rowCenter}>
-                <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
+                <Control
+                  itemProps={this.props.itemProps}
+                  store={this.props.store}
+                  setValue={this.props.setValue}
+                  disabled={this.props.disabled}
+                />
               </div>
               <div className={styles.rowRight}>{resetToDefault}</div>
             </div>
@@ -615,7 +675,12 @@ class PreferenceListItem extends Component {
           {<CheckboxPlaceholder />}
           {label}
           <div className={styles.rowRight}>
-            <Control itemProps={this.props.itemProps} store={this.props.store} setValue={this.props.setValue} />
+            <Control
+              itemProps={this.props.itemProps}
+              store={this.props.store}
+              setValue={this.props.setValue}
+              disabled={this.props.disabled}
+            />
           </div>
           <div className={styles.rowRight}>{resetToDefault}</div>
         </div>
@@ -632,6 +697,7 @@ const CATEGORY_MISC = 2;
 const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
 const CATEGORY_ACCESSIBILITY = 5;
+const CATEGORY_GRAPHICS = 6;
 const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
@@ -639,7 +705,8 @@ const categoryNames = defineMessages({
   [CATEGORY_MISC]: { id: "preferences-screen.category.misc", defaultMessage: "Misc" },
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
   [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" },
-  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" }
+  [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" },
+  [CATEGORY_GRAPHICS]: { id: "preferences-screen.category.graphics", defaultMessage: "Graphics" }
 });
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -685,7 +752,9 @@ const controlType = new Map([
   [PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, BooleanPreference],
   [PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION, MaxResolutionPreferenceItem],
   [PREFERENCE_LIST_ITEM_TYPE.SELECT, PreferenceSelect],
-  [PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE, NumberRangeSelector]
+  [PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE, NumberRangeSelector],
+  [PREFERENCE_LIST_ITEM_TYPE.MAP_COUNT, MapCountPreference],
+  [PREFERENCE_LIST_ITEM_TYPE.CUSTOM_COMPONENT, CustomComponentWrapper]
 ]);
 
 function Control({ itemProps, store, setValue }) {
@@ -695,10 +764,12 @@ function Control({ itemProps, store, setValue }) {
 Control.propTypes = {
   itemProps: PropTypes.object,
   store: PropTypes.object,
-  setValue: PropTypes.func
+  setValue: PropTypes.func,
+  disabled: PropTypes.bool
 };
 
 function createItem(itemProps, store) {
+  if (itemProps.hidden) return null;
   const setValue = v => {
     if (itemProps.promptForRefresh) {
       store.update({ preferences: { [itemProps.key]: v, shouldPromptForRefresh: true } });
@@ -714,6 +785,7 @@ function createItem(itemProps, store) {
       storeKey={itemProps.key}
       setValue={setValue}
       onChanged={itemProps.onChanged}
+      disabled={itemProps.disabled}
     />
   );
 }
@@ -799,10 +871,11 @@ class PreferencesScreen extends Component {
     // We should either avoid remounting or persist the category somewhere besides state.
     super();
 
-    this.devicesUpdated = () => {
-      this.updateVideoDevices();
-    };
-    this.mediaDevicesManager = window.APP.mediaDevicesManager;
+    this.storeUpdated = this.storeUpdated.bind(this);
+    this.permissionsUpdated = this.permissionsUpdated.bind(this);
+    const canVoiceChat = APP.hubChannel.can("voice_chat");
+
+    this.mediaDevicesManager = APP.mediaDevicesManager;
 
     this.state = {
       category: CATEGORY_AUDIO,
@@ -811,51 +884,56 @@ class PreferencesScreen extends Component {
         key: "preferredMic",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
         options: [{ value: "none", text: "None" }],
-        defaultString: "none",
-        onChanged: this.onMicSelectionChanged
+        disabled: !canVoiceChat
       },
       preferredCamera: {
         key: "preferredCamera",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "none", text: "None" }],
-        defaultString: "none"
-      }
+        options: [{ value: "none", text: "None" }]
+      },
+      ...(MediaDevicesManager.isAudioOutputSelectEnabled && {
+        preferredSpeakers: {
+          key: "preferredSpeakers",
+          prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+          options: [{ value: "none", text: "None" }]
+        }
+      }),
+      canVoiceChat
     };
   }
 
-  onMicSelectionChanged = deviceId => {
-    if (deviceId === "none") {
-      this.mediaDevicesManager.stopMicShare().then(this.updateMediaDevices);
-    } else {
-      this.mediaDevicesManager.startMicShare(deviceId).then(this.updateMediaDevices);
-    }
-  };
-
   onMediaDevicesUpdated = () => {
+    const currentSpeakers = this.mediaDevicesManager.selectedSpeakersDeviceId;
+    if (this.props.store.state.preferences.preferredSpeakers !== currentSpeakers) {
+      this.props.store.update({
+        preferences: { preferredSpeakers: currentSpeakers }
+      });
+    }
     this.updateMediaDevices();
   };
 
   updateMediaDevices = () => {
     // Audio devices update
-    const micOptions = this.mediaDevicesManager.micDevices.map(device => ({
+    const micOptions = this.mediaDevicesManager.micDevicesOptions.map(device => ({
       value: device.value,
       text: device.label
     }));
     const preferredMic = { ...this.state.preferredMic };
-    preferredMic.options = [
-      {
-        value: "none",
-        text: this.props.intl.formatMessage({
-          id: "preferences-screen.preferred-mic.default",
-          defaultMessage: "None"
-        })
-      }
-    ];
-    preferredMic.options.push(...micOptions);
-    this.props.store.update({ preferences: { ["preferredMic"]: this.mediaDevicesManager.selectedMicDeviceId } });
+    preferredMic.options = micOptions;
+    preferredMic.disabled = !this.state.canVoiceChat;
+
+    const speakersOptions = this.mediaDevicesManager.outputDevicesOptions.map(device => ({
+      value: device.value,
+      text: device.label
+    }));
+    const preferredSpeakers = { ...this.state.preferredSpeakers };
+    preferredSpeakers.options = speakersOptions?.length > 0 ? speakersOptions : [{ value: "none", text: "None" }];
+    preferredSpeakers.disabled =
+      !this.state.canVoiceChat &&
+      this.mediaDevicesManager.getPermissionsStatus(MediaDevices.SPEAKERS) !== PermissionStatus.GRANTED;
 
     // Video devices update
-    const videoOptions = this.mediaDevicesManager.videoDevices.map(device => ({
+    const videoOptions = this.mediaDevicesManager.videoDevicesOptions.map(device => ({
       value: device.value,
       text: device.label
     }));
@@ -886,30 +964,44 @@ class PreferencesScreen extends Component {
     preferredCamera.options.push(...videoOptions);
 
     // Update media devices state
-    this.setState({ preferredMic, preferredCamera });
-  };
-
-  storeUpdated = () => {
-    const deviceId = this.props.store?.state?.preferences?.preferredMic;
-    if (!deviceId && this.mediaDevicesManager.isMicShared) {
-      this.mediaDevicesManager.stopMicShare();
-    }
+    this.setState({
+      preferredMic,
+      preferredSpeakers,
+      preferredCamera
+    });
   };
 
   componentDidMount() {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
-    this.props.scene.addEventListener("devicechange", this.onMediaDevicesUpdated);
+    this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
+    APP.hubChannel.addEventListener("permissions_updated", this.permissionsUpdated);
 
-    if (!this.mediaDevicesManager.isMicShared) {
-      this.mediaDevicesManager.startMicShare().then(this.updateMediaDevices);
+    if (this.state.canVoiceChat) {
+      this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
     } else {
-      this.mediaDevicesManager.fetchMediaDevices().then(this.updateMediaDevices);
+      this.updateMediaDevices();
     }
   }
 
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    this.props.scene.removeEventListener("devicechange", this.onMediaDevicesUpdated);
+    this.mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
+    APP.hubChannel.removeEventListener("permissions_updated", this.permissionsUpdated);
+  }
+
+  permissionsUpdated() {
+    this.setState({
+      canVoiceChat: APP.hubChannel.can("voice_chat")
+    });
+    this.updateMediaDevices();
+  }
+
+  storeUpdated() {
+    const { preferredMic } = this.props.store.state.preferences;
+    if (preferredMic !== this.mediaDevicesManager.selectedMicDeviceId) {
+      this.state.canVoiceChat &&
+        this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
+    }
   }
 
   createSections() {
@@ -949,10 +1041,22 @@ class PreferencesScreen extends Component {
       [
         CATEGORY_TOUCHSCREEN,
         [
-          { key: "enableOnScreenJoystickLeft", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "enableOnScreenJoystickRight", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "enableGyro", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
-          { key: "invertTouchscreenCameraMove", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true }
+          {
+            key: "enableOnScreenJoystickLeft",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "enableOnScreenJoystickRight",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "enableGyro",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "invertTouchscreenCameraMove",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          }
         ]
       ],
       [
@@ -964,71 +1068,104 @@ class PreferencesScreen extends Component {
             min: 0,
             max: 90,
             step: 5,
-            digits: 0,
-            defaultNumber: 45
+            digits: 0
           },
-          { key: "disableMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableBackwardsMovement", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableStrafing", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableTeleporter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          {
+            key: "disableMovement",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "disableBackwardsMovement",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "disableStrafing",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "disableTeleporter",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
           {
             key: "movementSpeedModifier",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 0,
             max: 2,
             step: 0.1,
-            digits: 1,
-            defaultNumber: 1
+            digits: 1
           }
         ]
       ],
       [
         CATEGORY_AUDIO,
         [
-          this.state.preferredMic,
-          { key: "muteMicOnEntry", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          ...(!this.state.canVoiceChat
+            ? [
+                {
+                  key: "voiceChatPinnedMessage",
+                  prefType: PREFERENCE_LIST_ITEM_TYPE.CUSTOM_COMPONENT,
+                  componentType: PermissionNotification,
+                  permission: "voice_chat"
+                }
+              ]
+            : []),
+          ...(MediaDevicesManager.isAudioInputSelectEnabled ? [this.state.preferredMic] : []),
+          ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           {
             key: "globalVoiceVolume",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: GLOBAL_VOLUME_MIN,
             max: GLOBAL_VOLUME_MAX,
             step: GLOBAL_VOLUME_STEP,
-            digits: 0,
-            defaultNumber: GLOBAL_VOLUME_DEFAULT
+            digits: 0
           },
           {
             key: "globalMediaVolume",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: GLOBAL_VOLUME_MIN,
+            max: GLOBAL_VOLUME_MAX,
+            step: GLOBAL_VOLUME_STEP,
+            digits: 0
+          },
+          {
+            key: "globalSFXVolume",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 0,
             max: 200,
             step: 5,
-            digits: 0,
-            defaultNumber: 100
+            digits: 0
           },
-          { key: "disableSoundEffects", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
+          {
+            key: "avatarVoiceLevels",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.MAP_COUNT,
+            defaultValue: 0,
+            text: intl.formatMessage({
+              id: "preferences-screen.preference.avatar-volumes.entries",
+              defaultMessage: "Entries"
+            })
+          },
+          {
+            key: "disableSoundEffects",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
           {
             key: "disableEchoCancellation",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
             promptForRefresh: true
           },
           {
             key: "disableNoiseSuppression",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
             promptForRefresh: true
           },
           {
             key: "disableAutoGainControl",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
             promptForRefresh: true
           },
           {
             key: "enableAudioClipping",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: CLIPPING_THRESHOLD_ENABLED,
-            promptForRefresh: false
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           },
           {
             key: "audioClippingThreshold",
@@ -1036,10 +1173,32 @@ class PreferencesScreen extends Component {
             min: CLIPPING_THRESHOLD_MIN,
             max: CLIPPING_THRESHOLD_MAX,
             step: CLIPPING_THRESHOLD_STEP,
-            digits: 3,
-            defaultNumber: 0.015
+            digits: 3
           },
-          { key: "showAudioDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
+          {
+            key: "showAudioDebugPanel",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "audioPanningQuality",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: [
+              {
+                value: "High",
+                text: intl.formatMessage({
+                  id: "preferences-screen.audio-panning-quality.high",
+                  defaultMessage: "High"
+                })
+              },
+              {
+                value: "Low",
+                text: intl.formatMessage({
+                  id: "preferences-screen.audio-panning-quality.low",
+                  defaultMessage: "Low"
+                })
+              }
+            ]
+          }
         ]
       ],
       [
@@ -1048,18 +1207,118 @@ class PreferencesScreen extends Component {
           {
             key: "locale",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-            options: availableLocales,
-            defaultString: "browser"
+            options: availableLocales
           },
           {
             key: "theme",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-            options: availableThemes,
-            defaultString: "Browser Default"
+            options: availableThemes
           },
-          { key: "onlyShowNametagsInFreeze", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
+          {
+            key: "nametagVisibility",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            options: [
+              {
+                value: "showAll",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-all",
+                  defaultMessage: "Always"
+                })
+              },
+              {
+                value: "showNone",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-none",
+                  defaultMessage: "Never"
+                })
+              },
+              {
+                value: "showFrozen",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-frozen",
+                  defaultMessage: "Only in Frozen state"
+                })
+              },
+              {
+                value: "showSpeaking",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-speaking",
+                  defaultMessage: "Only speaking"
+                })
+              },
+              {
+                value: "showClose",
+                text: intl.formatMessage({
+                  id: "preferences-screen.nametag-visibility.show-close",
+                  defaultMessage: "Close to me"
+                })
+              }
+            ]
+          },
+          {
+            key: "nametagVisibilityDistance",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 1,
+            max: 20,
+            step: 1,
+            digits: 2
+          },
           this.state.preferredCamera,
+          {
+            key: "allowMultipleHubsInstances",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "disableIdleDetection",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "fastRoomSwitching",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "lazyLoadSceneMedia",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "preferMobileObjectInfoPanel",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "animateWaypointTransitions",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "showFPSCounter",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "showRtcDebugPanel",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "cursorSize",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            min: 1,
+            max: 5,
+            step: 0.5,
+            digits: 1
+          }
+        ]
+      ],
+      [
+        CATEGORY_ACCESSIBILITY,
+        [
+          {
+            key: "disableLeftRightPanning",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          }
+        ]
+      ],
+      [
+        CATEGORY_GRAPHICS,
+        [
+          { key: "maxResolution", prefType: PREFERENCE_LIST_ITEM_TYPE.MAX_RESOLUTION },
           {
             key: "materialQualitySetting",
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
@@ -1086,33 +1345,73 @@ class PreferencesScreen extends Component {
                 })
               }
             ],
-            defaultString: defaultMaterialQualitySetting,
             promptForRefresh: true
           },
           {
             key: "enableDynamicShadows",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "disableAutoPixelRatio",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "enablePostEffects",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false,
+            hidden: AFRAME.utils.device.isMobileVR(),
+            tooltipKey: "enablePostEffectsTooltip",
             promptForRefresh: true
           },
-          { key: "disableAutoPixelRatio", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "allowMultipleHubsInstances", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "disableIdleDetection", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "fastRoomSwitching", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "lazyLoadSceneMedia", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "preferMobileObjectInfoPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "animateWaypointTransitions", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: true },
-          { key: "showFPSCounter", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false },
-          { key: "showRtcDebugPanel", prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX, defaultBool: false }
-        ]
-      ],
-      [
-        CATEGORY_ACCESSIBILITY,
-        [
           {
-            key: "disableLeftRightPanning",
+            key: "enableBloom",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
-            defaultBool: false
+            hidden: AFRAME.utils.device.isMobileVR(),
+            disableIfFalse: "enablePostEffects",
+            promptForRefresh: true
+          },
+          {
+            key: "aaMode",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+            hidden: AFRAME.utils.device.isMobileVR(),
+            disableIfFalse: "enablePostEffects",
+            promptForRefresh: true,
+            options: [
+              {
+                value: AAModes.NONE,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.none",
+                  defaultMessage: "none"
+                })
+              },
+              {
+                value: AAModes.SMAA,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.smaa",
+                  defaultMessage: "SMAA"
+                })
+              },
+              {
+                value: AAModes.MSAA_2X,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.msaa_2x",
+                  defaultMessage: "2x MSAA"
+                })
+              },
+              {
+                value: AAModes.MSAA_4X,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.msaa_4x",
+                  defaultMessage: "4x MSAA"
+                })
+              },
+              {
+                value: AAModes.MSAA_8X,
+                text: intl.formatMessage({
+                  id: "preferences-screen.aa-mode.msaa_8x",
+                  defaultMessage: "8x MSAA"
+                })
+              }
+            ]
           }
         ]
       ]
@@ -1123,7 +1422,10 @@ class PreferencesScreen extends Component {
     const items = new Map();
 
     for (const [category, definitions] of DEFINITIONS) {
-      items.set(category, definitions.map(toItem));
+      items.set(
+        category,
+        definitions.map(toItem).filter(item => !!item)
+      );
     }
 
     return new Map([
@@ -1150,13 +1452,22 @@ class PreferencesScreen extends Component {
           }
         ]
       ],
-      [CATEGORY_MISC, [{ items: items.get(CATEGORY_MISC) }]]
+      [
+        CATEGORY_MISC,
+        [
+          { items: items.get(CATEGORY_MISC) },
+          {
+            name: intl.formatMessage(categoryNames[CATEGORY_GRAPHICS]),
+            items: items.get(CATEGORY_GRAPHICS)
+          }
+        ]
+      ]
     ]);
   }
 
   render() {
     const intl = this.props.intl;
-    const shouldPromptForRefresh = !!this.props.store.state.preferences.shouldPromptForRefresh;
+    const shouldPromptForRefresh = this.props.store.state.preferences.shouldPromptForRefresh;
 
     return (
       <div className={classNames(styles.preferencesPanel)}>
@@ -1188,9 +1499,7 @@ class PreferencesScreen extends Component {
         </Nav>
         <div className={styles.contentContainer}>
           <div className={styles.scrollingContent}>
-            {this.createSections()
-              .get(this.state.category)
-              .map(Section)}
+            {this.createSections().get(this.state.category).map(Section)}
             {shouldPromptForRefresh && (
               <div
                 style={{

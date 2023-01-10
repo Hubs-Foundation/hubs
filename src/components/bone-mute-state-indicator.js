@@ -37,7 +37,7 @@ AFRAME.registerComponent("bone-mute-state-indicator", {
 
   updateMuteState() {
     if (!this.modelLoaded) return;
-    const muted = !APP.dialog.isMicEnabled;
+    const muted = !APP.mediaDevicesManager.isMicEnabled;
     this.mutedBone.position.y = muted ? this.data.onPos : this.data.offPos;
     this.unmutedBone.position.y = !muted ? this.data.onPos : this.data.offPos;
     this.mutedBone.matrixNeedsUpdate = true;

@@ -1,53 +1,25 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-
-let config = process.env.APP_CONFIG;
-
-// Storybook includes environment variables as a string
-// https://storybook.js.org/docs/react/configure/environment-variables
-if (!config && process.env.STORYBOOK_APP_CONFIG) {
-  config = JSON.parse(process.env.STORYBOOK_APP_CONFIG);
-}
-
-if (!config) {
-  config = window.APP_CONFIG;
-}
-
-if (config?.theme?.error) {
-  console.error(
-    `Custom themes failed to load.\n${
-      config.theme.error
-    }\nIf you are an admin, reconfigure your themes in the admin panel.`
-  );
-}
-
-export const defaultTheme = "default";
-
-export const themes = config?.theme?.themes || [];
+import configs from "../../utils/configs";
+import { tryGetTheme, getCurrentTheme, registerDarkModeQuery } from "../../utils/theme";
 
 function useDarkMode() {
   const [darkMode, setDarkMode] = useState(false);
 
+  const changeListener = useCallback(
+    event => {
+      setDarkMode(event.matches);
+    },
+    [setDarkMode]
+  );
+
   useEffect(() => {
-    const darkmodeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const [darkModeQuery, removeListener] = registerDarkModeQuery(changeListener);
 
-    setDarkMode(darkmodeQuery.matches);
+    setDarkMode(darkModeQuery.matches);
 
-    // This is a workaround for old Safari.
-    // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use
-    // addListener() and removeListener() to observe media query lists.
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
-    // We may remove this workaround when no one will use Safari 13 or before.
-    if (darkmodeQuery.addEventListener) {
-      darkmodeQuery.addEventListener("change", event => {
-        setDarkMode(event.matches);
-      });
-    } else {
-      darkmodeQuery.addListener(event => {
-        setDarkMode(event.matches);
-      });
-    }
-  }, []);
+    return removeListener;
+  }, [changeListener]);
 
   return darkMode;
 }
@@ -55,50 +27,43 @@ function useDarkMode() {
 export function useTheme(themeId) {
   const darkMode = useDarkMode();
 
-  useEffect(
-    () => {
-      // Themes can come from an external source. Ensure it is an array.
-      if (!Array.isArray(themes)) return;
+  useEffect(() => {
+    const theme = tryGetTheme(themeId);
 
-      let theme;
+    if (!theme) {
+      return;
+    }
 
-      if (themeId) {
-        theme = themes.find(t => t.id === themeId);
-      }
+    const variables = [];
 
-      if (!theme && darkMode) {
-        theme = themes.find(t => t.darkModeDefault);
-      }
+    for (const key in theme.variables) {
+      if (!Object.prototype.hasOwnProperty.call(theme.variables, key)) continue;
+      variables.push(`--${key}: ${theme.variables[key]};`);
+    }
 
-      if (!theme) {
-        theme = themes.find(t => t.default);
-      }
+    const styleTag = document.createElement("style");
 
-      if (!theme) {
-        return;
-      }
-
-      const variables = [];
-
-      for (const key in theme.variables) {
-        if (!theme.variables.hasOwnProperty(key)) continue;
-        variables.push(`--${key}: ${theme.variables[key]};`);
-      }
-
-      const styleTag = document.createElement("style");
-
-      styleTag.innerHTML = `:root {
+    styleTag.innerHTML = `:root {
         ${variables.join("\n")}
       }`;
 
-      document.head.appendChild(styleTag);
+    document.head.appendChild(styleTag);
 
-      return () => {
-        document.head.removeChild(styleTag);
-      };
-    },
-    [themeId, darkMode]
-  );
+    return () => {
+      document.head.removeChild(styleTag);
+    };
+  }, [themeId, darkMode]);
+}
+
+function getAppLogo(darkMode) {
+  const theme = getCurrentTheme();
+  const shouldUseDarkLogo = theme ? theme.darkModeDefault : darkMode;
+  return (shouldUseDarkLogo && configs.image("logo_dark")) || configs.image("logo");
+}
+
+export function useLogo() {
+  const darkMode = useDarkMode();
+  return getAppLogo(darkMode);
 }
 
 export function useThemeFromStore(store) {

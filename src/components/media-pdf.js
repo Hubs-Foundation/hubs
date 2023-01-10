@@ -1,4 +1,4 @@
-import pdfjs from "pdfjs-dist";
+import * as pdfjs from "pdfjs-dist";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { errorTexture } from "../utils/error-texture";
@@ -18,15 +18,15 @@ const TYPE_IMG_PNG = { type: "image/png" };
  * name -> how to name the file
  * Then the path to the worker script
  */
-pdfjs.GlobalWorkerOptions.workerSrc = require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js");
+pdfjs.GlobalWorkerOptions.workerSrc =
+  require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js").default;
 
 AFRAME.registerComponent("media-pdf", {
   schema: {
     src: { type: "string" },
     projection: { type: "string", default: "flat" },
     contentType: { type: "string" },
-    index: { default: 0 },
-    batch: { default: false }
+    index: { default: 0 }
   },
 
   init() {
@@ -61,12 +61,6 @@ AFRAME.registerComponent("media-pdf", {
     entity.addEventListener("image-loaded", this.onSnapImageLoaded, ONCE_TRUE);
   },
 
-  remove() {
-    if (this.data.batch && this.mesh) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.mesh);
-    }
-  },
-
   async update(oldData) {
     let texture;
     let ratio = 1;
@@ -84,7 +78,7 @@ AFRAME.registerComponent("media-pdf", {
 
       if (src !== oldData.src) {
         const loadingSrc = this.data.src;
-        const pdf = await pdfjs.getDocument(src);
+        const pdf = await pdfjs.getDocument(src).promise;
         if (loadingSrc !== this.data.src) return;
 
         this.pdf = pdf;
@@ -130,10 +124,6 @@ AFRAME.registerComponent("media-pdf", {
     this.mesh.material.needsUpdate = true;
 
     scaleToAspectRatio(this.el, ratio);
-
-    if (texture !== errorTexture && this.data.batch) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.mesh);
-    }
 
     if (this.el.components["media-pager"] && this.el.components["media-pager"].data.index !== this.data.index) {
       this.el.setAttribute("media-pager", { index: this.data.index });

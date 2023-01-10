@@ -46,9 +46,9 @@ AFRAME.registerComponent("audio-zone", {
     return this.data.enabled;
   },
 
-  getBoundingBox: (function() {
+  getBoundingBox: (function () {
     const bbaa = new THREE.Box3();
-    return function() {
+    return function () {
       return bbaa.copy(this.debugMesh.geometry.boundingBox).applyMatrix4(this.el.object3D.matrixWorld);
     };
   })(),

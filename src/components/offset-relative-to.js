@@ -37,13 +37,13 @@ AFRAME.registerComponent("offset-relative-to", {
     });
   },
 
-  updateOffset: (function() {
+  updateOffset: (function () {
     const y = new THREE.Vector3(0, 1, 0);
     const z = new THREE.Vector3(0, 0, -1);
     const QUARTER_CIRCLE = Math.PI / 2;
     const offsetVector = new THREE.Vector3();
     const targetWorldPos = new THREE.Vector3();
-    return function() {
+    return function () {
       const obj = this.el.object3D;
       const target = this.data.target.object3D;
       offsetVector.copy(this.data.offset);

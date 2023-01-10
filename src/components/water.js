@@ -1,4 +1,4 @@
-import { Layers } from "./layers";
+import { Layers } from "../camera-layers";
 import "../vendor/Water";
 import waterNormalMap from "../assets/waternormals.jpg";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";

@@ -8,7 +8,7 @@
   h1 {
     font-size: theme.$font-size-xl;
     text-align: center;
-    margin-bottom: 20px;
+    margin: 15px 0;
   }
 }
 
@@ -26,6 +26,15 @@
     flex-direction: column;
   }
 }
+.note {
+  margin: 20px 0;
+  @media (max-width: 768px) {
+    margin: 10px 0;
+  }
+  strong {
+    font-size: 100%;
+  }
+}
 .date, .date-blank, .title {
   margin: 0;
 }
@@ -34,7 +43,7 @@
 }
 .title {
   flex: 1;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   @media (max-width: 768px) {
     align-self: flex-start;
   }
@@ -45,7 +54,7 @@
   width: 120px;
 }
 .date {
-  margin-top: 0.2em;
+  margin: 0.2em 0;
 }
 
 .body {
@@ -60,4 +69,14 @@
   }
 
   img { width: 100%; }
+
+  pre {
+    overflow-x: auto;
+  }
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  margin: 2em 0;
 }

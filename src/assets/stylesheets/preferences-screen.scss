@@ -20,9 +20,15 @@ $semi-bold: 600;
   display: flex;
   flex-flow: column;
   align-items: center;
+  padding-bottom: 16px;
 
   input[type='number'] {
     -moz-appearance:textfield;
+
+    &:disabled,
+    &[disabled] {
+      color: theme.$disabled-text-color;
+    }
   }
 
   input[type=text],input[type=number] {
@@ -38,6 +44,11 @@ $semi-bold: 600;
     text-align: center;
     width: 60px;
     height: 38px;
+
+    &:disabled,
+    &[disabled] {
+      color: theme.$disabled-text-color;
+    }
   }
 
   input::-webkit-outer-spin-button,
@@ -196,6 +207,10 @@ $semi-bold: 600;
   font-size: $fontSize;
   font-weight: 600;
   flex-grow: 1;
+
+  &:local(.disabled) {
+    color: theme.$disabled-text-color;
+  }
 }
 
 :local(.close-button) {
@@ -355,12 +370,21 @@ $semi-bold: 600;
     font-weight: bold;
     padding-right: 30px;
     max-width: 170px;
+
+    &:disabled,
+    &[disabled] {
+      color: theme.$disabled-text-color;
+    }
   }
 }
 :local(.dropdown-arrow){
   pointer-events: none;
   position: absolute;
   right: 7.5%;
+
+  &:local(.disabled) {
+    filter: opacity(25%);
+  }
 }
 
 :local(.number-with-range){
@@ -374,151 +398,21 @@ $semi-bold: 600;
     justify-content: center;
     cursor: pointer;
 
-  }
-  :local(.range-slider) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    max-height: 2.5rem;
-    padding: 0px 0px 0px 12px;
+    &:local(.disabled) {
+      color: theme.$disabled-icon-color;
+    }
   }
 }
 
-// Styling Cross-Browser Compatible Range Inputs with Sass
-// Github: https://github.com/darlanrod/input-range-sass
-// Author: Darlan Rod https://github.com/darlanrod
-// Version 1.5.2
-// MIT License
-
-$track-color: theme.$toggle-button-color !default;
-$thumb-color: theme.$primary-color !default;
-
-$thumb-radius: 10px !default;
-$thumb-height: 20px !default;
-$thumb-width: 20px !default;
-$thumb-shadow-size: 0px !default;
-$thumb-shadow-blur: 0px !default;
-$thumb-border-width: 0px !default;
-$thumb-border-color: theme.$button-border-color !default;
-
-$track-width: 100% !default;
-$track-height: 8px !default;
-$track-shadow-size: 0px !default;
-$track-shadow-blur: 0px !default;
-$track-border-width: 0px !default;
-$track-border-color: theme.$button-border-color !default;
-
-$track-radius: 5px !default;
-$contrast: 5% !default;
-
-$ie-bottom-track-color: $track-color !default;
-
-@mixin track {
-  cursor: default;
-  height: $track-height;
-  transition: all .2s ease;
-  width: $track-width;
-}
-
-@mixin thumb {
-  background: $thumb-color;
-  border: $thumb-border-width solid $thumb-border-color;
-  border-radius: $thumb-radius;
-  box-sizing: border-box;
-  cursor: default;
-  height: $thumb-height;
-  width: $thumb-width;
-}
-
-[type='range'] {
-  -webkit-appearance: none;
-  background: transparent;
-  margin: $thumb-height / 2 0;
-  width: $track-width;
-  cursor: pointer;
-
-  &::-moz-focus-outer {
-    border: 0;
-  }
-
-  &:focus {
-    outline: 0;
-
-    &::-webkit-slider-runnable-track {
-      background: $track-color;
-    }
-
-    &::-ms-fill-lower {
-      background: $track-color;
-    }
-
-    &::-ms-fill-upper {
-      background: $track-color;
-    }
-  }
-
-  &::-webkit-slider-runnable-track {
-    @include track;
-    background: $track-color;
-    border: $track-border-width solid $track-border-color;
-    border-radius: $track-radius;
-  }
-
-  &::-webkit-slider-thumb {
-    @include thumb;
-    cursor: pointer;
-    -webkit-appearance: none;
-    margin-top: ((-$track-border-width * 2 + $track-height) / 2 - $thumb-height / 2);
-  }
-
-  &::-moz-range-track {
-    @include track;
-    background: $track-color;
-    border: $track-border-width solid $track-border-color;
-    border-radius: $track-radius;
-    height: $track-height / 2;
-  }
-
-  &::-moz-range-thumb {
-    @include thumb;
-    cursor: pointer;
-  }
-
-  &::-ms-track {
-    @include track;
-    background: transparent;
-    border-color: transparent;
-    border-width: ($thumb-height / 2) 0;
-    color: transparent;
-  }
-
-  &::-ms-fill-lower {
-    background: $ie-bottom-track-color;
-    border: $track-border-width solid $track-border-color;
-    border-radius: ($track-radius * 2);
-  }
-
-  &::-ms-fill-upper {
-    background: $track-color;
-    border: $track-border-width solid $track-border-color;
-    border-radius: ($track-radius * 2);
-  }
-
-  &::-ms-thumb {
-    @include thumb;
-    cursor: pointer;
-    margin-top: $track-height / 4;
-  }
-
-  &:disabled {
-    &::-webkit-slider-thumb,
-    &::-moz-range-thumb,
-    &::-ms-thumb,
-    &::-webkit-slider-runnable-track,
-    &::-ms-fill-lower,
-    &::-ms-fill-upper {
-      cursor: not-allowed;
-    }
-  }
+:local(.pinned-message) {
+  display: flex;
+  gap: 10px;
+  background-color: var(--chat-bubble-bg-color-received);
+  border-radius: 10px;
+  margin: 8px 16px 18px 56px;
+  padding: 10px 16px;
+  font-size: 14px;
+  overflow-wrap: break-word;
+  line-height: 1.25;
 }
 

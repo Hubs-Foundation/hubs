@@ -53,7 +53,7 @@ AFRAME.registerComponent("follow-in-fov", {
     // Compute position + rotation by projecting offset along a downward ray in target space,
     // and mask out Z rotation.
     this._applyMaskedTargetRotation(
-      -this.data.angle * THREE.Math.DEG2RAD,
+      -this.data.angle * THREE.MathUtils.DEG2RAD,
       target.rotation.y,
       0,
       this.snappedXFormWorld
@@ -96,11 +96,7 @@ AFRAME.registerComponent("follow-in-fov", {
     this.snappedRot.set(x, y, z, target.rotation.order);
     this.snappedQ.setFromEuler(this.snappedRot);
 
-    this.snappedXForm.compose(
-      target.position,
-      this.snappedQ,
-      target.scale
-    );
+    this.snappedXForm.compose(target.position, this.snappedQ, target.scale);
 
     to.multiplyMatrices(target.parent.matrixWorld, this.snappedXForm);
   }

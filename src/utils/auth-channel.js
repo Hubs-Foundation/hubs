@@ -52,12 +52,7 @@ export default class AuthChannel {
 
   async startAuthentication(email, hubChannel) {
     const channel = this.socket.channel(`auth:${uuid()}`);
-    await new Promise((resolve, reject) =>
-      channel
-        .join()
-        .receive("ok", resolve)
-        .receive("error", reject)
-    );
+    await new Promise((resolve, reject) => channel.join().receive("ok", resolve).receive("error", reject));
 
     const authComplete = new Promise(resolve =>
       channel.on("auth_credentials", async ({ credentials: token }) => {

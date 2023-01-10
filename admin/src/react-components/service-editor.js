@@ -1,3 +1,6 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable @calm/react-intl/missing-formatted-message*/
+
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -18,7 +21,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import clsx from "classnames";
 import { Title } from "react-admin";
 
-import Store from "hubs/src/storage/store";
+import { store } from "hubs/src/utils/store-instance";
 import withCommonStyles from "../utils/with-common-styles";
 import {
   getEditableConfig,
@@ -117,7 +120,7 @@ function getDescriptors(schema) {
 
 function isEmptyObject(obj) {
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       return false;
     }
   }
@@ -462,7 +465,6 @@ const AppConfigEditor = withStyles(styles)(
   class AppConfigEditor extends ConfigurationEditor {
     constructor(props) {
       super(props);
-      const store = new Store();
       if (store.state && store.state.credentials && store.state.credentials.token) {
         AppConfigUtils.setAuthToken(store.state.credentials.token);
       }

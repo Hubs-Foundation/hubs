@@ -14,6 +14,16 @@
     margin-top: 8px;
     margin-bottom: 3px;
     white-space: nowrap;
+
+    &:disabled,
+    &[disabled] {
+      cursor: default;
+    }
+  }
+
+  &:disabled,
+  &[disabled] {
+    cursor: default;
   }
 }
 
@@ -31,13 +41,13 @@
   transition: background-color 0.1s ease-in-out, border-color 0.1s ease-in-out;
 
   svg {
+    color: theme.$toolbar-icon-color;
+
     *[stroke=\#000] {
-      stroke: theme.$toolbar-icon-color;
       transition: stroke 0.1s ease-in-out;
     }
 
     *[fill=\#000] {
-      fill: theme.$toolbar-icon-color;
       transition: fill 0.1s ease-in-out;
     }
   }
@@ -51,21 +61,33 @@
 :local(.basic), :local(.transparent) {
   :local(.icon-container) {
     border-color: theme.$toolbar-basic-border-color;
-    background-color: transparent;
+    background-color: theme.$transparent;;
     svg {
-      *[stroke=\#000] {
-        stroke: theme.$toolbar-basic-icon-color;
-      }
-  
-      *[fill=\#000] {
-        fill: theme.$toolbar-basic-icon-color;
+      color: theme.$toolbar-basic-icon-color;
+    }
+
+    &:disabled,
+    &[disabled] {
+      border-color: theme.$transparent;
+      background-color: theme.$disabled-bg-color;
+      svg {
+        color: theme.$disabled-icon-color;
       }
     }
-  }  
+  }
 
   &:hover :local(.icon-container) {
     border: 1px solid theme.$toolbar-basic-border-color;
     background-color: theme.$basic-color-hover;
+
+    &:disabled,
+    &[disabled] {
+      border-color: theme.$transparent;
+      background-color: theme.$disabled-bg-color;
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:active :local(.icon-container) {
@@ -79,13 +101,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
     }
     svg {
-      *[stroke=\#000] {
-        stroke: theme.$toolbar-basic-selected-icon-color;
-      }
-  
-      *[fill=\#000] {
-        fill: theme.$toolbar-basic-selected-icon-color;
-      }
+      color: theme.$toolbar-basic-selected-icon-color;
     }
 
     label {
@@ -113,7 +129,14 @@
 :local(.primary) {
   :local(.icon-container) {
     background-color: theme.$primary-color;
-  }  
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
+  }
 
   &:hover :local(.icon-container) {
     background-color: theme.$primary-color-hover;
@@ -129,13 +152,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
-        *[stroke=\#000] {
-          stroke: theme.$toolbar-basic-icon-color;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$toolbar-basic-icon-color;
-        }
+        color: theme.$toolbar-basic-icon-color;
       }
     }
 
@@ -149,13 +166,23 @@
         background-color: theme.$toolbar-basic-color-hover;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$primary-color-hover;
+          color: theme.$primary-color-hover;
+        }
+
+        &:disabled,
+        &[disabled] {
+          svg {
+            color: theme.$disabled-icon-color;
           }
-      
-          *[fill=\#000] {
-            fill: theme.$primary-color-hover;
-          }
+        }
+      }
+
+      &:disabled,
+      &[disabled] {
+        border-color: theme.$transparent;
+        background-color: theme.$disabled-bg-color;
+        svg {
+          color: theme.$disabled-icon-color;
         }
       }
     }
@@ -165,13 +192,7 @@
         border-color: theme.$primary-color-pressed;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$primary-color-pressed;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$primary-color-pressed;
-          }
+          color: theme.$primary-color-pressed;
         }
       }
     }
@@ -183,10 +204,24 @@
   :local(.icon-container) {
     background-color: theme.$accept-color;
     border-color: theme.$accept-border-color;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }  
 
   &:hover :local(.icon-container) {
     background-color: theme.$accept-color-hover;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:active :local(.icon-container) {
@@ -199,13 +234,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
-        *[stroke=\#000] {
-          stroke: theme.$accept-color;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$accept-color;
-        }
+        color: theme.$accept-color;
       }
     }
 
@@ -218,13 +247,7 @@
         border-color: theme.$accept-color-hover;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accept-color-hover;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accept-color-hover;
-          }
+          color: theme.$accept-color-hover;
         }
       }
     }
@@ -234,13 +257,7 @@
         border-color: theme.$accept-color-pressed;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accept-color-pressed;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accept-color-pressed;
-          }
+          color: theme.$accept-color-pressed;
         }
       }
     }
@@ -250,10 +267,24 @@
 :local(.cancel) {
   :local(.icon-container) {
     background-color: theme.$cancel-color;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }  
 
   &:hover :local(.icon-container) {
     background-color: theme.$cancel-color-hover;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:active :local(.icon-container) {
@@ -266,13 +297,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
-        *[stroke=\#000] {
-          stroke: theme.$cancel-color;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$cancel-color;
-        }
+        color: theme.$cancel-color;
       }
     }
 
@@ -285,13 +310,7 @@
         border-color: theme.$cancel-color-hover;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$cancel-color-hover;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$cancel-color-hover;
-          }
+          color: theme.$cancel-color-hover;
         }
       }
     }
@@ -301,13 +320,7 @@
         border-color: theme.$cancel-color-pressed;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$cancel-color-pressed;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$cancel-color-pressed;
-          }
+          color: theme.$cancel-color-pressed;
         }
       }
     }
@@ -318,10 +331,22 @@
   :local(.icon-container) {
     background-color: theme.$accent1-color;
     border-color: theme.$accent1-border-color;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }  
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent1-color-hover;
+
+    &:disabled,
+    &[disabled] {
+      background-color: theme.$accent1-color;
+    }
   }
 
   &:active :local(.icon-container) {
@@ -334,13 +359,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
-        *[stroke=\#000] {
-          stroke: theme.$accent1-color;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$accent1-color;
-        }
+        color: theme.$accent1-color;
       }
     }
 
@@ -353,13 +372,14 @@
         border-color: theme.$accent1-color-hover;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent1-color-hover;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent1-color-hover;
-          }
+          color: theme.$accent1-color-hover;
+        }
+      }
+
+      &:disabled,
+      &[disabled] {
+        svg {
+          color: theme.$disabled-icon-color;
         }
       }
     }
@@ -369,13 +389,7 @@
         border-color: theme.$accent1-color-pressed;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent1-color-pressed;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent1-color-pressed;
-          }
+          color: theme.$accent1-color-pressed;
         }
       }
     }
@@ -386,10 +400,24 @@
   :local(.icon-container) {
     background-color: theme.$accent2-color;
     border-color: theme.$accent2-border-color;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }  
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent2-color-hover;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:active :local(.icon-container) {
@@ -402,13 +430,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
-        *[stroke=\#000] {
-          stroke: theme.$accent2-color;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$accent2-color;
-        }
+        color: theme.$accent2-color;
       }
     }
 
@@ -421,13 +443,7 @@
         border-color: theme.$accent2-color-hover;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent2-color-hover;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent2-color-hover;
-          }
+          color: theme.$accent2-color-hover;
         }
       }
     }
@@ -437,13 +453,7 @@
         border-color: theme.$accent2-color-pressed;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent2-color-pressed;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent2-color-pressed;
-          }
+          color: theme.$accent2-color-pressed;
         }
       }
     }
@@ -454,10 +464,24 @@
   :local(.icon-container) {
     background-color: theme.$accent3-color;
     border-color: theme.$accent3-border-color;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }  
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent3-color-hover;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:active :local(.icon-container) {
@@ -470,13 +494,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
-        *[stroke=\#000] {
-          stroke: theme.$accent3-color;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$accent3-color;
-        }
+        color: theme.$accent3-color;
       }
     }
 
@@ -489,13 +507,7 @@
         border-color: theme.$accent3-color-hover;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent3-color-hover;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent3-color-hover;
-          }
+          color: theme.$accent3-color-hover;
         }
       }
     }
@@ -505,13 +517,7 @@
         border-color: theme.$accent3-color-pressed;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent3-color-pressed;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent3-color-pressed;
-          }
+          color: theme.$accent3-color-pressed;
         }
       }
     }
@@ -522,10 +528,24 @@
   :local(.icon-container) {
     background-color: theme.$accent4-color;
     border-color: theme.$accent4-border-color;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent4-color-hover;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:active :local(.icon-container) {
@@ -538,13 +558,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
-        *[stroke=\#000] {
-          stroke: theme.$accent4-color;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$accent4-color;
-        }
+        color: theme.$accent4-color;
       }
     }
 
@@ -557,13 +571,7 @@
         border-color: theme.$accent4-color-hover;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent4-color-hover;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent4-color-hover;
-          }
+          color: theme.$accent4-color-hover;
         }
       }
     }
@@ -573,13 +581,7 @@
         border-color: theme.$accent4-color-pressed;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent4-color-pressed;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent4-color-pressed;
-          }
+          color: theme.$accent4-color-pressed;
         }
       }
     }
@@ -590,10 +592,24 @@
   :local(.icon-container) {
     background-color: theme.$accent5-color;
     border-color: theme.$accent5-border-color;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }  
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent5-color-hover;
+
+    &:disabled,
+    &[disabled] {
+      svg {
+        color: theme.$disabled-icon-color;
+      }
+    }
   }
 
   &:active :local(.icon-container) {
@@ -606,13 +622,7 @@
       background-color: theme.$toolbar-icon-selected-bg;
 
       svg {
-        *[stroke=\#000] {
-          stroke: theme.$accent5-color;
-        }
-    
-        *[fill=\#000] {
-          fill: theme.$accent5-color;
-        }
+        color: theme.$accent5-color;
       }
     }
 
@@ -625,13 +635,7 @@
         border-color: theme.$accent5-color-hover;
 
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent5-color-hover;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent5-color-hover;
-          }
+          color: theme.$accent5-color-hover;
         }
       }
     }
@@ -640,13 +644,7 @@
       :local(.icon-container) {
         border-color: theme.$accent5-color-pressed;
         svg {
-          *[stroke=\#000] {
-            stroke: theme.$accent5-color-pressed;
-          }
-      
-          *[fill=\#000] {
-            fill: theme.$accent5-color-pressed;
-          }
+          color: theme.$accent5-color-pressed;
         }
       }
     }
@@ -676,4 +674,28 @@
 
 :local(.status-recording) {
   background-color: theme.$status-recording-color;
+}
+
+:local(.left) {
+  :local(.icon-container) {
+    width: 48px;
+    border-radius: 0px;
+    border-top-left-radius: 9999px;
+    border-bottom-left-radius: 9999px;
+  } 
+}
+
+:local(.middle) {
+  :local(.icon-container) {
+    border-radius: 0px;
+  }
+}
+
+:local(.right) {
+  :local(.icon-container) {
+    width: 48px;
+    border-radius: 0px;
+    border-top-right-radius: 9999px;
+    border-bottom-right-radius: 9999px;
+  }
 }

@@ -84,7 +84,7 @@ $input-height: 40px;
 }
 
 :local(.disabled) {
-  cursor: not-allowed;
+  cursor: default;
   color: theme.$disabled-text-color;
   background-color: theme.$disabled-bg-color;
 }
@@ -112,12 +112,5 @@ $input-height: 40px;
 
 :local(.invalid-icon) {
   margin: 0 8px;
-
-  *[fill=\#000] {
-    stroke: theme.$error-color;
-  }
-
-  *[stroke=\#000] {
-    stroke: theme.$error-color;
-  }
+  color: theme.$error-color;
 }

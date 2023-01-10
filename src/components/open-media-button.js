@@ -61,8 +61,9 @@ AFRAME.registerComponent("open-media-button", {
           // move to waypoint w/o writing to history
           window.history.replaceState(null, null, window.location.href.split("#")[0] + url.hash);
         } else if (APP.store.state.preferences.fastRoomSwitching && isLocalHubsUrl(this.src)) {
+          const waypoint = url.hash && url.hash.substring(1);
           // move to new room without page load or entry flow
-          changeHub(hubId);
+          changeHub(hubId, true, waypoint);
         } else {
           await exitImmersive();
           location.href = this.src;

@@ -1,0 +1,23 @@
+@use "../styles/theme.scss";
+
+:local(.content) {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  width: max-content;
+  max-width: min(100% - 8px, 420px);
+  min-width: 420px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column;
+  bottom: 8px;
+  margin-bottom: 8px;
+
+  @media (max-width: theme.$breakpoint-md) {
+    max-width: min(100% - 8px, 320px);
+    min-width: 320px;
+    bottom: auto;
+    height: 100%;
+    justify-content: flex-end;
+  }
+}

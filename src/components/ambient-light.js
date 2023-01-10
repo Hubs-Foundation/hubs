@@ -5,17 +5,14 @@ AFRAME.registerComponent("ambient-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.AmbientLight();
     this.el.setObject3D("ambient-light", this.light);
-    this.el.sceneEl.systems.light.registerLight(el);
-    this.rendererSystem = this.el.sceneEl.systems.renderer;
   },
 
   update(prevData) {
     if (this.data.color !== prevData.color) {
       this.light.color.set(this.data.color);
-      this.rendererSystem.applyColorCorrection(this.light.color);
+      this.light.color.convertSRGBToLinear();
     }
 
     if (this.data.intensity !== prevData.intensity) {
@@ -23,7 +20,7 @@ AFRAME.registerComponent("ambient-light", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("ambient-light");
   }
 });

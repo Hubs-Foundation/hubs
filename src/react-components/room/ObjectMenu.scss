@@ -6,13 +6,7 @@
   pointer-events: auto;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$overlay-text-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$overlay-text-color;
-    }
+    color: theme.$overlay-text-color;
   }
 
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
@@ -47,13 +41,7 @@
   border-radius: 12px;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$overlay-text-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$overlay-text-color;
-    }
+    color: theme.$overlay-text-color;
   }
 }
 
@@ -109,13 +97,7 @@
   padding: 0 4px;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$overlay-text-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$overlay-text-color;
-    }
+    color: theme.$overlay-text-color;
   }
 
   @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {

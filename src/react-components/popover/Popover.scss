@@ -88,11 +88,11 @@
     background-color: transparent;
 
     &:hover * {
-      stroke: theme.$link-color-hover;
+      color: theme.$link-color-hover;
     }
 
     &:active * {
-      stroke: theme.$link-color-pressed;
+      color: theme.$link-color-pressed;
     }
   }
 }
@@ -102,13 +102,11 @@
 }
 
 :local(.arrow-bg) {
-  fill: theme.$background1-color;
-  stroke: theme.$background1-color;
+  color: theme.$background1-color;
 }
 
 :local(.arrow-border) {
-  stroke: theme.$border1-color;
-  fill: theme.$background1-color;
+  color: theme.$border1-color;
 }
 
 :local(.fullscreen) {
@@ -132,6 +130,7 @@
 
   :local(.content) {
     padding: 0;
+    height: 100%;
     overflow-y: auto;
   }
 }

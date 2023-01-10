@@ -5,6 +5,7 @@ import { ReactComponent as AvatarIcon } from "./Avatar.svg";
 import { ReactComponent as CameraIcon } from "./Camera.svg";
 import { ReactComponent as CaretDownIcon } from "./CaretDown.svg";
 import { ReactComponent as ChatIcon } from "./Chat.svg";
+import { ReactComponent as ChatOffIcon } from "./ChatOff.svg";
 import { ReactComponent as ChevronBackIcon } from "./ChevronBack.svg";
 import { ReactComponent as CloseIcon } from "./Close.svg";
 import { ReactComponent as DeleteIcon } from "./Delete.svg";
@@ -60,6 +61,7 @@ export const AllIcons = args => (
     <CameraIcon {...args} />
     <CaretDownIcon {...args} />
     <ChatIcon {...args} />
+    <ChatOffIcon {...args} />
     <ChevronBackIcon {...args} />
     <CloseIcon {...args} />
     <DeleteIcon {...args} />

@@ -256,7 +256,7 @@ export default class RtcDebugPanel extends Component {
   };
 
   storeUpdated = () => {
-    const showPanel = this.props.store.state.preferences["showRtcDebugPanel"];
+    const showPanel = this.props.store.state.preferences.showRtcDebugPanel;
     this.setState({ showPanel: showPanel });
   };
 
@@ -566,7 +566,6 @@ export default class RtcDebugPanel extends Component {
     APP.dialog.connect({
       serverUrl: APP.dialog._serverUrl,
       roomId: APP.dialog._roomId,
-      joinToken: APP.hubChannel.token,
       serverParams: APP.dialog._serverParams,
       scene: APP.dialog.scene,
       clientId: APP.dialog._clientId,

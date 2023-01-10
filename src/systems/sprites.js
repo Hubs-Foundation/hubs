@@ -1,5 +1,3 @@
-/* global AFRAME THREE */
-
 // See doc/spritesheet-generation.md for information about this spritesheet
 import spritesheetAction from "../assets/images/spritesheets/sprite-system-action-spritesheet.json";
 import spritesheetNotice from "../assets/images/spritesheets/sprite-system-notice-spritesheet.json";
@@ -7,47 +5,28 @@ import { createImageTexture } from "../utils/media-utils";
 import spritesheetActionPng from "../assets/images/spritesheets/sprite-system-action-spritesheet.png";
 import spritesheetNoticePng from "../assets/images/spritesheets/sprite-system-notice-spritesheet.png";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import vert from "./sprites/sprite.vert";
-import frag from "./sprites/sprite.frag";
+import vertexShader from "./sprites/sprite.vert";
+import fragmentShader from "./sprites/sprite.frag";
 import { getThemeColorShifter } from "../utils/theme-sprites";
+import { onThemeChanged } from "../utils/theme";
 import { disposeTexture } from "../utils/material-utils";
+import { Layers } from "../camera-layers";
 
-const pngs = [[spritesheetActionPng, "action"], [spritesheetNoticePng, "notice"]];
+const MAX_SPRITES = 1024;
+const SHEET_TYPES = ["action", "notice"];
+const PNGS = {
+  action: spritesheetActionPng,
+  notice: spritesheetNoticePng
+};
+const ZEROS = new Array(16 * 4).fill(0);
 
-const multiviewVertPrefix = [
-  // GLSL 3.0 conversion
-  "#version 300 es",
-  "#define attribute in",
-  "#define varying out",
-  "#define texture2D texture",
-  "#extension GL_OVR_multiview : require",
-  "layout(num_views = 2) in;",
-  "uniform mat4 modelViewMatrix;",
-  "uniform mat4 modelViewMatrix2;",
-  "#define modelViewMatrix (gl_ViewID_OVR==0u?modelViewMatrix:modelViewMatrix2)",
-  "uniform mat4 projectionMatrix;",
-  "uniform mat4 projectionMatrix2;",
-  "#define projectionMatrix (gl_ViewID_OVR==0u?projectionMatrix:projectionMatrix2)",
-  ""
-].join("\n");
-const nonmultiviewVertPrefix = ["uniform mat4 modelViewMatrix;", "uniform mat4 projectionMatrix;", ""].join("\n");
+const getSheetType = sprite => (spritesheetAction.frames[sprite.data.name] ? "action" : "notice");
 
-const multiviewFragPrefix = [
-  "#version 300 es",
-  "#define varying in",
-  "out highp vec4 pc_fragColor;",
-  "#define gl_FragColor pc_fragColor",
-  "#define texture2D texture",
-  ""
-].join("\n");
-
-const nonmultiviewFragPrefix = "";
-
-function isVisible(o) {
+const isVisible = o => {
   if (!o.visible) return false;
   if (!o.parent) return true;
   return isVisible(o.parent);
-}
+};
 
 AFRAME.registerComponent("sprite", {
   schema: { name: { type: "string" } },
@@ -73,17 +52,14 @@ AFRAME.registerComponent("sprite", {
   }
 });
 
-const normalizedFrame = (function() {
+const normalizedFrame = (function () {
   const memo = new Map();
-  return function normalizedFrame(name, spritesheet, missingSprites) {
+  return function normalizedFrame(name, spritesheet) {
     let ret = memo.get(name);
     if (ret) {
       return ret;
     } else {
       if (!spritesheet.frames[name]) {
-        if (missingSprites.indexOf(name) === -1) {
-          missingSprites.push(name);
-        }
         ret = { x: 0, y: 0, w: 0, h: 0 };
         memo.set(name, ret);
         return ret;
@@ -102,10 +78,7 @@ const normalizedFrame = (function() {
   };
 })();
 
-const getSheetType = sprite => (spritesheetAction.frames[sprite.data.name] ? "action" : "notice");
-const SHEET_TYPES = ["action", "notice"];
-
-const raycastOnSprite = (function() {
+const raycastOnSprite = (function () {
   const vA = new THREE.Vector3();
   const vB = new THREE.Vector3();
   const vC = new THREE.Vector3();
@@ -137,15 +110,15 @@ const raycastOnSprite = (function() {
   };
 })();
 
-function getHoverableVisuals(el) {
+const getHoverableVisuals = el => {
   if (!el || !el.components) return null;
   if (el.components["hoverable-visuals"]) {
     return el.components["hoverable-visuals"];
   }
   return getHoverableVisuals(el.parentEl);
-}
+};
 
-function enableSweepingEffect(comp) {
+const enableSweepingEffect = comp => {
   const hoverableVisuals = getHoverableVisuals(comp.el);
   if (!hoverableVisuals) {
     return false;
@@ -156,29 +129,46 @@ function enableSweepingEffect(comp) {
   const isFrozen = hoverableVisuals.el.sceneEl.is("frozen");
   const hideDueToPinning = !isSpawner && isPinned && !isFrozen;
   return hoverableVisuals.data.enableSweepingEffect && !hideDueToPinning;
-}
+};
 
-function createGeometry(maxSprites) {
+const createGeometry = maxSprites => {
+  // TODO: Consider to use InstancedBufferGeometry which would be more efficient and performant
   const geometry = new THREE.BufferGeometry();
+
+  const positions = new Float32Array(maxSprites * 3 * 4);
+  for (let i = 0; i < maxSprites; i++) {
+    positions[i * 3 * 4 + 0] = -0.5;
+    positions[i * 3 * 4 + 1] = 0.5;
+    positions[i * 3 * 4 + 2] = 0.0;
+    positions[i * 3 * 4 + 3] = 0.5;
+    positions[i * 3 * 4 + 4] = 0.5;
+    positions[i * 3 * 4 + 5] = 0.0;
+    positions[i * 3 * 4 + 6] = -0.5;
+    positions[i * 3 * 4 + 7] = -0.5;
+    positions[i * 3 * 4 + 8] = 0.0;
+    positions[i * 3 * 4 + 9] = 0.5;
+    positions[i * 3 * 4 + 10] = -0.5;
+    positions[i * 3 * 4 + 11] = 0.0;
+  }
   // We need to use "position" as the attribute name here. It was previously "a_vertices". It seems three.js
   // might assume that geometries have a "position" attribute in some cases,
   // like in https://github.com/mrdoob/three.js/pull/18044
-  geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(maxSprites * 3 * 4), 3, false));
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3, false));
+
   geometry.setAttribute(
     "a_hubs_EnableSweepingEffect",
     new THREE.BufferAttribute(new Float32Array(maxSprites * 4), 1, false)
   );
+
   geometry.setAttribute(
     "a_hubs_SweepParams",
     new THREE.BufferAttribute(new Float32Array(maxSprites * 4 * 2), 2, false)
   );
+
   geometry.setAttribute("a_uvs", new THREE.BufferAttribute(new Float32Array(maxSprites * 2 * 4), 2, false));
-  const mvCols = new THREE.InterleavedBuffer(new Float32Array(maxSprites * 16 * 4), 16);
-  geometry.setAttribute("mvCol0", new THREE.InterleavedBufferAttribute(mvCols, 4, 0, false));
-  geometry.setAttribute("mvCol1", new THREE.InterleavedBufferAttribute(mvCols, 4, 4, false));
-  geometry.setAttribute("mvCol2", new THREE.InterleavedBufferAttribute(mvCols, 4, 8, false));
-  geometry.setAttribute("mvCol3", new THREE.InterleavedBufferAttribute(mvCols, 4, 12, false));
-  const indices = new Array(3 * 2 * maxSprites);
+  geometry.setAttribute("a_mv", new THREE.BufferAttribute(new Float32Array(maxSprites * 16 * 4), 16, false));
+
+  const indices = new Uint16Array(maxSprites * 3 * 2);
   for (let i = 0; i < maxSprites; i++) {
     indices[i * 3 * 2 + 0] = i * 4 + 0;
     indices[i * 3 * 2 + 1] = i * 4 + 2;
@@ -187,150 +177,152 @@ function createGeometry(maxSprites) {
     indices[i * 3 * 2 + 4] = i * 4 + 2;
     indices[i * 3 * 2 + 5] = i * 4 + 3;
   }
-  geometry.setIndex(indices);
-  return geometry;
-}
+  geometry.setIndex(new THREE.BufferAttribute(indices, 1));
 
-const ZEROS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  geometry.drawRange.count = 0;
+
+  return geometry;
+};
+
+const createMaterial = spritesheetTexture => {
+  return new THREE.RawShaderMaterial({
+    uniforms: {
+      u_spritesheet: { value: spritesheetTexture },
+      hubs_Time: { value: 0 }
+    },
+    vertexShader,
+    fragmentShader,
+    side: THREE.DoubleSide,
+    transparent: true
+  });
+};
 
 export class SpriteSystem {
   raycast(raycaster, intersects) {
-    for (let i = 0; i < SHEET_TYPES.length; i++) {
-      const sheetType = SHEET_TYPES[i];
-      const slots = this.slots[sheetType];
-
-      for (let i = 0, l = slots.length; i < l; i++) {
-        if (!slots[i]) continue;
-
-        const o = this.indexWithSprite[sheetType].get(i).el.object3D;
+    for (const sheetType of SHEET_TYPES) {
+      const sprites = this.sprites[sheetType];
+      for (const sprite of sprites) {
+        const o = sprite.el.object3D;
         if (isVisible(o)) {
           raycastOnSprite.call(o, raycaster, intersects);
         }
       }
     }
-
     return intersects;
   }
+
   constructor(scene) {
-    this.missingSprites = [];
-    this.maxSprites = 1024;
-    this.slots = { action: new Array(this.maxSprites), notice: new Array(this.maxSprites) };
-    this.spriteWithIndex = { action: new Map(), notice: new Map() };
-    this.indexWithSprite = { action: new Map(), notice: new Map() };
-    this.stack = { action: new Array(this.maxSprites), notice: new Array(this.maxSprites) };
-    this.meshes = {};
+    this.sprites = { action: [], notice: [] };
+    this.indicesFromSprites = { action: new WeakMap(), notice: new WeakMap() };
+    this.meshes = { action: null, notice: null };
 
-    for (const stack of Object.values(this.stack)) {
-      for (let i = 0; i < this.maxSprites; i++) {
-        stack[i] = this.maxSprites - 1 - i;
-      }
-    }
-
-    const vertexShader = String.prototype.concat(
-      scene.renderer.xr.multiview ? multiviewVertPrefix : nonmultiviewVertPrefix,
-      vert
-    );
-    const fragmentShader = String.prototype.concat(
-      scene.renderer.xr.multiview ? multiviewFragPrefix : nonmultiviewFragPrefix,
-      frag
-    );
-
-    const domReady = waitForDOMContentLoaded();
-
-    Promise.all([domReady]).then(() => {
-      for (const [spritesheetPng, type] of pngs) {
-        Promise.all([createImageTexture(spritesheetPng, getThemeColorShifter(type)), waitForDOMContentLoaded()]).then(
-          ([spritesheetTexture]) => {
-            const material = new THREE.RawShaderMaterial({
-              uniforms: {
-                u_spritesheet: { value: spritesheetTexture },
-                hubs_Time: { value: 0 }
-              },
-              vertexShader,
-              fragmentShader,
-              side: THREE.DoubleSide,
-              transparent: true
-            });
-            const mesh = (this.meshes[type] = new THREE.Mesh(createGeometry(this.maxSprites), material));
-            const el = document.createElement("a-entity");
-            el.classList.add("ui");
-            scene.appendChild(el);
-            el.setObject3D("mesh", mesh);
-            mesh.frustumCulled = false;
-            mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
-            mesh.raycast = this.raycast.bind(this);
-          }
-        );
+    waitForDOMContentLoaded().then(() => {
+      for (const type in PNGS) {
+        const spritesheetPng = PNGS[type];
+        createImageTexture(spritesheetPng, getThemeColorShifter(type)).then(spritesheetTexture => {
+          const geometry = createGeometry(MAX_SPRITES);
+          const material = createMaterial(spritesheetTexture);
+          const mesh = (this.meshes[type] = new THREE.Mesh(geometry, material));
+          const el = document.createElement("a-entity");
+          el.classList.add("ui");
+          scene.appendChild(el);
+          el.setObject3D("mesh", mesh);
+          mesh.frustumCulled = false;
+          mesh.layers.set(Layers.CAMERA_LAYER_UI);
+          mesh.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
+          mesh.renderOrder = window.APP.RENDER_ORDER.HUD_ICONS;
+          mesh.raycast = this.raycast.bind(this);
+        });
       }
     });
 
-    APP.store.addEventListener("themechanged", async () => {
-      for (const [spritesheetPng, type] of pngs) {
+    const updateSprites = () => {
+      for (const type in PNGS) {
+        const spritesheetPng = PNGS[type];
+        // TODO: Fix me if possible
+        // 1. If theme is changed before meshes are initialized, no effect to textures.
+        // 2. If theme is changed before textures loading for the previous theme is completed
+        // and textures loading for the new theme is completed earlier than the previous ones,
+        // the previous ones are set.
         if (this.meshes[type]) {
-          const newTexture = await createImageTexture(spritesheetPng, getThemeColorShifter(type));
-          const oldTexture = this.meshes[type].material.uniforms.u_spritesheet.value;
-          if (oldTexture) {
+          createImageTexture(spritesheetPng, getThemeColorShifter(type)).then(newTexture => {
+            const oldTexture = this.meshes[type].material.uniforms.u_spritesheet.value;
+            this.meshes[type].material.uniforms.u_spritesheet.value = newTexture;
+            this.meshes[type].material.uniformsNeedUpdate = true;
             disposeTexture(oldTexture);
-          }
-          this.meshes[type].material.uniforms.u_spritesheet.value = newTexture;
-          this.meshes[type].material.uniformsNeedUpdate = true;
+          });
         }
       }
-    });
+    };
+
+    onThemeChanged(updateSprites);
   }
 
   tick(t) {
-    if (!this.meshes.action || !this.meshes.notice) return;
-
-    for (let i = 0; i < SHEET_TYPES.length; i++) {
+    for (let i = 0, il = SHEET_TYPES.length; i < il; i++) {
       const sheetType = SHEET_TYPES[i];
       const mesh = this.meshes[sheetType];
+
+      if (!mesh) continue;
+
       mesh.material.uniforms.hubs_Time.value = t;
       mesh.material.uniformsNeedUpdate = true;
 
-      const mvCols = mesh.geometry.attributes["mvCol0"].data; // interleaved
-      const aEnableSweepingEffect = mesh.geometry.attributes["a_hubs_EnableSweepingEffect"];
-      const aSweepParams = mesh.geometry.attributes["a_hubs_SweepParams"];
-      for (let i = 0, l = this.slots[sheetType].length; i < l; i++) {
-        const slots = this.slots[sheetType];
-        if (!slots[i]) continue;
+      const geometry = mesh.geometry;
+      const aMv = geometry.getAttribute("a_mv");
+      const aEnableSweepingEffect = geometry.getAttribute("a_hubs_EnableSweepingEffect");
+      const aSweepParams = geometry.getAttribute("a_hubs_SweepParams");
+      const sprites = this.sprites[sheetType];
 
-        const indexWithSprite = this.indexWithSprite[sheetType];
+      let aEnableSweepingEffectNeedsUpdate = false;
+      let aSweepParamsNeedsUpdate = false;
 
-        const sprite = indexWithSprite.get(i);
+      for (let j = 0, jl = sprites.length; j < jl; j++) {
+        const sprite = sprites[j];
 
         if (isVisible(sprite.el.object3D)) {
           const enableSweepingEffectValue = enableSweepingEffect(sprite) ? 1 : 0;
-          aEnableSweepingEffect.array[i * 4 + 0] = enableSweepingEffectValue;
-          aEnableSweepingEffect.array[i * 4 + 1] = enableSweepingEffectValue;
-          aEnableSweepingEffect.array[i * 4 + 2] = enableSweepingEffectValue;
-          aEnableSweepingEffect.array[i * 4 + 3] = enableSweepingEffectValue;
-          aEnableSweepingEffect.needsUpdate = true;
+          aEnableSweepingEffect.array[j * 4 + 0] = enableSweepingEffectValue;
+          aEnableSweepingEffect.array[j * 4 + 1] = enableSweepingEffectValue;
+          aEnableSweepingEffect.array[j * 4 + 2] = enableSweepingEffectValue;
+          aEnableSweepingEffect.array[j * 4 + 3] = enableSweepingEffectValue;
+          aEnableSweepingEffectNeedsUpdate = true;
+
           if (enableSweepingEffectValue) {
             const hoverableVisuals = getHoverableVisuals(sprite.el);
             const s = hoverableVisuals.sweepParams[0];
             const t = hoverableVisuals.sweepParams[1];
-            aSweepParams.setXY(4 * i + 0, s, t);
-            aSweepParams.setXY(4 * i + 1, s, t);
-            aSweepParams.setXY(4 * i + 2, s, t);
-            aSweepParams.setXY(4 * i + 3, s, t);
-            aSweepParams.needsUpdate = true;
+            aSweepParams.setXY(j * 4 + 0, s, t);
+            aSweepParams.setXY(j * 4 + 1, s, t);
+            aSweepParams.setXY(j * 4 + 2, s, t);
+            aSweepParams.setXY(j * 4 + 3, s, t);
+            aSweepParamsNeedsUpdate = true;
           }
 
+          // TODO: This tick should be invoked after updating the entire scene graph matrices.
+          // If we do it, we may remove this .updateMatrices() call
           sprite.el.object3D.updateMatrices();
           const mat4 = sprite.el.object3D.matrixWorld;
-          mvCols.array.set(mat4.elements, i * 4 * 16 + 0);
-          mvCols.array.set(mat4.elements, i * 4 * 16 + 1 * 16);
-          mvCols.array.set(mat4.elements, i * 4 * 16 + 2 * 16);
-          mvCols.array.set(mat4.elements, i * 4 * 16 + 3 * 16);
-          mvCols.needsUpdate = true;
+          aMv.array.set(mat4.elements, j * 4 * 16);
+          aMv.array.set(mat4.elements, (j * 4 + 1) * 16);
+          aMv.array.set(mat4.elements, (j * 4 + 2) * 16);
+          aMv.array.set(mat4.elements, (j * 4 + 3) * 16);
         } else {
-          mvCols.array.set(ZEROS, i * 4 * 16 + 0);
-          mvCols.array.set(ZEROS, i * 4 * 16 + 1 * 16);
-          mvCols.array.set(ZEROS, i * 4 * 16 + 2 * 16);
-          mvCols.array.set(ZEROS, i * 4 * 16 + 3 * 16);
-          mvCols.needsUpdate = true;
+          aMv.array.set(ZEROS, j * 4 * 16);
         }
+      }
+
+      aMv.needsUpdate = true;
+      aMv.updateRange.count = sprites.length * 4 * 16;
+
+      if (aEnableSweepingEffectNeedsUpdate) {
+        aEnableSweepingEffect.needsUpdate = true;
+        aEnableSweepingEffect.updateRange.count = sprites.length * 4;
+      }
+
+      if (aSweepParamsNeedsUpdate) {
+        aSweepParams.needsUpdate = true;
+        aSweepParams.updateRange.count = sprites.length * 4 * 2;
       }
     }
   }
@@ -338,73 +330,86 @@ export class SpriteSystem {
   updateUVs(sprite) {
     const sheetType = getSheetType(sprite);
     const mesh = this.meshes[sheetType];
-    const spriteWithIndex = this.spriteWithIndex[sheetType];
 
+    // TODO: Is this guard necessary?
+    if (!mesh) return;
+
+    const indicesFromSprites = this.indicesFromSprites[sheetType];
+
+    // TODO: Is this guard necessary?
+    if (!indicesFromSprites.has(sprite)) return;
+
+    const index = indicesFromSprites.get(sprite);
     const flipY = mesh.material.uniforms.u_spritesheet.value.flipY;
-    const i = spriteWithIndex.get(sprite);
-    const frame = normalizedFrame(
-      sprite.data.name,
-      sheetType === "action" ? spritesheetAction : spritesheetNotice,
-      this.missingSprites
-    );
-    const aUvs = mesh.geometry.attributes["a_uvs"];
-
-    aUvs.setXY(i * 4 + 0, frame.x, flipY ? 1 - frame.y : frame.y);
-    aUvs.setXY(i * 4 + 1, frame.x + frame.w, flipY ? 1 - frame.y : frame.y);
-    aUvs.setXY(i * 4 + 2, frame.x, flipY ? 1 - frame.y - frame.h : frame.y + frame.h);
-    aUvs.setXY(i * 4 + 3, frame.x + frame.w, flipY ? 1 - frame.y - frame.h : frame.y + frame.h);
+    const frame = normalizedFrame(sprite.data.name, sheetType === "action" ? spritesheetAction : spritesheetNotice);
+    const aUvs = mesh.geometry.getAttribute("a_uvs");
+    aUvs.setXY(index * 4 + 0, frame.x, flipY ? 1 - frame.y : frame.y);
+    aUvs.setXY(index * 4 + 1, frame.x + frame.w, flipY ? 1 - frame.y : frame.y);
+    aUvs.setXY(index * 4 + 2, frame.x, flipY ? 1 - frame.y - frame.h : frame.y + frame.h);
+    aUvs.setXY(index * 4 + 3, frame.x + frame.w, flipY ? 1 - frame.y - frame.h : frame.y + frame.h);
     aUvs.needsUpdate = true;
+    aUvs.updateRange.count = this.sprites[sheetType].length * 4 * 2;
   }
 
   add(sprite) {
-    if (!this.meshes.action || !this.meshes.notice) {
-      return 0;
-    }
     const sheetType = getSheetType(sprite);
-    const stack = this.stack[sheetType];
-    const i = stack.pop();
-    if (i === undefined) {
+    const mesh = this.meshes[sheetType];
+
+    if (!mesh) return 0;
+
+    const sprites = this.sprites[sheetType];
+    const indicesFromSprites = this.indicesFromSprites[sheetType];
+
+    // TODO: Is this guard necessary?
+    if (indicesFromSprites.has(sprite)) {
+      console.error("This sprite is already added");
+      return -1;
+    }
+
+    if (sprites.length >= MAX_SPRITES) {
       console.error("Too many sprites");
       return -1;
     }
-    const slots = this.slots[sheetType];
-    const spriteWithIndex = this.spriteWithIndex[sheetType];
-    const indexWithSprite = this.indexWithSprite[sheetType];
-    const mesh = this.meshes[sheetType];
-    slots[i] = true;
-    spriteWithIndex.set(sprite, i);
-    indexWithSprite.set(i, sprite);
 
+    const index = sprites.push(sprite) - 1;
+    indicesFromSprites.set(sprite, index);
     this.updateUVs(sprite);
 
-    const aVertices = mesh.geometry.attributes["position"];
-    aVertices.setXYZ(i * 4 + 0, -0.5, 0.5, 0);
-    aVertices.setXYZ(i * 4 + 1, 0.5, 0.5, 0);
-    aVertices.setXYZ(i * 4 + 2, -0.5, -0.5, 0);
-    aVertices.setXYZ(i * 4 + 3, 0.5, -0.5, 0);
-    aVertices.needsUpdate = true;
+    const geometry = mesh.geometry;
+    geometry.drawRange.count = sprites.length * 3 * 2;
+
     return 1;
   }
 
   remove(sprite) {
     const sheetType = getSheetType(sprite);
-    const slots = this.slots[sheetType];
-    const spriteWithIndex = this.spriteWithIndex[sheetType];
-    const indexWithSprite = this.indexWithSprite[sheetType];
-    const stack = this.stack[sheetType];
     const mesh = this.meshes[sheetType];
 
-    const i = spriteWithIndex.get(sprite);
-    spriteWithIndex.delete(sprite);
-    indexWithSprite.delete(i);
-    slots[i] = false;
-    stack.push(i);
+    // TODO: Is this guard necessary?
+    if (!mesh) return;
 
-    const mvCols = mesh.geometry.attributes["mvCol0"].data; // interleaved
-    mvCols.array.set(ZEROS, i * 4 * 16 + 0);
-    mvCols.array.set(ZEROS, i * 4 * 16 + 1 * 16);
-    mvCols.array.set(ZEROS, i * 4 * 16 + 2 * 16);
-    mvCols.array.set(ZEROS, i * 4 * 16 + 3 * 16);
-    mvCols.needsUpdate = true;
+    const sprites = this.sprites[sheetType];
+    const indicesFromSprites = this.indicesFromSprites[sheetType];
+
+    // TODO: Is this guard necessary?
+    if (!indicesFromSprites.has(sprite)) {
+      console.error("This sprite is not found");
+      return;
+    }
+
+    const index = indicesFromSprites.get(sprite);
+    indicesFromSprites.delete(sprite);
+
+    const lastSprite = sprites.pop();
+
+    if (sprite !== lastSprite) {
+      // Move the last sprite to the place at the removed sprite index
+      sprites[index] = lastSprite;
+      indicesFromSprites.set(lastSprite, index);
+      this.updateUVs(lastSprite);
+    }
+
+    const geometry = mesh.geometry;
+    geometry.drawRange.count = sprites.length * 3 * 2;
   }
 }

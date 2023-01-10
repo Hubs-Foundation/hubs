@@ -1,8 +1,7 @@
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
-import { injectIntl } from "react-intl";
 import { formatSystemMessage } from "./room/ChatSidebar";
 
 import ChatMessage from "./chat-message";
@@ -10,23 +9,20 @@ import PhotoMessage from "./photo-message";
 import VideoMessage from "./video-message";
 import ImageMessage from "./image-message";
 import { getPresenceContextForSession } from "../utils/phoenix-utils";
+import { useIntl } from "react-intl";
+import PermissionMessage from "./permission-message";
+import { useRole } from "./room/useRole";
 
-class PresenceLog extends Component {
-  static propTypes = {
-    entries: PropTypes.array,
-    inRoom: PropTypes.bool,
-    hubId: PropTypes.string,
-    history: PropTypes.object,
-    presences: PropTypes.object,
-    onViewProfile: PropTypes.func,
-    intl: PropTypes.object
-  };
+export const presets = ["InRoom", "Notifications"];
 
-  constructor(props) {
-    super(props);
-  }
+export function PresenceLog({ entries, preset, hubId, history, presences, onViewProfile, include, exclude, ...rest }) {
+  const intl = useIntl();
+  const isMod = useRole("owner");
 
-  domForEntry = e => {
+  const domForEntry = e => {
+    if (include && !include.includes(e.type)) return;
+    if (exclude && exclude.includes(e.type)) return;
+
     const entryClasses = {
       [styles.presenceLogEntry]: true,
       [styles.presenceLogEntryWithButton]: (e.type === "chat" || e.type === "image") && e.maySpawn,
@@ -34,7 +30,7 @@ class PresenceLog extends Component {
       [styles.expired]: !!e.expired
     };
 
-    const presenceContext = e.sessionId ? getPresenceContextForSession(this.props.presences, e.sessionId) : {};
+    const presenceContext = e.sessionId ? getPresenceContextForSession(presences, e.sessionId) : {};
     const isBot = !!presenceContext.discord;
 
     switch (e.type) {
@@ -47,9 +43,9 @@ class PresenceLog extends Component {
             body={e.body}
             maySpawn={e.maySpawn}
             sessionId={e.sessionId}
-            includeFromLink={this.props.inRoom && !isBot}
-            history={this.props.history}
-            onViewProfile={this.props.onViewProfile}
+            includeFromLink={preset === "inRoom" && !isBot}
+            history={history}
+            onViewProfile={onViewProfile}
           />
         );
       case "image":
@@ -70,7 +66,7 @@ class PresenceLog extends Component {
             className={classNames(entryClasses, styles.media)}
             body={e.body}
             maySpawn={e.maySpawn}
-            hubId={this.props.hubId}
+            hubId={hubId}
           />
         );
       case "video":
@@ -81,11 +77,23 @@ class PresenceLog extends Component {
             className={classNames(entryClasses, styles.media)}
             body={e.body}
             maySpawn={e.maySpawn}
-            hubId={this.props.hubId}
+            hubId={hubId}
           />
         );
+      case "permission":
+        return (
+          (!isMod || e.sessionId !== NAF.clientId) && (
+            <PermissionMessage
+              key={e.key}
+              permission={e.body.permission}
+              className={classNames(entryClasses, styles.permission)}
+              body={e.body}
+              isMod={isMod && e.sessionId === NAF.clientId}
+            />
+          )
+        );
       default: {
-        const systemMessage = formatSystemMessage(e, this.props.intl);
+        const systemMessage = formatSystemMessage(e, intl);
 
         return (
           systemMessage && (
@@ -98,14 +106,22 @@ class PresenceLog extends Component {
     }
   };
 
-  render() {
-    const presenceClasses = {
-      [styles.presenceLog]: true,
-      [styles.presenceLogInRoom]: this.props.inRoom
-    };
-
-    return <div className={classNames(presenceClasses)}>{this.props.entries.map(this.domForEntry)}</div>;
-  }
+  return (
+    <div className={classNames(styles.presenceLog, styles["presenceLog" + preset])} {...rest}>
+      {entries.map(domForEntry)}
+    </div>
+  );
 }
 
-export default injectIntl(PresenceLog);
+PresenceLog.propTypes = {
+  entries: PropTypes.array,
+  preset: PropTypes.oneOf(presets),
+  hubId: PropTypes.string,
+  history: PropTypes.object,
+  presences: PropTypes.object,
+  onViewProfile: PropTypes.func,
+  className: PropTypes.string,
+  children: PropTypes.node,
+  include: PropTypes.array,
+  exclude: PropTypes.array
+};

@@ -1,4 +1,8 @@
 // Brief overview of client authorization can be found in the wiki:
+
+import { hasComponent } from "bitecs";
+import { HoldableButton } from "../bit-components";
+
 // https://github.com/mozilla/hubs/wiki/Hubs-authorization
 export function showHoverEffect(el) {
   const isFrozen = el.sceneEl.is("frozen");
@@ -17,20 +21,17 @@ export function showHoverEffect(el) {
 export function canMove(entity) {
   const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
   const networkedTemplate = entity && entity.components.networked && entity.components.networked.data.template;
-  const isCamera = networkedTemplate === "#interactable-camera";
   const isPen = networkedTemplate === "#interactable-pen";
   const spawnerTemplate =
     entity && entity.components["super-spawner"] && entity.components["super-spawner"].data.template;
   const isEmojiSpawner = spawnerTemplate === "#interactable-emoji";
   const isEmoji = !!entity.components.emoji;
-  const isHoldableButton = entity.components.tags && entity.components.tags.data.holdableButton;
   return (
-    isHoldableButton ||
+    hasComponent(APP.world, HoldableButton, entity.eid) ||
     ((isEmoji || isEmojiSpawner
       ? window.APP.hubChannel.can("spawn_emoji")
       : window.APP.hubChannel.can("spawn_and_move_media")) &&
       (!isPinned || window.APP.hubChannel.can("pin_objects")) &&
-      (!isCamera || window.APP.hubChannel.can("spawn_camera")) &&
       (!isPen || window.APP.hubChannel.can("spawn_drawing")))
   );
 }
@@ -60,7 +61,7 @@ function initializeNonAuthorizedSchemas() {
   nonAuthorizedSchemas = {};
   const { schemaDict } = NAF.schemas;
   for (const template in schemaDict) {
-    if (!schemaDict.hasOwnProperty(template)) continue;
+    if (!Object.prototype.hasOwnProperty.call(schemaDict, template)) continue;
     const schema = schemaDict[template];
     nonAuthorizedSchemas[template] = (schema.nonAuthorizedComponents || [])
       .map(nonAuthorizedComponent => indexForComponent(nonAuthorizedComponent, schema))
@@ -74,7 +75,7 @@ function sanitizeMessageData(template, data) {
   }
   const nonAuthorizedIndices = nonAuthorizedSchemas[template];
   for (const index in data.components) {
-    if (!data.components.hasOwnProperty(index)) continue;
+    if (!Object.prototype.hasOwnProperty.call(data.components, index)) continue;
     if (!nonAuthorizedIndices.includes(index)) {
       data.components[index] = null;
     }
@@ -186,7 +187,7 @@ export function authorizeOrSanitizeMessage(message) {
     let sanitizedAny = false;
     let stashedAny = false;
     for (const index in message.data.d) {
-      if (!message.data.d.hasOwnProperty(index)) continue;
+      if (!Object.prototype.hasOwnProperty.call(message.data.d, index)) continue;
       const entityData = message.data.d[index];
       if (entityData.persistent && !NAF.entities.getEntity(entityData.networkId)) {
         stashPersistentSync(message, entityData);

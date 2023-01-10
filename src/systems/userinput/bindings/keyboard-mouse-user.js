@@ -2,6 +2,7 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
+import qsTruthy from "../../../utils/qs_truthy";
 
 // import { Pose } from "../pose";
 
@@ -25,6 +26,44 @@ const inspectZoomSpeed = parseFloat(qs.get("izs")) || -10.0;
 const k = name => {
   return `/keyboard-mouse-user/keyboard-var/${name}`;
 };
+
+const videoBindings = [
+  {
+    src: { value: paths.device.mouse.wheel },
+    dest: { value: paths.actions.cursor.right.mediaVolumeMod },
+    xform: xforms.scale(-0.3),
+    priority: 1
+  }
+];
+
+if (qsTruthy("newLoader")) {
+  const priority = 3;
+  videoBindings.push({
+    src: { value: paths.device.mouse.buttonLeft },
+    dest: { value: k("mousedown") },
+    xform: xforms.rising,
+    priority
+  });
+  videoBindings.push({
+    src: { value: paths.device.mouse.buttonLeft },
+    dest: { value: k("mouseup") },
+    xform: xforms.falling,
+    priority
+  });
+  videoBindings.push({
+    src: {
+      rising: k("mousedown"),
+      falling: k("mouseup")
+    },
+    dest: {
+      click: paths.actions.cursor.right.togglePlayVideo,
+      grab: paths.actions.cursor.right.grab,
+      drop: paths.actions.cursor.right.drop
+    },
+    xform: xforms.clickAndHold(),
+    priority
+  });
+}
 
 export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
@@ -113,6 +152,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: { value: paths.device.keyboard.key("b") },
+      dest: { value: paths.actions.toggleRecord },
+      xform: xforms.rising
+    },
+    {
       src: { value: paths.device.keyboard.key("Tab") },
       dest: { value: paths.actions.toggleFreeze },
       xform: xforms.rising
@@ -152,11 +196,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       src: { value: paths.device.keyboard.key("c") },
       dest: { value: paths.actions.toggleCamera },
       xform: xforms.rising
-    },
-    {
-      src: { value: paths.device.keyboard.key("x") },
-      dest: { value: paths.actions.takeSnapshot },
-      xform: xforms.copy
     },
     {
       src: { value: paths.device.smartMouse.cursorPose },
@@ -724,16 +763,14 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.startInspecting },
       xform: xforms.any,
       priority: 201
-    }
-  ],
-  [sets.rightCursorHoveringOnVideo]: [
+    },
     {
-      src: { value: paths.device.mouse.wheel },
-      dest: { value: paths.actions.cursor.right.mediaVolumeMod },
-      xform: xforms.scale(-0.3),
-      priority: 1
+      src: { value: paths.device.keyboard.key("x") },
+      dest: { value: paths.actions.cursor.right.deleteEntity },
+      xform: xforms.rising
     }
   ],
+  [sets.rightCursorHoveringOnVideo]: videoBindings,
   [sets.inputFocused]: [
     {
       src: { value: "/device/keyboard" },

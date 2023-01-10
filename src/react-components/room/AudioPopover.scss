@@ -1,0 +1,74 @@
+@use "../styles/theme.scss";
+
+:local(.audio-toolbar-popover) {
+  width: 100%;
+  height: 100%;
+
+  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    padding-top: 8px;
+    width: 272px;
+    overflow: hidden;
+  }
+}
+
+:local(.selection-input) {  
+  width: 100%;
+  max-width: none;
+}
+
+:local(.buttons-container) {
+  display: flex;
+}
+
+:local(.icon-enabled) {
+  path {
+    stroke-width: 1;
+  }
+
+  width: 24px;
+  height: 24px;
+  color: theme.$text1-color;
+}
+
+:local(.icon-disabled) {
+  path {
+    stroke-width: 1;
+  }
+
+  width: 24px;
+  height: 24px;
+  color: theme.$text2-color;
+}
+
+:local(.arrow-button) {
+  svg {
+    transform: rotate(180deg);
+  }
+}
+
+:local(.arrow-button-selected) {
+  svg {
+    transform: rotate(0deg);
+  }
+}
+
+:local(.level-bar) {
+  width: 100%;
+  height: 24px;
+}
+
+:local(.voice-chat-disabled) {
+  display: flex;
+  flex: auto;
+  align-items: center;
+  justify-content: center;
+  flex-flow: column;
+  gap: 20px;
+  padding: 30px;
+}
+
+:local(.text-disabled) {
+  color: theme.$disabled-text-color;
+  font-size: theme.$font-size-md;
+  text-align: center;
+}

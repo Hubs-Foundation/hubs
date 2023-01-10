@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { SCHEMA } from "../storage/store";
 import { fetchAvatar } from "../utils/avatar-utils";
 import { replaceHistoryState } from "../utils/history";
 import { AvatarSettingsSidebar } from "./room/AvatarSettingsSidebar";
@@ -126,7 +125,7 @@ export default class ProfileEntryPanel extends Component {
       displayNameInputRef: inp => (this.nameInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
-      displayNamePattern: SCHEMA.definitions.profile.properties.displayName.pattern,
+      displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {

@@ -23,6 +23,18 @@ AFRAME.registerComponent("text-button", {
       this.updateButtonState();
     };
     this.textEl = this.el.querySelector("[text]");
+
+    if (this.el.getObject3D("mesh")) {
+      this.el.components.slice9.plane.material.toneMapped = false;
+    } else {
+      this.el.addEventListener(
+        "object3dset",
+        () => {
+          this.el.components.slice9.plane.material.toneMapped = false;
+        },
+        { once: true }
+      );
+    }
   },
 
   play() {
@@ -50,7 +62,7 @@ AFRAME.registerComponent("text-button", {
   }
 });
 
-const noop = function() {};
+const noop = function () {};
 // TODO: this should ideally be fixed upstream somehow but its pretty tricky since text is just a geometry not a different type of Object3D, and Object3D is what handles raycast checks.
 AFRAME.registerComponent("text-raycast-hack", {
   dependencies: ["text"],

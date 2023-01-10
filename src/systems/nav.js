@@ -2,14 +2,14 @@ const { Pathfinding } = require("three-pathfinding");
 import qsTruthy from "../utils/qs_truthy";
 
 AFRAME.registerSystem("nav", {
-  init: function() {
+  init: function () {
     this.pathfinder = new Pathfinding();
     this.mesh = null;
     this.el.addEventListener("reset_scene", this.removeNavMeshData.bind(this));
     this.el.addEventListener("leaving_loading_environment", this.removeNavMeshData.bind(this));
   },
 
-  loadMesh: function(mesh, zone) {
+  loadMesh: function (mesh, zone) {
     if (this.mesh) {
       console.error("tried to load multiple nav meshes");
       this.removeNavMeshData();
@@ -19,6 +19,7 @@ AFRAME.registerSystem("nav", {
     geometry.applyMatrix4(mesh.matrixWorld);
     this.pathfinder.setZoneData(zone, Pathfinding.createZone(geometry));
     this.mesh = mesh;
+
     this.el.sceneEl.emit("nav-mesh-loaded");
 
     if (qsTruthy("debugNavmesh")) {

@@ -1,10 +1,9 @@
-import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { TweetEditorModal } from "./TweetEditorModal";
 import { Modifier, EditorState } from "draft-js";
 import { createEditorStateWithText } from "draft-js-plugins-editor";
 import { fetchReticulumAuthenticated } from "../../utils/phoenix-utils";
-import { scaledThumbnailUrlFor } from "../../utils/media-url-utils";
 
 // Taken from draft-js-emoji
 const addEmoji = (emoji, editorState) => {
@@ -50,32 +49,20 @@ export function TweetEditorModalContainer({ initialTweet, mediaUrl, contentSubty
 
   const [sending, setSending] = useState(false);
 
-  const sendTweet = useCallback(
-    async () => {
-      setSending(true);
+  const sendTweet = useCallback(async () => {
+    setSending(true);
 
-      try {
-        const body = editorState.getCurrentContent().getPlainText();
-        // For now assume url is a stored file media url
-        await fetchReticulumAuthenticated("/api/v1/twitter/tweets", "POST", { media_stored_file_url: mediaUrl, body });
-      } catch (error) {
-        setSending(false);
-        console.error(error);
-      }
+    try {
+      const body = editorState.getCurrentContent().getPlainText();
+      // For now assume url is a stored file media url
+      await fetchReticulumAuthenticated("/api/v1/twitter/tweets", "POST", { media_stored_file_url: mediaUrl, body });
+    } catch (error) {
+      setSending(false);
+      console.error(error);
+    }
 
-      onClose();
-    },
-    [mediaUrl, editorState, onClose]
-  );
-
-  const mediaThumbnailUrl = useMemo(
-    () => {
-      return contentSubtype && !contentSubtype.startsWith("video")
-        ? scaledThumbnailUrlFor(mediaUrl, 450, 255)
-        : mediaUrl;
-    },
-    [contentSubtype, mediaUrl]
-  );
+    onClose();
+  }, [mediaUrl, editorState, onClose]);
 
   return (
     <TweetEditorModal
@@ -85,7 +72,7 @@ export function TweetEditorModalContainer({ initialTweet, mediaUrl, contentSubty
       sending={sending}
       onSend={sendTweet}
       onChange={setEditorState}
-      mediaThumbnailUrl={mediaThumbnailUrl}
+      mediaThumbnailUrl={mediaUrl}
       contentSubtype={contentSubtype}
     />
   );

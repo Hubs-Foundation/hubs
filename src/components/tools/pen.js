@@ -131,7 +131,7 @@ AFRAME.registerComponent("pen", {
     this.dirty = true;
 
     let material = new THREE.MeshStandardMaterial();
-    const quality = window.APP.store.materialQualitySetting;
+    const quality = window.APP.store.state.preferences.materialQualitySetting;
     material = convertStandardMaterial(material, quality);
 
     this.penTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), material);
@@ -288,7 +288,7 @@ AFRAME.registerComponent("pen", {
   _getIntersection: (() => {
     const rawIntersections = [];
     const worldQuaternion = new THREE.Quaternion();
-    return function(cursorPose) {
+    return function (cursorPose) {
       rawIntersections.length = 0;
 
       if (this.data.drawMode === DRAW_MODE.PROJECTION) {
@@ -338,7 +338,7 @@ AFRAME.registerComponent("pen", {
     const laserEndPosition = new THREE.Vector3();
     const camerWorldPosition = new THREE.Vector3();
     const remoteLaserOrigin = new THREE.Vector3();
-    return function(cursorPose, intersection) {
+    return function (cursorPose, intersection) {
       if (cursorPose) {
         laserStartPosition.copy(cursorPose.position);
       } else {
@@ -351,10 +351,7 @@ AFRAME.registerComponent("pen", {
         remoteLaserOrigin.copy(laserStartPosition);
       } else {
         this.data.camera.object3D.getWorldPosition(camerWorldPosition);
-        remoteLaserOrigin
-          .subVectors(laserEndPosition, camerWorldPosition)
-          .normalize()
-          .multiplyScalar(0.5);
+        remoteLaserOrigin.subVectors(laserEndPosition, camerWorldPosition).normalize().multiplyScalar(0.5);
         remoteLaserOrigin.add(camerWorldPosition);
       }
 
@@ -385,9 +382,8 @@ AFRAME.registerComponent("pen", {
     //Prevent drawings from "jumping" large distances
     if (
       this.currentDrawing &&
-      (this.lastIntersectedObject !== (intersection ? intersection.object : null) &&
-        (!intersection ||
-          Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES))
+      this.lastIntersectedObject !== (intersection ? intersection.object : null) &&
+      (!intersection || Math.abs(intersection.distance - this.lastIntersectionDistance) > MAX_DISTANCE_BETWEEN_SURFACES)
     ) {
       this.worldPosition.copy(this.lastPosition);
       this._endDraw();
@@ -432,7 +428,7 @@ AFRAME.registerComponent("pen", {
   //helper function to get normal of direction of drawing cross direction to camera
   _getNormal: (() => {
     const directionToCamera = new THREE.Vector3();
-    return function(normal, position, direction) {
+    return function (normal, position, direction) {
       directionToCamera.subVectors(position, this.data.camera.object3D.position).normalize();
       normal.crossVectors(direction, directionToCamera);
     };

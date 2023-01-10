@@ -2,20 +2,14 @@
 
 :local(.tip) {
   pointer-events: all;
-  position: absolute;
-  bottom: 4px;
   min-height: 48px;
   background-color: theme.$tip-bg-color;
   border-radius: 16px;
   display: flex;
   color: theme.$tip-text-color;
   align-items: center;
-  width: max-content;
-  max-width: min(calc(100% - 8px), 360px);
-  left: 50%;
-  transform: translateX(-50%);
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     bottom: 24px;
     max-width: 360px;
   }
@@ -23,7 +17,7 @@
 
 :local(.content) {
   margin: 16px;
-  font-size: theme.$font-size-sm;
+  font-size: theme.$font-size-md;
   font-weight: theme.$font-weight-bold;
   padding: 0 8px;
   line-height: 1.25;
@@ -41,7 +35,7 @@
   margin-right: 8px;
   margin-bottom: 8px;
   min-width: 48px;
-  font-size: theme.$font-size-xs;
+  font-size: theme.$font-size-md;
   font-weight: theme.$font-weight-bold;
   align-self: flex-end;
 
@@ -53,5 +47,19 @@
   &:active {
     border-color: theme.$tip-button-color-pressed;
     background-color: theme.$tip-button-color-pressed;
+  }
+}
+
+:local(.toast) {
+  animation: vanish 5s;
+  animation-fill-mode: forwards;
+  @keyframes vanish {
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 }

@@ -33,10 +33,7 @@ function b64EncodeUnicode(str) {
 const farsparkEncodeUrl = url => {
   // farspark doesn't know how to read '=' base64 padding characters
   // translate base64 + to - and / to _ for URL safety
-  return b64EncodeUnicode(url)
-    .replace(/=+$/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
+  return b64EncodeUnicode(url).replace(/=+$/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 };
 
 export const scaledThumbnailUrlFor = (url, width, height) => {
@@ -99,11 +96,13 @@ export function getAbsoluteHref(baseUrl, relativeUrl) {
   return getAbsoluteUrl(baseUrl, relativeUrl).href;
 }
 
-// Note this file is configured in webpack.config.js to be handled with file-loader, so this will be a string containing the file path
+// Note these files are configured in webpack.config.js to be handled with file-loader, so this will be a string containing the file paths
 import basisJsUrl from "three/examples/js/libs/basis/basis_transcoder.js";
+import dracoWrapperJsUrl from "three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js";
 import basisWasmUrl from "three/examples/js/libs/basis/basis_transcoder.wasm";
+import dracoWasmUrl from "three/examples/js/libs/draco/gltf/draco_decoder.wasm";
 
-export const rewriteBasisTranscoderUrls = function(url) {
+export const rewriteBasisTranscoderUrls = function (url) {
   if (url === "basis_transcoder.js") {
     return basisJsUrl;
   } else if (url === "basis_transcoder.wasm") {
@@ -118,6 +117,10 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
     return basisJsUrl;
   } else if (url === "basis_transcoder.wasm") {
     return basisWasmUrl;
+  } else if (url === "draco_wasm_wrapper.js") {
+    return dracoWrapperJsUrl;
+  } else if (url === "draco_decoder.wasm") {
+    return dracoWasmUrl;
   }
 
   if (typeof url !== "string" || url === "") return "";

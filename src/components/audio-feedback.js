@@ -2,6 +2,7 @@ import { findAncestorWithComponent } from "../utils/scene-graph";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
+import { MediaDevicesEvents } from "../utils/media-devices-utils";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -9,6 +10,7 @@ import { registerComponentInstance, deregisterComponentInstance } from "../utils
 // the avatar is quiet during that entire duration (eg they are muted)
 const DISABLE_AT_VOLUME_THRESHOLD = 0.00001;
 const DISABLE_GRACE_PERIOD_MS = 10000;
+const IS_TALKING_THRESHOLD_MS = 1000;
 const MIN_VOLUME_THRESHOLD = 0.08;
 
 const calculateVolume = (analyser, levels) => {
@@ -23,20 +25,10 @@ const calculateVolume = (analyser, levels) => {
   return currVolume;
 };
 
-const tempScaleFromPosition = new THREE.Vector3();
-const tempScaleToPosition = new THREE.Vector3();
-
-export function getAudioFeedbackScale(fromObject, toObject, minScale, maxScale, volume) {
-  tempScaleToPosition.setFromMatrixPosition(toObject.matrixWorld);
-  tempScaleFromPosition.setFromMatrixPosition(fromObject.matrixWorld);
-  const distance = tempScaleFromPosition.distanceTo(tempScaleToPosition) / 10;
-  return Math.min(maxScale, minScale + (maxScale - minScale) * volume * 8 * distance);
-}
-
 function updateVolume(component) {
   const newRawVolume = calculateVolume(component.analyser, component.levels);
 
-  const newPerceivedVolume = Math.log(THREE.Math.mapLinear(newRawVolume, 0, 1, 1, Math.E));
+  const newPerceivedVolume = Math.log(THREE.MathUtils.mapLinear(newRawVolume, 0, 1, 1, Math.E));
 
   component.volume = newPerceivedVolume < MIN_VOLUME_THRESHOLD ? 0 : newPerceivedVolume;
 
@@ -54,7 +46,8 @@ AFRAME.registerComponent("networked-audio-analyser", {
   async init() {
     this.volume = 0;
     this.prevVolume = 0;
-    this.avatarIsQuiet = true;
+    this.disableUpdates = true;
+    this.avatarIsTalking = false;
 
     this._updateAnalysis = this._updateAnalysis.bind(this);
     this._runScheduledWork = this._runScheduledWork.bind(this);
@@ -75,19 +68,19 @@ AFRAME.registerComponent("networked-audio-analyser", {
     registerComponentInstance(this, "networked-audio-analyser");
   },
 
-  remove: function() {
+  remove: function () {
     deregisterComponentInstance(this, "networked-audio-analyser");
     this.el.sceneEl.systems["frame-scheduler"].unschedule(this._runScheduledWork, "audio-analyser");
   },
 
-  tick: function(t) {
-    if (!this.avatarIsQuiet) {
+  tick: function (t) {
+    if (!this.disableUpdates) {
       this._updateAnalysis(t);
     }
   },
 
-  _runScheduledWork: function() {
-    if (this.avatarIsQuiet) {
+  _runScheduledWork: function () {
+    if (this.disableUpdates) {
       this._updateAnalysis();
     }
   },
@@ -96,21 +89,25 @@ AFRAME.registerComponent("networked-audio-analyser", {
   // and so as a performance optimization will check to see if it's been at least DISABLE_GRACE_PERIOD_MS
   // since the last volume was seen above DISABLE_AT_VOLUME_THRESHOLD, and if so, will disable
   // tick updates until the volume exceeds the level again.
-  _updateAnalysis: function(t) {
+  _updateAnalysis: function (t) {
     if (!this.analyser) return;
 
     updateVolume(this);
 
     if (this.volume < DISABLE_AT_VOLUME_THRESHOLD) {
       if (t && this.lastSeenVolume && this.lastSeenVolume < t - DISABLE_GRACE_PERIOD_MS) {
-        this.avatarIsQuiet = true;
+        this.disableUpdates = true;
+      }
+      if (t && this.lastSeenVolume && this.lastSeenVolume < t - IS_TALKING_THRESHOLD_MS) {
+        this.avatarIsTalking = false;
       }
     } else {
       if (t) {
         this.lastSeenVolume = t;
       }
 
-      this.avatarIsQuiet = false;
+      this.disableUpdates = false;
+      this.avatarIsTalking = true;
     }
   }
 });
@@ -135,16 +132,30 @@ AFRAME.registerSystem("local-audio-analyser", {
     this.volume = 0;
     this.prevVolume = 0;
 
-    this.el.addEventListener("local-media-stream-created", () => {
-      const audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
-      this.analyser = audioSystem.outboundAnalyser;
-      this.levels = audioSystem.analyserLevels;
-    });
+    this.onMicEnabled = this.onMicEnabled.bind(this);
+    this.el.addEventListener(MediaDevicesEvents.MIC_SHARE_STARTED, this.onMicEnabled);
   },
 
-  tick: function() {
+  remove() {
+    this.el.removeEventListener(MediaDevicesEvents.MIC_SHARE_STARTED, this.onMicEnabled);
+  },
+
+  onMicEnabled() {
+    const audioSystem = this.el.sceneEl.systems["hubs-systems"].audioSystem;
+    this.analyser = audioSystem.outboundAnalyser;
+    this.levels = audioSystem.analyserLevels;
+  },
+
+  tick: function () {
     if (!this.analyser) return;
-    updateVolume(this);
+
+    // TODO Ideally, when muted no audio should ever even make it into the analyser to begin with
+    if (APP.dialog.isMicEnabled) {
+      updateVolume(this);
+    } else {
+      this.prevVolume = this.volume;
+      this.volume = 0;
+    }
   }
 });
 
@@ -165,26 +176,13 @@ AFRAME.registerComponent("scale-audio-feedback", {
   },
 
   tick() {
-    // TODO: come up with a cleaner way to handle this.
-    // bone's are "hidden" by scaling them with bone-visibility, without this we would overwrite that.
-    if (!this.el.object3D.visible) return;
     if (!this.cameraEl) return;
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
-    const { minScale, maxScale } = this.data;
-
-    const { object3D } = this.el;
-
-    const scale = getAudioFeedbackScale(
-      this.el.object3D,
-      this.cameraEl.object3DMap.camera,
-      minScale,
-      maxScale,
-      this.analyser ? this.analyser.volume : 0
+    this.el.object3D.scale.setScalar(
+      THREE.MathUtils.mapLinear(this.analyser?.volume || 0, 0, 1, this.data.minScale, this.data.maxScale)
     );
-
-    object3D.scale.setScalar(scale);
-    object3D.matrixNeedsUpdate = true;
+    this.el.object3D.matrixNeedsUpdate = true;
   }
 });
 
@@ -221,7 +219,7 @@ AFRAME.registerComponent("morph-audio-feedback", {
     if (!this.analyser) this.analyser = getAnalyser(this.el);
 
     const { minValue, maxValue } = this.data;
-    const morphValue = THREE.Math.mapLinear(
+    const morphValue = THREE.MathUtils.mapLinear(
       easeOutQuadratic(this.analyser ? this.analyser.volume : 0),
       0,
       1,
@@ -269,7 +267,7 @@ const SPRITE_NAMES = {
 };
 
 export function micLevelForVolume(volume) {
-  return THREE.Math.clamp(Math.ceil(THREE.Math.mapLinear(volume - 0.05, 0, 1, 0, 7)), 0, 7);
+  return THREE.MathUtils.clamp(Math.ceil(THREE.MathUtils.mapLinear(volume - 0.05, 0, 1, 0, 7)), 0, 7);
 }
 
 AFRAME.registerComponent("mic-button", {

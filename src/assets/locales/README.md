@@ -125,7 +125,7 @@ const signInCompleteMessage = defineMessage({
 It is not enough to localize just the visible text. All labels, alt text, and callouts should also be localized.
 
 ```jsx
-<img alt={<FormattedMessage id="logo.alt-text" defaultMessage="Hubs Logo" />} src="logo.png" />
+<img alt={<FormattedMessage id="logo.alt-text" defaultMessage="Hubs Logo" />} src={logoUrl} />
 
 <div aria-label={<FormattedMessage id="element.label" defaultMessage="This is a label" />}></div>
 

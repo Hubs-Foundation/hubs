@@ -9,14 +9,11 @@ AFRAME.registerComponent("directional-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.DirectionalLight();
     this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, 1);
     this.light.add(this.light.target);
     this.el.setObject3D("directional-light", this.light);
-    this.el.sceneEl.systems.light.registerLight(el);
-    this.rendererSystem = this.el.sceneEl.systems.renderer;
   },
 
   update(prevData) {
@@ -24,7 +21,7 @@ AFRAME.registerComponent("directional-light", {
 
     if (this.data.color !== prevData.color) {
       const color = new THREE.Color(this.data.color);
-      this.rendererSystem.applyColorCorrection(color);
+      color.convertSRGBToLinear();
       light.color.copy(color);
     }
 
@@ -59,7 +56,7 @@ AFRAME.registerComponent("directional-light", {
     this.light.shadow.camera.matrixNeedsUpdate = true;
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("directional-light");
   }
 });

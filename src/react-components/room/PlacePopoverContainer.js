@@ -13,104 +13,103 @@ import { PlacePopoverButton } from "./PlacePopover";
 import { ObjectUrlModalContainer } from "./ObjectUrlModalContainer";
 import configs from "../../utils/configs";
 import { FormattedMessage } from "react-intl";
+import { anyEntityWith } from "../../utils/bit-utils";
+import { MyCameraTool } from "../../bit-components";
 
 export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {
   const [items, setItems] = useState([]);
 
-  useEffect(
-    () => {
-      function updateItems() {
-        const hasActiveCamera = !!scene.systems["camera-tools"].getMyCamera();
-        const hasActivePen = !!scene.systems["pen-tools"].getMyPen();
+  useEffect(() => {
+    function updateItems() {
+      const hasActiveCamera = !!anyEntityWith(APP.world, MyCameraTool);
+      const hasActivePen = !!scene.systems["pen-tools"].getMyPen();
 
-        let nextItems = [
-          hubChannel.can("spawn_drawing") && {
-            id: "pen",
-            icon: PenIcon,
-            color: "accent5",
-            label: <FormattedMessage id="place-popover.item-type.pen" defaultMessage="Pen" />,
-            onSelect: () => scene.emit("penButtonPressed"),
-            selected: hasActivePen
+      let nextItems = [
+        hubChannel.can("spawn_drawing") && {
+          id: "pen",
+          icon: PenIcon,
+          color: "accent5",
+          label: <FormattedMessage id="place-popover.item-type.pen" defaultMessage="Pen" />,
+          onSelect: () => scene.emit("penButtonPressed"),
+          selected: hasActivePen
+        },
+        hubChannel.can("spawn_camera") && {
+          id: "camera",
+          icon: CameraIcon,
+          color: "accent5",
+          label: <FormattedMessage id="place-popover.item-type.camera" defaultMessage="Camera" />,
+          onSelect: () => scene.emit("action_toggle_camera"),
+          selected: hasActiveCamera
+        }
+      ];
+
+      if (hubChannel.can("spawn_and_move_media")) {
+        nextItems = [
+          ...nextItems,
+          // TODO: Create text/link dialog
+          // { id: "text", icon: TextIcon, color: "blue", label: "Text" },
+          // { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
+          configs.integration("tenor") && {
+            id: "gif",
+            icon: GIFIcon,
+            color: "accent2",
+            label: <FormattedMessage id="place-popover.item-type.gif" defaultMessage="GIF" />,
+            onSelect: () => mediaSearchStore.sourceNavigate("gifs")
           },
-          hubChannel.can("spawn_camera") && {
-            id: "camera",
-            icon: CameraIcon,
-            color: "accent5",
-            label: <FormattedMessage id="place-popover.item-type.camera" defaultMessage="Camera" />,
-            onSelect: () => scene.emit("action_toggle_camera"),
-            selected: hasActiveCamera
+          configs.integration("sketchfab") && {
+            id: "model",
+            icon: ObjectIcon,
+            color: "accent2",
+            label: <FormattedMessage id="place-popover.item-type.model" defaultMessage="3D Model" />,
+            onSelect: () => mediaSearchStore.sourceNavigate("sketchfab")
+          },
+          {
+            id: "avatar",
+            icon: AvatarIcon,
+            color: "accent1",
+            label: <FormattedMessage id="place-popover.item-type.avatar" defaultMessage="Avatar" />,
+            onSelect: () => mediaSearchStore.sourceNavigate("avatars")
+          },
+          {
+            id: "scene",
+            icon: SceneIcon,
+            color: "accent1",
+            label: <FormattedMessage id="place-popover.item-type.scene" defaultMessage="Scene" />,
+            onSelect: () => mediaSearchStore.sourceNavigate("scenes")
+          },
+          // TODO: Launch system file prompt directly
+          {
+            id: "upload",
+            icon: UploadIcon,
+            color: "accent3",
+            label: <FormattedMessage id="place-popover.item-type.upload" defaultMessage="Upload" />,
+            onSelect: () => showNonHistoriedDialog(ObjectUrlModalContainer, { scene })
           }
         ];
-
-        if (hubChannel.can("spawn_and_move_media")) {
-          nextItems = [
-            ...nextItems,
-            // TODO: Create text/link dialog
-            // { id: "text", icon: TextIcon, color: "blue", label: "Text" },
-            // { id: "link", icon: LinkIcon, color: "blue", label: "Link" },
-            configs.integration("tenor") && {
-              id: "gif",
-              icon: GIFIcon,
-              color: "accent2",
-              label: <FormattedMessage id="place-popover.item-type.gif" defaultMessage="GIF" />,
-              onSelect: () => mediaSearchStore.sourceNavigate("gifs")
-            },
-            configs.integration("sketchfab") && {
-              id: "model",
-              icon: ObjectIcon,
-              color: "accent2",
-              label: <FormattedMessage id="place-popover.item-type.model" defaultMessage="3D Model" />,
-              onSelect: () => mediaSearchStore.sourceNavigate("sketchfab")
-            },
-            {
-              id: "avatar",
-              icon: AvatarIcon,
-              color: "accent1",
-              label: <FormattedMessage id="place-popover.item-type.avatar" defaultMessage="Avatar" />,
-              onSelect: () => mediaSearchStore.sourceNavigate("avatars")
-            },
-            {
-              id: "scene",
-              icon: SceneIcon,
-              color: "accent1",
-              label: <FormattedMessage id="place-popover.item-type.scene" defaultMessage="Scene" />,
-              onSelect: () => mediaSearchStore.sourceNavigate("scenes")
-            },
-            // TODO: Launch system file prompt directly
-            {
-              id: "upload",
-              icon: UploadIcon,
-              color: "accent3",
-              label: <FormattedMessage id="place-popover.item-type.upload" defaultMessage="Upload" />,
-              onSelect: () => showNonHistoriedDialog(ObjectUrlModalContainer, { scene })
-            }
-          ];
-        }
-
-        setItems(nextItems);
       }
 
-      hubChannel.addEventListener("permissions_updated", updateItems);
+      setItems(nextItems);
+    }
 
-      updateItems();
+    hubChannel.addEventListener("permissions_updated", updateItems);
 
-      function onSceneStateChange(event) {
-        if (event.detail === "camera" || event.detail === "pen") {
-          updateItems();
-        }
+    updateItems();
+
+    function onSceneStateChange(event) {
+      if (event.detail === "camera" || event.detail === "pen") {
+        updateItems();
       }
+    }
 
-      scene.addEventListener("stateadded", onSceneStateChange);
-      scene.addEventListener("stateremoved", onSceneStateChange);
+    scene.addEventListener("stateadded", onSceneStateChange);
+    scene.addEventListener("stateremoved", onSceneStateChange);
 
-      return () => {
-        hubChannel.removeEventListener("permissions_updated", updateItems);
-        scene.removeEventListener("stateadded", onSceneStateChange);
-        scene.removeEventListener("stateremoved", onSceneStateChange);
-      };
-    },
-    [hubChannel, mediaSearchStore, showNonHistoriedDialog, scene]
-  );
+    return () => {
+      hubChannel.removeEventListener("permissions_updated", updateItems);
+      scene.removeEventListener("stateadded", onSceneStateChange);
+      scene.removeEventListener("stateremoved", onSceneStateChange);
+    };
+  }, [hubChannel, mediaSearchStore, showNonHistoriedDialog, scene]);
 
   return <PlacePopoverButton items={items} />;
 }

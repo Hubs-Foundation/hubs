@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
+import PropTypes from "prop-types";
+import { useState, useEffect } from "react";
 import { ReactionPopoverButton } from "./ReactionPopover";
 import { spawnEmojiInFrontOfUser, emojis } from "../../components/emoji";
 import { defineMessages, useIntl } from "react-intl";
@@ -13,8 +15,23 @@ const emojiLabels = defineMessages({
   cry: { id: "reaction-popover.emoji-label.cry", defaultMessage: "Cry" }
 });
 
-export function ReactionPopoverContainer() {
+function usePresence(scene, initialPresence) {
+  const [presence, setPresence] = useState(initialPresence);
+
+  const onPresenceUpdate = ({ detail: presence }) => {
+    if (presence.sessionId === NAF.clientId) setPresence(presence);
+  };
+  useEffect(() => {
+    scene.addEventListener("presence_updated", onPresenceUpdate);
+    return () => scene.removeEventListener("presence_updated", onPresenceUpdate);
+  }, [scene]);
+
+  return presence;
+}
+
+export function ReactionPopoverContainer({ scene, initialPresence }) {
   const intl = useIntl();
+  const presence = usePresence(scene, initialPresence);
 
   const items = emojis.map(emoji => ({
     src: emoji.particleEmitterConfig.src,
@@ -23,5 +40,18 @@ export function ReactionPopoverContainer() {
     ...emoji
   }));
 
-  return <ReactionPopoverButton items={items} />;
+  const onToggleHandRaised = useCallback(() => {
+    if (presence.hand_raised) {
+      window.APP.hubChannel.lowerHand();
+    } else {
+      window.APP.hubChannel.raiseHand();
+    }
+  }, [presence]);
+
+  return <ReactionPopoverButton items={items} presence={presence} onToggleHandRaised={onToggleHandRaised} />;
 }
+
+ReactionPopoverContainer.propTypes = {
+  scene: PropTypes.object,
+  initialPresence: PropTypes.object
+};

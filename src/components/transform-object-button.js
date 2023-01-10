@@ -64,8 +64,8 @@ AFRAME.registerComponent("transform-button", {
         e.object3D.el.id === "right-cursor"
           ? rightHand.object3D
           : e.object3D.el.id === "left-cursor"
-            ? leftHand.object3D
-            : e.object3D,
+          ? leftHand.object3D
+          : e.object3D,
         this.data
       );
     };
@@ -131,7 +131,7 @@ AFRAME.registerSystem("transform-selected-object", {
     this.el.object3D.add(this.planarInfo.plane);
   },
 
-  stopTransform: (function() {
+  stopTransform: (function () {
     const q = new THREE.Quaternion();
     const PI_AROUND_Y = new THREE.Quaternion(0, 1, 0, 0);
     const pInv = new THREE.Quaternion();
@@ -244,15 +244,8 @@ AFRAME.registerSystem("transform-selected-object", {
   },
 
   cursorAxisOrScaleTick() {
-    const {
-      plane,
-      normal,
-      intersections,
-      previousPointOnPlane,
-      currentPointOnPlane,
-      deltaOnPlane,
-      finalProjectedVec
-    } = this.planarInfo;
+    const { plane, normal, intersections, previousPointOnPlane, currentPointOnPlane, deltaOnPlane, finalProjectedVec } =
+      this.planarInfo;
     this.target.getWorldPosition(plane.position);
     //    this.el.camera.getWorldQuaternion(plane.quaternion);
     this.el.camera.getWorldPosition(v);
@@ -279,7 +272,7 @@ AFRAME.registerSystem("transform-selected-object", {
       .applyQuaternion(q.copy(plane.quaternion).invert())
       .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
     if (this.mode === TRANSFORM_MODE.CURSOR) {
-      const modify = AFRAME.scenes[0].systems.userinput.get(paths.actions.transformModifier);
+      const modify = !AFRAME.scenes[0].systems.userinput.get(paths.actions.transformModifier);
 
       this.dyAll = this.dyStore + finalProjectedVec.y;
       this.dyApplied = modify ? this.dyAll : Math.round(this.dyAll / STEP_LENGTH) * STEP_LENGTH;

@@ -1,14 +1,10 @@
-// It seems we need to use require to import modules
-// under the three/examples/js to avoid tree shaking
-// in webpack production mode.
-require("three/examples/js/lights/LightProbeGenerator");
+import { LightProbeGenerator } from "three/examples/jsm/lights/LightProbeGenerator";
 
 const {
   AmbientLight,
   BackSide,
   BoxBufferGeometry,
   CubeCamera,
-  LightProbeGenerator,
   LinearFilter,
   Mesh,
   Object3D,
@@ -470,7 +466,7 @@ AFRAME.registerComponent("skybox", {
     }
 
     // TODO Remove or rework medium quality mode
-    if (window.APP.store.materialQualitySetting === "medium") {
+    if (window.APP.store.state.preferences.materialQualitySetting === "medium") {
       // This extra ambient light is here to normalize lighting with the MeshStandardMaterial.
       // Without it, objects are significantly darker in brighter environments.
       // It's kept to a low value to not wash out objects in very dark environments.

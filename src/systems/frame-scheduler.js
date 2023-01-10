@@ -29,7 +29,7 @@ AFRAME.registerSystem("frame-scheduler", {
     }
   },
 
-  tick: function() {
+  tick: function () {
     for (let i = 0; i < this.queues.length; i++) {
       const queue = this.queues[i];
       const entries = this.registry.get(queue);

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { Component } from "react";
 import classNames from "classnames";
 import inflection from "inflection";
@@ -17,6 +18,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 import HubsCloudLogo from "../assets/images/hubs_cloud_dark.png";
+import configs from "../utils/configs";
 
 const mapStateToProps = state => ({
   resources: getResources(state)
@@ -119,101 +121,166 @@ class Menu extends Component {
   }
 
   render() {
-    return (
-      <List className={this.props.classes.root}>
-        <ListItem className={this.props.classes.logo}>
-          <img className={this.props.classes.logo} src={HubsCloudLogo} />
-        </ListItem>
-        <ListItem
-          className={this.props.classes.item}
-          component={NavLink}
-          activeStyle={{ backgroundColor: "#D0D0D0" }}
-          key="home"
-          to="/home"
-        >
-          <ListItemIcon className={this.props.classes.icon}>
-            <HomeIcon />
-          </ListItemIcon>
-          <ListItemText className={this.props.classes.text} primary="Home" />
-        </ListItem>
-        <ListItem className={this.props.classes.item}>
-          <ListItemIcon className={this.props.classes.icon}>
-            <LibraryBooksIcon />
-          </ListItemIcon>
-          <ListItemText className={this.props.classes.text} primary="Content" />
-        </ListItem>
-        <Collapse in={true} timeout="auto" unmountOnExit>
-          <List component="nav" disablePadding>
-            <ListItem
-              className={classNames(this.props.classes.item, this.props.classes.nested)}
-              component={NavLink}
-              key="import"
-              to="/import"
-            >
-              <ListItemIcon className={this.props.classes.icon}>
-                <BackupIcon />
-              </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="Import Content" />
-            </ListItem>
-            {this.props.resources.map(this.renderResource.bind(this))}
-          </List>
-        </Collapse>
-        <ListItem className={this.props.classes.item}>
-          <ListItemIcon className={this.props.classes.icon}>
-            <SettingsIcon />
-          </ListItemIcon>
-          <ListItemText className={this.props.classes.text} primary="Setup" />
-        </ListItem>
-        <Collapse in={true} timeout="auto" unmountOnExit>
-          <List component="nav" disablePadding>
-            <ListItem
-              className={classNames(this.props.classes.item, this.props.classes.nested)}
-              component={NavLink}
-              key="app-settings"
-              to="/app-settings"
-            >
-              <ListItemIcon className={this.props.classes.icon}>
-                <ViewIcon />
-              </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="App Settings" />
-            </ListItem>
-            <ListItem
-              className={classNames(this.props.classes.item, this.props.classes.nested)}
-              component={NavLink}
-              key="server-setup"
-              to="/server-setup"
-            >
-              <ListItemIcon className={this.props.classes.icon}>
-                <ViewIcon />
-              </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="Server Settings" />
-            </ListItem>
-            <ListItem
-              className={classNames(this.props.classes.item, this.props.classes.nested)}
-              component={NavLink}
-              key="server-access"
-              to="/server-access"
-            >
-              <ListItemIcon className={this.props.classes.icon}>
-                <ViewIcon />
-              </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="Server Access" />
-            </ListItem>
-            <ListItem
-              className={classNames(this.props.classes.item, this.props.classes.nested)}
-              component={NavLink}
-              key="content-cdn"
-              to="/content-cdn"
-            >
-              <ListItemIcon className={this.props.classes.icon}>
-                <ViewIcon />
-              </ListItemIcon>
-              <ListItemText className={this.props.classes.text} primary="Content CDN" />
-            </ListItem>
-          </List>
-        </Collapse>
-      </List>
-    );
+    if (configs.ITA_SERVER == "turkey") {
+      return (
+        <List className={this.props.classes.root}>
+          <ListItem className={this.props.classes.logo}>
+            <img className={this.props.classes.logo} src={HubsCloudLogo} />
+          </ListItem>
+          <ListItem
+            className={this.props.classes.item}
+            component={NavLink}
+            activeStyle={{ backgroundColor: "#D0D0D0" }}
+            key="home"
+            to="/home"
+          >
+            <ListItemIcon className={this.props.classes.icon}>
+              <HomeIcon />
+            </ListItemIcon>
+            <ListItemText className={this.props.classes.text} primary="Home" />
+          </ListItem>
+          <ListItem className={this.props.classes.item}>
+            <ListItemIcon className={this.props.classes.icon}>
+              <LibraryBooksIcon />
+            </ListItemIcon>
+            <ListItemText className={this.props.classes.text} primary="Content" />
+          </ListItem>
+          <Collapse in={true} timeout="auto" unmountOnExit>
+            <List component="nav" disablePadding>
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="import"
+                to="/import"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <BackupIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="Import Content" />
+              </ListItem>
+              {this.props.resources.map(this.renderResource.bind(this))}
+            </List>
+          </Collapse>
+          <ListItem className={this.props.classes.item}>
+            <ListItemIcon className={this.props.classes.icon}>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText className={this.props.classes.text} primary="Setup" />
+          </ListItem>
+          <Collapse in={true} timeout="auto" unmountOnExit>
+            <List component="nav" disablePadding>
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="app-settings"
+                to="/app-settings"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <ViewIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="App Settings" />
+              </ListItem>
+            </List>
+          </Collapse>
+        </List>
+      );
+    } else {
+      return (
+        <List className={this.props.classes.root}>
+          <ListItem className={this.props.classes.logo}>
+            <img className={this.props.classes.logo} src={HubsCloudLogo} />
+          </ListItem>
+          <ListItem
+            className={this.props.classes.item}
+            component={NavLink}
+            activeStyle={{ backgroundColor: "#D0D0D0" }}
+            key="home"
+            to="/home"
+          >
+            <ListItemIcon className={this.props.classes.icon}>
+              <HomeIcon />
+            </ListItemIcon>
+            <ListItemText className={this.props.classes.text} primary="Home" />
+          </ListItem>
+          <ListItem className={this.props.classes.item}>
+            <ListItemIcon className={this.props.classes.icon}>
+              <LibraryBooksIcon />
+            </ListItemIcon>
+            <ListItemText className={this.props.classes.text} primary="Content" />
+          </ListItem>
+          <Collapse in={true} timeout="auto" unmountOnExit>
+            <List component="nav" disablePadding>
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="import"
+                to="/import"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <BackupIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="Import Content" />
+              </ListItem>
+              {this.props.resources.map(this.renderResource.bind(this))}
+            </List>
+          </Collapse>
+          <ListItem className={this.props.classes.item}>
+            <ListItemIcon className={this.props.classes.icon}>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText className={this.props.classes.text} primary="Setup" />
+          </ListItem>
+          <Collapse in={true} timeout="auto" unmountOnExit>
+            <List component="nav" disablePadding>
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="app-settings"
+                to="/app-settings"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <ViewIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="App Settings" />
+              </ListItem>
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="server-setup"
+                to="/server-setup"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <ViewIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="Server Settings" />
+              </ListItem>
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="server-access"
+                to="/server-access"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <ViewIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="Server Access" />
+              </ListItem>
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="content-cdn"
+                to="/content-cdn"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <ViewIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="Content CDN" />
+              </ListItem>
+            </List>
+          </Collapse>
+        </List>
+      );
+    }
   }
 }
 

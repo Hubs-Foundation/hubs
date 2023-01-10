@@ -29,8 +29,9 @@ Steps to contributing code to the Hubs project:
 1. Clone the repo you want to contribute to and get things running locally
 2. Find an issue or improvement that you want to fix - give us a heads up that you're working on it by dropping in a comment on the issue.
 3. Fix the bug! Test out your changes on your local setup and let us know if you have questions or want another opinion about the fix. 
-4. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. If your PR adds a new feature, consider requesting the 'What's New' tag. With the 'What's New' tag, any text in the main body of the PR up to (and including) an image will be added to the [hubs website](https://hubs.mozilla.com/whats-new). Gifs are especially appreciated! [This pull request](https://github.com/mozilla/hubs/pull/1536) shows an example of how the 'What's New' tag can be used.
-5. Celebrate! 🎉 You're helping Mozilla's mission to make the web an open and accessible place for social experiences! 
+4. Run `npm run test` to make sure that there are no linter errors and the tests pass.
+5. Submit your PR for a code review and someone from the team will take a look and give feedback. Make sure you follow up! We'll close the PR if it seems like you've abandoned it by not responding to any questions or comments we leave in the review. If your PR adds a new feature, consider requesting the 'What's New' tag. With the 'What's New' tag, any text in the main body of the PR up to (and including) an image will be added to the [hubs website](https://hubs.mozilla.com/whats-new). Gifs are especially appreciated! [This pull request](https://github.com/mozilla/hubs/pull/1536) shows an example of how the 'What's New' tag can be used.
+6. Celebrate! 🎉 You're helping Mozilla's mission to make the web an open and accessible place for social experiences! 
 
 ### 🐛Filing Issues and Feature Requests
 Reporting bugs, feature requests, and questions that you have about the platform helps the team prioritize the work that we're doing and make Hubs better! We welcome user-submitted issues and use Github's built-in issue tracking for our bug reporting process. 
@@ -73,7 +74,7 @@ Getting set up to work on the Hubs client main fork is a little different than w
 
 ### 0. Dependencies
 
-[Install NodeJS](https://nodejs.org) if you haven't already. We recommend version 12 or above.
+[Install NodeJS](https://nodejs.org) if you haven't already. We use version 16.16.0 on our build servers. If you work on multiple javascript projects it may be useful to use something like [NVM](https://github.com/nvm-sh/nvm) to manage multiple versions of node for you.
 
 ### 1. Setting up the Repository
 
@@ -82,6 +83,7 @@ Clone the Hubs repository and install the npm dependencies.
 ```bash
 git clone https://github.com/mozilla/hubs.git
 cd hubs
+# nvm use v16.16.0 # if using NVM
 npm ci
 ```
 
@@ -128,12 +130,16 @@ The testing process for Hubs is mostly a manual one. You need to test your chang
 The Hubs team has a more in-depth testing and release process internally, but we don't have any additional testing process for external contributors at this time.
 
 
-### 5. Modifying The 2-D Sprite Graphics
+### 5. Adding or updating dependencies
+
+When adding or updating dependencies you should not manually edit the package-lock.json file, but instead run the appropriate npm commands (`npm install` or `npm update`) to update the lockfile for you. It is essential that you are running the same version of node/npm as other developers to ensure the lockfiles remain compatible.
+
+### 6. Modifying The 2-D Sprite Graphics
 
 To update the 2-D sprite graphics, you must (manually) install [ImageMagick](https://imagemagick.org/script/download.php) to your command line.  See `doc/spritesheet-generation.md` for further details
 
 
-### 6. High Level Project Organization
+### 7. High Level Project Organization
 
 ```
 hubs/
@@ -164,7 +170,7 @@ hubs/
     scene.html <- Scene Page html template
     scene.js <- Scene Page js entry point
 ```
-### 7. Testing on an HMD
+### 8. Testing on an HMD
 
 The simplest way to test on an HMD is to use `npm run dev` from Step 2 above while having 8080 port traffic on your device point to you local dev instance's port 8080. In order to do that, you'll need to do a few things that will vary per device. 
 

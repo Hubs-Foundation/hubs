@@ -1,7 +1,9 @@
-import { detectOS } from "detect-browser";
+import { isIOS as detectIOS } from "./is-mobile";
+const isIOS = detectIOS();
 
+// TODO should we be using touch-action CSS for this?
 export function disableiOSZoom() {
-  if (detectOS(navigator.userAgent) !== "iOS") return;
+  if (!isIOS) return;
 
   let lastTouchAtMs = 0;
 

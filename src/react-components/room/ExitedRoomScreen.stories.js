@@ -1,15 +1,13 @@
 import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
 import { ExitedRoomScreen, ExitReason } from "./ExitedRoomScreen";
-import logoSrc from "../../assets/images/company-logo.png";
 
 export default {
   title: "Room/ExitedRoomScreen",
   args: {
     showTerms: true,
     showSourceLink: true,
-    termsUrl: "#",
-    logoSrc
+    termsUrl: "#"
   },
   parameters: {
     layout: "fullscreen"

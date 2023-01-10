@@ -1,3 +1,5 @@
+import { defineQuery } from "bitecs";
+import { CameraTool } from "../bit-components";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 
@@ -14,6 +16,8 @@ function quaternionAlmostEquals(epsilon, u, v) {
       Math.abs(-u.w - v.w) < epsilon)
   );
 }
+
+const cameraToolsQuery = defineQuery([CameraTool]);
 
 /**
  * Provides access to the end effectors for IK.
@@ -53,7 +57,7 @@ const HAND_ROTATIONS = {
   right: new Matrix4().makeRotationFromEuler(new Euler(-Math.PI / 2, -Math.PI / 2, 0))
 };
 
-const angleOnXZPlaneBetweenMatrixRotations = (function() {
+const angleOnXZPlaneBetweenMatrixRotations = (function () {
   const XZ_PLANE_NORMAL = new THREE.Vector3(0, -1, 0);
   const v1 = new THREE.Vector3();
   const v2 = new THREE.Vector3();
@@ -79,7 +83,7 @@ AFRAME.registerComponent("ik-controller", {
     rightHand: { type: "string", default: "RightHand" },
     chest: { type: "string", default: "Spine" },
     rotationSpeed: { default: 8 },
-    maxLerpAngle: { default: 90 * THREE.Math.DEG2RAD },
+    maxLerpAngle: { default: 90 * THREE.MathUtils.DEG2RAD },
     alwaysUpdate: { type: "boolean", default: false }
   },
 
@@ -162,10 +166,7 @@ AFRAME.registerComponent("ik-controller", {
     this.middleEyeMatrix.makeTranslation(this.middleEyePosition.x, this.middleEyePosition.y, this.middleEyePosition.z);
     this.invMiddleEyeToHead = this.middleEyeMatrix.copy(this.middleEyeMatrix).invert();
 
-    this.invHipsToHeadVector
-      .addVectors(this.chest.position, this.neck.position)
-      .add(this.head.position)
-      .negate();
+    this.invHipsToHeadVector.addVectors(this.chest.position, this.neck.position).add(this.head.position).negate();
   },
 
   tick(time, dt) {
@@ -279,6 +280,7 @@ AFRAME.registerComponent("ik-controller", {
       // Ensure the avatar is not shown until we've done our first IK step, to prevent seeing mis-oriented/t-pose pose or our own avatar at the wrong place.
       this.ikRoot.el.object3D.visible = true;
       this._hadFirstTick = true;
+      this.el.emit("ik-first-tick");
     }
   },
 
@@ -317,33 +319,34 @@ AFRAME.registerComponent("ik-controller", {
     this._updateIsInView();
   },
 
-  _updateIsInView: (function() {
+  _updateIsInView: (function () {
     const frustum = new THREE.Frustum();
     const frustumMatrix = new THREE.Matrix4();
-    const cameraWorld = new THREE.Vector3();
+    const tmpPos = new THREE.Vector3();
     const isInViewOfCamera = (screenCamera, pos) => {
       frustumMatrix.multiplyMatrices(screenCamera.projectionMatrix, screenCamera.matrixWorldInverse);
       frustum.setFromProjectionMatrix(frustumMatrix);
       return frustum.containsPoint(pos);
     };
 
-    return function() {
-      if (!this.playerCamera) return;
+    return function () {
+      if (!this.playerCamera || this.data.alwaysUpdate) return;
 
       const camera = this.ikRoot.camera.object3D;
-      camera.getWorldPosition(cameraWorld);
+      camera.getWorldPosition(tmpPos);
 
       // Check player camera
-      this.isInView = isInViewOfCamera(this.playerCamera, cameraWorld);
+      this.isInView = isInViewOfCamera(this.playerCamera, tmpPos);
 
       if (!this.isInView) {
-        // Check in-game camera if rendering to viewfinder and owned
-        const cameraTools = this.el.sceneEl.systems["camera-tools"];
-
-        if (cameraTools) {
-          cameraTools.ifMyCameraRenderingViewfinder(cameraTool => {
-            this.isInView = this.isInView || isInViewOfCamera(cameraTool.camera, cameraWorld);
-          });
+        const world = APP.world;
+        // Check camera tools if they are rendering to viewfinder
+        const cameraTools = cameraToolsQuery(world);
+        for (const eid of cameraTools) {
+          const screenObj = world.eid2obj.get(CameraTool.screenRef[eid]);
+          const cameraObj = world.eid2obj.get(CameraTool.cameraRef[eid]);
+          this.isInView = screenObj.visible && isInViewOfCamera(cameraObj, tmpPos);
+          if (this.isInView) break;
         }
       }
     };

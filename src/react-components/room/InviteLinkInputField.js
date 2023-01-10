@@ -18,13 +18,10 @@ export function InviteLinkInputField({ fetchingInvite, inviteUrl, onRevokeInvite
     setShowRevokeConfirmation(false);
   }, []);
 
-  const confirmRevokeInvite = useCallback(
-    () => {
-      onRevokeInvite();
-      setShowRevokeConfirmation(false);
-    },
-    [onRevokeInvite]
-  );
+  const confirmRevokeInvite = useCallback(() => {
+    onRevokeInvite();
+    setShowRevokeConfirmation(false);
+  }, [onRevokeInvite]);
 
   return (
     <CopyableTextInputField

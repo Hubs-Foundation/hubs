@@ -5,28 +5,22 @@ const MIN_SCALE = 0.05;
 const MAX_SCALE = 4;
 const ROTATE_Y = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
-const updateFromLocalBB = (function() {
+const updateFromLocalBB = (function () {
   const currentPosition = new THREE.Vector3();
   const currentScale = new THREE.Vector3();
   return function updateFromLocalBB(object3D, localBox, center, halfExtents, offsetToCenter) {
     object3D.updateMatrices();
     const min = localBox.min;
     const max = localBox.max;
-    center
-      .addVectors(min, max)
-      .multiplyScalar(0.5)
-      .applyMatrix4(object3D.matrixWorld);
+    center.addVectors(min, max).multiplyScalar(0.5).applyMatrix4(object3D.matrixWorld);
     currentScale.setFromMatrixScale(object3D.matrixWorld);
-    halfExtents
-      .subVectors(max, min)
-      .multiplyScalar(0.5)
-      .multiply(currentScale);
+    halfExtents.subVectors(max, min).multiplyScalar(0.5).multiply(currentScale);
     currentPosition.setFromMatrixPosition(object3D.matrixWorld);
     offsetToCenter.subVectors(center, currentPosition);
   };
 })();
 
-const updateTargetRotationFromCamera = (function() {
+const updateTargetRotationFromCamera = (function () {
   const right = new THREE.Vector3();
   const up = new THREE.Vector3();
   const back = new THREE.Vector3();
@@ -40,10 +34,7 @@ const updateTargetRotationFromCamera = (function() {
     desiredTargetQuaternion
   ) {
     if (!isVR) {
-      back
-        .set(0, 0, 1)
-        .applyMatrix4(cameraRotation)
-        .normalize();
+      back.set(0, 0, 1).applyMatrix4(cameraRotation).normalize();
     } else {
       back.subVectors(cameraPosition, vrFocalPoint).normalize();
     }
@@ -116,7 +107,7 @@ AFRAME.registerComponent("position-at-border", {
     this.isTargetBoundingBoxDirty = true;
   },
 
-  tick2: (function() {
+  tick2: (function () {
     const cameraPosition = new THREE.Vector3();
     const cameraRotation = new THREE.Matrix4();
     const centerToCamera = new THREE.Vector3();
@@ -216,7 +207,7 @@ AFRAME.registerComponent("position-at-border", {
       }
       if (this.data.scale) {
         const distanceToCenter = centerToCamera.subVectors(cameraPosition, desiredCenterPoint).length();
-        desiredTargetScale.setScalar(THREE.Math.clamp(0.45 * distanceToCenter, MIN_SCALE, MAX_SCALE));
+        desiredTargetScale.setScalar(THREE.MathUtils.clamp(0.45 * distanceToCenter, MIN_SCALE, MAX_SCALE));
       } else {
         desiredTargetScale.setFromMatrixScale(this.target.matrixWorld);
       }
@@ -250,11 +241,7 @@ AFRAME.registerComponent("position-at-border", {
           desiredTargetQuaternion
         );
       }
-      desiredTargetTransform.compose(
-        desiredTargetPosition,
-        desiredTargetQuaternion,
-        desiredTargetScale
-      );
+      desiredTargetTransform.compose(desiredTargetPosition, desiredTargetQuaternion, desiredTargetScale);
       setMatrixWorld(this.target, desiredTargetTransform);
     };
   })()

@@ -1,29 +1,96 @@
 import "./stats-plus.css";
 import qsTruthy from "../utils/qs_truthy";
+import { defineQuery } from "bitecs";
+import { AEntity } from "../bit-components";
+
+function ThreeStats(renderer) {
+  let _rS = null;
+
+  const _values = {
+    "renderer.info.memory.geometries": {
+      caption: "Geometries"
+    },
+    "renderer.info.memory.textures": {
+      caption: "Textures"
+    },
+    "renderer.info.programs": {
+      caption: "Programs"
+    },
+    "renderer.info.render.calls": {
+      caption: "Calls"
+    },
+    "renderer.info.render.triangles": {
+      caption: "Triangles",
+      over: 100000
+    },
+    "renderer.info.render.points": {
+      caption: "Points"
+    }
+  };
+
+  const _groups = [
+    {
+      caption: "Three.js - Memory",
+      values: ["renderer.info.memory.geometries", "renderer.info.programs", "renderer.info.memory.textures"]
+    },
+    {
+      caption: "Three.js - Render",
+      values: ["renderer.info.render.calls", "renderer.info.render.triangles", "renderer.info.render.points"]
+    }
+  ];
+
+  const _fractions = [];
+
+  function _update() {
+    _rS("renderer.info.memory.geometries").set(renderer.info.memory.geometries);
+    _rS("renderer.info.programs").set(renderer.info.programs.length);
+    _rS("renderer.info.memory.textures").set(renderer.info.memory.textures);
+    _rS("renderer.info.render.calls").set(renderer.info.render.calls);
+    _rS("renderer.info.render.triangles").set(renderer.info.render.triangles);
+    _rS("renderer.info.render.points").set(renderer.info.render.points);
+  }
+
+  function _start() {}
+
+  function _end() {}
+
+  function _attach(r) {
+    _rS = r;
+  }
+
+  return {
+    update: _update,
+    start: _start,
+    end: _end,
+    attach: _attach,
+    values: _values,
+    groups: _groups,
+    fractions: _fractions
+  };
+}
 
 // Adapted from https://github.com/aframevr/aframe/blob/master/src/components/scene/stats.js
-
 function createStats(scene) {
-  const threeStats = new window.threeStats(scene.renderer);
-  const aframeStats = new window.aframeStats(scene);
-  const plugins = scene.isMobile ? [] : [threeStats, aframeStats];
+  const plugins = scene.isMobile ? [] : [new ThreeStats(scene.renderer)];
   return new window.rStats({
-    css: [], // Our stylesheet is injected from AFrame.
+    css: [],
     values: {
-      fps: { caption: "fps", below: 30 },
-      batchdraws: { caption: "Draws" },
-      batchinstances: { caption: "Instances" },
-      batchatlassize: { caption: "Atlas Size" }
+      fps: { caption: "fps", below: 30 }
     },
     groups: [
       { caption: "Framerate", values: ["fps", "raf", "physics"] },
-      { caption: "Batching", values: ["batchdraws", "batchinstances", "batchatlassize"] }
+      { caption: "BitECS", values: ["entities", "a-entities", "queries"] }
     ],
     plugins: plugins
   });
 }
 
 const HIDDEN_CLASS = "a-hidden";
+
+let $queries;
+
+const allEntitiesQuery = defineQuery();
+const aEntityQuery = defineQuery([AEntity]);
 
 AFRAME.registerComponent("stats-plus", {
   // Whether or not the stats panel is expanded.
@@ -82,10 +149,12 @@ AFRAME.registerComponent("stats-plus", {
       this.initVRStats();
     }
     this.lastUpdate = 0;
+
+    $queries = Object.getOwnPropertySymbols(APP.world).find(s => s.description == "queries");
   },
   initVRStats() {
     this.vrPanel = document.createElement("a-entity");
-    this.vrPanel.setAttribute("text", { width: 0.5, whiteSpace: "pre", value: "_", baseline: "bottom" });
+    this.vrPanel.setAttribute("text", { maxWidth: 0.5, value: "_", anchorY: "bottom" });
     this.vrPanel.addEventListener(
       "loaded",
       () =>
@@ -95,14 +164,12 @@ AFRAME.registerComponent("stats-plus", {
       { once: true }
     );
     this.el.append(this.vrPanel);
-    const background = document.createElement("a-plane");
-    background.setAttribute("color", "#333333");
-    background.setAttribute("material", "shader", "flat");
-    background.setAttribute("material", "depthTest", false);
-    background.setAttribute("width", 0.1);
-    background.setAttribute("height", 0.12);
-    background.setAttribute("position", "-0.2 0.055 0");
-    this.el.append(background);
+    const background = new THREE.Mesh(
+      new THREE.PlaneBufferGeometry(0.1, 0.12),
+      new THREE.MeshBasicMaterial({ color: 0x333333, depthTest: false })
+    );
+    background.position.set(-0.2, 0.055, 0);
+    this.el.object3D.add(background);
   },
   toggleVRStats() {
     if (this.vrStatsEnabled) {
@@ -143,13 +210,9 @@ AFRAME.registerComponent("stats-plus", {
       stats("FPS").frame();
       stats("physics").set(this.el.sceneEl.systems["hubs-systems"].physicsSystem.stepDuration);
 
-      const batchManagerSystem = this.el.sceneEl.systems["hubs-systems"].batchManagerSystem;
-      if (batchManagerSystem.batchingEnabled) {
-        const batchManager = batchManagerSystem.batchManager;
-        stats("batchdraws").set(batchManager.batches.length);
-        stats("batchinstances").set(batchManager.instanceCount);
-        stats("batchatlassize").set(batchManager.atlas.arrayDepth);
-      }
+      stats("queries").set(APP.world[$queries].size);
+      stats("entities").set(allEntitiesQuery(APP.world).length);
+      stats("a-entities").set(aEntityQuery(APP.world).length);
 
       stats().update();
     } else if (!this.inVR) {
@@ -173,15 +236,9 @@ AFRAME.registerComponent("stats-plus", {
         "text",
         "value",
         [
-          `f ${stats("fps")
-            .value()
-            .toFixed(0)}`,
-          `r ${stats("raf")
-            .value()
-            .toFixed(0)}`,
-          `p ${stats("physics")
-            .value()
-            .toFixed(0)}`,
+          `f ${stats("fps").value().toFixed(0)}`,
+          `r ${stats("raf").value().toFixed(0)}`,
+          `p ${stats("physics").value().toFixed(0)}`,
           `c ${this.el.sceneEl.renderer.info.render.calls}`,
           `t ${(this.el.sceneEl.renderer.info.render.triangles / 1000).toFixed(0)}k`
         ].join("\n")

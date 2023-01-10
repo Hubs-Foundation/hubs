@@ -2,6 +2,7 @@ import * as mediasoupClient from "mediasoup-client";
 import protooClient from "protoo-client";
 import { debug as newDebug } from "debug";
 import EventEmitter from "eventemitter3";
+import { MediaDevices } from "./utils/media-devices-utils";
 
 // Used for VP9 webcam video.
 //const VIDEO_KSVC_ENCODINGS = [{ scalabilityMode: "S3T3_KEY" }];
@@ -34,7 +35,10 @@ const WEBCAM_SIMULCAST_ENCODINGS = [
 ];
 
 // Used for simulcast screen sharing.
-const SCREEN_SHARING_SIMULCAST_ENCODINGS = [{ dtx: true, maxBitrate: 1500000 }, { dtx: true, maxBitrate: 6000000 }];
+const SCREEN_SHARING_SIMULCAST_ENCODINGS = [
+  { dtx: true, maxBitrate: 1500000 },
+  { dtx: true, maxBitrate: 6000000 }
+];
 
 export const DIALOG_CONNECTION_CONNECTED = "dialog-connection-connected";
 export const DIALOG_CONNECTION_ERROR_FATAL = "dialog-connection-error-fatal";
@@ -237,20 +241,9 @@ export class DialogAdapter extends EventEmitter {
     }
   }
 
-  async connect({
-    serverUrl,
-    roomId,
-    joinToken,
-    serverParams,
-    scene,
-    clientId,
-    forceTcp,
-    forceTurn,
-    iceTransportPolicy
-  }) {
+  async connect({ serverUrl, roomId, serverParams, scene, clientId, forceTcp, forceTurn, iceTransportPolicy }) {
     this._serverUrl = serverUrl;
     this._roomId = roomId;
-    this._joinToken = joinToken;
     this._serverParams = serverParams;
     this._clientId = clientId;
     this.scene = scene;
@@ -292,14 +285,8 @@ export class DialogAdapter extends EventEmitter {
 
       switch (request.method) {
         case "newConsumer": {
-          const {
-            peerId,
-            producerId,
-            id,
-            kind,
-            rtpParameters,
-            /*type, */ appData /*, producerPaused */
-          } = request.data;
+          const { peerId, producerId, id, kind, rtpParameters, /*type, */ appData /*, producerPaused */ } =
+            request.data;
 
           try {
             const consumer = await this._recvTransport.consume({
@@ -466,7 +453,6 @@ export class DialogAdapter extends EventEmitter {
     await this.connect({
       serverUrl: newServerUrl,
       roomId: this._roomId,
-      joinToken: APP.hubChannel.token,
       serverParams,
       scene: this.scene,
       clientId: this._clientId,
@@ -574,30 +560,33 @@ export class DialogAdapter extends EventEmitter {
       proprietaryConstraints: PC_PROPRIETARY_CONSTRAINTS
     });
 
-    this._sendTransport.on("connect", (
-      { dtlsParameters },
-      callback,
-      errback // eslint-disable-line no-shadow
-    ) => {
-      this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
-      this._sendTransport.observer.on("close", () => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [close]`);
-      });
-      this._sendTransport.observer.on("newproducer", producer => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
-      });
-      this._sendTransport.observer.on("newconsumer", consumer => {
-        this.emitRTCEvent("info", "RTC", () => `Send transport [newconsumer]: ${consumer.id}`);
-      });
+    this._sendTransport.on(
+      "connect",
+      (
+        { dtlsParameters },
+        callback,
+        errback // eslint-disable-line no-shadow
+      ) => {
+        this.emitRTCEvent("info", "RTC", () => `Send transport [connect]`);
+        this._sendTransport.observer.on("close", () => {
+          this.emitRTCEvent("info", "RTC", () => `Send transport [close]`);
+        });
+        this._sendTransport.observer.on("newproducer", producer => {
+          this.emitRTCEvent("info", "RTC", () => `Send transport [newproducer]: ${producer.id}`);
+        });
+        this._sendTransport.observer.on("newconsumer", consumer => {
+          this.emitRTCEvent("info", "RTC", () => `Send transport [newconsumer]: ${consumer.id}`);
+        });
 
-      this._protoo
-        .request("connectWebRtcTransport", {
-          transportId: this._sendTransport.id,
-          dtlsParameters
-        })
-        .then(callback)
-        .catch(errback);
-    });
+        this._protoo
+          .request("connectWebRtcTransport", {
+            transportId: this._sendTransport.id,
+            dtlsParameters
+          })
+          .then(callback)
+          .catch(errback);
+      }
+    );
 
     this._sendTransport.on("connectionstatechange", connectionState => {
       let level = "info";
@@ -675,30 +664,33 @@ export class DialogAdapter extends EventEmitter {
       iceTransportPolicy: this._iceTransportPolicy
     });
 
-    this._recvTransport.on("connect", (
-      { dtlsParameters },
-      callback,
-      errback // eslint-disable-line no-shadow
-    ) => {
-      this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
-      this._recvTransport.observer.on("close", () => {
-        this.emitRTCEvent("info", "RTC", () => `Receive transport [close]`);
-      });
-      this._recvTransport.observer.on("newproducer", producer => {
-        this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
-      });
-      this._recvTransport.observer.on("newconsumer", consumer => {
-        this.emitRTCEvent("info", "RTC", () => `Receive transport [newconsumer]: ${consumer.id}`);
-      });
+    this._recvTransport.on(
+      "connect",
+      (
+        { dtlsParameters },
+        callback,
+        errback // eslint-disable-line no-shadow
+      ) => {
+        this.emitRTCEvent("info", "RTC", () => `Receive transport [connect]`);
+        this._recvTransport.observer.on("close", () => {
+          this.emitRTCEvent("info", "RTC", () => `Receive transport [close]`);
+        });
+        this._recvTransport.observer.on("newproducer", producer => {
+          this.emitRTCEvent("info", "RTC", () => `Receive transport [newproducer]: ${producer.id}`);
+        });
+        this._recvTransport.observer.on("newconsumer", consumer => {
+          this.emitRTCEvent("info", "RTC", () => `Receive transport [newconsumer]: ${consumer.id}`);
+        });
 
-      this._protoo
-        .request("connectWebRtcTransport", {
-          transportId: this._recvTransport.id,
-          dtlsParameters
-        })
-        .then(callback)
-        .catch(errback);
-    });
+        this._protoo
+          .request("connectWebRtcTransport", {
+            transportId: this._recvTransport.id,
+            dtlsParameters
+          })
+          .then(callback)
+          .catch(errback);
+      }
+    );
 
     this._recvTransport.on("connectionstatechange", connectionState => {
       let level = "info";
@@ -746,7 +738,7 @@ export class DialogAdapter extends EventEmitter {
       device: this._device,
       rtpCapabilities: this._mediasoupDevice.rtpCapabilities,
       sctpCapabilities: this._useDataChannel ? this._mediasoupDevice.sctpCapabilities : undefined,
-      token: this._joinToken
+      token: APP.hubChannel.token
     });
 
     if (this._localMediaStream) {
@@ -778,8 +770,8 @@ export class DialogAdapter extends EventEmitter {
           } else {
             // stopTracks = false because otherwise the track will end during a temporary disconnect
             this._micProducer = await this._sendTransport.produce({
-              paused: !this._micShouldBeEnabled,
               track,
+              pause: !this._micShouldBeEnabled,
               stopTracks: false,
               codecOptions: { opusStereo: false, opusDtx: true },
               zeroRtpOnPause: true,
@@ -790,14 +782,16 @@ export class DialogAdapter extends EventEmitter {
               this.emitRTCEvent("info", "RTC", () => `Mic transport closed`);
               this._micProducer = null;
             });
+
+            this.emit("mic-state-changed", { enabled: this.isMicEnabled });
           }
         } else {
           sawVideo = true;
 
-          if (track._hubs_contentHint === "share") {
+          if (track._hubs_contentHint === MediaDevices.SCREEN) {
             await this.disableCamera();
             await this.enableShare(track);
-          } else if (track._hubs_contentHint === "camera") {
+          } else if (track._hubs_contentHint === MediaDevices.CAMERA) {
             await this.disableShare();
             await this.enableCamera(track);
           }
@@ -952,7 +946,7 @@ export class DialogAdapter extends EventEmitter {
       .request("kick", {
         room_id: this.room,
         user_id: clientId,
-        token: this._joinToken
+        token: APP.hubChannel.token
       })
       .then(() => {
         document.body.dispatchEvent(new CustomEvent("kicked", { detail: { clientId: clientId } }));

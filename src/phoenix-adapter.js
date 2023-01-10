@@ -7,10 +7,12 @@ const getTimeOffsetToServer = async () => {
   const clientSentTime = Date.now();
   const serverReceivedTime =
     new Date(
-      (await fetch(document.location.href, {
-        method: "HEAD",
-        cache: "no-cache"
-      })).headers.get("Date")
+      (
+        await fetch(document.location.href, {
+          method: "HEAD",
+          cache: "no-cache"
+        })
+      ).headers.get("Date")
     ).getTime() +
     precision / 2;
   const clientReceivedTime = Date.now();
@@ -43,6 +45,10 @@ const getAverageTimeOffset = (() => {
   };
 })();
 
+export function getServerTime() {
+  return Date.now() + getAverageTimeOffset();
+}
+
 export default class PhoenixAdapter {
   constructor() {
     this.refs = new Map();
@@ -66,15 +72,28 @@ export default class PhoenixAdapter {
   }
   async connect() {
     this.refs.set("naf", this.hubChannel.channel.on("naf", this.handleIncomingNAF));
-    this.refs.set("nafr", this.hubChannel.channel.on("nafr", this.handleIncomingNAFR));
+    // Assume the networking system parses the raw nafr message and writes the parsed data back into
+    // the event object for consumption here. That way, we avoid parsing the json twice.
+    this.refs.set(
+      "nafr",
+      this.hubChannel.channel.on("nafr", ({ parsed }) => {
+        this.handleIncomingNAF(parsed);
+      })
+    );
 
     this.nafConnectSuccess(this.session_id);
     this.reliableTransport = transportForChannel(this.hubChannel.channel, true);
     this.unreliableTransport = transportForChannel(this.hubChannel.channel, false);
 
     this.hubChannel.presence.list(key => key).forEach(this.nafOccupantJoined);
-    this.refs.set("hub:join", this.events.on(`hub:join`, ({ key }) => this.nafOccupantJoined(key)));
-    this.refs.set("hub:leave", this.events.on(`hub:leave`, ({ key }) => this.nafOccupantLeave(key)));
+    this.refs.set(
+      "hub:join",
+      this.events.on(`hub:join`, ({ key }) => this.nafOccupantJoined(key))
+    );
+    this.refs.set(
+      "hub:leave",
+      this.events.on(`hub:leave`, ({ key }) => this.nafOccupantLeave(key))
+    );
   }
   shouldStartConnectionTo() {}
   startStreamConnection() {}
@@ -86,7 +105,7 @@ export default class PhoenixAdapter {
   }
 
   getServerTime() {
-    return Date.now() + getAverageTimeOffset();
+    return getServerTime();
   }
 
   sendData(clientId, dataType, data) {
@@ -168,18 +187,11 @@ export default class PhoenixAdapter {
 
     message.source = source;
 
-    //TODO: Handle frozen
-    if (this.frozen) {
+    if (this.frozen && (message.dataType === "um" || message.dataType === "u")) {
       this.storeMessage(message);
     } else {
-      this.nafMessageReceived(null, message.dataType, message.data, message.source);
+      this.nafMessageReceived(message.from_session_id, message.dataType, message.data, message.source);
     }
-  };
-  handleIncomingNAFR = ({ from_session_id, naf: unparsedData }) => {
-    // Server optimization: server passes through unparsed NAF message, we must now parse it.
-    const data = JSON.parse(unparsedData);
-    data.from_session_id = from_session_id;
-    this.handleIncomingNAF(data);
   };
 
   storeMessage(message) {

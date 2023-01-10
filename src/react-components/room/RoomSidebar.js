@@ -69,6 +69,15 @@ function SceneAttribution({ attribution }) {
   }
 }
 
+SceneAttribution.propTypes = {
+  attribution: {
+    name: PropTypes.string,
+    title: PropTypes.string,
+    author: PropTypes.string,
+    url: PropTypes.string
+  }
+};
+
 // To assist with content control, we avoid displaying scene links to users who are not the scene
 // creator, unless the scene is remixable or promotable.
 function allowDisplayOfSceneLink(accountId, scene) {
@@ -122,18 +131,33 @@ export function SceneInfo({ accountId, scene, showAttributions, canChangeScene, 
           />
         </div>
       </div>
-      {showAttributions &&
-        filteredAttributionElements.length > 0 && (
-          <InputField
-            label={<FormattedMessage id="room-sidebar.scene-info.attributions" defaultMessage="Attributions" />}
-          >
-            <ul className={styles.attributions}>{filteredAttributionElements}</ul>
-          </InputField>
-        )}
+      {showAttributions && filteredAttributionElements.length > 0 && (
+        <InputField
+          label={<FormattedMessage id="room-sidebar.scene-info.attributions" defaultMessage="Attributions" />}
+        >
+          <ul className={styles.attributions}>{filteredAttributionElements}</ul>
+        </InputField>
+      )}
       {changeSceneButton}
     </>
   );
 }
+
+SceneInfo.propTypes = {
+  accountId: PropTypes.string,
+  showAttributions: PropTypes.bool,
+  canChangeScene: PropTypes.bool,
+  onChangeScene: PropTypes.func,
+  scene: {
+    attributions: {
+      content: PropTypes.string,
+      creator: PropTypes.string
+    },
+    url: PropTypes.string,
+    screenshot_url: PropTypes.string,
+    name: PropTypes.string
+  }
+};
 
 export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChangeScene }) {
   return (

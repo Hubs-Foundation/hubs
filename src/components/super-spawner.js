@@ -1,9 +1,10 @@
-/* global require AFRAME THREE setTimeout clearTimeout */
 import { addMedia } from "../utils/media-utils";
 import { waitForEvent } from "../utils/async-utils";
 import { ObjectContentOrigins } from "../object-types";
 import { paths } from "../systems/userinput/paths";
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
+import { addComponent } from "bitecs";
+import { Held, HeldRemoteLeft, HeldRemoteRight } from "../bit-components";
 
 const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
 
@@ -77,8 +78,6 @@ AFRAME.registerComponent("super-spawner", {
     this.handleMediaLoaded = this.handleMediaLoaded.bind(this);
 
     this.spawnedMediaScale = null;
-
-    this.physicsSystem = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
   },
 
   play() {
@@ -153,15 +152,6 @@ AFRAME.registerComponent("super-spawner", {
     const willAnimateFromCursor =
       this.data.animateFromCursor &&
       (userinput.get(paths.actions.rightHand.matrix) || userinput.get(paths.actions.leftHand.matrix));
-    if (!willAnimateFromCursor) {
-      if (left) {
-        interaction.state.leftRemote.held = spawnedEntity;
-        interaction.state.leftRemote.spawning = true;
-      } else {
-        interaction.state.rightRemote.held = spawnedEntity;
-        interaction.state.rightRemote.spawning = true;
-      }
-    }
     this.activateCooldown();
     await waitForEvent("model-loaded", spawnedEntity);
 
@@ -184,14 +174,22 @@ AFRAME.registerComponent("super-spawner", {
         easing: "easeInOutBack"
       });
     } else {
+      addComponent(APP.world, Held, spawnedEntity.eid);
       if (left) {
-        interaction.state.leftRemote.spawning = false;
+        addComponent(APP.world, HeldRemoteLeft, spawnedEntity.eid);
       } else {
-        interaction.state.rightRemote.spawning = false;
+        addComponent(APP.world, HeldRemoteRight, spawnedEntity.eid);
       }
     }
 
-    this.physicsSystem.resetDynamicBody(spawnedEntity.components["body-helper"].uuid);
+    // We skip this in the scene preview because
+    //   1. hubs-systems is not initialized in the scene preview
+    //   2. physics is not needed in the scene preview
+    if (this.el.sceneEl.systems["hubs-systems"]) {
+      this.el.sceneEl.systems["hubs-systems"].physicsSystem.resetDynamicBody(
+        spawnedEntity.components["body-helper"].uuid
+      );
+    }
 
     spawnedEntity.addEventListener(
       "media-loaded",

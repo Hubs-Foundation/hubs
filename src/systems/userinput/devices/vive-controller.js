@@ -5,7 +5,7 @@ import { copySittingToStandingTransform } from "./copy-sitting-to-standing-trans
 const ONES = new THREE.Vector3(1, 1, 1);
 const HAND_OFFSET = new THREE.Matrix4().compose(
   new THREE.Vector3(0, 0, 0.13),
-  new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.Math.DEG2RAD, 0, 0)),
+  new THREE.Quaternion().setFromEuler(new THREE.Euler(-40 * THREE.MathUtils.DEG2RAD, 0, 0)),
   new THREE.Vector3(1, 1, 1)
 );
 const RAY_ROTATION = new THREE.Quaternion();
@@ -28,7 +28,10 @@ export class ViveControllerDevice {
         { name: "joystick", buttonId: 4 },
         { name: "bumper", buttonId: 5 }
       ];
-      this.axisMap = [{ name: "joyX", axisId: 0 }, { name: "joyY", axisId: 1 }];
+      this.axisMap = [
+        { name: "joyX", axisId: 0 },
+        { name: "joyY", axisId: 1 }
+      ];
     } else if (this.gamepad.id === "HTC Vive Focus Plus Controller") {
       RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 15);
       this.buttonMap = [
@@ -36,7 +39,10 @@ export class ViveControllerDevice {
         { name: "trigger", buttonId: 1 },
         { name: "grip", buttonId: 2 }
       ];
-      this.axisMap = [{ name: "touchX", axisId: 0 }, { name: "touchY", axisId: 1 }];
+      this.axisMap = [
+        { name: "touchX", axisId: 0 },
+        { name: "touchY", axisId: 1 }
+      ];
     } else if (this.gamepad.axes.length === 4) {
       RAY_ROTATION.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 12);
       this.buttonMap = [
@@ -65,7 +71,10 @@ export class ViveControllerDevice {
         { name: "grip", buttonId: 2 },
         { name: "primary", buttonId: 3 }
       ];
-      this.axisMap = [{ name: "touchX", axisId: 0 }, { name: "touchY", axisId: 1 }];
+      this.axisMap = [
+        { name: "touchX", axisId: 0 },
+        { name: "touchY", axisId: 1 }
+      ];
     }
 
     this.pose = new Pose();
@@ -115,10 +124,7 @@ export class ViveControllerDevice {
     rayObject.updateMatrixWorld();
     this.rayObjectRotation.setFromRotationMatrix(m.extractRotation(rayObject.matrixWorld));
     this.pose.position.setFromMatrixPosition(rayObject.matrixWorld);
-    this.pose.direction
-      .set(0, 0, -1)
-      .applyQuaternion(RAY_ROTATION)
-      .applyQuaternion(this.rayObjectRotation);
+    this.pose.direction.set(0, 0, -1).applyQuaternion(RAY_ROTATION).applyQuaternion(this.rayObjectRotation);
     this.pose.fromOriginAndDirection(this.pose.position, this.pose.direction);
     frame.setPose(this.path.pose, this.pose);
 

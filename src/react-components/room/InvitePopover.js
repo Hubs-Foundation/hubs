@@ -9,7 +9,7 @@ import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 
-function InvitePopoverContent({ url, shortUrl, code, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
+function InvitePopoverContent({ url, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
   return (
     <Column center padding grow gap="lg" className={styles.invitePopover}>
       {inviteRequired ? (
@@ -23,24 +23,13 @@ function InvitePopoverContent({ url, shortUrl, code, embed, inviteRequired, fetc
             value={url}
             buttonPreset="accent3"
           />
-          <CopyableTextInputField
-            label={<FormattedMessage id="invite-popover.room-code" defaultMessage="Room Code" />}
-            value={code}
-            buttonPreset="accent4"
-            description={
-              <>
-                Enter code on{" "}
-                <a href={shortUrl} target="_blank" rel="noopener noreferrer">
-                  {shortUrl.replace("https://", "")}
-                </a>
-              </>
-            }
-          />
-          <CopyableTextInputField
-            label={<FormattedMessage id="invite-popover.embed-code" defaultMessage="Embed Code" />}
-            value={embed}
-            buttonPreset="accent5"
-          />
+          {embed && (
+            <CopyableTextInputField
+              label={<FormattedMessage id="invite-popover.embed-code" defaultMessage="Embed Code" />}
+              value={embed}
+              buttonPreset="accent5"
+            />
+          )}
         </>
       )}
     </Column>
@@ -48,10 +37,8 @@ function InvitePopoverContent({ url, shortUrl, code, embed, inviteRequired, fetc
 }
 
 InvitePopoverContent.propTypes = {
-  shortUrl: PropTypes.string,
   url: PropTypes.string.isRequired,
-  code: PropTypes.string.isRequired,
-  embed: PropTypes.string.isRequired,
+  embed: PropTypes.string,
   inviteRequired: PropTypes.bool,
   fetchingInvite: PropTypes.bool,
   inviteUrl: PropTypes.string,
@@ -64,9 +51,7 @@ const invitePopoverTitle = defineMessage({
 });
 
 export function InvitePopoverButton({
-  shortUrl,
   url,
-  code,
   embed,
   initiallyVisible,
   popoverApiRef,
@@ -84,9 +69,7 @@ export function InvitePopoverButton({
       title={title}
       content={() => (
         <InvitePopoverContent
-          shortUrl={shortUrl}
           url={url}
-          code={code}
           embed={embed}
           inviteRequired={inviteRequired}
           fetchingInvite={fetchingInvite}

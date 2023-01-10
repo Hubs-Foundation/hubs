@@ -5,24 +5,9 @@ import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 const COLLISION_LAYERS = require("./constants").COLLISION_LAYERS;
 import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
-
-function registerRootSceneComponent(componentName) {
-  AFRAME.GLTFModelPlus.registerComponent(componentName, componentName, (el, componentName, componentData) => {
-    const sceneEl = AFRAME.scenes[0];
-
-    sceneEl.setAttribute(componentName, componentData);
-
-    sceneEl.addEventListener(
-      "reset_scene",
-      () => {
-        sceneEl.removeAttribute(componentName);
-      },
-      { once: true }
-    );
-  });
-}
-
-registerRootSceneComponent("fog");
+import { renderAsEntity } from "./utils/jsx-entity";
+import { Networked } from "./bit-components";
+import { addComponent } from "bitecs";
 
 AFRAME.GLTFModelPlus.registerComponent("duck", "duck", el => {
   el.setAttribute("duck", "");
@@ -83,6 +68,8 @@ AFRAME.GLTFModelPlus.registerComponent("morph-audio-feedback", "morph-audio-feed
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("uv-scroll", "uv-scroll");
+AFRAME.GLTFModelPlus.registerComponent("frustrum", "frustrum");
+AFRAME.GLTFModelPlus.registerComponent("mirror", "mirror");
 AFRAME.GLTFModelPlus.registerComponent(
   "box-collider",
   "shape-helper",
@@ -119,20 +106,8 @@ AFRAME.GLTFModelPlus.registerComponent("spawn-point", "spawn-point", el => {
     willMaintainWorldUp: true
   });
 });
-AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh", (el, _componentName, componentData) => {
-  const nav = AFRAME.scenes[0].systems.nav;
-  const zone = componentData.zone || "character";
-  let found = false;
-  el.object3D.traverse(node => {
-    if (node.isMesh && !found) {
-      found = true;
-      nav.loadMesh(node, zone);
-    }
-  });
-  // There isn't actually an a-frame nav-mesh component, but we want to tag this el as a nav-mesh since
-  // nav-mesh-helper will query for it later.
-  el.setAttribute("nav-mesh");
-});
+
+AFRAME.GLTFModelPlus.registerComponent("nav-mesh", "nav-mesh");
 
 AFRAME.GLTFModelPlus.registerComponent("pinnable", "pinnable");
 
@@ -149,23 +124,21 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
   el.setAttribute("waypoint", componentData);
 });
 
-AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, componentName, componentData, components) => {
-  el.setAttribute("networked", {
-    template: "#interactable-media-frame",
-    owner: "scene",
-    persistent: true,
-    networkId: components.networked.id
-  });
-  el.setAttribute("shape-helper", {
-    type: "box",
-    fit: "manual",
-    halfExtents: {
-      x: componentData.bounds.x / 2,
-      y: componentData.bounds.y / 2,
-      z: componentData.bounds.z / 2
-    }
-  });
-  el.setAttribute("media-frame", componentData);
+import { findAncestorWithComponent } from "./utils/scene-graph";
+import { createElementEntity } from "./utils/jsx-entity";
+/** @jsx createElementEntity */ createElementEntity;
+
+AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _componentName, componentData) => {
+  const eid = renderAsEntity(APP.world, <entity mediaFrame={componentData} />);
+
+  addComponent(APP.world, Networked, eid);
+
+  const networkedEl = findAncestorWithComponent(el, "networked");
+  const rootNid = (networkedEl && networkedEl.components.networked.data.networkId) || "scene";
+  Networked.id[eid] = APP.getSid(`${rootNid}.${el.object3D.children[0].userData.gltfIndex}`);
+  APP.world.nid2eid.set(Networked.id[eid], eid);
+
+  el.object3D.add(APP.world.eid2obj.get(eid));
 });
 
 AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, componentData) => {
@@ -377,16 +350,8 @@ AFRAME.GLTFModelPlus.registerComponent(
   "trigger-volume",
   "trigger-volume",
   (el, componentName, componentData, components, indexToEntityMap) => {
-    const {
-      size,
-      target,
-      enterComponent,
-      enterProperty,
-      enterValue,
-      leaveComponent,
-      leaveProperty,
-      leaveValue
-    } = componentData;
+    const { size, target, enterComponent, enterProperty, enterValue, leaveComponent, leaveProperty, leaveValue } =
+      componentData;
 
     let enterComponentMapping, leaveComponentMapping, targetEntity;
 
@@ -524,6 +489,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 AFRAME.GLTFModelPlus.registerComponent("video-texture-source", "video-texture-source");
 
 AFRAME.GLTFModelPlus.registerComponent("text", "text");
+
 AFRAME.GLTFModelPlus.registerComponent(
   "audio-target",
   "audio-target",
@@ -606,6 +572,21 @@ AFRAME.GLTFModelPlus.registerComponent("background", "background", (el, _compone
   el.setAttribute("environment-settings", { backgroundColor: new THREE.Color(componentData.color) });
 });
 
+AFRAME.GLTFModelPlus.registerComponent("fog", "fog", (el, _componentName, componentData) => {
+  // TODO need to actually implement this in blender exporter before showing this warning
+  // console.warn(
+  //   "The `fog` component is deprecated, use the fog properties on the `environment-settings` component instead."
+  // );
+  // This assumes the fog component is on the root entitycoco
+  el.setAttribute("environment-settings", {
+    fogType: componentData.type,
+    fogColor: new THREE.Color(componentData.color),
+    fogNear: componentData.near,
+    fogFar: componentData.far,
+    fogDensity: componentData.density
+  });
+});
+
 AFRAME.GLTFModelPlus.registerComponent(
   "environment-settings",
   "environment-settings",
@@ -617,3 +598,12 @@ AFRAME.GLTFModelPlus.registerComponent(
     });
   }
 );
+
+AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (el, componentName, componentData) => {
+  // TODO PMREMGenerator should be fixed to not assume this
+  componentData.envMapTexture.flipY = true;
+  // Assume texture is always an equirect for now
+  componentData.envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
+
+  el.setAttribute(componentName, componentData);
+});

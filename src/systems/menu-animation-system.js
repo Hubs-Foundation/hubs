@@ -25,7 +25,7 @@ export class MenuAnimationSystem {
     this.components.splice(this.components.indexOf(component), 1);
     this.data.delete(component);
   }
-  tick = (function() {
+  tick = (function () {
     const menuToCamera = new THREE.Vector3();
     const menuScale = new THREE.Vector3();
     const menuParentScale = new THREE.Vector3();
@@ -50,17 +50,17 @@ export class MenuAnimationSystem {
         menuParentScale.setFromMatrixScale(datum.menuEl.object3D.parent.matrixWorld);
         if (isMenuOpening) {
           const scale = datum.chooseScale
-            ? THREE.Math.clamp(0.45 * distanceToMenu, 0.05, 4)
+            ? THREE.MathUtils.clamp(0.45 * distanceToMenu, 0.05, 4)
             : menuScale.setFromMatrixScale(datum.menuEl.object3D.matrixWorld).x;
           datum.endingScale = scale / menuParentScale.x;
           datum.menuOpenTime = t;
           datum.startScaleAtMenuOpenTime = datum.endingScale * 0.8;
         }
         if (isMenuVisible) {
-          const currentScale = THREE.Math.lerp(
+          const currentScale = THREE.MathUtils.lerp(
             datum.startScaleAtMenuOpenTime,
             datum.endingScale,
-            elasticOut(THREE.Math.clamp((t - datum.menuOpenTime) / MENU_ANIMATION_DURATION_MS, 0, 1))
+            elasticOut(THREE.MathUtils.clamp((t - datum.menuOpenTime) / MENU_ANIMATION_DURATION_MS, 0, 1))
           );
           if (datum.menuEl.object3D.scale.x !== currentScale) {
             datum.menuEl.object3D.scale.setScalar(currentScale);

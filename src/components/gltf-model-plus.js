@@ -1,14 +1,19 @@
-import nextTick from "../utils/next-tick";
-import { updateMaterials, mapMaterials, convertStandardMaterial } from "../utils/material-utils";
-import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
-import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
-import { promisifyWorker } from "../utils/promisify-worker.js";
-import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
-import { disposeNode, cloneObject3D } from "../utils/three-utils";
-import HubsTextureLoader from "../loaders/HubsTextureLoader";
+import GLBRangeRequests from "three-gltf-extensions/loaders/GLB_range_requests/GLB_range_requests";
+import GLTFLodExtension from "three-gltf-extensions/loaders/MSFT_lod/MSFT_lod";
+import { acceleratedRaycast, MeshBVH } from "three-mesh-bvh";
+import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
-import { BasisTextureLoader } from "three/examples/jsm/loaders/BasisTextureLoader";
+import HubsTextureLoader from "../loaders/HubsTextureLoader";
+import { convertStandardMaterial, mapMaterials, updateMaterials } from "../utils/material-utils";
+import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
+import nextTick from "../utils/next-tick";
+import { promisifyWorker } from "../utils/promisify-worker.js";
+import qsTruthy from "../utils/qs_truthy";
+import { cloneObject3D } from "../utils/three-utils";
+import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -16,6 +21,7 @@ class GLTFCache {
   cache = new Map();
 
   set(src, gltf) {
+    gltf.scene.userData.gltfCacheKey = src;
     this.cache.set(src, {
       gltf,
       count: 0
@@ -47,12 +53,13 @@ class GLTFCache {
 
     cacheItem.count--;
     if (cacheItem.count <= 0) {
-      cacheItem.gltf.scene.traverse(disposeNode);
+      cacheItem.gltf.scene.dispose();
       this.cache.delete(src);
     }
   }
 }
-const gltfCache = new GLTFCache();
+
+export const gltfCache = new GLTFCache();
 const inflightGltfs = new Map();
 
 const extractZipFile = promisifyWorker(new SketchfabZipWorker());
@@ -110,9 +117,10 @@ function generateMeshBVH(object3D) {
 }
 
 function cloneGltf(gltf) {
+  const scene = cloneObject3D(gltf.scene);
   return {
-    animations: gltf.scene.animations,
-    scene: cloneObject3D(gltf.scene)
+    animations: scene.animations,
+    scene
   };
 }
 
@@ -144,7 +152,7 @@ function getHubsComponentsFromMaterial(node) {
 /// or templates associated with any of their nodes.)
 ///
 /// Returns the A-Frame entity associated with the given node, if one was constructed.
-const inflateEntities = function(indexToEntityMap, node, templates, isRoot, modelToWorldScale = 1) {
+const inflateEntities = function (indexToEntityMap, node, templates, isRoot, modelToWorldScale = 1) {
   // TODO: Remove this once we update the legacy avatars to the new node names
   if (node.name === "Chest") {
     node.name = "Spine";
@@ -209,7 +217,7 @@ const inflateEntities = function(indexToEntityMap, node, templates, isRoot, mode
   // the group. See `PropertyBinding.findNode`:
   // https://github.com/mrdoob/three.js/blob/dev/src/animation/PropertyBinding.js#L211
   el.object3D.uuid = node.uuid;
-  node.uuid = THREE.Math.generateUUID();
+  node.uuid = THREE.MathUtils.generateUUID();
 
   if (node.animations) {
     // Pass animations up to the group object so that when we can pass the group as
@@ -266,7 +274,10 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
 
     if (entityComponents && el) {
       for (const prop in entityComponents) {
-        if (entityComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+        if (
+          Object.prototype.hasOwnProperty.call(entityComponents, prop) &&
+          Object.prototype.hasOwnProperty.call(AFRAME.GLTFModelPlus.components, prop)
+        ) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
           await inflator(
             el,
@@ -283,7 +294,10 @@ async function inflateComponents(inflatedEntity, indexToEntityMap) {
 
     if (materialComponents && el) {
       for (const prop in materialComponents) {
-        if (materialComponents.hasOwnProperty(prop) && AFRAME.GLTFModelPlus.components.hasOwnProperty(prop)) {
+        if (
+          Object.prototype.hasOwnProperty.call(materialComponents, prop) &&
+          Object.prototype.hasOwnProperty.call(AFRAME.GLTFModelPlus.components, prop)
+        ) {
           const { componentName, inflator } = AFRAME.GLTFModelPlus.components[prop];
           await inflator(
             el,
@@ -372,12 +386,20 @@ function runMigration(version, json) {
   }
 }
 
+const convertStandardMaterialsIfNeeded = object => {
+  const materialQuality = window.APP.store.state.preferences.materialQualitySetting;
+  updateMaterials(object, material => convertStandardMaterial(material, materialQuality));
+  return object;
+};
+
 let ktxLoader;
+let dracoLoader;
 
 class GLTFHubsPlugin {
   constructor(parser, jsonPreprocessor) {
     this.parser = parser;
     this.jsonPreprocessor = jsonPreprocessor;
+    this.name = "MOZ_hubs_plugin";
 
     // We override glTF parser textureLoader with our HubsTextureLoader for
     // 1. Clean up the texture image related resources after it is uploaded to WebGL texture
@@ -410,7 +432,7 @@ class GLTFHubsPlugin {
     if (
       parser.json.extensions &&
       parser.json.extensions.MOZ_hubs_components &&
-      parser.json.extensions.MOZ_hubs_components.hasOwnProperty("version")
+      Object.prototype.hasOwnProperty.call(parser.json.extensions.MOZ_hubs_components, "version")
     ) {
       version = parser.json.extensions.MOZ_hubs_components.version;
     }
@@ -436,8 +458,7 @@ class GLTFHubsPlugin {
       // GLTFLoader sets matrixAutoUpdate on animated objects, we want to keep the defaults
       // @TODO: Should this be fixed in the gltf loader?
       object.matrixAutoUpdate = THREE.Object3D.DefaultMatrixAutoUpdate;
-      const materialQuality = window.APP.store.materialQualitySetting;
-      updateMaterials(object, material => convertStandardMaterial(material, materialQuality));
+      convertStandardMaterialsIfNeeded(object);
     });
 
     // Replace animation target node name with the node uuid.
@@ -457,7 +478,6 @@ class GLTFHubsPlugin {
       }
     }
 
-    //
     gltf.scene.animations = gltf.animations;
   }
 }
@@ -560,6 +580,12 @@ class GLTFHubsLightMapExtension {
       const lightMap = results[1];
       material.lightMap = lightMap;
       material.lightMapIntensity = extensionDef.intensity !== undefined ? extensionDef.intensity : 1;
+
+      // See https://github.com/mrdoob/three.js/pull/23613
+      if (material.isMeshBasicMaterial) {
+        material.lightMapIntensity *= Math.PI;
+      }
+
       return material;
     });
   }
@@ -593,7 +619,7 @@ class GLTFHubsTextureBasisExtension {
     console.warn(`The ${this.name} extension is deprecated, you should use KHR_texture_basisu instead.`);
 
     const extensionDef = textureDef.extensions[this.name];
-    const source = json.images[extensionDef.source];
+    const source = extensionDef.source;
 
     return parser.loadTextureImage(textureIndex, source, this.basisLoader);
   }
@@ -616,7 +642,7 @@ class GLTFMozTextureRGBE {
     }
 
     const extensionDef = textureDef.extensions[this.name];
-    const source = json.images[extensionDef.source];
+    const source = extensionDef.source;
     return parser.loadTextureImage(textureIndex, source, this.loader).then(t => {
       // TODO pretty severe artifacting when using mipmaps, disable for now
       if (t.minFilter == THREE.NearestMipmapNearestFilter || t.minFilter == THREE.NearestMipmapLinearFilter) {
@@ -638,15 +664,71 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     gltfUrl = fileMap["scene.gtlf"];
   }
 
+  const useRangeRequests = qsTruthy("rangerequests");
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
-  const gltfLoader = new THREE.GLTFLoader(loadingManager);
+  const gltfLoader = new GLTFLoader(loadingManager);
   gltfLoader
     .register(parser => new GLTFHubsComponentsExtension(parser))
     .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
     .register(parser => new GLTFHubsLightMapExtension(parser))
     .register(parser => new GLTFHubsTextureBasisExtension(parser))
-    .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)));
+    .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)))
+    .register(
+      parser =>
+        new GLTFLodExtension(parser, {
+          loadingMode: useRangeRequests ? "progressive" : "all",
+          onLoadMesh: (lod, mesh, level, lowestLevel) => {
+            // Nothing to do for "all" mode
+            if (!useRangeRequests) {
+              return mesh;
+            }
+
+            // Higher levels are progressively loaded on demand.
+            // So some post-loading processings done in gltf-model-plus and media-loader
+            // need to be done here now.
+
+            // Nothing to do if this is the lowest level mesh.
+            if (level === lowestLevel || lod.levels.length === 0) {
+              return mesh;
+            }
+
+            let lowestMeshLevel = null;
+            for (let index = lowestLevel; index > level; index--) {
+              if (lod.levels[index].object.type !== "Object3D") {
+                lowestMeshLevel = index;
+                break;
+              }
+            }
+
+            if (lowestMeshLevel === null) {
+              return mesh;
+            }
+
+            // Create a mesh clone. Otherwise if an lod instance is cloned before higher
+            // levels are loaded the lods instance can refer to the same mesh instance,
+            // therefore the lods can be broken because an object can't be placed
+            // at multiple places in a Three.js scene tree.
+            mesh = mesh.clone();
+
+            convertStandardMaterialsIfNeeded(mesh);
+
+            // A hacky solution. media-loader and media-utils make a material clone
+            // and inject shader code chunk for hover effects on before compile hook
+            // as a post-loading process. Here simulates them.
+            // @TODO: Check if this always works. Replace with a better and simpler solution.
+            const currentOnBeforeRender = mesh.material.onBeforeRender;
+            mesh.material = mesh.material.clone();
+            mesh.material.onBeforeRender = currentOnBeforeRender;
+
+            // onBeforeCompile of the material of the lowest level mesh should be
+            // already set up because the lowest level should be loaded first.
+            mesh.material.onBeforeCompile = lod.levels[lowestMeshLevel].object.material.onBeforeCompile;
+
+            return mesh;
+          }
+        })
+    );
 
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
   // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of
@@ -654,19 +736,83 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   if (!ktxLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
     ktxLoader = new KTX2Loader(loadingManager).detectSupport(AFRAME.scenes[0].renderer);
   }
+  if (!dracoLoader && AFRAME && AFRAME.scenes && AFRAME.scenes[0]) {
+    dracoLoader = new DRACOLoader(loadingManager);
+  }
 
   if (ktxLoader) {
     gltfLoader.setKTX2Loader(ktxLoader);
   }
+  if (dracoLoader) {
+    gltfLoader.setDRACOLoader(dracoLoader);
+  }
 
   return new Promise((resolve, reject) => {
-    gltfLoader.load(gltfUrl, resolve, onProgress, reject);
+    const onLoad = gltf => {
+      const disposables = new Set();
+
+      gltf.scenes.forEach(scene => {
+        scene.traverse(obj => {
+          if (obj.geometry) {
+            disposables.add(obj.geometry);
+          }
+
+          if (obj.material) {
+            if (obj.material.map) disposables.add(obj.material.map);
+            if (obj.material.lightMap) disposables.add(obj.material.lightMap);
+            if (obj.material.bumpMap) disposables.add(obj.material.bumpMap);
+            if (obj.material.normalMap) disposables.add(obj.material.normalMap);
+            if (obj.material.specularMap) disposables.add(obj.material.specularMap);
+            if (obj.material.envMap) disposables.add(obj.material.envMap);
+            if (obj.material.aoMap) disposables.add(obj.material.aoMap);
+            if (obj.material.metalnessMap) disposables.add(obj.material.metalnessMap);
+            if (obj.material.roughnessMap) disposables.add(obj.material.roughnessMap);
+            if (obj.material.emissiveMap) disposables.add(obj.material.emissiveMap);
+          }
+
+          const mozHubsComponents = obj.userData.gltfExtensions?.MOZ_hubs_components;
+          if (mozHubsComponents) {
+            for (const name in mozHubsComponents) {
+              const componentData = mozHubsComponents[name];
+              for (const propName in componentData) {
+                const propValue = componentData[propName];
+                if (propValue && (propValue.isTexture || propValue.isGeometry)) {
+                  disposables.add(propValue);
+                }
+              }
+            }
+          }
+        });
+
+        scene.dispose = function dispose() {
+          disposables.forEach(disposable => {
+            disposable.dispose();
+          });
+        };
+      });
+
+      resolve(gltf);
+    };
+    if (useRangeRequests) {
+      GLBRangeRequests.load(gltfUrl, gltfLoader, onLoad, onProgress, reject);
+    } else {
+      gltfLoader.load(gltfUrl, onLoad, onProgress, reject);
+    }
   }).finally(() => {
     if (fileMap) {
       // The GLTF is now cached as a THREE object, we can get rid of the original blobs
       Object.keys(fileMap).forEach(URL.revokeObjectURL);
     }
   });
+}
+
+export function cloneModelFromCache(src) {
+  if (gltfCache.has(src)) {
+    gltfCache.retain(src);
+    return cloneGltf(gltfCache.get(src).gltf);
+  } else {
+    throw new Error(`Model not in cache: ${src}`);
+  }
 }
 
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
@@ -717,7 +863,6 @@ AFRAME.registerComponent("gltf-model-plus", {
     contentType: { type: "string" },
     useCache: { default: true },
     inflate: { default: false },
-    batch: { default: false },
     modelToWorldScale: { type: "number", default: 1 }
   },
 
@@ -737,12 +882,11 @@ AFRAME.registerComponent("gltf-model-plus", {
   },
 
   remove() {
-    if (this.data.batch && this.model) {
-      this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.removeObject(this.el.object3DMap.mesh);
-    }
-    const src = resolveAsset(this.data.src);
-    if (src) {
-      gltfCache.release(src);
+    if (this.data.useCache) {
+      const src = resolveAsset(this.data.src);
+      if (src) {
+        gltfCache.release(src);
+      }
     }
   },
 
@@ -781,13 +925,9 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       this.model = gltf.scene;
 
-      if (this.data.batch) {
-        this.el.sceneEl.systems["hubs-systems"].batchManagerSystem.addObject(this.model);
-      }
-
       if (gltf.animations.length > 0) {
         this.el.setAttribute("animation-mixer", {});
-        this.el.components["animation-mixer"].initMixer(this.model.animations);
+        this.el.components["animation-mixer"].initMixer(gltf.animations);
       } else {
         generateMeshBVH(this.model);
       }
@@ -836,7 +976,7 @@ AFRAME.registerComponent("gltf-model-plus", {
         if (el) rewires.push(() => (o.el = el));
       });
 
-      if (lastSrc) {
+      if (lastSrc && this.data.useCache) {
         gltfCache.release(lastSrc);
       }
       this.el.setObject3D("mesh", object3DToSet);

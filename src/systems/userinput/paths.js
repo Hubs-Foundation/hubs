@@ -24,6 +24,7 @@ paths.actions.thaw = "/actions/thaw";
 paths.actions.muteMic = "/actions/muteMic";
 paths.actions.toggleFly = "/actions/toggleFly";
 paths.actions.toggleUI = "/actions/toggleUI";
+paths.actions.toggleRecord = "/actions/toggleRecord";
 paths.actions.waypointDeltaDistance = "/actions/waypointDeltaDistance";
 paths.actions.focusChat = "/actions/focusChat";
 paths.actions.focusChatCommand = "/actions/focusChatCommand";
@@ -54,9 +55,11 @@ paths.actions.cursor.right.penNextColor = "/actions/cursor/right/PenNextColor";
 paths.actions.cursor.right.penPrevColor = "/actions/cursor/right/PenPrevColor";
 paths.actions.cursor.right.scalePenTip = "/actions/cursor/right/ScalePenTip";
 paths.actions.cursor.right.scaleGrabbedGrabbable = "/actions/cursor/right/ScaleGrabbedGrabbable";
-paths.actions.cursor.right.mediaVolumeMod = "/actions/cursor/right//mediaVolumeMod";
+paths.actions.cursor.right.mediaVolumeMod = "/actions/cursor/right/mediaVolumeMod";
 paths.actions.cursor.right.takeSnapshot = "/actions/cursor/right/TakeSnapshot";
 paths.actions.cursor.right.wake = "/actions/cursor/right/wake";
+paths.actions.cursor.right.togglePlayVideo = "/actions/cursor/right/TogglePlayVideo";
+paths.actions.cursor.right.deleteEntity = "/actions/cursor/right/DeleteEntity";
 paths.actions.cursor.left = {};
 paths.actions.cursor.left.pose = "/actions/cursor/left/Pose";
 paths.actions.cursor.left.hideLine = "/actions/cursor/left/HideLine";
@@ -73,6 +76,8 @@ paths.actions.cursor.left.scaleGrabbedGrabbable = "/actions/cursor/left/ScaleGra
 paths.actions.cursor.left.mediaVolumeMod = "/actions/cursor/left//mediaVolumeMod";
 paths.actions.cursor.left.takeSnapshot = "/actions/cursor/left/TakeSnapshot";
 paths.actions.cursor.left.wake = "/actions/cursor/left/wake";
+paths.actions.cursor.left.togglePlayVideo = "/actions/cursor/left/TogglePlayVideo";
+paths.actions.cursor.left.deleteEntity = "/actions/cursor/left/DeleteEntity";
 paths.actions.pen = {};
 paths.actions.pen.remove = "/actions/pen/remove";
 paths.actions.rightHand = {};
@@ -171,7 +176,7 @@ paths.device.hud.penButton = "/device/hud/penButton";
 
 paths.device.keyboard = {
   map: new Map(),
-  key: function(k) {
+  key: function (k) {
     let path = this.map.get(k);
     if (path) {
       return path;

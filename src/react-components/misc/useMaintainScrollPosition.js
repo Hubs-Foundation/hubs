@@ -12,18 +12,15 @@ export function useMaintainScrollPosition(items) {
     [setScrolledToBottom]
   );
 
-  useEffect(
-    () => {
-      if (scrolledToBottom) {
-        const el = listRef.current;
+  useEffect(() => {
+    if (scrolledToBottom) {
+      const el = listRef.current;
 
-        if (el.scrollTop !== el.scrollHeight) {
-          el.scrollTop = el.scrollHeight;
-        }
+      if (el.scrollTop !== el.scrollHeight) {
+        el.scrollTop = el.scrollHeight;
       }
-    },
-    [items, scrolledToBottom]
-  );
+    }
+  }, [items, scrolledToBottom]);
 
   return [onScrollList, listRef, scrolledToBottom];
 }

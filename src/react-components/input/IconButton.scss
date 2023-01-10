@@ -11,13 +11,7 @@
   cursor: pointer;
 
   svg {
-    *[stroke=\#000] {
-      stroke: theme.$text1-color;
-    }
-
-    *[fill=\#000] {
-      fill: theme.$text1-color;
-    }
+    color: theme.$text1-color;
   }
 
   & > * {
@@ -32,13 +26,7 @@
     color: theme.$primary-color-hover;
 
     svg {
-      *[stroke=\#000] {
-        stroke: theme.$primary-color-hover;
-      }
-  
-      *[fill=\#000] {
-        fill: theme.$primary-color-hover;
-      }
+      color: theme.$primary-color-hover;
     }
   }
 
@@ -46,13 +34,7 @@
     color: theme.$primary-color-pressed;
 
     svg {
-      *[stroke=\#000] {
-        stroke: theme.$primary-color-pressed;
-      }
-  
-      *[fill=\#000] {
-        fill: theme.$primary-color-pressed;
-      }
+      color: theme.$primary-color-pressed;
     }
   }
 
@@ -65,13 +47,7 @@
     cursor: not-allowed;
 
     svg {
-      *[stroke=\#000] {
-        stroke: theme.$disabled-icon-color;
-      }
-  
-      *[fill=\#000] {
-        fill: theme.$disabled-icon-color;
-      }
+      color: theme.$disabled-icon-color;
     }
   }
 

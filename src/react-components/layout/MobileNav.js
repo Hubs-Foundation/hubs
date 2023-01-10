@@ -55,6 +55,13 @@ export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCo
                     </a>
                   </li>
                 )}
+                {isHmc && (
+                  <li>
+                    <a href="/labs">
+                      <FormattedMessage id="header.labs" defaultMessage="Labs" />
+                    </a>
+                  </li>
+                )}
                 {isAdmin && (
                   <li>
                     <a style={{ marginLeft: 0 }} href="/admin" rel="noreferrer noopener">
@@ -76,19 +83,11 @@ export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCo
 }
 
 MobileNav.propTypes = {
-  appName: PropTypes.string,
-  appLogo: PropTypes.string,
-  showCloud: PropTypes.bool,
-  enableSpoke: PropTypes.bool,
-  editorName: PropTypes.string,
   showDocsLink: PropTypes.bool,
   docsUrl: PropTypes.string,
   showSourceLink: PropTypes.bool,
   showCommunityLink: PropTypes.bool,
   communityUrl: PropTypes.string,
   isAdmin: PropTypes.bool,
-  isSignedIn: PropTypes.bool,
-  email: PropTypes.string,
-  onSignOut: PropTypes.func,
   isHmc: PropTypes.bool
 };

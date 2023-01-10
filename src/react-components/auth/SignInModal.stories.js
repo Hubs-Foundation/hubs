@@ -1,4 +1,5 @@
 import React from "react";
+import { TERMS, PRIVACY } from "../../constants";
 // import { Center } from "../layout/Center";
 // import { Page } from "../layout/Page";
 import { RoomLayout } from "../layout/RoomLayout";
@@ -19,9 +20,9 @@ export default {
 //     <Center>
 //       <SignInModal disableFullscreen>
 //         <SubmitEmail
-//           termsUrl="https://github.com/mozilla/hubs/blob/master/TERMS.md"
+//           termsUrl={TERMS}
 //           showTerms
-//           privacyUrl="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
+//           privacyUrl={PRIVACY}
 //           showPrivacy
 //         />
 //       </SignInModal>
@@ -43,10 +44,7 @@ export const RoomSubmit = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <SubmitEmail
-          termsUrl="https://github.com/mozilla/hubs/blob/master/TERMS.md"
-          privacyUrl="https://github.com/mozilla/hubs/blob/master/PRIVACY.md"
-        />
+        <SubmitEmail termsUrl={TERMS} privacyUrl={PRIVACY} />
       </SignInModal>
     }
   />
@@ -56,7 +54,7 @@ export const RoomSubmitNoTOS = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <SubmitEmail privacyUrl="https://github.com/mozilla/hubs/blob/master/PRIVACY.md" />
+        <SubmitEmail privacyUrl={PRIVACY} />
       </SignInModal>
     }
   />
@@ -66,7 +64,7 @@ export const RoomSubmitNoPrivacyPolicy = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <SubmitEmail termsUrl="https://github.com/mozilla/hubs/blob/master/TERMS.md" />
+        <SubmitEmail termsUrl={TERMS} />
       </SignInModal>
     }
   />

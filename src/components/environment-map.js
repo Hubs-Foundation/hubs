@@ -10,6 +10,6 @@ export async function createDefaultEnvironmentMap() {
   const texture = await new Promise((resolve, reject) =>
     new THREE.CubeTextureLoader().load(urls, resolve, undefined, reject)
   );
-  texture.format = THREE.RGBFormat;
+  texture.format = THREE.RGBAFormat;
   return texture;
 }

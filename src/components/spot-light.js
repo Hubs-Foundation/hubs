@@ -13,7 +13,6 @@ AFRAME.registerComponent("spot-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.SpotLight();
     this.light.position.set(0, 0, 0);
     this.light.target.position.set(0, 0, 1);
@@ -21,7 +20,6 @@ AFRAME.registerComponent("spot-light", {
     this.light.matrixNeedsUpdate = true;
     this.light.target.matrixNeedsUpdate = true;
     this.el.setObject3D("spot-light", this.light);
-    this.el.sceneEl.systems.light.registerLight(el);
   },
 
   update(prevData) {
@@ -73,7 +71,7 @@ AFRAME.registerComponent("spot-light", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("spot-light");
   }
 });

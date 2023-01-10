@@ -12,3 +12,5 @@ export const TextAreaInput = forwardRef(({ className, ...rest }, ref) => (
 TextAreaInput.propTypes = {
   className: PropTypes.string
 };
+
+TextAreaInput.displayName = "TextAreaInput";

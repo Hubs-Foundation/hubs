@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for Hubs!
 title: ''
-labels: enhancement, jira-hubs
+labels: enhancement
 assignees: ''
 
 ---

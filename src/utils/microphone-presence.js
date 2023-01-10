@@ -4,7 +4,7 @@ export const getMicrophonePresences = (() => {
   const microphonePresences = new Map();
   const sessionIds = [];
   const currentSessionIds = [];
-  return function() {
+  return function () {
     if (!window.APP || !window.APP.componentRegistry) {
       return null;
     }

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
 import ReactDOM from "react-dom";
@@ -32,14 +33,13 @@ import { ServerAccess } from "./react-components/server-access";
 import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
-import Store from "hubs/src/storage/store";
 import registerTelemetry from "hubs/src/telemetry";
 import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 import { UnauthorizedPage } from "./react-components/unauthorized";
+import { store } from "hubs/src/utils/store-instance";
 
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
-const store = new Store();
 window.APP = { store };
 
 registerTelemetry("/admin", "Hubs Admin");

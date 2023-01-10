@@ -32,7 +32,7 @@ AFRAME.registerComponent("hover-visuals", {
     }
   },
 
-  handleLeftVisuals: function() {
+  handleLeftVisuals: function () {
     const interaction = AFRAME.scenes[0].systems.interaction;
     const interactingElement = interaction.state.leftHand.held || interaction.state.leftHand.hovered;
     const hideVisual = !interactingElement || !showHoverEffect(interactingElement);
@@ -52,7 +52,7 @@ AFRAME.registerComponent("hover-visuals", {
     }
   },
 
-  handleRightVisuals: function() {
+  handleRightVisuals: function () {
     const interaction = AFRAME.scenes[0].systems.interaction;
 
     const interactingElement = interaction.state.rightHand.held || interaction.state.rightHand.hovered;

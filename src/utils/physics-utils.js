@@ -49,10 +49,10 @@ function isGeometryHighDensity(geo) {
   return false;
 }
 
-export const traverseMeshesAndAddShapes = (function() {
+export const traverseMeshesAndAddShapes = (function () {
   const shapePrefix = "shape-helper__";
   const shapes = [];
-  return function(el) {
+  return function (el) {
     const meshRoot = el.object3DMap.mesh;
     while (shapes.length > 0) {
       const { id, entity } = shapes.pop();

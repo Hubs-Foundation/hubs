@@ -1,24 +1,14 @@
 module.exports = {
-  parser: "babel-eslint",
-  env: {
-    browser: true,
-    es6: true,
-    node: true
+  parser: "@babel/eslint-parser",
+  parserOptions: {
+    babelOptions: {
+      rootMode: "upward"
+    }
   },
-  globals: {
-    THREE: true,
-    AFRAME: true,
-    NAF: true
-  },
-  plugins: ["prettier", "react"],
   rules: {
-    "react/prop-types": "off",
-    "prettier/prettier": "error",
-    "prefer-const": "error",
-    "no-use-before-define": "error",
-    "no-var": "error",
-    "no-throw-literal": "error",
-    "no-console": "off"
-  },
-  extends: ["prettier", "plugin:react/recommended", "eslint:recommended"]
+    // TODO these are new as of our Webpack 5 upgrade, making them warnings till we get a handle on them or decide we don't want them
+    "react/prop-types": "error",
+    "@calm/react-intl/missing-formatted-message": "error",
+    "@calm/react-intl/missing-attribute": "error"
+  }
 };

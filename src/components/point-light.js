@@ -11,12 +11,9 @@ AFRAME.registerComponent("point-light", {
   },
 
   init() {
-    const el = this.el;
     this.light = new THREE.PointLight();
     this.light.shadow.camera.matrixAutoUpdate = true;
     this.el.setObject3D("point-light", this.light);
-    this.el.sceneEl.systems.light.registerLight(el);
-    this.rendererSystem = this.el.sceneEl.systems.renderer;
   },
 
   update(prevData) {
@@ -24,7 +21,7 @@ AFRAME.registerComponent("point-light", {
 
     if (this.data.color !== prevData.color) {
       const color = new THREE.Color(this.data.color);
-      this.rendererSystem.applyColorCorrection(color);
+      color.convertSRGBToLinear();
       light.color.copy(color);
     }
 
@@ -65,7 +62,7 @@ AFRAME.registerComponent("point-light", {
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.el.removeObject3D("point-light");
   }
 });

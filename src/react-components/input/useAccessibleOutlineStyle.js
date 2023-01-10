@@ -7,30 +7,27 @@ import { useEffect, useState } from "react";
 export function useAccessibleOutlineStyle(keyboardUserClass = "keyboard-user") {
   const [keyboardUser, setKeyboardUser] = useState(false);
 
-  useEffect(
-    () => {
-      function onMouseDown() {
-        if (keyboardUser) {
-          document.body.classList.remove(keyboardUserClass);
-          setKeyboardUser(false);
-        }
+  useEffect(() => {
+    function onMouseDown() {
+      if (keyboardUser) {
+        document.body.classList.remove(keyboardUserClass);
+        setKeyboardUser(false);
       }
+    }
 
-      function onKeyDown(e) {
-        if (e.key === "Tab" && !keyboardUser) {
-          document.body.classList.add(keyboardUserClass);
-          setKeyboardUser(true);
-        }
+    function onKeyDown(e) {
+      if (e.key === "Tab" && !keyboardUser) {
+        document.body.classList.add(keyboardUserClass);
+        setKeyboardUser(true);
       }
+    }
 
-      window.addEventListener("keydown", onKeyDown);
-      window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("mousedown", onMouseDown);
 
-      return () => {
-        window.removeEventListener("keydown", onKeyDown);
-        window.removeEventListener("mousedown", onMouseDown);
-      };
-    },
-    [keyboardUserClass, keyboardUser]
-  );
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", onMouseDown);
+    };
+  }, [keyboardUserClass, keyboardUser]);
 }

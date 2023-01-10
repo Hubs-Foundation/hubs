@@ -72,7 +72,7 @@ $spacing: (
 
 // flex-basis 10% to 90%
 @for $i from 1 to 9 {
-  $percent: percentage($number: ($i/10));
+  $percent: percentage($number: calc($i/10));
   // .flex-basis-10 // flexBasis10
   :local(.flex-basis-#{$i}0) {
     flex-basis: $percent;

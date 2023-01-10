@@ -57,7 +57,10 @@ const DEFAULT_FACETS = {
     { text: "Newest", params: { filter: "" } }
   ],
   favorites: [],
-  scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
+  scenes: [
+    { text: "Featured", params: { filter: "featured" } },
+    { text: "My Scenes", params: { filter: "my-scenes" } }
+  ]
 };
 
 const poweredByMessages = defineMessages({
@@ -492,23 +495,22 @@ class MediaBrowserContainer extends Component {
                 label={<FormattedMessage id="media-browser.create-avatar" defaultMessage="Create Avatar" />}
               />
             )}
-            {urlSource === "scenes" &&
-              configs.feature("enable_spoke") && (
-                <CreateTile
-                  as="a"
-                  href="/spoke/new"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  type="scene"
-                  label={
-                    <FormattedMessage
-                      id="media-browser.create-scene"
-                      defaultMessage="Create Scene with {editorName}"
-                      values={{ editorName: configs.translation("editor-name") }}
-                    />
-                  }
-                />
-              )}
+            {urlSource === "scenes" && configs.feature("enable_spoke") && (
+              <CreateTile
+                as="a"
+                href="/spoke/new"
+                rel="noopener noreferrer"
+                target="_blank"
+                type="scene"
+                label={
+                  <FormattedMessage
+                    id="media-browser.create-scene"
+                    defaultMessage="Create Scene with {editorName}"
+                    values={{ editorName: configs.translation("editor-name") }}
+                  />
+                }
+              />
+            )}
             {entries.map((entry, idx) => {
               const isAvatar = entry.type === "avatar" || entry.type === "avatar_listing";
               const isScene = entry.type === "scene" || entry.type === "scene_listing";

@@ -37,11 +37,20 @@
       margin-bottom: 0;
     }
 
+    &:not(:last-child) {
+      margin-bottom: 16px;
+    }
+
     :local(.message-body) {
       margin-left: 4px;
       overflow-wrap: break-word;
       overflow: hidden;
       max-width: 500px;
+      padding-bottom: 8px;
+    }
+    /* this checks if a sibling has the message source for when have chat closed and resets padding */
+    :local(.message-source + .message-body) {
+      padding-bottom: 0px;
     }
 
     :local(.message-body-multi) {
@@ -134,6 +143,19 @@
         border-radius: 5px;
       }
     }
+
+    &:local(.permission) {
+      display: flex;
+      align-items: center;
+      min-height: 35px;
+
+      :local(.permissionBody) {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+      }
+    }
   }
 
   :local(.expired) {
@@ -151,7 +173,7 @@
 :local(.presence-log-in-room) {
   position: absolute;
   left: 20px;
-  bottom: 20px;
+  bottom: 8px;
 
   :local(.presence-log-entry) {
     background-color: theme.$overlay-bg-color;
@@ -173,7 +195,7 @@
 
 :local(.presence-log-spawn) {
   position: absolute;
-  top: 0;
+  bottom: 0;
   z-index: -10;
   width: auto;
   margin: 0;
@@ -223,6 +245,33 @@
   :local(.message-source-link) {
     cursor: pointer;
     text-decoration: underline;
+  }
+}
+
+:local(.presence-log-notifications) {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  align-items: center;
+
+  :local(.presence-log-entry) {
+    background-color: theme.$overlay-bg-color;
+    color: theme.$overlay-text-color;
+    min-height: 18px;
+
+    // If this is selectable, tap holding on mobile anywhere on the screen will result
+    // in a selection.
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+
+    &:first-child {
+      margin-top: 16px;
+    }
+
+    a {
+      color: theme.$link-color;
+    }
   }
 }
 

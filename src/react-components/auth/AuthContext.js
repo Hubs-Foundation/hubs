@@ -91,14 +91,11 @@ export function AuthContextProvider({ children, store }) {
     [store]
   );
 
-  const signOut = useCallback(
-    async () => {
-      configs.setIsAdmin(false);
-      store.update({ credentials: { token: null, email: null } });
-      await store.resetToRandomDefaultAvatar();
-    },
-    [store]
-  );
+  const signOut = useCallback(async () => {
+    configs.setIsAdmin(false);
+    store.update({ credentials: { token: null, email: null } });
+    await store.resetToRandomDefaultAvatar();
+  }, [store]);
 
   const [context, setContext] = useState({
     initialized: false,
@@ -112,45 +109,42 @@ export function AuthContextProvider({ children, store }) {
   });
 
   // Trigger re-renders when the store updates
-  useEffect(
-    () => {
-      const onStoreChanged = () => {
-        setContext(state => ({
-          ...state,
-          isSignedIn: !!store.state.credentials && !!store.state.credentials.token,
-          isAdmin: configs.isAdmin(),
-          email: store.state.credentials && store.state.credentials.email,
-          userId: store.credentialsAccountId
-        }));
-      };
+  useEffect(() => {
+    const onStoreChanged = () => {
+      setContext(state => ({
+        ...state,
+        isSignedIn: !!store.state.credentials && !!store.state.credentials.token,
+        isAdmin: configs.isAdmin(),
+        email: store.state.credentials && store.state.credentials.email,
+        userId: store.credentialsAccountId
+      }));
+    };
 
-      store.addEventListener("statechanged", onStoreChanged);
+    store.addEventListener("statechanged", onStoreChanged);
 
-      // Check if the user is an admin on page load
-      const runAsync = async () => {
-        if (store.state.credentials && store.state.credentials.token) {
-          const socket = await connectToReticulum();
-          return checkIsAdmin(socket, store);
-        }
+    // Check if the user is an admin on page load
+    const runAsync = async () => {
+      if (store.state.credentials && store.state.credentials.token) {
+        const socket = await connectToReticulum();
+        return checkIsAdmin(socket, store);
+      }
 
-        return false;
-      };
+      return false;
+    };
 
-      runAsync()
-        .then(isAdmin => {
-          setContext(state => ({ ...state, isAdmin }));
-        })
-        .catch(error => {
-          console.error(error);
-          setContext(state => ({ ...state, isAdmin: false }));
-        });
+    runAsync()
+      .then(isAdmin => {
+        setContext(state => ({ ...state, isAdmin }));
+      })
+      .catch(error => {
+        console.error(error);
+        setContext(state => ({ ...state, isAdmin: false }));
+      });
 
-      return () => {
-        store.removeEventListener("statechanged", onStoreChanged);
-      };
-    },
-    [store, setContext]
-  );
+    return () => {
+      store.removeEventListener("statechanged", onStoreChanged);
+    };
+  }, [store, setContext]);
 
   return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
 }
