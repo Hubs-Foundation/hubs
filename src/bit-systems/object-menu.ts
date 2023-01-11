@@ -65,7 +65,7 @@ function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) 
   }
 }
 
-function render(world: HubsWorld, menu: EntityID, frozen: boolean) {
+function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const target = ObjectMenu.targetRef[menu];
   const visible = !!(target && frozen);
 
@@ -113,5 +113,5 @@ export function objectMenuSystem(
     moveToTarget(world, menu);
     handleClicks(world, menu, hubChannel);
   }
-  render(world, menu, sceneIsFrozen);
+  updateVisibility(world, menu, sceneIsFrozen);
 }
