@@ -76,7 +76,13 @@ export default class SceneEntryManager {
       await exit2DInterstitialAndEnterVR(true);
     }
 
-    moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
+    if (qsTruthy("newLoader")) {
+      moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
+    } else {
+      const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
+      waypointSystem.moveToSpawnPoint();
+    }
+
     if (isMobile || forceEnableTouchscreen || qsTruthy("force_enable_touchscreen")) {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
     }

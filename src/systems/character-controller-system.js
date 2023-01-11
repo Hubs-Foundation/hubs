@@ -335,7 +335,11 @@ export class CharacterControllerSystem {
         ) {
           this.didTeleportSinceLastWaypointTravel = false;
           this.shouldUnoccupyWaypointsOnceMoving = false;
-          releaseOccupiedWaypoint();
+          if (qsTruthy("newLoader")) {
+            releaseOccupiedWaypoint();
+          } else {
+            this.waypointSystem.releaseAnyOccupiedWaypoints();
+          }
           if (this.fly && this.shouldLandWhenPossible && shouldResnapToNavMesh && squareDistNavMeshCorrection < 3) {
             newPOV.setPosition(navMeshSnappedPOVPosition);
             this.shouldLandWhenPossible = false;
