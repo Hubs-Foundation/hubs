@@ -14,5 +14,5 @@ export async function loadWaypointPreviewModel() {
 export function WaypointPreview() {
   if (!model) throw new Error("Must load the model before creating waypoint preview entity.");
 
-  return <entity name="Waypoint Preview" waypointPreview model={{ model: model! }}></entity>;
+  return <entity name="Waypoint Preview" waypointPreview model={{ model }}></entity>;
 }
