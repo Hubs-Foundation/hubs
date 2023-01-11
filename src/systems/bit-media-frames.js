@@ -17,7 +17,7 @@ import { updateMaterials } from "../utils/material-utils";
 import { MediaType } from "../utils/media-utils";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { takeOwnership } from "../utils/take-ownership";
-import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
+import { takeSoftOwnership } from "../utils/take-soft-ownership";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
@@ -239,7 +239,7 @@ export function mediaFramesSystem(world) {
         eid,
         setTimeout(() => {
           if (Networked.owner[eid] === APP.getSid("reticulum")) {
-            takeOwnershipWithTime(world, eid, Networked.timestamp[eid] + 1);
+            takeSoftOwnership(world, eid);
           }
           takeOwnershipOnTimeout.delete(eid);
         }, 10000)

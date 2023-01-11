@@ -6,7 +6,7 @@ import { networkableComponents, schemas, StoredComponent } from "../utils/networ
 import type { ClientID, CursorBufferUpdateMessage, EntityID, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { tryUnpin } from "../utils/store-networked-state";
-import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
+import { takeSoftOwnership } from "../utils/take-soft-ownership";
 import {
   createMessageDatas,
   isPinned,
@@ -226,9 +226,7 @@ export function networkReceiveSystem(world: HubsWorld) {
     pendingParts.forEach(partingClientId => {
       networkedEntities
         .filter(eid => Networked.owner[eid] === partingClientId)
-        .forEach(eid => {
-          takeOwnershipWithTime(world, eid, Networked.timestamp[eid] + 1);
-        });
+        .forEach(eid => takeSoftOwnership(world, eid));
     });
 
     pendingParts.length = 0;

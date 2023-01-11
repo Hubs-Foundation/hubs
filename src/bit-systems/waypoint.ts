@@ -18,7 +18,7 @@ import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import { coroutine } from "../utils/coroutine";
 import { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
-import { takeOwnershipWithTime } from "../utils/take-ownership-with-time";
+import { takeSoftOwnership } from "../utils/take-soft-ownership";
 import { setMatrixWorld } from "../utils/three-utils";
 
 export enum WaypointFlags {
@@ -73,7 +73,7 @@ function occupiableSpawnPoints(world: HubsWorld) {
 
 function* tryOccupyAndSpawn(world: HubsWorld, characterController: CharacterControllerSystem, spawnPoint: EntityID) {
   moveToWaypoint(world, spawnPoint, characterController, true);
-  takeOwnershipWithTime(world, spawnPoint, Networked.timestamp[spawnPoint] + 1);
+  takeSoftOwnership(world, spawnPoint);
   occupyWaypoint(world, spawnPoint);
   // TODO: We could check if we lost ownership, and not wait as long "lostOwnershipWithTimeout"
   yield sleep(2000);
