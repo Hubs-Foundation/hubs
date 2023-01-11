@@ -167,7 +167,9 @@ export function waypointSystem(
     if (hasComponent(world, Interacted, eid)) {
       if (hasComponent(world, NetworkedWaypoint, eid)) {
         if (NetworkedWaypoint.occupied[eid]) {
-          console.warn("Can't travel to occupied waypoint...");
+          // We don't expect to get here:
+          // We should be able to interact with an occupied waypoint...
+          console.error("Interacted with an occupied waypoint. Doing nothing.");
         } else {
           takeOwnership(world, eid);
           occupyWaypoint(world, eid);
