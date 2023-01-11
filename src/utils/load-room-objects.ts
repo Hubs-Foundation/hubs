@@ -36,7 +36,6 @@ export async function loadStoredRoomData(hubId: string) {
     }
     messages.forEach(m => {
       m.fromClientId = "reticulum";
-      m.hubId = hubId;
       m.updates.forEach(update => {
         update.owner = "reticulum";
       });
@@ -56,7 +55,6 @@ export async function loadLegacyRoomObjects(hubId: string) {
     const message = messageForLegacyRoomObjects(legacyRoomObjects);
     if (message) {
       message.fromClientId = "reticulum";
-      message.hubId = hubId;
 
       pendingMessages.push(message);
       // TODO All clients must use the new loading path for this to work correctly,

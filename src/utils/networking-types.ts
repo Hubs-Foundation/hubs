@@ -31,7 +31,6 @@ export interface StorableUpdateMessage extends UpdateMessageBase {
 export type DeleteMessage = NetworkID;
 export type Message = {
   fromClientId?: ClientID;
-  hubId?: string;
   creates: CreateMessage[];
   updates: UpdateMessage[];
   deletes: DeleteMessage[];
