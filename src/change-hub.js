@@ -89,13 +89,9 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   NAF.connection.connectedClients = {};
   NAF.connection.activeDataChannels = {};
   if (pendingMessages.length || storedUpdates.size) {
-    console.warn(
+    console.log(
       `Deleting ${pendingMessages.length + storedUpdates.size} unapplied network messages from previous hub.`
     );
-    pendingMessages.forEach(console.warn);
-    for (const update of storedUpdates.entries()) {
-      console.warn(update);
-    }
     pendingMessages.length = 0;
     storedUpdates.clear();
   }
