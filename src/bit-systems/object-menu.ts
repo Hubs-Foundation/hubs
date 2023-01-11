@@ -35,10 +35,8 @@ function moveToTarget(world: HubsWorld, menu: EntityID) {
 
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
-    console.log("Clicked pin");
     tryPin(world, ObjectMenu.targetRef[menu], hubChannel);
   } else if (clicked(world, ObjectMenu.unpinButtonRef[menu])) {
-    console.log("Clicked unpin");
     tryUnpin(world, ObjectMenu.targetRef[menu], hubChannel);
   } else if (clicked(world, ObjectMenu.cameraFocusButtonRef[menu])) {
     console.log("Clicked focus");

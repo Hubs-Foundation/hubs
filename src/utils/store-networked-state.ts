@@ -1,11 +1,10 @@
-import { Networked } from "../bit-components";
-import type { EntityID, Message } from "./networking-types";
 import { HubsWorld } from "../app";
-import HubChannel from "./hub-channel";
-import { takeOwnership } from "./take-ownership";
-import { messageFor, messageForStorage } from "./message-for";
+import { Networked } from "../bit-components";
 import { localClientID } from "../bit-systems/networking";
-import { unpinMessages } from "../bit-systems/network-send-system";
+import HubChannel from "./hub-channel";
+import { messageFor, messageForStorage } from "./message-for";
+import type { EntityID, Message } from "./networking-types";
+import { takeOwnership } from "./take-ownership";
 
 export interface StorableMessage extends Message {
   version: 1;
@@ -15,14 +14,13 @@ export async function tryPin(world: HubsWorld, eid: EntityID, hubChannel: HubCha
   if (!localClientID) throw new Error("Tried to unpin before connected to the channel...");
   takeOwnership(world, eid);
   Networked.creator[eid] = APP.getSid("reticulum");
-
   const nid = APP.getString(Networked.id[eid])!;
-
   const storableMessage = messageForStorage(world, [eid], [eid], []);
   const fileId = null;
   const fileAccessToken = null;
   const promotionToken = null;
   console.log("Pinning is disabled until storage for new networked objects is implemented in reticulum.", {
+    nid,
     storableMessage,
     fileId,
     fileAccessToken,
