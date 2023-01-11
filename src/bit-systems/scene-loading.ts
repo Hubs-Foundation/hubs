@@ -35,6 +35,7 @@ function* loadScene(
 ) {
   try {
     addComponent(world, Networked, loaderEid);
+    // TODO: Use a unique id for each scene as the root nid
     setInitialNetworkedData(world, loaderEid, "scene", "reticulum");
 
     const src = APP.getString(SceneLoader.src[loaderEid]);
@@ -48,7 +49,6 @@ function* loadScene(
     }
 
     add(world, scene, loaderEid);
-    // TODO: Use a unique id for each scene as the root nid
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
     if (hasComponent(world, EnvironmentSettings, scene)) {
