@@ -191,8 +191,8 @@ export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
         }
       },
       nid,
-      lastOwnerTime: -1,
-      timestamp: -1,
+      lastOwnerTime: 1,
+      timestamp: 1,
       owner: "reticulum",
       creator: "reticulum"
     };
