@@ -398,7 +398,7 @@ class GLTFAccessibilityInfo {
   afterRoot(gltf) {
     const parser = this.parser
     
-    // getting info from Sketchfab model
+    // getting info from extras (Sketchfab models)
     if (gltf.asset.extras) {
       extras = gltf.asset.extras
     }
@@ -958,14 +958,15 @@ AFRAME.registerComponent("gltf-model-plus", {
 
       this.model = gltf.scene;
 
-      // setting accessibility component
+      //Setting accessibility component
       this.el.setAttribute("accessibility", {})
-
+      
+      //Setting name of the object to be the name of the file as default
       if (this.el.components['media-loader']) {
         this.el.components["accessibility"].data["dc:title"] = this.el.components["media-loader"].data["mediaName"];
       }
 
-      //Setting extras information to the entity
+      //If information is in extras reassign to the component
       if (extras) {
         if (extras.accessibility) {
           for (const key in extras.accessibility) {
@@ -977,12 +978,13 @@ AFRAME.registerComponent("gltf-model-plus", {
         }
       }
 
-      // adding info to new component 'accessibility'
+      // If information is in the xmp extension reassign values to component
       for (const key in xmpInfo) {
         if (key.includes("dc:")) {
           this.el.components["accessibility"].data[key] = xmpInfo[key]["rdf:_1"]["@value"]
         }
       }
+      // Cleaning the variables
       xmpInfo = {}
       extras = {}
 

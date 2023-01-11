@@ -1,19 +1,3 @@
-# Equal Entry Hub - A Research Project for XR Access
-
-The 3D Content Descriptions group is part of the Accessible Development of XR Workstream at [XRAccess](https://xraccess.org/workstreams/adxr/) and will be used to demonstrate features that enable people who are blind or low-vision to get information about content that is used within spatial worlds.
-
-## Commands Available in Prototype
-| Command Name | What does it do?                                                                                                       | Sample Command                | Keyboard Shortcut | Voice Shortcut |
-|--------------|------------------------------------------------------------------------------------------------------------------------|-------------------------------|-------------------|----------------|
-| A11y         | This will list out everything you can use in the prototype feature                                                     | /a11y                         |                   |                |
-| List         | What is in the room? Note that the command can be used to separately list objects, avatars, and field of view elements | /list /list o /list a /list f |                   |                |
-|              |                                                                                                                        |                               |                   |                |
-|              |                                                                                                                        |                               |                   |                |
-|              |                                                                                                                        |                               |                   |                |
-|              |                                                                                                                        |                               |                   |                |
-
-**Note using [Markdown Table Generator to create this List](https://www.tablesgenerator.com/markdown_tables)
-
 # [Mozilla Hubs](https://hubs.mozilla.com/)
 
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![Build Status](https://travis-ci.org/mozilla/hubs.svg?branch=master)](https://travis-ci.org/mozilla/hubs) [![Discord](https://img.shields.io/discord/498741086295031808)](https://discord.gg/CzAbuGu)
