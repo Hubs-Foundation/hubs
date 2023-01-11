@@ -10,7 +10,6 @@ import { loadTexture, loadTextureFromCache } from "../utils/load-texture";
 import { preload } from "../utils/preload";
 import { ProjectionMode } from "../utils/projection-mode";
 
-// We intentionally do not remove this model from the GLTF Cache
 preload(loadTexture(spawnPointSrc, 1, "image/png"));
 
 export interface WaypointParams {
