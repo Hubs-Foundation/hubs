@@ -112,20 +112,23 @@ export function networkReceiveSystem(world: HubsWorld) {
       const nid = APP.getSid(nidString);
 
       if (world.deletedNids.has(nid)) {
-        console.log(`Received a create message for an entity I've already deleted. Skipping ${nidString}`);
+        console.warn(`Received a create message for an entity I've already deleted. Skipping ${nidString}`);
+        // TODO : Rebroadcast a delete for this nid, because a client must not have known about it.
+        // This can happen in the unlikely case that the client who created this object disconnected as someone else deleted it.
+        // The creator will send another create message when it reconnects.
       } else if (world.nid2eid.has(nid)) {
-        console.log(`Received create message for entity I already created. Skipping ${nidString}`);
+        console.warn(`Received create message for entity I already created. Skipping ${nidString}.`);
+      } else if (world.ignoredNids.has(nid)) {
+        console.warn(`Received create message for nid I ignored. Skipping ${nidString}.`);
       } else if (!hasPermissionToSpawn(creator, prefabName)) {
-        // this should only ever happen if there is a bug or the sender is maliciously modified
-        console.warn(`Received create from a user who does not have permission to spawn ${prefabName}`);
-        world.ignoredNids.add(nid); // TODO should we just use deletedNids for this?
+        // This should only happen if there is a bug or the sender is maliciously modified.
+        console.warn(
+          `Received create from a user who does not have permission to spawn ${prefabName}. Skipping ${nidString}.`
+        );
+        world.ignoredNids.add(nid);
       } else {
-        // TODO: Do we need to delete from ignoredNids?
-        // If permissions have changed, we don't want to permantently ignore messages.
-        // world.ignoredNids.delete(nid);
-
         const eid = renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
-        console.log("got create message for", nidString, eid);
+        console.log(`Received create message for ${nidString}. (eid: ${eid})`);
       }
     }
   }
@@ -140,6 +143,8 @@ export function networkReceiveSystem(world: HubsWorld) {
       for (let i = 0; i < updates.length; i++) {
         const update = updates[i];
         if (partedClientIds.has(APP.getSid(update.owner))) {
+          // We missed the frame when we would have taken soft ownership from this owner,
+          // so modify the message to act as though we had done so.
           console.log("Rewriting update message from client who left.", JSON.stringify(update));
           update.owner = NAF.clientId;
           update.lastOwnerTime = update.timestamp;
@@ -183,10 +188,6 @@ export function networkReceiveSystem(world: HubsWorld) {
       const eid = world.nid2eid.get(nid)!;
 
       if (isOutdatedMessage(eid, updateMessage)) {
-        console.log("Skipping update from an old owner, skipping", {
-          updateMessage,
-          currentOwner: Networked.lastOwnerTime[eid]
-        });
         continue;
       }
 

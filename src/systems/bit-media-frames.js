@@ -239,7 +239,7 @@ export function mediaFramesSystem(world) {
         eid,
         setTimeout(() => {
           if (Networked.owner[eid] === APP.getSid("reticulum")) {
-            takeOwnershipWithTime(world, eid, Networked.timestamp[eid]);
+            takeOwnershipWithTime(world, eid, Networked.timestamp[eid] + 1);
           }
           takeOwnershipOnTimeout.delete(eid);
         }, 10000)
