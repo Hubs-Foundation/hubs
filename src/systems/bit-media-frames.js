@@ -1,7 +1,7 @@
 // https://dev.reticulum.io/scenes/7vGnzkM/outdoor-meetup
 // A scene with media-frames
 
-import { addEntity, defineQuery, entityExists, hasComponent, removeEntity } from "bitecs";
+import { addEntity, defineQuery, enterQuery, exitQuery, entityExists, hasComponent, removeEntity } from "bitecs";
 import {
   AEntity,
   Held,
@@ -17,12 +17,15 @@ import { updateMaterials } from "../utils/material-utils";
 import { MediaType } from "../utils/media-utils";
 import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { takeOwnership } from "../utils/take-ownership";
+import { takeSoftOwnership } from "../utils/take-soft-ownership";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
 const FULL_COLOR = 0x808080;
 
 const mediaFramesQuery = defineQuery([MediaFrame]);
+const enteredMediaFramesQuery = enterQuery(mediaFramesQuery);
+const exitedMediaFramesQuery = exitQuery(mediaFramesQuery);
 
 // TODO currently only aframe entiteis can be placed in media frames
 function mediaTypeMaskFor(world, eid) {
@@ -44,6 +47,17 @@ function isAncestor(a, b) {
     ancestor = ancestor.parent;
   }
   return false;
+}
+
+function isOwnedByRet(world, eid) {
+  if (hasComponent(world, AEntity, eid)) {
+    const networkedEl = world.eid2obj.get(eid).el;
+    const owner = NAF.utils.getNetworkOwner(networkedEl);
+    // Legacy networked objects don't set "reticulum" as the owner
+    return owner === "scene";
+  } else {
+    return Networked.owner[eid] === APP.getSid("reticulum");
+  }
 }
 
 function inOtherFrame(world, ignoredFrame, eid) {
@@ -215,9 +229,32 @@ function mediaTypesOf(world, entities) {
   return mask;
 }
 
+const takeOwnershipOnTimeout = new Map();
 const heldQuery = defineQuery([Held]);
 // const droppedQuery = exitQuery(heldQuery);
 export function mediaFramesSystem(world) {
+  enteredMediaFramesQuery(world).forEach(eid => {
+    if (Networked.owner[eid] === APP.getSid("reticulum")) {
+      takeOwnershipOnTimeout.set(
+        eid,
+        setTimeout(() => {
+          if (Networked.owner[eid] === APP.getSid("reticulum")) {
+            takeSoftOwnership(world, eid);
+          }
+          takeOwnershipOnTimeout.delete(eid);
+        }, 10000)
+      );
+    }
+  });
+
+  exitedMediaFramesQuery(world).forEach(eid => {
+    const timeout = takeOwnershipOnTimeout.get(eid);
+    if (timeout) {
+      clearTimeout(timeout);
+      takeOwnershipOnTimeout.delete(eid);
+    }
+  });
+
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   const heldMediaTypes = mediaTypesOf(world, heldQuery(world));
   // const droppedEntities = droppedQuery(world).filter(eid => entityExists(world, eid));
@@ -249,11 +286,13 @@ export function mediaFramesSystem(world) {
       const capturable = getCapturableEntity(world, frame);
       if (
         capturable &&
-        hasComponent(world, Owned, capturable) &&
+        (hasComponent(world, Owned, capturable) ||
+          (isOwnedByRet(world, capturable) && hasComponent(world, Owned, frame))) &&
         !hasComponent(world, Held, capturable) &&
         !inOtherFrame(world, frame, capturable)
       ) {
         takeOwnership(world, frame);
+        takeOwnership(world, capturable);
         NetworkedMediaFrame.capturedNid[frame] = Networked.id[capturable];
         const obj = world.eid2obj.get(capturable);
         obj.updateMatrices();

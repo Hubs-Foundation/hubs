@@ -10,6 +10,15 @@ export const networkedQuery = defineQuery([Networked]);
 export const pendingMessages: Message[] = [];
 export const pendingJoins: StringID[] = [];
 export const pendingParts: StringID[] = [];
+export const softRemovedEntities = new Set<EntityID>();
 export function isNetworkInstantiated(eid: EntityID) {
   return createMessageDatas.has(eid);
+}
+
+export function isPinned(eid: EntityID) {
+  return Networked.creator[eid] === APP.getSid("reticulum");
+}
+
+export function isCreatedByMe(eid: EntityID) {
+  return Networked.creator[eid] === APP.getSid(NAF.clientId);
 }

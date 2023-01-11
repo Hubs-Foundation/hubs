@@ -189,6 +189,7 @@ import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
 
 window.APP = new App();
@@ -204,6 +205,7 @@ function addToScene(entityDef, visible) {
 }
 preload(addToScene(ObjectMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
+preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
@@ -256,6 +258,7 @@ import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
+import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -591,15 +594,19 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   scene.addEventListener(
     "didConnectToNetworkedScene",
     () => {
-      // Append objects once we are in the NAF room since ownership may be taken.
-      const objectsScene = document.querySelector("#objects-scene");
-      const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
-      const objectsEl = document.createElement("a-entity");
+      if (qsTruthy("newLoader")) {
+        loadStoredRoomData(hub.hub_id);
+        loadLegacyRoomObjects(hub.hub_id);
+      } else {
+        // Append objects once we are in the NAF room since ownership may be taken.
+        const objectsScene = document.querySelector("#objects-scene");
+        const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+        const objectsEl = document.createElement("a-entity");
+        objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
 
-      objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-
-      if (!isBotMode) {
-        objectsScene.appendChild(objectsEl);
+        if (!isBotMode) {
+          objectsScene.appendChild(objectsEl);
+        }
       }
     },
     { once: true }

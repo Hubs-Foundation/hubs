@@ -8,6 +8,7 @@ import { EventTarget } from "event-target-shim";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
+import qsTruthy from "./utils/qs_truthy";
 
 let uiRoot;
 // Handles user-entered messages
@@ -125,8 +126,31 @@ export default class MessageDispatch extends EventTarget {
         this.entryManager.exitScene();
         this.remountUI({ roomUnavailableReason: ExitReason.left });
         break;
-      case "duck":
+
+      case "oldduck":
         spawnChatMessage(getAbsoluteHref(location.href, ducky));
+        if (Math.random() < 0.01) {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
+        } else {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
+        }
+        break;
+      case "duck":
+        if (qsTruthy("newLoader")) {
+          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+          const eid = createNetworkedEntity(APP.world, "media", {
+            src: getAbsoluteHref(location.href, ducky),
+            resize: true,
+            recenter: true,
+            animateLoad: true,
+            isObjectMenuTarget: true
+          });
+          const obj = APP.world.eid2obj.get(eid);
+          obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+          obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+        } else {
+          spawnChatMessage(getAbsoluteHref(location.href, ducky));
+        }
         if (Math.random() < 0.01) {
           this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
         } else {

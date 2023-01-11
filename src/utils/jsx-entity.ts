@@ -31,7 +31,8 @@ import {
   SceneLoader,
   NavMesh,
   SceneRoot,
-  NetworkDebug
+  NetworkDebug,
+  WaypointPreview
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -44,6 +45,7 @@ import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
 import { inflateEnvironmentSettings } from "../inflators/environment-settings";
+import { inflateWaypoint, WaypointParams } from "../inflators/waypoint";
 import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
@@ -66,12 +68,12 @@ const reservedAttrs = ["position", "rotation", "scale", "visible", "name", "laye
 
 export class Ref {
   current: number | null;
-  constructor() {
-    this.current = null;
+  constructor(value: number | null) {
+    this.current = value;
   }
 }
-export function createRef() {
-  return new Ref();
+export function createRef(value: number | null = null) {
+  return new Ref(value);
 }
 
 export function resolveRef(world: HubsWorld, ref: Ref) {
@@ -250,6 +252,7 @@ export interface JSXComponentData extends ComponentData {
   networkedTransform?: any;
   objectMenu?: {
     pinButtonRef: Ref;
+    unpinButtonRef: Ref;
     cameraFocusButtonRef: Ref;
     cameraTrackButtonRef: Ref;
     removeButtonRef: Ref;
@@ -286,6 +289,7 @@ export interface JSXComponentData extends ComponentData {
   text?: any;
   model?: ModelParams;
   networkDebug?: boolean;
+  waypointPreview?: boolean;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -294,6 +298,7 @@ export interface GLTFComponentData extends ComponentData {
   environmentSettings?: any;
   reflectionProbe?: ReflectionProbeParams;
   navMesh?: boolean;
+  waypoint?: WaypointParams;
 }
 
 declare global {
@@ -348,6 +353,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   sceneRoot: createDefaultInflator(SceneRoot),
   sceneLoader: createDefaultInflator(SceneLoader),
   networkDebug: createDefaultInflator(NetworkDebug),
+  waypointPreview: createDefaultInflator(WaypointPreview),
   mediaLoader: inflateMediaLoader,
 
   // inflators that create Object3Ds
@@ -366,6 +372,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   image: inflateImageLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
+  waypoint: inflateWaypoint,
   environmentSettings: inflateEnvironmentSettings
 };
 
