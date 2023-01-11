@@ -147,7 +147,7 @@ export function networkReceiveSystem(world: HubsWorld) {
           // so modify the message to act as though we had done so.
           console.log("Rewriting update message from client who left.", JSON.stringify(update));
           update.owner = NAF.clientId;
-          update.lastOwnerTime = update.timestamp;
+          update.lastOwnerTime = update.timestamp + 1;
         }
       }
 
