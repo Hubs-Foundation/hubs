@@ -29,15 +29,10 @@ function breakTie(a: ClientID, b: ClientID) {
 }
 
 function isOutdatedMessage(eid: EntityID, updateMessage: UpdateMessage) {
-  const entityHasOwner = !!Networked.owner[eid];
-  const messageIsNewer = Networked.lastOwnerTime[eid] < updateMessage.lastOwnerTime;
-  if (!entityHasOwner || messageIsNewer) {
-    return false;
-  }
-
-  const messageIsOlder = Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime;
-  const messageLosesTie = updateMessage.owner !== breakTie(APP.getString(Networked.owner[eid])!, updateMessage.owner);
-  return messageIsOlder || messageLosesTie;
+  if (!Networked.owner[eid]) return false;
+  if (Networked.lastOwnerTime[eid] < updateMessage.lastOwnerTime) return false;
+  if (Networked.lastOwnerTime[eid] > updateMessage.lastOwnerTime) return true;
+  return updateMessage.owner !== breakTie(APP.getString(Networked.owner[eid])!, updateMessage.owner);
 }
 
 const partedClientIds = new Set<StringID>();
