@@ -49,6 +49,8 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
 
   let data;
   try {
+    // TODO Migrating to a new hub in one step makes state cleanup suspicious.
+    //      Would prefer to disconnect, cleanup state, then connect to the new hub.
     data = await APP.hubChannel.migrateToHub(hubId);
   } catch (e) {
     console.warn(`Failed to join hub ${hubId}: ${e.reason}|${e.message}`);
