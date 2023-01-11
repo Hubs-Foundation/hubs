@@ -22,7 +22,12 @@ export async function tryPin(world: HubsWorld, eid: EntityID, hubChannel: HubCha
   const fileId = null;
   const fileAccessToken = null;
   const promotionToken = null;
-  await hubChannel.pin(nid, storableMessage, fileId, fileAccessToken, promotionToken);
+  console.log("Pinning is disabled until storage for new networked objects is implemented in reticulum.", {
+    storableMessage,
+    fileId,
+    fileAccessToken,
+    promotionToken
+  });
 }
 
 export async function tryUnpin(world: HubsWorld, eid: EntityID, hubChannel: HubChannel) {
@@ -30,7 +35,10 @@ export async function tryUnpin(world: HubsWorld, eid: EntityID, hubChannel: HubC
   takeOwnership(world, eid);
   Networked.creator[eid] = APP.getSid(localClientID!);
   const message = messageFor(world, [eid], [eid], [eid], [], false)!;
-  unpinMessages.push(message);
   const fileId = null;
-  hubChannel.unpin(APP.getString(Networked.id[eid])!, fileId);
+  // unpinMessages.push(message);
+  console.log("Pinning/unpinning is disabled until storage for new networked objects is implemented in reticulum.", {
+    message,
+    fileId
+  });
 }
