@@ -1,12 +1,14 @@
-
 @use "./theme.scss";
 @import "~normalize.css";
 
 // Theme CSS Variables
 // Injected theme will overwrite these defaults
 :root {
-  --font-family-default: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --font-family-monospace: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+  --font-family-default: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-family-monospace: "Bebas Neue", "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+    "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier,
+    monospace;
 
   --text1-color: #{theme.$black};
   --text1-color-hover: #{theme.$black-hover};
@@ -24,7 +26,6 @@
   --text5-color-hover: var(--text5-color);
   --text5-color-pressed: var(--text5-color);
   --text-inverted-color: #{theme.$white};
- 
 
   --link-color: #{theme.$blue};
   --link-color-hover: #{theme.$blue-hover};
@@ -81,7 +82,7 @@
   --background3-color: #{theme.$lightgrey};
   --background4-color: #{theme.$grey};
 
-  --loading-screen-background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%);
+  --loading-screen-background: radial-gradient(50% 50% at 50% 50%, #ffffff 0%, #eeeeee 100%);
 
   --border1-color: #{theme.$lightgrey};
   --border2-color: #{theme.$grey};
@@ -97,7 +98,7 @@
   --basic-border-color: var(--border1-color);
 
   --disabled-text-color: var(--text4-color);
-  --disabled-bg-color:  var(--background3-color);
+  --disabled-bg-color: var(--background3-color);
   --disabled-icon-color: var(--background4-color);
 
   --radio-border-color: var(--border1-color);
@@ -162,7 +163,7 @@
   --overlay-outline-color: #{theme.$white};
 
   --toolbar-icon-color: var(--text5-color);
-  --toolbar-icon-selected-bg: var(--transparent); 
+  --toolbar-icon-selected-bg: var(--transparent);
   --toolbar-basic-icon-color: var(--text1-color);
   --toolbar-basic-selected-icon-color: var(--text1-color);
   --toolbar-basic-color: var(--secondary-color);
@@ -187,12 +188,12 @@
 }
 
 html {
-  height  : 100%;
+  height: 100%;
   overflow: hidden;
 }
 
 body {
-  height  : 100%;
+  height: 100%;
   overflow: auto;
   overscroll-behavior-y: none;
 }
@@ -205,7 +206,9 @@ html {
   line-height: 1;
 }
 
-*, *:before, *:after {
+*,
+*:before,
+*:after {
   box-sizing: inherit;
 }
 
@@ -250,7 +253,7 @@ ul {
  */
 
 html {
- font-family: theme.$font-family-default;
+  font-family: theme.$font-family-default;
 }
 
 textarea {
@@ -313,7 +316,7 @@ pre,
 code,
 kbd,
 samp {
- font-family: theme.$font-family-monospace;
+  font-family: theme.$font-family-monospace;
 }
 
 /**
@@ -358,7 +361,8 @@ label {
   font-weight: theme.$font-weight-bold;
 }
 
-body :focus, [type="button"]:focus {
+body :focus,
+[type="button"]:focus {
   outline: none;
 }
 
@@ -410,7 +414,9 @@ h5 {
   font-size: theme.$font-size-sm;
 }
 
-label, small, strong {
+label,
+small,
+strong {
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
 }
@@ -419,7 +425,9 @@ small {
   color: theme.$text2-color;
 }
 
-p, small, strong {
+p,
+small,
+strong {
   line-height: 1.25;
 }
 
