@@ -1,7 +1,7 @@
-import appLogo from "../assets/images/app-logo.png";
-import appLogoDark from "../assets/images/app-logo-dark.png";
+import appLogo from "../assets/images/ShadowByEclipseRealityLogo.png";
+import appLogoDark from "../assets/images/ShadowByEclipseRealityLogo.png";
 import companyLogo from "../assets/images/company-logo.png";
-import homeHeroBackground from "../assets/images/home-hero-background-unbranded.png";
+import homeHeroBackground from "../assets/images/BannerView.png";
 import sceneEditorLogo from "../assets/images/editor-logo.png";
 import { getLocale, getMessage } from "./i18n";
 

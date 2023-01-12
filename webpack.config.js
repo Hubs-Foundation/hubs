@@ -26,7 +26,7 @@ function createHTTPSConfig() {
       [
         {
           name: "commonName",
-          value: "localhost"
+          value: "52.22.35.245"
         }
       ],
       {
@@ -39,11 +39,11 @@ function createHTTPSConfig() {
             altNames: [
               {
                 type: 2,
-                value: "localhost"
+                value: "52.22.35.245"
               },
               {
                 type: 2,
-                value: "hubs.local"
+                value: "52.22.35.245"
               }
             ]
           }
@@ -184,13 +184,13 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
 
-  const localIp = process.env.HOST_IP || (await internalIpV4()) || "localhost";
+  const localIp = process.env.HOST_IP || (await internalIpV4()) || "52.22.35.245";
 
   process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
-  process.env.CORS_PROXY_SERVER = `hubs.local:8080/cors-proxy`;
+  process.env.CORS_PROXY_SERVER = `52.22.35.245:8080/cors-proxy`;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
-  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},hubs.local,localhost`;
+  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},52.22.35.245,52.22.35.245`;
 
   return appConfig;
 }
@@ -250,12 +250,12 @@ module.exports = async (env, argv) => {
     }
 
     if (env.localDev) {
-      const localDevHost = "hubs.local";
+      const localDevHost = "52.22.35.245";
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
         HOST: localDevHost,
         RETICULUM_SOCKET_SERVER: localDevHost,
-        CORS_PROXY_SERVER: "hubs-proxy.local:4000",
+        CORS_PROXY_SERVER: "52.22.35.245:4000",
         NON_CORS_PROXY_DOMAINS: `${localDevHost},dev.reticulum.io`,
         BASE_ASSETS_PATH: `https://${localDevHost}:8080/`,
         RETICULUM_SERVER: `${localDevHost}:4000`,
@@ -269,7 +269,7 @@ module.exports = async (env, argv) => {
   // In production, the environment variables are defined in CI or loaded from ita and
   // the app config is injected into the head of the page by Reticulum.
 
-  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
+  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "52.22.35.245" : "52.22.35.245";
 
   const liveReload = !!process.env.LIVE_RELOAD || false;
 
@@ -285,7 +285,7 @@ module.exports = async (env, argv) => {
     // .replaceAll("connect-src", "connect-src https://example.com");
   }
 
-  const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
+  const internalHostname = process.env.INTERNAL_HOSTNAME || "52.22.35.245";
   return {
     cache: {
       type: "filesystem"
@@ -347,7 +347,7 @@ module.exports = async (env, argv) => {
       },
       server: {
         type: "https",
-        options: createHTTPSConfig()
+        options: createHTTPSConfig(),
       },
       host: "0.0.0.0",
       port: 8080,
@@ -384,7 +384,7 @@ module.exports = async (env, argv) => {
           const redirectLocation = req.header("location");
 
           if (redirectLocation) {
-            res.header("Location", "https://localhost:8080/cors-proxy/" + redirectLocation);
+            res.header("Location", "https://52.22.35.245:8080/cors-proxy/" + redirectLocation);
           }
 
           if (req.method === "OPTIONS") {
