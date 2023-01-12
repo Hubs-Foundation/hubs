@@ -95,6 +95,20 @@ function tryGetTheme(themeId) {
     return theme;
   } else {
     const darkMode = getDarkModeQuery().matches;
+
+    //making changes to the dark mode theme
+    if (darkMode) {
+      let darkModeObject = themes.find(t => t.darkModeDefault);
+      console.log(darkModeObject);
+      darkModeObject.variables["primary-color"] = "#FF034E";
+      darkModeObject.variables["accent2-border-color"] = "#FF034E";
+      darkModeObject.variables["accent4-border-color"] = "#FF034E";
+      darkModeObject.variables["accent5-border-color"] = "#FF034E";
+      darkModeObject.variables["toolbar-basic-border-color"] = "#FF034E";
+      darkModeObject.variables["active-color-hover"] = "#FF034E";
+      darkModeObject.variables["admin-color"] = "#FF034E";
+    }
+
     return (darkMode && themes.find(t => t.darkModeDefault)) || getDefaultTheme();
   }
 }
