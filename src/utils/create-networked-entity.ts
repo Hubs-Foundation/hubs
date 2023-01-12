@@ -6,41 +6,32 @@ import { PrefabName, prefabs } from "../prefabs/prefabs";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnership } from "../utils/take-ownership";
-import type { ClientID, InitialData } from "./networking-types";
+import { setNetworkedDataWithRoot } from "./assign-network-ids";
+import type { ClientID, InitialData, NetworkID } from "./networking-types";
 
 export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, initialData: InitialData) {
   if (!hasPermissionToSpawn(NAF.clientId, prefabName))
     throw new Error(`You do not have permission to spawn ${prefabName}`);
-  const rootNid = NAF.utils.createNetworkId();
-  return createNetworkedEntityFromRemote(world, prefabName, initialData, rootNid, NAF.clientId, NAF.clientId);
+  const nid = NAF.utils.createNetworkId();
+  const entity = renderAsNetworkedEntity(world, prefabName, initialData, nid, NAF.clientId);
+  takeOwnership(world, entity);
+  return entity;
 }
 
-export function createNetworkedEntityFromRemote(
+export function renderAsNetworkedEntity(
   world: HubsWorld,
   prefabName: PrefabName,
   initialData: InitialData,
-  rootNid: string,
-  creator: ClientID,
-  owner: ClientID
+  nid: NetworkID,
+  creator: ClientID
 ) {
   const eid = renderAsEntity(world, prefabs.get(prefabName)!.template(initialData));
+  if (!hasComponent(world, Networked, eid)) {
+    throw new Error("Networked prefabs must have the Networked component");
+  }
   const obj = world.eid2obj.get(eid)!;
-
   createMessageDatas.set(eid, { prefabName, initialData });
-
-  let i = 0;
-  obj.traverse(function (o) {
-    if (o.eid && hasComponent(world, Networked, o.eid)) {
-      const eid = o.eid;
-      Networked.id[eid] = APP.getSid(i === 0 ? rootNid : `${rootNid}.${i}`);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = APP.getSid(creator);
-      Networked.owner[eid] = APP.getSid(owner);
-      if (NAF.clientId === owner) takeOwnership(world, eid);
-      i += 1;
-    }
-  });
-
+  setNetworkedDataWithRoot(world, nid, eid, creator);
   AFRAME.scenes[0].object3D.add(obj);
   return eid;
 }

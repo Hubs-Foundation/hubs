@@ -1,16 +1,16 @@
-import { LoadingObject } from "../prefabs/loading-object";
-import { ErrorObject } from "../prefabs/error-object";
-import { easeOutQuadratic } from "../utils/easing";
-import { loadImage } from "../utils/load-image";
-import { loadVideo } from "../utils/load-video";
-import { loadModel } from "../utils/load-model";
-import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
-import { crTimeout, crClearTimeout, cancelable, coroutine, makeCancelable } from "../utils/coroutine";
-import { takeOwnership } from "../utils/take-ownership";
-import { renderAsEntity } from "../utils/jsx-entity";
+import { GLTFModel, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import { ErrorObject } from "../prefabs/error-object";
+import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
+import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
+import { cancelable, coroutine, crClearTimeout, crTimeout, makeCancelable } from "../utils/coroutine";
+import { easeOutQuadratic } from "../utils/easing";
+import { renderAsEntity } from "../utils/jsx-entity";
+import { loadImage } from "../utils/load-image";
+import { loadModel } from "../utils/load-model";
+import { loadVideo } from "../utils/load-video";
+import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 
 const loaderForMediaType = {
   [MediaType.IMAGE]: (world, { accessibleUrl, contentType }) => loadImage(world, accessibleUrl, contentType),
@@ -25,21 +25,6 @@ export const MEDIA_LOADER_FLAGS = {
   IS_OBJECT_MENU_TARGET: 1 << 3
 };
 
-export function assignNetworkIds(world, rootNid, mediaEid, mediaLoaderEid) {
-  let i = 0;
-  world.eid2obj.get(mediaEid).traverse(function (obj) {
-    if (obj.eid && hasComponent(world, Networked, obj.eid)) {
-      const eid = obj.eid;
-      Networked.id[eid] = APP.getSid(`${rootNid}.${i}`);
-      APP.world.nid2eid.set(Networked.id[eid], eid);
-      Networked.creator[eid] = Networked.creator[mediaLoaderEid];
-      Networked.owner[eid] = Networked.owner[mediaLoaderEid];
-      if (APP.getSid(NAF.clientId) === Networked.owner[mediaLoaderEid]) takeOwnership(world, eid);
-      i += 1;
-    }
-  });
-}
-
 function resizeAndRecenter(world, media, eid) {
   const resize = MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RESIZE;
   const recenter = MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RECENTER;
@@ -53,8 +38,8 @@ function resizeAndRecenter(world, media, eid) {
   if (resize) {
     const size = new THREE.Vector3();
     box.getSize(size);
-    // Might want to consider avatar scale someday
-    scale = 0.5 / Math.max(size.x, size.y, size.z);
+    const multiplier = hasComponent(world, GLTFModel, media) ? 0.5 : 1.0;
+    scale = multiplier / Math.max(size.x, size.y, size.z);
     mediaObj.scale.setScalar(scale);
     mediaObj.matrixNeedsUpdate = true;
   }
@@ -145,12 +130,12 @@ function* loadMedia(world, eid) {
 function* loadAndAnimateMedia(world, eid, signal) {
   const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
   if (!canceled) {
-    assignNetworkIds(world, APP.getString(Networked.id[eid]), media, eid);
     resizeAndRecenter(world, media, eid);
     if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
       addComponent(world, ObjectMenuTarget, eid);
     }
     add(world, media, eid);
+    setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid]), media);
     if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
       yield* animateScale(world, media);
     }

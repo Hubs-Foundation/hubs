@@ -12,6 +12,7 @@ import {
 } from "../utils/three-utils";
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 import qsTruthy from "../utils/qs_truthy";
+import { releaseOccupiedWaypoint } from "../bit-systems/waypoint";
 //import { m4String } from "../utils/pretty-print";
 const NAV_ZONE = "character";
 const qsAllowWaypointLerp = qsTruthy("waypointLerp");
@@ -84,6 +85,7 @@ export class CharacterControllerSystem {
     const targetForRig = new THREE.Vector3();
     //TODO: Use enqueue waypoint
     return function teleportTo(targetWorldPosition) {
+      this.didTeleportSinceLastWaypointTravel = true;
       this.isMotionDisabled = false;
       this.avatarRig.object3D.getWorldPosition(rig);
       this.avatarPOV.object3D.getWorldPosition(head);
@@ -111,8 +113,9 @@ export class CharacterControllerSystem {
       if (!this.fly && !snapToNavMesh) {
         this.fly = true;
         this.shouldLandWhenPossible = true;
-        this.shouldUnoccupyWaypointsOnceMoving = true;
       }
+      this.shouldUnoccupyWaypointsOnceMoving = true;
+      this.didTeleportSinceLastWaypointTravel = false;
       inMat4Copy.copy(inMat4);
       rotateInPlaceAroundWorldUp(inMat4Copy, Math.PI, finalPOV);
       const navMeshExists = NAV_ZONE in this.scene.systems.nav.pathfinder.zones;
@@ -251,6 +254,7 @@ export class CharacterControllerSystem {
         this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
       }
       const characterAcceleration = userinput.get(paths.actions.characterAcceleration);
+      const hasCharacterAcceleration = characterAcceleration && (characterAcceleration[0] || characterAcceleration[1]);
       if (characterAcceleration) {
         const zCharacterAcceleration = -1 * characterAcceleration[1];
         this.relativeMotion.set(
@@ -324,9 +328,18 @@ export class CharacterControllerSystem {
           }
         }
 
-        if (!this.activeWaypoint && this.shouldUnoccupyWaypointsOnceMoving && triedToMove) {
+        if (
+          !this.activeWaypoint &&
+          this.shouldUnoccupyWaypointsOnceMoving &&
+          (hasCharacterAcceleration || this.didTeleportSinceLastWaypointTravel)
+        ) {
+          this.didTeleportSinceLastWaypointTravel = false;
           this.shouldUnoccupyWaypointsOnceMoving = false;
-          this.waypointSystem.releaseAnyOccupiedWaypoints();
+          if (qsTruthy("newLoader")) {
+            releaseOccupiedWaypoint();
+          } else {
+            this.waypointSystem.releaseAnyOccupiedWaypoints();
+          }
           if (this.fly && this.shouldLandWhenPossible && shouldResnapToNavMesh && squareDistNavMeshCorrection < 3) {
             newPOV.setPosition(navMeshSnappedPOVPosition);
             this.shouldLandWhenPossible = false;

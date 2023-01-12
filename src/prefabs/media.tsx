@@ -1,10 +1,10 @@
 /** @jsx createElementEntity */
-import { createElementEntity } from "../utils/jsx-entity";
+import { createElementEntity, EntityDef } from "../utils/jsx-entity";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 import { MediaLoaderParams } from "../inflators/media-loader";
 
-export function MediaPrefab(params: MediaLoaderParams) {
+export function MediaPrefab(params: MediaLoaderParams): EntityDef {
   return (
     <entity
       name="Interactable Media"

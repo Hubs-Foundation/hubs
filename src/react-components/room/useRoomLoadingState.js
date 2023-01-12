@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useRef, useCallback } from "react";
 import { useIntl, defineMessages } from "react-intl";
 import { waitForPreloads } from "../../utils/preload";
+import qsTruthy from "../../utils/qs_truthy";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -59,6 +60,7 @@ const messages = defineMessages({
   }
 });
 
+const newLoader = qsTruthy("newLoader");
 export function useRoomLoadingState(sceneEl) {
   // Holds the id of the current
   const loadingTimeoutRef = useRef();
@@ -85,7 +87,8 @@ export function useRoomLoadingState(sceneEl) {
     donePreloading: false,
     lazyLoadMedia
   });
-  const doneLoadingObjects = lazyLoadMedia || allObjectsLoaded;
+  // Skip object loading callbacks for the newLoader, since they don't yet fire events we can listen to.
+  const doneLoadingObjects = lazyLoadMedia || newLoader || allObjectsLoaded;
   const done =
     sceneEl.is("loaded") ||
     (environmentLoaded && networkConnected && dialogConnected && doneLoadingObjects && donePreloading);
