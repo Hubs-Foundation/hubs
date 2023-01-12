@@ -31,39 +31,39 @@
   --link-color-hover: #{theme.$pink-hover};
   --link-color-pressed: #{theme.$pink-pressed};
 
-  --accept-color: #{theme.$green};
-  --accept-border-color: #{theme.$green};
-  --accept-color-hover: #{theme.$green-hover};
-  --accept-color-pressed: #{theme.$green-pressed};
+  --accept-color: #{theme.$pink};
+  --accept-border-color: #{theme.$pink};
+  --accept-color-hover: #{theme.$dark-purple};
+  --accept-color-pressed: #{theme.$pink};
 
   --cancel-color: #{theme.$red};
   --cancel-color-hover: #{theme.$red-hover};
   --cancel-color-pressed: #{theme.$red-pressed};
 
-  --accent1-color: #{theme.$red};
+  --accent1-color: #{theme.$pink};
   --accent1-border-color: var(--accent1-color);
-  --accent1-color-hover: #{theme.$red-hover};
-  --accent1-color-pressed: #{theme.$red-pressed};
+  --accent1-color-hover: #{theme.$dark-purple};
+  --accent1-color-pressed: #{theme.$pink-pressed};
 
-  --accent2-color: #{theme.$orange};
+  --accent2-color: #{theme.$pink};
   --accent2-border-color: var(--accent2-color);
-  --accent2-color-hover: #{theme.$orange-hover};
-  --accent2-color-pressed: #{theme.$orange-pressed};
+  --accent2-color-hover: #{theme.$dark-purple};
+  --accent2-color-pressed: #{theme.$pink-pressed};
 
-  --accent3-color: #{theme.$green};
+  --accent3-color: #{theme.$pink};
   --accent3-border-color: var(--accent3-color);
-  --accent3-color-hover: #{theme.$green-hover};
-  --accent3-color-pressed: #{theme.$green-pressed};
+  --accent3-color-hover: #{theme.$dark-purple};
+  --accent3-color-pressed: #{theme.$pink-pressed};
 
   --accent4-color: #{theme.$pink};
   --accent4-border-color: var(--accent4-color);
-  --accent4-color-hover: #{theme.$pink-hover};
+  --accent4-color-hover: #{theme.$dark-purple};
   --accent4-color-pressed: #{theme.$pink-pressed};
 
-  --accent5-color: #{theme.$purple};
+  --accent5-color: #{theme.$pink};
   --accent5-border-color: var(--accent5-color);
-  --accent5-color-hover: #{theme.$purple-hover};
-  --accent5-color-pressed: #{theme.$purple-pressed};
+  --accent5-color-hover: #{theme.$dark-purple};
+  --accent5-color-pressed: #{theme.$pink-pressed};
 
   --accent6-color: #{theme.$black};
   --accent6-color-hover: #{theme.$black-hover};
