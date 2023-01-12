@@ -9,7 +9,7 @@ import { useLogo } from "../styles/theme";
 export function AppLogo({ className, forceConfigurableLogo }) {
   const logo = useLogo();
   if (isHmc() && !forceConfigurableLogo) {
-    return <HmcLogo className="hmc-logo" />;
+    return <HmcLogo className="hmc-logo" style={{ maxWidth: "100%" }} />;
   } else {
     return <img className={className} alt={configs.translation("app-name")} src={logo} />;
   }

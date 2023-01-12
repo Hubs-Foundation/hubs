@@ -30,9 +30,9 @@ export function RoomEntryModal({
   const breakpoint = useCssBreakpoints();
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
-      <Column center className={styles.content}>
+      <Column center className={styles.content} style={{}}>
         {breakpoint !== "sm" && breakpoint !== "md" && (
-          <div className={styles.logoContainer}>
+          <div className={styles.logoContainer} style={{ maxWidth: "100%", position: "relative" }}>
             <AppLogo />
           </div>
         )}
