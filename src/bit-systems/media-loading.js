@@ -1,5 +1,5 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, removeComponent, removeEntity } from "bitecs";
-import { MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { GLTFModel, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
@@ -38,8 +38,8 @@ function resizeAndRecenter(world, media, eid) {
   if (resize) {
     const size = new THREE.Vector3();
     box.getSize(size);
-    // Might want to consider avatar scale someday
-    scale = 0.5 / Math.max(size.x, size.y, size.z);
+    const multiplier = hasComponent(world, GLTFModel, media) ? 0.5 : 1.0;
+    scale = multiplier / Math.max(size.x, size.y, size.z);
     mediaObj.scale.setScalar(scale);
     mediaObj.matrixNeedsUpdate = true;
   }
