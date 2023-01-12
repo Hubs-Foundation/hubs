@@ -283,13 +283,13 @@
 }
 
 :local(.landing) {
-  border: 2px solid #007ab8;
   background-color: theme.$pink;
   color: theme.$text5-color;
   box-sizing: border-box;
   border-radius: 13px;
+  transition:0.2s;
   &:hover {
-    background-color: theme.$pink;
+    background-color: theme.$dark-purple;
   }
   &:active {
     background-color: theme.$pink;

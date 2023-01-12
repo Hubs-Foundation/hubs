@@ -94,6 +94,9 @@ header {
   a {
     margin-left: 8px;
     color: theme.$pink;
+    &:hover{
+      text-decoration: underline;
+    }
   }
 
   @media (min-width: theme.$breakpoint-lg) {

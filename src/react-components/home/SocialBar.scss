@@ -9,6 +9,8 @@
         width: 169px;
         align-items: center;
         margin-bottom: 2em !important;
+        
+        display: none;
       }
 }
 
@@ -19,6 +21,8 @@
     width: 250px;
     justify-content: space-between;
     align-items: center;
+
+    display:none;
 
     @media(min-width: theme.$breakpoint-lg) {
       display: none;

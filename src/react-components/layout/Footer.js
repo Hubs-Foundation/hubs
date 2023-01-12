@@ -60,7 +60,7 @@ export function Footer({
                 </a>
               </li>
             )}
-            {isHmc && (
+            {/* {isHmc && (
               <li>
                 <a target="_blank" rel="noopener noreferrer" href={"https://shop.spreadshirt.com/mozillaMR/"}>
                   <FormattedMessage id="footer.hubs-merch" defaultMessage="Hubs Merch" />
@@ -73,7 +73,7 @@ export function Footer({
                   <FormattedMessage id="footer.FAQ" defaultMessage="FAQ" />
                 </a>
               </li>
-            )}
+            )} */}
             {showTerms && (
               <li>
                 <a target="_blank" rel="noopener noreferrer" href={termsUrl}>
