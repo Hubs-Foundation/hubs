@@ -275,24 +275,24 @@
 }
 
 :local(.signin) {
-  border: 2px solid #007ab8;
+  border: 2px solid theme.$pink;
   background-color: transparent;
-  color: #007ab8;
+  color: theme.$primary-color;
   box-sizing: border-box;
   border-radius: 13px;
 }
 
 :local(.landing) {
   border: 2px solid #007ab8;
-  background-color: #007ab8;
+  background-color: theme.$pink;
   color: theme.$text5-color;
   box-sizing: border-box;
   border-radius: 13px;
   &:hover {
-    background-color: #008bd1;
+    background-color: theme.$pink;
   }
   &:active {
-    background-color: #00699e;
+    background-color: theme.$pink;
   }
 }
 

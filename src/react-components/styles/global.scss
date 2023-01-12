@@ -27,9 +27,9 @@
   --text5-color-pressed: var(--text5-color);
   --text-inverted-color: #{theme.$white};
 
-  --link-color: #{theme.$blue};
-  --link-color-hover: #{theme.$blue-hover};
-  --link-color-pressed: #{theme.$blue-pressed};
+  --link-color: #{theme.$pink};
+  --link-color-hover: #{theme.$pink-hover};
+  --link-color-pressed: #{theme.$pink-pressed};
 
   --accept-color: #{theme.$green};
   --accept-border-color: #{theme.$green};
@@ -55,10 +55,10 @@
   --accent3-color-hover: #{theme.$green-hover};
   --accent3-color-pressed: #{theme.$green-pressed};
 
-  --accent4-color: #{theme.$blue};
+  --accent4-color: #{theme.$pink};
   --accent4-border-color: var(--accent4-color);
-  --accent4-color-hover: #{theme.$blue-hover};
-  --accent4-color-pressed: #{theme.$blue-pressed};
+  --accent4-color-hover: #{theme.$pink-hover};
+  --accent4-color-pressed: #{theme.$pink-pressed};
 
   --accent5-color: #{theme.$purple};
   --accent5-border-color: var(--accent5-color);
@@ -69,9 +69,9 @@
   --accent6-color-hover: #{theme.$black-hover};
   --accent6-color-pressed: #{theme.$black-pressed};
 
-  --primary-color: #{theme.$blue};
-  --primary-color-hover: #{theme.$blue-hover};
-  --primary-color-pressed: #{theme.$blue-pressed};
+  --primary-color: #{theme.$pink};
+  --primary-color-hover: #{theme.$pink-hover};
+  --primary-color-pressed: #{theme.$pink-pressed};
 
   --secondary-color: #{theme.$lightgrey};
   --secondary-color-hover: #{theme.$lightgrey-hover};

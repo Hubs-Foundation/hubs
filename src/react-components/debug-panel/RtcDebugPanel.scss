@@ -1,8 +1,7 @@
-
 @use "../styles/theme.scss";
 
 :local(.border-tile) {
-  border: 2px;  
+  border: 2px;
   border-color: theme.$lightgrey;
   border-style: solid;
   padding: 4px;
@@ -14,7 +13,11 @@
   background-color: theme.$overlay-bg-color;
   pointer-events: auto;
 
-  @media not all and (min-resolution:.001dpcm){ @supports (-webkit-appearance:none) { height: 100%; }}
+  @media not all and (min-resolution: 0.001dpcm) {
+    @supports (-webkit-appearance: none) {
+      height: 100%;
+    }
+  }
 }
 
 :local(.border-tile).collapsed {
@@ -42,7 +45,7 @@
   right: 0;
   position: absolute;
 
-  @media(max-width: 500px) {
+  @media (max-width: 500px) {
     flex-flow: column nowrap;
     width: 100%;
     justify-content: stretch;
@@ -57,7 +60,7 @@
   align-self: flex-start;
   max-height: 100%;
 
-  @media(max-width: 500px) {
+  @media (max-width: 500px) {
     width: 100%;
     max-height: 33%;
     align-self: baseline;
@@ -74,7 +77,7 @@
   @extend :local(.rtc-status-container);
   justify-content: end;
 
-  @media(max-width: 500px) {
+  @media (max-width: 500px) {
     justify-content: start;
   }
 }
@@ -88,7 +91,7 @@
   overflow-y: hidden;
   pointer-events: none;
 
-  @media(max-width: 500px) {
+  @media (max-width: 500px) {
     justify-content: start;
     width: 100%;
   }
@@ -104,7 +107,7 @@
   flex: 0 1 auto;
   justify-content: center;
 
-  @media(max-width: 500px) {
+  @media (max-width: 500px) {
     width: 100%;
     align-self: baseline;
     flex: 0 1 auto;
@@ -114,7 +117,7 @@
 
 :local(.rtc-log-time) {
   font-size: theme.$font-size-xs;
-  color: theme.$blue;
+  color: theme.$pink;
   margin: 0;
 }
 

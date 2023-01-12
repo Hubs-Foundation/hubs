@@ -18,7 +18,7 @@ h2 {
 }
 
 :local(.background-white) {
-  background-color: theme.$background1-color; 
+  background-color: theme.$background1-color;
 }
 
 :local(.background-gray) {
@@ -33,7 +33,7 @@ h2 {
 :local(.center-padding-sides) {
   width: 100%;
 
-  @media(min-width: theme.$breakpoint-md) {
+  @media (min-width: theme.$breakpoint-md) {
     width: 80%;
     max-width: 800px;
     margin: 0 auto;
@@ -61,7 +61,7 @@ $tag-top-margin: theme.$spacing-xs;
 }
 
 :local(.selected-border) {
-  border: 2px solid theme.$blue;
+  border: 2px solid theme.$pink;
 }
 
 :local(.unselected-border) {
@@ -121,7 +121,7 @@ $tag-top-margin: theme.$spacing-xs;
 }
 
 :local(.token-modal) > * {
-  justify-content: left ;
+  justify-content: left;
   height: auto;
   border-bottom: none;
   max-height: 100%;

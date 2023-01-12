@@ -11,7 +11,7 @@
     font-size: 16px;
     display: inline-block;
     color: theme.$text1-color;
-    --tab-highlight-color: #{theme.$blue};
+    --tab-highlight-color: #{theme.$pink};
     @media (max-width: theme.$breakpoint-md) {
       width: 95% !important; /* leave room for scrollbar */
     }
@@ -174,7 +174,6 @@
     font-weight: 500;
     padding: 5px 6px;
     background-color: theme.$background1-color;
-    
   }
 
   .emoji-mart-category-list {
@@ -201,7 +200,8 @@
   }
 
   .emoji-mart-emoji-native {
-    font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji";
+    font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla",
+      "Noto Color Emoji", "Android Emoji";
   }
 
   .emoji-mart-no-results {

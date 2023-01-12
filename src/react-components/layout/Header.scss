@@ -2,9 +2,8 @@
 
 header {
   display: block;
-  
 
-  @media(min-width: theme.$breakpoint-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
     padding: 0;
   }
 
@@ -19,14 +18,14 @@ header {
     display: flex;
     flex-direction: column;
 
-    @media(min-width: theme.$breakpoint-lg) {
+    @media (min-width: theme.$breakpoint-lg) {
       flex-direction: row;
     }
 
     li {
       &:first-child {
         padding-top: 20px;
-        @media(min-width: theme.$breakpoint-lg) {
+        @media (min-width: theme.$breakpoint-lg) {
           img {
             width: 100%;
             height: 100%;
@@ -35,7 +34,7 @@ header {
       }
       padding-top: 20px;
 
-      @media(min-width: theme.$breakpoint-lg) {
+      @media (min-width: theme.$breakpoint-lg) {
         padding-top: 0;
       }
     }
@@ -55,7 +54,7 @@ header {
       align-items: center;
       justify-content: space-between;
 
-      @media(min-width: theme.$breakpoint-lg) {
+      @media (min-width: theme.$breakpoint-lg) {
         justify-content: flex-end;
         flex-direction: row;
       }
@@ -67,7 +66,7 @@ header {
   flex-direction: column;
   align-items: center;
 
-  @media(min-width: theme.$breakpoint-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
     height: 140px;
     flex-direction: row;
     align-items: inherit;
@@ -78,9 +77,9 @@ header {
   display: inline-block;
   width: 124px;
   height: 83px;
-  @media(min-width: theme.$breakpoint-lg) {
-   img {
-    height: 32px;
+  @media (min-width: theme.$breakpoint-lg) {
+    img {
+      height: 32px;
     }
   }
 }
@@ -91,13 +90,13 @@ header {
   padding-top: 20px;
   font-size: theme.$font-size-md;
   font-weight: theme.$font-weight-bold;
-  
+
   a {
     margin-left: 8px;
-    color: theme.$link-color;
+    color: theme.$pink;
   }
 
-  @media(min-width: theme.$breakpoint-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -116,7 +115,7 @@ header {
   flex-direction: row;
   justify-content: flex-start;
   width: 100vw;
-  @media(min-width: theme.$breakpoint-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
     display: none;
   }
 }
@@ -151,24 +150,24 @@ header {
     visibility: hidden;
     opacity: 0;
     height: 0px;
-    transition: height .3s;
+    transition: height 0.3s;
     overflow: hidden;
   }
 
   header.is-active {
     opacity: 1;
-    height:280px;
+    height: 280px;
     visibility: visible;
-    transition: opacity .4s, visibility .4s, height .6s;
+    transition: opacity 0.4s, visibility 0.4s, height 0.6s;
     ul {
-      height:230px;
+      height: 230px;
       justify-content: space-between;
     }
   }
   header.cloud {
-    height:230px;
+    height: 230px;
     ul {
-      height:200px;
+      height: 200px;
       justify-content: center;
     }
   }
