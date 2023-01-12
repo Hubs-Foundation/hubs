@@ -2,7 +2,8 @@ import { AElement } from "aframe";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
-import { EnvironmentSettings, NavMesh, Networked, SceneLoader, SceneRoot } from "../bit-components";
+import { EnvironmentSettings, NavMesh, Networked, SceneLoader, SceneRoot, Skybox } from "../bit-components";
+import Sky from "../components/skybox";
 import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
@@ -51,13 +52,7 @@ function* loadScene(
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
-    if (hasComponent(world, EnvironmentSettings, scene)) {
-      // TODO: Support legacy components (fog, background, skybox)
-      const environmentSettings = (EnvironmentSettings as any).map.get(scene);
-      environmentSystem.updateEnvironmentSettings(environmentSettings);
-    } else {
-      environmentSystem.updateEnvironmentSettings({});
-    }
+    let skybox: Sky | undefined;
     world.eid2obj.get(scene)!.traverse(o => {
       if ((o as Mesh).isMesh) {
         // TODO animated objects should not be static
@@ -69,9 +64,26 @@ function* loadScene(
         (o as any).box.applyMatrix4(o.matrixWorld);
       }
       if (hasComponent(world, NavMesh, o.eid!)) {
-        AFRAME.scenes[0].systems.nav.loadMesh(o as Mesh, "character");
+        // TODO the "as any" here is because of incorrect type definition for getObjectByProperty. It was fixed in r145
+        const navMesh = o.getObjectByProperty("isMesh", true as any) as Mesh;
+        // Some older scenes have the nav-mesh component as an ancestor of the mesh itself
+        if (navMesh !== o) {
+          console.warn("The `nav-mesh` component should be placed directly on a mesh.");
+        }
+        AFRAME.scenes[0].systems.nav.loadMesh(navMesh, "character");
+      }
+
+      if (!skybox && hasComponent(world, Skybox, o.eid!)) {
+        skybox = o as Sky;
       }
     });
+
+    const envSettings = { skybox };
+    if (hasComponent(world, EnvironmentSettings, scene)) {
+      Object.assign(envSettings, (EnvironmentSettings as any).map.get(scene));
+    }
+    environmentSystem.updateEnvironmentSettings(envSettings);
+
     const sceneEl = AFRAME.scenes[0];
     sceneEl.emit("environment-scene-loaded", scene);
     document.querySelector(".a-canvas")!.classList.remove("a-hidden");

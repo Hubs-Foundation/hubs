@@ -44,8 +44,15 @@ import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
-import { inflateEnvironmentSettings } from "../inflators/environment-settings";
-import { inflateWaypoint, WaypointParams } from "../inflators/waypoint";
+import {
+  BackgroundParams,
+  EnvironmentSettingsParams,
+  FogParams,
+  inflateBackground,
+  inflateEnvironmentSettings,
+  inflateFog
+} from "../inflators/environment-settings";
+import { inflateSpawnpoint, inflateWaypoint, WaypointParams } from "../inflators/waypoint";
 import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
@@ -54,6 +61,7 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { ProjectionMode } from "./projection-mode";
+import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
 
 preload(
   new Promise(resolve => {
@@ -295,10 +303,16 @@ export interface JSXComponentData extends ComponentData {
 export interface GLTFComponentData extends ComponentData {
   video?: VideoLoaderParams;
   image?: ImageLoaderParams;
-  environmentSettings?: any;
+  environmentSettings?: EnvironmentSettingsParams;
   reflectionProbe?: ReflectionProbeParams;
   navMesh?: boolean;
   waypoint?: WaypointParams;
+
+  // deprecated
+  spawnPoint?: true;
+  skybox: SkyboxParams;
+  fog: FogParams;
+  background: BackgroundParams;
 }
 
 declare global {
@@ -373,7 +387,11 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
   waypoint: inflateWaypoint,
-  environmentSettings: inflateEnvironmentSettings
+  environmentSettings: inflateEnvironmentSettings,
+  fog: inflateFog,
+  background: inflateBackground,
+  spawnPoint: inflateSpawnpoint,
+  skybox: inflateSkybox
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

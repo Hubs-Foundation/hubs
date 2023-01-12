@@ -22,6 +22,24 @@ export interface WaypointParams {
   snapToNavMesh: boolean;
 }
 
+/**
+ * @deprecated Use inflateWaypoint with `canBeSpawnPoint instead`
+ */
+export function inflateSpawnpoint(world: HubsWorld, eid: number, _props: {}) {
+  console.warn(
+    "The `spawn-point` component is deprecated. Use the `waypoint` component with `canBeSpawnPoint` instead."
+  );
+  return inflateWaypoint(world, eid, {
+    canBeSpawnPoint: true,
+    canBeOccupied: false,
+    canBeClicked: false,
+    willDisableMotion: false,
+    willDisableTeleporting: false,
+    willMaintainInitialOrientation: false,
+    snapToNavMesh: false
+  });
+}
+
 export function inflateWaypoint(world: HubsWorld, eid: number, props: WaypointParams) {
   addComponent(world, Waypoint, eid);
   let flags = 0;

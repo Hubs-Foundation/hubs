@@ -188,3 +188,5 @@ export const NetworkedWaypoint = defineComponent({
   occupied: Types.ui8
 });
 export const WaypointPreview = defineComponent();
+
+export const Skybox = defineComponent();
