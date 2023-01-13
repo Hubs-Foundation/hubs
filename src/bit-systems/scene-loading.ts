@@ -44,7 +44,7 @@ function* loadScene(
       throw new Error("Scene loading failed. No src url provided to load.");
     }
 
-    const { value: scene, canceled } = yield* cancelable(loadModel(world, src, false), signal);
+    const { value: scene, canceled } = yield* cancelable(loadModel(world, src, "model/gltf", false), signal);
     if (canceled) {
       return;
     }

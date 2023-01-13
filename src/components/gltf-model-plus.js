@@ -815,6 +815,12 @@ export function cloneModelFromCache(src) {
   }
 }
 
+/**
+ * @param {string} src
+ * @param {string|null} [contentType]
+ * @param {boolean} [useCache]
+ * @param {null|(json:any)=>any} [jsonPreprocessor]
+ */
 export async function loadModel(src, contentType = null, useCache = false, jsonPreprocessor = null) {
   console.log(`Loading model ${src}`);
   if (useCache) {
