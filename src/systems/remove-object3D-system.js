@@ -14,7 +14,6 @@ import {
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
-import { disposeTexture } from "../utils/material-utils";
 import { disposeMaterial, traverseSome } from "../utils/three-utils";
 
 function cleanupObjOnExit(Component, f) {
