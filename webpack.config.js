@@ -330,7 +330,8 @@ module.exports = async (env, argv) => {
       verify: path.join(__dirname, "src", "verify.js"),
       tokens: path.join(__dirname, "src", "tokens.js"),
       "whats-new": path.join(__dirname, "src", "whats-new.js"),
-      "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js")
+      "webxr-polyfill": path.join(__dirname, "src", "webxr-polyfill.js"),
+      viewer: path.join(__dirname, "src", "viewer.js")
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
@@ -365,7 +366,8 @@ module.exports = async (env, argv) => {
           { from: /^\/cloud/, to: "/cloud.html" },
           { from: /^\/verify/, to: "/verify.html" },
           { from: /^\/tokens/, to: "/tokens.html" },
-          { from: /^\/whats-new/, to: "/whats-new.html" }
+          { from: /^\/whats-new/, to: "/whats-new.html" },
+          { from: /^\/viewer/, to: "/viewer.html" }
         ]
       },
       setupMiddlewares: (middlewares, { app }) => {
@@ -693,6 +695,12 @@ module.exports = async (env, argv) => {
       }),
       htmlPagePlugin({
         filename: "tokens.html"
+      }),
+      htmlPagePlugin({
+        filename: "viewer.html",
+        extraChunks: ["support"],
+        chunksSortMode: "manual",
+        inject: "head"
       }),
       new CopyWebpackPlugin({
         patterns: [

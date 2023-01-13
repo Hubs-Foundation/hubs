@@ -52,10 +52,9 @@ import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distanc
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
 import { objectMenuSystem } from "../bit-systems/object-menu";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
-import type { HubsSystems } from "aframe";
+import type { AScene, ASystem, HubsSystems } from "aframe";
 import { Camera, Scene, WebGLRenderer } from "three";
 import { HubsWorld } from "../app";
-import { EffectComposer } from "postprocessing";
 import { sceneLoadingSystem } from "../bit-systems/scene-loading";
 import { networkDebugSystem } from "../bit-systems/network-debug";
 import qsTruthy from "../utils/qs_truthy";
@@ -76,6 +75,245 @@ const timeSystem = (world: HubsWorld) => {
 
 const enableNetworkDebug = qsTruthy("networkDebug");
 
+interface ITickParams {
+  world: HubsWorld;
+  xrFrame: XRFrame;
+  renderer: WebGLRenderer;
+  scene: Scene;
+  camera: Camera;
+  hubsSystems: any;
+  aframeSystems: AScene["systems"];
+  t: number;
+  dt: number;
+}
+
+interface ISystemParams {
+  init?: (hubsSystems: any) => void;
+  tick?: (params: ITickParams) => void;
+  remove?: (hubsSystems: any) => void;
+}
+
+interface ISystem {
+  [key: string]: ISystemParams;
+}
+
+const Systems: ISystem = {
+  ["audio-settings-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.audioSettingsSystem = new AudioSettingsSystem(hubsSystems.el))
+  } as ISystemParams,
+  ["network-receive-system"]: {
+    tick: (params: ITickParams) => networkReceiveSystem(params.world)
+  } as ISystemParams,
+  ["on-ownership-lost"]: {
+    tick: (params: ITickParams) => onOwnershipLost(params.world)
+  } as ISystemParams,
+  ["scene-loading-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.environmentSystem = new EnvironmentSystem(hubsSystems.el)),
+    tick: (params: ITickParams) => sceneLoadingSystem(params.world, params.hubsSystems.environmentSystem)
+  } as ISystemParams,
+  ["media-loading-system"]: {
+    tick: (params: ITickParams) => mediaLoadingSystem(params.world)
+  } as ISystemParams,
+  ["physics-compat-system"]: {
+    tick: (params: ITickParams) => physicsCompatSystem(params.world)
+  } as ISystemParams,
+  ["networked-transform-system"]: {
+    tick: (params: ITickParams) => networkedTransformSystem(params.world)
+  } as ISystemParams,
+  ["user-input"]: {
+    tick: (params: ITickParams) => params.aframeSystems.userinput.tick2(params.xrFrame)
+  } as ISystemParams,
+  ["interaction-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.cursorTargettingSystem = new CursorTargettingSystem()),
+    tick: (params: ITickParams) =>
+      interactionSystem(params.world, params.hubsSystems.cursorTargettingSystem, params.t, params.aframeSystems),
+    remove: (hubsSystems: any) => hubsSystems.cursorTargettingSystem.remove()
+  } as ISystemParams,
+  ["button-system"]: {
+    tick: (params: ITickParams) => buttonSystems(params.world)
+  } as ISystemParams,
+  ["constraints-system"]: {
+    tick: (params: ITickParams) => constraintsSystem(params.world, params.hubsSystems.physicsSystem)
+  } as ISystemParams,
+  // We run this earlier in the frame so things have a chance to override properties run by animations
+  ["animation-mixer-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.animationMixerSystem = new AnimationMixerSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.animationMixerSystem.tick(params.dt)
+  } as ISystemParams,
+  ["character-controller-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.characterController = new CharacterControllerSystem(hubsSystems.el)),
+    tick: (params: ITickParams) => params.hubsSystems.characterController.tick(params.t, params.dt)
+  } as ISystemParams,
+  ["cursor-toggling-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.cursorTogglingSystem = new CursorTogglingSystem()),
+    tick: (params: ITickParams) =>
+      params.hubsSystems.cursorTogglingSystem.tick(
+        params.aframeSystems.interaction,
+        params.aframeSystems.userinput,
+        params.hubsSystems.el
+      )
+  } as ISystemParams,
+  ["interaction-sfx-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.interactionSfxSystem = new InteractionSfxSystem()),
+    tick: (params: ITickParams) =>
+      params.hubsSystems.interactionSfxSystem.tick(
+        params.aframeSystems.interaction,
+        params.aframeSystems.userinput,
+        params.hubsSystems.soundEffectsSystem
+      )
+  } as ISystemParams,
+  ["super-spawner-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.superSpawnerSystem = new SuperSpawnerSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.superSpawnerSystem.tick()
+  } as ISystemParams,
+  ["emoji-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.emojiSystem = new EmojiSystem(hubsSystems.el)),
+    tick: (params: ITickParams) => params.hubsSystems.emojiSystem.tick(params.t, params.aframeSystems.userinput)
+  } as ISystemParams,
+  ["cursor-pose-tracking-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.cursorPoseTrackingSystem = new CursorPoseTrackingSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.cursorPoseTrackingSystem.tick()
+  } as ISystemParams,
+  ["hover-menu-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.hoverMenuSystem = new HoverMenuSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.hoverMenuSystem.tick()
+  } as ISystemParams,
+  ["position-at-border-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.positionAtBorderSystem = new PositionAtBorderSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.positionAtBorderSystem.tick()
+  } as ISystemParams,
+  ["two-point-stretching-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.twoPointStretchingSystem = new TwoPointStretchingSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.twoPointStretchingSystem.tick()
+  } as ISystemParams,
+  ["floaty-object-system"]: {
+    tick: (params: ITickParams) => floatyObjectSystem(params.world)
+  } as ISystemParams,
+  ["holdable-button-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.holdableButtonSystem = new HoldableButtonSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.holdableButtonSystem.tick()
+  } as ISystemParams,
+  ["hover-button-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.hoverButtonSystem = new HoverButtonSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.hoverButtonSystem.tick()
+  } as ISystemParams,
+  ["drawing-menu-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.drawingMenuSystem = new DrawingMenuSystem(hubsSystems.el)),
+    tick: (params: ITickParams) => params.hubsSystems.drawingMenuSystem.tick()
+  } as ISystemParams,
+  ["heptic-feedback-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.hapticFeedbackSystem = new HapticFeedbackSystem()),
+    tick: (params: ITickParams) =>
+      params.hubsSystems.hapticFeedbackSystem.tick(
+        params.hubsSystems.twoPointStretchingSystem,
+        false,
+        false
+        // TODO: didInteractLeftHubsSystemsFrame doesn't exist?
+        // hubsSystems.singleActionButtonSystem.didInteractLeftHubsSystemsFrame,
+        // hubsSystems.singleActionButtonSystem.didInteractRightHubsSystemsFrame
+      )
+  } as ISystemParams,
+  ["sound-effects-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.soundEffectsSystem = new SoundEffectsSystem(hubsSystems.el)),
+    tick: (params: ITickParams) => params.hubsSystems.soundEffectsSystem.tick()
+  } as ISystemParams,
+  ["scene-camera-preview-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.scenePreviewCameraSystem = new ScenePreviewCameraSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.scenePreviewCameraSystem.tick()
+  } as ISystemParams,
+  ["physics-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.physicsSystem = new PhysicsSystem(hubsSystems.el.object3D)),
+    tick: (params: ITickParams) => params.hubsSystems.physicsSystem.tick()
+  } as ISystemParams,
+  ["inspect-yourself-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.inspectYourselfSystem = new InspectYourselfSystem()),
+    tick: (params: ITickParams) =>
+      params.hubsSystems.inspectYourselfSystem.tick(
+        params.hubsSystems.el,
+        params.aframeSystems.userinput,
+        params.hubsSystems.cameraSystem
+      )
+  } as ISystemParams,
+  ["camera-system"]: {
+    init: (hubsSystems: any) =>
+      (hubsSystems.cameraSystem = new CameraSystem(hubsSystems.el.camera, hubsSystems.el.renderer)),
+    tick: (params: ITickParams) => params.hubsSystems.cameraSystem.tick(params.hubsSystems.el, params.dt)
+  } as ISystemParams,
+  ["camera-tool-system"]: {
+    tick: (params: ITickParams) => cameraToolSystem(params.world)
+  } as ISystemParams,
+  ["waypoint-system"]: {
+    init: (hubsSystems: any) =>
+      (hubsSystems.waypointSystem = new WaypointSystem(hubsSystems.el, hubsSystems.characterController)),
+    tick: (params: ITickParams) => params.hubsSystems.waypointSystem.tick(params.t, params.dt)
+  } as ISystemParams,
+  ["menu-animation-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.menuAnimationSystem = new MenuAnimationSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.menuAnimationSystem.tick(params.t)
+  } as ISystemParams,
+  ["sprite-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.spriteSystem = new SpriteSystem(hubsSystems.el)),
+    tick: (params: ITickParams) => params.hubsSystems.spriteSystem.tick(params.t, params.dt)
+  } as ISystemParams,
+  ["uv-scroll-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.uvScrollSystem = new UVScrollSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.uvScrollSystem.tick(params.dt)
+  } as ISystemParams,
+  ["shadows-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.shadowSystem = new ShadowSystem(hubsSystems.el)),
+    tick: (params: ITickParams) => params.hubsSystems.shadowSystem.tick()
+  } as ISystemParams,
+  ["object-menu-system"]: {
+    tick: (params: ITickParams) =>
+      objectMenuSystem(params.world, AFRAME.scenes[0].is("frozen"), params.aframeSystems.userinput)
+  } as ISystemParams,
+  ["video-menu-system"]: {
+    tick: (params: ITickParams) => videoMenuSystem(params.world, params.aframeSystems.userinput)
+  } as ISystemParams,
+  ["video-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.audioSystem = new AudioSystem(hubsSystems.el)),
+    tick: (params: ITickParams) => videoSystem(params.world, params.hubsSystems.audioSystem)
+  } as ISystemParams,
+  ["media-frames-system"]: {
+    tick: (params: ITickParams) => mediaFramesSystem(params.world)
+  } as ISystemParams,
+  ["audio-zones-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.audioZonesSystem = new AudioZonesSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.audioZonesSystem.tick(params.hubsSystems.el)
+  } as ISystemParams,
+  ["gain-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.gainSystem = new GainSystem()),
+    tick: (params: ITickParams) => params.hubsSystems.gainSystem.tick()
+  } as ISystemParams,
+  ["name-tag-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.nameTagSystem = new NameTagVisibilitySystem(hubsSystems.el)),
+    tick: (params: ITickParams) => params.hubsSystems.nameTagSystem.tick()
+  } as ISystemParams,
+  ["delete-entity-system"]: {
+    tick: (params: ITickParams) => deleteEntitySystem(params.world, params.aframeSystems.userinput)
+  } as ISystemParams,
+  ["destroy-at-extreme-distance-system"]: {
+    tick: (params: ITickParams) => destroyAtExtremeDistanceSystem(params.world)
+  } as ISystemParams,
+  ["remove-networked-object-button-system"]: {
+    tick: (params: ITickParams) => removeNetworkedObjectButtonSystem(params.world)
+  } as ISystemParams,
+  ["remove-object-3d-system"]: {
+    tick: (params: ITickParams) => removeObject3DSystem(params.world)
+  } as ISystemParams,
+  // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
+  ["bone-visibility-system"]: {
+    init: (hubsSystems: any) => (hubsSystems.boneVisibilitySystem = new BoneVisibilitySystem()),
+    tick: (params: ITickParams) => params.hubsSystems.boneVisibilitySystem.tick()
+  } as ISystemParams,
+  ["network-send-system"]: {
+    tick: (params: ITickParams) => networkSendSystem(params.world)
+  } as ISystemParams,
+  ["network-debug-system"]: {
+    tick: (params: ITickParams) => enableNetworkDebug && networkDebugSystem(params.world, params.scene)
+  } as ISystemParams
+};
+
 // NOTE keeping this around since many things index into it to get a reference to a system. This will
 // naturally burn down as we migrate things, so it is not worth going through and changing all of them.
 AFRAME.registerSystem("hubs-systems", {
@@ -83,44 +321,22 @@ AFRAME.registerSystem("hubs-systems", {
     waitForDOMContentLoaded().then(() => {
       this.DOMContentDidLoad = true;
     });
-    this.cursorTogglingSystem = new CursorTogglingSystem();
-    this.interactionSfxSystem = new InteractionSfxSystem();
-    this.superSpawnerSystem = new SuperSpawnerSystem();
-    this.cursorTargettingSystem = new CursorTargettingSystem();
-    this.positionAtBorderSystem = new PositionAtBorderSystem();
-    this.physicsSystem = new PhysicsSystem(this.el.object3D);
-    this.twoPointStretchingSystem = new TwoPointStretchingSystem();
-    this.holdableButtonSystem = new HoldableButtonSystem();
-    this.hoverButtonSystem = new HoverButtonSystem();
-    this.hoverMenuSystem = new HoverMenuSystem();
-    this.hapticFeedbackSystem = new HapticFeedbackSystem();
-    this.audioSystem = new AudioSystem(this.el);
-    this.soundEffectsSystem = new SoundEffectsSystem(this.el);
-    this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
-    this.spriteSystem = new SpriteSystem(this.el);
-    this.cameraSystem = new CameraSystem(this.el.camera, this.el.renderer);
-    this.drawingMenuSystem = new DrawingMenuSystem(this.el);
-    this.characterController = new CharacterControllerSystem(this.el);
-    this.waypointSystem = new WaypointSystem(this.el, this.characterController);
-    this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
-    this.menuAnimationSystem = new MenuAnimationSystem();
-    this.audioSettingsSystem = new AudioSettingsSystem(this.el);
-    this.animationMixerSystem = new AnimationMixerSystem();
-    this.boneVisibilitySystem = new BoneVisibilitySystem();
-    this.uvScrollSystem = new UVScrollSystem();
-    this.shadowSystem = new ShadowSystem(this.el);
-    this.inspectYourselfSystem = new InspectYourselfSystem();
-    this.emojiSystem = new EmojiSystem(this.el);
-    this.audioZonesSystem = new AudioZonesSystem();
-    this.gainSystem = new GainSystem();
-    this.environmentSystem = new EnvironmentSystem(this.el);
-    this.nameTagSystem = new NameTagVisibilitySystem(this.el);
+
+    // Init systems
+    for (const [name, funcs] of Object.entries(Systems)) {
+      const { init } = funcs;
+      APP.enabledSystems.has(name) && init && init(this);
+    }
 
     window.$S = this;
   },
 
   remove() {
-    this.cursorTargettingSystem.remove();
+    // Remove systems
+    for (const [name, funcs] of Object.entries(Systems)) {
+      const { remove } = funcs;
+      APP.enabledSystems.has(name) && remove && remove(this);
+    }
   }
 });
 
@@ -159,88 +375,29 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   // aframeSystems["ui-hotkeys"].tick(t, dt);
   // aframeSystems["tips"].tick(t, dt);
   const systemNames = sceneEl.systemNames;
+  const tick = (name: keyof AScene["systems"]) => {
+    if (!APP.enabledSystems.has(name) || !aframeSystems[name].tick) return;
+    aframeSystems[name].tick(t, dt);
+  };
   for (let i = 0; i < systemNames.length; i++) {
-    if (!aframeSystems[systemNames[i]].tick) continue;
-    aframeSystems[systemNames[i]].tick(t, dt);
+    tick(systemNames[i]);
   }
 
-  networkReceiveSystem(world);
-  onOwnershipLost(world);
-  sceneLoadingSystem(world, hubsSystems.environmentSystem);
-  mediaLoadingSystem(world);
-
-  physicsCompatSystem(world);
-
-  networkedTransformSystem(world);
-
-  aframeSystems.userinput.tick2(xrFrame);
-
-  interactionSystem(world, hubsSystems.cursorTargettingSystem, t, aframeSystems);
-
-  buttonSystems(world);
-  constraintsSystem(world, hubsSystems.physicsSystem);
-
-  // We run this earlier in the frame so things have a chance to override properties run by animations
-  hubsSystems.animationMixerSystem.tick(dt);
-
-  hubsSystems.characterController.tick(t, dt);
-  hubsSystems.cursorTogglingSystem.tick(aframeSystems.interaction, aframeSystems.userinput, hubsSystems.el);
-  hubsSystems.interactionSfxSystem.tick(
-    aframeSystems.interaction,
-    aframeSystems.userinput,
-    hubsSystems.soundEffectsSystem
-  );
-  hubsSystems.superSpawnerSystem.tick();
-  hubsSystems.emojiSystem.tick(t, aframeSystems.userinput);
-  hubsSystems.cursorPoseTrackingSystem.tick();
-  hubsSystems.hoverMenuSystem.tick();
-  hubsSystems.positionAtBorderSystem.tick();
-  hubsSystems.twoPointStretchingSystem.tick();
-
-  floatyObjectSystem(world);
-
-  hubsSystems.holdableButtonSystem.tick();
-  hubsSystems.hoverButtonSystem.tick();
-  hubsSystems.drawingMenuSystem.tick();
-  hubsSystems.hapticFeedbackSystem.tick(
-    hubsSystems.twoPointStretchingSystem,
-    false,
-    false
-    // TODO: didInteractLeftHubsSystemsFrame doesn't exist?
-    // hubsSystems.singleActionButtonSystem.didInteractLeftHubsSystemsFrame,
-    // hubsSystems.singleActionButtonSystem.didInteractRightHubsSystemsFrame
-  );
-  hubsSystems.soundEffectsSystem.tick();
-  hubsSystems.scenePreviewCameraSystem.tick();
-  hubsSystems.physicsSystem.tick(dt);
-  hubsSystems.inspectYourselfSystem.tick(hubsSystems.el, aframeSystems.userinput, hubsSystems.cameraSystem);
-  hubsSystems.cameraSystem.tick(hubsSystems.el, dt);
-  cameraToolSystem(world);
-  hubsSystems.waypointSystem.tick(t, dt);
-  hubsSystems.menuAnimationSystem.tick(t);
-  hubsSystems.spriteSystem.tick(t, dt);
-  hubsSystems.uvScrollSystem.tick(dt);
-  hubsSystems.shadowSystem.tick();
-  objectMenuSystem(world, sceneEl.is("frozen"), aframeSystems.userinput);
-  videoMenuSystem(world, aframeSystems.userinput);
-  videoSystem(world, hubsSystems.audioSystem);
-  mediaFramesSystem(world);
-  hubsSystems.audioZonesSystem.tick(hubsSystems.el);
-  hubsSystems.gainSystem.tick();
-  hubsSystems.nameTagSystem.tick();
-
-  deleteEntitySystem(world, aframeSystems.userinput);
-  destroyAtExtremeDistanceSystem(world);
-  removeNetworkedObjectButtonSystem(world);
-  removeObject3DSystem(world);
-
-  // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
-  hubsSystems.boneVisibilitySystem.tick();
-
-  networkSendSystem(world);
-
-  if (enableNetworkDebug) {
-    networkDebugSystem(world, scene);
+  for (const [name, funcs] of Object.entries(Systems)) {
+    const { tick } = funcs;
+    APP.enabledSystems.has(name) &&
+      tick &&
+      tick({
+        world,
+        xrFrame,
+        renderer,
+        scene,
+        camera,
+        hubsSystems,
+        aframeSystems,
+        t,
+        dt
+      });
   }
 
   scene.updateMatrixWorld();

@@ -82,6 +82,7 @@ export class App {
   audioDebugPanelOverrides = new Map<SourceType, AudioSettings>();
   sceneAudioDefaults = new Map<SourceType, AudioSettings>();
   moderatorAudioSource = new Set<AElement | number>();
+  enabledSystems = new Set<string>();
 
   world: HubsWorld = createWorld();
 
