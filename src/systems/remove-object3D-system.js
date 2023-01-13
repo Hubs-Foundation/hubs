@@ -9,12 +9,12 @@ import {
   Object3DTag,
   Slice9,
   Text,
-  VideoMenu
+  VideoMenu,
+  Skybox
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
-import { disposeTexture } from "../utils/material-utils";
-import { traverseSome } from "../utils/three-utils";
+import { disposeMaterial, traverseSome } from "../utils/three-utils";
 
 function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
@@ -52,11 +52,15 @@ const cleanupImages = cleanupObjOnExit(MediaImage, obj => {
   obj.geometry.dispose();
 });
 const cleanupVideos = cleanupObjOnExit(MediaVideo, obj => {
-  disposeTexture(obj.material.map);
+  disposeMaterial(obj.material);
   obj.geometry.dispose();
 });
 const cleanupEnvironmentSettings = cleanupOnExit(EnvironmentSettings, eid => {
   EnvironmentSettings.map.delete(eid);
+});
+const cleanupSkyboxes = cleanupObjOnExit(Skybox, obj => {
+  disposeMaterial(obj.sky.material);
+  obj.sky.geometry.dispose();
 });
 
 // TODO This feels messy and brittle
@@ -109,6 +113,7 @@ export function removeObject3DSystem(world) {
   cleanupVideos(world);
   cleanupEnvironmentSettings(world);
   cleanupAudioEmitters(world);
+  cleanupSkyboxes(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeFromMap);

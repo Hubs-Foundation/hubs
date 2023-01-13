@@ -213,7 +213,13 @@ export function networkReceiveSystem(world: HubsWorld) {
         for (const schema of schemas.values()) {
           if (updateMessage.data.hasOwnProperty(schema.componentName)) {
             const storedComponent: StoredComponent = updateMessage.data[schema.componentName];
-            schema.deserializeFromStorage(eid, storedComponent);
+            if (!schema.deserializeFromStorage) {
+              console.error(
+                `Had stored data for a component with no \`deserializeForStorage\`: ${schema.componentName}`
+              );
+            } else {
+              schema.deserializeFromStorage(eid, storedComponent);
+            }
           }
         }
       }

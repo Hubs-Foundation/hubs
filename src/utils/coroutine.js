@@ -103,6 +103,11 @@ export function cancelable(iter, signal) {
   })();
 }
 
+const nextFramePromise = Promise.resolve();
+export function crNextFrame() {
+  return nextFramePromise;
+}
+
 function isPromise(p) {
   return p.__proto__ === Promise.prototype;
 }

@@ -120,7 +120,7 @@ export function messageForStorage(world: HubsWorld, created: EntityID[], updated
       const component = networkableComponents[j];
       if (hasComponent(world, component, eid)) {
         const schema = schemas.get(component)!;
-        updateMessage.data[schema.componentName] = schema.serializeForStorage(eid);
+        if (schema.serializeForStorage) updateMessage.data[schema.componentName] = schema.serializeForStorage(eid);
       }
     }
 

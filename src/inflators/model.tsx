@@ -17,10 +17,10 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
     const eid = obj === model ? rootEid : addEntity(world);
     Object.keys(components).forEach(name => {
       const inflatorName = camelCase(name);
-      if (inflatorName === "visible" || inflatorName === "frustum") {
+      if (inflatorName === "visible" || inflatorName === "frustum" || inflatorName === "shadow") {
         // These are handled below
       } else if (!gltfInflatorExists(inflatorName)) {
-        console.warn(`Failed to inflate unknown component called ${inflatorName}`);
+        console.warn(`Failed to inflate unknown component called ${inflatorName}`, components[name]);
       } else {
         gltfInflators[inflatorName](world, eid, components[name]);
       }
@@ -63,7 +63,20 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
     const components = obj.userData.gltfExtensions?.MOZ_hubs_components || {};
     if (components.visible) {
       const { visible } = components.visible;
-      obj.visible = !!visible;
+      obj.visible = visible;
+    }
+
+    if (components.shadow) {
+      const { cast, receive } = components.shadow;
+      obj.traverse(o => {
+        o.castShadow = cast;
+        o.receiveShadow = receive;
+      });
+    }
+
+    // We have had both spellings at different times.
+    if (components.frustrum) {
+      components.frustum = components.frustrum;
     }
 
     if (components.frustum) {

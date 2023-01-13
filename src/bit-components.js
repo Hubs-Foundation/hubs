@@ -98,6 +98,7 @@ export const Pinned = defineComponent();
 export const DestroyAtExtremeDistance = defineComponent();
 export const MediaLoading = defineComponent();
 export const FloatyObject = defineComponent({ flags: Types.ui8, releaseGravity: Types.f32 });
+export const NetworkedFloatyObject = defineComponent({ flags: Types.ui8 });
 export const MakeKinematicOnRelease = defineComponent();
 export const CameraTool = defineComponent({
   snapTime: Types.f32,
@@ -188,3 +189,8 @@ export const NetworkedWaypoint = defineComponent({
   occupied: Types.ui8
 });
 export const WaypointPreview = defineComponent();
+export const Skybox = defineComponent();
+export const ObjectSpawner = defineComponent({
+  src: Types.ui32,
+  flags: Types.ui8
+});

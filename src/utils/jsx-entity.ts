@@ -32,7 +32,8 @@ import {
   NavMesh,
   SceneRoot,
   NetworkDebug,
-  WaypointPreview
+  WaypointPreview,
+  NetworkedFloatyObject
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -44,8 +45,15 @@ import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
 import { inflateText } from "../inflators/text";
-import { inflateEnvironmentSettings } from "../inflators/environment-settings";
-import { inflateWaypoint, WaypointParams } from "../inflators/waypoint";
+import {
+  BackgroundParams,
+  EnvironmentSettingsParams,
+  FogParams,
+  inflateBackground,
+  inflateEnvironmentSettings,
+  inflateFog
+} from "../inflators/environment-settings";
+import { inflateSpawnpoint, inflateWaypoint, WaypointParams } from "../inflators/waypoint";
 import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
 import { Group, Object3D, Texture, VideoTexture } from "three";
@@ -54,6 +62,8 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { ProjectionMode } from "./projection-mode";
+import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
+import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
 
 preload(
   new Promise(resolve => {
@@ -249,6 +259,7 @@ export interface JSXComponentData extends ComponentData {
   rigidbody?: any;
   physicsShape?: any;
   floatyObject?: any;
+  networkedFloatyObject?: any;
   networkedTransform?: any;
   objectMenu?: {
     pinButtonRef: Ref;
@@ -295,10 +306,17 @@ export interface JSXComponentData extends ComponentData {
 export interface GLTFComponentData extends ComponentData {
   video?: VideoLoaderParams;
   image?: ImageLoaderParams;
-  environmentSettings?: any;
+  environmentSettings?: EnvironmentSettingsParams;
   reflectionProbe?: ReflectionProbeParams;
-  navMesh?: boolean;
+  navMesh?: true;
   waypoint?: WaypointParams;
+  spawner: SpawnerParams;
+
+  // deprecated
+  spawnPoint?: true;
+  skybox: SkyboxParams;
+  fog: FogParams;
+  background: BackgroundParams;
 }
 
 declare global {
@@ -340,6 +358,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   rigidbody: createDefaultInflator(Rigidbody),
   physicsShape: createDefaultInflator(PhysicsShape),
   floatyObject: createDefaultInflator(FloatyObject),
+  networkedFloatyObject: createDefaultInflator(NetworkedFloatyObject),
   makeKinematicOnRelease: createDefaultInflator(MakeKinematicOnRelease),
   destroyAtExtremeDistance: createDefaultInflator(DestroyAtExtremeDistance),
   networkedTransform: createDefaultInflator(NetworkedTransform),
@@ -373,7 +392,12 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
   waypoint: inflateWaypoint,
-  environmentSettings: inflateEnvironmentSettings
+  environmentSettings: inflateEnvironmentSettings,
+  fog: inflateFog,
+  background: inflateBackground,
+  spawnPoint: inflateSpawnpoint,
+  skybox: inflateSkybox,
+  spawner: inflateSpawner
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

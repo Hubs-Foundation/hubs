@@ -127,7 +127,7 @@ export class EnvironmentSystem {
 
     const envSettings = {
       ...defaultEnvSettings,
-      skybox: skyboxEl?.components["skybox"]
+      skybox: skyboxEl?.components["skybox"]?.sky
     };
 
     if (envSettingsEl) {
@@ -246,7 +246,7 @@ export class EnvironmentSystem {
     } else if (settings.skybox) {
       if (this.prevEnvMapTextureUUID !== settings.skybox.uuid) {
         this.prevEnvMapTextureUUID = settings.skybox.uuid;
-        this.scene.environment = settings.skybox.sky.generateEnvironmentMap(this.renderer);
+        this.scene.environment = settings.skybox.generateEnvironmentMap(this.renderer);
       }
     } else {
       this.scene.environment = null;

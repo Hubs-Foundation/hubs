@@ -22,8 +22,10 @@ const loaderForMediaType = {
   ) => loadImage(world, accessibleUrl, contentType),
   [MediaType.VIDEO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
     loadVideo(world, accessibleUrl),
-  [MediaType.MODEL]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadModel(world, accessibleUrl, true)
+  [MediaType.MODEL]: (
+    world: HubsWorld,
+    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
+  ) => loadModel(world, accessibleUrl, contentType, true)
 };
 
 export const MEDIA_LOADER_FLAGS = {
@@ -60,7 +62,7 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   }
 }
 
-function* animateScale(world: HubsWorld, media: EntityID) {
+export function* animateScale(world: HubsWorld, media: EntityID) {
   const mediaObj = world.eid2obj.get(media)!;
 
   const onAnimate = ([position, scale]: [Vector3, Vector3]) => {
