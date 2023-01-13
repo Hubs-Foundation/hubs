@@ -28,8 +28,8 @@ export interface NetworkSchema {
     writeToShadow: boolean
   ) => boolean;
   deserialize: (world: HubsWorld, eid: EntityID, data: CursorBuffer) => void;
-  serializeForStorage: (eid: EntityID) => StoredComponent;
-  deserializeFromStorage: (eid: EntityID, storedComponent: StoredComponent) => void;
+  serializeForStorage?: (eid: EntityID) => StoredComponent;
+  deserializeFromStorage?: (eid: EntityID, storedComponent: StoredComponent) => void;
 }
 
 export const schemas: Map<Component, NetworkSchema> = new Map();
