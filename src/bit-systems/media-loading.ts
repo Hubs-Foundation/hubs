@@ -62,7 +62,7 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   }
 }
 
-function* animateScale(world: HubsWorld, media: EntityID) {
+export function* animateScale(world: HubsWorld, media: EntityID) {
   const mediaObj = world.eid2obj.get(media)!;
 
   const onAnimate = ([position, scale]: [Vector3, Vector3]) => {

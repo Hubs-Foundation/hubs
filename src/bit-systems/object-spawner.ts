@@ -7,6 +7,7 @@ import { coroutine, nextFrame } from "../utils/coroutine";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
 import { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
+import { animateScale } from "./media-loading";
 
 export enum OBJECT_SPAWNER_FLAGS {
   /** Apply gravity to spawned objects */
@@ -44,6 +45,9 @@ function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
   spawnerObj.visible = false;
   yield sleep(1000);
   spawnerObj.visible = true;
+
+  // TODO we should come up with a nicer way to get at the media that was loaded by a MediaLoader
+  yield* animateScale(world, spawnerObj.children[0]!.eid!);
 }
 
 // TODO type for coroutine
