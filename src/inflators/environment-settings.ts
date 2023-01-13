@@ -19,7 +19,7 @@ export interface EnvironmentSettingsParams {
   fogColor?: Color;
   fogDensity?: number;
   fogFar?: number;
-  fogNear?: 1;
+  fogNear?: number;
 
   enableHDRPipeline?: boolean;
   enableBloom?: boolean;
@@ -53,16 +53,13 @@ export function inflateFog(world: HubsWorld, eid: number, props: FogParams) {
   console.warn(
     "The `fog` component is deprecated. Use the `fogX` properties on the `environment-settings` component instead."
   );
-  addComponent(world, EnvironmentSettings, eid);
-  const map = (EnvironmentSettings as any).map as Map<number, EnvironmentSettingsParams>;
-  const settings = Object.assign(map.get(eid) || {}, {
+  inflateEnvironmentSettings(world, eid, {
     fogType: props.type,
     fogColor: new THREE.Color(props.color),
     fogNear: props.near,
     fogFar: props.far,
     fogDensity: props.density
   });
-  map.set(eid, settings);
 }
 
 export interface BackgroundParams {
@@ -76,10 +73,7 @@ export function inflateBackground(world: HubsWorld, eid: number, props: Backgrou
   console.warn(
     "The `background` component is deprecated. Use the `backgroundColor` on the `environment-settings` component instead."
   );
-  addComponent(world, EnvironmentSettings, eid);
-  const map = (EnvironmentSettings as any).map as Map<number, EnvironmentSettingsParams>;
-  const settings = Object.assign(map.get(eid) || {}, {
+  inflateEnvironmentSettings(world, eid, {
     backgroundColor: new THREE.Color(props.backgroundColor)
   });
-  map.set(eid, settings);
 }

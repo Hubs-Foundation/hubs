@@ -3,7 +3,7 @@ import { HubsWorld } from "../app";
 import { FloatyObject, Held, HeldRemoteRight, Interacted, MediaLoader, ObjectSpawner } from "../bit-components";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 import { sleep } from "../utils/async-utils";
-import { coroutine, nextFrame } from "../utils/coroutine";
+import { coroutine, crNextFrame } from "../utils/coroutine";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
 import { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
@@ -16,7 +16,7 @@ export enum OBJECT_SPAWNER_FLAGS {
 
 function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
-    yield nextFrame();
+    yield crNextFrame();
   }
 }
 
@@ -54,10 +54,10 @@ function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
 type Coroutine = () => IteratorResult<undefined, any>;
 const jobs = new Map<EntityID, Coroutine>();
 
-const interactedSpanersEnterQuery = enterQuery(defineQuery([ObjectSpawner, Interacted]));
+const interactedSpawnersEnterQuery = enterQuery(defineQuery([ObjectSpawner, Interacted]));
 const spawnerExitQuery = exitQuery(defineQuery([ObjectSpawner]));
 export function objectSpawnerSystem(world: HubsWorld) {
-  interactedSpanersEnterQuery(world).forEach(spawner => {
+  interactedSpawnersEnterQuery(world).forEach(spawner => {
     if (!jobs.has(spawner)) jobs.set(spawner, coroutine(spawnObjectJob(world, spawner)));
   });
   spawnerExitQuery(world).forEach(function (spawner) {

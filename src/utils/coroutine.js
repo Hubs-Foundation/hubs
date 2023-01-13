@@ -104,7 +104,7 @@ export function cancelable(iter, signal) {
 }
 
 const nextFramePromise = Promise.resolve();
-export function nextFrame() {
+export function crNextFrame() {
   return nextFramePromise;
 }
 
