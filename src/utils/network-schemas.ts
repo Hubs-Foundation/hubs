@@ -2,11 +2,13 @@ import { Component } from "bitecs";
 import { HubsWorld } from "../app";
 import {
   $isStringType,
+  NetworkedFloatyObject,
   NetworkedMediaFrame,
   NetworkedTransform,
   NetworkedVideo,
   NetworkedWaypoint
 } from "../bit-components";
+import { defineNetworkSchema } from "./define-network-schema";
 import { NetworkedMediaFrameSchema } from "./networked-media-frame-schema";
 import { NetworkedTransformSchema } from "./networked-transform-schema";
 import { NetworkedVideoSchema } from "./networked-video-schema";
@@ -37,6 +39,10 @@ schemas.set(NetworkedMediaFrame, NetworkedMediaFrameSchema);
 schemas.set(NetworkedTransform, NetworkedTransformSchema);
 schemas.set(NetworkedVideo, NetworkedVideoSchema);
 schemas.set(NetworkedWaypoint, NetworkedWaypointSchema);
+schemas.set(NetworkedFloatyObject, {
+  componentName: "floaty-object",
+  ...defineNetworkSchema(NetworkedFloatyObject)
+});
 
 export const networkableComponents = Array.from(schemas.keys());
 

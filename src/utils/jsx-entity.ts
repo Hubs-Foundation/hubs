@@ -32,7 +32,8 @@ import {
   NavMesh,
   SceneRoot,
   NetworkDebug,
-  WaypointPreview
+  WaypointPreview,
+  NetworkedFloatyObject
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -62,6 +63,7 @@ import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { ProjectionMode } from "./projection-mode";
 import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
+import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
 
 preload(
   new Promise(resolve => {
@@ -257,6 +259,7 @@ export interface JSXComponentData extends ComponentData {
   rigidbody?: any;
   physicsShape?: any;
   floatyObject?: any;
+  networkedFloatyObject?: any;
   networkedTransform?: any;
   objectMenu?: {
     pinButtonRef: Ref;
@@ -305,8 +308,9 @@ export interface GLTFComponentData extends ComponentData {
   image?: ImageLoaderParams;
   environmentSettings?: EnvironmentSettingsParams;
   reflectionProbe?: ReflectionProbeParams;
-  navMesh?: boolean;
+  navMesh?: true;
   waypoint?: WaypointParams;
+  spawner: SpawnerParams;
 
   // deprecated
   spawnPoint?: true;
@@ -354,6 +358,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   rigidbody: createDefaultInflator(Rigidbody),
   physicsShape: createDefaultInflator(PhysicsShape),
   floatyObject: createDefaultInflator(FloatyObject),
+  networkedFloatyObject: createDefaultInflator(NetworkedFloatyObject),
   makeKinematicOnRelease: createDefaultInflator(MakeKinematicOnRelease),
   destroyAtExtremeDistance: createDefaultInflator(DestroyAtExtremeDistance),
   networkedTransform: createDefaultInflator(NetworkedTransform),
@@ -391,7 +396,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   fog: inflateFog,
   background: inflateBackground,
   spawnPoint: inflateSpawnpoint,
-  skybox: inflateSkybox
+  skybox: inflateSkybox,
+  spawner: inflateSpawner
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

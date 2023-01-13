@@ -20,7 +20,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
       if (inflatorName === "visible" || inflatorName === "frustum" || inflatorName === "shadow") {
         // These are handled below
       } else if (!gltfInflatorExists(inflatorName)) {
-        console.warn(`Failed to inflate unknown component called ${inflatorName}`);
+        console.warn(`Failed to inflate unknown component called ${inflatorName}`, components[name]);
       } else {
         gltfInflators[inflatorName](world, eid, components[name]);
       }
