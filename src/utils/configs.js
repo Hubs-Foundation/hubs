@@ -1,5 +1,5 @@
 import appLogo from "../assets/images/ShadowByEclipseRealityLogo.png";
-import appLogoDark from "../assets/images/ShadowByEclipseRealityLogo.png";
+import appLogoDark from "../assets/images/ShadowByEclipseRealityLogoReversed.png";
 import companyLogo from "../assets/images/company-logo.png";
 import homeHeroBackground from "../assets/images/BannerView.png";
 import sceneEditorLogo from "../assets/images/editor-logo.png";
