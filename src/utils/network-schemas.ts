@@ -40,7 +40,7 @@ schemas.set(NetworkedTransform, NetworkedTransformSchema);
 schemas.set(NetworkedVideo, NetworkedVideoSchema);
 schemas.set(NetworkedWaypoint, NetworkedWaypointSchema);
 schemas.set(NetworkedFloatyObject, {
-  componentName: "floaty-object",
+  componentName: "networked-floaty-object",
   ...defineNetworkSchema(NetworkedFloatyObject)
 });
 
