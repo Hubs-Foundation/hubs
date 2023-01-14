@@ -12,6 +12,7 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { loadImage } from "../utils/load-image";
 import { loadModel } from "../utils/load-model";
 import { loadVideo } from "../utils/load-video";
+import { loadPDF } from "../utils/load-pdf";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
 
@@ -25,7 +26,8 @@ const loaderForMediaType = {
   [MediaType.MODEL]: (
     world: HubsWorld,
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
-  ) => loadModel(world, accessibleUrl, contentType, true)
+  ) => loadModel(world, accessibleUrl, contentType, true),
+  [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl)
 };
 
 export const MEDIA_LOADER_FLAGS = {

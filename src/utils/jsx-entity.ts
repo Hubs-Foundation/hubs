@@ -4,6 +4,7 @@ import {
   $isStringType,
   CameraTool,
   ObjectMenu,
+  PDFMenu,
   CursorRaycastable,
   DestroyAtExtremeDistance,
   FloatyObject,
@@ -43,6 +44,7 @@ import { inflateMediaFrame } from "../inflators/media-frame";
 import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
 import { inflateVideo } from "../inflators/video";
+import { inflatePDFLoader, PDFLoaderParams } from "../inflators/pdf-loader";
 import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader";
 import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
 import { inflateModel, ModelParams } from "../inflators/model";
@@ -70,6 +72,7 @@ import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
 import { inflateVideoTextureTarget, VideoTextureTargetParams } from "../inflators/video-texture-target";
 import { inflateUVScroll, UVScrollParams } from "../inflators/uv-scroll";
 import { SimpleWaterParams, inflateSimpleWater } from "../inflators/simple-water";
+import { inflatePDF, PDFParams } from "../inflators/pdf";
 
 preload(
   new Promise(resolve => {
@@ -290,6 +293,11 @@ export interface JSXComponentData extends ComponentData {
     mirrorButtonRef: Ref;
     scaleButtonRef: Ref;
   };
+  pdfMenu?: {
+    prevButtonRef: Ref;
+    nextButtonRef: Ref;
+    pageLabelRef: Ref;
+  };
   cameraTool?: {
     snapMenuRef: Ref;
     nextButtonRef: Ref;
@@ -314,9 +322,11 @@ export interface JSXComponentData extends ComponentData {
   model?: ModelParams;
   networkDebug?: boolean;
   waypointPreview?: boolean;
+  pdf?: PDFParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
+  pdf?: PDFLoaderParams;
   video?: VideoLoaderParams;
   image?: ImageLoaderParams;
   environmentSettings?: EnvironmentSettingsParams;
@@ -382,6 +392,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   objectMenu: createDefaultInflator(ObjectMenu),
+  pdfMenu: createDefaultInflator(PDFMenu),
   cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   animationMixer: createDefaultInflator(AnimationMixer),
   networkedVideo: createDefaultInflator(NetworkedVideo),
@@ -391,6 +402,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   sceneLoader: createDefaultInflator(SceneLoader),
   networkDebug: createDefaultInflator(NetworkDebug),
   waypointPreview: createDefaultInflator(WaypointPreview),
+  pdf: inflatePDF,
   mediaLoader: inflateMediaLoader,
 
   // inflators that create Object3Ds
@@ -405,6 +417,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
   ...commonInflators,
+  pdf: inflatePDFLoader,
   video: inflateVideoLoader,
   image: inflateImageLoader,
   reflectionProbe: inflateReflectionProbe,

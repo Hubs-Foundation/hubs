@@ -137,6 +137,12 @@ export const MediaImage = defineComponent({
 });
 MediaImage.cacheKey[$isStringType] = true;
 
+export const NetworkedPDF = defineComponent({
+  page: Types.ui8
+});
+export const MediaPDF = defineComponent();
+MediaPDF.map = new Map();
+
 export const MediaVideo = defineComponent({
   autoPlay: Types.ui8
 });
@@ -177,6 +183,14 @@ export const ObjectMenu = defineComponent({
   mirrorButtonRef: Types.eid,
   scaleButtonRef: Types.eid,
   targetRef: Types.eid
+});
+// TODO: Store this data elsewhere, since only one or two will ever exist.
+export const PDFMenu = defineComponent({
+  prevButtonRef: Types.eid,
+  nextButtonRef: Types.eid,
+  pageLabelRef: Types.eid,
+  targetRef: Types.eid,
+  clearTargetTimer: Types.f64
 });
 export const ObjectMenuTarget = defineComponent();
 export const NetworkDebug = defineComponent();

@@ -51,6 +51,7 @@ import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
 import { objectMenuSystem } from "../bit-systems/object-menu";
+import { pdfMenuSystem } from "../bit-systems/pdf-menu-system";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
 import type { HubsSystems } from "aframe";
 import { Camera, Scene, WebGLRenderer } from "three";
@@ -64,6 +65,7 @@ import { billboardSystem } from "../bit-systems/billboard";
 import { videoTextureSystem } from "../bit-systems/video-texture";
 import { uvScrollSystem } from "../bit-systems/uv-scroll";
 import { simpleWaterSystem } from "../bit-systems/simple-water";
+import { pdfSystem } from "../bit-systems/pdf-system";
 
 
 declare global {
@@ -234,6 +236,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   objectMenuSystem(world, sceneEl.is("frozen"), APP.hubChannel!);
   videoMenuSystem(world, aframeSystems.userinput);
   videoSystem(world, hubsSystems.audioSystem);
+  pdfMenuSystem(world, sceneEl.is("frozen"));
+  pdfSystem(world);
   mediaFramesSystem(world);
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   hubsSystems.gainSystem.tick();
