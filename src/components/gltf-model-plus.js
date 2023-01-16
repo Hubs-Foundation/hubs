@@ -928,13 +928,6 @@ AFRAME.registerComponent("gltf-model-plus", {
     try {
       if (src === this.lastSrc) return;
 
-      var readableName;
-      if (src.includes("|")) {
-        const srcWithName = src.split("|");
-        src = srcWithName[0];
-        readableName = srcWithName[1];
-      }
-
       const lastSrc = this.lastSrc;
       this.lastSrc = src;
 
