@@ -33,7 +33,8 @@ import {
   SceneRoot,
   NetworkDebug,
   WaypointPreview,
-  NetworkedFloatyObject
+  NetworkedFloatyObject,
+  Billboard
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -301,6 +302,7 @@ export interface JSXComponentData extends ComponentData {
   model?: ModelParams;
   networkDebug?: boolean;
   waypointPreview?: boolean;
+  billboard?: { onlyY: boolean };
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -317,6 +319,7 @@ export interface GLTFComponentData extends ComponentData {
   skybox: SkyboxParams;
   fog: FogParams;
   background: BackgroundParams;
+  billboard?: { onlyY: boolean };
 }
 
 declare global {
@@ -333,6 +336,8 @@ declare global {
     }
   }
 }
+
+export const billboardInflator = createDefaultInflator(Billboard);
 
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   grabbable: inflateGrabbable,
@@ -374,6 +379,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   networkDebug: createDefaultInflator(NetworkDebug),
   waypointPreview: createDefaultInflator(WaypointPreview),
   mediaLoader: inflateMediaLoader,
+  billboard: billboardInflator,
 
   // inflators that create Object3Ds
   mediaFrame: inflateMediaFrame,
@@ -397,7 +403,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   background: inflateBackground,
   spawnPoint: inflateSpawnpoint,
   skybox: inflateSkybox,
-  spawner: inflateSpawner
+  spawner: inflateSpawner,
+  billboard: billboardInflator
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
