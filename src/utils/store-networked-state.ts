@@ -1,6 +1,8 @@
+import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { localClientID } from "../bit-systems/networking";
+import { selfWithDescendants } from "./bit-utils";
 import HubChannel from "./hub-channel";
 import { messageFor, messageForStorage } from "./message-for";
 import type { EntityID, Message } from "./networking-types";
@@ -15,7 +17,12 @@ export async function tryPin(world: HubsWorld, eid: EntityID, hubChannel: HubCha
   takeOwnership(world, eid);
   Networked.creator[eid] = APP.getSid("reticulum");
   const nid = APP.getString(Networked.id[eid])!;
-  const storableMessage = messageForStorage(world, [eid], [eid], []);
+  const storableMessage = messageForStorage(
+    world,
+    [eid],
+    selfWithDescendants(world, eid).filter(eid => hasComponent(world, Networked, eid)),
+    []
+  );
   const fileId = null;
   const fileAccessToken = null;
   const promotionToken = null;
