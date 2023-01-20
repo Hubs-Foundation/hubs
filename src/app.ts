@@ -13,7 +13,6 @@ import { EffectComposer, EffectPass } from "postprocessing";
 import {
   Audio,
   AudioListener,
-  Camera,
   Object3D,
   PerspectiveCamera,
   PositionalAudio,
@@ -94,7 +93,6 @@ export class App {
   sid2str: Map<number, string | null>;
   nextSid = 1;
 
-  camera: Camera;
   audioListener: AudioListener;
 
   dialog = new DialogAdapter();
@@ -196,7 +194,6 @@ export class App {
     const audioListener = new AudioListener();
     this.audioListener = audioListener;
     camera.add(audioListener);
-    this.camera = camera;
 
     this.world.time = {
       delta: 0,
