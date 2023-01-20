@@ -84,11 +84,6 @@ declare module "aframe" {
     mesh?: Mesh;
   }
 
-  interface FrameSchedulerSystem extends ASystem {
-    schedule(func: Function, queue: string);
-    unschedule(func: Function, queue: string);
-  }
-
   interface AScene extends AElement {
     object3D: Scene;
     renderStarted: boolean;
@@ -105,7 +100,6 @@ declare module "aframe" {
       /** @deprecated see bit-interaction-system */
       interaction: InteractionSystem;
       nav: NavSystem;
-      "frame-scheduler": FrameSchedulerSystem;
     };
     emit(string, any): void;
     addState(string): void;

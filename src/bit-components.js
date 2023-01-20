@@ -195,5 +195,5 @@ export const ObjectSpawner = defineComponent({
   flags: Types.ui8
 });
 export const Billboard = defineComponent({
-  flags: Types.ui8
+  onlyY: Types.ui8
 });

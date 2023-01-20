@@ -185,7 +185,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   // We run this earlier in the frame so things have a chance to override properties run by animations
   hubsSystems.animationMixerSystem.tick(dt);
 
-  billboardSystem(world, aframeSystems["frame-scheduler"]);
+  billboardSystem(world);
   waypointSystem(world, hubsSystems.characterController, sceneEl.is("frozen"));
   hubsSystems.characterController.tick(t, dt);
   hubsSystems.cursorTogglingSystem.tick(aframeSystems.interaction, aframeSystems.userinput, hubsSystems.el);

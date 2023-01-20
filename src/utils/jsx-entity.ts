@@ -33,7 +33,8 @@ import {
   SceneRoot,
   NetworkDebug,
   WaypointPreview,
-  NetworkedFloatyObject
+  NetworkedFloatyObject,
+  Billboard
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -64,7 +65,6 @@ import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/di
 import { ProjectionMode } from "./projection-mode";
 import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
 import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
-import { BillboardParams, inflateBillboard } from "../inflators/billboard";
 
 preload(
   new Promise(resolve => {
@@ -210,7 +210,7 @@ interface InflatorFn {
 export interface ComponentData {
   directionalLight?: DirectionalLightParams;
   grabbable?: GrabbableParams;
-  billboard?: BillboardParams;
+  billboard?: { onlyY: boolean };
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -341,7 +341,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
 
   // inflators that create Object3Ds
   directionalLight: inflateDirectionalLight,
-  billboard: inflateBillboard
+  billboard: createDefaultInflator(Billboard)
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
