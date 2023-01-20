@@ -41,8 +41,8 @@ const updateIsInView = (world: HubsWorld, billboard: number) => {
   };
 
   return () => {
-    const object3D = world.eid2obj.get(billboard);
-    if (!object3D || !object3D.visible) {
+    const object3D = world.eid2obj.get(billboard)!;
+    if (!object3D.visible) {
       inView.set(billboard, false);
       return;
     }
@@ -71,9 +71,8 @@ export function billboardSystem(world: HubsWorld, frameScheduler: FrameScheduler
   billboardQuery(world).forEach(billboard => {
     const isInView = inView.get(billboard);
     if (isInView || !isMobileVR) {
-      const object3D = world.eid2obj.get(billboard);
+      const object3D = world.eid2obj.get(billboard)!;
       const onlyY = Billboard.onlyY[billboard];
-      if (!object3D || !object3D.visible) return;
 
       const camera = APP.camera;
       if (camera) {
