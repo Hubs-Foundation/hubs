@@ -1,5 +1,6 @@
 import { FrameSchedulerSystem } from "aframe";
 import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { Box3, Frustum, Matrix4, Vector3, Mesh, Object3D, Camera } from "three";
 import { HubsWorld } from "../app";
 import { Billboard } from "../bit-components";
 
@@ -9,17 +10,17 @@ const billboardExitQuery = exitQuery(billboardQuery);
 
 const isMobileVR = AFRAME.utils.device.isMobileVR();
 
-const targetPos = new THREE.Vector3();
-const worldPos = new THREE.Vector3();
+const targetPos = new Vector3();
+const worldPos = new Vector3();
 const inView = new Map();
 
 const updateIsInView = (world: HubsWorld, billboard: number) => {
-  const frustum = new THREE.Frustum();
-  const frustumMatrix = new THREE.Matrix4();
-  const box = new THREE.Box3();
-  const boxTemp = new THREE.Box3();
+  const frustum = new Frustum();
+  const frustumMatrix = new Matrix4();
+  const box = new Box3();
+  const boxTemp = new Box3();
 
-  const expandBox = (child: THREE.Mesh) => {
+  const expandBox = (child: Mesh) => {
     if (child.geometry && child.geometry.boundingBox) {
       child.updateMatrices();
       child.geometry.computeBoundingBox();
@@ -29,7 +30,7 @@ const updateIsInView = (world: HubsWorld, billboard: number) => {
     }
   };
 
-  const isInViewOfCamera = (object3D: THREE.Object3D, camera: THREE.Camera) => {
+  const isInViewOfCamera = (object3D: Object3D, camera: Camera) => {
     frustumMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
     frustum.setFromProjectionMatrix(frustumMatrix);
     box.makeEmpty();
