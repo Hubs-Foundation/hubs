@@ -1,4 +1,3 @@
-import { UserInputSystem } from "aframe";
 import { defineQuery, hasComponent } from "bitecs";
 import type { HubsWorld } from "../app";
 import { HoveredRemoteRight, Interacted, ObjectMenu, ObjectMenuTarget } from "../bit-components";
@@ -18,8 +17,7 @@ function objectMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boole
     return 0;
   }
 
-  const hovered = hoveredQuery(world);
-  const target = hovered.find(eid => findAncestorWithComponent(world, ObjectMenuTarget, eid));
+  const target = hoveredQuery(world).map(eid => findAncestorWithComponent(world, ObjectMenuTarget, eid))[0] || 0;
   return target || ObjectMenu.targetRef[menu];
 }
 
@@ -97,12 +95,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
 }
 
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
-export function objectMenuSystem(
-  world: HubsWorld,
-  sceneIsFrozen: boolean,
-  userinput: UserInputSystem,
-  hubChannel: HubChannel
-) {
+export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, hubChannel: HubChannel) {
   const menu = anyEntityWith(world, ObjectMenu) as EntityID | null;
   if (!menu) {
     return; // TODO: Fix initialization so that this is assigned via preload.

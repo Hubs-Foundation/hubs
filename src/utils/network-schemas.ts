@@ -58,7 +58,7 @@ export function write(prop: any, eid: EntityID, value: any) {
   if (ArrayBuffer.isView(prop[eid])) {
     prop[eid].set(value);
   } else {
-    prop[$isStringType] ? APP.getString(value) : value;
+    prop[eid] = prop[$isStringType] ? APP.getString(value) : value;
   }
 }
 
