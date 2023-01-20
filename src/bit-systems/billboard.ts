@@ -1,8 +1,9 @@
 import { FrameSchedulerSystem } from "aframe";
 import { defineQuery, enterQuery, exitQuery } from "bitecs";
-import { Box3, Frustum, Matrix4, Vector3, Mesh, Object3D, Camera } from "three";
+import { Box3, Frustum, Matrix4, Vector3, Object3D, Camera, Mesh } from "three";
 import { HubsWorld } from "../app";
 import { Billboard } from "../bit-components";
+import { BillboardFlags } from "../inflators/billboard";
 
 const billboardQuery = defineQuery([Billboard]);
 const billboardEnterQuery = enterQuery(billboardQuery);
@@ -12,7 +13,6 @@ const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 const targetPos = new Vector3();
 const worldPos = new Vector3();
-const inView = new Map();
 
 const updateIsInView = (world: HubsWorld, billboard: number) => {
   const frustum = new Frustum();
@@ -21,10 +21,10 @@ const updateIsInView = (world: HubsWorld, billboard: number) => {
   const boxTemp = new Box3();
 
   const expandBox = (child: Mesh) => {
-    if (child.geometry && child.geometry.boundingBox) {
+    if (child.geometry) {
       child.updateMatrices();
       child.geometry.computeBoundingBox();
-      boxTemp.copy(child.geometry.boundingBox).applyMatrix4(child.matrixWorld);
+      boxTemp.copy(child.geometry.boundingBox!).applyMatrix4(child.matrixWorld);
       box.expandByPoint(boxTemp.min);
       box.expandByPoint(boxTemp.max);
     }
@@ -44,14 +44,18 @@ const updateIsInView = (world: HubsWorld, billboard: number) => {
   return () => {
     const object3D = world.eid2obj.get(billboard)!;
     if (!object3D.visible) {
-      inView.set(billboard, false);
+      Billboard.flags[billboard] &= ~BillboardFlags.IN_VIEW;
       return;
     }
 
     if (!APP.camera) return;
 
     const inVR = APP.scene?.is("vr-mode");
-    inView.set(billboard, inVR ? true : isInViewOfCamera(object3D, APP.camera));
+    if (inVR || isInViewOfCamera(object3D, APP.camera)) {
+      Billboard.flags[billboard] |= BillboardFlags.IN_VIEW;
+    } else {
+      Billboard.flags[billboard] &= ~BillboardFlags.IN_VIEW;
+    }
   };
 };
 
@@ -72,17 +76,16 @@ export function billboardSystem(world: HubsWorld, frameScheduler: FrameScheduler
     }
   });
   billboardQuery(world).forEach(billboard => {
-    const isInView = inView.get(billboard);
-    if (isInView || !isMobileVR) {
+    const flags = Billboard.flags[billboard];
+    if (flags & BillboardFlags.IN_VIEW || !isMobileVR) {
       const object3D = world.eid2obj.get(billboard)!;
-      const onlyY = Billboard.onlyY[billboard];
 
       const camera = APP.camera;
       if (camera) {
         // Set the camera world position as the target.
         targetPos.setFromMatrixPosition(camera.matrixWorld);
 
-        if (onlyY) {
+        if (flags & BillboardFlags.ONLY_Y) {
           object3D.getWorldPosition(worldPos);
           targetPos.y = worldPos.y;
         }

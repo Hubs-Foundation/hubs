@@ -1,4 +1,4 @@
-import { addComponent, addEntity, Component, ComponentType, hasComponent } from "bitecs";
+import { addComponent, addEntity, Component, hasComponent } from "bitecs";
 import { preloadFont } from "troika-three-text";
 import {
   $isStringType,
@@ -33,8 +33,7 @@ import {
   SceneRoot,
   NetworkDebug,
   WaypointPreview,
-  NetworkedFloatyObject,
-  Billboard
+  NetworkedFloatyObject
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -65,6 +64,7 @@ import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/di
 import { ProjectionMode } from "./projection-mode";
 import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
 import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
+import { BillboardParams, inflateBillboard } from "../inflators/billboard";
 
 preload(
   new Promise(resolve => {
@@ -210,6 +210,7 @@ interface InflatorFn {
 export interface ComponentData {
   directionalLight?: DirectionalLightParams;
   grabbable?: GrabbableParams;
+  billboard?: BillboardParams;
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -302,7 +303,6 @@ export interface JSXComponentData extends ComponentData {
   model?: ModelParams;
   networkDebug?: boolean;
   waypointPreview?: boolean;
-  billboard?: { onlyY: boolean };
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -319,7 +319,6 @@ export interface GLTFComponentData extends ComponentData {
   skybox: SkyboxParams;
   fog: FogParams;
   background: BackgroundParams;
-  billboard?: { onlyY: boolean };
 }
 
 declare global {
@@ -337,13 +336,12 @@ declare global {
   }
 }
 
-export const billboardInflator = createDefaultInflator(Billboard);
-
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   grabbable: inflateGrabbable,
 
   // inflators that create Object3Ds
-  directionalLight: inflateDirectionalLight
+  directionalLight: inflateDirectionalLight,
+  billboard: inflateBillboard
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
@@ -379,7 +377,6 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   networkDebug: createDefaultInflator(NetworkDebug),
   waypointPreview: createDefaultInflator(WaypointPreview),
   mediaLoader: inflateMediaLoader,
-  billboard: billboardInflator,
 
   // inflators that create Object3Ds
   mediaFrame: inflateMediaFrame,
@@ -403,8 +400,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   background: inflateBackground,
   spawnPoint: inflateSpawnpoint,
   skybox: inflateSkybox,
-  spawner: inflateSpawner,
-  billboard: billboardInflator
+  spawner: inflateSpawner
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

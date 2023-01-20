@@ -5,9 +5,10 @@ import { TYPE, SHAPE, FIT } from "three-ammo/constants";
 import { COLLISION_LAYERS } from "./constants";
 import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
-import { billboardInflator, renderAsEntity } from "./utils/jsx-entity";
+import { renderAsEntity } from "./utils/jsx-entity";
 import { Networked } from "./bit-components";
 import { addComponent } from "bitecs";
+import { inflateBillboard } from "./inflators/billboard";
 
 const inflatorWrapper = inflator => (el, _componentName, componentData) =>
   inflator(APP.world, el.object3D.eid, componentData);
@@ -60,7 +61,7 @@ AFRAME.GLTFModelPlus.registerComponent("directional-light", "directional-light")
 AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
 AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
 AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
-AFRAME.GLTFModelPlus.registerComponent("billboard", "billboard", inflatorWrapper(billboardInflator));
+AFRAME.GLTFModelPlus.registerComponent("billboard", "billboard", inflatorWrapper(inflateBillboard));
 AFRAME.GLTFModelPlus.registerComponent("simple-water", "simple-water");
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
