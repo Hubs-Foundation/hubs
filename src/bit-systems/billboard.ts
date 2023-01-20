@@ -56,6 +56,8 @@ const updateIsInView = (world: HubsWorld, billboard: number) => {
 
 let updateIsInViewCallback: (world: HubsWorld, billboard: number) => void;
 
+// Billboard component that only updates visible objects and only those in the camera view on mobile VR.
+// TODO billboarding assumes a single camera viewpoint but with video-texture-source, mirrors, and camera tools this is no longer valid
 export function billboardSystem(world: HubsWorld, frameScheduler: FrameSchedulerSystem) {
   billboardEnterQuery(world).forEach(billboard => {
     if (isMobileVR) {
