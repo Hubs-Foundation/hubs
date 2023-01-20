@@ -17,8 +17,7 @@ function objectMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boole
     return 0;
   }
 
-  const hovered = hoveredQuery(world);
-  const target = hovered.find(eid => findAncestorWithComponent(world, ObjectMenuTarget, eid));
+  const target = hoveredQuery(world).map(eid => findAncestorWithComponent(world, ObjectMenuTarget, eid))[0] || 0;
   return target || ObjectMenu.targetRef[menu];
 }
 
