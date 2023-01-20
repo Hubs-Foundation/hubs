@@ -1,5 +1,7 @@
 import { defineQuery } from "bitecs";
+import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
+import { findAncestorEntity } from "../utils/bit-utils";
 import type { ClientID, CreateMessageData, EntityID, Message, StringID } from "../utils/networking-types";
 export let localClientID: ClientID | null = null;
 export function setLocalClientID(clientID: ClientID) {
@@ -17,6 +19,12 @@ export function isNetworkInstantiated(eid: EntityID) {
 
 export function isPinned(eid: EntityID) {
   return Networked.creator[eid] === APP.getSid("reticulum");
+}
+
+export function hasSavedEntityState(world: HubsWorld, eid: EntityID) {
+  return !!findAncestorEntity(world, eid, ancestor => {
+    return isNetworkInstantiated(ancestor) && isPinned(ancestor);
+  });
 }
 
 export function isCreatedByMe(eid: EntityID) {

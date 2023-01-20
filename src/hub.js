@@ -258,9 +258,9 @@ import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
-import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
+import { listenForNetworkMessages, loadSavedEntityStates } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
-import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
+import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -597,7 +597,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     "didConnectToNetworkedScene",
     () => {
       if (qsTruthy("newLoader")) {
-        loadStoredRoomData(hub.hub_id);
+        loadSavedEntityStates(APP.hubChannel);
         loadLegacyRoomObjects(hub.hub_id);
       } else {
         // Append objects once we are in the NAF room since ownership may be taken.

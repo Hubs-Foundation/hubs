@@ -1,12 +1,14 @@
-import { defineQuery, entityExists, hasComponent } from "bitecs";
+import { addComponent, defineQuery, entityExists, hasComponent } from "bitecs";
 import { Text } from "troika-three-text";
 import type { HubsWorld } from "../app";
-import { HoveredRemoteRight, Interacted, MediaPDF, NetworkedPDF, PDFMenu } from "../bit-components";
+import { EntityStateDirty, HoveredRemoteRight, Interacted, MediaPDF, NetworkedPDF, PDFMenu } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
+import { saveEntityState } from "../utils/hub-channel-utils";
 import type { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
 import { setMatrixWorld } from "../utils/three-utils";
 import { PDFResourcesMap } from "./pdf-system";
+import { hasSavedEntityState } from "./networking";
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);

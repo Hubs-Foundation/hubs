@@ -1,7 +1,7 @@
 import { localClientID, pendingJoins, pendingMessages, pendingParts } from "../bit-systems/networking";
-import { isStorableMessage } from "./load-room-objects";
-import type { ClientID, Message, NetworkID } from "./networking-types";
-import { StorableMessage } from "./store-networked-state";
+import HubChannel from "./hub-channel";
+import { listEntityStates, parseStorableMessages } from "./hub-channel-utils";
+import type { ClientID, Message, StorableMessage } from "./networking-types";
 
 type Emitter = {
   on: (event: string, callback: (a: any) => any) => number;
@@ -16,7 +16,9 @@ export function listenForNetworkMessages(channel: PhoenixChannel, presenceEventE
   presenceEventEmitter.on("hub:leave", onLeave);
   channel.on("naf", onNaf);
   channel.on("nafr", onNafr);
-  channel.on("pin", onPin);
+  channel.on("entity_state_saved", onStorableMessage);
+  channel.on("entity_state_deleted", onStorableMessage);
+  channel.on("entity_state_hierarchy_deleted", onStorableMessage);
 }
 
 function onJoin({ key }: { key: ClientID }) {
@@ -58,14 +60,16 @@ function onNafr(message: NafrMessage) {
   onNaf(message.parsed!);
 }
 
-type PinMessage = {
-  gltf_node: StorableMessage;
-  object_id: NetworkID;
-  pinned_by: ClientID;
-};
-function onPin(pinMessage: PinMessage) {
-  if (isStorableMessage(pinMessage.gltf_node)) {
-    pinMessage.gltf_node.fromClientId = "reticulum";
-    pendingMessages.push(pinMessage.gltf_node);
+function onStorableMessage(message: StorableMessage) {
+  message.fromClientId = "reticulum";
+  pendingMessages.push(message);
+}
+
+export async function loadSavedEntityStates(hubChannel: HubChannel) {
+  if (!localClientID) {
+    throw new Error("Cannot load saved entity states without a local client ID.");
   }
+  const list = await listEntityStates(hubChannel);
+  const messages = parseStorableMessages(list);
+  messages.forEach(onStorableMessage);
 }

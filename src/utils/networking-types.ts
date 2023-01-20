@@ -35,3 +35,34 @@ export type Message = {
   updates: UpdateMessage[];
   deletes: DeleteMessage[];
 };
+export interface StorableMessage extends Message {
+  version: 1;
+}
+
+export type FileInfo = {
+  file_id: string;
+  file_access_token: string;
+  promotion_token: string;
+};
+
+export type SaveEntityStatePayload = {
+  root_nid: NetworkID;
+  nid: NetworkID;
+  message: StorableMessage;
+  file?: FileInfo;
+};
+
+export type DeleteEntityStatePayload = {
+  nid: NetworkID;
+  message: StorableMessage;
+  file_id?: string;
+};
+
+export type EntityState = {
+  nid: NetworkID;
+  message: StorableMessage; // Parse this to a StorableMessage
+};
+
+export type EntityStateList = {
+  data: EntityState[];
+};

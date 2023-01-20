@@ -1,10 +1,10 @@
-import { defineQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, hasComponent, removeComponent } from "bitecs";
 import type { HubsWorld } from "../app";
-import { HoveredRemoteRight, Interacted, ObjectMenu, ObjectMenuTarget } from "../bit-components";
+import { HoveredRemoteRight, Interacted, ObjectMenu, ObjectMenuTarget, PinCooldown } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import HubChannel from "../utils/hub-channel";
+import { saveEntityStateHierarchy, deleteEntityStateHierarchy, pinCooldownMS } from "../utils/hub-channel-utils";
 import type { EntityID } from "../utils/networking-types";
-import { tryPin, tryUnpin } from "../utils/store-networked-state";
 import { setMatrixWorld } from "../utils/three-utils";
 import { isPinned } from "./networking";
 
@@ -33,9 +33,11 @@ function moveToTarget(world: HubsWorld, menu: EntityID) {
 
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
-    tryPin(world, ObjectMenu.targetRef[menu], hubChannel);
+    saveEntityStateHierarchy(hubChannel, world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.unpinButtonRef[menu])) {
-    tryUnpin(world, ObjectMenu.targetRef[menu], hubChannel);
+    addComponent(world, PinCooldown, ObjectMenu.targetRef[menu]);
+    PinCooldown.timer[ObjectMenu.targetRef[menu]] = world.time.elapsed + pinCooldownMS;
+    deleteEntityStateHierarchy(hubChannel, world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.cameraFocusButtonRef[menu])) {
     console.log("Clicked focus");
   } else if (clicked(world, ObjectMenu.cameraTrackButtonRef[menu])) {
@@ -70,7 +72,8 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && !isPinned(target);
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
+    visible && !isPinned(target) && !hasComponent(world, PinCooldown, target);
   world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned(target);
 
   [
@@ -94,12 +97,10 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   });
 }
 
+const pinCooldownQuery = defineQuery([PinCooldown]);
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
 export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, hubChannel: HubChannel) {
-  const menu = anyEntityWith(world, ObjectMenu) as EntityID | null;
-  if (!menu) {
-    return; // TODO: Fix initialization so that this is assigned via preload.
-  }
+  const menu = anyEntityWith(world, ObjectMenu)!;
 
   ObjectMenu.targetRef[menu] = objectMenuTarget(world, menu, sceneIsFrozen);
   if (ObjectMenu.targetRef[menu]) {
@@ -107,4 +108,9 @@ export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, hubCh
     handleClicks(world, menu, hubChannel);
   }
   updateVisibility(world, menu, sceneIsFrozen);
+
+  const now = world.time.elapsed;
+  pinCooldownQuery(world).forEach(function (eid) {
+    if (PinCooldown.timer[eid] < now) removeComponent(world, PinCooldown, eid);
+  });
 }

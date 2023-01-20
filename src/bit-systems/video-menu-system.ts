@@ -5,6 +5,7 @@ import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
 import {
   CursorRaycastable,
+  EntityStateDirty,
   Held,
   HeldRemoteRight,
   HoveredRemoteRight,
@@ -85,6 +86,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     if (togglePlayVideo) {
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
+        addComponent(world, EntityStateDirty, videoEid);
       }
 
       const playIndicatorObj = world.eid2obj.get(VideoMenu.playIndicatorRef[eid])!;
@@ -122,6 +124,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
       }
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
+        addComponent(world, EntityStateDirty, videoEid);
       }
     }
     headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -sliderHalfWidth, sliderHalfWidth);

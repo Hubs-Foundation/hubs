@@ -12,9 +12,9 @@ import type {
   EntityID,
   Message,
   NetworkID,
+  StorableMessage,
   StorableUpdateMessage
 } from "./networking-types";
-import { StorableMessage } from "./store-networked-state";
 
 const hasNetworkedComponentChanged = (() => {
   const serialize = defineNetworkSchemaForProps([
@@ -133,11 +133,7 @@ export function messageForStorage(world: HubsWorld, created: EntityID[], updated
     message.deletes.push(APP.getString(nid)!);
   });
 
-  if (message.creates.length || message.updates.length || message.deletes.length) {
-    return message;
-  }
-
-  return null;
+  return message;
 }
 
 export interface LegacyRoomObject {
