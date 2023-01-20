@@ -20,7 +20,8 @@ function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
     recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: true
+    isObjectMenuTarget: true,
+    sphericalProjection: false
   });
 
   if (ObjectSpawner.flags[spawner] & OBJECT_SPAWNER_FLAGS.APPLY_GRAVITY) {

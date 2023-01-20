@@ -6,10 +6,11 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { HubsWorld } from "../app";
 import { Texture } from "three";
 import { AlphaMode } from "./create-image-mesh";
+import { MEDIA_LOADER_FLAGS } from "../bit-systems/media-loading";
 
 // TODO AlphaMode is written in JS and should be a ts enum
 type AlphaModeType = typeof AlphaMode.Opaque | typeof AlphaMode.Mask | typeof AlphaMode.Blend;
-export function* loadImage(world: HubsWorld, url: string, contentType: string) {
+export function* loadImage(world: HubsWorld, flags: number, url: string, contentType: string) {
   const { texture, ratio, cacheKey }: { texture: Texture; ratio: number; cacheKey: string } =
     yield loadTextureCancellable(url, 1, contentType);
 
@@ -22,6 +23,8 @@ export function* loadImage(world: HubsWorld, url: string, contentType: string) {
   } else if (contentType === "image/jpeg") {
     alphaMode = AlphaMode.Opaque;
   }
+  const projection =
+    flags & MEDIA_LOADER_FLAGS.SPHERICAL_PROJECTION ? ProjectionMode.SPHERE_EQUIRECTANGULAR : ProjectionMode.FLAT;
 
   return renderAsEntity(
     world,
@@ -30,7 +33,7 @@ export function* loadImage(world: HubsWorld, url: string, contentType: string) {
       image={{
         texture,
         ratio,
-        projection: ProjectionMode.FLAT,
+        projection,
         alphaMode,
         cacheKey
       }}

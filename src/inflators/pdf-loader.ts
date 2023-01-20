@@ -9,7 +9,8 @@ export function inflatePDFLoader(world: HubsWorld, eid: number, params: PDFLoade
     recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: false
+    isObjectMenuTarget: false,
+    sphericalProjection: false
   });
 
   // TODO Should the PDF be controlled by users? (Should it be a PDFMenuTarget?)

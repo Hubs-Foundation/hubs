@@ -143,7 +143,8 @@ export default class MessageDispatch extends EventTarget {
             resize: true,
             recenter: true,
             animateLoad: true,
-            isObjectMenuTarget: true
+            isObjectMenuTarget: true,
+            sphericalProjection: false
           });
           const obj = APP.world.eid2obj.get(eid);
           obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));

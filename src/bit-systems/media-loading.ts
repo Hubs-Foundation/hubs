@@ -24,24 +24,22 @@ export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
 }
 
 const loaderForMediaType = {
-  [MediaType.IMAGE]: (
-    world: HubsWorld,
-    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
-  ) => loadImage(world, accessibleUrl, contentType),
-  [MediaType.VIDEO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadVideo(world, accessibleUrl),
-  [MediaType.MODEL]: (
-    world: HubsWorld,
-    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
-  ) => loadModel(world, accessibleUrl, contentType, true),
-  [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl)
+  [MediaType.IMAGE]: (world: HubsWorld, flags: number, { accessibleUrl, contentType }: MediaInfo) =>
+    loadImage(world, flags, accessibleUrl, contentType),
+  [MediaType.VIDEO]: (world: HubsWorld, flags: number, { accessibleUrl }: MediaInfo) =>
+    loadVideo(world, flags, accessibleUrl),
+  [MediaType.MODEL]: (world: HubsWorld, flags: number, { accessibleUrl, contentType }: MediaInfo) =>
+    loadModel(world, flags, accessibleUrl, contentType, true),
+  [MediaType.PDF]: (world: HubsWorld, flags: number, { accessibleUrl }: MediaInfo) =>
+    loadPDF(world, flags, accessibleUrl)
 };
 
 export const MEDIA_LOADER_FLAGS = {
   RECENTER: 1 << 0,
   RESIZE: 1 << 1,
   ANIMATE_LOAD: 1 << 2,
-  IS_OBJECT_MENU_TARGET: 1 << 3
+  IS_OBJECT_MENU_TARGET: 1 << 3,
+  SPHERICAL_PROJECTION: 1 << 4
 };
 
 function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
@@ -144,7 +142,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     if (!loader) {
       throw new UnsupportedMediaTypeError(eid, urlData.mediaType);
     }
-    media = yield* loader(world, urlData);
+    media = yield* loader(world, MediaLoader.flags[eid], urlData);
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());

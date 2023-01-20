@@ -9,12 +9,13 @@ export type MediaLoaderParams = {
   recenter: boolean;
   animateLoad: boolean;
   isObjectMenuTarget: boolean;
+  sphericalProjection: boolean;
 };
 
 export function inflateMediaLoader(
   world: HubsWorld,
   eid: number,
-  { src, recenter, resize, animateLoad, isObjectMenuTarget }: MediaLoaderParams
+  { src, recenter, resize, animateLoad, isObjectMenuTarget, sphericalProjection }: MediaLoaderParams
 ) {
   addComponent(world, MediaLoader, eid);
   let flags = 0;
@@ -22,6 +23,7 @@ export function inflateMediaLoader(
   if (resize) flags |= MEDIA_LOADER_FLAGS.RESIZE;
   if (animateLoad) flags |= MEDIA_LOADER_FLAGS.ANIMATE_LOAD;
   if (isObjectMenuTarget) flags |= MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET;
+  if (sphericalProjection) flags |= MEDIA_LOADER_FLAGS.SPHERICAL_PROJECTION;
   MediaLoader.flags[eid] = flags;
   MediaLoader.src[eid] = APP.getSid(src)!;
 }

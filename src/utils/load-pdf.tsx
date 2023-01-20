@@ -20,7 +20,7 @@ function* createPDFResources(url: string): Generator<any, PDFResources, any> {
   return { pdf, canvasContext, material };
 }
 
-export function* loadPDF(world: HubsWorld, url: string) {
+export function* loadPDF(world: HubsWorld, _flags: number, url: string) {
   const resources = yield* createPDFResources(url);
   const pageNumber = 1;
   const { width, height } = yield* loadPageJob(resources, pageNumber);
