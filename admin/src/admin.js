@@ -37,6 +37,7 @@ import registerTelemetry from "hubs/src/telemetry";
 import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 import { UnauthorizedPage } from "./react-components/unauthorized";
 import { store } from "hubs/src/utils/store-instance";
+import { Lily } from './react-components/lily'
 
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
@@ -247,8 +248,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const importRoute = <Route exact path="/import" component={ImportContent} />;
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
   const cdnRoute = <Route exact path="/content-cdn" component={ContentCDN} />;
+  const lilyRoute = <Route exact path="/lily" component={Lily} />;
 
-  const customRoutes = [homeRoute, importRoute, accessRoute, cdnRoute];
+  const customRoutes = [homeRoute, importRoute, accessRoute, cdnRoute, lilyRoute];
 
   try {
     const appConfigSchema = schemaByCategories({
