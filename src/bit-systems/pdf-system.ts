@@ -1,4 +1,4 @@
-import { defineQuery, entityExists } from "bitecs";
+import { defineQuery, entityExists, exitQuery } from "bitecs";
 import * as pdfjs from "pdfjs-dist";
 import { Mesh, MeshBasicMaterial } from "three";
 import { HubsWorld } from "../app";
@@ -7,6 +7,8 @@ import { PDFComponent } from "../inflators/pdf";
 import { sleep } from "../utils/async-utils";
 import { EntityID } from "../utils/networking-types";
 import { scaleMeshToAspectRatio } from "../utils/scale-to-aspect-ratio";
+import { coroutine } from "../utils/coroutine";
+import { mediaScaleAnimationDurationMS } from "./media-loading";
 
 /**
  * Warning! This require statement is fragile!
@@ -24,44 +26,51 @@ pdfjs.GlobalWorkerOptions.workerSrc =
 
 export type PDFComponentMap = Map<EntityID, PDFComponent>;
 
-async function loadPage(world: HubsWorld, eid: EntityID, component: PDFComponent, pageNumber: number) {
-  const page = await component.pdf.getPage(pageNumber);
-  // Since loading is async, make sure the entity is still around.
-  // TODO Convert this to cancelable coroutine, so that we can't get burned by entity id recycling
-  if (!entityExists(world, eid)) return;
-
+function* loadPageJob(world: HubsWorld, eid: EntityID, component: PDFComponent, pageNumber: number) {
+  const page: pdfjs.PDFPageProxy = yield component.pdf.getPage(pageNumber);
   const viewport = page.getViewport({ scale: 3 });
   const ratio = viewport.height / viewport.width;
-
   component.canvas.width = viewport.width;
   component.canvas.height = viewport.height;
   const renderTask = page.render({ canvasContext: component.canvasContext, viewport });
-  await renderTask.promise;
-  if (!entityExists(world, eid)) return;
+  yield renderTask.promise;
   const mesh = world.eid2obj.get(eid)! as Mesh;
   const material = mesh.material as MeshBasicMaterial;
   material.map = component.texture;
   material.map!.needsUpdate = true;
   material.needsUpdate = true;
   scaleMeshToAspectRatio(mesh, ratio);
-  component.isLoading = false;
 
-  // The loading animation in media loader
+  // HACK The loading animation in media loader
   // might still be controlling this object's scale,
-  // so set the size again.
-  // TODO Fix
-  await sleep(400);
+  // so wait for that long and then set the scale again.
+  yield sleep(mediaScaleAnimationDurationMS);
   scaleMeshToAspectRatio(mesh, ratio);
 }
 
+// TODO type for coroutine
+type Coroutine = () => IteratorResult<undefined, any>;
+const jobs = new Map<EntityID, Coroutine>();
+
 const pdfQuery = defineQuery([MediaPDF, NetworkedPDF]);
+const pdfExitQuery = exitQuery(pdfQuery);
 export function pdfSystem(world: HubsWorld) {
-  pdfQuery(world).forEach(eid => {
+  pdfQuery(world).forEach(function (eid) {
     const component = (MediaPDF.map as PDFComponentMap).get(eid)!;
-    if (!component.isLoading && component.page !== NetworkedPDF.page[eid]) {
-      component.isLoading = true;
+    if (component.page !== NetworkedPDF.page[eid]) {
+      if (jobs.has(eid)) {
+        jobs.delete(eid); // interrupt the page load in progress
+      }
       component.page = NetworkedPDF.page[eid];
-      loadPage(world, eid, component, NetworkedPDF.page[eid]);
+      jobs.set(eid, coroutine(loadPageJob(world, eid, component, NetworkedPDF.page[eid])));
     }
+  });
+
+  pdfExitQuery(world).forEach(function (eid) {
+    jobs.delete(eid);
+  });
+
+  jobs.forEach((job, pdf) => {
+    if (job().done) jobs.delete(pdf);
   });
 }
