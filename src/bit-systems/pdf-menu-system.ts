@@ -49,10 +49,7 @@ function findPDFMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: bool
 function moveToTarget(world: HubsWorld, menu: EntityID) {
   const targetObj = world.eid2obj.get(PDFMenu.targetRef[menu])!;
   targetObj.updateMatrices();
-
   const menuObj = world.eid2obj.get(menu)!;
-
-  // TODO: position the menu more carefully...
   setMatrixWorld(menuObj, targetObj.matrixWorld);
 }
 
