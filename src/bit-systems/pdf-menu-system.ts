@@ -4,7 +4,6 @@ import type { HubsWorld } from "../app";
 import { HoveredRemoteRight, Interacted, MediaPDF, NetworkedPDF, PDFMenu } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import type { EntityID } from "../utils/networking-types";
-import { preload, repeatUntilTrue } from "../utils/preload";
 import { takeOwnership } from "../utils/take-ownership";
 import { setMatrixWorld } from "../utils/three-utils";
 import { PDFComponentMap } from "./pdf-system";
@@ -91,16 +90,9 @@ function render(world: HubsWorld, menu: EntityID, frozen: boolean) {
   }
 }
 
-let menu: EntityID;
-preload(
-  repeatUntilTrue(() => {
-    menu = (window.APP && APP.world && anyEntityWith(APP.world, PDFMenu)) as EntityID;
-    return !!menu;
-  })
-);
-
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
 export function pdfMenuSystem(world: HubsWorld, sceneIsFrozen: boolean) {
+  const menu = anyEntityWith(world, PDFMenu)!;
   findPDFMenuTarget(world, menu, sceneIsFrozen);
   if (PDFMenu.targetRef[menu]) {
     moveToTarget(world, menu);
