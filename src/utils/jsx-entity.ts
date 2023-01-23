@@ -338,10 +338,10 @@ declare global {
 
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   grabbable: inflateGrabbable,
+  billboard: createDefaultInflator(Billboard),
 
   // inflators that create Object3Ds
-  directionalLight: inflateDirectionalLight,
-  billboard: createDefaultInflator(Billboard)
+  directionalLight: inflateDirectionalLight
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
