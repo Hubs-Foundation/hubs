@@ -197,3 +197,4 @@ export const ObjectSpawner = defineComponent({
 export const Billboard = defineComponent({
   onlyY: Types.ui8
 });
+export const SimpleWater = defineComponent();

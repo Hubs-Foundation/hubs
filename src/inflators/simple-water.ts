@@ -1,28 +1,52 @@
+import { addComponent, addEntity, hasComponent } from "bitecs";
+import { addObject3DComponent } from "../utils/jsx-entity";
+import { AEntity, SimpleWater } from "../bit-components";
+import {
+  Mesh,
+  PlaneBufferGeometry,
+  MeshStandardMaterial,
+  MeshPhongMaterial,
+  Vector2,
+  RepeatWrapping,
+  Texture,
+  IUniform,
+  Color,
+  BufferAttribute,
+  InterleavedBufferAttribute,
+  DynamicDrawUsage
+} from "three";
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
+import { HubsWorld } from "../app";
 import waterNormalsUrl from "../assets/waternormals.jpg";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 
-const { Mesh, PlaneBufferGeometry, MeshStandardMaterial, MeshPhongMaterial, Vector2, RepeatWrapping } = THREE;
-
-/**
- * SimpleWater
- * Keep in sync with Spoke's SimpleWater class
- */
-
-/**
- * Adapted dynamic geometry code from: https://github.com/ditzel/UnityOceanWavesAndShip
- */
-
 class Octave {
-  constructor(speed = new Vector2(1, 1), scale = new Vector2(1, 1), height = 0.0025, alternate = true) {
+  speed: Vector2;
+  scale: Vector2;
+  height: number;
+  alternate: boolean;
+  constructor(
+    speed: Vector2 = new Vector2(1, 1),
+    scale: Vector2 = new Vector2(1, 1),
+    height: number = 0.0025,
+    alternate: boolean = true
+  ) {
     this.speed = speed;
     this.scale = scale;
     this.height = height;
     this.alternate = alternate;
   }
 }
-export default class SimpleWater extends Mesh {
-  constructor(normalMap, resolution = 24, lowQuality = false) {
+
+export class SimpleWaterMesh extends Mesh {
+  lowQuality: boolean;
+  waterUniforms: { [uniform: string]: IUniform };
+  resolution: number;
+  octaves: Octave[];
+  simplex: SimplexNoise;
+  waterMaterial: MeshPhongMaterial | MeshStandardMaterial;
+
+  constructor(normalMap: Texture, resolution: number = 24, lowQuality: boolean = false) {
     const geometry = new PlaneBufferGeometry(10, 10, resolution, resolution);
     geometry.rotateX(-Math.PI / 2);
 
@@ -117,16 +141,22 @@ export default class SimpleWater extends Mesh {
 
     super(geometry, material);
 
+    this.waterMaterial = material;
     this.lowQuality = lowQuality;
     this.waterUniforms = waterUniforms;
 
     if (lowQuality) {
-      this.material.specular.set(0xffffff);
+      if (this.material instanceof MeshPhongMaterial) {
+        this.material.specular.set(0xffffff);
+      }
     } else {
       this.receiveShadow = true;
     }
 
-    this.geometry.attributes.position.dynamic = true;
+    const buffer: BufferAttribute | InterleavedBufferAttribute = this.geometry.attributes.position;
+    if (buffer instanceof BufferAttribute) {
+      (buffer as BufferAttribute).setUsage(DynamicDrawUsage);
+    }
 
     this.resolution = resolution;
     this.octaves = [
@@ -137,20 +167,19 @@ export default class SimpleWater extends Mesh {
     this.simplex = new SimplexNoise();
   }
 
-  get opacity() {
-    return this.material.opacity;
+  get opacity(): number {
+    return this.waterMaterial.opacity;
   }
 
-  set opacity(value) {
-    this.material.opacity = value;
-
+  set opacity(value: number) {
+    this.waterMaterial.opacity = value;
     if (value !== 1) {
-      this.material.transparent = true;
+      this.waterMaterial.transparent = true;
     }
   }
 
-  get color() {
-    return this.material.color;
+  get color(): Color {
+    return this.waterMaterial.color;
   }
 
   get tideHeight() {
@@ -201,7 +230,7 @@ export default class SimpleWater extends Mesh {
     return this.waterUniforms.ripplesScale.value;
   }
 
-  update(time) {
+  update(time: number) {
     const positionAttribute = this.geometry.attributes.position;
 
     for (let x = 0; x <= this.resolution; x++) {
@@ -236,11 +265,14 @@ export default class SimpleWater extends Mesh {
     this.waterUniforms.time.value = time;
   }
 
-  clone(recursive) {
-    return new SimpleWater(this.material.normalMap, this.resolution, this.lowQuality).copy(this, recursive);
+  clone(recursive: boolean = true): this {
+    return new (<any>this.constructor)(this.waterMaterial.normalMap, this.resolution, this.lowQuality).copy(
+      this,
+      recursive
+    );
   }
 
-  copy(source, recursive = true) {
+  copy(source: this, recursive: boolean = true) {
     super.copy(source, recursive);
 
     this.opacity = source.opacity;
@@ -258,83 +290,61 @@ export default class SimpleWater extends Mesh {
   }
 }
 
-function vec2Equals(a, b) {
-  return a && b && a.x === b.x && a.y === b.y;
-}
+export type SimpleWaterParams = {
+  opacity: number;
+  color: string;
+  tideHeight: number;
+  tideScale: { x: number; y: number };
+  tideSpeed: { x: number; y: number };
+  waveHeight: number;
+  waveScale: { x: number; y: number };
+  waveSpeed: { x: number; y: number };
+  ripplesScale: number;
+  ripplesSpeed: number;
+};
 
-let waterNormalMap = null;
+let waterNormalMap: Texture;
 
-AFRAME.registerComponent("simple-water", {
-  schema: {
-    opacity: { type: "number", default: 1 },
-    color: { type: "color" },
-    tideHeight: { type: "number", default: 0.01 },
-    tideScale: { type: "vec2", default: { x: 1, y: 1 } },
-    tideSpeed: { type: "vec2", default: { x: 0.5, y: 0.5 } },
-    waveHeight: { type: "number", default: 0.1 },
-    waveScale: { type: "vec2", default: { x: 1, y: 20 } },
-    waveSpeed: { type: "vec2", default: { x: 0.05, y: 6 } },
-    ripplesScale: { type: "number", default: 1 },
-    ripplesSpeed: { type: "number", default: 0.25 }
-  },
+const DEFAULTS = {
+  opacity: 1,
+  color: "#0054df",
+  tideHeight: 0.01,
+  tideScale: { x: 1, y: 1 },
+  tideSpeed: { x: 0.5, y: 0.5 },
+  waveHeight: 0.1,
+  waveScale: { x: 1, y: 20 },
+  waveSpeed: { x: 0.05, y: 6 },
+  ripplesScale: 1,
+  ripplesSpeed: 0.25
+};
 
-  init() {
-    if (!waterNormalMap) {
-      waterNormalMap = new HubsTextureLoader().load(waterNormalsUrl);
-    }
-
-    const usePhongShader = window.APP.store.state.preferences.materialQualitySetting !== "high";
-    this.water = new SimpleWater(waterNormalMap, undefined, usePhongShader);
-    this.el.setObject3D("mesh", this.water);
-  },
-
-  update(oldData) {
-    if (this.data.opacity !== oldData.opacity) {
-      this.water.opacity = this.data.opacity;
-    }
-
-    if (this.data.color !== oldData.color) {
-      this.water.color.set(this.data.color);
-    }
-
-    if (this.data.tideHeight !== oldData.tideHeight) {
-      this.water.tideHeight = this.data.tideHeight;
-    }
-
-    if (!vec2Equals(this.data.tideScale, oldData.tideScale)) {
-      this.water.tideScale.copy(this.data.tideScale);
-    }
-
-    if (!vec2Equals(this.data.tideSpeed, oldData.tideSpeed)) {
-      this.water.tideSpeed.copy(this.data.tideSpeed);
-    }
-
-    if (this.data.waveHeight !== oldData.waveHeight) {
-      this.water.waveHeight = this.data.waveHeight;
-    }
-
-    if (!vec2Equals(this.data.waveScale, oldData.waveScale)) {
-      this.water.waveScale.copy(this.data.waveScale);
-    }
-
-    if (!vec2Equals(this.data.waveSpeed, oldData.waveSpeed)) {
-      this.water.waveSpeed.copy(this.data.waveSpeed);
-    }
-
-    if (this.data.ripplesScale !== oldData.ripplesScale) {
-      this.water.ripplesScale = this.data.ripplesScale;
-    }
-
-    if (this.data.ripplesSpeed !== oldData.ripplesSpeed) {
-      this.water.ripplesSpeed = this.data.ripplesSpeed;
-    }
-  },
-
-  tick(time) {
-    this.water.update(time / 1000);
-  },
-
-  remove() {
-    this.el.removeObject3D("mesh");
+export function inflateSimpleWater(world: HubsWorld, eid: number, params: SimpleWaterParams) {
+  if (!waterNormalMap) {
+    waterNormalMap = new HubsTextureLoader().load(waterNormalsUrl);
   }
-});
+
+  params = Object.assign({}, DEFAULTS, params);
+  const lowQuality = window.APP.store.state.preferences.materialQualitySetting !== "high";
+  const simpleWater = new SimpleWaterMesh(waterNormalMap, undefined, lowQuality);
+  simpleWater.opacity = params.opacity;
+  simpleWater.color.set(params.color);
+  simpleWater.tideHeight = params.tideHeight;
+  simpleWater.tideScale.set(params.tideScale.x, params.tideScale.y);
+  simpleWater.tideSpeed.set(params.tideSpeed.x, params.tideSpeed.y);
+  simpleWater.waveHeight = params.waveHeight;
+  simpleWater.waveScale.set(params.waveScale.x, params.waveScale.y);
+  simpleWater.waveSpeed.set(params.waveSpeed.x, params.waveSpeed.y);
+  simpleWater.ripplesScale = params.ripplesScale;
+  simpleWater.ripplesSpeed = params.ripplesSpeed;
+
+  if (hasComponent(world, AEntity, eid)) {
+    const simpleWaterEid = addEntity(world);
+    addObject3DComponent(world, simpleWaterEid, simpleWater);
+    addComponent(world, SimpleWater, simpleWaterEid);
+    const aObj3D = world.eid2obj.get(eid);
+    aObj3D?.add(simpleWater);
+  } else {
+    addObject3DComponent(world, eid, simpleWater);
+    addComponent(world, SimpleWater, eid);
+  }
+}
