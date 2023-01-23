@@ -35,7 +35,7 @@ const isInViewOfCamera = (object3D: Object3D, camera: Camera) => {
   return frustum.intersectsBox(box);
 };
 
-const updateIsInView = (world: HubsWorld, billboard: number, camera: Camera): boolean => {
+const shouldUpdateBillboard = (world: HubsWorld, billboard: number, camera: Camera): boolean => {
   const object3D = world.eid2obj.get(billboard)!;
   if (!object3D.visible) {
     return false;
@@ -71,7 +71,7 @@ export function billboardSystem(world: HubsWorld, camera: Camera) {
       nextBillboard = 0;
     }
     const billboard = billboards[nextBillboard++];
-    updateIsInView(world, billboard, camera) && updateBillboard(world, billboard, camera);
+    shouldUpdateBillboard(world, billboard, camera) && updateBillboard(world, billboard, camera);
   } else {
     billboards.forEach(billboard => updateBillboard(world, billboard, camera));
   }
