@@ -28,7 +28,7 @@ const calculatePlaneMatrix = (function () {
 })();
 
 const planeForLeftCursor = new THREE.Mesh(
-  new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
+  new THREE.PlaneGeometry(100000, 100000, 2, 2),
   new THREE.MeshBasicMaterial({
     visible: true,
     wireframe: false,
@@ -38,7 +38,7 @@ const planeForLeftCursor = new THREE.Mesh(
   })
 );
 const planeForRightCursor = new THREE.Mesh(
-  new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
+  new THREE.PlaneGeometry(100000, 100000, 2, 2),
   new THREE.MeshBasicMaterial({
     visible: true,
     wireframe: false,

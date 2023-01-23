@@ -2,7 +2,7 @@ import * as pdfjs from "pdfjs-dist";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { errorTexture } from "../utils/error-texture";
-import { createPlaneBufferGeometry } from "../utils/three-utils";
+import { createPlaneGeometry } from "../utils/three-utils";
 import { addAndArrangeMedia } from "../utils/media-utils";
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -111,7 +111,7 @@ AFRAME.registerComponent("media-pdf", {
 
     if (!this.mesh) {
       const material = new THREE.MeshBasicMaterial();
-      const geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+      const geometry = createPlaneGeometry(1, 1, 1, 1, texture.flipY);
       material.side = THREE.DoubleSide;
 
       this.mesh = new THREE.Mesh(geometry, material);

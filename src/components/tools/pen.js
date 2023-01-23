@@ -134,7 +134,7 @@ AFRAME.registerComponent("pen", {
     const quality = window.APP.store.state.preferences.materialQualitySetting;
     material = convertStandardMaterial(material, quality);
 
-    this.penTip = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 16, 12), material);
+    this.penTip = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), material);
     this.penTip.scale.setScalar(this.data.radius / this.el.parentEl.object3D.scale.x);
     this.penTip.matrixNeedsUpdate = true;
 

@@ -42,7 +42,7 @@ AFRAME.registerComponent("cursor-controller", {
     this.enabled = false;
 
     this.cursorVisual = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(),
+      new THREE.PlaneGeometry(),
       new THREE.ShaderMaterial({
         depthTest: false,
         uniforms: {

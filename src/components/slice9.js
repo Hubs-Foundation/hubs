@@ -73,7 +73,7 @@ AFRAME.registerComponent("slice9", {
 
     this.textureSrc = null;
 
-    const geometry = (this.geometry = new THREE.PlaneBufferGeometry(data.width, data.height, 3, 3));
+    const geometry = (this.geometry = new THREE.PlaneGeometry(data.width, data.height, 3, 3));
 
     // Create mesh.
     if (data.usingCustomMaterial) {
