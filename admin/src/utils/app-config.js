@@ -1,4 +1,4 @@
-import { upload } from "hubs/src/utils/media-utils";
+import { upload } from './media-utils';
 
 let currentAuthToken = null;
 
@@ -7,22 +7,22 @@ function setAuthToken(token) {
 }
 
 function fetchAppConfigs(method, body) {
-  return fetch("/api/v1/app_configs", {
+  return fetch('/api/v1/app_configs', {
     method,
     headers: {
       Authorization: `Bearer ${currentAuthToken}`,
-      "Content-Type": "application/json"
+      'Content-Type': 'application/json',
     },
-    body
+    body,
   });
 }
 
 function getConfig() {
-  return fetchAppConfigs("GET").then(r => r.json());
+  return fetchAppConfigs('GET').then((r) => r.json());
 }
 
 async function putConfig(config) {
-  const uploadFiles = async obj => {
+  const uploadFiles = async (obj) => {
     for (const key in obj) {
       if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
       const val = obj[key];
@@ -34,7 +34,7 @@ async function putConfig(config) {
     }
   };
   await uploadFiles(config);
-  return fetchAppConfigs("POST", JSON.stringify(config));
+  return fetchAppConfigs('POST', JSON.stringify(config));
 }
 
 export { getConfig, putConfig, setAuthToken };

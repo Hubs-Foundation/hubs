@@ -1,60 +1,68 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 /* eslint-disable react/prop-types */
-import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
-import Card from "@material-ui/core/Card";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import CardContent from "@material-ui/core/CardContent";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import Done from "@material-ui/icons/Done";
-import Warning from "@material-ui/icons/Warning";
-import Snackbar from "@material-ui/core/Snackbar";
-import SnackbarContent from "@material-ui/core/SnackbarContent";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormControl from "@material-ui/core/FormControl";
-import FormGroup from "@material-ui/core/FormGroup";
-import Checkbox from "@material-ui/core/Checkbox";
-import Icon from "@material-ui/core/Icon";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableHead from "@material-ui/core/TableHead";
-import TableCell from "@material-ui/core/TableCell";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import { Title } from "react-admin";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
-import clsx from "classnames";
-import { GET_MANY_REFERENCE } from "react-admin";
-import { sceneApproveNew, sceneApproveExisting, sceneReviewed } from "./scene-actions";
-import { avatarApproveNew, avatarApproveExisting, avatarReviewed } from "./avatar-actions";
-import withCommonStyles from "../utils/with-common-styles";
-import configs from "../utils/configs";
+import React, { Component } from 'react';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import Card from '@material-ui/core/Card';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import CardContent from '@material-ui/core/CardContent';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Done from '@material-ui/icons/Done';
+import Warning from '@material-ui/icons/Warning';
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormGroup from '@material-ui/core/FormGroup';
+import Checkbox from '@material-ui/core/Checkbox';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableHead from '@material-ui/core/TableHead';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
+import Paper from '@material-ui/core/Paper';
+import { Title } from 'react-admin';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import { fetchReticulumAuthenticated } from '../utils/phoenix-utils';
+import clsx from 'classnames';
+import { GET_MANY_REFERENCE } from 'react-admin';
+import {
+  sceneApproveNew,
+  sceneApproveExisting,
+  sceneReviewed,
+} from './scene-actions';
+import {
+  avatarApproveNew,
+  avatarApproveExisting,
+  avatarReviewed,
+} from './avatar-actions';
+import withCommonStyles from '../utils/with-common-styles';
+import configs from '../utils/configs';
 
 const RESULTS = {
-  pending: "pending",
-  importing: "importing",
-  new_listing: "new_listing",
-  existing_listing: "existing_listing",
-  failed: "failed"
+  pending: 'pending',
+  importing: 'importing',
+  new_listing: 'new_listing',
+  existing_listing: 'existing_listing',
+  failed: 'failed',
 };
 
 const styles = withCommonStyles(() => ({}));
 
 class ImportContentComponent extends Component {
   state = {
-    urls: "",
+    urls: '',
     imports: [],
     addBaseTag: false,
     addDefaultTag: false,
-    reticulumMeta: {}
+    reticulumMeta: {},
   };
 
   handleUrlChanged(ev) {
@@ -66,17 +74,22 @@ class ImportContentComponent extends Component {
   }
 
   async updateReticulumMeta() {
-    const reticulumMeta = await fetchReticulumAuthenticated(`/api/v1/meta?include_repo`);
+    const reticulumMeta = await fetchReticulumAuthenticated(
+      `/api/v1/meta?include_repo`
+    );
     this.setState({ reticulumMeta });
   }
 
   apiInfoForSubmittedUrl(url) {
     try {
       const parsedUrl = new URL(url);
-      const pathParts = parsedUrl.pathname.split("/");
-      const isScene = pathParts[1] === "scenes";
-      const type = isScene ? "scenes" : "avatars";
-      return { url: `${parsedUrl.origin}/api/v1/${type}/${pathParts[2]}`, isScene };
+      const pathParts = parsedUrl.pathname.split('/');
+      const isScene = pathParts[1] === 'scenes';
+      const type = isScene ? 'scenes' : 'avatars';
+      return {
+        url: `${parsedUrl.origin}/api/v1/${type}/${pathParts[2]}`,
+        isScene,
+      };
     } catch (e) {
       return null;
     }
@@ -94,33 +107,37 @@ class ImportContentComponent extends Component {
       isBase,
       isFeatured,
       isImported: false,
-      isEnabled: true
+      isEnabled: true,
     });
     this.setState({ imports });
   }
 
   setImportResult(url, result) {
-    this.setImportFields(url, i => (i.result = result));
+    this.setImportFields(url, (i) => (i.result = result));
 
-    if (result === RESULTS.new_listing || result === RESULTS.existing_listing || result === RESULTS.failed) {
-      this.setImportFields(url, i => (i.isImported = true));
+    if (
+      result === RESULTS.new_listing ||
+      result === RESULTS.existing_listing ||
+      result === RESULTS.failed
+    ) {
+      this.setImportFields(url, (i) => (i.isImported = true));
     }
   }
 
   setImportIsEnabled(url, isEnabled) {
-    this.setImportFields(url, i => (i.isEnabled = isEnabled));
+    this.setImportFields(url, (i) => (i.isEnabled = isEnabled));
   }
 
   setImportIsDefault(url, isDefault) {
-    this.setImportFields(url, i => (i.isDefault = isDefault));
+    this.setImportFields(url, (i) => (i.isDefault = isDefault));
   }
 
   setImportIsBase(url, isBase) {
-    this.setImportFields(url, i => (i.isBase = isBase));
+    this.setImportFields(url, (i) => (i.isBase = isBase));
   }
 
   setImportIsFeatured(url, isFeatured) {
-    this.setImportFields(url, i => (i.isFeatured = isFeatured));
+    this.setImportFields(url, (i) => (i.isFeatured = isFeatured));
   }
 
   setImportFields(url, setter) {
@@ -140,14 +157,20 @@ class ImportContentComponent extends Component {
     if (e) e.preventDefault();
 
     const urls = this.state.urls.split(/[, ]+/);
-    if (!urls.find(u => u.length !== 0)) return;
+    if (!urls.find((u) => u.length !== 0)) return;
 
-    const needsBaseAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.base;
-    const needsDefaultAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.default;
-    const needsDefaultScene = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.default;
+    const needsBaseAvatar =
+      this.state.reticulumMeta.repo &&
+      !this.state.reticulumMeta.repo.avatar_listings.base;
+    const needsDefaultAvatar =
+      this.state.reticulumMeta.repo &&
+      !this.state.reticulumMeta.repo.avatar_listings.default;
+    const needsDefaultScene =
+      this.state.reticulumMeta.repo &&
+      !this.state.reticulumMeta.repo.scene_listings.default;
 
     let hadUrl = false;
-    await new Promise(r => this.setState({ imports: [] }, r));
+    await new Promise((r) => this.setState({ imports: [] }, r));
     this.setState({ isLoading: true });
 
     const importableUrls = [];
@@ -155,11 +178,11 @@ class ImportContentComponent extends Component {
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
 
-      if (url.endsWith(".pack")) {
+      if (url.endsWith('.pack')) {
         const res = await fetch(`https://${configs.CORS_PROXY_SERVER}/${url}`);
-        const packUrls = (await res.text()).split("\n");
+        const packUrls = (await res.text()).split('\n');
         for (const u of packUrls) {
-          if (u.trim() !== "") {
+          if (u.trim() !== '') {
             importableUrls.push(u);
           }
         }
@@ -180,12 +203,23 @@ class ImportContentComponent extends Component {
 
       if (!importUrl) continue;
 
-      const res = await fetch(`https://${configs.CORS_PROXY_SERVER}/${importUrl}`);
-      const type = isScene ? "scenes" : "avatars";
+      const res = await fetch(
+        `https://${configs.CORS_PROXY_SERVER}/${importUrl}`
+      );
+      const type = isScene ? 'scenes' : 'avatars';
       const asset = (await res.json())[type][0];
-      const isDefault = (isScene && needsDefaultScene) || (isAvatar && needsDefaultAvatar);
+      const isDefault =
+        (isScene && needsDefaultScene) || (isAvatar && needsDefaultAvatar);
       const isBase = isAvatar && needsBaseAvatar && first; // Only set first avatar to be base by default
-      this.addImport(url, importUrl, type, asset, isDefault, isBase, true /* isFeatured */);
+      this.addImport(
+        url,
+        importUrl,
+        type,
+        asset,
+        isDefault,
+        isBase,
+        true /* isFeatured */
+      );
       first = false;
       hadUrl = true;
     }
@@ -194,7 +228,7 @@ class ImportContentComponent extends Component {
       this.setState({ loadFailed: true });
     }
 
-    this.setState({ urls: "", isLoading: false });
+    this.setState({ urls: '', isLoading: false });
   }
 
   async onImport(e) {
@@ -202,18 +236,29 @@ class ImportContentComponent extends Component {
     const { imports } = this.state;
 
     for (let i = 0; i < imports.length; i++) {
-      const { url, type, importUrl, isEnabled, isImported, isBase, isDefault, isFeatured } = imports[i];
+      const {
+        url,
+        type,
+        importUrl,
+        isEnabled,
+        isImported,
+        isBase,
+        isDefault,
+        isFeatured,
+      } = imports[i];
       if (isImported || !isEnabled) continue;
 
       this.setImportResult(url, RESULTS.importing);
 
-      const isScene = type === "scenes";
+      const isScene = type === 'scenes';
       const isAvatar = !isScene;
-      const columnPrefix = isScene ? "scene" : "avatar";
+      const columnPrefix = isScene ? 'scene' : 'avatar';
       let res;
 
       try {
-        res = await fetchReticulumAuthenticated(`/api/v1/${type}`, "POST", { url: importUrl });
+        res = await fetchReticulumAuthenticated(`/api/v1/${type}`, 'POST', {
+          url: importUrl,
+        });
       } catch (e) {
         this.setImportResult(url, RESULTS.failed);
         continue;
@@ -223,19 +268,21 @@ class ImportContentComponent extends Component {
       const tags = [];
 
       if (isAvatar && isBase) {
-        tags.push("base");
+        tags.push('base');
       }
 
       if (isDefault) {
-        tags.push("default");
+        tags.push('default');
       }
 
       if (isFeatured) {
-        tags.push("featured");
+        tags.push('featured');
       }
 
       const approveNew = isScene ? sceneApproveNew : avatarApproveNew;
-      const approveExisting = isScene ? sceneApproveExisting : avatarApproveExisting;
+      const approveExisting = isScene
+        ? sceneApproveExisting
+        : avatarApproveExisting;
       const reviewed = isScene ? sceneReviewed : avatarReviewed;
 
       const dataProvider = window.APP.dataProvider;
@@ -244,21 +291,25 @@ class ImportContentComponent extends Component {
       const sid = asset[`${columnPrefix}_id`];
 
       const objectRes = await dataProvider(GET_MANY_REFERENCE, type, {
-        sort: { field: "id", order: "desc" },
+        sort: { field: 'id', order: 'desc' },
         target: `${columnPrefix}_sid`,
-        id: sid
+        id: sid,
       });
       const objId = objectRes.data[0].id;
-      const listingRes = await dataProvider(GET_MANY_REFERENCE, `${columnPrefix}_listings`, {
-        sort: { field: "id", order: "desc" },
-        target: `_${columnPrefix}_id`,
-        id: objId
-      });
+      const listingRes = await dataProvider(
+        GET_MANY_REFERENCE,
+        `${columnPrefix}_listings`,
+        {
+          sort: { field: 'id', order: 'desc' },
+          target: `_${columnPrefix}_id`,
+          id: objId,
+        }
+      );
 
       // If there is an existing listing, object ends up in pending, otherwise create a listing.
       const isNew = listingRes.data.length === 0;
       const approve = isNew ? approveNew : approveExisting;
-      const exec = async f => {
+      const exec = async (f) => {
         const d = f();
         await dataProvider(d.meta.fetch, d.meta.resource, d.payload);
       };
@@ -278,7 +329,10 @@ class ImportContentComponent extends Component {
         await exec(() => reviewed(objId));
       }
 
-      this.setImportResult(url, isNew ? RESULTS.new_listing : RESULTS.existing_listing);
+      this.setImportResult(
+        url,
+        isNew ? RESULTS.new_listing : RESULTS.existing_listing
+      );
 
       this.updateReticulumMeta();
     }
@@ -286,13 +340,18 @@ class ImportContentComponent extends Component {
 
   renderImportTable() {
     const { imports } = this.state;
-    const isImportingAny = imports ? !!imports.find(i => i.result === RESULTS.importing) : false;
-    const hasNonImported = imports ? !!imports.find(i => !i.isImported) : false;
+    const isImportingAny = imports
+      ? !!imports.find((i) => i.result === RESULTS.importing)
+      : false;
+    const hasNonImported = imports
+      ? !!imports.find((i) => !i.isImported)
+      : false;
 
-    const rowForImportRecord = r => {
+    const rowForImportRecord = (r) => {
       let icon = null;
       let status = null;
-      const listingType = r.type === "scenes" ? "scene_listings" : "avatar_listings";
+      const listingType =
+        r.type === 'scenes' ? 'scene_listings' : 'avatar_listings';
 
       switch (r.result) {
         case RESULTS.importing:
@@ -307,7 +366,8 @@ class ImportContentComponent extends Component {
             <p>
               Import Successful.
               <br />
-              Go to <a href={`/admin?#/${listingType}`}>approved {r.type}</a> to manage.
+              Go to <a href={`/admin?#/${listingType}`}>approved {r.type}</a> to
+              manage.
             </p>
           );
           break;
@@ -317,13 +377,16 @@ class ImportContentComponent extends Component {
             <p>
               Update Successful.
               <br />
-              Go to <a href={`/admin?#/${listingType}`}>approved {r.type}</a> to manage.
+              Go to <a href={`/admin?#/${listingType}`}>approved {r.type}</a> to
+              manage.
             </p>
           );
           break;
       }
 
-      const screenshotUrl = `https://${configs.CORS_PROXY_SERVER}/${r.asset.screenshot_url || r.asset.files.thumbnail}`;
+      const screenshotUrl = `https://${configs.CORS_PROXY_SERVER}/${
+        r.asset.screenshot_url || r.asset.files.thumbnail
+      }`;
 
       return (
         <TableRow key={r.url}>
@@ -332,31 +395,37 @@ class ImportContentComponent extends Component {
               (!isImportingAny && (
                 <Checkbox
                   checked={r.isEnabled}
-                  onChange={e => this.setImportIsEnabled(r.url, e.target.checked)}
+                  onChange={(e) =>
+                    this.setImportIsEnabled(r.url, e.target.checked)
+                  }
                   value="enabled"
                 />
               ))}
           </TableCell>
           <TableCell>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <FormControlLabel
                 control={
                   <Checkbox
                     disabled={!r.isEnabled || isImportingAny || r.isImported}
                     checked={r.isDefault}
-                    onChange={e => this.setImportIsDefault(r.url, e.target.checked)}
+                    onChange={(e) =>
+                      this.setImportIsDefault(r.url, e.target.checked)
+                    }
                     value="default"
                   />
                 }
                 label="Set to Default"
               />
-              {r.type === "avatars" && (
+              {r.type === 'avatars' && (
                 <FormControlLabel
                   control={
                     <Checkbox
                       disabled={!r.isEnabled || isImportingAny || r.isImported}
                       checked={r.isBase}
-                      onChange={e => this.setImportIsBase(r.url, e.target.checked)}
+                      onChange={(e) =>
+                        this.setImportIsBase(r.url, e.target.checked)
+                      }
                       value="base"
                     />
                   }
@@ -368,7 +437,9 @@ class ImportContentComponent extends Component {
                   <Checkbox
                     disabled={!r.isEnabled || isImportingAny || r.isImported}
                     checked={r.isFeatured}
-                    onChange={e => this.setImportIsFeatured(r.url, e.target.checked)}
+                    onChange={(e) =>
+                      this.setImportIsFeatured(r.url, e.target.checked)
+                    }
                     value="featured"
                   />
                 }
@@ -377,7 +448,7 @@ class ImportContentComponent extends Component {
             </div>
           </TableCell>
           <TableCell>
-            <img src={screenshotUrl} style={{ width: "100px" }} />
+            <img src={screenshotUrl} style={{ width: '100px' }} />
           </TableCell>
           <TableCell align="right">
             <a href={r.url} target="_blank" rel="noopener noreferrer">
@@ -389,7 +460,9 @@ class ImportContentComponent extends Component {
       );
     };
 
-    const numSelected = imports ? imports.filter(i => i.isEnabled && !i.isImported).length : 0;
+    const numSelected = imports
+      ? imports.filter((i) => i.isEnabled && !i.isImported).length
+      : 0;
     const rowCount = imports ? imports.length : 0;
 
     return (
@@ -403,7 +476,7 @@ class ImportContentComponent extends Component {
                     <Checkbox
                       indeterminate={numSelected > 0 && numSelected < rowCount}
                       checked={numSelected === rowCount}
-                      onChange={e => {
+                      onChange={(e) => {
                         for (const { isImported, url } of imports) {
                           if (!isImported) {
                             this.setImportIsEnabled(url, e.target.checked);
@@ -426,27 +499,49 @@ class ImportContentComponent extends Component {
   }
 
   render() {
-    const needsBaseAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.base;
-    const needsDefaultAvatar = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.avatar_listings.default;
-    const needsDefaultScene = this.state.reticulumMeta.repo && !this.state.reticulumMeta.repo.scene_listings.default;
+    const needsBaseAvatar =
+      this.state.reticulumMeta.repo &&
+      !this.state.reticulumMeta.repo.avatar_listings.base;
+    const needsDefaultAvatar =
+      this.state.reticulumMeta.repo &&
+      !this.state.reticulumMeta.repo.avatar_listings.default;
+    const needsDefaultScene =
+      this.state.reticulumMeta.repo &&
+      !this.state.reticulumMeta.repo.scene_listings.default;
     const { urls, imports, loadFailed } = this.state;
-    const unimportedCount = imports ? imports.filter(i => !i.isImported).length : 0;
-    const readyToImportCount = imports ? imports.filter(i => i.isEnabled && !i.isImported).length : 0;
+    const unimportedCount = imports
+      ? imports.filter((i) => !i.isImported).length
+      : 0;
+    const readyToImportCount = imports
+      ? imports.filter((i) => i.isEnabled && !i.isImported).length
+      : 0;
     const importCount = imports ? imports.length : 0;
-    const isImportingAny = imports ? imports.find(i => i.result === RESULTS.importing) : false;
+    const isImportingAny = imports
+      ? imports.find((i) => i.result === RESULTS.importing)
+      : false;
 
     return (
       <Card className={this.props.classes.container}>
         <Title title="Import Content" />
         <CardContent className={this.props.classes.info}>
           <Typography variant="body2" gutterBottom>
-            You can import avatars and scenes from any other Hubs Cloud site, such as{" "}
-            <a href="https://hubs.mozilla.com" target="_blank" rel="noopener noreferrer">
+            You can import avatars and scenes from any other Hubs Cloud site,
+            such as{' '}
+            <a
+              href="https://hubs.mozilla.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               hubs.mozilla.com
             </a>
             .<br />
-            Please ensure the content you import has a permissible license (such as{" "}
-            <a href="https://creativecommons.org/licenses/by/2.0/" rel="noopener noreferrer" target="_blank">
+            Please ensure the content you import has a permissible license (such
+            as{' '}
+            <a
+              href="https://creativecommons.org/licenses/by/2.0/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
               CC-BY
             </a>
             ) or is licensed to you for redistribution.
@@ -460,13 +555,19 @@ class ImportContentComponent extends Component {
           >
             Find Avatars &amp; Scenes
           </Button>
-          <Typography variant="subheading" gutterBottom className={this.props.classes.section}>
+          <Typography
+            variant="subheading"
+            gutterBottom
+            className={this.props.classes.section}
+          >
             Importing Content
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Enter a comma-separted list of URLs avatars or scenes to import them into your Hubs Cloud instance.
+            Enter a comma-separted list of URLs avatars or scenes to import them
+            into your Hubs Cloud instance.
             <br />
-            Or, specify a .pack file which contains a list of URLs, one per line.
+            Or, specify a .pack file which contains a list of URLs, one per
+            line.
           </Typography>
           {(needsBaseAvatar || needsDefaultAvatar || needsDefaultScene) && (
             <List>
@@ -539,7 +640,8 @@ class ImportContentComponent extends Component {
             <div>
               <p />
               <Typography variant="subheading" gutterBottom>
-                Next, choose the content you&apos;d like to import, and which content flags to set. Then, click Import.
+                Next, choose the content you&apos;d like to import, and which
+                content flags to set. Then, click Import.
               </Typography>
             </div>
           )}
@@ -551,23 +653,33 @@ class ImportContentComponent extends Component {
               variant="contained"
               color="primary"
             >
-              Import {readyToImportCount} Item{readyToImportCount > 1 && "s"}
+              Import {readyToImportCount} Item{readyToImportCount > 1 && 's'}
             </Button>
           )}
           {isImportingAny && <CircularProgress />}
           <Snackbar
-            anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
+            anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
             open={!!loadFailed}
             autoHideDuration={10000}
-            onClose={() => this.setState({ importFailed: false, lastImportedUrl: null })}
+            onClose={() =>
+              this.setState({ importFailed: false, lastImportedUrl: null })
+            }
           >
             <SnackbarContent
               className={clsx({
-                [this.props.classes.warning]: this.state.importFailed
+                [this.props.classes.warning]: this.state.importFailed,
               })}
               message={
-                <span id="import-snackbar" className={this.props.classes.message}>
-                  <Icon className={clsx(this.props.classes.icon, this.props.classes.iconVariant)} />
+                <span
+                  id="import-snackbar"
+                  className={this.props.classes.message}
+                >
+                  <Icon
+                    className={clsx(
+                      this.props.classes.icon,
+                      this.props.classes.iconVariant
+                    )}
+                  />
                   Failed to load specified URLs.
                 </span>
               }
@@ -575,10 +687,15 @@ class ImportContentComponent extends Component {
                 <IconButton
                   key="close"
                   color="inherit"
-                  onClick={() => this.setState({ importFailed: false, lastImportedUrl: null })}
+                  onClick={() =>
+                    this.setState({
+                      importFailed: false,
+                      lastImportedUrl: null,
+                    })
+                  }
                 >
                   <CloseIcon className={this.props.classes.icon} />
-                </IconButton>
+                </IconButton>,
               ]}
             ></SnackbarContent>
           </Snackbar>
