@@ -4,16 +4,17 @@ import {
   EnvironmentSettings,
   GLTFModel,
   LightTag,
-  MediaImage,
+  MaterialTag,
   MediaFrame,
+  MediaImage,
+  MediaPDF,
   MediaVideo,
   Object3DTag,
+  SimpleWater,
+  Skybox,
   Slice9,
   Text,
-  VideoMenu,
-  Skybox,
-  MaterialTag,
-  SimpleWater
+  VideoMenu
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
@@ -58,6 +59,10 @@ const cleanupImages = cleanupObjOnExit(MediaImage, obj => {
 const cleanupVideos = cleanupObjOnExit(MediaVideo, obj => {
   disposeMaterial(obj.material);
   obj.geometry.dispose();
+});
+const cleanupPDFs = cleanupOnExit(MediaPDF, eid => {
+  // TODO: Do loaded pdfs / pages need further cleanup?
+  MediaPDF.map.delete(eid);
 });
 const cleanupEnvironmentSettings = cleanupOnExit(EnvironmentSettings, eid => {
   EnvironmentSettings.map.delete(eid);
@@ -131,6 +136,7 @@ export function removeObject3DSystem(world) {
   cleanupMediaFrames(world);
   cleanupImages(world);
   cleanupVideos(world);
+  cleanupPDFs(world);
   cleanupEnvironmentSettings(world);
   cleanupAudioEmitters(world);
   cleanupSkyboxes(world);
