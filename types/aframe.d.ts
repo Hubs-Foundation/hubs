@@ -106,10 +106,18 @@ declare module "aframe" {
     is(string): boolean;
   }
 
+  interface Device {
+    isMobileVR: Function;
+  }
+  interface Utils {
+    device: Device;
+  }
+
   declare global {
     const AFRAME: {
       registerSystem(name: string, def: Partial<ASystem>);
       scenes: AScene[];
+      utils: Util;
     };
   }
 }

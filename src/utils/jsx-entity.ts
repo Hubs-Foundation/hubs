@@ -1,4 +1,4 @@
-import { addComponent, addEntity, Component, ComponentType, hasComponent } from "bitecs";
+import { addComponent, addEntity, Component, hasComponent } from "bitecs";
 import { preloadFont } from "troika-three-text";
 import {
   $isStringType,
@@ -33,7 +33,8 @@ import {
   SceneRoot,
   NetworkDebug,
   WaypointPreview,
-  NetworkedFloatyObject
+  NetworkedFloatyObject,
+  Billboard
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -209,6 +210,7 @@ interface InflatorFn {
 export interface ComponentData {
   directionalLight?: DirectionalLightParams;
   grabbable?: GrabbableParams;
+  billboard?: { onlyY: boolean };
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -336,6 +338,7 @@ declare global {
 
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   grabbable: inflateGrabbable,
+  billboard: createDefaultInflator(Billboard),
 
   // inflators that create Object3Ds
   directionalLight: inflateDirectionalLight

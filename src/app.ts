@@ -1,4 +1,3 @@
-import * as bitecs from "bitecs";
 import { addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
 import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
