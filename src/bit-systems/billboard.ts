@@ -5,7 +5,7 @@ import { Billboard } from "../bit-components";
 
 const billboardQuery = defineQuery([Billboard]);
 
-const isMobileVR = AFRAME.utils.device.isMobileVR() || true;
+const isMobileVR = AFRAME.utils.device.isMobileVR();
 
 const targetPos = new Vector3();
 const worldPos = new Vector3();
