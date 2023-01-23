@@ -207,7 +207,7 @@ export class App {
     resolvePromiseToScene(scene);
 
     // We manually call scene.updateMatrixWolrd in mainTick
-    scene.autoUpdate = false;
+    scene.matrixWorldAutoUpdate = false;
 
     if (enablePostEffects) {
       this.fx = createEffectsComposer(canvas, renderer, camera, scene, sceneEl, this.store);

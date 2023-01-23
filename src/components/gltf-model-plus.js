@@ -678,10 +678,10 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
       parser =>
         new GLTFLodExtension(parser, {
           loadingMode: useRangeRequests ? "progressive" : "all",
-          onLoadMesh: (lod, mesh, level, lowestLevel) => {
+          onLoadNode: (lod, node, level, lowestLevel) => {
             // Nothing to do for "all" mode
             if (!useRangeRequests) {
-              return mesh;
+              return node;
             }
 
             // Higher levels are progressively loaded on demand.
@@ -690,42 +690,45 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
 
             // Nothing to do if this is the lowest level mesh.
             if (level === lowestLevel || lod.levels.length === 0) {
-              return mesh;
+              return node;
             }
 
-            let lowestMeshLevel = null;
-            for (let index = lowestLevel; index > level; index--) {
-              if (lod.levels[index].object.type !== "Object3D") {
-                lowestMeshLevel = index;
-                break;
-              }
-            }
-
-            if (lowestMeshLevel === null) {
-              return mesh;
-            }
-
-            // Create a mesh clone. Otherwise if an lod instance is cloned before higher
+            // Create a node clone. Otherwise if an lod instance is cloned before higher
             // levels are loaded the lods instance can refer to the same mesh instance,
             // therefore the lods can be broken because an object can't be placed
             // at multiple places in a Three.js scene tree.
-            mesh = mesh.clone();
+            try {
+              node = cloneObject3D(node);
+            } catch (error) {
+              // cloneObject3D() can fail if skeleton bones are not under this node.
+              // Give up cloning in that case for now because progressive loding mode is
+              // behind the flag. We may want to revisit later.
+              console.error(error);
+              console.log(node);
+            }
 
-            convertStandardMaterialsIfNeeded(mesh);
+            node.traverse(obj => {
+              if (obj.isMesh) {
+                convertStandardMaterialsIfNeeded(obj);
 
-            // A hacky solution. media-loader and media-utils make a material clone
-            // and inject shader code chunk for hover effects on before compile hook
-            // as a post-loading process. Here simulates them.
-            // @TODO: Check if this always works. Replace with a better and simpler solution.
-            const currentOnBeforeRender = mesh.material.onBeforeRender;
-            mesh.material = mesh.material.clone();
-            mesh.material.onBeforeRender = currentOnBeforeRender;
+                updateMaterials(obj, material => {
+                  // A hacky solution. media-loader and media-utils make a material clone
+                  // and inject shader code chunk for hover effects on before compile hook
+                  // as a post-loading process. Here simulates them.
+                  // @TODO: Check if this always works. Replace with a better and simpler solution.
+                  const currentOnBeforeRender = material.onBeforeRender;
+                  material = material.clone();
+                  material.onBeforeRender = currentOnBeforeRender;
 
-            // onBeforeCompile of the material of the lowest level mesh should be
-            // already set up because the lowest level should be loaded first.
-            mesh.material.onBeforeCompile = lod.levels[lowestMeshLevel].object.material.onBeforeCompile;
+                  // onBeforeCompile of the material of the lowest level mesh should be
+                  // already set up because the lowest level should be loaded first.
+                  material.onBeforeCompile = lod.levels[lowestLevel].object.material.onBeforeCompile;
+                  return material;
+                });
+              }
+            });
 
-            return mesh;
+            return node;
           }
         })
     );

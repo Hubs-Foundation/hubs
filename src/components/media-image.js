@@ -2,7 +2,7 @@ import { createImageTexture } from "../utils/media-utils";
 import { createBasisTexture, createKTX2Texture } from "../utils/create-basis-texture";
 import { TextureCache } from "../utils/texture-cache";
 import { errorTexture } from "../utils/error-texture";
-import { createPlaneBufferGeometry } from "../utils/three-utils";
+import { createPlaneGeometry } from "../utils/three-utils";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { createGIFTexture } from "../utils/gif-texture";
 import { Layers } from "../camera-layers";
@@ -112,7 +112,7 @@ AFRAME.registerComponent("media-image", {
       let geometry;
 
       if (projection === "360-equirectangular") {
-        geometry = new THREE.SphereBufferGeometry(1, 64, 32);
+        geometry = new THREE.SphereGeometry(1, 64, 32);
         // invert the geometry on the x-axis so that all of the faces point inward
         geometry.scale(-1, 1, 1);
 
@@ -125,7 +125,7 @@ AFRAME.registerComponent("media-image", {
           }
         }
       } else {
-        geometry = createPlaneBufferGeometry(1, 1, 1, 1, texture.flipY);
+        geometry = createPlaneGeometry(1, 1, 1, 1, texture.flipY);
         material.side = THREE.DoubleSide;
       }
 

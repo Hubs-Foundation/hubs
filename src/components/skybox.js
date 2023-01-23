@@ -3,7 +3,7 @@ import { LightProbeGenerator } from "three/examples/jsm/lights/LightProbeGenerat
 const {
   AmbientLight,
   BackSide,
-  BoxBufferGeometry,
+  BoxGeometry,
   CubeCamera,
   LinearFilter,
   Mesh,
@@ -124,7 +124,7 @@ varying vec3 vBetaR;
 varying vec3 vBetaM;
 varying float vSunE;
 
-uniform float luminance;
+uniform float luminanceSky;
 uniform float mieDirectionalG;
 
 const vec3 cameraPos = vec3( 0.0, 0.0, 0.0 );
@@ -208,7 +208,7 @@ void main() {
 
   vec3 texColor = ( Lin + L0 ) * 0.04 + vec3( 0.0, 0.0003, 0.00075 );
 
-  vec3 curr = Uncharted2Tonemap( ( log2( 2.0 / pow( luminance, 4.0 ) ) ) * texColor );
+  vec3 curr = Uncharted2Tonemap( ( log2( 2.0 / pow( luminanceSky, 4.0 ) ) ) * texColor );
   vec3 color = curr * whiteScale;
 
   vec3 retColor = pow( color, vec3( 1.0 / ( 1.2 + ( 1.2 * vSunfade ) ) ) );
@@ -224,7 +224,7 @@ export default class Sky extends Object3D {
     uniforms: UniformsUtils.merge([
       UniformsLib.fog,
       {
-        luminance: { value: 1 },
+        luminanceSky: { value: 1 },
         turbidity: { value: 10 },
         rayleigh: { value: 2 },
         mieCoefficient: { value: 0.005 },
@@ -236,7 +236,7 @@ export default class Sky extends Object3D {
     fragmentShader
   };
 
-  static _geometry = new BoxBufferGeometry(1, 1, 1);
+  static _geometry = new BoxGeometry(1, 1, 1);
 
   constructor() {
     super();
@@ -276,11 +276,11 @@ export default class Sky extends Object3D {
   }
 
   get luminance() {
-    return this.sky.material.uniforms.luminance.value;
+    return this.sky.material.uniforms.luminanceSky.value;
   }
 
   set luminance(value) {
-    this.sky.material.uniforms.luminance.value = value;
+    this.sky.material.uniforms.luminanceSky.value = value;
   }
 
   get mieCoefficient() {

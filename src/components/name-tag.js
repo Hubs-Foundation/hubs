@@ -4,7 +4,7 @@ import { getThemeColor } from "../utils/theme";
 import qsTruthy from "../utils/qs_truthy";
 import { findAncestorWithComponent } from "../utils/scene-graph";
 import nextTick from "../utils/next-tick";
-import { createPlaneBufferGeometry, setMatrixWorld } from "../utils/three-utils";
+import { createPlaneGeometry, setMatrixWorld } from "../utils/three-utils";
 import { textureLoader } from "../utils/media-utils";
 
 import handRaisedIconSrc from "../assets/hud/hand-raised.png";
@@ -26,13 +26,13 @@ const ANIM_CONFIG = {
   round: false
 };
 
-const nametagVolumeGeometry = new THREE.PlaneBufferGeometry(1, 0.025);
+const nametagVolumeGeometry = new THREE.PlaneGeometry(1, 0.025);
 const nametagVolumeMaterial = new THREE.MeshBasicMaterial({ color: "#7ED320" });
 
-const nametagTypingGeometry = new THREE.CircleBufferGeometry(0.01, 6);
+const nametagTypingGeometry = new THREE.CircleGeometry(0.01, 6);
 
 const handRaisedTexture = textureLoader.load(handRaisedIconSrc);
-const handRaisedGeometry = createPlaneBufferGeometry(0.2, 0.2, 1, 1, handRaisedTexture.flipY);
+const handRaisedGeometry = createPlaneGeometry(0.2, 0.2, 1, 1, handRaisedTexture.flipY);
 const handRaisedMaterial = new THREE.MeshBasicMaterial({ transparent: true, map: handRaisedTexture });
 
 AFRAME.registerComponent("name-tag", {

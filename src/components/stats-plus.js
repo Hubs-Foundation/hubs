@@ -165,7 +165,7 @@ AFRAME.registerComponent("stats-plus", {
     );
     this.el.append(this.vrPanel);
     const background = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(0.1, 0.12),
+      new THREE.PlaneGeometry(0.1, 0.12),
       new THREE.MeshBasicMaterial({ color: 0x333333, depthTest: false })
     );
     background.position.set(-0.2, 0.055, 0);

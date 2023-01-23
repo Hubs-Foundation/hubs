@@ -350,7 +350,7 @@ AFRAME.registerComponent("teleporter", {
 
     // Torus.
     this.torus = new THREE.Mesh(
-      new THREE.TorusBufferGeometry(data.hitCylinderRadius, 0.01, 16, 18, 360 * THREE.MathUtils.DEG2RAD),
+      new THREE.TorusGeometry(data.hitCylinderRadius, 0.01, 16, 18, 360 * THREE.MathUtils.DEG2RAD),
       new THREE.MeshBasicMaterial({
         color: data.hitCylinderColor,
         side: THREE.DoubleSide,
@@ -364,7 +364,7 @@ AFRAME.registerComponent("teleporter", {
 
     // Cylinder.
     this.cylinder = new THREE.Mesh(
-      new THREE.CylinderBufferGeometry(
+      new THREE.CylinderGeometry(
         data.hitCylinderRadius,
         data.hitCylinderRadius,
         data.hitCylinderHeight,
@@ -390,7 +390,7 @@ AFRAME.registerComponent("teleporter", {
 
     // create another torus for animating when the hit destination is ready to go
     this.outerTorus = new THREE.Mesh(
-      new THREE.TorusBufferGeometry(data.outerRadius, 0.01, 16, 18, 360 * THREE.MathUtils.DEG2RAD),
+      new THREE.TorusGeometry(data.outerRadius, 0.01, 16, 18, 360 * THREE.MathUtils.DEG2RAD),
       new THREE.MeshBasicMaterial({
         color: data.hitCylinderColor,
         side: THREE.DoubleSide,

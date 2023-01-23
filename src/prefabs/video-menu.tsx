@@ -1,5 +1,5 @@
 /** @jsx createElementEntity */
-import { BoxBufferGeometry, Mesh, MeshBasicMaterial, PlaneBufferGeometry } from "three";
+import { BoxGeometry, Mesh, MeshBasicMaterial, PlaneGeometry } from "three";
 import { Label } from "../prefabs/camera-tool";
 import { AlphaMode } from "../utils/create-image-mesh";
 import { createElementEntity, createRef } from "../utils/jsx-entity";
@@ -21,7 +21,7 @@ function Slider({ trackRef, headRef, ...props }: any) {
         videoMenuItem
         object3D={
           new Mesh(
-            new PlaneBufferGeometry(1.0, 0.05),
+            new PlaneGeometry(1.0, 0.05),
             new MeshBasicMaterial({ opacity: 0.5, color: 0x000000, transparent: true })
           )
         }
@@ -33,7 +33,7 @@ function Slider({ trackRef, headRef, ...props }: any) {
       >
         <entity
           name="Slider:Head"
-          object3D={new Mesh(new BoxBufferGeometry(0.05, 0.05, 0.05), new MeshBasicMaterial())}
+          object3D={new Mesh(new BoxGeometry(0.05, 0.05, 0.05), new MeshBasicMaterial())}
           ref={headRef}
         />
       </entity>
