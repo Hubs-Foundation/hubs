@@ -157,6 +157,7 @@ AFRAME.registerComponent("name-tag", {
 
         this.neck.getWorldPosition(worldPos);
         worldPos.setY(this.nametagElPosY + this.ikRoot.position.y);
+        mat.copy(this.nametag.matrixWorld);
         mat.setPosition(worldPos);
         setMatrixWorld(this.nametag, mat);
       } else {
