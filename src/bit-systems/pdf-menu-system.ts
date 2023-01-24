@@ -67,7 +67,7 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
   }
 }
 
-function render(world: HubsWorld, menu: EntityID, frozen: boolean) {
+function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const target = PDFMenu.targetRef[menu];
   const visible = !!(target && !frozen);
 
@@ -95,5 +95,5 @@ export function pdfMenuSystem(world: HubsWorld, sceneIsFrozen: boolean) {
     moveToTarget(world, menu);
     handleClicks(world, menu);
   }
-  render(world, menu, sceneIsFrozen);
+  flushToObject3Ds(world, menu, sceneIsFrozen);
 }
