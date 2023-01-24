@@ -64,7 +64,7 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   }
 }
 
-export const mediaScaleAnimationDurationMS = 400;
+export const MEDIA_SPAWN_ANIMATION_DURATION_MS = 400;
 export function* animateScale(world: HubsWorld, media: EntityID) {
   const mediaObj = world.eid2obj.get(media)!;
 
@@ -92,7 +92,7 @@ export function* animateScale(world: HubsWorld, media: EntityID) {
       [startPosition, endPosition],
       [startScale, endScale]
     ],
-    durationMS: mediaScaleAnimationDurationMS,
+    durationMS: MEDIA_SPAWN_ANIMATION_DURATION_MS,
     easing: easeOutQuadratic,
     fn: onAnimate
   });

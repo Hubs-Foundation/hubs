@@ -8,7 +8,7 @@ import { sleep } from "../utils/async-utils";
 import { EntityID } from "../utils/networking-types";
 import { scaleMeshToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { coroutine } from "../utils/coroutine";
-import { mediaScaleAnimationDurationMS } from "./media-loading";
+import { MEDIA_SPAWN_ANIMATION_DURATION_MS } from "./media-loading";
 
 /**
  * Warning! This require statement is fragile!
@@ -44,7 +44,7 @@ function* loadPageJob(world: HubsWorld, eid: EntityID, component: PDFComponent, 
   // HACK The loading animation in media loader
   // might still be controlling this object's scale,
   // so wait for that long and then set the scale again.
-  yield sleep(mediaScaleAnimationDurationMS);
+  yield sleep(MEDIA_SPAWN_ANIMATION_DURATION_MS);
   scaleMeshToAspectRatio(mesh, ratio);
 }
 
