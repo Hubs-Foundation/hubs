@@ -61,7 +61,7 @@ AFRAME.GLTFModelPlus.registerComponent("hemisphere-light", "hemisphere-light");
 AFRAME.GLTFModelPlus.registerComponent("point-light", "point-light");
 AFRAME.GLTFModelPlus.registerComponent("spot-light", "spot-light");
 AFRAME.GLTFModelPlus.registerComponent("billboard", "billboard", inflatorWrapper(commonInflators.billboard));
-AFRAME.GLTFModelPlus.registerComponent("simple-water", "simple-water", inflatorWrapper(commonInflators.simpleWater));
+AFRAME.GLTFModelPlus.registerComponent("simple-water", "simple-water");
 AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
 AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");

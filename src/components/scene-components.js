@@ -22,6 +22,7 @@ import "./spot-light";
 import "./floaty-object";
 import "./super-spawner";
 import "./water";
+import "./simple-water";
 import "./trigger-volume";
 import "./video-pause-state";
 import "./particle-emitter";

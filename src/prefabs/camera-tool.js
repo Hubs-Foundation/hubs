@@ -183,7 +183,6 @@ export function CubeMediaFramePrefab() {
       }}
       physicsShape={{ halfExtents: [0.5, 0.5, 0.5] }}
       object3D={new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial())}
-      simpleWater
     >
       <entity mediaFrame position={[0, 1, 0]} />
     </entity>
