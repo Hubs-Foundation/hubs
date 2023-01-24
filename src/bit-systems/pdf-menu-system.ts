@@ -35,7 +35,7 @@ function findPDFMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: bool
     return;
   }
 
-  if (hovered.map(eid => findAncestorWithComponent(world, PDFMenu, eid))[0]) {
+  if (hovered.some(eid => findAncestorWithComponent(world, PDFMenu, eid))) {
     PDFMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
     return;
   }
