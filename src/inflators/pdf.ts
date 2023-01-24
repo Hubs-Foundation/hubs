@@ -12,7 +12,6 @@ export interface PDFParams {
 }
 export interface PDFComponent {
   pdf: PDFDocumentProxy;
-  canvas: HTMLCanvasElement;
   texture: CanvasTexture;
   canvasContext: CanvasRenderingContext2D;
   page: number;
@@ -32,7 +31,6 @@ export function inflatePDF(world: HubsWorld, eid: EntityID, params: PDFParams) {
   addComponent(world, MediaPDF, eid);
   (MediaPDF.map as Map<EntityID, PDFComponent>).set(eid, {
     pdf: params.pdf,
-    canvas,
     texture,
     canvasContext,
     page: -1 // No page is loaded yet

@@ -30,8 +30,8 @@ function* loadPageJob(world: HubsWorld, eid: EntityID, component: PDFComponent, 
   const page: pdfjs.PDFPageProxy = yield component.pdf.getPage(pageNumber);
   const viewport = page.getViewport({ scale: 3 });
   const ratio = viewport.height / viewport.width;
-  component.canvas.width = viewport.width;
-  component.canvas.height = viewport.height;
+  (component.texture.image as HTMLCanvasElement).width = viewport.width;
+  (component.texture.image as HTMLCanvasElement).height = viewport.height;
   const renderTask = page.render({ canvasContext: component.canvasContext, viewport });
   yield renderTask.promise;
   const mesh = world.eid2obj.get(eid)! as Mesh;
