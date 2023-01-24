@@ -1,13 +1,9 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
-import React from 'react';
-import {
-  AvatarLink,
-  OwnedFileImage,
-  ConditionalReferenceField,
-} from './fields';
-import { ApproveAvatarButton } from './approve-buttons';
-import { DenyAvatarButton } from './deny-buttons';
-import { ToolbarWithoutDelete } from './toolbar-without-delete';
+import React from "react";
+import { AvatarLink, OwnedFileImage, ConditionalReferenceField } from "./fields";
+import { ApproveAvatarButton } from "./approve-buttons";
+import { DenyAvatarButton } from "./deny-buttons";
+import { ToolbarWithoutDelete } from "./toolbar-without-delete";
 
 import {
   List,
@@ -21,19 +17,19 @@ import {
   TextField,
   DateField,
   BooleanField,
-  Filter,
-} from 'react-admin';
+  Filter
+} from "react-admin";
 
-import 'aframe';
+import "aframe";
 
-const AvatarFilter = (props) => (
+const AvatarFilter = props => (
   <Filter {...props}>
     <TextInput label="Search Name" source="name" alwaysOn />
     <TextInput label="Search SID" source="avatar_sid" alwaysOn />
   </Filter>
 );
 
-export const AvatarEdit = (props) => (
+export const AvatarEdit = props => (
   <Edit {...props}>
     <SimpleForm toolbar={<ToolbarWithoutDelete />}>
       <TextInput source="name" />
@@ -42,8 +38,8 @@ export const AvatarEdit = (props) => (
       <SelectInput
         source="state"
         choices={[
-          { id: 'active', name: 'active' },
-          { id: 'removed', name: 'removed' },
+          { id: "active", name: "active" },
+          { id: "removed", name: "removed" }
         ]}
       />
       <BooleanInput source="allow_remixing" />
@@ -52,18 +48,14 @@ export const AvatarEdit = (props) => (
   </Edit>
 );
 
-const rowStyle = (record) => ({
-  opacity: record.state === 'removed' ? 0.3 : 1,
+const rowStyle = record => ({
+  opacity: record.state === "removed" ? 0.3 : 1
 });
 
-export const AvatarList = (props) => (
+export const AvatarList = props => (
   <List {...props} filters={<AvatarFilter />} bulkActionButtons={false}>
     <Datagrid rowStyle={rowStyle}>
-      <ConditionalReferenceField
-        label="live thumbnail"
-        reference="avatar_listings"
-        source="avatar_listing_id"
-      >
+      <ConditionalReferenceField label="live thumbnail" reference="avatar_listings" source="avatar_listing_id">
         <OwnedFileImage
           source="thumbnail_owned_file_id"
           aspect="tall"
@@ -71,11 +63,7 @@ export const AvatarList = (props) => (
         />
       </ConditionalReferenceField>
 
-      <ConditionalReferenceField
-        label="live name"
-        reference="avatar_listings"
-        source="avatar_listing_id"
-      >
+      <ConditionalReferenceField label="live name" reference="avatar_listings" source="avatar_listing_id">
         <TextField source="name" />
       </ConditionalReferenceField>
       <span> ➡ </span>
@@ -88,10 +76,7 @@ export const AvatarList = (props) => (
       <TextField source="name" />
       <TextField source="account_id" />
       <AvatarLink source="avatar_sid" />
-      <ConditionalReferenceField
-        reference="avatar_listings"
-        source="parent_avatar_listing_id"
-      >
+      <ConditionalReferenceField reference="avatar_listings" source="parent_avatar_listing_id">
         <TextField source="name" />
       </ConditionalReferenceField>
       <OwnedFileImage source="base_map_owned_file_id" aspect="square" />
