@@ -61,6 +61,7 @@ import qsTruthy from "../utils/qs_truthy";
 import { waypointSystem } from "../bit-systems/waypoint";
 import { objectSpawnerSystem } from "../bit-systems/object-spawner";
 import { billboardSystem } from "../bit-systems/billboard";
+import { videoTextureSystem } from "../bit-systems/video-texture";
 
 declare global {
   interface Window {
@@ -233,6 +234,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
+  videoTextureSystem(world);
 
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);

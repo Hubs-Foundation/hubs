@@ -34,7 +34,9 @@ import {
   NetworkDebug,
   WaypointPreview,
   NetworkedFloatyObject,
-  Billboard
+  Billboard,
+  MaterialTag,
+  VideoTextureSource
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -65,6 +67,7 @@ import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/di
 import { ProjectionMode } from "./projection-mode";
 import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
 import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
+import { inflateVideoTextureTarget, VideoTextureTargetParams } from "../inflators/video-texture-target";
 
 preload(
   new Promise(resolve => {
@@ -323,6 +326,8 @@ export interface GLTFComponentData extends ComponentData {
   navMesh?: true;
   waypoint?: WaypointParams;
   spawner: SpawnerParams;
+  videoTextureTarget: VideoTextureTargetParams;
+  videoTextureSource: { fps: number; resolution: [x: number, y: number] };
 
   // deprecated
   spawnPoint?: true;
@@ -410,7 +415,9 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   background: inflateBackground,
   spawnPoint: inflateSpawnpoint,
   skybox: inflateSkybox,
-  spawner: inflateSpawner
+  spawner: inflateSpawner,
+  videoTextureTarget: inflateVideoTextureTarget,
+  videoTextureSource: createDefaultInflator(VideoTextureSource),
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
