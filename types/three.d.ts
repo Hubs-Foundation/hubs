@@ -9,6 +9,9 @@ declare module "three" {
     el?: AElement;
     updateMatrices: (forceLocalUpdate?: boolean, forceWorldUpdate?: boolean, skipParents?: boolean) => void;
   }
+  interface Material {
+    eid?: number;
+  }
   interface Mesh {
     reflectionProbeMode: "static" | "dynamic" | false;
   }

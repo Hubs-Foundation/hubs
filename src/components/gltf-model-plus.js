@@ -12,7 +12,7 @@ import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 import nextTick from "../utils/next-tick";
 import { promisifyWorker } from "../utils/promisify-worker.js";
 import qsTruthy from "../utils/qs_truthy";
-import { cloneObject3D } from "../utils/three-utils";
+import { cloneObject3D, disposeMaterial } from "../utils/three-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
@@ -757,18 +757,9 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
             disposables.add(obj.geometry);
           }
 
-          if (obj.material) {
-            if (obj.material.map) disposables.add(obj.material.map);
-            if (obj.material.lightMap) disposables.add(obj.material.lightMap);
-            if (obj.material.bumpMap) disposables.add(obj.material.bumpMap);
-            if (obj.material.normalMap) disposables.add(obj.material.normalMap);
-            if (obj.material.specularMap) disposables.add(obj.material.specularMap);
-            if (obj.material.envMap) disposables.add(obj.material.envMap);
-            if (obj.material.aoMap) disposables.add(obj.material.aoMap);
-            if (obj.material.metalnessMap) disposables.add(obj.material.metalnessMap);
-            if (obj.material.roughnessMap) disposables.add(obj.material.roughnessMap);
-            if (obj.material.emissiveMap) disposables.add(obj.material.emissiveMap);
-          }
+          mapMaterials(obj, function (m) {
+            disposables.add(m);
+          });
 
           const mozHubsComponents = obj.userData.gltfExtensions?.MOZ_hubs_components;
           if (mozHubsComponents) {
@@ -784,9 +775,14 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
           }
         });
 
+        scene.associations = gltf.parser.associations;
         scene.dispose = function dispose() {
           disposables.forEach(disposable => {
-            disposable.dispose();
+            if (disposable.isMaterial) {
+              disposeMaterial(disposable);
+            } else {
+              disposable.dispose();
+            }
           });
         };
       });

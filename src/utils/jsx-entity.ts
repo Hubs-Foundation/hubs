@@ -57,7 +57,7 @@ import {
 import { inflateSpawnpoint, inflateWaypoint, WaypointParams } from "../inflators/waypoint";
 import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
-import { Group, Object3D, Texture, VideoTexture } from "three";
+import { Group, Material, Object3D, Texture, VideoTexture } from "three";
 import { AlphaMode } from "./create-image-mesh";
 import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
@@ -171,6 +171,16 @@ export function swapObject3DComponent(world: HubsWorld, eid: number, obj: Object
   oldObj.eid = 0;
   world.eid2obj.set(eid, obj);
   obj.eid = eid;
+  return eid;
+}
+
+export function addMaterialComponent(world: HubsWorld, eid: number, mat: Material) {
+  if (hasComponent(world, MaterialTag, eid)) {
+    throw new Error("Tried to add an Material tag to an entity that already has one");
+  }
+  addComponent(world, MaterialTag, eid);
+  world.eid2mat.set(eid, mat);
+  mat.eid = eid;
   return eid;
 }
 
