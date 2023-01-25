@@ -154,43 +154,62 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   return media;
 }
 
-function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, signal: AbortSignal) {
-  const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), signal);
-  if (!canceled) {
-    resizeAndRecenter(world, media, eid);
-    if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
-      addComponent(world, ObjectMenuTarget, eid);
-    }
-    add(world, media, eid);
-    setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid])!, media);
-    if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
-      yield* animateScale(world, media);
-    }
-    removeComponent(world, MediaLoader, eid);
+function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID) {
+  if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
+    addComponent(world, ObjectMenuTarget, eid);
   }
+  const job = jobs.get(eid)!;
+  job.abortController = new AbortController();
+  const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), job.abortController.signal);
+  delete job.abortController;
+  if (canceled) {
+    return;
+  }
+
+  resizeAndRecenter(world, media, eid);
+  add(world, media, eid);
+  setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid])!, media);
+  if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
+    yield* animateScale(world, media);
+  }
+  removeComponent(world, MediaLoader, eid);
 }
 
-const jobs = new Set();
-const abortControllers = new Map();
+// TODO type for coroutine
+type Coroutine = () => IteratorResult<undefined, any>;
+type Job = {
+  coroutine: Coroutine;
+  abortController?: AbortController;
+};
+const jobs = new Map<EntityID, Job>();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
-    const ac = new AbortController();
-    abortControllers.set(eid, ac);
-    jobs.add(coroutine(loadAndAnimateMedia(world, eid, ac.signal)));
+    jobs.set(eid, {
+      coroutine: coroutine(loadAndAnimateMedia(world, eid))
+    });
   });
 
   mediaLoaderExitQuery(world).forEach(function (eid) {
-    const ac = abortControllers.get(eid);
-    ac.abort();
-    abortControllers.delete(eid);
+    const job = jobs.get(eid);
+    if (job) {
+      if (job.abortController) {
+        // Job is in the middle of cancellable work;
+        // We can call abort, but must run the coroutine to completion
+        job.abortController.abort();
+      } else {
+        // Job doesn't need to do cleanup:
+        // Interrupt it immediately by not running the coroutine anymore
+        jobs.delete(eid);
+      }
+    }
   });
 
-  jobs.forEach((c: any) => {
-    if (c().done) {
-      jobs.delete(c);
+  jobs.forEach((job, eid) => {
+    if (job.coroutine().done) {
+      jobs.delete(eid);
     }
   });
 }
