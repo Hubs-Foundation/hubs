@@ -8,29 +8,18 @@ const buttonHeight = 0.2;
 const buttonScale: ArrayVec3 = [0.4, 0.4, 0.4];
 const buttonWidth = 0.3;
 
-function PreviousPageButton(props: Attrs) {
-  return (
-    <Button3D
-      name="Previous Page Button"
-      scale={buttonScale}
-      width={buttonWidth}
-      height={buttonHeight}
-      type={BUTTON_TYPES.ACTION}
-      text={"<"}
-      {...props}
-    />
-  );
+interface PDFPageButtonProps extends Attrs {
+  text: string;
 }
 
-function NextPageButton(props: Attrs) {
+function PDFPageButton(props: PDFPageButtonProps) {
   return (
     <Button3D
-      name="Next Page Button"
+      name={props.name}
       scale={buttonScale}
       width={buttonWidth}
       height={buttonHeight}
       type={BUTTON_TYPES.ACTION}
-      text={">"}
       {...props}
     />
   );
@@ -62,8 +51,8 @@ export function PDFMenuPrefab() {
         pageLabelRef: refs.label
       }}
     >
-      <PreviousPageButton ref={refs.prev} position={position.prev} />
-      <NextPageButton ref={refs.next} position={position.next} />
+      <PDFPageButton name="Previous Page Button" text="<" ref={refs.prev} position={position.prev} />
+      <PDFPageButton name="Next Page Button" text=">" ref={refs.next} position={position.next} />
       <Label ref={refs.label} position={position.label} text={{ color: pageLabelColor }} />
     </entity>
   );
