@@ -7,6 +7,7 @@ import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
 import { cancelable, coroutine, crClearTimeout, crNextFrame, crTimeout, makeCancelable } from "../utils/coroutine";
+import { Job, JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadImage } from "../utils/load-image";
@@ -172,36 +173,18 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID) {
   removeComponent(world, MediaLoader, eid);
 }
 
-// TODO type for coroutine
-type Coroutine = () => IteratorResult<undefined, any>;
-export type Job = {
-  coroutine: Coroutine;
-  abortController?: AbortController;
-};
-const jobs = new Map<EntityID, Job>();
+const jobs: JobMap = new Map();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
-    jobs.set(eid, {
-      coroutine: coroutine(loadAndAnimateMedia(world, eid))
-    });
+    startJob(jobs, eid, coroutine(loadAndAnimateMedia(world, eid)));
   });
 
   mediaLoaderExitQuery(world).forEach(function (eid) {
-    const job = jobs.get(eid);
-    if (!job) return;
-
-    if (job.abortController) {
-      job.abortController.abort();
-    }
-    jobs.delete(eid);
+    stopJob(jobs, eid);
   });
 
-  jobs.forEach((job, eid) => {
-    if (job.coroutine().done) {
-      jobs.delete(eid);
-    }
-  });
+  tickJobs(jobs);
 }

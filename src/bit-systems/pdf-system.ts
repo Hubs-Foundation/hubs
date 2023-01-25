@@ -5,9 +5,10 @@ import { HubsWorld } from "../app";
 import { MediaPDF, NetworkedPDF } from "../bit-components";
 import { PDFComponent } from "../inflators/pdf";
 import { cancelable, coroutine, makeCancelable } from "../utils/coroutine";
+import { JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
 import { EntityID } from "../utils/networking-types";
 import { scaleMeshToAspectRatio } from "../utils/scale-to-aspect-ratio";
-import { Job, waitForMediaLoaded } from "./media-loading";
+import { waitForMediaLoaded } from "./media-loading";
 
 /**
  * Warning! This require statement is fragile!
@@ -67,23 +68,7 @@ function* loadPageJob(world: HubsWorld, eid: EntityID, component: PDFComponent, 
   scaleMeshToAspectRatio(mesh, ratio);
 }
 
-function stopLoading(eid: EntityID) {
-  const job = jobs.get(eid);
-  if (!job) return;
-  if (job.abortController) {
-    job.abortController.abort();
-  }
-  jobs.delete(eid);
-}
-
-function startLoading(world: HubsWorld, eid: EntityID) {
-  const data = (MediaPDF.map as PDFComponentMap).get(eid)!;
-  jobs.set(eid, {
-    coroutine: coroutine(loadPageJob(world, eid, data, NetworkedPDF.pageNumber[eid]))
-  });
-}
-
-const jobs = new Map<EntityID, Job>();
+const jobs: JobMap = new Map();
 const pdfQuery = defineQuery([MediaPDF, NetworkedPDF]);
 const pdfExitQuery = exitQuery(pdfQuery);
 export function pdfSystem(world: HubsWorld) {
@@ -91,18 +76,14 @@ export function pdfSystem(world: HubsWorld) {
     const data = (MediaPDF.map as PDFComponentMap).get(eid)!;
     if (data.pageNumber !== NetworkedPDF.pageNumber[eid]) {
       data.pageNumber = NetworkedPDF.pageNumber[eid];
-      stopLoading(eid);
-      startLoading(world, eid);
+      stopJob(jobs, eid);
+      startJob(jobs, eid, coroutine(loadPageJob(world, eid, data, NetworkedPDF.pageNumber[eid])));
     }
   });
 
   pdfExitQuery(world).forEach(function (eid) {
-    stopLoading(eid);
+    stopJob(jobs, eid);
   });
 
-  jobs.forEach((job, eid) => {
-    if (job.coroutine().done) {
-      jobs.delete(eid);
-    }
-  });
+  tickJobs(jobs);
 }
