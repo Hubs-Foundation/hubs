@@ -505,6 +505,21 @@ class GLTFHubsComponentsExtension {
       for (const componentName in ext) {
         const props = ext[componentName];
         for (const propName in props) {
+          // These components had a variant before mhc_link_type existed that just directly pointed at the node index, fix them
+          if (
+            ((componentName === "video-texture-target" && propName === "srcNode") ||
+              (componentName === "audio-target" && propName === "srcNode")) &&
+            typeof props[propName] === "number"
+          ) {
+            console.warn(
+              `Found an outdated ${componentName} 'srcNode' property, fixing. Make sure you are using the latest exporter.`
+            );
+            props[propName] = {
+              __mhc_link_type: "node",
+              index: props[propName]
+            };
+          }
+
           const value = props[propName];
           const type = value?.__mhc_link_type;
           if (type && value.index !== undefined) {
