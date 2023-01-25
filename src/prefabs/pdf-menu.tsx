@@ -26,34 +26,26 @@ function PDFPageButton(props: PDFPageButtonProps) {
 }
 
 const uiZ = 0.001;
-// prettier-ignore
-const position = {
-  prev:  [-0.45,  0.0 , uiZ] as ArrayVec3,
-  next:  [ 0.45,  0.0 , uiZ] as ArrayVec3,
-  label: [ 0.0 , -0.45, uiZ] as ArrayVec3,
-};
-
+const positionPrev: ArrayVec3 = [-0.45, 0.0, uiZ];
+const positionNext: ArrayVec3 = [0.45, 0.0, uiZ];
+const positionLabel: ArrayVec3 = [0.0, -0.45, uiZ];
 const pageLabelColor = new Color(0.1, 0.1, 0.1);
-
 export function PDFMenuPrefab() {
-  const refs = {
-    prev: createRef(),
-    next: createRef(),
-    label: createRef()
-  };
-
+  const refPrev = createRef();
+  const refNext = createRef();
+  const refLabel = createRef();
   return (
     <entity
       name="PDF Menu"
       pdfMenu={{
-        prevButtonRef: refs.prev,
-        nextButtonRef: refs.next,
-        pageLabelRef: refs.label
+        prevButtonRef: refPrev,
+        nextButtonRef: refNext,
+        pageLabelRef: refLabel
       }}
     >
-      <PDFPageButton name="Previous Page Button" text="<" ref={refs.prev} position={position.prev} />
-      <PDFPageButton name="Next Page Button" text=">" ref={refs.next} position={position.next} />
-      <Label ref={refs.label} position={position.label} text={{ color: pageLabelColor }} />
+      <PDFPageButton name="Previous Page Button" text="<" ref={refPrev} position={positionPrev} />
+      <PDFPageButton name="Next Page Button" text=">" ref={refNext} position={positionNext} />
+      <Label ref={refLabel} position={positionLabel} text={{ color: pageLabelColor }} />
     </entity>
   );
 }
