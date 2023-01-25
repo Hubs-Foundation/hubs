@@ -6,6 +6,11 @@
         overflow: hidden;
         height: 100%;
     }
+
+    section {
+        padding: 8px 0;
+    }
+
     .object-list, .object-properties {
         height: 50%;
         overflow: auto;
