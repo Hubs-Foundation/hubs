@@ -44,10 +44,7 @@ function* loadScene(
       throw new Error("Scene loading failed. No src url provided to load.");
     }
 
-    const job = jobs.get(loaderEid)!;
-    job.abortController = new AbortController();
-    const scene = yield* cancelable(loadModel(world, src, "model/gltf", false), job.abortController.signal);
-    delete job.abortController;
+    const scene = yield* cancelable(jobs.get(loaderEid)!, loadModel(world, src, "model/gltf", false));
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 

@@ -7,7 +7,7 @@ import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
 import { coroutine, crClearTimeout, crNextFrame, crTimeout, makeCancelable } from "../utils/coroutine";
-import { cancelable, Job, JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
+import { cancelable, JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadImage } from "../utils/load-image";
@@ -159,11 +159,7 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID) {
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
     addComponent(world, ObjectMenuTarget, eid);
   }
-  const job = jobs.get(eid)!;
-  job.abortController = new AbortController();
-  const media: EntityID = yield* cancelable(loadMedia(world, eid), job.abortController.signal);
-  delete job.abortController;
-
+  const media: EntityID = yield* cancelable(jobs.get(eid)!, loadMedia(world, eid));
   resizeAndRecenter(world, media, eid);
   add(world, media, eid);
   setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid])!, media);

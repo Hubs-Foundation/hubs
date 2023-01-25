@@ -54,11 +54,7 @@ function* renderPageCancelable(component: PDFComponent, pageNumber: number) {
 }
 
 function* loadPageJob(world: HubsWorld, eid: EntityID, component: PDFComponent, pageNumber: number) {
-  const job = jobs.get(eid)!;
-  job.abortController = new AbortController();
-  const ratio = yield* cancelable(renderPageCancelable(component, pageNumber), job.abortController.signal);
-  delete job.abortController;
-
+  const ratio = yield* cancelable(jobs.get(eid)!, renderPageCancelable(component, pageNumber));
   const mesh = world.eid2obj.get(eid)! as Mesh;
   const material = mesh.material as MeshBasicMaterial;
   material.map = component.texture;

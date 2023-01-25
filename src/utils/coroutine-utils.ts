@@ -35,7 +35,10 @@ export function tickJobs(jobs: JobMap) {
 type CancelableGenerator = Generator<any, any, any>;
 type Fn = () => void;
 // The thing whose "cancel" function you can call
-export function cancelable(iter: Generator, signal: AbortSignal) {
+export function cancelable(job: Job, iter: Generator) {
+  if (job.abortController) throw new Error("Nesting cancellables is not allowed.");
+  job.abortController = new AbortController();
+
   const cancelFns: Fn[] = [];
   const rollback = () => {
     for (let i = cancelFns.length - 1; i >= 0; i--) {
@@ -44,10 +47,10 @@ export function cancelable(iter: Generator, signal: AbortSignal) {
   };
 
   let canceled = false;
-  signal.onabort = () => {
+  job.abortController.signal.onabort = () => {
     rollback();
     canceled = true;
-    signal.onabort = null;
+    job.abortController!.signal.onabort = null;
   };
 
   let nextValue: any;
@@ -63,7 +66,8 @@ export function cancelable(iter: Generator, signal: AbortSignal) {
         ) as { value?: any; done?: boolean };
         throwing = false;
         if (done) {
-          signal.onabort = null;
+          job.abortController!.signal.onabort = null;
+          delete job.abortController;
           return value;
         } else {
           if (isCancelable(value)) {
