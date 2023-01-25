@@ -4,9 +4,9 @@ import { ArrayVec3, Attrs, createElementEntity, createRef } from "../utils/jsx-e
 import { Button3D, BUTTON_TYPES } from "./button3D";
 import { Label } from "./camera-tool";
 
-const buttonHeight = 0.2;
-const buttonScale: ArrayVec3 = [0.4, 0.4, 0.4];
-const buttonWidth = 0.3;
+const BUTTON_HEIGHT = 0.2;
+const BUTTON_SCALE: ArrayVec3 = [0.4, 0.4, 0.4];
+const BUTTON_WIDTH = 0.3;
 
 interface PDFPageButtonProps extends Attrs {
   text: string;
@@ -16,20 +16,20 @@ function PDFPageButton(props: PDFPageButtonProps) {
   return (
     <Button3D
       name={props.name}
-      scale={buttonScale}
-      width={buttonWidth}
-      height={buttonHeight}
+      scale={BUTTON_SCALE}
+      width={BUTTON_WIDTH}
+      height={BUTTON_HEIGHT}
       type={BUTTON_TYPES.ACTION}
       {...props}
     />
   );
 }
 
-const uiZ = 0.001;
-const positionPrev: ArrayVec3 = [-0.45, 0.0, uiZ];
-const positionNext: ArrayVec3 = [0.45, 0.0, uiZ];
-const positionLabel: ArrayVec3 = [0.0, -0.45, uiZ];
-const pageLabelColor = new Color(0.1, 0.1, 0.1);
+const UI_Z = 0.001;
+const POSITION_PREV: ArrayVec3 = [-0.45, 0.0, UI_Z];
+const POSITION_NEXT: ArrayVec3 = [0.45, 0.0, UI_Z];
+const POSITION_LABEL: ArrayVec3 = [0.0, -0.45, UI_Z];
+const PAGE_LABEL_COLOR = new Color(0.1, 0.1, 0.1);
 export function PDFMenuPrefab() {
   const refPrev = createRef();
   const refNext = createRef();
@@ -43,9 +43,9 @@ export function PDFMenuPrefab() {
         pageLabelRef: refLabel
       }}
     >
-      <PDFPageButton name="Previous Page Button" text="<" ref={refPrev} position={positionPrev} />
-      <PDFPageButton name="Next Page Button" text=">" ref={refNext} position={positionNext} />
-      <Label ref={refLabel} position={positionLabel} text={{ color: pageLabelColor }} />
+      <PDFPageButton name="Previous Page Button" text="<" ref={refPrev} position={POSITION_PREV} />
+      <PDFPageButton name="Next Page Button" text=">" ref={refNext} position={POSITION_NEXT} />
+      <Label ref={refLabel} position={POSITION_LABEL} text={{ color: PAGE_LABEL_COLOR }} />
     </entity>
   );
 }
