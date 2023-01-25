@@ -68,6 +68,7 @@ import { ProjectionMode } from "./projection-mode";
 import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
 import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
 import { inflateVideoTextureTarget, VideoTextureTargetParams } from "../inflators/video-texture-target";
+import { inflateUVScroll, UVScrollParams } from "../inflators/uv-scroll";
 
 preload(
   new Promise(resolve => {
@@ -326,6 +327,7 @@ export interface GLTFComponentData extends ComponentData {
   navMesh?: true;
   waypoint?: WaypointParams;
   spawner: SpawnerParams;
+  uvScroll: UVScrollParams;
   videoTextureTarget: VideoTextureTargetParams;
   videoTextureSource: { fps: number; resolution: [x: number, y: number] };
 
@@ -418,6 +420,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   spawner: inflateSpawner,
   videoTextureTarget: inflateVideoTextureTarget,
   videoTextureSource: createDefaultInflator(VideoTextureSource),
+  uvScroll: inflateUVScroll
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

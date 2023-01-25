@@ -198,6 +198,11 @@ export const Billboard = defineComponent({
   onlyY: Types.ui8
 });
 export const MaterialTag = defineComponent();
+export const UVScroll = defineComponent({
+  speed: [Types.f32, 2],
+  increment: [Types.f32, 2],
+  offset: [Types.f32, 2]
+});
 export const VideoTextureSource = defineComponent({
   fps: Types.ui8,
   resolution: [Types.ui16, 2]
