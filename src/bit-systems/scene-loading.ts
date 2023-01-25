@@ -10,8 +10,8 @@ import { CharacterControllerSystem } from "../systems/character-controller-syste
 import { EnvironmentSystem } from "../systems/environment-system";
 import { setInitialNetworkedData, setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
 import { anyEntityWith } from "../utils/bit-utils";
-import { cancelable, coroutine } from "../utils/coroutine";
-import { JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
+import { coroutine } from "../utils/coroutine";
+import { cancelable, JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
 import { EntityID } from "../utils/networking-types";

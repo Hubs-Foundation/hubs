@@ -44,7 +44,7 @@ export function crInterval(fn, ms) {
   return handle;
 }
 
-function isCancelable(c) {
+export function isCancelable(c) {
   return !!c.onCancel;
 }
 
@@ -52,55 +52,6 @@ function isCancelable(c) {
 export function makeCancelable(fn, obj = {}) {
   obj.onCancel = fn;
   return obj;
-}
-
-// The thing whose "cancel" function you can call
-export function cancelable(iter, signal) {
-  const cancelFns = [];
-  const rollback = () => {
-    for (let i = cancelFns.length - 1; i >= 0; i--) {
-      cancelFns[i]();
-    }
-  };
-
-  let canceled = false;
-  signal.onabort = () => {
-    rollback();
-    canceled = true;
-    signal.onabort = null;
-  };
-
-  let nextValue;
-  let throwing;
-  return (function* () {
-    while (true) {
-      if (canceled) {
-        throw new Error("It is invalid to tick a canceled coroutine.");
-      }
-      try {
-        const { value, done } = throwing ? iter.throw(nextValue) : iter.next(nextValue);
-        throwing = false;
-        if (done) {
-          signal.onabort = null;
-          return value;
-        } else {
-          if (isCancelable(value)) {
-            cancelFns.push(value.onCancel);
-          }
-          nextValue = yield value;
-        }
-      } catch (e) {
-        if (throwing) {
-          // We already threw back into the iter, rollback and throw ourselves
-          rollback();
-          throw e;
-        } else {
-          throwing = true;
-          nextValue = e;
-        }
-      }
-    }
-  })();
 }
 
 const nextFramePromise = Promise.resolve();
