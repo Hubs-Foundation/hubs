@@ -1,23 +1,17 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery } from "bitecs";
 import { HubsWorld } from "../app";
-import { FloatyObject, Held, HeldRemoteRight, Interacted, MediaLoader, ObjectSpawner } from "../bit-components";
+import { FloatyObject, Held, HeldRemoteRight, Interacted, ObjectSpawner } from "../bit-components";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 import { sleep } from "../utils/async-utils";
-import { coroutine, crNextFrame } from "../utils/coroutine";
+import { coroutine } from "../utils/coroutine";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
 import { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
-import { animateScale } from "./media-loading";
+import { animateScale, waitForMediaLoaded } from "./media-loading";
 
 export enum OBJECT_SPAWNER_FLAGS {
   /** Apply gravity to spawned objects */
   APPLY_GRAVITY = 1 << 0
-}
-
-function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
-  while (hasComponent(world, MediaLoader, eid)) {
-    yield crNextFrame();
-  }
 }
 
 function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {

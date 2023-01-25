@@ -1,14 +1,13 @@
-import { defineQuery, entityExists, exitQuery } from "bitecs";
+import { defineQuery, exitQuery } from "bitecs";
 import * as pdfjs from "pdfjs-dist";
 import { Mesh, MeshBasicMaterial } from "three";
 import { HubsWorld } from "../app";
 import { MediaPDF, NetworkedPDF } from "../bit-components";
 import { PDFComponent } from "../inflators/pdf";
-import { sleep } from "../utils/async-utils";
+import { coroutine } from "../utils/coroutine";
 import { EntityID } from "../utils/networking-types";
 import { scaleMeshToAspectRatio } from "../utils/scale-to-aspect-ratio";
-import { coroutine } from "../utils/coroutine";
-import { MEDIA_SPAWN_ANIMATION_DURATION_MS } from "./media-loading";
+import { waitForMediaLoaded } from "./media-loading";
 
 /**
  * Warning! This require statement is fragile!
@@ -39,12 +38,7 @@ function* loadPageJob(world: HubsWorld, eid: EntityID, component: PDFComponent, 
   material.map = component.texture;
   material.map!.needsUpdate = true;
   material.needsUpdate = true;
-  scaleMeshToAspectRatio(mesh, ratio);
-
-  // HACK The loading animation in media loader
-  // might still be controlling this object's scale,
-  // so wait for that long and then set the scale again.
-  yield sleep(MEDIA_SPAWN_ANIMATION_DURATION_MS);
+  yield* waitForMediaLoaded(world, mesh.parent!.eid!);
   scaleMeshToAspectRatio(mesh, ratio);
 }
 

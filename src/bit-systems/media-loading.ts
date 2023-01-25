@@ -6,15 +6,21 @@ import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
-import { cancelable, coroutine, crClearTimeout, crTimeout, makeCancelable } from "../utils/coroutine";
+import { cancelable, coroutine, crClearTimeout, crNextFrame, crTimeout, makeCancelable } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadImage } from "../utils/load-image";
 import { loadModel } from "../utils/load-model";
-import { loadVideo } from "../utils/load-video";
 import { loadPDF } from "../utils/load-pdf";
+import { loadVideo } from "../utils/load-video";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
+
+export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
+  while (hasComponent(world, MediaLoader, eid)) {
+    yield crNextFrame();
+  }
+}
 
 const loaderForMediaType = {
   [MediaType.IMAGE]: (
@@ -64,7 +70,6 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   }
 }
 
-export const MEDIA_SPAWN_ANIMATION_DURATION_MS = 400;
 export function* animateScale(world: HubsWorld, media: EntityID) {
   const mediaObj = world.eid2obj.get(media)!;
 
@@ -92,7 +97,7 @@ export function* animateScale(world: HubsWorld, media: EntityID) {
       [startPosition, endPosition],
       [startScale, endScale]
     ],
-    durationMS: MEDIA_SPAWN_ANIMATION_DURATION_MS,
+    durationMS: 400,
     easing: easeOutQuadratic,
     fn: onAnimate
   });
