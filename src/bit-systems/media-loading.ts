@@ -6,8 +6,8 @@ import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
-import { coroutine, crClearTimeout, crNextFrame, crTimeout, makeCancelable } from "../utils/coroutine";
-import { cancelable, JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
+import { coroutine, crClearTimeout, crNextFrame, crTimeout } from "../utils/coroutine";
+import { cancelable, JobMap, startJob, stopJob, tickJobs, withRollback } from "../utils/coroutine-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadImage } from "../utils/load-image";
@@ -136,7 +136,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     loadingObjEid = renderAsEntity(world, LoadingObject());
     add(world, loadingObjEid, eid);
   }, 400);
-  yield makeCancelable(() => loadingObjEid && removeEntity(world, loadingObjEid));
+  yield withRollback(() => loadingObjEid && removeEntity(world, loadingObjEid));
   const src = APP.getString(MediaLoader.src[eid]);
   let media;
   try {

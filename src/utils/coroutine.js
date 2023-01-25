@@ -1,3 +1,4 @@
+import { hasCancelHandler } from "./coroutine-utils";
 let timers;
 
 class CoroutineTimerError extends Error {
@@ -42,16 +43,6 @@ export function crInterval(fn, ms) {
   const handle = nextTimerId();
   timers.set(handle, { repeat: true, fn, ms, exp: now + ms });
   return handle;
-}
-
-export function isCancelable(c) {
-  return !!c.onCancel;
-}
-
-// The thing that has an "onCancel" handler fn.
-export function makeCancelable(fn, obj = {}) {
-  obj.onCancel = fn;
-  return obj;
 }
 
 const nextFramePromise = Promise.resolve();
@@ -109,7 +100,7 @@ export function coroutine(iter) {
             doThrow = true;
             nextValue = e;
           });
-      } else if (isCancelable(value)) {
+      } else if (hasCancelHandler(value)) {
         nextValue = value;
       } else {
         console.error(`Coroutine yielded value that was not a promise or cancelable.`, value, iter);

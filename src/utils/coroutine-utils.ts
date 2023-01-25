@@ -1,4 +1,3 @@
-import { isCancelable } from "./coroutine";
 import { EntityID } from "./networking-types";
 
 // TODO Write a better type for coroutine
@@ -31,18 +30,27 @@ export function tickJobs(jobs: JobMap) {
   });
 }
 
+export function hasCancelHandler(c: any) {
+  return !!c.onCancel;
+}
+
+export function withRollback(fn: RollbackFunction, obj = {}) {
+  (obj as any).onCancel = fn;
+  return obj;
+}
+
 // TODO: A better type for this
 type CancelableGenerator = Generator<any, any, any>;
-type Fn = () => void;
+type RollbackFunction = () => void;
 // The thing whose "cancel" function you can call
 export function cancelable(job: Job, iter: Generator) {
   if (job.abortController) throw new Error("Nesting cancellables is not allowed.");
   job.abortController = new AbortController();
 
-  const cancelFns: Fn[] = [];
+  const rollbackFns: RollbackFunction[] = [];
   const rollback = () => {
-    for (let i = cancelFns.length - 1; i >= 0; i--) {
-      cancelFns[i]();
+    for (let i = rollbackFns.length - 1; i >= 0; i--) {
+      rollbackFns[i]();
     }
   };
 
@@ -70,8 +78,8 @@ export function cancelable(job: Job, iter: Generator) {
           delete job.abortController;
           return value;
         } else {
-          if (isCancelable(value)) {
-            cancelFns.push(value.onCancel);
+          if (hasCancelHandler(value)) {
+            rollbackFns.push(value.onCancel);
           }
           nextValue = yield value;
         }

@@ -4,8 +4,8 @@ import { Mesh, MeshBasicMaterial } from "three";
 import { HubsWorld } from "../app";
 import { MediaPDF, NetworkedPDF } from "../bit-components";
 import { PDFComponent } from "../inflators/pdf";
-import { coroutine, makeCancelable } from "../utils/coroutine";
-import { cancelable, JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
+import { coroutine } from "../utils/coroutine";
+import { cancelable, JobMap, startJob, stopJob, tickJobs, withRollback } from "../utils/coroutine-utils";
 import { EntityID } from "../utils/networking-types";
 import { scaleMeshToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { waitForMediaLoaded } from "./media-loading";
@@ -37,7 +37,7 @@ function cleanupPage(page: PDFPageProxy) {
 
 function* renderPageCancelable(component: PDFComponent, pageNumber: number) {
   const pagePromise = component.pdf.getPage(pageNumber);
-  yield makeCancelable(function () {
+  yield withRollback(function () {
     pagePromise.then(page => {
       cleanupPage(page);
     });
