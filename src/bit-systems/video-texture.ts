@@ -7,12 +7,15 @@ import {
   PerspectiveCamera,
   RGBAFormat,
   sRGBEncoding,
+  Texture,
   WebGLRenderTarget
 } from "three";
 import { HubsWorld } from "../app";
 import { MaterialTag, VideoTextureSource, VideoTextureTarget } from "../bit-components";
 import { Layers } from "../camera-layers";
+import { VIDEO_TEXTURE_TARGET_FLAGS } from "../inflators/video-texture-target";
 import { EntityID } from "../utils/networking-types";
+import { findNode } from "../utils/three-utils";
 
 function noop() {}
 
@@ -66,20 +69,36 @@ export function updateRenderTarget(world: HubsWorld, renderTarget: WebGLRenderTa
 interface SourceData {
   renderTarget: WebGLRenderTarget;
   lastUpdated: number;
+  camera: EntityID;
 }
 
-const sourceData = new Map<EntityID, SourceData>();
+interface TargetData {
+  originalMap: Texture | null;
+  originalEmissiveMap: Texture | null;
+}
+
+const sourceDataMap = new Map<EntityID, SourceData>();
+const targetDataMap = new Map<EntityID, TargetData>();
 
 const videoTextureSourceQuery = defineQuery([VideoTextureSource]);
 const enteredVideoTextureSourcesQuery = enterQuery(videoTextureSourceQuery);
 const exitedVideoTextureSourcesQuery = exitQuery(videoTextureSourceQuery);
-const enteredVideoTextureTargetsQuery = enterQuery(defineQuery([VideoTextureTarget, MaterialTag]));
+
+const videoTextureTargetQuery = defineQuery([VideoTextureTarget, MaterialTag]);
+const enteredVideoTextureTargetsQuery = enterQuery(videoTextureTargetQuery);
+const exitedVideoTextureTargetsQuery = exitQuery(videoTextureTargetQuery);
 export function videoTextureSystem(world: HubsWorld) {
   enteredVideoTextureSourcesQuery(world).forEach(function (eid) {
-    const camera = world.eid2obj.get(eid)! as PerspectiveCamera;
+    let camera = world.eid2obj.get(eid)! as PerspectiveCamera;
     if (!(camera && camera.isCamera)) {
-      console.error("video-texture-source added to an entity without a camera");
-      return;
+      const actualCamera = findNode(camera, (o: any) => o.isCamera);
+      if (actualCamera) {
+        console.warn("video-texture-source should be added directly to a camera, not it's ancestor.");
+        camera = actualCamera as PerspectiveCamera;
+      } else {
+        console.error("video-texture-source added to an entity without a camera");
+        return;
+      }
     }
 
     camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
@@ -102,30 +121,52 @@ export function videoTextureSystem(world: HubsWorld) {
     renderTarget.texture.matrix.scale(1, -1);
     renderTarget.texture.matrix.translate(0, 1);
 
-    sourceData.set(eid, { renderTarget, lastUpdated: 0 });
+    sourceDataMap.set(eid, { renderTarget, lastUpdated: 0, camera: camera.eid! });
   });
   exitedVideoTextureSourcesQuery(world).forEach(function (eid) {
-    const data = sourceData.get(eid);
-    if (data) {
-      data.renderTarget.dispose();
-      sourceData.delete(eid);
+    const srcData = sourceDataMap.get(eid);
+    if (srcData) {
+      srcData.renderTarget.dispose();
+      sourceDataMap.delete(eid);
     }
   });
+
   enteredVideoTextureTargetsQuery(world).forEach(function (eid) {
-    const data = sourceData.get(VideoTextureTarget.srcNode[eid]);
-    if (!data) {
-      console.error("video-texture-target unable to get source");
+    const srcData = sourceDataMap.get(VideoTextureTarget.srcNode[eid]);
+    const targetData: TargetData = { originalMap: null, originalEmissiveMap: null };
+    targetDataMap.set(eid, targetData);
+
+    if (!srcData) {
+      console.error("video-texture-target unable to find source");
       return;
     }
+
     const mat = world.eid2mat.get(eid)! as MeshStandardMaterial;
-    mat.color.setHex(0x00ff00);
-    mat.map = data.renderTarget.texture;
-    mat.emissiveMap = data.renderTarget.texture;
+    if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_BASE_MAP) {
+      targetData.originalMap = mat.map;
+      mat.map = srcData.renderTarget.texture;
+    }
+    if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_EMISSIVE_MAP) {
+      targetData.originalEmissiveMap = mat.emissiveMap;
+      mat.emissiveMap = srcData.renderTarget.texture;
+    }
   });
+  exitedVideoTextureTargetsQuery(world).forEach(function (eid) {
+    const targetData = targetDataMap.get(VideoTextureTarget.srcNode[eid])!;
+    const mat = world.eid2mat.get(eid)! as MeshStandardMaterial;
+    if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_BASE_MAP) {
+      mat.map = targetData.originalMap;
+    }
+    if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_EMISSIVE_MAP) {
+      mat.emissiveMap = targetData.originalMap;
+    }
+    targetDataMap.delete(eid);
+  });
+
   videoTextureSourceQuery(world).forEach(function (eid) {
-    const data = sourceData.get(eid);
+    const data = sourceDataMap.get(eid);
     if (data && world.time.elapsed > data.lastUpdated + 1000 / VideoTextureSource.fps[eid]) {
-      updateRenderTarget(world, data.renderTarget, eid);
+      updateRenderTarget(world, data.renderTarget, data.camera);
       data.lastUpdated = world.time.elapsed;
     }
   });
