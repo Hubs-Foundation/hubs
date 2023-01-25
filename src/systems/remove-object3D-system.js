@@ -66,9 +66,9 @@ const cleanupSkyboxes = cleanupObjOnExit(Skybox, obj => {
 const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
   obj.geometry.dispose();
   if (Array.isArray(obj.material)) {
-    obj.material.forEach(material => disposeMaterial(material));
+    obj.material.forEach(material => material.dispose());
   } else {
-    disposeMaterial(obj.material);
+    obj.material.dispose();
   }
 });
 
