@@ -44,11 +44,7 @@ function* loadScene(
       throw new Error("Scene loading failed. No src url provided to load.");
     }
 
-    const { value: scene, canceled } = yield* cancelable(loadModel(world, src, "model/gltf", false), signal);
-    if (canceled) {
-      return;
-    }
-
+    const scene = yield* cancelable(loadModel(world, src, "model/gltf", false), signal);
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 

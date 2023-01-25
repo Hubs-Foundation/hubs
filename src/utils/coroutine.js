@@ -75,14 +75,14 @@ export function cancelable(iter, signal) {
   return (function* () {
     while (true) {
       if (canceled) {
-        return { canceled: true };
+        throw new Error("It is invalid to tick a canceled coroutine.");
       }
       try {
         const { value, done } = throwing ? iter.throw(nextValue) : iter.next(nextValue);
         throwing = false;
         if (done) {
           signal.onabort = null;
-          return { value, canceled: false };
+          return value;
         } else {
           if (isCancelable(value)) {
             cancelFns.push(value.onCancel);

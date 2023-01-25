@@ -160,11 +160,8 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID) {
   }
   const job = jobs.get(eid)!;
   job.abortController = new AbortController();
-  const { value: media, canceled } = yield* cancelable(loadMedia(world, eid), job.abortController.signal);
+  const media: EntityID = yield* cancelable(loadMedia(world, eid), job.abortController.signal);
   delete job.abortController;
-  if (canceled) {
-    return;
-  }
 
   resizeAndRecenter(world, media, eid);
   add(world, media, eid);
@@ -177,7 +174,7 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID) {
 
 // TODO type for coroutine
 type Coroutine = () => IteratorResult<undefined, any>;
-type Job = {
+export type Job = {
   coroutine: Coroutine;
   abortController?: AbortController;
 };
@@ -194,17 +191,12 @@ export function mediaLoadingSystem(world: HubsWorld) {
 
   mediaLoaderExitQuery(world).forEach(function (eid) {
     const job = jobs.get(eid);
-    if (job) {
-      if (job.abortController) {
-        // Job is in the middle of cancellable work;
-        // We can call abort, but must run the coroutine to completion
-        job.abortController.abort();
-      } else {
-        // Job doesn't need to do cleanup:
-        // Interrupt it immediately by not running the coroutine anymore
-        jobs.delete(eid);
-      }
+    if (!job) return;
+
+    if (job.abortController) {
+      job.abortController.abort();
     }
+    jobs.delete(eid);
   });
 
   jobs.forEach((job, eid) => {
