@@ -53,17 +53,25 @@ function moveToTarget(world: HubsWorld, menu: EntityID) {
   setMatrixWorld(menuObj, targetObj.matrixWorld);
 }
 
+function wrapAround(n: number, min: number, max: number) {
+  // Wrap around [min, max] inclusively
+  // Assumes that n is only 1 more than max or 1 less than min
+  return n < min ? max : n > max ? min : n;
+}
+
+function setPage(world: HubsWorld, pdf: EntityID, pageNumber: number) {
+  const component = (MediaPDF.map as PDFComponentMap).get(pdf)!;
+  NetworkedPDF.pageNumber[pdf] = wrapAround(pageNumber, 1, component.pdf.numPages);
+  takeOwnership(world, pdf);
+}
+
 function handleClicks(world: HubsWorld, menu: EntityID) {
   if (clicked(world, PDFMenu.nextButtonRef[menu])) {
     const pdf = PDFMenu.targetRef[menu];
-    takeOwnership(world, pdf);
-    const numPages = (MediaPDF.map as PDFComponentMap).get(pdf)!.pdf.numPages;
-    NetworkedPDF.page[pdf] = NetworkedPDF.page[pdf] === numPages ? 1 : NetworkedPDF.page[pdf] + 1;
+    setPage(world, pdf, NetworkedPDF.pageNumber[pdf] + 1);
   } else if (clicked(world, PDFMenu.prevButtonRef[menu])) {
     const pdf = PDFMenu.targetRef[menu];
-    takeOwnership(world, pdf);
-    const numPages = (MediaPDF.map as PDFComponentMap).get(pdf)!.pdf.numPages;
-    NetworkedPDF.page[pdf] = NetworkedPDF.page[pdf] === 1 ? numPages : NetworkedPDF.page[pdf] - 1;
+    setPage(world, pdf, NetworkedPDF.pageNumber[pdf] - 1);
   }
 }
 
@@ -83,7 +91,7 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
 
   if (target) {
     const numPages = (MediaPDF.map as PDFComponentMap).get(target)!.pdf.numPages;
-    (world.eid2obj.get(PDFMenu.pageLabelRef[menu]) as Text).text = `${NetworkedPDF.page[target]} / ${numPages}`;
+    (world.eid2obj.get(PDFMenu.pageLabelRef[menu]) as Text).text = `${NetworkedPDF.pageNumber[target]} / ${numPages}`;
   }
 }
 

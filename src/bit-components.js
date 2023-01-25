@@ -138,7 +138,7 @@ export const MediaImage = defineComponent({
 MediaImage.cacheKey[$isStringType] = true;
 
 export const NetworkedPDF = defineComponent({
-  page: Types.ui8
+  pageNumber: Types.ui8
 });
 export const MediaPDF = defineComponent();
 MediaPDF.map = new Map();

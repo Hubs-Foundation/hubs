@@ -12,7 +12,7 @@ export const NetworkedPDFSchema: NetworkSchema = {
     return {
       version: 1,
       data: {
-        page: read(NetworkedPDF.page, eid)
+        page: read(NetworkedPDF.pageNumber, eid)
       }
     };
   },
@@ -26,6 +26,6 @@ export const NetworkedPDFSchema: NetworkSchema = {
     }
 
     const { page }: { page: number } = component.data;
-    write(NetworkedPDF.page, eid, page);
+    write(NetworkedPDF.pageNumber, eid, page);
   }
 };

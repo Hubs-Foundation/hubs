@@ -1,5 +1,5 @@
-import { addComponent, Types } from "bitecs";
-import { PDFDocumentProxy } from "pdfjs-dist";
+import { addComponent } from "bitecs";
+import { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
 import { CanvasTexture, DoubleSide, LinearFilter, Mesh, sRGBEncoding } from "three";
 import { HubsWorld } from "../app";
 import { MediaPDF, Networked, NetworkedPDF } from "../bit-components";
@@ -10,11 +10,13 @@ import { createPlaneBufferGeometry } from "../utils/three-utils";
 export interface PDFParams {
   pdf: PDFDocumentProxy;
 }
+
 export interface PDFComponent {
   pdf: PDFDocumentProxy;
+  page?: PDFPageProxy;
   texture: CanvasTexture;
   canvasContext: CanvasRenderingContext2D;
-  page: number;
+  pageNumber: number;
 }
 
 export function inflatePDF(world: HubsWorld, eid: EntityID, params: PDFParams) {
@@ -33,10 +35,10 @@ export function inflatePDF(world: HubsWorld, eid: EntityID, params: PDFParams) {
     pdf: params.pdf,
     texture,
     canvasContext,
-    page: -1 // No page is loaded yet
+    pageNumber: -1 // No page is loaded yet
   });
   addComponent(world, Networked, eid);
   addComponent(world, NetworkedPDF, eid);
-  NetworkedPDF.page[eid] = 1;
+  NetworkedPDF.pageNumber[eid] = 1; // Must be a valid page number. Zero is invalid.
   return eid;
 }
