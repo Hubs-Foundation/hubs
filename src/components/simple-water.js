@@ -71,6 +71,9 @@ AFRAME.registerComponent("simple-water", {
   },
 
   remove() {
+    const mesh = this.el.getObject3D("mesh");
+    mesh.geometry.dispose();
+    mesh.material.dispose();
     this.el.removeObject3D("mesh");
   }
 });
