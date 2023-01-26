@@ -6,8 +6,8 @@ import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
-import { coroutine, crClearTimeout, crNextFrame, crTimeout } from "../utils/coroutine";
-import { cancelable, JobMap, startJob, stopJob, tickJobs, withRollback } from "../utils/coroutine-utils";
+import { crClearTimeout, crNextFrame, crTimeout } from "../utils/coroutine";
+import { ClearFunction, JobRunner, withRollback } from "../utils/coroutine-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadImage } from "../utils/load-image";
@@ -136,9 +136,9 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     loadingObjEid = renderAsEntity(world, LoadingObject());
     add(world, loadingObjEid, eid);
   }, 400);
-  yield withRollback(() => loadingObjEid && removeEntity(world, loadingObjEid));
+  yield withRollback(Promise.resolve(), () => loadingObjEid && removeEntity(world, loadingObjEid));
   const src = APP.getString(MediaLoader.src[eid]);
-  let media;
+  let media: EntityID;
   try {
     const urlData = (yield resolveMediaInfo(src)) as MediaInfo;
     const loader = urlData.mediaType && loaderForMediaType[urlData.mediaType];
@@ -155,11 +155,13 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   return media;
 }
 
-function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID) {
+function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: ClearFunction) {
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
     addComponent(world, ObjectMenuTarget, eid);
   }
-  const media: EntityID = yield* cancelable(jobs.get(eid)!, loadMedia(world, eid));
+  const media = yield* loadMedia(world, eid);
+  clearRollbacks(); // After this point, normal entity cleanup will takes care of things
+
   resizeAndRecenter(world, media, eid);
   add(world, media, eid);
   setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid])!, media);
@@ -169,18 +171,18 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID) {
   removeComponent(world, MediaLoader, eid);
 }
 
-const jobs: JobMap = new Map();
+const jobs = new JobRunner();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
-    startJob(jobs, eid, coroutine(loadAndAnimateMedia(world, eid)));
+    jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
   });
 
   mediaLoaderExitQuery(world).forEach(function (eid) {
-    stopJob(jobs, eid);
+    jobs.stop(eid);
   });
 
-  tickJobs(jobs);
+  jobs.tick();
 }

@@ -10,8 +10,7 @@ import { CharacterControllerSystem } from "../systems/character-controller-syste
 import { EnvironmentSystem } from "../systems/environment-system";
 import { setInitialNetworkedData, setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
 import { anyEntityWith } from "../utils/bit-utils";
-import { coroutine } from "../utils/coroutine";
-import { cancelable, JobMap, startJob, stopJob, tickJobs } from "../utils/coroutine-utils";
+import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
 import { EntityID } from "../utils/networking-types";
@@ -32,7 +31,8 @@ function* loadScene(
   world: HubsWorld,
   loaderEid: EntityID,
   environmentSystem: EnvironmentSystem,
-  characterController: CharacterControllerSystem
+  characterController: CharacterControllerSystem,
+  clearRollbacks: ClearFunction
 ) {
   try {
     addComponent(world, Networked, loaderEid);
@@ -44,7 +44,8 @@ function* loadScene(
       throw new Error("Scene loading failed. No src url provided to load.");
     }
 
-    const scene = yield* cancelable(jobs.get(loaderEid)!, loadModel(world, src, "model/gltf", false));
+    const scene = yield* loadModel(world, src, "model/gltf", false);
+    clearRollbacks(); // After this point, normal entity cleanup will takes care of things
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
@@ -98,7 +99,7 @@ function* loadScene(
   }
 }
 
-const jobs: JobMap = new Map();
+const jobs = new JobRunner();
 const sceneLoaderQuery = defineQuery([SceneLoader]);
 const sceneLoaderEnterQuery = enterQuery(sceneLoaderQuery);
 const sceneLoaderExitQuery = exitQuery(sceneLoaderQuery);
@@ -108,12 +109,12 @@ export function sceneLoadingSystem(
   characterController: CharacterControllerSystem
 ) {
   sceneLoaderEnterQuery(world).forEach(function (eid) {
-    startJob(jobs, eid, coroutine(loadScene(world, eid, environmentSystem, characterController)));
+    jobs.add(eid, clearRollbacks => loadScene(world, eid, environmentSystem, characterController, clearRollbacks));
   });
 
   sceneLoaderExitQuery(world).forEach(function (eid) {
-    stopJob(jobs, eid);
+    jobs.stop(eid);
   });
 
-  tickJobs(jobs);
+  jobs.tick();
 }

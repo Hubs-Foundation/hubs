@@ -68,10 +68,10 @@ export async function releaseTextureByKey(cacheKey) {
 
 export function loadTextureCancellable(src, version, contentType) {
   const p = loadTexture(src, version, contentType);
-  return withRollback(() => {
+  return withRollback(p, () => {
     // TODO: Pass in an AbortSignal through to loadTexture so that we can cancel inflight requests.
     p.then(({ cacheKey }) => {
       releaseTextureByKey(cacheKey);
     });
-  }, p);
+  });
 }

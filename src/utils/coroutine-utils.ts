@@ -1,98 +1,87 @@
-import { EntityID } from "./networking-types";
+import { coroutine } from "./coroutine";
 
 // TODO Write a better type for coroutine
 type Coroutine = () => IteratorResult<undefined, any>;
+// TODO: A better type for this
+type RollbackFunction = () => void;
+export type ClearFunction = () => void;
+type JobStartCallback = (
+  clear: ClearFunction,
+  abortSignal: AbortSignal
+) => Generator<Promise<any> | CancelablePromise<any>, any, any>;
 export type Job = {
-  coroutine: Coroutine;
-  abortController?: AbortController;
+  coroutine?: Coroutine;
+  fn: JobStartCallback;
+  abortController: AbortController;
+  rollbacks: RollbackFunction[];
 };
 
-export type JobMap = Map<EntityID, Job>;
+export class JobRunner<T> {
+  jobs = new Map<T, Job>();
+  pendingStart: Job[] = [];
 
-export function startJob(jobs: JobMap, eid: EntityID, coroutine: Coroutine) {
-  jobs.set(eid, { coroutine });
-}
-
-export function stopJob(jobs: JobMap, eid: EntityID) {
-  const job = jobs.get(eid);
-  if (!job) return;
-  if (job.abortController) {
-    job.abortController.abort();
+  add(key: T, fn: JobStartCallback) {
+    if (this.jobs.has(key)) {
+      throw new Error(`Job already exists for key ${key}`);
+    }
+    const rollbacks: RollbackFunction[] = [];
+    const abortController = new AbortController();
+    const job = {
+      fn,
+      abortController,
+      rollbacks
+    };
+    this.pendingStart.push(job);
+    this.jobs.set(key, job);
   }
-  jobs.delete(eid);
-}
 
-export function tickJobs(jobs: JobMap) {
-  jobs.forEach((job, eid) => {
-    if (job.coroutine().done) {
-      jobs.delete(eid);
+  has(key: T) {
+    return this.jobs.has(key);
+  }
+
+  stop(key: T) {
+    const job = this.jobs.get(key);
+    if (!job) return false;
+    job.abortController.abort();
+    for (let i = job.rollbacks.length - 1; i >= 0; i--) {
+      job.rollbacks[i]();
     }
-  });
-}
+    this.jobs.delete(key);
+    return true;
+  }
 
-export function hasCancelHandler(c: any) {
-  return !!c.onCancel;
-}
+  tick() {
+    this.pendingStart.forEach(job => {
+      const clear = () => {
+        job.rollbacks.length = 0;
+      };
+      job.coroutine = coroutine(job.fn(clear, job.abortController.signal), job.rollbacks);
+    });
+    this.pendingStart.length = 0;
 
-export function withRollback(fn: RollbackFunction, obj = {}) {
-  (obj as any).onCancel = fn;
-  return obj;
-}
-
-// TODO: A better type for this
-type CancelableGenerator = Generator<any, any, any>;
-type RollbackFunction = () => void;
-// The thing whose "cancel" function you can call
-export function cancelable(job: Job, iter: Generator) {
-  if (job.abortController) throw new Error("Nesting cancellables is not allowed.");
-  job.abortController = new AbortController();
-
-  const rollbackFns: RollbackFunction[] = [];
-  const rollback = () => {
-    for (let i = rollbackFns.length - 1; i >= 0; i--) {
-      rollbackFns[i]();
-    }
-  };
-
-  let canceled = false;
-  job.abortController.signal.onabort = () => {
-    rollback();
-    canceled = true;
-    job.abortController!.signal.onabort = null;
-  };
-
-  let nextValue: any;
-  let throwing;
-  return (function* (): CancelableGenerator {
-    while (true) {
-      if (canceled) {
-        throw new Error("It is invalid to tick a canceled coroutine.");
+    this.jobs.forEach((job, eid) => {
+      if (job.coroutine!().done) {
+        this.jobs.delete(eid); // TODO Is this safe?
       }
-      try {
-        const { value, done }: { value?: any; done?: boolean } = (
-          throwing ? iter.throw(nextValue) : iter.next(nextValue)
-        ) as { value?: any; done?: boolean };
-        throwing = false;
-        if (done) {
-          job.abortController!.signal.onabort = null;
-          delete job.abortController;
-          return value;
-        } else {
-          if (hasCancelHandler(value)) {
-            rollbackFns.push(value.onCancel);
-          }
-          nextValue = yield value;
-        }
-      } catch (e) {
-        if (throwing) {
-          // We already threw back into the iter, rollback and throw ourselves
-          rollback();
-          throw e;
-        } else {
-          throwing = true;
-          nextValue = e;
-        }
-      }
-    }
-  })();
+    });
+  }
+}
+
+const $rollbackSymbol = Symbol("rollback");
+class CancelablePromise<T> {
+  promise: Promise<T>;
+  rollback: RollbackFunction;
+  $rollback = $rollbackSymbol;
+  constructor(promise: Promise<T>, rollback: RollbackFunction) {
+    this.promise = promise;
+    this.rollback = rollback;
+  }
+}
+
+export function isCancelablePromise<T>(c: any): c is CancelablePromise<T> {
+  return c.$rollback === $rollbackSymbol;
+}
+
+export function withRollback<T>(promise: Promise<T>, rollback: RollbackFunction) {
+  return new CancelablePromise(promise, rollback);
 }

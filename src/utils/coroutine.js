@@ -1,4 +1,4 @@
-import { hasCancelHandler } from "./coroutine-utils";
+import { isCancelablePromise } from "./coroutine-utils";
 let timers;
 
 class CoroutineTimerError extends Error {
@@ -54,7 +54,7 @@ function isPromise(p) {
   return p.__proto__ === Promise.prototype;
 }
 
-export function coroutine(iter) {
+export function coroutine(iter, rollbacks) {
   let waiting = false;
   let doThrow = false;
   let nextValue;
@@ -81,11 +81,16 @@ export function coroutine(iter) {
         continue;
       }
       timers = _timers;
-      const { value, done } = doThrow ? iter.throw(nextValue) : iter.next(nextValue);
+      let { value, done } = doThrow ? iter.throw(nextValue) : iter.next(nextValue);
       doThrow = false;
       timers = null;
       if (done) {
         return value;
+      }
+
+      if (isCancelablePromise(value)) {
+        rollbacks.push(value.rollback);
+        value = value.promise;
       }
 
       if (isPromise(value)) {
@@ -100,8 +105,6 @@ export function coroutine(iter) {
             doThrow = true;
             nextValue = e;
           });
-      } else if (hasCancelHandler(value)) {
-        nextValue = value;
       } else {
         console.error(`Coroutine yielded value that was not a promise or cancelable.`, value, iter);
         throw new Error(`Coroutine yielded value that was not a promise or cancelable.`);
