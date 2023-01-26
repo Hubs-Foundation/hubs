@@ -30,7 +30,7 @@ function inflateComponents(
     }
 
     const props = components[name];
-    Object.keys(components[name]).forEach(propName => {
+    Object.keys(props).forEach(propName => {
       const value = props[propName];
       const linkType = value?.__mhc_link_type;
       if (linkType) {

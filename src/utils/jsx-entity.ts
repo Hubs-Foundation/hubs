@@ -188,9 +188,6 @@ export function addMaterialComponent(world: HubsWorld, eid: number, mat: Materia
   return eid;
 }
 
-// TODO HACK gettting internal bitecs symbol, should expose an API to check a properties type
-const $isEidType = Object.getOwnPropertySymbols(CameraTool.screenRef).find(s => s.description === "isEidType");
-
 const createDefaultInflator = (C: Component, defaults = {}): InflatorFn => {
   return (world, eid, componentProps) => {
     componentProps = Object.assign({}, defaults, componentProps);
@@ -207,8 +204,6 @@ const createDefaultInflator = (C: Component, defaults = {}): InflatorFn => {
           throw new TypeError(`Expected ${propName} to be a string, got an ${typeof value} (${value})`);
         }
         prop[eid] = APP.getSid(value);
-      } else if (prop[$isEidType!]) {
-        prop[eid] = resolveRef(world, value);
       } else {
         prop[eid] = value;
       }
@@ -436,6 +431,13 @@ export function renderAsEntity(world: HubsWorld, entityDef: EntityDef) {
   Object.keys(entityDef.components).forEach(name => {
     if (!jsxInflatorExists(name)) {
       throw new Error(`Failed to inflate unknown component called ${name}`);
+    }
+    const props = entityDef.components[name];
+    for (const propName in props) {
+      const value = props[propName];
+      if (value instanceof Ref) {
+        props[propName] = resolveRef(world, value);
+      }
     }
     jsxInflators[name](world, eid, entityDef.components[name]);
   });
