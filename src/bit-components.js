@@ -208,6 +208,6 @@ export const VideoTextureSource = defineComponent({
   resolution: [Types.ui16, 2]
 });
 export const VideoTextureTarget = defineComponent({
-  srcNode: Types.eid,
+  source: Types.eid,
   flags: Types.ui8
 });

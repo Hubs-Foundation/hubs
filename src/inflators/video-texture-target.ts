@@ -16,7 +16,7 @@ export interface VideoTextureTargetParams {
 
 export function inflateVideoTextureTarget(world: HubsWorld, eid: number, props: VideoTextureTargetParams) {
   addComponent(world, VideoTextureTarget, eid);
-  VideoTextureTarget.srcNode[eid] = props.srcNode;
+  VideoTextureTarget.source[eid] = props.srcNode;
   let flags = 0;
   if (props.targetBaseColorMap) flags |= VIDEO_TEXTURE_TARGET_FLAGS.TARGET_BASE_MAP;
   if (props.targetEmissiveMap) flags |= VIDEO_TEXTURE_TARGET_FLAGS.TARGET_EMISSIVE_MAP;

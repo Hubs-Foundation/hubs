@@ -132,7 +132,7 @@ export function videoTextureSystem(world: HubsWorld) {
   });
 
   enteredVideoTextureTargetsQuery(world).forEach(function (eid) {
-    const srcData = sourceDataMap.get(VideoTextureTarget.srcNode[eid]);
+    const srcData = sourceDataMap.get(VideoTextureTarget.source[eid]);
     const targetData: TargetData = { originalMap: null, originalEmissiveMap: null };
     targetDataMap.set(eid, targetData);
 
@@ -152,7 +152,7 @@ export function videoTextureSystem(world: HubsWorld) {
     }
   });
   exitedVideoTextureTargetsQuery(world).forEach(function (eid) {
-    const targetData = targetDataMap.get(VideoTextureTarget.srcNode[eid])!;
+    const targetData = targetDataMap.get(VideoTextureTarget.source[eid])!;
     const mat = world.eid2mat.get(eid)! as MeshStandardMaterial;
     if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_BASE_MAP) {
       mat.map = targetData.originalMap;
