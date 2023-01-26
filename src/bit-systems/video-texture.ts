@@ -1,7 +1,8 @@
-import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { defineQuery, enterQuery, entityExists, exitQuery, removeComponent } from "bitecs";
 import {
   Camera,
   LinearFilter,
+  Material,
   MeshStandardMaterial,
   NearestFilter,
   PerspectiveCamera,
@@ -16,6 +17,20 @@ import { Layers } from "../camera-layers";
 import { VIDEO_TEXTURE_TARGET_FLAGS } from "../inflators/video-texture-target";
 import { EntityID } from "../utils/networking-types";
 import { findNode } from "../utils/three-utils";
+
+interface SourceData {
+  renderTarget: WebGLRenderTarget;
+  camera: EntityID;
+  lastUpdated: number;
+  needsUpdate: boolean;
+}
+
+interface TargetData {
+  originalMap: Texture | null;
+  originalEmissiveMap: Texture | null;
+  originalBeforeRender: typeof Material.prototype.onBeforeRender;
+  boundTo: EntityID;
+}
 
 function noop() {}
 
@@ -66,15 +81,46 @@ export function updateRenderTarget(world: HubsWorld, renderTarget: WebGLRenderTa
   }
 }
 
-interface SourceData {
-  renderTarget: WebGLRenderTarget;
-  lastUpdated: number;
-  camera: EntityID;
+function bindMaterial(world: HubsWorld, eid: EntityID) {
+  const srcData = sourceDataMap.get(VideoTextureTarget.source[eid]);
+  if (!srcData) {
+    console.error("video-texture-target unable to find source");
+    VideoTextureTarget.source[eid] = 0;
+    return;
+  }
+
+  const mat = world.eid2mat.get(eid)! as MeshStandardMaterial;
+  const targetData: TargetData = {
+    originalMap: mat.map,
+    originalEmissiveMap: mat.emissiveMap,
+    originalBeforeRender: mat.onBeforeRender,
+    boundTo: VideoTextureTarget.source[eid]
+  };
+  mat.onBeforeRender = function () {
+    // Only update when a target were in view last frame
+    // This is safe because this system always runs before render and invalid sources are unbound
+    sourceDataMap.get(VideoTextureTarget.source[eid])!.needsUpdate = true;
+  };
+  if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_BASE_MAP) {
+    mat.map = srcData.renderTarget.texture;
+  }
+  if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_EMISSIVE_MAP) {
+    mat.emissiveMap = srcData.renderTarget.texture;
+  }
+  targetDataMap.set(eid, targetData);
 }
 
-interface TargetData {
-  originalMap: Texture | null;
-  originalEmissiveMap: Texture | null;
+function unbindMaterial(world: HubsWorld, eid: EntityID) {
+  const targetData = targetDataMap.get(eid)!;
+  const mat = world.eid2mat.get(eid)! as MeshStandardMaterial;
+  if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_BASE_MAP) {
+    mat.map = targetData.originalMap;
+  }
+  if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_EMISSIVE_MAP) {
+    mat.emissiveMap = targetData.originalMap;
+  }
+  mat.onBeforeRender = targetData.originalBeforeRender;
+  targetDataMap.delete(eid);
 }
 
 const sourceDataMap = new Map<EntityID, SourceData>();
@@ -85,7 +131,6 @@ const enteredVideoTextureSourcesQuery = enterQuery(videoTextureSourceQuery);
 const exitedVideoTextureSourcesQuery = exitQuery(videoTextureSourceQuery);
 
 const videoTextureTargetQuery = defineQuery([VideoTextureTarget, MaterialTag]);
-const enteredVideoTextureTargetsQuery = enterQuery(videoTextureTargetQuery);
 const exitedVideoTextureTargetsQuery = exitQuery(videoTextureTargetQuery);
 export function videoTextureSystem(world: HubsWorld) {
   enteredVideoTextureSourcesQuery(world).forEach(function (eid) {
@@ -97,6 +142,7 @@ export function videoTextureSystem(world: HubsWorld) {
         camera = actualCamera as PerspectiveCamera;
       } else {
         console.error("video-texture-source added to an entity without a camera");
+        removeComponent(world, VideoTextureSource, eid);
         return;
       }
     }
@@ -121,7 +167,7 @@ export function videoTextureSystem(world: HubsWorld) {
     renderTarget.texture.matrix.scale(1, -1);
     renderTarget.texture.matrix.translate(0, 1);
 
-    sourceDataMap.set(eid, { renderTarget, lastUpdated: 0, camera: camera.eid! });
+    sourceDataMap.set(eid, { renderTarget, lastUpdated: 0, camera: camera.eid!, needsUpdate: false });
   });
   exitedVideoTextureSourcesQuery(world).forEach(function (eid) {
     const srcData = sourceDataMap.get(eid);
@@ -131,43 +177,33 @@ export function videoTextureSystem(world: HubsWorld) {
     }
   });
 
-  enteredVideoTextureTargetsQuery(world).forEach(function (eid) {
-    const srcData = sourceDataMap.get(VideoTextureTarget.source[eid]);
-    const targetData: TargetData = { originalMap: null, originalEmissiveMap: null };
-    targetDataMap.set(eid, targetData);
-
-    if (!srcData) {
-      console.error("video-texture-target unable to find source");
-      return;
-    }
-
-    const mat = world.eid2mat.get(eid)! as MeshStandardMaterial;
-    if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_BASE_MAP) {
-      targetData.originalMap = mat.map;
-      mat.map = srcData.renderTarget.texture;
-    }
-    if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_EMISSIVE_MAP) {
-      targetData.originalEmissiveMap = mat.emissiveMap;
-      mat.emissiveMap = srcData.renderTarget.texture;
-    }
-  });
   exitedVideoTextureTargetsQuery(world).forEach(function (eid) {
-    const targetData = targetDataMap.get(VideoTextureTarget.source[eid])!;
-    const mat = world.eid2mat.get(eid)! as MeshStandardMaterial;
-    if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_BASE_MAP) {
-      mat.map = targetData.originalMap;
-    }
-    if (VideoTextureTarget.flags[eid] & VIDEO_TEXTURE_TARGET_FLAGS.TARGET_EMISSIVE_MAP) {
-      mat.emissiveMap = targetData.originalMap;
-    }
+    const isBound = targetDataMap.has(eid);
+    if (isBound && entityExists(world, eid)) unbindMaterial(world, eid);
     targetDataMap.delete(eid);
+  });
+  videoTextureTargetQuery(world).forEach(function (eid) {
+    const source = VideoTextureTarget.source[eid];
+    const isBound = targetDataMap.has(eid);
+    if (isBound) {
+      if (!source || !entityExists(world, source)) {
+        unbindMaterial(world, eid);
+        VideoTextureTarget.source[eid] = 0;
+      } else if (source !== targetDataMap.get(eid)!.boundTo) {
+        unbindMaterial(world, eid);
+        bindMaterial(world, eid);
+      }
+    } else if (source && entityExists(world, source)) {
+      bindMaterial(world, eid);
+    }
   });
 
   videoTextureSourceQuery(world).forEach(function (eid) {
-    const data = sourceDataMap.get(eid);
-    if (data && world.time.elapsed > data.lastUpdated + 1000 / VideoTextureSource.fps[eid]) {
-      updateRenderTarget(world, data.renderTarget, data.camera);
-      data.lastUpdated = world.time.elapsed;
+    const sourceData = sourceDataMap.get(eid)!;
+    if (sourceData.needsUpdate && world.time.elapsed > sourceData.lastUpdated + 1000 / VideoTextureSource.fps[eid]) {
+      updateRenderTarget(world, sourceData.renderTarget, sourceData.camera);
+      sourceData.lastUpdated = world.time.elapsed;
+      sourceData.needsUpdate = false;
     }
   });
 }
