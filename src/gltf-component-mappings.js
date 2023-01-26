@@ -462,7 +462,7 @@ AFRAME.GLTFModelPlus.registerComponent("audio-settings", "audio-settings", (el, 
 AFRAME.GLTFModelPlus.registerComponent(
   "video-texture-target",
   "video-texture-target",
-  (el, componentName, componentData, _components, indexToEntityMap) => {
+  (el, componentName, componentData) => {
     const { targetBaseColorMap, targetEmissiveMap, srcNode } = componentData;
 
     let srcEl;
@@ -488,61 +488,55 @@ AFRAME.GLTFModelPlus.registerComponent("video-texture-source", "video-texture-so
 
 AFRAME.GLTFModelPlus.registerComponent("text", "text");
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "audio-target",
-  "audio-target",
-  (el, componentName, componentData, _components, indexToEntityMap) => {
-    const { srcNode } = componentData;
+AFRAME.GLTFModelPlus.registerComponent("audio-target", "audio-target", (el, componentName, componentData) => {
+  const { srcNode } = componentData;
 
-    let srcEl;
-    if (srcNode !== undefined) {
-      srcEl = srcNode?.el;
-      if (!srcEl) {
-        console.warn(
-          `Error inflating gltf component ${componentName}: Couldn't find srcEl entity with index ${srcNode}`
-        );
-      }
+  let srcEl;
+  if (srcNode !== undefined) {
+    srcEl = srcNode?.el;
+    if (!srcEl) {
+      console.warn(`Error inflating gltf component ${componentName}: Couldn't find srcEl entity with index ${srcNode}`);
     }
-
-    if (componentData.positional !== undefined) {
-      // This is an old version of the audio-target component, which had built-in audio parameters.
-      // The way we are handling it is wrong. If a user created a scene in spoke with this old version
-      // of this component, all of these parameters will be present whether the user explicitly set
-      // the values for them or not. But really, they should only count as "overrides" if the user
-      // meant for them to take precendence over the app and scene defaults.
-      // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
-      //       but simplifying the handling. Another option is to compare the component data here with
-      //       the "defaults" and only save the values that are different from the defaults. However,
-      //       this loses information if the user changed the scene settings but wanted this specific
-      //       node to use the "defaults".
-      //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
-      APP.audioOverrides.set(el, {
-        audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
-        distanceModel: componentData.distanceModel,
-        rolloffFactor: componentData.rolloffFactor,
-        refDistance: componentData.refDistance,
-        maxDistance: componentData.maxDistance,
-        coneInnerAngle: componentData.coneInnerAngle,
-        coneOuterAngle: componentData.coneOuterAngle,
-        coneOuterGain: componentData.coneOuterGain,
-        gain: componentData.gain
-      });
-      APP.sourceType.set(el, SourceType.AUDIO_TARGET);
-
-      const audio = APP.audios.get(el);
-      if (audio) {
-        updateAudioSettings(el, audio);
-      }
-    }
-
-    el.setAttribute(componentName, {
-      minDelay: componentData.minDelay,
-      maxDelay: componentData.maxDelay,
-      debug: componentData.debug,
-      srcEl
-    });
   }
-);
+
+  if (componentData.positional !== undefined) {
+    // This is an old version of the audio-target component, which had built-in audio parameters.
+    // The way we are handling it is wrong. If a user created a scene in spoke with this old version
+    // of this component, all of these parameters will be present whether the user explicitly set
+    // the values for them or not. But really, they should only count as "overrides" if the user
+    // meant for them to take precendence over the app and scene defaults.
+    // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
+    //       but simplifying the handling. Another option is to compare the component data here with
+    //       the "defaults" and only save the values that are different from the defaults. However,
+    //       this loses information if the user changed the scene settings but wanted this specific
+    //       node to use the "defaults".
+    //       I don't see a perfect solution here and would prefer not to handle the "legacy" components.
+    APP.audioOverrides.set(el, {
+      audioType: componentData.positional ? AudioType.PannerNode : AudioType.Stereo,
+      distanceModel: componentData.distanceModel,
+      rolloffFactor: componentData.rolloffFactor,
+      refDistance: componentData.refDistance,
+      maxDistance: componentData.maxDistance,
+      coneInnerAngle: componentData.coneInnerAngle,
+      coneOuterAngle: componentData.coneOuterAngle,
+      coneOuterGain: componentData.coneOuterGain,
+      gain: componentData.gain
+    });
+    APP.sourceType.set(el, SourceType.AUDIO_TARGET);
+
+    const audio = APP.audios.get(el);
+    if (audio) {
+      updateAudioSettings(el, audio);
+    }
+  }
+
+  el.setAttribute(componentName, {
+    minDelay: componentData.minDelay,
+    maxDelay: componentData.maxDelay,
+    debug: componentData.debug,
+    srcEl
+  });
+});
 AFRAME.GLTFModelPlus.registerComponent("zone-audio-source", "zone-audio-source");
 
 AFRAME.GLTFModelPlus.registerComponent("audio-params", "audio-params", (el, componentName, componentData) => {
