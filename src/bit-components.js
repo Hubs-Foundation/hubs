@@ -46,6 +46,7 @@ export const NetworkedTransform = defineComponent({
 export const AEntity = defineComponent();
 export const Object3DTag = defineComponent();
 export const GLTFModel = defineComponent();
+export const LightTag = defineComponent();
 export const DirectionalLight = defineComponent();
 export const CursorRaycastable = defineComponent();
 export const RemoteHoverTarget = defineComponent();
