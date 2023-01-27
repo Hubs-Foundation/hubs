@@ -76,6 +76,7 @@ import { inflateUVScroll, UVScrollParams } from "../inflators/uv-scroll";
 import { SimpleWaterParams, inflateSimpleWater } from "../inflators/simple-water";
 import { inflatePDF, PDFParams } from "../inflators/pdf";
 import { MirrorParams, inflateMirror } from "../inflators/mirror";
+import { inflateParticleEmitter, ParticleEmitterParams } from "../inflators/particle-emitter";
 
 preload(
   new Promise(resolve => {
@@ -230,6 +231,7 @@ export interface ComponentData {
   billboard?: { onlyY: boolean };
   simpleWater?: SimpleWaterParams;
   mirror?: MirrorParams;
+  particleEmitter?: ParticleEmitterParams;
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -373,7 +375,8 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   ambientLight: inflateAmbientLight,
   directionalLight: inflateDirectionalLight,
   simpleWater: inflateSimpleWater,
-  mirror: inflateMirror
+  mirror: inflateMirror,
+  particleEmitter: inflateParticleEmitter
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
