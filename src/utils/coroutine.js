@@ -81,7 +81,10 @@ export function coroutine(iter, rollbacks) {
         continue;
       }
       timers = _timers;
-      let { value, done } = doThrow ? iter.throw(nextValue) : iter.next(nextValue);
+      const v = doThrow ? iter.throw(nextValue) : iter.next(nextValue);
+      const done = v.done;
+      let value = v.value;
+
       doThrow = false;
       timers = null;
       if (done) {
