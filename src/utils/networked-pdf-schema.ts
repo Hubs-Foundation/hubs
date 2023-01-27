@@ -1,7 +1,17 @@
 import { NetworkedPDF } from "../bit-components";
 import { defineNetworkSchema } from "./define-network-schema";
-import { NetworkSchema, read, StoredComponent, write } from "./network-schemas";
+import { deserializerWithMigrations, Migration, NetworkSchema, read, StoredComponent, write } from "./network-schemas";
 import type { EntityID } from "./networking-types";
+
+const migrations = new Map<number, Migration>();
+
+function apply(eid: EntityID, { version, data }: StoredComponent) {
+  if (version !== 1) return false;
+
+  const { pageNumber }: { pageNumber: number } = data;
+  write(NetworkedPDF.pageNumber, eid, pageNumber);
+  return true;
+}
 
 const runtimeSerde = defineNetworkSchema(NetworkedPDF);
 export const NetworkedPDFSchema: NetworkSchema = {
@@ -12,20 +22,9 @@ export const NetworkedPDFSchema: NetworkSchema = {
     return {
       version: 1,
       data: {
-        page: read(NetworkedPDF.pageNumber, eid)
+        pageNumber: read(NetworkedPDF.pageNumber, eid)
       }
     };
   },
-  deserializeFromStorage: function (eid: EntityID, component: StoredComponent) {
-    if (component.version !== 1) {
-      // Don't throw, even though it's an error. It's probably not game breaking.
-      // TODO It would be nice to have a "strict mode" for development / testing
-      // that would elevate the severity of this to throw an error.
-      console.error("Failed to deserialize stored networked-pdf component data.", component);
-      return;
-    }
-
-    const { page }: { page: number } = component.data;
-    write(NetworkedPDF.pageNumber, eid, page);
-  }
+  deserializeFromStorage: deserializerWithMigrations(migrations, apply)
 };
