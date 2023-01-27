@@ -8,14 +8,14 @@ import { addObject3DComponent } from "../utils/jsx-entity";
 import { EntityID } from "../utils/networking-types";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 
-export interface PDFParams extends PDFResources {
-  pageNumber: number;
-}
-
 export interface PDFResources {
   pdf: PDFDocumentProxy;
   material: MeshBasicMaterial;
   canvasContext: CanvasRenderingContext2D;
+}
+
+export interface PDFParams extends PDFResources {
+  pageNumber: number;
 }
 
 export function inflatePDF(world: HubsWorld, eid: EntityID, params: PDFParams) {
