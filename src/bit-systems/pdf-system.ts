@@ -1,13 +1,16 @@
 import { defineQuery, exitQuery } from "bitecs";
 import { GlobalWorkerOptions, PDFPageProxy } from "pdfjs-dist";
-import { Mesh, MeshBasicMaterial } from "three";
+import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { MediaPDF, NetworkedPDF } from "../bit-components";
-import { PDFComponent } from "../inflators/pdf";
+import { PDFResources } from "../inflators/pdf";
 import { JobRunner } from "../utils/coroutine-utils";
 import { EntityID } from "../utils/networking-types";
-import { scaleMeshToAspectRatio } from "../utils/scale-to-aspect-ratio";
+import { disposeMaterial } from "../utils/three-utils";
 import { waitForMediaLoaded } from "./media-loading";
+
+// TODO This can go away if we make bit-components becomes typescript file
+export const PDFResourcesMap = (MediaPDF as any).map as Map<EntityID, PDFResources>;
 
 /**
  * Warning! This require statement is fragile!
@@ -23,23 +26,38 @@ import { waitForMediaLoaded } from "./media-loading";
 GlobalWorkerOptions.workerSrc =
   require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js").default;
 
-export type PDFComponentMap = Map<EntityID, PDFComponent>;
+type Aspect = { width: number; height: number };
 
-function* loadPageJob(world: HubsWorld, eid: EntityID, component: PDFComponent, pageNumber: number) {
-  const page: PDFPageProxy = yield component.pdf.getPage(pageNumber);
+export function* loadPageJob(
+  { pdf, canvasContext, material }: PDFResources,
+  pageNumber: number
+): Generator<any, Aspect, any> {
+  const page: PDFPageProxy = yield pdf.getPage(pageNumber);
   const viewport = page!.getViewport({ scale: 3 });
-  const ratio = viewport.height / viewport.width;
-  (component.texture.image as HTMLCanvasElement).width = viewport.width;
-  (component.texture.image as HTMLCanvasElement).height = viewport.height;
-  const renderTask = page!.render({ canvasContext: component.canvasContext, viewport, intent: "print" });
+  (material.map!.image as HTMLCanvasElement).width = viewport.width;
+  (material.map!.image as HTMLCanvasElement).height = viewport.height;
+  const renderTask = page!.render({ canvasContext, viewport, intent: "print" });
   yield renderTask.promise;
-  const mesh = world.eid2obj.get(eid)! as Mesh;
-  const material = mesh.material as MeshBasicMaterial;
-  material.map = component.texture;
   material.map!.needsUpdate = true;
   material.needsUpdate = true;
+  return { width: viewport.width, height: viewport.height };
+}
+
+export function fitToAspect(o: Object3D, { width, height }: Aspect) {
+  // Define a constant c to preserve the original area (scale.x * scale*y)
+  const c = Math.sqrt((o.scale.x * o.scale.y) / (width * height));
+  o.scale.x = width * c;
+  o.scale.y = height * c;
+  o.matrixNeedsUpdate = true;
+}
+
+export function* loadPageAndSetScale(world: HubsWorld, eid: EntityID, pageNumber: number) {
+  const aspect = yield* loadPageJob(PDFResourcesMap.get(eid)!, pageNumber);
+  const mesh = world.eid2obj.get(eid)!;
+  // HACK The loading animation may still be controlling the pdf scale,
+  // so wait until it is finished. This is rarely necessary.
   yield* waitForMediaLoaded(world, mesh.parent!.eid!);
-  scaleMeshToAspectRatio(mesh, ratio);
+  fitToAspect(mesh, aspect);
 }
 
 const jobs = new JobRunner();
@@ -47,19 +65,19 @@ const pdfQuery = defineQuery([MediaPDF, NetworkedPDF]);
 const pdfExitQuery = exitQuery(pdfQuery);
 export function pdfSystem(world: HubsWorld) {
   pdfQuery(world).forEach(function (eid) {
-    const data = (MediaPDF.map as PDFComponentMap).get(eid)!;
-    if (data.pageNumber !== NetworkedPDF.pageNumber[eid]) {
-      data.pageNumber = NetworkedPDF.pageNumber[eid];
+    if (MediaPDF.pageNumber[eid] !== NetworkedPDF.pageNumber[eid]) {
+      MediaPDF.pageNumber[eid] = NetworkedPDF.pageNumber[eid];
 
       jobs.stop(eid);
-      jobs.add(eid, () => loadPageJob(world, eid, data, NetworkedPDF.pageNumber[eid]));
+      jobs.add(eid, () => loadPageAndSetScale(world, eid, NetworkedPDF.pageNumber[eid]));
     }
   });
 
   pdfExitQuery(world).forEach(function (eid) {
-    const data = (MediaPDF.map as PDFComponentMap).get(eid)!;
-    data.pdf.cleanup();
-    (MediaPDF.map as PDFComponentMap).delete(eid);
+    const resources = PDFResourcesMap.get(eid)!;
+    resources.pdf.cleanup();
+    disposeMaterial(resources.material);
+    PDFResourcesMap.delete(eid);
     jobs.stop(eid);
   });
 

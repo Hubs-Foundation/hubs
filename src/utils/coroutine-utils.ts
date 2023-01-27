@@ -6,7 +6,7 @@ type Coroutine = () => IteratorResult<undefined, any>;
 type RollbackFunction = () => void;
 export type ClearFunction = () => void;
 type JobStartCallback = (
-  clear: ClearFunction,
+  clearRollbacks: ClearFunction,
   abortSignal: AbortSignal
 ) => Generator<Promise<any> | CancelablePromise<any>, any, any>;
 export type Job = {
@@ -52,10 +52,10 @@ export class JobRunner<T> {
 
   tick() {
     this.pendingStart.forEach(job => {
-      const clear = () => {
+      const clearRollbacks = () => {
         job.rollbacks.length = 0;
       };
-      job.coroutine = coroutine(job.fn(clear, job.abortController.signal), job.rollbacks);
+      job.coroutine = coroutine(job.fn(clearRollbacks, job.abortController.signal), job.rollbacks);
     });
     this.pendingStart.length = 0;
 

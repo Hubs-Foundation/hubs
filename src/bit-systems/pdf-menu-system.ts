@@ -6,7 +6,7 @@ import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import type { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
 import { setMatrixWorld } from "../utils/three-utils";
-import { PDFComponentMap } from "./pdf-system";
+import { PDFResourcesMap } from "./pdf-system";
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
@@ -59,10 +59,9 @@ function wrapAround(n: number, min: number, max: number) {
   return n < min ? max : n > max ? min : n;
 }
 
-function setPage(world: HubsWorld, pdf: EntityID, pageNumber: number) {
-  const component = (MediaPDF.map as PDFComponentMap).get(pdf)!;
-  NetworkedPDF.pageNumber[pdf] = wrapAround(pageNumber, 1, component.pdf.numPages);
-  takeOwnership(world, pdf);
+function setPage(world: HubsWorld, eid: EntityID, pageNumber: number) {
+  takeOwnership(world, eid);
+  NetworkedPDF.pageNumber[eid] = wrapAround(pageNumber, 1, PDFResourcesMap.get(eid)!.pdf.numPages);
 }
 
 function handleClicks(world: HubsWorld, menu: EntityID) {
@@ -90,7 +89,7 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   });
 
   if (target) {
-    const numPages = (MediaPDF.map as PDFComponentMap).get(target)!.pdf.numPages;
+    const numPages = PDFResourcesMap.get(target)!.pdf.numPages;
     (world.eid2obj.get(PDFMenu.pageLabelRef[menu]) as Text).text = `${NetworkedPDF.pageNumber[target]} / ${numPages}`;
   }
 }

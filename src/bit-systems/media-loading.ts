@@ -53,20 +53,20 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   const box = new THREE.Box3();
   box.setFromObject(mediaObj);
 
-  let scale = 1;
+  let scalar = 1;
   if (resize) {
     const size = new THREE.Vector3();
     box.getSize(size);
-    const multiplier = hasComponent(world, GLTFModel, media) ? 0.5 : 1.0;
-    scale = multiplier / Math.max(size.x, size.y, size.z);
-    mediaObj.scale.setScalar(scale);
+    scalar = 1 / Math.max(size.x, size.y, size.z);
+    if (hasComponent(world, GLTFModel, media)) scalar = scalar * 0.5;
+    mediaObj.scale.multiplyScalar(scalar);
     mediaObj.matrixNeedsUpdate = true;
   }
 
   if (recenter) {
     const center = new THREE.Vector3();
     box.getCenter(center);
-    mediaObj.position.copy(center).multiplyScalar(-1 * scale);
+    mediaObj.position.copy(center).multiplyScalar(-1 * scalar);
     mediaObj.matrixNeedsUpdate = true;
   }
 }
@@ -74,30 +74,24 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
 export function* animateScale(world: HubsWorld, media: EntityID) {
   const mediaObj = world.eid2obj.get(media)!;
 
-  const onAnimate = ([position, scale]: [Vector3, Vector3]) => {
-    mediaObj.position.copy(position);
+  const onAnimate = ([scale]: [Vector3]) => {
     mediaObj.scale.copy(scale);
     mediaObj.matrixNeedsUpdate = true;
   };
 
-  const startScale = new Vector3().setScalar(0.0001);
-  const endScale = new Vector3().setScalar(mediaObj.scale.x);
+  mediaObj.updateMatrices();
+  const startScale = new Vector3().copy(mediaObj.scale).multiplyScalar(0.001);
+  const endScale = new Vector3().copy(mediaObj.scale);
 
-  const startPosition = new Vector3().copy(mediaObj.position).multiplyScalar(startScale.x);
-  const endPosition = new Vector3().copy(mediaObj.position);
-
-  // Set the initial position and yield one frame
-  // because the first frame that we render a new object is slow
+  // Set the initial state, then yield one frame because
+  // the first render of a new object is slow
   // TODO: We could move uploading textures to the GPU to the loader,
   //       so that we don't hitch here
-  onAnimate([startPosition, startScale]);
+  onAnimate([startScale]);
   yield Promise.resolve();
 
   yield* animate({
-    properties: [
-      [startPosition, endPosition],
-      [startScale, endScale]
-    ],
+    properties: [[startScale, endScale]],
     durationMS: 400,
     easing: easeOutQuadratic,
     fn: onAnimate
