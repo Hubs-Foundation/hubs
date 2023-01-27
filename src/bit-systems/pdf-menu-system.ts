@@ -13,9 +13,13 @@ function clicked(world: HubsWorld, eid: EntityID) {
 }
 
 function findPDFMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boolean) {
+  if (PDFMenu.targetRef[menu] && !entityExists(world, PDFMenu.targetRef[menu])) {
+    // Clear the invalid entity reference. (The pdf entity was removed).
+    PDFMenu.targetRef[menu] = 0;
+  }
+
   if (sceneIsFrozen) {
     PDFMenu.targetRef[menu] = 0;
-    PDFMenu.clearTargetTimer[menu] = 0;
     return;
   }
 
@@ -24,14 +28,6 @@ function findPDFMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: bool
   if (target) {
     PDFMenu.targetRef[menu] = target;
     PDFMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
-    return;
-  }
-
-  if (PDFMenu.targetRef[menu] && !entityExists(world, PDFMenu.targetRef[menu])) {
-    // Invalid entity reference. (The pdf entity was removed).
-    // TODO Should this be handled in removeObject3DSystem instead?
-    PDFMenu.targetRef[menu] = 0;
-    PDFMenu.clearTargetTimer[menu] = 0;
     return;
   }
 
