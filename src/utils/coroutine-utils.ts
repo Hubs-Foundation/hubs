@@ -11,28 +11,23 @@ type JobStartCallback = (
 ) => Generator<Promise<any> | CancelablePromise<any>, any, any>;
 export type Job = {
   coroutine?: Coroutine;
-  fn: JobStartCallback;
+  startCallback: JobStartCallback;
   abortController: AbortController;
   rollbacks: RollbackFunction[];
 };
 
 export class JobRunner<T> {
   jobs = new Map<T, Job>();
-  pendingStart: Job[] = [];
 
-  add(key: T, fn: JobStartCallback) {
+  add(key: T, startCallback: JobStartCallback) {
     if (this.jobs.has(key)) {
       throw new Error(`Job already exists for key ${key}`);
     }
-    const rollbacks: RollbackFunction[] = [];
-    const abortController = new AbortController();
-    const job = {
-      fn,
-      abortController,
-      rollbacks
-    };
-    this.pendingStart.push(job);
-    this.jobs.set(key, job);
+    this.jobs.set(key, {
+      startCallback,
+      abortController: new AbortController(),
+      rollbacks: []
+    });
   }
 
   has(key: T) {
@@ -51,17 +46,16 @@ export class JobRunner<T> {
   }
 
   tick() {
-    this.pendingStart.forEach(job => {
-      const clearRollbacks = () => {
-        job.rollbacks.length = 0;
-      };
-      job.coroutine = coroutine(job.fn(clearRollbacks, job.abortController.signal), job.rollbacks);
-    });
-    this.pendingStart.length = 0;
-
     this.jobs.forEach((job, eid) => {
+      if (!job.coroutine) {
+        const clearRollbacks = () => {
+          job.rollbacks.length = 0;
+        };
+        job.coroutine = coroutine(job.startCallback(clearRollbacks, job.abortController.signal), job.rollbacks);
+      }
+
       if (job.coroutine!().done) {
-        this.jobs.delete(eid); // TODO Is this safe?
+        this.jobs.delete(eid);
       }
     });
   }
