@@ -9,7 +9,7 @@ import { EntityID } from "../utils/networking-types";
 import { disposeMaterial } from "../utils/three-utils";
 import { waitForMediaLoaded } from "./media-loading";
 
-// TODO This can go away if we make bit-components becomes typescript file
+// TODO This can go away if we make bit-components a typescript file
 export const PDFResourcesMap = (MediaPDF as any).map as Map<EntityID, PDFResources>;
 
 /**

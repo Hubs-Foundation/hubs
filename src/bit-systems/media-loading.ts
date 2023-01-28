@@ -73,25 +73,30 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
 
 export function* animateScale(world: HubsWorld, media: EntityID) {
   const mediaObj = world.eid2obj.get(media)!;
-
-  const onAnimate = ([scale]: [Vector3]) => {
+  const onAnimate = ([position, scale]: [Vector3, Vector3]) => {
+    mediaObj.position.copy(position);
     mediaObj.scale.copy(scale);
     mediaObj.matrixNeedsUpdate = true;
   };
-
-  mediaObj.updateMatrices();
-  const startScale = new Vector3().copy(mediaObj.scale).multiplyScalar(0.001);
+  const scalar = 0.001;
+  const startScale = new Vector3().copy(mediaObj.scale).multiplyScalar(scalar);
   const endScale = new Vector3().copy(mediaObj.scale);
-
-  // Set the initial state, then yield one frame because
-  // the first render of a new object is slow
+  // The animation should affect the mediaObj as if its parent were being scaled:
+  // If mediaObj is offset from its parent (e.g. because it was recentered),
+  // then its position relative to its parent also needs to be scaled.
+  const startPosition = new Vector3().copy(mediaObj.position).multiplyScalar(scalar);
+  const endPosition = new Vector3().copy(mediaObj.position);
+  // Animate once to set the initial state, then yield one frame
+  // because the first render of the new object may be slow
   // TODO: We could move uploading textures to the GPU to the loader,
   //       so that we don't hitch here
-  onAnimate([startScale]);
-  yield Promise.resolve();
-
+  onAnimate([startPosition, startScale]);
+  yield crNextFrame();
   yield* animate({
-    properties: [[startScale, endScale]],
+    properties: [
+      [startPosition, endPosition],
+      [startScale, endScale]
+    ],
     durationMS: 400,
     easing: easeOutQuadratic,
     fn: onAnimate
