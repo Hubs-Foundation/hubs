@@ -37,7 +37,7 @@ const hoveredRightQuery = defineQuery([HoveredRemoteRight]);
 const hoveredLeftQuery = defineQuery([HoveredRemoteLeft]);
 const coroutines = new Map();
 
-function deleteTheDeletableAncestor(world: HubsWorld, eid: number) {
+export function deleteTheDeletableAncestor(world: HubsWorld, eid: number) {
   const ancestor = findAncestorEntity(world, eid, (e: number) => hasComponent(world, Deletable, e));
   if (ancestor && !coroutines.has(ancestor)) {
     coroutines.set(ancestor, coroutine(animateThenRemoveEntity(world, ancestor)));
