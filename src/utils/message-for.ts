@@ -12,7 +12,6 @@ import type {
   EntityID,
   Message,
   NetworkID,
-  StorableMessage,
   StorableUpdateMessage
 } from "./networking-types";
 
@@ -51,7 +50,12 @@ export function messageFor(
 
   created.forEach(eid => {
     const { prefabName, initialData } = createMessageDatas.get(eid)!;
-    message.creates.push([APP.getString(Networked.id[eid])!, prefabName, initialData]);
+    message.creates.push({
+      version: 1,
+      networkId: APP.getString(Networked.id[eid])!,
+      prefabName,
+      initialData
+    });
   });
 
   updated.forEach(eid => {
@@ -93,49 +97,6 @@ export function messageFor(
   return null;
 }
 
-export function messageForStorage(world: HubsWorld, created: EntityID[], updated: EntityID[], deleted: EntityID[]) {
-  const message: StorableMessage = {
-    version: 1,
-    creates: [],
-    updates: [],
-    deletes: []
-  };
-
-  created.forEach(eid => {
-    const { prefabName, initialData } = createMessageDatas.get(eid)!;
-    message.creates.push([APP.getString(Networked.id[eid])!, prefabName, initialData]);
-  });
-
-  updated.forEach(eid => {
-    const updateMessage: StorableUpdateMessage = {
-      nid: APP.getString(Networked.id[eid])!,
-      lastOwnerTime: Networked.lastOwnerTime[eid],
-      timestamp: Networked.timestamp[eid],
-      owner: APP.getString(Networked.owner[eid])!,
-      creator: APP.getString(Networked.creator[eid])!,
-      data: {}
-    };
-
-    for (let j = 0; j < networkableComponents.length; j++) {
-      const component = networkableComponents[j];
-      if (hasComponent(world, component, eid)) {
-        const schema = schemas.get(component)!;
-        if (schema.serializeForStorage) updateMessage.data[schema.componentName] = schema.serializeForStorage(eid);
-      }
-    }
-
-    message.updates.push(updateMessage);
-  });
-
-  deleted.forEach(eid => {
-    // TODO: We are reading component data of a deleted entity here.
-    const nid = Networked.id[eid];
-    message.deletes.push(APP.getString(nid)!);
-  });
-
-  return message;
-}
-
 export interface LegacyRoomObject {
   extensions: {
     HUBS_components: {
@@ -172,7 +133,12 @@ export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
       animateLoad: true,
       isObjectMenuTarget: true
     };
-    const createMessage: CreateMessage = [nid, "media", initialData];
+    const createMessage: CreateMessage = {
+      version: 1,
+      networkId: nid,
+      prefabName: "media",
+      initialData
+    };
     message.creates.push(createMessage);
 
     const updateMessage: StorableUpdateMessage = {

@@ -3,12 +3,10 @@ import { Text } from "troika-three-text";
 import type { HubsWorld } from "../app";
 import { EntityStateDirty, HoveredRemoteRight, Interacted, MediaPDF, NetworkedPDF, PDFMenu } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
-import { saveEntityState } from "../utils/hub-channel-utils";
 import type { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
 import { setMatrixWorld } from "../utils/three-utils";
 import { PDFResourcesMap } from "./pdf-system";
-import { hasSavedEntityState } from "./networking";
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
@@ -59,6 +57,7 @@ function wrapAround(n: number, min: number, max: number) {
 
 function setPage(world: HubsWorld, eid: EntityID, pageNumber: number) {
   takeOwnership(world, eid);
+  addComponent(world, EntityStateDirty, eid);
   NetworkedPDF.pageNumber[eid] = wrapAround(pageNumber, 1, PDFResourcesMap.get(eid)!.pdf.numPages);
 }
 

@@ -1,7 +1,12 @@
-import { localClientID, pendingJoins, pendingMessages, pendingParts } from "../bit-systems/networking";
-import HubChannel from "./hub-channel";
-import { listEntityStates, parseStorableMessages } from "./hub-channel-utils";
-import type { ClientID, Message, StorableMessage } from "./networking-types";
+import {
+  localClientID,
+  pendingCreatorChanges,
+  pendingJoins,
+  pendingMessages,
+  pendingParts
+} from "../bit-systems/networking";
+import { EntityState } from "./entity-state-utils";
+import type { ClientID, CreatorChange, Message } from "./networking-types";
 
 type Emitter = {
   on: (event: string, callback: (a: any) => any) => number;
@@ -16,9 +21,9 @@ export function listenForNetworkMessages(channel: PhoenixChannel, presenceEventE
   presenceEventEmitter.on("hub:leave", onLeave);
   channel.on("naf", onNaf);
   channel.on("nafr", onNafr);
-  channel.on("entity_state_saved", onStorableMessage);
-  channel.on("entity_state_deleted", onStorableMessage);
-  channel.on("entity_state_hierarchy_deleted", onStorableMessage);
+  channel.on("entity_state_created", onEntityStateCreated);
+  channel.on("entity_state_updated", onEntityStateUpdated);
+  channel.on("entity_state_deleted", onEntityStateDeleted);
 }
 
 function onJoin({ key }: { key: ClientID }) {
@@ -60,16 +65,36 @@ function onNafr(message: NafrMessage) {
   onNaf(message.parsed!);
 }
 
-function onStorableMessage(message: StorableMessage) {
-  message.fromClientId = "reticulum";
-  pendingMessages.push(message);
+export function queueEntityStateAsMessage(entityState: EntityState) {
+  const rootNid = entityState.create_message.networkId;
+  entityState.update_messages.forEach(update => {
+    if (update.nid === rootNid) {
+      update.creator = "reticulum";
+    }
+    update.owner = "reticulum";
+  });
+  pendingMessages.push({
+    fromClientId: "reticulum",
+    creates: [entityState.create_message],
+    updates: entityState.update_messages,
+    deletes: []
+  });
+  pendingCreatorChanges.push({
+    nid: rootNid,
+    creator: "reticulum"
+  });
 }
 
-export async function loadSavedEntityStates(hubChannel: HubChannel) {
-  if (!localClientID) {
-    throw new Error("Cannot load saved entity states without a local client ID.");
-  }
-  const list = await listEntityStates(hubChannel);
-  const messages = parseStorableMessages(list);
-  messages.forEach(onStorableMessage);
+function onEntityStateCreated(response: { data: EntityState[] }) {
+  console.log("entity_state_created", response);
+  queueEntityStateAsMessage(response.data[0]!);
+}
+
+function onEntityStateUpdated(response: any) {
+  console.log("entity_state_updated", response);
+}
+
+function onEntityStateDeleted(response: CreatorChange) {
+  console.log("entity_state_deleted", response);
+  pendingCreatorChanges.push(response);
 }

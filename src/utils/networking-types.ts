@@ -9,7 +9,12 @@ export interface CreateMessageData {
 export type ClientID = string;
 export type NetworkID = string;
 export type StringID = number;
-export type CreateMessage = [networkId: NetworkID, prefabName: PrefabName, initialData: InitialData];
+export type CreateMessage = {
+  version: 1;
+  networkId: NetworkID;
+  prefabName: PrefabName;
+  initialData: InitialData;
+};
 export interface CursorBuffer extends Array<any> {
   cursor?: number;
 }
@@ -52,17 +57,7 @@ export type SaveEntityStatePayload = {
   file?: FileInfo;
 };
 
-export type DeleteEntityStatePayload = {
+export type CreatorChange = {
   nid: NetworkID;
-  message: StorableMessage;
-  file_id?: string;
-};
-
-export type EntityState = {
-  nid: NetworkID;
-  message: StorableMessage; // Parse this to a StorableMessage
-};
-
-export type EntityStateList = {
-  data: EntityState[];
+  creator: ClientID;
 };

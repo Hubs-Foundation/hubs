@@ -19,9 +19,6 @@ Networked.owner[$isStringType] = true;
 
 export const Owned = defineComponent();
 export const EntityStateDirty = defineComponent();
-export const PinCooldown = defineComponent({
-  timer: Types.ui32
-});
 export const NetworkedMediaFrame = defineComponent({
   capturedNid: Types.ui32,
   scale: [Types.f32, 3]

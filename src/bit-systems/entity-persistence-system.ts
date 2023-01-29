@@ -2,10 +2,10 @@ import { addComponent, defineQuery, entityExists, exitQuery, hasComponent, remov
 import { HubsWorld } from "../app";
 import { Constraint, EntityStateDirty, Owned } from "../bit-components";
 import { coroutine, crNextFrame } from "../utils/coroutine";
+import { hasSavedEntityState, updateEntityState } from "../utils/entity-state-utils";
 import HubChannel from "../utils/hub-channel";
-import { saveEntityState } from "../utils/hub-channel-utils";
 import { EntityID } from "../utils/networking-types";
-import { hasSavedEntityState, localClientID } from "./networking";
+import { localClientID } from "./networking";
 
 const timers = new Map<EntityID, number>();
 
@@ -19,7 +19,7 @@ function* saveEntityStateJob(hubChannel: HubChannel, world: HubsWorld, eid: Enti
   // Don't save entity state if this entity is no longer persistent
   if (!hasSavedEntityState(world, eid)) return;
 
-  saveEntityState(hubChannel, world, eid);
+  updateEntityState(hubChannel, world, eid);
 }
 
 // TODO type for coroutine

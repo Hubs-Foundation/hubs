@@ -2,7 +2,7 @@ import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, r
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
-import { deleteEntityStateHierarchy } from "../utils/hub-channel-utils";
+import { deleteEntityState } from "../utils/entity-state-utils";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
 import type { ClientID, CursorBufferUpdateMessage, EntityID, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
@@ -12,6 +12,7 @@ import {
   isPinned,
   localClientID,
   networkedQuery,
+  pendingCreatorChanges,
   pendingMessages,
   pendingParts,
   softRemovedEntities
@@ -74,7 +75,7 @@ export function networkReceiveSystem(world: HubsWorld) {
           // We only expect this to happen if the client who sent the delete
           // didn't know it was pinned yet.
           console.warn("Told to delete a pinned entity. Unpinning it...");
-          deleteEntityStateHierarchy(APP.hubChannel!, world, eid);
+          deleteEntityState(APP.hubChannel!, world, eid);
         }
 
         createMessageDatas.delete(eid);
@@ -95,7 +96,12 @@ export function networkReceiveSystem(world: HubsWorld) {
     const message = pendingMessages[i];
 
     for (let j = 0; j < message.creates.length; j++) {
-      const [nidString, prefabName, initialData] = message.creates[j];
+      const { version, networkId: nidString, prefabName, initialData } = message.creates[j];
+      if (version !== 1) {
+        console.warn(`Received create message with unsupported version (${version}).`);
+        continue;
+      }
+
       const creator = message.fromClientId;
       if (!creator) {
         // We do not expect to get here.
@@ -125,9 +131,19 @@ export function networkReceiveSystem(world: HubsWorld) {
         world.ignoredNids.add(nid);
       } else {
         const eid = renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
-        // console.log(`Received create message for ${nidString}. (eid: ${eid})`);
+        console.log(`Received create message for ${nidString}. (eid: ${eid})`);
       }
     }
+  }
+
+  {
+    // If reticulum told us to reassign an entity's creator, do so now
+    pendingCreatorChanges.forEach(({ nid, creator }) => {
+      const eid = world.nid2eid.get(APP.getSid(nid));
+      if (!eid) return; // Entity has been removed. Nothing to do.
+      Networked.creator[eid] = APP.getSid(creator);
+    });
+    pendingCreatorChanges.length = 0;
   }
 
   // If we stored updates for newly created entities, queue them for processing
@@ -172,7 +188,7 @@ export function networkReceiveSystem(world: HubsWorld) {
       }
 
       if (!world.nid2eid.has(nid)) {
-        // console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
+        console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
         // TODO What if we will NEVER be able to apply this update?
         // TODO It would be nice if we could squash these updates
         const updates = storedUpdates.get(nid) || [];
