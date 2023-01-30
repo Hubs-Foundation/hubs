@@ -15,7 +15,7 @@ type UploadResponse = {
   origin: string;
 };
 
-function spawnFromUrl(text: string) {
+export function spawnFromUrl(text: string) {
   if (!text) {
     return;
   }
@@ -36,7 +36,7 @@ function spawnFromUrl(text: string) {
   obj.lookAt(avatarPov.getWorldPosition(new Vector3()));
 }
 
-async function spawnFromFileList(files: FileList) {
+export async function spawnFromFileList(files: FileList) {
   for (const file of files) {
     const desiredContentType = file.type || guessContentType(file.name);
     const params = await upload(file, desiredContentType)

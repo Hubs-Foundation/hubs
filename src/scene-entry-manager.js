@@ -26,6 +26,9 @@ import { addComponent, removeEntity } from "bitecs";
 import { MyCameraTool } from "./bit-components";
 import { anyEntityWith } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
+import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
+
+const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -76,7 +79,7 @@ export default class SceneEntryManager {
       await exit2DInterstitialAndEnterVR(true);
     }
 
-    if (qsTruthy("newLoader")) {
+    if (useNewLoader) {
       moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
     } else {
       const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
@@ -215,9 +218,26 @@ export default class SceneEntryManager {
   };
 
   _setupMedia = () => {
-    const offset = { x: 0, y: 0, z: -1.5 };
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      console.warn(
+        "Spawning newLoader object using `spawnMediaInFrontOfPlayer`. This codepath should likely be made more direct.",
+        src,
+        contentOrigin
+      );
+      if (useNewLoader) {
+        if (typeof src === "string") {
+          spawnFromUrl(src);
+        } else {
+          spawnFromFileList([src]);
+        }
+      } else {
+        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin).eid;
+      }
+    };
+    // HACK we only care about the return value in 1 spot, don't want to deal with that in the newLoader path
+    const spawnMediaInfrontOfPlayerAndReturn = (src, contentOrigin) => {
       if (!this.hubChannel.can("spawn_and_move_media")) return;
+      const offset = { x: 0, y: 0, z: -1.5 };
       const { entity, orientation } = addMedia(
         src,
         "#interactable-media",
@@ -270,7 +290,7 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
-    if (!qsTruthy("newLoader")) {
+    if (!useNewLoader) {
       document.addEventListener("paste", e => {
         if (
           (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
@@ -340,7 +360,7 @@ export default class SceneEntryManager {
         if (target === "avatar") {
           this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
         } else {
-          currentVideoShareEntity = spawnMediaInfrontOfPlayer(this.mediaDevicesManager.mediaStream, undefined);
+          currentVideoShareEntity = spawnMediaInfrontOfPlayerAndReturn(this.mediaDevicesManager.mediaStream, undefined);
           // Wire up custom removal event which will stop the stream.
           currentVideoShareEntity.setAttribute(
             "emit-scene-event-on-remove",
