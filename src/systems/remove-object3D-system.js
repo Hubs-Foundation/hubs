@@ -3,6 +3,7 @@ import {
   AudioEmitter,
   EnvironmentSettings,
   GLTFModel,
+  LightTag,
   MediaImage,
   MediaFrame,
   MediaVideo,
@@ -41,6 +42,7 @@ const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => {
     obj.dispose();
   }
 });
+const cleanupLights = cleanupObjOnExit(LightTag, obj => obj.dispose());
 const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
 const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
@@ -116,6 +118,7 @@ export function removeObject3DSystem(world) {
   // cleanup any component specific resources
   cleanupGLTFs(world);
   cleanupSlice9s(world);
+  cleanupLights(world);
   cleanupTexts(world);
   cleanupMediaFrames(world);
   cleanupImages(world);
