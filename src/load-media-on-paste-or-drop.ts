@@ -94,10 +94,21 @@ async function onPaste(e: ClipboardEvent) {
   spawnFromUrl(text);
 }
 
+let lastDebugScene: string;
 function onDrop(e: DragEvent) {
   if (!(AFRAME as any).scenes[0].is("entered")) {
     return;
   }
+
+  if (qsTruthy("debugLocalScene")) {
+    URL.revokeObjectURL(lastDebugScene);
+    if (!e.dataTransfer?.files.length) return;
+    const url = URL.createObjectURL(e.dataTransfer.files[0]);
+    APP.hubChannel!.updateScene(url);
+    lastDebugScene = url;
+    return;
+  }
+
   const files = e.dataTransfer?.files;
   if (files && files.length) {
     e.preventDefault();
