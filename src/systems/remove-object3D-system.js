@@ -10,7 +10,8 @@ import {
   Slice9,
   Text,
   VideoMenu,
-  Skybox
+  Skybox,
+  SimpleWater
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
@@ -61,6 +62,14 @@ const cleanupEnvironmentSettings = cleanupOnExit(EnvironmentSettings, eid => {
 const cleanupSkyboxes = cleanupObjOnExit(Skybox, obj => {
   disposeMaterial(obj.sky.material);
   obj.sky.geometry.dispose();
+});
+const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
+  obj.geometry.dispose();
+  if (Array.isArray(obj.material)) {
+    obj.material.forEach(material => material.dispose());
+  } else {
+    obj.material.dispose();
+  }
 });
 
 // TODO This feels messy and brittle
@@ -114,6 +123,7 @@ export function removeObject3DSystem(world) {
   cleanupEnvironmentSettings(world);
   cleanupAudioEmitters(world);
   cleanupSkyboxes(world);
+  cleanupSimpleWaters(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeFromMap);
