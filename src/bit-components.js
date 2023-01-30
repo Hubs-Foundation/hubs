@@ -229,3 +229,4 @@ export const VideoTextureTarget = defineComponent({
   flags: Types.ui8
 });
 export const SimpleWater = defineComponent();
+export const Mirror = defineComponent();

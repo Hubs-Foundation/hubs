@@ -8,6 +8,7 @@ import {
   MediaFrame,
   MediaImage,
   MediaVideo,
+  Mirror,
   Object3DTag,
   SimpleWater,
   Skybox,
@@ -74,6 +75,7 @@ const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
     obj.material.dispose();
   }
 });
+const cleanupMirrors = cleanupObjOnExit(Mirror, obj => obj.dispose());
 
 // TODO This feels messy and brittle
 //
@@ -135,6 +137,7 @@ export function removeObject3DSystem(world) {
   cleanupAudioEmitters(world);
   cleanupSkyboxes(world);
   cleanupSimpleWaters(world);
+  cleanupMirrors(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeObjFromMap);
