@@ -1,4 +1,6 @@
 import {
+  connectedClientIds,
+  disconnectedClientIds,
   localClientID,
   pendingCreatorChanges,
   pendingJoins,
@@ -27,14 +29,20 @@ export function listenForNetworkMessages(channel: PhoenixChannel, presenceEventE
 }
 
 function onJoin({ key }: { key: ClientID }) {
-  if (key !== localClientID!) {
-    pendingJoins.push(APP.getSid(key));
+  const clientId = APP.getSid(key);
+  if (clientId !== localClientID!) {
+    pendingJoins.push(clientId);
+    connectedClientIds.add(clientId);
+    disconnectedClientIds.delete(clientId); // In case of reconnect
   }
 }
 
 function onLeave({ key }: { key: ClientID }) {
-  if (key !== localClientID!) {
-    pendingParts.push(APP.getSid(key));
+  const clientId = APP.getSid(key);
+  if (clientId !== localClientID!) {
+    pendingParts.push(clientId);
+    connectedClientIds.delete(clientId);
+    disconnectedClientIds.add(clientId);
   }
 }
 
@@ -68,9 +76,6 @@ function onNafr(message: NafrMessage) {
 export function queueEntityStateAsMessage(entityState: EntityState) {
   const rootNid = entityState.create_message.networkId;
   entityState.update_messages.forEach(update => {
-    if (update.nid === rootNid) {
-      update.creator = "reticulum";
-    }
     update.owner = "reticulum";
   });
   pendingMessages.push({
@@ -86,15 +91,15 @@ export function queueEntityStateAsMessage(entityState: EntityState) {
 }
 
 function onEntityStateCreated(response: { data: EntityState[] }) {
-  console.log("entity_state_created", response);
+  // console.log("entity_state_created", response);
   queueEntityStateAsMessage(response.data[0]!);
 }
 
-function onEntityStateUpdated(response: any) {
-  console.log("entity_state_updated", response);
+function onEntityStateUpdated(_response: any) {
+  // console.log("entity_state_updated", response);
 }
 
 function onEntityStateDeleted(response: CreatorChange) {
-  console.log("entity_state_deleted", response);
+  // console.log("entity_state_deleted", response);
   pendingCreatorChanges.push(response);
 }

@@ -24,7 +24,6 @@ export interface UpdateMessageBase {
   lastOwnerTime: number;
   timestamp: number;
   owner: ClientID;
-  creator: ClientID;
 }
 export interface CursorBufferUpdateMessage extends UpdateMessageBase {
   componentIds: number[];

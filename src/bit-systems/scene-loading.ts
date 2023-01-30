@@ -37,7 +37,7 @@ function* loadScene(
   try {
     addComponent(world, Networked, loaderEid);
     // TODO: Use a unique id for each scene as the root nid
-    setInitialNetworkedData(world, loaderEid, "scene", "reticulum");
+    setInitialNetworkedData(loaderEid, "scene", "reticulum");
 
     const src = APP.getString(SceneLoader.src[loaderEid]);
     if (!src) {

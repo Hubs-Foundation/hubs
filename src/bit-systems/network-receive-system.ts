@@ -2,14 +2,16 @@ import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, r
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
-import { deleteEntityState } from "../utils/entity-state-utils";
+import { deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
 import type { ClientID, CursorBufferUpdateMessage, EntityID, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
 import {
+  connectedClientIds,
   createMessageDatas,
-  isPinned,
+  disconnectedClientIds,
+  isNetworkInstantiated,
   localClientID,
   networkedQuery,
   pendingCreatorChanges,
@@ -36,7 +38,6 @@ function isOutdatedMessage(eid: EntityID, updateMessage: UpdateMessage) {
   return updateMessage.owner !== breakTie(APP.getString(Networked.owner[eid])!, updateMessage.owner);
 }
 
-const partedClientIds = new Set<StringID>();
 export const storedUpdates = new Map<StringID, UpdateMessage[]>();
 const enteredNetworkedQuery = enterQuery(defineQuery([Networked]));
 
@@ -47,8 +48,6 @@ export function networkReceiveSystem(world: HubsWorld) {
     // When a user leaves, remove the entities created by that user
     const networkedEntities = networkedQuery(world);
     pendingParts.forEach(partingClientId => {
-      partedClientIds.add(partingClientId);
-
       networkedEntities
         .filter(eid => Networked.creator[eid] === partingClientId)
         .forEach(eid => {
@@ -61,27 +60,30 @@ export function networkReceiveSystem(world: HubsWorld) {
     });
   }
 
+  // Handle delete entity messages
   for (let i = 0; i < pendingMessages.length; i++) {
     const message = pendingMessages[i];
 
     for (let j = 0; j < message.deletes.length; j += 1) {
       const nid = APP.getSid(message.deletes[j]);
-      if (world.deletedNids.has(nid)) continue;
-      world.deletedNids.add(nid);
+      if (world.deletedNids.has(nid)) continue; // Already done
 
       const eid = world.nid2eid.get(nid);
+      if (eid && !isNetworkInstantiated(eid)) {
+        console.warn("Received delete message for a non network-instantiated entity. Ignoring it.");
+        continue;
+      }
+
+      world.deletedNids.add(nid);
+
       if (eid) {
-        if (isPinned(eid)) {
-          // We only expect this to happen if the client who sent the delete
-          // didn't know it was pinned yet.
-          console.warn("Told to delete a pinned entity. Unpinning it...");
+        if (hasSavedEntityState(world, eid)) {
+          console.warn("Received delete message for a persistent entity. Deleting its entity state...");
           deleteEntityState(APP.hubChannel!, world, eid);
         }
-
         createMessageDatas.delete(eid);
         world.nid2eid.delete(nid);
         removeEntity(world, eid);
-        // console.log("Deleting ", APP.getString(nid));
       }
 
       // TODO: Clear out any stored messages for this entity's children.
@@ -92,6 +94,7 @@ export function networkReceiveSystem(world: HubsWorld) {
     }
   }
 
+  // Handle create entity messages
   for (let i = 0; i < pendingMessages.length; i++) {
     const message = pendingMessages[i];
 
@@ -105,34 +108,42 @@ export function networkReceiveSystem(world: HubsWorld) {
       const creator = message.fromClientId;
       if (!creator) {
         // We do not expect to get here.
-        // We only check because we are synthesizing messages elsewhere;
-        // They should not have any create messages in them.
         throw new Error("Received create message without a fromClientId.");
       }
 
       const nid = APP.getSid(nidString);
 
       if (world.deletedNids.has(nid)) {
-        console.warn(`Received a create message for an entity I've already deleted. Skipping ${nidString}`);
         // TODO : Rebroadcast a delete for this nid, because a client must not have known about it.
         // This can happen in the unlikely case that the client who created this object disconnected as someone else deleted it.
         // The creator will send another create message when it reconnects.
-      } else if (world.nid2eid.has(nid)) {
+        console.warn(`Received a create message for an entity I've already deleted. Skipping ${nidString}`);
+        continue;
+      }
+
+      if (world.nid2eid.has(nid)) {
         // We expect this case to happen often, because saveEntityState
         // will rebroadcast create message for saved entities.
         // console.log(`Received create message for entity I already created. Skipping ${nidString}.`);
-      } else if (world.ignoredNids.has(nid)) {
+        continue;
+      }
+
+      if (world.ignoredNids.has(nid)) {
         console.warn(`Received create message for nid I ignored. Skipping ${nidString}.`);
-      } else if (!hasPermissionToSpawn(creator, prefabName)) {
+        continue;
+      }
+
+      if (!hasPermissionToSpawn(creator, prefabName)) {
         // This should only happen if there is a bug or the sender is maliciously modified.
         console.warn(
           `Received create from a user who does not have permission to spawn ${prefabName}. Skipping ${nidString}.`
         );
         world.ignoredNids.add(nid);
-      } else {
-        const eid = renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
-        console.log(`Received create message for ${nidString}. (eid: ${eid})`);
+        continue;
       }
+
+      renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
+      // console.log(`Received create message for ${nidString}. (eid: ${eid})`);
     }
   }
 
@@ -140,7 +151,17 @@ export function networkReceiveSystem(world: HubsWorld) {
     // If reticulum told us to reassign an entity's creator, do so now
     pendingCreatorChanges.forEach(({ nid, creator }) => {
       const eid = world.nid2eid.get(APP.getSid(nid));
-      if (!eid) return; // Entity has been removed. Nothing to do.
+      if (!eid) return; // Nothing to do.
+
+      const creatorSid = APP.getSid(creator);
+      if (creator !== "reticulum" && !connectedClientIds.has(creatorSid)) {
+        // If we do not recognize the clientId, then the entity is no longer valid.
+        // This can happen if a client unpins something just before they disconnect.
+        removeEntity(world, eid);
+        softRemovedEntities.add(eid);
+        return;
+      }
+
       Networked.creator[eid] = APP.getSid(creator);
     });
     pendingCreatorChanges.length = 0;
@@ -150,12 +171,11 @@ export function networkReceiveSystem(world: HubsWorld) {
   enteredNetworkedQuery(world).forEach(eid => {
     const nid = Networked.id[eid];
     if (storedUpdates.has(nid)) {
-      // console.log("Had stored updates for", APP.getString(nid), storedUpdates.get(nid));
       const updates = storedUpdates.get(nid)!;
 
       for (let i = 0; i < updates.length; i++) {
         const update = updates[i];
-        if (partedClientIds.has(APP.getSid(update.owner))) {
+        if (disconnectedClientIds.has(APP.getSid(update.owner))) {
           // We missed the frame when we would have taken soft ownership from this owner,
           // so modify the message to act as though we had done so.
           // console.log("Rewriting update message from client who left.", JSON.stringify(update));
@@ -188,8 +208,9 @@ export function networkReceiveSystem(world: HubsWorld) {
       }
 
       if (!world.nid2eid.has(nid)) {
-        console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
+        // console.log(`Holding onto an update for ${updateMessage.nid} because we don't have it yet.`);
         // TODO What if we will NEVER be able to apply this update?
+        // Can we use connectedClientIds / disconnectedClientIds / and the nid prefix to figure this out?
         // TODO It would be nice if we could squash these updates
         const updates = storedUpdates.get(nid) || [];
         updates.push(updateMessage);
@@ -209,7 +230,6 @@ export function networkReceiveSystem(world: HubsWorld) {
         removeComponent(world, Owned, eid);
       }
 
-      Networked.creator[eid] = APP.getSid(updateMessage.creator);
       Networked.owner[eid] = APP.getSid(updateMessage.owner);
       Networked.lastOwnerTime[eid] = updateMessage.lastOwnerTime;
       Networked.timestamp[eid] = updateMessage.timestamp;

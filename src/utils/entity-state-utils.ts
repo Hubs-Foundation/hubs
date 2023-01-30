@@ -2,11 +2,11 @@ import { defineQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { createMessageDatas, isNetworkInstantiated, isPinned, localClientID } from "../bit-systems/networking";
+import { findAncestorEntity } from "./bit-utils";
 import HubChannel from "./hub-channel";
 import { queueEntityStateAsMessage } from "./listen-for-network-messages";
 import { networkableComponents, schemas } from "./network-schemas";
 import { CreateMessage, EntityID, NetworkID, StorableUpdateMessage } from "./networking-types";
-import { findAncestorEntity } from "./bit-utils";
 
 export type EntityState = {
   create_message: CreateMessage;
@@ -87,7 +87,6 @@ function entityStateUpdateMessage(world: HubsWorld, eid: EntityID): StorableUpda
     lastOwnerTime: Networked.lastOwnerTime[eid],
     timestamp: Networked.timestamp[eid],
     owner: APP.getString(Networked.owner[eid])!,
-    creator: isNetworkInstantiated(eid) ? "reticulum" : APP.getString(Networked.creator[eid])!,
     data: {}
   };
 
@@ -157,4 +156,25 @@ async function deleteAllEntityStates(hubChannel: HubChannel, world: HubsWorld) {
 // For debugging
 (window as any).deleteAllEntityStates = () => {
   deleteAllEntityStates(APP.hubChannel!, APP.world);
+};
+
+function downloadAsJson(exportObj: any, exportName: string) {
+  var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+  var downloadAnchorNode = document.createElement("a");
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", `${exportName}.json`);
+  document.body.appendChild(downloadAnchorNode); // required for firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+}
+
+async function downloadSavedEntityStates(hubChannel: HubChannel) {
+  listEntityStates(hubChannel).then(list => {
+    downloadAsJson(list, `hub-${hubChannel.hubId}`);
+  });
+}
+
+// For debugging
+(window as any).download = () => {
+  downloadSavedEntityStates(APP.hubChannel!);
 };

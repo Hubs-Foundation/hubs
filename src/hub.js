@@ -1266,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel
     .join()
     .receive("ok", async data => {
-      setLocalClientID(data.session_id);
+      setLocalClientID(APP.getSid(data.session_id));
       APP.hideHubPresenceEvents = true;
       presenceSync.promise = new Promise(resolve => {
         presenceSync.resolve = resolve;

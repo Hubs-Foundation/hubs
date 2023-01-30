@@ -15,19 +15,10 @@ import type {
   StorableUpdateMessage
 } from "./networking-types";
 
-const hasNetworkedComponentChanged = (() => {
-  const serialize = defineNetworkSchemaForProps([
-    Networked.lastOwnerTime,
-    Networked.creator,
-    Networked.owner
-  ]).serialize;
+const hasOwnerInfoChanged = (() => {
+  const serialize = defineNetworkSchemaForProps([Networked.lastOwnerTime, Networked.owner]).serialize;
   const data: CursorBuffer = [];
-  return function hasNetworkedComponentChanged(
-    world: HubsWorld,
-    eid: EntityID,
-    isFullSync: boolean,
-    isBroadcast: boolean
-  ) {
+  return function hasOwnerInfoChanged(world: HubsWorld, eid: EntityID, isFullSync: boolean, isBroadcast: boolean) {
     const hasChanged = serialize(world, eid, data, isFullSync, isBroadcast);
     data.length = 0;
     return hasChanged;
@@ -64,7 +55,6 @@ export function messageFor(
       lastOwnerTime: Networked.lastOwnerTime[eid],
       timestamp: Networked.timestamp[eid],
       owner: APP.getString(Networked.owner[eid])!,
-      creator: APP.getString(Networked.creator[eid])!,
       componentIds: [],
       data: []
     };
@@ -79,7 +69,7 @@ export function messageFor(
       }
     }
 
-    if (hasNetworkedComponentChanged(world, eid, isFullSync, isBroadcast) || updateMessage.componentIds.length) {
+    if (hasOwnerInfoChanged(world, eid, isFullSync, isBroadcast) || updateMessage.componentIds.length) {
       message.updates.push(updateMessage);
     }
   });
@@ -155,8 +145,7 @@ export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
       nid,
       lastOwnerTime: 1,
       timestamp: 1,
-      owner: "reticulum",
-      creator: "reticulum"
+      owner: "reticulum"
     };
     message.updates.push(updateMessage);
   });

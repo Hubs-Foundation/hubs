@@ -41,8 +41,9 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
 
   // Generate leave events for everyone in the room.
   Object.keys(APP.hubChannel.presence.state).forEach(key => {
-    if (key !== localClientID) {
-      pendingParts.push(APP.getSid(key));
+    const clientId = APP.getSid(key);
+    if (clientId !== localClientID) {
+      pendingParts.push(clientId);
     }
   });
   // Reticulum "leaving" causes pinned objects to get cleaned up.
