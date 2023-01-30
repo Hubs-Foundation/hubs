@@ -66,6 +66,7 @@ import { AlphaMode } from "./create-image-mesh";
 import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
+import { AmbientLightParams, inflateAmbientLight } from "../inflators/ambient-light";
 import { ProjectionMode } from "./projection-mode";
 import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
 import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
@@ -221,6 +222,7 @@ interface InflatorFn {
 
 // @TODO these properties should import types from their inflators
 export interface ComponentData {
+  ambientLight?: AmbientLightParams;
   directionalLight?: DirectionalLightParams;
   grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
@@ -365,6 +367,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   billboard: createDefaultInflator(Billboard),
 
   // inflators that create Object3Ds
+  ambientLight: inflateAmbientLight,
   directionalLight: inflateDirectionalLight,
   simpleWater: inflateSimpleWater
 };
