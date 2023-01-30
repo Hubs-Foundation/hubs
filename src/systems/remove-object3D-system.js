@@ -12,7 +12,7 @@ import {
   Text,
   VideoMenu,
   Skybox,
-  MaterialTag
+  MaterialTag,
   SimpleWater
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
