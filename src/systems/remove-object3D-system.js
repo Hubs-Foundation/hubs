@@ -12,6 +12,7 @@ import {
   Text,
   VideoMenu,
   Skybox,
+  MaterialTag,
   SimpleWater
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
@@ -89,11 +90,17 @@ const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
 //      When we remove an AFRAME entity, AFRAME will call `removeEntity` for all of its descendants,
 //      which means we will remove each descendent from its parent.
 const exitedObject3DQuery = exitQuery(defineQuery([Object3DTag]));
+const exitedMaterialQuery = exitQuery(defineQuery([MaterialTag]));
 export function removeObject3DSystem(world) {
-  function removeFromMap(eid) {
+  function removeObjFromMap(eid) {
     const o = world.eid2obj.get(eid);
     world.eid2obj.delete(eid);
-    o.eid = null;
+    o.eid = 0;
+  }
+  function removeFromMatMap(eid) {
+    const m = world.eid2mat.get(eid);
+    world.eid2mat.delete(eid);
+    m.eid = 0;
   }
 
   // TODO  write removeObject3DEntity to do this work up-front,
@@ -116,6 +123,7 @@ export function removeObject3DSystem(world) {
   });
 
   // cleanup any component specific resources
+  // NOTE These are done here as opposed to in other systems because the eid2obj and eid2mat maps are cleared of removed entities at the end of this system.
   cleanupGLTFs(world);
   cleanupSlice9s(world);
   cleanupLights(world);
@@ -129,6 +137,7 @@ export function removeObject3DSystem(world) {
   cleanupSimpleWaters(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
-  entities.forEach(removeFromMap);
-  exitedObject3DQuery(world).forEach(removeFromMap);
+  entities.forEach(removeObjFromMap);
+  exitedObject3DQuery(world).forEach(removeObjFromMap);
+  exitedMaterialQuery(world).forEach(removeFromMatMap);
 }

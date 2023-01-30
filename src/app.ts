@@ -13,6 +13,7 @@ import { EffectComposer, EffectPass } from "postprocessing";
 import {
   Audio,
   AudioListener,
+  Material,
   Object3D,
   PerspectiveCamera,
   PositionalAudio,
@@ -48,6 +49,7 @@ export interface HubsWorld extends IWorld {
   deletedNids: Set<number>;
   nid2eid: Map<number, number>;
   eid2obj: Map<number, Object3D>;
+  eid2mat: Map<number, Material>;
   time: { delta: number; elapsed: number; tick: number };
 }
 
@@ -113,6 +115,7 @@ export class App {
     this.store = store;
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map();
+    this.world.eid2mat = new Map();
 
     this.world.nid2eid = new Map();
     this.world.deletedNids = new Set();

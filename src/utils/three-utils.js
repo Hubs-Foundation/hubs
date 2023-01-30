@@ -1,3 +1,5 @@
+import { removeEntity } from "bitecs";
+
 const tempVector3 = new THREE.Vector3();
 const tempQuaternion = new THREE.Quaternion();
 
@@ -31,6 +33,9 @@ export function disposeMaterial(mtrl) {
   if (mtrl.roughnessMap) mtrl.roughnessMap.dispose();
   if (mtrl.emissiveMap) mtrl.emissiveMap.dispose();
   mtrl.dispose();
+  if (mtrl.eid) {
+    removeEntity(APP.world, mtrl.eid);
+  }
 }
 
 export function disposeNode(node) {

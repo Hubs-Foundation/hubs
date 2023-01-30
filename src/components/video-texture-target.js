@@ -20,12 +20,12 @@ AFRAME.registerComponent("video-texture-source", {
   init() {
     this.camera = findNode(this.el.object3D, n => n.isCamera);
 
-    this.camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
-
     if (!this.camera) {
       console.warn("video-texture-source added to an entity without a camera");
       return;
     }
+
+    this.camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
 
     this.camera.aspect = this.data.resolution[0] / this.data.resolution[1];
 

@@ -61,7 +61,10 @@ import qsTruthy from "../utils/qs_truthy";
 import { waypointSystem } from "../bit-systems/waypoint";
 import { objectSpawnerSystem } from "../bit-systems/object-spawner";
 import { billboardSystem } from "../bit-systems/billboard";
+import { videoTextureSystem } from "../bit-systems/video-texture";
+import { uvScrollSystem } from "../bit-systems/uv-scroll";
 import { simpleWaterSystem } from "../bit-systems/simple-water";
+
 
 declare global {
   interface Window {
@@ -226,6 +229,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.menuAnimationSystem.tick(t);
   hubsSystems.spriteSystem.tick(t, dt);
   hubsSystems.uvScrollSystem.tick(dt);
+  uvScrollSystem(world);
   hubsSystems.shadowSystem.tick();
   objectMenuSystem(world, sceneEl.is("frozen"), APP.hubChannel!);
   videoMenuSystem(world, aframeSystems.userinput);
@@ -235,6 +239,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
+  
+  videoTextureSystem(world);
 
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);
