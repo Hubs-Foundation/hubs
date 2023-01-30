@@ -69,6 +69,7 @@ import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
 import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
 import { inflateVideoTextureTarget, VideoTextureTargetParams } from "../inflators/video-texture-target";
 import { inflateUVScroll, UVScrollParams } from "../inflators/uv-scroll";
+import { SimpleWaterParams, inflateSimpleWater } from "../inflators/simple-water";
 
 preload(
   new Promise(resolve => {
@@ -220,6 +221,7 @@ export interface ComponentData {
   directionalLight?: DirectionalLightParams;
   grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
+  simpleWater?: SimpleWaterParams;
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -353,7 +355,8 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   billboard: createDefaultInflator(Billboard),
 
   // inflators that create Object3Ds
-  directionalLight: inflateDirectionalLight
+  directionalLight: inflateDirectionalLight,
+  simpleWater: inflateSimpleWater
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {

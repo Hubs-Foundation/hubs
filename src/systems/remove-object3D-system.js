@@ -3,6 +3,7 @@ import {
   AudioEmitter,
   EnvironmentSettings,
   GLTFModel,
+  LightTag,
   MediaImage,
   MediaFrame,
   MediaVideo,
@@ -12,6 +13,7 @@ import {
   VideoMenu,
   Skybox,
   MaterialTag
+  SimpleWater
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
@@ -41,6 +43,7 @@ const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => {
     obj.dispose();
   }
 });
+const cleanupLights = cleanupObjOnExit(LightTag, obj => obj.dispose());
 const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
 const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
@@ -62,6 +65,14 @@ const cleanupEnvironmentSettings = cleanupOnExit(EnvironmentSettings, eid => {
 const cleanupSkyboxes = cleanupObjOnExit(Skybox, obj => {
   disposeMaterial(obj.sky.material);
   obj.sky.geometry.dispose();
+});
+const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
+  obj.geometry.dispose();
+  if (Array.isArray(obj.material)) {
+    obj.material.forEach(material => material.dispose());
+  } else {
+    obj.material.dispose();
+  }
 });
 
 // TODO This feels messy and brittle
@@ -115,6 +126,7 @@ export function removeObject3DSystem(world) {
   // NOTE These are done here as opposed to in other systems because the eid2obj and eid2mat maps are cleared of removed entities at the end of this system.
   cleanupGLTFs(world);
   cleanupSlice9s(world);
+  cleanupLights(world);
   cleanupTexts(world);
   cleanupMediaFrames(world);
   cleanupImages(world);
@@ -122,6 +134,7 @@ export function removeObject3DSystem(world) {
   cleanupEnvironmentSettings(world);
   cleanupAudioEmitters(world);
   cleanupSkyboxes(world);
+  cleanupSimpleWaters(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeObjFromMap);
