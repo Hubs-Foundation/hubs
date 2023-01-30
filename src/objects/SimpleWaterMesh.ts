@@ -183,9 +183,7 @@ export class SimpleWaterMesh extends Mesh {
 
   set opacity(value: number) {
     this.waterMaterial.opacity = value;
-    if (value !== 1) {
-      this.waterMaterial.transparent = true;
-    }
+    this.waterMaterial.transparent = value !== 1;
   }
 
   get color(): Color {
