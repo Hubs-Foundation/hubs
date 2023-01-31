@@ -4,16 +4,16 @@ import {
   EnvironmentSettings,
   GLTFModel,
   LightTag,
-  MediaImage,
+  MaterialTag,
   MediaFrame,
+  MediaImage,
   MediaVideo,
   Object3DTag,
+  SimpleWater,
+  Skybox,
   Slice9,
   Text,
-  VideoMenu,
-  Skybox,
-  MaterialTag,
-  SimpleWater
+  VideoMenu
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";

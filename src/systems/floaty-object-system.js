@@ -124,9 +124,9 @@ export const floatyObjectSystem = world => {
 
   networkedFloatyObjectsQuery(world).forEach(eid => {
     if (hasComponent(world, Owned, eid)) {
-      NetworkedFloatyObject.flags = FloatyObject.flags;
+      NetworkedFloatyObject.flags[eid] = FloatyObject.flags[eid];
     } else {
-      FloatyObject.flags = NetworkedFloatyObject.flags;
+      FloatyObject.flags[eid] = NetworkedFloatyObject.flags[eid];
     }
   });
 

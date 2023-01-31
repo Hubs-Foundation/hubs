@@ -10,7 +10,7 @@ import { CharacterControllerSystem } from "../systems/character-controller-syste
 import { EnvironmentSystem } from "../systems/environment-system";
 import { setInitialNetworkedData, setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
 import { anyEntityWith } from "../utils/bit-utils";
-import { cancelable, coroutine } from "../utils/coroutine";
+import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
 import { EntityID } from "../utils/networking-types";
@@ -30,9 +30,9 @@ export function swapActiveScene(world: HubsWorld, src: string) {
 function* loadScene(
   world: HubsWorld,
   loaderEid: EntityID,
-  signal: AbortSignal,
   environmentSystem: EnvironmentSystem,
-  characterController: CharacterControllerSystem
+  characterController: CharacterControllerSystem,
+  clearRollbacks: ClearFunction
 ) {
   try {
     addComponent(world, Networked, loaderEid);
@@ -44,11 +44,8 @@ function* loadScene(
       throw new Error("Scene loading failed. No src url provided to load.");
     }
 
-    const { value: scene, canceled } = yield* cancelable(loadModel(world, src, "model/gltf", false), signal);
-    if (canceled) {
-      return;
-    }
-
+    const scene = yield* loadModel(world, src, "model/gltf", false);
+    clearRollbacks(); // After this point, normal entity cleanup will takes care of things
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
@@ -102,8 +99,7 @@ function* loadScene(
   }
 }
 
-const jobs = new Set();
-const abortControllers = new Map();
+const jobs = new JobRunner();
 const sceneLoaderQuery = defineQuery([SceneLoader]);
 const sceneLoaderEnterQuery = enterQuery(sceneLoaderQuery);
 const sceneLoaderExitQuery = exitQuery(sceneLoaderQuery);
@@ -113,23 +109,12 @@ export function sceneLoadingSystem(
   characterController: CharacterControllerSystem
 ) {
   sceneLoaderEnterQuery(world).forEach(function (eid) {
-    const ac = new AbortController();
-    abortControllers.set(eid, ac);
-    jobs.add(coroutine(loadScene(world, eid, ac.signal, environmentSystem, characterController)));
+    jobs.add(eid, clearRollbacks => loadScene(world, eid, environmentSystem, characterController, clearRollbacks));
   });
 
   sceneLoaderExitQuery(world).forEach(function (eid) {
-    const ac = abortControllers.get(eid);
-    ac.abort();
-    abortControllers.delete(eid);
+    jobs.stop(eid);
   });
 
-  jobs.forEach((c: Coroutine) => {
-    if (c().done) {
-      jobs.delete(c);
-    }
-  });
+  jobs.tick();
 }
-
-// TODO: Don't use any. Write the correct type
-type Coroutine = () => any;
