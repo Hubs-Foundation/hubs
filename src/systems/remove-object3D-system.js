@@ -18,6 +18,7 @@ import {
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
 import { disposeMaterial, traverseSome } from "../utils/three-utils";
+import { forEachMaterial } from "../utils/material-utils";
 
 function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
@@ -68,11 +69,7 @@ const cleanupSkyboxes = cleanupObjOnExit(Skybox, obj => {
 });
 const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
   obj.geometry.dispose();
-  if (Array.isArray(obj.material)) {
-    obj.material.forEach(material => material.dispose());
-  } else {
-    obj.material.dispose();
-  }
+  forEachMaterial(obj.material, material => material.dispose());
 });
 
 // TODO This feels messy and brittle
