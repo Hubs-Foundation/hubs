@@ -218,22 +218,6 @@ export default class SceneEntryManager {
   };
 
   _setupMedia = () => {
-    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      console.warn(
-        "Spawning newLoader object using `spawnMediaInFrontOfPlayer`. This codepath should likely be made more direct.",
-        src,
-        contentOrigin
-      );
-      if (useNewLoader) {
-        if (typeof src === "string") {
-          spawnFromUrl(src);
-        } else {
-          spawnFromFileList([src]);
-        }
-      } else {
-        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin).eid;
-      }
-    };
     // HACK we only care about the return value in 1 spot, don't want to deal with that in the newLoader path
     const spawnMediaInfrontOfPlayerAndReturn = (src, contentOrigin) => {
       if (!this.hubChannel.can("spawn_and_move_media")) return;
@@ -255,6 +239,23 @@ export default class SceneEntryManager {
       });
 
       return entity;
+    };
+
+    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      if (useNewLoader) {
+        console.warn(
+          "Spawning newLoader object using `spawnMediaInFrontOfPlayer`. This codepath should likely be made more direct.",
+          src,
+          contentOrigin
+        );
+        if (typeof src === "string") {
+          spawnFromUrl(src);
+        } else {
+          spawnFromFileList([src]);
+        }
+      } else {
+        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin).eid;
+      }
     };
 
     this.scene.addEventListener("add_media", e => {
