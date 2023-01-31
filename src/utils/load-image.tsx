@@ -12,7 +12,6 @@ type AlphaModeType = typeof AlphaMode.Opaque | typeof AlphaMode.Mask | typeof Al
 export function* loadImage(world: HubsWorld, url: string, contentType: string) {
   const { texture, ratio, cacheKey }: { texture: Texture; ratio: number; cacheKey: string } =
     yield loadTextureCancellable(url, 1, contentType);
-  console.log(url, contentType, texture);
 
   // TODO it would be nice if we could be less agressive with transparency here.
   // Doing so requires inspecting the raw file data upstream of here and passing
