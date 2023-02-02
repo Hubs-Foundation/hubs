@@ -1,4 +1,5 @@
 import { removeEntity } from "bitecs";
+import { forEachMaterial } from "./material-utils";
 
 const tempVector3 = new THREE.Vector3();
 const tempQuaternion = new THREE.Quaternion();
@@ -45,13 +46,7 @@ export function disposeNode(node) {
     node.geometry.dispose();
   }
 
-  if (node.material) {
-    if (Array.isArray(node.material)) {
-      node.material.forEach(disposeMaterial);
-    } else {
-      disposeMaterial(node.material);
-    }
-  }
+  forEachMaterial(node.material, disposeMaterial);
 }
 
 const IDENTITY = new THREE.Matrix4().identity();
