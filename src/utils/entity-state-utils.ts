@@ -7,6 +7,7 @@ import HubChannel from "./hub-channel";
 import { queueEntityStateAsMessage } from "./listen-for-network-messages";
 import { networkableComponents, schemas } from "./network-schemas";
 import { CreateMessage, EntityID, NetworkID, StorableUpdateMessage } from "./networking-types";
+import qsTruthy from "./qs_truthy";
 
 export type EntityState = {
   create_message: CreateMessage;
@@ -108,9 +109,14 @@ function push(hubChannel: HubChannel, command: HubChannelCommand, payload?: HubC
   if (!localClientID) {
     throw new Error("Cannot get/set entity states without a local client ID.");
   }
-  return new Promise((resolve, reject) => {
-    hubChannel.channel.push(command, payload).receive("ok", resolve).receive("error", reject);
-  });
+  if (qsTruthy("entity_state_api")) {
+    return new Promise((resolve, reject) => {
+      hubChannel.channel.push(command, payload).receive("ok", resolve).receive("error", reject);
+    });
+  } else {
+    console.warn("Entity state API is inactive. Would have sent:", { command, payload });
+    return Promise.reject();
+  }
 }
 
 function listEntityStates(hubChannel: HubChannel) {
