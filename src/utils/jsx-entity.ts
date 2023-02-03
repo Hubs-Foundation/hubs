@@ -37,7 +37,8 @@ import {
   NetworkedFloatyObject,
   Billboard,
   MaterialTag,
-  VideoTextureSource
+  VideoTextureSource,
+  Mirror
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -74,6 +75,7 @@ import { inflateVideoTextureTarget, VideoTextureTargetParams } from "../inflator
 import { inflateUVScroll, UVScrollParams } from "../inflators/uv-scroll";
 import { SimpleWaterParams, inflateSimpleWater } from "../inflators/simple-water";
 import { inflatePDF, PDFParams } from "../inflators/pdf";
+import { MirrorParams, inflateMirror } from "../inflators/mirror";
 
 preload(
   new Promise(resolve => {
@@ -227,6 +229,7 @@ export interface ComponentData {
   grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
   simpleWater?: SimpleWaterParams;
+  mirror?: MirrorParams;
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -369,7 +372,8 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   // inflators that create Object3Ds
   ambientLight: inflateAmbientLight,
   directionalLight: inflateDirectionalLight,
-  simpleWater: inflateSimpleWater
+  simpleWater: inflateSimpleWater,
+  mirror: inflateMirror
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
