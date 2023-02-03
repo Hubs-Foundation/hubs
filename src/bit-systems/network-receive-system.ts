@@ -143,7 +143,6 @@ export function networkReceiveSystem(world: HubsWorld) {
       }
 
       renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
-      // console.log(`Received create message for ${nidString}. (eid: ${eid})`);
     }
   }
 

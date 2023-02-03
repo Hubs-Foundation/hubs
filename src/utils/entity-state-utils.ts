@@ -178,3 +178,52 @@ async function downloadSavedEntityStates(hubChannel: HubChannel) {
 (window as any).download = () => {
   downloadSavedEntityStates(APP.hubChannel!);
 };
+
+function rebroadcastEntityState(hubChannel: HubChannel, entityState: EntityState) {
+  push(hubChannel, "create_entity_state", {
+    nid: entityState.create_message.networkId,
+    create_message: entityState.create_message,
+    updates: entityState.update_messages.map(update => {
+      return {
+        root_nid: entityState.create_message.networkId,
+        nid: update.nid,
+        update_message: update
+      };
+    })
+  });
+}
+
+function rewriteNidsForEntityState(entityState: EntityState) {
+  const nid = NAF.utils.createNetworkId();
+  entityState.create_message.networkId = nid;
+  entityState.update_messages.forEach(updateMessage => {
+    const parts = updateMessage.nid.split(".");
+    parts.shift();
+    parts.unshift(nid);
+    updateMessage.nid = parts.join(".");
+  });
+}
+
+function loadFromJson(hubChannel: HubChannel) {
+  const fileSelector = document.createElement("input");
+  fileSelector.setAttribute("type", "file");
+  fileSelector.setAttribute("multiple", "");
+  document.body.appendChild(fileSelector);
+  fileSelector.click();
+
+  fileSelector.addEventListener("change", (event: any) => {
+    const fileList = event.target.files;
+    const file = fileList[0]!;
+    file.text().then((t: any) => {
+      const entityStates: EntityStateList = JSON.parse(t);
+      entityStates.data.forEach(entityState => {
+        rewriteNidsForEntityState(entityState);
+        rebroadcastEntityState(hubChannel, entityState);
+      });
+    });
+    fileSelector.remove();
+  });
+}
+(window as any).loadFromJson = () => {
+  loadFromJson(APP.hubChannel!);
+};
