@@ -1,0 +1,1 @@
+This directory contains built markdown files from source `.org` files in the parent directory. Avoid editing the markdown files directly. We will settle on a different authoring format eventually, but for now the org files are the source.

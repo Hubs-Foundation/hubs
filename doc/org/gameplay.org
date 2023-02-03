@@ -1,0 +1,240 @@
+#+TITLE Core Concepts for Gameplay Code
+
+Core Concepts for Gameplay Code
+
+* Intro
+This document gives an overview of the core concepts for writing gameplay code in the Hubs client.
+
+* Entities, components, systems.
+ECS became a popular topic in recent years.
+- Unity's ~DOTS~ emphasizes data-oriented design for speed and control, separates behavior from data, and helps developers build multi-threaded game loops.
+- Supermedium's ~A-Frame~ emphasizes ease of use and a low barrier to entry, exposes three.js through familiar HTML, and enables rapid prototyping with many built-in components and hundreds more from the community.
+
+Originally built with ~A-Frame~, Hubs switched to ~bitECS~ and using ~three.js~ directly. Motivation, goals, and non-goals about the transition can be found in this PR from June, 2022. https://github.com/mozilla/hubs/pull/5536
+
+** ~bitECS~
+The ~bitECS~ API is minimal, and its own documentation should be consulted for details. The main ideas from the Hubs gameplay code perspective are:
+
+- Component data are structs of arrays. https://en.wikipedia.org/wiki/AoS_and_SoA
+- Entities are indices into these arrays.
+- Queries filter entities by their associated components.
+
+~bitECS~ has no built-in concept of systems. We frequently refer the functions invoked during the game loop as "systems", but there is no formal construct.
+
+** Disclaimer
+Much has been written about the philosophy of various ECS frameworks and design choices. Our choices should not be interpreted fanatically.
+
+We need to store game state somehow, and conventions are useful. We use three.js, which means a lot of game state is stored in various ~Object3D~ subtypes. We store the rest in ~bitECS~ entities and components, or ~map~ s from entity to struct in cases where ~bitECS~ components won't do.
+
+In other words, our game state is not "purely" in ECS, nor do we care to make it so. The PR linked above states the (relatively humble) goals and non-goals of our entity framework.
+
+* Writing systems
+
+** Systems are functions
+
+~bitECS~ has no built-in concept of systems. We frequently refer the functions invoked during the game loop as "systems", but there is no formal construct.
+
+We provide the browser's ~requestAnimationFrame~ with our game loop function (~mainTick~), to be invoked each frame.
+
+** The game loop
+** Queries are useful
+** Replacing ~async~ functions with ~JobRunner~
+
+* Writing components
+
+** Defining components
+
+~bitECS~ components are defined with ~defineComponent~.
+
+** Data types
+
+~bitECS~ components only store numeric types:
+- ~i8~
+- ~ui8~
+- ~ui8c~
+- ~i16~
+- ~ui16~
+- ~i32~
+- ~ui32~
+- ~f32~
+- ~f64~
+- ~eid~
+
+** Avoid holding references
+
+The ~eid~ type indicates that the property values will be entity IDs. Be careful when storing references to entities. If the referenced entity is removed from the world with ~removeEntity~, then you should consider the entity reference in the component to be invalid! You can use ~entityExists~ to check whether the referenced entity still exists, but in general it is best to avoid storing entity references if you can.
+
+The most common scenario for using the ~eid~ type is when building multi-entity objects, such as in-world menus. The ~VideoMenu~ component stores references to each entity so that it can manage them all easily.
+
+#+begin_src typescript
+export const VideoMenu = defineComponent({
+  videoRef: Types.eid,
+  timeLabelRef: Types.eid,
+  trackRef: Types.eid,
+  headRef: Types.eid,
+  playIndicatorRef: Types.eid,
+  pauseIndicatorRef: Types.eid
+});
+#+end_src
+
+** String data
+We sometimes want to be able to store string data in components. Since ~bitECS~ does not allow strings in components, we store numeric string ID's instead.
+
+For example, consider a ~SceneLoader~ component with a ~src~ property, which we wish was a string.
+
+#+begin_src typescript
+export const SceneLoader = defineComponent({ src: Types.ui32 });
+SceneLoader.src[$isStringType] = true;
+#+end_src
+
+The symbol ~$isStringType~, defined in ~bit-components.js~, indicates that this property is a string handle. Code that handles component state anonymously (e.g. ~createDefaultInflator~) use this to correctly handle the property values.
+
+Strings are converted to numeric ~StringID~ s by the ~getSid~ function. ~StringID~ s can be converted back to strings by the ~getString~ function.
+
+#+begin_src typescript
+const src = APP.getString(SceneLoader.src[loaderEid]);
+console.log(`Loading scene from this url: ${src}`);
+#+end_src
+
+** Flags
+
+~bitECS~ components do not support ~boolean~ properties. In lieu of boolean properties, we often define a single ~flags~ property as an unsigned integer type to use as a bitmask:
+
+#+begin_src typescript
+export const Waypoint = defineComponent({
+  flags: Types.ui8
+});
+
+// Use bit shifting to create values we can use instead of booleans
+export enum WaypointFlags {
+  canBeSpawnPoint = 1 << 0,
+  canBeOccupied = 1 << 1,
+  canBeClicked = 1 << 2,
+  willDisableMotion = 1 << 3,
+  willDisableTeleporting = 1 << 4,
+  willMaintainInitialOrientation = 1 << 5,
+  snapToNavMesh = 1 << 6
+}
+
+// These values are booleans because they originate from an external source, like json in a glb file.
+export interface WaypointParams {
+  canBeSpawnPoint: boolean;
+  canBeOccupied: boolean;
+  canBeClicked: boolean;
+  willDisableMotion: boolean;
+  willDisableTeleporting: boolean;
+  willMaintainInitialOrientation: boolean;
+  snapToNavMesh: boolean;
+}
+
+// When we inflate a waypoint component, we pack the booleans into the flags property
+export function inflateWaypoint(world: HubsWorld, eid: number, props: WaypointParams) {
+  addComponent(world, Waypoint, eid);
+  let flags = 0;
+  if (props.canBeSpawnPoint) flags |= WaypointFlags.canBeSpawnPoint;
+  if (props.canBeOccupied) flags |= WaypointFlags.canBeOccupied;
+  if (props.canBeClicked) flags |= WaypointFlags.canBeClicked;
+  if (props.willDisableMotion) flags |= WaypointFlags.willDisableMotion;
+  if (props.willDisableTeleporting) flags |= WaypointFlags.willDisableTeleporting;
+  if (props.willMaintainInitialOrientation) flags |= WaypointFlags.willMaintainInitialOrientation;
+  if (props.snapToNavMesh) flags |= WaypointFlags.snapToNavMesh;
+  Waypoint.flags[eid] = flags;
+
+  // More lines omitted
+}
+
+// Later, we can read the waypoint flags using bitwise &:
+const canBeSpawnPoint = Waypoint.flags[eid] & WaypointFlags.canBeSpawnPoint;
+#+end_src
+
+** Tag components
+
+~bitECS~ components with no properties are called tag components. It is useful to be able to tag an entity so that it appears in queries.
+
+** The escape hatch
+
+Sometimes, we need to store data that is just numbers and strings. Since we can't store the data in ~bitECS~ components, we store it in regular ~Map~ s instead.
+
+For example, the ~MediaPDF~ component stores a numeric ~pageNumber~, and separately has a (uninspiringly named) ~map~ property:
+
+#+begin_src typescript
+export const MediaPDF = defineComponent({
+  pageNumber: Types.ui8
+});
+MediaPDF.map = new Map();
+#+end_src
+
+In typescript, we specify the data types we will store in the map:
+#+begin_src typescript
+export interface PDFResources {
+  pdf: PDFDocumentProxy;
+  material: MeshBasicMaterial;
+  canvasContext: CanvasRenderingContext2D;
+}
+export const PDFResourcesMap = (MediaPDF as any).map as Map<EntityID, PDFResources>;
+#+end_src
+
+It is our responsibility to clean up anything we put into the map:
+#+begin_src typescript
+pdfExitQuery(world).forEach(function (eid) {
+  const resources = PDFResourcesMap.get(eid)!;
+  resources.pdf.cleanup();
+  disposeMaterial(resources.material);
+  PDFResourcesMap.delete(eid);
+});
+#+end_src
+
+
+** Associating entities with ~Object3D~ s
+We often associate an entity with an ~Object3D~. We do this by adding an ~Object3DTag~ component to the entity, storing the association in ~world.eid2obj~, and setting ~obj.eid~ to the ~EntityID~.
+
+An entity can only be associated with a single ~Object3D~.
+
+You may find it strange that we have a different pattern for ~world.eid2obj~, and that we do not simply use the same pattern as the one shown above for ~MediaPDF~. Well, I do too. We wrote ~world.eid2obj~ long before we wrote ~MediaPDF~, so this may be an accident. Perhaps we'll change ~world.eid2obj~ to ~Object3DTag.map~, since the ~eid2obj~ map is meant to be kept in sync with the ~Object3DTag~ component.
+
+** Avoid duplicating state
+
+~Object3D~ and its subtypes have many properties that change at runtime. Rather than storing a duplicate copy of these properties in ~bitECS~ components, we use tag components on the entity so that they show up in the necessary queries, and then operate on the associated ~Object3D~ directly.
+
+For example, ~TroikaText~ extends ~Mesh~, which extends ~Object3D~. ~TroikaText~ s have a ~text~ string property and a function ~sync~ that will flush the ~text~ to the underlying shader program.
+
+In Hubs, we define the ~Text~ component as a tag (i.e. with no properties):
+#+begin_src typescript
+export const Text = defineComponent();
+#+end_src
+
+We do not duplicate the ~text~ string in a ~bitECS~ component. We simply operate on the underlying ~Object3D~ (a ~TroikaText~):
+
+#+begin_src typescript
+const timeLabel = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
+timeLabel.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
+timeLabel.sync();
+#+end_src
+
+* Creating entities
+** Entities are numbers
+** Loading from prefabs
+*** ~EntityDef~ s
+*** JSX without React
+** Loading from glb files
+*** The Hubs Blender add-on
+** Entity creation is synchronous
+** Component inflators
+*** Inflator rules
+*** Default inflators
+*** Associating ~Object3D~ s (~eid2obj~)
+*** Associating ~Material~ s (~eid2mat~)
+*** ~Ref~ s and node
+*** Common inflators
+*** ~JSX~
+*** ~GLB~
+** Entity ID's are recycled
+
+* Custom clients and addons
+** Addons aren't ready yet (February 2023)
+** preload
+** Inserting prefabs
+** Inserting inflators
+** Inserting system calls
+** Handling interactions
+** Handling networking
