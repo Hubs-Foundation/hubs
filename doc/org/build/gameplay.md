@@ -1,59 +1,60 @@
-- [Intro](#org4e55791)
-- [Entities, components, systems.](#orga1af0f7)
-  - [`bitECS`](#orgcffa85a)
-  - [Disclaimer](#orgcfbfbf5)
-- [Writing systems](#org3316e7a)
-  - [Systems are functions](#org7b7c6c9)
-  - [The game loop](#orgcfa22b2)
-  - [Queries are useful](#org0d64a9b)
-  - [Replacing `async` functions with `JobRunner`](#orgf1feaa4)
-- [Writing components](#orgb2ecbee)
-  - [Defining components](#orgf978235)
-  - [Data types](#orga3757d7)
-  - [Avoid holding references](#org79d322a)
-  - [Entity ID&rsquo;s are recycled](#orge0e0372)
-  - [String data](#orgc9f2288)
-  - [Flags](#org35603d1)
-  - [Tag components](#orgf59047e)
-  - [The escape hatch](#org7e9d9c3)
-  - [Associating entities with `Object3D` s](#orgba23c3c)
-  - [Avoid duplicating state](#orgae4fb77)
-- [Adding entities](#orgfe26f03)
-  - [Entity basics](#org5990fd9)
-  - [Creating `EntityDef` s](#org2933e3b)
-  - [Creating model files](#orgcf8022f)
-  - [Entity creation is synchronous](#orgb0c2aa1)
-  - [Inflation](#orgf7ad262)
-    - [What does `renderAsEntity` do?](#orgec09b67)
-    - [`Inflator` s](#org68cdb74)
-    - [Default inflators](#org1646688)
-    - [Associating `Object3D` s (`eid2obj`)](#org5c34243)
-    - [Loading model files](#orgd1fa577)
-    - [Common inflators, `jsxInflators`, and `gltfInflators`](#org0cb5922)
-    - [Entity `Ref` s and `__mhc_link_type` : `"node"`](#org7910942)
-    - [Associating `Material` s (`eid2mat`)](#orgbc310fc)
-- [Custom clients and addons](#org9086134)
-  - [Addons aren&rsquo;t ready yet (February 2023)](#orgb0f7d0c)
-  - [preload](#org25a442f)
-  - [Inserting prefabs](#org6d3a100)
-  - [Inserting inflators](#orgaeeab48)
-  - [Inserting system calls](#orgaee3fbb)
-  - [Handling interactions](#org5dfa7cf)
-  - [Handling networking](#orgb51469b)
+- [Intro](#org71ab195)
+- [Entities, components, systems.](#org739a535)
+  - [`bitECS`](#org0bfe8ab)
+  - [Disclaimer](#orgff3efea)
+- [Writing systems](#org751fbe1)
+  - [Systems are functions](#org775dcd0)
+  - [The game loop](#orga589afa)
+  - [Queries are useful](#org1d5d556)
+  - [Replacing `async` functions with `coroutines`](#org2233e62)
+- [Writing components](#org7331485)
+  - [Defining components](#org18a6d0b)
+  - [Data types](#org3db6503)
+  - [Avoid holding references](#org589f3d9)
+  - [Entity ID&rsquo;s are recycled](#org31d40f6)
+  - [String data](#orgdf10967)
+  - [Flags](#org70bd5dd)
+  - [Tag components](#org58d595d)
+  - [The escape hatch](#orga5547d0)
+  - [Associating entities with `Object3D` s](#orgf29a631)
+  - [Avoid duplicating state](#orgfe9fb09)
+- [Adding entities](#orgbad6d63)
+  - [Entity basics](#org9d285be)
+  - [Creating `EntityDef` s](#orgdd790f5)
+  - [Creating model files](#org156c909)
+  - [Entity creation is synchronous](#org2319bae)
+  - [Inflation](#org628683b)
+    - [What does `renderAsEntity` do?](#org20a38aa)
+    - [`Inflator` s](#org357d40d)
+    - [Default inflators](#orga810c47)
+    - [Associating `Object3D` s (`eid2obj`)](#org4f9fcd3)
+    - [Loading model files](#org7a41123)
+    - [Common inflators, `jsxInflators`, and `gltfInflators`](#org8ca2b33)
+    - [Entity `Ref` s and `__mhc_link_type` : `"node"`](#orgfcfa191)
+    - [Associating `Material` s (`eid2mat`)](#org7fe068b)
+- [Custom clients and addons](#org1a8110a)
+  - [Addons are not ready yet (February 2023)](#org2b06d43)
+  - [Creating an add-on](#org35960ac)
+  - [`preload`](#orge79e4e1)
+  - [Inserting prefabs](#org1d14013)
+  - [Inserting inflators](#org86ae847)
+  - [Inserting system calls](#org354b138)
+  - [Handling interactions](#org306c661)
+  - [Handling networking](#org19b999f)
 
 \#+TITLE Core Concepts for Gameplay Code
 
 Core Concepts for Gameplay Code
 
 
-<a id="org4e55791"></a>
+<a id="org71ab195"></a>
 
 # Intro
 
 This document gives an overview of the core concepts for writing gameplay code in the Hubs client.
 
 
-<a id="orga1af0f7"></a>
+<a id="org739a535"></a>
 
 # Entities, components, systems.
 
@@ -65,7 +66,7 @@ ECS became a popular topic in recent years.
 Originally built with `A-Frame`, Hubs switched to `bitECS` and using `three.js` directly. Motivation, goals, and non-goals about the transition can be found in this PR from June, 2022. <https://github.com/mozilla/hubs/pull/5536>
 
 
-<a id="orgcffa85a"></a>
+<a id="org0bfe8ab"></a>
 
 ## `bitECS`
 
@@ -78,7 +79,7 @@ The `bitECS` API is minimal, and its own documentation should be consulted for d
 `bitECS` has no built-in concept of systems. We frequently refer the functions invoked during the game loop as &ldquo;systems&rdquo;, but there is no formal construct.
 
 
-<a id="orgcfbfbf5"></a>
+<a id="orgff3efea"></a>
 
 ## Disclaimer
 
@@ -89,66 +90,61 @@ We need to store game state somehow, and conventions are useful. We use three.js
 In other words, our game state is not &ldquo;purely&rdquo; in ECS, nor do we care to make it so. The PR linked above states the (relatively humble) goals and non-goals of our entity framework.
 
 
-<a id="org3316e7a"></a>
+<a id="org751fbe1"></a>
 
 # Writing systems
 
 
-<a id="org7b7c6c9"></a>
+<a id="org775dcd0"></a>
 
 ## Systems are functions
 
 `bitECS` has no built-in concept of systems. We frequently refer the functions invoked during the game loop as &ldquo;systems&rdquo;, but there is no formal construct.
 
-We provide the browser&rsquo;s `requestAnimationFrame` with our game loop function (`mainTick`), to be invoked each frame.
 
-
-<a id="orgcfa22b2"></a>
+<a id="orga589afa"></a>
 
 ## The game loop
 
+We provide the browser&rsquo;s `requestAnimationFrame` with our game loop function (`mainTick`), to be invoked each frame.
 
-<a id="org0d64a9b"></a>
+
+<a id="org1d5d556"></a>
 
 ## Queries are useful
 
-
-<a id="orgf1feaa4"></a>
-
-## Replacing `async` functions with `JobRunner`
+`bitECS` queries allow us to find entities based on the components that are attached to them. `enterQuery` and `exitQuery` wrap regular queries so that we handle when an entity first matches or stops matching a given query. The `bitECS` documentation should be consulted for more details.
 
 
-<a id="orgb2ecbee"></a>
+<a id="org2233e62"></a>
+
+## Replacing `async` functions with `coroutines`
+
+TODO: Describe `JobRunner` and `coroutine` s.
+
+
+<a id="org7331485"></a>
 
 # Writing components
 
 
-<a id="orgf978235"></a>
+<a id="org18a6d0b"></a>
 
 ## Defining components
 
 `bitECS` components are defined with `defineComponent`.
 
 
-<a id="orga3757d7"></a>
+<a id="org3db6503"></a>
 
 ## Data types
 
-`bitECS` components only store numeric types:
+`bitECS` components only store numeric types: `i8`, `ui8`, `ui8c`, `i16`, `ui16`, `i32`, `ui32`, `f32`, `f64`, and `eid`.
 
--   `i8`
--   `ui8`
--   `ui8c`
--   `i16`
--   `ui16`
--   `i32`
--   `ui32`
--   `f32`
--   `f64`
--   `eid`
+The sections below describe what we do when we need to store non-numeric data.
 
 
-<a id="org79d322a"></a>
+<a id="org589f3d9"></a>
 
 ## Avoid holding references
 
@@ -168,14 +164,14 @@ export const VideoMenu = defineComponent({
 ```
 
 
-<a id="orge0e0372"></a>
+<a id="org31d40f6"></a>
 
 ## Entity ID&rsquo;s are recycled
 
 After an entity is removed (by `removeEntity`), its `EntityID` can later be reused in subsequent calls to `addEntity`. This does not happen right away, but is something you should be aware of, and is all the more reason to avoid holding onto entity references.
 
 
-<a id="orgc9f2288"></a>
+<a id="orgdf10967"></a>
 
 ## String data
 
@@ -198,7 +194,7 @@ console.log(`Loading scene from this url: ${src}`);
 ```
 
 
-<a id="org35603d1"></a>
+<a id="org70bd5dd"></a>
 
 ## Flags
 
@@ -252,14 +248,14 @@ const canBeSpawnPoint = Waypoint.flags[eid] & WaypointFlags.canBeSpawnPoint;
 ```
 
 
-<a id="orgf59047e"></a>
+<a id="org58d595d"></a>
 
 ## Tag components
 
 `bitECS` components with no properties are called tag components. It is useful to be able to tag an entity so that it appears in queries.
 
 
-<a id="org7e9d9c3"></a>
+<a id="orga5547d0"></a>
 
 ## The escape hatch
 
@@ -297,7 +293,7 @@ pdfExitQuery(world).forEach(function (eid) {
 ```
 
 
-<a id="orgba23c3c"></a>
+<a id="orgf29a631"></a>
 
 ## Associating entities with `Object3D` s
 
@@ -308,7 +304,7 @@ An entity can only be associated with a single `Object3D`.
 You may find it strange that we have a different pattern for `world.eid2obj`, and that we do not simply use the same pattern as the one shown above for `MediaPDF`. Well, I do too. We wrote `world.eid2obj` long before we wrote `MediaPDF`, so this may be an accident. Perhaps we&rsquo;ll change `world.eid2obj` to `Object3DTag.map`, since the `eid2obj` map is meant to be kept in sync with the `Object3DTag` component.
 
 
-<a id="orgae4fb77"></a>
+<a id="orgfe9fb09"></a>
 
 ## Avoid duplicating state
 
@@ -331,12 +327,12 @@ timeLabel.sync();
 ```
 
 
-<a id="orgfe26f03"></a>
+<a id="orgbad6d63"></a>
 
 # Adding entities
 
 
-<a id="org5990fd9"></a>
+<a id="org9d285be"></a>
 
 ## Entity basics
 
@@ -347,7 +343,7 @@ You will rarely need to call `addEntity` yourself. Instead, you will write entit
 Note: We support both `glTF` formats, where binary data buffers contain base64-encoded strings (as in `.gltf`) or raw byte arrays (as in `.glb`). We refer to `gltf` and `glb` files interchangably.
 
 
-<a id="org2933e3b"></a>
+<a id="orgdd790f5"></a>
 
 ## Creating `EntityDef` s
 
@@ -386,7 +382,7 @@ Although `EntityDef` s are written with `jsx` syntax, this is not `React`. The `
 For `network instantiated` entities, `template` functions are grouped together with `permission` information to form a named `Prefab`. More information about `network instantiated` entities can be found in the networking documentation.
 
 
-<a id="orgcf8022f"></a>
+<a id="org156c909"></a>
 
 ## Creating model files
 
@@ -397,7 +393,7 @@ The `hubs-blender-exporter` is a Blender add-on that helps artists do this.
 Spoke also includes component data in the gltf files that it exports and uploads.
 
 
-<a id="orgb0c2aa1"></a>
+<a id="org2319bae"></a>
 
 ## Entity creation is synchronous
 
@@ -406,12 +402,12 @@ It is important to realize that `renderAsEntity` is a synchronous function. That
 The presence of some components (like `MediaLoader`) cause systems to begin asynchronous work. In the case of `MediaLoader`, this work can include downloading model or image files, loading them with the GLTF loader, and ultimately creating additional entities and components. But the entity at the root of this `Object3D` hierarchy will be created synchronously/immediately when `renderAsEntity` runs.
 
 
-<a id="orgf7ad262"></a>
+<a id="org628683b"></a>
 
 ## Inflation
 
 
-<a id="orgec09b67"></a>
+<a id="org20a38aa"></a>
 
 ### What does `renderAsEntity` do?
 
@@ -420,7 +416,7 @@ In the example above, we show a `template` function (`MediaPrefab`) that takes s
 Question: How does `renderAsEntity` (and whatever loads models) accomplish this? Answer: By running `inflators`.
 
 
-<a id="org68cdb74"></a>
+<a id="org357d40d"></a>
 
 ### `Inflator` s
 
@@ -459,7 +455,7 @@ export function inflateGrabbable(world: HubsWorld, eid: number, props: Grabbable
 Notice that `GrabbableParams` do not map one-to-one with runtime components. That is, there is no `Grabbable` component. This is common in situations where we want to expose user-friendly options (for use in Blender, Spoke, or when writing `EntityDef` s), while representing the information differently at runtime.
 
 
-<a id="org1646688"></a>
+<a id="orga810c47"></a>
 
 ### Default inflators
 
@@ -504,7 +500,7 @@ This situation is so common that we have a helper function, `createDefaultInflat
 The default inflator handles the conversion from `string` s to `StringID`, and will log an error if a property name is passed to the `inflator` that does not have a corresponding property in the underlying component.
 
 
-<a id="org5c34243"></a>
+<a id="org4f9fcd3"></a>
 
 ### Associating `Object3D` s (`eid2obj`)
 
@@ -551,7 +547,7 @@ renderAsEntity(
 By default, if no `inflator` creates an `Object3D` for the entity, then `renderAsEntity` will create and assign it a `Group`.
 
 
-<a id="orgd1fa577"></a>
+<a id="org7a41123"></a>
 
 ### Loading model files
 
@@ -583,7 +579,7 @@ The `model` inflator (`inflateModel`) is to `gltf` files as `renderAsEntity` is 
 This is what we mean when we say that loading from `gltf` files is &ldquo;equivalent&rdquo; to loading from `EntityDef` s.
 
 
-<a id="org0cb5922"></a>
+<a id="org8ca2b33"></a>
 
 ### Common inflators, `jsxInflators`, and `gltfInflators`
 
@@ -598,51 +594,129 @@ Notice that in the sentences above, we overload the word `components`. As we hav
 While it might be helpful to define a `new` word (like &ldquo;pre-components&rdquo;) to describe these data, we think this is overly complicated. From the perspective of the Blender add-on for example, its job is to add components (specifically, &ldquo;`MOZ_hubs_components`&rdquo;) to nodes in the `.blend` scene and exported `gltf` files.
 
 
-<a id="org7910942"></a>
+<a id="orgfcfa191"></a>
 
 ### Entity `Ref` s and `__mhc_link_type` : `"node"`
 
 
-<a id="orgbc310fc"></a>
+<a id="org7fe068b"></a>
 
 ### Associating `Material` s (`eid2mat`)
 
 
-<a id="org9086134"></a>
+<a id="org1a8110a"></a>
 
 # Custom clients and addons
 
 
-<a id="orgb0f7d0c"></a>
+<a id="org2b06d43"></a>
 
-## Addons aren&rsquo;t ready yet (February 2023)
+## Addons are not ready yet (February 2023)
+
+We are exploring ways to enable add-ons within the Hubs client. This work is not complete, so expect this section to change in the near future.
+
+We will need to start versioning each client deliberately so that developers can test and report which clients versions their add-on are compatible with. We will need to aim for backwards-compatibility and avoid breaking addons with changes, but we should things to be bumpy as we learn how best to structure the client.
+
+Add-ons will require us to change how we update the hubs client on Managed or Hubs Cloud instances. If an add-on is installed on the instance that is not compatible with a new client version, we cannot auto-update the client without risking breaking the installed add-on.
+
+Wordpress and Blender are good models to follow here. In general, if an add-on is not compatible with a new client version, upgrading the instance can be a user-initiated action. However, we may be required in some cases to push updates or partial updates that fix critical security vulnerabilities.
+
+We will need to figure out how / where these addons will be hosted, how they will be installed, and to what extent Mozilla verifies that a given add-on is safe. We suspect that in the early days, add-ons will likely be installed via the admin interface, with a warning from us saying that you must trust the add-on developer is not doing anything nefarious, and that we have not validated or audited the code. This is similar to the warning that appears when installing add-ons to Firefox.
+
+It will be easier for us to support custom clients than to support add-ons. Users should expect better support for writing, loading, and sharing custom clients soon, including on Managed instances.
+
+In order for addons to do meaningful work, we need to expose a number of functions and data structures (and relax their types). The sections below describe the extension points we expect add-ons and custom clients will need to access.
 
 
-<a id="org25a442f"></a>
+<a id="org35960ac"></a>
 
-## preload
+## Creating an add-on
+
+Hubs client add-ons will work similarly to how add-ons work in Blender. An addon will be a module that exports an `info : AddonInfo`, a `load` function, and an `unload` function:
+
+```typescript
+export const info : AddonInfo = {
+  name: "My Special Addon",
+  // etc
+}
+
+export function load( params : LoadCallbackParams ) {
+  // Do whatever initialization you need to do when your add on is loaded
+}
+
+export function unload () {
+  // Do whatever cleanup you need to do when your add on is unloaded
+
+  // TODO Is it even possible for add-ons to be unloaded at runtime like this?
+  //      If they are added/removed from the admin panel for the whole hub, then maybe unload is not needed.
+}
+```
+
+Where the types will look something like this:
+
+```typescript
+type AddonInfo = {
+  name: string;
+  author?: string;
+  description?; string;
+  compatibleWith?: ClientVersion[];
+  version?: AddonVersion;
+  location?: string;
+  wikiUrl?: string;
+  trackerUrl?: string;
+  warning?: string;
+  category?: AddonCategory;
+  tags: AddonTag[];
+}
+
+interface LoadCallbackParams = {
+  world: HubsWorld
+  // Maybe other things?
+}
+```
 
 
-<a id="org6d3a100"></a>
+<a id="orge79e4e1"></a>
+
+## `preload`
+
+If your addon needs to complete some work before the main tick game loop runs, pass a `Promise` to the `preload` function that resolves once you are ready.
+
+
+<a id="org1d14013"></a>
 
 ## Inserting prefabs
 
+`Network instantiated` entities must be registered in the `prefabs` map. See the `networking` documentation for more information.
 
-<a id="orgaeeab48"></a>
+
+<a id="org86ae847"></a>
 
 ## Inserting inflators
 
+Custom components require you to register `inflator` s. Be sure to insert your `inflator` s into `commonInflators`, `jsxInflators`, or `gltfInflators` before calling `renderAsEntity` or invoking `inflateModel`.
 
-<a id="orgaee3fbb"></a>
+
+<a id="org354b138"></a>
 
 ## Inserting system calls
 
+The `mainTick` function calls all of the systems that need to run in a given animation frame. You will need to insert your system calls into this main game loop in the appropriate spot. We are not sure yet how we will expose this to addons. Custom client developers can insert it directly into the file that defines `mainTick`.
 
-<a id="org5dfa7cf"></a>
+
+<a id="org306c661"></a>
 
 ## Handling interactions
 
+Basic interactions like hovering, holding, and moving objects can be achieved with built-in components or inflators (like `inflateGrabbable`).
 
-<a id="orgb51469b"></a>
+Custom interactions that define their own `actions`, `action sets`, and `device bindings` need to be able to append their `device bindings` and change the logic of `resolveActionSets`. We are not sure yet how we will expose these capabilities.
+
+More information can be found in the interactions documentation.
+
+
+<a id="org19b999f"></a>
 
 ## Handling networking
+
+Add-ons and custom clients can define their own networked components. Developers will need to be especially careful when saving data to the database, as maintaining backwards compatibility with their chosen schema will be their responsibility. More information can be found in the networking documentation.

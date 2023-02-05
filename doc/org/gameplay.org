@@ -34,11 +34,17 @@ In other words, our game state is not "purely" in ECS, nor do we care to make it
 
 ~bitECS~ has no built-in concept of systems. We frequently refer the functions invoked during the game loop as "systems", but there is no formal construct.
 
+** The game loop
+
 We provide the browser's ~requestAnimationFrame~ with our game loop function (~mainTick~), to be invoked each frame.
 
-** The game loop
 ** Queries are useful
-** Replacing ~async~ functions with ~JobRunner~
+
+~bitECS~ queries allow us to find entities based on the components that are attached to them. ~enterQuery~ and ~exitQuery~ wrap regular queries so that we handle when an entity first matches or stops matching a given query. The ~bitECS~ documentation should be consulted for more details.
+
+** Replacing ~async~ functions with ~coroutines~
+
+TODO: Describe ~JobRunner~ and ~coroutine~ s.
 
 * Writing components
 
@@ -48,17 +54,9 @@ We provide the browser's ~requestAnimationFrame~ with our game loop function (~m
 
 ** Data types
 
-~bitECS~ components only store numeric types:
-- ~i8~
-- ~ui8~
-- ~ui8c~
-- ~i16~
-- ~ui16~
-- ~i32~
-- ~ui32~
-- ~f32~
-- ~f64~
-- ~eid~
+~bitECS~ components only store numeric types: ~i8~, ~ui8~, ~ui8c~, ~i16~, ~ui16~, ~i32~, ~ui32~, ~f32~, ~f64~, and ~eid~.
+
+The sections below describe what we do when we need to store non-numeric data.
 
 ** Avoid holding references
 
@@ -444,10 +442,89 @@ While it might be helpful to define a ~new~ word (like "pre-components") to desc
 *** Associating ~Material~ s (~eid2mat~)
 
 * Custom clients and addons
-** Addons aren't ready yet (February 2023)
-** preload
+** Addons are not ready yet (February 2023)
+We are exploring ways to enable add-ons within the Hubs client. This work is not complete, so expect this section to change in the near future.
+
+We will need to start versioning each client deliberately so that developers can test and report which clients versions their add-on are compatible with. We will need to aim for backwards-compatibility and avoid breaking addons with changes, but we should things to be bumpy as we learn how best to structure the client.
+
+Add-ons will require us to change how we update the hubs client on Managed or Hubs Cloud instances. If an add-on is installed on the instance that is not compatible with a new client version, we cannot auto-update the client without risking breaking the installed add-on.
+
+Wordpress and Blender are good models to follow here. In general, if an add-on is not compatible with a new client version, upgrading the instance can be a user-initiated action. However, we may be required in some cases to push updates or partial updates that fix critical security vulnerabilities.
+
+We will need to figure out how / where these addons will be hosted, how they will be installed, and to what extent Mozilla verifies that a given add-on is safe. We suspect that in the early days, add-ons will likely be installed via the admin interface, with a warning from us saying that you must trust the add-on developer is not doing anything nefarious, and that we have not validated or audited the code. This is similar to the warning that appears when installing add-ons to Firefox.
+
+It will be easier for us to support custom clients than to support add-ons. Users should expect better support for writing, loading, and sharing custom clients soon, including on Managed instances.
+
+In order for addons to do meaningful work, we need to expose a number of functions and data structures (and relax their types). The sections below describe the extension points we expect add-ons and custom clients will need to access.
+
+** Creating an add-on
+Hubs client add-ons will work similarly to how add-ons work in Blender. An addon will be a module that exports an ~info : AddonInfo~, a ~load~ function, and an ~unload~ function:
+
+#+begin_src typescript
+export const info : AddonInfo = {
+  name: "My Special Addon",
+  // etc
+}
+
+export function load( params : LoadCallbackParams ) {
+  // Do whatever initialization you need to do when your add on is loaded
+}
+
+export function unload () {
+  // Do whatever cleanup you need to do when your add on is unloaded
+
+  // TODO Is it even possible for add-ons to be unloaded at runtime like this?
+  //      If they are added/removed from the admin panel for the whole hub, then maybe unload is not needed.
+}
+#+end_src
+
+Where the types will look something like this:
+#+begin_src typescript
+type AddonInfo = {
+  name: string;
+  author?: string;
+  description?; string;
+  compatibleWith?: ClientVersion[];
+  version?: AddonVersion;
+  location?: string;
+  wikiUrl?: string;
+  trackerUrl?: string;
+  warning?: string;
+  category?: AddonCategory;
+  tags: AddonTag[];
+}
+
+interface LoadCallbackParams = {
+  world: HubsWorld
+  // Maybe other things?
+}
+#+end_src
+
+
+** ~preload~
+
+If your addon needs to complete some work before the main tick game loop runs, pass a ~Promise~ to the ~preload~ function that resolves once you are ready.
+
 ** Inserting prefabs
+
+~Network instantiated~ entities must be registered in the ~prefabs~ map. See the ~networking~ documentation for more information.
+
 ** Inserting inflators
+
+Custom components require you to register ~inflator~ s. Be sure to insert your ~inflator~ s into ~commonInflators~, ~jsxInflators~, or ~gltfInflators~ before calling ~renderAsEntity~ or invoking ~inflateModel~.
+
 ** Inserting system calls
+
+The ~mainTick~ function calls all of the systems that need to run in a given animation frame. You will need to insert your system calls into this main game loop in the appropriate spot. We are not sure yet how we will expose this to addons. Custom client developers can insert it directly into the file that defines ~mainTick~.
+
 ** Handling interactions
+
+Basic interactions like hovering, holding, and moving objects can be achieved with built-in components or inflators (like ~inflateGrabbable~).
+
+Custom interactions that define their own ~actions~, ~action sets~, and ~device bindings~ need to be able to append their ~device bindings~ and change the logic of ~resolveActionSets~. We are not sure yet how we will expose these capabilities.
+
+More information can be found in the interactions documentation.
+
 ** Handling networking
+
+Add-ons and custom clients can define their own networked components. Developers will need to be especially careful when saving data to the database, as maintaining backwards compatibility with their chosen schema will be their responsibility. More information can be found in the networking documentation.
