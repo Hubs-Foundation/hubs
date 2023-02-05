@@ -116,7 +116,7 @@ export enum WaypointFlags {
   snapToNavMesh = 1 << 6
 }
 
-// These values are booleans because they originate from an external source, like json in a glb file.
+// These values are booleans because they originate from an external source, like json in a gltf file.
 export interface WaypointParams {
   canBeSpawnPoint: boolean;
   canBeOccupied: boolean;
@@ -211,23 +211,234 @@ timeLabel.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
 timeLabel.sync();
 #+end_src
 
-* Creating entities
-** Entities are numbers
-** Loading from prefabs
-*** ~EntityDef~ s
-*** JSX without React
-** Loading from glb files
-*** The Hubs Blender add-on
+* Adding entities
+** Entity basics
+
+Entities are added to the world with ~addEntity~ and removed from the world with ~removeEntity~. In ~bitECS~, component state is stored in large, pre-allocated ~TypedArrays~. In other words, entities are not objects with components inside them. Entities are simply numbers (~EntityID~ s), and the ~World~ keeps track of things like whether an entity has a given component (~hasComponent(world, MyComponent, eid)~).
+
+You will rarely need to call ~addEntity~ yourself. Instead, you will write entity definitions (~EntityDef~ s) using ~jsx~ or create model files (~gltf~) with that add entities and components when the models are loaded.
+
+Note: We support both ~glTF~ formats, where binary data buffers contain base64-encoded strings (as in ~.gltf~) or raw byte arrays (as in ~.glb~). We refer to ~gltf~ and ~glb~ files interchangably.
+
+** Creating ~EntityDef~ s
+
+~EntityDef~ s are ~jsx~ expressions that can be passed to ~renderAsEntity~ to add entities and components to the world. ~EntityDef~ s are commonly returned from ~template~ functions, which take some ~InitialData~ and return an ~EntityDef~ with the that ~InitialData~ applied.
+
+For example, the commonly used ~MediaPrefab~ function is a ~template~ that takes ~MediaLoaderParams~ as its ~InitialData~, and returns an ~EntityDef~ for an interactable object.
+
+#+begin_src typescript
+export function MediaPrefab(params: MediaLoaderParams): EntityDef {
+  return (
+    <entity
+      name="Interactable Media"
+      networked
+      networkedTransform
+      mediaLoader={params}
+      deletable
+      grabbable={{ cursor: true, hand: true }}
+      destroyAtExtremeDistance
+      floatyObject={{
+        flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE,
+        releaseGravity: 0
+      }}
+      networkedFloatyObject={{
+        flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE
+      }}
+      rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
+      physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }} /* TODO Physics shapes*/
+      scale={[1, 1, 1]}
+    />
+  );
+}
+#+end_src
+
+Although ~EntityDef~ s are written with ~jsx~ syntax, this is not ~React~. The ~jsx~ syntax allows us to describe our desired scene graph, entities, and components. The definition is static, and there should be no expectation of "re-rendering" (as in ~React~ or ~three-fiber~). Semantically, an ~EntityDef~ is equivalent to a model file with component data. ~EntityDef~ s are meant to be easy to edit by hand and to version control.
+
+For ~network instantiated~ entities, ~template~ functions are grouped together with ~permission~ information to form a named ~Prefab~. More information about ~network instantiated~ entities can be found in the networking documentation.
+
+** Creating model files
+
+Equivalently, hubs components can be added to nodes in a GLTF file with the ~MOZ_hubs_components~ extension.
+
+The ~hubs-blender-exporter~ is a Blender add-on that helps artists do this.
+
+Spoke also includes component data in the gltf files that it exports and uploads.
+
 ** Entity creation is synchronous
-** Component inflators
-*** Inflator rules
+
+It is important to realize that ~renderAsEntity~ is a synchronous function. That is, it will immediately return a valid ~EntityID~ with a corresponding ~Object3D~ added to the scene graph.
+
+The presence of some components (like ~MediaLoader~) cause systems to begin asynchronous work. In the case of ~MediaLoader~, this work can include downloading model or image files, loading them with the GLTF loader, and ultimately creating additional entities and components. But the entity at the root of this ~Object3D~ hierarchy will be created synchronously/immediately when ~renderAsEntity~ runs.
+
+** Inflation
+*** What does ~renderAsEntity~ do?
+
+In the example above, we show a ~template~ function (~MediaPrefab~) that takes some ~InitialData~ (the ~MediaLoaderParams~) and returns an ~EntityDef~. We then said that the ~EntityDef~ can be passed to ~renderAsEntity~ which will (synchronously) add entities and components to the world. We also said this was equivalent to loading a model file (GLTF).
+
+Question: How does ~renderAsEntity~ (and whatever loads models) accomplish this?
+Answer: By running ~inflators~.
+
+*** ~Inflator~ s
+
+An ~inflator~ is a function that transforms a _description_ of some components/entities into real components and real entities.
+
+When ~renderAsEntity~ is given the ~EntityDef~ generated by the ~MediaPrefab~ above, it will run an ~inflator~ for each of the properties found in the ~jsx~ expression.
+
+For example, the ~jsx~ expression contains the following line:
+#+begin_src typescript
+  grabbable={{ cursor: true, hand: true }}
+#+end_src
+
+When ~renderAsEntity~ parses this line, it checks the ~jsxInflators~ map (for the key ~"grabbable"~ ) to find the associated inflator (~inflateGrabbable~), and calls it.
+
+The ~inflateGrabbable~ function transforms the description into the necessary runtime components:
+
+#+begin_src typescript
+export type GrabbableParams = { cursor: boolean; hand: boolean };
+const defaults: GrabbableParams = { cursor: true, hand: true };
+export function inflateGrabbable(world: HubsWorld, eid: number, props: GrabbableParams) {
+  props = Object.assign({}, defaults, props);
+  if (props.hand) {
+    addComponent(world, HandCollisionTarget, eid);
+    addComponent(world, OffersHandConstraint, eid);
+  }
+  if (props.cursor) {
+    addComponent(world, CursorRaycastable, eid);
+    addComponent(world, RemoteHoverTarget, eid);
+    addComponent(world, OffersRemoteConstraint, eid);
+  }
+  addComponent(world, Holdable, eid);
+}
+#+end_src
+
+Notice that ~GrabbableParams~ do not map one-to-one with runtime components. That is, there is no ~Grabbable~ component. This is common in situations where we want to expose user-friendly options (for use in Blender, Spoke, or when writing ~EntityDef~ s), while representing the information differently at runtime.
+
 *** Default inflators
+
+For many components, the ~EntityDef~ or ~GLTF~ representation DOES match the runtime component, and writing individual inflators for each would be unnecessary boilerplate.
+
+For example, the ~SceneLoader~ component has a single property, a string ~src~:
+#+begin_src typescript
+export const SceneLoader = defineComponent({ src: Types.ui32 });
+SceneLoader.src[$isStringType] = true;
+#+end_src
+
+It can be specified in the following ~EntityDef~ :
+#+begin_src typescript
+export function ScenePrefab(src: string): EntityDef {
+  return <entity name="Scene" sceneRoot sceneLoader={{ src }} />;
+}
+#+end_src
+
+Writing the inflator for the ~SceneLoader~ component is simple, except for the fact that we have to remember to convert the ~string~ to a ~StringID~, so that the ~bitECS~ component can hold onto it:
+#+begin_src typescript
+export function inflateSceneLoader(world: HubsWorld, eid: number, props: { src: string }) {
+  addComponent(world, SceneLoader, eid);
+  SceneLoader.src[eid] = APP.getSid(props.src); // Convert string to string id
+}
+#+end_src
+
+In our ~jsxInflators~ map, we would associate ~"sceneLoader"~ with ~inflateSceneLoader~ :
+#+begin_src typescript
+  sceneLoader: inflateSceneLoader,
+#+end_src
+
+This situation is so common that we have a helper function, ~createDefaultInflator~, that we can use instead of writing ~inflateSceneLoader~ manually. We simply pass the component we want to inflate to ~createDefaultInflator~ and we're done:
+
+#+begin_src typescript
+  sceneLoader: createDefaultInflator(SceneLoader),
+#+end_src
+
+The default inflator handles the conversion from ~string~ s to ~StringID~, and will log an error if a property name is passed to the ~inflator~ that does not have a corresponding property in the underlying component.
+
 *** Associating ~Object3D~ s (~eid2obj~)
+
+Most of the time, we add a component definition to an ~EntityDef~ or model file just to cause some component data to be associated with an entity. Sometimes, we want to control the ~Object3D~ that will be inserted into the scene graph for this entity.
+
+We do this by calling ~addObject3DComponent~ from within an ~inflator~.
+
+For example, when a ~simpleWater~ component is found within a node of a GLTF file, the ~inflateSimpleWater~ inflator will create a ~SimpleWaterMesh~ with the given params and associate it with the given ~EntityID~ :
+
+#+begin_src typescript
+export function inflateSimpleWater(world: HubsWorld, eid: EntityID, params: SimpleWaterParams) {
+  params = Object.assign({}, DEFAULTS, params);
+  const lowQuality = APP.store.state.preferences.materialQualitySetting !== "high";
+  const simpleWater = new SimpleWaterMesh({ lowQuality });
+  simpleWater.opacity = params.opacity;
+  simpleWater.color.set(params.color);
+  simpleWater.tideHeight = params.tideHeight;
+  simpleWater.tideScale.fromArray(params.tideScale);
+  simpleWater.tideSpeed.fromArray(params.tideSpeed);
+  simpleWater.waveHeight = params.waveHeight;
+  simpleWater.waveScale.fromArray(params.waveScale);
+  simpleWater.waveSpeed.fromArray(params.waveSpeed);
+  simpleWater.ripplesScale = params.ripplesScale;
+  simpleWater.ripplesSpeed = params.ripplesSpeed;
+
+  addObject3DComponent(world, eid, simpleWater);
+  addComponent(world, SimpleWater, eid);
+}
+#+end_src
+
+Only one inflator per entity can create and assign an ~Object3D~. An ~EntityDef~ that describes an entity that is both a ~SimpleWaterMesh~ and a ~DirectionalLight~ will fail to load:
+
+#+begin_src typescript
+renderAsEntity(
+  <entity
+      name="Buggy Entity"
+      simpleWater
+      directionalLight
+  />
+); // throws Error("Tried to add an object3D tag to an entity that already has one");
+
+#+end_src
+
+By default, if no ~inflator~ creates an ~Object3D~ for the entity, then ~renderAsEntity~ will create and assign it a ~Group~.
+
+*** Loading model files
+
+The sections above explain how ~renderAsEntity~ transforms a ~jsx~ ~EntityDef~ into an entity and components, and claims that the process for loading a ~gltf~ file is equivalent.
+
+We are now ready to understand why, and will explain by example.
+
+The ~EntityDef~ returned by the ~MediaPrefab~ template (above) includes a ~mediaLoader~, which will cause ~renderAsEntity~ to invoke the ~inflateMediaLoader~ inflator and assign a ~MediaLoader~ component to the entity.
+
+Assume the ~MediaPrefab~ template is initialized with ~src~ set to the url of a ~gltf~ file. In other words, we are trying to use the ~MediaPrefab~ load a ~gltf~ file that we can grab and interact with.
+
+We pass the ~EntityDef~ to ~renderAsEntity~, an entity is returned synchronously, and execution continues as normal.
+
+When the ~mediaLoading~ system runs, it notices the new ~MediaLoader~ component and starts an asynchronous ~coroutine~ that determines the media type pointed to by the ~src~ property, downloads the ~gltf~ file and loads it as Three.js scene graph via a ~GLTFLoader~. Finally, the loaded scene graph is passed into an ~EntityDef~'s ~model~ parameter:
+
+#+begin_src typescript
+export function* loadModel(world: HubsWorld, src: string, contentType: string, useCache: boolean) {
+  const { scene, animations } = yield loadGLTFModel(src, contentType, useCache, null);
+  scene.animations = animations;
+  scene.mixer = new THREE.AnimationMixer(scene);
+  return renderAsEntity(world, <entity model={{ model: scene }} />);
+}
+#+end_src
+
+In other words, the asynchronous work of loading the model is done ~before~ an entity is created for the loaded ~gltf~. Despite being called after some asynchronous work, the entity creation step that happens in ~renderAsEntity~ itself happens synchronously.
+
+The ~model~ inflator (~inflateModel~) is to ~gltf~ files as ~renderAsEntity~ is to ~EntityDef~ s. You will notice that ~inflateModel~ invokes other component inflators and adds many entities to the world to match the ~Object3D~ hierarchy that was provided within the ~ModelParams~.
+
+This is what we mean when we say that loading from ~gltf~ files is "equivalent" to loading from ~EntityDef~ s.
+
+*** Common inflators, ~jsxInflators~, and ~gltfInflators~
+
+We can now explain why there are three collections of ~inflators~:
+
+- ~commonInflators~ are for components can be loaded (identically) whether they are defined in ~EntityDef~ s or ~gltf~ files.
+- ~jsxInflators~ are for components that are specified in ~EntityDef~ s.
+- ~gltfInflators~ are for components that are specified in ~gltf~ files.
+
+Notice that in the sentences above, we overload the word ~components~. As we have shown, the data in ~EntityDef~ s or ~gltf~ files are not ~bitECS~ components, but need to be transformed (via ~inflator~ s) to their runtime formats (which is usually ~bitECS~ components).
+
+While it might be helpful to define a ~new~ word (like "pre-components") to describe these data, we think this is overly complicated. From the perspective of the Blender add-on for example, its job is to add components (specifically, "~MOZ_hubs_components~") to nodes in the ~.blend~ scene and exported ~gltf~ files.
+
+*** Entity ~Ref~ s and ~__mhc_link_type~ : ~"node"~
 *** Associating ~Material~ s (~eid2mat~)
-*** ~Ref~ s and node
-*** Common inflators
-*** ~JSX~
-*** ~GLB~
+
 ** Entity ID's are recycled
 
 * Custom clients and addons
