@@ -1,17 +1,14 @@
-
-# Table of Contents
-
-1.  [Technologies and Backend Services](#org6403180)
-2.  [How the code is organized](#org4c547eb)
-3.  [Where to go from here](#org73b2819)
-    1.  [Core Concepts for Gameplay Code](#orgff2c327)
-    2.  [Interactivity](#org1e72509)
-    3.  [Networking](#orga1b8c1a)
+- [Technologies and Backend Services](#org3f3162a)
+- [How the code is organized](#orga3ec246)
+- [Where to go from here](#org6def927)
+  - [Core Concepts for Gameplay Code](#org619c8bf)
+  - [Interactivity](#org4758997)
+  - [Networking](#orgc703920)
 
 The Hubs client is a web application that runs in each user&rsquo;s web browser. It contains the HTML, CSS, and Javascript necessary to simulate a networked 3D world and display interactive 2D menus. This document provides an overview of the Hubs client: the technologies it uses, the backend services it connects to, and how its code is organized.
 
 
-<a id="org6403180"></a>
+<a id="org3f3162a"></a>
 
 # Technologies and Backend Services
 
@@ -27,7 +24,7 @@ These are the main technologies in use by the hubs client:
 -   `Typescript` : `Typescript` is a superset of Javascript that compiles to Javascript. We adopted typescript in 2022. While we are not trying to rewrite all of our existing javascript, new code is usually written in typescript.
 
 
-<a id="org4c547eb"></a>
+<a id="orga3ec246"></a>
 
 # How the code is organized
 
@@ -40,24 +37,23 @@ The `react-components` directory contains all of the 2D UI shown in menus, modal
 The `src` directory contains of the code that powers the 3D simulation. The entry points for various pages are defined in `webpack.config.js`.
 
 
-<a id="org73b2819"></a>
+<a id="org6def927"></a>
 
 # Where to go from here
 
 Check out the other docs. They cover
 
 
-<a id="orgff2c327"></a>
+<a id="org619c8bf"></a>
 
 ## Core Concepts for Gameplay Code
 
 
-<a id="org1e72509"></a>
+<a id="org4758997"></a>
 
 ## Interactivity
 
 
-<a id="orga1b8c1a"></a>
+<a id="orgc703920"></a>
 
 ## Networking
-

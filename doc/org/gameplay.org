@@ -77,6 +77,10 @@ export const VideoMenu = defineComponent({
 });
 #+end_src
 
+** Entity ID's are recycled
+
+After an entity is removed (by ~removeEntity~), its ~EntityID~ can later be reused in subsequent calls to ~addEntity~. This does not happen right away, but is something you should be aware of, and is all the more reason to avoid holding onto entity references.
+
 ** String data
 We sometimes want to be able to store string data in components. Since ~bitECS~ does not allow strings in components, we store numeric string ID's instead.
 
@@ -438,8 +442,6 @@ While it might be helpful to define a ~new~ word (like "pre-components") to desc
 
 *** Entity ~Ref~ s and ~__mhc_link_type~ : ~"node"~
 *** Associating ~Material~ s (~eid2mat~)
-
-** Entity ID's are recycled
 
 * Custom clients and addons
 ** Addons aren't ready yet (February 2023)

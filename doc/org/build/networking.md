@@ -1,23 +1,20 @@
-
-# Table of Contents
-
-1.  [Intro](#orgb119da2)
-2.  [The `Networked` Component](#org2bbd35c)
-3.  [Message Types](#orgad43d30)
-    1.  [`CreateMessage`](#orgdae0b06)
-    2.  [`UpdateMessage`](#orgbd864df)
-    3.  [`DeleteMessage`](#org1c7f55f)
-    4.  [`ClientJoin`](#orge92e4e5)
-    5.  [`ClientLeave`](#org2695677)
-    6.  [`CreatorChange`](#orgc99342a)
-4.  [Eventual Consistency](#orgc85401e)
-5.  [Creating Networked Entities](#orgcc2964d)
-6.  [Writing Networked Components](#org7110b85)
-7.  [Persisting Networked Entity State](#org22fd151)
-8.  [Networked Entity Hierarchies](#org7edeaa3)
+- [Intro](#orgca5b855)
+- [The `Networked` Component](#orgabca6d0)
+- [Message Types](#orge720d3c)
+  - [`CreateMessage`](#org4f63df9)
+  - [`UpdateMessage`](#orge698598)
+  - [`DeleteMessage`](#org8f17ac8)
+  - [`ClientJoin`](#orgf98374b)
+  - [`ClientLeave`](#orgebe8740)
+  - [`CreatorChange`](#org9b3f8a5)
+- [Eventual Consistency](#orga8173d0)
+- [Creating Networked Entities](#org62cc95d)
+- [Writing Networked Components](#orgd90eddd)
+- [Persisting Networked Entity State](#orgd0901c8)
+- [Networked Entity Hierarchies](#orge3d34eb)
 
 
-<a id="orgb119da2"></a>
+<a id="orgca5b855"></a>
 
 # Intro
 
@@ -32,7 +29,7 @@ Clients send messages at fixed intervals in the `networkSendSystem`. Messages ar
 Clients receive messages outside of frame boundaries, and simply queue them for processing. Clients process queued messages each frame in the `networkReceiveSystem`.
 
 
-<a id="org2bbd35c"></a>
+<a id="orgabca6d0"></a>
 
 # The `Networked` Component
 
@@ -56,7 +53,7 @@ Conceptually, the `creator` and the `owner` act as authorities over two facets o
 -   The `owner` is the authority over the entity&rsquo;s current state. Thus, it is associated with `UpdateMessage` s. The `owner` is expected to change regularly, whenever a new client performs an action on an entity. The `takeOwnership` and `takeSoftOwnership` functions allow a client to establish itself as the `owner` of an entity.
 
 
-<a id="orgad43d30"></a>
+<a id="orge720d3c"></a>
 
 # Message Types
 
@@ -74,7 +71,7 @@ Event handlers that queue messages for later processing can be found in `listenF
 Note that this is a slight simplification. The message types are not represented in these exact terms throughout the client. For example, clients may combine `CreateMessage` s, `UpdateMessage` s, and `DeleteMessage` s into a single outgoing message, which receiving clients then separate and parse. There are also two variants of `UpdateMessage`, which will be explained below.
 
 
-<a id="orgdae0b06"></a>
+<a id="org4f63df9"></a>
 
 ## `CreateMessage`
 
@@ -89,7 +86,7 @@ Reticulum inserts a `fromClientId` into `"nn"` messages, so that clients who rec
 Entities that are created by calling `createNetworkedEntity` or receiving a `CreateMessage` are said to be `network instantiated`. `Network instantiated` entities may have many descendants. We do not say that the descendants are `network instantiated`.
 
 
-<a id="orgbd864df"></a>
+<a id="orge698598"></a>
 
 ## `UpdateMessage`
 
@@ -103,7 +100,7 @@ These tell a client to update an entity. Each `UpdateMessage` contains:
 Update messages also have the `data` needed to update an entity&rsquo;s state. An entity&rsquo;s state is simply the component data associated with this entity. Updates can be partial (updating only some components) or full (updating all components). Update messages also have two variants, depending on whether they are can be saved for long term storage in the database. This topic will be covered in another section.
 
 
-<a id="org1c7f55f"></a>
+<a id="org8f17ac8"></a>
 
 ## `DeleteMessage`
 
@@ -113,28 +110,28 @@ These tell a client to `delete` an entity. Each `DeleteMessage` contains simply 
 -   A `removed` entity was removed incidentally. For example, it may have been removed when the `creator` disconnected from the room. If the `creator` reconnects and sends a `CreateMessage` with a matching `networkId`, it is acceptable to recreate the entity.
 
 
-<a id="orge92e4e5"></a>
+<a id="orgf98374b"></a>
 
 ## `ClientJoin`
 
 These tell a client that a new client has connected. The next time the `networkSendSystem` runs, the receiving client will send the new client messages about entities it is the `creator` of, and update messages for entities it is the `owner` of.
 
 
-<a id="org2695677"></a>
+<a id="orgebe8740"></a>
 
 ## `ClientLeave`
 
 These tell a client that another client has disconnected. The next time the `networkReceiveSystem` runs, the receiving client will `remove` entities that the disconnected client was the `creator` of.
 
 
-<a id="orgc99342a"></a>
+<a id="org9b3f8a5"></a>
 
 ## `CreatorChange`
 
 These tell a client that the `creator` of an entity has been reassigned. Typically, this means that an entity has been `pinned` (or `unpinned`), and reticulum has assigned (or unassigned) itself as the entity&rsquo;s `creator`.
 
 
-<a id="orgc85401e"></a>
+<a id="orga8173d0"></a>
 
 # Eventual Consistency
 
@@ -151,14 +148,16 @@ For the most part, users of the networking systems do not need to understand the
 
 Users can inspect the state the `Networked` or `Owned` components as needed in cases when their ownership claims matter. They may find themselves writing coroutines that looks like this:
 
-    takeSoftOwnership(world, eid);
-    yield sleep( 3000 ); // Wait a few seconds to see if we "win" ownership
-    if (!hasComponent(world, Owned, eid)) return;
+```typescript
+takeSoftOwnership(world, eid);
+yield sleep( 3000 ); // Wait a few seconds to see if we "win" ownership
+if (!hasComponent(world, Owned, eid)) return;
+```
 
 If this becomes a common and error-prone pattern, then we may introduce helper functions or additional semantics to cover these cases.
 
 
-<a id="orgcc2964d"></a>
+<a id="org62cc95d"></a>
 
 # Creating Networked Entities
 
@@ -173,36 +172,38 @@ Prefabs must be registered in `prefabs` , a map from `PrefabName` to `PrefabDefi
 
 For example, the commonly used `"media"` prefab&rsquo;s `template` is:
 
-    export function MediaPrefab(params: MediaLoaderParams): EntityDef {
-      return (
-        <entity
-          name="Interactable Media"
-          networked
-          networkedTransform
-          mediaLoader={params}
-          deletable
-          grabbable={{ cursor: true, hand: true }}
-          destroyAtExtremeDistance
-          floatyObject={{
-            flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE,
-            releaseGravity: 0
-          }}
-          networkedFloatyObject={{
-            flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE
-          }}
-          rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-          physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }} /* TODO Physics shapes*/
-          scale={[1, 1, 1]}
-        />
-      );
-    }
+```typescript
+export function MediaPrefab(params: MediaLoaderParams): EntityDef {
+  return (
+    <entity
+      name="Interactable Media"
+      networked
+      networkedTransform
+      mediaLoader={params}
+      deletable
+      grabbable={{ cursor: true, hand: true }}
+      destroyAtExtremeDistance
+      floatyObject={{
+        flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE,
+        releaseGravity: 0
+      }}
+      networkedFloatyObject={{
+        flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE
+      }}
+      rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
+      physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }} /* TODO Physics shapes*/
+      scale={[1, 1, 1]}
+    />
+  );
+}
+```
 
 When supplied with `MediaLoaderParams` as its `InitialData`, this prefab `template` creates an entity with several components, including a `Networked` and `NetworkedTransform` component.
 
 Calling `createNetworkedEntity(world, "media", mediaLoaderParams)` would cause the `networkSendSystem` to send a `CreateMessage` the next time it sends messages.
 
 
-<a id="org7110b85"></a>
+<a id="orgd90eddd"></a>
 
 # Writing Networked Components
 
@@ -221,7 +222,7 @@ The `serializeForStorage` and `deserializeForStorage` functions need careful aut
 Note that `NetworkSchema` s are likely to change in the near future, as we are looking for ways to simplify the complexity that `serializeForStorage` and `deserializeForStorage` introduce.
 
 
-<a id="org22fd151"></a>
+<a id="orgd0901c8"></a>
 
 # Persisting Networked Entity State
 
@@ -238,7 +239,7 @@ When the client connects to a hub channel, it calls `listEntityStates` in order 
 Saved entity states include `CreateMessage` s for the `network instantiated` entity and `UpdateMessage` s for itself and its descendants. These messages are queued and later processed by the `networkReceiveSystem` like any other messages. The client&rsquo;s eventually consistent properties guarantee that if entity state updates that come from the database are out-of-date, they will be appropriately handled (i.e. ignored).
 
 
-<a id="org7edeaa3"></a>
+<a id="orge3d34eb"></a>
 
 # Networked Entity Hierarchies
 
@@ -253,4 +254,3 @@ Between the time that the `network instantiated` entity is created (e.g. upon re
 Clients store these `UpdateMessage` s until they can be applied.
 
 A critical property of the networked system that enables this to work is that descendants of `networked instantiated` entities are assigned network IDs deterministically, even in cases where some parts of a descendant hierarchy fails to load. This ensures that the descendants can load in any order (or even fail to load) without causing a client to delete, overwrite, or ignore descendant updates.
-

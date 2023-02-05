@@ -1,35 +1,26 @@
-
-# Table of Contents
-
-1.  [User input](#org51ad019)
-2.  [Standard Interactions](#orgbe4feb9)
-3.  [Collision volumes](#org929588f)
+- [User input](#orgd36457e)
+- [Standard Interactions](#orgb381e04)
+- [Collision volumes](#org327abc9)
 
 \#+TITLE Interactivity
 
 Interactivity
 
 
-<a id="org51ad019"></a>
+<a id="orgd36457e"></a>
 
 # User input
 
-Mouse, keyboard, gamepads, and webxr devices
-The userinput frame
+Mouse, keyboard, gamepads, and webxr devices The userinput frame
 
 
-<a id="orgbe4feb9"></a>
+<a id="orgb381e04"></a>
 
 # Standard Interactions
 
-Raycasting
-Hovering
-Grabbing
-Constraints
-Action Sets
+Raycasting Hovering Grabbing Constraints Action Sets
 
 
-<a id="org929588f"></a>
+<a id="org327abc9"></a>
 
 # Collision volumes
-
