@@ -1,6 +1,7 @@
 import { getReticulumFetchUrl, hubUrl } from "./utils/phoenix-utils";
 import { updateEnvironmentForHub, getSceneUrlForHub, updateUIForHub, remountUI } from "./hub";
-import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
+import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
+import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import qsTruthy from "./utils/qs_truthy";
 import { localClientID, pendingMessages, pendingParts } from "./bit-systems/networking";
 import { storedUpdates } from "./bit-systems/network-receive-system";
@@ -40,8 +41,9 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
 
   // Generate leave events for everyone in the room.
   Object.keys(APP.hubChannel.presence.state).forEach(key => {
-    if (key !== localClientID) {
-      pendingParts.push(APP.getSid(key));
+    const clientId = APP.getSid(key);
+    if (clientId !== localClientID) {
+      pendingParts.push(clientId);
     }
   });
   // Reticulum "leaving" causes pinned objects to get cleaned up.
@@ -133,7 +135,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   ]);
 
   if (qsTruthy("newLoader")) {
-    loadStoredRoomData(hubId);
+    loadSavedEntityStates(APP.hubChannel);
     loadLegacyRoomObjects(hubId);
   } else {
     loadRoomObjects(hubId);

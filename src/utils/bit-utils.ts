@@ -29,13 +29,3 @@ export function findAncestorEntity(world: HubsWorld, eid: number, predicate: (ei
 export function findAncestorWithComponent(world: HubsWorld, component: Component, eid: number) {
   return findAncestorEntity(world, eid, otherId => hasComponent(world, component, otherId));
 }
-
-export function selfWithDescendants(world: HubsWorld, eid: EntityID) {
-  const eids: EntityID[] = [];
-  world.eid2obj.get(eid)!.traverse(o => {
-    if (o.eid) {
-      eids.push(o.eid);
-    }
-  });
-  return eids;
-}

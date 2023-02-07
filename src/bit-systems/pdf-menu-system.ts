@@ -1,7 +1,7 @@
-import { defineQuery, entityExists, hasComponent } from "bitecs";
+import { addComponent, defineQuery, entityExists, hasComponent } from "bitecs";
 import { Text } from "troika-three-text";
 import type { HubsWorld } from "../app";
-import { HoveredRemoteRight, Interacted, MediaPDF, NetworkedPDF, PDFMenu } from "../bit-components";
+import { EntityStateDirty, HoveredRemoteRight, Interacted, MediaPDF, NetworkedPDF, PDFMenu } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import type { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
@@ -57,6 +57,7 @@ function wrapAround(n: number, min: number, max: number) {
 
 function setPage(world: HubsWorld, eid: EntityID, pageNumber: number) {
   takeOwnership(world, eid);
+  addComponent(world, EntityStateDirty, eid);
   NetworkedPDF.pageNumber[eid] = wrapAround(pageNumber, 1, PDFResourcesMap.get(eid)!.pdf.numPages);
 }
 

@@ -34,6 +34,7 @@ import { NameTagVisibilitySystem } from "./name-tag-visibility-system";
 // new world
 import { networkReceiveSystem } from "../bit-systems/network-receive-system";
 import { networkSendSystem } from "../bit-systems/network-send-system";
+import { entityPersistenceSystem } from "../bit-systems/entity-persistence-system";
 import { onOwnershipLost } from "./on-ownership-lost";
 import { interactionSystem } from "./bit-interaction-system";
 import { floatyObjectSystem } from "./floaty-object-system";
@@ -255,6 +256,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   // We run this late in the frame so that its the last thing to have an opinion about the scale of an object
   hubsSystems.boneVisibilitySystem.tick();
 
+  entityPersistenceSystem(world, APP.hubChannel!);
   networkSendSystem(world);
 
   if (enableNetworkDebug) {

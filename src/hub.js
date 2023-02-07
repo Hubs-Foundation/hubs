@@ -260,7 +260,8 @@ import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
-import { loadStoredRoomData, loadLegacyRoomObjects } from "./utils/load-room-objects";
+import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
+import { loadSavedEntityStates } from "./utils/entity-state-utils";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -597,7 +598,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     "didConnectToNetworkedScene",
     () => {
       if (qsTruthy("newLoader")) {
-        loadStoredRoomData(hub.hub_id);
+        loadSavedEntityStates(APP.hubChannel);
         loadLegacyRoomObjects(hub.hub_id);
       } else {
         // Append objects once we are in the NAF room since ownership may be taken.
@@ -1265,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel
     .join()
     .receive("ok", async data => {
-      setLocalClientID(data.session_id);
+      setLocalClientID(APP.getSid(data.session_id));
       APP.hideHubPresenceEvents = true;
       presenceSync.promise = new Promise(resolve => {
         presenceSync.resolve = resolve;

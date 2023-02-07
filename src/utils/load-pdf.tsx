@@ -1,5 +1,5 @@
 /** @jsx createElementEntity */
-import { getDocument, PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
+import { getDocument, PDFDocumentProxy } from "pdfjs-dist";
 import { CanvasTexture, DoubleSide, LinearFilter, MeshBasicMaterial, sRGBEncoding } from "three";
 import { HubsWorld } from "../app";
 import { loadPageJob } from "../bit-systems/pdf-system";

@@ -7,6 +7,7 @@ import { animate } from "../utils/animate";
 import { findAncestorEntity } from "../utils/bit-utils";
 import { coroutine } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
+import { deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
 
 // TODO Move to coroutine.ts when it exists
 // TODO Figure out the appropriate type and use it everywhere
@@ -14,6 +15,9 @@ export type Coroutine = Generator<Promise<void>, void, unknown>;
 
 const END_SCALE = new Vector3().setScalar(0.001);
 function* animateThenRemoveEntity(world: HubsWorld, eid: number): Coroutine {
+  if (hasSavedEntityState(world, eid)) {
+    deleteEntityState(APP.hubChannel!, world, eid);
+  }
   const obj = world.eid2obj.get(eid)!;
   yield* animate({
     properties: [[obj.scale.clone(), END_SCALE]],
@@ -33,7 +37,7 @@ const hoveredRightQuery = defineQuery([HoveredRemoteRight]);
 const hoveredLeftQuery = defineQuery([HoveredRemoteLeft]);
 const coroutines = new Map();
 
-function deleteTheDeletableAncestor(world: HubsWorld, eid: number) {
+export function deleteTheDeletableAncestor(world: HubsWorld, eid: number) {
   const ancestor = findAncestorEntity(world, eid, (e: number) => hasComponent(world, Deletable, e));
   if (ancestor && !coroutines.has(ancestor)) {
     coroutines.set(ancestor, coroutine(animateThenRemoveEntity(world, ancestor)));

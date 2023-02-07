@@ -1,7 +1,14 @@
-import { localClientID, pendingJoins, pendingMessages, pendingParts } from "../bit-systems/networking";
-import { isStorableMessage } from "./load-room-objects";
-import type { ClientID, Message, NetworkID } from "./networking-types";
-import { StorableMessage } from "./store-networked-state";
+import {
+  connectedClientIds,
+  disconnectedClientIds,
+  localClientID,
+  pendingCreatorChanges,
+  pendingJoins,
+  pendingMessages,
+  pendingParts
+} from "../bit-systems/networking";
+import { EntityState } from "./entity-state-utils";
+import type { ClientID, CreatorChange, Message } from "./networking-types";
 
 type Emitter = {
   on: (event: string, callback: (a: any) => any) => number;
@@ -16,18 +23,26 @@ export function listenForNetworkMessages(channel: PhoenixChannel, presenceEventE
   presenceEventEmitter.on("hub:leave", onLeave);
   channel.on("naf", onNaf);
   channel.on("nafr", onNafr);
-  channel.on("pin", onPin);
+  channel.on("entity_state_created", onEntityStateCreated);
+  channel.on("entity_state_updated", onEntityStateUpdated);
+  channel.on("entity_state_deleted", onEntityStateDeleted);
 }
 
 function onJoin({ key }: { key: ClientID }) {
-  if (key !== localClientID!) {
-    pendingJoins.push(APP.getSid(key));
+  const clientId = APP.getSid(key);
+  if (clientId !== localClientID!) {
+    pendingJoins.push(clientId);
+    connectedClientIds.add(clientId);
+    disconnectedClientIds.delete(clientId); // In case of reconnect
   }
 }
 
 function onLeave({ key }: { key: ClientID }) {
-  if (key !== localClientID!) {
-    pendingParts.push(APP.getSid(key));
+  const clientId = APP.getSid(key);
+  if (clientId !== localClientID!) {
+    pendingParts.push(clientId);
+    connectedClientIds.delete(clientId);
+    disconnectedClientIds.add(clientId);
   }
 }
 
@@ -58,14 +73,33 @@ function onNafr(message: NafrMessage) {
   onNaf(message.parsed!);
 }
 
-type PinMessage = {
-  gltf_node: StorableMessage;
-  object_id: NetworkID;
-  pinned_by: ClientID;
-};
-function onPin(pinMessage: PinMessage) {
-  if (isStorableMessage(pinMessage.gltf_node)) {
-    pinMessage.gltf_node.fromClientId = "reticulum";
-    pendingMessages.push(pinMessage.gltf_node);
-  }
+export function queueEntityStateAsMessage(entityState: EntityState) {
+  const rootNid = entityState.create_message.networkId;
+  entityState.update_messages.forEach(update => {
+    update.owner = "reticulum";
+  });
+  pendingMessages.push({
+    fromClientId: "reticulum",
+    creates: [entityState.create_message],
+    updates: entityState.update_messages,
+    deletes: []
+  });
+  pendingCreatorChanges.push({
+    nid: rootNid,
+    creator: "reticulum"
+  });
+}
+
+function onEntityStateCreated(response: { data: EntityState[] }) {
+  // console.log("entity_state_created", response);
+  queueEntityStateAsMessage(response.data[0]!);
+}
+
+function onEntityStateUpdated(_response: any) {
+  // console.log("entity_state_updated", response);
+}
+
+function onEntityStateDeleted(response: CreatorChange) {
+  // console.log("entity_state_deleted", response);
+  pendingCreatorChanges.push(response);
 }

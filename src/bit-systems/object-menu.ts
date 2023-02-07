@@ -1,11 +1,12 @@
-import { defineQuery, hasComponent } from "bitecs";
+import { defineQuery, entityExists, hasComponent } from "bitecs";
 import type { HubsWorld } from "../app";
 import { HoveredRemoteRight, Interacted, ObjectMenu, ObjectMenuTarget } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
+import { createEntityState, deleteEntityState } from "../utils/entity-state-utils";
 import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
-import { tryPin, tryUnpin } from "../utils/store-networked-state";
 import { setMatrixWorld } from "../utils/three-utils";
+import { deleteTheDeletableAncestor } from "./delete-entity-system";
 import { isPinned } from "./networking";
 
 function clicked(world: HubsWorld, eid: EntityID) {
@@ -17,8 +18,14 @@ function objectMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boole
     return 0;
   }
 
-  const target = hoveredQuery(world).map(eid => findAncestorWithComponent(world, ObjectMenuTarget, eid))[0] || 0;
-  return target || ObjectMenu.targetRef[menu];
+  const target = hoveredQuery(world).map(eid => findAncestorWithComponent(world, ObjectMenuTarget, eid))[0];
+  if (target) return target;
+
+  if (entityExists(world, ObjectMenu.targetRef[menu])) {
+    return ObjectMenu.targetRef[menu];
+  }
+
+  return 0;
 }
 
 function moveToTarget(world: HubsWorld, menu: EntityID) {
@@ -33,15 +40,15 @@ function moveToTarget(world: HubsWorld, menu: EntityID) {
 
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
-    tryPin(world, ObjectMenu.targetRef[menu], hubChannel);
+    createEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.unpinButtonRef[menu])) {
-    tryUnpin(world, ObjectMenu.targetRef[menu], hubChannel);
+    deleteEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.cameraFocusButtonRef[menu])) {
     console.log("Clicked focus");
   } else if (clicked(world, ObjectMenu.cameraTrackButtonRef[menu])) {
     console.log("Clicked track");
   } else if (clicked(world, ObjectMenu.removeButtonRef[menu])) {
-    console.log("Clicked remove");
+    deleteTheDeletableAncestor(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.dropButtonRef[menu])) {
     console.log("Clicked drop");
   } else if (clicked(world, ObjectMenu.inspectButtonRef[menu])) {
@@ -96,10 +103,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
 
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
 export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, hubChannel: HubChannel) {
-  const menu = anyEntityWith(world, ObjectMenu) as EntityID | null;
-  if (!menu) {
-    return; // TODO: Fix initialization so that this is assigned via preload.
-  }
+  const menu = anyEntityWith(world, ObjectMenu)!;
 
   ObjectMenu.targetRef[menu] = objectMenuTarget(world, menu, sceneIsFrozen);
   if (ObjectMenu.targetRef[menu]) {
