@@ -7,7 +7,7 @@ import { IconButton } from "../input/IconButton";
 import { FormattedMessage } from "react-intl";
 
 import * as bitComponents from "../../bit-components";
-import { defineQuery, getEntityComponents } from "bitecs";
+import { defineQuery, getEntityComponents, removeEntity } from "bitecs";
 
 const bitComponentNames = new Map();
 for (const [name, Component] of Object.entries(bitComponents)) {
@@ -126,6 +126,9 @@ function ObjectProperties({ obj }) {
         <span>{displayName}</span>
         <button onClick={() => console.log(obj)}>
           <FormattedMessage id="ecs-sidebar.log-button" defaultMessage="log" />
+        </button>
+        <button onClick={() => removeEntity(APP.world, obj.eid)}>
+          <FormattedMessage id="ecs-sidebar.remove-button" defaultMessage="remove" />
         </button>
       </div>
       <div className="content">{obj.eid && <EntityInfo eid={obj.eid} />}</div>
