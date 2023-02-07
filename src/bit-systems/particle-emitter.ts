@@ -28,7 +28,7 @@ function* setTexture(world: HubsWorld, eid: number) {
   particleEmitter.material.uniforms.map.value = texture;
   particleEmitter.visible = true;
 
-  ParticleEmitterTag.updateParticles[eid] = 1;
+  particleEmitter.updateParticles();
 }
 
 const particleEmitterQuery = defineQuery([ParticleEmitterTag]);
@@ -47,11 +47,6 @@ export function particleEmitterSystem(world: HubsWorld) {
   });
   particleEmitterQuery(world).forEach(eid => {
     const particleEmitter: ParticleEmitter = world.eid2obj.get(eid)! as ParticleEmitter;
-
-    if (ParticleEmitterTag.updateParticles[eid]) {
-      particleEmitter.updateParticles();
-      ParticleEmitterTag.updateParticles[eid] = 0;
-    }
 
     if (particleEmitter.visible) {
       particleEmitter.update(world.time.delta / 1000);

@@ -62,7 +62,6 @@ export function inflateParticleEmitter(world: HubsWorld, eid: number, params: Pa
   addObject3DComponent(world, eid, particleEmitter);
   addComponent(world, ParticleEmitterTag, eid);
 
-  ParticleEmitterTag.updateParticles[eid] = false ? 0 : 1;
   ParticleEmitterTag.src[eid] = APP.getSid(params.src || defaultSrcUrl);
 
   particleEmitter.startColor.set(params.startColor);
