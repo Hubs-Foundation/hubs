@@ -14,11 +14,12 @@ import {
   Skybox,
   Slice9,
   Text,
-  VideoMenu
+  VideoMenu,
+  ParticleEmitterTag
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
-import { disposeMaterial, traverseSome } from "../utils/three-utils";
+import { disposeMaterial, traverseSome, disposeNode } from "../utils/three-utils";
 import { forEachMaterial } from "../utils/material-utils";
 
 function cleanupObjOnExit(Component, f) {
@@ -73,6 +74,7 @@ const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
   forEachMaterial(obj.material, material => material.dispose());
 });
 const cleanupMirrors = cleanupObjOnExit(Mirror, obj => obj.dispose());
+const cleanupParticleSystem = cleanupObjOnExit(ParticleEmitterTag, obj => disposeNode(obj));
 
 // TODO This feels messy and brittle
 //
@@ -135,6 +137,7 @@ export function removeObject3DSystem(world) {
   cleanupSkyboxes(world);
   cleanupSimpleWaters(world);
   cleanupMirrors(world);
+  cleanupParticleSystem(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeObjFromMap);

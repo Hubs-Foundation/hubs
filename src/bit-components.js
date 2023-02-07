@@ -231,3 +231,6 @@ export const VideoTextureTarget = defineComponent({
 });
 export const SimpleWater = defineComponent();
 export const Mirror = defineComponent();
+export const ParticleEmitterTag = defineComponent({
+  src: Types.ui32
+});

@@ -66,7 +66,7 @@ import { videoTextureSystem } from "../bit-systems/video-texture";
 import { uvScrollSystem } from "../bit-systems/uv-scroll";
 import { simpleWaterSystem } from "../bit-systems/simple-water";
 import { pdfSystem } from "../bit-systems/pdf-system";
-
+import { particleEmitterSystem } from "../bit-systems/particle-emitter";
 
 declare global {
   interface Window {
@@ -192,6 +192,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.animationMixerSystem.tick(dt);
 
   billboardSystem(world, hubsSystems.cameraSystem.viewingCamera);
+  particleEmitterSystem(world);
   waypointSystem(world, hubsSystems.characterController, sceneEl.is("frozen"));
   hubsSystems.characterController.tick(t, dt);
   hubsSystems.cursorTogglingSystem.tick(aframeSystems.interaction, aframeSystems.userinput, hubsSystems.el);
@@ -243,7 +244,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
-  
+
   videoTextureSystem(world);
 
   deleteEntitySystem(world, aframeSystems.userinput);
