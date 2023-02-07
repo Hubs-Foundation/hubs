@@ -137,7 +137,6 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
 
     const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
     timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
-    timeLabelRef.sync();
 
     if (rightMenuIndicatorCoroutine && rightMenuIndicatorCoroutine().done) {
       rightMenuIndicatorCoroutine = null;

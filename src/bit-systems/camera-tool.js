@@ -178,17 +178,14 @@ function updateUI(world, camera) {
   if (countdownLblObj.visible) {
     const timeLeftSec = Math.ceil((CameraTool.snapTime[camera] - world.time.elapsed) / 1000);
     countdownLblObj.text = timeLeftSec;
-    countdownLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
   }
 
   if (captureDurLblObj.visible) {
     captureDurLblObj.text = CAPTURE_DURATIONS[CameraTool.captureDurIdx[camera]];
-    captureDurLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
   }
 
   if (sndToggleBtnObj.visible) {
     sndToggleLblObj.text = captureAudio ? "Sound ON" : "Sound OFF";
-    sndToggleLblObj.sync();
   }
 }
 

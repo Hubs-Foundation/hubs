@@ -37,6 +37,5 @@ export function networkDebugSystem(world: HubsWorld, scene: Scene) {
     textObj.matrixNeedsUpdate = true;
 
     textObj.text = formatObjectName(networkedObj) + "\nNetworked " + formatComponentProps(eid, Networked);
-    textObj.sync();
   });
 }

@@ -50,7 +50,7 @@ import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader
 import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflateSlice9 } from "../inflators/slice9";
-import { inflateText } from "../inflators/text";
+import { TextParams, inflateText } from "../inflators/text";
 import {
   BackgroundParams,
   EnvironmentSettingsParams,
@@ -328,7 +328,7 @@ export interface JSXComponentData extends ComponentData {
   sceneLoader?: { src: string };
   mediaFrame?: any;
   object3D?: any;
-  text?: any;
+  text?: TextParams;
   model?: ModelParams;
   networkDebug?: boolean;
   waypointPreview?: boolean;
