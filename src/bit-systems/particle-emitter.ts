@@ -38,7 +38,6 @@ const particleEmitterExitQuery = exitQuery(particleEmitterQuery);
 const jobs = new JobRunner();
 export function particleEmitterSystem(world: HubsWorld) {
   particleEmitterEnterQuery(world).forEach(eid => {
-    jobs.stop(eid);
     jobs.add(eid, () => setTexture(world, eid));
   });
   particleEmitterExitQuery(world).forEach(function (eid) {
@@ -46,11 +45,11 @@ export function particleEmitterSystem(world: HubsWorld) {
     jobs.stop(eid);
   });
   particleEmitterQuery(world).forEach(eid => {
-    const particleEmitter: ParticleEmitter = world.eid2obj.get(eid)! as ParticleEmitter;
+    jobs.tick();
 
+    const particleEmitter: ParticleEmitter = world.eid2obj.get(eid)! as ParticleEmitter;
     if (particleEmitter.visible) {
       particleEmitter.update(world.time.delta / 1000);
     }
   });
-  jobs.tick();
 }
