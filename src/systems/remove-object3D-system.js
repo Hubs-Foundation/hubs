@@ -74,9 +74,7 @@ const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
   forEachMaterial(obj.material, material => material.dispose());
 });
 const cleanupMirrors = cleanupObjOnExit(Mirror, obj => obj.dispose());
-const cleanupParticleSystem = cleanupObjOnExit(ParticleEmitterTag, obj => {
-  disposeNode(obj);
-});
+const cleanupParticleSystem = cleanupObjOnExit(ParticleEmitterTag, obj => disposeNode(obj));
 
 // TODO This feels messy and brittle
 //
