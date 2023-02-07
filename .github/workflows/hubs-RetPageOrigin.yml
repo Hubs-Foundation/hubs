@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 jobs:
   turkeyGitops:
-    uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@master
+    uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@feature/smoke
     with:
       registry: mozillareality
       dockerfile: RetPageOriginDockerfile
