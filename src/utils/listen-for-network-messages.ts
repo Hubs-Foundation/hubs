@@ -23,7 +23,7 @@ export function listenForNetworkMessages(channel: PhoenixChannel, presenceEventE
   presenceEventEmitter.on("hub:leave", onLeave);
   channel.on("naf", onNaf);
   channel.on("nafr", onNafr);
-  channel.on("entity_state_created", onEntityStateCreated);
+  channel.on("entity_state_saved", onEntityStateCreated);
   channel.on("entity_state_updated", onEntityStateUpdated);
   channel.on("entity_state_deleted", onEntityStateDeleted);
 }
@@ -91,7 +91,7 @@ export function queueEntityStateAsMessage(entityState: EntityState) {
 }
 
 function onEntityStateCreated(response: { data: EntityState[] }) {
-  // console.log("entity_state_created", response);
+  // console.log("entity_state_saved", response);
   queueEntityStateAsMessage(response.data[0]!);
 }
 

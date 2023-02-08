@@ -43,8 +43,8 @@ export function hasSavedEntityState(world: HubsWorld, eid: EntityID) {
 
 export async function createEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
   const payload = createEntityStatePayload(world, eid);
-  // console.log("create_entity_state",  payload);
-  return push(hubChannel, "create_entity_state", payload);
+  // console.log("save_entity_state",  payload);
+  return push(hubChannel, "save_entity_state", payload);
 }
 
 export async function updateEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
@@ -102,7 +102,7 @@ function entityStateUpdateMessage(world: HubsWorld, eid: EntityID): StorableUpda
   return updateMessage;
 }
 
-type HubChannelCommand = "list_entity_states" | "create_entity_state" | "update_entity_state" | "delete_entity_state";
+type HubChannelCommand = "list_entities" | "save_entity_state" | "update_entity_state" | "delete_entity_state";
 type HubChannelPayload = CreateEntityStatePayload | UpdateEntityStatePayload | DeleteEntityStatePayload;
 
 function push(hubChannel: HubChannel, command: HubChannelCommand, payload?: HubChannelPayload) {
@@ -120,7 +120,7 @@ function push(hubChannel: HubChannel, command: HubChannelCommand, payload?: HubC
 }
 
 function listEntityStates(hubChannel: HubChannel) {
-  return push(hubChannel, "list_entity_states") as Promise<EntityStateList>;
+  return push(hubChannel, "list_entities") as Promise<EntityStateList>;
 }
 
 function updateEntityStatePayload(world: HubsWorld, eid: EntityID): UpdateEntityStatePayload {
@@ -186,7 +186,7 @@ async function downloadSavedEntityStates(hubChannel: HubChannel) {
 };
 
 function rebroadcastEntityState(hubChannel: HubChannel, entityState: EntityState) {
-  push(hubChannel, "create_entity_state", {
+  push(hubChannel, "save_entity_state", {
     nid: entityState.create_message.networkId,
     create_message: entityState.create_message,
     updates: entityState.update_messages.map(update => {
