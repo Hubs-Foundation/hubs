@@ -21,6 +21,7 @@ import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
 import { disposeMaterial, traverseSome, disposeNode } from "../utils/three-utils";
 import { forEachMaterial } from "../utils/material-utils";
+import { cleanupAudio } from "../bit-systems/audio-emitter-system";
 
 function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
@@ -49,11 +50,7 @@ const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => {
 const cleanupLights = cleanupObjOnExit(LightTag, obj => obj.dispose());
 const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
-const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => {
-  obj.disconnect();
-  const audioSystem = AFRAME.scenes[0].systems["hubs-systems"].audioSystem;
-  audioSystem.removeAudio({ node: obj });
-});
+const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => cleanupAudio(obj));
 const cleanupImages = cleanupObjOnExit(MediaImage, obj => {
   releaseTextureByKey(APP.getString(MediaImage.cacheKey[obj.eid]));
   obj.geometry.dispose();

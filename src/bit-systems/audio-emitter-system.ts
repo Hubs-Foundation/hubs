@@ -14,6 +14,16 @@ function isPositionalAudio(node: AudioObject3D): node is PositionalAudio {
   return (node as any).panner !== undefined;
 }
 
+export function cleanupAudio(audio: AudioObject3D) {
+  const eid = audio.eid!;
+  audio.disconnect();
+  const audioSystem = APP.scene?.systems["hubs-systems"].audioSystem;
+  APP.audios.delete(eid);
+  APP.supplementaryAttenuation.delete(eid);
+  APP.isAudioPaused.delete(eid);
+  audioSystem.removeAudio({ node: audio });
+}
+
 function swapAudioType<T extends AudioObject3D>(
   world: HubsWorld,
   audioSystem: AudioSystem,
@@ -22,6 +32,10 @@ function swapAudioType<T extends AudioObject3D>(
 ) {
   const audio = world.eid2obj.get(eid)! as AudioObject3D;
   audio.disconnect();
+  APP.gainMultipliers.delete(eid);
+  APP.sourceType.set(eid, SourceType.MEDIA_VIDEO);
+  APP.supplementaryAttenuation.delete(eid);
+  APP.audios.delete(eid);
   audioSystem.removeAudio({ node: audio });
 
   const newAudio = new NewType(APP.audioListener);
