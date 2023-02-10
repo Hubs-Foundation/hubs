@@ -235,3 +235,19 @@ export const Mirror = defineComponent();
 export const ParticleEmitterTag = defineComponent({
   src: Types.ui32
 });
+export const AudioZone = defineComponent({
+  flags: Types.ui8
+});
+export const AudioListenerTag = defineComponent();
+export const AudioParams = defineComponent({
+  audioType: Types.ui32,
+  distanceModel: Types.ui32,
+  panningModel: Types.ui32,
+  rolloffFactor: Types.ui32,
+  refDistance: Types.ui32,
+  maxDistance: Types.ui32,
+  coneInnerAngle: Types.ui32,
+  coneOuterAngle: Types.ui32,
+  coneOuterGain: Types.ui32,
+  gain: Types.ui32
+});
