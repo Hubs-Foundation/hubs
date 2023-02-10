@@ -69,6 +69,7 @@ import { simpleWaterSystem } from "../bit-systems/simple-water";
 import { pdfSystem } from "../bit-systems/pdf-system";
 import { particleEmitterSystem } from "../bit-systems/particle-emitter";
 import { audioEmitterSystem } from "../bit-systems/audio-emitter-system";
+import { audioZoneSystem } from "../bit-systems/audio-zone-system";
 
 declare global {
   interface Window {
@@ -243,12 +244,13 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   pdfSystem(world);
   mediaFramesSystem(world);
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
+  audioZoneSystem(world);
+  audioEmitterSystem(world, hubsSystems.audioSystem);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
 
   videoTextureSystem(world);
-  audioEmitterSystem(world, hubsSystems.audioSystem);
 
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);
