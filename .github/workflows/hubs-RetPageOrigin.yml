@@ -5,13 +5,12 @@ on:
     paths-ignore: ["README.md"]
   workflow_dispatch:
     inputs:
-      smoke-room:
+      smokeroom-choice:
         type: choice
         description: select smoke room
         options:
           - "smoke01"
           - "smoke02"
-
 jobs:
   turkeyGitops:
     uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@feature/smoke
@@ -21,7 +20,7 @@ jobs:
       personal_k8s_deployment: hubs
       personal_k8s_deployment_container: hubs
       bio_script_path: scripts/hab-wrap-and-push.sh
-      smoke-room: ${{inputs.smoke-room}}
+      smoke-room: ${{github.event.inputs.smokeroom-choice}}
     secrets:
       DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
       GCP_TURKEYGITOPS_SA_JSON: ${{ secrets.GCP_TURKEYGITOPS_SA_JSON  }}
