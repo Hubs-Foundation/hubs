@@ -178,7 +178,28 @@ MediaPDF.map = new Map();
 export const MediaVideo = defineComponent({
   autoPlay: Types.ui8
 });
-export const AnimationMixer = defineComponent();
+export const MixerAnimatableInitialize = defineComponent({});
+export const MixerAnimatable = defineComponent({});
+/**
+ * @type {Map<EntityId, AnimationMixer}>}
+ */
+export const MixerAnimatableData = new Map();
+export const LoopAnimationInitialize = defineComponent({});
+/**
+ * @type {Map<EntityId, {
+ *          activeClipIndices: number[],
+ *          clip: number,
+ *          paused: boolean,
+ *          startOffset: number,
+ *          timeScale: number
+ *        }[]>}
+ */
+export const LoopAnimationInitializeData = new Map();
+export const LoopAnimation = defineComponent();
+/**
+ * @type {Map<EntityId, AnimationAction[]>}
+ */
+export const LoopAnimationData = new Map();
 export const NetworkedVideo = defineComponent({
   time: Types.f32,
   flags: Types.ui8
