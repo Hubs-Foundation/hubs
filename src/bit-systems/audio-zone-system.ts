@@ -20,20 +20,21 @@ const debugMaterial = new MeshBasicMaterial({
 
 const addZoneDebugObject = (world: HubsWorld, zone: number) => {
   const geometry = new BoxGeometry();
-  const obj = new Mesh(geometry, debugMaterial);
-  const aabb = new BoxHelper(obj, DEBUG_BBAA_COLOR);
+  const mesh = new Mesh(geometry, debugMaterial);
+  const helper = new BoxHelper(mesh, DEBUG_BBAA_COLOR);
 
-  const parent = APP.world.eid2obj.get(zone) as Object3D;
-  parent.add(aabb);
+  const parent = world.eid2obj.get(zone) as Object3D;
+  parent.add(helper);
   parent.updateMatrixWorld(true);
 
-  debugObjects.set(zone, obj);
+  debugObjects.set(zone, helper);
 };
 
 const releaseZoneDebugObject = (world: HubsWorld, zone: number) => {
-  const obj = debugObjects.get(zone)!;
-  obj?.removeFromParent();
-  disposeNode(obj);
+  const helper = debugObjects.get(zone)!;
+  helper?.removeFromParent();
+  disposeNode(helper);
+  debugObjects.delete(zone);
 };
 
 const isZoneEnabled = (zone: number): boolean => {
