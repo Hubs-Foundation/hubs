@@ -35,40 +35,10 @@ let isEnabled = false;
 let unsupported = false;
 let maxDebugSources = 64;
 let uniforms: DebugUniforms;
-let debugMaterial: ShaderMaterial;
+let debugMaterial: ShaderMaterial | undefined | null;
 const nav2mat = new Map<number, Material | Material[]>();
 
-const addDebugMaterial = (world: HubsWorld, nav: number) => {
-  if (nav2mat.has(nav)) return;
-  setupMaterial();
-  const obj = world.eid2obj.get(nav);
-  if (obj) {
-    const navMesh = obj as Mesh;
-    navMesh.visible = isEnabled;
-    nav2mat.set(nav, navMesh.material);
-    navMesh.material = debugMaterial;
-    navMesh.material.needsUpdate = true;
-    navMesh.geometry.computeVertexNormals();
-  }
-};
-
-const removeDebugMaterial = (world: HubsWorld, nav: number) => {
-  if (!nav2mat.has(nav)) return;
-  const obj = world.eid2obj.get(nav);
-  if (obj) {
-    const navMesh = obj as Mesh;
-    navMesh.visible = false;
-    disposeMaterial(navMesh.material);
-    navMesh.material = nav2mat.get(nav)!;
-    nav2mat.delete(nav);
-    (navMesh.material as Material).needsUpdate = true;
-    navMesh.geometry.computeVertexNormals();
-  }
-};
-
-export const cleanupAudioDebugNavMesh = (nav: number) => removeDebugMaterial(APP.world, nav);
-
-const setupMaterial = () => {
+const createMaterial = () => {
   if (isEnabled) {
     if (!uniforms) {
       uniforms = {
@@ -114,15 +84,6 @@ const setupMaterial = () => {
   }
 };
 
-const updateDebugConfig = (nav: number) => {
-  if (unsupported) return;
-  if (isEnabled) {
-    addDebugMaterial(APP.world, nav);
-  } else {
-    removeDebugMaterial(APP.world, nav);
-  }
-};
-
 getScene().then(() => {
   const webGLVersion = getWebGLVersion(APP.scene!.renderer);
   if (webGLVersion < "2.0") {
@@ -136,10 +97,51 @@ getScene().then(() => {
   if (unsupported) return;
   (APP.store as any).addEventListener("statechanged", () => {
     isEnabled = APP.store.state.preferences.showAudioDebugPanel;
-    defineQuery([NavMesh])(APP.world).forEach(nav => updateDebugConfig(nav));
+    isEnabled && createMaterial();
+    defineQuery([NavMesh])(APP.world).forEach(nav => {
+      if (unsupported) return;
+      if (isEnabled) {
+        addDebugMaterial(APP.world, nav);
+      } else {
+        removeDebugMaterial(APP.world, nav);
+      }
+    });
+    if (!isEnabled && debugMaterial) {
+      disposeMaterial(debugMaterial);
+      debugMaterial = null;
+    }
   });
   isEnabled = APP.store.state.preferences.showAudioDebugPanel;
+  isEnabled && createMaterial();
 });
+
+const addDebugMaterial = (world: HubsWorld, nav: number) => {
+  if (nav2mat.has(nav)) return;
+  const obj = world.eid2obj.get(nav);
+  if (obj) {
+    const navMesh = obj as Mesh;
+    navMesh.visible = isEnabled;
+    nav2mat.set(nav, navMesh.material);
+    navMesh.material = debugMaterial!;
+    navMesh.material.needsUpdate = true;
+    navMesh.geometry.computeVertexNormals();
+  }
+};
+
+const removeDebugMaterial = (world: HubsWorld, nav: number) => {
+  if (!nav2mat.has(nav)) return;
+  const obj = world.eid2obj.get(nav);
+  if (obj) {
+    const navMesh = obj as Mesh;
+    navMesh.visible = false;
+    navMesh.material = nav2mat.get(nav)!;
+    nav2mat.delete(nav);
+    (navMesh.material as Material).needsUpdate = true;
+    navMesh.geometry.computeVertexNormals();
+  }
+};
+
+export const cleanupAudioDebugNavMesh = (nav: number) => removeDebugMaterial(APP.world, nav);
 
 const sourcePos = new THREE.Vector3();
 const sourceDir = new THREE.Vector3();
@@ -149,13 +151,13 @@ const navMeshEnterQuery = enterQuery(navMeshQuery);
 const navMeshExitQuery = exitQuery(navMeshQuery);
 export function audioDebugSystem(world: HubsWorld) {
   if (unsupported) return;
-  navMeshEnterQuery(world).forEach(nav => {
-    addDebugMaterial(world, nav);
-  });
   navMeshExitQuery(world).forEach(nav => {
     removeDebugMaterial(world, nav);
   });
   if (isEnabled && uniforms) {
+    navMeshEnterQuery(world).forEach(nav => {
+      isEnabled && addDebugMaterial(world, nav);
+    });
     let idx = 0;
     audioEmittersQuery(world).forEach(emitter => {
       if (APP.isAudioPaused.has(emitter)) return;
@@ -188,17 +190,17 @@ export function audioDebugSystem(world: HubsWorld) {
 
       idx++;
     });
-    debugMaterial.uniforms.time.value = world.time.elapsed;
-    debugMaterial.uniforms.distanceModel.value = uniforms.distanceModels;
-    debugMaterial.uniforms.maxDistance.value = uniforms.maxDistances;
-    debugMaterial.uniforms.refDistance.value = uniforms.refDistances;
-    debugMaterial.uniforms.rolloffFactor.value = uniforms.rolloffFactors;
-    debugMaterial.uniforms.sourcePosition.value = uniforms.sourcePositions;
-    debugMaterial.uniforms.sourceOrientation.value = uniforms.sourceOrientations;
-    debugMaterial.uniforms.count.value = idx;
-    debugMaterial.uniforms.coneInnerAngle.value = uniforms.coneInnerAngles;
-    debugMaterial.uniforms.coneOuterAngle.value = uniforms.coneOuterAngles;
-    debugMaterial.uniforms.gain.value = uniforms.gains;
-    debugMaterial.uniforms.clipped.value = uniforms.clipped;
+    debugMaterial!.uniforms.time.value = world.time.elapsed;
+    debugMaterial!.uniforms.distanceModel.value = uniforms.distanceModels;
+    debugMaterial!.uniforms.maxDistance.value = uniforms.maxDistances;
+    debugMaterial!.uniforms.refDistance.value = uniforms.refDistances;
+    debugMaterial!.uniforms.rolloffFactor.value = uniforms.rolloffFactors;
+    debugMaterial!.uniforms.sourcePosition.value = uniforms.sourcePositions;
+    debugMaterial!.uniforms.sourceOrientation.value = uniforms.sourceOrientations;
+    debugMaterial!.uniforms.count.value = idx;
+    debugMaterial!.uniforms.coneInnerAngle.value = uniforms.coneInnerAngles;
+    debugMaterial!.uniforms.coneOuterAngle.value = uniforms.coneOuterAngles;
+    debugMaterial!.uniforms.gain.value = uniforms.gains;
+    debugMaterial!.uniforms.clipped.value = uniforms.clipped;
   }
 }

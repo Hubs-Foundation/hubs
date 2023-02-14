@@ -1,35 +1,52 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
-import { HubsWorld } from "../app";
-import { AudioEmitter, AudioZone, AudioListenerTag, AudioDebugChanged } from "../bit-components";
+import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { getScene, HubsWorld } from "../app";
+import { AudioEmitter, AudioZone, AudioListenerTag } from "../bit-components";
 import { Box3, BoxGeometry, DoubleSide, MeshBasicMaterial, Object3D, Ray, Vector3, Mesh, BoxHelper } from "three";
 import { AUDIO_ZONE_FLAGS } from "../inflators/audio-zone";
-import { disposeNode } from "../utils/three-utils";
+import { disposeMaterial, disposeNode } from "../utils/three-utils";
 import { AudioSettings } from "../components/audio-params";
 import { updateAudioSettings } from "../update-audio-settings";
-import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 const debugObjects = new Map<number, Object3D>();
 
 const DEBUG_BBAA_COLOR = 0x49ef4;
 
-const debugMaterial = new MeshBasicMaterial({
-  color: DEBUG_BBAA_COLOR,
-  transparent: true,
-  opacity: 0.25,
-  side: DoubleSide
-});
+let debugMaterial: MeshBasicMaterial | undefined | null;
 
-waitForDOMContentLoaded().then(() => {
-  (APP.store as any).addEventListener("statechanged", () => {
-    audioZoneQuery(APP.world).forEach(zone => {
-      addComponent(APP.world, AudioDebugChanged, zone);
+const createMaterial = () => {
+  if (!debugMaterial) {
+    debugMaterial = new MeshBasicMaterial({
+      color: DEBUG_BBAA_COLOR,
+      transparent: true,
+      opacity: 0.25,
+      side: DoubleSide
     });
+  }
+};
+
+getScene().then(() => {
+  (APP.store as any).addEventListener("statechanged", () => {
+    const isDebugEnabled = APP.store.state.preferences.showAudioDebugPanel;
+    if (isDebugEnabled) createMaterial();
+    defineQuery([AudioZone])(APP.world).forEach(zone => {
+      if (isDebugEnabled) {
+        !debugObjects.has(zone) && addZoneDebugObject(APP.world, zone);
+      } else {
+        debugObjects.has(zone) && releaseZoneDebugObject(APP.world, zone);
+      }
+    });
+    if (!isDebugEnabled && debugMaterial) {
+      disposeMaterial(debugMaterial);
+      debugMaterial = null;
+    }
   });
+  const isDebugEnabled = APP.store.state.preferences.showAudioDebugPanel;
+  if (isDebugEnabled) createMaterial();
 });
 
 const addZoneDebugObject = (world: HubsWorld, zone: number) => {
   const geometry = new BoxGeometry();
-  const mesh = new Mesh(geometry, debugMaterial);
+  const mesh = new Mesh(geometry, debugMaterial!);
   const helper = new BoxHelper(mesh, DEBUG_BBAA_COLOR);
 
   const parent = world.eid2obj.get(zone) as Object3D;
@@ -240,7 +257,6 @@ const audioZoneSourceExitQuery = exitQuery(audioZoneSourceQuery);
 const audioZoneListenerQuery = defineQuery([AudioListenerTag]);
 const audioZoneListenerEnterQuery = enterQuery(audioZoneListenerQuery);
 const audioZoneListenerExitQuery = exitQuery(audioZoneListenerQuery);
-const audioZoneDebugQuery = defineQuery([AudioZone, AudioDebugChanged]);
 
 export function audioZoneSystem(world: HubsWorld) {
   const zones = audioZoneQuery(world);
@@ -260,10 +276,16 @@ export function audioZoneSystem(world: HubsWorld) {
     const aabb = new Box3();
     aabb.setFromObject(obj);
     aabbs.set(zone, aabb);
+
+    const isDebugEnabled = APP.store.state.preferences.showAudioDebugPanel;
+    isDebugEnabled && !debugObjects.has(zone) && addZoneDebugObject(APP.world, zone);
   });
   audioZoneExitQuery(world).forEach(zone => {
     aabbs.delete(zone);
     debugObjects.delete(zone);
+
+    const isDebugEnabled = APP.store.state.preferences.showAudioDebugPanel;
+    isDebugEnabled && debugObjects.has(zone) && releaseZoneDebugObject(APP.world, zone);
   });
 
   const listener = APP.audioListener.eid!;
@@ -292,15 +314,5 @@ export function audioZoneSystem(world: HubsWorld) {
       zones.clear();
       currZones.get(entity)?.forEach(zone => zones.add(zone));
     }
-  });
-  audioZoneDebugQuery(world).forEach(zone => {
-    const shouldShowDebug =
-      AudioZone.flags[zone] & AUDIO_ZONE_FLAGS.DEBUG && APP.store.state.preferences.showAudioDebugPanel;
-    if (shouldShowDebug) {
-      !debugObjects.has(zone) && addZoneDebugObject(world, zone);
-    } else {
-      debugObjects.has(zone) && releaseZoneDebugObject(world, zone);
-    }
-    removeComponent(world, AudioDebugChanged, zone);
   });
 }

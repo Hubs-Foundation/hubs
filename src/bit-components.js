@@ -252,4 +252,3 @@ export const AudioParams = defineComponent({
   coneOuterGain: Types.ui32,
   gain: Types.ui32
 });
-export const AudioDebugChanged = defineComponent();
