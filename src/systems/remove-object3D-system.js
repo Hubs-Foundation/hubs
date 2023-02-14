@@ -15,13 +15,15 @@ import {
   Slice9,
   Text,
   VideoMenu,
-  ParticleEmitterTag
+  ParticleEmitterTag,
+  NavMesh
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
 import { disposeMaterial, traverseSome, disposeNode } from "../utils/three-utils";
 import { forEachMaterial } from "../utils/material-utils";
 import { cleanupAudio } from "../bit-systems/audio-emitter-system";
+import { cleanupAudioDebugNavMesh } from "../bit-systems/audio-debug-system";
 
 function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
@@ -72,6 +74,7 @@ const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
 });
 const cleanupMirrors = cleanupObjOnExit(Mirror, obj => obj.dispose());
 const cleanupParticleSystem = cleanupObjOnExit(ParticleEmitterTag, obj => disposeNode(obj));
+const cleanupAudioDebugSystems = cleanupOnExit(NavMesh, eid => cleanupAudioDebugNavMesh(eid));
 
 // TODO This feels messy and brittle
 //
@@ -135,6 +138,7 @@ export function removeObject3DSystem(world) {
   cleanupSimpleWaters(world);
   cleanupMirrors(world);
   cleanupParticleSystem(world);
+  cleanupAudioDebugSystems(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeObjFromMap);

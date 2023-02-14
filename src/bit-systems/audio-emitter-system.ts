@@ -10,7 +10,7 @@ import { addObject3DComponent, swapObject3DComponent } from "../utils/jsx-entity
 type AudioObject3D = StereoAudio | PositionalAudio;
 type AudioConstructor<T> = new (listener: ThreeAudioListener) => T;
 
-function isPositionalAudio(node: AudioObject3D): node is PositionalAudio {
+export function isPositionalAudio(node: AudioObject3D): node is PositionalAudio {
   return (node as any).panner !== undefined;
 }
 
