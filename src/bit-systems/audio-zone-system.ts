@@ -1,11 +1,12 @@
-import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { AudioEmitter, AudioZone, AudioListenerTag } from "../bit-components";
+import { AudioEmitter, AudioZone, AudioListenerTag, AudioDebugChanged } from "../bit-components";
 import { Box3, BoxGeometry, DoubleSide, MeshBasicMaterial, Object3D, Ray, Vector3, Mesh, BoxHelper } from "three";
 import { AUDIO_ZONE_FLAGS } from "../inflators/audio-zone";
 import { disposeNode } from "../utils/three-utils";
 import { AudioSettings } from "../components/audio-params";
 import { updateAudioSettings } from "../update-audio-settings";
+import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 const debugObjects = new Map<number, Object3D>();
 
@@ -16,6 +17,14 @@ const debugMaterial = new MeshBasicMaterial({
   transparent: true,
   opacity: 0.25,
   side: DoubleSide
+});
+
+waitForDOMContentLoaded().then(() => {
+  (APP.store as any).addEventListener("statechanged", () => {
+    audioZoneQuery(APP.world).forEach(zone => {
+      addComponent(APP.world, AudioDebugChanged, zone);
+    });
+  });
 });
 
 const addZoneDebugObject = (world: HubsWorld, zone: number) => {
@@ -231,6 +240,7 @@ const audioZoneSourceExitQuery = exitQuery(audioZoneSourceQuery);
 const audioZoneListenerQuery = defineQuery([AudioListenerTag]);
 const audioZoneListenerEnterQuery = enterQuery(audioZoneListenerQuery);
 const audioZoneListenerExitQuery = exitQuery(audioZoneListenerQuery);
+const audioZoneDebugQuery = defineQuery([AudioZone, AudioDebugChanged]);
 
 export function audioZoneSystem(world: HubsWorld) {
   [...audioZoneSourceEnterQuery(world), ...audioZoneListenerEnterQuery(world)].forEach(entity => {
@@ -259,14 +269,6 @@ export function audioZoneSystem(world: HubsWorld) {
   const sourcesQuery = audioZoneSourceQuery(world);
 
   zones.forEach(zone => {
-    const shouldShowDebug =
-      (AudioZone.flags[zone] & AUDIO_ZONE_FLAGS.DEBUG && APP.store.state.preferences.showAudioDebugPanel) || true;
-    if (shouldShowDebug) {
-      !debugObjects.has(zone) && addZoneDebugObject(world, zone);
-    } else {
-      debugObjects.has(zone) && releaseZoneDebugObject(world, zone);
-    }
-
     APP.audioListener.getWorldPosition(listenerPos);
     addOrRemoveZone(currZones.get(listener)!, zone, listenerPos);
     sourcesQuery.forEach((source: number) => {
@@ -288,5 +290,15 @@ export function audioZoneSystem(world: HubsWorld) {
       zones.clear();
       currZones.get(entity)?.forEach(zone => zones.add(zone));
     }
+  });
+  audioZoneDebugQuery(world).forEach(zone => {
+    const shouldShowDebug =
+      AudioZone.flags[zone] & AUDIO_ZONE_FLAGS.DEBUG && APP.store.state.preferences.showAudioDebugPanel;
+    if (shouldShowDebug) {
+      !debugObjects.has(zone) && addZoneDebugObject(world, zone);
+    } else {
+      debugObjects.has(zone) && releaseZoneDebugObject(world, zone);
+    }
+    removeComponent(world, AudioDebugChanged, zone);
   });
 }

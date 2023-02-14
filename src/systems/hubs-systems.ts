@@ -70,6 +70,7 @@ import { pdfSystem } from "../bit-systems/pdf-system";
 import { particleEmitterSystem } from "../bit-systems/particle-emitter";
 import { audioEmitterSystem } from "../bit-systems/audio-emitter-system";
 import { audioZoneSystem } from "../bit-systems/audio-zone-system";
+import { audioDebugSystem } from "../bit-systems/audio-debug-system";
 
 declare global {
   interface Window {
@@ -251,6 +252,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   simpleWaterSystem(world);
 
   videoTextureSystem(world);
+  audioDebugSystem(world);
 
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);
