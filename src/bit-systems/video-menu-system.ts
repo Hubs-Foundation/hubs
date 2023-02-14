@@ -10,6 +10,7 @@ import {
   HeldRemoteRight,
   HoveredRemoteRight,
   MediaVideo,
+  MediaVideoPlaybackChanged,
   NetworkedVideo,
   VideoMenu,
   VideoMenuItem
@@ -103,6 +104,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
         pauseIndicatorObj.visible = true;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.pauseIndicatorRef[eid]));
       }
+      addComponent(world, MediaVideoPlaybackChanged, videoEid);
     }
 
     const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);

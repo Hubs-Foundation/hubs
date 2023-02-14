@@ -150,6 +150,7 @@ MediaPDF.map = new Map();
 export const MediaVideo = defineComponent({
   autoPlay: Types.ui8
 });
+export const MediaVideoPlaybackChanged = defineComponent();
 export const AnimationMixer = defineComponent();
 export const NetworkedVideo = defineComponent({
   time: Types.f32,
