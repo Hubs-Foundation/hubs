@@ -243,6 +243,9 @@ const audioZoneListenerExitQuery = exitQuery(audioZoneListenerQuery);
 const audioZoneDebugQuery = defineQuery([AudioZone, AudioDebugChanged]);
 
 export function audioZoneSystem(world: HubsWorld) {
+  const zones = audioZoneQuery(world);
+  if (!zones.length) return;
+
   [...audioZoneSourceEnterQuery(world), ...audioZoneListenerEnterQuery(world)].forEach(entity => {
     currZones.set(entity, new Set());
     prevZones.set(entity, new Set());
@@ -264,7 +267,6 @@ export function audioZoneSystem(world: HubsWorld) {
   });
 
   const listener = APP.audioListener.eid!;
-  const zones = audioZoneQuery(world);
   const listenersQuery = audioZoneListenerQuery(world);
   const sourcesQuery = audioZoneSourceQuery(world);
 
