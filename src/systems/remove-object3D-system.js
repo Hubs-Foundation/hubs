@@ -74,7 +74,7 @@ const cleanupSimpleWaters = cleanupObjOnExit(SimpleWater, obj => {
 });
 const cleanupMirrors = cleanupObjOnExit(Mirror, obj => obj.dispose());
 const cleanupParticleSystem = cleanupObjOnExit(ParticleEmitterTag, obj => disposeNode(obj));
-const cleanupAudioDebugSystems = cleanupOnExit(NavMesh, eid => cleanupAudioDebugNavMesh(eid));
+const cleanupAudioDebugSystem = cleanupOnExit(NavMesh, eid => cleanupAudioDebugNavMesh(eid));
 
 // TODO This feels messy and brittle
 //
@@ -138,7 +138,7 @@ export function removeObject3DSystem(world) {
   cleanupSimpleWaters(world);
   cleanupMirrors(world);
   cleanupParticleSystem(world);
-  cleanupAudioDebugSystems(world);
+  cleanupAudioDebugSystem(world);
 
   // Finally remove all the entities we just removed from the eid2obj map
   entities.forEach(removeObjFromMap);
