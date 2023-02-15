@@ -28,4 +28,10 @@ done
 
 if [ "${access_log}" = "enabled" ]; then sed -i "s/access_log off;//g" /etc/nginx/conf.d/default.conf; fi
 
+addgroup --gid 1111 -S ng-grp && adduser --uid 1111 -S ng-usr -G ng-grp
+chown -R ng-usr:ng-grp /www/hubs/
+sed -i 's/user  nginx/user ng-usr ng-grp/' /etc/nginx/nginx.conf 
+ls -lha /www/hubs/
+cat /etc/nginx/nginx.conf
+
 nginx -g "daemon off;"
