@@ -25,7 +25,7 @@
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
     "lint:html": "htmlhint 'src/**/*.html' && node scripts/indent-linter.js 'src/**/*.html'",
     "lint": "npm run lint:js && npm run lint:html",
-    "login": "node -r @babel/register -r esm -r ./scripts/shim scripts/login.js",
+    "login": "node -r @babel/register -r ./scripts/babel-register.js -r esm -r ./scripts/shim scripts/login.js",
     "logout": "node ./scripts/logout.mjs",
     "deploy": "node ./scripts/deploy.mjs",
     "undeploy": "node ./scripts/undeploy.mjs",
