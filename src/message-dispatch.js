@@ -9,6 +9,7 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
+import { add } from "./utils/chat-commands";
 
 let uiRoot;
 // Handles user-entered messages
@@ -235,6 +236,10 @@ export default class MessageDispatch extends EventTarget {
             this.log(LogMessageType.invalidAudioNormalizationRange);
           }
         }
+        break;
+      case "add":
+        const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+        add(APP.world, avatarPov, args);
         break;
     }
   };
