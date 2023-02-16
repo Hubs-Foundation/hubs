@@ -4,6 +4,7 @@ import { HubsWorld } from "../app";
 import { moveToSpawnPoint } from "../bit-systems/waypoint";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { createNetworkedEntity } from "./create-networked-entity";
+import qsTruthy from "./qs_truthy";
 
 function checkFlag(args: string[], flag: string) {
   return !!args.find(s => s === flag);
@@ -59,9 +60,15 @@ export function add(world: HubsWorld, avatarPov: Object3D, args: string[]) {
 }
 
 export function respawn(world: HubsWorld, scene: AScene, characterController: CharacterControllerSystem) {
-  if (scene.is("entered")) {
-    moveToSpawnPoint(world, characterController);
-  } else {
+  if (!scene.is("entered")) {
     console.error("Cannot respawn until you have entered the room.");
+    return;
   }
+
+  if (!qsTruthy("newLoader")) {
+    console.error("This command only works with the newLoader query string parameter.");
+    return;
+  }
+
+  moveToSpawnPoint(world, characterController);
 }
