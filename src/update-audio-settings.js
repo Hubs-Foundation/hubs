@@ -52,6 +52,7 @@ export function getCurrentAudioSettings(el) {
   const preferencesOverrides = {};
 
   const overriddenPanningModelType = getOverriddenPanningModelType();
+  const isNonModeratorAvatarAudio = sourceType === SourceType.AVATAR_AUDIO_SOURCE && !APP.moderatorAudioSource.has(el);
 
   if (overriddenPanningModelType !== null) {
     preferencesOverrides.panningModel = overriddenPanningModelType;
@@ -71,9 +72,11 @@ export function getCurrentAudioSettings(el) {
     preferencesOverrides
   );
 
-  if (!APP.hub.member_permissions || !APP.hub.member_permissions.voice_chat) {
-    if (!APP.moderatorAudioSource.has(el)) settings.gain = 0;
-  } else if (APP.clippingState.has(el) || APP.mutedState.has(el)) {
+  if (
+    APP.clippingState.has(el) ||
+    APP.mutedState.has(el) ||
+    (isNonModeratorAvatarAudio && !APP.hub.member_permissions?.voice_chat)
+  ) {
     settings.gain = 0;
   } else if (APP.gainMultipliers.has(el)) {
     settings.gain = settings.gain * APP.gainMultipliers.get(el);
