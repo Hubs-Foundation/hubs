@@ -14,6 +14,7 @@ import { loadImage } from "../utils/load-image";
 import { loadModel } from "../utils/load-model";
 import { loadPDF } from "../utils/load-pdf";
 import { loadVideo } from "../utils/load-video";
+import { loadAudio } from "../utils/load-audio";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
 
@@ -36,7 +37,9 @@ const loaderForMediaType = {
     world: HubsWorld,
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadModel(world, accessibleUrl, contentType, true),
-  [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl)
+  [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl),
+  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
+    loadAudio(world, accessibleUrl),
 };
 
 export const MEDIA_LOADER_FLAGS = {
