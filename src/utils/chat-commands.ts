@@ -31,18 +31,18 @@ function usage(
 }
 
 const FLAG_RESIZE = "--resize";
-const FLAG_NO_RECENTER = "--no-recenter";
-const FLAG_NO_ANIMATE_LOAD = "--no-animate";
+const FLAG_RECENTER = "--recenter";
+const FLAG_ANIMATE_LOAD = "--animate";
 const FLAG_NO_OBJECT_MENU = "--no-menu";
-const ADD_FLAGS = [FLAG_RESIZE, FLAG_NO_RECENTER, FLAG_NO_ANIMATE_LOAD, FLAG_NO_OBJECT_MENU];
+const ADD_FLAGS = [FLAG_RESIZE, FLAG_RECENTER, FLAG_ANIMATE_LOAD, FLAG_NO_OBJECT_MENU];
 export function add(world: HubsWorld, avatarPov: Object3D, args: string[]) {
   args = args.filter(arg => arg);
   if (args.length) {
     const initialData = {
       src: args[args.length - 1],
       resize: checkFlag(args, FLAG_RESIZE),
-      recenter: !checkFlag(args, FLAG_NO_RECENTER),
-      animateLoad: !checkFlag(args, FLAG_NO_ANIMATE_LOAD),
+      recenter: checkFlag(args, FLAG_RECENTER),
+      animateLoad: checkFlag(args, FLAG_ANIMATE_LOAD),
       isObjectMenuTarget: !checkFlag(args, FLAG_NO_OBJECT_MENU)
     };
     console.log("Adding media", initialData);
