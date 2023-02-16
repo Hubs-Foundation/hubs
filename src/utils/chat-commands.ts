@@ -1,5 +1,8 @@
+import { AScene } from "aframe";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
+import { moveToSpawnPoint } from "../bit-systems/waypoint";
+import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { createNetworkedEntity } from "./create-networked-entity";
 
 function checkFlag(args: string[], flag: string) {
@@ -52,5 +55,13 @@ export function add(world: HubsWorld, avatarPov: Object3D, args: string[]) {
     obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
   } else {
     console.log(usage("add", ADD_FLAGS, null, ["url"]));
+  }
+}
+
+export function respawn(world: HubsWorld, scene: AScene, characterController: CharacterControllerSystem) {
+  if (scene.is("entered")) {
+    moveToSpawnPoint(world, characterController);
+  } else {
+    console.error("Cannot respawn until you have entered the room.");
   }
 }
