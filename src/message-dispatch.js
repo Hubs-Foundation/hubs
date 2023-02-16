@@ -9,7 +9,7 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
-import { add } from "./utils/chat-commands";
+import { add, respawn } from "./utils/chat-commands";
 
 let uiRoot;
 // Handles user-entered messages
@@ -241,6 +241,13 @@ export default class MessageDispatch extends EventTarget {
         {
           const avatarPov = document.querySelector("#avatar-pov-node").object3D;
           add(APP.world, avatarPov, args);
+        }
+        break;
+      case "respawn":
+        {
+          const sceneEl = AFRAME.scenes[0];
+          const characterController = this.scene.systems["hubs-systems"].characterController;
+          respawn(APP.world, sceneEl, characterController);
         }
         break;
     }
