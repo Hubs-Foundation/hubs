@@ -238,8 +238,10 @@ export default class MessageDispatch extends EventTarget {
         }
         break;
       case "add":
-        const avatarPov = document.querySelector("#avatar-pov-node").object3D;
-        add(APP.world, avatarPov, args);
+        {
+          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+          add(APP.world, avatarPov, args);
+        }
         break;
     }
   };
