@@ -1,6 +1,6 @@
 import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { getScene, HubsWorld } from "../app";
-import { AudioEmitter, AudioZone, AudioListenerTag } from "../bit-components";
+import { AudioEmitter, AudioZone } from "../bit-components";
 import { Box3, BoxGeometry, DoubleSide, MeshBasicMaterial, Object3D, Ray, Vector3, Mesh, BoxHelper } from "three";
 import { AUDIO_ZONE_FLAGS } from "../inflators/audio-zone";
 import { disposeMaterial, disposeNode } from "../utils/three-utils";
@@ -245,6 +245,14 @@ const addOrRemoveZone = (zones: Set<number>, zoneEid: number, position: Vector3)
   }
 };
 
+const clearEntity = (entityEid: number) => {
+  const zones = prevZones.get(entityEid);
+  if (zones) {
+    zones.clear();
+    currZones.get(entityEid)?.forEach(zone => zones.add(zone));
+  }
+};
+
 const currZones = new Map<number, Set<number>>();
 const prevZones = new Map<number, Set<number>>();
 const aabbs = new Map<number, Box3>();
@@ -256,16 +264,14 @@ const audioZoneExitQuery = exitQuery(audioZoneQuery);
 const audioEmitterQuery = defineQuery([AudioEmitter]);
 const audioEmitterEnterQuery = enterQuery(audioEmitterQuery);
 const audioEmitterExitQuery = exitQuery(audioEmitterQuery);
-const audioZoneListenerQuery = defineQuery([AudioListenerTag]);
-const audioZoneListenerEnterQuery = enterQuery(audioZoneListenerQuery);
-const audioZoneListenerExitQuery = exitQuery(audioZoneListenerQuery);
 
 export function audioZoneSystem(world: HubsWorld) {
-  [...audioEmitterEnterQuery(world), ...audioZoneListenerEnterQuery(world)].forEach(entityEid => {
+  audioEmitterEnterQuery(world).forEach(entityEid => {
     currZones.set(entityEid, new Set());
     prevZones.set(entityEid, new Set());
   });
-  [...audioEmitterExitQuery(world), ...audioZoneListenerExitQuery(world)].forEach(entityEid => {
+  currZones.set(APP.audioListener.eid!, new Set());
+  audioEmitterExitQuery(world).forEach(entityEid => {
     currZones.delete(entityEid);
     prevZones.delete(entityEid);
   });
@@ -291,7 +297,6 @@ export function audioZoneSystem(world: HubsWorld) {
   if (!zones.length) return;
 
   const listener = APP.audioListener.eid!;
-  const listeners = audioZoneListenerQuery(world);
   const emitters = audioEmitterQuery(world);
 
   APP.audioListener.getWorldPosition(listenerPos);
@@ -316,11 +321,6 @@ export function audioZoneSystem(world: HubsWorld) {
     }
   });
 
-  [...emitters, ...listeners].forEach(entityEid => {
-    const zones = prevZones.get(entityEid);
-    if (zones) {
-      zones.clear();
-      currZones.get(entityEid)?.forEach(zone => zones.add(zone));
-    }
-  });
+  emitters.forEach(clearEntity);
+  clearEntity(APP.audioListener.eid!);
 }

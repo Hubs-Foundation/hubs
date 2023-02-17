@@ -1,6 +1,6 @@
 import { addComponent, addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
-import { AEntity, AudioListenerTag, Networked, Object3DTag, Owned } from "./bit-components";
+import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
 import MediaSearchStore from "./storage/media-search-store";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
@@ -199,7 +199,6 @@ export class App {
     this.audioListener = audioListener;
     const audioListenerEid = addEntity(this.world);
     addObject3DComponent(this.world, audioListenerEid, this.audioListener);
-    addComponent(this.world, AudioListenerTag, audioListenerEid);
 
     camera.add(audioListener);
 
