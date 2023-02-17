@@ -291,19 +291,19 @@ export function audioZoneSystem(world: HubsWorld) {
   if (!zones.length) return;
 
   const listener = APP.audioListener.eid!;
-  const listenersQuery = audioZoneListenerQuery(world);
-  const emittersQuery = audioEmitterQuery(world);
+  const listeners = audioZoneListenerQuery(world);
+  const emitters = audioEmitterQuery(world);
 
+  APP.audioListener.getWorldPosition(listenerPos);
   zones.forEach(zoneEid => {
-    APP.audioListener.getWorldPosition(listenerPos);
     addOrRemoveZone(currZones.get(listener)!, zoneEid, listenerPos);
-    emittersQuery.forEach((emitterEid: number) => {
+    emitters.forEach((emitterEid: number) => {
       addOrRemoveZone(currZones.get(emitterEid)!, zoneEid, getEmitterPosition(emitterEid));
     });
   });
 
-  emittersQuery.forEach(emitterEid => {
-    const isListenerUpdated = isUpdated(currZones.get(listener)!, prevZones.get(listener)!);
+  const isListenerUpdated = isUpdated(currZones.get(listener)!, prevZones.get(listener)!);
+  emitters.forEach(emitterEid => {
     const isEmitterUpdated = isUpdated(currZones.get(emitterEid)!, prevZones.get(emitterEid)!);
     if (isListenerUpdated || isEmitterUpdated) {
       updateEmitter(
@@ -316,7 +316,7 @@ export function audioZoneSystem(world: HubsWorld) {
     }
   });
 
-  [...emittersQuery, ...listenersQuery].forEach(entityEid => {
+  [...emitters, ...listeners].forEach(entityEid => {
     const zones = prevZones.get(entityEid);
     if (zones) {
       zones.clear();
