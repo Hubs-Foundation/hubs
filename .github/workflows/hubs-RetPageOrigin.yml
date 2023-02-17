@@ -20,8 +20,8 @@ jobs:
     with:
       registry: mozillareality
       dockerfile: RetPageOriginDockerfile
-      personal_k8s_deployment: hubs
-      personal_k8s_deployment_container: hubs
+      k8s_deployment: hubs
+      k8s_deployment_container: hubs
       bio_script_path: scripts/hab-wrap-and-push.sh
       smoke-instance: ${{inputs.smokeroom-choice}}
     secrets:
