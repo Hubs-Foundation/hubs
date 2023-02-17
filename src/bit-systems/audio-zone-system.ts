@@ -28,11 +28,11 @@ getScene().then(() => {
   (APP.store as any).addEventListener("statechanged", () => {
     const isDebugEnabled = APP.store.state.preferences.showAudioDebugPanel;
     if (isDebugEnabled) createMaterial();
-    defineQuery([AudioZone])(APP.world).forEach(zone => {
+    defineQuery([AudioZone])(APP.world).forEach(zoneEid => {
       if (isDebugEnabled) {
-        !debugObjects.has(zone) && addZoneDebugObject(APP.world, zone);
+        !debugObjects.has(zoneEid) && addZoneDebugObject(APP.world, zoneEid);
       } else {
-        debugObjects.has(zone) && releaseZoneDebugObject(APP.world, zone);
+        debugObjects.has(zoneEid) && releaseZoneDebugObject(APP.world, zoneEid);
       }
     });
     if (!isDebugEnabled && debugMaterial) {
@@ -44,47 +44,47 @@ getScene().then(() => {
   if (isDebugEnabled) createMaterial();
 });
 
-const addZoneDebugObject = (world: HubsWorld, zone: number) => {
+const addZoneDebugObject = (world: HubsWorld, zoneEid: number) => {
   const geometry = new BoxGeometry();
   const mesh = new Mesh(geometry, debugMaterial!);
   const helper = new BoxHelper(mesh, DEBUG_BBAA_COLOR);
 
-  const parent = world.eid2obj.get(zone) as Object3D;
+  const parent = world.eid2obj.get(zoneEid) as Object3D;
   parent.add(helper);
   parent.updateMatrixWorld(true);
 
-  debugObjects.set(zone, helper);
+  debugObjects.set(zoneEid, helper);
 };
 
-const releaseZoneDebugObject = (world: HubsWorld, zone: number) => {
-  const helper = debugObjects.get(zone)!;
+const releaseZoneDebugObject = (world: HubsWorld, zoneEid: number) => {
+  const helper = debugObjects.get(zoneEid)!;
   helper?.removeFromParent();
   disposeNode(helper);
-  debugObjects.delete(zone);
+  debugObjects.delete(zoneEid);
 };
 
-const isZoneEnabled = (zone: number): boolean => {
-  return Boolean(AudioZone.flags[zone] & AUDIO_ZONE_FLAGS.ENABLED);
+const isZoneEnabled = (zoneEid: number): boolean => {
+  return Boolean(AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.ENABLED);
 };
 
-const getZoneBoundingBox = (zone: number) => {
-  if (AudioZone.flags[zone] & AUDIO_ZONE_FLAGS.DYNAMIC) {
-    const obj = APP.world.eid2obj.get(zone)!;
-    return aabbs.get(zone)!.setFromObject(obj);
+const getZoneBoundingBox = (zoneEid: number) => {
+  if (AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.DYNAMIC) {
+    const obj = APP.world.eid2obj.get(zoneEid)!;
+    return aabbs.get(zoneEid)!.setFromObject(obj);
   } else {
-    return aabbs.get(zone)!;
+    return aabbs.get(zoneEid)!;
   }
 };
 
-const zoneContains = (zone: number, position: Vector3) => {
-  return getZoneBoundingBox(zone).containsPoint(position);
+const zoneContains = (zoneEid: number, position: Vector3) => {
+  return getZoneBoundingBox(zoneEid).containsPoint(position);
 };
 
-const getZoneAudioParams = (zone: number) => {
-  return APP.audioOverrides.get(zone);
+const getEmitterParams = (zoneEid: number) => {
+  return APP.audioOverrides.get(zoneEid);
 };
 
-type AnyPredicate = (zone: number) => boolean;
+type AnyPredicate = (zoneEid: number) => boolean;
 const any = (set: Set<number>, predicate: AnyPredicate) => {
   for (const item of set) {
     if (predicate(item)) return true;
@@ -93,13 +93,15 @@ const any = (set: Set<number>, predicate: AnyPredicate) => {
 };
 
 const isUpdated = (currZones: Set<number>, prevZones: Set<Number>) => {
-  return currZones && prevZones && (currZones.size !== prevZones.size || any(currZones, zone => !prevZones.has(zone)));
+  return (
+    currZones && prevZones && (currZones.size !== prevZones.size || any(currZones, zoneEid => !prevZones.has(zoneEid)))
+  );
 };
 
-const getSourcePosition = (() => {
+const getEmitterPosition = (() => {
   const pos = new Vector3();
-  return (source: number) => {
-    const audio = APP.audios.get(source);
+  return (emitterEid: number) => {
+    const audio = APP.audios.get(emitterEid);
     if (audio) {
       audio.getWorldPosition(pos);
     } else {
@@ -109,19 +111,19 @@ const getSourcePosition = (() => {
   };
 })();
 
-const applySourceParams = (source: number, params: AudioSettings) => {
-  APP.zoneOverrides.set(source, params);
-  const audio = APP.audios.get(source);
+const applyEmitterParams = (emitterEid: number, params: AudioSettings) => {
+  APP.zoneOverrides.set(emitterEid, params);
+  const audio = APP.audios.get(emitterEid);
   if (audio) {
-    updateAudioSettings(source, audio);
+    updateAudioSettings(emitterEid, audio);
   }
 };
 
-const restoreSourceParams = (source: number) => {
-  APP.zoneOverrides.delete(source);
-  const audio = APP.audios.get(source);
+const restoreEmitterParams = (emitterEid: number) => {
+  APP.zoneOverrides.delete(emitterEid);
+  const audio = APP.audios.get(emitterEid);
   if (audio) {
-    updateAudioSettings(source, audio);
+    updateAudioSettings(emitterEid, audio);
   }
 };
 
@@ -133,57 +135,57 @@ const setRay = (() => {
 })();
 
 const exclude = (zones: Set<number>) => {
-  return (zone: number) => {
-    return !zones.has(zone);
+  return (zoneEid: number) => {
+    return !zones.has(zoneEid);
   };
 };
 
 const hasIntersection = (ray: Ray) => {
   const intersectTarget = new Vector3();
-  return (zone: number) => {
-    ray.intersectBox(getZoneBoundingBox(zone), intersectTarget);
+  return (zoneEid: number) => {
+    ray.intersectBox(getZoneBoundingBox(zoneEid), intersectTarget);
     return intersectTarget !== null;
   };
 };
 
-const updateSource = (() => {
+const updateEmitter = (() => {
   const ray = new Ray();
   return (
-    source: number,
-    sourcePosition: Vector3,
-    sourceZones: Set<number>,
+    emitterEid: number,
+    emitterPosition: Vector3,
+    emitterZones: Set<number>,
     listenerPosition: Vector3,
     listenerZones: Set<number>
   ) => {
-    setRay(ray, listenerPosition, sourcePosition);
+    setRay(ray, listenerPosition, emitterPosition);
 
     // TODO: Reimplement the desired sorting of zones
-    const inOutParams = Array.from(sourceZones)
-      .filter(zone => AudioZone.flags[zone] & AUDIO_ZONE_FLAGS.IN_OUT)
+    const inOutParams = Array.from(emitterZones)
+      .filter(zoneEid => AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.IN_OUT)
       .filter(exclude(listenerZones))
       .filter(hasIntersection(ray))
-      .map(zone => getZoneAudioParams(zone))
+      .map(zone => getEmitterParams(zone))
       .reduce(paramsReducer, null);
 
     // TODO: Reimplement the desired sorting of zones
     const outInParams = Array.from(listenerZones)
-      .filter(zone => AudioZone.flags[zone] & AUDIO_ZONE_FLAGS.OUT_IN)
-      .filter(exclude(sourceZones))
+      .filter(zoneEid => AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.OUT_IN)
+      .filter(exclude(emitterZones))
       .filter(hasIntersection(ray))
-      .map(zone => getZoneAudioParams(zone))
+      .map(zone => getEmitterParams(zone))
       .reduce(paramsReducer, null);
 
     if (!outInParams && !inOutParams) {
-      restoreSourceParams(source);
+      restoreEmitterParams(emitterEid);
     } else if (outInParams && !inOutParams) {
-      applySourceParams(source, outInParams);
+      applyEmitterParams(emitterEid, outInParams);
     } else if (!outInParams && inOutParams) {
-      applySourceParams(source, inOutParams);
+      applyEmitterParams(emitterEid, inOutParams);
     } else {
-      // In this case two zones ar acting over the same source simultaneously.
+      // In this case two zones ar acting over the same emitter simultaneously.
       // We apply the closest zone params with the lowest gain
-      applySourceParams(
-        source,
+      applyEmitterParams(
+        emitterEid,
         Object.assign(
           {},
           inOutParams,
@@ -232,14 +234,14 @@ const paramsReducer = (acc: AudioSettings, curr: AudioSettings): AudioSettings =
     }, {});
 };
 
-const addOrRemoveZone = (zones: Set<number>, zone: number, position: Vector3) => {
+const addOrRemoveZone = (zones: Set<number>, zoneEid: number, position: Vector3) => {
   if (!zones) return;
-  const isInZone = isZoneEnabled(zone) && zoneContains(zone, position);
-  const wasInZone = zones.has(zone);
+  const isInZone = isZoneEnabled(zoneEid) && zoneContains(zoneEid, position);
+  const wasInZone = zones.has(zoneEid);
   if (isInZone && !wasInZone) {
-    zones.add(zone);
+    zones.add(zoneEid);
   } else if (!isInZone && wasInZone) {
-    zones.delete(zone);
+    zones.delete(zoneEid);
   }
 };
 
@@ -251,9 +253,9 @@ const listenerPos = new Vector3();
 const audioZoneQuery = defineQuery([AudioZone]);
 const audioZoneEnterQuery = enterQuery(audioZoneQuery);
 const audioZoneExitQuery = exitQuery(audioZoneQuery);
-const audioZoneSourceQuery = defineQuery([AudioEmitter]);
-const audioZoneSourceEnterQuery = enterQuery(audioZoneSourceQuery);
-const audioZoneSourceExitQuery = exitQuery(audioZoneSourceQuery);
+const audioEmitterQuery = defineQuery([AudioEmitter]);
+const audioEmitterEnterQuery = enterQuery(audioEmitterQuery);
+const audioEmitterExitQuery = exitQuery(audioEmitterQuery);
 const audioZoneListenerQuery = defineQuery([AudioListenerTag]);
 const audioZoneListenerEnterQuery = enterQuery(audioZoneListenerQuery);
 const audioZoneListenerExitQuery = exitQuery(audioZoneListenerQuery);
@@ -262,57 +264,63 @@ export function audioZoneSystem(world: HubsWorld) {
   const zones = audioZoneQuery(world);
   if (!zones.length) return;
 
-  [...audioZoneSourceEnterQuery(world), ...audioZoneListenerEnterQuery(world)].forEach(entity => {
-    currZones.set(entity, new Set());
-    prevZones.set(entity, new Set());
+  [...audioEmitterEnterQuery(world), ...audioZoneListenerEnterQuery(world)].forEach(entityEid => {
+    currZones.set(entityEid, new Set());
+    prevZones.set(entityEid, new Set());
   });
-  [...audioZoneSourceExitQuery(world), ...audioZoneListenerExitQuery(world)].forEach(entity => {
-    currZones.delete(entity);
-    prevZones.delete(entity);
+  [...audioEmitterExitQuery(world), ...audioZoneListenerExitQuery(world)].forEach(entityEid => {
+    currZones.delete(entityEid);
+    prevZones.delete(entityEid);
   });
 
-  audioZoneEnterQuery(world).forEach(zone => {
-    const obj = APP.world.eid2obj.get(zone)!;
+  audioZoneEnterQuery(world).forEach(zoneEid => {
+    const obj = APP.world.eid2obj.get(zoneEid)!;
     const aabb = new Box3();
     aabb.setFromObject(obj);
-    aabbs.set(zone, aabb);
+    aabbs.set(zoneEid, aabb);
 
     const isDebugEnabled = APP.store.state.preferences.showAudioDebugPanel;
-    isDebugEnabled && !debugObjects.has(zone) && addZoneDebugObject(APP.world, zone);
+    isDebugEnabled && !debugObjects.has(zoneEid) && addZoneDebugObject(APP.world, zoneEid);
   });
-  audioZoneExitQuery(world).forEach(zone => {
-    aabbs.delete(zone);
-    debugObjects.delete(zone);
+  audioZoneExitQuery(world).forEach(zoneEid => {
+    aabbs.delete(zoneEid);
+    debugObjects.delete(zoneEid);
 
     const isDebugEnabled = APP.store.state.preferences.showAudioDebugPanel;
-    isDebugEnabled && debugObjects.has(zone) && releaseZoneDebugObject(APP.world, zone);
+    isDebugEnabled && debugObjects.has(zoneEid) && releaseZoneDebugObject(APP.world, zoneEid);
   });
 
   const listener = APP.audioListener.eid!;
   const listenersQuery = audioZoneListenerQuery(world);
-  const sourcesQuery = audioZoneSourceQuery(world);
+  const emittersQuery = audioEmitterQuery(world);
 
-  zones.forEach(zone => {
+  zones.forEach(zoneEid => {
     APP.audioListener.getWorldPosition(listenerPos);
-    addOrRemoveZone(currZones.get(listener)!, zone, listenerPos);
-    sourcesQuery.forEach((source: number) => {
-      addOrRemoveZone(currZones.get(source)!, zone, getSourcePosition(source));
+    addOrRemoveZone(currZones.get(listener)!, zoneEid, listenerPos);
+    emittersQuery.forEach((emitterEid: number) => {
+      addOrRemoveZone(currZones.get(emitterEid)!, zoneEid, getEmitterPosition(emitterEid));
     });
   });
 
-  sourcesQuery.forEach(source => {
+  emittersQuery.forEach(emitterEid => {
     const isListenerUpdated = isUpdated(currZones.get(listener)!, prevZones.get(listener)!);
-    const isSourceUpdated = isUpdated(currZones.get(source)!, prevZones.get(source)!);
-    if (isListenerUpdated || isSourceUpdated) {
-      updateSource(source, getSourcePosition(source), currZones.get(source)!, listenerPos, currZones.get(listener)!);
+    const isEmitterUpdated = isUpdated(currZones.get(emitterEid)!, prevZones.get(emitterEid)!);
+    if (isListenerUpdated || isEmitterUpdated) {
+      updateEmitter(
+        emitterEid,
+        getEmitterPosition(emitterEid),
+        currZones.get(emitterEid)!,
+        listenerPos,
+        currZones.get(listener)!
+      );
     }
   });
 
-  [...sourcesQuery, ...listenersQuery].forEach(entity => {
-    const zones = prevZones.get(entity);
+  [...emittersQuery, ...listenersQuery].forEach(entityEid => {
+    const zones = prevZones.get(entityEid);
     if (zones) {
       zones.clear();
-      currZones.get(entity)?.forEach(zone => zones.add(zone));
+      currZones.get(entityEid)?.forEach(zone => zones.add(zone));
     }
   });
 }
