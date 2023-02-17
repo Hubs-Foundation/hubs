@@ -242,7 +242,6 @@ export const ParticleEmitterTag = defineComponent({
 export const AudioZone = defineComponent({
   flags: Types.ui8
 });
-export const AudioListenerTag = defineComponent();
 export const AudioParams = defineComponent({
   audioType: Types.ui32,
   distanceModel: Types.ui32,
