@@ -45,10 +45,11 @@ import { inflateMediaFrame } from "../inflators/media-frame";
 import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
 import { inflateVideo } from "../inflators/video";
+import { inflateModel, ModelParams } from "../inflators/model";
 import { inflatePDFLoader, PDFLoaderParams } from "../inflators/pdf-loader";
 import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader";
 import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
-import { inflateModel, ModelParams } from "../inflators/model";
+import { inflateModelLoader, ModelLoaderParams } from "../inflators/model-loader";
 import { inflateSlice9 } from "../inflators/slice9";
 import { TextParams, inflateText } from "../inflators/text";
 import {
@@ -345,6 +346,7 @@ export interface GLTFComponentData extends ComponentData {
   pdf?: PDFLoaderParams;
   video?: VideoLoaderParams;
   image?: ImageLoaderParams;
+  model?: ModelLoaderParams;
   environmentSettings?: EnvironmentSettingsParams;
   reflectionProbe?: ReflectionProbeParams;
   navMesh?: true;
@@ -444,6 +446,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   pdf: inflatePDFLoader,
   video: inflateVideoLoader,
   image: inflateImageLoader,
+  model: inflateModelLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
   waypoint: inflateWaypoint,
