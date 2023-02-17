@@ -128,6 +128,9 @@ export const MediaLoader = defineComponent({
   flags: Types.ui8
 });
 MediaLoader.src[$isStringType] = true;
+export const MediaLoaded = defineComponent({
+  rootRef: Types.eid
+});
 
 export const SceneRoot = defineComponent();
 export const NavMesh = defineComponent();
