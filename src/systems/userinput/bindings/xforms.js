@@ -95,6 +95,32 @@ export const xforms = {
       return state;
     };
   },
+  // TODO this needs further tuning and can easily lead to sticking on a single click
+  doubleClick: function (clickDelayMs = 160) {
+    return function (frame, src, dest, state = { clickCount: 0 }) {
+      let click = false;
+      let doubleClick = false;
+
+      if (frame.get(src.rising)) {
+        state.firstClickTime = performance.now();
+        state.clickCount++;
+      }
+
+      if (state.clickCount === 2) {
+        state.clickCount = 0;
+        state.firstClickTime = 0;
+        doubleClick = true;
+      } else if (state.firstClickTime && performance.now() - state.firstClickTime > clickDelayMs) {
+        state.clickCount = 0;
+        state.firstClickTime = 0;
+        click = true;
+      }
+
+      frame.setValueType(dest.click, click);
+      frame.setValueType(dest.doubleClick, doubleClick);
+      return state;
+    };
+  },
   risingWithFrameDelay: function (n) {
     return function risingWithFrameDelay(frame, src, dest, state = { values: new Array(n) }) {
       frame.setValueType(dest.value, state.values.shift());

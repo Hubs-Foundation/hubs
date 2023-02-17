@@ -7,6 +7,7 @@ import {
   EffectComposer,
   EffectPass,
   LambdaPass,
+  OutlineEffect,
   RenderPass,
   SMAAEffect,
   ToneMappingEffect,
@@ -45,6 +46,17 @@ export function createEffectsComposer(
   const copyBuffersPass = new EffectPass(camera);
   copyBuffersPass.enabled = false;
 
+  const outlineEffect = new OutlineEffect(scene, camera, {
+    blendFunction: BlendFunction.SCREEN,
+    edgeStrength: 20.5,
+    pulseSpeed: 0.0,
+    visibleEdgeColor: 0x08c7f1,
+    hiddenEdgeColor: 0x22090a,
+    height: 480,
+    blur: false,
+    xRay: true
+  });
+
   // TODO support other tonemapping options with HDR pipeline
   const tonemappingEffect = new ToneMappingEffect({
     mode: ToneMappingMode.ACES_FILMIC
@@ -53,10 +65,10 @@ export function createEffectsComposer(
   let bloomAndTonemapPass: EffectPass | undefined;
   if (store.state.preferences.enableBloom) {
     const bloom = new BloomEffect({ mipmapBlur: true });
-    bloomAndTonemapPass = new EffectPass(camera, bloom, tonemappingEffect);
+    bloomAndTonemapPass = new EffectPass(camera, bloom, tonemappingEffect, outlineEffect);
   }
 
-  let tonemapOnlyPass = new EffectPass(camera, tonemappingEffect);
+  let tonemapOnlyPass = new EffectPass(camera, tonemappingEffect, outlineEffect);
 
   let aaPass = new EffectPass(camera, new SMAAEffect());
   aaPass.renderToScreen = true;
@@ -134,12 +146,14 @@ export function createEffectsComposer(
     debugCamera.matrixAutoUpdate = true;
     debugCamera.position.z = 5;
 
-    debugMeshes = [bloom.luminancePass.texture, bloom.texture].map(function (t) {
-      const imageMesh = createImageMesh(t, 1);
-      imageMesh.material.depthTest = false;
-      debugScene.add(imageMesh);
-      return imageMesh;
-    });
+    debugMeshes = [bloom.luminancePass.texture, bloom.texture, (outlineEffect as any).renderTargetMask.texture].map(
+      function (t) {
+        const imageMesh = createImageMesh(t, 1);
+        imageMesh.material.depthTest = false;
+        debugScene.add(imageMesh);
+        return imageMesh;
+      }
+    );
 
     updateDebugMeshes = () => {
       let y = 10;
@@ -190,6 +204,7 @@ export function createEffectsComposer(
   return {
     composer,
     bloomAndTonemapPass,
-    tonemapOnlyPass
+    tonemapOnlyPass,
+    outlineEffect
   };
 }

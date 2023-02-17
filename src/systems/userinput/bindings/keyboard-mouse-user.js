@@ -770,6 +770,46 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.rising
     }
   ],
+  [sets.rightCursorHoveringOnCarryable]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: k("mousedown") },
+      xform: xforms.rising,
+      priority: 1000 // TODO
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: k("mouseup") },
+      xform: xforms.falling,
+      priority: 1000 // TODO
+    },
+    {
+      src: { value: paths.device.mouse.buttonRight },
+      dest: { value: paths.actions.cursor.right.menu },
+      xform: xforms.rising,
+      priority: 1000 // TODO
+    },
+    {
+      src: {
+        rising: k("mousedown"),
+        falling: k("mouseup")
+      },
+      dest: {
+        click: paths.actions.cursor.right.grab,
+        doubleClick: paths.actions.carry.carry
+      },
+      xform: xforms.doubleClick(),
+      priority: 2000 //TODO
+    }
+  ],
+  [sets.carryingObject]: [
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: paths.actions.carry.drop },
+      xform: xforms.rising,
+      priority: 2000 // TODO
+    }
+  ],
   [sets.rightCursorHoveringOnVideo]: videoBindings,
   [sets.inputFocused]: [
     {

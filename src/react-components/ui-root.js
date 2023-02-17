@@ -98,6 +98,7 @@ import { TERMS, PRIVACY } from "../constants";
 import { ECSDebugSidebarContainer } from "./debug-panel/ECSSidebar";
 import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/usePermissions";
+import { ObjectContextMenu } from "./room/ObjectContextMenu";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -164,6 +165,7 @@ class UIRoot extends Component {
     onLoaded: PropTypes.func,
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
+    menuObject: PropTypes.object,
     breakpoint: PropTypes.string,
     canVoiceChat: PropTypes.bool
   };
@@ -302,11 +304,16 @@ class UIRoot extends Component {
     }
   };
 
+  onShowObjectMenu = e => {
+    this.setState({ menuObject: e.detail });
+  };
+
   componentDidMount() {
     window.addEventListener("concurrentload", this.onConcurrentLoad);
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
     window.addEventListener("focus_chat", this.onFocusChat);
+    window.addEventListener("show_object_menu", this.onShowObjectMenu);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -1415,6 +1422,7 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
+                    {this.state.menuObject && <ObjectContextMenu {...this.state.menuObject} />}
                     {this.state.sidebarId !== "chat" && this.props.hub && (
                       <PresenceLog
                         preset={"InRoom"}

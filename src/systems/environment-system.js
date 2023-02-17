@@ -42,7 +42,7 @@ const defaultEnvSettings = {
   fogFar: 1000,
   fogNear: 1,
 
-  enableHDRPipeline: false,
+  enableHDRPipeline: true, // TODO should be possible to do outline without opting into the rest
   enableBloom: false,
   bloom: {
     threshold: 1.0,

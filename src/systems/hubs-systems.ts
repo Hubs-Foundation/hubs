@@ -184,7 +184,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   aframeSystems.userinput.tick2(xrFrame);
 
-  interactionSystem(world, hubsSystems.cursorTargettingSystem, t, aframeSystems);
+  hubsSystems.characterController.tick(t, dt);
+  interactionSystem(world, hubsSystems.cursorTargettingSystem, hubsSystems.characterController, t, aframeSystems);
 
   buttonSystems(world);
   constraintsSystem(world, hubsSystems.physicsSystem);
@@ -195,7 +196,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   billboardSystem(world, hubsSystems.cameraSystem.viewingCamera);
   particleEmitterSystem(world);
   waypointSystem(world, hubsSystems.characterController, sceneEl.is("frozen"));
-  hubsSystems.characterController.tick(t, dt);
   hubsSystems.cursorTogglingSystem.tick(aframeSystems.interaction, aframeSystems.userinput, hubsSystems.el);
   hubsSystems.interactionSfxSystem.tick(
     aframeSystems.interaction,

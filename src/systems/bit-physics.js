@@ -2,15 +2,26 @@ import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } f
 import { Object3DTag, Rigidbody, PhysicsShape, AEntity } from "../bit-components";
 import { ACTIVATION_STATE, FIT, SHAPE } from "three-ammo/constants";
 // import { holdableButtonSystem } from "./holdable-button-system";
+import { findAncestorWithComponent } from "../utils/bit-utils";
 
 const rigidbodyQuery = defineQuery([Rigidbody, Object3DTag, Not(AEntity)]);
 const rigidbodyEnteredQuery = enterQuery(rigidbodyQuery);
 const rigidbodyExitedQuery = exitQuery(rigidbodyQuery);
-const shapeExitQuery = exitQuery(defineQuery([PhysicsShape]));
+
+const shapeQuery = defineQuery([PhysicsShape, Not(AEntity)]);
+const shapeEnterQuery = enterQuery(shapeQuery);
+const shapeExitQuery = exitQuery(shapeQuery);
 
 export const RIGIDBODY_FLAGS = {
   DISABLE_COLLISIONS: 1 << 0
 };
+
+export const SHAPE_TYPE = {
+  BOX: 0,
+  HULL: 1,
+  MESH: 2
+};
+const SHAPE_TYPE_MAP = [SHAPE.BOX, SHAPE.HULL, SHAPE.MESH];
 
 export const physicsCompatSystem = world => {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
@@ -39,21 +50,6 @@ export const physicsCompatSystem = world => {
       collisionFilterMask: Rigidbody.collisionMask[eid]
     });
     Rigidbody.bodyId[eid] = bodyId;
-
-    // TODO same deal for these, hardcoded, also we may want to support nested shapes
-    if (hasComponent(world, PhysicsShape, eid)) {
-      const halfExtents = PhysicsShape.halfExtents[eid];
-      PhysicsShape.bodyId[eid] = bodyId;
-      const shapeId = physicsSystem.addShapes(bodyId, obj, {
-        type: SHAPE.BOX,
-        fit: FIT.MANUAL,
-        halfExtents: { x: halfExtents[0], y: halfExtents[1], z: halfExtents[2] },
-        margin: 0.01,
-        offset: { x: 0, y: 0, z: 0 },
-        orientation: { x: 0, y: 0, z: 0, w: 1 }
-      });
-      PhysicsShape.shapeId[eid] = shapeId;
-    }
   }
 
   {
@@ -61,6 +57,38 @@ export const physicsCompatSystem = world => {
     for (let i = 0; i < eids.length; i++) {
       const eid = eids[i];
       physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]);
+    }
+  }
+
+  {
+    const eids = shapeEnterQuery(world);
+    for (let i = 0; i < eids.length; i++) {
+      const eid = eids[i];
+
+      const body = findAncestorWithComponent(world, Rigidbody, eid);
+      const bodyId = Rigidbody.bodyId[body];
+
+      if (!bodyId) {
+        console.warn("PhysicsShape added to entity hierarchy with no Rigidbody");
+        continue;
+      }
+
+      const obj = world.eid2obj.get(eid);
+      const halfExtents = PhysicsShape.halfExtents[eid];
+      const offset = PhysicsShape.offset[eid];
+
+      // TODO same deal for these, many hardcoded values
+      const shapeId = physicsSystem.addShapes(bodyId, obj, {
+        type: SHAPE_TYPE_MAP[PhysicsShape.type[eid]],
+        fit: PhysicsShape.type[eid] !== 0 ? FIT.ALL : FIT.MANUAL,
+        halfExtents: { x: halfExtents[0], y: halfExtents[1], z: halfExtents[2] },
+        margin: 0.01,
+        offset: { x: offset[0], y: offset[1], z: offset[2] }, // TODO this and orientation is odd and probably should just not be a concpet
+        orientation: { x: 0, y: 0, z: 0, w: 1 },
+        includeInvisible: false
+      });
+      PhysicsShape.bodyId[eid] = bodyId;
+      PhysicsShape.shapeId[eid] = shapeId;
     }
   }
 

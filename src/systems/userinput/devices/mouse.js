@@ -24,6 +24,7 @@ export class MouseDevice {
     this.events = [];
     this.coords = [0, 0]; // normalized screenspace coordinates in [(-1, 1), (-1, 1)]
     this.movementXY = [0, 0]; // deltas
+    this.pos = [0, 0]; // in pixels
     this.buttonLeft = false;
     this.buttonRight = false;
     this.buttonMiddle = false;
@@ -66,6 +67,8 @@ export class MouseDevice {
     // This works with the current sidebar and toolbar layout.
     this.coords[0] = (event.clientX / this.canvas.clientWidth) * 2 - 1;
     this.coords[1] = -(event.clientY / this.canvas.clientHeight) * 2 + 1;
+    this.pos[0] = event.clientX;
+    this.pos[1] = event.clientY;
     this.movementXY[0] += event.movementX;
     this.movementXY[1] += event.movementY;
     if (event.type === "mousedown" && left) {
@@ -120,6 +123,7 @@ export class MouseDevice {
     }
 
     frame.setVector2(paths.device.mouse.coords, this.coords[0], this.coords[1]);
+    frame.setVector2(paths.device.mouse.pos, this.pos[0], this.pos[1]);
     frame.setVector2(paths.device.mouse.movementXY, this.movementXY[0], this.movementXY[1]);
     frame.setValueType(paths.device.mouse.buttonLeft, this.buttonLeft);
     frame.setValueType(paths.device.mouse.buttonRight, this.buttonRight);

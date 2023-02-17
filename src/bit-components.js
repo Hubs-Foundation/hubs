@@ -54,6 +54,7 @@ export const CursorRaycastable = defineComponent();
 export const RemoteHoverTarget = defineComponent();
 export const NotRemoteHoverTarget = defineComponent();
 export const Holdable = defineComponent();
+export const Carryable = defineComponent();
 export const RemoveNetworkedEntityButton = defineComponent();
 export const Interacted = defineComponent();
 export const HandRight = defineComponent();
@@ -95,7 +96,13 @@ export const Rigidbody = defineComponent({
   flags: Types.ui8,
   gravity: Types.f32
 });
-export const PhysicsShape = defineComponent({ bodyId: Types.ui16, shapeId: Types.ui16, halfExtents: [Types.f32, 3] });
+export const PhysicsShape = defineComponent({
+  bodyId: Types.ui16,
+  shapeId: Types.ui16,
+  type: Types.ui8,
+  halfExtents: [Types.f32, 3],
+  offset: [Types.f32, 3]
+});
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
 export const DestroyAtExtremeDistance = defineComponent();

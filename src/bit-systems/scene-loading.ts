@@ -2,7 +2,15 @@ import { AElement } from "aframe";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
-import { EnvironmentSettings, NavMesh, Networked, SceneLoader, SceneRoot, Skybox } from "../bit-components";
+import {
+  EnvironmentSettings,
+  NavMesh,
+  Networked,
+  PhysicsShape,
+  SceneLoader,
+  SceneRoot,
+  Skybox
+} from "../bit-components";
 import Sky from "../components/skybox";
 import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
@@ -48,6 +56,11 @@ function* loadScene(
     clearRollbacks(); // After this point, normal entity cleanup will takes care of things
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
+
+    // TODO this should only happen if the model does not have manually defined physics shapes, and needs to account for complexity
+    // HACK this probably belongs in model inflator but we want to specifcially use a mesh collider for the environment
+    addComponent(world, PhysicsShape, scene);
+    PhysicsShape.type[scene] = 2;
 
     let skybox: Sky | undefined;
     world.eid2obj.get(scene)!.traverse(o => {

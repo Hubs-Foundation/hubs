@@ -60,6 +60,7 @@ paths.actions.cursor.right.takeSnapshot = "/actions/cursor/right/TakeSnapshot";
 paths.actions.cursor.right.wake = "/actions/cursor/right/wake";
 paths.actions.cursor.right.togglePlayVideo = "/actions/cursor/right/TogglePlayVideo";
 paths.actions.cursor.right.deleteEntity = "/actions/cursor/right/DeleteEntity";
+paths.actions.cursor.right.menu = "/actions/cursor/right/menu";
 paths.actions.cursor.left = {};
 paths.actions.cursor.left.pose = "/actions/cursor/left/Pose";
 paths.actions.cursor.left.hideLine = "/actions/cursor/left/HideLine";
@@ -134,6 +135,10 @@ paths.actions.spawnEmoji3 = "/actions/spawnEmoji3";
 paths.actions.spawnEmoji4 = "/actions/spawnEmoji4";
 paths.actions.spawnEmoji5 = "/actions/spawnEmoji5";
 paths.actions.spawnEmoji6 = "/actions/spawnEmoji6";
+paths.actions.carry = {
+  drop: "/actions/carry/drop",
+  carry: "/actions/carry/carry"
+};
 paths.haptics = {};
 paths.haptics.actuators = {};
 paths.haptics.actuators.left = "/haptics/actuators/left";
@@ -142,6 +147,7 @@ paths.haptics.actuators.right = "/haptics/actuators/right";
 paths.device = {};
 paths.device.mouse = {};
 paths.device.mouse.coords = "/device/mouse/coords";
+paths.device.mouse.pos = "/device/mouse/pos";
 paths.device.mouse.movementXY = "/device/mouse/movementXY";
 paths.device.mouse.buttonLeft = "/device/mouse/buttonLeft";
 paths.device.mouse.buttonRight = "/device/mouse/buttonRight";

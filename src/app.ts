@@ -9,7 +9,7 @@ import type { AElement, AScene } from "aframe";
 import HubChannel from "./utils/hub-channel";
 import MediaDevicesManager from "./utils/media-devices-manager";
 
-import { EffectComposer, EffectPass } from "postprocessing";
+import { EffectComposer, EffectPass, OutlineEffect } from "postprocessing";
 import {
   Audio,
   AudioListener,
@@ -73,6 +73,7 @@ export class App {
   entryManager?: SceneEntryManager;
   messageDispatch?: any;
   store: Store;
+  canvas?: HTMLCanvasElement;
 
   mediaSearchStore = new MediaSearchStore();
 
@@ -109,6 +110,7 @@ export class App {
     composer?: EffectComposer;
     bloomAndTonemapPass?: EffectPass;
     tonemapOnlyPass?: EffectPass;
+    outlineEffect?: OutlineEffect;
   } = {};
 
   constructor() {
@@ -168,7 +170,8 @@ export class App {
       event.preventDefault();
     });
 
-    const enablePostEffects = this.store.state.preferences.enablePostEffects;
+    // TODO HACK post effects required for outline
+    const enablePostEffects = true || this.store.state.preferences.enablePostEffects;
 
     const renderer = new WebGLRenderer({
       alpha: true,
@@ -207,6 +210,7 @@ export class App {
     this.scene = sceneEl;
     const scene = sceneEl.object3D;
     this.world.scene = scene;
+    this.canvas = canvas;
     resolvePromiseToScene(scene);
 
     // We manually call scene.updateMatrixWolrd in mainTick

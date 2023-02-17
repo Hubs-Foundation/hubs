@@ -19,9 +19,11 @@ import {
   CameraTool,
   OffersHandConstraint,
   AEntity,
-  MediaVideo
+  MediaVideo,
+  Carryable
 } from "../../bit-components";
 import { hasComponent } from "bitecs";
+import { isCarryingObject } from "../../bit-systems/carry-system";
 const debugUserInput = qsTruthy("dui");
 
 let leftTeleporter, rightTeleporter;
@@ -97,6 +99,7 @@ export function resolveActionSets() {
       hc(world, TogglesHoveredActionSet, rightRemoteHovering) ||
       hcAFRAME(world, "super-spawner", rightRemoteHovering)
   );
+  userinput.toggleSet(sets.rightCursorHoveringOnCarryable, hc(world, Carryable, rightRemoteHovering));
 
   userinput.toggleSet(
     sets.leftCursorHoveringOnVideo,
@@ -143,6 +146,8 @@ export function resolveActionSets() {
   );
 
   userinput.toggleSet(sets.debugUserInput, debugUserInput);
+
+  userinput.toggleSet(sets.carryingObject, isCarryingObject());
 
   if (AFRAME.scenes[0] && AFRAME.scenes[0].systems["hubs-systems"]) {
     userinput.toggleSet(

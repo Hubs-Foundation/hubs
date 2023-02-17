@@ -12,5 +12,7 @@ loadModel(loadingObjectSrc, null, true).then(gltf => {
 });
 
 export function LoadingObject() {
-  return <entity name="Loading Object" object3D={loadingObject.clone()} />;
+  return (
+    <entity name="Loading Object" object3D={loadingObject.clone()} physicsShape={{ halfExtents: [0.1, 0.1, 0.1] }} />
+  );
 }

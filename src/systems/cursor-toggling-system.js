@@ -8,6 +8,7 @@ import {
   HoveredHandRight,
   Pen
 } from "../bit-components";
+import { isCarryingObject } from "../bit-systems/carry-system";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { anyEntityWith } from "../utils/bit-utils";
@@ -86,6 +87,7 @@ export class CursorTogglingSystem {
       isMobile ||
       hackyMobileSafariTest() ||
       (!inspecting &&
+        !isCarryingObject() &&
         shouldEnableRemote(
           world,
           scene,

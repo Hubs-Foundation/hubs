@@ -12,7 +12,7 @@ export function MediaPrefab(params: MediaLoaderParams): EntityDef {
       networkedTransform
       mediaLoader={params}
       deletable
-      grabbable={{ cursor: true, hand: true }}
+      grabbable={{ cursor: true, hand: true, carryable: true }}
       destroyAtExtremeDistance
       floatyObject={{
         flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE,
@@ -22,7 +22,6 @@ export function MediaPrefab(params: MediaLoaderParams): EntityDef {
         flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE
       }}
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-      physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }} /* TODO Physics shapes*/
       scale={[1, 1, 1]}
     />
   );

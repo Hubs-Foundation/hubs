@@ -1,7 +1,7 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import { GLTFModel, MediaLoader, Networked, ObjectMenuTarget, PhysicsShape } from "../bit-components";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
@@ -161,6 +161,14 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   const media = yield* loadMedia(world, eid);
   clearRollbacks(); // After this point, normal entity cleanup will takes care of things
 
+  const center = new Vector3();
+  // HACK physics offsets really need to be reworked. This object will still have the wrong center of mass but this corrects its shape at least
+  if (hasComponent(world, GLTFModel, media) && !(MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RECENTER)) {
+    const mediaObj = world.eid2obj.get(media)!;
+    const box = new THREE.Box3().setFromObject(mediaObj);
+    box.getCenter(center);
+  }
+
   resizeAndRecenter(world, media, eid);
   add(world, media, eid);
   setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid])!, media);
@@ -168,6 +176,16 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
     yield* animateScale(world, media);
   }
   removeComponent(world, MediaLoader, eid);
+
+  // HACK this should really be in model inflator, but the async nature of shape creation makes that tricky
+  if (hasComponent(world, GLTFModel, media)) {
+    // TODO we should only add this if the model has no manually defined physics shapes in it
+    addComponent(world, PhysicsShape, media);
+    PhysicsShape.type[media] = 1;
+    PhysicsShape.offset[media].set([0, 0, 0]);
+    center.toArray(PhysicsShape.offset[media]);
+    console.log("center", center, PhysicsShape.offset[media]);
+  }
 }
 
 const jobs = new JobRunner();

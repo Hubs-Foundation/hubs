@@ -1,4 +1,5 @@
-import { HeldRemoteRight } from "../../../bit-components";
+import { HeldRemoteRight, HoveredRemoteRight } from "../../../bit-components";
+import { isObjectMenuShowing } from "../../../bit-systems/carry-system";
 import { anyEntityWith } from "../../../utils/bit-utils";
 import { paths } from "../paths";
 import { Pose } from "../pose";
@@ -24,12 +25,24 @@ export class AppAwareMouseDevice {
     const buttonLeft = frame.get(paths.device.mouse.buttonLeft);
     const buttonRight = frame.get(paths.device.mouse.buttonRight);
 
-    if ((buttonRight && !transformSystem.transforming) || (buttonLeft && !anyEntityWith(APP.world, HeldRemoteRight))) {
+    if (
+      document.pointerLockElement ||
+      (buttonRight &&
+        !transformSystem.transforming &&
+        !anyEntityWith(APP.world, HoveredRemoteRight) &&
+        !isObjectMenuShowing()) ||
+      (buttonLeft && !anyEntityWith(APP.world, HeldRemoteRight))
+    ) {
       const movementXY = frame.get(paths.device.mouse.movementXY);
       if (movementXY) {
         frame.setVector2(paths.device.smartMouse.cameraDelta, movementXY[0], movementXY[1]);
+
+        // TODO HACK we should just provide deltas from mouse device directly
+        if (document.pointerLockElement) {
+          frame.setVector2(paths.actions.cameraDelta, -movementXY[0] / 100, -movementXY[1] / 100);
+        }
       }
-      frame.setValueType(paths.device.smartMouse.shouldMoveCamera, true);
+      frame.setValueType(paths.device.smartMouse.shouldMoveCamera, !document.pointerLockElement);
     }
 
     if (!this.camera) {
