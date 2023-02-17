@@ -229,9 +229,7 @@ export interface ComponentData {
   directionalLight?: DirectionalLightParams;
   grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
-  simpleWater?: SimpleWaterParams;
   mirror?: MirrorParams;
-  particleEmitter?: ParticleEmitterParams;
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -350,6 +348,8 @@ export interface GLTFComponentData extends ComponentData {
   skybox: SkyboxParams;
   fog: FogParams;
   background: BackgroundParams;
+  simpleWater?: SimpleWaterParams;
+  particleEmitter?: ParticleEmitterParams;
 }
 
 declare global {
@@ -374,9 +374,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   // inflators that create Object3Ds
   ambientLight: inflateAmbientLight,
   directionalLight: inflateDirectionalLight,
-  simpleWater: inflateSimpleWater,
-  mirror: inflateMirror,
-  particleEmitter: inflateParticleEmitter
+  mirror: inflateMirror
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
@@ -441,7 +439,9 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   spawner: inflateSpawner,
   videoTextureTarget: inflateVideoTextureTarget,
   videoTextureSource: createDefaultInflator(VideoTextureSource),
-  uvScroll: inflateUVScroll
+  uvScroll: inflateUVScroll,
+  simpleWater: inflateSimpleWater,
+  particleEmitter: inflateParticleEmitter
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
