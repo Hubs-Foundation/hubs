@@ -7,7 +7,7 @@ on:
     inputs:
       smokeroom-choice:
         type: choice
-        description: select smoke room
+        description: Select smoke instance
         options:
           - "smoke01"
           - "smoke02"
@@ -16,7 +16,7 @@ on:
           - "smoke05"
 jobs:
   turkeyGitops:
-    uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@feature/smoke
+    uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@master
     with:
       registry: mozillareality
       dockerfile: RetPageOriginDockerfile
