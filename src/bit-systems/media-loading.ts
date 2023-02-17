@@ -1,7 +1,7 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
@@ -145,6 +145,8 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
       throw new UnsupportedMediaTypeError(eid, urlData.mediaType);
     }
     media = yield* loader(world, urlData);
+    addComponent(world, MediaLoaded, media);
+    MediaLoaded.rootRef[media] = eid;
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());

@@ -1,7 +1,7 @@
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { Mesh, MeshStandardMaterial } from "three";
 import { HubsWorld } from "../app";
-import { MediaVideo, MediaVideoPlaybackChanged, NetworkedVideo, Owned } from "../bit-components";
+import { MediaLoaded, MediaVideo, MediaVideoPlaybackChanged, NetworkedVideo, Owned } from "../bit-components";
 import { AudioSystem } from "../systems/audio-system";
 import { makeAudioSourceEntity } from "./audio-emitter-system";
 
@@ -17,6 +17,9 @@ const mediaVideoQuery = defineQuery([MediaVideo]);
 const mediaVideoEnterQuery = enterQuery(mediaVideoQuery);
 const mediaVideoExitQuery = exitQuery(mediaVideoQuery);
 const mediaPlaybackUpdated = defineQuery([MediaVideo, MediaVideoPlaybackChanged]);
+const mediaLoadStatusQuery = defineQuery([MediaVideo, MediaLoaded]);
+const mediaLoadedQuery = enterQuery(mediaLoadStatusQuery);
+const mediaUnloadedQuery = exitQuery(mediaLoadStatusQuery);
 export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
   mediaVideoEnterQuery(world).forEach(function (videoEid) {
     const videoObj = world.eid2obj.get(videoEid) as Mesh;
@@ -34,7 +37,21 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     // Note in media-video we call updateMatrixWorld here to force PositionalAudio's updateMatrixWorld to run even
     // if it has an invisible parent. We don't want to have invisible parents now.
   });
+  mediaLoadedQuery(world).forEach(videoEid => {
+    const audioEid = video2audio.get(videoEid)!;
+    const rootEid = MediaLoaded.rootRef[videoEid];
+    if (APP.audioOverrides.has(rootEid)) {
+      const audioSettings = APP.audioOverrides.get(rootEid)!;
+      APP.audioOverrides.set(audioEid, audioSettings);
+    }
+  });
+  mediaUnloadedQuery(world).forEach(videoEid => {
+    const audioEid = video2audio.get(videoEid)!;
+    APP.audioOverrides.delete(audioEid);
+  });
   mediaVideoExitQuery(world).forEach(videoEid => {
+    const rootEid = MediaLoaded.rootRef[videoEid];
+    APP.audioOverrides.delete(rootEid);
     video2audio.delete(videoEid);
   });
   mediaPlaybackUpdated(world).forEach(videoEid => {
