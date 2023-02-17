@@ -1,4 +1,4 @@
-import { addComponent, addEntity, createWorld, IWorld } from "bitecs";
+import { addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
 import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
 import MediaSearchStore from "./storage/media-search-store";
