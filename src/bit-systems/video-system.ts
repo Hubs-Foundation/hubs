@@ -55,12 +55,12 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     video2audio.delete(videoEid);
   });
   mediaPlaybackUpdated(world).forEach(videoEid => {
-    const audio = video2audio.get(videoEid)!;
+    const audioEid = video2audio.get(videoEid)!;
     const videoEl = (world.eid2obj.get(videoEid) as any).material.map.image as HTMLVideoElement;
     if (videoEl.paused) {
-      APP.isAudioPaused.add(audio);
+      APP.isAudioPaused.add(audioEid);
     } else {
-      APP.isAudioPaused.delete(audio);
+      APP.isAudioPaused.delete(audioEid);
     }
     removeComponent(world, MediaVideoPlaybackChanged, videoEid);
   });
