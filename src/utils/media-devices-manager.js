@@ -389,19 +389,7 @@ export default class MediaDevicesManager extends EventEmitter {
     return this.micDevicesOptions.find(d => d.value === deviceId).label;
   }
 
-  speakersLabelForDeviceId(deviceId) {
-    return this._outputDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
-  }
-
   hasHmdMicrophone() {
     return !!this.state._micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
-  }
-
-  videoDeviceIdForMicLabel(label) {
-    return this._videoDevices.filter(d => d.label === label).map(d => d.value)[0];
-  }
-
-  videoLabelForDeviceId(deviceId) {
-    return this._videoDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
   }
 }
