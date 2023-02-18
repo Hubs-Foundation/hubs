@@ -141,10 +141,6 @@ export default class MediaDevicesManager extends EventEmitter {
     return APP.dialog.isMicEnabled;
   }
 
-  toggleMic() {
-    APP.dialog.toggleMicrophone();
-  }
-
   getPermissionsStatus(type) {
     return this._permissionsStatus[type];
   }

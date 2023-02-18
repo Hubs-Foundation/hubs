@@ -41,7 +41,7 @@ export function useMicrophoneStatus(scene) {
 
   const toggleMute = useCallback(() => {
     if (mediaDevicesManager.isMicShared) {
-      mediaDevicesManager.toggleMic();
+      APP.dialog.toggleMicrophone();
     } else {
       mediaDevicesManager.startMicShare({ unmute: true });
     }

@@ -52,7 +52,8 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onToggle: function () {
-    APP.mediaDevicesManager.toggleMic();
+    APP.dialog.toggleMicrophone();
+
     if (!this.el.sceneEl.is("entered")) return;
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
   },
