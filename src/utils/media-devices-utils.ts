@@ -43,3 +43,18 @@ export function optionFor(device: MediaDeviceInfo): MediaDeviceOption {
     label: labelFor(device)
   };
 }
+
+export async function getValidMediaDevices() {
+  const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+  // Some mediaDevices seem to be invalid. For example,
+  // {
+  //   deviceId : ""
+  //   groupId : ""
+  //   kind : "videoinput"
+  //   label : ""
+  // }
+  // was returned when testing Chrome Version 111.0.5563.19 (Official Build) beta (64-bit)
+  // Ignore these entries that lack a deviceId.
+  // Also ignore default devices. Default devices are handled separately.
+  return mediaDevices.filter(d => d.deviceId && d.deviceId !== "default");
+}
