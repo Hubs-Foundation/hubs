@@ -71,10 +71,6 @@ export default class MediaDevicesManager extends EventEmitter {
     return NO_DEVICE_ID;
   }
 
-  get defaultVideoDeviceId() {
-    return NO_DEVICE_ID;
-  }
-
   get micDevicesOptions() {
     return [DEFAULT_MEDIA_DEVICE_OPTION, ...this._micDevices];
   }
