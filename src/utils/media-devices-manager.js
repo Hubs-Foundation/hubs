@@ -1,5 +1,5 @@
 import { EventEmitter } from "eventemitter3";
-import { MediaDevicesEvents, PermissionStatus, MediaDevices, NO_DEVICE_ID } from "./media-devices-utils";
+import { MediaDevicesEvents, PermissionStatus, MediaDevices, NO_DEVICE_ID, optionFor } from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 import { isIOS as detectIOS } from "./is-mobile";
 
@@ -199,17 +199,14 @@ export default class MediaDevicesManager extends EventEmitter {
     console.log("Fetching media devices");
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
-        mediaDevices = mediaDevices.filter(d => d.label !== "");
-        this._micDevices = mediaDevices
-          .filter(d => d.deviceId !== "default" && d.kind === "audioinput")
-          .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substring(0, 9)})` }));
+        this._micDevices = mediaDevices.filter(d => d.deviceId !== "default" && d.kind === "audioinput").map(optionFor);
         this._videoDevices = mediaDevices
           .filter(d => d.deviceId !== "default" && d.kind === "videoinput")
-          .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substring(0, 9)})` }));
+          .map(optionFor);
         if (MediaDevicesManager.isAudioOutputSelectEnabled) {
           this._outputDevices = mediaDevices
             .filter(d => d.deviceId !== "default" && d.kind === "audiooutput")
-            .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substring(0, 9)})` }));
+            .map(optionFor);
         }
         this.updatePermissions();
         resolve();

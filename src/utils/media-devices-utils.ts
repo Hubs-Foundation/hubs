@@ -21,3 +21,25 @@ export const MediaDevices = Object.freeze({
 });
 
 export const NO_DEVICE_ID = "none";
+
+type MediaDeviceOption = {
+  value: string;
+  label: string;
+};
+
+const labelPrefix: Required<{ [K in MediaDeviceKind]: string }> = {
+  audioinput: "Mic Device",
+  videoinput: "Camera Device",
+  audiooutput: "Audio Output"
+};
+
+function labelFor(device: MediaDeviceInfo) {
+  return device.label || `${labelPrefix[device.kind]} ${device.deviceId.substring(0, 9)}`;
+}
+
+export function optionFor(device: MediaDeviceInfo): MediaDeviceOption {
+  return {
+    value: device.deviceId,
+    label: labelFor(device)
+  };
+}
