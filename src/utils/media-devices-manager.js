@@ -40,7 +40,6 @@ export default class MediaDevicesManager extends EventEmitter {
     this._micDevices = [];
     this._videoDevices = [];
     this._outputDevices = [];
-    this._deviceId = null;
     this._audioTrack = null;
     this.audioSystem = audioSystem;
     this._mediaStream = audioSystem.outboundStream;
@@ -63,14 +62,6 @@ export default class MediaDevicesManager extends EventEmitter {
 
   static get isAudioInputSelectEnabled() {
     return audioInputSelectEnabled;
-  }
-
-  get deviceId() {
-    return this._deviceId;
-  }
-
-  set deviceId(deviceId) {
-    this._deviceId = deviceId;
   }
 
   get audioTrack() {
