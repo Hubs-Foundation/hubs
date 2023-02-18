@@ -3,7 +3,7 @@ import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-util
 
 export function useMicrophoneStatus(scene) {
   const mediaDevicesManager = APP.mediaDevicesManager;
-  const [isMicMuted, setIsMicMuted] = useState(!mediaDevicesManager.isMicEnabled);
+  const [isMicMuted, setIsMicMuted] = useState(!APP.dialog.isMicEnabled);
   const [isMicEnabled, setIsMicEnabled] = useState(APP.mediaDevicesManager.isMicShared);
   const [permissionStatus, setPermissionsStatus] = useState(
     mediaDevicesManager.getPermissionsStatus(MediaDevices.MICROPHONE)
