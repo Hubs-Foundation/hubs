@@ -181,24 +181,12 @@ export default class MediaDevicesManager extends EventEmitter {
     });
   };
 
-  updatePermissions() {
-    const micStatus = this._micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
-    this._permissionsStatus[MediaDevices.MICROPHONE] = micStatus;
+  updatePermissionStatus(mediaDevice, shouldPrompt) {
+    const status = shouldPrompt ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
+    this._permissionsStatus[mediaDevice] = status;
     this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
-      mediaDevice: MediaDevices.MICROPHONE,
-      status: micStatus
-    });
-    const videoStatus = this._videoDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
-    this._permissionsStatus[MediaDevices.CAMERA] = videoStatus;
-    this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
-      mediaDevice: MediaDevices.CAMERA,
-      status: videoStatus
-    });
-    const speakersStatus = this._micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
-    this._permissionsStatus[MediaDevices.SPEAKERS] = speakersStatus;
-    this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
-      mediaDevice: MediaDevices.SPEAKERS,
-      status: speakersStatus
+      mediaDevice,
+      status
     });
   }
 
@@ -209,8 +197,10 @@ export default class MediaDevicesManager extends EventEmitter {
       this._videoDevices = mediaDevices.filter(d => d.kind === "videoinput").map(optionFor);
       if (MediaDevicesManager.isAudioOutputSelectEnabled) {
         this._outputDevices = mediaDevices.filter(d => d.kind === "audiooutput").map(optionFor);
+        this.updatePermissionStatus(MediaDevices.SPEAKERS, this._outputDevices.length === 0);
       }
-      this.updatePermissions();
+      this.updatePermissionStatus(MediaDevices.MICROPHONE, this._micDevices.length === 0);
+      this.updatePermissionStatus(MediaDevices.CAMERA, this._videoDevices.length === 0);
     });
   }
 
