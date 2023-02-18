@@ -199,14 +199,21 @@ export default class MediaDevicesManager extends EventEmitter {
     console.log("Fetching media devices");
     return new Promise(resolve => {
       navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
-        this._micDevices = mediaDevices.filter(d => d.deviceId !== "default" && d.kind === "audioinput").map(optionFor);
-        this._videoDevices = mediaDevices
-          .filter(d => d.deviceId !== "default" && d.kind === "videoinput")
-          .map(optionFor);
+        // Some mediaDevices seem to be invalid. For example,
+        // {
+        //   deviceId : ""
+        //   groupId : ""
+        //   kind : "videoinput"
+        //   label : ""
+        // }
+        // was returned when testing Chrome Version 111.0.5563.19 (Official Build) beta (64-bit)
+        // Ignore these entries that lack a deviceId.
+        // Also ignore default devices. Default devices are handled separately.
+        mediaDevices = mediaDevices.filter(d => d.deviceId && d.deviceId !== "default");
+        this._micDevices = mediaDevices.filter(d => d.kind === "audioinput").map(optionFor);
+        this._videoDevices = mediaDevices.filter(d => d.kind === "videoinput").map(optionFor);
         if (MediaDevicesManager.isAudioOutputSelectEnabled) {
-          this._outputDevices = mediaDevices
-            .filter(d => d.deviceId !== "default" && d.kind === "audiooutput")
-            .map(optionFor);
+          this._outputDevices = mediaDevices.filter(d => d.kind === "audiooutput").map(optionFor);
         }
         this.updatePermissions();
         resolve();
