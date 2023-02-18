@@ -59,10 +59,10 @@ AFRAME.registerComponent("mute-mic", {
   },
 
   onMute: function () {
-    APP.mediaDevicesManager.micEnabled = false;
+    APP.dialog.enableMicrophone(false);
   },
 
   onUnmute: function () {
-    APP.mediaDevicesManager.micEnabled = true;
+    APP.dialog.enableMicrophone(true);
   }
 });
