@@ -63,10 +63,6 @@ export default class MediaDevicesManager extends EventEmitter {
     return audioInputSelectEnabled;
   }
 
-  get defaultOutputDeviceId() {
-    return NO_DEVICE_ID;
-  }
-
   get micDevicesOptions() {
     return [DEFAULT_MEDIA_DEVICE_OPTION, ...this._micDevices];
   }
@@ -103,7 +99,7 @@ export default class MediaDevicesManager extends EventEmitter {
     const exists = this._outputDevices.some(device => {
       return device.value === preferredSpeakers;
     });
-    return exists ? preferredSpeakers : this.defaultOutputDeviceId;
+    return exists ? preferredSpeakers : NO_DEVICE_ID;
   }
 
   get isMicShared() {
@@ -385,11 +381,12 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   deviceIdForSpeakersDeviceLabel(label) {
-    return this._outputDevices.filter(d => d.label === label).map(d => d.value)[0] || this.defaultOutputDeviceId;
+    const match = this.outputDevicesOptions.find(d => d.label === label);
+    return (match && match.value) || NO_DEVICE_ID;
   }
 
   micLabelForDeviceId(deviceId) {
-    return this._micDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
+    return this.micDevicesOptions.find(d => d.value === deviceId).label;
   }
 
   speakersLabelForDeviceId(deviceId) {
