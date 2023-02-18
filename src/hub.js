@@ -764,6 +764,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store, hubId);
   window.APP.hubChannel = hubChannel;
+  hubChannel.addEventListener("permissions_updated", () => {
+    if (!hubChannel.can("voice_chat")) {
+      APP.dialog.enableMicrophone(false);
+    }
+  });
 
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;

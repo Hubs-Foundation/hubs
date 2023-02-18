@@ -52,8 +52,6 @@ export default class MediaDevicesManager extends EventEmitter {
 
     this.onDeviceChange = this.onDeviceChange.bind(this);
     navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
-    this.onPermissionsUpdated = this.onPermissionsUpdated.bind(this);
-    APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
   }
 
   static get isAudioOutputSelectEnabled() {
@@ -150,12 +148,6 @@ export default class MediaDevicesManager extends EventEmitter {
   getPermissionsStatus(type) {
     return this._permissionsStatus[type];
   }
-
-  onPermissionsUpdated = () => {
-    if (!APP.hubChannel.can("voice_chat")) {
-      APP.dialog.enableMicrophone(false);
-    }
-  };
 
   onDeviceChange = () => {
     this.fetchMediaDevices().then(() => {
