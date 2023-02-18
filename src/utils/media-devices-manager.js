@@ -204,16 +204,13 @@ export default class MediaDevicesManager extends EventEmitter {
 
   async fetchMediaDevices() {
     console.log("Fetching media devices");
-    return new Promise(resolve => {
-      getValidMediaDevices().then(mediaDevices => {
-        this._micDevices = mediaDevices.filter(d => d.kind === "audioinput").map(optionFor);
-        this._videoDevices = mediaDevices.filter(d => d.kind === "videoinput").map(optionFor);
-        if (MediaDevicesManager.isAudioOutputSelectEnabled) {
-          this._outputDevices = mediaDevices.filter(d => d.kind === "audiooutput").map(optionFor);
-        }
-        this.updatePermissions();
-        resolve();
-      });
+    return getValidMediaDevices().then(mediaDevices => {
+      this._micDevices = mediaDevices.filter(d => d.kind === "audioinput").map(optionFor);
+      this._videoDevices = mediaDevices.filter(d => d.kind === "videoinput").map(optionFor);
+      if (MediaDevicesManager.isAudioOutputSelectEnabled) {
+        this._outputDevices = mediaDevices.filter(d => d.kind === "audiooutput").map(optionFor);
+      }
+      this.updatePermissions();
     });
   }
 
