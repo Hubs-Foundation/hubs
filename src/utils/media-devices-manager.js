@@ -63,10 +63,6 @@ export default class MediaDevicesManager extends EventEmitter {
     return audioInputSelectEnabled;
   }
 
-  get defaultInputDeviceId() {
-    return NO_DEVICE_ID;
-  }
-
   get defaultOutputDeviceId() {
     return NO_DEVICE_ID;
   }
@@ -384,7 +380,8 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   deviceIdForMicDeviceLabel(label) {
-    return this._micDevices.filter(d => d.label === label).map(d => d.value)[0] || this.defaultInputDeviceId;
+    const match = this.micDevicesOptions.find(d => d.label === label);
+    return (match && match.value) || NO_DEVICE_ID;
   }
 
   deviceIdForSpeakersDeviceLabel(label) {
