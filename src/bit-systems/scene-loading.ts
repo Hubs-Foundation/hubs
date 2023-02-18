@@ -11,6 +11,7 @@ import {
   SceneRoot,
   Skybox
 } from "../bit-components";
+import { generateMeshBVH } from "../components/gltf-model-plus";
 import Sky from "../components/skybox";
 import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
@@ -63,7 +64,8 @@ function* loadScene(
     PhysicsShape.type[scene] = 2;
 
     let skybox: Sky | undefined;
-    world.eid2obj.get(scene)!.traverse(o => {
+    const newSceneObj = world.eid2obj.get(scene)!;
+    newSceneObj.traverse(o => {
       if ((o as Mesh).isMesh) {
         // TODO animated objects should not be static
         (o as Mesh).reflectionProbeMode = "static";
@@ -87,6 +89,8 @@ function* loadScene(
         skybox = o as Sky;
       }
     });
+
+    generateMeshBVH(newSceneObj);
 
     const envSettings = { skybox };
     if (hasComponent(world, EnvironmentSettings, scene)) {

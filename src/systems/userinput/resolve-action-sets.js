@@ -23,7 +23,7 @@ import {
   Carryable
 } from "../../bit-components";
 import { hasComponent } from "bitecs";
-import { isCarryingObject } from "../../bit-systems/carry-system";
+import { isCarryingObject, isSnappingObject } from "../../bit-systems/carry-system";
 const debugUserInput = qsTruthy("dui");
 
 let leftTeleporter, rightTeleporter;
@@ -148,6 +148,7 @@ export function resolveActionSets() {
   userinput.toggleSet(sets.debugUserInput, debugUserInput);
 
   userinput.toggleSet(sets.carryingObject, isCarryingObject());
+  userinput.toggleSet(sets.snappingObject, isSnappingObject());
 
   if (AFRAME.scenes[0] && AFRAME.scenes[0].systems["hubs-systems"]) {
     userinput.toggleSet(

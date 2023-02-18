@@ -43,3 +43,4 @@ sets.leftHandHoveringOnNothing = "leftHandHoveringOnNothing";
 sets.debugUserInput = "debugUserInput";
 sets.inspecting = "inspecting";
 sets.carryingObject = "carryingObject";
+sets.snappingObject = "snappingObject";

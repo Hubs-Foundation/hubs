@@ -87,7 +87,7 @@ AFRAME.GLTFModelPlus = {
   }
 };
 
-function generateMeshBVH(object3D) {
+export function generateMeshBVH(object3D) {
   object3D.traverse(obj => {
     // note that we might already have a bounds tree if this was a clone of an object with one
     const hasBufferGeometry = obj.isMesh && obj.geometry.isBufferGeometry;
