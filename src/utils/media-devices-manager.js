@@ -5,7 +5,8 @@ import {
   MediaDevices,
   NO_DEVICE_ID,
   optionFor,
-  getValidMediaDevices
+  getValidMediaDevices,
+  DEFAULT_MEDIA_DEVICE_OPTION
 } from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 import { isIOS as detectIOS } from "./is-mobile";
@@ -63,27 +64,27 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get defaultInputDeviceId() {
-    return this._micDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
+    return NO_DEVICE_ID;
   }
 
   get defaultOutputDeviceId() {
-    return this._outputDevices.length > 0 ? this._outputDevices[0].value : NO_DEVICE_ID;
+    return NO_DEVICE_ID;
   }
 
   get defaultVideoDeviceId() {
-    return this._videoDevices.length > 0 ? this._videoDevices[0].value : NO_DEVICE_ID;
+    return NO_DEVICE_ID;
   }
 
   get micDevicesOptions() {
-    return this._micDevices.length > 0 ? this._micDevices : [{ value: NO_DEVICE_ID, label: "None" }];
+    return [DEFAULT_MEDIA_DEVICE_OPTION, ...this._micDevices];
   }
 
   get videoDevicesOptions() {
-    return this._videoDevices.length > 0 ? this._videoDevices : [{ value: NO_DEVICE_ID, label: "None" }];
+    return [DEFAULT_MEDIA_DEVICE_OPTION, ...this._videoDevices];
   }
 
   get outputDevicesOptions() {
-    return this._outputDevices.length > 0 ? this._outputDevices : [{ value: NO_DEVICE_ID, label: "None" }];
+    return [DEFAULT_MEDIA_DEVICE_OPTION, ...this._outputDevices];
   }
 
   get mediaStream() {

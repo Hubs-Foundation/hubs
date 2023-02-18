@@ -27,6 +27,8 @@ type MediaDeviceOption = {
   label: string;
 };
 
+export const DEFAULT_MEDIA_DEVICE_OPTION: MediaDeviceOption = { value: NO_DEVICE_ID, label: "System Default" };
+
 const labelPrefix: Required<{ [K in MediaDeviceKind]: string }> = {
   audioinput: "Mic Device",
   videoinput: "Camera Device",
