@@ -10,6 +10,12 @@ import { addObject3DComponent, swapObject3DComponent } from "../utils/jsx-entity
 type AudioObject3D = StereoAudio | PositionalAudio;
 type AudioConstructor<T> = new (listener: ThreeAudioListener) => T;
 
+export const EMITTER_FLAGS = {
+  MUTED: 1 << 0,
+  PAUSED: 1 << 1,
+  CLIPPED: 1 << 2
+};
+
 export function isPositionalAudio(node: AudioObject3D): node is PositionalAudio {
   return (node as any).panner !== undefined;
 }
@@ -20,7 +26,6 @@ export function cleanupAudio(audio: AudioObject3D) {
   const audioSystem = APP.scene?.systems["hubs-systems"].audioSystem;
   APP.audios.delete(eid);
   APP.supplementaryAttenuation.delete(eid);
-  APP.isAudioPaused.delete(eid);
   audioSystem.removeAudio({ node: audio });
 }
 
@@ -53,9 +58,9 @@ export function makeAudioSourceEntity(world: HubsWorld, video: HTMLVideoElement,
   const eid = addEntity(world);
   APP.sourceType.set(eid, SourceType.MEDIA_VIDEO);
   if (video.paused) {
-    APP.isAudioPaused.add(eid);
+    AudioEmitter.flags[eid] |= EMITTER_FLAGS.PAUSED;
   } else {
-    APP.isAudioPaused.delete(eid);
+    AudioEmitter.flags[eid] &= ~EMITTER_FLAGS.PAUSED;
   }
 
   let audio;
