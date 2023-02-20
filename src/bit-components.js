@@ -153,7 +153,7 @@ MediaPDF.map = new Map();
 export const MediaVideo = defineComponent({
   autoPlay: Types.ui8
 });
-export const MediaVideoPlaybackChanged = defineComponent();
+MediaVideo.map = new Map();
 export const AnimationMixer = defineComponent();
 export const NetworkedVideo = defineComponent({
   time: Types.f32,
@@ -168,7 +168,9 @@ export const VideoMenu = defineComponent({
   playIndicatorRef: Types.eid,
   pauseIndicatorRef: Types.eid
 });
-export const AudioEmitter = defineComponent();
+export const AudioEmitter = defineComponent({
+  flags: Types.ui8
+});
 export const AudioSettingsChanged = defineComponent();
 export const Deletable = defineComponent();
 export const EnvironmentSettings = defineComponent();

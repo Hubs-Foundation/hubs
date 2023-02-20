@@ -4,13 +4,13 @@ import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
 import {
+  AudioEmitter,
   CursorRaycastable,
   EntityStateDirty,
   Held,
   HeldRemoteRight,
   HoveredRemoteRight,
   MediaVideo,
-  MediaVideoPlaybackChanged,
   NetworkedVideo,
   VideoMenu,
   VideoMenuItem
@@ -22,6 +22,8 @@ import { animate } from "../utils/animate";
 import { coroutine } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
 import { isFacingCamera } from "../utils/three-utils";
+import { MediaVideo2Audio } from "./video-system";
+import { EMITTER_FLAGS } from "./audio-emitter-system";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
 const hoverRightVideoQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
@@ -93,18 +95,20 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
       const playIndicatorObj = world.eid2obj.get(VideoMenu.playIndicatorRef[eid])!;
       const pauseIndicatorObj = world.eid2obj.get(VideoMenu.pauseIndicatorRef[eid])!;
 
+      const audioEid = MediaVideo2Audio.get(videoEid)!;
       if (video.paused) {
         video.play();
+        AudioEmitter.flags[audioEid] &= ~EMITTER_FLAGS.PAUSED;
         playIndicatorObj.visible = true;
         pauseIndicatorObj.visible = false;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.playIndicatorRef[eid]));
       } else {
         video.pause();
+        AudioEmitter.flags[audioEid] |= EMITTER_FLAGS.PAUSED;
         playIndicatorObj.visible = false;
         pauseIndicatorObj.visible = true;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.pauseIndicatorRef[eid]));
       }
-      addComponent(world, MediaVideoPlaybackChanged, videoEid);
     }
 
     const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);

@@ -114,17 +114,13 @@ const getEmitterPosition = (() => {
 const applyEmitterParams = (emitterEid: number, params: AudioSettings) => {
   APP.zoneOverrides.set(emitterEid, params);
   const audio = APP.audios.get(emitterEid);
-  if (audio) {
-    updateAudioSettings(emitterEid, audio);
-  }
+  updateAudioSettings(emitterEid, audio);
 };
 
 const restoreEmitterParams = (emitterEid: number) => {
   APP.zoneOverrides.delete(emitterEid);
   const audio = APP.audios.get(emitterEid);
-  if (audio) {
-    updateAudioSettings(emitterEid, audio);
-  }
+  updateAudioSettings(emitterEid, audio);
 };
 
 const setRay = (() => {
