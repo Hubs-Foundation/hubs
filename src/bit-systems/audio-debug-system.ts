@@ -175,8 +175,8 @@ export function audioDebugSystem(world: HubsWorld) {
 
       const panner = isPositionalAudio(audio) ? audio.panner : fakePanner;
 
-      uniforms.sourcePositions[idx] = emitterPos;
-      uniforms.sourceOrientations[idx] = emitterDir;
+      uniforms.sourcePositions[idx] = emitterPos.clone();
+      uniforms.sourceOrientations[idx] = emitterDir.clone();
       uniforms.distanceModels[idx] = 0;
       if (panner.distanceModel === DistanceModelType.Linear) {
         uniforms.distanceModels[idx] = 0;
