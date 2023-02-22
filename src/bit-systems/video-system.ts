@@ -2,9 +2,10 @@ import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "
 import { Mesh, MeshStandardMaterial } from "three";
 import { HubsWorld } from "../app";
 import { AudioParams, AudioSettingsChanged, MediaLoaded, MediaVideo, NetworkedVideo, Owned } from "../bit-components";
+import { SourceType } from "../components/audio-params";
 import { AudioSystem } from "../systems/audio-system";
 import { findAncestorWithComponent } from "../utils/bit-utils";
-import { Emitter2Audio, Emitter2Params, makeAudioSourceEntity } from "./audio-emitter-system";
+import { Emitter2Audio, Emitter2Params, makeAudioEntity } from "./audio-emitter-system";
 
 enum Flags {
   PAUSED = 1 << 0
@@ -27,7 +28,7 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
         console.error("Error auto-playing video.");
       });
     }
-    const audioEid = makeAudioSourceEntity(world, video, audioSystem);
+    const audioEid = makeAudioEntity(world, videoEid, SourceType.MEDIA_VIDEO, audioSystem);
     Emitter2Audio.set(videoEid, audioEid);
     const audio = world.eid2obj.get(audioEid)!;
     videoObj.add(audio);

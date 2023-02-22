@@ -71,6 +71,7 @@ import { particleEmitterSystem } from "../bit-systems/particle-emitter";
 import { audioEmitterSystem } from "../bit-systems/audio-emitter-system";
 import { audioZoneSystem } from "../bit-systems/audio-zone-system";
 import { audioDebugSystem } from "../bit-systems/audio-debug-system";
+import { audioTargetSystem } from "../bit-systems/audio-target-system";
 
 declare global {
   interface Window {
@@ -247,6 +248,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   audioZoneSystem(world);
   audioEmitterSystem(world, hubsSystems.audioSystem);
+  audioTargetSystem(world, hubsSystems.audioSystem);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);

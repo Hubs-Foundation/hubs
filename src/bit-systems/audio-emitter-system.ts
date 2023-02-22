@@ -1,5 +1,11 @@
 import { addComponent, addEntity, defineQuery, removeComponent } from "bitecs";
-import { PositionalAudio, Audio as StereoAudio, AudioListener as ThreeAudioListener } from "three";
+import {
+  PositionalAudio,
+  Audio as StereoAudio,
+  AudioListener as ThreeAudioListener,
+  MeshStandardMaterial,
+  Mesh
+} from "three";
 import { HubsWorld } from "../app";
 import { AudioEmitter, AudioSettingsChanged } from "../bit-components";
 import { AudioType, SourceType } from "../components/audio-params";
@@ -59,14 +65,9 @@ function swapAudioType<T extends AudioObject3D>(
   swapObject3DComponent(world, eid, newAudio);
 }
 
-export function makeAudioSourceEntity(world: HubsWorld, video: HTMLVideoElement, audioSystem: AudioSystem) {
+export function makeAudioEntity(world: HubsWorld, source: number, sourceType: SourceType, audioSystem: AudioSystem) {
   const eid = addEntity(world);
-  APP.sourceType.set(eid, SourceType.MEDIA_VIDEO);
-  if (video.paused) {
-    AudioEmitter.flags[eid] |= EMITTER_FLAGS.PAUSED;
-  } else {
-    AudioEmitter.flags[eid] &= ~EMITTER_FLAGS.PAUSED;
-  }
+  APP.sourceType.set(eid, sourceType);
 
   let audio;
   const { audioType } = getCurrentAudioSettings(eid);
@@ -76,20 +77,30 @@ export function makeAudioSourceEntity(world: HubsWorld, video: HTMLVideoElement,
   } else {
     audio = new StereoAudio(audioListener);
   }
+
+  if (sourceType === SourceType.MEDIA_VIDEO) {
+    const videoObj = world.eid2obj.get(source) as Mesh;
+    const video = (videoObj.material as MeshStandardMaterial).map!.image as HTMLVideoElement;
+    if (video.paused) {
+      AudioEmitter.flags[eid] |= EMITTER_FLAGS.PAUSED;
+    } else {
+      AudioEmitter.flags[eid] &= ~EMITTER_FLAGS.PAUSED;
+    }
+    const audioSrcEl = video;
+    audio.setMediaElementSource(audioSrcEl);
+    // Original audio source volume can now be restored as audio systems will take over
+    audioSrcEl.volume = 1;
+    audio.gain.gain.value = 0;
+  }
+
   addComponent(world, AudioEmitter, eid);
   addObject3DComponent(world, eid, audio);
 
-  audio.gain.gain.value = 0;
-  audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: audio });
-
-  const audioSrcEl = video;
-  audio.setMediaElementSource(audioSrcEl);
+  audioSystem.addAudio({ sourceType, node: audio });
 
   APP.audios.set(eid, audio);
   updateAudioSettings(eid, audio);
 
-  // Original audio source volume can now be restored as audio systems will take over
-  audioSrcEl.volume = 1;
   return eid;
 }
 
