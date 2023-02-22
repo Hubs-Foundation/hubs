@@ -1,11 +1,10 @@
-import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery } from "bitecs";
 import { getScene, HubsWorld } from "../app";
-import { AudioEmitter, AudioZone } from "../bit-components";
+import { AudioEmitter, AudioSettingsChanged, AudioZone } from "../bit-components";
 import { Box3, BoxGeometry, DoubleSide, MeshBasicMaterial, Object3D, Ray, Vector3, Mesh, BoxHelper } from "three";
 import { AUDIO_ZONE_FLAGS } from "../inflators/audio-zone";
 import { disposeMaterial, disposeNode } from "../utils/three-utils";
 import { AudioSettings } from "../components/audio-params";
-import { updateAudioSettings } from "../update-audio-settings";
 
 const debugObjects = new Map<number, Object3D>();
 
@@ -113,14 +112,12 @@ const getEmitterPosition = (() => {
 
 const applyEmitterParams = (emitterEid: number, params: Partial<AudioSettings>) => {
   APP.zoneOverrides.set(emitterEid, params);
-  const audio = APP.audios.get(emitterEid);
-  updateAudioSettings(emitterEid, audio);
+  addComponent(APP.world, AudioSettingsChanged, emitterEid);
 };
 
 const restoreEmitterParams = (emitterEid: number) => {
   APP.zoneOverrides.delete(emitterEid);
-  const audio = APP.audios.get(emitterEid);
-  updateAudioSettings(emitterEid, audio);
+  addComponent(APP.world, AudioSettingsChanged, emitterEid);
 };
 
 const setRay = (() => {
