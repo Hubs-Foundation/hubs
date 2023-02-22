@@ -28,16 +28,16 @@ export enum PanningModelType {
 }
 
 export interface AudioSettings {
-  audioType?: AudioType;
-  distanceModel?: DistanceModelType;
-  panningModel?: PanningModelType;
-  rolloffFactor?: number;
-  refDistance?: number;
-  maxDistance?: number;
-  coneInnerAngle?: number;
-  coneOuterAngle?: number;
-  coneOuterGain?: number;
-  gain?: number;
+  audioType: AudioType;
+  distanceModel: DistanceModelType;
+  panningModel: PanningModelType;
+  rolloffFactor: number;
+  refDistance: number;
+  maxDistance: number;
+  coneInnerAngle: number;
+  coneOuterAngle: number;
+  coneOuterGain: number;
+  gain: number;
 }
 
 export const AvatarAudioDefaults: AudioSettings = {

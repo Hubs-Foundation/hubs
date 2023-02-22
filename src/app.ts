@@ -79,15 +79,15 @@ export class App {
 
   audios = new Map<AElement | number, PositionalAudio | Audio>();
   sourceType = new Map<AElement | number, SourceType>();
-  audioOverrides = new Map<AElement | number, AudioSettings>();
-  zoneOverrides = new Map<AElement | number, AudioSettings>();
+  audioOverrides = new Map<AElement | number, Partial<AudioSettings>>();
+  zoneOverrides = new Map<AElement | number, Partial<AudioSettings>>();
   gainMultipliers = new Map<AElement | number, number>();
   supplementaryAttenuation = new Map<AElement | number, number>();
   clippingState = new Set<AElement | number>();
   mutedState = new Set<AElement | number>();
   isAudioPaused = new Set<AElement | number>();
-  audioDebugPanelOverrides = new Map<SourceType, AudioSettings>();
-  sceneAudioDefaults = new Map<SourceType, AudioSettings>();
+  audioDebugPanelOverrides = new Map<SourceType, Partial<AudioSettings>>();
+  sceneAudioDefaults = new Map<SourceType, Partial<AudioSettings>>();
   moderatorAudioSource = new Set<AElement | number>();
 
   world: HubsWorld = createWorld();

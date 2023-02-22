@@ -80,7 +80,7 @@ const zoneContains = (zoneEid: number, position: Vector3) => {
   return getZoneBoundingBox(zoneEid).containsPoint(position);
 };
 
-const getEmitterParams = (zoneEid: number) => {
+const getEmitterParams = (zoneEid: number): Partial<AudioSettings> | undefined => {
   return APP.audioOverrides.get(zoneEid);
 };
 
@@ -111,7 +111,7 @@ const getEmitterPosition = (() => {
   };
 })();
 
-const applyEmitterParams = (emitterEid: number, params: AudioSettings) => {
+const applyEmitterParams = (emitterEid: number, params: Partial<AudioSettings>) => {
   APP.zoneOverrides.set(emitterEid, params);
   const audio = APP.audios.get(emitterEid);
   updateAudioSettings(emitterEid, audio);
@@ -210,24 +210,27 @@ const REDUCED_KEYS = [
   "coneOuterGain"
 ] as const;
 type ReducedAudioSettingsKeys = typeof REDUCED_KEYS[number];
-type ReducedAudioSettings = Pick<AudioSettings, ReducedAudioSettingsKeys>;
+type ReducedAudioSettings = Pick<Partial<AudioSettings>, ReducedAudioSettingsKeys>;
 
 // We apply the most restrictive audio parameters
-const paramsReducer = (acc: AudioSettings, curr: AudioSettings): AudioSettings => {
+const paramsReducer = (acc: Partial<AudioSettings>, curr: Partial<AudioSettings>): Partial<AudioSettings> => {
   if (!curr && !acc) return {} as AudioSettings;
   else if (curr && !acc) return curr;
   else if (!curr && acc) return acc;
   else
-    return REDUCED_KEYS.reduce((result: ReducedAudioSettings, key: ReducedAudioSettingsKeys): AudioSettings => {
-      if (curr[key] !== undefined && acc[key] !== undefined) {
-        result[key] = Math.min(acc[key]!, curr[key]!);
-      } else if (curr[key] !== undefined && acc[key] === undefined) {
-        result[key] = curr[key];
-      } else if (curr[key] === undefined && acc[key] !== undefined) {
-        result[key] = acc[key];
-      }
-      return result;
-    }, {});
+    return REDUCED_KEYS.reduce(
+      (result: ReducedAudioSettings, key: ReducedAudioSettingsKeys): Partial<AudioSettings> => {
+        if (curr[key] !== undefined && acc[key] !== undefined) {
+          result[key] = Math.min(acc[key]!, curr[key]!);
+        } else if (curr[key] !== undefined && acc[key] === undefined) {
+          result[key] = curr[key];
+        } else if (curr[key] === undefined && acc[key] !== undefined) {
+          result[key] = acc[key];
+        }
+        return result;
+      },
+      {}
+    );
 };
 
 const addOrRemoveZone = (zones: Set<number>, zoneEid: number, position: Vector3) => {
