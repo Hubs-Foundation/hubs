@@ -7,8 +7,11 @@ import { AudioSystem } from "../systems/audio-system";
 import { applySettings, getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { addObject3DComponent, swapObject3DComponent } from "../utils/jsx-entity";
 
-type AudioObject3D = StereoAudio | PositionalAudio;
+export type AudioObject3D = StereoAudio | PositionalAudio;
 type AudioConstructor<T> = new (listener: ThreeAudioListener) => T;
+
+export const Emitter2Audio = (AudioEmitter as any).audios as Map<number, number>;
+export const Emitter2Params = (AudioEmitter as any).params as Map<number, number>;
 
 export const EMITTER_FLAGS = {
   MUTED: 1 << 0,
@@ -26,6 +29,7 @@ export function cleanupAudio(audio: AudioObject3D) {
   const audioSystem = APP.scene?.systems["hubs-systems"].audioSystem;
   APP.audios.delete(eid);
   APP.supplementaryAttenuation.delete(eid);
+  APP.audioOverrides.delete(eid);
   audioSystem.removeAudio({ node: audio });
 }
 
@@ -40,6 +44,7 @@ function swapAudioType<T extends AudioObject3D>(
   APP.gainMultipliers.delete(eid);
   APP.sourceType.set(eid, SourceType.MEDIA_VIDEO);
   APP.supplementaryAttenuation.delete(eid);
+  APP.audioOverrides.delete(eid);
   APP.audios.delete(eid);
   audioSystem.removeAudio({ node: audio });
 

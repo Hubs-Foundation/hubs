@@ -128,9 +128,7 @@ export const MediaLoader = defineComponent({
   flags: Types.ui8
 });
 MediaLoader.src[$isStringType] = true;
-export const MediaLoaded = defineComponent({
-  rootRef: Types.eid
-});
+export const MediaLoaded = defineComponent();
 
 export const SceneRoot = defineComponent();
 export const NavMesh = defineComponent();
@@ -153,7 +151,6 @@ MediaPDF.map = new Map();
 export const MediaVideo = defineComponent({
   autoPlay: Types.ui8
 });
-MediaVideo.map = new Map();
 export const AnimationMixer = defineComponent();
 export const NetworkedVideo = defineComponent({
   time: Types.f32,
@@ -171,6 +168,8 @@ export const VideoMenu = defineComponent({
 export const AudioEmitter = defineComponent({
   flags: Types.ui8
 });
+AudioEmitter.audios = new Map();
+AudioEmitter.params = new Map();
 export const AudioSettingsChanged = defineComponent();
 export const Deletable = defineComponent();
 export const EnvironmentSettings = defineComponent();
@@ -244,3 +243,4 @@ export const ParticleEmitterTag = defineComponent({
 export const AudioZone = defineComponent({
   flags: Types.ui8
 });
+export const AudioParams = defineComponent();

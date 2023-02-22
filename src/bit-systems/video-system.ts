@@ -1,15 +1,14 @@
-import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
 import { Mesh, MeshStandardMaterial } from "three";
 import { HubsWorld } from "../app";
-import { MediaLoaded, MediaVideo, NetworkedVideo, Owned } from "../bit-components";
+import { AudioParams, AudioSettingsChanged, MediaLoaded, MediaVideo, NetworkedVideo, Owned } from "../bit-components";
 import { AudioSystem } from "../systems/audio-system";
-import { makeAudioSourceEntity } from "./audio-emitter-system";
+import { findAncestorWithComponent } from "../utils/bit-utils";
+import { Emitter2Audio, Emitter2Params, makeAudioSourceEntity } from "./audio-emitter-system";
 
 enum Flags {
   PAUSED = 1 << 0
 }
-
-export const MediaVideo2Audio = (MediaVideo as any).map as Map<number, number>;
 
 const OUT_OF_SYNC_SEC = 5;
 const networkedVideoQuery = defineQuery([NetworkedVideo]);
@@ -18,7 +17,6 @@ const mediaVideoEnterQuery = enterQuery(mediaVideoQuery);
 const mediaVideoExitQuery = exitQuery(mediaVideoQuery);
 const mediaLoadStatusQuery = defineQuery([MediaVideo, MediaLoaded]);
 const mediaLoadedQuery = enterQuery(mediaLoadStatusQuery);
-const mediaUnloadedQuery = exitQuery(mediaLoadStatusQuery);
 export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
   mediaVideoEnterQuery(world).forEach(function (videoEid) {
     const videoObj = world.eid2obj.get(videoEid) as Mesh;
@@ -30,28 +28,27 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
       });
     }
     const audioEid = makeAudioSourceEntity(world, video, audioSystem);
-    MediaVideo2Audio.set(videoEid, audioEid);
+    Emitter2Audio.set(videoEid, audioEid);
     const audio = world.eid2obj.get(audioEid)!;
     videoObj.add(audio);
     // Note in media-video we call updateMatrixWorld here to force PositionalAudio's updateMatrixWorld to run even
     // if it has an invisible parent. We don't want to have invisible parents now.
   });
   mediaLoadedQuery(world).forEach(videoEid => {
-    const audioEid = MediaVideo2Audio.get(videoEid)!;
-    const rootEid = MediaLoaded.rootRef[videoEid];
-    if (APP.audioOverrides.has(rootEid)) {
-      const audioSettings = APP.audioOverrides.get(rootEid)!;
+    const audioParamsEid = findAncestorWithComponent(world, AudioParams, videoEid);
+    if (audioParamsEid) {
+      const audioSettings = APP.audioOverrides.get(audioParamsEid)!;
+      const audioEid = Emitter2Audio.get(videoEid)!;
       APP.audioOverrides.set(audioEid, audioSettings);
+      Emitter2Params.set(videoEid, audioParamsEid);
+      addComponent(world, AudioSettingsChanged, audioEid);
     }
   });
-  mediaUnloadedQuery(world).forEach(videoEid => {
-    const audioEid = MediaVideo2Audio.get(videoEid)!;
-    APP.audioOverrides.delete(audioEid);
-  });
   mediaVideoExitQuery(world).forEach(videoEid => {
-    const rootEid = MediaLoaded.rootRef[videoEid];
-    APP.audioOverrides.delete(rootEid);
-    MediaVideo2Audio.delete(videoEid);
+    const audioParamsEid = Emitter2Params.get(videoEid);
+    audioParamsEid && APP.audioOverrides.delete(audioParamsEid);
+    Emitter2Params.delete(videoEid);
+    Emitter2Audio.delete(videoEid);
   });
   networkedVideoQuery(world).forEach(function (eid) {
     const video = (world.eid2obj.get(eid) as any).material.map.image as HTMLVideoElement;
