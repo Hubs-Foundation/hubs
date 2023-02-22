@@ -146,7 +146,6 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     }
     media = yield* loader(world, urlData);
     addComponent(world, MediaLoaded, media);
-    MediaLoaded.rootRef[media] = eid;
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());
