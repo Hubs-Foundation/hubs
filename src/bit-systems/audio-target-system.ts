@@ -5,7 +5,7 @@ import { AudioEmitter, AudioSettingsChanged, AudioSource, AudioTarget } from "..
 import { SourceType } from "../components/audio-params";
 import { AUDIO_SOURCE_FLAGS } from "../inflators/audio-source";
 import { AudioSystem } from "../systems/audio-system";
-import { Emitter2Audio, makeAudioEntity } from "./audio-emitter-system";
+import { Emitter2Audio, EMITTER_FLAGS, makeAudioEntity } from "./audio-emitter-system";
 
 const createWhiteNoise = (audioContext: AudioContext, gain: number): AudioBufferSourceNode => {
   const bufferSize = 2 * audioContext.sampleRate,
@@ -177,7 +177,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
           const whiteNoise = source2Noise.get(audioSourceEid)!;
           addSourceToAudioTarget(audioSourceEid, whiteNoise);
         }
-        APP.mutedState.delete(currentEmitterEid);
+        AudioEmitter.flags[currentEmitterEid] &= ~EMITTER_FLAGS.MUTED;
         addComponent(world, AudioSettingsChanged, currentEmitterEid);
       }
     } else {
@@ -185,7 +185,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
         const sourceType = APP.sourceType.get(audioEmitterEid);
         if (sourceType === SourceType.AUDIO_TARGET) return true;
         if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
-          // Check permissions
+          // TODO Check user permissions
         }
         const emitterAudio = APP.audios.get(audioEmitterEid)!;
         emitterAudio.getWorldPosition(emitterWorldPos);
@@ -193,7 +193,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
         if (distanceSquared < radius) {
           source2Emitter.set(audioSourceEid, audioEmitterEid);
           if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.MUTE_SELF) {
-            APP.mutedState.add(audioEmitterEid);
+            AudioEmitter.flags[audioEmitterEid] |= EMITTER_FLAGS.MUTED;
             addComponent(world, AudioSettingsChanged, audioEmitterEid);
           }
           emitterAudio.source && addSourceToAudioTarget(audioSourceEid, emitterAudio.source);

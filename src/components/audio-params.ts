@@ -79,4 +79,30 @@ export const TargetAudioDefaults: AudioSettings = {
   gain: 1.0
 };
 
+export const SfxAudioDefaults: AudioSettings = {
+  audioType: AudioType.Stereo,
+  distanceModel: DistanceModelType.Inverse,
+  panningModel: PanningModelType.HRTF,
+  rolloffFactor: 5,
+  refDistance: 5,
+  maxDistance: 10000,
+  coneInnerAngle: 180,
+  coneOuterAngle: 360,
+  coneOuterGain: 0.9,
+  gain: 1.0
+};
+
+export const ZoneAudioDefaults: AudioSettings = {
+  audioType: AudioType.PannerNode,
+  distanceModel: DistanceModelType.Inverse,
+  panningModel: PanningModelType.HRTF,
+  rolloffFactor: 1,
+  refDistance: 1,
+  maxDistance: 10000,
+  coneInnerAngle: 360,
+  coneOuterAngle: 0,
+  coneOuterGain: 0.0,
+  gain: 1.0
+};
+
 export const GAIN_TIME_CONST = 0.2;
