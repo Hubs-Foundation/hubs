@@ -1,11 +1,9 @@
-import configs from "../utils/configs";
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
-import { addAndArrangeMedia, createVideoOrAudioEl, createDashPlayer, hasAudioTracks } from "../utils/media-utils";
+import { addAndArrangeMedia, createVideoOrAudioEl, createDashPlayer, createHLSPlayer, hasAudioTracks } from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
-import { buildAbsoluteURL } from "url-toolkit";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";
@@ -20,7 +18,6 @@ import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { isSafari } from "../utils/detect-safari";
 import { isIOS as detectIOS } from "../utils/is-mobile";
 import { Layers } from "../camera-layers";
-import qsTruthy from "../utils/qs_truthy";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -578,56 +575,13 @@ AFRAME.registerComponent("media-video", {
         texture.dash = createDashPlayer(url, videoEl, failLoad);
       } else if (AFRAME.utils.material.isHLS(url, contentType)) {
         if (HLS.isSupported()) {
-          const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
-          const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
-          const setupHls = () => {
-            if (texture.hls) {
-              texture.hls.stopLoad();
-              texture.hls.detachMedia();
-              texture.hls.destroy();
-              texture.hls = null;
-            }
-
-            const hls = new HLS({
-              debug: qsTruthy("hlsDebug"),
-              xhrSetup: (xhr, u) => {
-                if (u.startsWith(corsProxyPrefix)) {
-                  u = u.substring(corsProxyPrefix.length);
-                }
-
-                // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
-                // TODO extend HLS.js to allow overriding of its internal resolving instead
-                if (!u.startsWith("http")) {
-                  u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
-                }
-
-                xhr.open("GET", proxiedUrlFor(u), true);
-              }
-            });
-
-            texture.hls = hls;
-            hls.loadSource(url);
-            hls.attachMedia(videoEl);
-
-            hls.on(HLS.Events.ERROR, function (event, data) {
-              if (data.fatal) {
-                switch (data.type) {
-                  case HLS.ErrorTypes.NETWORK_ERROR:
-                    // try to recover network error
-                    hls.startLoad();
-                    break;
-                  case HLS.ErrorTypes.MEDIA_ERROR:
-                    hls.recoverMediaError();
-                    break;
-                  default:
-                    failLoad(event);
-                    return;
-                }
-              }
-            });
-          };
-
-          setupHls();
+          if (texture.hls) {
+            texture.hls.stopLoad();
+            texture.hls.detachMedia();
+            texture.hls.destroy();
+            texture.hls = null;
+          }
+          texture.hls = createHLSPlayer(url, videoEl, failLoad);
         } else if (videoEl.canPlayType(contentType)) {
           videoEl.src = url;
           videoEl.onerror = failLoad;

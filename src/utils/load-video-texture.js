@@ -1,12 +1,23 @@
 import { LinearFilter, VideoTexture, sRGBEncoding } from "three";
+import HLS from "hls.js";
 import { DashVideoTexture } from "../textures/DashVideoTexture";
-import { createDashPlayer, createVideoOrAudioEl } from "./media-utils";
+import { HLSVideoTexture } from "../textures/HLSVideoTexture";
+import { createDashPlayer, createHLSPlayer, createVideoOrAudioEl } from "./media-utils";
 
 export async function loadVideoTexture(src, contentType) {
   const videoEl = createVideoOrAudioEl("video");
-  let texture;
+  let texture = null;
 
   const isReady = () => {
+    // HLS audio only special path. TODO: Revisit later for properer handling.
+    if (texture.isHLSVideoTexture === true) {
+      if (texture.player.streamController.audioOnly === true) {
+        texture.image.videoWidth = 1;
+        texture.image.videoHeight = 1;
+        return true;
+      }
+    }
+
     return (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
   };
 
@@ -22,7 +33,17 @@ export async function loadVideoTexture(src, contentType) {
     if (contentType.startsWith("application/dash")) {
       texture = new DashVideoTexture(videoEl);
       texture.player = createDashPlayer(src, videoEl, failLoad);
-    } else {
+    // TODO: Remove the dependency with AFRAME
+    } else if (AFRAME.utils.material.isHLS(src, contentType)) {
+      texture = new HLSVideoTexture(videoEl);
+      if (HLS.isSupported()) {
+        texture.setPlayer(createHLSPlayer(src, videoEl, failLoad));
+      } else if (!videoEl.canPlayType(contentType)) {
+        failLoad("HLS unsupported");
+      }
+    }
+
+    if (texture === null) {
       texture = new VideoTexture(videoEl);
       videoEl.src = src;
       videoEl.onerror = failLoad;
