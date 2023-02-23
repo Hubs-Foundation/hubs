@@ -10,6 +10,7 @@ import { isIOS as detectIOS } from "./is-mobile";
 import Linkify from "linkify-it";
 import tlds from "tlds";
 import { mediaTypeFor } from "./media-type";
+import { MediaPlayer } from "dashjs";
 
 import anime from "animejs";
 
@@ -654,4 +655,21 @@ export async function resolveMediaInfo(urlString) {
     mediaType,
     thumbnail
   };
+}
+
+export function createDashPlayer(url, videoEl, failLoad) {
+  const player = MediaPlayer().create();
+  player.extend("RequestModifier", function () {
+    return { modifyRequestHeader: xhr => xhr, modifyRequestURL: proxiedUrlFor };
+  });
+  player.on(MediaPlayer.events.ERROR, failLoad);
+  player.initialize(videoEl, url);
+  player.setTextDefaultEnabled(false);
+
+  // TODO this countinously pings to get updated time, unclear if this is actually needed, but this preserves the default behavior
+  player.clearDefaultUTCTimingSources();
+  player.addUTCTimingSource("urn:mpeg:dash:utc:http-xsdate:2014", proxiedUrlFor("https://time.akamai.com/?iso"));
+  // We can also use our own HEAD request method like we use to sync NAF
+  // dashPlayer.addUTCTimingSource("urn:mpeg:dash:utc:http-head:2014", location.href);
+  return player;
 }

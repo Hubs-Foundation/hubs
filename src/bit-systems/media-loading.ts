@@ -28,8 +28,10 @@ const loaderForMediaType = {
     world: HubsWorld,
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadImage(world, accessibleUrl, contentType),
-  [MediaType.VIDEO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadVideo(world, accessibleUrl),
+  [MediaType.VIDEO]: (
+    world: HubsWorld,
+	{ accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
+  ) => loadVideo(world, accessibleUrl, contentType),
   [MediaType.MODEL]: (
     world: HubsWorld,
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
