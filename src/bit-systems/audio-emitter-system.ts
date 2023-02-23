@@ -117,7 +117,6 @@ export function cleanupAudio(audio: AudioObject3D) {
   const eid = audio.eid!;
   audio.disconnect();
   const audioSystem = APP.scene?.systems["hubs-systems"].audioSystem;
-  APP.audios.delete(eid);
   APP.supplementaryAttenuation.delete(eid);
   APP.audioOverrides.delete(eid);
   audioSystem.removeAudio({ node: audio });
@@ -133,13 +132,11 @@ function swapAudioType<T extends AudioObject3D>(
   audio.disconnect();
   APP.sourceType.set(eid, SourceType.MEDIA_VIDEO);
   APP.supplementaryAttenuation.delete(eid);
-  APP.audios.delete(eid);
   audioSystem.removeAudio({ node: audio });
 
   const newAudio = new NewType(APP.audioListener);
   newAudio.setNodeSource(audio.source!);
   audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: newAudio });
-  APP.audios.set(eid, newAudio);
 
   audio.parent!.add(newAudio);
   audio.removeFromParent();
@@ -180,7 +177,6 @@ export function makeAudioEntity(world: HubsWorld, source: number, sourceType: So
 
   audioSystem.addAudio({ sourceType, node: audio });
 
-  APP.audios.set(eid, audio);
   addComponent(world, AudioSettingsChanged, eid);
 
   return eid;

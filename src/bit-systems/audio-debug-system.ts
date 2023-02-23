@@ -5,7 +5,7 @@ import { getScene, HubsWorld } from "../app";
 import { AudioEmitter, NavMesh } from "../bit-components";
 import { DistanceModelType } from "../components/audio-params";
 import { getWebGLVersion } from "../utils/webgl";
-import { EMITTER_FLAGS, isPositionalAudio } from "./audio-emitter-system";
+import { AudioObject3D, EMITTER_FLAGS, isPositionalAudio } from "./audio-emitter-system";
 import { Mesh, Material, Vector3, ShaderMaterial } from "three";
 import { disposeMaterial } from "../utils/three-utils";
 
@@ -168,7 +168,7 @@ export function audioDebugSystem(world: HubsWorld) {
       }
       if (idx >= maxDebugEmitters) return;
 
-      const audio = APP.audios.get(emitterEid)!;
+      const audio = APP.world.eid2obj.get(emitterEid)! as AudioObject3D;
 
       audio.getWorldPosition(emitterPos);
       audio.getWorldDirection(emitterDir);
