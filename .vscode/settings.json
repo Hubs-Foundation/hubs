@@ -1,10 +1,6 @@
 {
   // Format on save for Prettier
   "editor.formatOnSave": true,
-  // Disable html formatting for now
-  "html.format.enable": false,
-  // Disable the default javascript formatter
-  "javascript.format.enable": false,
   // Using the prettier-vscode plugin as the old eslint integration has been deprecated. More here: https://github.com/prettier/prettier-vscode/issues/870
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[javascriptreact]": {
@@ -19,6 +15,7 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  // Enable eslint for JavaScript files.
-  "eslint.enable": true
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features" // Set to esbenp.prettier-vscode when we are ready to reformat all HTML files
+  }
 }
