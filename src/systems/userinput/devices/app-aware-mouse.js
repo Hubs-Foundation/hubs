@@ -39,7 +39,7 @@ export class AppAwareMouseDevice {
 
         // TODO HACK we should just provide deltas from mouse device directly
         if (document.pointerLockElement) {
-          frame.setVector2(paths.actions.cameraDelta, -movementXY[0] / 100, -movementXY[1] / 100);
+          frame.setVector2(paths.actions.cameraDelta, -movementXY[0] / 250, -movementXY[1] / 250);
         }
       }
       frame.setValueType(paths.device.smartMouse.shouldMoveCamera, !document.pointerLockElement);
