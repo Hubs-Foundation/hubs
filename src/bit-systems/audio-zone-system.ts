@@ -5,6 +5,7 @@ import { Box3, BoxGeometry, DoubleSide, MeshBasicMaterial, Object3D, Ray, Vector
 import { AUDIO_ZONE_FLAGS } from "../inflators/audio-zone";
 import { disposeMaterial, disposeNode } from "../utils/three-utils";
 import { AudioSettings } from "../components/audio-params";
+import { AudioObject3D } from "./audio-emitter-system";
 
 const debugObjects = new Map<number, Object3D>();
 
@@ -100,7 +101,7 @@ const isUpdated = (currZones: Set<number>, prevZones: Set<Number>) => {
 const getEmitterPosition = (() => {
   const pos = new Vector3();
   return (emitterEid: number) => {
-    const audio = APP.audios.get(emitterEid);
+    const audio = APP.world.eid2obj.get(emitterEid)! as AudioObject3D;
     if (audio) {
       audio.getWorldPosition(pos);
     } else {

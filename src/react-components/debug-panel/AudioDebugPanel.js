@@ -15,6 +15,9 @@ import {
 import { SelectInputField } from "../input/SelectInputField";
 import { DISTANCE_MODEL_OPTIONS, DistanceModelType, SourceType } from "../../components/audio-params";
 import { getCurrentAudioSettingsForSourceType, updateAudioSettings } from "../../update-audio-settings";
+import qsTruthy from "../../utils/qs_truthy";
+import { addComponent, defineQuery } from "bitecs";
+import { AudioEmitter, AudioSettingsChanged } from "../../bit-components";
 
 const ROLLOFF_MIN = 0.0;
 const ROLLOFF_MAX = 20.0;
@@ -95,6 +98,7 @@ function getPrefs() {
   };
 }
 
+const audioEmitterQuery = defineQuery([AudioEmitter]);
 export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
   const [mediaSettings, setMediaSettings] = useState(getCurrentAudioSettingsForSourceType(SourceType.MEDIA_VIDEO));
   const [avatarSettings, setAvatarSettings] = useState(
@@ -109,8 +113,14 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
     } else {
       setAvatarSettings(getCurrentAudioSettingsForSourceType(SourceType.AVATAR_AUDIO_SOURCE));
     }
-    for (const [el, audio] of APP.audios.entries()) {
-      updateAudioSettings(el, audio);
+    if (qsTruthy("newLoader")) {
+      audioEmitterQuery(APP.world).forEach(audioEmitterEid => {
+        addComponent(APP.world, AudioSettingsChanged, audioEmitterEid);
+      });
+    } else {
+      for (const [el, audio] of APP.audios.entries()) {
+        updateAudioSettings(el, audio);
+      }
     }
   };
 
@@ -125,8 +135,14 @@ export function AudioDebugPanel({ isNarrow, collapsed, onCollapsed }) {
       APP.store.removeEventListener("statechanged", onPreferencesUpdated);
       APP.audioDebugPanelOverrides.delete(SourceType.MEDIA_VIDEO);
       APP.audioDebugPanelOverrides.delete(SourceType.AVATAR_AUDIO_SOURCE);
-      for (const [el, audio] of APP.audios.entries()) {
-        updateAudioSettings(el, audio);
+      if (qsTruthy("newLoader")) {
+        audioEmitterQuery(APP.world).forEach(audioEmitterEid => {
+          addComponent(APP.world, AudioSettingsChanged, audioEmitterEid);
+        });
+      } else {
+        for (const [el, audio] of APP.audios.entries()) {
+          updateAudioSettings(el, audio);
+        }
       }
     };
   }, [onPreferencesUpdated]);
