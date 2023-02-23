@@ -1,17 +1,29 @@
 import { AElement, UserInputSystem } from "aframe";
 import { defineQuery, hasComponent } from "bitecs";
 import { Selection } from "postprocessing";
-import { Mesh, Raycaster, Vector3 } from "three";
+import {
+  ArrowHelper,
+  AxesHelper,
+  Box3,
+  Box3Helper,
+  Camera,
+  MathUtils,
+  Mesh,
+  Quaternion,
+  Raycaster,
+  Vector3
+} from "three";
+import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper";
 import { HubsWorld } from "../app";
 import { Carryable, FloatyObject, HoveredRemoteRight, Rigidbody, SceneRoot } from "../bit-components";
 import { COLLISION_LAYERS } from "../constants";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 import { paths } from "../systems/userinput/paths";
+import { computeLocalBoundingBox } from "../utils/auto-box-collider";
+import { anyEntityWith } from "../utils/bit-utils";
 import { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
-import { Pose } from "../systems/userinput/pose";
-import { anyEntityWith } from "../utils/bit-utils";
 
 enum CarryState {
   NONE,
@@ -45,6 +57,10 @@ export function isObjectMenuShowing() {
   return carryState === CarryState.MENU;
 }
 
+const tmpBox = new Box3();
+const center = new Vector3();
+const size = new Vector3();
+
 export function carryObject(eid: EntityID) {
   const world = APP.world;
   console.log("CARRY", eid);
@@ -60,6 +76,12 @@ export function carryObject(eid: EntityID) {
     type: "kinematic",
     gravity: { x: 0, y: 0, z: 0 }
   });
+
+  const obj = APP.world.eid2obj.get(eid)!;
+  computeLocalBoundingBox(obj, tmpBox, true);
+  tmpBox.getCenter(center);
+  tmpBox.getSize(size);
+  obj.add(axisHelper);
 }
 function dropObject(world: HubsWorld, applyGravity: boolean) {
   console.log("DROP");
@@ -95,6 +117,7 @@ function dropObject(world: HubsWorld, applyGravity: boolean) {
   }
   activeObject = 0;
   carryState = CarryState.NONE;
+  axisHelper.removeFromParent();
 }
 
 export function isCarryingObject() {
@@ -120,18 +143,29 @@ const CARRY_DISTANCE = 0.5;
 const tmpWorldPos = new Vector3();
 const tmpWorldDir = new Vector3();
 const UP = new Vector3(0, 1, 0);
+const DOWN = new Vector3(0, -1, 0);
 const FORWARD = new Vector3(0, 0, 1);
+
+const FLOOR_SNAP_ANGLE = MathUtils.degToRad(45);
+const COS_FLOOR_SNAP_ANGLE = Math.cos(FLOOR_SNAP_ANGLE);
 
 const raycaster = new Raycaster();
 raycaster.near = 0.1;
 raycaster.far = 100;
 (raycaster as any).firstHitOnly = true; // flag specific to three-mesh-bvh
 
+const tmpNormalMatrix = new THREE.Matrix3();
+
+let normalHelper: VertexNormalsHelper | null = null;
+const arrowHelper = new ArrowHelper();
+const axisHelper = new AxesHelper();
+
 const queryHoveredRemoteRight = defineQuery([Carryable, HoveredRemoteRight]);
 export function carrySystem(
   world: HubsWorld,
   userinput: UserInputSystem,
-  characterController: CharacterControllerSystem
+  characterController: CharacterControllerSystem,
+  camera: Camera
 ) {
   const selection = APP.fx.outlineEffect!.selection;
   selection.clear();
@@ -155,27 +189,71 @@ export function carrySystem(
 
     if (userinput.get(paths.actions.carry.toggle_snap)) {
       carryState = CarryState.SNAPPING;
-      document.exitPointerLock();
     }
   } else if (carryState == CarryState.SNAPPING) {
     const currentScene = anyEntityWith(world, SceneRoot)!;
 
-    const cursorPose = userinput.get(paths.actions.cursor.right.pose) as Pose;
-    raycaster.ray.origin = cursorPose.position;
-    raycaster.ray.direction = cursorPose.direction;
+    raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+
     const intersections = raycaster.intersectObjects([world.eid2obj.get(currentScene)!], true);
     if (intersections.length) {
       const intersection = intersections[0];
       const obj = world.eid2obj.get(activeObject)!;
-      // TODO account for object size, orentation can be much smarter
-      obj.position.copy(intersection.point);
-      obj.quaternion.setFromUnitVectors(UP, intersection.face!.normal);
+
+      tmpNormalMatrix.getNormalMatrix(intersection.object.matrixWorld);
+      const dir = intersection.face!.normal.clone();
+      dir.applyMatrix3(tmpNormalMatrix).normalize();
+
+      const target = intersection.point;
+
+      if (!normalHelper) {
+        const mesh = intersection.object;
+        normalHelper = new VertexNormalsHelper(mesh);
+        normalHelper.frustumCulled = false;
+        world.scene.add(normalHelper);
+        world.scene.add(arrowHelper);
+      }
+
+      if (normalHelper.object !== intersection.object) {
+        normalHelper.object = intersection.object;
+        normalHelper.update();
+      }
+
+      arrowHelper.position.copy(target);
+      arrowHelper.setDirection(dir);
+      arrowHelper.matrixNeedsUpdate = true;
+
+      // TODO GC/DRY
+      const dot = dir.dot(UP);
+      target.sub(center);
+      if (dot >= COS_FLOOR_SNAP_ANGLE) {
+        const objectOffset = dir.clone();
+        objectOffset.multiplyScalar(size.y / 2);
+        target.add(objectOffset);
+        obj.position.copy(target);
+
+        obj.quaternion.setFromUnitVectors(UP, dir);
+      } else if (dot <= -COS_FLOOR_SNAP_ANGLE) {
+        const objectOffset = dir.clone();
+        objectOffset.multiplyScalar(size.y / 2);
+        target.add(objectOffset);
+        obj.position.copy(target);
+
+        obj.quaternion.setFromUnitVectors(DOWN, dir);
+      } else {
+        const objectOffset = dir.clone();
+        objectOffset.multiplyScalar(size.z / 2);
+        target.add(objectOffset);
+        obj.position.copy(target);
+
+        target.add(dir);
+        obj.lookAt(target);
+      }
       obj.matrixNeedsUpdate = true;
     }
 
     if (userinput.get(paths.actions.carry.toggle_snap)) {
       carryState = CarryState.CARRYING;
-      APP.canvas!.requestPointerLock();
     }
 
     if (userinput.get(paths.actions.carry.drop)) {

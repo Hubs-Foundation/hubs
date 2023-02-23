@@ -185,7 +185,14 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   aframeSystems.userinput.tick2(xrFrame);
 
   hubsSystems.characterController.tick(t, dt);
-  interactionSystem(world, hubsSystems.cursorTargettingSystem, hubsSystems.characterController, t, aframeSystems);
+  interactionSystem(
+    world,
+    hubsSystems.cursorTargettingSystem,
+    hubsSystems.characterController,
+    hubsSystems.cameraSystem,
+    t,
+    aframeSystems
+  );
 
   buttonSystems(world);
   constraintsSystem(world, hubsSystems.physicsSystem);

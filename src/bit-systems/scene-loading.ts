@@ -90,6 +90,7 @@ function* loadScene(
       }
     });
 
+    // TODO this doesn't correctly do any cleanup
     generateMeshBVH(newSceneObj);
 
     const envSettings = { skybox };

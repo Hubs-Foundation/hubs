@@ -814,13 +814,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.carry.toggle_snap },
       xform: xforms.rising,
       priority: 2000 // TODO
-    },
-    // TODO helpful for Dom's weird keyboard, dont ship.
-    {
-      src: { value: paths.device.keyboard.key("Backspace") },
-      dest: { value: paths.actions.carry.toggle_snap },
-      xform: xforms.rising,
-      priority: 2000 // TODO
     }
   ],
   // TODO does this actually need its own set?
@@ -833,13 +826,6 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.keyboard.key("space") },
-      dest: { value: paths.actions.carry.toggle_snap },
-      xform: xforms.rising,
-      priority: 2000 // TODO
-    },
-    // TODO helpful for Dom's weird keyboard, dont ship.
-    {
-      src: { value: paths.device.keyboard.key("Backspace") },
       dest: { value: paths.actions.carry.toggle_snap },
       xform: xforms.rising,
       priority: 2000 // TODO
