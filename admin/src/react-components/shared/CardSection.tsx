@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon, Button } from '@mozilla/lilypad-ui';
+import { Icon, Button, ButtonSizesE } from '@mozilla/lilypad-ui';
 
 type CardSectionPropsT = {
   cta: string;
@@ -25,6 +25,7 @@ const CardSection = ({
       <Button
         onClick={ctaCallback}
         label={ctaLabel ? ctaLabel : cta}
+        size={ButtonSizesE.SMALL}
         text={cta}
       />
     </div>
