@@ -1,18 +1,7 @@
 import { AElement, UserInputSystem } from "aframe";
 import { defineQuery, hasComponent } from "bitecs";
 import { Selection } from "postprocessing";
-import {
-  ArrowHelper,
-  AxesHelper,
-  Box3,
-  Box3Helper,
-  Camera,
-  MathUtils,
-  Mesh,
-  Quaternion,
-  Raycaster,
-  Vector3
-} from "three";
+import { ArrowHelper, AxesHelper, Box3, Camera, MathUtils, Matrix4, Mesh, Quaternion, Raycaster, Vector3 } from "three";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper";
 import { HubsWorld } from "../app";
 import { Carryable, FloatyObject, HoveredRemoteRight, Rigidbody, SceneRoot } from "../bit-components";
@@ -34,6 +23,9 @@ enum CarryState {
 
 let carryState = CarryState.NONE;
 let activeObject = 0;
+let rotationOffset = 0;
+let prevDot = 0;
+let snapFaceOverrideIdx = -1;
 
 function showObjectMenu(eid: EntityID, x: number, y: number) {
   window.dispatchEvent(
@@ -63,7 +55,6 @@ const size = new Vector3();
 
 export function carryObject(eid: EntityID) {
   const world = APP.world;
-  console.log("CARRY", eid);
   clearObjectMenu();
   carryState = CarryState.CARRYING;
   activeObject = eid;
@@ -84,7 +75,6 @@ export function carryObject(eid: EntityID) {
   obj.add(axisHelper);
 }
 function dropObject(world: HubsWorld, applyGravity: boolean) {
-  console.log("DROP");
   document.exitPointerLock();
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   const bodyId = Rigidbody.bodyId[activeObject];
@@ -142,12 +132,58 @@ const CARRY_DISTANCE = 0.5;
 
 const tmpWorldPos = new Vector3();
 const tmpWorldDir = new Vector3();
-const UP = new Vector3(0, 1, 0);
-const DOWN = new Vector3(0, -1, 0);
-const FORWARD = new Vector3(0, 0, 1);
+const tmpQuat = new Quaternion();
+const tmpMat4 = new Matrix4();
+
+const ZERO = new Vector3(0, 0, 0);
+const X_AXIS = new Vector3(1, 0, 0);
+const Y_AXIS = new Vector3(0, 1, 0);
+const Z_AXIS = new Vector3(0, 0, 1);
+
+enum SNAP_FACE {
+  BOTTOM,
+  TOP,
+  FRONT,
+  BACK,
+  LEFT,
+  RIGHT
+}
+const SNAP_FACES = [SNAP_FACE.LEFT, SNAP_FACE.FRONT, SNAP_FACE.RIGHT, SNAP_FACE.TOP, SNAP_FACE.BOTTOM, SNAP_FACE.BACK];
+const DEFAULT_FLOOR_FACE_IDX = SNAP_FACES.indexOf(SNAP_FACE.BOTTOM);
+const DEFAULT_WALL_FACE_IDX = SNAP_FACES.indexOf(SNAP_FACE.BACK);
+const DEFAULT_CEIL_FACE_IDX = SNAP_FACES.indexOf(SNAP_FACE.TOP);
+
+// TODO simplify
+const QUAT_FOR_FACE = {
+  [SNAP_FACE.BOTTOM]: new Quaternion().setFromAxisAngle(X_AXIS, Math.PI / 2),
+  [SNAP_FACE.TOP]: new Quaternion().setFromAxisAngle(X_AXIS, -Math.PI / 2),
+  [SNAP_FACE.BACK]: new Quaternion(),
+  [SNAP_FACE.FRONT]: new Quaternion().setFromAxisAngle(Y_AXIS, Math.PI),
+  [SNAP_FACE.LEFT]: new Quaternion().setFromAxisAngle(Y_AXIS, Math.PI / 2),
+  [SNAP_FACE.RIGHT]: new Quaternion().setFromAxisAngle(Y_AXIS, -Math.PI / 2)
+};
+const ROT_AXIS_FOR_FACE = {
+  [SNAP_FACE.BOTTOM]: Y_AXIS,
+  [SNAP_FACE.TOP]: Y_AXIS,
+  [SNAP_FACE.BACK]: Z_AXIS,
+  [SNAP_FACE.FRONT]: Z_AXIS,
+  [SNAP_FACE.LEFT]: X_AXIS,
+  [SNAP_FACE.RIGHT]: X_AXIS
+};
+const AXIS_FOR_FACE = {
+  [SNAP_FACE.BOTTOM]: "y",
+  [SNAP_FACE.TOP]: "y",
+  [SNAP_FACE.BACK]: "z",
+  [SNAP_FACE.FRONT]: "z",
+  [SNAP_FACE.LEFT]: "x",
+  [SNAP_FACE.RIGHT]: "x"
+};
 
 const FLOOR_SNAP_ANGLE = MathUtils.degToRad(45);
 const COS_FLOOR_SNAP_ANGLE = Math.cos(FLOOR_SNAP_ANGLE);
+
+const ROTATIONS_PER_SECOND = 4;
+const ROTATION_SPEED = (Math.PI * 2) / ROTATIONS_PER_SECOND / 1000;
 
 const raycaster = new Raycaster();
 raycaster.near = 0.1;
@@ -155,10 +191,91 @@ raycaster.far = 100;
 (raycaster as any).firstHitOnly = true; // flag specific to three-mesh-bvh
 
 const tmpNormalMatrix = new THREE.Matrix3();
-
 let normalHelper: VertexNormalsHelper | null = null;
 const arrowHelper = new ArrowHelper();
 const axisHelper = new AxesHelper();
+
+// TODO GC clone/new/etc
+function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSystem) {
+  if (userinput.get(paths.actions.carry.toggle_snap)) {
+    carryState = CarryState.CARRYING;
+    return;
+  }
+  if (userinput.get(paths.actions.carry.drop)) {
+    dropObject(world, false);
+    return;
+  }
+  if (userinput.get(paths.actions.carry.rotate_ccw)) {
+    rotationOffset -= ROTATION_SPEED * world.time.delta;
+  } else if (userinput.get(paths.actions.carry.rotate_cw)) {
+    rotationOffset += ROTATION_SPEED * world.time.delta;
+  }
+  if (userinput.get(paths.actions.carry.change_snap_face)) {
+    snapFaceOverrideIdx = (snapFaceOverrideIdx + 1) % 6;
+  }
+
+  const currentScene = anyEntityWith(world, SceneRoot)!;
+  raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+  const intersections = raycaster.intersectObjects([world.eid2obj.get(currentScene)!], true);
+  if (!intersections.length) return;
+
+  const intersection = intersections[0];
+  const obj = world.eid2obj.get(activeObject)!;
+
+  const dir = intersection
+    .face!.normal.clone()
+    .applyNormalMatrix(tmpNormalMatrix.getNormalMatrix(intersection.object.matrixWorld));
+
+  const target = intersection.point;
+
+  if (!normalHelper) {
+    const mesh = intersection.object;
+    normalHelper = new VertexNormalsHelper(mesh);
+    normalHelper.frustumCulled = false;
+    world.scene.add(normalHelper);
+    world.scene.add(arrowHelper);
+  }
+
+  if (normalHelper.object !== intersection.object) {
+    normalHelper.object = intersection.object;
+    normalHelper.update();
+    // rotationOffset = 0;
+  }
+
+  arrowHelper.position.copy(target);
+  arrowHelper.setDirection(dir);
+  arrowHelper.matrixNeedsUpdate = true;
+
+  const dot = dir.dot(Y_AXIS);
+  if (Math.abs(dot - prevDot) > 0.2) {
+    rotationOffset = 0;
+  }
+  prevDot = dot;
+
+  // TODO we are doing 3 different rotations, i think they can be combined into 1 transformation
+  obj.quaternion.setFromRotationMatrix(tmpMat4.lookAt(dir, ZERO, Y_AXIS));
+
+  let snapFace;
+  if (snapFaceOverrideIdx !== -1) {
+    snapFace = SNAP_FACES[snapFaceOverrideIdx];
+  } else if (Math.abs(dot) >= COS_FLOOR_SNAP_ANGLE) {
+    snapFace = SNAP_FACES[dot > 0 ? DEFAULT_FLOOR_FACE_IDX : DEFAULT_CEIL_FACE_IDX];
+  } else {
+    snapFace = SNAP_FACES[DEFAULT_WALL_FACE_IDX];
+  }
+
+  const rotationAxis = ROT_AXIS_FOR_FACE[snapFace];
+  const offsetDistance = ((size as any)[AXIS_FOR_FACE[snapFace]] as number) / 2;
+
+  obj.quaternion.multiply(QUAT_FOR_FACE[snapFace]);
+  obj.quaternion.multiply(tmpQuat.setFromAxisAngle(rotationAxis, -rotationOffset));
+
+  target.sub(center.clone().applyQuaternion(obj.quaternion));
+  target.addScaledVector(dir, offsetDistance);
+  obj.position.copy(target);
+
+  obj.matrixNeedsUpdate = true;
+}
 
 const queryHoveredRemoteRight = defineQuery([Carryable, HoveredRemoteRight]);
 export function carrySystem(
@@ -175,8 +292,8 @@ export function carrySystem(
     const pov = (characterController.avatarPOV as AElement).object3D;
     rig.getWorldPosition(tmpWorldPos);
     pov.getWorldDirection(tmpWorldDir);
-    tmpWorldDir.projectOnPlane(UP).normalize();
-    obj.quaternion.setFromUnitVectors(FORWARD, tmpWorldDir);
+    tmpWorldDir.projectOnPlane(Y_AXIS).normalize();
+    obj.quaternion.setFromUnitVectors(Z_AXIS, tmpWorldDir);
     tmpWorldDir.multiplyScalar(-CARRY_DISTANCE);
     tmpWorldDir.y = CARRY_HEIGHT;
     tmpWorldPos.add(tmpWorldDir);
@@ -189,76 +306,11 @@ export function carrySystem(
 
     if (userinput.get(paths.actions.carry.toggle_snap)) {
       carryState = CarryState.SNAPPING;
+      rotationOffset = 0;
+      snapFaceOverrideIdx = -1;
     }
   } else if (carryState == CarryState.SNAPPING) {
-    const currentScene = anyEntityWith(world, SceneRoot)!;
-
-    raycaster.setFromCamera({ x: 0, y: 0 }, camera);
-
-    const intersections = raycaster.intersectObjects([world.eid2obj.get(currentScene)!], true);
-    if (intersections.length) {
-      const intersection = intersections[0];
-      const obj = world.eid2obj.get(activeObject)!;
-
-      tmpNormalMatrix.getNormalMatrix(intersection.object.matrixWorld);
-      const dir = intersection.face!.normal.clone();
-      dir.applyMatrix3(tmpNormalMatrix).normalize();
-
-      const target = intersection.point;
-
-      if (!normalHelper) {
-        const mesh = intersection.object;
-        normalHelper = new VertexNormalsHelper(mesh);
-        normalHelper.frustumCulled = false;
-        world.scene.add(normalHelper);
-        world.scene.add(arrowHelper);
-      }
-
-      if (normalHelper.object !== intersection.object) {
-        normalHelper.object = intersection.object;
-        normalHelper.update();
-      }
-
-      arrowHelper.position.copy(target);
-      arrowHelper.setDirection(dir);
-      arrowHelper.matrixNeedsUpdate = true;
-
-      // TODO GC/DRY
-      const dot = dir.dot(UP);
-      target.sub(center);
-      if (dot >= COS_FLOOR_SNAP_ANGLE) {
-        const objectOffset = dir.clone();
-        objectOffset.multiplyScalar(size.y / 2);
-        target.add(objectOffset);
-        obj.position.copy(target);
-
-        obj.quaternion.setFromUnitVectors(UP, dir);
-      } else if (dot <= -COS_FLOOR_SNAP_ANGLE) {
-        const objectOffset = dir.clone();
-        objectOffset.multiplyScalar(size.y / 2);
-        target.add(objectOffset);
-        obj.position.copy(target);
-
-        obj.quaternion.setFromUnitVectors(DOWN, dir);
-      } else {
-        const objectOffset = dir.clone();
-        objectOffset.multiplyScalar(size.z / 2);
-        target.add(objectOffset);
-        obj.position.copy(target);
-
-        target.add(dir);
-        obj.lookAt(target);
-      }
-      obj.matrixNeedsUpdate = true;
-    }
-
-    if (userinput.get(paths.actions.carry.toggle_snap)) {
-      carryState = CarryState.CARRYING;
-    }
-
-    if (userinput.get(paths.actions.carry.drop)) {
-      dropObject(world, false);
-    }
+    handleSnapping(world, camera, userinput);
   } else {
     const hovered = queryHoveredRemoteRight(world)[0];
     if (activeObject) {

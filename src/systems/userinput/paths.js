@@ -138,7 +138,10 @@ paths.actions.spawnEmoji6 = "/actions/spawnEmoji6";
 paths.actions.carry = {
   drop: "/actions/carry/drop",
   carry: "/actions/carry/carry",
-  toggle_snap: "/actions/carry/toggle_nsap"
+  toggle_snap: "/actions/carry/toggle_nsap",
+  rotate_ccw: "/actions/carry/rotate_ccs",
+  rotate_cw: "/actions/carry/rotate_cw",
+  change_snap_face: "/actions/carry/change_snap_face"
 };
 paths.haptics = {};
 paths.haptics.actuators = {};

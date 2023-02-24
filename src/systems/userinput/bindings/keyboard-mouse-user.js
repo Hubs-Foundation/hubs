@@ -829,6 +829,24 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.carry.toggle_snap },
       xform: xforms.rising,
       priority: 2000 // TODO
+    },
+    {
+      src: { value: paths.device.keyboard.key("q") },
+      dest: { value: paths.actions.carry.rotate_ccw },
+      xform: xforms.copy,
+      priority: 2000 // TODO
+    },
+    {
+      src: { value: paths.device.keyboard.key("e") },
+      dest: { value: paths.actions.carry.rotate_cw },
+      xform: xforms.copy,
+      priority: 2000 // TODO
+    },
+    {
+      src: { value: paths.device.keyboard.key("t") },
+      dest: { value: paths.actions.carry.change_snap_face },
+      xform: xforms.rising,
+      priority: 2000 // TODO
     }
   ],
   [sets.rightCursorHoveringOnVideo]: videoBindings,
