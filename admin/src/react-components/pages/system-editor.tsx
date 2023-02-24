@@ -17,12 +17,15 @@ import DeveloperModeIcon from '@material-ui/icons/DeveloperMode';
 import Warning from '@material-ui/icons/Warning';
 import Info from '@material-ui/icons/Info';
 import { fetchReticulumAuthenticated } from 'hubs/src/utils/phoenix-utils';
-import withCommonStyles from '../utils/with-common-styles';
-import { getAdminInfo, getEditableConfig } from '../utils/ita';
-import configs from '../utils/configs';
-import { ReticulumMetaT, AdminInfoT, RetConfigT } from '../../types';
+import withUpdatedStyles from '../../utils/with-updated-styles';
+import { getAdminInfo, getEditableConfig } from '../../utils/ita';
+import configs from '../../utils/configs';
+import { ReticulumMetaT, AdminInfoT, RetConfigT } from '../../../types';
+import '../../styles/globals.scss';
+import { Button, Icon } from '@mozilla/lilypad-ui';
+import CardSection from '../shared/CardSection';
 
-const styles = withCommonStyles(() => ({}));
+const styles = withUpdatedStyles(() => ({}));
 
 const SystemEditorComponent = ({ classes }) => {
   const [adminInfo, setAdminInfo] = useState<AdminInfoT>({} as AdminInfoT);
@@ -91,8 +94,9 @@ const SystemEditorComponent = ({ classes }) => {
       `cors-proxy.${adminInfo.worker_domain}`;
 
   return (
-    <>
-      <Card className={classes.container}>
+    <div className="page_wrapper">
+      {/* WARNING  */}
+      {/* <Card className={classes.container}>
         <CardContent className={classes.info}>
           {reticulumMeta &&
             adminInfo &&
@@ -189,6 +193,7 @@ const SystemEditorComponent = ({ classes }) => {
                       primary="Your system has no avatars."
                       secondary="Choose 'Import Content' on the left to load avatars."
                     />
+                    <p></p>
                   </ListItem>
                 )}
                 {needsScenes && (
@@ -222,14 +227,71 @@ const SystemEditorComponent = ({ classes }) => {
               </List>
             )}
         </CardContent>
+      </Card> */}
+
+      <Card className={classes.container}>
+        <CardContent className={classes.info}>
+          <h2 className="heading-lg mb-12">Getting Stared</h2>
+
+          {/* AVATARS / SCENES  */}
+          <section className="mb-40">
+            <h3 className="heading-sm mb-28">Add avatars and scenes</h3>
+
+            <CardSection
+              ctaCallback={() => {}}
+              cta="get more avatars and scenes"
+              body="Give your hub visitors more scenes to explore and a wider
+              selection of avatars to choose from. Install your new assets
+              on the Import Content page."
+            />
+          </section>
+
+          {/* CUSTOMIZE HUB */}
+          <section className="mb-40">
+            <h3 className="heading-sm mb-28">Customize the look of your hub</h3>
+
+            <CardSection
+              ctaCallback={() => {}}
+              cta="apply my window"
+              body="Apply your branding to the hub’s website and lobby."
+            />
+
+            <CardSection
+              ctaCallback={() => {}}
+              cta="Edit hub’s text and details"
+              body="Edit your hub’s name, description and other text content for
+                  improved search engines results."
+            />
+          </section>
+
+          {/* CHANGE ROOM */}
+          <section className="mb-40">
+            <h3 className="heading-sm mb-28">Change room settings</h3>
+
+            <CardSection
+              ctaCallback={() => {}}
+              cta="Change room settings"
+              body="Specify the default room size and how they are accessed and created."
+            />
+          </section>
+
+          {/* CHANGE ROOM */}
+          <section className="mb-40">
+            <h3 className="heading-sm mb-28">Limit whoe can access your hub</h3>
+
+            <CardSection
+              ctaCallback={() => {}}
+              cta="Limit access guide"
+              body="Learn how to control who can enter your hub’s rooms."
+            />
+          </section>
+        </CardContent>
       </Card>
 
       <Card className={classes.container}>
         <CardContent className={classes.info}>
-          <Typography variant="title" gutterBottom>
-            🐣 Hubs Cloud is live
-          </Typography>
-          <Typography variant="body1" gutterBottom>
+          <h2>🐣 Hubs Cloud is live</h2>
+          <p>
             Need help? Check out the{' '}
             <a
               href="https://hubs.mozilla.com/docs/hubs-cloud-getting-started.html"
@@ -239,7 +301,7 @@ const SystemEditorComponent = ({ classes }) => {
               Getting Started
             </a>{' '}
             guide.
-          </Typography>
+          </p>
           <Typography variant="body1" gutterBottom>
             Hubs Cloud updates automatically, see the{' '}
             <a
@@ -420,7 +482,7 @@ const SystemEditorComponent = ({ classes }) => {
           )}
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 };
 

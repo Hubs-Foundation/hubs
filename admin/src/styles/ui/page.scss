@@ -1,0 +1,13 @@
+@use '../core/boilerplate.scss' as *;
+
+.page_wrapper {
+  @include primary-font();
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+}
+
+.global_background {
+  // need to override material
+  background-color: $color-neutral-1 !important;
+}
