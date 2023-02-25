@@ -2,6 +2,9 @@
 .flex {
   display: flex;
 }
+.flex-wrap {
+  flex-wrap: wrap;
+}
 .flex-align-start {
   display: flex;
   align-items: flex-start;

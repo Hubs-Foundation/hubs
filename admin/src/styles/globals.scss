@@ -4,13 +4,6 @@
 @use './core/theme.scss' as *;
 @use './ui/page.scss' as *;
 
-html,
-body {
-  @include primary-font();
-  padding: 0;
-  margin: 0;
-  font-size: 16px;
-}
 
 a {
   color: inherit;
@@ -37,3 +30,5 @@ button {
 * {
   box-sizing: border-box;
 }
+
+

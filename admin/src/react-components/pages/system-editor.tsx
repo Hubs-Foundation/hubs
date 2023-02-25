@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React, { useState, useEffect } from 'react';
-import Card from '@material-ui/core/Card';
+// import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
@@ -24,6 +24,8 @@ import { ReticulumMetaT, AdminInfoT, RetConfigT } from '../../../types';
 import '../../styles/globals.scss';
 import { Button, Icon } from '@mozilla/lilypad-ui';
 import CardSection from '../shared/CardSection';
+import DiscordIcon from '../shared/icons/DiscordIcon';
+import Card from '../shared/Card';
 
 const styles = withUpdatedStyles(() => ({}));
 
@@ -229,66 +231,97 @@ const SystemEditorComponent = ({ classes }) => {
         </CardContent>
       </Card> */}
 
-      <Card className={classes.container}>
-        <CardContent className={classes.info}>
-          <h2 className="heading-lg mb-12">Getting Stared</h2>
+      <Card classProp="mb-24">
+        <h2 className="heading-lg mb-12">Getting Stared</h2>
 
-          {/* AVATARS / SCENES  */}
-          <section className="mb-40">
-            <h3 className="heading-sm mb-28">Add avatars and scenes</h3>
+        {/* AVATARS / SCENES  */}
+        <div className="mb-40">
+          <h3 className="heading-sm mb-28">Add avatars and scenes</h3>
 
-            <CardSection
-              ctaCallback={() => {}}
-              cta="get more avatars and scenes"
-              body="Give your hub visitors more scenes to explore and a wider
+          <CardSection
+            ctaCallback={() => {}}
+            cta="get more avatars and scenes"
+            body="Give your hub visitors more scenes to explore and a wider
               selection of avatars to choose from. Install your new assets
               on the Import Content page."
-            />
-          </section>
+          />
+        </div>
 
-          {/* CUSTOMIZE HUB */}
-          <section className="mb-40">
-            <h3 className="heading-sm mb-28">Customize the look of your hub</h3>
+        {/* CUSTOMIZE HUB */}
+        <section className="mb-40">
+          <h3 className="heading-sm mb-28">Customize the look of your hub</h3>
 
-            <CardSection
-              ctaCallback={() => {}}
-              cta="apply my window"
-              body="Apply your branding to the hub’s website and lobby."
-            />
+          <CardSection
+            ctaCallback={() => {}}
+            cta="apply my window"
+            body="Apply your branding to the hub’s website and lobby."
+          />
 
-            <CardSection
-              ctaCallback={() => {}}
-              cta="Edit hub’s text and details"
-              body="Edit your hub’s name, description and other text content for
+          <CardSection
+            ctaCallback={() => {}}
+            cta="Edit hub’s text and details"
+            body="Edit your hub’s name, description and other text content for
                   improved search engines results."
-            />
-          </section>
+          />
+        </section>
 
-          {/* CHANGE ROOM */}
-          <section className="mb-40">
-            <h3 className="heading-sm mb-28">Change room settings</h3>
+        {/* CHANGE ROOM */}
+        <section className="mb-40">
+          <h3 className="heading-sm mb-28">Change room settings</h3>
 
-            <CardSection
-              ctaCallback={() => {}}
-              cta="Change room settings"
-              body="Specify the default room size and how they are accessed and created."
-            />
-          </section>
+          <CardSection
+            ctaCallback={() => {}}
+            cta="Change room settings"
+            body="Specify the default room size and how they are accessed and created."
+          />
+        </section>
 
-          {/* CHANGE ROOM */}
-          <section className="mb-40">
-            <h3 className="heading-sm mb-28">Limit whoe can access your hub</h3>
+        {/* CHANGE ROOM */}
+        <section className="">
+          <h3 className="heading-sm mb-28">Limit whoe can access your hub</h3>
 
-            <CardSection
-              ctaCallback={() => {}}
-              cta="Limit access guide"
-              body="Learn how to control who can enter your hub’s rooms."
-            />
-          </section>
-        </CardContent>
+          <CardSection
+            ctaCallback={() => {}}
+            cta="Limit access guide"
+            body="Learn how to control who can enter your hub’s rooms."
+          />
+        </section>
       </Card>
 
-      <Card className={classes.container}>
+      <Card>
+        <h2 className="heading-lg mb-12">Getting Help</h2>
+        <div className="flex-align-items-center mb-20">
+          <div className="mr-10">
+            <DiscordIcon />
+          </div>
+          <p className="body-md">
+            The <a>Hubs Discord Community</a> is built by Hubs users and
+            administrators, just like you.
+          </p>
+        </div>
+
+        <div className="flex-align-items-center mb-20">
+          <div className="mr-10">
+            <DiscordIcon />
+          </div>
+          <p className="body-md">
+            The <a>Hubs Discord Community</a> is built by Hubs users and
+            administrators, just like you.
+          </p>
+        </div>
+
+        <div className="flex-align-items-center">
+          <div className="mr-10">
+            <DiscordIcon />
+          </div>
+          <p className="body-md">
+            The <a>Hubs Discord Community</a> is built by Hubs users and
+            administrators, just like you.
+          </p>
+        </div>
+      </Card>
+
+      {/* <Card className={classes.container}>
         <CardContent className={classes.info}>
           <h2>🐣 Hubs Cloud is live</h2>
           <p>
@@ -481,7 +514,7 @@ const SystemEditorComponent = ({ classes }) => {
             </Typography>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };

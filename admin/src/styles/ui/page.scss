@@ -11,3 +11,21 @@
   // need to override material
   background-color: $color-neutral-1 !important;
 }
+
+.card_section {
+  &_wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 28px;
+
+    @include tablet-large-down {
+      flex-direction: column;
+    }
+  }
+}
+
+.card {
+  box-shadow: $drop-shadow;
+  padding: 24px;
+  margin: 12px;
+}

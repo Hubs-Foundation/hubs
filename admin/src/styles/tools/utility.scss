@@ -133,6 +133,10 @@ $fontSizes: 12, 14, 16, 18, 20;
   white-space: nowrap !important;
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
 .clear-button {
   cursor: pointer;
   border: none;
@@ -223,11 +227,33 @@ $fontSizes: 12, 14, 16, 18, 20;
 //  Layout
 // ---------------------------------
 
+$percentWidths: 10, 20, 30, 40, 50, 60, 70, 80, 90, 100;
+$percent: '%';
+$unit: 'px';
+
+@each $percentWidth in $percentWidths {
+  .max-w-#{$percentWidth}-percent {
+    max-width: #{$percentWidth}#{$percent};
+  }
+}
+
+$pxWidths: 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000;
+@each $pxWidth in $pxWidths {
+  .max-w-#{$pxWidth}-px {
+    max-width: #{$pxWidth}#{$unit};
+  }
+}
+
+@each $pxWidth in $pxWidths {
+  .w-#{$pxWidth}-px {
+    width: #{$pxWidth}#{$unit};
+  }
+}
+
 // Create Size Value Array
 $start: 0;
 $end: 100;
 $array: '';
-$unit: 'px';
 
 @for $i from $start + 1 through $end {
   $array: append($array, $i, comma);
@@ -420,9 +446,9 @@ $unit: 'px';
     }
   }
 
-  // Margin: Top
+  // Margin: Bottom
   .mb-#{$size} {
-    margin-bottom: #{$size}#{$unit};
+    margin-bottom: #{$size}#{$unit} !important;
     &-dt {
       @include mobile-up {
         margin-bottom: #{$size}#{$unit};

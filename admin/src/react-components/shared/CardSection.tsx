@@ -15,19 +15,23 @@ const CardSection = ({
   body,
 }: CardSectionPropsT) => {
   return (
-    <div className="flex-box mb-28">
-      <div className="flex-align-items-center mb-20">
+    <div className="card_section_wrapper">
+      <div className="flex-align-items-center mb-20  max-w-600-px">
         <div>
           <Icon name="arrow-right-circle" size={30} classProp="mr-20" />
         </div>
-        <p className="body-md">{body}</p>
+        <p className="body-md mr-10">{body}</p>
       </div>
-      <Button
-        onClick={ctaCallback}
-        label={ctaLabel ? ctaLabel : cta}
-        size={ButtonSizesE.SMALL}
-        text={cta}
-      />
+
+      <div className="flex-box">
+        <Button
+          onClick={ctaCallback}
+          label={ctaLabel ? ctaLabel : cta}
+          size={ButtonSizesE.SMALL}
+          text={cta}
+          classProp="nowrap"
+        />
+      </div>
     </div>
   );
 };
