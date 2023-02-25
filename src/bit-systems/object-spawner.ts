@@ -10,7 +10,7 @@ import qsTruthy from "../utils/qs_truthy";
 import { setMatrixWorld } from "../utils/three-utils";
 import { animateScale, waitForMediaLoaded } from "./media-loading";
 
-const alwaysMouselock = qsTruthy("alwaysMouselock");
+const mouselockWhenNotGrabbing = qsTruthy("mouselockWhenNotGrabbing");
 
 export enum OBJECT_SPAWNER_FLAGS {
   /** Apply gravity to spawned objects */
@@ -30,7 +30,7 @@ function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
     FloatyObject.flags[spawned] &= ~FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE;
   }
 
-  if (alwaysMouselock) document.exitPointerLock();
+  if (mouselockWhenNotGrabbing) document.exitPointerLock();
   addComponent(world, HeldRemoteRight, spawned);
   addComponent(world, Held, spawned);
 

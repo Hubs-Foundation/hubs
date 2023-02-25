@@ -12,7 +12,10 @@ import { paths } from "../systems/userinput/paths";
 import { computeLocalBoundingBox } from "../utils/auto-box-collider";
 import { anyEntityWith } from "../utils/bit-utils";
 import { EntityID } from "../utils/networking-types";
+import qsTruthy from "../utils/qs_truthy";
 import { takeOwnership } from "../utils/take-ownership";
+
+const unlockPointerOnDrop = !qsTruthy("mouselockWhenNotGrabbing") && !qsTruthy("alwaysMouselock");
 
 enum CarryState {
   NONE,
@@ -75,7 +78,7 @@ export function carryObject(eid: EntityID) {
   obj.add(axisHelper);
 }
 function dropObject(world: HubsWorld, applyGravity: boolean) {
-  document.exitPointerLock();
+  if (unlockPointerOnDrop) document.exitPointerLock();
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   const bodyId = Rigidbody.bodyId[activeObject];
   // TODO multiple things have opinions about bodyOptions and they will conflict
@@ -323,6 +326,7 @@ export function carrySystem(
       } else if (userinput.get(paths.actions.cursor.right.menu)) {
         const mousePos = userinput.get(paths.device.mouse.pos) as [x: number, y: number]; // TODO this should probably come from cursor pose?
         showObjectMenu(hovered, mousePos[0], mousePos[1]);
+        document.exitPointerLock();
       }
     }
   }

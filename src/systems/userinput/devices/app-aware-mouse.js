@@ -5,7 +5,7 @@ import qsTruthy from "../../../utils/qs_truthy";
 import { paths } from "../paths";
 import { Pose } from "../pose";
 
-const alwaysMouselock = qsTruthy("alwaysMouselock");
+const mouselockOnClick = qsTruthy("alwaysMouselock") || qsTruthy("mouselockWhenNotGrabbing");
 
 const calculateCursorPose = (function () {
   const origin = new THREE.Vector3();
@@ -37,7 +37,7 @@ export class AppAwareMouseDevice {
       (buttonLeft && !anyEntityWith(APP.world, HeldRemoteRight))
     ) {
       // HACK
-      if (alwaysMouselock && !document.pointerLockElement) {
+      if (mouselockOnClick && !document.pointerLockElement) {
         APP.canvas.requestPointerLock();
       }
 
@@ -48,7 +48,7 @@ export class AppAwareMouseDevice {
         // TODO HACK we should just provide deltas from mouse device directly
         if (document.pointerLockElement) {
           frame.setVector2(paths.actions.cameraDelta, -movementXY[0] / 250, -movementXY[1] / 250);
-          if (alwaysMouselock) frame.setVector2(paths.device.mouse.coords, 0, 0);
+          if (mouselockOnClick) frame.setVector2(paths.device.mouse.coords, 0, 0);
         }
       }
       frame.setValueType(paths.device.smartMouse.shouldMoveCamera, !document.pointerLockElement);
