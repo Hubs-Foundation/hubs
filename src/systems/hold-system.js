@@ -15,6 +15,9 @@ import {
   AEntity
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
+import qsTruthy from "../utils/qs_truthy";
+
+const alwaysMouselock = qsTruthy("alwaysMouselock");
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
 const DROP_REMOTE_RIGHT = paths.actions.cursor.right.drop;
@@ -40,6 +43,7 @@ function grab(world, userinput, queryHovered, held, grabPath) {
   ) {
     addComponent(world, held, hovered);
     addComponent(world, Held, hovered);
+    if (alwaysMouselock) document.exitPointerLock();
   }
 }
 
@@ -56,6 +60,7 @@ function drop(world, userinput, queryHeld, held, dropPath) {
       !hasComponent(world, HeldHandLeft, heldEid)
     ) {
       removeComponent(world, Held, heldEid);
+      if (alwaysMouselock) APP.canvas.requestPointerLock();
     }
   }
 }

@@ -1,8 +1,11 @@
 import { HeldRemoteRight, HoveredRemoteRight } from "../../../bit-components";
 import { isObjectMenuShowing } from "../../../bit-systems/carry-system";
 import { anyEntityWith } from "../../../utils/bit-utils";
+import qsTruthy from "../../../utils/qs_truthy";
 import { paths } from "../paths";
 import { Pose } from "../pose";
+
+const alwaysMouselock = qsTruthy("alwaysMouselock");
 
 const calculateCursorPose = (function () {
   const origin = new THREE.Vector3();
@@ -33,6 +36,11 @@ export class AppAwareMouseDevice {
         !isObjectMenuShowing()) ||
       (buttonLeft && !anyEntityWith(APP.world, HeldRemoteRight))
     ) {
+      // HACK
+      if (alwaysMouselock && !document.pointerLockElement) {
+        APP.canvas.requestPointerLock();
+      }
+
       const movementXY = frame.get(paths.device.mouse.movementXY);
       if (movementXY) {
         frame.setVector2(paths.device.smartMouse.cameraDelta, movementXY[0], movementXY[1]);
@@ -40,6 +48,7 @@ export class AppAwareMouseDevice {
         // TODO HACK we should just provide deltas from mouse device directly
         if (document.pointerLockElement) {
           frame.setVector2(paths.actions.cameraDelta, -movementXY[0] / 250, -movementXY[1] / 250);
+          if (alwaysMouselock) frame.setVector2(paths.device.mouse.coords, 0, 0);
         }
       }
       frame.setValueType(paths.device.smartMouse.shouldMoveCamera, !document.pointerLockElement);

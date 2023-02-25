@@ -6,8 +6,11 @@ import { sleep } from "../utils/async-utils";
 import { coroutine } from "../utils/coroutine";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
 import { EntityID } from "../utils/networking-types";
+import qsTruthy from "../utils/qs_truthy";
 import { setMatrixWorld } from "../utils/three-utils";
 import { animateScale, waitForMediaLoaded } from "./media-loading";
+
+const alwaysMouselock = qsTruthy("alwaysMouselock");
 
 export enum OBJECT_SPAWNER_FLAGS {
   /** Apply gravity to spawned objects */
@@ -27,6 +30,7 @@ function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
     FloatyObject.flags[spawned] &= ~FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE;
   }
 
+  if (alwaysMouselock) document.exitPointerLock();
   addComponent(world, HeldRemoteRight, spawned);
   addComponent(world, Held, spawned);
 
