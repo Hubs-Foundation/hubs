@@ -46,6 +46,7 @@ import { constraintsSystem } from "./bit-constraints-system";
 import { mediaFramesSystem } from "./bit-media-frames";
 import { videoSystem } from "../bit-systems/video-system";
 import { cameraToolSystem } from "../bit-systems/camera-tool";
+import { roomPortalSystem } from "../bit-systems/room-portal-system";
 import { mediaLoadingSystem } from "../bit-systems/media-loading";
 // import { holdableButtonSystem } from "./holdable-button-system";
 import { physicsCompatSystem } from "./bit-physics";
@@ -226,6 +227,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.soundEffectsSystem.tick();
   hubsSystems.scenePreviewCameraSystem.tick();
   hubsSystems.physicsSystem.tick(dt);
+  roomPortalSystem(world);
   hubsSystems.inspectYourselfSystem.tick(hubsSystems.el, aframeSystems.userinput, hubsSystems.cameraSystem);
   hubsSystems.cameraSystem.tick(hubsSystems.el, dt);
   cameraToolSystem(world);

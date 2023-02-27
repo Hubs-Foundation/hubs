@@ -235,3 +235,9 @@ export const Mirror = defineComponent();
 export const ParticleEmitterTag = defineComponent({
   src: Types.ui32
 });
+export const RoomPortal = defineComponent({
+  src: Types.ui32
+});
+RoomPortal.src[$isStringType] = true;
+export const EntityProxy = defineComponent();
+EntityProxy.map = new Map();

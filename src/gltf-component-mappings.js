@@ -6,8 +6,9 @@ import { COLLISION_LAYERS } from "./constants";
 import { AudioType, DistanceModelType, SourceType } from "./components/audio-params";
 import { updateAudioSettings } from "./update-audio-settings";
 import { commonInflators, renderAsEntity } from "./utils/jsx-entity";
-import { Networked } from "./bit-components";
+import { Networked, EntityProxy } from "./bit-components";
 import { addComponent } from "bitecs";
+import { createNetworkedEntity } from "./utils/create-networked-entity";
 
 const inflatorWrapper = inflator => (el, _componentName, componentData) =>
   inflator(APP.world, el.object3D.eid, componentData);
@@ -130,6 +131,9 @@ AFRAME.GLTFModelPlus.registerComponent("waypoint", "waypoint", (el, componentNam
 import { findAncestorWithComponent } from "./utils/scene-graph";
 import { createElementEntity } from "./utils/jsx-entity";
 import { setInitialNetworkedData } from "./utils/assign-network-ids";
+import { portal } from "./utils/chat-commands";
+import { setMatrixWorld } from "./utils/three-utils";
+import { RoomPortalPrefab } from "./prefabs/room-portal";
 /** @jsx createElementEntity */ createElementEntity;
 
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _componentName, componentData) => {
@@ -549,6 +553,17 @@ AFRAME.GLTFModelPlus.registerComponent("audio-params", "audio-params", (el, comp
 
 AFRAME.GLTFModelPlus.registerComponent("audio-zone", "audio-zone", (el, componentName, componentData) => {
   el.setAttribute(componentName, { ...componentData });
+});
+
+AFRAME.GLTFModelPlus.registerComponent("roomPortal", "roomPortal", (el, _componentName, componentData) => {
+  const eid = renderAsEntity(APP.world, RoomPortalPrefab(componentData.src));
+  const obj = APP.world.eid2obj.get(eid);
+  AFRAME.scenes[0].object3D.attach(obj);
+  el.object3D.updateMatrices();
+  setMatrixWorld(obj, el.object3D.matrixWorld);
+  el.setAttribute("entity-proxy", { eid });
+  addComponent(APP.world, EntityProxy, eid);
+  EntityProxy.map.set(eid, el);
 });
 
 AFRAME.GLTFModelPlus.registerComponent("background", "background", (el, _componentName, componentData) => {

@@ -38,7 +38,8 @@ import {
   Billboard,
   MaterialTag,
   VideoTextureSource,
-  Mirror
+  Mirror,
+  RoomPortal
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -274,6 +275,9 @@ export interface JSXComponentData extends ComponentData {
   deletable?: true;
   makeKinematicOnRelease?: true;
   destroyAtExtremeDistance?: true;
+  roomPortal?: {
+    src: string;
+  };
 
   // @TODO Define all the anys
   networked?: any;
@@ -414,6 +418,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   waypointPreview: createDefaultInflator(WaypointPreview),
   pdf: inflatePDF,
   mediaLoader: inflateMediaLoader,
+  roomPortal: createDefaultInflator(RoomPortal),
 
   // inflators that create Object3Ds
   mediaFrame: inflateMediaFrame,
