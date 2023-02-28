@@ -2,12 +2,12 @@ import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { createMessageDatas } from "../bit-systems/networking";
-import { PrefabName, prefabs } from "../prefabs/prefabs";
+import { InitialData, PrefabName, prefabs } from "../prefabs/prefabs";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnership } from "../utils/take-ownership";
 import { setNetworkedDataWithRoot } from "./assign-network-ids";
-import type { ClientID, InitialData, NetworkID } from "./networking-types";
+import type { ClientID, CreateMessageData, NetworkID } from "./networking-types";
 
 export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, initialData: InitialData) {
   if (!hasPermissionToSpawn(NAF.clientId, prefabName))
@@ -25,12 +25,12 @@ export function renderAsNetworkedEntity(
   nid: NetworkID,
   creator: ClientID
 ) {
-  const eid = renderAsEntity(world, prefabs.get(prefabName)!.template(initialData));
+  const eid = renderAsEntity(world, prefabs.get(prefabName)!.template(initialData as any));
   if (!hasComponent(world, Networked, eid)) {
     throw new Error("Networked prefabs must have the Networked component");
   }
   const obj = world.eid2obj.get(eid)!;
-  createMessageDatas.set(eid, { prefabName, initialData });
+  createMessageDatas.set(eid, { prefabName, initialData } as CreateMessageData);
   setNetworkedDataWithRoot(world, nid, eid, creator);
   AFRAME.scenes[0].object3D.add(obj);
   return eid;

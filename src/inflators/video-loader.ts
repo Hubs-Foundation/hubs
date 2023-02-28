@@ -16,7 +16,8 @@ export function inflateVideoLoader(world: HubsWorld, eid: number, params: VideoL
     recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: false
+    isObjectMenuTarget: false,
+    sphericalProjection: params.projection === ProjectionMode.SPHERE_EQUIRECTANGULAR
   });
 
   // TODO: Use the rest of VideoLoaderParams

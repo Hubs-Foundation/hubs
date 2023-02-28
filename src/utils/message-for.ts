@@ -121,7 +121,8 @@ export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
       resize: true,
       recenter: true,
       animateLoad: true,
-      isObjectMenuTarget: true
+      isObjectMenuTarget: true,
+      sphericalProjection: false
     };
     const createMessage: CreateMessage = {
       version: 1,

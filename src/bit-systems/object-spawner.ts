@@ -16,11 +16,12 @@ export enum OBJECT_SPAWNER_FLAGS {
 
 function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
   const spawned = createNetworkedEntity(world, "media", {
-    src: APP.getString(ObjectSpawner.src[spawner]),
+    src: APP.getString(ObjectSpawner.src[spawner])!,
     recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: true
+    isObjectMenuTarget: true,
+    sphericalProjection: false
   });
 
   if (ObjectSpawner.flags[spawner] & OBJECT_SPAWNER_FLAGS.APPLY_GRAVITY) {

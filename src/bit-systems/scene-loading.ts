@@ -44,8 +44,9 @@ function* loadScene(
       throw new Error("Scene loading failed. No src url provided to load.");
     }
 
-    const scene = yield* loadModel(world, src, "model/gltf", false);
+    const scene = yield* loadModel(world, 0, src, "model/gltf", false);
     clearRollbacks(); // After this point, normal entity cleanup will takes care of things
+
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 

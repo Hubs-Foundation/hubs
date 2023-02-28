@@ -28,7 +28,8 @@ export function spawnFromUrl(text: string) {
     recenter: true,
     resize: true,
     animateLoad: true,
-    isObjectMenuTarget: true
+    isObjectMenuTarget: true,
+    sphericalProjection: false
   });
   const avatarPov = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
   const obj = APP.world.eid2obj.get(eid)!;
@@ -51,7 +52,8 @@ export async function spawnFromFileList(files: FileList) {
           recenter: true,
           resize: true,
           animateLoad: true,
-          isObjectMenuTarget: true
+          isObjectMenuTarget: true,
+          sphericalProjection: false
         };
       })
       .catch(e => {
@@ -61,7 +63,8 @@ export async function spawnFromFileList(files: FileList) {
           recenter: true,
           resize: true,
           animateLoad: true,
-          isObjectMenuTarget: true
+          isObjectMenuTarget: true,
+          sphericalProjection: false
         };
       });
 

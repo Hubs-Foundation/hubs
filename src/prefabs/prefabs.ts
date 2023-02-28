@@ -3,18 +3,17 @@ import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
 import { MediaPrefab } from "../prefabs/media";
 import { EntityDef } from "../utils/jsx-entity";
 
-type CameraPrefabT = () => EntityDef;
-type CubeMediaPrefabT = () => EntityDef;
-type MediaPrefabT = (params: MediaLoaderParams) => EntityDef;
-
-export type PrefabDefinition = {
-  permission?: "spawn_camera";
-  template: CameraPrefabT | CubeMediaPrefabT | MediaPrefabT;
-};
-
+export type CubeInitialData = undefined;
+export type CameraInitialData = undefined;
+export type InitialData = CameraInitialData | CubeInitialData | MediaLoaderParams;
+export type PermissionName = "spawn_camera";
 export type PrefabName = "camera" | "cube" | "media";
-
-export const prefabs = new Map<PrefabName, PrefabDefinition>();
-prefabs.set("camera", { permission: "spawn_camera", template: CameraPrefab });
-prefabs.set("cube", { template: CubeMediaFramePrefab });
-prefabs.set("media", { template: MediaPrefab });
+export type PrefabDefinition = {
+  permission?: PermissionName;
+  template: (params: InitialData) => EntityDef;
+};
+export const prefabs: Map<PrefabName, PrefabDefinition> = new Map([
+  ["camera", { permission: "spawn_camera", template: CameraPrefab }],
+  ["cube", { template: CubeMediaFramePrefab }],
+  ["media", { template: MediaPrefab }]
+]);

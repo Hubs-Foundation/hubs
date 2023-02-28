@@ -23,7 +23,8 @@ export function inflateSpawner(world: HubsWorld, eid: number, props: SpawnerPara
     recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: false
+    isObjectMenuTarget: false,
+    sphericalProjection: false
   });
 
   addComponent(world, HandCollisionTarget, eid);

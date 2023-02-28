@@ -13,7 +13,8 @@ export function inflateImageLoader(world: HubsWorld, eid: number, params: ImageL
     recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: false
+    isObjectMenuTarget: false,
+    sphericalProjection: params.projection === ProjectionMode.SPHERE_EQUIRECTANGULAR
   });
 
   // TODO: Use projection

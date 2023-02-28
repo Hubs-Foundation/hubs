@@ -1,11 +1,21 @@
-import { PrefabName } from "../prefabs/prefabs";
+import { MediaLoaderParams } from "../inflators/media-loader";
+import { CameraInitialData, CubeInitialData, InitialData, PrefabName } from "../prefabs/prefabs";
 
 export type EntityID = number;
-export type InitialData = any;
-export interface CreateMessageData {
-  prefabName: PrefabName;
-  initialData: InitialData;
-}
+export type CreateMessageData =
+  | {
+      prefabName: "camera";
+      initialData: CameraInitialData;
+    }
+  | {
+      prefabName: "cube";
+      initialData: CubeInitialData;
+    }
+  | {
+      prefabName: "media";
+      initialData: MediaLoaderParams;
+    };
+
 export type ClientID = string;
 export type NetworkID = string;
 export type StringID = number;
