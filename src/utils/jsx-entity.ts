@@ -77,6 +77,9 @@ import { SimpleWaterParams, inflateSimpleWater } from "../inflators/simple-water
 import { inflatePDF, PDFParams } from "../inflators/pdf";
 import { MirrorParams, inflateMirror } from "../inflators/mirror";
 import { inflateParticleEmitter, ParticleEmitterParams } from "../inflators/particle-emitter";
+import { AudioZoneParams, inflateAudioZone } from "../inflators/audio-zone";
+import { AudioSettings } from "../components/audio-params";
+import { inflateAudioParams } from "../inflators/audio-params";
 
 preload(
   new Promise(resolve => {
@@ -230,6 +233,8 @@ export interface ComponentData {
   grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
   mirror?: MirrorParams;
+  audioZone?: AudioZoneParams;
+  audioParams?: AudioSettings;
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -374,7 +379,9 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   // inflators that create Object3Ds
   ambientLight: inflateAmbientLight,
   directionalLight: inflateDirectionalLight,
-  mirror: inflateMirror
+  mirror: inflateMirror,
+  audioZone: inflateAudioZone,
+  audioParams: inflateAudioParams
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
