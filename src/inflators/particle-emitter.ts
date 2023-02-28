@@ -24,8 +24,16 @@ export type ParticleEmitterParams = {
   lifetime: number;
   lifetimeRandomness: number;
   particleCount: number;
-  startVelocity: [number, number];
-  endVelocity: [number, number, number];
+  startVelocity: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  endVelocity: {
+    x: number;
+    y: number;
+    z: number;
+  };
   velocityCurve: string;
   angularVelocity: number;
 };
@@ -47,8 +55,8 @@ const DEFAULTS = {
   lifetime: 5,
   lifetimeRandomness: 5,
   particleCount: 100,
-  startVelocity: [0, 0, 0.5],
-  endVelocity: [0, 0, 0],
+  startVelocity: { x: 0, y: 0, z: 0.5 },
+  endVelocity: { x: 0, y: 0, z: 0 },
   velocityCurve: "linear",
   angularVelocity: 0
 };
@@ -79,8 +87,8 @@ export function inflateParticleEmitter(world: HubsWorld, eid: number, params: Pa
   particleEmitter.lifetime = params.lifetime;
   particleEmitter.lifetimeRandomness = params.lifetimeRandomness;
   particleEmitter.particleCount = params.particleCount;
-  particleEmitter.startVelocity.fromArray(params.startVelocity);
-  particleEmitter.endVelocity.fromArray(params.endVelocity);
+  particleEmitter.startVelocity.set(params.startVelocity.x, params.startVelocity.y, params.startVelocity.z);
+  particleEmitter.endVelocity.set(params.endVelocity.x, params.endVelocity.y, params.endVelocity.z);
   particleEmitter.velocityCurve = params.velocityCurve;
   particleEmitter.angularVelocity = params.angularVelocity;
 
