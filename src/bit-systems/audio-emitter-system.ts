@@ -41,10 +41,8 @@ function swapAudioType<T extends AudioObject3D>(
 ) {
   const audio = world.eid2obj.get(eid)! as AudioObject3D;
   audio.disconnect();
-  APP.gainMultipliers.delete(eid);
   APP.sourceType.set(eid, SourceType.MEDIA_VIDEO);
   APP.supplementaryAttenuation.delete(eid);
-  APP.audioOverrides.delete(eid);
   APP.audios.delete(eid);
   audioSystem.removeAudio({ node: audio });
 
