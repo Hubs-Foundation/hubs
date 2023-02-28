@@ -82,6 +82,8 @@ import { AudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
 import { AudioSourceParams, inflateAudioSource } from "../inflators/audio-source";
 import { AudioTargetParams, inflateAudioTarget } from "../inflators/audio-target";
+import { inflateScaleAudioFeedback, ScaleAudioFeedbackParams } from "../inflators/scale-audio-feedback";
+import { inflateMorphAudioFeedback, MorphAudioFeedbackParams } from "../inflators/morph-audio-feedback";
 
 preload(
   new Promise(resolve => {
@@ -239,6 +241,8 @@ export interface ComponentData {
   particleEmitter?: ParticleEmitterParams;
   audioZone?: AudioZoneParams;
   audioParams?: AudioSettings;
+  scaleAudioFeedback?: ScaleAudioFeedbackParams;
+  morphAudioFeedback?: MorphAudioFeedbackParams;
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -387,7 +391,9 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   mirror: inflateMirror,
   particleEmitter: inflateParticleEmitter,
   audioZone: inflateAudioZone,
-  audioParams: inflateAudioParams
+  audioParams: inflateAudioParams,
+  scaleAudioFeedback: inflateScaleAudioFeedback,
+  morphAudioFeedback: inflateMorphAudioFeedback
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {

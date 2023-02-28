@@ -3,6 +3,9 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
+import { addComponent, removeComponent } from "bitecs";
+import { NetworkAudioAnalyser } from "../bit-components";
+import qsTruthy from "../utils/qs_truthy";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -66,11 +69,17 @@ AFRAME.registerComponent("networked-audio-analyser", {
 
     this.playerSessionId = findAncestorWithComponent(this.el, "player-info").components["player-info"].playerSessionId;
     registerComponentInstance(this, "networked-audio-analyser");
+    if (qsTruthy("newLoader")) {
+      addComponent(APP.world, NetworkAudioAnalyser, this.el.eid);
+    }
   },
 
   remove: function () {
     deregisterComponentInstance(this, "networked-audio-analyser");
     this.el.sceneEl.systems["frame-scheduler"].unschedule(this._runScheduledWork, "audio-analyser");
+    if (qsTruthy("newLoader")) {
+      removeComponent(APP.world, NetworkAudioAnalyser, this.el.eid);
+    }
   },
 
   tick: function (t) {

@@ -1,6 +1,7 @@
-import { defineQuery } from "bitecs";
-import { CameraTool } from "../bit-components";
+import { addComponent, defineQuery, removeComponent } from "bitecs";
+import { CameraTool, LocalAudioAnalyser } from "../bit-components";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import qsTruthy from "../utils/qs_truthy";
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 
 function quaternionAlmostEquals(epsilon, u, v) {
@@ -30,6 +31,11 @@ AFRAME.registerComponent("ik-root", {
     leftController: { type: "string", default: ".left-controller" },
     rightController: { type: "string", default: ".right-controller" }
   },
+  init() {
+    if (qsTruthy("newLoader")) {
+      addComponent(APP.world, LocalAudioAnalyser, this.el.eid);
+    }
+  },
   update(oldData) {
     if (this.data.camera !== oldData.camera) {
       this.camera = this.el.querySelector(this.data.camera);
@@ -41,6 +47,11 @@ AFRAME.registerComponent("ik-root", {
 
     if (this.data.rightController !== oldData.rightController) {
       this.rightController = this.el.querySelector(this.data.rightController);
+    }
+  },
+  remove() {
+    if (qsTruthy("newLoader")) {
+      removeComponent(APP.world, LocalAudioAnalyser, this.el.eid);
     }
   }
 });

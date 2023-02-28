@@ -1,6 +1,10 @@
 import { SourceType, AudioType } from "./audio-params";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { isRoomOwner } from "../utils/hub-utils";
+import { Emitter2Audio, makeAudioEntity } from "../bit-systems/audio-emitter-system";
+import { addComponent, removeComponent } from "bitecs";
+import { AudioEmitter, AudioSettingsChanged, AvatarAudioSource } from "../bit-components";
+import qsTruthy from "../utils/qs_truthy";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
@@ -45,27 +49,21 @@ async function getMediaStream(el) {
 
 AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function () {
-    this.removeAudio();
-
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
     this.isCreatingAudio = false;
     const isRemoved = !this.el.parentNode;
     if (!stream || isRemoved) return;
 
-    APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
-    const { audioType } = getCurrentAudioSettings(this.el);
-    const audioListener = this.el.sceneEl.audioListener;
-    let audio = this.el.getObject3D(this.attrName);
-    if (audioType === AudioType.PannerNode) {
-      audio = new THREE.PositionalAudio(audioListener);
-    } else {
-      audio = new THREE.Audio(audioListener);
-    }
-    // Default to being quiet so it fades in when volume is set by audio systems
-    audio.gain.gain.value = 0;
+    this.audioEid = makeAudioEntity(APP.world, this.el.eid, SourceType.AVATAR_AUDIO_SOURCE, this.audioSystem);
+    const audio = APP.world.eid2obj.get(this.audioEid);
 
-    this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: audio });
+    if (qsTruthy("newLoader")) {
+      addComponent(APP.world, AvatarAudioSource, this.el.eid);
+      Emitter2Audio.set(this.el.eid, this.audioEid);
+    } else {
+      APP.sourceType.set(this.el, SourceType.AVATAR_AUDIO_SOURCE);
+    }
 
     if (SHOULD_CREATE_SILENT_AUDIO_ELS) {
       createSilentAudioEl(stream); // TODO: Do the audio els need to get cleaned up?
@@ -85,17 +83,17 @@ AFRAME.registerComponent("avatar-audio-source", {
       } else {
         APP.moderatorAudioSource.delete(this.el);
       }
-      APP.audios.set(this.el, audio);
-      updateAudioSettings(this.el, audio);
+      if (qsTruthy("newLoader")) {
+        addComponent(APP.world, AudioSettingsChanged, this.audioEid);
+      } else {
+        APP.audios.set(this.el, audio);
+        updateAudioSettings(this.el, audio);
+      }
     });
   },
 
   removeAudio() {
-    const audio = this.el.getObject3D(this.attrName);
-    if (audio) {
-      this.audioSystem.removeAudio({ node: audio });
-      this.el.removeObject3D(this.attrName);
-    }
+    removeComponent(APP.world, AudioEmitter, this.audioEid);
   },
 
   init() {
@@ -124,8 +122,13 @@ AFRAME.registerComponent("avatar-audio-source", {
       } else if (shouldUpdateAudioSettings) {
         // updateAudioSettings() is called in this.createAudio()
         // so no need to call it if shouldRecreateAudio is true.
-        const audio = this.el.getObject3D(this.attrName);
-        updateAudioSettings(this.el, audio);
+        if (qsTruthy("newLoader")) {
+          addComponent(APP.world, AudioSettingsChanged, this.audioEid);
+        } else {
+          const audio = APP.world.eid2obj.get(this.audioEid);
+          APP.audios.set(this.el, audio);
+          updateAudioSettings(this.el, audio);
+        }
       }
     };
     APP.store.addEventListener("statechanged", this.onPreferenceChanged);
@@ -136,17 +139,22 @@ AFRAME.registerComponent("avatar-audio-source", {
   onPermissionsUpdated() {
     getOwnerId(this.el).then(async ownerId => {
       if (isRoomOwner(ownerId)) {
-        APP.moderatorAudioSource.add(this.el);
+        APP.moderatorAudioSource.add(this.audioEid);
       } else {
-        APP.moderatorAudioSource.delete(this.el);
+        APP.moderatorAudioSource.delete(this.audioEid);
       }
-      const audio = APP.audios.get(this.el);
-      audio && updateAudioSettings(this.el, audio);
+      if (qsTruthy("newLoader")) {
+        addComponent(APP.world, AudioSettingsChanged, this.audioEid);
+      } else {
+        const audio = APP.world.eid2obj.get(this.audioEid);
+        APP.audios.set(this.el, audio);
+        updateAudioSettings(this.el, audio);
+      }
     });
   },
 
   async _onStreamUpdated(peerId, kind) {
-    const audio = this.el.getObject3D(this.attrName);
+    const audio = APP.audios.get(this.el.eid);
     if (!audio) return;
     const stream = audio.source.mediaStream;
     if (!stream) return;
@@ -174,11 +182,12 @@ AFRAME.registerComponent("avatar-audio-source", {
     window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
     this.el.removeEventListener("audio_type_changed", this.createAudio);
 
-    APP.audios.delete(this.el);
-    APP.sourceType.delete(this.el);
-    APP.supplementaryAttenuation.delete(this.el);
-
     this.removeAudio();
+
+    if (qsTruthy("newLoader")) {
+      Emitter2Audio.delete(this.el.eid);
+      removeComponent(APP.world, AvatarAudioSource, this.el.eid);
+    }
   }
 });
 

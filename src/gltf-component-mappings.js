@@ -8,6 +8,7 @@ import { updateAudioSettings } from "./update-audio-settings";
 import { commonInflators, renderAsEntity } from "./utils/jsx-entity";
 import { Networked } from "./bit-components";
 import { addComponent } from "bitecs";
+import qsTruthy from "./utils/qs_truthy";
 
 const inflatorWrapper = inflator => (el, _componentName, componentData) =>
   inflator(APP.world, el.object3D.eid, componentData);
@@ -66,8 +67,16 @@ AFRAME.GLTFModelPlus.registerComponent("skybox", "skybox");
 AFRAME.GLTFModelPlus.registerComponent("layers", "layers");
 AFRAME.GLTFModelPlus.registerComponent("shadow", "shadow");
 AFRAME.GLTFModelPlus.registerComponent("water", "water");
-AFRAME.GLTFModelPlus.registerComponent("scale-audio-feedback", "scale-audio-feedback");
-AFRAME.GLTFModelPlus.registerComponent("morph-audio-feedback", "morph-audio-feedback");
+AFRAME.GLTFModelPlus.registerComponent(
+  "scale-audio-feedback",
+  "scale-audio-feedback",
+  qsTruthy("newLoader") ? inflatorWrapper(commonInflators.scaleAudioFeedback) : undefined
+);
+AFRAME.GLTFModelPlus.registerComponent(
+  "morph-audio-feedback",
+  "morph-audio-feedback",
+  qsTruthy("newLoader") ? inflatorWrapper(commonInflators.morphAudioFeedback) : undefined
+);
 AFRAME.GLTFModelPlus.registerComponent("animation-mixer", "animation-mixer");
 AFRAME.GLTFModelPlus.registerComponent("loop-animation", "loop-animation");
 AFRAME.GLTFModelPlus.registerComponent("uv-scroll", "uv-scroll");

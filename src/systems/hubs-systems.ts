@@ -72,6 +72,10 @@ import { audioEmitterSystem } from "../bit-systems/audio-emitter-system";
 import { audioZoneSystem } from "../bit-systems/audio-zone-system";
 import { audioDebugSystem } from "../bit-systems/audio-debug-system";
 import { audioTargetSystem } from "../bit-systems/audio-target-system";
+import { localAudioAnalyserSystem } from "../bit-systems/local-audio-analyser";
+import { scaleAudioFeedbackSystem } from "../bit-systems/scale-audio-feedback";
+import { networkAudioAnalyserSystem } from "../bit-systems/networked-audio-analyser";
+import { morphAudioFeedbackSystem } from "../bit-systems/morph-audio-feedback";
 
 declare global {
   interface Window {
@@ -251,6 +255,10 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   audioTargetSystem(world, hubsSystems.audioSystem);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
+  localAudioAnalyserSystem(world, hubsSystems.audioSystem);
+  networkAudioAnalyserSystem(world);
+  scaleAudioFeedbackSystem(world);
+  morphAudioFeedbackSystem(world);
   simpleWaterSystem(world);
 
   videoTextureSystem(world);

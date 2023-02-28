@@ -253,3 +253,24 @@ export const AudioSource = defineComponent({
   flags: Types.ui8
 });
 export const AudioParams = defineComponent();
+export const ScaleAudioFeedback = defineComponent({
+  minScale: Types.f32,
+  maxScale: Types.f32
+});
+export const MorphAudioFeedback = defineComponent({
+  name: Types.ui32,
+  minValue: Types.f32,
+  maxValue: Types.f32
+});
+export const LocalAudioAnalyser = defineComponent({
+  volume: Types.f32,
+  prevVolume: Types.f32
+});
+export const NetworkAudioAnalyser = defineComponent({
+  volume: Types.f32,
+  prevVolume: Types.f32,
+  lastSeenVolume: Types.ui32,
+  flags: Types.ui8
+});
+export const NetworkedAvatar = defineComponent();
+export const AvatarAudioSource = defineComponent();
