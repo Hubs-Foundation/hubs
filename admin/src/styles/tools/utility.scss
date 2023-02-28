@@ -55,6 +55,14 @@ $fontSizes: 12, 14, 16, 18, 20;
   text-transform: capitalize;
 }
 
+.link {
+  @include primary-font();
+  @include font-size(16);
+  line-height: 24px;
+  color: $color-interaction-primary;
+  text-decoration-line: underline;
+}
+
 // ---------------------------------
 //   Quick Media-Q
 // ---------------------------------

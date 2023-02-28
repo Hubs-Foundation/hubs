@@ -16,7 +16,6 @@
   &_wrapper {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 28px;
 
     @include tablet-large-down {
       flex-direction: column;
