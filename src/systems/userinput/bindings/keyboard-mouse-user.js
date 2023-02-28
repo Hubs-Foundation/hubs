@@ -847,6 +847,15 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       dest: { value: paths.actions.carry.change_snap_face },
       xform: xforms.rising,
       priority: 2000 // TODO
+    },
+    {
+      src: { value: paths.device.mouse.wheel, modifier: paths.device.keyboard.key("shift") },
+      dest: {
+        unmodified: paths.actions.carry.snap_nudge,
+        modified: paths.actions.carry.snap_scale
+      },
+      xform: xforms.copyWithModifier,
+      priority: 2000 // TODO
     }
   ],
   [sets.rightCursorHoveringOnVideo]: videoBindings,

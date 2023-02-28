@@ -27,6 +27,7 @@ enum CarryState {
 let carryState = CarryState.NONE;
 let activeObject = 0;
 let rotationOffset = 0;
+let nudgeOffset = 0;
 let prevDot = 0;
 let snapFaceOverrideIdx = -1;
 
@@ -75,7 +76,7 @@ export function carryObject(eid: EntityID) {
   computeLocalBoundingBox(obj, tmpBox, true);
   tmpBox.getCenter(center);
   tmpBox.getSize(size);
-  obj.add(axisHelper);
+  // obj.add(axisHelper);
 }
 function dropObject(world: HubsWorld, applyGravity: boolean) {
   if (unlockPointerOnDrop) document.exitPointerLock();
@@ -139,6 +140,7 @@ const tmpQuat = new Quaternion();
 const tmpMat4 = new Matrix4();
 
 const ZERO = new Vector3(0, 0, 0);
+const MIN_SCALE = new Vector3(0.01, 0.01, 0.01);
 const X_AXIS = new Vector3(1, 0, 0);
 const Y_AXIS = new Vector3(0, 1, 0);
 const Z_AXIS = new Vector3(0, 0, 1);
@@ -173,20 +175,24 @@ const ROT_AXIS_FOR_FACE = {
   [SNAP_FACE.LEFT]: X_AXIS,
   [SNAP_FACE.RIGHT]: X_AXIS
 };
-const AXIS_FOR_FACE = {
+const AXIS_NAME_FOR_FACE = {
   [SNAP_FACE.BOTTOM]: "y",
   [SNAP_FACE.TOP]: "y",
   [SNAP_FACE.BACK]: "z",
   [SNAP_FACE.FRONT]: "z",
   [SNAP_FACE.LEFT]: "x",
   [SNAP_FACE.RIGHT]: "x"
-};
+} as const;
 
 const FLOOR_SNAP_ANGLE = MathUtils.degToRad(45);
 const COS_FLOOR_SNAP_ANGLE = Math.cos(FLOOR_SNAP_ANGLE);
 
 const ROTATIONS_PER_SECOND = 4;
 const ROTATION_SPEED = (Math.PI * 2) / ROTATIONS_PER_SECOND / 1000;
+
+const SCALE_SPEED = 0.1;
+const NUDGE_SPEED = 0.1;
+const NUDGE_START_OFFSET = 0.001; // start objects slightly off the surface to avoid any z-fighting, especially on flat objects
 
 const raycaster = new Raycaster();
 raycaster.near = 0.1;
@@ -225,6 +231,16 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
   const intersection = intersections[0];
   const obj = world.eid2obj.get(activeObject)!;
 
+  const nudgeDelta = userinput.get<number | undefined>(paths.actions.carry.snap_nudge);
+  if (nudgeDelta !== undefined) {
+    nudgeOffset += nudgeDelta * world.time.delta * NUDGE_SPEED;
+  }
+
+  const scaleDelta = userinput.get<number | undefined>(paths.actions.carry.snap_scale);
+  if (scaleDelta !== undefined) {
+    obj.scale.addScalar(scaleDelta * world.time.delta * SCALE_SPEED);
+  }
+
   const dir = intersection
     .face!.normal.clone()
     .applyNormalMatrix(tmpNormalMatrix.getNormalMatrix(intersection.object.matrixWorld));
@@ -235,8 +251,8 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
     const mesh = intersection.object;
     normalHelper = new VertexNormalsHelper(mesh);
     normalHelper.frustumCulled = false;
-    world.scene.add(normalHelper);
-    world.scene.add(arrowHelper);
+    // world.scene.add(normalHelper);
+    // world.scene.add(arrowHelper);
   }
 
   if (normalHelper.object !== intersection.object) {
@@ -252,10 +268,13 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
   const dot = dir.dot(Y_AXIS);
   if (Math.abs(dot - prevDot) > 0.2) {
     rotationOffset = 0;
+    nudgeOffset = NUDGE_START_OFFSET;
   }
   prevDot = dot;
 
-  // TODO we are doing 3 different rotations, i think they can be combined into 1 transformation
+  obj.scale.max(MIN_SCALE);
+
+  // TODO we are doing 3 quaternion multiplies, I suspect this can be simplified
   obj.quaternion.setFromRotationMatrix(tmpMat4.lookAt(dir, ZERO, Y_AXIS));
 
   let snapFace;
@@ -268,12 +287,15 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
   }
 
   const rotationAxis = ROT_AXIS_FOR_FACE[snapFace];
-  const offsetDistance = ((size as any)[AXIS_FOR_FACE[snapFace]] as number) / 2;
+  const sizeOnAxis = size[AXIS_NAME_FOR_FACE[snapFace]];
+  const scaleOnAxis = obj.scale[AXIS_NAME_FOR_FACE[snapFace]];
+  // const offsetDistance = (sizeOnAxis / 2 + nudgeOffset) * scaleOnAxis;
+  const offsetDistance = (sizeOnAxis / 2) * scaleOnAxis + nudgeOffset;
 
   obj.quaternion.multiply(QUAT_FOR_FACE[snapFace]);
   obj.quaternion.multiply(tmpQuat.setFromAxisAngle(rotationAxis, -rotationOffset));
 
-  target.sub(center.clone().applyQuaternion(obj.quaternion));
+  target.sub(center.clone().multiply(obj.scale).applyQuaternion(obj.quaternion));
   target.addScaledVector(dir, offsetDistance);
   obj.position.copy(target);
 
@@ -287,7 +309,8 @@ export function carrySystem(
   characterController: CharacterControllerSystem,
   camera: Camera
 ) {
-  const selection = APP.fx.outlineEffect!.selection;
+  const outlineEffect = APP.fx.outlineEffect!;
+  const selection = outlineEffect.selection;
   selection.clear();
   if (carryState === CarryState.CARRYING) {
     const obj = world.eid2obj.get(activeObject)!;
@@ -310,11 +333,15 @@ export function carrySystem(
     if (userinput.get(paths.actions.carry.toggle_snap)) {
       carryState = CarryState.SNAPPING;
       rotationOffset = 0;
+      nudgeOffset = NUDGE_START_OFFSET;
       snapFaceOverrideIdx = -1;
     }
   } else if (carryState == CarryState.SNAPPING) {
+    outlineEffect.visibleEdgeColor.setHex(0x08f108);
+    addEntityToSelection(world, selection, activeObject);
     handleSnapping(world, camera, userinput);
   } else {
+    outlineEffect.visibleEdgeColor.setHex(0x08c7f1);
     const hovered = queryHoveredRemoteRight(world)[0];
     if (activeObject) {
       addEntityToSelection(world, selection, activeObject);

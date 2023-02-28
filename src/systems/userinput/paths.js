@@ -141,7 +141,9 @@ paths.actions.carry = {
   toggle_snap: "/actions/carry/toggle_nsap",
   rotate_ccw: "/actions/carry/rotate_ccs",
   rotate_cw: "/actions/carry/rotate_cw",
-  change_snap_face: "/actions/carry/change_snap_face"
+  change_snap_face: "/actions/carry/change_snap_face",
+  snap_scale: "/actions/carry/snap_scale",
+  snap_nudge: "/actions/carry/snap_nudge"
 };
 paths.haptics = {};
 paths.haptics.actuators = {};

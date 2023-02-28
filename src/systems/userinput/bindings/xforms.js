@@ -58,6 +58,11 @@ export const xforms = {
       frame.setVector2(dest.value, v2[0], v2[1]);
     }
   },
+  copyWithModifier: function (frame, src, dest) {
+    const modifierTrue = !!frame.get(src.modifier);
+    frame.setValueType(dest.modified, modifierTrue ? frame.get(src.value) : undefined);
+    frame.setValueType(dest.unmodified, modifierTrue ? undefined : frame.get(src.value));
+  },
   zeroIfDefined: function (frame, src, dest) {
     frame.setValueType(dest.value, frame.get(src.bool) !== undefined ? 0 : frame.get(src.value));
   },
