@@ -986,11 +986,7 @@ class PreferencesScreen extends Component {
     this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
     APP.hubChannel.addEventListener("permissions_updated", this.permissionsUpdated);
 
-    if (this.state.canVoiceChat) {
-      this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
-    } else {
-      this.updateMediaDevices();
-    }
+    this.updateMediaDevices();
   }
 
   componentWillUnmount() {
@@ -1007,11 +1003,7 @@ class PreferencesScreen extends Component {
   }
 
   storeUpdated() {
-    const { preferredMic } = this.props.store.state.preferences;
-    if (preferredMic !== this.mediaDevicesManager.selectedMicDeviceId) {
-      this.state.canVoiceChat &&
-        this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
-    }
+    this.updateMediaDevices();
   }
 
   createSections() {

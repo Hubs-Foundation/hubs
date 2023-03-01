@@ -43,7 +43,7 @@ export function useMicrophoneStatus(scene) {
     if (mediaDevicesManager.isMicShared) {
       APP.dialog.toggleMicrophone();
     } else {
-      mediaDevicesManager.startMicShare({ unmute: true });
+      mediaDevicesManager.startMicShare(true);
     }
   }, [mediaDevicesManager]);
 

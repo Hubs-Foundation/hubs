@@ -572,7 +572,7 @@ class UIRoot extends Component {
 
     if (hasGrantedMic) {
       if (!this.mediaDevicesManager.isMicShared) {
-        await this.mediaDevicesManager.startMicShare({});
+        await this.mediaDevicesManager.startMicShare();
       }
       this.beginOrSkipAudioSetup();
     } else {
@@ -604,7 +604,7 @@ class UIRoot extends Component {
 
   onRequestMicPermission = async () => {
     if (this.props.canVoiceChat) {
-      await this.mediaDevicesManager.startMicShare({});
+      await this.mediaDevicesManager.startMicShare();
     }
   };
 

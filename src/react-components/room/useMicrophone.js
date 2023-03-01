@@ -61,7 +61,7 @@ export function useMicrophone(scene) {
         value: mediaDevicesManager.selectedMicDeviceId,
         options: mediaDevicesManager.micDevicesOptions
       });
-      mediaDevicesManager.startMicShare({ deviceId });
+      mediaDevicesManager.changeAudioInput(deviceId);
     },
     [mediaDevicesManager]
   );

@@ -53,6 +53,8 @@ export default class MediaDevicesManager extends EventEmitter {
 
     this.onDeviceChange = this.onDeviceChange.bind(this);
     navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
+    this.onStoreUpdated = this.onStoreUpdated.bind(this);
+    this._store.addEventListener("statechanged", this.onStoreUpdated);
   }
 
   static get isAudioOutputSelectEnabled() {
@@ -88,10 +90,18 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   get selectedMicDeviceId() {
-    return MediaDevicesManager.isAudioInputSelectEnabled &&
+    if (
+      MediaDevicesManager.isAudioInputSelectEnabled &&
       this._permissionsStatus[MediaDevices.MICROPHONE] !== PermissionStatus.GRANTED
-      ? NO_DEVICE_ID
-      : this.deviceIdForMicDeviceLabel(this.selectedMicLabel);
+    ) {
+      return NO_DEVICE_ID;
+    } else {
+      const { preferredMic } = this._store.state.preferences;
+      const exists = this._micDevices.some(device => {
+        return device.value === preferredMic;
+      });
+      return exists ? preferredMic : NO_DEVICE_ID;
+    }
   }
 
   get selectedSpeakersDeviceId() {
@@ -133,6 +143,10 @@ export default class MediaDevicesManager extends EventEmitter {
     });
   };
 
+  onStoreUpdated() {
+    this.startMicShare();
+  }
+
   updatePermissionStatus(mediaDevice, shouldPrompt) {
     const status = shouldPrompt ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
     this._permissionsStatus[mediaDevice] = status;
@@ -156,20 +170,21 @@ export default class MediaDevicesManager extends EventEmitter {
     });
   }
 
+  changeAudioInput(deviceId) {
+    this._store.update({ preferences: { preferredMic: deviceId } });
+  }
+
   changeAudioOutput(deviceId) {
     this._store.update({ preferences: { preferredSpeakers: deviceId } });
   }
 
-  async startMicShare({ deviceId, unmute, updatePrefs = true }) {
-    if (this.isMicShared && this.selectedMicDeviceId === deviceId) return;
+  async startMicShare(unmute = false) {
+    const deviceId = this.selectedMicDeviceId;
+    if (this._store.state.canVoiceChat === false) return;
     console.log("Starting microphone sharing");
 
-    if (!deviceId) {
-      const { preferredMic } = this._store.state.preferences;
-      deviceId = preferredMic !== NO_DEVICE_ID ? preferredMic : undefined;
-    }
     let constraints = { audio: {} };
-    if (deviceId) {
+    if (deviceId !== undefined && deviceId !== NO_DEVICE_ID) {
       constraints = { audio: { deviceId: { ideal: [deviceId] } } };
     }
 
@@ -178,21 +193,9 @@ export default class MediaDevicesManager extends EventEmitter {
     await this.fetchMediaDevices();
 
     // we should definitely have an audioTrack at this point unless they denied mic access
-    if (this.audioTrack) {
-      const micDeviceId = this.deviceIdForMicDeviceLabel(this.micLabelForAudioTrack(this.audioTrack));
-      if (micDeviceId) {
-        if (updatePrefs) {
-          this._store.update({
-            preferences: {
-              preferredMic: micDeviceId,
-              preferredSpeakers: this.selectedSpeakersDeviceId
-            }
-          });
-        }
-        console.log(`Selected input device: ${this.micLabelForDeviceId(micDeviceId)}`);
-      }
-    } else {
+    if (!this.audioTrack) {
       console.log("No available audio tracks");
+      return false;
     }
 
     await APP.dialog.setLocalMediaStream(this._mediaStream);
@@ -236,7 +239,7 @@ export default class MediaDevicesManager extends EventEmitter {
       this.audioTrack = newStream.getAudioTracks()[0];
       this.audioTrack.addEventListener("ended", async () => {
         this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
-        this.startMicShare({ unmute: APP.dialog.isMicEnabled });
+        this.startMicShare(APP.dialog.isMicEnabled);
       });
 
       if (/Oculus/.test(navigator.userAgent)) {
