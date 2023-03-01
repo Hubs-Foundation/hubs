@@ -1,5 +1,5 @@
-import React from 'react';
-import { Icon, Button, ButtonSizesE } from '@mozilla/lilypad-ui';
+import React from "react";
+import { Icon, Button, ButtonSizesE } from "@mozilla/lilypad-ui";
 
 type CardSectionPropsT = {
   cta: string;
@@ -9,13 +9,7 @@ type CardSectionPropsT = {
   classProp?: string;
 };
 
-const CardSection = ({
-  cta,
-  ctaLabel,
-  ctaCallback,
-  body,
-  classProp,
-}: CardSectionPropsT) => {
+const CardSection = ({ cta, ctaLabel, ctaCallback, body, classProp }: CardSectionPropsT) => {
   return (
     <div className={`card_section_wrapper ${classProp}`}>
       <div className="flex-align-items-center max-w-600-px">
