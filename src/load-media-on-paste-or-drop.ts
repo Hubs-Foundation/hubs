@@ -26,7 +26,7 @@ export function spawnFromUrl(text: string) {
   const eid = createNetworkedEntity(APP.world, "media", {
     src: text,
     recenter: true,
-    resize: true,
+    resize: !qsTruthy("noResize"),
     animateLoad: true,
     isObjectMenuTarget: true
   });
@@ -49,7 +49,7 @@ export async function spawnFromFileList(files: FileList) {
         return {
           src: srcUrl.href,
           recenter: true,
-          resize: true,
+          resize: !qsTruthy("noResize"),
           animateLoad: true,
           isObjectMenuTarget: true
         };
@@ -59,7 +59,7 @@ export async function spawnFromFileList(files: FileList) {
         return {
           src: "error",
           recenter: true,
-          resize: true,
+          resize: !qsTruthy("noResize"),
           animateLoad: true,
           isObjectMenuTarget: true
         };
