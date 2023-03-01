@@ -13,6 +13,16 @@ $fontSizes: 12, 14, 16, 18, 20;
   }
 }
 
+// Body XS Text
+.body-xs {
+  @include body-xs();
+}
+
+// Body SM Text
+.body-sm {
+  @include body-sm();
+}
+
 // Body Text
 .body-md {
   @include body-md();

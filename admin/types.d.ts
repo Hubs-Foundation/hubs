@@ -1,32 +1,30 @@
-export type ReticulumStorageT = {
-  in_quota: boolean;
-};
-
-export type ReticulumSceneListingT = {
-  any: boolean;
-  default: boolean;
-  featured: boolean;
-};
-
-export type ReticulumAvatarListingT = {
-  any: boolean;
-  base: boolean;
-  default: boolean;
-  featured: boolean;
-};
-
-export type ReticulumRepoT = {
-  storage: ReticulumStorageT;
-  scene_listings: ReticulumSceneListingT;
-  avatar_listings: ReticulumAvatarListingT;
-};
-
 export type ReticulumMetaT = {
   phx_host: string;
   phx_port: string;
-  pool: string | null;
+  pool: string;
   version: string;
   repo: ReticulumRepoT;
+};
+
+export type ReticulumRepoT = {
+  accounts: {
+    any: boolean;
+    admin: boolean;
+  };
+  storage: {
+    in_quota: boolean;
+  };
+  scene_listings: {
+    any: boolean;
+    default: boolean;
+    featured: boolean;
+  };
+  avatar_listings: {
+    any: boolean;
+    base: boolean;
+    default: boolean;
+    featured: boolean;
+  };
 };
 
 export type AdminInfoT = {
