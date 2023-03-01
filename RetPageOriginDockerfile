@@ -9,7 +9,7 @@ copy package-lock.json ./
 run npm ci
 copy admin/package.json admin/
 copy admin/package-lock.json admin/
-run cd admin && npm ci && cd ..
+run cd admin && npm ci --legacy-peer-deps && cd ..
 copy . .
 env BASE_ASSETS_PATH="{{rawhubs-base-assets-path}}"
 run npm run build 1> /dev/null
