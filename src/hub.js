@@ -1393,10 +1393,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     scene.emit("hub_updated", { hub });
   });
 
-  window.testChangeHost = () => {
-    hubPhxChannel.push("test_change_host", {});
-  };
-
   hubPhxChannel.on("host_changed", ({ host, port, turn }) => {
     console.log("Dialog host changed. Disconnecting from current host and connecting to the new one.", {
       hub_id: APP.hub.hub_id,
