@@ -257,7 +257,7 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
-import { setLocalClientID } from "./bit-systems/networking";
+import { localClientID, setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
@@ -1391,6 +1391,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     scene.emit("hub_updated", { hub });
+  });
+
+  hubPhxChannel.on("host_changed", ({ host, port, turn }) => {
+    console.log("Dialog host changed. Disconnecting from current host and connecting to the new one.", {
+      hub_id: APP.hub.hub_id,
+      host,
+      port,
+      turn
+    });
+
+    APP.dialog.disconnect();
+    APP.dialog.connect({
+      serverUrl: `wss://${host}:${port}`,
+      roomId: APP.hub.hub_id,
+      serverParams: { host, port, turn },
+      scene,
+      clientId: APP.getString(localClientID),
+      forceTcp: qs.get("force_tcp"),
+      forceTurn: qs.get("force_turn"),
+      iceTransportPolicy: qs.get("force_tcp") || qs.get("force_turn") ? "relay" : "all"
+    });
   });
 
   hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());
