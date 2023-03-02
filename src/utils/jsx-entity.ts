@@ -3,6 +3,7 @@ import { preloadFont } from "troika-three-text";
 import {
   $isStringType,
   CameraTool,
+  ObjectMenu,
   CursorRaycastable,
   DestroyAtExtremeDistance,
   FloatyObject,
@@ -30,7 +31,7 @@ import {
   SceneLoader,
   NavMesh,
   SceneRoot,
-  EnvironmentSettings
+  NetworkDebug
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -80,8 +81,8 @@ export function resolveRef(world: HubsWorld, ref: Ref) {
   return ref.current;
 }
 
-type ArrayVec3 = [x: number, y: number, z: number];
-type Attrs = {
+export type ArrayVec3 = [x: number, y: number, z: number];
+export type Attrs = {
   position?: ArrayVec3;
   rotation?: ArrayVec3;
   scale?: ArrayVec3;
@@ -202,6 +203,7 @@ export interface JSXComponentData extends ComponentData {
   slice9?: {
     size: [width: number, height: number];
     insets: [top: number, buttom: number, left: number, right: number];
+    texture: Texture;
   };
   image?: {
     texture: Texture;
@@ -246,6 +248,21 @@ export interface JSXComponentData extends ComponentData {
   physicsShape?: any;
   floatyObject?: any;
   networkedTransform?: any;
+  objectMenu?: {
+    pinButtonRef: Ref;
+    cameraFocusButtonRef: Ref;
+    cameraTrackButtonRef: Ref;
+    removeButtonRef: Ref;
+    dropButtonRef: Ref;
+    inspectButtonRef: Ref;
+    deserializeDrawingButtonRef: Ref;
+    openLinkButtonRef: Ref;
+    refreshButtonRef: Ref;
+    cloneButtonRef: Ref;
+    rotateButtonRef: Ref;
+    mirrorButtonRef: Ref;
+    scaleButtonRef: Ref;
+  };
   cameraTool?: {
     snapMenuRef: Ref;
     nextButtonRef: Ref;
@@ -268,6 +285,7 @@ export interface JSXComponentData extends ComponentData {
   object3D?: any;
   text?: any;
   model?: ModelParams;
+  networkDebug?: boolean;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -321,6 +339,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   destroyAtExtremeDistance: createDefaultInflator(DestroyAtExtremeDistance),
   networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
+  objectMenu: createDefaultInflator(ObjectMenu),
   cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   animationMixer: createDefaultInflator(AnimationMixer),
   networkedVideo: createDefaultInflator(NetworkedVideo),
@@ -328,6 +347,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   videoMenuItem: createDefaultInflator(VideoMenuItem),
   sceneRoot: createDefaultInflator(SceneRoot),
   sceneLoader: createDefaultInflator(SceneLoader),
+  networkDebug: createDefaultInflator(NetworkDebug),
   mediaLoader: inflateMediaLoader,
 
   // inflators that create Object3Ds

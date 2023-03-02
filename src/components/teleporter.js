@@ -285,9 +285,11 @@ AFRAME.registerComponent("teleporter", {
       parabolicCurve(this.p0, this.v0, t, vecHelper);
       this.parabola[i].copy(vecHelper);
 
-      if (
-        navMesh &&
-        checkLineIntersection(
+      if (navMesh) {
+        // HACK TODO Fix navmesh visibility + raycasting
+        const visible = navMesh.visible;
+        navMesh.visible = true;
+        const result = checkLineIntersection(
           this.parabola[i - 1],
           this.parabola[i],
           [navMesh],
@@ -295,11 +297,13 @@ AFRAME.registerComponent("teleporter", {
           LANDING_NORMAL,
           MAX_LANDING_ANGLE,
           this.hitPoint
-        )
-      ) {
-        this.hit = true;
-        collidedIndex = i;
-        break;
+        );
+        navMesh.visible = visible;
+        if (result) {
+          this.hit = true;
+          collidedIndex = i;
+          break;
+        }
       }
     }
     if (this.characterController.isTeleportingDisabled) {

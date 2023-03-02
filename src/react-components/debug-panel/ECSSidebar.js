@@ -14,12 +14,17 @@ for (const [name, Component] of Object.entries(bitComponents)) {
   bitComponentNames.set(Component, name);
 }
 
+export function formatObjectName(obj) {
+  const name =
+    obj.name ||
+    (obj.el ? (obj.el?.id && `#${obj.el.id}`) || `.${obj.el?.className?.replaceAll(" ", ".") || "a-entity"}` : "");
+  return name ? `${name}(${obj.constructor.name})` : `${obj.constructor.name}`;
+}
+
 function Object3DItem(props) {
   const { obj, toggleObjExpand, setSelectedObj, expanded, expandedIds } = props;
 
-  const name =
-    obj.name || (obj.el?.id && `#${obj.el.id}`) || `.${obj.el?.className?.replaceAll(" ", ".") || "a-entity"}`;
-  const displayName = name ? `${name}(${obj.constructor.name})` : `${obj.constructor.name}`;
+  const displayName = formatObjectName(obj);
 
   return (
     <div className="obj-item">
@@ -46,7 +51,7 @@ function Object3DItem(props) {
   );
 }
 
-function formatComponentProps(eid, component) {
+export function formatComponentProps(eid, component) {
   const formatted = Object.keys(component).reduce((str, k, i, arr) => {
     const val = component[k][eid];
     const isStr = component[k][bitComponents.$isStringType];
@@ -54,7 +59,12 @@ function formatComponentProps(eid, component) {
     if (ArrayBuffer.isView(val)) {
       str += JSON.stringify(Array.from(val));
     } else if (isStr) {
-      str += `${val} "${APP.getString(val)}"`;
+      const strVal = APP.getString(val);
+      if (strVal === NAF.clientId) {
+        str += `${val} *You* "${strVal}"`;
+      } else {
+        str += `${val} "${strVal}"`;
+      }
     } else {
       str += val;
     }

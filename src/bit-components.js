@@ -170,3 +170,27 @@ export const Deletable = defineComponent();
 
 export const EnvironmentSettings = defineComponent();
 EnvironmentSettings.map = new Map();
+
+// TODO: Store this data elsewhere, since only one or two will ever exist.
+export const ObjectMenu = defineComponent({
+  pinButtonRef: Types.eid,
+  cameraFocusButtonRef: Types.eid,
+  cameraTrackButtonRef: Types.eid,
+  removeButtonRef: Types.eid,
+  dropButtonRef: Types.eid,
+  inspectButtonRef: Types.eid,
+  deserializeDrawingButtonRef: Types.eid,
+  openLinkButtonRef: Types.eid,
+  refreshButtonRef: Types.eid,
+  cloneButtonRef: Types.eid,
+  rotateButtonRef: Types.eid,
+  mirrorButtonRef: Types.eid,
+  scaleButtonRef: Types.eid,
+  targetRef: Types.eid
+});
+
+export const ObjectMenuTarget = defineComponent();
+export const NetworkDebug = defineComponent();
+export const NetworkDebugRef = defineComponent({
+  ref: Types.eid
+});

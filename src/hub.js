@@ -181,17 +181,29 @@ import "./systems/audio-gain-system";
 
 import "./gltf-component-mappings";
 
-import { App } from "./app";
+import { App, getScene } from "./app";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
+import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { preload } from "./utils/preload";
 
 window.APP = new App();
 renderAsEntity(APP.world, VideoMenuPrefab());
 renderAsEntity(APP.world, VideoMenuPrefab());
+function addToScene(entityDef, visible) {
+  return getScene().then(scene => {
+    const eid = renderAsEntity(APP.world, entityDef);
+    const obj = APP.world.eid2obj.get(eid);
+    scene.add(obj);
+    obj.visible = !!visible;
+  });
+}
+preload(addToScene(ObjectMenuPrefab(), false));
+preload(addToScene(ObjectMenuPrefab(), false));
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
@@ -243,6 +255,7 @@ import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
+import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -274,6 +287,10 @@ disableiOSZoom();
 
 if (!isOAuthModal) {
   detectConcurrentLoad();
+}
+
+if (qsTruthy("ecsDebug")) {
+  exposeBitECSDebugHelpers();
 }
 
 function setupLobbyCamera() {
@@ -717,7 +734,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   subscriptions.register();
 
   const scene = document.querySelector("a-scene");
-  window.APP.scene = scene;
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;

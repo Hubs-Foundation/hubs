@@ -31,7 +31,6 @@ import { store } from "./utils/store-instance";
 
 declare global {
   interface Window {
-    $B: typeof bitecs;
     $O: (eid: number) => Object3D | undefined;
     APP: App;
   }
@@ -53,7 +52,13 @@ export interface HubsWorld extends IWorld {
   time: { delta: number; elapsed: number; tick: number };
 }
 
-window.$B = bitecs;
+let resolvePromiseToScene: (value: Scene) => void;
+const promiseToScene: Promise<Scene> = new Promise(resolve => {
+  resolvePromiseToScene = resolve;
+});
+export function getScene() {
+  return promiseToScene;
+}
 
 export class App {
   scene?: AScene;
@@ -192,8 +197,10 @@ export class App {
       tick: 0
     };
 
-    this.world.scene = sceneEl.object3D;
+    this.scene = sceneEl;
     const scene = sceneEl.object3D;
+    this.world.scene = scene;
+    resolvePromiseToScene(scene);
 
     // We manually call scene.updateMatrixWolrd in mainTick
     scene.autoUpdate = false;

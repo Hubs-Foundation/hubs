@@ -1,42 +1,12 @@
 /* eslint-disable react/prop-types */
 /** @jsx createElementEntity */
 import cameraModelSrc from "../assets/camera_tool.glb";
-import buttonSrc from "../assets/hud/button.9.png";
-import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { Layers } from "../camera-layers";
+import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { COLLISION_LAYERS } from "../constants";
-import { BUTTON_TYPES } from "../systems/single-action-button-system";
 import { createElementEntity, createRef } from "../utils/jsx-entity";
-import { textureLoader } from "../utils/media-utils";
 import { preload } from "../utils/preload";
-
-const buttonTexture = textureLoader.load(buttonSrc);
-
-// eslint-disable-next-line react/prop-types
-export function Button({ text, width, height, texture = buttonTexture, type = BUTTON_TYPES.DEFAULT, ...props }) {
-  const labelRef = createRef();
-  return (
-    <entity
-      name={"Button"}
-      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
-      cursorRaycastable
-      remoteHoverTarget
-      hoverButton={{ type }}
-      textButton={{ labelRef }}
-      singleActionButton
-      layers={1 << Layers.CAMERA_LAYER_UI}
-      {...props}
-    >
-      <entity
-        ref={labelRef}
-        layers={1 << Layers.CAMERA_LAYER_UI}
-        text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
-        position={[0, 0, 0.01]}
-        name={props.name ? `${props.name} Label` : "Button Label"}
-      />
-    </entity>
-  );
-}
+import { Button3D, BUTTON_TYPES } from "./button3D";
 
 // eslint-disable-next-line react/prop-types
 export function Label({ text = {}, ...props }, ...children) {
@@ -131,7 +101,7 @@ export function CameraPrefab() {
         <Label ref={countdownLblRef} position={[0, 0, uiZ + 0.002]} />
         <Label ref={captureDurLblRef} position={[0, 0, uiZ + 0.002]} />
 
-        <Button
+        <Button3D
           ref={cancelRef}
           scale={buttonScale}
           position={[0, 0.1, uiZ]}
@@ -139,7 +109,7 @@ export function CameraPrefab() {
           height={buttonHeight}
           text={"Cancel"}
         />
-        <Button
+        <Button3D
           ref={snapRef}
           scale={buttonScale}
           position={[0, 0.1, uiZ]}
@@ -149,7 +119,7 @@ export function CameraPrefab() {
           text={"Photo"}
         />
 
-        <Button
+        <Button3D
           ref={prevButtonRef}
           scale={smallButtonScale}
           position={[-0.082, 0, uiZ]}
@@ -157,7 +127,7 @@ export function CameraPrefab() {
           height={buttonHeight}
           text={"<"}
         />
-        <Button
+        <Button3D
           ref={recVideoRef}
           scale={buttonScale}
           position={[0, -0.1, uiZ]}
@@ -166,7 +136,7 @@ export function CameraPrefab() {
           type={BUTTON_TYPES.ACTION}
           text={"Video"}
         />
-        <Button
+        <Button3D
           ref={nextButtonRef}
           scale={smallButtonScale}
           position={[0.082, 0, uiZ]}
@@ -175,7 +145,7 @@ export function CameraPrefab() {
           text={">"}
         />
 
-        <Button
+        <Button3D
           ref={sndToggleRef}
           scale={smallButtonScale}
           position={[0, -0.17, uiZ]}
