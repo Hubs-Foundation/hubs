@@ -197,6 +197,16 @@ export const ObjectMenu = defineComponent({
   targetRef: Types.eid
 });
 // TODO: Store this data elsewhere, since only one or two will ever exist.
+export const LinkHoverMenu = defineComponent({
+  targetObject: Types.eid,
+  linkButtonRef: Types.eid
+});
+export const LinkHoverMenuItem = defineComponent();
+export const Link = defineComponent({
+  url: Types.ui32
+});
+Link.url[$isStringType] = true;
+// TODO: Store this data elsewhere, since only one or two will ever exist.
 export const PDFMenu = defineComponent({
   prevButtonRef: Types.eid,
   nextButtonRef: Types.eid,

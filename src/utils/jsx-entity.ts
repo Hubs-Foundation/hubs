@@ -4,6 +4,8 @@ import {
   $isStringType,
   CameraTool,
   ObjectMenu,
+  LinkHoverMenu,
+  LinkHoverMenuItem,
   PDFMenu,
   CursorRaycastable,
   DestroyAtExtremeDistance,
@@ -50,6 +52,7 @@ import { inflatePDFLoader, PDFLoaderParams } from "../inflators/pdf-loader";
 import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader";
 import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
 import { inflateModelLoader, ModelLoaderParams } from "../inflators/model-loader";
+import { inflateLink, LinkParams } from "../inflators/link";
 import { inflateSlice9 } from "../inflators/slice9";
 import { TextParams, inflateText } from "../inflators/text";
 import {
@@ -239,6 +242,7 @@ export interface ComponentData {
   spotLight?: SpotLightParams;
   grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
+  link?: LinkParams;
   mirror?: MirrorParams;
   audioZone?: AudioZoneParams;
   audioParams?: AudioSettings;
@@ -310,6 +314,10 @@ export interface JSXComponentData extends ComponentData {
     mirrorButtonRef: Ref;
     scaleButtonRef: Ref;
   };
+  linkHoverMenu?: {
+    linkButtonRef: Ref;
+  };
+  linkHoverMenuItem?: boolean;
   pdfMenu?: {
     prevButtonRef: Ref;
     nextButtonRef: Ref;
@@ -384,6 +392,7 @@ declare global {
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   grabbable: inflateGrabbable,
   billboard: createDefaultInflator(Billboard),
+  link: inflateLink,
 
   // inflators that create Object3Ds
   ambientLight: inflateAmbientLight,
@@ -419,6 +428,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   objectMenu: createDefaultInflator(ObjectMenu),
+  linkHoverMenu: createDefaultInflator(LinkHoverMenu),
+  linkHoverMenuItem: createDefaultInflator(LinkHoverMenuItem),
   pdfMenu: createDefaultInflator(PDFMenu),
   cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   animationMixer: createDefaultInflator(AnimationMixer),

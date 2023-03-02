@@ -53,6 +53,7 @@ import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distanc
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
 import { objectMenuSystem } from "../bit-systems/object-menu";
 import { pdfMenuSystem } from "../bit-systems/pdf-menu-system";
+import { linkHoverMenuSystem } from "../bit-systems/link-hover-menu";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
 import type { HubsSystems } from "aframe";
 import { Camera, Scene, WebGLRenderer } from "three";
@@ -243,6 +244,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   videoMenuSystem(world, aframeSystems.userinput);
   videoSystem(world, hubsSystems.audioSystem);
   pdfMenuSystem(world, sceneEl.is("frozen"));
+  linkHoverMenuSystem(world);
   pdfSystem(world);
   mediaFramesSystem(world);
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
