@@ -58,14 +58,18 @@ const SystemEditorComponent = ({ classes }) => {
     setReticulumMeta(reticulumMeta);
   };
 
+  /**
+   * CHECK USER STATUS
+   * - Needs Avatars
+   * - Needs Scenes
+   * - Is in a Sandbox
+   * - is Using cloud flate
+   */
   const needsAvatars = reticulumMeta.repo && !reticulumMeta.repo.avatar_listings.any;
-
   const needsScenes = reticulumMeta.repo && !reticulumMeta.repo.scene_listings.any;
   const exceededStorageQuota = reticulumMeta.repo && !reticulumMeta.repo.storage.in_quota;
-
   const isInSESSandbox =
     adminInfo && adminInfo.using_ses && adminInfo.ses_max_24_hour_send <= MAX_AWS_SES_QUOTA_FOR_SANDBOX;
-
   const isUsingCloudflare =
     adminInfo &&
     retConfig &&

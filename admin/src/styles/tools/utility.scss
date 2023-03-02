@@ -1,6 +1,6 @@
-@use '../tools/media-queries.scss' as *;
-@use '../tools/mixins.scss' as *;
-@use '../core/variables.scss' as *;
+@use "../tools/media-queries.scss" as *;
+@use "../tools/mixins.scss" as *;
+@use "../core/variables.scss" as *;
 
 // ---------------------------------
 //   Quick Typograpjhy
@@ -204,12 +204,12 @@ $fontSizes: 12, 14, 16, 18, 20;
   text-transform: capitalize;
 }
 
-.u-left-absolute {
+.left-absolute {
   position: absolute;
   left: 0;
 }
 
-.u-right-absolute {
+.right-absolute {
   position: absolute;
   right: 0;
 }
@@ -246,8 +246,8 @@ $fontSizes: 12, 14, 16, 18, 20;
 // ---------------------------------
 
 $percentWidths: 10, 20, 30, 40, 50, 60, 70, 80, 90, 100;
-$percent: '%';
-$unit: 'px';
+$percent: "%";
+$unit: "px";
 
 @each $percentWidth in $percentWidths {
   .max-w-#{$percentWidth}-percent {
@@ -271,7 +271,7 @@ $pxWidths: 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000;
 // Create Size Value Array
 $start: 0;
 $end: 100;
-$array: '';
+$array: "";
 
 @for $i from $start + 1 through $end {
   $array: append($array, $i, comma);
