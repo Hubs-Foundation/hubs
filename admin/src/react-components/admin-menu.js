@@ -19,8 +19,7 @@ import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 import HubsCloudLogo from "../assets/images/hubs_cloud_dark.png";
 import configs from "../utils/configs";
-import HubsLogo from "../assets/images/hubs_logo.png"
-
+import HubsLogo from "../assets/images/hubs_logo.png";
 
 const mapStateToProps = state => ({
   resources: getResources(state)

@@ -269,7 +269,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const layout = props => (
-    <Layout {...props} className="global_background" appBar={HiddenAppBar} menu={props => <AdminMenu {...props} services={schemaCategories} />} />
+    <Layout
+      {...props}
+      className="global_background"
+      appBar={HiddenAppBar}
+      menu={props => <AdminMenu {...props} services={schemaCategories} />}
+    />
   );
 
   const redirectToLogin = () => (document.location = "/?sign_in&sign_in_destination=admin");
