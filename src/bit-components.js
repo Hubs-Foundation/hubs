@@ -121,8 +121,7 @@ export const PhysicsShape = defineComponent({
   offset: [Types.f32, 3],
   orientation: [Types.f32, 4],
   heightfieldData: [Types.f32],
-  heightfieldDistance: Types.f32,
-  flags: Types.ui8
+  heightfieldDistance: Types.f32
 });
 export const DestroyAtExtremeDistance = defineComponent();
 export const MediaLoading = defineComponent();
@@ -161,6 +160,8 @@ export const LoadedByMediaLoader = defineComponent();
 export const MediaContentBounds = defineComponent({
   bounds: [Types.f32, 3]
 });
+MediaLoaded.map = new Map();
+export const MediaVisible = defineComponent();
 
 // MediaImageLoaderData and MediaVideoLoaderData are
 // for parameters that are set at glTF inflators
