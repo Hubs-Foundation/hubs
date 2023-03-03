@@ -120,6 +120,9 @@ export const PhysicsShape = defineComponent({
   orientation: [Types.f32, 4],
   flags: Types.ui8
 });
+export const AmmoShape = defineComponent();
+export const BoxCollider = defineComponent();
+export const Trimesh = defineComponent();
 PhysicsShape.shapeIds = new Map();
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
