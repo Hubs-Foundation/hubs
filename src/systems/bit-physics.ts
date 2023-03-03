@@ -62,11 +62,11 @@ function setupPhysicsShapeForMedia(world: HubsWorld, physicsSystem: PhysicsSyste
     case MediaTypeE.IMAGE:
     case MediaTypeE.PDF:
     case MediaTypeE.HTML: {
-      PhysicsShape.type[eid] = Shape.BOX;
+      PhysicsShape.shape[eid] = Shape.BOX;
       break;
     }
     case MediaTypeE.GLTF: {
-      PhysicsShape.type[eid] = Shape.HULL;
+      PhysicsShape.shape[eid] = Shape.HULL;
       break;
     }
   }
