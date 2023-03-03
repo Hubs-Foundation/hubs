@@ -1,9 +1,19 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } from "bitecs";
-import { Object3DTag, Rigidbody, PhysicsShape, AEntity, MediaLoader, MediaLoaded } from "../bit-components";
+import {
+  Object3DTag,
+  Rigidbody,
+  PhysicsShape,
+  AEntity,
+  MediaLoader,
+  MediaLoaded,
+  AmmoShape,
+  BoxCollider,
+  Trimesh
+} from "../bit-components";
 import { Fit, getShapeFromPhysicsShape, PhysicsShapes, Shape } from "../inflators/physics-shape";
-import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
+import { findAncestorWithComponent, findChildWithComponent, hasAnyComponent } from "../utils/bit-utils";
 import { contentTypeForMediaInfo, MediaLoadedInfo, MediaTypeE } from "../bit-systems/media-loading";
-import { Mesh } from "three";
+import { Mesh, Vector3, Object3D } from "three";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
 import { HubsWorld } from "../app";
 import { PhysicsSystem } from "./physics-system";
@@ -17,6 +27,23 @@ const shapeExitQuery = exitQuery(shapeQuery);
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const exitMediaLoaderQuery = exitQuery(mediaLoaderQuery);
 
+const tmpV = new Vector3();
+
+function updateOffsets(world: HubsWorld, eid: number, obj: Object3D) {
+  // As we don't set offsets for components like ammo-shape that don't have a rigid body, we add offsets here.
+  const offset = new Float32Array(PhysicsShape.offset[eid].length);
+  if (hasComponent(world, AmmoShape, eid)) {
+    offset.set(PhysicsShape.offset[eid]);
+  }
+  if (hasAnyComponent(world, [BoxCollider, Trimesh, AmmoShape], eid)) {
+    PhysicsShape.offset[eid].set(obj.position.clone().add(tmpV.fromArray(offset)).toArray());
+    PhysicsShape.orientation[eid].set(obj.quaternion.toArray());
+    if (hasComponent(world, BoxCollider, eid)) {
+      PhysicsShape.halfExtents[eid].set(obj.scale.divideScalar(2).toArray());
+    }
+  }
+}
+
 function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: number) {
   const bodyId = PhysicsShape.bodyId[eid];
   const shapeIds = PhysicsShapes.get(eid)!;
@@ -25,9 +52,9 @@ function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: n
     let found = false;
     obj.traverse(child => {
       if (child instanceof Mesh) {
-        child.updateMatrices();
+        updateOffsets(world, eid, obj);
         const shape = getShapeFromPhysicsShape(eid);
-        const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
+        const shapeId = physicsSystem.addShapes(bodyId, child, shape);
         shapeIds.add(shapeId);
         found = true;
       }
@@ -37,6 +64,7 @@ function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: n
       return;
     }
   } else {
+    updateOffsets(world, eid, obj);
     const shape = getShapeFromPhysicsShape(eid);
     const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
     shapeIds.add(shapeId);
