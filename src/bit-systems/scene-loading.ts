@@ -2,18 +2,29 @@ import { AElement } from "aframe";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
-import { EnvironmentSettings, NavMesh, Networked, SceneLoader, SceneRoot, Skybox } from "../bit-components";
+import {
+  EnvironmentSettings,
+  HeightField,
+  NavMesh,
+  Networked,
+  SceneLoader,
+  SceneRoot,
+  Skybox,
+  Trimesh
+} from "../bit-components";
 import Sky from "../components/skybox";
+import { Fit, Shape, inflatePhysicsShape, PhysicsShapeParams } from "../inflators/physics-shape";
 import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { EnvironmentSystem } from "../systems/environment-system";
 import { setInitialNetworkedData, setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
-import { anyEntityWith } from "../utils/bit-utils";
+import { anyEntityWith, findChildWithComponent } from "../utils/bit-utils";
 import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
 import { EntityID } from "../utils/networking-types";
+import { isGeometryHighDensity } from "../utils/physics-utils";
 import { add } from "./media-loading";
 import { moveToSpawnPoint } from "./waypoint";
 
@@ -49,6 +60,7 @@ function* loadScene(
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
+    let isHighDensity = false;
     let skybox: Sky | undefined;
     world.eid2obj.get(scene)!.traverse(o => {
       if ((o as Mesh).isMesh) {
@@ -73,7 +85,52 @@ function* loadScene(
       if (!skybox && hasComponent(world, Skybox, o.eid!)) {
         skybox = o as Sky;
       }
+
+      if (
+        (o as Mesh).isMesh &&
+        (!Sky || (o as any).__proto__ != Sky.prototype) &&
+        !o.name.startsWith("Floor_Plan") &&
+        !o.name.startsWith("Ground_Plane") &&
+        ((o as Mesh).geometry as any).boundsTree
+      ) {
+        if (isGeometryHighDensity((o as Mesh).geometry)) {
+          isHighDensity = true;
+        }
+      }
     });
+
+    const navMeshEid = findChildWithComponent(world, NavMesh, scene);
+    const trimeshEid = findChildWithComponent(world, Trimesh, scene);
+    const heightfieldEid = findChildWithComponent(world, HeightField, scene);
+    if (!heightfieldEid && !trimeshEid) {
+      console.log("collision not found in scene");
+      if (navMeshEid) {
+        inflatePhysicsShape(world, navMeshEid, {
+          type: Shape.MESH,
+          margin: 0.01,
+          fit: Fit.ALL,
+          includeInvisible: true
+        } as PhysicsShapeParams);
+      } else {
+        if (!isHighDensity) {
+          inflatePhysicsShape(world, scene, {
+            type: Shape.MESH,
+            margin: 0.01,
+            fit: Fit.ALL
+          } as PhysicsShapeParams);
+        } else {
+          inflatePhysicsShape(world, scene, {
+            type: Shape.BOX,
+            margin: 0.01,
+            fit: Fit.MANUAL,
+            halfExtents: [4000, 0.5, 4000],
+            offset: [0, -0.5, 0]
+          } as PhysicsShapeParams);
+        }
+      }
+    } else {
+      console.log("heightfield or trimesh found on scene");
+    }
 
     const envSettings = { skybox };
     if (hasComponent(world, EnvironmentSettings, scene)) {
