@@ -1,7 +1,7 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget, PhysicsShape } from "../bit-components";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
@@ -17,6 +17,38 @@ import { loadVideo } from "../utils/load-video";
 import { loadAudio } from "../utils/load-audio";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
+
+export enum MediaTypeE {
+  VIDEO,
+  GLTF,
+  PDF,
+  IMAGE,
+  HTML
+}
+
+export function contentTypeForMediaInfo(mediaInfo: MediaInfo) {
+  const { contentType, accessibleUrl } = mediaInfo;
+  if (
+    contentType.startsWith("video/") ||
+    contentType.startsWith("audio/") ||
+    contentType.startsWith("application/dash") ||
+    AFRAME.utils.material.isHLS(accessibleUrl, contentType)
+  ) {
+    return MediaTypeE.VIDEO;
+  } else if (
+    contentType.includes("application/octet-stream") ||
+    contentType.includes("x-zip-compressed") ||
+    contentType.startsWith("model/gltf")
+  ) {
+    return MediaTypeE.GLTF;
+  } else if (contentType.startsWith("image/")) {
+    return MediaTypeE.IMAGE;
+  } else if (contentType.startsWith("application/pdf")) {
+    return MediaTypeE.PDF;
+  } else if (contentType.startsWith("text/html")) {
+    return MediaTypeE.HTML;
+  }
+}
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -134,6 +166,8 @@ type MediaInfo = {
   thumbnail: string;
 };
 
+export const MediaLoadedInfo = (MediaLoaded as any).map as Map<EntityID, MediaInfo>;
+
 function* loadMedia(world: HubsWorld, eid: EntityID) {
   let loadingObjEid = 0;
   const addLoadingObjectTimeout = crTimeout(() => {
@@ -151,6 +185,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     }
     media = yield* loader(world, urlData);
     addComponent(world, MediaLoaded, media);
+    MediaLoadedInfo.set(media, urlData);
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());
@@ -180,6 +215,8 @@ const jobs = new JobRunner();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
+const mediaLoadedQuery = defineQuery([MediaLoaded]);
+const mediaLoadedExitQuery = exitQuery(mediaLoadedQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
     jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
@@ -188,6 +225,8 @@ export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderExitQuery(world).forEach(function (eid) {
     jobs.stop(eid);
   });
+
+  mediaLoadedExitQuery(world).forEach(eid => MediaLoadedInfo.delete(eid));
 
   jobs.tick();
 }

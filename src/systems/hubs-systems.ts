@@ -183,7 +183,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   sceneLoadingSystem(world, hubsSystems.environmentSystem, hubsSystems.characterController);
   mediaLoadingSystem(world);
 
-  physicsCompatSystem(world);
+  physicsCompatSystem(world, hubsSystems.physicsSystem);
 
   networkedTransformSystem(world);
 
