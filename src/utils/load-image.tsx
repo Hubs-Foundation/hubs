@@ -9,7 +9,8 @@ import { AlphaMode } from "./create-image-mesh";
 
 // TODO AlphaMode is written in JS and should be a ts enum
 type AlphaModeType = typeof AlphaMode.Opaque | typeof AlphaMode.Mask | typeof AlphaMode.Blend;
-export function* loadImage(world: HubsWorld, url: string, contentType: string) {
+
+export function* createImageDef(world: HubsWorld, url: string, contentType: string) {
   const { texture, ratio, cacheKey }: { texture: Texture; ratio: number; cacheKey: string } =
     yield loadTextureCancellable(url, 1, contentType);
 
@@ -23,17 +24,23 @@ export function* loadImage(world: HubsWorld, url: string, contentType: string) {
     alphaMode = AlphaMode.Opaque;
   }
 
+  return {
+    texture,
+    ratio,
+    projection: ProjectionMode.FLAT,
+    alphaMode,
+    cacheKey
+  };
+}
+
+export function* loadImage(world: HubsWorld, url: string, contentType: string) {
+  const imageDef = yield* createImageDef(world, url, contentType);
+
   return renderAsEntity(
     world,
     <entity
       name="Image"
-      image={{
-        texture,
-        ratio,
-        projection: ProjectionMode.FLAT,
-        alphaMode,
-        cacheKey
-      }}
+      image={imageDef}
     />
   );
 }
