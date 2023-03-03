@@ -1,7 +1,19 @@
 import { AElement, UserInputSystem } from "aframe";
 import { defineQuery, hasComponent } from "bitecs";
 import { Selection } from "postprocessing";
-import { ArrowHelper, AxesHelper, Box3, Camera, MathUtils, Matrix4, Mesh, Quaternion, Raycaster, Vector3 } from "three";
+import {
+  ArrowHelper,
+  AxesHelper,
+  Box3,
+  Camera,
+  MathUtils,
+  Matrix4,
+  Mesh,
+  MeshBasicMaterial,
+  Quaternion,
+  Raycaster,
+  Vector3
+} from "three";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper";
 import { HubsWorld } from "../app";
 import { Carryable, FloatyObject, HoveredRemoteRight, Rigidbody, SceneRoot } from "../bit-components";
@@ -14,6 +26,7 @@ import { anyEntityWith } from "../utils/bit-utils";
 import { EntityID } from "../utils/networking-types";
 import qsTruthy from "../utils/qs_truthy";
 import { takeOwnership } from "../utils/take-ownership";
+import { setMatrixWorld } from "../utils/three-utils";
 
 const unlockPointerOnDrop = !qsTruthy("mouselockWhenNotGrabbing") && !qsTruthy("alwaysMouselock");
 
@@ -30,6 +43,7 @@ let rotationOffset = 0;
 let nudgeOffset = 0;
 let prevDot = 0;
 let snapFaceOverrideIdx = -1;
+let lastIntersectedObj: Mesh | null = null;
 
 function showObjectMenu(eid: EntityID, x: number, y: number) {
   window.dispatchEvent(
@@ -112,6 +126,8 @@ function dropObject(world: HubsWorld, applyGravity: boolean) {
   activeObject = 0;
   carryState = CarryState.NONE;
   axisHelper.removeFromParent();
+  arrowHelper.visible = false;
+  gridMesh.visible = false;
 }
 
 export function isCarryingObject() {
@@ -202,12 +218,67 @@ raycaster.far = 100;
 const tmpNormalMatrix = new THREE.Matrix3();
 let normalHelper: VertexNormalsHelper | null = null;
 const arrowHelper = new ArrowHelper();
+arrowHelper.setColor(0xffffff);
 const axisHelper = new AxesHelper();
+const gridMesh = new Mesh(
+  undefined,
+  new THREE.ShaderMaterial({
+    transparent: true,
+    toneMapped: false,
+    // opacity: 0.1,
+    // polygonOffset: true,
+    // polygonOffsetFactor: 1,
+    // polygonOffsetUnits: 1,
+    uniforms: {
+      color: { value: new THREE.Color(0xffffff) },
+      objectPos: { value: new THREE.Vector3() },
+      objectScale: { value: 1.0 }
+    },
+    vertexShader: `
+      varying vec3 vWorld;
+      void main()
+      {
+        vWorld = (modelMatrix * vec4( position, 1.0 )).xyz;
+        gl_Position = projectionMatrix * viewMatrix * vec4( vWorld, 1.0 );
+        gl_Position.z -= 0.001;
+      }
+    `,
+    // TODO this is just using a world aligned grid and rendering all 3 axes.
+    // This has some artifacts on non axis aligned surfaces. We can likely improve this.
+    fragmentShader: `
+varying vec3 vWorld;
+uniform vec3 color;
+uniform vec3 objectPos;
+uniform float objectScale;
+
+void main() {
+    vec3 coord = vWorld.xyz * 5.0 + 0.0001; // fudge for flat surfaces perfectly aligned with world axes
+    vec3 grid = abs(fract(coord - 0.5) - 0.5) / fwidth(coord);
+
+    float line = 1.0 - min(min(min(grid.x, grid.y), grid.z), 1.0);
+    float dist = length(vWorld - objectPos);
+
+    float centerCircle = 1.0 - smoothstep(0.01, 0.03, dist);
+
+    float fadeCore = 0.8 * objectScale;
+    float fadedLines = line * (1.0 - smoothstep(fadeCore, fadeCore + 1.5 * objectScale, dist));
+
+    float alpha = min(max(fadedLines, centerCircle), 1.0);
+
+    gl_FragColor = vec4(color, alpha);
+}
+  `
+  })
+);
+
+(gridMesh as any).raycast = function () {};
+gridMesh.visible = false;
 
 // TODO GC clone/new/etc
 function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSystem) {
   if (userinput.get(paths.actions.carry.toggle_snap)) {
     carryState = CarryState.CARRYING;
+    gridMesh.visible = false;
     return;
   }
   if (userinput.get(paths.actions.carry.drop)) {
@@ -252,18 +323,19 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
     normalHelper = new VertexNormalsHelper(mesh);
     normalHelper.frustumCulled = false;
     // world.scene.add(normalHelper);
-    // world.scene.add(arrowHelper);
+    world.scene.add(arrowHelper);
+    world.scene.add(gridMesh);
   }
 
-  if (normalHelper.object !== intersection.object) {
+  if (lastIntersectedObj !== intersection.object) {
+    lastIntersectedObj = intersection.object as Mesh;
     normalHelper.object = intersection.object;
     normalHelper.update();
+
+    gridMesh.geometry = lastIntersectedObj.geometry;
+    setMatrixWorld(gridMesh, lastIntersectedObj.matrixWorld);
     // rotationOffset = 0;
   }
-
-  arrowHelper.position.copy(target);
-  arrowHelper.setDirection(dir);
-  arrowHelper.matrixNeedsUpdate = true;
 
   const dot = dir.dot(Y_AXIS);
   if (Math.abs(dot - prevDot) > 0.2) {
@@ -272,7 +344,16 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
   }
   prevDot = dot;
 
+  arrowHelper.position.copy(target);
+  arrowHelper.setDirection(dir);
+  arrowHelper.setLength(nudgeOffset, 0.1, 0.1);
+  arrowHelper.matrixNeedsUpdate = true;
+  arrowHelper.visible = nudgeOffset !== 0;
+
   obj.scale.max(MIN_SCALE);
+
+  gridMesh.material.uniforms.objectPos.value.copy(target);
+  gridMesh.material.uniforms.objectScale.value = size.x * obj.scale.x;
 
   // TODO we are doing 3 quaternion multiplies, I suspect this can be simplified
   obj.quaternion.setFromRotationMatrix(tmpMat4.lookAt(dir, ZERO, Y_AXIS));
@@ -290,7 +371,8 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
   const sizeOnAxis = size[AXIS_NAME_FOR_FACE[snapFace]];
   const scaleOnAxis = obj.scale[AXIS_NAME_FOR_FACE[snapFace]];
   // const offsetDistance = (sizeOnAxis / 2 + nudgeOffset) * scaleOnAxis;
-  const offsetDistance = (sizeOnAxis / 2) * scaleOnAxis + nudgeOffset;
+  const offsetDistance =
+    nudgeOffset < 0 ? (sizeOnAxis / 2 + nudgeOffset) * scaleOnAxis : (sizeOnAxis / 2) * scaleOnAxis + nudgeOffset;
 
   obj.quaternion.multiply(QUAT_FOR_FACE[snapFace]);
   obj.quaternion.multiply(tmpQuat.setFromAxisAngle(rotationAxis, -rotationOffset));
@@ -335,10 +417,12 @@ export function carrySystem(
       rotationOffset = 0;
       nudgeOffset = NUDGE_START_OFFSET;
       snapFaceOverrideIdx = -1;
+      gridMesh.visible = true;
+      lastIntersectedObj = null;
     }
   } else if (carryState == CarryState.SNAPPING) {
-    outlineEffect.visibleEdgeColor.setHex(0x08f108);
-    addEntityToSelection(world, selection, activeObject);
+    outlineEffect.visibleEdgeColor.setHex(0xffffff);
+    if (nudgeOffset < 0) addEntityToSelection(world, selection, activeObject);
     handleSnapping(world, camera, userinput);
   } else {
     outlineEffect.visibleEdgeColor.setHex(0x08c7f1);
