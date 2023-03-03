@@ -3,7 +3,7 @@ import { Fit, inflatePhysicsShape, PhysicsShapeParams, Shape } from "./physics-s
 import { inflateRigidBody, RigiBodyParams, Type } from "./rigid-body";
 import { Euler, Quaternion } from "three";
 
-export type AmmoShapeParams = {
+export type BoxColliderParams = {
   position: { x: number; y: number; z: number };
   rotation: { x: number; y: number; z: number };
   scale: { x: number; y: number; z: number };
@@ -15,7 +15,7 @@ const DEFAULTS = {
   scale: { x: 1, y: 1, z: 1 }
 };
 
-export function inflateBoxCollider(world: HubsWorld, eid: number, params: AmmoShapeParams) {
+export function inflateBoxCollider(world: HubsWorld, eid: number, params: BoxColliderParams) {
   params = Object.assign({}, DEFAULTS, params);
 
   const euler = new Euler(params.rotation.x, params.rotation.y, params.rotation.z);
