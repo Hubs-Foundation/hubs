@@ -108,7 +108,6 @@ export const Rigidbody = defineComponent({
 });
 export const PhysicsShape = defineComponent({
   bodyId: Types.ui16,
-  shapeId: Types.ui16,
   type: Types.ui8,
   fit: Types.ui8,
   halfExtents: [Types.f32, 3],
@@ -121,6 +120,7 @@ export const PhysicsShape = defineComponent({
   orientation: [Types.f32, 4],
   flags: Types.ui8
 });
+PhysicsShape.shapeIds = new Map();
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
 export const DestroyAtExtremeDistance = defineComponent();
