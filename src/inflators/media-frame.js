@@ -3,8 +3,8 @@ import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape, Networked } f
 import { addComponent, hasComponent } from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
-import { RIGIDBODY_FLAGS } from "../systems/bit-physics";
 import { Layers } from "../camera-layers";
+import { RIGID_BODY_FLAGS } from "./rigid-body";
 
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
@@ -70,7 +70,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
   addComponent(world, Rigidbody, eid);
   Rigidbody.collisionGroup[eid] = COLLISION_LAYERS.MEDIA_FRAMES;
   Rigidbody.collisionMask[eid] = COLLISION_LAYERS.INTERACTABLES;
-  Rigidbody.flags[eid] = RIGIDBODY_FLAGS.DISABLE_COLLISIONS;
+  Rigidbody.flags[eid] = RIGID_BODY_FLAGS.DISABLE_COLLISIONS;
   addComponent(world, PhysicsShape, eid);
   PhysicsShape.halfExtents[eid].set([
     componentProps.bounds.x / 2,

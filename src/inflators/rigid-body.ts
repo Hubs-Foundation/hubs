@@ -51,7 +51,7 @@ const DEFAULTS = {
   scaleAutoUpdate: true
 };
 
-const RIGID_BODY_FLAGS = {
+export const RIGID_BODY_FLAGS = {
   EMIT_COLLISION_EVENTS: 1 << 0,
   DISABLE_COLLISION: 1 << 1,
   SCALE_AUTO_UPDATE: 1 << 2
