@@ -1,7 +1,7 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } from "bitecs";
 import { Object3DTag, Rigidbody, PhysicsShape, AEntity, MediaLoader, MediaLoaded } from "../bit-components";
-import { Fit, getShapeFromPhysicsShape, Shape } from "../inflators/physics-shape";
-import { findChildWithComponent } from "../utils/bit-utils";
+import { Fit, getShapeFromPhysicsShape, PhysicsShapes, Shape } from "../inflators/physics-shape";
+import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
 import { contentTypeForMediaInfo, MediaLoadedInfo, MediaTypeE } from "../bit-systems/media-loading";
 import { Mesh } from "three";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
@@ -15,30 +15,29 @@ const shapeQuery = defineQuery([Rigidbody, PhysicsShape]);
 const shapeEnterQuery = enterQuery(shapeQuery);
 const shapeExitQuery = exitQuery(shapeQuery);
 const mediaLoaderQuery = defineQuery([MediaLoader]);
-const enterMediaLoaderQuery = enterQuery(mediaLoaderQuery);
 const exitMediaLoaderQuery = exitQuery(mediaLoaderQuery);
 
 const media = new Set<number>();
 
-export const RIGIDBODY_FLAGS = {
-  DISABLE_COLLISIONS: 1 << 0
-};
-
 function updatePhysicsShape(world: HubsWorld, physicsSystem: PhysicsSystem, shapeEid: number, objEid: number) {
   const bodyId = Rigidbody.bodyId[shapeEid];
-  let shapeId = PhysicsShape.shapeId[shapeEid];
-  bodyId && shapeId && physicsSystem.removeShapes(bodyId, shapeId);
+  let shapeIds = PhysicsShapes.get(shapeEid)!;
+  if (bodyId) {
+    shapeIds.forEach((shapeId: number) => {
+      physicsSystem.removeShapes(bodyId, shapeId);
+      shapeIds!.delete(shapeId);
+    });
+  }
   const obj = world.eid2obj.get(objEid)!;
   if (PhysicsShape.fit[shapeEid] === Fit.ALL) {
-    // TODO Support for multiple shapes
     let found = false;
     obj.traverse(child => {
-      if (!found && child instanceof Mesh) {
+      if (child instanceof Mesh) {
         child.updateMatrices();
         const shape = getShapeFromPhysicsShape(shapeEid);
-        shapeId = physicsSystem.addShapes(bodyId, obj, shape);
-        PhysicsShape.shapeId[shapeEid] = shapeId;
-        found = true;
+        const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
+        let shapeIds = PhysicsShapes.get(shapeEid)!;
+        shapeIds.add(shapeId);
       }
     });
     if (!found) {
@@ -47,8 +46,9 @@ function updatePhysicsShape(world: HubsWorld, physicsSystem: PhysicsSystem, shap
     }
   } else {
     const shape = getShapeFromPhysicsShape(shapeEid);
-    shapeId = physicsSystem.addShapes(bodyId, obj, shape);
-    PhysicsShape.shapeId[shapeEid] = shapeId;
+    const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
+    let shapeIds = PhysicsShapes.get(shapeEid)!;
+    shapeIds.add(shapeId);
   }
 }
 
@@ -88,30 +88,33 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
   shapeEnterQuery(world).forEach(eid => {
     if (hasComponent(world, Rigidbody, eid)) {
       const bodyId = Rigidbody.bodyId[eid];
-      // TODO If not physics body. Look up the graph for one and use that
-      PhysicsShape.bodyId[eid] = bodyId;
-      updatePhysicsShape(world, physicsSystem, eid, eid);
+      if (bodyId) {
+        PhysicsShape.bodyId[eid] = bodyId;
+      } else {
+        const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
+        bodyEid && (PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid]);
+      }
+      PhysicsShape.bodyId[eid] && updatePhysicsShape(world, physicsSystem, eid, eid);
     }
   });
 
-  enterMediaLoaderQuery(world).forEach(eid => {
-    if (hasComponent(world, PhysicsShape, eid)) {
-      media.add(eid);
-    }
-  });
+  exitMediaLoaderQuery(world).forEach(eid => setupPhysicsShapeForMedia(world, physicsSystem, eid));
 
-  exitMediaLoaderQuery(world).forEach(eid => {
-    if (media.has(eid)) {
-      setupPhysicsShapeForMedia(world, physicsSystem, eid);
-      media.delete(eid);
-    }
+  shapeExitQuery(world).forEach(eid => {
+    const shapeIds = PhysicsShapes.get(eid)!;
+    shapeIds.forEach(shapeId => {
+      physicsSystem.removeShapes(PhysicsShape.bodyId[eid], shapeId);
+      shapeIds.delete(shapeId);
+    });
   });
-
-  shapeExitQuery(world).forEach(eid => physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]));
 
   rigidbodyExitedQuery(world).forEach(eid => {
     if (entityExists(world, eid) && hasComponent(world, PhysicsShape, eid)) {
-      physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]);
+      const shapeIds = PhysicsShapes.get(eid)!;
+      shapeIds.forEach(shapeId => {
+        physicsSystem.removeShapes(PhysicsShape.bodyId[eid], shapeId);
+        shapeIds.delete(shapeId);
+      });
       // The PhysicsShape is still on this entity!
     }
     physicsSystem.removeBody(Rigidbody.bodyId[eid]);

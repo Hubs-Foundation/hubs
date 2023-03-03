@@ -107,11 +107,14 @@ export const getShapeFromPhysicsShape = (eid: number) => {
   };
 };
 
+export const PhysicsShapes = (PhysicsShape as any).shapeIds as Map<number, Set<number>>;
+
 export function inflatePhysicsShape(world: HubsWorld, eid: number, params: PhysicsShapeParams) {
   params = Object.assign({}, DEFAULTS, params);
 
   addComponent(world, PhysicsShape, eid);
 
+  PhysicsShapes.set(eid, new Set<number>());
   PhysicsShape.type[eid] = params.type;
   PhysicsShape.fit[eid] = params.fit;
   PhysicsShape.halfExtents[eid].set(params.halfExtents);
