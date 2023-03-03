@@ -108,7 +108,7 @@ export const Rigidbody = defineComponent({
 });
 export const PhysicsShape = defineComponent({
   bodyId: Types.ui16,
-  shape: Types.ui8,
+  type: Types.ui8,
   fit: Types.ui8,
   halfExtents: [Types.f32, 3],
   minHalfExtent: Types.f32,

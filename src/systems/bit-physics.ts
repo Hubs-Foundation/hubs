@@ -17,18 +17,16 @@ const shapeExitQuery = exitQuery(shapeQuery);
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const exitMediaLoaderQuery = exitQuery(mediaLoaderQuery);
 
-const media = new Set<number>();
-
-function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, shapeEid: number, objEid: number) {
-  const bodyId = PhysicsShape.bodyId[shapeEid];
-  const shapeIds = PhysicsShapes.get(shapeEid)!;
-  const obj = world.eid2obj.get(objEid)!;
-  if (PhysicsShape.fit[shapeEid] === Fit.ALL) {
+function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: number) {
+  const bodyId = PhysicsShape.bodyId[eid];
+  const shapeIds = PhysicsShapes.get(eid)!;
+  const obj = world.eid2obj.get(eid)!;
+  if (PhysicsShape.fit[eid] === Fit.ALL) {
     let found = false;
     obj.traverse(child => {
       if (child instanceof Mesh) {
         child.updateMatrices();
-        const shape = getShapeFromPhysicsShape(shapeEid);
+        const shape = getShapeFromPhysicsShape(eid);
         const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
         shapeIds.add(shapeId);
         found = true;
@@ -39,7 +37,7 @@ function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, shapeE
       return;
     }
   } else {
-    const shape = getShapeFromPhysicsShape(shapeEid);
+    const shape = getShapeFromPhysicsShape(eid);
     const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
     shapeIds.add(shapeId);
   }
@@ -55,11 +53,11 @@ function addPhysicsShapeForMedia(world: HubsWorld, physicsSystem: PhysicsSystem,
     case MediaTypeE.IMAGE:
     case MediaTypeE.PDF:
     case MediaTypeE.HTML: {
-      PhysicsShape.shape[eid] = Shape.BOX;
+      PhysicsShape.type[eid] = Shape.BOX;
       break;
     }
     case MediaTypeE.GLTF: {
-      PhysicsShape.shape[eid] = Shape.HULL;
+      PhysicsShape.type[eid] = Shape.HULL;
       break;
     }
   }
@@ -67,7 +65,7 @@ function addPhysicsShapeForMedia(world: HubsWorld, physicsSystem: PhysicsSystem,
   // TODO update scale?
   PhysicsShape.minHalfExtent[eid] = 0.04;
 
-  addPhysicsShapes(world, physicsSystem, eid, mediaEid);
+  addPhysicsShapes(world, physicsSystem, eid);
 }
 
 export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSystem) => {
@@ -86,7 +84,7 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
       const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
       bodyEid && (PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid]);
     }
-    PhysicsShape.bodyId[eid] && addPhysicsShapes(world, physicsSystem, eid, eid);
+    PhysicsShape.bodyId[eid] && addPhysicsShapes(world, physicsSystem, eid);
   });
 
   exitMediaLoaderQuery(world).forEach(eid => addPhysicsShapeForMedia(world, physicsSystem, eid));

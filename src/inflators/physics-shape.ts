@@ -28,7 +28,7 @@ export enum Axis {
 }
 
 export type PhysicsShapeParams = {
-  shape: Shape;
+  type: Shape;
   fit: Fit;
   halfExtents: [number, number, number];
   minHalfExtent: number;
@@ -42,7 +42,7 @@ export type PhysicsShapeParams = {
 };
 
 const DEFAULTS = {
-  shape: Shape.HULL,
+  type: Shape.HULL,
   fit: Fit.ALL,
   halfExtents: [1, 1, 1],
   minHalfExtent: 0,
@@ -59,8 +59,8 @@ const PHYSICS_SHAPE_FLAGS = {
   INCLUDE_INVISIBLE: 1 << 0
 };
 
-const getShapeString = (eid: number) => {
-  return Object.values(CONSTANTS.SHAPE)[PhysicsShape.shape[eid]];
+const getTypeString = (eid: number) => {
+  return Object.values(CONSTANTS.SHAPE)[PhysicsShape.type[eid]];
 };
 
 const getFitString = (eid: number) => {
@@ -80,7 +80,7 @@ const getCylinderAxisString = (eid: number) => {
 
 export const getShapeFromPhysicsShape = (eid: number) => {
   return {
-    type: getShapeString(eid),
+    type: getTypeString(eid),
     fit: getFitString(eid),
     halfExtents: {
       x: PhysicsShape.halfExtents[eid][0],
@@ -115,7 +115,7 @@ export function inflatePhysicsShape(world: HubsWorld, eid: number, params: Physi
   addComponent(world, PhysicsShape, eid);
 
   PhysicsShapes.set(eid, new Set<number>());
-  PhysicsShape.shape[eid] = params.shape;
+  PhysicsShape.type[eid] = params.type;
   PhysicsShape.fit[eid] = params.fit;
   PhysicsShape.halfExtents[eid].set(params.halfExtents);
   PhysicsShape.minHalfExtent[eid] = params.minHalfExtent;

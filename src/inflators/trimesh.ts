@@ -3,7 +3,7 @@ import { Fit, inflatePhysicsShape, PhysicsShapeParams, Shape } from "./physics-s
 
 export function inflateTrimesh(world: HubsWorld, eid: number) {
   inflatePhysicsShape(world, eid, {
-    shape: Shape.MESH,
+    type: Shape.MESH,
     fit: Fit.ALL,
     includeInvisible: true,
     margin: 0.01
