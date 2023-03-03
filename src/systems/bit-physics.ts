@@ -11,7 +11,7 @@ import { PhysicsSystem } from "./physics-system";
 const rigidbodyQuery = defineQuery([Rigidbody, Object3DTag, Not(AEntity)]);
 const rigidbodyEnteredQuery = enterQuery(rigidbodyQuery);
 const rigidbodyExitedQuery = exitQuery(rigidbodyQuery);
-const shapeQuery = defineQuery([Rigidbody, PhysicsShape]);
+const shapeQuery = defineQuery([PhysicsShape]);
 const shapeEnterQuery = enterQuery(shapeQuery);
 const shapeExitQuery = exitQuery(shapeQuery);
 const mediaLoaderQuery = defineQuery([MediaLoader]);
@@ -20,7 +20,7 @@ const exitMediaLoaderQuery = exitQuery(mediaLoaderQuery);
 const media = new Set<number>();
 
 function updatePhysicsShape(world: HubsWorld, physicsSystem: PhysicsSystem, shapeEid: number, objEid: number) {
-  const bodyId = Rigidbody.bodyId[shapeEid];
+  const bodyId = PhysicsShape.bodyId[shapeEid];
   let shapeIds = PhysicsShapes.get(shapeEid)!;
   if (bodyId) {
     shapeIds.forEach((shapeId: number) => {
@@ -38,6 +38,7 @@ function updatePhysicsShape(world: HubsWorld, physicsSystem: PhysicsSystem, shap
         const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
         let shapeIds = PhysicsShapes.get(shapeEid)!;
         shapeIds.add(shapeId);
+        found = true;
       }
     });
     if (!found) {
@@ -86,16 +87,14 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
   });
 
   shapeEnterQuery(world).forEach(eid => {
-    if (hasComponent(world, Rigidbody, eid)) {
-      const bodyId = Rigidbody.bodyId[eid];
-      if (bodyId) {
-        PhysicsShape.bodyId[eid] = bodyId;
-      } else {
-        const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
-        bodyEid && (PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid]);
-      }
-      PhysicsShape.bodyId[eid] && updatePhysicsShape(world, physicsSystem, eid, eid);
+    const bodyId = Rigidbody.bodyId[eid];
+    if (bodyId) {
+      PhysicsShape.bodyId[eid] = bodyId;
+    } else {
+      const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
+      bodyEid && (PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid]);
     }
+    PhysicsShape.bodyId[eid] && updatePhysicsShape(world, physicsSystem, eid, eid);
   });
 
   exitMediaLoaderQuery(world).forEach(eid => setupPhysicsShapeForMedia(world, physicsSystem, eid));
