@@ -118,10 +118,13 @@ export const PhysicsShape = defineComponent({
   margin: Types.f32,
   offset: [Types.f32, 3],
   orientation: [Types.f32, 4],
+  heightfieldData: [Types.f32],
+  heightfieldDistance: Types.f32,
   flags: Types.ui8
 });
 export const AmmoShape = defineComponent();
 export const BoxCollider = defineComponent();
+export const HeightField = defineComponent();
 export const Trimesh = defineComponent();
 PhysicsShape.shapeIds = new Map();
 export const Pinnable = defineComponent();
