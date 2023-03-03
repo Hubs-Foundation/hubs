@@ -181,7 +181,7 @@ export default class MessageDispatch extends EventTarget {
               this.log(LogMessageType.unauthorizedSceneChange);
             }
           } else {
-            this.log(LogMessageType.inalidSceneUrl);
+            this.log(LogMessageType.invalidSceneUrl);
           }
         } else if (this.hubChannel.canOrWillIfCreator("update_hub")) {
           this.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
