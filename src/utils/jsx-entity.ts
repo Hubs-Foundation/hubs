@@ -90,6 +90,7 @@ import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
 import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
 import { inflateBoxCollider } from "../inflators/box-collider";
 import { inflateTrimesh } from "../inflators/trimesh";
+import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 
 preload(
   new Promise(resolve => {
@@ -380,6 +381,7 @@ export interface GLTFComponentData extends ComponentData {
   ammoShape?: AmmoShapeParams;
   boxCollider?: true;
   trimesh?: true;
+  heightfield?: HeightFieldParams;
 }
 
 declare global {
@@ -488,7 +490,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   particleEmitter: inflateParticleEmitter,
   ammoShape: inflateAmmoShape,
   boxCollider: inflateBoxCollider,
-  trimesh: inflateTrimesh
+  trimesh: inflateTrimesh,
+  heightfield: inflateHeightField
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

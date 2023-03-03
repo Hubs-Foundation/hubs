@@ -38,6 +38,8 @@ export type PhysicsShapeParams = {
   margin: number;
   offset: [number, number, number];
   orientation: [number, number, number, number];
+  heightfieldData: number[];
+  heightfieldDistance: number;
   includeInvisible: boolean;
 };
 
@@ -52,6 +54,8 @@ const DEFAULTS = {
   margin: 0.01,
   offset: [0, 0, 0],
   orientation: [0, 0, 0, 1],
+  heightfieldData: [],
+  heightfieldDistance: 1,
   includeInvisible: false
 };
 
@@ -103,6 +107,8 @@ export const getShapeFromPhysicsShape = (eid: number) => {
       z: PhysicsShape.orientation[eid][2],
       w: PhysicsShape.orientation[eid][3]
     },
+    heightfieldData: PhysicsShape.heightfieldData[eid],
+    heightfieldDistance: PhysicsShape.heightfieldDistance[eid],
     includeInvisible: PhysicsShape.flags[eid] & PHYSICS_SHAPE_FLAGS.INCLUDE_INVISIBLE
   };
 };
@@ -124,6 +130,8 @@ export function inflatePhysicsShape(world: HubsWorld, eid: number, params: Physi
   PhysicsShape.cylinderAxis[eid] = params.cylinderAxis;
   PhysicsShape.margin[eid] = params.margin;
   PhysicsShape.offset[eid].set(params.offset);
+  PhysicsShape.heightfieldData[eid] = params.heightfieldData.slice();
+  PhysicsShape.heightfieldDistance[eid] = params.heightfieldDistance;
   PhysicsShape.orientation[eid].set(params.orientation);
   params.includeInvisible && (PhysicsShape.flags[eid] |= PHYSICS_SHAPE_FLAGS.INCLUDE_INVISIBLE);
 

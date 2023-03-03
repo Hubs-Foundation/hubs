@@ -8,7 +8,8 @@ import {
   MediaLoaded,
   AmmoShape,
   BoxCollider,
-  Trimesh
+  Trimesh,
+  HeightField
 } from "../bit-components";
 import { Fit, getShapeFromPhysicsShape, PhysicsShapes, Shape } from "../inflators/physics-shape";
 import { findAncestorWithComponent, findChildWithComponent, hasAnyComponent } from "../utils/bit-utils";
@@ -30,12 +31,12 @@ const exitMediaLoaderQuery = exitQuery(mediaLoaderQuery);
 const tmpV = new Vector3();
 
 function updateOffsets(world: HubsWorld, eid: number, obj: Object3D) {
-  // As we don't set offsets for components like ammo-shape that don't have a rigid body, we add offsets here.
-  const offset = new Float32Array(PhysicsShape.offset[eid].length);
-  if (hasComponent(world, AmmoShape, eid)) {
+  // As we don't set offsets for components like ammo-shape that don't have a rigid body, we need to set them here.
+  const offset = PhysicsShape.offset[eid].slice();
+  if (hasAnyComponent(world, [AmmoShape, HeightField], eid)) {
     offset.set(PhysicsShape.offset[eid]);
   }
-  if (hasAnyComponent(world, [BoxCollider, Trimesh, AmmoShape], eid)) {
+  if (hasAnyComponent(world, [BoxCollider, Trimesh, AmmoShape, HeightField], eid)) {
     PhysicsShape.offset[eid].set(obj.position.clone().add(tmpV.fromArray(offset)).toArray());
     PhysicsShape.orientation[eid].set(obj.quaternion.toArray());
     if (hasComponent(world, BoxCollider, eid)) {
