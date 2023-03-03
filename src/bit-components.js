@@ -155,7 +155,6 @@ export const MediaLoader = defineComponent({
 MediaLoader.src[$isStringType] = true;
 export const MediaLoaded = defineComponent();
 MediaLoaded.map = new Map();
-export const MediaVisible = defineComponent();
 
 export const SceneRoot = defineComponent();
 export const NavMesh = defineComponent();
