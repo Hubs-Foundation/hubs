@@ -240,7 +240,9 @@ const gridMesh = new Mesh(
       {
         vWorld = (modelMatrix * vec4( position, 1.0 )).xyz;
         gl_Position = projectionMatrix * viewMatrix * vec4( vWorld, 1.0 );
-        gl_Position.z -= 0.001;
+        // TODO is there a better way to do this?
+        // gridMesh shares the exact matrixWorld of the object it is on, nudge depth values to avoid z-fighting
+        gl_Position.z -= 0.000001;
       }
     `,
     // TODO this is just using a world aligned grid and rendering all 3 axes.
