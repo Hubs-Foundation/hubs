@@ -5,6 +5,7 @@ import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
 import { Layers } from "../camera-layers";
 import { RIGID_BODY_FLAGS } from "./rigid-body";
+import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
@@ -71,7 +72,12 @@ export function inflateMediaFrame(world, eid, componentProps) {
   Rigidbody.collisionGroup[eid] = COLLISION_LAYERS.MEDIA_FRAMES;
   Rigidbody.collisionMask[eid] = COLLISION_LAYERS.INTERACTABLES;
   Rigidbody.flags[eid] = RIGID_BODY_FLAGS.DISABLE_COLLISIONS;
-  addComponent(world, PhysicsShape, eid);
+  inflatePhysicsShape(world, eid, {
+    type: Shape.MESH,
+    margin: 0.01,
+    fit: Fit.ALL,
+    includeInvisible: true
+  });
   PhysicsShape.halfExtents[eid].set([
     componentProps.bounds.x / 2,
     componentProps.bounds.y / 2,

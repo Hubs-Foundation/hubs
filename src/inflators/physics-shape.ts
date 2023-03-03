@@ -59,7 +59,7 @@ const DEFAULTS = {
   includeInvisible: false
 };
 
-const PHYSICS_SHAPE_FLAGS = {
+export const PHYSICS_SHAPE_FLAGS = {
   INCLUDE_INVISIBLE: 1 << 0
 };
 
