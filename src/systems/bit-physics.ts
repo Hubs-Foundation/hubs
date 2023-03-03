@@ -19,15 +19,9 @@ const exitMediaLoaderQuery = exitQuery(mediaLoaderQuery);
 
 const media = new Set<number>();
 
-function updatePhysicsShape(world: HubsWorld, physicsSystem: PhysicsSystem, shapeEid: number, objEid: number) {
+function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, shapeEid: number, objEid: number) {
   const bodyId = PhysicsShape.bodyId[shapeEid];
-  let shapeIds = PhysicsShapes.get(shapeEid)!;
-  if (bodyId) {
-    shapeIds.forEach((shapeId: number) => {
-      physicsSystem.removeShapes(bodyId, shapeId);
-      shapeIds!.delete(shapeId);
-    });
-  }
+  const shapeIds = PhysicsShapes.get(shapeEid)!;
   const obj = world.eid2obj.get(objEid)!;
   if (PhysicsShape.fit[shapeEid] === Fit.ALL) {
     let found = false;
@@ -36,7 +30,6 @@ function updatePhysicsShape(world: HubsWorld, physicsSystem: PhysicsSystem, shap
         child.updateMatrices();
         const shape = getShapeFromPhysicsShape(shapeEid);
         const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
-        let shapeIds = PhysicsShapes.get(shapeEid)!;
         shapeIds.add(shapeId);
         found = true;
       }
@@ -48,7 +41,6 @@ function updatePhysicsShape(world: HubsWorld, physicsSystem: PhysicsSystem, shap
   } else {
     const shape = getShapeFromPhysicsShape(shapeEid);
     const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
-    let shapeIds = PhysicsShapes.get(shapeEid)!;
     shapeIds.add(shapeId);
   }
 }
@@ -75,7 +67,7 @@ function setupPhysicsShapeForMedia(world: HubsWorld, physicsSystem: PhysicsSyste
   // TODO update scale?
   PhysicsShape.minHalfExtent[eid] = 0.04;
 
-  updatePhysicsShape(world, physicsSystem, eid, mediaEid);
+  addPhysicsShapes(world, physicsSystem, eid, mediaEid);
 }
 
 export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSystem) => {
@@ -94,7 +86,7 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
       const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
       bodyEid && (PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid]);
     }
-    PhysicsShape.bodyId[eid] && updatePhysicsShape(world, physicsSystem, eid, eid);
+    PhysicsShape.bodyId[eid] && addPhysicsShapes(world, physicsSystem, eid, eid);
   });
 
   exitMediaLoaderQuery(world).forEach(eid => setupPhysicsShapeForMedia(world, physicsSystem, eid));

@@ -30,14 +30,14 @@ export enum Axis {
 export type PhysicsShapeParams = {
   shape: Shape;
   fit: Fit;
-  halfExtents: [number, 3];
+  halfExtents: [number, number, number];
   minHalfExtent: number;
   maxHalfExtent: number;
   sphereRadius: number;
   cylinderAxis: Axis;
   margin: number;
-  offset: [number, 3];
-  orientation: [number, 4];
+  offset: [number, number, number];
+  orientation: [number, number, number, number];
   includeInvisible: boolean;
 };
 
@@ -59,15 +59,15 @@ const PHYSICS_SHAPE_FLAGS = {
   INCLUDE_INVISIBLE: 1 << 0
 };
 
-export const getShapeString = (eid: number) => {
+const getShapeString = (eid: number) => {
   return Object.values(CONSTANTS.SHAPE)[PhysicsShape.shape[eid]];
 };
 
-export const getFitString = (eid: number) => {
+const getFitString = (eid: number) => {
   return Object.values(CONSTANTS.FIT)[PhysicsShape.fit[eid]];
 };
 
-export const getCylinderAxisString = (eid: number) => {
+const getCylinderAxisString = (eid: number) => {
   switch (PhysicsShape.cylinderAxis[eid]) {
     case Axis.X:
       return "x";
