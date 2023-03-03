@@ -1,6 +1,5 @@
 import { HubsWorld } from "../app";
 import { Fit, inflatePhysicsShape, PhysicsShapeParams, Shape } from "./physics-shape";
-import { inflateRigidBody, RigiBodyParams, Type } from "./rigid-body";
 import { Euler, Quaternion } from "three";
 
 export type BoxColliderParams = {
@@ -21,9 +20,8 @@ export function inflateBoxCollider(world: HubsWorld, eid: number, params: BoxCol
   const euler = new Euler(params.rotation.x, params.rotation.y, params.rotation.z);
   const orientation = new Quaternion().setFromEuler(euler);
 
-  inflateRigidBody(world, eid, { type: Type.STATIC } as RigiBodyParams);
   inflatePhysicsShape(world, eid, {
-    shape: Shape.BOX,
+    type: Shape.BOX,
     fit: Fit.MANUAL,
     offset: [params.position.x, params.position.y, params.position.z],
     halfExtents: [params.scale.x / 2, params.scale.y / 2, params.scale.z / 2],
