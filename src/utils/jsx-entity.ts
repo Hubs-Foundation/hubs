@@ -87,8 +87,9 @@ import { AudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
 import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
 import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
-import { inflateAmmoShape } from "../inflators/ammo-shape";
-import { inflateBoxCollider } from "../inflators/box-collider";
+import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
+import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
+import { inflateTrimesh } from "../inflators/trimesh";
 
 preload(
   new Promise(resolve => {
@@ -376,8 +377,9 @@ export interface GLTFComponentData extends ComponentData {
   background: BackgroundParams;
   simpleWater?: SimpleWaterParams;
   particleEmitter?: ParticleEmitterParams;
-  ammoShape?: PhysicsShapeParams;
-  boxCollider?: PhysicsShapeParams;
+  ammoShape?: AmmoShapeParams;
+  boxCollider?: BoxColliderParams;
+  trimesh?: true;
 }
 
 declare global {
@@ -485,7 +487,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   simpleWater: inflateSimpleWater,
   particleEmitter: inflateParticleEmitter,
   ammoShape: inflateAmmoShape,
-  boxCollider: inflateBoxCollider
+  boxCollider: inflateBoxCollider,
+  trimesh: inflateTrimesh
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
