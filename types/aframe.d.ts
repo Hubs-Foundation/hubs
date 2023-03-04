@@ -22,6 +22,7 @@ declare module "aframe" {
   }
 
   interface AComponent {
+    data: any;
     init();
     tick: FnTick;
     tock: FnTick;
@@ -127,6 +128,7 @@ declare module "aframe" {
   declare global {
     const AFRAME: {
       registerSystem(name: string, def: Partial<ASystem>);
+      registerComponent(name: string, def: Partial<AComponent>);
       scenes: AScene[];
       utils: Util;
     };
