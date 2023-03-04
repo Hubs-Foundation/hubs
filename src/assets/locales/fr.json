@@ -401,7 +401,6 @@
   "preferences-screen.preference.enable-gyro": "Activer le gyroscope (si compatible avec le navigateur / l'appareil)",
   "preferences-screen.preference.enable-on-screen-joystick-left": "Activer le joystick sur l'écran à gauche pour se déplacer",
   "preferences-screen.preference.enable-on-screen-joystick-right": "Activer le joystick sur l'écran à droite pour regarder autour de vous",
-  "preferences-screen.preference.fast-room-switching": "Activer le passage rapide d'une salle à l'autre",
   "preferences-screen.preference.global-media-volume": "Volume audio des médias",
   "preferences-screen.preference.global-voice-volume": "Volume audio de la voix entrante",
   "preferences-screen.preference.invert-touchscreen-camera-move": "Inverser la direction du mouvement de caméra pour les écrans tactiles",

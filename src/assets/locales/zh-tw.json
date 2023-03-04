@@ -409,7 +409,6 @@
 	"preferences-screen.preference.enable-gyro": "允許陀螺儀 (當瀏覽器或裝置支持)",
 	"preferences-screen.preference.enable-on-screen-joystick-left": "允許左螢幕搖桿移動",
 	"preferences-screen.preference.enable-on-screen-joystick-right": "允許右螢幕搖桿移動",
-	"preferences-screen.preference.fast-room-switching": "允許快速房間替換",
 	"preferences-screen.preference.global-media-volume": "媒體音量",
 	"preferences-screen.preference.global-sfx-volume": "效果音音量",
 	"preferences-screen.preference.global-voice-volume": "輸入聲音音量",
@@ -645,4 +644,3 @@
 	"webvr-unsupported-modal.webvr-rocks-link": "支援實驗VR的瀏覽器清單請見<a>WebVR Rocks</a>.",
 	"whats-new-page.title": "新消息"
 }
-   

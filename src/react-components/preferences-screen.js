@@ -516,10 +516,6 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.theme",
     defaultMessage: "Theme"
   },
-  fastRoomSwitching: {
-    id: "preferences-screen.preference.fast-room-switching",
-    defaultMessage: "Enable Fast Room Switching"
-  },
   lazyLoadSceneMedia: {
     id: "preferences-screen.preference.lazy-load-scene-media",
     defaultMessage: "Enable Scene Media Lazy Loading"
@@ -1270,10 +1266,6 @@ class PreferencesScreen extends Component {
           },
           {
             key: "disableIdleDetection",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
-          },
-          {
-            key: "fastRoomSwitching",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           },
           {
