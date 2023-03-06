@@ -4,16 +4,13 @@ import {
   Rigidbody,
   PhysicsShape,
   AEntity,
-  MediaLoader,
-  MediaLoaded,
   AmmoShape,
   BoxCollider,
   Trimesh,
   HeightField
 } from "../bit-components";
-import { Fit, getShapeFromPhysicsShape, PhysicsShapes, Shape } from "../inflators/physics-shape";
-import { findAncestorWithComponent, findChildWithComponent, hasAnyComponent } from "../utils/bit-utils";
-import { contentTypeForMediaInfo, MediaLoadedInfo, MediaTypeE } from "../bit-systems/media-loading";
+import { Fit, getShapeFromPhysicsShape, PhysicsShapes } from "../inflators/physics-shape";
+import { findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
 import { Mesh, Vector3, Object3D } from "three";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
 import { HubsWorld } from "../app";
@@ -25,8 +22,6 @@ const rigidbodyExitedQuery = exitQuery(rigidbodyQuery);
 const shapeQuery = defineQuery([PhysicsShape]);
 const shapeEnterQuery = enterQuery(shapeQuery);
 const shapeExitQuery = exitQuery(shapeQuery);
-const mediaLoaderQuery = defineQuery([MediaLoader]);
-const exitMediaLoaderQuery = exitQuery(mediaLoaderQuery);
 
 const tmpV = new Vector3();
 
@@ -72,31 +67,6 @@ function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: n
   }
 }
 
-function addPhysicsShapeForMedia(world: HubsWorld, physicsSystem: PhysicsSystem, eid: number) {
-  const mediaEid = findChildWithComponent(world, MediaLoaded, eid)!;
-  const mediaInfo = MediaLoadedInfo.get(mediaEid)!;
-  const mediaType = contentTypeForMediaInfo(mediaInfo);
-
-  switch (mediaType) {
-    case MediaTypeE.VIDEO:
-    case MediaTypeE.IMAGE:
-    case MediaTypeE.PDF:
-    case MediaTypeE.HTML: {
-      PhysicsShape.type[eid] = Shape.BOX;
-      break;
-    }
-    case MediaTypeE.GLTF: {
-      PhysicsShape.type[eid] = Shape.HULL;
-      break;
-    }
-  }
-
-  // TODO update scale?
-  PhysicsShape.minHalfExtent[eid] = 0.04;
-
-  addPhysicsShapes(world, physicsSystem, eid);
-}
-
 export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSystem) => {
   rigidbodyEnteredQuery(world).forEach(eid => {
     const obj = world.eid2obj.get(eid);
@@ -115,8 +85,6 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
     }
     PhysicsShape.bodyId[eid] && addPhysicsShapes(world, physicsSystem, eid);
   });
-
-  exitMediaLoaderQuery(world).forEach(eid => addPhysicsShapeForMedia(world, physicsSystem, eid));
 
   shapeExitQuery(world).forEach(eid => {
     const shapeIds = PhysicsShapes.get(eid)!;
