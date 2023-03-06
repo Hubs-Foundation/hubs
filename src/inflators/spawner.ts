@@ -5,10 +5,13 @@ import {
   HandCollisionTarget,
   ObjectSpawner,
   RemoteHoverTarget,
+  Rigidbody,
   SingleActionButton
 } from "../bit-components";
 import { OBJECT_SPAWNER_FLAGS } from "../bit-systems/object-spawner";
+import { COLLISION_LAYERS } from "../constants";
 import { inflateMediaLoader } from "./media-loader";
+import { RIGID_BODY_FLAGS } from "./rigid-body";
 
 export interface SpawnerParams {
   src: string;
@@ -35,10 +38,9 @@ export function inflateSpawner(world: HubsWorld, eid: number, props: SpawnerPara
   ObjectSpawner.src[eid] = APP.getSid(props.src);
   ObjectSpawner.flags[eid] = props.mediaOptions?.applyGravity ? OBJECT_SPAWNER_FLAGS.APPLY_GRAVITY : 0;
 
-  // TODO rigidbody+shape for hand grabbing
-  // addComponent(world, Rigidbody, eid);
-  // // Rigidbody.mass[eid] = 0;
-  // Rigidbody.collisionGroup[eid] = COLLISION_LAYERS.INTERACTABLES;
-  // Rigidbody.collisionMask[eid] = COLLISION_LAYERS.DEFAULT_SPAWNER;
-  // Rigidbody.flags[eid] = RIGIDBODY_FLAGS.DISABLE_COLLISIONS;
+  addComponent(world, Rigidbody, eid);
+  Rigidbody.mass[eid] = 0;
+  Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION;
+  Rigidbody.collisionFilterGroup[eid] = COLLISION_LAYERS.INTERACTABLES;
+  Rigidbody.collisionFilterMask[eid] = COLLISION_LAYERS.DEFAULT_SPAWNER;
 }

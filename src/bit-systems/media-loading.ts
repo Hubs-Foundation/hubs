@@ -2,6 +2,7 @@ import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeC
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
 import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget, PhysicsShape } from "../bit-components";
+import { inflatePhysicsShape, PhysicsShapeParams, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
@@ -26,7 +27,7 @@ export enum MediaTypeE {
   HTML
 }
 
-export function contentTypeForMediaInfo(mediaInfo: MediaInfo) {
+function contentTypeForMediaInfo(mediaInfo: MediaInfo) {
   const { contentType, accessibleUrl } = mediaInfo;
   if (
     contentType.startsWith("video/") ||
@@ -48,6 +49,22 @@ export function contentTypeForMediaInfo(mediaInfo: MediaInfo) {
   } else if (contentType.startsWith("text/html")) {
     return MediaTypeE.HTML;
   }
+}
+
+function addMediaPhysicsShape(world: HubsWorld, eid: number, mediaInfo: MediaInfo) {
+  const mediaType = contentTypeForMediaInfo(mediaInfo);
+
+  addComponent(world, PhysicsShape, eid);
+  let shape = Shape.BOX;
+  if (mediaType === MediaTypeE.GLTF) {
+    shape = Shape.HULL;
+  }
+
+  // TODO update scale?
+  inflatePhysicsShape(world, eid, {
+    type: shape,
+    minHalfExtent: 0.04
+  } as PhysicsShapeParams);
 }
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
@@ -189,6 +206,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());
+    MediaLoadedInfo.delete(media);
   }
   crClearTimeout(addLoadingObjectTimeout);
   loadingObjEid && removeEntity(world, loadingObjEid);
@@ -209,6 +227,10 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
     yield* animateScale(world, media);
   }
   removeComponent(world, MediaLoader, eid);
+
+  if (MediaLoadedInfo.has(media)) {
+    addMediaPhysicsShape(world, media, MediaLoadedInfo.get(media)!);
+  }
 }
 
 const jobs = new JobRunner();
