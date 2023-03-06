@@ -35,7 +35,7 @@ function updateOffsets(world: HubsWorld, eid: number, obj: Object3D) {
     PhysicsShape.offset[eid].set(obj.position.clone().add(tmpV.fromArray(offset)).toArray());
     PhysicsShape.orientation[eid].set(obj.quaternion.toArray());
     if (hasComponent(world, BoxCollider, eid)) {
-      PhysicsShape.halfExtents[eid].set(obj.scale.divideScalar(2).toArray());
+      PhysicsShape.halfExtents[eid].set(obj.scale.clone().divideScalar(2).toArray());
     }
   }
 }
