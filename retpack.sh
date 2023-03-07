@@ -12,7 +12,7 @@ docker build -f RetPageOriginDockerfile -t hubs:retpack .
 echo -e "\n ### packing ### "
 docker run -v $PWD/.retpack/:/tmp/ \
     --entrypoint sh hubs:retpack \
-    -c 'cd /www/hubs/ && tar -czvf /tmp/retpack.tar .'
+    -c 'cd /www/hubs/ && tar -czvf /tmp/retpack.tar.gz .'
 
 echo -e "\n ### done ### "
 ls -lha ./.retpack/retpack.tar.gz
