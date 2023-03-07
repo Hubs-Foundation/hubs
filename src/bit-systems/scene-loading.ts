@@ -88,7 +88,7 @@ function* loadScene(
 
       if (
         (o as Mesh).isMesh &&
-        (!Sky || (o as any).__proto__ != Sky.prototype) &&
+        !(o instanceof Sky) &&
         !o.name.startsWith("Floor_Plan") &&
         !o.name.startsWith("Ground_Plane") &&
         ((o as Mesh).geometry as any).boundsTree
