@@ -57,7 +57,7 @@ const theme = createMuiTheme({
   },
   palette: {
     primary: {
-      main: "#FF3464"
+      main: "#1700c7"
     },
     secondary: {
       main: "#000000"
@@ -281,7 +281,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (store.state.credentials && store.state.credentials.token) {
     // Reticulum global channel
-    const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
+    const retPhxChannel = socket.channel(`ret`, {
+      hub_id: "admin",
+      token: store.state.credentials.token
+    });
     retPhxChannel
       .join()
       .receive("ok", async () => {

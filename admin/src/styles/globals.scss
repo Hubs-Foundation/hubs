@@ -1,9 +1,8 @@
-@use './core/boilerplate.scss' as *;
-@use './tools/utility.scss' as *;
-@use './ui/dropdown.scss' as *;
-@use './core/theme.scss' as *;
-@use './ui/page.scss' as *;
-
+@use "./core/boilerplate.scss" as *;
+@use "./tools/utility.scss" as *;
+@use "./ui/dropdown.scss" as *;
+@use "./core/theme.scss" as *;
+@use "./ui/page.scss" as *;
 
 a {
   color: inherit;
@@ -27,8 +26,10 @@ button {
   }
 }
 
+button[type="button"] {
+  border-radius: 20px;
+}
+
 * {
   box-sizing: border-box;
 }
-
-

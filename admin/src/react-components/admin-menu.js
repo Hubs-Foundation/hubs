@@ -30,11 +30,15 @@ const styles = () => ({
     paddingTop: 0,
 
     "& .active": {
-      background: "#FF3464 !important"
+      background: "#1700c7!important"
+    },
+
+    "& .active div span": {
+      color: "#ffffff!important"
     },
 
     "& .active svg": {
-      color: "#FFA7C6"
+      color: "#FFFFFF"
     },
 
     active: {
@@ -47,6 +51,7 @@ const styles = () => ({
   logo: {
     margin: 0,
     padding: 0,
+    background: "#222222;!important",
 
     "& img": {
       padding: "0 12px 8px 12px",
@@ -68,7 +73,7 @@ const styles = () => ({
 
     "@media (max-width: 599.95px) and (min-width: 0px)": {
       // Used to override typography on mobile
-      "& span": {
+      "& span ": {
         color: "#333333"
       }
     }
