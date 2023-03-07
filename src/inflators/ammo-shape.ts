@@ -1,6 +1,6 @@
 import { HubsWorld } from "../app";
 import { CONSTANTS } from "three-ammo";
-import { inflatePhysicsShape, PhysicsShapeParams } from "./physics-shape";
+import { inflatePhysicsShape } from "./physics-shape";
 import { addComponent } from "bitecs";
 import { AmmoShape } from "../bit-components";
 
@@ -26,5 +26,5 @@ export function inflateAmmoShape(world: HubsWorld, eid: number, params: AmmoShap
     sphereRadius: params.sphereRadius,
     offset: [params.offset.x, params.offset.y, params.offset.z],
     includeInvisible: params.includeInvisible
-  } as PhysicsShapeParams);
+  });
 }
