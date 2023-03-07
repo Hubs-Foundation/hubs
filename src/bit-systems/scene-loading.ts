@@ -106,29 +106,27 @@ function* loadScene(
     const heightfieldEid = findChildWithComponent(world, HeightField, scene);
     if (!heightfieldEid && !trimeshEid) {
       console.log("collision not found in scene");
-      if (navMeshEid) {
+      if (navMeshEid && isHighDensity) {
         inflatePhysicsShape(world, navMeshEid, {
           type: Shape.MESH,
           margin: 0.01,
           fit: Fit.ALL,
           includeInvisible: true
         });
+      } else if (!isHighDensity) {
+        inflatePhysicsShape(world, scene, {
+          type: Shape.MESH,
+          margin: 0.01,
+          fit: Fit.ALL
+        });
       } else {
-        if (!isHighDensity) {
-          inflatePhysicsShape(world, scene, {
-            type: Shape.MESH,
-            margin: 0.01,
-            fit: Fit.ALL
-          });
-        } else {
-          inflatePhysicsShape(world, scene, {
-            type: Shape.BOX,
-            margin: 0.01,
-            fit: Fit.MANUAL,
-            halfExtents: [4000, 0.5, 4000],
-            offset: [0, -0.5, 0]
-          });
-        }
+        inflatePhysicsShape(world, scene, {
+          type: Shape.BOX,
+          margin: 0.01,
+          fit: Fit.MANUAL,
+          halfExtents: [4000, 0.5, 4000],
+          offset: [0, -0.5, 0]
+        });
       }
     } else {
       console.log("heightfield or trimesh found on scene");
