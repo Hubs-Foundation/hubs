@@ -20,15 +20,9 @@ import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils
 import { EntityID } from "../utils/networking-types";
 
 function addMediaPhysicsShape(world: HubsWorld, eid: number) {
-  addComponent(world, PhysicsShape, eid);
-  let shape = Shape.BOX;
-  if (hasComponent(world, GLTFModel, eid)) {
-    shape = Shape.HULL;
-  }
-
   // TODO update scale?
   inflatePhysicsShape(world, eid, {
-    type: shape,
+    type: hasComponent(world, GLTFModel, eid) ? Shape.HULL : Shape.BOX,
     minHalfExtent: 0.04
   });
 }

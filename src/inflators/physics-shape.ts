@@ -116,23 +116,23 @@ export const getShapeFromPhysicsShape = (eid: number) => {
 export const PhysicsShapes = (PhysicsShape as any).shapeIds as Map<number, Set<number>>;
 
 export function inflatePhysicsShape(world: HubsWorld, eid: number, params: Partial<PhysicsShapeParams>) {
-  params = Object.assign({}, DEFAULTS, params);
+  const shapeParams = Object.assign({}, DEFAULTS, params);
 
   addComponent(world, PhysicsShape, eid);
 
   PhysicsShapes.set(eid, new Set<number>());
-  PhysicsShape.type[eid] = params.type;
-  PhysicsShape.fit[eid] = params.fit;
-  PhysicsShape.halfExtents[eid].set(params.halfExtents);
-  PhysicsShape.minHalfExtent[eid] = params.minHalfExtent;
-  PhysicsShape.maxHalfExtent[eid] = params.maxHalfExtent;
-  PhysicsShape.sphereRadius[eid] = params.sphereRadius;
-  PhysicsShape.cylinderAxis[eid] = params.cylinderAxis;
-  PhysicsShape.margin[eid] = params.margin;
-  PhysicsShape.offset[eid].set(params.offset);
-  PhysicsShape.heightfieldData[eid] = params.heightfieldData!.slice();
-  PhysicsShape.heightfieldDistance[eid] = params.heightfieldDistance;
-  PhysicsShape.orientation[eid].set(params.orientation);
+  PhysicsShape.type[eid] = shapeParams.type;
+  PhysicsShape.fit[eid] = shapeParams.fit;
+  PhysicsShape.halfExtents[eid].set(shapeParams.halfExtents);
+  PhysicsShape.minHalfExtent[eid] = shapeParams.minHalfExtent;
+  PhysicsShape.maxHalfExtent[eid] = shapeParams.maxHalfExtent;
+  PhysicsShape.sphereRadius[eid] = shapeParams.sphereRadius;
+  PhysicsShape.cylinderAxis[eid] = shapeParams.cylinderAxis;
+  PhysicsShape.margin[eid] = shapeParams.margin;
+  PhysicsShape.offset[eid].set(shapeParams.offset);
+  PhysicsShape.heightfieldData[eid] = shapeParams.heightfieldData.slice();
+  PhysicsShape.heightfieldDistance[eid] = shapeParams.heightfieldDistance;
+  PhysicsShape.orientation[eid].set(shapeParams.orientation);
   params.includeInvisible && (PhysicsShape.flags[eid] |= PHYSICS_SHAPE_FLAGS.INCLUDE_INVISIBLE);
 
   return eid;
