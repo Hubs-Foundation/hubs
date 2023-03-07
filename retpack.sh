@@ -15,4 +15,4 @@ docker run -v $PWD/.retpack/:/tmp/ \
     -c 'cd /www/hubs/ && tar -czvf /tmp/retpack.tar .'
 
 echo -e "\n ### done ### "
-ls -lha ./.retpack/retpack.tar
+ls -lha ./.retpack/retpack.tar.gz
