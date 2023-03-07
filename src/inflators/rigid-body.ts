@@ -88,25 +88,25 @@ export const getBodyFromRigidBody = (eid: number) => {
   };
 };
 
-export function inflateRigidBody(world: HubsWorld, eid: number, params: RigiBodyParams) {
-  params = Object.assign({}, DEFAULTS, params);
+export function inflateRigidBody(world: HubsWorld, eid: number, params: Partial<RigiBodyParams>) {
+  const bodyParams = Object.assign({}, DEFAULTS, params);
 
   addComponent(world, Rigidbody, eid);
 
-  Rigidbody.type[eid] = params.type;
-  Rigidbody.mass[eid] = params.mass;
-  Rigidbody.gravity[eid].set(params.gravity);
-  Rigidbody.linearDamping[eid] = params.linearDamping;
-  Rigidbody.angularDamping[eid] = params.angularDamping;
-  Rigidbody.linearSleepingThreshold[eid] = params.linearSleepingThreshold;
-  Rigidbody.angularSleepingThreshold[eid] = params.angularSleepingThreshold;
-  Rigidbody.angularFactor[eid].set(params.angularFactor);
-  Rigidbody.activationState[eid] = params.activationState;
+  Rigidbody.type[eid] = bodyParams.type;
+  Rigidbody.mass[eid] = bodyParams.mass;
+  Rigidbody.gravity[eid].set(bodyParams.gravity);
+  Rigidbody.linearDamping[eid] = bodyParams.linearDamping;
+  Rigidbody.angularDamping[eid] = bodyParams.angularDamping;
+  Rigidbody.linearSleepingThreshold[eid] = bodyParams.linearSleepingThreshold;
+  Rigidbody.angularSleepingThreshold[eid] = bodyParams.angularSleepingThreshold;
+  Rigidbody.angularFactor[eid].set(bodyParams.angularFactor);
+  Rigidbody.activationState[eid] = bodyParams.activationState;
   params.emitCollisionEvents && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS);
   params.disableCollision && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION);
-  Rigidbody.collisionFilterGroup[eid] = params.collisionGroup;
-  Rigidbody.collisionFilterMask[eid] = params.collisionMask;
-  params.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
+  Rigidbody.collisionFilterGroup[eid] = bodyParams.collisionGroup;
+  Rigidbody.collisionFilterMask[eid] = bodyParams.collisionMask;
+  bodyParams.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
 
   return eid;
 }
