@@ -2,7 +2,7 @@ import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeC
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
 import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget, PhysicsShape } from "../bit-components";
-import { inflatePhysicsShape, PhysicsShapeParams, Shape } from "../inflators/physics-shape";
+import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
@@ -30,7 +30,7 @@ function addMediaPhysicsShape(world: HubsWorld, eid: number) {
   inflatePhysicsShape(world, eid, {
     type: shape,
     minHalfExtent: 0.04
-  } as PhysicsShapeParams);
+  });
 }
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {

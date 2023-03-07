@@ -14,7 +14,7 @@ import {
   Trimesh
 } from "../bit-components";
 import Sky from "../components/skybox";
-import { Fit, Shape, inflatePhysicsShape, PhysicsShapeParams } from "../inflators/physics-shape";
+import { Fit, Shape, inflatePhysicsShape } from "../inflators/physics-shape";
 import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
@@ -112,14 +112,14 @@ function* loadScene(
           margin: 0.01,
           fit: Fit.ALL,
           includeInvisible: true
-        } as PhysicsShapeParams);
+        });
       } else {
         if (!isHighDensity) {
           inflatePhysicsShape(world, scene, {
             type: Shape.MESH,
             margin: 0.01,
             fit: Fit.ALL
-          } as PhysicsShapeParams);
+          });
         } else {
           inflatePhysicsShape(world, scene, {
             type: Shape.BOX,
@@ -127,7 +127,7 @@ function* loadScene(
             fit: Fit.MANUAL,
             halfExtents: [4000, 0.5, 4000],
             offset: [0, -0.5, 0]
-          } as PhysicsShapeParams);
+          });
         }
       }
     } else {

@@ -115,7 +115,7 @@ export const getShapeFromPhysicsShape = (eid: number) => {
 
 export const PhysicsShapes = (PhysicsShape as any).shapeIds as Map<number, Set<number>>;
 
-export function inflatePhysicsShape(world: HubsWorld, eid: number, params: PhysicsShapeParams) {
+export function inflatePhysicsShape(world: HubsWorld, eid: number, params: Partial<PhysicsShapeParams>) {
   params = Object.assign({}, DEFAULTS, params);
 
   addComponent(world, PhysicsShape, eid);
@@ -130,7 +130,7 @@ export function inflatePhysicsShape(world: HubsWorld, eid: number, params: Physi
   PhysicsShape.cylinderAxis[eid] = params.cylinderAxis;
   PhysicsShape.margin[eid] = params.margin;
   PhysicsShape.offset[eid].set(params.offset);
-  PhysicsShape.heightfieldData[eid] = params.heightfieldData.slice();
+  PhysicsShape.heightfieldData[eid] = params.heightfieldData!.slice();
   PhysicsShape.heightfieldDistance[eid] = params.heightfieldDistance;
   PhysicsShape.orientation[eid].set(params.orientation);
   params.includeInvisible && (PhysicsShape.flags[eid] |= PHYSICS_SHAPE_FLAGS.INCLUDE_INVISIBLE);
