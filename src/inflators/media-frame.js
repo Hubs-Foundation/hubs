@@ -1,10 +1,10 @@
 import { addObject3DComponent } from "../utils/jsx-entity";
-import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape, Networked } from "../bit-components";
+import { NetworkedMediaFrame, MediaFrame, Networked } from "../bit-components";
 import { addComponent, hasComponent } from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
 import { Layers } from "../camera-layers";
-import { RIGID_BODY_FLAGS } from "./rigid-body";
+import { inflateRigidBody } from "./rigid-body";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide, Group } from "three";
 
@@ -69,10 +69,11 @@ export function inflateMediaFrame(world, eid, componentProps) {
   }[componentProps.mediaType];
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
 
-  addComponent(world, Rigidbody, eid);
-  Rigidbody.collisionFilterGroup[eid] = COLLISION_LAYERS.MEDIA_FRAMES;
-  Rigidbody.collisionFilterMask[eid] = COLLISION_LAYERS.INTERACTABLES;
-  Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION;
+  inflateRigidBody(world, eid, {
+    collisionGroup: COLLISION_LAYERS.MEDIA_FRAMES,
+    collisionMask: COLLISION_LAYERS.INTERACTABLES,
+    disableCollision: true
+  });
   inflatePhysicsShape(world, eid, {
     type: Shape.MESH,
     margin: 0.01,
