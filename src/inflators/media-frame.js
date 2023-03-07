@@ -77,11 +77,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
     type: Shape.MESH,
     margin: 0.01,
     fit: Fit.ALL,
-    includeInvisible: true
+    includeInvisible: true,
+    halfExtents: [componentProps.bounds.x / 2, componentProps.bounds.y / 2, componentProps.bounds.z / 2]
   });
-  PhysicsShape.halfExtents[eid].set([
-    componentProps.bounds.x / 2,
-    componentProps.bounds.y / 2,
-    componentProps.bounds.z / 2
-  ]);
 }
