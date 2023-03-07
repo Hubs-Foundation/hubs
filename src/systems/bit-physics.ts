@@ -11,7 +11,7 @@ import {
 } from "../bit-components";
 import { Fit, getShapeFromPhysicsShape, PhysicsShapes } from "../inflators/physics-shape";
 import { findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
-import { Mesh, Vector3, Object3D } from "three";
+import { Vector3, Object3D } from "three";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
 import { HubsWorld } from "../app";
 import { PhysicsSystem } from "./physics-system";
@@ -45,20 +45,10 @@ function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: n
   const shapeIds = PhysicsShapes.get(eid)!;
   const obj = world.eid2obj.get(eid)!;
   if (PhysicsShape.fit[eid] === Fit.ALL) {
-    let found = false;
-    obj.traverse(child => {
-      if (child instanceof Mesh) {
-        updateOffsets(world, eid, obj);
-        const shape = getShapeFromPhysicsShape(eid);
-        const shapeId = physicsSystem.addShapes(bodyId, child, shape);
-        shapeIds.add(shapeId);
-        found = true;
-      }
-    });
-    if (!found) {
-      console.error("Cannot use FIT.ALL without a mesh");
-      return;
-    }
+    updateOffsets(world, eid, obj);
+    const shape = getShapeFromPhysicsShape(eid);
+    const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
+    shapeIds.add(shapeId);
   } else {
     updateOffsets(world, eid, obj);
     const shape = getShapeFromPhysicsShape(eid);
