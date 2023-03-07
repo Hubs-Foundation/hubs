@@ -9,7 +9,7 @@ import {
   Trimesh,
   HeightField
 } from "../bit-components";
-import { Fit, getShapeFromPhysicsShape, PhysicsShapes } from "../inflators/physics-shape";
+import { Fit, getShapeFromPhysicsShape } from "../inflators/physics-shape";
 import { findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
 import { Vector3, Object3D } from "three";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
@@ -42,18 +42,17 @@ function updateOffsets(world: HubsWorld, eid: number, obj: Object3D) {
 
 function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: number) {
   const bodyId = PhysicsShape.bodyId[eid];
-  const shapeIds = PhysicsShapes.get(eid)!;
   const obj = world.eid2obj.get(eid)!;
   if (PhysicsShape.fit[eid] === Fit.ALL) {
     updateOffsets(world, eid, obj);
     const shape = getShapeFromPhysicsShape(eid);
     const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
-    shapeIds.add(shapeId);
+    PhysicsShape.shapeId[eid] = shapeId;
   } else {
     updateOffsets(world, eid, obj);
     const shape = getShapeFromPhysicsShape(eid);
     const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
-    shapeIds.add(shapeId);
+    PhysicsShape.shapeId[eid] = shapeId;
   }
 }
 
@@ -76,21 +75,11 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
     PhysicsShape.bodyId[eid] && addPhysicsShapes(world, physicsSystem, eid);
   });
 
-  shapeExitQuery(world).forEach(eid => {
-    const shapeIds = PhysicsShapes.get(eid)!;
-    shapeIds.forEach(shapeId => {
-      physicsSystem.removeShapes(PhysicsShape.bodyId[eid], shapeId);
-      shapeIds.delete(shapeId);
-    });
-  });
+  shapeExitQuery(world).forEach(eid => physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]));
 
   rigidbodyExitedQuery(world).forEach(eid => {
     if (entityExists(world, eid) && hasComponent(world, PhysicsShape, eid)) {
-      const shapeIds = PhysicsShapes.get(eid)!;
-      shapeIds.forEach(shapeId => {
-        physicsSystem.removeShapes(PhysicsShape.bodyId[eid], shapeId);
-        shapeIds.delete(shapeId);
-      });
+      physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]);
       // The PhysicsShape is still on this entity!
     }
     physicsSystem.removeBody(Rigidbody.bodyId[eid]);
