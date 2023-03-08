@@ -1,13 +1,20 @@
 import { defineQuery, entityExists, hasComponent } from "bitecs";
+import { Matrix4, Vector3 } from "three";
 import type { HubsWorld } from "../app";
 import { HoveredRemoteRight, Interacted, ObjectMenu, ObjectMenuTarget } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
+import { createNetworkedEntity } from "../utils/create-networked-entity";
 import { createEntityState, deleteEntityState } from "../utils/entity-state-utils";
 import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
 import { deleteTheDeletableAncestor } from "./delete-entity-system";
 import { createMessageDatas, isPinned } from "./networking";
+
+// Working variables.
+const _vec1 = new Vector3();
+const _vec2 = new Vector3();
+const _mat4 = new Matrix4();
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
@@ -48,6 +55,29 @@ function openLink(world: HubsWorld, eid: EntityID) {
   window.open(src);
 }
 
+function cloneObject(world: HubsWorld, sourceEid: EntityID) {
+  // Cloning by creating a networked entity from initial data.
+  // Probably it would be easier than copying Component data and
+  // Object3D.
+  const { prefabName, initialData } = createMessageDatas.get(sourceEid)!;
+  const clonedEid = createNetworkedEntity(world, prefabName, initialData);
+  const clonedObj = world.eid2obj.get(clonedEid)!;
+
+  // Place the cloned object a little bit closer to the camera in the scene
+  // TODO: Remove the dependency with AFRAME
+  const camera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+  camera.updateMatrices();
+
+  const sourceObj = world.eid2obj.get(sourceEid)!;
+  sourceObj.updateMatrices();
+
+  const objPos = _vec1.setFromMatrixPosition(sourceObj.matrixWorld);
+  const cameraPos = _vec2.setFromMatrixPosition(camera.matrixWorld);
+  objPos.add(cameraPos.sub(objPos).normalize().multiplyScalar(0.2));
+  const clonedMatrixWorld = _mat4.copy(sourceObj.matrixWorld).setPosition(objPos);
+  setMatrixWorld(clonedObj, clonedMatrixWorld);
+}
+
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
     createEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
@@ -70,7 +100,7 @@ function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) 
   } else if (clicked(world, ObjectMenu.refreshButtonRef[menu])) {
     console.log("Clicked refresh");
   } else if (clicked(world, ObjectMenu.cloneButtonRef[menu])) {
-    console.log("Clicked clone");
+    cloneObject(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.rotateButtonRef[menu])) {
     console.log("Clicked rotate");
   } else if (clicked(world, ObjectMenu.mirrorButtonRef[menu])) {
