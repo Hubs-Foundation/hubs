@@ -99,6 +99,8 @@ import { ECSDebugSidebarContainer } from "./debug-panel/ECSSidebar";
 import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/usePermissions";
 import { ObjectContextMenu } from "./room/ObjectContextMenu";
+import { CarryKeyboardHints } from "./room/CarryKeyboardHints";
+import { CarryState } from "../bit-systems/carry-system";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -165,7 +167,6 @@ class UIRoot extends Component {
     onLoaded: PropTypes.func,
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
-    menuObject: PropTypes.object,
     breakpoint: PropTypes.string,
     canVoiceChat: PropTypes.bool
   };
@@ -304,8 +305,9 @@ class UIRoot extends Component {
     }
   };
 
-  onShowObjectMenu = e => {
-    this.setState({ menuObject: e.detail });
+  onUpdateCarryUI = e => {
+    const { carryState, carryStateData } = e.detail;
+    this.setState({ carryState, carryStateData });
   };
 
   componentDidMount() {
@@ -313,7 +315,7 @@ class UIRoot extends Component {
     window.addEventListener("idle_detected", this.onIdleDetected);
     window.addEventListener("activity_detected", this.onActivityDetected);
     window.addEventListener("focus_chat", this.onFocusChat);
-    window.addEventListener("show_object_menu", this.onShowObjectMenu);
+    window.addEventListener("update_carry_ui", this.onUpdateCarryUI);
     document.querySelector(".a-canvas").addEventListener("mouseup", () => {
       if (this.state.showShareDialog) {
         this.setState({ showShareDialog: false });
@@ -420,6 +422,7 @@ class UIRoot extends Component {
     window.removeEventListener("idle_detected", this.onIdleDetected);
     window.removeEventListener("activity_detected", this.onActivityDetected);
     window.removeEventListener("focus_chat", this.onFocusChat);
+    window.removeEventListener("update_carry_ui", this.onUpdateCarryUI);
   }
 
   storeUpdated = () => {
@@ -1422,7 +1425,7 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    {this.state.menuObject && <ObjectContextMenu {...this.state.menuObject} />}
+                    {this.state.carryState === CarryState.MENU && <ObjectContextMenu {...this.state.carryStateData} />}
                     {this.state.sidebarId !== "chat" && this.props.hub && (
                       <PresenceLog
                         preset={"InRoom"}
@@ -1470,6 +1473,7 @@ class UIRoot extends Component {
                         showAudioDebug={showAudioDebugPanel}
                       />
                     )}
+                    <CarryKeyboardHints carryState={this.state.carryState} carryStateData={this.state.carryStateData} />
                   </>
                 }
                 sidebar={

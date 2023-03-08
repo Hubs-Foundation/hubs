@@ -30,38 +30,72 @@ import { setMatrixWorld } from "../utils/three-utils";
 
 const unlockPointerOnDrop = !qsTruthy("mouselockWhenNotGrabbing") && !qsTruthy("alwaysMouselock");
 
-enum CarryState {
+export enum CarryState {
   NONE,
   MENU,
   CARRYING,
   SNAPPING
 }
 
+export enum SnapFace {
+  AUTO = -1,
+  LEFT,
+  FRONT,
+  RIGHT,
+  TOP,
+  BOTTOM,
+  BACK
+}
+
+type MenuPosition = [x: number, y: number];
+export interface CarryStateData {
+  activeObject: number;
+  rotationOffset: number;
+  nudgeOffset: number;
+  snapFaceOverride: SnapFace;
+  applyGravity: boolean;
+  menuPos: MenuPosition;
+}
+
 let carryState = CarryState.NONE;
+// TODO move this all into a CarryStateData
 let activeObject = 0;
 let rotationOffset = 0;
 let nudgeOffset = 0;
 let prevDot = 0;
-let snapFaceOverrideIdx = -1;
+let snapFaceOverride = SnapFace.AUTO;
 let lastIntersectedObj: Mesh | null = null;
+let menuPos: MenuPosition = [0, 0];
+let applyGravity = true;
 
-function showObjectMenu(eid: EntityID, x: number, y: number) {
+let uiNeedsUpdate = false;
+function updateUI() {
   window.dispatchEvent(
-    new CustomEvent("show_object_menu", {
-      detail: { eid, x, y }
+    new CustomEvent("update_carry_ui", {
+      detail: {
+        carryState,
+        carryStateData: {
+          activeObject,
+          rotationOffset,
+          nudgeOffset,
+          snapFaceOverride: snapFaceOverride,
+          applyGravity,
+          menuPos
+        }
+      }
     })
   );
+}
+function showObjectMenu(eid: EntityID, pos: MenuPosition) {
   carryState = CarryState.MENU;
   activeObject = eid;
+  menuPos = pos;
+  uiNeedsUpdate = true;
 }
 export function clearObjectMenu() {
-  window.dispatchEvent(
-    new CustomEvent("show_object_menu", {
-      detail: null
-    })
-  );
   carryState = CarryState.NONE;
   activeObject = 0;
+  uiNeedsUpdate = true;
 }
 export function isObjectMenuShowing() {
   return carryState === CarryState.MENU;
@@ -76,6 +110,7 @@ export function carryObject(eid: EntityID) {
   clearObjectMenu();
   carryState = CarryState.CARRYING;
   activeObject = eid;
+  applyGravity = true;
   takeOwnership(world, activeObject);
 
   APP.canvas!.requestPointerLock();
@@ -91,6 +126,7 @@ export function carryObject(eid: EntityID) {
   tmpBox.getCenter(center);
   tmpBox.getSize(size);
   // obj.add(axisHelper);
+  uiNeedsUpdate = true;
 }
 function dropObject(world: HubsWorld, applyGravity: boolean) {
   if (unlockPointerOnDrop) document.exitPointerLock();
@@ -128,6 +164,7 @@ function dropObject(world: HubsWorld, applyGravity: boolean) {
   axisHelper.removeFromParent();
   arrowHelper.visible = false;
   gridMesh.visible = false;
+  uiNeedsUpdate = true;
 }
 
 export function isCarryingObject() {
@@ -161,43 +198,37 @@ const X_AXIS = new Vector3(1, 0, 0);
 const Y_AXIS = new Vector3(0, 1, 0);
 const Z_AXIS = new Vector3(0, 0, 1);
 
-enum SNAP_FACE {
-  BOTTOM,
-  TOP,
-  FRONT,
-  BACK,
-  LEFT,
-  RIGHT
-}
-const SNAP_FACES = [SNAP_FACE.LEFT, SNAP_FACE.FRONT, SNAP_FACE.RIGHT, SNAP_FACE.TOP, SNAP_FACE.BOTTOM, SNAP_FACE.BACK];
-const DEFAULT_FLOOR_FACE_IDX = SNAP_FACES.indexOf(SNAP_FACE.BOTTOM);
-const DEFAULT_WALL_FACE_IDX = SNAP_FACES.indexOf(SNAP_FACE.BACK);
-const DEFAULT_CEIL_FACE_IDX = SNAP_FACES.indexOf(SNAP_FACE.TOP);
+const DEFAULT_FLOOR_FACE = SnapFace.BOTTOM;
+const DEFAULT_WALL_FACE = SnapFace.BACK;
+const DEFAULT_CEIL_FACE = SnapFace.TOP;
 
 // TODO simplify
 const QUAT_FOR_FACE = {
-  [SNAP_FACE.BOTTOM]: new Quaternion().setFromAxisAngle(X_AXIS, Math.PI / 2),
-  [SNAP_FACE.TOP]: new Quaternion().setFromAxisAngle(X_AXIS, -Math.PI / 2),
-  [SNAP_FACE.BACK]: new Quaternion(),
-  [SNAP_FACE.FRONT]: new Quaternion().setFromAxisAngle(Y_AXIS, Math.PI),
-  [SNAP_FACE.LEFT]: new Quaternion().setFromAxisAngle(Y_AXIS, Math.PI / 2),
-  [SNAP_FACE.RIGHT]: new Quaternion().setFromAxisAngle(Y_AXIS, -Math.PI / 2)
+  [SnapFace.AUTO]: new Quaternion().setFromAxisAngle(X_AXIS, Math.PI / 2),
+  [SnapFace.BOTTOM]: new Quaternion().setFromAxisAngle(X_AXIS, Math.PI / 2),
+  [SnapFace.TOP]: new Quaternion().setFromAxisAngle(X_AXIS, -Math.PI / 2),
+  [SnapFace.BACK]: new Quaternion(),
+  [SnapFace.FRONT]: new Quaternion().setFromAxisAngle(Y_AXIS, Math.PI),
+  [SnapFace.LEFT]: new Quaternion().setFromAxisAngle(Y_AXIS, Math.PI / 2),
+  [SnapFace.RIGHT]: new Quaternion().setFromAxisAngle(Y_AXIS, -Math.PI / 2)
 };
 const ROT_AXIS_FOR_FACE = {
-  [SNAP_FACE.BOTTOM]: Y_AXIS,
-  [SNAP_FACE.TOP]: Y_AXIS,
-  [SNAP_FACE.BACK]: Z_AXIS,
-  [SNAP_FACE.FRONT]: Z_AXIS,
-  [SNAP_FACE.LEFT]: X_AXIS,
-  [SNAP_FACE.RIGHT]: X_AXIS
+  [SnapFace.AUTO]: Y_AXIS,
+  [SnapFace.BOTTOM]: Y_AXIS,
+  [SnapFace.TOP]: Y_AXIS,
+  [SnapFace.BACK]: Z_AXIS,
+  [SnapFace.FRONT]: Z_AXIS,
+  [SnapFace.LEFT]: X_AXIS,
+  [SnapFace.RIGHT]: X_AXIS
 };
 const AXIS_NAME_FOR_FACE = {
-  [SNAP_FACE.BOTTOM]: "y",
-  [SNAP_FACE.TOP]: "y",
-  [SNAP_FACE.BACK]: "z",
-  [SNAP_FACE.FRONT]: "z",
-  [SNAP_FACE.LEFT]: "x",
-  [SNAP_FACE.RIGHT]: "x"
+  [SnapFace.AUTO]: "y",
+  [SnapFace.BOTTOM]: "y",
+  [SnapFace.TOP]: "y",
+  [SnapFace.BACK]: "z",
+  [SnapFace.FRONT]: "z",
+  [SnapFace.LEFT]: "x",
+  [SnapFace.RIGHT]: "x"
 } as const;
 
 const FLOOR_SNAP_ANGLE = MathUtils.degToRad(45);
@@ -281,9 +312,10 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
   if (userinput.get(paths.actions.carry.toggle_snap)) {
     carryState = CarryState.CARRYING;
     gridMesh.visible = false;
+    uiNeedsUpdate = true;
     return;
   }
-  if (userinput.get(paths.actions.carry.drop)) {
+  if (userinput.get(paths.actions.carry.drop) || exitedPointerlock) {
     dropObject(world, false);
     return;
   }
@@ -293,7 +325,8 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
     rotationOffset += ROTATION_SPEED * world.time.delta;
   }
   if (userinput.get(paths.actions.carry.change_snap_face)) {
-    snapFaceOverrideIdx = (snapFaceOverrideIdx + 1) % 6;
+    snapFaceOverride = (snapFaceOverride + 1) % 6;
+    uiNeedsUpdate = true;
   }
 
   const currentScene = anyEntityWith(world, SceneRoot)!;
@@ -355,18 +388,18 @@ function handleSnapping(world: HubsWorld, camera: Camera, userinput: UserInputSy
   obj.scale.max(MIN_SCALE);
 
   gridMesh.material.uniforms.objectPos.value.copy(target);
-  gridMesh.material.uniforms.objectScale.value = size.x * obj.scale.x;
+  gridMesh.material.uniforms.objectScale.value = Math.max(size.x, size.y, size.z) * obj.scale.x;
 
   // TODO we are doing 3 quaternion multiplies, I suspect this can be simplified
   obj.quaternion.setFromRotationMatrix(tmpMat4.lookAt(dir, ZERO, Y_AXIS));
 
   let snapFace;
-  if (snapFaceOverrideIdx !== -1) {
-    snapFace = SNAP_FACES[snapFaceOverrideIdx];
+  if (snapFaceOverride !== -1) {
+    snapFace = snapFaceOverride;
   } else if (Math.abs(dot) >= COS_FLOOR_SNAP_ANGLE) {
-    snapFace = SNAP_FACES[dot > 0 ? DEFAULT_FLOOR_FACE_IDX : DEFAULT_CEIL_FACE_IDX];
+    snapFace = dot > 0 ? DEFAULT_FLOOR_FACE : DEFAULT_CEIL_FACE;
   } else {
-    snapFace = SNAP_FACES[DEFAULT_WALL_FACE_IDX];
+    snapFace = DEFAULT_WALL_FACE;
   }
 
   const rotationAxis = ROT_AXIS_FOR_FACE[snapFace];
@@ -410,17 +443,24 @@ export function carrySystem(
     obj.position.copy(tmpWorldPos);
     obj.matrixNeedsUpdate = true;
 
+    if (userinput.get(paths.actions.carry.toggle_gravity)) {
+      applyGravity = !applyGravity;
+      uiNeedsUpdate = true;
+    }
+
     if (userinput.get(paths.actions.carry.drop) || exitedPointerlock) {
-      dropObject(world, true);
+      dropObject(world, applyGravity);
     }
 
     if (userinput.get(paths.actions.carry.toggle_snap)) {
       carryState = CarryState.SNAPPING;
       rotationOffset = 0;
       nudgeOffset = NUDGE_START_OFFSET;
-      snapFaceOverrideIdx = -1;
+      snapFaceOverride = -1;
       gridMesh.visible = true;
       lastIntersectedObj = null;
+
+      uiNeedsUpdate = true;
     }
   } else if (carryState == CarryState.SNAPPING) {
     outlineEffect.visibleEdgeColor.setHex(0xffffff);
@@ -438,10 +478,14 @@ export function carrySystem(
         carryObject(hovered);
       } else if (userinput.get(paths.actions.cursor.right.menu)) {
         const mousePos = userinput.get(paths.device.mouse.pos) as [x: number, y: number]; // TODO this should probably come from cursor pose?
-        showObjectMenu(hovered, mousePos[0], mousePos[1]);
+        showObjectMenu(hovered, mousePos);
         document.exitPointerLock();
       }
     }
+  }
+  if (uiNeedsUpdate) {
+    updateUI();
+    uiNeedsUpdate = false;
   }
   exitedPointerlock = false;
 }

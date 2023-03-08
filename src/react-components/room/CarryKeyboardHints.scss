@@ -1,0 +1,36 @@
+@use "../styles/theme.scss";
+
+:local(.keyboard-hint-panel) {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    li {
+      background: black;
+      opacity: 0.8;
+      color: theme.$text-inverted-color;
+      padding: 8px;
+      margin-top: 10px;
+      .key {
+        border-radius: 8px;
+        border: 1px solid theme.$border1-color;
+        font-weight: theme.$font-weight-bold;
+        display: inline-block;
+        min-width: 36px;
+        padding: 0 10px;
+        text-align: center;
+        line-height: 36px;
+        height: 36px;
+        margin-right: 10px;
+      }
+      .modifier {
+        margin-right: 10px;
+        display: inline-block;
+      }
+      span {
+      }
+    }
+}

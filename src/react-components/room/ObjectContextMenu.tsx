@@ -2,9 +2,9 @@ import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { EntityID } from "../../utils/networking-types";
 import styles from "./ObjectContextMenu.scss";
 import classNames from "classnames";
-import { carryObject, clearObjectMenu } from "../../bit-systems/carry-system";
+import { carryObject, CarryStateData, clearObjectMenu } from "../../bit-systems/carry-system";
 
-export function ObjectContextMenu({ eid, x, y }: { eid: EntityID; x: number; y: number }) {
+export function ObjectContextMenu({ activeObject, menuPos: [x, y] }: CarryStateData) {
   const menuRef: MutableRefObject<HTMLElement | null> = useRef(null);
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -25,9 +25,9 @@ export function ObjectContextMenu({ eid, x, y }: { eid: EntityID; x: number; y: 
 
   const onCarryClicked = useCallback(
     function () {
-      carryObject(eid);
+      carryObject(activeObject);
     },
-    [eid]
+    [activeObject]
   );
 
   return (

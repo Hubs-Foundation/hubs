@@ -810,6 +810,12 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       priority: 2000 // TODO
     },
     {
+      src: { value: paths.device.keyboard.key("t") },
+      dest: { value: paths.actions.carry.toggle_gravity },
+      xform: xforms.rising,
+      priority: 2000 // TODO
+    },
+    {
       src: { value: paths.device.keyboard.key("space") },
       dest: { value: paths.actions.carry.toggle_snap },
       xform: xforms.rising,
