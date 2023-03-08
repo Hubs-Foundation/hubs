@@ -7,7 +7,7 @@ import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
 import { deleteTheDeletableAncestor } from "./delete-entity-system";
-import { isPinned } from "./networking";
+import { createMessageDatas, isPinned } from "./networking";
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
@@ -38,6 +38,16 @@ function moveToTarget(world: HubsWorld, menu: EntityID) {
   setMatrixWorld(menuObj, targetObj.matrixWorld);
 }
 
+function openLink(world: HubsWorld, eid: EntityID) {
+  const { initialData } = createMessageDatas.get(eid)!;
+  const src = initialData.src;
+  // TODO: Currently only accounts for the simple case of an external url
+  //       but should support other type actions(eg: avatar update for avatar
+  //       url, room switch for Hubs room url).
+  //       See src/components/open-media-button.js
+  window.open(src);
+}
+
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
     createEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
@@ -56,7 +66,7 @@ function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) 
   } else if (clicked(world, ObjectMenu.deserializeDrawingButtonRef[menu])) {
     console.log("Clicked deserialize drawing");
   } else if (clicked(world, ObjectMenu.openLinkButtonRef[menu])) {
-    console.log("Clicked open link");
+    openLink(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.refreshButtonRef[menu])) {
     console.log("Clicked refresh");
   } else if (clicked(world, ObjectMenu.cloneButtonRef[menu])) {
