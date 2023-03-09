@@ -75,17 +75,18 @@ function changeAvatar(avatarUrl: string) {
 
 const TEST_ASSET_PREFIX =
   "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/Exported%20GLB%20Models/";
+const TEST_ASSET_SUFFIX = ".glb";
 const FLAG_SCENE = "--scene";
 const FLAG_AVATAR = "--avatar";
 const TEST_ASSET_FLAGS = [FLAG_SCENE, FLAG_AVATAR, ...ADD_FLAGS];
 export function testAsset(world: HubsWorld, avatarPov: Object3D, args: string[]) {
   args = args.filter(arg => arg);
   if (!args.length) {
-    console.log(usage("test", TEST_ASSET_FLAGS, null, ["asset_name"]));
+    console.log(usage("test", TEST_ASSET_FLAGS, null, ["AssetName"]));
     return;
   }
 
-  args[args.length - 1] = `${TEST_ASSET_PREFIX}${args[args.length - 1]}`;
+  args[args.length - 1] = [TEST_ASSET_PREFIX, args[args.length - 1], TEST_ASSET_SUFFIX].join("");
   if (checkFlag(args, FLAG_SCENE)) {
     changeScene(args[args.length - 1]);
   } else if (checkFlag(args, FLAG_AVATAR)) {
