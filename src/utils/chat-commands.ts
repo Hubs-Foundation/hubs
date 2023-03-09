@@ -59,6 +59,43 @@ export function add(world: HubsWorld, avatarPov: Object3D, args: string[]) {
   }
 }
 
+function changeScene(sceneUrl: string) {
+  console.log(`Changing scene to ${sceneUrl}`);
+  const error = APP.hubChannel!.updateScene(sceneUrl);
+  if (error) {
+    console.error(error);
+  }
+}
+
+function changeAvatar(avatarUrl: string) {
+  console.log(`Changing avatar to ${avatarUrl}`);
+  APP.store.update({ profile: { ...APP.store.state.profile, ...{ avatarId: avatarUrl } } });
+  AFRAME.scenes[0].emit("avatar_updated");
+}
+
+const TEST_ASSET_PREFIX =
+  "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/Exported%20GLB%20Models/";
+const TEST_ASSET_SUFFIX = ".glb";
+const FLAG_SCENE = "--scene";
+const FLAG_AVATAR = "--avatar";
+const TEST_ASSET_FLAGS = [FLAG_SCENE, FLAG_AVATAR, ...ADD_FLAGS];
+export function testAsset(world: HubsWorld, avatarPov: Object3D, args: string[]) {
+  args = args.filter(arg => arg);
+  if (!args.length) {
+    console.log(usage("test", TEST_ASSET_FLAGS, null, ["AssetName"]));
+    return;
+  }
+
+  args[args.length - 1] = [TEST_ASSET_PREFIX, args[args.length - 1], TEST_ASSET_SUFFIX].join("");
+  if (checkFlag(args, FLAG_SCENE)) {
+    changeScene(args[args.length - 1]);
+  } else if (checkFlag(args, FLAG_AVATAR)) {
+    changeAvatar(args[args.length - 1]);
+  } else {
+    add(world, avatarPov, args);
+  }
+}
+
 export function respawn(world: HubsWorld, scene: AScene, characterController: CharacterControllerSystem) {
   if (!scene.is("entered")) {
     console.error("Cannot respawn until you have entered the room.");

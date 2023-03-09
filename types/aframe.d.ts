@@ -112,7 +112,7 @@ declare module "aframe" {
       interaction: InteractionSystem;
       nav: NavSystem;
     };
-    emit(string, any): void;
+    emit(string, any?): void;
     addState(string): void;
     is(string): boolean;
   }
