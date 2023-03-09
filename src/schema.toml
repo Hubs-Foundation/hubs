@@ -46,6 +46,7 @@ features.show_feedback_ui = { category = "features", type = "boolean", internal 
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_cloud = { category = "features", type = "boolean", internal = "true" }
 features.show_newsletter_signup = { category = "features", type = "boolean", internal = "true" }
+features.change_hub_near_room_links = { category = "features", type = "boolean", internal = "true" }
 
 images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
 images.logo_dark = { category = "images", type = "file", name = "App Logo Dark", description = "Logo used across the app in dark mode." }

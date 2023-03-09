@@ -116,6 +116,7 @@ import "./components/emit-scene-event-on-remove";
 import "./components/follow-in-fov";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/change-hub-when-near";
 import "./components/refresh-media-button";
 import "./components/tweet-media-button";
 import "./components/remix-avatar-button";
