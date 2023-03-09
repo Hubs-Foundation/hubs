@@ -1,10 +1,9 @@
 import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
-import { EntityID } from "../../utils/networking-types";
 import styles from "./ObjectContextMenu.scss";
 import classNames from "classnames";
 import { carryObject, CarryStateData, clearObjectMenu } from "../../bit-systems/carry-system";
 
-export function ObjectContextMenu({ activeObject, menuPos: [x, y] }: CarryStateData) {
+export function ObjectContextMenu({ activeObject, menuPosX, menuPosY }: CarryStateData) {
   const menuRef: MutableRefObject<HTMLElement | null> = useRef(null);
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -35,8 +34,8 @@ export function ObjectContextMenu({ activeObject, menuPos: [x, y] }: CarryStateD
       ref={ref => (menuRef.current = ref)}
       className={styles.objectContextMenu}
       style={{
-        left: x,
-        top: y
+        left: menuPosX,
+        top: menuPosY
       }}
     >
       <div className={classNames(styles.menuItem, "disabled")}>Transform</div>

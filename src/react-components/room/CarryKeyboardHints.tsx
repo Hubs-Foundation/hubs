@@ -79,7 +79,7 @@ export function CarryKeyboardHints({
         <li>
           <div className="key">T</div>
           <span>
-            Swapping face: <b>{NAME_FOR_FACE[carryStateData.snapFaceOverride]}</b>
+            Swapping face: <b>{NAME_FOR_FACE[carryStateData.snapFace]}</b>
           </span>
         </li>
       </ul>
