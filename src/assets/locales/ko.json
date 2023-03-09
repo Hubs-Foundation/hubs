@@ -431,7 +431,6 @@
   "preferences-screen.preference.enable-audio-clipping": "Audio Clipping 활성화",
   "preferences-screen.preference.audio-clipping-threshold": "Audio Clipping 임계점",
   "preferences-screen.preference.theme": "테마",
-  "preferences-screen.preference.fast-room-switching": "빠른 Room 스위칭 사용",
   "preferences-screen.preference.lazy-load-scene-media": "Scene 미디어 Lazy Loading 사용",
   "preferences-screen.preference.disable-panning": "스테레오 사용 안 함",
   "preferences-screen.preference.cursor-size": "커서 크기",

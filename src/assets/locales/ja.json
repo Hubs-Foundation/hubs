@@ -455,7 +455,6 @@
   "preferences-screen.preference.enable-gyro": "ジャイロスコープを有効にする(ブラウザ/デバイスが対応している場合のみ)",
   "preferences-screen.preference.enable-on-screen-joystick-left": "画面上の左側のジョイスティックで移動できるようにする",
   "preferences-screen.preference.enable-on-screen-joystick-right": "画面上の右のジョイスティックで見回せるようにする",
-  "preferences-screen.preference.fast-room-switching": "高速ルーム切り替えを有効にする(実験的機能)",
   "preferences-screen.preference.fx-aa-mode": "アンチエイリアスモード",
   "preferences-screen.preference.global-media-volume": "メディアボリューム",
   "preferences-screen.preference.global-sfx-volume": "SFXボリューム",
