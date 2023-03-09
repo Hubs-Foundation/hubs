@@ -40,7 +40,7 @@ function isHighDensity(subtree) {
   }
 }
 
-export function isGeometryHighDensity(geo) {
+function isGeometryHighDensity(geo) {
   const bvh = geo.boundsTree;
   const roots = bvh._roots;
   for (let i = 0; i < roots.length; ++i) {
