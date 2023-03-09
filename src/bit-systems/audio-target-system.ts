@@ -5,7 +5,7 @@ import { AudioEmitter, AudioSettingsChanged, AudioSource, AudioTarget } from "..
 import { SourceType } from "../components/audio-params";
 import { AUDIO_SOURCE_FLAGS } from "../inflators/audio-source";
 import { AudioSystem } from "../systems/audio-system";
-import { AudioObject3D, Emitter2Audio, EMITTER_FLAGS, makeAudioEntity } from "./audio-emitter-system";
+import { Emitter2Audio, makeAudioEntity } from "./audio-emitter-system";
 
 const createWhiteNoise = (audioContext: AudioContext, gain: number): AudioBufferSourceNode => {
   const bufferSize = 2 * audioContext.sampleRate,
@@ -27,7 +27,7 @@ const addSourceToAudioTarget = (audioSourceEid: number, source: AudioBufferSourc
   const audioTargetEids = source2Target.get(audioSourceEid);
   audioTargetEids?.forEach(audioTargetEid => {
     const audioEid = Emitter2Audio.get(audioTargetEid)!;
-    const targetAudio = APP.world.eid2obj.get(audioEid)! as AudioObject3D;
+    const targetAudio = APP.audios.get(audioEid)!;
     try {
       targetAudio.disconnect();
     } catch (e) {}
@@ -43,7 +43,7 @@ const removeSourceFromAudioTarget = (audioSourceEid: number) => {
   const audioTargetEids = source2Target.get(audioSourceEid);
   audioTargetEids?.forEach(audioTargetEid => {
     const audioEid = Emitter2Audio.get(audioTargetEid)!;
-    const targetAudio = APP.world.eid2obj.get(audioEid)! as AudioObject3D;
+    const targetAudio = APP.audios.get(audioEid)!;
     try {
       targetAudio.disconnect();
     } catch (e) {}
@@ -107,7 +107,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     const maxDelay = AudioTarget.maxDelay[audioTargetEid];
     const minDelay = AudioTarget.minDelay[audioTargetEid];
     if (maxDelay > 0) {
-      const audio = APP.world.eid2obj.get(audioEid)! as AudioObject3D;
+      const audio = APP.audios.get(audioEid)!;
       const delayNode = ctx.createDelay(maxDelay);
       delayNode.delayTime.value = THREE.MathUtils.randFloat(minDelay, maxDelay);
       audio.setFilters([delayNode]);
@@ -168,7 +168,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     const radius = source2Radius.get(audioSourceEid)!;
     const currentEmitterEid = source2Emitter.get(audioSourceEid)!;
     if (currentEmitterEid) {
-      const currentEmitterAudio = APP.world.eid2obj.get(currentEmitterEid)! as AudioObject3D;
+      const currentEmitterAudio = APP.audios.get(currentEmitterEid)!;
       currentEmitterAudio.getWorldPosition(emitterWorldPos);
       const distanceSquared = emitterWorldPos.distanceToSquared(sourceWorldPos);
       if (distanceSquared > radius) {
@@ -177,7 +177,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
           const whiteNoise = source2Noise.get(audioSourceEid)!;
           addSourceToAudioTarget(audioSourceEid, whiteNoise);
         }
-        AudioEmitter.flags[currentEmitterEid] &= ~EMITTER_FLAGS.MUTED;
+        APP.mutedState.delete(currentEmitterEid);
         addComponent(world, AudioSettingsChanged, currentEmitterEid);
       }
     } else {
@@ -185,15 +185,15 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
         const sourceType = APP.sourceType.get(audioEmitterEid);
         if (sourceType === SourceType.AUDIO_TARGET) return true;
         if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
-          // TODO Check user permissions
+          // Check permissions
         }
-        const emitterAudio = APP.world.eid2obj.get(audioEmitterEid)! as AudioObject3D;
+        const emitterAudio = APP.audios.get(audioEmitterEid)!;
         emitterAudio.getWorldPosition(emitterWorldPos);
         const distanceSquared = emitterWorldPos.distanceToSquared(sourceWorldPos);
         if (distanceSquared < radius) {
           source2Emitter.set(audioSourceEid, audioEmitterEid);
           if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.MUTE_SELF) {
-            AudioEmitter.flags[audioEmitterEid] |= EMITTER_FLAGS.MUTED;
+            APP.mutedState.add(audioEmitterEid);
             addComponent(world, AudioSettingsChanged, audioEmitterEid);
           }
           emitterAudio.source && addSourceToAudioTarget(audioSourceEid, emitterAudio.source);

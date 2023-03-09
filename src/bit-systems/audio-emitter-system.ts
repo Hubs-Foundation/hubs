@@ -8,17 +8,9 @@ import {
 } from "three";
 import { HubsWorld } from "../app";
 import { AudioEmitter, AudioSettingsChanged } from "../bit-components";
-import {
-  AudioSettings,
-  AudioType,
-  MediaAudioDefaults,
-  PanningModelType,
-  SfxAudioDefaults,
-  SourceType,
-  TargetAudioDefaults,
-  ZoneAudioDefaults
-} from "../components/audio-params";
+import { AudioType, SourceType } from "../components/audio-params";
 import { AudioSystem } from "../systems/audio-system";
+import { applySettings, getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { addObject3DComponent, swapObject3DComponent } from "../utils/jsx-entity";
 
 export type AudioObject3D = StereoAudio | PositionalAudio;
@@ -37,86 +29,11 @@ export function isPositionalAudio(node: AudioObject3D): node is PositionalAudio 
   return (node as any).panner !== undefined;
 }
 
-const SourceTypeToAudioParams = {
-  [SourceType.MEDIA_VIDEO]: MediaAudioDefaults,
-  [SourceType.AVATAR_AUDIO_SOURCE]: MediaAudioDefaults,
-  [SourceType.AUDIO_TARGET]: TargetAudioDefaults,
-  [SourceType.AUDIO_ZONE]: ZoneAudioDefaults,
-  [SourceType.SFX]: SfxAudioDefaults
-};
-
-const getOverriddenPanningModelType = () => {
-  switch (APP.store.state.preferences.audioPanningQuality) {
-    case "High":
-      return PanningModelType.HRTF;
-    case "Low":
-      return PanningModelType.EqualPower;
-    default:
-      return null;
-  }
-};
-
-const getCurrentAudioSettings = (eid: number) => {
-  const sourceType = APP.sourceType.get(eid)!;
-  const defaults = SourceTypeToAudioParams[sourceType];
-  const sceneOverrides = APP.sceneAudioDefaults.get(sourceType);
-  const audioOverrides = APP.audioOverrides.get(eid);
-  const audioDebugPanelOverrides = APP.audioDebugPanelOverrides.get(sourceType);
-  const zoneSettings = APP.zoneOverrides.get(eid);
-  const preferencesOverrides = {} as AudioSettings;
-
-  const overriddenPanningModelType = getOverriddenPanningModelType();
-
-  if (overriddenPanningModelType !== null) {
-    preferencesOverrides.panningModel = overriddenPanningModelType;
-  }
-
-  if (APP.store.state.preferences.disableLeftRightPanning) {
-    preferencesOverrides.audioType = AudioType.Stereo;
-  }
-
-  const settings = Object.assign(
-    {},
-    defaults,
-    sceneOverrides,
-    audioOverrides,
-    audioDebugPanelOverrides,
-    zoneSettings,
-    preferencesOverrides
-  );
-
-  // TODO Handle voice permissions
-  if (AudioEmitter.flags[eid] & EMITTER_FLAGS.CLIPPED || AudioEmitter.flags[eid] & EMITTER_FLAGS.MUTED) {
-    settings.gain = 0;
-  } else if (APP.gainMultipliers.has(eid)) {
-    settings.gain = settings.gain * APP.gainMultipliers.get(eid)!;
-  }
-
-  if (APP.supplementaryAttenuation.has(eid)) {
-    settings.gain = settings.gain * APP.supplementaryAttenuation.get(eid)!;
-  }
-
-  return settings;
-};
-
-const applySettings = (audio: AudioObject3D, settings: AudioSettings) => {
-  if (audio instanceof PositionalAudio) {
-    audio.setDistanceModel(settings.distanceModel);
-    audio.setRolloffFactor(settings.rolloffFactor);
-    audio.setRefDistance(settings.refDistance);
-    audio.setMaxDistance(settings.maxDistance);
-    audio.panner.panningModel = settings.panningModel;
-    audio.panner.coneInnerAngle = settings.coneInnerAngle;
-    audio.panner.coneOuterAngle = settings.coneOuterAngle;
-    audio.panner.coneOuterGain = settings.coneOuterGain;
-  }
-  audio.gain.gain.setTargetAtTime(settings.gain, audio.context.currentTime, 0.1);
-};
-
 export function cleanupAudio(audio: AudioObject3D) {
   const eid = audio.eid!;
   audio.disconnect();
   const audioSystem = APP.scene?.systems["hubs-systems"].audioSystem;
+  APP.audios.delete(eid);
   APP.supplementaryAttenuation.delete(eid);
   APP.audioOverrides.delete(eid);
   audioSystem.removeAudio({ node: audio });
@@ -132,11 +49,13 @@ function swapAudioType<T extends AudioObject3D>(
   audio.disconnect();
   APP.sourceType.set(eid, SourceType.MEDIA_VIDEO);
   APP.supplementaryAttenuation.delete(eid);
+  APP.audios.delete(eid);
   audioSystem.removeAudio({ node: audio });
 
   const newAudio = new NewType(APP.audioListener);
   newAudio.setNodeSource(audio.source!);
   audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: newAudio });
+  APP.audios.set(eid, newAudio);
 
   audio.parent!.add(newAudio);
   audio.removeFromParent();
@@ -177,7 +96,8 @@ export function makeAudioEntity(world: HubsWorld, source: number, sourceType: So
 
   audioSystem.addAudio({ sourceType, node: audio });
 
-  addComponent(world, AudioSettingsChanged, eid);
+  APP.audios.set(eid, audio);
+  updateAudioSettings(eid, audio);
 
   return eid;
 }
