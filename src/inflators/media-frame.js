@@ -4,7 +4,7 @@ import { addComponent, hasComponent } from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
 import { Layers } from "../camera-layers";
-import { inflateRigidBody } from "./rigid-body";
+import { inflateRigidBody, Type } from "./rigid-body";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide, Group } from "three";
 
@@ -70,15 +70,14 @@ export function inflateMediaFrame(world, eid, componentProps) {
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
 
   inflateRigidBody(world, eid, {
+    type: Type.KINEMATIC,
     collisionGroup: COLLISION_LAYERS.MEDIA_FRAMES,
     collisionMask: COLLISION_LAYERS.INTERACTABLES,
     disableCollision: true
   });
   inflatePhysicsShape(world, eid, {
-    type: Shape.MESH,
-    margin: 0.01,
-    fit: Fit.ALL,
-    includeInvisible: true,
+    type: Shape.BOX,
+    fit: Fit.MANUAL,
     halfExtents: [componentProps.bounds.x / 2, componentProps.bounds.y / 2, componentProps.bounds.z / 2]
   });
 }
