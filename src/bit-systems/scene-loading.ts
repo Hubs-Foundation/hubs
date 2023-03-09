@@ -2,8 +2,17 @@ import { AElement } from "aframe";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
-import { EnvironmentSettings, NavMesh, Networked, SceneLoader, SceneRoot, Skybox } from "../bit-components";
+import {
+  EnvironmentSettings,
+  NavMesh,
+  Networked,
+  PhysicsShape,
+  SceneLoader,
+  SceneRoot,
+  Skybox
+} from "../bit-components";
 import Sky from "../components/skybox";
+import { Fit, inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
@@ -74,6 +83,16 @@ function* loadScene(
         skybox = o as Sky;
       }
     });
+
+    if (!hasComponent(world, PhysicsShape, scene)) {
+      inflatePhysicsShape(world, scene, {
+        type: Shape.BOX,
+        margin: 0.01,
+        fit: Fit.MANUAL,
+        halfExtents: [4000, 0.5, 4000],
+        offset: [0, -0.5, 0]
+      });
+    }
 
     const envSettings = { skybox };
     if (hasComponent(world, EnvironmentSettings, scene)) {
