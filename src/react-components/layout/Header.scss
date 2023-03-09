@@ -73,8 +73,8 @@ header {
   width: 124px;
  
   img {
-    height: 83px;
-    width: 83px;
+    max-height: 83px;
+    height: 100%;
   }
 }
 :local(.sign-in) {

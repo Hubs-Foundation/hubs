@@ -19,8 +19,8 @@
 }
 
 :local(.logo) {
-  height: 250px;
-  width: 250px;
+  max-height: 250px;
+  height: 100%;
 }
 
 :local(.room-name) {
