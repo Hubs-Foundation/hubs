@@ -20,12 +20,12 @@ export enum ActivationState {
 export type RigiBodyParams = {
   type: Type;
   mass: number;
-  gravity: [number, 3];
+  gravity: [number, number, number];
   linearDamping: number;
   angularDamping: number;
   linearSleepingThreshold: number;
   angularSleepingThreshold: number;
-  angularFactor: [number, 3];
+  angularFactor: [number, number, number];
   activationState: ActivationState;
   emitCollisionEvents: boolean;
   disableCollision: boolean;
