@@ -14,7 +14,7 @@ import Card from "../shared/Card";
 const styles = withCommonStyles(() => ({}));
 
 const SystemEditorComponent = ({ classes }) => {
-  const [adminInfo, setAdminInfo] = useState<AdminInfoT>({} as AdminInfoT);
+  const [adminInfo, setAdminInfo] = useState<AdminInfoT | null>(null);
   const [retConfig, setRetConfig] = useState<RetConfigT>({} as RetConfigT);
   const [reticulumMeta, setReticulumMeta] = useState<ReticulumMetaT>({} as ReticulumMetaT);
   // Send quota to use as heuristic for checking if in SES sandbox
@@ -28,22 +28,20 @@ const SystemEditorComponent = ({ classes }) => {
     const init = async () => {
       try {
         const adminInfo = await getAdminInfo();
+        // if adminInfo.error {
         setAdminInfo(adminInfo);
-      } catch (error) {
-        console.log("error", error);
-      }
 
-      try {
         const retConfig = await getEditableConfig("reticulum");
+        // if retConfig.error
         setRetConfig(retConfig);
-      } catch (error) {
-        console.log("error", error);
-      }
 
-      try {
         updateReticulumMeta();
       } catch (error) {
-        console.log("error", error);
+        // TODO impliment an error state in the UI
+        // also if any of the above come back error - we need
+        // a ui for that as well.
+
+        console.error(error);
       }
     };
     init();
