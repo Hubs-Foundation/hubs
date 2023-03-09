@@ -1,8 +1,7 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } from "bitecs";
 import { Object3DTag, Rigidbody, PhysicsShape, AEntity } from "../bit-components";
-import { Fit, getShapeFromPhysicsShape } from "../inflators/physics-shape";
+import { getShapeFromPhysicsShape } from "../inflators/physics-shape";
 import { findAncestorWithComponent } from "../utils/bit-utils";
-import { Vector3 } from "three";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
 import { HubsWorld } from "../app";
 import { PhysicsSystem } from "./physics-system";
@@ -14,20 +13,12 @@ const shapeQuery = defineQuery([PhysicsShape]);
 const shapeEnterQuery = enterQuery(shapeQuery);
 const shapeExitQuery = exitQuery(shapeQuery);
 
-const tmpV = new Vector3();
-
 function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: number) {
   const bodyId = PhysicsShape.bodyId[eid];
   const obj = world.eid2obj.get(eid)!;
-  if (PhysicsShape.fit[eid] === Fit.ALL) {
-    const shape = getShapeFromPhysicsShape(eid);
-    const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
-    PhysicsShape.shapeId[eid] = shapeId;
-  } else {
-    const shape = getShapeFromPhysicsShape(eid);
-    const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
-    PhysicsShape.shapeId[eid] = shapeId;
-  }
+  const shape = getShapeFromPhysicsShape(eid);
+  const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
+  PhysicsShape.shapeId[eid] = shapeId;
 }
 
 export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSystem) => {
