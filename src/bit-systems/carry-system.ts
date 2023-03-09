@@ -1,9 +1,9 @@
 import { AElement, UserInputSystem } from "aframe";
-import { defineQuery, hasComponent } from "bitecs";
+import { defineQuery, entityExists, hasComponent } from "bitecs";
 import { Selection } from "postprocessing";
 import { ArrowHelper, Box3, Camera, MathUtils, Matrix3, Matrix4, Mesh, Quaternion, Raycaster, Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { Carryable, FloatyObject, HoveredRemoteRight, Rigidbody, SceneRoot } from "../bit-components";
+import { Carryable, FloatyObject, HoveredRemoteRight, Owned, Rigidbody, SceneRoot } from "../bit-components";
 import { COLLISION_LAYERS } from "../constants";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
@@ -404,6 +404,20 @@ export function carrySystem(
   const outlineEffect = APP.fx.outlineEffect!;
   const selection = outlineEffect.selection;
   selection.clear();
+
+  const entityWasRemoved = !entityExists(world, carryStateData.activeObject);
+  const lostOwnership = !hasComponent(world, Owned, carryStateData.activeObject);
+  if (
+    entityWasRemoved ||
+    ((carryState === CarryState.CARRYING || carryState === CarryState.SNAPPING) && lostOwnership)
+  ) {
+    carryState = CarryState.NONE;
+    carryStateData.activeObject = 0;
+    arrowHelper.visible = false;
+    gridMesh.visible = false;
+    uiNeedsUpdate = true;
+  }
+
   if (carryState === CarryState.CARRYING) {
     const obj = world.eid2obj.get(carryStateData.activeObject)!;
     const rig = (characterController.avatarRig as AElement).object3D;
