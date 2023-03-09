@@ -1,17 +1,8 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } from "bitecs";
-import {
-  Object3DTag,
-  Rigidbody,
-  PhysicsShape,
-  AEntity,
-  AmmoShape,
-  BoxCollider,
-  Trimesh,
-  HeightField
-} from "../bit-components";
+import { Object3DTag, Rigidbody, PhysicsShape, AEntity } from "../bit-components";
 import { Fit, getShapeFromPhysicsShape } from "../inflators/physics-shape";
-import { findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
-import { Vector3, Object3D } from "three";
+import { findAncestorWithComponent } from "../utils/bit-utils";
+import { Vector3 } from "three";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
 import { HubsWorld } from "../app";
 import { PhysicsSystem } from "./physics-system";
@@ -25,31 +16,14 @@ const shapeExitQuery = exitQuery(shapeQuery);
 
 const tmpV = new Vector3();
 
-function updateOffsets(world: HubsWorld, eid: number, obj: Object3D) {
-  // As we don't set offsets for components like ammo-shape that don't have a rigid body, we need to set them here.
-  const offset = PhysicsShape.offset[eid].slice();
-  if (hasAnyComponent(world, [AmmoShape, HeightField], eid)) {
-    offset.set(PhysicsShape.offset[eid]);
-  }
-  if (hasAnyComponent(world, [BoxCollider, Trimesh, AmmoShape, HeightField], eid)) {
-    PhysicsShape.offset[eid].set(obj.position.clone().add(tmpV.fromArray(offset)).toArray());
-    PhysicsShape.orientation[eid].set(obj.quaternion.toArray());
-    if (hasComponent(world, BoxCollider, eid)) {
-      PhysicsShape.halfExtents[eid].set(obj.scale.clone().divideScalar(2).toArray());
-    }
-  }
-}
-
 function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: number) {
   const bodyId = PhysicsShape.bodyId[eid];
   const obj = world.eid2obj.get(eid)!;
   if (PhysicsShape.fit[eid] === Fit.ALL) {
-    updateOffsets(world, eid, obj);
     const shape = getShapeFromPhysicsShape(eid);
     const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
     PhysicsShape.shapeId[eid] = shapeId;
   } else {
-    updateOffsets(world, eid, obj);
     const shape = getShapeFromPhysicsShape(eid);
     const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
     PhysicsShape.shapeId[eid] = shapeId;
