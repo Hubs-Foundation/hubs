@@ -1,6 +1,4 @@
-import { addComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { HeightField } from "../bit-components";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 
 export type HeightFieldParams = {
@@ -10,7 +8,6 @@ export type HeightFieldParams = {
 };
 
 export function inflateHeightField(world: HubsWorld, eid: number, params: HeightFieldParams) {
-  addComponent(world, HeightField, eid);
   inflatePhysicsShape(world, eid, {
     type: Shape.HEIGHTFIELD,
     fit: Fit.MANUAL,

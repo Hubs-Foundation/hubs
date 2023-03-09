@@ -123,10 +123,6 @@ export const PhysicsShape = defineComponent({
   heightfieldDistance: Types.f32,
   flags: Types.ui8
 });
-export const AmmoShape = defineComponent();
-export const BoxCollider = defineComponent();
-export const HeightField = defineComponent();
-export const Trimesh = defineComponent();
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
 export const DestroyAtExtremeDistance = defineComponent();
