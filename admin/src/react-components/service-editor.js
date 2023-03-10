@@ -1,28 +1,28 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 
-import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Card from "@material-ui/core/Card";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import CardContent from "@material-ui/core/CardContent";
-import Snackbar from "@material-ui/core/Snackbar";
-import SnackbarContent from "@material-ui/core/SnackbarContent";
-import TextField from "@material-ui/core/TextField";
-import Switch from "@material-ui/core/Switch";
-import Typography from "@material-ui/core/Typography";
-import Icon from "@material-ui/core/Icon";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Button from "@material-ui/core/Button";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import clsx from "classnames";
-import { Title } from "react-admin";
+import React, { Component } from 'react';
+import { withStyles } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Card from '@material-ui/core/Card';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import CardContent from '@material-ui/core/CardContent';
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import TextField from '@material-ui/core/TextField';
+import Switch from '@material-ui/core/Switch';
+import Typography from '@material-ui/core/Typography';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import Button from '@material-ui/core/Button';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import clsx from 'classnames';
+import { Title } from 'react-admin';
 
-import { store } from "hubs/src/utils/store-instance";
-import withCommonStyles from "../utils/with-common-styles";
+import { store } from '../utils/store-instance';
+import withCommonStyles from '../utils/with-common-styles';
 import {
   getEditableConfig,
   getConfigValue,
@@ -32,65 +32,65 @@ import {
   isDescriptor,
   putConfig,
   schemaCategories,
-  getAdminInfo
-} from "../utils/ita";
-import * as AppConfigUtils from "../utils/app-config";
+  getAdminInfo,
+} from '../utils/ita';
+import * as AppConfigUtils from '../utils/app-config';
 
-const qs = new URLSearchParams(location.hash.split("?")[1]);
+const qs = new URLSearchParams(location.hash.split('?')[1]);
 
-const styles = withCommonStyles(theme => {
+const styles = withCommonStyles((theme) => {
   return {
     inputDescription: {
-      display: "block",
+      display: 'block',
       color: theme.palette.text.secondary,
-      fontSize: "0.75rem",
-      marginTop: "0.5em",
-      borderTop: "1px solid rgba(0, 0, 0, 0.42)"
+      fontSize: '0.75rem',
+      marginTop: '0.5em',
+      borderTop: '1px solid rgba(0, 0, 0, 0.42)',
     },
     fileInput: {
-      marginTop: "2em",
-      marginBottom: "1em",
-      "& .name": {
+      marginTop: '2em',
+      marginBottom: '1em',
+      '& .name': {
         color: theme.palette.text.secondary,
-        display: "block",
-        marginBottom: "0.5em",
-        "&.filled": {
-          fontSize: "0.75rem"
-        }
+        display: 'block',
+        marginBottom: '0.5em',
+        '&.filled': {
+          fontSize: '0.75rem',
+        },
       },
-      "& .image": {
-        width: "50px",
-        maxHeight: "50px",
-        marginRight: "1em",
-        verticalAlign: "middle"
-      }
+      '& .image': {
+        width: '50px',
+        maxHeight: '50px',
+        marginRight: '1em',
+        verticalAlign: 'middle',
+      },
     },
     switchInput: {
-      margin: "2em 0",
-      "& label": {
-        marginLeft: "-1em",
-        fontSize: "1rem"
+      margin: '2em 0',
+      '& label': {
+        marginLeft: '-1em',
+        fontSize: '1rem',
       },
-      "& .switch": {
-        marginTop: "-0.1em"
-      }
+      '& .switch': {
+        marginTop: '-0.1em',
+      },
     },
     colorInput: {
-      margin: "2em 0",
-      "& label": {
-        fontSize: "1rem"
+      margin: '2em 0',
+      '& label': {
+        fontSize: '1rem',
       },
-      "& input": {
+      '& input': {
         margin: 0,
-        marginRight: "1em",
-        padding: "4px",
-        border: "1px solid hsl(0, 0%, 90%)",
-        backgroundColor: "hsl(0, 0%, 90%)",
-        borderRadius: "3px",
-        height: "32px",
-        verticalAlign: "middle"
-      }
-    }
+        marginRight: '1em',
+        padding: '4px',
+        border: '1px solid hsl(0, 0%, 90%)',
+        backgroundColor: 'hsl(0, 0%, 90%)',
+        borderRadius: '3px',
+        height: '32px',
+        verticalAlign: 'middle',
+      },
+    },
   };
 });
 
@@ -137,19 +137,25 @@ class ConfigurationEditor extends Component {
       saving: false,
       saved: false,
       saveError: null,
-      warningMessage: null
+      warningMessage: null,
     };
   }
 
   firstAvailableCategory() {
     for (const category of schemaCategories) {
-      if (!this.props.schema[category] || isEmptyObject(this.props.schema[category])) continue;
+      if (
+        !this.props.schema[category] ||
+        isEmptyObject(this.props.schema[category])
+      )
+        continue;
       return category;
     }
   }
 
   async fetchConfigsForCategory() {
-    const servicesForCategory = Object.keys(this.props.schema[this.state.category]);
+    const servicesForCategory = Object.keys(
+      this.props.schema[this.state.category]
+    );
 
     const config = {};
 
@@ -161,11 +167,11 @@ class ConfigurationEditor extends Component {
   }
 
   async getConfig() {
-    throw new Error("Not implemented");
+    throw new Error('Not implemented');
   }
 
   async putConfig() {
-    throw new Error("Not implemented");
+    throw new Error('Not implemented');
   }
 
   async componentDidMount() {
@@ -175,7 +181,9 @@ class ConfigurationEditor extends Component {
   }
 
   handleTabChange(event, category) {
-    this.setState({ category, config: null }, () => this.fetchConfigsForCategory());
+    this.setState({ category, config: null }, () =>
+      this.fetchConfigsForCategory()
+    );
   }
 
   onChange(path, val) {
@@ -208,16 +216,16 @@ class ConfigurationEditor extends Component {
   }
 
   renderSimpleInput(path, descriptor, currentValue) {
-    const displayPath = path.join(" > ");
-    const inputType = descriptor.type === "number" ? "number" : "text";
+    const displayPath = path.join(' > ');
+    const inputType = descriptor.type === 'number' ? 'number' : 'text';
     return (
       <TextField
         key={displayPath}
         id={displayPath}
         label={descriptor.name || displayPath}
         inputProps={{ maxLength: 4096 }}
-        value={currentValue || ""}
-        onChange={ev => this.onChange(path, ev.target.value)}
+        value={currentValue || ''}
+        onChange={(ev) => this.onChange(path, ev.target.value)}
         helperText={descriptor.description}
         type={inputType}
         fullWidth
@@ -227,7 +235,7 @@ class ConfigurationEditor extends Component {
   }
 
   renderLongTextInput(path, descriptor, currentValue) {
-    const displayPath = path.join(" > ");
+    const displayPath = path.join(' > ');
 
     function isValidJSON(s) {
       try {
@@ -245,15 +253,19 @@ class ConfigurationEditor extends Component {
         id={displayPath}
         label={descriptor.name || displayPath}
         inputProps={{ maxLength: 4096 }}
-        value={currentValue || ""}
-        onChange={ev => {
-          if (descriptor.type === "json") {
+        value={currentValue || ''}
+        onChange={(ev) => {
+          if (descriptor.type === 'json') {
             if (!isValidJSON(ev.target.value)) {
-              const warningMessage = `Invalid JSON for ${descriptor.name || displayPath}. See console for details.`;
+              const warningMessage = `Invalid JSON for ${
+                descriptor.name || displayPath
+              }. See console for details.`;
               if (this.state.warningMessage !== warningMessage) {
                 this.setState({ warningMessage });
               }
-              console.error(`Invalid JSON for ${descriptor.name || displayPath}.`);
+              console.error(
+                `Invalid JSON for ${descriptor.name || displayPath}.`
+              );
               console.error(ev.target.value);
             } else {
               if (this.state.warningMessage !== null) {
@@ -263,8 +275,8 @@ class ConfigurationEditor extends Component {
           }
           this.onChange(path, ev.target.value);
         }}
-        onBlur={ev => {
-          if (descriptor.type === "json" && isValidJSON(ev.target.value)) {
+        onBlur={(ev) => {
+          if (descriptor.type === 'json' && isValidJSON(ev.target.value)) {
             // Pretty print json strings
             const pretty = JSON.stringify(JSON.parse(ev.target.value), null, 2);
             this.onChange(path, pretty);
@@ -291,69 +303,90 @@ class ConfigurationEditor extends Component {
       imageURL = currentValue;
     }
 
-    const displayPath = path.join(" > ");
+    const displayPath = path.join(' > ');
 
     return (
       <div key={displayPath} className={this.props.classes.fileInput}>
-        <div className={clsx("name", { filled: !!imageURL })}>{descriptor.name || displayPath}</div>
+        <div className={clsx('name', { filled: !!imageURL })}>
+          {descriptor.name || displayPath}
+        </div>
         <label>
           {imageURL && <img className="image" src={imageURL} />}
-          <input type="file" onChange={ev => this.onChange(path, ev.target.files[0])} style={{ display: "none" }} />
-          <Button variant="outlined" color="secondary" size="small" onClick={e => e.target.parentNode.click()}>
+          <input
+            type="file"
+            onChange={(ev) => this.onChange(path, ev.target.files[0])}
+            style={{ display: 'none' }}
+          />
+          <Button
+            variant="outlined"
+            color="secondary"
+            size="small"
+            onClick={(e) => e.target.parentNode.click()}
+          >
             Upload
           </Button>
         </label>
-        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
+        <span className={this.props.classes.inputDescription}>
+          {descriptor.description}
+        </span>
       </div>
     );
   }
 
   renderSwitchInput(path, descriptor, currentValue) {
-    const displayPath = path.join(" > ");
+    const displayPath = path.join(' > ');
     return (
       <div key={displayPath} className={this.props.classes.switchInput}>
         <label>
-          <Switch className="switch" checked={currentValue} onChange={ev => this.onChange(path, ev.target.checked)} />
+          <Switch
+            className="switch"
+            checked={currentValue}
+            onChange={(ev) => this.onChange(path, ev.target.checked)}
+          />
           {descriptor.name || displayPath}
         </label>
-        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
+        <span className={this.props.classes.inputDescription}>
+          {descriptor.description}
+        </span>
       </div>
     );
   }
 
   renderColorInput(path, descriptor, currentValue) {
-    const displayPath = path.join(" > ");
+    const displayPath = path.join(' > ');
     return (
       <div key={displayPath} className={this.props.classes.colorInput}>
         <label>
           <input
             type="color"
-            value={currentValue || ""}
-            onChange={ev => this.onChange(path, ev.target.value)}
+            value={currentValue || ''}
+            onChange={(ev) => this.onChange(path, ev.target.value)}
             title={currentValue}
           />
           {descriptor.name || displayPath}
         </label>
-        <span className={this.props.classes.inputDescription}>{descriptor.description}</span>
+        <span className={this.props.classes.inputDescription}>
+          {descriptor.description}
+        </span>
       </div>
     );
   }
 
   renderConfigurable(path, descriptor, currentValue) {
     switch (descriptor.type) {
-      case "list":
+      case 'list':
         return null;
-      case "file":
+      case 'file':
         return this.renderFileInput(path, descriptor, currentValue);
-      case "boolean":
+      case 'boolean':
         return this.renderSwitchInput(path, descriptor, currentValue);
-      case "color":
+      case 'color':
         return this.renderColorInput(path, descriptor, currentValue);
-      case "longstring":
-      case "json":
+      case 'longstring':
+      case 'json':
         return this.renderLongTextInput(path, descriptor, currentValue);
-      case "string":
-      case "number":
+      case 'string':
+      case 'number':
       default:
         return this.renderSimpleInput(path, descriptor, currentValue);
     }
@@ -361,9 +394,19 @@ class ConfigurationEditor extends Component {
 
   renderTree(schema, category, config) {
     const configurables = getDescriptors(schema[category])
-      .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
-      .filter(([, descriptor]) => qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true")
-      .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
+      .filter(
+        ([, descriptor]) =>
+          qs.get('show_internal_configs') !== null ||
+          descriptor.internal !== 'true'
+      )
+      .filter(
+        ([, descriptor]) =>
+          qs.get('show_deprecated_configs') !== null ||
+          descriptor.deprecated !== 'true'
+      )
+      .map(([path, descriptor]) =>
+        this.renderConfigurable(path, descriptor, getConfigValue(config, path))
+      );
 
     return (
       <form onSubmit={this.onSubmit.bind(this)}>
@@ -403,8 +446,11 @@ class ConfigurationEditor extends Component {
             onChange={this.handleTabChange.bind(this)}
           >
             {schemaCategories
-              .filter(c => this.props.schema[c] && !isEmptyObject(this.props.schema[c]))
-              .map(c => (
+              .filter(
+                (c) =>
+                  this.props.schema[c] && !isEmptyObject(this.props.schema[c])
+              )
+              .map((c) => (
                 <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
               ))}
           </Tabs>
@@ -412,36 +458,60 @@ class ConfigurationEditor extends Component {
             <Typography variant="body2" gutterBottom>
               {getCategoryDescription(this.state.category, this.state.provider)}
             </Typography>
-            {schema && config ? this.renderTree(schema, category, config) : <LinearProgress />}
+            {schema && config ? (
+              this.renderTree(schema, category, config)
+            ) : (
+              <LinearProgress />
+            )}
           </TabContainer>
         </CardContent>
         <Snackbar
-          anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
-          open={this.state.saved || !!this.state.saveError || !!this.state.warningMessage}
+          anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+          open={
+            this.state.saved ||
+            !!this.state.saveError ||
+            !!this.state.warningMessage
+          }
           autoHideDuration={10000}
           onClose={() => {
-            this.setState({ saved: false, saveError: null, warningMessage: null });
+            this.setState({
+              saved: false,
+              saveError: null,
+              warningMessage: null,
+            });
           }}
         >
           <SnackbarContent
             className={clsx({
-              [this.props.classes.success]: !this.state.saveError && !this.state.warningMessage,
-              [this.props.classes.warning]: !!this.state.saveError || !!this.state.warningMessage
+              [this.props.classes.success]:
+                !this.state.saveError && !this.state.warningMessage,
+              [this.props.classes.warning]:
+                !!this.state.saveError || !!this.state.warningMessage,
             })}
             message={
               <span id="import-snackbar" className={this.props.classes.message}>
-                <Icon className={clsx(this.props.classes.icon, this.props.classes.iconVariant)} />
-                {this.state.saveError || this.state.warningMessage || (this.state.saved && "Settings saved.") || ""}
+                <Icon
+                  className={clsx(
+                    this.props.classes.icon,
+                    this.props.classes.iconVariant
+                  )}
+                />
+                {this.state.saveError ||
+                  this.state.warningMessage ||
+                  (this.state.saved && 'Settings saved.') ||
+                  ''}
               </span>
             }
             action={[
               <IconButton
                 key="close"
                 color="inherit"
-                onClick={() => this.setState({ saved: false, warningMessage: null })}
+                onClick={() =>
+                  this.setState({ saved: false, warningMessage: null })
+                }
               >
                 <CloseIcon className={this.props.classes.icon} />
-              </IconButton>
+              </IconButton>,
             ]}
           ></SnackbarContent>
         </Snackbar>
@@ -465,7 +535,11 @@ const AppConfigEditor = withStyles(styles)(
   class AppConfigEditor extends ConfigurationEditor {
     constructor(props) {
       super(props);
-      if (store.state && store.state.credentials && store.state.credentials.token) {
+      if (
+        store.state &&
+        store.state.credentials &&
+        store.state.credentials.token
+      ) {
         AppConfigUtils.setAuthToken(store.state.credentials.token);
       }
     }

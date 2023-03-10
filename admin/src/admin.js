@@ -14,7 +14,7 @@ import {
   getAdminInfo
 } from "./utils/ita";
 import { detectIdle } from "./utils/idle-detector";
-import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
+import { connectToReticulum } from "./utils/phoenix-utils";
 import { AppBar, Admin, Layout, Resource } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
@@ -33,10 +33,11 @@ import { ServerAccess } from "./react-components/server-access";
 import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
-import registerTelemetry from "hubs/src/telemetry";
+import registerTelemetry from "./utils/telemetry";
 import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 import { UnauthorizedPage } from "./react-components/unauthorized";
-import { store } from "hubs/src/utils/store-instance";
+import { store } from "./utils/store-instance";
+import { Lily } from "./react-components/lily";
 
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
@@ -247,8 +248,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const importRoute = <Route exact path="/import" component={ImportContent} />;
   const accessRoute = <Route exact path="/server-access" component={ServerAccess} />;
   const cdnRoute = <Route exact path="/content-cdn" component={ContentCDN} />;
+  const lilyRoute = <Route exact path="/lily" component={Lily} />;
 
-  const customRoutes = [homeRoute, importRoute, accessRoute, cdnRoute];
+  const customRoutes = [homeRoute, importRoute, accessRoute, cdnRoute, lilyRoute];
 
   try {
     const appConfigSchema = schemaByCategories({
@@ -276,7 +278,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (store.state.credentials && store.state.credentials.token) {
     // Reticulum global channel
-    const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
+    const retPhxChannel = socket.channel(`ret`, {
+      hub_id: "admin",
+      token: store.state.credentials.token
+    });
     retPhxChannel
       .join()
       .receive("ok", async () => {

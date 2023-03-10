@@ -9,23 +9,18 @@ import {
   List,
   Edit,
   SimpleForm,
-  TextInput,
   EditButton,
   SelectInput,
   BooleanInput,
   Datagrid,
+  TextInput,
   TextField,
   DateField,
   BooleanField,
   Filter
 } from "react-admin";
-import { withStyles } from "@material-ui/core/styles";
 
-// Quite ugly but simplest way to have AvatarPreview work is to import aframe.
-// We can technically untangle the dependencies for this, but doesn't seem worth it for admin.
 import "aframe";
-import AvatarPreview from "./avatar-preview";
-import { getReticulumFetchUrl } from "hubs/src/utils/phoenix-utils";
 
 const AvatarFilter = props => (
   <Filter {...props}>
@@ -53,20 +48,6 @@ export const AvatarEdit = props => (
   </Edit>
 );
 
-const styles = {
-  preview: {
-    height: 200,
-    width: 200 * (9 / 16)
-  }
-};
-
-const Preview = withStyles(styles)(({ record, classes, source = "avatar_sid" }) => (
-  <AvatarPreview
-    className={classes.preview}
-    avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record[source]}/avatar.gltf?v=${record.updated_at}`)}
-  />
-));
-
 const rowStyle = record => ({
   opacity: record.state === "removed" ? 0.3 : 1
 });
@@ -81,9 +62,7 @@ export const AvatarList = props => (
           defaultImage="https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png"
         />
       </ConditionalReferenceField>
-      <ConditionalReferenceField label="live preview" reference="avatar_listings" source="avatar_listing_id">
-        <Preview source="avatar_listing_sid" />
-      </ConditionalReferenceField>
+
       <ConditionalReferenceField label="live name" reference="avatar_listings" source="avatar_listing_id">
         <TextField source="name" />
       </ConditionalReferenceField>
@@ -94,7 +73,6 @@ export const AvatarList = props => (
         aspect="tall"
         defaultImage="https://asset-bundles-prod.reticulum.io/bots/avatar_unavailable.png"
       />
-      <Preview label="preview" />
       <TextField source="name" />
       <TextField source="account_id" />
       <AvatarLink source="avatar_sid" />
