@@ -20,6 +20,7 @@ import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import clsx from "classnames";
 import { Title } from "react-admin";
+import theme from "../utils/sample-theme";
 
 import { store } from "hubs/src/utils/store-instance";
 import withCommonStyles from "../utils/with-common-styles";
@@ -245,7 +246,7 @@ class ConfigurationEditor extends Component {
         id={displayPath}
         label={descriptor.name || displayPath}
         inputProps={{ maxLength: 4096 }}
-        value={currentValue || ""}
+        value={currentValue || (descriptor.name === "Themes" && JSON.stringify(theme, null, 2)) || ""}
         onChange={ev => {
           if (descriptor.type === "json") {
             if (!isValidJSON(ev.target.value)) {
@@ -261,13 +262,13 @@ class ConfigurationEditor extends Component {
               }
             }
           }
-          this.onChange(path, ev.target.value);
+          this.onChange(path, ev.target.value || " ");
         }}
         onBlur={ev => {
           if (descriptor.type === "json" && isValidJSON(ev.target.value)) {
             // Pretty print json strings
             const pretty = JSON.stringify(JSON.parse(ev.target.value), null, 2);
-            this.onChange(path, pretty);
+            this.onChange(path, pretty || " ");
           }
         }}
         helperText={descriptor.description}
