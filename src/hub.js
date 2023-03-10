@@ -499,6 +499,11 @@ export async function updateEnvironmentForHub(hub, entryManager) {
           { once: true }
         );
 
+        // If we had a loop-animation component on the environment, we need to remove it
+        // before loading a new model with gltf-model-plus, or else the component won't
+        // find and play animations in the new scene.
+        environmentEl.removeAttribute("loop-animation");
+
         sceneEl.emit("leaving_loading_environment");
         if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
           console.warn("Updating environment to the same url.");
