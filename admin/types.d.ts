@@ -32,10 +32,17 @@ export type AdminInfoT = {
   ses_max_24_hour_send: number;
   provider: string;
   worker_domain: string;
+  code: number;
 };
 
 export type RetConfigT = {
   phx: {
     cors_proxy_url_host: string;
   };
+  code: number;
+};
+
+export type ErrorT = {
+  error: boolean;
+  code: number;
 };

@@ -2,12 +2,12 @@ import React, { ReactNode } from "react";
 
 type CardPropsT = {
   children: ReactNode;
-  classProp?: string;
+  className?: string;
 };
 
-const Card = ({ children, classProp }: CardPropsT) => {
+const Card = ({ children, className }: CardPropsT) => {
   return (
-    <div className={`${classProp} card `}>
+    <div className={`${className} card `}>
       <>{children}</>
     </div>
   );

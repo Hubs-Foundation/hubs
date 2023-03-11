@@ -4,7 +4,7 @@ import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import withCommonStyles from "../../utils/with-common-styles";
 import { getAdminInfo, getEditableConfig } from "../../utils/ita";
 import configs from "../../utils/configs";
-import { ReticulumMetaT, AdminInfoT, RetConfigT } from "../../../types";
+import { ReticulumMetaT, AdminInfoT, RetConfigT, ErrorT } from "../../../types";
 import "../../styles/globals.scss";
 import CardSection from "../shared/CardSection";
 import { Icon } from "@mozilla/lilypad-ui";
@@ -17,9 +17,11 @@ const SystemEditorComponent = ({ classes }) => {
   const [adminInfo, setAdminInfo] = useState<AdminInfoT | null>(null);
   const [retConfig, setRetConfig] = useState<RetConfigT>({} as RetConfigT);
   const [reticulumMeta, setReticulumMeta] = useState<ReticulumMetaT>({} as ReticulumMetaT);
-  // Send quota to use as heuristic for checking if in SES sandbox
-  // https://forums.aws.amazon.com/thread.jspa?threadID=61090
-  const MAX_AWS_SES_QUOTA_FOR_SANDBOX = 200;
+  const [needsAvatars, setNeedsAvatars] = useState<boolean>(false);
+  const [needsScenes, setNeedsScenes] = useState<boolean>(false);
+  const [exceededStorageQuota, setExceededStorageQuota] = useState<boolean>(false);
+  const [isInSESSandbox, setIsInSESSandbox] = useState<boolean>(false);
+  const [isUsingCloudflare, setIsUsingCloudflare] = useState<boolean>(false);
 
   /**
    * Init Component
@@ -27,20 +29,29 @@ const SystemEditorComponent = ({ classes }) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const adminInfo = await getAdminInfo();
-        // if adminInfo.error {
-        setAdminInfo(adminInfo);
+        const service = "reticulum";
+        const retResp: RetConfigT | ErrorT = await getEditableConfig(service);
+        const adminResp: AdminInfoT | ErrorT = await getAdminInfo();
 
-        const retConfig = await getEditableConfig("reticulum");
-        // if retConfig.error
-        setRetConfig(retConfig);
+        if (adminResp.code === 200 && retResp.code === 200) {
+          const adminData = adminResp as AdminInfoT;
+          const { using_ses, ses_max_24_hour_send } = adminData;
+          const retData = retResp as RetConfigT;
+          const maxQuotaForSandbox = 200;
+          // Send quota to use as heuristic for checking if in SES sandbox
+          // https://forums.aws.amazon.com/thread.jspa?threadID=61090
+
+          setRetConfig(retData);
+          setAdminInfo(adminData);
+          setIsInSESSandbox(using_ses && ses_max_24_hour_send <= maxQuotaForSandbox);
+          setIsUsingCloudflare(retConfig.phx.cors_proxy_url_host === `cors-proxy.${adminData.worker_domain}`);
+        }
 
         updateReticulumMeta();
       } catch (error) {
         // TODO impliment an error state in the UI
         // also if any of the above come back error - we need
         // a ui for that as well.
-
         console.error(error);
       }
     };
@@ -52,31 +63,25 @@ const SystemEditorComponent = ({ classes }) => {
    */
   const updateReticulumMeta = async () => {
     const path = `/api/v1/meta?include_repo`;
-    const reticulumMeta = await fetchReticulumAuthenticated(path);
+    const reticulumMeta: ReticulumMetaT = await fetchReticulumAuthenticated(path);
     setReticulumMeta(reticulumMeta);
-  };
 
-  /**
-   * CHECK USER STATUS
-   * - Needs Avatars
-   * - Needs Scenes
-   * - Is in a Sandbox
-   * - is Using cloud flate
-   */
-  const needsAvatars = reticulumMeta.repo && !reticulumMeta.repo.avatar_listings.any;
-  const needsScenes = reticulumMeta.repo && !reticulumMeta.repo.scene_listings.any;
-  const exceededStorageQuota = reticulumMeta.repo && !reticulumMeta.repo.storage.in_quota;
-  const isInSESSandbox =
-    adminInfo && adminInfo.using_ses && adminInfo.ses_max_24_hour_send <= MAX_AWS_SES_QUOTA_FOR_SANDBOX;
-  const isUsingCloudflare =
-    adminInfo &&
-    retConfig &&
-    retConfig.phx &&
-    retConfig.phx.cors_proxy_url_host === `cors-proxy.${adminInfo.worker_domain}`;
+    /**
+     * CHECK USER STATUS
+     * - Needs Avatars
+     * - Needs Scenes
+     * - Is in a Sandbox
+     * - is Using cloud flate
+     */
+    const { avatar_listings, scene_listings, storage } = reticulumMeta.repo;
+    setNeedsAvatars(!avatar_listings.any);
+    setNeedsScenes(!scene_listings.any);
+    setExceededStorageQuota(!storage.in_quota);
+  };
 
   return (
     <div className="page_wrapper">
-      <Card classProp="mb-24">
+      <Card className="mb-24">
         <h2 className="heading-lg mb-24">Getting Started</h2>
 
         {/* AVATARS / SCENES  */}
@@ -84,7 +89,7 @@ const SystemEditorComponent = ({ classes }) => {
           <h3 className="heading-sm mb-28">Add avatars and scenes</h3>
 
           <CardSection
-            classProp="mb-20"
+            className="mb-20"
             ctaCallback={() => {
               window.open(`https://hubs.mozilla.com/docs/hubs-cloud-asset-packs.html`);
             }}
@@ -100,7 +105,7 @@ const SystemEditorComponent = ({ classes }) => {
           <h3 className="heading-sm mb-28">Customize the look of your hub</h3>
 
           <CardSection
-            classProp="mb-20"
+            className="mb-20"
             ctaCallback={() => {
               window.location.href = "#/app-settings";
             }}
@@ -109,7 +114,7 @@ const SystemEditorComponent = ({ classes }) => {
           />
 
           <CardSection
-            classProp="mb-20"
+            className="mb-20"
             ctaCallback={() => {
               window.location.href = "#/app-settings";
             }}
@@ -124,7 +129,7 @@ const SystemEditorComponent = ({ classes }) => {
           <h3 className="heading-sm mb-28">Change room settings</h3>
 
           <CardSection
-            classProp="mb-20"
+            className="mb-20"
             ctaCallback={() => {
               window.location.href = "#/app-settings";
             }}
