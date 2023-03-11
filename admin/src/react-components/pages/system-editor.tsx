@@ -41,6 +41,11 @@ const SystemEditorComponent = ({ classes }) => {
           // Send quota to use as heuristic for checking if in SES sandbox
           // https://forums.aws.amazon.com/thread.jspa?threadID=61090
 
+          /**
+           * CHECK USER STATUS
+           * - Is in a Sandbox
+           * - is Using cloud flate
+           */
           setRetConfig(retData);
           setAdminInfo(adminData);
           setIsInSESSandbox(using_ses && ses_max_24_hour_send <= maxQuotaForSandbox);
@@ -64,16 +69,14 @@ const SystemEditorComponent = ({ classes }) => {
   const updateReticulumMeta = async () => {
     const path = `/api/v1/meta?include_repo`;
     const reticulumMeta: ReticulumMetaT = await fetchReticulumAuthenticated(path);
-    setReticulumMeta(reticulumMeta);
 
     /**
      * CHECK USER STATUS
      * - Needs Avatars
      * - Needs Scenes
-     * - Is in a Sandbox
-     * - is Using cloud flate
      */
     const { avatar_listings, scene_listings, storage } = reticulumMeta.repo;
+    setReticulumMeta(reticulumMeta);
     setNeedsAvatars(!avatar_listings.any);
     setNeedsScenes(!scene_listings.any);
     setExceededStorageQuota(!storage.in_quota);
