@@ -301,7 +301,16 @@ const SystemEditorComponent = ({ classes }) => {
             <QuestionIcon />
           </div>
           <p className="body-md">
-            Visit <a className="link">Mozilla Support</a> to seek help with Hubs subscriptions.
+            Visit{" "}
+            <a
+              href="https://support.mozilla.org/en-US/products/hubs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link"
+            >
+              Mozilla Support
+            </a>{" "}
+            to seek help with Hubs subscriptions.
           </p>
         </div>
 
@@ -329,7 +338,9 @@ const SystemEditorComponent = ({ classes }) => {
       </Card>
 
       <div className="flex-align-items-center ml-12">
-        <a className="link mr-24">What's new</a>
+        <a href="https://hubs.mozilla.com/whats-new" target="_blank" rel="noopener noreferrer" className="link mr-24">
+          What's new
+        </a>
         {!configs.IS_LOCAL_OR_CUSTOM_CLIENT && (
           <p className="body-md">{`Hubs version: ${process.env.BUILD_VERSION || "?"}`}</p>
         )}
