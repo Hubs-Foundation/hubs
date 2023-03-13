@@ -27,7 +27,7 @@ import { FeaturedSceneListingList, FeaturedSceneListingEdit } from "./react-comp
 import { PendingSceneList } from "./react-components/pending-scenes";
 import { AccountList, AccountEdit } from "./react-components/accounts";
 import { ProjectList, ProjectShow } from "./react-components/projects";
-import { SystemEditor } from "./react-components/system-editor";
+import { SystemEditor } from "./react-components/pages/system-editor";
 import { ServiceEditor, AppConfigEditor } from "./react-components/service-editor";
 import { ServerAccess } from "./react-components/server-access";
 import { ContentCDN } from "./react-components/content-cdn";
@@ -57,14 +57,14 @@ const theme = createMuiTheme({
   },
   palette: {
     primary: {
-      main: "#FF3464"
+      main: "#1700c7"
     },
     secondary: {
       main: "#000000"
     }
   },
   typography: {
-    fontFamily: "Open Sans, sans-serif"
+    fontFamily: "Inter,Arial"
   }
 });
 
@@ -269,14 +269,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const layout = props => (
-    <Layout {...props} appBar={HiddenAppBar} menu={props => <AdminMenu {...props} services={schemaCategories} />} />
+    <Layout
+      {...props}
+      className="global_background"
+      appBar={HiddenAppBar}
+      menu={props => <AdminMenu {...props} services={schemaCategories} />}
+    />
   );
 
   const redirectToLogin = () => (document.location = "/?sign_in&sign_in_destination=admin");
 
   if (store.state.credentials && store.state.credentials.token) {
     // Reticulum global channel
-    const retPhxChannel = socket.channel(`ret`, { hub_id: "admin", token: store.state.credentials.token });
+    const retPhxChannel = socket.channel(`ret`, {
+      hub_id: "admin",
+      token: store.state.credentials.token
+    });
     retPhxChannel
       .join()
       .receive("ok", async () => {

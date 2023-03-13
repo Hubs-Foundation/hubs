@@ -1,0 +1,35 @@
+@use "./core/boilerplate.scss" as *;
+@use "./tools/utility.scss" as *;
+@use "./ui/dropdown.scss" as *;
+@use "./core/theme.scss" as *;
+@use "./ui/page.scss" as *;
+
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0px;
+}
+
+button {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+button[type="button"] {
+  border-radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}

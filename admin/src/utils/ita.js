@@ -123,7 +123,14 @@ function getAdminInfo() {
 }
 
 function getEditableConfig(service) {
-  return fetchWithAuth(getEndpoint(`configs/${service}/ps`)).then(resp => resp.json());
+  return fetchWithAuth(getEndpoint(`configs/${service}/ps`))
+    .then(resp => {
+      if (resp.status === 200) {
+        resp.code = 200;
+        return resp.json();
+      } else return { error: true, code: resp.status };
+    })
+    .catch(e => console.error(e));
 }
 
 function getConfig(service) {

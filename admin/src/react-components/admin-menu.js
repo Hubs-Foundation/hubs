@@ -17,8 +17,8 @@ import ViewIcon from "@material-ui/icons/ViewList";
 import SettingsIcon from "@material-ui/icons/Settings";
 import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
-import HubsCloudLogo from "../assets/images/hubs_cloud_dark.png";
 import configs from "../utils/configs";
+import HubsLogo from "../assets/images/hubs_logo.png";
 
 const mapStateToProps = state => ({
   resources: getResources(state)
@@ -30,11 +30,15 @@ const styles = () => ({
     paddingTop: 0,
 
     "& .active": {
-      background: "#FF3464 !important"
+      background: "#1700c7!important"
+    },
+
+    "& .active div span": {
+      color: "#ffffff!important"
     },
 
     "& .active svg": {
-      color: "#FFA7C6"
+      color: "#FFFFFF"
     },
 
     active: {
@@ -47,6 +51,7 @@ const styles = () => ({
   logo: {
     margin: 0,
     padding: 0,
+    background: "#222222;!important",
 
     "& img": {
       padding: "0 12px 8px 12px",
@@ -68,7 +73,7 @@ const styles = () => ({
 
     "@media (max-width: 599.95px) and (min-width: 0px)": {
       // Used to override typography on mobile
-      "& span": {
+      "& span ": {
         color: "#333333"
       }
     }
@@ -125,7 +130,7 @@ class Menu extends Component {
       return (
         <List className={this.props.classes.root}>
           <ListItem className={this.props.classes.logo}>
-            <img className={this.props.classes.logo} src={HubsCloudLogo} />
+            <img className={this.props.classes.logo} src={HubsLogo} />
           </ListItem>
           <ListItem
             className={this.props.classes.item}
@@ -188,7 +193,7 @@ class Menu extends Component {
       return (
         <List className={this.props.classes.root}>
           <ListItem className={this.props.classes.logo}>
-            <img className={this.props.classes.logo} src={HubsCloudLogo} />
+            <img className={this.props.classes.logo} src={HubsLogo} />
           </ListItem>
           <ListItem
             className={this.props.classes.item}
