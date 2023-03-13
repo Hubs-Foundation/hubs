@@ -33,7 +33,7 @@ export function RoomEntryModal({
       <Column center className={styles.content}>
         {breakpoint !== "sm" && breakpoint !== "md" && (
           <div className={styles.logoContainer}>
-            <AppLogo />
+            <AppLogo className={styles.logo} />
           </div>
         )}
         <div className={styles.roomName}>

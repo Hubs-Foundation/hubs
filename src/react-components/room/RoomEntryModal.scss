@@ -18,6 +18,11 @@
   margin-bottom: 32px;
 }
 
+:local(.logo) {
+  max-height: 250px;
+  height: 100%;
+}
+
 :local(.room-name) {
   display: flex;
   flex-direction: column;
