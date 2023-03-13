@@ -138,7 +138,8 @@ class ConfigurationEditor extends Component {
       saving: false,
       saved: false,
       saveError: null,
-      warningMessage: null
+      warningMessage: null,
+      isDirty: false
     };
   }
 
@@ -183,6 +184,7 @@ class ConfigurationEditor extends Component {
     const config = this.state.config;
     setConfigValue(config, path, val);
     this.setState({ config: config });
+    this.setState({ isDirty: true });
   }
 
   onSubmit(e) {
@@ -246,7 +248,9 @@ class ConfigurationEditor extends Component {
         id={displayPath}
         label={descriptor.name || displayPath}
         inputProps={{ maxLength: 4096 }}
-        value={currentValue || (descriptor.name === "Themes" && JSON.stringify(theme, null, 2)) || ""}
+        value={
+          currentValue || (descriptor.name === "Themes" && !this.state.isDirty && JSON.stringify(theme, null, 2)) || ""
+        }
         onChange={ev => {
           if (descriptor.type === "json") {
             if (!isValidJSON(ev.target.value)) {
@@ -262,13 +266,13 @@ class ConfigurationEditor extends Component {
               }
             }
           }
-          this.onChange(path, ev.target.value || " ");
+          this.onChange(path, ev.target.value);
         }}
         onBlur={ev => {
           if (descriptor.type === "json" && isValidJSON(ev.target.value)) {
             // Pretty print json strings
             const pretty = JSON.stringify(JSON.parse(ev.target.value), null, 2);
-            this.onChange(path, pretty || " ");
+            this.onChange(path, pretty);
           }
         }}
         helperText={descriptor.description}
