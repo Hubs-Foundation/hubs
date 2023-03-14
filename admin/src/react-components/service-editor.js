@@ -4,6 +4,7 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import Card from "@material-ui/core/Card";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -74,6 +75,11 @@ const styles = withCommonStyles(theme => {
       },
       "& .switch": {
         marginTop: "-0.1em"
+      }
+    },
+    longInput: {
+      "& textarea": {
+        backgroundColor: "#E9E9E9"
       }
     },
     colorInput: {
@@ -229,8 +235,10 @@ class ConfigurationEditor extends Component {
     );
   }
 
-  renderLongTextInput(path, descriptor, currentValue) {
+  renderLongTextInput(path, { type, name, description }, currentValue) {
     const displayPath = path.join(" > ");
+    const isTheme = name === "Themes";
+    const isJson = type === "json";
 
     function isValidJSON(s) {
       try {
@@ -243,44 +251,76 @@ class ConfigurationEditor extends Component {
     }
 
     return (
-      <TextField
-        key={displayPath}
-        id={displayPath}
-        label={descriptor.name || displayPath}
-        inputProps={{ maxLength: 4096 }}
-        value={
-          currentValue || (descriptor.name === "Themes" && !this.state.isDirty && JSON.stringify(theme, null, 2)) || ""
-        }
-        onChange={ev => {
-          if (descriptor.type === "json") {
-            if (!isValidJSON(ev.target.value)) {
-              const warningMessage = `Invalid JSON for ${descriptor.name || displayPath}. See console for details.`;
-              if (this.state.warningMessage !== warningMessage) {
-                this.setState({ warningMessage });
-              }
-              console.error(`Invalid JSON for ${descriptor.name || displayPath}.`);
-              console.error(ev.target.value);
-            } else {
-              if (this.state.warningMessage !== null) {
-                this.setState({ warningMessage: null });
+      <div className={this.props.classes.longInput} key={displayPath}>
+        {isTheme && (
+          <>
+            <h3 className="heading-sm mb-24">Theme Data</h3>
+            <p className="body-md">
+              This section contains the code which generates the available themes a user can choose from when in your
+              hub's rooms (More &gt; Preferences &gt; Misc &gt; Theme). More information about customising you hubs'
+              themes can be found in our documentation pages.
+            </p>
+          </>
+        )}
+        <TextField
+          multiline
+          rows={20}
+          key={displayPath}
+          id={displayPath}
+          label={name || displayPath}
+          inputProps={{ maxLength: 4096 }}
+          value={currentValue || (isTheme && !this.state.isDirty && JSON.stringify(theme, null, 2)) || ""}
+          onChange={ev => {
+            const value = ev.target.value;
+            if (isJson) {
+              if (!isValidJSON(value)) {
+                const warningMessage = `Invalid JSON for ${name || displayPath}. See console for details.`;
+                if (this.state.warningMessage !== warningMessage) {
+                  this.setState({ warningMessage });
+                }
+                console.error(`Invalid JSON for ${name || displayPath}.`);
+                console.error(value);
+              } else {
+                if (this.state.warningMessage !== null) {
+                  this.setState({ warningMessage: null });
+                }
               }
             }
-          }
-          this.onChange(path, ev.target.value);
-        }}
-        onBlur={ev => {
-          if (descriptor.type === "json" && isValidJSON(ev.target.value)) {
-            // Pretty print json strings
-            const pretty = JSON.stringify(JSON.parse(ev.target.value), null, 2);
-            this.onChange(path, pretty);
-          }
-        }}
-        helperText={descriptor.description}
-        type="text"
-        fullWidth
-        multiline
-        margin="normal"
-      />
+            this.onChange(path, value);
+          }}
+          onBlur={ev => {
+            const value = ev.target.value;
+            if (isJson && isValidJSON(value)) {
+              // Pretty print json strings
+              const pretty = JSON.stringify(JSON.parse(value), null, 2);
+              this.onChange(path, pretty);
+            }
+          }}
+          helperText={description}
+          type="text"
+          fullWidth
+          margin="normal"
+        />
+
+        {isTheme && (
+          <div className="flex-end">
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => {
+                this.onChange(path, JSON.stringify(theme, null, 2));
+                const warningMessage = `Make sure to save your updates`;
+                if (this.state.warningMessage !== warningMessage) {
+                  this.setState({ warningMessage });
+                }
+              }}
+            >
+              <RefreshIcon />
+              Revert to original theme data
+            </Button>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -330,12 +370,14 @@ class ConfigurationEditor extends Component {
     const displayPath = path.join(" > ");
     return (
       <div key={displayPath} className={this.props.classes.colorInput}>
+        {descriptor.name === "Background Color" && <h3 className="heading-sm mb-24">Nametags</h3>}
         <label>
           <input
             type="color"
             value={currentValue || ""}
             onChange={ev => this.onChange(path, ev.target.value)}
             title={currentValue}
+            key={descriptor.name}
           />
           {descriptor.name || displayPath}
         </label>
