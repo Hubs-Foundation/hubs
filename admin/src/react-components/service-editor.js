@@ -22,7 +22,6 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import clsx from "classnames";
 import { Title } from "react-admin";
 import theme from "../utils/sample-theme";
-
 import { store } from "hubs/src/utils/store-instance";
 import withCommonStyles from "../utils/with-common-styles";
 import {
@@ -41,6 +40,13 @@ import * as AppConfigUtils from "../utils/app-config";
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
 const styles = withCommonStyles(theme => {
+  const swatch = {
+    borderRadius: "22px",
+    border: "solid 1px #000000",
+    width: "40px",
+    height: "40px"
+  };
+
   return {
     inputDescription: {
       display: "block",
@@ -90,12 +96,16 @@ const styles = withCommonStyles(theme => {
       "& input": {
         margin: 0,
         marginRight: "1em",
+        marginBottom: "10px",
         padding: "4px",
-        border: "1px solid hsl(0, 0%, 90%)",
-        backgroundColor: "hsl(0, 0%, 90%)",
+        backgroundColor: "transparent",
+        border: "0px solid hsl(0, 0%, 90%)",
         borderRadius: "3px",
-        height: "32px",
-        verticalAlign: "middle"
+        verticalAlign: "middle",
+        height: "40px",
+        width: "40px",
+        "&::-webkit-color-swatch": swatch,
+        "&::-moz-color-swatch": swatch
       }
     }
   };
@@ -254,11 +264,19 @@ class ConfigurationEditor extends Component {
       <div className={this.props.classes.longInput} key={displayPath}>
         {isTheme && (
           <>
-            <h3 className="heading-sm mb-24">Theme Data</h3>
+            <h3 className="heading-sm mb-24 mt-40">Theme Data</h3>
             <p className="body-md">
               This section contains the code which generates the available themes a user can choose from when in your
-              hub's rooms (More &gt; Preferences &gt; Misc &gt; Theme). More information about customising you hubs'
-              themes can be found in our documentation pages.
+              hub's rooms (More &gt; Preferences &gt; Misc &gt; Theme). More information about{" "}
+              <a
+                href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-themes.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link"
+              >
+                customising you hubs'themes
+              </a>{" "}
+              can be found in our documentation pages.
             </p>
           </>
         )}
