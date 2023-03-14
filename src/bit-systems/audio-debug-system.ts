@@ -5,7 +5,7 @@ import { getScene, HubsWorld } from "../app";
 import { AudioEmitter, NavMesh } from "../bit-components";
 import { DistanceModelType } from "../components/audio-params";
 import { getWebGLVersion } from "../utils/webgl";
-import { EMITTER_FLAGS, isPositionalAudio } from "./audio-emitter-system";
+import { isPositionalAudio } from "./audio-emitter-system";
 import { Mesh, Material, Vector3, ShaderMaterial } from "three";
 import { disposeMaterial } from "../utils/three-utils";
 
@@ -160,10 +160,7 @@ export function audioDebugSystem(world: HubsWorld) {
     });
     let idx = 0;
     audioEmittersQuery(world).forEach(emitterEid => {
-      if (
-        AudioEmitter.flags[emitterEid] & EMITTER_FLAGS.PAUSED ||
-        AudioEmitter.flags[emitterEid] & EMITTER_FLAGS.MUTED
-      ) {
+      if (APP.isAudioPaused.has(emitterEid) || APP.mutedState.has(emitterEid)) {
         return;
       }
       if (idx >= maxDebugEmitters) return;

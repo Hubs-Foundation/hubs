@@ -22,7 +22,7 @@ import { animate } from "../utils/animate";
 import { coroutine } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
 import { isFacingCamera } from "../utils/three-utils";
-import { Emitter2Audio, EMITTER_FLAGS } from "./audio-emitter-system";
+import { Emitter2Audio } from "./audio-emitter-system";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
 const hoverRightVideoQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
@@ -97,13 +97,13 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
       const audioEid = Emitter2Audio.get(videoEid)!;
       if (video.paused) {
         video.play();
-        AudioEmitter.flags[audioEid] &= ~EMITTER_FLAGS.PAUSED;
+        APP.isAudioPaused.delete(audioEid);
         playIndicatorObj.visible = true;
         pauseIndicatorObj.visible = false;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.playIndicatorRef[eid]));
       } else {
         video.pause();
-        AudioEmitter.flags[audioEid] |= EMITTER_FLAGS.PAUSED;
+        APP.isAudioPaused.add(audioEid);
         playIndicatorObj.visible = false;
         pauseIndicatorObj.visible = true;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.pauseIndicatorRef[eid]));

@@ -19,12 +19,6 @@ type AudioConstructor<T> = new (listener: ThreeAudioListener) => T;
 export const Emitter2Audio = (AudioEmitter as any).audios as Map<number, number>;
 export const Emitter2Params = (AudioEmitter as any).params as Map<number, number>;
 
-export const EMITTER_FLAGS = {
-  MUTED: 1 << 0,
-  PAUSED: 1 << 1,
-  CLIPPED: 1 << 2
-};
-
 export function isPositionalAudio(node: AudioObject3D): node is PositionalAudio {
   return (node as any).panner !== undefined;
 }
@@ -80,9 +74,9 @@ export function makeAudioEntity(world: HubsWorld, source: number, sourceType: So
     const videoObj = world.eid2obj.get(source) as Mesh;
     const video = (videoObj.material as MeshStandardMaterial).map!.image as HTMLVideoElement;
     if (video.paused) {
-      AudioEmitter.flags[eid] |= EMITTER_FLAGS.PAUSED;
+      APP.isAudioPaused.add(eid);
     } else {
-      AudioEmitter.flags[eid] &= ~EMITTER_FLAGS.PAUSED;
+      APP.isAudioPaused.delete(eid);
     }
     const audioSrcEl = video;
     audio.setMediaElementSource(audioSrcEl);
