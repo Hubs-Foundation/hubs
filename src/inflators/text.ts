@@ -35,7 +35,7 @@ export type TextParams = {
   strokeColor?: string;
   strokeOpacity?: number;
   strokeWidth?: number | `${number}%`;
-  textAlign?: 'left' | 'right' | 'center' | 'justify';
+  textAlign?: "left" | "right" | "center" | "justify";
   textIndent?: number;
   whiteSpace?: "normal" | "nowrap";
 };
@@ -46,9 +46,7 @@ const THREE_SIDES = {
   double: DoubleSide
 };
 
-// Defaults values must be set for all the optional properties
-// to safely use foo! operator in the inflator.
-const DEFAULTS: TextParams = {
+const DEFAULTS: Required<TextParams> = {
   anchorX: "center",
   anchorY: "middle",
   clipRect: null,
@@ -84,44 +82,44 @@ const DEFAULTS: TextParams = {
 };
 
 export function inflateText(world: HubsWorld, eid: number, params: TextParams) {
-  params = Object.assign({}, DEFAULTS, params);
+  const requiredParams = Object.assign({}, DEFAULTS, params) as Required<TextParams>;
   const text = new TroikaText();
   text.material!.toneMapped = false;
 
-  text.text = params.value;
-  text.material!.side = THREE_SIDES[params.side!];
-  text.material!.opacity = params.opacity!;
-  text.font = params.fontUrl!;
+  text.text = requiredParams.value;
+  text.material!.side = THREE_SIDES[requiredParams.side];
+  text.material!.opacity = requiredParams.opacity;
+  text.font = requiredParams.fontUrl;
 
-  text.anchorX = params.anchorX!;
-  text.anchorY = params.anchorY!;
-  text.clipRect = params.clipRect!;
-  text.color = params.color!;
-  text.curveRadius = params.curveRadius!;
-  text.depthOffset = params.depthOffset!;
-  text.direction = params.direction!;
-  text.fillOpacity = params.fillOpacity!;
-  text.fontSize = params.fontSize!;
-  text.glyphGeometryDetail = params.glyphGeometryDetail!;
-  text.gpuAccelerateSDF = params.gpuAccelerateSDF!;
-  text.letterSpacing = params.letterSpacing!;
-  text.lineHeight = params.lineHeight!;
-  text.maxWidth = params.maxWidth!;
-  text.outlineBlur = params.outlineBlur!;
-  text.outlineColor = params.outlineColor!;
-  text.outlineOffsetX = params.outlineOffsetX!;
-  text.outlineOffsetY = params.outlineOffsetY!;
-  text.outlineOpacity = params.outlineOpacity!;
-  text.outlineWidth = params.outlineWidth!;
-  text.overflowWrap = params.overflowWrap!;
-  text.sdfGlyphSize = params.sdfGlyphSize!;
-  text.strokeColor = params.strokeColor!;
-  text.strokeOpacity = params.strokeOpacity!;
-  text.strokeWidth = params.strokeWidth!;
-  text.textAlign = params.textAlign!;
-  text.textIndent = params.textIndent!;
-  text.whiteSpace = params.whiteSpace!;
- 
+  text.anchorX = requiredParams.anchorX;
+  text.anchorY = requiredParams.anchorY;
+  text.clipRect = requiredParams.clipRect;
+  text.color = requiredParams.color;
+  text.curveRadius = requiredParams.curveRadius;
+  text.depthOffset = requiredParams.depthOffset;
+  text.direction = requiredParams.direction;
+  text.fillOpacity = requiredParams.fillOpacity;
+  text.fontSize = requiredParams.fontSize;
+  text.glyphGeometryDetail = requiredParams.glyphGeometryDetail;
+  text.gpuAccelerateSDF = requiredParams.gpuAccelerateSDF;
+  text.letterSpacing = requiredParams.letterSpacing;
+  text.lineHeight = requiredParams.lineHeight;
+  text.maxWidth = requiredParams.maxWidth;
+  text.outlineBlur = requiredParams.outlineBlur;
+  text.outlineColor = requiredParams.outlineColor;
+  text.outlineOffsetX = requiredParams.outlineOffsetX;
+  text.outlineOffsetY = requiredParams.outlineOffsetY;
+  text.outlineOpacity = requiredParams.outlineOpacity;
+  text.outlineWidth = requiredParams.outlineWidth;
+  text.overflowWrap = requiredParams.overflowWrap;
+  text.sdfGlyphSize = requiredParams.sdfGlyphSize;
+  text.strokeColor = requiredParams.strokeColor;
+  text.strokeOpacity = requiredParams.strokeOpacity;
+  text.strokeWidth = requiredParams.strokeWidth;
+  text.textAlign = requiredParams.textAlign;
+  text.textIndent = requiredParams.textIndent;
+  text.whiteSpace = requiredParams.whiteSpace;
+
   text.sync();
 
   addComponent(world, TextTag, eid);

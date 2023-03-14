@@ -251,8 +251,10 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
+
+  // All systems that update text properties should run before this
   textSystem(world);
-  
+
   videoTextureSystem(world);
   audioDebugSystem(world);
 
