@@ -1,17 +1,19 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
 import { Mesh, MeshStandardMaterial } from "three";
 import { HubsWorld } from "../app";
-import { AudioParams, AudioSettingsChanged, MediaLoaded, MediaVideo, NetworkedVideo, Owned } from "../bit-components";
+import { AudioParams, AudioSettingsChanged, MediaLoaded, MediaVideo, Networked, NetworkedVideo, Owned } from "../bit-components";
 import { AudioSystem } from "../systems/audio-system";
 import { findAncestorWithComponent } from "../utils/bit-utils";
 import { Emitter2Audio, Emitter2Params, makeAudioSourceEntity } from "./audio-emitter-system";
+import { takeSoftOwnership } from "../utils/take-soft-ownership";
 
 enum Flags {
   PAUSED = 1 << 0
 }
 
 const OUT_OF_SYNC_SEC = 5;
-const networkedVideoQuery = defineQuery([NetworkedVideo]);
+const networkedVideoQuery = defineQuery([Networked, NetworkedVideo]);
+const networkedVideoEnterQuery = enterQuery(networkedVideoQuery);
 const mediaVideoQuery = defineQuery([MediaVideo]);
 const mediaVideoEnterQuery = enterQuery(mediaVideoQuery);
 const mediaVideoExitQuery = exitQuery(mediaVideoQuery);
@@ -50,6 +52,13 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     Emitter2Params.delete(videoEid);
     Emitter2Audio.delete(videoEid);
   });
+
+  networkedVideoEnterQuery(world).forEach(function (eid) {
+    if (Networked.owner[eid] === APP.getSid("reticulum")) {
+      takeSoftOwnership(world, eid);
+    }
+  });
+
   networkedVideoQuery(world).forEach(function (eid) {
     const video = (world.eid2obj.get(eid) as any).material.map.image as HTMLVideoElement;
     if (hasComponent(world, Owned, eid)) {
