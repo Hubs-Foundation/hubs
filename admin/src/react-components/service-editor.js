@@ -267,14 +267,14 @@ class ConfigurationEditor extends Component {
             <h3 className="heading-sm mb-24 mt-40">Theme Data</h3>
             <p className="body-md">
               This section contains the code which generates the available themes a user can choose from when in your
-              hub's rooms (More &gt; Preferences &gt; Misc &gt; Theme). More information about{" "}
+              hub&#39;s rooms (More &gt; Preferences &gt; Misc &gt; Theme). More information about{" "}
               <a
                 href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-themes.html"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="link"
               >
-                customising you hubs'themes
+                customising you hubs&#39; themes
               </a>{" "}
               can be found in our documentation pages.
             </p>
