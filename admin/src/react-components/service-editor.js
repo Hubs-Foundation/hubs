@@ -376,7 +376,6 @@ class ConfigurationEditor extends Component {
             value={currentValue || ""}
             onChange={ev => this.onChange(path, ev.target.value)}
             title={currentValue}
-            key={descriptor.name}
           />
           {descriptor.name || displayPath}
         </label>
