@@ -262,24 +262,6 @@ class ConfigurationEditor extends Component {
 
     return (
       <div className={this.props.classes.longInput} key={displayPath}>
-        {isTheme && (
-          <>
-            <h3 className="heading-sm mb-24 mt-40">Theme Data</h3>
-            <p className="body-md">
-              This section contains the code which generates the available themes a user can choose from when in your
-              hub&#39;s rooms (More &gt; Preferences &gt; Misc &gt; Theme). More information about{" "}
-              <a
-                href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-themes.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="link"
-              >
-                customising you hubs&#39; themes
-              </a>{" "}
-              can be found in our documentation pages.
-            </p>
-          </>
-        )}
         <TextField
           multiline
           rows={20}
@@ -388,7 +370,6 @@ class ConfigurationEditor extends Component {
     const displayPath = path.join(" > ");
     return (
       <div key={displayPath} className={this.props.classes.colorInput}>
-        {descriptor.name === "Background Color" && <h3 className="heading-sm mb-24">Nametags</h3>}
         <label>
           <input
             type="color"
@@ -422,6 +403,60 @@ class ConfigurationEditor extends Component {
       default:
         return this.renderSimpleInput(path, descriptor, currentValue);
     }
+  }
+
+  renderCategory(schema, category, config) {
+    switch (category) {
+      case "theme":
+        return this.renderThemeSection(schema.theme, config);
+      default:
+        return this.renderTree(schema, category, config);
+    }
+  }
+
+  renderThemeSection(theme, config) {
+    const configurables = getDescriptors(theme)
+      .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
+      .filter(([, descriptor]) => qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true");
+
+    const getInput = ([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path));
+
+    return (
+      <form onSubmit={this.onSubmit.bind(this)}>
+        <h3 className="heading-sm mb-24">Nametags</h3>
+        {getInput(configurables[0])}
+        {getInput(configurables[1])}
+        <h3 className="heading-sm mb-24 mt-40">Theme Data</h3>
+        <p className="body-md">
+          This section contains the code which generates the available themes a user can choose from when in your
+          hub&#39;s rooms (More &gt; Preferences &gt; Misc &gt; Theme). More information about{" "}
+          <a
+            href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-themes.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link"
+          >
+            customising you hubs&#39; themes
+          </a>{" "}
+          can be found in our documentation pages.
+        </p>
+        {getInput(configurables[2])}
+        <div>
+          {this.state.saving ? (
+            <CircularProgress />
+          ) : (
+            <Button
+              onClick={this.onSubmit.bind(this)}
+              className={this.props.classes.button}
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+          )}
+        </div>
+      </form>
+    );
   }
 
   renderTree(schema, category, config) {
@@ -477,7 +512,8 @@ class ConfigurationEditor extends Component {
             <Typography variant="body2" gutterBottom>
               {getCategoryDescription(this.state.category, this.state.provider)}
             </Typography>
-            {schema && config ? this.renderTree(schema, category, config) : <LinearProgress />}
+
+            {schema && config ? this.renderCategory(schema, category, config) : <LinearProgress />}
           </TabContainer>
         </CardContent>
         <Snackbar
